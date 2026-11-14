@@ -4,7 +4,8 @@ import { HallPlan } from "@/components/hall-plan";
 import { KitScope } from "@/components/kit";
 import { PrintButton } from "@/components/print-button";
 import { PageHead, SectionHead } from "@/components/wurf-head";
-import { messages, type Locale } from "@/lib/i18n";
+import { fileVars } from "@/lib/files";
+import { fmt, messages, type Locale } from "@/lib/i18n";
 import { pageMeta } from "@/lib/seo";
 
 type Props = { params: Promise<{ locale: Locale }> };
@@ -19,6 +20,7 @@ export default async function Filming({ params }: Props) {
   const { locale } = await params;
   const m = messages(locale);
   const t = m.filming;
+  const files = fileVars(m);
   return (
     <KitScope>
       <div className="no-print">
@@ -28,7 +30,7 @@ export default async function Filming({ params }: Props) {
         <div className="no-print mt-12 grid grid-cols-1 gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,30rem)]">
           <div className="lg:order-2">
             <div className="lg:sticky lg:top-6">
-              <HallPlan label={t.planLabel} camera={t.planCamera} field={t.planField} />
+              <HallPlan label={t.planLabel} camera={t.planCamera} field={t.planField} corner={t.planCorner} />
             </div>
           </div>
           <div>
@@ -41,7 +43,7 @@ export default async function Filming({ params }: Props) {
                   {s.items.map((x) => (
                     <li key={x} className="flex gap-4 border-b border-rule py-4">
                       <i aria-hidden className="mark-band mt-[.45em] h-2.5 w-4 shrink-0" />
-                      <span>{x}</span>
+                      <span>{fmt(x, files)}</span>
                     </li>
                   ))}
                 </ul>

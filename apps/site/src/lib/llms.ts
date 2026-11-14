@@ -6,6 +6,7 @@
  */
 import plans from "@handball/plans";
 import { factRows } from "@/lib/facts";
+import { fileVars, notList } from "@/lib/files";
 import { fmt, messages, type Locale } from "@/lib/i18n";
 import { SITE_NAME, SITE_UPDATED, pageUrl } from "@/lib/site";
 import { BLOG } from "../../content/blog";
@@ -51,7 +52,7 @@ export function llmsTxt(): string {
     "",
     "## Kann noch nicht",
     "",
-    ...de.honest.not.map((x) => `- ${x}`),
+    ...notList(de).map((x) => `- ${x}`),
     "",
     `Preisstand: ${get("Preisstand")}`,
     "",
@@ -92,13 +93,13 @@ function section(locale: Locale): string[] {
     "",
     `### ${m.honest.notTitle}`,
     "",
-    ...m.honest.not.map((x) => `- ${x}`),
+    ...notList(m).map((x) => `- ${x}`),
     "",
     m.honest.note,
     "",
     `### ${m.faq.head}`,
     "",
-    ...m.faq.items.flatMap((f) => [`**${f.q}** ${fmt(f.a, { month: team.price_chf_month, year: team.price_chf_year })}`, ""]),
+    ...m.faq.items.flatMap((f) => [`**${f.q}** ${fmt(f.a, { month: team.price_chf_month, year: team.price_chf_year, ...fileVars(m) })}`, ""]),
     `### ${m.guides.title}`,
     "",
     ...guides(locale),

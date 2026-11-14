@@ -1,42 +1,55 @@
+import { MULTI_FILE } from "@/lib/site";
+
 export const howto = {
   name: "Filming a handball match with a phone",
   description: "From setting up to uploading: how to get a recording you can analyse.",
   totalTime: "PT15M",
-  tools: ["Phone that films in Full HD (1080p)", "Tripod or a raised spot", "Power bank with cable"],
+  tools: ["Phone with a wide angle that films in Full HD (1080p)", "Tripod or a raised spot", "Power bank with cable"],
   steps: [
     { name: "Arrive early", text: "Come 20 minutes before throw-off. Ask the caretaker or the home team where you may film, and put the notice on the door." },
-    { name: "Find the spot", text: "Level with the halfway line, as high as possible: stand, gallery, railing or a tall tripod. Never in an emergency exit." },
-    { name: "Set up the phone", text: "Airplane mode on, screen lock off, 1080p, at 50 or 60 frames per second if possible. Plug in the power bank." },
-    { name: "Check the picture", text: "Phone in landscape. Both goal areas and both sidelines must be in the picture, with some margin. No zoom." },
+    { name: "Find the spot", text: "Level with the halfway line, as high as possible and a few metres behind the sideline: stand, gallery, railing or a tall tripod. Never in an emergency exit." },
+    { name: "Set up the phone", text: "Wide angle (0.5× or \"Ultra Wide\"), 1080p, at 50 or 60 frames per second if possible. Airplane mode on, screen lock off, power bank plugged in." },
+    { name: "Check the picture", text: "Phone in landscape. Both goals and both goal areas must be fully in the picture, the sidelines as far as possible. If the two near corners are missing, that is fine. No zoom." },
     { name: "Start before throw-off", text: "Start recording when the teams walk out, and do not touch the phone after that." },
-    { name: "Keep it running at half-time", text: "Do not stop the recording at half-time. One match in one file is easier later." },
+    {
+      name: "Keep it running at half-time",
+      text: MULTI_FILE
+        ? "Best let the recording run through half-time. One match in one file is simplest."
+        : "Do not stop the recording at half-time. Otherwise a second file is made, and some programs, Handball Intelligence included, only analyse the first.",
+    },
     { name: "Stop after the final whistle", text: "Stop the recording, check that the file is complete and upload it at home over wifi." },
   ],
 };
 
 export const faq = [
   { q: "Which tripod do I need?", a: "A stable one that extends to at least 2.5 to 3 metres, for example a light stand with a phone holder. A small table tripod is only enough if you have a high spot in the stand." },
-  { q: "Is an older phone good enough?", a: "Usually, yes. It has to film in Full HD (1080p), have enough storage and last 90 minutes in one go, ideally on a power bank." },
-  { q: "Do I have to stop at half-time?", a: "No, let it run. Two files make the analysis more awkward, and some programs only analyse one file per match." },
+  { q: "Do I need the wide angle?", a: "Usually, yes. From the halfway line the normal lens sees little more than one half of the court. With the wide angle (0.5× or \"Ultra Wide\") both goals fit in." },
+  { q: "Is an older phone good enough?", a: "Usually, yes, if it has a wide angle. It has to film in Full HD (1080p), have enough storage and last 90 minutes in one go, ideally on a power bank." },
+  {
+    q: "Do I have to stop at half-time?",
+    a: MULTI_FILE
+      ? "No. Best let it run; if you stopped, simply upload both files to the same match."
+      : "No, let it run. Two files make the analysis more awkward, and some programs, Handball Intelligence included, only analyse the first file of a match.",
+  },
   { q: "Can I film from behind the goal?", a: "For the scenes of one goal, yes; for a match analysis, no: the far half of the court becomes too small and positions can hardly be estimated." },
   { q: "Portrait or landscape?", a: "Always landscape. The court is twice as long as it is wide; in portrait, the goals are cut off." },
 ];
 
 ## Why the spot matters more than the camera
 
-In a good match video you can always see all twelve court players, both goal areas and the lines. Any phone can do that if it stands in the right place. If it is too low or in a corner, even an expensive camera does not help: players hide each other, and half of the court is far away.
+In a good match video you can always see both goals, both goal areas and ideally all twelve court players. Any phone with a wide angle can do that if it stands in the right place. If it is too low or in a corner, even an expensive camera does not help: players hide each other, and half of the court is far away.
 
 <HallCamera
-  label="Plan of the hall from above: the camera is raised at the halfway line and sees the whole court. The spots behind the goals are crossed out."
-  camera="camera, 3 metres up or more"
-  field="the whole court in the picture"
-  avoid="behind the goal"
-  caption="The best spot: at the halfway line, on the long side, as high as possible."
+  label="Plan of the hall from above: the camera stands raised at the halfway line, a few metres behind the sideline. With the wide angle it sees both goals and goal areas; the two near corners are outside the picture."
+  camera="Camera high, wide angle"
+  field="both goals and goal areas in the picture"
+  corner="missing"
+  caption="Drawn to scale, with a wide angle of about 120 degrees. Both goals and goal areas are in the picture, the two near corners are not. That is normal and fine."
 />
 
 ## Where does the camera go?
 
-**Level with the halfway line, on the long side of the court.** From there both goals are equally far away and you never need to pan. A few metres off the halfway line works too, but the middle is best.
+**Level with the halfway line, on the long side of the court, a few metres behind the sideline.** From there both goals are equally far away and you never need to pan. A few metres off the halfway line works too, but the middle is best.
 
 Good spots are the stand, a gallery, a railing on the first floor or a tall tripod behind the bench. Less good are the corners and behind the goal.
 
@@ -45,20 +58,28 @@ Good spots are the stand, a gallery, a railing on the first floor or a tall trip
 **As high as possible, from about 3 metres.** The higher the camera, the less the players hide each other and the better you see the gaps in the defence. At eye level you mostly see the backs of the nearest players.
 
 <CameraSide
-  label="The hall from the side: a high camera sees over the players to the far sideline, a low camera mostly sees the nearest players."
-  high="high: 3 m and up"
-  low="low: blocked"
-  width="20 m to the far side"
-  caption="From above you see over the players. At eye level they hide each other."
+  label="Two views of the hall from the side. Left a low camera: the nearest players hide the others. Right a high camera in the stand: it sees over the players to the far sideline."
+  low="Low, at eye level: the nearest players hide the others."
+  high="High, from 3 metres: the view goes over the players to the far side."
 />
 
 Without a stand, a tall tripod helps. Put it where nobody trips over it and no emergency exit is blocked, and ask the caretaker first.
+
+## The most important step: the wide angle
+
+A handball court is 40 metres long. From the halfway line the normal lens sees little more than one half. Almost all recent phones have a second, wider view: in the camera app it is called **"0.5×"** or **"Ultra Wide"**. With it, both goals fit in.
+
+- **What must be in the picture:** both goals and both goal areas in full, the sidelines as far as possible. If the two near corners are missing, that is fine.
+- **If it still does not fit:** higher, a few metres further back, or both. Better both goals with some margin than close and sharp.
+- **Distortion at the edges:** a wide angle bends straight lines slightly at the edge of the picture. Many phones correct this themselves, on an iPhone for example with the setting "Lens Correction". Leave it on.
+
+Why both goal areas? An analysis that looks for the court in the video needs lines to hold on to. The Handball Intelligence analysis looks for the four outer lines: both sidelines and both goal lines. It works with straight lines and does not correct distortion itself. Strong distortion makes its job harder; then it asks you while checking whether the court is right, and you drag the corners into place.
 
 ## What you need
 
 <Check
   items={[
-    "A phone that films in Full HD (1080p). It need not be a new model.",
+    "A phone with a wide angle (0.5×) that films in Full HD (1080p). It need not be a new model.",
     "A tripod with a phone holder, or a fixed, high spot. If nothing else, a clamp on the railing.",
     "A power bank and a cable long enough to reach the phone.",
     "Enough free storage: closer to 10 GB than 5 GB.",
@@ -66,10 +87,11 @@ Without a stand, a tall tripod helps. Put it where nobody trips over it and no e
   ]}
 />
 
-How much space a match needs depends on the phone. Many phones show in the camera settings how much space one minute of video takes. At 1080p it is roughly 40 to 100 MB a minute, depending on the setting, so a match with half-time quickly takes 5 to 9 GB.
+How much space a match needs depends on the phone. Many phones show in the camera settings how much space one minute of video takes. At 1080p it is roughly 40 to 100 MB a minute, depending on the setting, so a match with half-time quickly takes 5 to 9 GB. You can work it out with the [storage calculator](../rechner/speicher).
 
 ## Which settings?
 
+- **Wide angle:** "0.5×" or "Ultra Wide".
 - **Resolution:** 1080p (Full HD). 4K adds little for analysis and fills the storage four times as fast.
 - **Frames per second:** 50 or 60 if the phone can do it. Fast shots are then less blurred. 25 or 30 also work.
 - **Airplane mode on:** otherwise a call can stop the recording.
@@ -84,10 +106,11 @@ How much space a match needs depends on the phone. Many phones show in the camer
 
 <Check
   items={[
+    "Filmed with the normal lens instead of the wide angle: one goal is missing from the picture.",
     "Stopped the recording at half-time and forgot to start it again.",
     "Filmed too low: players hide each other, the far half of the court is hard to see.",
     "Panned or zoomed: the video is shaky, and an automatic analysis has a harder time finding the court.",
-    "One goal area is missing from the picture because the phone is too close.",
+    "One goal area is missing from the picture because the phone is too close to the sideline.",
     "Battery flat in the second half.",
     "Backlight through large windows: if you can, choose the side with the windows behind you.",
   ]}

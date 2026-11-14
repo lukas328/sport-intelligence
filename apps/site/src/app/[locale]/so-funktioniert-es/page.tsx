@@ -54,7 +54,7 @@ export default async function How({ params }: Props) {
               </div>
               {i === 0 && (
                 <div className="col-span-2 mt-6 md:col-span-1 md:mt-0">
-                  <HallPlan label={m.filming.planLabel} camera={m.filming.planCamera} field={m.filming.planField} />
+                  <HallPlan label={m.filming.planLabel} camera={m.filming.planCamera} field={m.filming.planField} corner={m.filming.planCorner} />
                 </div>
               )}
             </li>

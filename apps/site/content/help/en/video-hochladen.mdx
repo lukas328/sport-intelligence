@@ -1,3 +1,5 @@
+import { MULTI_FILE } from "@/lib/site";
+
 How your match video gets into the app.
 
 ## Uploading
@@ -6,7 +8,7 @@ Open the match under "Matches" and choose "Upload video". Use the file as the ph
 
 - **Interrupted?** Choose the same file again. The upload continues where it stopped.
 - **Mobile data:** Large files are best uploaded on Wi-Fi. The app warns you.
-- **One file:** Best is the whole match in one file (MP4, MOV or MKV). A second file, such as the second half, is stored and can be played, but only the first file is analysed.
+- **One file:** {MULTI_FILE ? "Best is the whole match in one file (MP4, MOV or MKV). If you have several files, such as one per half, upload them all to the same match; all of them are analysed." : "Best is the whole match in one file (MP4, MOV or MKV). A second file, such as the second half, is stored and can be played, but only the first file is analysed."}
 - **By link:** A direct link to a video file works too, for example the download link from Veo or Spiideo.
 
 ## After uploading

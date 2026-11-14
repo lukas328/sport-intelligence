@@ -7,6 +7,7 @@ import { KitScope } from "@/components/kit";
 import { JsonLd } from "@/components/json-ld";
 import { PageHead, SectionHead, Updated } from "@/components/wurf-head";
 import { faqPage, graph } from "@/lib/schema";
+import { fileVars } from "@/lib/files";
 import { fmt, messages, type Locale } from "@/lib/i18n";
 import { pageMeta } from "@/lib/seo";
 import { MailLine } from "@/components/mail-line";
@@ -33,7 +34,7 @@ export default async function Help({ params }: Props) {
   };
   return (
     <KitScope>
-      <JsonLd data={graph(faqPage(locale, "hilfe", t.items.map((f) => ({ q: f.q, a: fmt(f.a, { month: team.price_chf_month, year: team.price_chf_year }) }))))} />
+      <JsonLd data={graph(faqPage(locale, "hilfe", t.items.map((f) => ({ q: f.q, a: fmt(f.a, { month: team.price_chf_month, year: team.price_chf_year, ...fileVars(m) }) }))))} />
       <PageHead kick={t.title} title={t.head} lead={t.lead}>
         <Updated locale={locale} />
       </PageHead>
@@ -44,7 +45,7 @@ export default async function Help({ params }: Props) {
               q: f.q,
               a: (
                 <>
-                  <p>{fmt(f.a, { month: team.price_chf_month, year: team.price_chf_year })}</p>
+                  <p>{fmt(f.a, { month: team.price_chf_month, year: team.price_chf_year, ...fileVars(m) })}</p>
                   {links[i] && (
                     <Link href={links[i][0]} className="link">
                       {links[i][1]}

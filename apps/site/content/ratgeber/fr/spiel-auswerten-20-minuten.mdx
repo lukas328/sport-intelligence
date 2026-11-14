@@ -1,0 +1,68 @@
+export const howto = {
+  name: "Analyser un match de handball en 20 minutes",
+  description: "Une question, les buts marqués et encaissés, une feuille de pointage et trois scènes pour l'équipe.",
+  totalTime: "PT20M",
+  tools: ["Vidéo du match", "Feuille de match", "Papier et crayon"],
+  steps: [
+    { name: "Choisir une question (2 minutes)", text: "Prends une seule question, par exemple : d'où viennent nos buts encaissés ? Tout le reste attend." },
+    { name: "Lire l'évolution du score (3 minutes)", text: "Regarde sur la feuille de match quand les buts sont tombés. Où une équipe a-t-elle marqué trois buts ou plus d'affilée ? Tu regardes ces phases en premier." },
+    { name: "Sauter à chaque but encaissé (8 minutes)", text: "Saute à chaque but encaissé et regarde les 15 à 20 secondes d'avant. Note pour chaque but d'où le tir est parti et s'il est venu d'une contre-attaque." },
+    { name: "Tenir une feuille de pointage (en continu)", text: "Fais un bâton par poste et pour les contre-attaques. Après le dernier but encaissé, tu vois où ça s'accumule." },
+    { name: "Survoler tes propres buts (4 minutes)", text: "Regarde vite comment vos buts sont nés. Une bonne scène te servira tout de suite pour l'équipe." },
+    { name: "Choisir trois scènes (3 minutes)", text: "Choisis deux scènes qui montrent la tendance et une bonne. Note le temps de jeu pour les retrouver." },
+  ],
+};
+
+export const faq = [
+  { q: "Pourquoi ne pas regarder tout le match ?", a: "Parce que ça prend plus d'une heure et que tu n'en sais rarement plus après. Avec une question et les buts comme point d'entrée, tu trouves l'essentiel en un tiers du temps." },
+  { q: "Et si je n'ai pas de feuille de match ?", a: "Alors tu avances plus vite et tu guettes l'engagement après chaque but. Il te montre qu'un but vient de tomber." },
+  { q: "Quelles questions conviennent ?", a: "D'où viennent les buts encaissés ? Combien de buts sur contre-attaque, des deux côtés ? Que s'est-il passé pendant les exclusions de 2 minutes ? Quand avons-nous perdu l'avance ?" },
+];
+
+## Pourquoi commencer par une question ?
+
+Si tu regardes une vidéo « juste pour voir », tu vois beaucoup et tu retiens peu. Avec une question, tu sais à quoi faire attention et tu peux sauter aux bons moments. En 20 minutes, tu traites ainsi une question à fond. Ça suffit pour une semaine d'entraînement.
+
+## Comment faire
+
+<Steps items={howto.steps} />
+
+## La feuille de pointage
+
+Papier et crayon suffisent. Voici à quoi elle peut ressembler, avec des chiffres inventés :
+
+| But encaissé depuis | Première mi-temps | Deuxième mi-temps | Total |
+|---|---|---|---|
+| Ailier gauche | II | I | 3 |
+| Arrière gauche | I | | 1 |
+| Demi-centre | II | II | 4 |
+| Arrière droit | IIII | III | 7 |
+| Ailier droit | I | I | 2 |
+| Pivot | II | I | 3 |
+| Jet de 7 mètres | | II | 2 |
+| Contre-attaque | I | I | 2 |
+| **Total** | 13 | 11 | **24** |
+
+Dans cet exemple, l'arrière droit ressort : 7 buts encaissés sur 24. Si ça vient de la défense, du gardien ou des pertes de balle, les sept scènes te le montrent. Comment lire une telle accumulation : [Lire les buts encaissés par poste](gegentore-nach-position).
+
+## Lire l'évolution du score
+
+Un match a des phases. Souvent, cinq minutes décident, pendant lesquelles une équipe marque trois ou quatre buts d'affilée. Tu trouves ces phases sur la feuille de match, avant même d'ouvrir la vidéo.
+
+<MatchTimeline
+  label="Un match inventé sur une ligne de 60 minutes : nos buts vers le haut, les buts encaissés vers le bas. Entre la 41e et la 46e minute, quatre buts encaissés d'affilée."
+  above={[2, 6, 9, 13, 17, 21, 24, 28, 33, 36, 39, 49, 52, 55, 58]}
+  below={[4, 8, 11, 15, 19, 23, 27, 31, 35, 41, 43, 44, 46, 51, 54]}
+  aboveLabel="nos buts"
+  belowLabel="buts encaissés"
+  half="Pause"
+  caption="Exemple inventé : entre la 41e et la 46e minute, quatre buts encaissés d'affilée. Ces cinq minutes, tu les regardes en premier."
+/>
+
+## Ce que tu as à la fin
+
+- Une réponse à ta question, avec un chiffre et sa base : « 7 buts encaissés sur 24 depuis l'arrière droit ».
+- Trois scènes avec le temps de jeu pour la prochaine séance vidéo. Comment les montrer : [Montrer des scènes à l'entraînement](szenen-im-training-zeigen).
+- Une idée d'exercice pour le prochain entraînement.
+
+Écris la réponse. Après trois ou quatre matchs, tu vois si c'est une tendance ou un hasard.

@@ -129,7 +129,7 @@ const de = {
     ],
     stepsTitle: "So kommst du dahin",
     steps: [
-      { title: "Filmen", text: "Handy aufs Stativ, hoch oben an der Mittellinie, das ganze Feld im Bild." },
+      { title: "Filmen", text: "Handy aufs Stativ, hoch oben an der Mittellinie, beide Tore im Bild." },
       { title: "Hochladen", text: "Video in der App wählen. Du bekommst eine Mail, wenn die Analyse fertig ist." },
       { title: "Prüfen und teilen", text: "Die Analyse schlägt die Tor-Momente vor, du bestätigst sie in ein paar Minuten. Dann schickst du dem Team den Link." },
     ],
@@ -158,8 +158,8 @@ const de = {
       "Paraden und Fehlwürfe erkennen. Die markierst du von Hand, wenn du sie willst.",
       "Spieler sicher von Zuschauern und Bank trennen. Die Positionen sind geschätzt.",
       "Laufdistanzen genau messen. Aus einer Kamera sind es Schätzungen.",
-      "Ein Spiel aus zwei Dateien auswerten. Ausgewertet wird nur die erste.",
     ],
+    notFiles: "Ein Spiel aus zwei Dateien auswerten. Ausgewertet wird nur die erste.",
     note: "Was geschätzt ist, zeichnen wir gestrichelt und schreiben «geschätzt» dazu.",
   },
   how: {
@@ -169,7 +169,7 @@ const de = {
     steps: [
       {
         title: "Filmen",
-        text: "Ein Handy reicht. Stell es auf ein Stativ, so hoch wie möglich, auf Höhe der Mittellinie. Das ganze Feld muss im Bild sein, mit beiden Torräumen. Dann einfach laufen lassen, auch in der Pause.",
+        text: "Ein Handy reicht. Stell es auf ein Stativ, so hoch wie möglich, auf Höhe der Mittellinie. Mit dem Weitwinkel (0,5×) sind beide Tore und Torräume im Bild. Dann einfach laufen lassen, auch in der Pause.",
       },
       {
         title: "Hochladen",
@@ -200,10 +200,11 @@ const de = {
   filming: {
     title: "Filmen",
     head: "So filmst du ein Spiel.",
-    lead: "Ein Handy reicht. Stell es hoch an die Mittellinie, so dass das ganze Feld im Bild ist, und lass es das ganze Spiel durchlaufen, auch in der Pause.",
-    planLabel: "Plan der Halle von oben: die Kamera steht erhöht auf Höhe der Mittellinie und sieht das ganze Feld mit beiden Torräumen.",
-    planCamera: "Kamera, ab 3 Metern hoch",
-    planField: "das ganze Feld im Bild",
+    lead: "Ein Handy reicht. Stell es hoch an die Mittellinie, nimm den Weitwinkel (0,5×), so dass beide Tore im Bild sind, und lass es das ganze Spiel durchlaufen.",
+    planLabel: "Plan der Halle von oben: die Kamera steht erhöht an der Mittellinie, ein paar Meter hinter der Seitenlinie. Mit Weitwinkel sieht sie beide Tore und Torräume; die zwei nahen Ecken liegen ausserhalb des Bildes.",
+    planCamera: "Kamera hoch, mit Weitwinkel",
+    planField: "beide Tore und Torräume im Bild",
+    planCorner: "fehlt",
     sections: [
       {
         title: "Was du brauchst",
@@ -219,13 +220,15 @@ const de = {
         items: [
           "Auf Höhe der Mittellinie, damit beide Tore gleich gut zu sehen sind.",
           "So hoch wie möglich, ab etwa 3 Metern: Tribüne, Galerie oder ein hohes Stativ.",
-          "Das ganze Feld im Bild, mit beiden Torräumen und Seitenlinien. Lieber etwas mehr Rand.",
+          "Beide Tore und Torräume ganz im Bild, die Seitenlinien so weit wie möglich. Fehlen die zwei nahen Ecken, ist das in Ordnung.",
+          "Passt es nicht: höher, ein paar Meter weiter zurück oder Weitwinkel. Lieber beide Tore mit etwas Rand als nah und scharf.",
           "Handy quer halten.",
         ],
       },
       {
         title: "Einstellen",
         items: [
+          "Weitwinkel wählen: in der Kamera-App «0,5×» oder «Ultraweit». Nur damit passen von der Mittellinie aus beide Tore ins Bild.",
           "1080p, wenn möglich 50 Bilder pro Sekunde.",
           "Flugmodus an, damit kein Anruf die Aufnahme stoppt.",
           "Bildschirmsperre aus, Ton egal.",
@@ -235,14 +238,14 @@ const de = {
         title: "Während dem Spiel",
         items: [
           "Nicht schwenken und nicht zoomen. Einfach laufen lassen.",
-          "Film in der Pause weiter. Wenn du stoppst, entsteht eine zweite Datei, und die zweite Halbzeit wird nicht ausgewertet.",
+          "{pause}",
         ],
       },
       {
         title: "Danach",
         items: [
           "In der App das Spiel öffnen und die Datei hochladen.",
-          "Am besten das ganze Spiel in einer Datei (MP4, MOV oder MKV). Eine zweite Datei, etwa die zweite Halbzeit, wird gespeichert und abgespielt, ausgewertet wird aber nur die erste.",
+          "{upload}",
           "Ein direkter Link auf eine Videodatei geht auch, zum Beispiel der Download-Link von Veo oder Spiideo.",
         ],
       },
@@ -259,6 +262,10 @@ const de = {
     noticeLead: "Sag dem Gegner und der Halle, dass gefilmt wird. Druck diesen Aushang aus und häng ihn an die Tür.",
     notice: "Dieses Spiel wird zu Analysezwecken gefilmt. Fragen beantwortet das Trainerteam des Heimteams.",
     print: "Aushang drucken",
+    pause: "Film in der Pause weiter. Wenn du stoppst, entsteht eine zweite Datei, und die zweite Halbzeit wird nicht ausgewertet.",
+    pauseMulti: "Lass die Aufnahme in der Pause am besten weiterlaufen. Hast du gestoppt, lädst du einfach alle Dateien zum selben Spiel hoch.",
+    upload: "Am besten das ganze Spiel in einer Datei (MP4, MOV oder MKV). Eine zweite Datei, etwa die zweite Halbzeit, wird gespeichert und abgespielt, ausgewertet wird aber nur die erste.",
+    uploadMulti: "Am besten das ganze Spiel in einer Datei (MP4, MOV oder MKV). Hast du mehrere Dateien, etwa eine pro Halbzeit, lädst du alle zum selben Spiel hoch; ausgewertet werden alle.",
     guideLink: "Standort, Höhe und Einstellungen ausführlich",
     moreTitle: "Mehr dazu",
   },
@@ -341,8 +348,8 @@ const de = {
     lead: "Ein Handy reicht. Die Analyse schlägt die Tor-Momente vor, du bestätigst sie in ein paar Minuten. Das Video sieht nur dein Trainerteam. Mehr dazu in den Fragen unten, darunter die Anleitungen zur App.",
     items: [
       { q: "Reicht mein Handy?", a: "Ja. Jedes Handy, das in Full HD (1080p) filmt, reicht. Wichtiger als die Kamera ist, wo sie steht." },
-      { q: "Wo stelle ich die Kamera hin?", a: "Auf Höhe der Mittellinie, so hoch wie möglich, ab etwa 3 Metern: Tribüne, Galerie oder ein hohes Stativ. Das ganze Feld muss im Bild sein, mit beiden Torräumen." },
-      { q: "Welche Datei kann ich hochladen?", a: "Die Videodatei, so wie das Handy sie speichert. Am besten das ganze Spiel in einer Datei (MP4, MOV oder MKV). Eine zweite Datei, etwa die zweite Halbzeit, wird gespeichert und abgespielt, ausgewertet wird aber nur die erste. Ein direkter Link auf eine Videodatei geht auch, zum Beispiel der Download-Link von Veo oder Spiideo." },
+      { q: "Wo stelle ich die Kamera hin?", a: "Auf Höhe der Mittellinie, so hoch wie möglich, ab etwa 3 Metern: Tribüne, Galerie oder ein hohes Stativ. Mit dem Weitwinkel (0,5×) sind beide Tore und Torräume im Bild." },
+      { q: "Welche Datei kann ich hochladen?", a: "Die Videodatei, so wie das Handy sie speichert. {upload} Ein direkter Link auf eine Videodatei geht auch, zum Beispiel der Download-Link von Veo oder Spiideo." },
       { q: "Wie lange dauert die Analyse?", a: "Das hängt von der Länge des Videos ab. Du musst nicht dabeibleiben: du bekommst eine Mail, wenn sie fertig ist. Danach prüfst du ein paar Minuten." },
       { q: "Muss ich etwas von Hand eintragen?", a: "Eintippen musst du nichts, aber kurz prüfen. Die Analyse schlägt die Momente vor, in denen ein Tor gefallen sein könnte, und du bestätigst sie mit einem Tipp. Das dauert ein paar Minuten. Paraden und Fehlwürfe markierst du nur, wenn du sie willst." },
       { q: "Was kostet es?", a: "Ein Team kostet CHF {month} im Monat oder CHF {year} im Jahr. Die Preise sind noch nicht endgültig." },
@@ -475,6 +482,9 @@ const de = {
     all: "Alle Ratgeber",
   },
   facts: {
+    fileNeed: "das ganze Spiel in einer Videodatei (MP4, MOV oder MKV)",
+    fileNeedMulti: "das Video des Spiels (MP4, MOV oder MKV), am besten in einer Datei",
+    fileNot: ", eine zweite Videodatei desselben Spiels auswerten",
     title: "Fakten auf einen Blick",
     metaTitle: "Fakten auf einen Blick",
     description: "Handball Intelligence in Kürze: was es ist, für wen, was du brauchst, was es kann und was nicht, Preisstand, Datenstandort und Kontakt. Zum Zitieren.",
@@ -485,10 +495,10 @@ const de = {
     rows: [
       { k: "Was es ist", v: "Eine Web-App zur Videoanalyse von Handballspielen. Sie läuft im Browser, am Handy und am Computer." },
       { k: "Für wen", v: "Trainerinnen und Trainer von Amateur- und Nachwuchsteams, zuerst in der Schweiz. Spielerinnen, Spieler und Eltern brauchen kein Konto." },
-      { k: "Was du brauchst", v: "Ein Handy, das in Full HD (1080p) filmt, einen erhöhten Platz an der Mittellinie und das ganze Spiel in einer Videodatei (MP4, MOV oder MKV)." },
+      { k: "Was du brauchst", v: "Ein Handy, das in Full HD (1080p) filmt, einen erhöhten Platz an der Mittellinie und {fileNeed}." },
       { k: "Wie es abläuft", v: "Filmen, hochladen, auf die Mail warten, dann ein paar Minuten prüfen: Die Analyse schlägt Momente vor, in denen ein Tor gefallen sein könnte, und du bestätigst sie." },
       { k: "Was du bekommst", v: "Resultat und Spielverlauf, jedes bestätigte Tor als Szene im Video, die Positionen von oben (geschätzt), bei genug Toren drei Dinge zum Mitnehmen und einen Link fürs Team." },
-      { k: "Was es nicht kann", v: "Den Ball verfolgen (darum keine Pässe und keine Wurfbahnen), Tore sicher von selbst erkennen, Paraden und Fehlwürfe erkennen, eine zweite Videodatei desselben Spiels auswerten." },
+      { k: "Was es nicht kann", v: "Den Ball verfolgen (darum keine Pässe und keine Wurfbahnen), Tore sicher von selbst erkennen, Paraden und Fehlwürfe erkennen{fileNot}." },
       { k: "Preisstand", v: "Gratis ohne automatische Analyse. Team: CHF {team} im Monat. Verein: CHF {club} im Monat für bis zu {clubTeams} Teams. Die Preise sind noch nicht endgültig." },
       { k: "Datenstandort", v: "Vorgesehen: App und Datenbank in der Schweiz, Videos in einem Speicher in der EU. Die Anbieter stehen vor dem Start in der Datenschutzerklärung." },
       { k: "Einwilligung", v: "Per Link im Teamchat, ohne Konto, für jeden Zweck einzeln, jederzeit änderbar. Für Kinder unter 16 entscheiden die Eltern." },
@@ -548,7 +558,7 @@ const de = {
         ],
       },
     ],
-    pictureCaption: "So filmst du: ein Handy, hoch an der Mittellinie, das ganze Feld im Bild.",
+    pictureCaption: "So filmst du: ein Handy, hoch an der Mittellinie, mit Weitwinkel beide Tore im Bild.",
     shotAlt: "Startseite der App mit Beispieldaten: oben das letzte Spiel in der Vereinsfarbe mit Resultat und Verlauf.",
     shotCaption: "Bild aus der App, mit Beispieldaten.",
     contactTitle: "Schreib uns",

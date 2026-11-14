@@ -131,7 +131,7 @@ const en: Messages = {
     ],
     stepsTitle: "How you get there",
     steps: [
-      { title: "Film", text: "Phone on a tripod, high up at the halfway line, the whole court in the picture." },
+      { title: "Film", text: "Phone on a tripod, high up at the halfway line, both goals in the picture." },
       { title: "Upload", text: "Choose the video in the app. You get an e-mail when the analysis is done." },
       { title: "Check and share", text: "The analysis suggests the goal moments, you confirm them in a few minutes. Then you send the team the link." },
     ],
@@ -160,8 +160,8 @@ const en: Messages = {
       "Detect saves and missed shots. You mark them by hand if you want them.",
       "Reliably tell players from spectators and the bench. The positions are estimates.",
       "Measure running distances exactly. From one camera they are estimates.",
-      "Analyse a match made of two files. Only the first one is analysed.",
     ],
+    notFiles: "Analyse a match made of two files. Only the first one is analysed.",
     note: "What is estimated, we draw dashed and label \"estimated\".",
   },
   how: {
@@ -171,7 +171,7 @@ const en: Messages = {
     steps: [
       {
         title: "Film",
-        text: "A phone is enough. Put it on a tripod, as high as possible, level with the halfway line. The whole court must be in the picture, with both goal areas. Then just let it run, half time included.",
+        text: "A phone is enough. Put it on a tripod, as high as possible, level with the halfway line. With the wide angle (0.5×), both goals and goal areas are in the picture. Then just let it run, half time included.",
       },
       {
         title: "Upload",
@@ -202,10 +202,11 @@ const en: Messages = {
   filming: {
     title: "Filming",
     head: "How to film a match.",
-    lead: "A phone is enough. Put it high up at the halfway line, with the whole court in the picture, and let it run for the whole match, half-time included.",
-    planLabel: "Plan of the hall from above: the camera stands raised, level with the halfway line, and sees the whole court with both goal areas.",
-    planCamera: "Camera, at least 3 metres high",
-    planField: "the whole court in the picture",
+    lead: "A phone is enough. Put it high up at the halfway line, use the wide angle (0.5×) so both goals are in the picture, and let it run for the whole match.",
+    planLabel: "Plan of the hall from above: the camera stands raised at the halfway line, a few metres behind the sideline. With the wide angle it sees both goals and goal areas; the two near corners are outside the picture.",
+    planCamera: "Camera high, wide angle",
+    planField: "both goals and goal areas in the picture",
+    planCorner: "missing",
     sections: [
       {
         title: "What you need",
@@ -221,13 +222,15 @@ const en: Messages = {
         items: [
           "Level with the halfway line, so both goals are equally visible.",
           "As high as possible, from about 3 metres: stands, gallery or a tall tripod.",
-          "The whole court in the picture, with both goal areas and side lines. Better a little more margin.",
+          "Both goals and goal areas fully in the picture, the sidelines as far as possible. If the two near corners are missing, that is fine.",
+          "If it does not fit: higher, a few metres further back or wide angle. Better both goals with some margin than close and sharp.",
           "Hold the phone sideways.",
         ],
       },
       {
         title: "Settings",
         items: [
+          "Choose the wide angle: \"0.5×\" or \"Ultra Wide\" in the camera app. Only then do both goals fit in from the halfway line.",
           "1080p, if possible 50 frames per second.",
           "Flight mode on, so no call stops the recording.",
           "Screen lock off, sound does not matter.",
@@ -237,14 +240,14 @@ const en: Messages = {
         title: "During the match",
         items: [
           "Do not pan and do not zoom. Just let it run.",
-          "Keep filming through half time. If you stop, a second file is made, and the second half is not analysed.",
+          "{pause}",
         ],
       },
       {
         title: "Afterwards",
         items: [
           "Open the match in the app and upload the file.",
-          "Best is the whole match in one file (MP4, MOV or MKV). A second file, such as the second half, is stored and can be played, but only the first file is analysed.",
+          "{upload}",
           "A direct link to a video file works too, for example the download link from Veo or Spiideo.",
         ],
       },
@@ -261,6 +264,10 @@ const en: Messages = {
     noticeLead: "Tell the opponent and the hall that you are filming. Print this notice and put it on the door.",
     notice: "This match is filmed for analysis. The home team's coaches answer any questions.",
     print: "Print the notice",
+    pause: "Keep filming through half time. If you stop, a second file is made, and the second half is not analysed.",
+    pauseMulti: "Best let the recording run through half time. If you stopped, simply upload all files to the same match.",
+    upload: "Best is the whole match in one file (MP4, MOV or MKV). A second file, such as the second half, is stored and can be played, but only the first file is analysed.",
+    uploadMulti: "Best is the whole match in one file (MP4, MOV or MKV). If you have several files, such as one per half, upload them all to the same match; all of them are analysed.",
     guideLink: "position, height and settings in detail",
     moreTitle: "More on this",
   },
@@ -343,8 +350,8 @@ const en: Messages = {
     lead: "A phone is enough. The analysis suggests the goal moments, you confirm them in a few minutes. Only your coaching staff sees the video. Details in the questions below, then the guides to the app.",
     items: [
       { q: "Is my phone good enough?", a: "Yes. Any phone that films in Full HD (1080p) is enough. Where it stands matters more than the camera." },
-      { q: "Where do I put the camera?", a: "Level with the halfway line, as high as possible, from about 3 metres: stands, gallery or a tall tripod. The whole court must be in the picture, with both goal areas." },
-      { q: "Which file can I upload?", a: "The video file as the phone saves it. Best is the whole match in one file (MP4, MOV or MKV). A second file, such as the second half, is stored and can be played, but only the first file is analysed. A direct link to a video file works too, for example the download link from Veo or Spiideo." },
+      { q: "Where do I put the camera?", a: "Level with the halfway line, as high as possible, from about 3 metres: stands, gallery or a tall tripod. With the wide angle (0.5×), both goals and goal areas are in the picture." },
+      { q: "Which file can I upload?", a: "The video file as the phone saves it. {upload} A direct link to a video file works too, for example the download link from Veo or Spiideo." },
       { q: "How long does the analysis take?", a: "That depends on the length of the video. You need not stay: you get an e-mail when it is done. Then you check for a few minutes." },
       { q: "Do I have to enter anything by hand?", a: "No typing, but a short check. The analysis suggests the moments when a goal may have been scored, and you confirm them with a tap. That takes a few minutes. You mark saves and missed shots only if you want them." },
       { q: "What does it cost?", a: "One team costs CHF {month} a month or CHF {year} a year. The prices are not final yet." },
@@ -477,6 +484,9 @@ const en: Messages = {
     all: "All guides",
   },
   facts: {
+    fileNeed: "the whole match in one video file (MP4, MOV or MKV)",
+    fileNeedMulti: "the match video (MP4, MOV or MKV), ideally in one file",
+    fileNot: ", analyse a second video file of the same match",
     title: "Facts at a glance",
     metaTitle: "Facts at a glance",
     description: "Handball Intelligence in brief: what it is, who it is for, what you need, what it can and cannot do, prices, data location and contact. For quoting.",
@@ -487,10 +497,10 @@ const en: Messages = {
     rows: [
       { k: "What it is", v: "A web app for video analysis of handball matches. It runs in the browser, on phones and computers." },
       { k: "Who it is for", v: "Coaches of amateur and youth teams, starting in Switzerland. Players and parents need no account." },
-      { k: "What you need", v: "A phone that films in Full HD (1080p), a raised spot at the halfway line and the whole match in one video file (MP4, MOV or MKV)." },
+      { k: "What you need", v: "A phone that films in Full HD (1080p), a raised spot at the halfway line and {fileNeed}." },
       { k: "How it works", v: "Film, upload, wait for the e-mail, then check for a few minutes: the analysis suggests moments when a goal may have been scored, and you confirm them." },
       { k: "What you get", v: "Result and run of play, every confirmed goal as a scene in the video, positions from above (estimated), three things to take home when there are enough goals, and a link for the team." },
-      { k: "What it cannot do", v: "Track the ball (so no passes and no shot paths), reliably detect goals by itself, detect saves and missed shots, analyse a second video file of the same match." },
+      { k: "What it cannot do", v: "Track the ball (so no passes and no shot paths), reliably detect goals by itself, detect saves and missed shots{fileNot}." },
       { k: "Prices", v: "Free without automatic analysis. Team: CHF {team} a month. Club: CHF {club} a month for up to {clubTeams} teams. The prices are not final yet." },
       { k: "Data location", v: "Planned: app and database in Switzerland, videos in storage in the EU. The providers will be named in the privacy policy before launch." },
       { k: "Consent", v: "By link in the team chat, no account, separately for each purpose, changeable at any time. For children under 16, the parents decide." },
@@ -550,7 +560,7 @@ const en: Messages = {
         ],
       },
     ],
-    pictureCaption: "How to film: one phone, high up at the halfway line, the whole court in the picture.",
+    pictureCaption: "How to film: one phone, high up at the halfway line, both goals in the picture with the wide angle.",
     shotAlt: "Start page of the app with example data: at the top the last match in the club colour with result and run of play.",
     shotCaption: "Picture from the app, with example data (in German).",
     contactTitle: "Write to us",

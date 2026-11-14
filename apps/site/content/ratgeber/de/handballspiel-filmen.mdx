@@ -1,42 +1,55 @@
+import { MULTI_FILE } from "@/lib/site";
+
 export const howto = {
   name: "Ein Handballspiel mit dem Handy filmen",
   description: "Vom Aufstellen bis zum Hochladen: so entsteht eine Aufnahme, die du auswerten kannst.",
   totalTime: "PT15M",
-  tools: ["Handy mit Full HD (1080p)", "Stativ oder erhöhter Platz", "Powerbank mit Kabel"],
+  tools: ["Handy mit Full HD (1080p) und Weitwinkel", "Stativ oder erhöhter Platz", "Powerbank mit Kabel"],
   steps: [
     { name: "Früh da sein", text: "Komm 20 Minuten vor dem Anpfiff. Frag den Hallenwart oder das Heimteam, wo du filmen darfst, und häng den Aushang an die Tür." },
-    { name: "Platz suchen", text: "Auf Höhe der Mittellinie, so hoch wie möglich: Tribüne, Galerie, Geländer oder ein hohes Stativ. Nicht in einen Fluchtweg." },
-    { name: "Handy einstellen", text: "Flugmodus an, Bildschirmsperre aus, 1080p, wenn möglich 50 oder 60 Bilder pro Sekunde. Powerbank anschliessen." },
-    { name: "Bild prüfen", text: "Handy quer. Beide Torräume und beide Seitenlinien müssen im Bild sein, mit etwas Rand. Nicht zoomen." },
+    { name: "Platz suchen", text: "Auf Höhe der Mittellinie, so hoch wie möglich und ein paar Meter hinter der Seitenlinie: Tribüne, Galerie, Geländer oder ein hohes Stativ. Nicht in einen Fluchtweg." },
+    { name: "Handy einstellen", text: "Weitwinkel wählen (0,5× oder «Ultraweit»), 1080p, wenn möglich 50 oder 60 Bilder pro Sekunde. Flugmodus an, Bildschirmsperre aus, Powerbank anschliessen." },
+    { name: "Bild prüfen", text: "Handy quer. Beide Tore und beide Torräume müssen ganz im Bild sein, die Seitenlinien so weit wie möglich. Fehlen die zwei nahen Ecken, ist das in Ordnung. Nicht zoomen." },
     { name: "Vor dem Anpfiff starten", text: "Starte die Aufnahme, wenn die Teams einlaufen, und fass das Handy danach nicht mehr an." },
-    { name: "In der Pause weiterlaufen lassen", text: "Stopp die Aufnahme in der Pause nicht. Ein Spiel in einer Datei ist später einfacher." },
+    {
+      name: "In der Pause weiterlaufen lassen",
+      text: MULTI_FILE
+        ? "Lass die Aufnahme in der Pause am besten weiterlaufen. Ein Spiel in einer Datei ist am einfachsten."
+        : "Stopp die Aufnahme in der Pause nicht. Sonst entsteht eine zweite Datei, und manche Programme, auch Handball Intelligence, werten nur die erste aus.",
+    },
     { name: "Nach dem Schlusspfiff stoppen", text: "Stopp die Aufnahme, prüf kurz, ob die Datei vollständig ist, und lade sie zu Hause im WLAN hoch." },
   ],
 };
 
 export const faq = [
   { q: "Welches Stativ brauche ich?", a: "Eines, das stabil auf mindestens 2,5 bis 3 Meter ausfährt, zum Beispiel ein Lampenstativ mit Handyhalter. Ein kleines Tischstativ reicht nur, wenn du einen hohen Platz auf der Tribüne hast." },
-  { q: "Reicht ein älteres Handy?", a: "Meistens ja. Es muss in Full HD (1080p) filmen, genug Speicher haben und 90 Minuten am Stück durchhalten, am besten an der Powerbank." },
-  { q: "Muss ich in der Pause stoppen?", a: "Nein, lass die Aufnahme laufen. Zwei Dateien machen das Auswerten umständlicher, und manche Programme werten nur eine Datei pro Spiel aus." },
+  { q: "Brauche ich den Weitwinkel?", a: "Meistens ja. Von der Mittellinie aus sieht die normale Linse kaum mehr als eine Hälfte des Feldes. Mit dem Weitwinkel (0,5× oder «Ultraweit») passen beide Tore ins Bild." },
+  { q: "Reicht ein älteres Handy?", a: "Meistens ja, wenn es einen Weitwinkel hat. Es muss in Full HD (1080p) filmen, genug Speicher haben und 90 Minuten am Stück durchhalten, am besten an der Powerbank." },
+  {
+    q: "Muss ich in der Pause stoppen?",
+    a: MULTI_FILE
+      ? "Nein. Lass die Aufnahme am besten laufen; hast du gestoppt, lädst du einfach beide Dateien zum selben Spiel hoch."
+      : "Nein, lass die Aufnahme laufen. Zwei Dateien machen das Auswerten umständlicher, und manche Programme, auch Handball Intelligence, werten nur die erste Datei eines Spiels aus.",
+  },
   { q: "Kann ich hinter dem Tor filmen?", a: "Für die Szenen eines Tors geht das, für eine Spielanalyse nicht: Das andere Ende des Feldes ist dann zu klein, und Positionen lassen sich kaum schätzen." },
   { q: "Hochformat oder Querformat?", a: "Immer quer. Das Feld ist doppelt so lang wie breit, im Hochformat fehlen die Tore." },
 ];
 
 ## Warum der Standort wichtiger ist als die Kamera
 
-Auf einem guten Spielvideo siehst du jederzeit alle zwölf Feldspieler, beide Torräume und die Linien. Das schafft jedes Handy, wenn es am richtigen Ort steht. Steht es zu tief oder in der Ecke, hilft auch eine teure Kamera nicht: Die Spieler verdecken sich, und die Hälfte des Feldes ist weit weg.
+Auf einem guten Spielvideo siehst du jederzeit beide Tore, beide Torräume und möglichst alle zwölf Feldspieler. Das schafft jedes Handy mit Weitwinkel, wenn es am richtigen Ort steht. Steht es zu tief oder in der Ecke, hilft auch eine teure Kamera nicht: Die Spieler verdecken sich, und die Hälfte des Feldes ist weit weg.
 
 <HallCamera
-  label="Plan der Halle von oben: die Kamera steht erhöht auf Höhe der Mittellinie und sieht das ganze Feld. Hinter den Toren ist der Platz durchgestrichen."
-  camera="Kamera, ab 3 Metern hoch"
-  field="das ganze Feld im Bild"
-  avoid="hinter dem Tor"
-  caption="Der beste Platz: an der Mittellinie, auf der langen Seite, so hoch wie möglich."
+  label="Plan der Halle von oben: die Kamera steht erhöht an der Mittellinie, ein paar Meter hinter der Seitenlinie. Mit Weitwinkel sieht sie beide Tore und Torräume; die zwei nahen Ecken liegen ausserhalb des Bildes."
+  camera="Kamera hoch, mit Weitwinkel"
+  field="beide Tore und Torräume im Bild"
+  corner="fehlt"
+  caption="Massstäblich gezeichnet, mit einem Weitwinkel von etwa 120 Grad. Beide Tore und Torräume sind im Bild, die zwei nahen Ecken nicht. Das ist normal und in Ordnung."
 />
 
 ## Wo kommt die Kamera hin?
 
-**Auf Höhe der Mittellinie, auf der langen Seite des Feldes.** Von dort sind beide Tore gleich weit weg, und du musst nie schwenken. Ein paar Meter neben der Mittellinie gehen auch, die Mitte ist aber am besten.
+**Auf Höhe der Mittellinie, auf der langen Seite des Feldes, ein paar Meter hinter der Seitenlinie.** Von dort sind beide Tore gleich weit weg, und du musst nie schwenken. Ein paar Meter neben der Mittellinie gehen auch, die Mitte ist aber am besten.
 
 Gut sind die Tribüne, eine Galerie, ein Geländer im ersten Stock oder ein hohes Stativ hinter der Bank. Weniger gut sind die Ecken und der Platz hinter dem Tor.
 
@@ -45,20 +58,28 @@ Gut sind die Tribüne, eine Galerie, ein Geländer im ersten Stock oder ein hohe
 **So hoch wie möglich, ab etwa 3 Metern.** Je höher die Kamera, desto weniger verdecken sich die Spieler, und desto besser siehst du die Abstände in der Abwehr. Auf Augenhöhe siehst du vor allem die Rücken der nächsten Spieler.
 
 <CameraSide
-  label="Die Halle von der Seite: eine hohe Kamera sieht über die Spieler hinweg bis zur anderen Seitenlinie, eine tiefe Kamera sieht vor allem die nächsten Spieler."
-  high="hoch: ab 3 m"
-  low="tief: verdeckt"
-  width="20 m bis zur anderen Seite"
-  caption="Von oben siehst du über die Spieler hinweg. Auf Augenhöhe verdecken sie sich."
+  label="Zwei Bilder der Halle von der Seite. Links eine tiefe Kamera: die nächsten Spieler verdecken die anderen. Rechts eine hohe Kamera auf der Tribüne: sie sieht über die Spieler hinweg bis zur anderen Seitenlinie."
+  low="Tief, auf Augenhöhe: Die nächsten Spieler verdecken die anderen."
+  high="Hoch, ab 3 Metern: Der Blick geht über die Spieler bis zur anderen Seite."
 />
 
 Ohne Tribüne hilft ein hohes Stativ. Stell es so, dass niemand darüber stolpert und kein Fluchtweg versperrt ist, und frag vorher den Hallenwart.
+
+## Der wichtigste Handgriff: Weitwinkel
+
+Ein Handballfeld ist 40 Meter lang. Von der Mittellinie aus siehst du mit der normalen Linse kaum mehr als eine Hälfte. Fast alle neueren Handys haben einen zweiten, weiteren Blickwinkel: In der Kamera-App heisst er **«0,5×»** oder **«Ultraweit»**. Damit passen beide Tore ins Bild.
+
+- **Was im Bild sein muss:** beide Tore und beide Torräume ganz, die Seitenlinien so weit wie möglich. Fehlen die zwei nahen Ecken, ist das in Ordnung.
+- **Passt es trotzdem nicht:** höher, ein paar Meter weiter zurück, oder beides. Lieber beide Tore mit etwas Rand als nah und scharf.
+- **Verzerrung am Rand:** Ein Weitwinkel biegt gerade Linien am Bildrand leicht. Viele Handys korrigieren das selbst, beim iPhone zum Beispiel mit der Einstellung «Objektivkorrektur». Lass sie eingeschaltet.
+
+Warum beide Torräume? Eine Analyse, die das Feld im Video sucht, braucht Linien, an denen sie sich festhalten kann. Die Analyse von Handball Intelligence sucht die vier Aussenlinien, also beide Seitenlinien und beide Torlinien. Sie rechnet mit geraden Linien und entzerrt das Bild nicht selbst. Starke Verzerrung macht ihr die Arbeit schwerer; dann fragt sie beim Prüfen, ob das Feld passt, und du ziehst die Ecken zurecht.
 
 ## Was du brauchst
 
 <Check
   items={[
-    "Ein Handy, das in Full HD (1080p) filmt. Ein neues Modell ist nicht nötig.",
+    "Ein Handy mit Weitwinkel (0,5×), das in Full HD (1080p) filmt. Ein neues Modell ist nicht nötig.",
     "Ein Stativ mit Handyhalter oder einen festen, hohen Platz. Zur Not hilft eine Klemme am Geländer.",
     "Eine Powerbank und ein Kabel, das bis zum Handy reicht.",
     "Genug freien Speicher: eher 10 GB als 5 GB.",
@@ -66,10 +87,11 @@ Ohne Tribüne hilft ein hohes Stativ. Stell es so, dass niemand darüber stolper
   ]}
 />
 
-Wie viel Speicher ein Spiel braucht, hängt vom Handy ab. Viele Handys zeigen in den Kamera-Einstellungen, wie viel Platz eine Minute Video braucht. In 1080p sind es je nach Einstellung etwa 40 bis 100 MB pro Minute, für ein Spiel mit Pause also schnell 5 bis 9 GB.
+Wie viel Speicher ein Spiel braucht, hängt vom Handy ab. Viele Handys zeigen in den Kamera-Einstellungen, wie viel Platz eine Minute Video braucht. In 1080p sind es je nach Einstellung etwa 40 bis 100 MB pro Minute, für ein Spiel mit Pause also schnell 5 bis 9 GB. Rechnen kannst du es mit dem [Speicher-Rechner](../rechner/speicher).
 
 ## Welche Einstellungen?
 
+- **Weitwinkel:** «0,5×» oder «Ultraweit».
 - **Auflösung:** 1080p (Full HD). 4K bringt für die Analyse wenig und füllt den Speicher viermal so schnell.
 - **Bilder pro Sekunde:** 50 oder 60, wenn das Handy das kann. Dann sind schnelle Würfe weniger verschwommen. 25 oder 30 gehen auch.
 - **Flugmodus an:** Ein Anruf kann die Aufnahme sonst stoppen.
@@ -80,14 +102,17 @@ Wie viel Speicher ein Spiel braucht, hängt vom Handy ab. Viele Handys zeigen in
 
 <Steps items={howto.steps} />
 
+Die Checkliste für den Spieltag gibt es auch [zum Ausdrucken](../vorlagen/spieltag).
+
 ## Häufige Fehler
 
 <Check
   items={[
+    "Mit der normalen Linse gefilmt statt mit dem Weitwinkel: Ein Tor fehlt im Bild.",
     "Die Aufnahme in der Pause gestoppt und danach vergessen, wieder zu starten.",
     "Zu tief gefilmt: Die Spieler verdecken sich, die andere Feldhälfte ist kaum zu sehen.",
     "Mitgeschwenkt oder gezoomt: Das Video ist unruhig, und eine automatische Analyse findet das Feld schwerer.",
-    "Ein Torraum fehlt im Bild, weil das Handy zu nah steht.",
+    "Ein Torraum fehlt im Bild, weil das Handy zu nah an der Seitenlinie steht.",
     "Akku leer in der zweiten Halbzeit.",
     "Gegenlicht durch grosse Fenster: Wenn möglich, die Seite mit den Fenstern im Rücken wählen.",
   ]}
@@ -95,6 +120,6 @@ Wie viel Speicher ein Spiel braucht, hängt vom Handy ab. Viele Handys zeigen in
 
 ## Darf ich überhaupt filmen?
 
-Sag vor dem Spiel dem Gegner, den Schiedsrichtern und der Halle, dass gefilmt wird, und häng einen Aushang an die Tür. Dein eigenes Team informierst du vorher und holst am besten eine Einwilligung ein, bei Kindern die der Eltern. Wie das geht, steht im Ratgeber [Filmen im Verein: Einwilligung, Kinder, Aufbewahrung](video-im-verein-einwilligung). Den Aushang zum Drucken findest du auf der Seite [Filmen](../aufnahme).
+Sag vor dem Spiel dem Gegner, den Schiedsrichtern und der Halle, dass gefilmt wird, und häng einen Aushang an die Tür. Dein eigenes Team informierst du vorher und holst am besten eine Einwilligung ein, bei Kindern die der Eltern. Wie das geht, steht im Ratgeber [Filmen im Verein: Einwilligung, Kinder, Aufbewahrung](video-im-verein-einwilligung). Den Aushang und eine Einwilligungs-Vorlage zum Drucken findest du unter [Vorlagen](../vorlagen).
 
 Wie du das Video danach in kurzer Zeit auswertest, steht unter [Ein Spiel in 20 Minuten auswerten](spiel-auswerten-20-minuten).

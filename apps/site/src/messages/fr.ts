@@ -131,7 +131,7 @@ const fr: Messages = {
     ],
     stepsTitle: "Comment y arriver",
     steps: [
-      { title: "Filmer", text: "Téléphone sur trépied, en hauteur à la ligne médiane, tout le terrain dans l'image." },
+      { title: "Filmer", text: "Téléphone sur trépied, en hauteur à la ligne médiane, les deux buts dans l'image." },
       { title: "Téléverser", text: "Choisir la vidéo dans l'app. Tu reçois un e-mail quand l'analyse est terminée." },
       { title: "Vérifier et partager", text: "L'analyse propose les moments de but, tu les confirmes en quelques minutes. Ensuite tu envoies le lien à l'équipe." },
     ],
@@ -160,8 +160,8 @@ const fr: Messages = {
       "Reconnaître les arrêts et les tirs manqués. Tu les marques à la main si tu les veux.",
       "Séparer sûrement les joueurs du public et du banc. Les positions sont estimées.",
       "Mesurer exactement les distances parcourues. Avec une seule caméra, ce sont des estimations.",
-      "Analyser un match composé de deux fichiers. Seul le premier est analysé.",
     ],
+    notFiles: "Analyser un match composé de deux fichiers. Seul le premier est analysé.",
     note: "Ce qui est estimé est dessiné en pointillé et marqué « estimé ».",
   },
   how: {
@@ -171,7 +171,7 @@ const fr: Messages = {
     steps: [
       {
         title: "Filmer",
-        text: "Un téléphone suffit. Pose-le sur un trépied, le plus haut possible, à hauteur de la ligne médiane. Tout le terrain doit être dans l'image, avec les deux zones de but. Ensuite, laisse tourner, pause comprise.",
+        text: "Un téléphone suffit. Pose-le sur un trépied, le plus haut possible, à hauteur de la ligne médiane. Avec le grand-angle (0,5×), les deux buts et les zones de but sont dans l'image. Ensuite, laisse tourner, pause comprise.",
       },
       {
         title: "Téléverser",
@@ -202,10 +202,11 @@ const fr: Messages = {
   filming: {
     title: "Filmer",
     head: "Comment filmer un match.",
-    lead: "Un téléphone suffit. Place-le en hauteur à la ligne médiane, avec tout le terrain dans l'image, et laisse-le tourner tout le match, pause comprise.",
-    planLabel: "Plan de la salle vu d'en haut : la caméra est surélevée à hauteur de la ligne médiane et voit tout le terrain avec les deux zones de but.",
-    planCamera: "Caméra, à 3 mètres ou plus",
-    planField: "tout le terrain dans l'image",
+    lead: "Un téléphone suffit. Place-le en hauteur à la ligne médiane, prends le grand-angle (0,5×) pour avoir les deux buts dans l'image, et laisse-le tourner tout le match.",
+    planLabel: "Plan de la salle vu d'en haut : la caméra est en hauteur à la ligne médiane, quelques mètres derrière la ligne de côté. Avec le grand-angle, elle voit les deux buts et les zones de but ; les deux coins proches sont hors de l'image.",
+    planCamera: "Caméra en hauteur, grand-angle",
+    planField: "les deux buts et zones de but dans l'image",
+    planCorner: "manque",
     sections: [
       {
         title: "Ce qu'il te faut",
@@ -221,13 +222,15 @@ const fr: Messages = {
         items: [
           "À hauteur de la ligne médiane, pour voir les deux buts aussi bien.",
           "Le plus haut possible, dès 3 mètres environ : tribune, galerie ou trépied haut.",
-          "Tout le terrain dans l'image, avec les deux zones de but et les lignes de côté. Plutôt un peu plus de marge.",
+          "Les deux buts et les zones de but entièrement dans l'image, les lignes de côté autant que possible. S'il manque les deux coins proches, ce n'est pas grave.",
+          "Si ça ne rentre pas : plus haut, quelques mètres plus en arrière ou grand-angle. Mieux vaut les deux buts avec un peu de marge que proche et net.",
           "Téléphone à l'horizontale.",
         ],
       },
       {
         title: "Régler",
         items: [
+          "Choisir le grand-angle : dans l'app appareil photo « 0,5× » ou « Ultra grand-angle ». Ce n'est qu'ainsi que les deux buts entrent dans l'image depuis la ligne médiane.",
           "1080p, si possible 50 images par seconde.",
           "Mode avion activé, pour qu'aucun appel n'arrête l'enregistrement.",
           "Verrouillage de l'écran désactivé, le son n'a pas d'importance.",
@@ -237,14 +240,14 @@ const fr: Messages = {
         title: "Pendant le match",
         items: [
           "Ne pas faire de panoramique ni zoomer. Laisser tourner.",
-          "Continue à filmer pendant la pause. Si tu arrêtes, un deuxième fichier se crée, et la deuxième mi-temps n'est pas analysée.",
+          "{pause}",
         ],
       },
       {
         title: "Après",
         items: [
           "Ouvrir le match dans l'app et téléverser le fichier.",
-          "Le mieux : tout le match dans un seul fichier (MP4, MOV ou MKV). Un deuxième fichier, par exemple la deuxième mi-temps, est enregistré et peut être lu, mais seul le premier est analysé.",
+          "{upload}",
           "Un lien direct vers un fichier vidéo va aussi, par exemple le lien de téléchargement de Veo ou de Spiideo.",
         ],
       },
@@ -261,6 +264,10 @@ const fr: Messages = {
     noticeLead: "Dis à l'adversaire et à la salle que tu filmes. Imprime cette affiche et mets-la sur la porte.",
     notice: "Ce match est filmé à des fins d'analyse. Le staff de l'équipe recevante répond aux questions.",
     print: "Imprimer l'affiche",
+    pause: "Continue à filmer pendant la pause. Si tu arrêtes, un deuxième fichier se crée, et la deuxième mi-temps n'est pas analysée.",
+    pauseMulti: "Le mieux est de laisser tourner pendant la pause. Si tu as arrêté, téléverse simplement tous les fichiers dans le même match.",
+    upload: "Le mieux : tout le match dans un seul fichier (MP4, MOV ou MKV). Un deuxième fichier, par exemple la deuxième mi-temps, est enregistré et peut être lu, mais seul le premier est analysé.",
+    uploadMulti: "Le mieux : tout le match dans un seul fichier (MP4, MOV ou MKV). Si tu as plusieurs fichiers, par exemple un par mi-temps, téléverse-les tous dans le même match ; tous sont analysés.",
     guideLink: "emplacement, hauteur et réglages en détail",
     moreTitle: "Pour aller plus loin",
   },
@@ -343,8 +350,8 @@ const fr: Messages = {
     lead: "Un téléphone suffit. L'analyse propose les moments de but, tu les confirmes en quelques minutes. Seul ton staff voit la vidéo. Les détails dans les questions ci-dessous, puis les guides de l'app.",
     items: [
       { q: "Mon téléphone suffit-il ?", a: "Oui. Tout téléphone qui filme en Full HD (1080p) suffit. L'endroit compte plus que la caméra." },
-      { q: "Où placer la caméra ?", a: "À hauteur de la ligne médiane, le plus haut possible, dès 3 mètres environ : tribune, galerie ou trépied haut. Tout le terrain doit être dans l'image, avec les deux zones de but." },
-      { q: "Quel fichier puis-je téléverser ?", a: "Le fichier vidéo tel que le téléphone l'enregistre. Le mieux : tout le match dans un seul fichier (MP4, MOV ou MKV). Un deuxième fichier, par exemple la deuxième mi-temps, est enregistré et peut être lu, mais seul le premier est analysé. Un lien direct vers un fichier vidéo va aussi, par exemple le lien de téléchargement de Veo ou de Spiideo." },
+      { q: "Où placer la caméra ?", a: "À hauteur de la ligne médiane, le plus haut possible, dès 3 mètres environ : tribune, galerie ou trépied haut. Avec le grand-angle (0,5×), les deux buts et les zones de but sont dans l'image." },
+      { q: "Quel fichier puis-je téléverser ?", a: "Le fichier vidéo tel que le téléphone l'enregistre. {upload} Un lien direct vers un fichier vidéo va aussi, par exemple le lien de téléchargement de Veo ou de Spiideo." },
       { q: "Combien de temps dure l'analyse ?", a: "Cela dépend de la durée de la vidéo. Pas besoin de rester : tu reçois un e-mail quand elle est terminée. Ensuite tu vérifies quelques minutes." },
       { q: "Dois-je saisir quelque chose à la main ?", a: "Rien à taper, mais une courte vérification. L'analyse propose les moments où un but a pu tomber, et tu les confirmes d'un geste. Cela prend quelques minutes. Tu marques les arrêts et les tirs manqués seulement si tu les veux." },
       { q: "Combien ça coûte ?", a: "Une équipe coûte CHF {month} par mois ou CHF {year} par an. Les prix ne sont pas encore définitifs." },
@@ -477,6 +484,9 @@ const fr: Messages = {
     all: "Tous les guides",
   },
   facts: {
+    fileNeed: "tout le match dans un seul fichier vidéo (MP4, MOV ou MKV)",
+    fileNeedMulti: "la vidéo du match (MP4, MOV ou MKV), idéalement en un seul fichier",
+    fileNot: ", analyser un deuxième fichier vidéo du même match",
     title: "L'essentiel en bref",
     metaTitle: "L'essentiel en bref",
     description: "Handball Intelligence en bref : ce que c'est, pour qui, ce qu'il faut, ce que ça sait faire et pas, état des prix, lieu des données et contact. À citer.",
@@ -487,10 +497,10 @@ const fr: Messages = {
     rows: [
       { k: "Ce que c'est", v: "Une app web d'analyse vidéo des matchs de handball. Elle fonctionne dans le navigateur, sur téléphone et sur ordinateur." },
       { k: "Pour qui", v: "Les entraîneuses et entraîneurs d'équipes amateurs et de jeunes, d'abord en Suisse. Joueuses, joueurs et parents n'ont pas besoin de compte." },
-      { k: "Ce qu'il te faut", v: "Un téléphone qui filme en Full HD (1080p), une place en hauteur à la ligne médiane et tout le match dans un seul fichier vidéo (MP4, MOV ou MKV)." },
+      { k: "Ce qu'il te faut", v: "Un téléphone qui filme en Full HD (1080p), une place en hauteur à la ligne médiane et {fileNeed}." },
       { k: "Déroulement", v: "Filmer, téléverser, attendre l'e-mail, puis vérifier quelques minutes : l'analyse propose les moments où un but a pu tomber, et tu les confirmes." },
       { k: "Ce que tu reçois", v: "Résultat et évolution du score, chaque but confirmé en scène dans la vidéo, les positions vues d'en haut (estimées), avec assez de buts trois points à retenir, et un lien pour l'équipe." },
-      { k: "Ce que ça ne sait pas faire", v: "Suivre le ballon (donc ni passes ni trajectoires de tir), reconnaître les buts seule de manière sûre, reconnaître arrêts et tirs manqués, analyser un deuxième fichier vidéo du même match." },
+      { k: "Ce que ça ne sait pas faire", v: "Suivre le ballon (donc ni passes ni trajectoires de tir), reconnaître les buts seule de manière sûre, reconnaître arrêts et tirs manqués{fileNot}." },
       { k: "État des prix", v: "Gratuit sans analyse automatique. Équipe : CHF {team} par mois. Club : CHF {club} par mois jusqu'à {clubTeams} équipes. Les prix ne sont pas encore définitifs." },
       { k: "Lieu des données", v: "Prévu : app et base de données en Suisse, vidéos dans un stockage dans l'UE. Les fournisseurs seront nommés avant le lancement dans la déclaration de protection des données." },
       { k: "Consentement", v: "Par lien dans le chat d'équipe, sans compte, séparément pour chaque usage, modifiable à tout moment. Pour les enfants de moins de 16 ans, les parents décident." },
@@ -550,7 +560,7 @@ const fr: Messages = {
         ],
       },
     ],
-    pictureCaption: "Comment filmer : un téléphone, en hauteur à la ligne médiane, tout le terrain dans l'image.",
+    pictureCaption: "Comment filmer : un téléphone, en hauteur à la ligne médiane, les deux buts dans l'image grâce au grand-angle.",
     shotAlt: "Accueil de l'app avec des données d'exemple : en haut le dernier match dans la couleur du club, avec résultat et évolution du score.",
     shotCaption: "Image de l'app, avec des données d'exemple (en allemand).",
     contactTitle: "Écris-nous",

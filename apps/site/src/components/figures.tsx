@@ -19,30 +19,41 @@ function Figure({ caption, children }: { caption?: ReactNode; children: ReactNod
   );
 }
 
-/** The hall from above: camera raised at the middle line; optionally the places that work less well. */
-export function HallCamera({ label, camera, field, avoid, caption }: { label: string; camera: string; field: string; avoid?: string; caption?: ReactNode }) {
+/**
+ * The hall from above: the camera raised about nine metres behind the near sideline (a stand) at the middle line,
+ * with a wide-angle lens (0.5x, about 120 degrees). Drawn to scale: both goals and goal areas are in
+ * the picture, the two near corners are not. Labels sit outside the court.
+ */
+export function HallCamera({ label, camera, field, corner, caption }: { label: string; camera: string; field: string; corner?: string; caption?: ReactNode }) {
+  // camera at (20, 29.5) in court metres: the near goal areas just fit; rays at 60 degrees either side of straight ahead
+  const cx = 20;
+  const cy = 29.5;
+  const k = Math.tan((60 * Math.PI) / 180); // dx per dy
+  const yAt = (x: number) => cy - Math.abs(x - cx) / k;
   return (
     <Figure caption={caption}>
-      <svg viewBox="-6 -6 52 40" role="img" aria-label={label} className="block w-full border-2 border-ink">
-        <rect x={-6} y={-6} width={52} height={40} fill="var(--paper)" />
-        <path d="M20 27.5 L-2.5 -1.5 L42.5 -1.5 Z" fill="var(--club)" fillOpacity={0.14} stroke="var(--club-line)" strokeWidth={0.18} strokeDasharray="0.8 0.6" />
+      <svg viewBox="-6 -6 52 43" role="img" aria-label={label} className="block w-full border-2 border-ink">
+        <rect x={-6} y={-6} width={52} height={43} fill="var(--paper)" />
+        <path d={`M${cx} ${cy} L-6 ${yAt(-6).toFixed(2)} L-6 -6 L46 -6 L46 ${yAt(46).toFixed(2)} Z`} fill="var(--club)" fillOpacity={0.13} />
+        <path d={`M-6 ${yAt(-6).toFixed(2)} L${cx} ${cy} L46 ${yAt(46).toFixed(2)}`} fill="none" stroke="var(--club-line)" strokeWidth={0.2} strokeDasharray="0.8 0.6" />
         <CourtLines line="var(--ink)" width={1.6} />
-        {avoid && (
+        {corner && (
           <g>
-            <path d="M-4.6 8.6l2.2 2.8M-2.4 8.6l-2.2 2.8" stroke="var(--loss)" strokeWidth={0.45} />
-            <path d="M44.6 8.6l-2.2 2.8M42.4 8.6l2.2 2.8" stroke="var(--loss)" strokeWidth={0.45} />
-            <path d="M-4.8 -4.6l1.4 1.8M-3.4 -4.6l-1.4 1.8" stroke="var(--loss)" strokeWidth={0.4} />
-            <text x={-2.6} y={-3.1} fill="var(--ink)" style={SMALL}>
-              {avoid}
+            <path d="M0 20l2.6 -2.6M0 17.4l2.6 2.6M40 20l-2.6 -2.6M40 17.4l-2.6 2.6" stroke="var(--loss)" strokeWidth={0.35} />
+            <text x={1.3} y={23.2} textAnchor="middle" fill="var(--ink)" style={SMALL}>
+              {corner}
+            </text>
+            <text x={38.7} y={23.2} textAnchor="middle" fill="var(--ink)" style={SMALL}>
+              {corner}
             </text>
           </g>
         )}
-        <rect x={18} y={26.4} width={4} height={2.2} fill="var(--ink)" />
-        <circle cx={20} cy={26.4} r={0.7} fill="var(--paper)" />
-        <text x={20} y={31.8} textAnchor="middle" fill="var(--ink)" style={LABEL}>
+        <rect x={18} y={cy} width={4} height={2.2} fill="var(--ink)" />
+        <circle cx={20} cy={cy} r={0.7} fill="var(--paper)" />
+        <text x={20} y={34.9} textAnchor="middle" fill="var(--ink)" style={LABEL}>
           {camera}
         </text>
-        <text x={20} y={15.2} textAnchor="middle" fill="var(--ink)" paintOrder="stroke" stroke="var(--paper)" strokeWidth={0.8} style={LABEL}>
+        <text x={20} y={-2.6} textAnchor="middle" fill="var(--ink)" style={LABEL}>
           {field}
         </text>
       </svg>
@@ -51,42 +62,45 @@ export function HallCamera({ label, camera, field, avoid, caption }: { label: st
 }
 
 /**
- * The hall from the side, across the court: a camera high up sees over the players to the far
- * side; a low one sees mostly the backs of the nearest players.
+ * Two small views from the side, across the court: a low camera sees mostly the backs of the
+ * nearest players, a high one sees over them to the far side.
  */
-export function CameraSide({ label, high, low, width, caption }: { label: string; high: string; low: string; width: string; caption?: ReactNode }) {
-  // x: metres across the court (near sideline 0, far 20), y: metres up (drawn upwards)
-  const Y = (m: number) => 8 - m;
-  const players = [3, 6.5, 11, 15.5];
-  const T = { font: "600 1.35px var(--font-sans)" } as const;
-  return (
-    <Figure caption={caption}>
-      <svg viewBox="-8 1 31 10.2" role="img" aria-label={label} className="block w-full border-2 border-ink">
-        <rect x={-8} y={1} width={31} height={10.2} fill="var(--paper)" />
-        <path d={`M-8 ${Y(0)}H23`} stroke="var(--ink)" strokeWidth={0.08} />
-        <path d={`M0 ${Y(0)}H20`} stroke="var(--ink)" strokeWidth={0.25} />
-        {/* stand */}
-        <path d={`M-7 ${Y(0)}V${Y(3.2)}H-3.6V${Y(1.6)}H-1.8V${Y(0)}Z`} fill="var(--rule)" />
+export function CameraSide({ label, high, low, caption }: { label: string; high: string; low: string; width?: string; caption?: ReactNode }) {
+  const panel = (camH: number, tone: "low" | "high") => {
+    const Y = (m: number) => 7 - m; // metres up, drawn upwards
+    const camX = -2.5;
+    const players = [3, 7.5, 12, 16.5];
+    const line = tone === "high" ? "var(--club-line)" : "var(--ink-2)";
+    return (
+      <svg viewBox="-5 0 27 8.6" aria-hidden className="block w-full border-2 border-ink">
+        <rect x={-5} y={0} width={27} height={8.6} fill="var(--paper)" />
+        <path d={`M-5 ${Y(0)}H22`} stroke="var(--ink)" strokeWidth={0.1} />
+        <path d={`M0 ${Y(0)}H20`} stroke="var(--ink)" strokeWidth={0.3} />
+        {tone === "high" && <path d={`M-5 ${Y(0)}V${Y(camH - 0.6)}H-1.2V${Y(0)}Z`} fill="var(--rule)" />}
         {players.map((x) => (
-          <rect key={x} x={x - 0.3} y={Y(1.9)} width={0.6} height={1.9} fill="var(--ink)" />
+          <rect key={x} x={x - 0.35} y={Y(1.9)} width={0.7} height={1.9} fill="var(--ink)" />
         ))}
-        {/* high camera */}
-        <path d={`M-4.5 ${Y(3.9)}L0 ${Y(0)}M-4.5 ${Y(3.9)}L20 ${Y(0)}`} stroke="var(--club-line)" strokeWidth={0.1} />
-        <rect x={-5.1} y={Y(4.2)} width={1.2} height={0.7} fill="var(--club)" stroke="var(--ink)" strokeWidth={0.06} />
-        <text x={-7.8} y={Y(4.6)} fill="var(--ink)" style={T}>
-          {high}
-        </text>
-        {/* low camera */}
-        <path d={`M-1.2 ${Y(1.2)}L20 ${Y(1.5)}`} stroke="var(--ink-2)" strokeWidth={0.08} strokeDasharray="0.4 0.3" />
-        <rect x={-1.8} y={Y(1.5)} width={1.2} height={0.6} fill="var(--paper)" stroke="var(--ink-2)" strokeWidth={0.08} strokeDasharray="0.25 0.2" />
-        <text x={-7.8} y={Y(-1.7)} fill="var(--ink-2)" style={T}>
-          {low}
-        </text>
-        <text x={22.6} y={Y(5.2)} textAnchor="end" fill="var(--ink)" style={T}>
-          {width}
-        </text>
+        {/* sight lines: to the far sideline, and over the first player */}
+        <path d={`M${camX} ${Y(camH)}L20 ${Y(0)}`} stroke={line} strokeWidth={0.14} strokeDasharray={tone === "low" ? "0.5 0.35" : undefined} />
+        <path d={`M${camX} ${Y(camH)}L${players[0]! + 0.35} ${Y(1.9)}`} stroke={line} strokeWidth={0.1} opacity={0.6} />
+        <rect x={camX - 0.7} y={Y(camH) - 0.4} width={1.4} height={0.8} fill={tone === "high" ? "var(--club)" : "var(--paper)"} stroke="var(--ink)" strokeWidth={0.08} />
       </svg>
-    </Figure>
+    );
+  };
+  return (
+    <figure role="img" aria-label={label} className="not-prose mx-0 my-8">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div>
+          {panel(1.5, "low")}
+          <p className="mt-2 text-[1.0625rem]">{low}</p>
+        </div>
+        <div>
+          {panel(4, "high")}
+          <p className="mt-2 text-[1.0625rem]">{high}</p>
+        </div>
+      </div>
+      {caption && <figcaption className="mt-3 text-[1.0625rem] text-ink-2">{caption}</figcaption>}
+    </figure>
   );
 }
 
