@@ -17,7 +17,7 @@ from handball_api.core.errors import ProblemError
 from handball_api.models import Match, MatchSegment, VideoAsset
 from handball_api.models.enums import VideoRole, VideoStatus
 from handball_api.services.context import Ctx
-from handball_api.services.matches import get_match, parts_of
+from handball_api.services.matches import get_match, parts_of, second_half
 from handball_api.services.policies import Action
 
 
@@ -98,7 +98,9 @@ async def rebuild(ctx: Ctx, match: Match) -> list[MatchSegment]:
 
 async def parts(ctx: Ctx, match_id: uuid.UUID) -> list[dict[str, Any]]:
     match = await get_match(ctx, match_id)
-    offsets = {p.video_id: p.offset_ms for p in await parts_of(ctx, match.id)}
+    layout = await parts_of(ctx, match.id)
+    offsets = {p.video_id: p.offset_ms for p in layout}
+    turned = {p.video_id for p in layout if second_half(layout, p)}
     rows = (
         await ctx.db.execute(
             select(MatchSegment, VideoAsset)
@@ -118,9 +120,32 @@ async def parts(ctx: Ctx, match_id: uuid.UUID) -> list[dict[str, Any]]:
             "gap_before_ms": s.gap_before_ms,
             "source": s.source,
             "confirmed": s.confirmed,
+            "side_change": s.side_change,
+            "side_change_assumed": v.id in turned,
         }
         for s, v in rows
     ]
+
+
+async def set_side_change(
+    ctx: Ctx, match_id: uuid.UUID, video_id: uuid.UUID, value: bool | None
+) -> list[dict[str, Any]]:
+    """The coach says whether the teams changed ends before this part (a recording split mid-half
+    has no side change). The part is analysed again with it; that takes some minutes."""
+    from handball_api.services import videos  # imports this module (timeline)
+
+    match = await get_match(ctx, match_id, Action.VIDEO_UPLOAD)
+    seg = await ctx.db.scalar(
+        select(MatchSegment).where(
+            MatchSegment.match_id == match.id, MatchSegment.video_id == video_id
+        )
+    )
+    if seg is None or seg.position == 0:
+        raise ProblemError(422, "not-a-later-part", "Only a later part can follow a side change")
+    seg.side_change = value
+    await ctx.db.flush()
+    await videos.retry_analysis(ctx, video_id)
+    return await parts(ctx, match_id)
 
 
 async def reorder(
@@ -130,6 +155,7 @@ async def reorder(
 
     match = await get_match(ctx, match_id, Action.VIDEO_UPLOAD)
     before = await parts_of(ctx, match.id)
+    lead = timeline.lead_part(match, before)
     segs = {
         s.video_id: s
         for s in (
@@ -145,11 +171,12 @@ async def reorder(
         segs[vid].gap_before_ms = None if i == 0 else segs[vid].gap_before_ms
     await ctx.db.flush()
     # everything of the match moves with its part (confirmed answers included)
-    await timeline.apply_moves(ctx, match, timeline.moves(before, await parts_of(ctx, match.id)))
+    after = await parts_of(ctx, match.id)
+    await timeline.apply_moves(ctx, match, timeline.moves(before, after, lead))
     await ctx.db.refresh(match)
     k = match.kickoff_ms or {}
     if "1" in k and "2" in k and int(k["1"]) > int(k["2"]):
-        match.kickoff_ms = {"1": int(k["2"]), "2": int(k["1"])}
+        timeline.swap_halves(match)
     await ctx.db.flush()
     return await parts(ctx, match_id)
 

@@ -67,6 +67,7 @@ async def test_graphics_from_the_report_without_video(make_api: Callable[[], Api
     assert len(drawn) == 1
     goal = drawn[0]
     assert goal["run"] == [] and goal["source"] == "marked" and goal["confirmed"] is True
+    assert all(x["by_coach"] for x in g["goals"])  # entered by hand
     assert goal["zone"] == "la"
     # half court: attacker's left is small u, the goal line is v = 0
     assert goal["shot"] == [1.5, 1.5]
@@ -466,6 +467,8 @@ async def test_answers_survive_a_new_analysis_after_a_moved_court(
     asked = {c["frame_ref"] for c in g["checks"] + g["more_checks"] if c["kind"] == "goal"}
     assert first["goal_ms"] not in asked and len(asked) == 3
     assert len([e for e in g["goals"] if e["has_video"]]) == 1
+    # «von dir bestätigt» counts the goals a person confirmed, whatever their spot (Echtlauf 5 P5)
+    assert [e["by_coach"] for e in g["goals"] if e["has_video"]] == [True]
 
 
 def test_scene_shows_only_the_court_unmirrored() -> None:

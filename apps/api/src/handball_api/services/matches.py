@@ -57,9 +57,10 @@ def duplicate_of(v: VideoAsset) -> uuid.UUID | None:
     return None
 
 
-def video_out(v: VideoAsset, part: Part | None = None) -> VideoOut:
+def video_out(v: VideoAsset, part: Part | None = None, half: int | None = None) -> VideoOut:
     return VideoOut(
         part=part.position + 1 if part is not None else None,
+        half=half,
         part_start_ms=part.offset_ms if part is not None else None,
         duplicate_of=duplicate_of(v),
         id=v.id,
@@ -313,6 +314,7 @@ class Part:
     status: VideoStatus
     filename: str
     gap_before_ms: int | None = None
+    side_change: bool | None = None  # said by the coach; None: from the gap
 
     @property
     def end_ms(self) -> int | None:
@@ -361,10 +363,59 @@ async def parts_of(ctx: Ctx, match_id: uuid.UUID) -> list[Part]:
     for i, (seg, v) in enumerate(rows):
         length = duration_ms(v)
         out.append(
-            Part(v.id, i, offset, length, v.status, v.filename, seg.gap_before_ms if i else None)
+            Part(
+                v.id,
+                i,
+                offset,
+                length,
+                v.status,
+                v.filename,
+                seg.gap_before_ms if i else None,
+                seg.side_change if i else None,
+            )
         )
         offset = None if offset is None or length is None else offset + length
     return out
+
+
+# a part after a break of at least this long is the next half (the half-time break is 10 to 15
+# minutes); after a gap shorter than NO_BREAK_MS the recording only went on (the phone split it,
+# the coach restarted it): no side change (Echtlauf 5 P9)
+HALF_BREAK_MS = 5 * 60_000
+NO_BREAK_MS = 60_000
+# a part this short is a recording started by mistake, not a half
+MIN_HALF_MS = 60_000
+
+
+def real_parts(parts: list[Part]) -> list[Part]:
+    """The parts that can be halves (not a few seconds started by mistake)."""
+    return [p for p in parts if p.duration_ms is None or p.duration_ms >= MIN_HALF_MS]
+
+
+def second_half(parts: list[Part], part: Part) -> bool:
+    """A part after which the teams play on the other ends: what the coach said, else the second
+    of two parts unless the recordings follow each other within a minute, or a part after a break
+    as long as a half-time break."""
+    if part.position == 0 or (part.duration_ms is not None and part.duration_ms < MIN_HALF_MS):
+        return False
+    if part.side_change is not None:
+        return part.side_change
+    if part.gap_before_ms is not None and part.gap_before_ms < NO_BREAK_MS:
+        return False
+    real = real_parts(parts)
+    if len(real) == 2 and real[1].video_id == part.video_id:
+        return True
+    return part.gap_before_ms is not None and part.gap_before_ms >= HALF_BREAK_MS
+
+
+def halves(parts: list[Part]) -> dict[uuid.UUID, int]:
+    """The half of each part when the match is two halves (two real parts with a side change
+    between them): named «1. / 2. Halbzeit»; otherwise none («Teil 1 / Teil 2»). A short part
+    started by mistake does not count."""
+    real = real_parts(parts)
+    if len(real) != 2 or not second_half(parts, real[1]):
+        return {}
+    return {real[0].video_id: 1, real[1].video_id: 2}
 
 
 def locate(parts: list[Part], t_ms: int) -> tuple[Part, int] | None:
@@ -520,7 +571,9 @@ async def opponent_of(ctx: Ctx, match: Match) -> Opponent | None:
 
 async def match_out(ctx: Ctx, match: Match) -> MatchOut:
     opp = await opponent_of(ctx, match)
-    parts = {p.video_id: p for p in await parts_of(ctx, match.id)}
+    layout = await parts_of(ctx, match.id)
+    parts = {p.video_id: p for p in layout}
+    half = halves(layout)
     videos = sorted(
         (
             await ctx.db.scalars(
@@ -577,7 +630,7 @@ async def match_out(ctx: Ctx, match: Match) -> MatchOut:
         is_demo=match.is_demo,
         kickoff_ms=match.kickoff_ms,
         report_extra=match.report_extra,
-        videos=[video_out(v, parts.get(v.id)) for v in videos],
+        videos=[video_out(v, parts.get(v.id), half.get(v.id)) for v in videos],
         jobs=[JobOut.model_validate(j) for j in jobs],
     )
 

@@ -157,6 +157,9 @@ class VideoOut(ApiModel):
     # and where it starts on the match timeline; None for other files and while not placed
     part: int | None = None
     part_start_ms: int | None = None
+    # the half this part is when the match is two halves with a side change between them; None:
+    # the parts are named «Teil 1 / Teil 2» (a split recording, more parts, a short one)
+    half: int | None = None
     # the same file is already in the match (checksum): this copy is not used
     duplicate_of: uuid.UUID | None = None
 
@@ -575,6 +578,11 @@ class GoalRunOut(ApiModel):
     )
     aim: tuple[float, float] | None
     confirmed: bool = Field(description="false: the shot spot is estimated")
+    by_coach: bool = Field(
+        default=False,
+        description="the goal itself comes from a person (confirmed in Prüfen, marked by hand), "
+        "not from the analysis or a match report",
+    )
     source: Literal["tracking", "marked", "demo"] | None
     has_video: bool
     t_ms: int | None = Field(default=None, description="video time of the goal")

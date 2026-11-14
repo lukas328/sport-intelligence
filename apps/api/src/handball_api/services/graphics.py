@@ -372,6 +372,7 @@ async def match_graphics(ctx: Ctx, match_id: uuid.UUID) -> dict[str, Any]:
                 # where on the goal is only marked by hand (goal_zone); never drawn as a flight
                 "aim": None,
                 "confirmed": not estimated_spot,
+                "by_coach": e.source not in (*ESTIMATED_SOURCES, "official_report"),
                 "source": source,
                 "has_video": e.t_ms is not None,
                 "t_ms": e.t_ms,

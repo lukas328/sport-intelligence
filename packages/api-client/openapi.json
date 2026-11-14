@@ -5434,6 +5434,12 @@
             ],
             "title": "Aim"
           },
+          "by_coach": {
+            "default": false,
+            "description": "the goal itself comes from a person (confirmed in Pr\u00fcfen, marked by hand), not from the analysis or a match report",
+            "title": "By Coach",
+            "type": "boolean"
+          },
           "confirmed": {
             "description": "false: the shot spot is estimated",
             "title": "Confirmed",
@@ -10993,6 +10999,22 @@
             ],
             "title": "Recorded At"
           },
+          "side_change": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Side Change"
+          },
+          "side_change_assumed": {
+            "default": false,
+            "title": "Side Change Assumed",
+            "type": "boolean"
+          },
           "source": {
             "title": "Source",
             "type": "string"
@@ -15550,6 +15572,26 @@
         "title": "ShotSpotOut",
         "type": "object"
       },
+      "SideChangeIn": {
+        "properties": {
+          "side_change": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Side Change"
+          }
+        },
+        "required": [
+          "side_change"
+        ],
+        "title": "SideChangeIn",
+        "type": "object"
+      },
       "SlideIn": {
         "description": "Content per type (addendum 01, 4.1):\n\n- clip: video_id, in_ms, out_ms, holds [{t_ms, duration_ms, shapes}], slow [{from_ms, to_ms,\n  rate}], spotlight [track ids], notes\n- tactics_board: play_id (field), notes\n- text: title, body, notes\n- stat_card: title, rows [{label, value, n}], notes\n- image: caption, notes (image uploaded separately)",
         "properties": {
@@ -17733,6 +17775,17 @@
               }
             ],
             "title": "Fps"
+          },
+          "half": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Half"
           },
           "has_hls": {
             "title": "Has Hls",
@@ -25476,6 +25529,84 @@
           }
         },
         "summary": "Reorder",
+        "tags": [
+          "matches"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/matches/{match_id}/parts/{video_id}/side-change": {
+      "put": {
+        "description": "Whether the teams changed ends before this part; the part is analysed again.",
+        "operationId": "set_side_change_v1_orgs__org_id__matches__match_id__parts__video_id__side_change_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "match_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Match Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "video_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Video Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SideChangeIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PartOut"
+                  },
+                  "title": "Response Set Side Change V1 Orgs  Org Id  Matches  Match Id  Parts  Video Id  Side Change Put",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Set Side Change",
         "tags": [
           "matches"
         ]

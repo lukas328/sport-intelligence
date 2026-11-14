@@ -525,6 +525,56 @@ async def test_swap_and_swap_back_gives_the_same_times(make_api: Callable[[], Ap
     assert await times() == before
 
 
+@pytest.mark.parametrize("length", [HALF, 158_000])
+async def test_a_throw_off_before_the_video_goes_with_its_part(
+    make_api: Callable[[], Api], length: int
+) -> None:
+    """Echtlauf 5: the video begins at minute 8:15, the coach says «the throw-off is not in the
+    video, minute 8» (a time before the timeline). Swapped, it moves with its part; swapped back,
+    it is exactly where it was (before: it went with whichever part was first and ended 5 minutes
+    off). Both with long halves (the moved throw-off lands inside the other part) and short ones."""
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    m = await new_match(api, ids)
+    match_id = m["id"]
+    first = await upload(api, ids, match_id, b"a" * 100, name="teil1.mp4")
+    await _ingest(api, first["id"], 141_640, "2026-11-10T19:00:00Z")
+    second = await upload(api, ids, match_id, b"b" * 100, name="teil2.mp4")
+    await _ingest(api, second["id"], length, "2026-11-10T19:02:21Z")
+    base = f"/v1/orgs/{org}/matches/{match_id}"
+    put = await api.put(
+        f"{base}/kickoff", json={"period": 1, "t_ms": 0, "absent": True, "clock_s": 480}
+    )
+    assert put.status_code == 204
+    goal = (
+        await api.post(
+            f"{base}/events",
+            json={"type": "shot", "side": "own", "outcome": "goal", "t_ms": 14_900},
+        )
+    ).json()
+
+    async def state() -> tuple[Any, Any]:
+        events = {e["id"]: e["t_ms"] for e in (await api.get(f"{base}/events")).json()}
+        return (await api.get(base)).json()["kickoff_ms"], events[goal["id"]]
+
+    assert await state() == ({"1": -480_000}, 14_900)
+    url = f"{base}/parts"
+    await api.put(url, json={"video_ids": [second["id"], first["id"]]})
+    kickoff, t = await state()
+    assert t == length + 14_900
+    assert kickoff == {"1": length - 480_000}  # still 8:00 before the start of its part
+    for _ in range(2):
+        await api.put(url, json={"video_ids": [first["id"], second["id"]]})
+        assert await state() == ({"1": -480_000}, 14_900)
+    # a throw-off said anew belongs to the first part, whatever happened before
+    await api.put(url, json={"video_ids": [second["id"], first["id"]]})
+    await api.put(f"{base}/kickoff", json={"period": 1, "t_ms": 0, "absent": True, "clock_s": 300})
+    await api.put(url, json={"video_ids": [first["id"], second["id"]]})
+    await api.put(url, json={"video_ids": [second["id"], first["id"]]})
+    assert (await state())[0] == {"1": -300_000}
+
+
 async def test_a_reel_cuts_each_scene_from_its_own_half(make_api: Callable[[], Api]) -> None:
     api = make_api()
     ids = await setup_club(api)
@@ -545,3 +595,89 @@ async def test_a_reel_cuts_each_scene_from_its_own_half(make_api: Callable[[], A
     assert payload["sources"][1]["proxy_key"].endswith(f"{second}/proxy.mp4")
     later = [c for c in payload["clips"] if c["source"] == 1]
     assert later and all(0 <= c["in_ms"] < HALF for c in later)
+
+
+@pytest.mark.parametrize("first_fails", [False, True])
+async def test_halves_uploaded_together_wait_for_the_first(
+    make_api: Callable[[], Api], first_fails: bool
+) -> None:
+    """Both files chosen at once (Echtlauf 5 P3): the second half is ready while the first is
+    still analysed. Its analysis waits and then starts with the side change from the first half;
+    a failed first half does not keep it waiting."""
+    api = make_api()
+    ids = await setup_club(api)
+    m = await new_match(api, ids)
+    first = await upload(api, ids, m["id"], b"a" * 100, name="halbzeit1.mp4")
+    second = await upload(api, ids, m["id"], b"b" * 100, name="halbzeit2.mp4")
+    await _ingest(api, first["id"], HALF, "2026-11-07T18:00:00Z")
+    await _ingest(api, second["id"], HALF, "2026-11-07T18:45:00Z")
+    queued = [j[3]["asset_id"] for j in _jobs(api).jobs if j[1] == ANALYSIS]
+    assert queued == [first["id"]]  # the second half waits
+    job, _ = _job_of(api, first["id"], ANALYSIS)
+    if first_fails:
+        r = await api.http.post(
+            f"/internal/jobs/{job}",
+            headers=_token(api),
+            json={"status": "failed", "progress": 0.4, "error": "boom"},
+        )
+        assert r.status_code == 200, r.text
+    else:
+        await _finish(api, job, {"tracks": _tracks(), "detector": "model", "events": FIRST})
+    payload = _job_of(api, second["id"], ANALYSIS)[1]
+    assert payload.get("side_hint") == (None if first_fails else "right")
+    # the waiting job is the one that runs: no second job for the second half
+    org = ids["org"]
+    jobs = (await api.get(f"/v1/orgs/{org}/matches/{m['id']}")).json()["jobs"]
+    runs = [j for j in jobs if j["kind"] == "analysis" and j["video_asset_id"] == second["id"]]
+    assert len(runs) == 1 and runs[0]["id"] == _job_of(api, second["id"], ANALYSIS)[0]
+
+
+async def test_a_recording_split_mid_half_has_no_side_change(make_api: Callable[[], Api]) -> None:
+    """Echtlauf 5 P9: the second file starts within a minute of the first one's end (the phone
+    split the recording): no side change, the parts are «Teil 1 / Teil 2». The coach can say
+    otherwise for the later part; it is analysed again with the side change."""
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    m = await new_match(api, ids)
+    base = f"/v1/orgs/{org}/matches/{m['id']}"
+    first = await upload(api, ids, m["id"], b"a" * 100, name="teil1.mp4")
+    await _ingest(api, first["id"], 141_640, "2026-11-10T19:00:00Z")
+    await _analyse(api, first["id"], events=FIRST)
+    second = await upload(api, ids, m["id"], b"b" * 100, name="teil2.mp4")
+    await _ingest(api, second["id"], 158_490, "2026-11-10T19:02:21Z")
+    assert "side_hint" not in _job_of(api, second["id"], ANALYSIS)[1]
+    match = (await api.get(base)).json()
+    assert [v["half"] for v in match["videos"] if v["part"]] == [None, None]
+    rows = (await api.get(f"{base}/parts")).json()
+    assert [(r["side_change"], r["side_change_assumed"]) for r in rows] == [
+        (None, False),
+        (None, False),
+    ]
+    # the coach says the teams did change ends: the part runs again, with the side change
+    await _analyse(api, second["id"], events=SECOND)
+    url = f"{base}/parts/{second['id']}/side-change"
+    r = await api.put(url, json={"side_change": True})
+    assert r.status_code == 200, r.text
+    assert r.json()[1]["side_change"] is True and r.json()[1]["side_change_assumed"] is True
+    assert _job_of(api, second["id"], ANALYSIS)[1]["side_hint"] == "right"
+    match = (await api.get(base)).json()
+    assert [v["half"] for v in match["videos"] if v["part"]] == [1, 2]
+    # while it runs, it cannot be changed again
+    assert (await api.put(url, json={"side_change": False})).status_code == 409
+    # the first part has no «before»
+    first_url = f"{base}/parts/{first['id']}/side-change"
+    assert (await api.put(first_url, json={"side_change": True})).status_code == 422
+
+
+async def test_without_recording_times_two_parts_stay_halves(make_api: Callable[[], Api]) -> None:
+    """No camera clock in the files: the rule of before (two parts are two halves)."""
+    api = make_api()
+    ids = await setup_club(api)
+    m = await new_match(api, ids)
+    first = await upload(api, ids, m["id"], b"a" * 100, name="a.mp4")
+    await _ingest(api, first["id"], HALF)
+    second = await upload(api, ids, m["id"], b"b" * 100, name="b.mp4")
+    await _ingest(api, second["id"], HALF)
+    match = (await api.get(f"/v1/orgs/{ids['org']}/matches/{m['id']}")).json()
+    assert [v["half"] for v in match["videos"] if v["part"]] == [1, 2]
