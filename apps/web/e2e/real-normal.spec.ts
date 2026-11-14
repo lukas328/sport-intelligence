@@ -80,6 +80,8 @@ test("no goal found by the analysis: after Prüfen the result, course, goals and
     if (n < 2) await expect(page.getByText(`Frage ${n + 3} von 5`)).toBeVisible();
     else await expect(page.getByText("Frage 5 von 5")).toBeVisible();
     await page.getByRole("button", { name: who }).click();
+    // then «Von wo?» in the same question (H7): not seen here
+    await page.getByTestId("spot-unknown").click();
   }
   // one moment is still open: nothing looks final (third real-video test G1)
   await expect(page.getByTestId("check-main-done")).toContainText("Die wichtigsten Momente sind geprüft.");
@@ -110,7 +112,8 @@ test("no goal found by the analysis: after Prüfen the result, course, goals and
   await expect(page.locator("[data-zone=wurf] svg").filter({ visible: true }).first()).toBeVisible();
   const goals = page.getByTestId("video-goals");
   await expect(goals.getByTestId("video-goal")).toHaveCount(3);
-  await expect(goals).toContainText("ohne Position");
+  // each goal says where it was thrown from, or that it is missing (H7)
+  await expect(goals.getByTestId("video-goal-spot")).toHaveCount(3);
   await expect(page.getByTestId("match-list")).toContainText("3 Tore im Video");
   // positions on the tactics camera: the court is confirmed and the scene has tracks
   await expect(goals.getByRole("img", { name: /Positionen aus dem Video/ })).toBeVisible({ timeout: 30_000 });
@@ -198,9 +201,11 @@ test("a moved corner: Prüfen waits for the new analysis and asks what is open",
   execFileSync("psql", [DB, "-qc", `INSERT INTO goal_candidates (id, organization_id, match_id, video_asset_id, kind, t_ms, goal_ms, start_ms, end_ms, score, rate, rank, status, suggested_side) VALUES ('${randomUUID()}', '${org}', '${match.id}', '${video}', 'goal', 14000, 12000, 9000, 15000, 3, 1, 0, 'open', 'own')`]);
   // the clip has no throw-off (G8): said so, the minute left empty; no «Prüfen 1» stays
   await page.getByTestId("kickoff-absent").click();
-  await expect(page.getByText("Welche Spielminute zeigt der Anfang?")).toBeVisible();
+  await expect(page.getByText("Welche Spielzeit zeigt die Tafel am Anfang des Videos?")).toBeVisible();
   await page.getByTestId("kickoff-absent-save").click();
   await page.getByRole("button", { name: "Tor HC Ecke" }).click();
+  // «Von wo?» (H7): the place of the shot, one tap
+  await page.getByTestId("spot-zone-kr").click();
   await expect(page.getByRole("heading", { name: "Alles geprüft." })).toBeVisible({ timeout: 30_000 });
   const g = await (await page.request.get(`/v1/orgs/${org}/matches/${match.id}/graphics`)).json();
   expect(g.checks.filter((c: { kind: string }) => c.kind === "kickoff")).toHaveLength(0);

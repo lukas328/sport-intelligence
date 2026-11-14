@@ -367,6 +367,10 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
     }
     next(step.q);
   }
+  // keyboard and screen reader: the question «Von wo?» takes the focus when it appears
+  useEffect(() => {
+    if (spotStep) document.getElementById("spot-question")?.focus({ preventScroll: true });
+  }, [spotStep]);
   const replay = () => {
     if (current?.kind !== "goal") return;
     player.current?.seek(goalWindow(current.c).start_ms);
@@ -599,7 +603,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
                   <Check aria-hidden className="mr-1.5 inline size-5 align-[-3px] text-win" strokeWidth={3} />
                   {ts("saved", { goal: spotStep.goal })}
                 </p>
-                <h1 id="spot-question" className="mt-2 mb-2 text-[40px] leading-[.95] md:text-[58px]">
+                <h1 id="spot-question" tabIndex={-1} className="mt-2 mb-2 text-[40px] leading-[.95] outline-none md:text-[58px]">
                   {ts("question")}
                 </h1>
                 <p className="mt-3 max-w-[54ch] text-[17px] text-ink-2">

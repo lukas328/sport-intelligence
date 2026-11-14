@@ -364,7 +364,22 @@ Weaknesses of the recognition, recorded here and not fixed in the interface work
   goal moment is confirmed, and sets only x/y while `zone_of()` in graphics.py reads only
   shot_zone and shot_type. *Decided 2026-11-14:* Prüfen asks «Von wo?» with one tap on a small
   court right after the team of a confirmed goal; an estimate from the tracks is only the
-  fallback.
+  fallback. *Built (branch `claude/shot-zone`, not yet on a real clip):* the review takes
+  `shot_zone` (la, rl, rm, rr, ra, kr, m7, gs or unknown) and the tapped point;
+  `PUT …/goals/{event}/spot` changes or adds it for any goal (report goals keep their source);
+  without a tap `shot_positions.fill_one` estimates that goal from its part's tracks and sets
+  shot_zone too; `zone_of` falls back to the zone at x/y; `attributes.zone_source` says coach,
+  estimated or unknown. Left and right are the attacker's (zones.json): on the half court with the
+  goal at the top, «Aussen links» is on the left of the picture. Gegenstoss is shot_type
+  fast_break (zone gs) and replaces the place in the question; an estimated place stays. Goals of
+  the match report are asked in «Wurfort nachtragen» once the throw-off puts them in the video.
+  *Left:* (1) the time of a report goal on the video comes from the clock and the throw-off: the
+  clip of 10 s before to 2 s after can miss the throw where the report's minute is coarse or the
+  clock runs on during breaks; (2) a tap gives a coarse point (thumb on a 20 m wide drawing), good
+  for the bundle, not for distances; (3) how long «Von wo?» adds on a whole match (50 to 60 goals)
+  is not measured, the estimate is 23 s per goal question instead of 18 s; (4) the estimate from
+  the tracks stays weak while candidates come 4 to 7 s late (Q-REC-CANDTIME) and people beside the
+  court are tracked (Q-REC-OFFCOURT).
 - **Q-REC-CALQUALITY The court's quality is not measured.** `observe.py` sets the reprojection
   error to 0 and the confidence to 1.0, also for a court 2 to 5 m off; until it is measured the
   interface never treats the court as sure and always asks for it (done, E03).

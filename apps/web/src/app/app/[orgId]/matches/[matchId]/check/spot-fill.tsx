@@ -57,6 +57,10 @@ export function SpotFill({ orgId, match, goalId }: { orgId: string; match: Match
   const total = list?.length ?? 0;
   const who = (g: Goal) => t("fillGoal", { team: g.team === "own" ? own : oppName });
   const when = (g: Goal) => (g.minute != null ? `${clockOf(g.minute)} · ${tc("videoAt", { video: formatClock(g.t_ms ?? 0) })}` : tc("videoAt", { video: formatClock(g.t_ms ?? 0) }));
+  // keyboard and screen reader: each goal's question takes the focus
+  useEffect(() => {
+    if (at > 0) document.getElementById("spot-fill-question")?.focus({ preventScroll: true });
+  }, [at]);
   const media = main ? `/v1/orgs/${orgId}/videos/${main.id}/media/hls/master.m3u8` : null;
 
   return (
@@ -102,7 +106,7 @@ export function SpotFill({ orgId, match, goalId }: { orgId: string; match: Match
           <section aria-labelledby="spot-fill-question" data-testid="spot-step">
             <p className="m-0 text-[15px] font-semibold text-ink-2">{t("fillCount", { n: at + 1, total })}</p>
             <p className="m-0 mt-2 text-[17px] font-semibold">{who(goal)}</p>
-            <h1 id="spot-fill-question" className="mt-1 mb-2 text-[40px] leading-[.95] md:text-[58px]">
+            <h1 id="spot-fill-question" tabIndex={-1} className="mt-1 mb-2 text-[40px] leading-[.95] outline-none md:text-[58px]">
               {t("question")}
             </h1>
             <p className="mt-3 max-w-[54ch] text-[17px] text-ink-2">{t("why")}</p>

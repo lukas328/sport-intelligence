@@ -13,6 +13,7 @@ import { VideoPlayer, type PlayerHandle } from "@/components/video/player";
 import { api } from "@/lib/client";
 import { goalRuns, reportGoals, thingSequence, type MatchGraphics } from "@/lib/graphics";
 import { threeThings } from "@/lib/three-things";
+import { SpotChange, useSpotText } from "@/components/anlauf/spot-parts";
 import { cn } from "@/lib/utils";
 import { usePartMarkers } from "./parts-panel";
 
@@ -101,6 +102,7 @@ export function VideoStage({
   // without the throw-off the place in the video stands for the clock (G8)
   const when = (g: Goal) => (g.minute != null ? clockOf(g.minute) : g.t_ms != null ? t("atVideo", { time: mmss(g.t_ms) }) : "");
   const label = (g: Goal) => t("goalOf", { team: team(g), clock: when(g) });
+  const spotText = useSpotText();
   const where = (g: Goal) => (!g.zone ? "" : ["la", "ra", "rl", "rm", "rr", "kr"].includes(g.zone) ? tz(`zoneTitle.${g.zone}` as "zoneTitle.ra") : t(`zoneShort.${g.zone}` as "zoneShort.gs"));
   const notes = useQuery({
     queryKey: ["comments", match.id],
@@ -276,6 +278,13 @@ export function VideoStage({
             );
           })}
         </ol>
+        {/* the running scene's place of the shot, changed with two taps (fourth real-video test H7) */}
+        {goal && goal.has_video && (
+          <p className="m-0 flex flex-wrap items-center justify-between gap-x-3 border-t border-rule px-3 py-1.5 text-[15px]" data-testid="stage-spot">
+            <span className="text-ink-2">{spotText(goal)}</span>
+            {staff && <SpotChange orgId={orgId} matchId={match.id} goal={goal} label={label(goal)} />}
+          </p>
+        )}
         {!chosen && things.length > 0 && (
           <div className="mt-6">
             <SectionHead as="h3" title={t("thingsHere")} />

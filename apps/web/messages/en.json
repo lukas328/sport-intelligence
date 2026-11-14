@@ -3472,7 +3472,9 @@
     "noFixtures": "No match scheduled.",
     "more": "More about the season",
     "moreNote": "Figures, bests, all matches in detail, runs and reports",
-    "rankKick": "Rank {rank}, {points} points"
+    "rankKick": "Rank {rank}, {points} points",
+    "kickLeague": "{n, plural, one {1 of them in the league} other {# of them in the league}}",
+    "trendNoteLast": "Goal difference per match, the last {shown} of {n} ({phone} on a phone)"
   },
   "numbersTab": {
     "intro": "Goals, 7 m and 2 minutes from the match report and the video, shots and saves from the tagged events.",

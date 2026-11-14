@@ -231,7 +231,7 @@ const mmss = formatClock;
 
 /**
  * The goals of a match without three things yet: each with its time (match clock, else the place
- * in the video), the team, «ohne Position» where no spot is known, and the scene on the tactics
+ * in the video), the team, the place of the shot («Wurfort fehlt», «Wurfort ändern»), and the scene on the tactics
  * camera (E01, E02).
  */
 export function VideoGoals({ orgId, matchId, graphics, oppName, onScene }: { orgId: string; matchId: string; graphics: MatchGraphics; oppName: string; onScene?: (eventId: string) => void }) {

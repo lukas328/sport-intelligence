@@ -158,7 +158,11 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
   const season = `${t("title")} ${team.data?.current_season?.label ?? ""}`.trim();
   const kickBase = league ? ts("kick", { season, league, n }) : ts("kickNoLeague", { season, n });
   // the rank always stands in the head when the table is known (UX test B41), in the title or here
-  const kick = ours?.rank && !(zoneNoun && ours.rank) ? `${kickBase} · ${ts("rankKick", { rank: ours.rank, points: ours.points ?? 0 })}` : kickBase;
+  // the head counts every match of the season (cup and friendlies too), the table only the
+  // league's: said when they differ (fourth real-video test H9)
+  const leagueGames = ours?.games != null && ours.games !== n ? ts("kickLeague", { n: ours.games }) : null;
+  const kickCounted = leagueGames ? `${kickBase}, ${leagueGames}` : kickBase;
+  const kick = ours?.rank && !(zoneNoun && ours.rank) ? `${kickCounted} · ${ts("rankKick", { rank: ours.rank, points: ours.points ?? 0 })}` : kickCounted;
   const goalsAgainstTotal = data.matches.reduce((sum, m) => sum + m.score_opponent, 0);
   const goalsForTotal = data.matches.reduce((sum, m) => sum + m.score_own, 0);
   const noVideo = data.matches.length - withVideo.length;
@@ -236,7 +240,8 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
           </section>
 
           <section>
-            <SectionHead title={ts("trend")} note={ts("trendNote")} />
+            {/* the course shows the last ten (six on a phone): said when there are more (H9) */}
+            <SectionHead title={ts("trend")} note={chrono.length > 6 ? ts("trendNoteLast", { shown: Math.min(10, chrono.length), phone: 6, n: chrono.length }) : ts("trendNote")} />
             {/* phones: the last six matches at a readable size */}
             <div className="sm:hidden">
               <DiffBars matches={chrono.slice(-6).map((m) => ({ label: shortName(m.opponent), diff: m.score_own - m.score_opponent }))} width={400} label={t("chartLabel")} />

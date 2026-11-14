@@ -3472,7 +3472,9 @@
     "noFixtures": "Kein Spiel angesetzt.",
     "more": "Mehr zur Saison",
     "moreNote": "Zahlen, Bestwerte, alle Spiele im Detail, Läufe und Auswertungen",
-    "rankKick": "Rang {rank}, {points} Punkte"
+    "rankKick": "Rang {rank}, {points} Punkte",
+    "kickLeague": "{n, plural, one {1 davon in der Meisterschaft} other {# davon in der Meisterschaft}}",
+    "trendNoteLast": "Tordifferenz pro Spiel, die letzten {shown} von {n} (am Handy {phone})"
   },
   "numbersTab": {
     "intro": "Tore, 7 m und 2 Minuten aus Spielbericht und Video, Würfe und Paraden aus den markierten Ereignissen.",

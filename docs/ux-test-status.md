@@ -243,10 +243,10 @@ video; the court question on a phone (part of G9) was not fixed and is fixed now
 | H4 | Prüfen head «0 Fragen» with open moments; list row without the open moments | fixed (434799e) |
 | H5 | Longest phase without an own goal counted from the whistle, not from the video's start | fixed (bd9fa7a) |
 | H6 | Zahlen intro named a match report that does not exist | fixed (bd9fa7a) |
-| H7 | Confirmed goals get no shot position, the three things never appear | open: «Von wo?» in Prüfen (Q-REC-SHOTZONE) |
-| H8 | One scene with three different times (8:15, 8:14, video 0:15) | open |
-| H9 | Season: 12 matches in the head, 8 in the table, the last 10 in the course, unsaid | open |
-| H10 | «Welche Spielminute zeigt der Anfang?» is ambiguous at 8:15; «Zurück» at question 1 | open |
+| H7 | Confirmed goals get no shot position, the three things never appear | built on `claude/shot-zone`, not yet seen on a real clip: Prüfen asks «Von wo?» right after «Tor [Team]» (one tap on the attacked half, Siebenmeter, Gegenstoss, Weiss nicht; the estimate from the tracks marked «Vorschlag»); without a tap the estimate runs for that goal and sets the zone; «Wurfort ändern» in «Beantwortet» and at the scene; «Wurfort nachtragen» for older and report goals; the place of the three things says how many goals have a place and leads there. API and Playwright tests (`test_shot_spots.py`, `e2e/shot-zone.spec.ts`). Q-REC-SHOTZONE |
+| H8 | One scene with three different times (8:15, 8:14, video 0:15) | built: one rounding (full seconds, as the scoreboard) on every screen, the API's minute with four places; Szenen show the match clock of any goal (also without a spot) large and the video time small beside it |
+| H9 | Season: 12 matches in the head, 8 in the table, the last 10 in the course, unsaid | built: the head adds «8 davon in der Meisterschaft» when the table counts fewer; the course says «die letzten 10 von 12 (am Handy 6)» |
+| H10 | «Welche Spielminute zeigt der Anfang?» is ambiguous at 8:15; «Zurück» at question 1 | built: «Welche Spielzeit zeigt die Tafel am Anfang des Videos?» with Minute and Sekunde; «Zurück» only where a question was answered before this one |
 
 ## Tests
 

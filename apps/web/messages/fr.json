@@ -3472,7 +3472,9 @@
     "noFixtures": "Aucun match prévu.",
     "more": "Plus sur la saison",
     "moreNote": "Chiffres, records, tous les matchs en détail, séries et analyses",
-    "rankKick": "Rang {rank}, {points} points"
+    "rankKick": "Rang {rank}, {points} points",
+    "kickLeague": "{n, plural, one {dont 1 en championnat} other {dont # en championnat}}",
+    "trendNoteLast": "Différence de buts par match, les {shown} derniers sur {n} (sur mobile {phone})"
   },
   "numbersTab": {
     "intro": "Buts, 7 m et 2 minutes de la feuille de match et de la vidéo, tirs et arrêts des événements saisis.",
