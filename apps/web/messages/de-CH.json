@@ -1938,7 +1938,7 @@
     "send": "Senden",
     "chat": "Chat öffnen",
     "thanks": "Danke! Wir melden uns per E-Mail.",
-    "failed": "Senden hat nicht geklappt. Schreib an support@handball-ai.ch.",
+    "failed": "Senden hat nicht geklappt. Schreib an support@handball-intelligence.com.",
     "close": "Schliessen"
   },
   "checklist": {
@@ -3232,6 +3232,7 @@
     "rowFailed": "Analyse nicht geklappt",
     "rowVideoOnly": "Video da, noch nicht ausgewertet",
     "rowGoals": "{n, plural, one {1 Tor} other {# Tore}} im Video",
+    "rowGoalsOpen": "{n, plural, one {1 Tor} other {# Tore}} bisher, {open, plural, one {1 Moment offen} other {# Momente offen}}",
     "colourTip": "Tipp: Mit der Trikotfarbe von {opponent} trennt die Analyse die Teams sicherer.",
     "minutesSpan": "noch etwa {low} bis {high} Minuten",
     "answerChecks": "{n, plural, one {1 Frage beantworten} other {# Fragen beantworten}}",
@@ -3253,11 +3254,12 @@
     "fieldYes": "Passt",
     "fieldCorners": "Ecken verschieben",
     "goalQuestion": "Tor oder kein Tor?",
-    "goalWhy": "Hier hat sich etwas am Tor getan, die Anzeigetafel sagt es nicht sicher.",
+    "goalWhy": "Hier hat sich etwas am Tor getan.",
     "goalOf": "Tor {team}",
     "noGoal": "Kein Tor",
     "dontKnow": "Weiss nicht",
     "goalCaption": "Spielzeit {clock} · Video {video}",
+    "videoAt": "Video {video}",
     "progress": "{done} von {total} beantwortet",
     "count": "{n, plural, one {1 Frage} other {# Fragen}}",
     "questionOf": "Frage {n} von {total}",
@@ -3471,6 +3473,7 @@
   },
   "numbersTab": {
     "intro": "Tore, 7 m und 2 Minuten aus Spielbericht und Video, Würfe und Paraden aus den markierten Ereignissen.",
+    "introVideo": "Tore aus dem Video, so wie du sie in Prüfen bestätigt hast; Würfe und Paraden aus den markierten Ereignissen.",
     "field": "Feld",
     "byGoals": "nach Toren",
     "numberName": "Nr. Name",

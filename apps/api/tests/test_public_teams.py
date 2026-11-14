@@ -116,8 +116,8 @@ async def test_public_config_gives_the_website_and_support_addresses(
     r = await make_api().get("/v1/public/config")
     assert r.status_code == 200
     assert r.json() == {
-        "site_url": "https://handball-ai.ch",
-        "support_email": "support@handball-ai.ch",
+        "site_url": "https://handball-intelligence.com",
+        "support_email": "support@handball-intelligence.com",
     }
 
 

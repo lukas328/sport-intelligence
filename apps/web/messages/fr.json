@@ -1938,7 +1938,7 @@
     "send": "Envoyer",
     "chat": "Ouvrir le chat",
     "thanks": "Merci ! Nous répondons par e-mail.",
-    "failed": "L'envoi a échoué. Écrivez à support@handball-ai.ch.",
+    "failed": "L'envoi a échoué. Écrivez à support@handball-intelligence.com.",
     "close": "Fermer"
   },
   "checklist": {
@@ -3232,6 +3232,7 @@
     "rowFailed": "L'analyse n'a pas fonctionné",
     "rowVideoOnly": "Vidéo là, pas encore analysée",
     "rowGoals": "{n, plural, one {1 but} other {# buts}} dans la vidéo",
+    "rowGoalsOpen": "{n, plural, one {1 but} other {# buts}} pour l'instant, {open, plural, one {1 moment ouvert} other {# moments ouverts}}",
     "colourTip": "Conseil : avec la couleur du maillot de {opponent}, l'analyse sépare mieux les équipes.",
     "minutesSpan": "encore environ {low} à {high} minutes",
     "answerChecks": "{n, plural, one {Répondre à 1 question} other {Répondre à # questions}}",
@@ -3253,11 +3254,12 @@
     "fieldYes": "C'est bon",
     "fieldCorners": "Déplacer les coins",
     "goalQuestion": "But ou pas but ?",
-    "goalWhy": "Il s'est passé quelque chose au but ici ; le tableau d'affichage ne le dit pas avec certitude.",
+    "goalWhy": "Il s'est passé quelque chose au but ici.",
     "goalOf": "But {team}",
     "noGoal": "Pas de but",
     "dontKnow": "Je ne sais pas",
     "goalCaption": "Temps de jeu {clock} · vidéo {video}",
+    "videoAt": "Vidéo {video}",
     "progress": "{done} sur {total} répondues",
     "count": "{n, plural, one {1 question} other {# questions}}",
     "questionOf": "Question {n} sur {total}",
@@ -3471,6 +3473,7 @@
   },
   "numbersTab": {
     "intro": "Buts, 7 m et 2 minutes de la feuille de match et de la vidéo, tirs et arrêts des événements saisis.",
+    "introVideo": "Buts tirés de la vidéo tels que tu les as confirmés dans Vérifier ; tirs et arrêts tirés des événements marqués.",
     "field": "Terrain",
     "byGoals": "par buts",
     "numberName": "N° Nom",

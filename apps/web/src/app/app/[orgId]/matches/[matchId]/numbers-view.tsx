@@ -78,7 +78,7 @@ export function NumbersView({
   const td = "py-2.5 text-right tabular-nums";
   return (
     <div className="space-y-12">
-      <p className="max-w-[90ch] text-[15px] text-ink-2 md:text-[15px]">{t("intro")}</p>
+      <p className="max-w-[90ch] text-[15px] text-ink-2 md:text-[15px]">{graphics && !graphics.has_report ? t("introVideo") : t("intro")}</p>
       <div className="grid gap-x-12 gap-y-12 lg:grid-cols-[minmax(0,1fr)_340px]">
         <div className="min-w-0 space-y-12">
           {field.length > 0 && (

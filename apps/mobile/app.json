@@ -10,7 +10,7 @@
     "ios": {
       "bundleIdentifier": "ch.handballai.app",
       "supportsTablet": true,
-      "associatedDomains": ["applinks:app.handball-ai.ch"],
+      "associatedDomains": ["applinks:app.handball-intelligence.com"],
       "infoPlist": {
         "NSCameraUsageDescription": "Die Kamera filmt das Spiel für die Analyse. / The camera records the match for the analysis.",
         "NSMicrophoneUsageDescription": "Der Ton gehört zur Aufnahme. / Sound is part of the recording.",
@@ -25,7 +25,7 @@
         {
           "action": "VIEW",
           "autoVerify": true,
-          "data": [{ "scheme": "https", "host": "app.handball-ai.ch", "pathPrefix": "/app" }],
+          "data": [{ "scheme": "https", "host": "app.handball-intelligence.com", "pathPrefix": "/app" }],
           "category": ["BROWSABLE", "DEFAULT"]
         }
       ]
@@ -38,6 +38,6 @@
       ["expo-notifications", { "color": "#0b6bcb" }]
     ],
     "experiments": { "typedRoutes": false },
-    "extra": { "apiUrl": "https://app.handball-ai.ch" }
+    "extra": { "apiUrl": "https://app.handball-intelligence.com" }
   }
 }

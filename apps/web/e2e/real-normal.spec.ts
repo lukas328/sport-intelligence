@@ -243,11 +243,14 @@ test("the court question on a phone: the corners can be dragged with a finger", 
   await page.goto(`/app/${org}/matches/${match.id}/check`);
   await expect(page.getByTestId("field-check")).toBeVisible({ timeout: 30_000 });
   const vw = page.viewportSize()!.width;
-  // every handle on the screen, none beyond its edge
+  // every handle on the screen, none beyond its edge and none under a button: a finger on its
+  // centre reaches the handle (fourth real-video test: «Bild vergrössern» covered a corner)
   for (let i = 0; i < 4; i++) {
     const b = (await page.getByTestId(`corner-${i}`).boundingBox())!;
     expect(b.x + b.width / 2).toBeGreaterThanOrEqual(0);
     expect(b.x + b.width / 2).toBeLessThanOrEqual(vw);
+    const hit = await page.evaluate(([x, y]) => document.elementFromPoint(x!, y!)?.closest("[data-testid^=corner-]")?.getAttribute("data-testid") ?? null, [b.x + b.width / 2, b.y + b.height / 2]);
+    expect(hit).toBe(`corner-${i}`);
   }
   await expect(page.getByTestId("field-reset")).toBeDisabled();
   // a finger drags the near left corner (touch events, as on the phone)
@@ -264,5 +267,14 @@ test("the court question on a phone: the corners can be dragged with a finger", 
   await expect(page.getByTestId("field-reset")).toBeEnabled();
   const after = (await corner.boundingBox())!;
   expect(Math.abs(after.x - box.x) + Math.abs(after.y - box.y)).toBeGreaterThan(10);
+  // enlarged, a swipe beside the handles moves the picture, so the far corners can be reached
+  await page.getByTestId("field-zoom").click();
+  const frame = page.getByTestId("field-frame");
+  const fb = (await frame.boundingBox())!;
+  const [sx, sy] = [fb.x + fb.width / 2, fb.y + fb.height - 12];
+  await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x: sx, y: sy }] });
+  for (let k = 1; k <= 15; k++) await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ x: sx - k * 15, y: sy }] });
+  await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+  await expect.poll(() => frame.evaluate((el) => el.scrollLeft)).toBeGreaterThan(50);
   await page.screenshot({ path: info.outputPath("court-phone.png") });
 });

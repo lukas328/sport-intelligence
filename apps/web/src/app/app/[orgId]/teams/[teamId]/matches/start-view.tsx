@@ -297,7 +297,12 @@ function RowSummary({ orgId, m }: { orgId: string; m: Match }) {
   // no things yet: the state in words, not «Kein Ding · 0 Szenen» (UX test A02)
   if (things.length === 0 && g.data.analysis !== "ready") return <>{t("rowVideoOnly")}</>;
   if (things.length === 0 && !g.data.goals.some((x) => x.has_video)) return <>{checkCount(g.data) > 0 ? t("rowChecks", { n: checkCount(g.data) }) : t("rowNoGoals")}</>;
-  if (things.length === 0) return <>{t("rowGoals", { n: g.data.goals.filter((x) => x.has_video).length })}</>;
+  // while goal moments are open the count is an interim one, also in the list (fourth real-video test)
+  if (things.length === 0) {
+    const n = g.data.goals.filter((x) => x.has_video).length;
+    const open = openMoments(g.data);
+    return <>{open > 0 ? t("rowGoalsOpen", { n, open }) : t("rowGoals", { n })}</>;
+  }
   return <>{t("rowSummary", { things: things.length, scenes, first: things[0] ? text(things[0]) : "none" })}</>;
 }
 

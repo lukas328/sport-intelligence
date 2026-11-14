@@ -5,10 +5,12 @@ Each question has the **assumption** I work with until it is answered. Status: o
 ## Product and business
 - **Q-PROD-1 Product name and domain.** "Handball AI" was very close to the competitor
   *handball.ai* named in the brief. *Decided 2026-11-12:* the product is called **Handball
-  Intelligence**, logo «Taktik» (docs/design/brand2/taktik). *Open:* the domain
-  (`handball-ai.ch` stays in config, mail addresses, deep links and the mobile bundle ids until a
-  new domain is registered), the legal entity name on invoices (`Handball AI GmbH`), and a
-  trademark search (Swissreg, EUIPO, classes 9, 41, 42).
+  Intelligence**, logo «Taktik» (docs/design/brand2/taktik). *Decided 2026-11-13:* the domain is
+  **handball-intelligence.com** (site), `app.handball-intelligence.com` (app, deep links),
+  `support@handball-intelligence.com`; config defaults, mail addresses and deep links use it.
+  *Open:* DNS, mail (SPF, DKIM, DMARC) and the app-link files on the new host (docs/site/SEO.md,
+  «Vor dem Livegang»), the mobile bundle ids (`ch.handballai.app`), the legal entity name on
+  invoices (`Handball AI GmbH`), and a trademark search (Swissreg, EUIPO, classes 9, 41, 42).
 - **Q-PROD-2 Languages.** de-CH ("ss") first. Germany uses "ß". *Assumption:* v1 ships de-CH only, a de-DE
   variant can be added as a separate locale later.
 - **Q-PROD-3 Company entity, VAT and currencies for Stripe** (CHF only, or CHF + EUR). *Assumption:* CHF and EUR prices in config.
@@ -183,7 +185,7 @@ the M11 report.
 ### Q-M11-3 Store accounts and push credentials
 Apple Developer and Google Play accounts of the operating company, an Expo (EAS) project id
 (`app.json` extra.eas.projectId), APNs key and FCM credentials, the domain for app links
-(`app.handball-ai.ch`, apple-app-site-association and assetlinks.json on the web server).
+(`app.handball-intelligence.com`, apple-app-site-association and assetlinks.json on the web server).
 **Default**: prepared in `apps/mobile` (bundle id `ch.handballai.app`); submission once accounts exist.
 
 ### Q-UX-1 Usability test with real coaches, players and parents
@@ -351,7 +353,18 @@ The app uses the new colours; Archivo is not yet bundled in the Expo build (syst
 Weaknesses of the recognition, recorded here and not fixed in the interface work (E01 to E12):
 
 - **Q-REC-SCOREBOARD The hall's scoreboard is not read.** In clip 1 the board (8:7 to 11:11) is
-  readable when the camera points left; the analysis finds no goal by itself.
+  readable when the camera points left (about 100 of 300 s, about 100 x 70 px at 720p, digits 12
+  to 15 px high); the analysis finds no goal by itself. Measured in the fourth test: the text
+  recognition returns the clock without its colon («849» for 8:49), so the clock rule in
+  `hallboard.py` never matches and the board has no anchor, and it does not find the single
+  seven-segment score digits at all. Open: accept three and four digit clock fields as mm:ss,
+  find the board by red on black, a reader of its own for seven-segment digits.
+- **Q-REC-SHOTZONE Confirmed goals have no shot position, so the three things never appear
+  (fourth test, H7).** `shot_positions.fill` runs only at the end of the analysis, not when a
+  goal moment is confirmed, and sets only x/y while `zone_of()` in graphics.py reads only
+  shot_zone and shot_type. *Decided 2026-11-14:* Prüfen asks «Von wo?» with one tap on a small
+  court right after the team of a confirmed goal; an estimate from the tracks is only the
+  fallback.
 - **Q-REC-CALQUALITY The court's quality is not measured.** `observe.py` sets the reprojection
   error to 0 and the confidence to 1.0, also for a court 2 to 5 m off; until it is measured the
   interface never treats the court as sure and always asks for it (done, E03).

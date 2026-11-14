@@ -375,7 +375,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
         </Link>
       </div>
       <div className="bleed-x">
-        <Strip name={own} sub={`${ta("vsShort")} ${oppName} · ${t("count", { n: total })}`} own={match.score_own} opp={match.score_opponent} />
+        <Strip name={own} sub={`${ta("vsShort")} ${oppName} · ${t("count", { n: total > 0 || wantMore ? total : moreGoals })}`} own={match.score_own} opp={match.score_opponent} />
       </div>
       {loading ? (
         <p className="py-10 text-ink-2">{t("loading")}</p>
@@ -431,6 +431,8 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
                 {answered.map((x, i) => (
                   <li key={id(x.q)} className="flex min-h-12 items-center justify-between gap-3 border-b border-rule text-[17px]">
                     <span>
+                      {/* the video time per goal moment: five «Tor Lakers Stäfa» in a row are told apart (fourth real-video test) */}
+                      {x.q.kind === "goal" && <span className="mr-2 font-mono text-[15px] font-semibold text-ink-2">{t("videoAt", { video: clock(x.q.c.goal_ms / 1000) })}</span>}
                       {x.q.kind === "field" ? t("fieldQuestion") : x.q.kind === "kickoff" ? t("kickoffQuestion", { n: x.q.period }) : x.q.kind === "person" ? t("personQuestion") : t("goalQuestion")} <b>{x.label}</b>
                     </span>
                     <button type="button" onClick={() => setRevisit(i)} className="min-h-11 cursor-pointer border-0 bg-transparent p-0 font-bold underline underline-offset-4">

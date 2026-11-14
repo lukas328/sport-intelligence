@@ -230,6 +230,24 @@ Open (recognition, not interface): Q-REC-OFFCOURT (people beside the court, goal
 another colour), Q-REC-SIDES, Q-REC-CANDTIME, Q-REC-SCOREBOARD, Q-REC-PERSONBOX (see
 OPEN_QUESTIONS.md).
 
+## Fourth real-video test (H1 to H10)
+
+Report: docs/ux-test/echttest/BERICHT.md, «Vierter Durchlauf». G1 to G8 are confirmed on the real
+video; the court question on a phone (part of G9) was not fixed and is fixed now.
+
+| # | Finding | Status |
+|---|---|---|
+| H1 | Corner handle under the zoom button, the enlarged court could not be moved (390 px) | fixed (434799e, 7dd0a09) |
+| H2 | Goal question named the scoreboard although none was read | fixed (434799e) |
+| H3 | «Beantwortet» without times | fixed (434799e) |
+| H4 | Prüfen head «0 Fragen» with open moments; list row without the open moments | fixed (434799e) |
+| H5 | Longest phase without an own goal counted from the whistle, not from the video's start | fixed (bd9fa7a) |
+| H6 | Zahlen intro named a match report that does not exist | fixed (bd9fa7a) |
+| H7 | Confirmed goals get no shot position, the three things never appear | open: «Von wo?» in Prüfen (Q-REC-SHOTZONE) |
+| H8 | One scene with three different times (8:15, 8:14, video 0:15) | open |
+| H9 | Season: 12 matches in the head, 8 in the table, the last 10 in the course, unsaid | open |
+| H10 | «Welche Spielminute zeigt der Anfang?» is ambiguous at 8:15; «Zurück» at question 1 | open |
+
 ## Tests
 
 Round 3: API 352 passed (3 deselected). Web unit tests 205 passed. ESLint clean again (11
