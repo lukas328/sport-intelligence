@@ -19,7 +19,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from export import promote_tracks, tier  # noqa: E402
 
-KEEP = ("sure", "track")
+KEEP = ("sure", "track", "confirmed")
 
 
 def main() -> None:
@@ -35,10 +35,22 @@ def main() -> None:
         "clips 98 %% of Claude's check points were the ball, but the pilot put only 92 %% of them "
         "within 12 px",
     )
+    ap.add_argument(
+        "--reviews",
+        type=Path,
+        nargs="*",
+        default=[],
+        help="Ball-oder-nicht exports of the check items (ball -> confirmed, none -> dropped)",
+    )
     a = ap.parse_args()
+    review = {}
+    for rd in a.reviews:
+        for q in rd.glob("*.json"):
+            v = json.loads(q.read_text())
+            review[q.stem] = v.get("data", v)["state"]
     keep = KEEP + (("check",) if a.with_check else ())
     clips = {c["id"]: c for c in json.loads(a.clips_json.read_text())}
-    out, counts = {}, {"sure": 0, "track": 0, "check": 0, "owner": 0}
+    out, counts = {}, {k: 0 for k in ("sure", "track", "confirmed", "check", "rejected", "owner")}
     for cid in sorted(clips):
         p = a.state / "s2" / f"{cid}_doc.json"
         if not p.exists():
@@ -59,6 +71,10 @@ def main() -> None:
             if v.get("p")
         ]
         promote_tracks(rows)
+        for r in rows:  # the owner's verdict on unconfirmed points
+            if r["tier"] == "check":
+                st = review.get(f"{cid}_{r['frame']}")
+                r["tier"] = {"ball": "confirmed", "none": "rejected"}.get(st, "check")
         for r in rows:
             counts[r["tier"]] += 1
         c = clips[cid]
