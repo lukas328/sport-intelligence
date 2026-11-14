@@ -328,7 +328,18 @@ The app uses the new colours; Archivo is not yet bundled in the Expo build (syst
 Weaknesses of the recognition, recorded here and not fixed in the interface work (E01 to E12):
 
 - **Q-REC-SCOREBOARD The hall's scoreboard is not read.** In clip 1 the board (8:7 to 11:11) is
-  readable when the camera points left; the analysis finds no goal by itself.
+  readable when the camera points left (about 100 of 300 s, about 100 x 70 px at 720p, digits 12
+  to 15 px high); the analysis finds no goal by itself. Measured in the fourth test: the text
+  recognition returns the clock without its colon («849» for 8:49), so the clock rule in
+  `hallboard.py` never matches and the board has no anchor, and it does not find the single
+  seven-segment score digits at all. Open: accept three and four digit clock fields as mm:ss,
+  find the board by red on black, a reader of its own for seven-segment digits.
+- **Q-REC-SHOTZONE Confirmed goals have no shot position, so the three things never appear
+  (fourth test, H7).** `shot_positions.fill` runs only at the end of the analysis, not when a
+  goal moment is confirmed, and sets only x/y while `zone_of()` in graphics.py reads only
+  shot_zone and shot_type. *Decided 2026-11-14:* Prüfen asks «Von wo?» with one tap on a small
+  court right after the team of a confirmed goal; an estimate from the tracks is only the
+  fallback.
 - **Q-REC-CALQUALITY The court's quality is not measured.** `observe.py` sets the reprojection
   error to 0 and the confidence to 1.0, also for a court 2 to 5 m off; until it is measured the
   interface never treats the court as sure and always asks for it (done, E03).

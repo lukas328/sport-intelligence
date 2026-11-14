@@ -179,3 +179,73 @@ automatische Tests abgesichert, nicht mehr mit den echten Clips.
 - handball.ch lieferte am Testtag ein Zertifikat ohne Zwischenzertifikat; die Teamsuche im
   Einstieg antwortete mit 503, bis das Zwischenzertifikat lokal ergänzt wurde. Die Prüfung der
   Zertifikate blieb eingeschaltet.
+
+---
+
+# Vierter Durchlauf (14. November 2026): Nachprüfung von G1 bis G9 am echten Video
+
+Geprüft mit Clip 1 (SG Horgen gegen Lakers Stäfa, fünf Minuten, neun Tore, wahres Resultat im
+Ausschnitt 4:5), als neuer Trainer am Handy (390 px) und am Desktop. Clip 2 wurde in diesem
+Durchlauf nicht noch einmal ausgewertet, nur seine Anzeigetafel angesehen. Analyse 20 bis 21
+Minuten, Prüfen 22 Fragen (12 Pflicht, 10 freiwillig) in rund 6 bis 7 Minuten.
+
+## Urteil
+
+G1 bis G8 sind am echten Video bestätigt behoben. Bei G9 war die Feldfrage am Handy nicht behoben
+(ein Eckgriff lag unter dem Knopf «Bild vergrössern», das vergrösserte Bild liess sich nicht
+verschieben); das ist in diesem Durchlauf behoben. Nach allen 22 Antworten steht 4:5, das wahre
+Resultat. **Drei Dinge entstehen aber nie:** Kein bestätigtes Tor bekommt eine Wurfposition (H7).
+Damit fehlt dem Trainer genau das, was Start und Website als Erstes versprechen.
+
+## G1 bis G9
+
+| # | Urteil | Gesehen |
+|---|---|---|
+| G1 | behoben | Nach dem Pflichtteil «Die wichtigsten Momente sind geprüft. 10 weitere könnten Tore sein.»; Start, Spiel und Video zeigen 2:5 mit «bisher bestätigt · 10 Momente offen»; «Alles geprüft» erst nach allen Antworten, dann 4:5. |
+| G2 | behoben | Kein Pflicht-Ausschnitt zeigt ein bestätigtes Tor zweimal; bei 2:23 «In diesem Ausschnitt liegt das Tor von 2:15» mit «Nein, dasselbe Tor». Die genannte Zeit ist die späte Kandidatenzeit, das Tor fiel um 2:09. |
+| G3 | behoben | Taktikkamera zeichnet das Tor auf der Seite, die das Video zeigt; die Szene enthält den Wurf; höchstens ein bis zwei Punkte zu viel. |
+| G4 | behoben | Nach dem gespeicherten Feld keine zweite Mail, eine Mitteilung. |
+| G5 | behoben | Die gemerkte Gegnerfarbe geht ohne neue Frage in die Analyse. |
+| G6 | behoben | Saison und Start zeigen dieselben Torschützen. |
+| G7 | behoben | Die Gegnerfarbe bleibt leer, bis sie gewählt ist. |
+| G8 | behoben | «Der Anwurf ist nicht im Video» führt zur Spielminute des Anfangs; die Spielzeiten stimmen danach. |
+| G9 | Feldfrage am Handy war nicht behoben, jetzt behoben | Zoom-Knopf unter dem Bild, Ziehen nur auf den Griffen, das vergrösserte Bild lässt sich mit einem Finger verschieben. |
+
+## Neue Befunde
+
+| # | Schwere | Befund | Stand |
+|---|---|---|---|
+| H1 | stört | Eckgriff unter dem Zoom-Knopf, Vergrösserung nicht verschiebbar (390 px) | behoben |
+| H2 | falsch | Jede Torfrage sagte «die Anzeigetafel sagt es nicht sicher», obwohl keine Tafel gelesen wurde | behoben |
+| H3 | stört | Liste «Beantwortet» ohne Zeiten | behoben |
+| H4 | Kleinigkeit | Prüfen-Kopf «0 Fragen» bei offenen Momenten; Listenzeile «7 Tore im Video» ohne offene Momente | behoben |
+| H5 | falsche Zahl | «Längste Phase ohne eigenes Tor: 8 min» ab Anpfiff gezählt, obwohl das Video in Minute 8 beginnt | behoben |
+| H6 | falsch | Zahlen-Tab nennt den Spielbericht, obwohl es keinen gibt | behoben |
+| H7 | blockiert die drei Dinge | Bestätigte Tor-Momente bekommen keine Wurfposition: `shot_positions.fill` läuft nur am Ende der Analyse, nicht bei der Bestätigung, und setzt nur x/y, während `zone_of()` in graphics.py nur shot_zone und shot_type liest. Prüfen fragt nie nach dem Wurfort. Der Trainer liest «Für drei Dinge braucht es mehr Tore mit Position» und hat keinen Weg dorthin. | offen, Entscheid: Tipp «Von wo?» bei der Tor-Bestätigung |
+| H8 | Kleinigkeit | Dieselbe Szene heisst 8:15 (Spiel), 8:14 (Sammlung) und «Video 0:15» (Szenen) | offen |
+| H9 | Kleinigkeit | Saison: «nach 12 Spielen» (mit Cup und Freundschaftsspielen), Tabelle 8, Verlauf zeigt die letzten 10, ohne es zu sagen | offen |
+| H10 | Kleinigkeit | «Welche Spielminute zeigt der Anfang?» ist bei 8:15 mehrdeutig; «Zurück» steht schon bei Frage 1 | offen |
+
+## Anzeigetafel der Halle (gemessen)
+
+Clip 1: Die Tafel hängt links oben an der Wand und ist rund 100 von 300 Sekunden im Bild, immer
+wenn die Kamera nach links schwenkt. Im 720p-Bild ist sie etwa 100 × 70 Pixel gross, die Ziffern
+12 bis 15 Pixel hoch, für das Auge gut lesbar (7:7, 8:7, 8:8, 9:8, 10:10, 11:11; Spieluhr =
+Videozeit + 8:15). Die Analyse liest trotzdem nichts: Die Texterkennung gibt die Uhr ohne
+Doppelpunkt zurück («849» statt 8:49), darum greift die Uhr-Regel in `hallboard.py` nie, und die
+einzelnen Leuchtziffern des Spielstands findet sie gar nicht. Ansatz: drei- und vierstellige
+Uhrfelder als mm:ss gelten lassen, die Tafel über Rot auf Schwarz finden, eine eigene Erkennung für
+Sieben-Segment-Ziffern. Clip 2: Tafel angeschnitten und dunkel, keine Quelle.
+
+## Erkennung, beobachtet
+
+Tor-Momente liegen weiter 4 bis 7 Sekunden nach dem Tor; das Fenster der Frage (10 s davor bis 2 s
+danach) fängt es meist auf, schneidet aber einzelne Tore ab. In den zwei geprüften Szenen höchstens
+ein bis zwei Personen zu viel, ein Schiedsrichter fehlt meist. Die Seite kippte in Clip 1 nicht.
+
+## Grenzen
+
+Ein Ausschnitt von fünf Minuten, kein ganzes Spiel: Wie lange das Prüfen bei 50 bis 60 Toren
+dauert, ist nicht gemessen. Kein Spielbericht zu diesen Spielen: Der Weg «Tore aus dem
+Spielbericht» ist weiter nur mit automatischen Tests geprüft. Clip 2 nicht noch einmal
+ausgewertet. Die Wurforte der neun Tore sind am Standbild nur unsicher zu bestimmen.
