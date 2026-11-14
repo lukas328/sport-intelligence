@@ -33,7 +33,8 @@ export function pageMeta(locale: Locale, path: string, title: string | undefined
   const others = available.filter((l) => l !== locale).map((l) => HTML_LANG[l].replace("-", "_"));
   const image = { url: "/og.png", width: 1200, height: 630, alt: SITE_NAME };
   return {
-    ...(title ? { title } : {}),
+    // the layout adds « | Handball Intelligence»; a title that would pass 60 characters stands alone
+    ...(title ? { title: `${title} | ${SITE_NAME}`.length > 60 ? { absolute: title } : title } : {}),
     description,
     alternates: { canonical: url, languages: alternates(path, available) },
     openGraph: {

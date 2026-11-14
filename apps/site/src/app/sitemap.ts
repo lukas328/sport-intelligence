@@ -9,7 +9,7 @@ import { HELP } from "../../content/help";
 export const dynamic = "force-static";
 
 /** Pages that exist in all three languages, without the legal drafts' own dates. */
-export const PAGES = ["", "so-funktioniert-es", "aufnahme", "demo", "preise", "hilfe", "ratgeber", "fakten", "ueber-uns", "daten", "kontakt", "blog", "agb", "datenschutz", "impressum"];
+export const PAGES = ["", "so-funktioniert-es", "aufnahme", "demo", "preise", "hilfe", "ratgeber", "fakten", "vorlagen", "vorlagen/einwilligung", "vorlagen/strichliste", "vorlagen/spieltag", "rechner/wurfquote", "rechner/speicher", "ueber-uns", "daten", "kontakt", "blog", "agb", "datenschutz", "impressum"];
 
 type Entry = { path: string; available: readonly (typeof LOCALES)[number][]; modified: string };
 

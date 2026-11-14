@@ -12,6 +12,9 @@ const NUMBER: Record<string, string> = {
   "video-im-verein-einwilligung": "16",
   "handball-begriffe": "5:1",
   "wege-zur-videoanalyse": "4",
+  vorlagen: "A4",
+  "rechner-quote": "60%",
+  "rechner-speicher": "GB",
 };
 
 export function GuideThumb({ slug }: { slug: string }) {

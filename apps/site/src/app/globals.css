@@ -373,7 +373,18 @@
   border-bottom: 2px solid var(--ink);
 }
 
+@page {
+  size: A4;
+  margin: 12mm;
+}
 @media print {
+  .sheet {
+    margin: 0;
+    border: 0;
+    padding: 0;
+    background: #fff;
+    font-size: 11pt;
+  }
   header,
   footer,
   .no-print {

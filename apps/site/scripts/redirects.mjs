@@ -15,7 +15,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const out = join(root, "out");
 
 const slugsOf = (file) => [...readFileSync(join(root, file), "utf8").matchAll(/slug: "([a-z0-9-]+)"/g)].map((m) => m[1]);
-const PAGES = ["so-funktioniert-es", "aufnahme", "demo", "preise", "hilfe", "ratgeber", "fakten", "ueber-uns", "daten", "kontakt", "blog", "agb", "datenschutz", "impressum", "funktionen"];
+const PAGES = ["so-funktioniert-es", "aufnahme", "demo", "preise", "hilfe", "ratgeber", "fakten", "vorlagen", "vorlagen/einwilligung", "vorlagen/strichliste", "vorlagen/spieltag", "rechner/wurfquote", "rechner/speicher", "ueber-uns", "daten", "kontakt", "blog", "agb", "datenschutz", "impressum", "funktionen"];
 const paths = [
   ...PAGES,
   ...slugsOf("content/help/index.ts").map((s) => `hilfe/${s}`),

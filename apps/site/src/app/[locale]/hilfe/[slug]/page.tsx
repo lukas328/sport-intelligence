@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, slug } = await params;
   const entry = HELP.find((h) => h.slug === slug);
   if (!entry) return {};
-  const meta = pageMeta(locale, `hilfe/${slug}`, entry.title[locale], entry.summary[locale]);
+  const meta = pageMeta(locale, `hilfe/${slug}`, entry.title[locale], `${entry.summary[locale]} ${messages(locale).help.descSuffix}`);
   // guides outside the core stay reachable for the app's links, but out of search engines
   return entry.listed === false ? { ...meta, robots: { index: false } } : meta;
 }

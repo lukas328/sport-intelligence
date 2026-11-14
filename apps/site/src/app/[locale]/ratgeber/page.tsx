@@ -68,6 +68,14 @@ export default async function Guides({ params }: Props) {
             </section>
           );
         })}
+        <section aria-labelledby="g-tools" className="mt-14">
+          <SectionHead id="g-tools" title={m.tools.groupTitle} />
+          <ul className="max-w-[52rem]">
+            {item("vorlagen", `/${locale}/vorlagen/`, m.tools.templates.title, m.tools.templates.lead, false)}
+            {item("rechner-quote", `/${locale}/rechner/wurfquote/`, m.tools.rate.title, m.tools.rate.lead, false)}
+            {item("rechner-speicher", `/${locale}/rechner/speicher/`, m.tools.storage.title, m.tools.storage.lead, false)}
+          </ul>
+        </section>
         {german.length > 0 && (
           <section aria-labelledby="g-de" className="mt-14">
             <SectionHead id="g-de" title={t.germanTitle} note={t.germanNote} />
