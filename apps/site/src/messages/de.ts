@@ -462,6 +462,8 @@ const de = {
     imprint: { title: "Impressum", description: "Angaben zur Betreiberin von Handball Intelligence und Kontakt." },
   },
   guides: {
+    toc: "Auf dieser Seite",
+    try: "Probier es mit deinem nächsten Spiel. Dein Team ansehen geht ohne Konto.",
     homeTitle: "Aus dem Ratgeber",
     title: "Ratgeber",
     metaTitle: "Ratgeber für Handballtrainer",

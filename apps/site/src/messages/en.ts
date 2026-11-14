@@ -464,6 +464,8 @@ const en: Messages = {
     imprint: { title: "Imprint", description: "Details of the operator of Handball Intelligence and contact." },
   },
   guides: {
+    toc: "On this page",
+    try: "Try it with your next match. Looking at your team needs no account.",
     homeTitle: "From the guides",
     title: "Guides",
     metaTitle: "Guides for handball coaches",

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { JsonLd } from "@/components/json-ld";
+import { GuideThumb } from "@/components/guide-thumb";
 import { KitScope } from "@/components/kit";
 import { PageHead, SectionHead } from "@/components/wurf-head";
 import { HTML_LANG, fmt, messages, type Locale } from "@/lib/i18n";
@@ -27,16 +28,20 @@ export default async function Guides({ params }: Props) {
   const own = GUIDES.filter((g) => g.locales.includes(locale));
   const german = GUIDES.filter((g) => !g.locales.includes(locale));
   const date = new Intl.DateTimeFormat(HTML_LANG[locale], { dateStyle: "long", timeZone: "Europe/Zurich" });
-  const row = (g: Guide, l: Locale) => (
-    <li key={g.slug} className="border-b border-rule py-5">
-      <Link href={`/${l}/ratgeber/${g.slug}/`} hrefLang={l === locale ? undefined : "de-CH"} lang={l === locale ? undefined : "de-CH"} className="font-slant text-[1.5rem] leading-tight hover:underline md:text-[1.625rem]">
-        {g.title[l]}
-      </Link>
-      <p className="measure mt-1 text-ink-2" lang={l === locale ? undefined : "de-CH"}>
-        {g.answer[l]}
-      </p>
+  const item = (key: string, href: string, title: string, text: string, de: boolean) => (
+    <li key={key} className="flex gap-5 border-b border-rule py-5">
+      <GuideThumb slug={key} />
+      <div className="min-w-0">
+        <Link href={href} hrefLang={de ? "de-CH" : undefined} lang={de ? "de-CH" : undefined} className="font-slant text-[1.5rem] leading-tight hover:underline md:text-[1.625rem]">
+          {title}
+        </Link>
+        <p className="measure mt-1 text-ink-2" lang={de ? "de-CH" : undefined}>
+          {text}
+        </p>
+      </div>
     </li>
   );
+  const row = (g: Guide, l: Locale) => item(g.slug, `/${l}/ratgeber/${g.slug}/`, g.title[l]!, g.answer[l]!, l !== locale);
   const latest = GUIDES.map((g) => g.updated).sort().at(-1) ?? "";
   return (
     <KitScope>
@@ -56,7 +61,10 @@ export default async function Guides({ params }: Props) {
           return (
             <section key={group} aria-labelledby={`g-${group}`} className="mt-14">
               <SectionHead id={`g-${group}`} title={t.groups[group]} />
-              <ul className="max-w-[52rem]">{items.map((g) => row(g, locale))}</ul>
+              <ul className="max-w-[52rem]">
+                {items.map((g) => row(g, locale))}
+                {group === "filmen" && item("aufnahme", `/${locale}/aufnahme/`, m.seo.filming.title, m.filming.lead, false)}
+              </ul>
             </section>
           );
         })}

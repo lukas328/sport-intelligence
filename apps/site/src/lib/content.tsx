@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { ComponentType } from "react";
 import type { Locale } from "@/lib/i18n";
 import { resolveHref } from "@/lib/links";
+import { slugify } from "@/lib/slug";
 import type { HowToData } from "@/lib/schema";
 import * as figures from "@/components/figures";
 
@@ -44,6 +45,8 @@ export function mdxComponents(locale: Locale, folder: string): MDXComponents {
         <table {...props} />
       </div>
     ),
+    // level-two headings get the same ids as the table of contents (lib/slug.ts)
+    h2: ({ children }) => <h2 id={typeof children === "string" ? slugify(children) : undefined}>{children}</h2>,
     a: ({ href = "", children }) => {
       const target = resolveHref(href, locale, folder);
       return target.startsWith("/") ? <Link href={target}>{children}</Link> : <a href={target}>{children}</a>;
