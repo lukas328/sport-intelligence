@@ -63,7 +63,7 @@ export const GUIDES: Guide[] = [
     metaTitle: { de: "Videoanalyse im Amateurhandball", fr: "L'analyse vidéo en handball amateur", en: "Video analysis for amateur handball teams" },
     answer: {
       de: "Sie zeigt dir, was im Spiel wirklich passiert ist, und deinem Team Szenen statt Worte. Sie ersetzt weder das Training noch dein Auge, und sie kostet Zeit. Am meisten bringt sie mit einer Frage pro Spiel und wenigen Szenen.",
-      fr: "Elle te montre ce qui s'est vraiment passé pendant le match, et à ton équipe des scènes plutôt que des mots. Elle ne remplace ni l'entraînement ni ton œil, et elle prend du temps. Elle apporte le plus avec une question par match et peu de scènes.",
+      fr: "Elle te montre ce qui s'est vraiment passé pendant le match, et à ton équipe des séquences plutôt que des mots. Elle ne remplace ni l'entraînement ni ton œil, et elle prend du temps. Elle apporte le plus avec une question par match et peu de séquences.",
       en: "It shows you what really happened in the match, and shows your team scenes instead of words. It replaces neither training nor your eye, and it takes time. It helps most with one question per match and a few scenes.",
     },
     description: {
@@ -83,9 +83,9 @@ export const GUIDES: Guide[] = [
     metaTitle: { de: "Handballspiel in 20 Minuten auswerten", fr: "Analyser un match en 20 minutes" },
     answer: {
       de: "Schau nicht das ganze Spiel noch einmal. Nimm dir eine Frage vor, spring zu den Toren und Gegentoren und mach zu jeder Szene einen Strich. Nach 20 Minuten hast du ein Muster und drei Szenen für das Team.",
-      fr: "Ne revois pas tout le match. Prends une question, saute aux buts marqués et encaissés et fais un bâton pour chaque scène. Après 20 minutes, tu as une tendance et trois scènes pour l'équipe.",
+      fr: "Ne revois pas tout le match. Prends une question, saute aux buts marqués et encaissés et fais un bâton pour chaque séquence. Après 20 minutes, tu as une tendance et trois séquences pour l'équipe.",
     },
-    description: { de: "Eine Frage, der Spielverlauf, die Gegentore, eine Strichliste und drei Szenen: so wertest du ein Handballspiel in 20 Minuten aus. Mit Vorlage.", fr: "Une question, l'évolution du score, les buts encaissés, une feuille de pointage et trois scènes : analyser un match de handball en 20 minutes." },
+    description: { de: "Eine Frage, der Spielverlauf, die Gegentore, eine Strichliste und drei Szenen: so wertest du ein Handballspiel in 20 Minuten aus. Mit Vorlage.", fr: "Une question, l'évolution du score, les buts encaissés, une feuille de pointage et trois séquences : analyser un match de handball en 20 minutes." },
     related: ["gegentore-nach-position", "gegenstoss-und-ballverluste", "szenen-im-training-zeigen"],
   },
   {
@@ -98,7 +98,7 @@ export const GUIDES: Guide[] = [
     metaTitle: { de: "Gegentore nach Position lesen", fr: "Buts encaissés par poste" },
     answer: {
       de: "Zähl die Gegentore danach, von wo geworfen wurde: Aussen, Rückraum links, Mitte, rechts, Kreis, Siebenmeter, Gegenstoss. Eine Häufung zeigt dir, wo du zuerst hinschaust. Ob es an der Abwehr, am Torhüter oder an Ballverlusten liegt, sagt dir erst die Szene.",
-      fr: "Compte les buts encaissés selon l'endroit d'où le tir est parti : ailes, arrière gauche, demi-centre, arrière droit, pivot, jet de 7 mètres, contre-attaque. Une accumulation te montre où regarder en premier. Si c'est la défense, le gardien ou les pertes de balle, seule la scène te le dit.",
+      fr: "Compte les buts encaissés selon l'endroit d'où le tir est parti : ailes, arrière gauche, demi-centre, arrière droit, pivot, jet de 7 mètres, contre-attaque. Une accumulation te montre où regarder en premier. Si c'est la défense, le gardien ou les pertes de balle, seule la séquence te le dit.",
     },
     description: { de: "Gegentore nach Wurfposition zählen, Häufungen richtig lesen und typische Ursachen erkennen: Rückraum, Aussen, Kreis, Siebenmeter, Gegenstoss.", fr: "Compter les buts encaissés selon la position du tir, bien lire les accumulations et reconnaître les causes : arrières, ailes, pivot, 7 mètres." },
     related: ["spiel-auswerten-20-minuten", "wurfquote-torhueterquote", "handball-begriffe"],
@@ -139,13 +139,13 @@ export const GUIDES: Guide[] = [
     published: "2026-11-13",
     updated: "2026-11-13",
     locales: ["de", "fr"],
-    title: { de: "Wie zeige ich Szenen, ohne das halbe Training zu verlieren?", fr: "Comment montrer des scènes sans perdre la moitié de l'entraînement ?" },
+    title: { de: "Wie zeige ich Szenen, ohne das halbe Training zu verlieren?", fr: "Comment montrer des séquences sans perdre la moitié de l'entraînement ?" },
     metaTitle: { de: "Videositzung: Szenen im Training zeigen", fr: "Séance vidéo à l'entraînement" },
     answer: {
       de: "Zeig höchstens fünf Szenen zu einem Thema, in zehn Minuten. Beginne mit einer guten Szene, sag vorher, worauf alle schauen sollen, und geh danach gleich in die Übung dazu.",
-      fr: "Montre au plus cinq scènes sur un thème, en dix minutes. Commence par une bonne scène, dis avant à quoi tout le monde doit faire attention, et passe ensuite tout de suite à l'exercice qui va avec.",
+      fr: "Montre au plus cinq séquences sur un thème, en dix minutes. Commence par une bonne séquence, dis avant à quoi tout le monde doit faire attention, et passe ensuite tout de suite à l'exercice qui va avec.",
     },
-    description: { de: "Eine Videositzung in zehn Minuten: ein Thema, drei bis fünf Szenen, wie du darüber sprichst und was bei Kindern und Jugendlichen gilt.", fr: "Une séance vidéo en dix minutes : un thème, trois à cinq scènes, comment en parler et ce qui vaut avec des enfants et des jeunes." },
+    description: { de: "Eine Videositzung in zehn Minuten: ein Thema, drei bis fünf Szenen, wie du darüber sprichst und was bei Kindern und Jugendlichen gilt.", fr: "Une séance vidéo en dix minutes : un thème, trois à cinq séquences, comment en parler et ce qui vaut avec des enfants et des jeunes." },
     related: ["spiel-auswerten-20-minuten", "videoanalyse-amateurteam", "video-im-verein-einwilligung"],
   },
   {
@@ -197,7 +197,7 @@ export const GUIDES: Guide[] = [
     metaTitle: { de: "Wege zur Videoanalyse im Vergleich", fr: "Analyse vidéo : les solutions comparées" },
     answer: {
       de: "Vier Wege: das Video von Hand durchsehen und schneiden, eine automatische Kamera, eine Analyse-Software zum Markieren und eine automatische Analyse wie Handball Intelligence. Welcher passt, hängt von deiner Zeit, deinem Budget und deiner Halle ab.",
-      fr: "Quatre solutions : revoir et découper la vidéo à la main, une caméra automatique, un logiciel pour marquer les scènes et une analyse automatique comme Handball Intelligence. Le bon choix dépend de ton temps, de ton budget et de ta salle.",
+      fr: "Quatre solutions : revoir et découper la vidéo à la main, une caméra automatique, un logiciel pour marquer les séquences et une analyse automatique comme Handball Intelligence. Le bon choix dépend de ton temps, de ton budget et de ta salle.",
     },
     description: { de: "Von Hand schneiden, automatische Kamera, Analyse-Software oder automatische Analyse: die Wege zur Videoanalyse im Handball ehrlich verglichen.", fr: "À la main, caméra automatique, logiciel d'analyse ou analyse automatique : les solutions d'analyse vidéo au handball, comparées honnêtement." },
     related: ["videoanalyse-amateurteam", "handballspiel-filmen", "spiel-auswerten-20-minuten"],

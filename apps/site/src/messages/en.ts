@@ -119,6 +119,12 @@ const en: Messages = {
     leadPrice: "From CHF {price} a month for one team, {days} days free.",
     teamAfter: "After \"Show\" you see your team with fixtures and results from the federation's data, without an account.",
     moreTitle: "And also",
+    honestLines: [
+      "Can: suggest goal moments, show every confirmed goal as a scene, estimate positions from above.",
+      "Cannot yet: track the ball, so no passes and no shot paths.",
+      "The analysis does not reliably detect goals on its own. You confirm them, goal by goal.",
+    ],
+    honestLink: "Everything at a glance: facts",
     more: [
       { title: "All scenes", text: "Every goal as a short scene, sorted by match and theme. One tap, and the video jumps to the spot." },
       { title: "The tactics camera", text: "The scene from above, as dots on the court. The positions are estimates." },

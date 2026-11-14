@@ -117,6 +117,12 @@ const de = {
     leadPrice: "Ab CHF {price} im Monat für ein Team, {days} Tage gratis.",
     teamAfter: "Nach «Zeigen» siehst du dein Team mit Spielplan und Resultaten aus den Verbandsdaten, ohne Konto.",
     moreTitle: "Und dazu",
+    honestLines: [
+      "Kann: Tor-Momente vorschlagen, jedes bestätigte Tor als Szene zeigen, die Positionen von oben schätzen.",
+      "Kann noch nicht: den Ball verfolgen, darum keine Pässe und keine Wurfbahnen.",
+      "Tore erkennt die Analyse nicht sicher allein. Du bestätigst sie, Tor für Tor.",
+    ],
+    honestLink: "Alles auf einen Blick: Fakten",
     more: [
       { title: "Alle Szenen", text: "Jedes Tor als kurze Szene, nach Spiel und Thema geordnet. Ein Tipp, und das Video springt an die Stelle." },
       { title: "Die Taktikkamera", text: "Die Szene von oben, als Punkte auf dem Feld. Die Positionen sind geschätzt." },

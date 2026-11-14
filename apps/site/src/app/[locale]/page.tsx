@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import plans from "@handball/plans";
 import { DemoCamera } from "@/components/demo-camera";
-import { Honest } from "@/components/honest";
 import { JsonLd } from "@/components/json-ld";
 import { DemoLink, KitScope, ShirtPicker } from "@/components/kit";
 import { TeamField } from "@/components/team-field";
@@ -146,11 +145,15 @@ export default async function Home({ params }: Props) {
 
         <section aria-labelledby="honest" className="mt-20">
           <SectionHead id="honest" title={m.honest.title} />
-          <div className="mt-8">
-            <Honest t={m.honest} short />
-          </div>
-          <Link href={`/${locale}/so-funktioniert-es/#kann`} className="link mt-2">
-            {m.cta.honest}
+          <ul className="measure mt-4">
+            {t.honestLines.map((x) => (
+              <li key={x} className="border-b border-rule py-3">
+                {x}
+              </li>
+            ))}
+          </ul>
+          <Link href={`/${locale}/fakten/`} className="link mt-2">
+            {t.honestLink}
           </Link>
         </section>
 
