@@ -1,14 +1,28 @@
 # Website: Suchmaschinen und KI-Assistenten
 
-Stand 13. November 2026, Branch `claude/site-seo`. Ziel: Trainerinnen und Trainer von
+Stand 14. November 2026, Branch `claude/site-seo`. Ziel: Trainerinnen und Trainer von
 Amateur-Handballteams (zuerst Deutschschweiz, dann Romandie, Deutschland, Österreich), Vorstände und
 Eltern finden die Website über eine Suche oder über die Antwort eines KI-Assistenten, und was sie dort
 lesen, hält das Produkt.
 
+## Vor dem öffentlichen Start: braucht Lukas (Voraussetzung)
+
+Aus dem Gegenlesen (R4). Solange das fehlt, steht auf Fakten, Über uns, in `llms.txt` und in der
+Frage «Kann ich es heute schon nutzen?» der Satz «Stand [Datum]: Handball Intelligence ist vor dem
+öffentlichen Start. Betreiberangaben, AGB und Datenschutzerklärung werden bis dahin ergänzt.»
+Geschaltet über `LAUNCHED = false` in `apps/site/src/lib/site.ts` (Datum aus `SITE_UPDATED`).
+
+- Betreiberin mit Adresse fürs Impressum (Build-Variablen `NEXT_PUBLIC_COMPANY_*`).
+- Geprüfte AGB und Datenschutzerklärung, «(Entwurf)» weg.
+- Auf «Über uns» mindestens eine verantwortliche Person mit Funktion, mit Einverständnis.
+- Speicherort bestätigt (Q-SITE-4), dann «vorgesehen» weg.
+- Danach `LAUNCHED = true` setzen; die Knöpfe bleiben, wie sie sind.
+
 Grundlage für jede Aussage über das Produkt: `docs/ux-test/echttest/BERICHT.md` und
 `docs/OPEN_QUESTIONS.md` (Q-REC-*, Q-VIDEO-PARTS, Q-SITE-*). Kurz: Die Analyse findet das Feld und
 verfolgt Spieler; Tore findet sie nicht sicher von selbst, sondern schlägt Momente vor, die die
-Trainerin in ein paar Minuten bestätigt; danach gibt es Resultat, Verlauf, Tore als Szenen und
+Trainerin bestätigt, Tor für Tor (im Test mit einem Spielausschnitt 22 Fragen in rund sieben Minuten
+für neun Tore; ein ganzes Spiel ist nicht gemessen); danach gibt es Resultat, Verlauf, Tore als Szenen und
 Positionen von oben. Kein Ball, keine Pässe, nur die erste Videodatei eines Spiels wird ausgewertet.
 
 ## 1. Bestand
@@ -106,7 +120,7 @@ Veo ([Handball-Kamera](https://www.veo.com/us/handball-camera): Cam 3 für Handb
 automatische Ereignisse nur für Fussball genannt), Pixellot ([Handball](https://www.pixellot.tv/sports/handball/):
 fest oder tragbar, keine Preise), Spiideo ([AutoData](https://www.spiideo.com/handball-video-analysis-software/):
 Auswertung durch Fachleute innert 24 h, auch fremde Videos), Dartfish ([Teamsport](https://www.dartfish.com/teamsports):
-Markieren live oder danach, ab 40 € im Monat bei Jahreszahlung), LongoMatch ([Preise](https://longomatch.com/en/pro/):
+Markieren live oder danach, Paket «Live S» 80 € im Monat bei Jahreszahlung; «360 S» 40 €), LongoMatch ([Preise](https://longomatch.com/en/pro/):
 Gratis-Version, ab 15 € im Monat), Hudl Sportscode ([Seite](https://www.hudl.com/en_gb/products/sportscode)),
 Handball.ai ([Seite](https://handball.ai/)), Kinovea ([gratis, quelloffen](https://www.kinovea.org/)),
 Shotcut ([gratis](https://www.shotcut.org/)). Nicht verifiziert und darum nicht genannt: Nacsport-Preise,
@@ -470,5 +484,38 @@ Leistung / Barrierefreiheit / Best Practices / SEO.
    in die strukturierten Daten) und «noch nicht endgültig» von den Seiten nehmen (Q-SITE-1).
 6. **Rechtstexte** prüfen lassen (AGB, Datenschutz, Impressum; Firmenangaben per Build-Variable), den
    Speicherort bestätigen (Q-SITE-4) und danach «vorgesehen» entfernen.
-7. **Einwilligungs-Ratgeber** von einer Fachperson gegenlesen lassen, das SHV-Infoblatt einarbeiten.
+7. **Einwilligungs-Ratgeber** von einer Fachperson gegenlesen lassen. Das SHV-Infoblatt «Datenschutz aufgezeichnete Spiele» (handball.ch, ab 2025/26) war am 14. November 2026 weiter nicht abrufbar (503); der Ratgeber sagt darum nur, dass es das Blatt gibt und wofür (laut SHV/RED+-FAQ vom 16. Juli 2025), nichts zum Inhalt. Sobald es lesbar ist: Absatz «Was Handball Schweiz schon regelt» nachschärfen.
 8. **fr und en** gegenlesen lassen (Romandie zuerst).
+
+## 14. Gegenlesen umgesetzt (14. November 2026)
+
+Befunde aus `docs/site/GEGENLESEN.md` (Branch `claude/site-review`), in dessen Reihenfolge.
+
+| R | Stand | Commit / warum offen |
+|---|---|---|
+| R1 | erledigt: Demo zeigt die drei Dinge der App (conceded_zone, conceded_fast_breaks, scored_zone), gerechnet mit einer Kopie von `apps/web/src/lib/three-things.ts`; `three-things.test.ts` vergleicht beide; Ballverluste aus Demo und Generator | 8d8a2f5 |
+| R2 | erledigt: «ein paar Minuten» überall ersetzt durch den Test (22 Fragen, rund sieben Minuten, neun Tore, Ausschnitt; ganzes Spiel nicht gemessen); Spielbericht-Weg nach Code beschrieben, «nicht an echtem Video geprüft»; optionale Fragen in Fakten und llms.txt; eigene Zeile im Wege-Ratgeber | 8d8a2f5 |
+| R3 | erledigt: Bedingung «ab drei Toren aus derselben Zone, sonst weniger als drei» überall, wo drei Dinge versprochen werden; Preisliste angepasst | 8d8a2f5 |
+| R4 | erledigt: Schalter `LAUNCHED`, Standsatz auf Fakten, Über uns, llms.txt, neue Frage «Kann ich es heute schon nutzen?»; Liste oben in diesem Dokument. Die Angaben selbst fehlen weiter (Lukas) | ab98d34 |
+| R5 | erledigt: «wo eine Lücke aufging» weg; «Positionen sind geschätzt»; «Das noch nicht»: Szene nicht immer direkt vor dem Tor, Zuschauer und Bank | 8d8a2f5 |
+| R6 | erledigt: eine Altersregel (Gesetz ohne feste Grenze, in der App bis 16 die Eltern); Vorlage mit zwei Unterschriften | ab98d34 |
+| R7 | erledigt: «grundsätzlich», «am sichersten mit Einwilligung», EDÖB-«im Zweifel» auf «Umgang mit Fotos», Art. 28 ZGB als Persönlichkeitsschutz, Rückennummer wie im Merkblatt, eigene Wertungen als «Wir empfehlen» | ab98d34 |
+| R8 | teilweise: vorsichtiger Absatz «Was Handball Schweiz schon regelt» mit der SHV/RED+-FAQ als Quelle; offen, weil das Infoblatt auf handball.ch 503 liefert (Abschnitt 13, Punkt 7) | ab98d34 |
+| R9 | erledigt: Felder Verein und Person, Dienst und Speicherort, Löschfrist; weiter eine A4-Seite (check-print) | ab98d34 |
+| R10 | erledigt: iMovie nur iPhone/iPad, Pixellot ohne Zahl, Dartfish «Live S» 80 € und «360 S» 40 €, Stärke/Grenze/Zeiten als Einschätzung, Satz ohne Beleg gestrichen | 4942d01 |
+| R11 | erledigt: «Wir nennen die Dauer, sobald wir sie im Betrieb gemessen haben.» (Hilfe, Fakten, llms.txt) | 8d8a2f5 |
+| R12 | erledigt: h1 «Videoanalyse für dein Handballteam.», Satz mit Preisstand und «noch nicht endgültig», Satz nach «Zeigen», «Erfundenes Beispielspiel» beim Resultat; Titel, Beschreibung, OG in drei Sprachen | 8d8a2f5 |
+| R13 | erledigt: Zeile «Andere Wege» in Fakten und llms.txt (Veo/Pixellot, Veo-Link, «gibt Veo nicht an», Stand) | 8d8a2f5 |
+| R14 | erledigt: Startseite Kann/Kann-nicht in drei Zeilen mit Link auf Fakten; Filmen-Ratgeber Ausrüstung und Einstellungen zusammen; «Darf ich filmen?» ausführlich nur im Einwilligungs-Ratgeber | 4942d01 |
+| R15 | erledigt: séquence, charger, ligne de touche, surface de but, panoramique, tes données, Farbwahl, «chaque but en séquence vidéo», «Course jusqu'au tir»; Querlesen durch eine Trainerin aus der Romandie bleibt offen | 4942d01 |
+| R16 | erledigt: «Junioren und Aktive, von der 1. Liga abwärts», ohne Schweizer Ligazählung für Deutschland | 8d8a2f5 |
+| R17 | erledigt: «Wenig Handarbeit» | c8d07d7 |
+| R18 | erledigt: Highlights «aus den bestätigten Toren»; Beispiel «Tor oder nicht?» | 8d8a2f5, 4942d01 |
+| R19 | erledigt: «Die Analyse braucht die Linien beider Torräume …» | 4942d01 |
+| R20 | erledigt: «So ist es in der App eingestellt», «ab dem Start» | ab98d34 |
+| R21 | offen: Es gibt keinen OG-Generator, nur ein festes `public/og.png`; drei eigene Bilder wären Handarbeit ausserhalb des Vereinbarten | |
+| R22 | nichts zu tun (Hinweis für ein späteres de-DE) | |
+| R23 | nichts zu tun | |
+
+Prüfungen nach der Runde: `pnpm build` mit check-out (152 Seiten, 122 indexierbar, 0 Probleme),
+Vitest 31 grün, `node scripts/check-print.mjs` 12/12 eine Seite, `make_demo.py --check` grün, ruff sauber.
