@@ -21,16 +21,19 @@ export function Alert({
   kind = "error",
   children,
   className,
+  "data-testid": testId,
 }: {
   kind?: "error" | "info" | "success";
   children: ReactNode;
   className?: string;
+  "data-testid"?: string;
 }) {
   const Icon = { error: AlertCircle, info: Info, success: CheckCircle2 }[kind];
   const tone = { error: "text-error", info: "text-accent", success: "text-ok" }[kind];
   return (
     <div
       role={kind === "error" ? "alert" : "status"}
+      data-testid={testId}
       className={cn("flex gap-3 bg-surface px-4 py-3 text-sm", className)}
     >
       <Icon aria-hidden className={cn("mt-0.5 size-4 shrink-0", tone)} />
