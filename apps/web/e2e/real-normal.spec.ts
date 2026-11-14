@@ -271,7 +271,10 @@ test("the court question on a phone: the corners can be dragged with a finger", 
   await page.getByTestId("field-zoom").click();
   const frame = page.getByTestId("field-frame");
   const fb = (await frame.boundingBox())!;
-  await cdp.send("Input.synthesizeScrollGesture", { x: fb.x + fb.width / 2, y: fb.y + fb.height - 12, xDistance: -200, yDistance: 0, gestureSourceType: "touch" });
+  const [sx, sy] = [fb.x + fb.width / 2, fb.y + fb.height - 12];
+  await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x: sx, y: sy }] });
+  for (let k = 1; k <= 15; k++) await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ x: sx - k * 15, y: sy }] });
+  await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
   await expect.poll(() => frame.evaluate((el) => el.scrollLeft)).toBeGreaterThan(50);
   await page.screenshot({ path: info.outputPath("court-phone.png") });
 });
