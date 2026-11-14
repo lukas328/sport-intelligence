@@ -56,8 +56,8 @@ async def test_graphics_from_the_report_without_video(make_api: Callable[[], Api
     assert g["has_report"] is False  # goals entered by hand are no match report
     # the goal sequence of the report, in order, misses left out
     assert g["report_goals"] == [
-        {"minute": 1.58, "team": "own"},
-        {"minute": 3.33, "team": "opp"},
+        {"minute": 1.5833, "team": "own"},
+        {"minute": 3.3333, "team": "opp"},
         {"minute": 5.5, "team": "own"},
     ]
     # every goal is listed (E01); only the goal with a spot can be drawn: no run without
@@ -280,9 +280,9 @@ async def test_a_confirmed_goal_without_spot_reaches_score_course_and_scene(
     g = (await api.get(f"{base}/graphics")).json()
     minutes = sorted(x["minute"] for x in g["goals"])
     assert minutes == [
-        round((61_500 - 20_000) / 60_000, 2),
-        round(128.5 / 60, 2),
-        round(178.5 / 60, 2),
+        round((61_500 - 20_000) / 60_000, 4),
+        round(128.5 / 60, 4),
+        round(178.5 / 60, 4),
     ]
     assert [x["team"] for x in g["report_goals"]] == ["own", "opp", "opp"]
     assert g["span"] == [0.0, round(310 / 60, 2)]

@@ -68,6 +68,7 @@ TEAM_OF_TRACK = {"home": "own", "home_gk": "own", "away": "opp", "away_gk": "opp
 # shot zones of the events (left/right from the attacker's view) as zones of the graphics, and
 # the zone of a goal (shot_positions: one rule for the review, the graphics and the estimate)
 ZONE = GRAPHIC_ZONE
+__all__ = ["ZONE", "match_graphics", "minute_of", "zone_of"]
 
 
 def spot_estimated(e: Event) -> bool:
