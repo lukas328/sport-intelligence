@@ -54,7 +54,7 @@ describe("Von wo? on the half court", () => {
 });
 
 function goal(id: string, team: "own" | "opp", zone: string | null, extra: Partial<MatchGraphics["goals"][number]> = {}): MatchGraphics["goals"][number] {
-  return { event_id: id, team, minute: 1, number: null, zone, run: [], shot: null, aim: null, confirmed: true, source: null, has_video: true, t_ms: 1000, zone_source: zone ? "coach" : null, by_coach: zone != null, spot_missing: zone == null, ...extra };
+  return { event_id: id, team, minute: 1, number: null, zone, run: [], shot: null, aim: null, confirmed: true, source: null, has_video: true, t_ms: 1000, zone_source: zone ? "coach" : null, spot_by_coach: zone != null, spot_missing: zone == null, ...extra };
 }
 
 function graphics(goals: MatchGraphics["goals"]): MatchGraphics {
@@ -76,7 +76,7 @@ describe("places for the three things", () => {
   });
 
   it("an estimate counts in no thing and not as a place, but is still drawn hollow (V1)", () => {
-    const est = { zone_source: "estimated" as const, by_coach: false, spot_missing: true, confirmed: false, shot: [9, 4] as [number, number] };
+    const est = { zone_source: "estimated" as const, spot_by_coach: false, spot_missing: true, confirmed: false, shot: [9, 4] as [number, number] };
     const g = graphics([goal("a", "opp", "rl"), goal("b", "opp", "rl"), goal("c", "opp", "rl", est), goal("d", "opp", "kr", { ...est, zone_source: "unknown" })]);
     expect(threeThings(goalRuns(g))).toEqual([]);
     const drawn = goalRuns(g).find((x) => x.eventId === "c")!;
@@ -94,6 +94,12 @@ describe("places for the three things", () => {
     const g = graphics([goal("a", "own", "la"), goal("b", "opp", null, { t_ms: 9000 }), goal("c", "own", null, { t_ms: 2000 }), goal("d", "own", null, { spot_missing: false, zone_source: "unknown" })]);
     expect(goalsWithoutSpot(g).map((x) => x.event_id)).toEqual(["c", "b"]);
     expect(spotCounts(g)).toEqual({ placed: 1, missing: 2, total: 4 });
+  });
+
+  it("does not count an estimate after «Weiss nicht» as a place the coach gave (Echtlauf 6)", () => {
+    // the API: «Weiss nicht» is no place a person gave, and it is asked again (V1)
+    const g = graphics([goal("a", "own", "la"), goal("b", "opp", "kr", { spot_missing: true, spot_by_coach: false, zone_source: "unknown" })]);
+    expect(spotCounts(g)).toEqual({ placed: 1, missing: 1, total: 2 });
   });
 });
 

@@ -88,6 +88,8 @@ class MatchSegment(Base, EntityMixin, TenantMixin):
     gap_before_ms: Mapped[int | None] = mapped_column(Integer)  # detected gap to previous segment
     source: Mapped[str] = mapped_column(String(20), nullable=False, default="manual")
     confirmed: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    # the coach said whether the teams changed ends before this part (None: the app decides)
+    side_change: Mapped[bool | None] = mapped_column(Boolean)
 
 
 class LiveTagSession(Base, EntityMixin, TenantMixin):

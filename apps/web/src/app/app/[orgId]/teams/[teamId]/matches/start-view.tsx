@@ -46,9 +46,11 @@ export function StartView({
   // the team's name in the head, the same as in the top bar (UX test H11: one club, one name)
   const { org, team } = useShell();
   // a freshly analysed match stands in the head until opened, or while it has open questions
-  // (real-video test, second round); otherwise the last match with a result
+  // (real-video test, second round); otherwise the last match with a result or a video (a video
+  // match has no result of its own, its goals are in the video: Echtlauf 6, after Prüfen the head
+  // jumped back to an older match without video)
   const fresh = useFreshMatch(orgId, played);
-  const last = played.find((m) => m.id === fresh) ?? played.find((m) => m.kind !== "training" && m.score_own != null) ?? played[0] ?? null;
+  const last = played.find((m) => m.id === fresh) ?? played.find((m) => m.kind !== "training" && (m.score_own != null || m.has_video)) ?? played[0] ?? null;
   const next = upcoming.find((m) => m.kind !== "training") ?? null;
   const withoutVideo = played.filter((m) => !m.has_video).length;
   return (

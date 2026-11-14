@@ -97,7 +97,7 @@ def scene_window_of(e: Event, length: int | None) -> tuple[int, int]:
     return clip_window(int(e.t_ms or 0), pre, post, length)
 
 
-def by_coach(e: Event) -> bool:
+def spot_by_coach(e: Event) -> bool:
     """The place of the shot comes from a person (tapped in Prüfen, marked by hand, a penalty of
     the report). Only these make the three things and count as «mit Wurfort» (real-clip test of
     «Von wo?», V1): an estimate is shown as estimated and counts nowhere."""
@@ -112,7 +112,7 @@ def spot_missing(e: Event, length_ms: int | None) -> bool:
         return False
     if length_ms is not None and e.t_ms > length_ms:
         return False
-    return not by_coach(e)
+    return not spot_by_coach(e)
 
 
 def to_half(x: float, y: float) -> tuple[float, float]:
@@ -382,7 +382,7 @@ async def match_graphics(ctx: Ctx, match_id: uuid.UUID) -> dict[str, Any]:
                 "player_id": e.player_id,
                 "zone": zone_of(e),
                 "zone_source": zone_said(e),
-                "by_coach": by_coach(e),
+                "spot_by_coach": spot_by_coach(e),
                 # the scene in the Video tab, as on the tactics camera (V6: 12 s before a goal
                 # from a candidate)
                 "scene": list(scene_window_of(e, length)) if e.t_ms is not None else None,
@@ -392,6 +392,7 @@ async def match_graphics(ctx: Ctx, match_id: uuid.UUID) -> dict[str, Any]:
                 # where on the goal is only marked by hand (goal_zone); never drawn as a flight
                 "aim": None,
                 "confirmed": not estimated_spot,
+                "by_coach": e.source not in (*ESTIMATED_SOURCES, "official_report"),
                 "source": source,
                 "has_video": e.t_ms is not None,
                 "t_ms": e.t_ms,

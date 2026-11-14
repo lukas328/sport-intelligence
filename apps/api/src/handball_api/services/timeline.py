@@ -36,16 +36,11 @@ from handball_api.models import (
     Possession,
     VideoAsset,
 )
-from handball_api.services import segments
+from handball_api.services import matches, segments
 from handball_api.services.context import Ctx
-from handball_api.services.matches import Part, locate, parts_of
+from handball_api.services.matches import Part, locate, parts_of, second_half
 
 AUTOMATIC_SOURCES = ("heuristic", "scoreboard_ocr")
-# a part after a break of at least this long is the next half (the half-time break is 10 to 15
-# minutes; a phone that splits a recording leaves no gap)
-HALF_BREAK_MS = 5 * 60_000
-# a part this short is a recording started by mistake, not a half
-MIN_HALF_MS = 60_000
 
 
 # ---- the layout and its changes --------------------------------------------------------------
@@ -62,20 +57,33 @@ class Move:
     delta: int | None
 
 
-def moves(before: list[Part], after: list[Part]) -> list[Move]:
-    """How each placed part of `before` moves in `after`. The first part also takes the times
-    before it, the last one the times after it (negative times, events past the end)."""
+def moves(before: list[Part], after: list[Part], lead: uuid.UUID | None = None) -> list[Move]:
+    """How each placed part of `before` moves in `after`. The last part also takes the times
+    after it (events past the end). The times before the timeline (a throw-off before the video
+    began, report events placed by it) belong to `lead`, the part they belonged to when they were
+    set (by default the first one), and move with it wherever it goes: swapped and swapped back,
+    they are where they were."""
     placed = [p for p in before if p.offset_ms is not None]
     now = {p.video_id: p for p in after}
+    if lead is None or all(p.video_id != lead for p in placed):
+        lead = placed[0].video_id if placed else None
     out: list[Move] = []
-    for i, p in enumerate(placed):
-        lo = None if i == 0 else int(p.offset_ms or 0)
-        hi = None if i == len(placed) - 1 else int(placed[i + 1].offset_ms or 0)
+
+    def delta(p: Part) -> int | bool | None:
         q = now.get(p.video_id)
         if q is None or q.offset_ms is None:
-            out.append(Move(p.video_id, lo, hi, None))
-        elif q.offset_ms != p.offset_ms:
-            out.append(Move(p.video_id, lo, hi, int(q.offset_ms) - int(p.offset_ms or 0)))
+            return None
+        return False if q.offset_ms == p.offset_ms else int(q.offset_ms) - int(p.offset_ms or 0)
+
+    for i, p in enumerate(placed):
+        d = delta(p)
+        if d is False:
+            continue
+        lo = int(p.offset_ms or 0) if i else (None if p.video_id == lead else 0)
+        hi = None if i == len(placed) - 1 else int(placed[i + 1].offset_ms or 0)
+        out.append(Move(p.video_id, lo, hi, None if d is None else int(d)))
+        if i and p.video_id == lead:
+            out.append(Move(p.video_id, None, int(placed[0].offset_ms or 0), d or None))
     return out
 
 
@@ -111,6 +119,89 @@ _TABLES: list[tuple[Any, InstrumentedAttribute[Any], list[InstrumentedAttribute[
     (Comment, Comment.t_ms, [Comment.t_ms]),
     (Annotation, Annotation.t_ms, [Annotation.t_ms]),
 ]
+
+
+# report_extra: which part the throw-offs and the times before the timeline belong to, kept
+# through every change of the order: {"kickoffs": {half: {"video_id", "t_ms"}}, "lead": video_id}.
+# A throw-off record holds while the throw-off still has that time; "lead" is the part a time
+# before the timeline (a throw-off before the video began, report events placed by it) moves with.
+OWNERS = "timeline_owners"
+
+
+def _owners(match: Match) -> dict[str, Any]:
+    rec = (match.report_extra or {}).get(OWNERS)
+    return rec if isinstance(rec, dict) else {}
+
+
+def lead_part(match: Match, parts: list[Part]) -> uuid.UUID | None:
+    """The part the times before the timeline belong to, when known (`OWNERS`)."""
+    vid = str(_owners(match).get("lead"))
+    return next((p.video_id for p in parts if str(p.video_id) == vid), None)
+
+
+def _move_kickoffs(match: Match, ms: list[Move]) -> None:
+    """The throw-offs moved with the part they belong to (also one before the timeline, or one
+    that moved into another part's old stretch), and the owners kept for the next change."""
+    owners = _owners(match)
+    raw_known = owners.get("kickoffs")
+    known: dict[str, Any] = raw_known if isinstance(raw_known, dict) else {}
+    kept: dict[str, int] = {}
+    recs: dict[str, Any] = {}
+    for k, raw in (match.kickoff_ms or {}).items():
+        v = int(raw)
+        rec = known.get(k)
+        owner = str(rec["video_id"]) if isinstance(rec, dict) and rec.get("t_ms") == v else None
+        if owner is not None:
+            m = next((m for m in ms if str(m.video_id) == owner), None)
+        else:
+            m = next(
+                (m for m in ms if (m.lo is None or v >= m.lo) and (m.hi is None or v < m.hi)),
+                None,
+            )
+        if m is not None and m.delta is None:
+            continue  # its part left the timeline
+        new = v if m is None else v + int(m.delta or 0)
+        kept[k] = new
+        if m is not None:
+            recs[k] = {"video_id": str(m.video_id), "t_ms": new}
+        elif owner is not None:
+            recs[k] = rec
+    if kept != match.kickoff_ms:
+        match.kickoff_ms = kept or None
+    first = next((m for m in ms if m.lo is None), None)
+    lead = (
+        owners.get("lead")
+        if first is None
+        else (None if first.delta is None else str(first.video_id))
+    )
+    out = {k: v for k, v in (("kickoffs", recs), ("lead", lead)) if v}
+    extra = {**(match.report_extra or {}), OWNERS: out}
+    if not out:
+        extra.pop(OWNERS)
+    if extra != (match.report_extra or {}):
+        match.report_extra = extra or None
+
+
+def forget_lead(match: Match) -> None:
+    """A throw-off set anew: times before the timeline belong to the first part again."""
+    owners = _owners(match)
+    if "lead" in owners:
+        rest = {k: v for k, v in owners.items() if k != "lead"}
+        extra = {**(match.report_extra or {}), OWNERS: rest}
+        if not rest:
+            extra.pop(OWNERS)
+        match.report_extra = extra or None
+
+
+def swap_halves(match: Match) -> None:
+    """The throw-offs of the two halves change places (the earlier one is the first half's)."""
+    k = match.kickoff_ms or {}
+    match.kickoff_ms = {**k, "1": int(k["2"]), "2": int(k["1"])}
+    owners = _owners(match)
+    known = owners.get("kickoffs")
+    if isinstance(known, dict) and known:
+        swapped = {str(3 - int(h)) if h in ("1", "2") else h: rec for h, rec in known.items()}
+        match.report_extra = {**(match.report_extra or {}), OWNERS: {**owners, "kickoffs": swapped}}
 
 
 async def apply_moves(ctx: Ctx, match: Match, ms: list[Move]) -> None:
@@ -162,10 +253,7 @@ async def apply_moves(ctx: Ctx, match: Match, ms: list[Move]) -> None:
                 .execution_options(synchronize_session=False)
             )
     if match.kickoff_ms:
-        moved = {k: shift_value(int(v), ms) for k, v in match.kickoff_ms.items()}
-        kept = {k: int(v) for k, v in moved.items() if v is not None}
-        if kept != match.kickoff_ms:
-            match.kickoff_ms = kept or None
+        _move_kickoffs(match, ms)
     await ctx.db.flush()
     # rows of these tables already loaded in the session would hide the new times
     stale = (Event, Possession, GoalCandidate, Clip, Comment, Annotation)
@@ -179,7 +267,7 @@ async def settle(ctx: Ctx, match: Match, before: list[Part]) -> list[Part]:
     part. Returns the new layout."""
     await segments.rebuild(ctx, match)
     after = await parts_of(ctx, match.id)
-    ms = moves(before, after)
+    ms = moves(before, after, lead_part(match, before))
     if ms:
         await apply_moves(ctx, match, ms)
         await ctx.db.refresh(match)
@@ -212,14 +300,8 @@ CANDIDATE_TIMES = ("t_ms", "goal_ms", "start_ms", "end_ms")
 
 
 def is_second_half(parts: list[Part], part: Part) -> bool:
-    """A part that is recognisably the second half: the second of two parts, or a part after a
-    break as long as a half-time break."""
-    if part.position == 0 or (part.duration_ms is not None and part.duration_ms < MIN_HALF_MS):
-        return False
-    real = [p for p in parts if p.duration_ms is None or p.duration_ms >= MIN_HALF_MS]
-    if len(real) == 2 and real[1].video_id == part.video_id:
-        return True
-    return part.gap_before_ms is not None and part.gap_before_ms >= HALF_BREAK_MS
+    """A part that is recognisably the second half (matches.second_half)."""
+    return second_half(parts, part)
 
 
 def side_hint(parts: list[Part], part: Part, analyses: dict[uuid.UUID, Any]) -> str | None:
@@ -231,7 +313,7 @@ def side_hint(parts: list[Part], part: Part, analyses: dict[uuid.UUID, Any]) -> 
         next(
             p
             for p in reversed(parts[: part.position])
-            if p.duration_ms is None or p.duration_ms >= MIN_HALF_MS
+            if p.duration_ms is None or p.duration_ms >= matches.MIN_HALF_MS
         )
         if part.position
         else parts[0]

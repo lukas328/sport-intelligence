@@ -296,6 +296,7 @@ async def abort_upload(ctx: Ctx, asset_id: uuid.UUID) -> None:
     if match is not None and placed:
         await timeline.settle(ctx, match, before)
         await _whole_match(ctx, match)
+        await start_waiting(ctx, match)
     await audit.record(ctx, "video.deleted", target_type="video", target_id=asset_id)
 
 
@@ -687,6 +688,13 @@ async def apply_job_update(ctx: Ctx, job_id: uuid.UUID, data: JobUpdate) -> Proc
                 await highlights.auto(ctx, match)  # reels right after the analysis (4.3)
         elif data.status == JobStatus.SUCCEEDED and job.kind == "sync" and data.result:
             _apply_sync_result(asset, data.result)
+    if (
+        match is not None
+        and job.kind == "analysis"
+        and data.status in (JobStatus.SUCCEEDED, JobStatus.FAILED)
+    ):
+        await ctx.db.flush()
+        await start_waiting(ctx, match)
     await ctx.db.flush()
     await ctx.require_events().publish(f"match:{job.match_id}", job_event(job))
     return job
@@ -762,6 +770,68 @@ async def start_analysis(
         # fails the automatic court again and the run would drop the tracks and identities
         clicked = meta[CLICKED]
         points, space, frame_ms = clicked["points"], clicked["space"], int(clicked["frame_ms"])
+    elif references is None and await _earlier_part_busy(ctx, asset):
+        # the second half uploaded together with the first: it waits until the first half is
+        # analysed (or failed), so its job gets the first half's sides and court (Echtlauf 5 P3)
+        asset.analysis = {**meta, WAITING: str(job.id)}
+        return job
+    await _enqueue_analysis(ctx, asset, match, job, points, space, frame_ms, references)
+    return job
+
+
+WAITING = "waiting_job"  # analysis meta: the job of this part waits for an earlier part's analysis
+
+
+async def _earlier_part_busy(ctx: Ctx, asset: VideoAsset) -> bool:
+    """A second half whose earlier part is still being analysed."""
+    parts = await parts_of(ctx, asset.match_id)
+    part = next((p for p in parts if p.video_id == asset.id), None)
+    if part is None or not timeline.is_second_half(parts, part):
+        return False
+    earlier = [p.video_id for p in parts[: part.position]]
+    busy = await ctx.db.scalar(
+        select(ProcessingJob.id)
+        .where(
+            ProcessingJob.video_asset_id.in_(earlier),
+            ProcessingJob.kind == "analysis",
+            ProcessingJob.status.in_((JobStatus.QUEUED, JobStatus.RUNNING)),
+        )
+        .limit(1)
+    )
+    return busy is not None
+
+
+async def start_waiting(ctx: Ctx, match: Match) -> None:
+    """The analyses that waited for an earlier part: started once it is no longer busy (done,
+    failed or gone), never blocked by its failure."""
+    assets = (
+        await ctx.db.scalars(
+            select(VideoAsset).where(
+                VideoAsset.match_id == match.id, VideoAsset.role == VideoRole.MAIN
+            )
+        )
+    ).all()
+    for a in assets:
+        waiting = (a.analysis or {}).get(WAITING)
+        if not waiting or await _earlier_part_busy(ctx, a):
+            continue
+        a.analysis = {k: v for k, v in (a.analysis or {}).items() if k != WAITING}
+        job = await ctx.db.get(ProcessingJob, uuid.UUID(str(waiting)))
+        if job is None or job.status != JobStatus.QUEUED:
+            continue
+        await _enqueue_analysis(ctx, a, match, job, None, "frame", 0, None)
+
+
+async def _enqueue_analysis(
+    ctx: Ctx,
+    asset: VideoAsset,
+    match: Match,
+    job: ProcessingJob,
+    points: list[dict[str, Any]] | None,
+    space: str,
+    frame_ms: int,
+    references: list[dict[str, Any]] | None,
+) -> None:
     opp = await ctx.db.get(Opponent, match.opponent_id) if match.opponent_id else None
     opponent_kit = match.opponent_kit or (opp.primary_color if opp is not None else None)
     refs: list[dict[str, Any]] = list(references or [])
@@ -816,7 +886,6 @@ async def start_analysis(
         payload,
         timeout_s=job_budget_s("analysis", duration_s=asset.duration_s),
     )
-    return job
 
 
 async def _rosters(ctx: Ctx, match: Match) -> dict[str, list[int]]:

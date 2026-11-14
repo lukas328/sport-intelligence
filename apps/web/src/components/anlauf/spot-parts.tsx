@@ -50,8 +50,8 @@ export function useGoalView(orgId: string, matchId: string, eventId: string | nu
 export function useSpotText() {
   const t = useTranslations("spot");
   // «Weiss nicht» with an estimate behind it reads «…, geschätzt» too: only the coach's place is plain (V1)
-  return (g: { zone?: string | null; by_coach?: boolean }) =>
-    g.zone ? t(g.by_coach ? "of" : "ofEstimated", { zone: t(`zone.${g.zone}` as "zone.la") }) : t("missing");
+  return (g: { zone?: string | null; spot_by_coach?: boolean }) =>
+    g.zone ? t(g.spot_by_coach ? "of" : "ofEstimated", { zone: t(`zone.${g.zone}` as "zone.la") }) : t("missing");
 }
 
 /**
@@ -76,7 +76,7 @@ export function SpotChange({ orgId, matchId, goal, label }: { orgId: string; mat
           disabled={busy || !view.ready}
           orientation={view.orientation}
           // an estimate is never marked (V2); the coach's own earlier answer reads «Bisher»
-          current={zone && goal.by_coach ? zone : null}
+          current={zone && goal.spot_by_coach ? zone : null}
           onPick={(answer, point) => {
             setBusy(true);
             setFailed(null);

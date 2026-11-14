@@ -249,3 +249,105 @@ Ein Ausschnitt von fünf Minuten, kein ganzes Spiel: Wie lange das Prüfen bei 5
 dauert, ist nicht gemessen. Kein Spielbericht zu diesen Spielen: Der Weg «Tore aus dem
 Spielbericht» ist weiter nur mit automatischen Tests geprüft. Clip 2 nicht noch einmal
 ausgewertet. Die Wurforte der neun Tore sind am Standbild nur unsicher zu bestimmen.
+
+---
+
+# Fünfter Durchlauf (14. November 2026): ein Spiel aus zwei Videodateien
+
+Clip 1 ohne Neu-Kodieren bei 2:21,6 in zwei Dateien geteilt (zwischen dem fünften und sechsten
+Tor), dazu eine Datei von fünf Sekunden. Zwei Wege: die zweite Hälfte nachreichen, und beide
+Dateien zusammen wählen. Analyse je Teil 10 bis 15 Minuten, Prüfen je Teil rund zwei Minuten.
+
+## Urteil
+
+Es funktioniert: Beide Teile werden ausgewertet, am Ende steht 4:5 mit durchlaufender Spielzeit,
+und die Tore des ersten Teils sind nach dem Nachreichen unverändert. Das Video spielt am Desktop
+und am Handy über die Grenze (kurzes Warten von einer halben Sekunde, kein Hänger). Der
+Zusammenschnitt schneidet jede Szene aus der richtigen Datei.
+
+## Die acht Prüfpunkte
+
+| | Urteil | Gesehen |
+|---|---|---|
+| Liste der Teile | geht | «Das Spiel in 2 Teilen», Längen, Zustand je Teil, «Pause 9:59 davor», Tauschen. |
+| Video über die Grenze | geht | Im Browser abgespielt, 1280 und 390 mit Touch. |
+| Szenen und Momente | geht | Tore aus beiden Teilen, Spielzeit 8:15 bis 12:02 durchlaufend; ein Moment mit Fenster über die Grenze. |
+| Bestätigtes bleibt | geht | Fünf Tore des ersten Teils unverändert nach dem zweiten. |
+| Feld des zweiten Teils | geht | Beim Nachreichen übernommen ohne Frage; «Ecken der 1. Halbzeit übernehmen» erschien erst nach Neuladen (behoben). |
+| Seite im zweiten Teil | geht, mit Frage | Die App nahm einen Seitenwechsel an; die Torhüter-Erkennung hat ihn überstimmt. |
+| Zusammenschnitt | geht | Szenen beider Teile, aus der richtigen Datei. |
+| Dateien | geht | Dieselbe Datei zweimal: «schon dabei»; fünf Sekunden: Hinweis; Entfernen lässt die Tore stehen. |
+
+## Befunde
+
+| # | Schwere | Befund | Stand |
+|---|---|---|---|
+| P1 | stört | Tauschen und Zurücktauschen verschob den Anwurf vor dem Video, die Uhr ging fünf Minuten falsch | behoben (4fcc7de) |
+| P2 | stört | «Zur 2. Halbzeit» fehlte, sobald das Spiel Tore hat, und in der Werkbank | behoben (a15bf6f), nicht im Browser gesehen |
+| P3 | stört | Beide Dateien zusammen: Teil 2 bekam keinen Seiten-Hinweis, weil Teil 1 noch lief | behoben (4fcc7de): Teil 2 wartet auf Teil 1 |
+| P4 | Kleinigkeit | Der Anwurf der 2. Halbzeit wird nur bei Videos über 65 Minuten gefragt | offen |
+| P5 | falsch | «4 von 9 Toren von dir bestätigt», obwohl alle bestätigt waren | behoben (4fcc7de, a15bf6f) |
+| P6 | Kleinigkeit | Eine versehentliche kurze Datei änderte Namen und liess «Tauschen» verschwinden | behoben (a15bf6f) |
+| P7 | Kleinigkeit | Liste beim Hochladen: zugeklappt, falscher Fortschritt, «Hauptkamera \| Hauptkamera» | behoben (a15bf6f), nicht im Browser gesehen |
+| P8 | Kleinigkeit | Titelkarte des Highlight-Films ohne Umlaute | behoben (8af403f) |
+| P9 | Entscheid | Seitenwechsel bei einer mitten in der Halbzeit geteilten Aufnahme: Liegen die Aufnahmezeiten weniger als 60 Sekunden auseinander, nimmt die App keinen Seitenwechsel an und nennt die Teile «Teil 1 / Teil 2»; je späterem Teil «Seitenwechsel vor diesem Teil: ja / nein» | gebaut (4fcc7de, a15bf6f, Migration 0045), nicht im Browser gesehen |
+
+Schon im Durchlauf behoben: kein Ton-Abgleich zwischen zwei Hälften, Szenen-Links öffnen den
+Spieler, Spielzeit bei Toren ohne Wurfort, «Ecken übernehmen» sofort (528c806, fa5ee52).
+
+## Grenzen
+
+Kein iPhone und kein Safari, keine Datei ohne Ton, kein Hochformat neben Querformat. Die Behebungen
+P2, P7 und P9 sind mit Tests geprüft, aber nicht mehr im Browser angesehen.
+
+---
+
+# Sechster Durchlauf (14. November 2026): «Von wo?» am echten Video
+
+Clip 1 als eine Datei, Prüfen am Handy (390 × 844, Touch). Analyse 21:40. 22 Fragen mit Wurfort
+in 6:05 gestoppt, mit dem Zögern eines Trainers geschätzt 8 bis 9 Minuten; die App kündigte
+zusammen 8 Minuten an.
+
+## Urteil
+
+Der Schritt ist schnell und passt auf einen Bildschirm, und mit eigenen Tipps stimmen Zahlen und
+Bündel. Er trägt die drei Dinge aber erst, wenn drei Dinge behoben sind: «Weiss nicht» wurde
+stillschweigend durch eine Schätzung ersetzt, der gelbe Vorschlag lag bei vier von sieben
+erkennbaren Toren falsch (sechsmal von neun «Kreis»), und links und rechts verlangt beim Angriff
+aufs linke Tor Umdenken. Mit den wahren Wurforten der neun Tore entsteht in diesem Ausschnitt
+kein Ding (keine Ecke kommt auf drei Tore); das ist richtig so.
+
+## Die neun Tore
+
+| Tor | getippt | Vorschlag der App | stimmt |
+|---|---|---|---|
+| 0:08 Horgen | Aussen links | Aussen links | ja |
+| 0:41 Stäfa | Rückraum Mitte | Kreis | nein |
+| 0:55 Horgen | Aussen rechts | Kreis | nein |
+| 1:28 Stäfa | Weiss nicht, später Kreis | Kreis | offen |
+| 2:09 Stäfa | Gegenstoss | Kreis | nein |
+| 2:37 Horgen | Weiss nicht, später Rückraum Mitte | Aussen rechts | offen |
+| 3:27 Stäfa | Kreis | Kreis | ja |
+| 3:45 Horgen | Aussen links | Aussen links | ja |
+| 3:55 Stäfa | Aussen links | Kreis | nein |
+
+Die Wurforte sind aus Einzelbildern bei 720p bestimmt und bleiben unsicher.
+
+## Befunde
+
+| # | Schwere | Befund | Stand |
+|---|---|---|---|
+| V1 | falsch | «Weiss nicht» liess die Schätzung stehen; sie zählte als Wurfort und ins Ding | Anzeige und Zählung behoben (2d6c862); Entscheid: Dinge nur aus getippten Wurforten, in Arbeit |
+| V2 | stört | Der Vorschlag führt eher in die Irre | Entscheid: kein Vorschlag mehr im Feld, in Arbeit |
+| V3 | stört | Nach dem Prüfen zeigte der Start-Kopf ein älteres Spiel ohne Video | behoben (2d6c862), nicht im Browser gesehen |
+| V4 | stört | In der Szene eines Dings fehlt «Wurfort ändern»; die Torliste verschwindet, sobald es ein Ding gibt | in Arbeit |
+| V5 | Kleinigkeit | «Beantwortet» ist nach Neuladen leer | in Arbeit |
+| V6 | stört | Szenen beginnen zu spät: Die Szene des ersten Tors enthielt den Wurf nicht | in Arbeit: Szenen aus Tor-Momenten beginnen 12 s vor der Kandidatenzeit |
+| V7 | Kleinigkeit | Das Standbild bei «Von wo?» zeigt oft schon die andere Hallenseite | in Arbeit: Ausschnitt läuft in Schleife |
+| links/rechts | stört | Beim Angriff aufs linke Tor ist «links» die kameranahe Seite | Entscheid: Minifeld so gedreht, wie die Kamera das Feld sieht, in Arbeit |
+
+## Grenzen
+
+Nach einem Neustart des Containers waren Stack und Video weg; die Behebungen dieses Durchlaufs
+sind mit Tests geprüft, aber nicht im Browser angesehen. «Nochmal ansehen» spielte im kopflosen
+Browser nur bei einem von drei Versuchen; ob das am Browser lag, ist offen.

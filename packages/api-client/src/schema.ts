@@ -2327,6 +2327,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/matches/{match_id}/parts/{video_id}/side-change": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Set Side Change
+         * @description Whether the teams changed ends before this part; the part is analysed again.
+         */
+        put: operations["set_side_change_v1_orgs__org_id__matches__match_id__parts__video_id__side_change_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/matches/{match_id}/physical": {
         parameters: {
             query?: never;
@@ -6867,7 +6887,7 @@ export interface components {
             ] | null;
             /**
              * By Coach
-             * @description the zone was given by a person; only these make the three things and count as «mit Wurfort» (an estimate does not)
+             * @description the goal itself comes from a person (confirmed in Prüfen, marked by hand), not from the analysis or a match report
              * @default false
              */
             by_coach?: boolean;
@@ -6915,6 +6935,12 @@ export interface components {
             ] | null;
             /** Source */
             source: ("tracking" | "marked" | "demo") | null;
+            /**
+             * Spot By Coach
+             * @description the zone was given by a person; only these make the three things and count as «mit Wurfort» (an estimate does not)
+             * @default false
+             */
+            spot_by_coach?: boolean;
             /**
              * Spot Missing
              * @description a goal in the video whose shot place nobody gave yet (asked in Prüfen)
@@ -8814,6 +8840,13 @@ export interface components {
             position: number;
             /** Recorded At */
             recorded_at: string | null;
+            /** Side Change */
+            side_change?: boolean | null;
+            /**
+             * Side Change Assumed
+             * @default false
+             */
+            side_change_assumed?: boolean;
             /** Source */
             source: string;
             /** Start Ms */
@@ -10438,6 +10471,11 @@ export interface components {
             /** Zone Source */
             zone_source: ("coach" | "estimated" | "unknown") | null;
         };
+        /** SideChangeIn */
+        SideChangeIn: {
+            /** Side Change */
+            side_change: boolean | null;
+        };
         /**
          * SlideIn
          * @description Content per type (addendum 01, 4.1):
@@ -11158,6 +11196,8 @@ export interface components {
             filename: string;
             /** Fps */
             fps: number | null;
+            /** Half */
+            half?: number | null;
             /** Has Hls */
             has_hls: boolean;
             /** Has Poster */
@@ -15991,6 +16031,43 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["PartOrder"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PartOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    set_side_change_v1_orgs__org_id__matches__match_id__parts__video_id__side_change_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: string;
+                video_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SideChangeIn"];
             };
         };
         responses: {

@@ -95,7 +95,7 @@ async def test_a_goal_in_the_second_half_gets_its_place_estimated_then_tapped(
     # mirrored to the goal at x = 40, then the half court (goal at the top, attacker's left small)
     assert goal["shot"] == [5.2, 6.0]
     # an estimate is shown, but it is no place the coach gave: still asked, in no thing (V1)
-    assert goal["by_coach"] is False and goal["spot_missing"] is True
+    assert goal["spot_by_coach"] is False and goal["spot_missing"] is True
 
     # the coach taps «Kreis» on the small court: the tap wins and is no longer estimated
     spot = f"{base}/goals/{row['event_id']}/spot"
@@ -110,7 +110,7 @@ async def test_a_goal_in_the_second_half_gets_its_place_estimated_then_tapped(
     }
     goal = _goal((await api.get(f"{base}/graphics")).json(), row["event_id"])
     assert (goal["zone"], goal["zone_source"], goal["confirmed"]) == ("kr", "coach", True)
-    assert goal["by_coach"] is True and goal["spot_missing"] is False
+    assert goal["spot_by_coach"] is True and goal["spot_missing"] is False
     assert goal["shot"] == [9.5, 4.5]
     listed = (await api.get(f"{base}/goal-candidates")).json()["candidates"][-1]
     assert (listed["shot_zone"], listed["zone_source"]) == ("kr", "coach")
@@ -159,7 +159,7 @@ async def test_review_with_the_place_and_its_corrections(make_api: Callable[[], 
     assert (r["shot_zone"], r["zone_source"]) == ("rl", "unknown")
     goal = _goal((await api.get(f"{base}/graphics")).json(), row["event_id"])
     # «Weiss nicht»: the estimate stays in the data, the place counts as missing and is asked again
-    assert goal["zone_source"] == "unknown" and goal["by_coach"] is False
+    assert goal["zone_source"] == "unknown" and goal["spot_by_coach"] is False
     assert goal["spot_missing"] is True
 
     assert (await api.put(spot, json={"shot_zone": "xx"})).status_code == 422

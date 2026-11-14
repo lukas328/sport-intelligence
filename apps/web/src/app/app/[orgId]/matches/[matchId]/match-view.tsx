@@ -164,20 +164,25 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
   const [bench, setBench] = useState(false);
   // deep links (?t=ms), e.g. a scene from Szenen or a play drawn on a video moment: the moment
   // plays in the full player, so it opens (behind the stage it would seek out of sight)
-  useEffect(() => {
-    const t0 = Number(new URLSearchParams(window.location.search).get("t"));
-    if (!Number.isFinite(t0) || t0 <= 0) return;
+  // a moment in the full player: it opens, and the moment is sought once the video can
+  const benchAt = useCallback((t0: number, play = false) => {
     setBench(true);
     const id = window.setInterval(() => {
       const v = player.current?.video();
       if (v && v.readyState >= 1) {
         player.current?.seek(t0);
+        if (play) player.current?.play();
         window.clearInterval(id);
       }
     }, 300);
     const stop = window.setTimeout(() => window.clearInterval(id), 30_000);
     return () => (window.clearInterval(id), window.clearTimeout(stop));
   }, []);
+  useEffect(() => {
+    const t0 = Number(new URLSearchParams(window.location.search).get("t"));
+    if (!Number.isFinite(t0) || t0 <= 0) return;
+    return benchAt(t0);
+  }, [benchAt]);
   const ta = useTranslations("anlauf");
   const tParts = useTranslations("parts");
   const plainPlayer = useRef<PlayerHandle>(null);
@@ -230,7 +235,18 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
   const partFailed = (j: Job) => parts.length > 1 && j.kind === "analysis" && j.status === "failed" && parts.some((p) => p.id === j.video_asset_id);
   const shownJobs = jobs.filter((j) => !partFailed(j));
   const running = shownJobs.filter((j) => j.status !== "succeeded");
-  const runningPart = parts.length > 1 ? parts.find((p) => ["processing", "analysing"].includes(partState(p, jobs).kind)) : undefined;
+  // a further file on its way or being analysed: the progress shows its own steps (not the done
+  // steps of the first half), under its name once it is a part
+  const newcomer = parts.length >= 1 ? match.videos.find((v) => v.role === "main" && v.part == null && v.status === "processing") : undefined;
+  const runningPart = parts.length > 1 ? (parts.find((p) => ["processing", "analysing"].includes(partState(p, jobs).kind)) ?? newcomer) : newcomer;
+  const runningName = runningPart?.part != null ? partName(runningPart.part, parts) : null;
+  const runningPartName = runningName ? tParts(runningName.key, { n: runningName.n }) : runningPart ? runningPart.filename : undefined;
+  // the «Weitere Datei» box stays open after the upload (with «Fertig hochgeladen») until closed
+  const [addOpen, setAddOpen] = useState(false);
+  const adding = pendingVideos.some((v) => v.status === "processing" || v.status === "uploading");
+  useEffect(() => {
+    if (adding) setAddOpen(true);
+  }, [adding]);
   // RSVP belongs to "Teamfunktionen" (ADR 029): hidden while the team has them off
   const teamFeatures = shell?.teams.find((x) => x.id === match.team_id)?.team_features ?? false;
 
@@ -303,11 +319,17 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
   const checks = graphics.data ? checkCount(graphics.data) : 0;
   // the stage of the tab Video (SPEC 7.3) once there are goals to show on it
   const stage = Boolean(main && graphics.data && graphics.data.goals.some((g) => g.has_video || g.source === "demo"));
-  const confirmedGoals = graphics.data?.goals.filter((g) => g.confirmed).length ?? 0;
+  // «von dir bestätigt»: the goals a person confirmed (Prüfen, by hand), and of those how many have
+  // their place («Von wo?»); not the estimated shot spot (Echtlauf 5 P5)
+  const coachGoals = graphics.data?.goals.filter((g) => g.by_coach) ?? [];
+  const placedGoals = coachGoals.filter((g) => g.zone != null && g.zone_source !== "unknown").length;
+  const totalGoals = graphics.data?.goals.length ?? 0;
   const sourceParts = [
     main ? ta("sourceVideo") : null,
     graphics.data?.has_report ? ta("sourceReport") : null,
-    graphics.data && graphics.data.goals.length > 0 ? ta("sourceMarked", { n: confirmedGoals, total: graphics.data.goals.length }) : null,
+    coachGoals.length > 0
+      ? `${coachGoals.length === totalGoals ? ta("sourceMarkedAll", { n: coachGoals.length }) : ta("sourceMarked", { n: coachGoals.length, total: totalGoals })}${ta("sourcePlaced", { n: placedGoals })}`
+      : null,
   ].filter(Boolean);
   return (
     <div className="space-y-8" style={matchStyle(club, oppKit) as CSSProperties}>
@@ -451,7 +473,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
           </div>
         </details>
       )}
-      {running.length > 0 && <Processing jobs={shownJobs} part={runningPart?.part != null ? tParts(partName(runningPart.part, parts.length).key, { n: runningPart.part }) : undefined} orgId={orgId} staff={staff} hasReport={graphics.data?.has_report ?? false} onOtherFile={() => (setView("video"), requestAnimationFrame(() => document.getElementById("upload")?.scrollIntoView({ behavior: "smooth" })))} />}
+      {running.length > 0 && <Processing jobs={runningPart ? shownJobs.filter((j) => j.video_asset_id === runningPart.id) : shownJobs} part={runningPartName} orgId={orgId} staff={staff} hasReport={graphics.data?.has_report ?? false} onOtherFile={() => (setView("video"), requestAnimationFrame(() => document.getElementById("upload")?.scrollIntoView({ behavior: "smooth" })))} />}
 
       <div hidden={view !== "video"} className="space-y-6">
         {/* a player's own scenes of this match, one step away */}
@@ -471,6 +493,9 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
             onBench={() => setBench(true)}
           />
         )}
+        {/* the jump to the second half also with goals on the stage: it plays in the full player
+            (the stage plays scenes only) */}
+        {stage && main && graphics.data && !bench && <PartsLine videos={match.videos} onJump={(ms) => benchAt(ms, true)} />}
         {main && !stage && !bench && (
           // without goals on the stage: the video, one sentence, the way on; never the old capture
           // workbench by default (UX test N04), it opens with one tap
@@ -507,6 +532,9 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
                 </Button>
               </div>
             )}
+            <div className="mb-3">
+              <PartsLine videos={match.videos} onJump={(ms) => benchAt(ms, true)} />
+            </div>
             <Workspace orgId={orgId} match={match} video={main} staff={staff} teamName={teamName} oppName={oppName(match)} names={names} handle={player} setup={setup} requestPane={askPane} checkSteps={false} />
           </section>
         ) : !staff ? (
@@ -530,7 +558,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
         {/* a further file (the second half, another camera): right in the Video tab, not only
             in the workbench (Q-VIDEO-PARTS) */}
         {main && staff && match.source !== "paper_report" && (
-          <details id="upload" className="group" open={pendingVideos.length > 0 && pendingVideos.some((v) => v.status === "processing")} data-testid="add-file">
+          <details id="upload" className="group" open={addOpen} onToggle={(e) => setAddOpen(e.currentTarget.open)} data-testid="add-file">
             <summary className="flex min-h-11 cursor-pointer list-none items-center gap-1.5 text-[17px] font-bold text-ink underline decoration-[1.5px] underline-offset-4 [&::-webkit-details-marker]:hidden">
               <Plus aria-hidden className="size-4" />
               {t("upload.addCamera")}
@@ -540,7 +568,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
             </div>
           </details>
         )}
-        {main && staff && parts.length === 1 && <p className="m-0 max-w-[60ch] text-[15px] text-ink-2">{tParts("later")}</p>}
+        {main && staff && parts.length === 1 && !adding && <p className="m-0 max-w-[60ch] text-[15px] text-ink-2">{tParts("later")}</p>}
         {!main && match.videos.map((v) => v.quality_report && <QualityReport key={v.id} video={v} />)}
       </div>
 

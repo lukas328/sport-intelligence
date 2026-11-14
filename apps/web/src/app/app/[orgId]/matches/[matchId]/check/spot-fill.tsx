@@ -151,7 +151,7 @@ export function SpotFill({ orgId, match, goalId }: { orgId: string; match: Match
                 disabled={busy || !view.ready}
                 orientation={view.orientation}
                 // the estimate from the tracks is no suggestion (real-clip test V2); only what the coach said before
-                current={goal.zone && goal.by_coach ? (goal.zone as SpotZone) : null}
+                current={goal.zone && goal.spot_by_coach ? (goal.zone as SpotZone) : null}
                 onPick={(spot, point) => {
                   setBusy(true);
                   setFailed(null);

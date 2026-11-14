@@ -12,7 +12,7 @@ const goal = (i: number, team: "own" | "opp", zone: string, tMs: number | null =
   aim: null,
   confirmed: true,
   zone,
-  by_coach: true,
+  spot_by_coach: true,
   t_ms: tMs,
   has_video: true,
   source: "video",

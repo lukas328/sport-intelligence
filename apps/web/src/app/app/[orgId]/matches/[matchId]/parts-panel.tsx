@@ -11,7 +11,7 @@ import { useConfirm } from "@/components/ui/confirm";
 import { api } from "@/lib/client";
 import { formatClock } from "@/lib/format";
 import { cn } from "@/lib/utils";
-import { isShort, latestJobs, mainFiles, partName, partsOf, partStarts, partState, type PartState } from "@/lib/video-parts";
+import { isShort, latestJobs, mainFiles, partName, partsOf, partStarts, partState, swappable, type PartState } from "@/lib/video-parts";
 
 type Match = Schemas["MatchOut"];
 type Job = Schemas["JobOut"];
@@ -47,7 +47,19 @@ export function PartsPanel({ orgId, match, jobs, staff, onChanged }: { orgId: st
   const parts = partsOf(match.videos);
   const latest = latestJobs(jobs);
   const total = parts.length;
-  const nameOf = (n: number) => t(partName(n, total).key, { n });
+  const nameOf = (n: number) => {
+    const name = partName(n, parts);
+    return t(name.key, { n: name.n });
+  };
+  const pair = swappable(match.videos);
+  const [turning, setTurning] = useState<string | null>(null);
+  async function sideChange(videoId: string, value: boolean) {
+    setFailed(null);
+    const r = await api.PUT("/v1/orgs/{org_id}/matches/{match_id}/parts/{video_id}/side-change", { params: { path: { ...path, video_id: videoId } }, body: { side_change: value } });
+    if (r.error) setFailed(videoId);
+    else setTurning(videoId);
+    refresh();
+  }
   const label = (v: (typeof files)[number]) => (v.part != null ? nameOf(v.part) : v.filename);
   const twinName = (id: string | null | undefined) => {
     const twin = files.find((x) => x.id === id);
@@ -77,8 +89,14 @@ export function PartsPanel({ orgId, match, jobs, staff, onChanged }: { orgId: st
             title={t("title", { n: total > 1 ? total : files.length })}
             note={total > 1 ? t(source) : undefined}
             action={
-              staff && total === 2 ? (
-                <button type="button" className={cn(linkClass, "min-h-11 cursor-pointer border-0 bg-transparent p-0")} disabled={order.isPending} onClick={() => order.mutate([parts[1]!.id, parts[0]!.id])} data-testid="parts-swap">
+              staff && pair ? (
+                <button
+                  type="button"
+                  className={cn(linkClass, "min-h-11 cursor-pointer border-0 bg-transparent p-0")}
+                  disabled={order.isPending}
+                  onClick={() => order.mutate(parts.map((x) => (x.id === pair[0].id ? pair[1].id : x.id === pair[1].id ? pair[0].id : x.id)))}
+                  data-testid="parts-swap"
+                >
                   {t("swap")}
                 </button>
               ) : undefined
@@ -89,6 +107,9 @@ export function PartsPanel({ orgId, match, jobs, staff, onChanged }: { orgId: st
               const st = partState(v, latest);
               const short = isShort(v, files) && st.kind !== "duplicate";
               const gap = v.part != null && v.part > 1 ? gapOf(v.id) : null;
+              const seg = segments.data?.find((x) => x.video_id === v.id);
+              // a later part: whether the teams changed ends before it, one tap to say otherwise
+              const askTurn = staff && seg != null && v.part != null && v.part > 1 && !short && st.kind !== "duplicate";
               return (
                 <li key={v.id} className="grid gap-x-4 gap-y-1.5 border-b border-rule py-3 sm:grid-cols-[minmax(0,1fr)_auto]" data-testid="part-row" data-state={st.kind}>
                   <div className="min-w-0 space-y-1">
@@ -106,6 +127,30 @@ export function PartsPanel({ orgId, match, jobs, staff, onChanged }: { orgId: st
                         <AttnTag>{t("short", { seconds: Math.round(v.duration_s ?? 0) })}</AttnTag>
                       </p>
                     )}
+                    {askTurn && (
+                      <p className="m-0 flex flex-wrap items-center gap-x-3 text-[15px] text-ink-2" data-testid="part-side-change">
+                        <span>{t("sideChange")}</span>
+                        {[true, false].map((value) =>
+                          seg.side_change_assumed === value ? (
+                            <span key={String(value)} className="font-bold text-ink" aria-current="true">
+                              {value ? t("yes") : t("no")}
+                            </span>
+                          ) : (
+                            <button
+                              key={String(value)}
+                              type="button"
+                              className={cn(linkClass, "min-h-11 cursor-pointer border-0 bg-transparent p-0 text-[15px]")}
+                              disabled={st.kind === "analysing" || st.kind === "processing"}
+                              onClick={() => void sideChange(v.id, value)}
+                              data-testid={`part-side-change-${value ? "yes" : "no"}`}
+                            >
+                              {value ? t("yes") : t("no")}
+                            </button>
+                          ),
+                        )}
+                      </p>
+                    )}
+                    {turning === v.id && <p className="m-0 max-w-[60ch] text-[15px]">{t("sideChangeRerun", { name: label(v) })}</p>}
                     {failed === v.id && <p className="m-0 text-[15px] font-bold" role="alert">{t("state_analysisFailed")}</p>}
                   </div>
                   {staff && (
@@ -115,7 +160,7 @@ export function PartsPanel({ orgId, match, jobs, staff, onChanged }: { orgId: st
                           {st.kind === "analysisFailed" ? t("retry") : t("analyse")}
                         </Button>
                       )}
-                      {total > 2 && v.part != null && v.part > 1 && (
+                      {total > 2 && v.part != null && v.part > 1 && !short && (
                         <Button
                           size="sm"
                           variant="secondary"
@@ -167,12 +212,16 @@ function State({ st }: { st: PartState }) {
 /** Markers on the player's bar where each further part starts (the line between the halves). */
 export function usePartMarkers(videos: Match["videos"]): { t_ms: number; kind: "part"; label: string }[] {
   const t = useTranslations("parts");
-  const total = partsOf(videos).length;
+  const parts = partsOf(videos);
   const starts = partStarts(videos);
-  const sig = starts.map((p) => `${p.part}:${p.start_ms}`).join(",");
+  const sig = starts.map((p) => `${p.part}:${p.start_ms}:${parts.find((x) => x.part === p.part)?.half ?? ""}`).join(",");
   return useMemo(
-    () => starts.map((p) => ({ t_ms: p.start_ms, kind: "part" as const, label: t("marker", { name: t(partName(p.part, total).key, { n: p.part }) }) })),
-    [sig, total, t], // eslint-disable-line react-hooks/exhaustive-deps
+    () =>
+      starts.map((p) => {
+        const name = partName(p.part, parts);
+        return { t_ms: p.start_ms, kind: "part" as const, label: t("marker", { name: t(name.key, { n: name.n }) }) };
+      }),
+    [sig, t], // eslint-disable-line react-hooks/exhaustive-deps
   );
 }
 
@@ -185,12 +234,15 @@ export function PartsLine({ videos, onJump }: { videos: Match["videos"]; onJump:
   if (parts.length < 2 || starts.length === 0) return null;
   return (
     <p className="m-0 flex max-w-[66ch] flex-wrap items-center gap-x-4 gap-y-1 text-[17px]" data-testid="parts-line">
-      <span>{parts.length === 2 ? t("videoBoth") : t("videoAll", { n: parts.length })}</span>
-      {starts.map((p) => (
-        <button key={p.video_id} type="button" onClick={() => onJump(p.start_ms)} className={cn(linkClass, "min-h-11 cursor-pointer border-0 bg-transparent p-0 text-[17px]")} data-testid="parts-jump">
-          {parts.length === 2 ? t("jump", { name: t("half", { n: p.part }) }) : t("jumpPart", { n: p.part })}
-        </button>
-      ))}
+      <span>{parts.length === 2 ? (parts.every((p) => p.half != null) ? t("videoBoth") : t("videoTwo")) : t("videoAll", { n: parts.length })}</span>
+      {starts.map((p) => {
+        const name = partName(p.part, parts);
+        return (
+          <button key={p.video_id} type="button" onClick={() => onJump(p.start_ms)} className={cn(linkClass, "min-h-11 cursor-pointer border-0 bg-transparent p-0 text-[17px]")} data-testid="parts-jump">
+            {name.key === "half" ? t("jump", { name: t("half", { n: name.n }) }) : t("jumpPart", { n: p.part })}
+          </button>
+        );
+      })}
     </p>
   );
 }

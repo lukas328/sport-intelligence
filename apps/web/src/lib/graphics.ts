@@ -56,8 +56,8 @@ export function spreadSpots<T extends GoalRun & { eventId: string }>(runs: T[]):
  * The zone a goal counts with: only a place a person gave (real-clip test of «Von wo?», V1). An
  * estimated spot is still drawn (hollow, «geschätzt») but counts in no thing and no zone tally.
  */
-export function coachZone(x: Pick<MatchGraphics["goals"][number], "zone" | "by_coach">): string | null {
-  return x.by_coach === true ? (x.zone ?? null) : null;
+export function coachZone(x: Pick<MatchGraphics["goals"][number], "zone" | "spot_by_coach">): string | null {
+  return x.spot_by_coach === true ? (x.zone ?? null) : null;
 }
 
 function goalRunsAsGiven(g: MatchGraphics, team?: "own" | "opp"): (GoalRun & { eventId: string })[] {
@@ -71,7 +71,7 @@ function goalRunsAsGiven(g: MatchGraphics, team?: "own" | "opp"): (GoalRun & { e
       shot: (x.shot ? [x.shot[0], x.shot[1]] : ZONE_AT[coachZone(x)!]!) as Pt,
       aim: x.aim ? ([x.aim[0], x.aim[1]] as Pt) : null,
       // an estimate is never a coach's spot: hollow in the drawing
-      confirmed: x.confirmed && x.by_coach === true,
+      confirmed: x.confirmed && x.spot_by_coach === true,
       zone: coachZone(x),
     }));
 }
