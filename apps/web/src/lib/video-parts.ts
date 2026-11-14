@@ -97,8 +97,12 @@ export function partState(v: PartVideo, jobs: PartJob[]): PartState {
   return { kind: "analysing", progress: analysis.progress };
 }
 
-export function isShort(v: PartVideo): boolean {
-  return v.duration_s != null && v.duration_s < SHORT_PART_S;
+/** A part started by mistake: under a minute, next to a part at least four times as long (two
+ * short test clips are not a mistake). */
+export function isShort(v: PartVideo, others: PartVideo[] = []): boolean {
+  if (v.duration_s == null || v.duration_s >= SHORT_PART_S) return false;
+  const longest = Math.max(0, ...others.filter((o) => o.id !== v.id).map((o) => o.duration_s ?? 0));
+  return longest >= 4 * v.duration_s;
 }
 
 /** The newest job of each file and kind (the API sends the newest first): an analysis that failed

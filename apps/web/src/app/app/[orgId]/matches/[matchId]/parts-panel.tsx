@@ -87,7 +87,7 @@ export function PartsPanel({ orgId, match, jobs, staff, onChanged }: { orgId: st
           <ol className="m-0 list-none p-0">
             {files.map((v) => {
               const st = partState(v, latest);
-              const short = isShort(v) && st.kind !== "duplicate";
+              const short = isShort(v, files) && st.kind !== "duplicate";
               const gap = v.part != null && v.part > 1 ? gapOf(v.id) : null;
               return (
                 <li key={v.id} className="grid gap-x-4 gap-y-1.5 border-b border-rule py-3 sm:grid-cols-[minmax(0,1fr)_auto]" data-testid="part-row" data-state={st.kind}>

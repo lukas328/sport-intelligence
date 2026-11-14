@@ -49,9 +49,11 @@ describe("a match in several files (Q-VIDEO-PARTS)", () => {
   });
 
   it("spots a part started by mistake", () => {
-    expect(isShort(v("s", { duration_s: 5 }))).toBe(true);
-    expect(isShort(first)).toBe(false);
-    expect(isShort(v("u", { duration_s: null }))).toBe(false);
+    expect(isShort(v("s", { duration_s: 5 }), [first])).toBe(true);
+    expect(isShort(first, [first, v("s", { duration_s: 5 })])).toBe(false);
+    expect(isShort(v("u", { duration_s: null }), [first])).toBe(false);
+    // two short clips side by side: neither is a mistake
+    expect(isShort(v("p", { duration_s: 15 }), [v("q", { duration_s: 15 })])).toBe(false);
   });
 
   it("uploads files chosen together in the order they were recorded", () => {

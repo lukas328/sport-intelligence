@@ -294,17 +294,6 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
   const setup = main ? (
     <>
       {match.videos.map((v) => v.quality_report && <QualityReport key={v.id} video={v} />)}
-      {staff && match.source !== "paper_report" && (
-        <details id="upload" className="group" open={pendingVideos.length > 0 && pendingVideos.some((v) => v.status === "processing")}>
-          <summary className="flex cursor-pointer list-none items-center gap-1.5 text-sm font-medium text-muted hover:text-foreground [&::-webkit-details-marker]:hidden">
-            <Plus aria-hidden className="size-4" />
-            {t("upload.addCamera")}
-          </summary>
-          <div className="pt-3">
-            <UploadPanel orgId={orgId} matchId={match.id} hasMain onUploaded={() => void qc.invalidateQueries({ queryKey: key })} />
-          </div>
-        </details>
-      )}
     </>
   ) : null;
   const club: [string, string | null] = [shell?.org.primary_color ?? DEFAULT_CLUB, shell?.org.secondary_color ?? null];
@@ -536,6 +525,20 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
           </section>
         )}
         <PartsPanel orgId={orgId} match={match} jobs={jobs} staff={staff} onChanged={() => void qc.invalidateQueries({ queryKey: key })} />
+        {/* a further file (the second half, another camera): right in the Video tab, not only
+            in the workbench (Q-VIDEO-PARTS) */}
+        {main && staff && match.source !== "paper_report" && (
+          <details id="upload" className="group" open={pendingVideos.length > 0 && pendingVideos.some((v) => v.status === "processing")} data-testid="add-file">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center gap-1.5 text-[17px] font-bold text-ink underline decoration-[1.5px] underline-offset-4 [&::-webkit-details-marker]:hidden">
+              <Plus aria-hidden className="size-4" />
+              {t("upload.addCamera")}
+            </summary>
+            <div className="pt-3">
+              <UploadPanel orgId={orgId} matchId={match.id} hasMain onUploaded={() => void qc.invalidateQueries({ queryKey: key })} />
+            </div>
+          </details>
+        )}
+        {main && staff && parts.length === 1 && <p className="m-0 max-w-[60ch] text-[15px] text-ink-2">{tParts("later")}</p>}
         {!main && match.videos.map((v) => v.quality_report && <QualityReport key={v.id} video={v} />)}
       </div>
 
