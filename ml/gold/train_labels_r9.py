@@ -5,7 +5,7 @@
 - per labelled frame up to NEG of the ball net's peaks (score >= MIN_SCORE, at least FAR px from
   the labelled ball) as "none": the net's own confident mistakes in frames where the ball is
   known, the hard negatives round 8 showed it can learn.
-Frame numbers are segment frames (seg_frame0 of the prelabel kernel plus the clip frame), points in
+Games in ml/data/not_handball.json are skipped. Frame numbers are segment frames (seg_frame0 of the prelabel kernel plus the clip frame), points in
 the 1280 px wide picture the training kernel resizes to.
 
     python ml/gold/train_labels_r9.py R8_LABELS_JSON TRAIN_BALL_JSON PRE_JSON OUT_JSON [--neg 1]
@@ -16,6 +16,7 @@ import json
 import math
 from pathlib import Path
 
+ROOT = Path(__file__).resolve().parents[2]
 FAR = 40.0
 MIN_SCORE = 0.3
 
@@ -28,12 +29,19 @@ def main() -> None:
     ap.add_argument("out", type=Path)
     ap.add_argument("--neg", type=int, default=1)
     a = ap.parse_args()
-    out = [x for x in json.loads(a.r8.read_text()) if x["state"] in ("ball", "none")]
+    skip = set(json.loads((ROOT / "ml/data/not_handball.json").read_text())["games"])
+    out = [
+        x
+        for x in json.loads(a.r8.read_text())
+        if x["state"] in ("ball", "none") and x["game"] not in skip
+    ]
     pre = json.loads(a.pre.read_text())["clips"]
     train = json.loads(a.train.read_text())["clips"]
     nb = nn = 0
     for cid, c in sorted(train.items()):
         p = pre[cid]
+        if p["game"] in skip:
+            continue
         s = 1280 / p["w"]
         video = f"{p['dataset']}/{p['file']}"
         for lab in c["labels"]:

@@ -1,0 +1,6 @@
+{
+ "note": "Library games that are not handball (found while labelling); every ML step must skip them.",
+ "games": {
+  "DE_Bezirksoberliga_ATSKulmbach_DonBoscoBamberg_2015": "basketball (free throws, two- and three-pointers on the overlays); seen in training clips t114, t115 on 2026-11-14"
+ }
+}
