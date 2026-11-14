@@ -50,7 +50,8 @@ export function ShotSpotPicker({
   const court = useRef<SVGGElement>(null);
   const side = orientation !== "top";
   const mark = (z: SpotZone) => (current === z ? t("current") : null);
-  const font = side ? 1.2 : 0.95;
+  // words at 14 px and more on a 360 px phone, also on the court turned on its side
+  const font = side ? 1.3 : 0.95;
 
   const tap = (zone: (typeof COURT_ZONES)[number], e: MouseEvent<SVGElement>) => {
     if (disabled) return;

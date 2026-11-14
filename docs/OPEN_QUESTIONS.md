@@ -380,6 +380,19 @@ Weaknesses of the recognition, recorded here and not fixed in the interface work
   is not measured, the estimate is 23 s per goal question instead of 18 s; (4) the estimate from
   the tracks stays weak while candidates come 4 to 7 s late (Q-REC-CANDTIME) and people beside the
   court are tracked (Q-REC-OFFCOURT).
+  *After the real-clip test of «Von wo?» (nine goals, phone, 22 questions in 6 to 9 minutes):*
+  only places a person gave make the three things and count as «mit Wurfort» (`by_coach`); an
+  estimate is drawn hollow with «geschätzt» and counts nowhere; «Weiss nicht» is missing and asked
+  again in «Wurfort nachtragen». The estimate is no longer offered (it was wrong in 4 of 7
+  recognisable goals, 6 of 9 said «Kreis»); it stays in the data as estimated. With a court a
+  person confirmed, the small court lies as the camera sees it: `GET …/goals/{event}/view` gives
+  the attacked goal's side in the picture from the attackers' direction and the court-to-image
+  homography (any long side, any panning; null without a confirmed court or tracks, then the goal
+  is at the top). The clip loops during the step. Scenes of goals from candidates run from 12 s
+  before to 2 s after (`matches.scene_window`, one rule for every view). *Left:* the side comes
+  from the attackers' mean position in the 10 s before the candidate time; in a fast break that
+  window can still hold the other half (then the court lies the wrong way round); the estimate
+  waits for better recognition (Q-REC-CANDTIME, Q-REC-OFFCOURT).
 - **Q-REC-CALQUALITY The court's quality is not measured.** `observe.py` sets the reprojection
   error to 0 and the confidence to 1.0, also for a court 2 to 5 m off; until it is measured the
   interface never treats the court as sure and always asks for it (done, E03).
