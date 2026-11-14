@@ -29,7 +29,7 @@ import numpy as np
 from sqlalchemy import select
 
 from handball_api.core.storage import ObjectNotFoundError
-from handball_api.models import Event, Match, Track, VideoAsset
+from handball_api.models import CameraCalibration, Event, Match, Track, VideoAsset
 from handball_api.services.context import Ctx
 from handball_api.services.timeline import Files
 from handball_court.zones import shot_zone, spec
@@ -158,6 +158,71 @@ async def fill(ctx: Ctx, match: Match) -> int:
     return filled
 
 
+async def _attack(
+    ctx: Ctx, g: Event, files: Files, tracks_of: dict[uuid.UUID, list[Track]]
+) -> tuple[list[Any], float, dict[int, int | None]] | None:
+    """The attacking side's positions in the 10 s before goal `g` (its part of the match), the
+    goal they attack (x = 0 or 40, from where they are) and the shirt number per track."""
+    if g.t_ms is None:
+        return None
+    hit = files.at(g.t_ms)
+    if hit is None or not (hit[0].analysis or {}).get("chunks"):
+        return None
+    asset, local = hit
+    if asset.id not in tracks_of:
+        tracks_of[asset.id] = list(
+            (await ctx.db.scalars(select(Track).where(Track.video_asset_id == asset.id))).all()
+        )
+    team_of = {t.track_no: str(t.team or "") for t in tracks_of[asset.id]}
+    number_of = {t.track_no: t.number for t in tracks_of[asset.id]}
+    label = "home" if g.side == "own" else "away"  # the own kit is "home" in the analysis
+    rows = await _rows(ctx, asset, local - WINDOW_MS, local)
+    attackers = [r for r in rows if team_of.get(int(r[1])) == label]
+    if not attackers:
+        return None
+    gx = LENGTH if float(np.mean([r[2] for r in attackers])) > LENGTH / 2 else 0.0
+    return attackers, gx, number_of
+
+
+def side_in_image(homography: list[list[float]], goal_x: float) -> str | None:
+    """Where the goal at `goal_x` (0 or 40) stands in the camera's picture, "left" or "right",
+    from the court-to-image homography (any panning keeps the order of the two ends)."""
+
+    def image_x(x: float) -> float | None:
+        h = homography
+        w = h[2][0] * x + h[2][1] * (WIDTH / 2) + h[2][2]
+        if w <= 1e-9:
+            return None
+        return (h[0][0] * x + h[0][1] * (WIDTH / 2) + h[0][2]) / w
+
+    a, b = image_x(0.0), image_x(LENGTH)
+    if a is None or b is None or a == b:
+        return None
+    left_end = 0.0 if a < b else LENGTH
+    return "left" if goal_x == left_end else "right"
+
+
+async def goal_view(ctx: Ctx, g: Event) -> str | None:
+    """Where the goal a shot went at stands in the video, "left" or "right", for drawing «Von wo?»
+    as the camera sees the court (real-clip test of «Von wo?»): needs a court a person confirmed
+    on that part of the match and tracks of the attackers; None otherwise (the court is drawn with
+    the goal at the top)."""
+    files = await Files.of(ctx, g.match_id)
+    hit = files.at(g.t_ms) if g.t_ms is not None else None
+    if hit is None:
+        return None
+    cal = await ctx.db.scalar(
+        select(CameraCalibration)
+        .where(CameraCalibration.video_asset_id == hit[0].id)
+        .order_by(CameraCalibration.created_at.desc())
+        .limit(1)
+    )
+    if cal is None or cal.source != "user_correction":
+        return None
+    found = await _attack(ctx, g, files, {})
+    return side_in_image(cal.homography, found[1]) if found is not None else None
+
+
 async def fill_one(
     ctx: Ctx,
     g: Event,
@@ -173,22 +238,10 @@ async def fill_one(
     # the goal's part of the match and the time in that file (Q-VIDEO-PARTS): a goal in the second
     # half reads the second file's tracks; the attacked goal is found per goal, so the change of
     # ends at half time needs nothing of its own
-    hit = files.at(g.t_ms)
-    if hit is None or not (hit[0].analysis or {}).get("chunks"):
+    found = await _attack(ctx, g, files, tracks_of)
+    if found is None:
         return False
-    asset, local = hit
-    if asset.id not in tracks_of:
-        tracks_of[asset.id] = list(
-            (await ctx.db.scalars(select(Track).where(Track.video_asset_id == asset.id))).all()
-        )
-    team_of = {t.track_no: str(t.team or "") for t in tracks_of[asset.id]}
-    number_of = {t.track_no: t.number for t in tracks_of[asset.id]}
-    label = "home" if g.side == "own" else "away"  # the own kit is "home" in the analysis
-    rows = await _rows(ctx, asset, local - WINDOW_MS, local)
-    attackers = [r for r in rows if team_of.get(int(r[1])) == label]
-    if not attackers:
-        return False
-    gx = LENGTH if float(np.mean([r[2] for r in attackers])) > LENGTH / 2 else 0.0
+    attackers, gx, number_of = found
     mine = [r for r in attackers if g.number is not None and number_of.get(int(r[1])) == g.number]
     pool, method = (mine, "tracking_number") if mine else (attackers, "tracking_nearest")
     best = min(pool, key=lambda r: _goal_distance(float(r[2]), float(r[3]), gx))

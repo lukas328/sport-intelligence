@@ -47,7 +47,6 @@ from handball_api.services.matches import (
 from handball_api.services.shot_positions import (
     COACH,
     GRAPHIC_ZONE,
-    UNKNOWN,
     _rows,
     zone_of,
     zone_source,
@@ -88,15 +87,22 @@ def zone_said(e: Event) -> str | None:
     return "estimated" if spot_estimated(e) and e.shot_type is None else COACH
 
 
+def by_coach(e: Event) -> bool:
+    """The place of the shot comes from a person (tapped in Prüfen, marked by hand, a penalty of
+    the report). Only these make the three things and count as «mit Wurfort» (real-clip test of
+    «Von wo?», V1): an estimate is shown as estimated and counts nowhere."""
+    return zone_said(e) == COACH
+
+
 def spot_missing(e: Event, length_ms: int | None) -> bool:
-    """A goal in the video whose place nobody gave: asked in «Wurfort nachtragen». Report goals
-    count once the throw-off places them in the video; a goal only guessed from a throw-off is not
-    asked (Prüfen asks whether it is one)."""
+    """A goal in the video whose place no person gave (none, only estimated, or «Weiss nicht»):
+    asked in «Wurfort nachtragen». Report goals count once the throw-off places them in the video;
+    a goal only guessed from a throw-off is not asked (Prüfen asks whether it is one)."""
     if e.source == "heuristic" or e.t_ms is None or e.t_ms < 0:
         return False
     if length_ms is not None and e.t_ms > length_ms:
         return False
-    return zone_of(e) is None and zone_source(e) != UNKNOWN
+    return not by_coach(e)
 
 
 def to_half(x: float, y: float) -> tuple[float, float]:
@@ -366,6 +372,7 @@ async def match_graphics(ctx: Ctx, match_id: uuid.UUID) -> dict[str, Any]:
                 "player_id": e.player_id,
                 "zone": zone_of(e),
                 "zone_source": zone_said(e),
+                "by_coach": by_coach(e),
                 "spot_missing": (not demo) and spot_missing(e, length),
                 "run": run,
                 "shot": shot,

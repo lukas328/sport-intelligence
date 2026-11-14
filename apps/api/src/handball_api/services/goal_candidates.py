@@ -693,6 +693,15 @@ async def spot(
     return spot_row(goal)
 
 
+async def view(ctx: Ctx, match_id: uuid.UUID, event_id: uuid.UUID) -> dict[str, Any]:
+    """Where the attacked goal of a goal stands in the video (see shot_positions.goal_view)."""
+    match = await get_match(ctx, match_id)
+    goal = await ctx.db.get(Event, event_id)
+    if goal is None or goal.match_id != match.id or goal.type != "shot":
+        raise ProblemError(404, "not-found", "Goal not found")
+    return {"event_id": goal.id, "goal_in_video": await shot_positions.goal_view(ctx, goal)}
+
+
 def spot_row(goal: Event) -> dict[str, Any]:
     return {
         "event_id": goal.id,

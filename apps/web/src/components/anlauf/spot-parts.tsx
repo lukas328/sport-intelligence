@@ -34,8 +34,9 @@ export function useSaveSpot(orgId: string, matchId: string) {
 /** The place of a goal in words: «Rückraum links», «… , geschätzt», or «Wurfort fehlt». */
 export function useSpotText() {
   const t = useTranslations("spot");
-  return (g: { zone?: string | null; zone_source?: string | null }) =>
-    g.zone ? t(g.zone_source === "estimated" ? "ofEstimated" : "of", { zone: t(`zone.${g.zone}` as "zone.la") }) : t("missing");
+  // «Weiss nicht» with an estimate behind it reads «…, geschätzt» too: only the coach's place is plain (V1)
+  return (g: { zone?: string | null; by_coach?: boolean }) =>
+    g.zone ? t(g.by_coach ? "of" : "ofEstimated", { zone: t(`zone.${g.zone}` as "zone.la") }) : t("missing");
 }
 
 /**
@@ -57,7 +58,8 @@ export function SpotChange({ orgId, matchId, goal, label }: { orgId: string; mat
       <DialogContent title={t("dialogTitle")} description={label}>
         <ShotSpotPicker
           disabled={busy}
-          suggestion={zone ? { zone, kind: goal.zone_source === "estimated" ? "estimated" : "current" } : null}
+          // an estimate is never marked (V2); the coach's own earlier answer reads «Bisher»
+          suggestion={zone && goal.by_coach ? { zone, kind: "current" } : null}
           onPick={(answer, point) => {
             setBusy(true);
             setFailed(null);

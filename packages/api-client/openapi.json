@@ -5434,6 +5434,12 @@
             ],
             "title": "Aim"
           },
+          "by_coach": {
+            "default": false,
+            "description": "the zone was given by a person; only these make the three things and count as \u00abmit Wurfort\u00bb (an estimate does not)",
+            "title": "By Coach",
+            "type": "boolean"
+          },
           "confirmed": {
             "description": "false: the shot spot is estimated",
             "title": "Confirmed",
@@ -5608,6 +5614,37 @@
           "has_video"
         ],
         "title": "GoalRunOut",
+        "type": "object"
+      },
+      "GoalViewOut": {
+        "properties": {
+          "event_id": {
+            "format": "uuid",
+            "title": "Event Id",
+            "type": "string"
+          },
+          "goal_in_video": {
+            "anyOf": [
+              {
+                "enum": [
+                  "left",
+                  "right"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "where the goal the shot went at stands in the video; null without a court a person confirmed or without tracks (the small court is drawn with the goal at the top)",
+            "title": "Goal In Video"
+          }
+        },
+        "required": [
+          "event_id",
+          "goal_in_video"
+        ],
+        "title": "GoalViewOut",
         "type": "object"
       },
       "GraphicsPartOut": {
@@ -24592,6 +24629,70 @@
           }
         },
         "summary": "Set Shot Spot",
+        "tags": [
+          "events"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/matches/{match_id}/goals/{event_id}/view": {
+      "get": {
+        "description": "Where the attacked goal of this goal stands in the video (\u00ableft\u00bb or \u00abright\u00bb), so \u00abVon wo?\u00bb\ndraws the court as the camera sees it; null without a confirmed court or tracks.",
+        "operationId": "goal_view_v1_orgs__org_id__matches__match_id__goals__event_id__view_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "match_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Match Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "event_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Event Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoalViewOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Goal View",
         "tags": [
           "events"
         ]

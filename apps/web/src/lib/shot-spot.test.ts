@@ -54,7 +54,7 @@ describe("Von wo? on the half court", () => {
 });
 
 function goal(id: string, team: "own" | "opp", zone: string | null, extra: Partial<MatchGraphics["goals"][number]> = {}): MatchGraphics["goals"][number] {
-  return { event_id: id, team, minute: 1, number: null, zone, run: [], shot: null, aim: null, confirmed: true, source: null, has_video: true, t_ms: 1000, zone_source: zone ? "coach" : null, spot_missing: zone == null, ...extra };
+  return { event_id: id, team, minute: 1, number: null, zone, run: [], shot: null, aim: null, confirmed: true, source: null, has_video: true, t_ms: 1000, zone_source: zone ? "coach" : null, by_coach: zone != null, spot_missing: zone == null, ...extra };
 }
 
 function graphics(goals: MatchGraphics["goals"]): MatchGraphics {
@@ -73,6 +73,16 @@ describe("places for the three things", () => {
     for (const r of runs) expect(Math.hypot(r.shot[0] - ZONE_AT.rl![0], r.shot[1] - ZONE_AT.rl![1])).toBeCloseTo(1.1, 5);
     const things = threeThings(runs);
     expect(things.map((x) => [x.key, x.zone, x.value])).toEqual([["conceded_zone", "rl", 3]]);
+  });
+
+  it("an estimate counts in no thing and not as a place, but is still drawn hollow (V1)", () => {
+    const est = { zone_source: "estimated" as const, by_coach: false, spot_missing: true, confirmed: false, shot: [9, 4] as [number, number] };
+    const g = graphics([goal("a", "opp", "rl"), goal("b", "opp", "rl"), goal("c", "opp", "rl", est), goal("d", "opp", "kr", { ...est, zone_source: "unknown" })]);
+    expect(threeThings(goalRuns(g))).toEqual([]);
+    const drawn = goalRuns(g).find((x) => x.eventId === "c")!;
+    expect([drawn.zone, drawn.confirmed]).toEqual([null, false]);
+    expect(spotCounts(g)).toEqual({ placed: 2, missing: 2, total: 4 });
+    expect(goalsWithoutSpot(g).map((x) => x.event_id)).toEqual(["c", "d"]);
   });
 
   it("three fast breaks are a thing of their own", () => {

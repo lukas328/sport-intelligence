@@ -562,6 +562,11 @@ class GoalRunOut(ApiModel):
         description="who gave the zone: the coach, an estimate from the tracks, the coach did "
         "not know (unknown); null: nobody yet",
     )
+    by_coach: bool = Field(
+        default=False,
+        description="the zone was given by a person; only these make the three things and count "
+        "as «mit Wurfort» (an estimate does not)",
+    )
     spot_missing: bool = Field(
         default=False,
         description="a goal in the video whose shot place nobody gave yet (asked in Prüfen)",

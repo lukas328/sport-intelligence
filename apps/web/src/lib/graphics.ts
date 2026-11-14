@@ -52,24 +52,33 @@ export function spreadSpots<T extends GoalRun & { eventId: string }>(runs: T[]):
   return runs.map((r) => (moved.has(r) ? { ...r, shot: moved.get(r)! } : r));
 }
 
+/**
+ * The zone a goal counts with: only a place a person gave (real-clip test of «Von wo?», V1). An
+ * estimated spot is still drawn (hollow, «geschätzt») but counts in no thing and no zone tally.
+ */
+export function coachZone(x: Pick<MatchGraphics["goals"][number], "zone" | "by_coach">): string | null {
+  return x.by_coach === true ? (x.zone ?? null) : null;
+}
+
 function goalRunsAsGiven(g: MatchGraphics, team?: "own" | "opp"): (GoalRun & { eventId: string })[] {
   return g.goals
-    .filter((x) => (x.shot != null || (x.zone != null && ZONE_AT[x.zone] != null)) && (!team || x.team === team))
+    .filter((x) => (x.shot != null || (coachZone(x) != null && ZONE_AT[coachZone(x)!] != null)) && (!team || x.team === team))
     .map((x) => ({
       eventId: x.event_id,
       team: x.team,
       minute: x.minute ?? undefined,
       run: x.run.map((p) => [p[0], p[1]] as Pt),
-      shot: (x.shot ? [x.shot[0], x.shot[1]] : ZONE_AT[x.zone!]!) as Pt,
+      shot: (x.shot ? [x.shot[0], x.shot[1]] : ZONE_AT[coachZone(x)!]!) as Pt,
       aim: x.aim ? ([x.aim[0], x.aim[1]] as Pt) : null,
-      confirmed: x.confirmed,
-      zone: x.zone,
+      // an estimate is never a coach's spot: hollow in the drawing
+      confirmed: x.confirmed && x.by_coach === true,
+      zone: coachZone(x),
     }));
 }
 
 /** Goals without a shot spot: counted and listed, said honestly where drawings would be. */
 export function spotless(g: MatchGraphics, team?: "own" | "opp"): MatchGraphics["goals"] {
-  return g.goals.filter((x) => x.shot == null && x.zone == null && (!team || x.team === team));
+  return g.goals.filter((x) => x.shot == null && coachZone(x) == null && (!team || x.team === team));
 }
 
 /** The score the video's goals give, when the match itself has none (real-video test E10). */

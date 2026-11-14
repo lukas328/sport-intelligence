@@ -2048,6 +2048,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/matches/{match_id}/goals/{event_id}/view": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Goal View
+         * @description Where the attacked goal of this goal stands in the video («left» or «right»), so «Von wo?»
+         *     draws the court as the camera sees it; null without a confirmed court or tracks.
+         */
+        get: operations["goal_view_v1_orgs__org_id__matches__match_id__goals__event_id__view_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/matches/{match_id}/graphics": {
         parameters: {
             query?: never;
@@ -6845,6 +6866,12 @@ export interface components {
                 number
             ] | null;
             /**
+             * By Coach
+             * @description the zone was given by a person; only these make the three things and count as «mit Wurfort» (an estimate does not)
+             * @default false
+             */
+            by_coach?: boolean;
+            /**
              * Confirmed
              * @description false: the shot spot is estimated
              */
@@ -6906,6 +6933,19 @@ export interface components {
              * @description who gave the zone: the coach, an estimate from the tracks, the coach did not know (unknown); null: nobody yet
              */
             zone_source?: ("coach" | "estimated" | "unknown") | null;
+        };
+        /** GoalViewOut */
+        GoalViewOut: {
+            /**
+             * Event Id
+             * Format: uuid
+             */
+            event_id: string;
+            /**
+             * Goal In Video
+             * @description where the goal the shot went at stands in the video; null without a court a person confirmed or without tracks (the small court is drawn with the goal at the top)
+             */
+            goal_in_video: ("left" | "right") | null;
         };
         /** GraphicsPartOut */
         GraphicsPartOut: {
@@ -15413,6 +15453,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ShotSpotOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    goal_view_v1_orgs__org_id__matches__match_id__goals__event_id__view_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: string;
+                event_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GoalViewOut"];
                 };
             };
             /** @description Validation Error */

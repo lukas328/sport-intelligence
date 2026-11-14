@@ -378,6 +378,14 @@ class ShotSpotOut(ApiModel):
     y: float | None
 
 
+class GoalViewOut(ApiModel):
+    event_id: uuid.UUID
+    goal_in_video: Literal["left", "right"] | None = Field(
+        description="where the goal the shot went at stands in the video; null without a court a "
+        "person confirmed or without tracks (the small court is drawn with the goal at the top)"
+    )
+
+
 class GoalCandidateReviewIn(ApiModel):
     status: Literal["confirmed", "rejected"] | None  # null: back to open (undo)
     # to confirm: whose shot and its outcome (goal candidates: default goal); a shot candidate

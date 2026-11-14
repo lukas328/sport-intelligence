@@ -4,6 +4,8 @@ fallback, and goals without a place (older matches, the match report) are filled
 
 from __future__ import annotations
 
+import json
+import uuid
 from collections.abc import Callable
 from typing import Any
 
@@ -91,7 +93,9 @@ async def test_a_goal_in_the_second_half_gets_its_place_estimated_then_tapped(
     assert goal["t_ms"] == HALF + 50_500
     assert (goal["zone"], goal["zone_source"], goal["confirmed"]) == ("rl", "estimated", False)
     # mirrored to the goal at x = 40, then the half court (goal at the top, attacker's left small)
-    assert goal["shot"] == [5.2, 6.0] and goal["spot_missing"] is False
+    assert goal["shot"] == [5.2, 6.0]
+    # an estimate is shown, but it is no place the coach gave: still asked, in no thing (V1)
+    assert goal["by_coach"] is False and goal["spot_missing"] is True
 
     # the coach taps «Kreis» on the small court: the tap wins and is no longer estimated
     spot = f"{base}/goals/{row['event_id']}/spot"
@@ -106,6 +110,7 @@ async def test_a_goal_in_the_second_half_gets_its_place_estimated_then_tapped(
     }
     goal = _goal((await api.get(f"{base}/graphics")).json(), row["event_id"])
     assert (goal["zone"], goal["zone_source"], goal["confirmed"]) == ("kr", "coach", True)
+    assert goal["by_coach"] is True and goal["spot_missing"] is False
     assert goal["shot"] == [9.5, 4.5]
     listed = (await api.get(f"{base}/goal-candidates")).json()["candidates"][-1]
     assert (listed["shot_zone"], listed["zone_source"]) == ("kr", "coach")
@@ -153,7 +158,9 @@ async def test_review_with_the_place_and_its_corrections(make_api: Callable[[], 
     r = (await api.put(spot, json={"shot_zone": "unknown"})).json()
     assert (r["shot_zone"], r["zone_source"]) == ("rl", "unknown")
     goal = _goal((await api.get(f"{base}/graphics")).json(), row["event_id"])
-    assert goal["zone_source"] == "unknown" and goal["spot_missing"] is False
+    # «Weiss nicht»: the estimate stays in the data, the place counts as missing and is asked again
+    assert goal["zone_source"] == "unknown" and goal["by_coach"] is False
+    assert goal["spot_missing"] is True
 
     assert (await api.put(spot, json={"shot_zone": "xx"})).status_code == 422
     assert (await api.put(spot, json={"shot_zone": "rl", "x": 30})).status_code == 422
@@ -192,7 +199,9 @@ async def test_goals_without_a_place_are_filled_in_later(
     g = (await api.get(f"{base}/graphics")).json()
     assert _goal(g, tagged["id"])["zone"] == "la"
     assert _goal(g, report["id"])["zone"] == "rr" and g["has_report"] is True
-    assert not any(x["spot_missing"] for x in g["goals"] if x["event_id"] != early["id"])
+    assert not any(
+        x["spot_missing"] for x in g["goals"] if x["event_id"] in (tagged["id"], report["id"])
+    )
     # the report goal stays the report's
     ev = next(e for e in (await api.get(f"{base}/events")).json() if e["id"] == report["id"])
     assert ev["source"] == "official_report"
@@ -211,3 +220,69 @@ async def test_goals_without_a_place_are_filled_in_later(
         "SELECT data FROM audit_logs WHERE action = 'match.shot_spot_set'"
     )
     assert len(actions) == 2
+
+
+def _homography(
+    court: list[tuple[float, float]], image: list[tuple[float, float]]
+) -> list[list[float]]:
+    """Court-to-image homography from four correspondences (DLT)."""
+    rows = []
+    for (x, y), (u, v) in zip(court, image, strict=True):
+        rows.append([x, y, 1, 0, 0, 0, -u * x, -u * y, -u])
+        rows.append([0, 0, 0, x, y, 1, -v * x, -v * y, -v])
+    _, _, vt = np.linalg.svd(np.array(rows, dtype=float))
+    h = vt[-1].reshape(3, 3)
+    return (h / h[2, 2]).tolist()
+
+
+CORNERS = [(0.0, 0.0), (40.0, 0.0), (40.0, 20.0), (0.0, 20.0)]
+# the camera on the long side y = 0: the end x = 0 on the left of the picture
+NEAR_Y0 = _homography(CORNERS, [(100, 700), (1180, 700), (900, 300), (380, 300)])
+# the camera on the other long side (y = 20): the end x = 40 on the left
+NEAR_Y20 = _homography(CORNERS, [(900, 300), (380, 300), (100, 700), (1180, 700)])
+
+
+def test_where_the_attacked_goal_stands_in_the_video_in_all_four_positions() -> None:
+    from handball_api.services.shot_positions import side_in_image
+
+    assert side_in_image(NEAR_Y0, 0.0) == "left" and side_in_image(NEAR_Y0, 40.0) == "right"
+    assert side_in_image(NEAR_Y20, 0.0) == "right" and side_in_image(NEAR_Y20, 40.0) == "left"
+    flat = [[0.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
+    assert side_in_image(flat, 40.0) is None  # both ends on one point: nothing to say
+
+
+async def test_the_court_of_von_wo_turns_as_the_camera_sees_it(
+    make_api: Callable[[], Api], owner_conn: Any
+) -> None:
+    api = make_api()
+    ids = await setup_club(api)
+    base, _, second, cand = await _second_half_with_tracks(api, ids)
+    row = (
+        await api.put(
+            f"{base}/goal-candidates/{cand['id']}/review",
+            json={"status": "confirmed", "side": "own"},
+        )
+    ).json()
+    view = f"{base}/goals/{row['event_id']}/view"
+    # no court a person confirmed: drawn with the goal at the top
+    assert (await api.get(view)).json()["goal_in_video"] is None
+
+    async def court(h: list[list[float]], source: str = "user_correction") -> None:
+        await owner_conn.execute(
+            "INSERT INTO calibrations (id, organization_id, video_asset_id, homography, image_size,"
+            " confidence, reprojection_px, source, pipeline_version) VALUES ($1, $2, $3, $4::jsonb,"
+            " '[1280, 720]'::jsonb, 1, 0, $5, 'test')",
+            uuid.uuid4(),
+            uuid.UUID(ids["org"]),
+            uuid.UUID(second),
+            json.dumps(h),
+            source,
+        )
+
+    await court(NEAR_Y0, "heuristic")
+    assert (await api.get(view)).json()["goal_in_video"] is None  # recognised, not confirmed
+    # the second half attacks the goal at x = 0: with the camera on y = 0 it is on the left
+    await court(NEAR_Y0)
+    assert (await api.get(view)).json() == {"event_id": row["event_id"], "goal_in_video": "left"}
+    await court(NEAR_Y20)
+    assert (await api.get(view)).json()["goal_in_video"] == "right"

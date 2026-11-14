@@ -9,7 +9,7 @@ const G: MatchGraphics = {
     { minute: null, team: "opp" },
   ],
   goals: [
-    { event_id: "a", team: "own", minute: 1.5, number: 7, zone: "la", run: [[2, 6], [1.5, 1.5]], shot: [1.5, 1.5], aim: null, confirmed: true, source: "tracking", has_video: true },
+    { event_id: "a", team: "own", minute: 1.5, number: 7, zone: "la", run: [[2, 6], [1.5, 1.5]], shot: [1.5, 1.5], aim: null, confirmed: true, source: "tracking", has_video: true, by_coach: true },
     { event_id: "b", team: "opp", minute: 3, number: null, zone: null, run: [], shot: [10, 8], aim: null, confirmed: false, source: "marked", has_video: false },
   ],
   phases: [],

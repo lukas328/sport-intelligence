@@ -16,6 +16,7 @@ from handball_api.schemas.events import (
     GoalCandidateRow,
     GoalComparison,
     GoalReviewIn,
+    GoalViewOut,
     KickoffIn,
     OfficialReportIn,
     OfficialReportResult,
@@ -184,6 +185,13 @@ async def review_goal_candidate(
         data.x,
         data.y,
     )
+
+
+@router.get("/matches/{match_id}/goals/{event_id}/view", response_model=GoalViewOut)
+async def goal_view(match_id: uuid.UUID, event_id: uuid.UUID, scope: OrgDep) -> dict[str, Any]:
+    """Where the attacked goal of this goal stands in the video («left» or «right»), so «Von wo?»
+    draws the court as the camera sees it; null without a confirmed court or tracks."""
+    return await goal_candidates.view(scope.ctx, match_id, event_id)
 
 
 @router.put("/matches/{match_id}/goals/{event_id}/spot", response_model=ShotSpotOut)

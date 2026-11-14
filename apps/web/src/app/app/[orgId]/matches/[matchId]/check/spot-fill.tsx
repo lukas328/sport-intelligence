@@ -127,7 +127,7 @@ export function SpotFill({ orgId, match, goalId }: { orgId: string; match: Match
               </button>
             </div>
             <p className="mt-1 mb-0 max-w-[54ch] text-[15px] text-ink-2 md:mt-3 md:text-[17px]">
-              {t("why")} {goal.zone_source === "estimated" ? t("suggestedWhy") : ""}
+              {t("why")}
             </p>
             {failed && (
               <p role="alert" className="mt-4 max-w-[54ch] border-l-4 border-loss pl-3 text-[17px] font-semibold" data-testid="check-failed">
@@ -138,7 +138,8 @@ export function SpotFill({ orgId, match, goalId }: { orgId: string; match: Match
               <ShotSpotPicker
                 key={goal.event_id}
                 disabled={busy}
-                suggestion={goal.zone ? { zone: goal.zone as SpotZone, kind: goal.zone_source === "estimated" ? "estimated" : "current" } : null}
+                // the estimate from the tracks is no suggestion (real-clip test V2: wrong in 4 of 7); only what the coach said before
+                suggestion={goal.zone && goal.by_coach ? { zone: goal.zone as SpotZone, kind: "current" } : null}
                 onPick={(spot, point) => {
                   setBusy(true);
                   setFailed(null);

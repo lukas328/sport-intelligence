@@ -41,7 +41,7 @@ const PERSON_MIN_MS = 5000;
 const PERSON_MAX = 6;
 type Answer = { key: string; label: string; first?: boolean; numeral?: string; run: () => Promise<void> };
 /** «Von wo?» after a confirmed goal (fourth real-video test H7): the goal's event, the place to mark */
-type SpotStep = { q: Question; eventId: string; goal: string; suggestion: { zone: SpotZone; kind: "estimated" | "current" } | null; index: number; fromList?: boolean };
+type SpotStep = { q: Question; eventId: string; goal: string; suggestion: { zone: SpotZone; kind: "current" } | null; index: number; fromList?: boolean };
 type Answered = { q: Question; label: string; eventId?: string; spot?: SpotAnswer };
 
 // one rounding on every screen: full seconds, as the scoreboard (fourth real-video test H8)
@@ -346,7 +346,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
     setAnswered((list) => (revisit != null ? list.map((x, i) => (i === revisit ? entry : x)) : [...list, entry]));
     if (goal && row) {
       const zone = row.shot_zone as SpotZone | null | undefined;
-      setSpotStep({ q: current, eventId: goal, goal: a.label, index, suggestion: zone ? { zone, kind: row.zone_source === "coach" ? "current" : "estimated" } : null });
+      setSpotStep({ q: current, eventId: goal, goal: a.label, index, suggestion: zone && row.zone_source === "coach" ? { zone, kind: "current" } : null });
       return;
     }
     if (revisit != null) {
@@ -630,7 +630,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
                   </button>
                 </div>
                 <p className="mt-1 mb-0 max-w-[54ch] text-[15px] text-ink-2 md:mt-3 md:text-[17px]">
-                  {ts("why")} {spotStep.suggestion?.kind === "estimated" ? ts("suggestedWhy") : ""}
+                  {ts("why")}
                 </p>
                 {failed && (
                   <p role="alert" className="mt-4 max-w-[54ch] border-l-4 border-loss pl-3 text-[17px] font-semibold" data-testid="check-failed">
