@@ -107,7 +107,10 @@ export function ShotSpotPicker({
           );
         })}
       </svg>
-      <div className="mt-2.5 grid grid-cols-2 gap-2.5">
+      {/* which way round, small under the court: read once, not before every tap */}
+      <p className="m-0 mt-1 text-[14px] leading-snug text-ink-2">{t("sideNote")}</p>
+      {/* the two kinds and «Weiss nicht» in one row: the whole step fits one phone screen */}
+      <div className="mt-2 grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] items-stretch gap-2">
         {(["m7", "gs"] as const).map((z) => {
           const word = mark(z);
           return (
@@ -117,17 +120,17 @@ export function ShotSpotPicker({
               disabled={disabled}
               onClick={() => onPick(z)}
               data-testid={`spot-${z}`}
-              className={cn("flex min-h-14 cursor-pointer flex-col items-start justify-center border-2 border-ink px-4 text-left text-[17px] font-semibold text-ink md:min-h-16", word ? "bg-attn" : "bg-transparent")}
+              className={cn("flex min-h-12 cursor-pointer flex-col items-start justify-center border-2 border-ink px-2.5 text-left text-[15px] font-semibold text-ink sm:px-4 sm:text-[17px] md:min-h-14", word ? "bg-attn" : "bg-transparent")}
             >
               {t(`zone.${z}` as "zone.m7")}
-              {word && <span className="text-[15px] font-semibold italic">{word}</span>}
+              {word && <span className="text-[14px] font-semibold italic">{word}</span>}
             </button>
           );
         })}
+        <button type="button" disabled={disabled} onClick={() => onPick("unknown")} className="min-h-12 cursor-pointer border-0 bg-transparent px-1 text-[15px] font-bold whitespace-nowrap text-ink underline underline-offset-4 sm:text-[17px]" data-testid="spot-unknown">
+          {t("unknown")}
+        </button>
       </div>
-      <button type="button" disabled={disabled} onClick={() => onPick("unknown")} className="mt-1 min-h-12 cursor-pointer border-0 bg-transparent p-0 text-[17px] font-bold text-ink underline underline-offset-4" data-testid="spot-unknown">
-        {t("unknown")}
-      </button>
     </div>
   );
 }

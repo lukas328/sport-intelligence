@@ -53,12 +53,14 @@ interface Props {
   autoPlay?: boolean;
   /** how times read in the controls, e.g. the match clock ("1. HZ 12:55"); video time by default */
   clock?: (ms: number) => string;
+  /** on a phone without the control bar under the picture (Prüfen «Von wo?»: one screen); from tablets up the bar floats over it */
+  bare?: boolean;
 }
 
 const SPEEDS = [0.25, 0.5, 1, 1.5, 2];
 
 export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
-  { src, poster, thumbsVtt, fps, markers = [], annotations = [], window: win, onWindowEnd, onTime, onKey, overlay, autoPlay, clock },
+  { src, poster, thumbsVtt, fps, markers = [], annotations = [], window: win, onWindowEnd, onTime, onKey, overlay, autoPlay, clock, bare },
   ref,
 ) {
   const t = useTranslations("player");
@@ -282,6 +284,7 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
       tabIndex={0}
       onKeyDown={onKeyDown}
       className="group relative overflow-hidden bg-black outline-none focus-visible:ring-2 focus-visible:ring-accent"
+      role="group"
       aria-label={t("shortcutsList")}
       data-testid="player"
     >
@@ -323,6 +326,7 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
         className={cn(
           "space-y-0.5 bg-black px-2 pt-1 pb-1 text-white transition-opacity duration-200 sm:absolute sm:inset-x-0 sm:bottom-0 sm:space-y-1 sm:bg-transparent sm:bg-gradient-to-t sm:from-black/85 sm:via-black/45 sm:to-transparent sm:px-3 sm:pt-10 sm:pb-2",
           playing && !hover && "sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100",
+          bare && "max-sm:hidden",
         )}
       >
         <div

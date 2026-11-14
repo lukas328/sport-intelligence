@@ -228,11 +228,11 @@
     "parent": "Elternteil"
   },
   "positions": {
-    "LA": "Linksaussen",
+    "LA": "Aussen links",
     "RL": "Rückraum links",
     "RM": "Rückraum Mitte",
     "RR": "Rückraum rechts",
-    "RA": "Rechtsaussen",
+    "RA": "Aussen rechts",
     "KM": "Kreismitte",
     "TW": "Torhüter/in"
   },
@@ -1970,7 +1970,7 @@
     "title": "Suchen",
     "hint": "Antworten kommen nur aus den erfassten Ereignissen eures Teams. Jede Zahl stammt aus einer Abfrage, die du unten nachlesen kannst.",
     "example1": "Wie oft treffen wir nach einem Timeout?",
-    "example2": "Zeig alle Gegentore über Rechtsaussen in den letzten 5 Spielen.",
+    "example2": "Zeig alle Gegentore über Aussen rechts in den letzten 5 Spielen.",
     "example3": "Wie ist unsere Wurfquote in der zweiten Halbzeit im Vergleich zur ersten?",
     "question": "Frage",
     "placeholder": "Frage zu euren Spielen stellen",
@@ -3002,8 +3002,8 @@
   },
   "anlauf": {
     "zoneFrom": {
-      "la": "über links aussen",
-      "ra": "über rechts aussen",
+      "la": "über aussen links",
+      "ra": "über aussen rechts",
       "rl": "aus dem Rückraum links",
       "rm": "aus dem Rückraum Mitte",
       "rr": "aus dem Rückraum rechts",
@@ -3306,15 +3306,15 @@
   },
   "scenesPage": {
     "searchLabel": "Szenen suchen",
-    "placeholder": "Gegentore rechts aussen, letzte 3 Spiele",
+    "placeholder": "Gegentore aussen rechts, letzte 3 Spiele",
     "filters": "Aktive Filter und Vorschläge",
     "chip": {
       "conceded": "Gegentor",
       "scored": "Tor",
       "saves": "Parade",
       "turnovers": "Ballverlust",
-      "wing_right": "rechts aussen",
-      "wing_left": "links aussen",
+      "wing_right": "aussen rechts",
+      "wing_left": "aussen links",
       "back_left": "Rückraum links",
       "back_centre": "Rückraum Mitte",
       "back_right": "Rückraum rechts",
@@ -3353,8 +3353,8 @@
       "turnovers": "Ballverlusten"
     },
     "where": {
-      "wing_right": "über rechts aussen",
-      "wing_left": "über links aussen",
+      "wing_right": "über aussen rechts",
+      "wing_left": "über aussen links",
       "back_left": "aus dem Rückraum links",
       "back_centre": "aus dem Rückraum Mitte",
       "back_right": "aus dem Rückraum rechts",
@@ -3419,16 +3419,16 @@
     "titleRank": "Rang {rank}. Und {zone} bleibt offen.",
     "titleCount": "{n, plural, =1 {Ein Spiel} =2 {Zwei Spiele} =3 {Drei Spiele} =4 {Vier Spiele} =5 {Fünf Spiele} =6 {Sechs Spiele} =7 {Sieben Spiele} =8 {Acht Spiele} =9 {Neun Spiele} =10 {Zehn Spiele} other {# Spiele}}. Und {zone} bleibt offen.",
     "zoneNoun": {
-      "la": "links aussen",
-      "ra": "rechts aussen",
+      "la": "aussen links",
+      "ra": "aussen rechts",
       "rl": "Rückraum links",
       "rm": "Rückraum Mitte",
       "rr": "Rückraum rechts",
       "kr": "der Kreis"
     },
     "zoneTitle": {
-      "la": "Links aussen",
-      "ra": "Rechts aussen",
+      "la": "Aussen links",
+      "ra": "Aussen rechts",
       "rl": "Rückraum links",
       "rm": "Rückraum Mitte",
       "rr": "Rückraum rechts",
@@ -3587,7 +3587,7 @@
   },
   "spot": {
     "question": "Von wo?",
-    "why": "Tipp auf die Stelle, von der geworfen wurde. Ein Tipp genügt, dann geht es weiter. Das Tor ist oben, links im Bild ist links aus Sicht des Angriffs.",
+    "why": "Tipp, von wo geworfen wurde.",
     "courtLabel": "Angegriffene Hälfte, Tor oben. Links und rechts aus Sicht des Angriffs.",
     "zone": {
       "la": "Aussen links",
@@ -3612,7 +3612,7 @@
     "unknown": "Weiss nicht",
     "replay": "Nochmal ansehen",
     "saved": "{goal} ist gespeichert.",
-    "suggestedWhy": "Gelb ist der Vorschlag aus dem Video. Stimmt er, tipp darauf.",
+    "suggestedWhy": "Gelb ist unser Vorschlag.",
     "estimated": "geschätzt",
     "missing": "Wurfort fehlt",
     "of": "Wurfort: {zone}",
@@ -3633,6 +3633,7 @@
     "noPattern": "Noch kommt keine Ecke auf drei Tore.",
     "soFar": "{n, plural, one {Ein Ding bisher.} other {# Dinge bisher.}}",
     "dialogTitle": "Von wo wurde dieses Tor geworfen?",
-    "close": "Schliessen"
+    "close": "Schliessen",
+    "sideNote": "Tor oben. Links und rechts aus Sicht des Angriffs."
   }
 }

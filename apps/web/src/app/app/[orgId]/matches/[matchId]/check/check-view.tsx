@@ -369,7 +369,10 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
   }
   // keyboard and screen reader: the question «Von wo?» takes the focus when it appears
   useEffect(() => {
-    if (spotStep) document.getElementById("spot-question")?.focus({ preventScroll: true });
+    if (!spotStep) return;
+    // video and court on one screen: from the top, wherever the answer key was
+    window.scrollTo({ top: 0 });
+    document.getElementById("spot-question")?.focus({ preventScroll: true });
   }, [spotStep]);
   const replay = () => {
     if (current?.kind !== "goal") return;
@@ -436,7 +439,8 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
           {t("later")}
         </Link>
       </div>
-      <div className="bleed-x">
+      {/* «Von wo?» on a phone: video and court on one screen, the strip gives way */}
+      <div className={cn("bleed-x", spotStep && "max-md:hidden")}>
         <Strip
           name={own}
           sub={`${ta("vsShort")} ${oppName} · ${left > 0 ? t("openCount", { n: left, minutes: leftMinutes }) : t("count", { n: total > 0 || wantMore ? total : moreGoals })}`}
@@ -531,7 +535,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
         </div>
       ) : (
         // the court gets the whole width: the hall image as large as possible (E04)
-        <div className={cn("grid gap-5 py-6 md:gap-14 md:py-10", current.kind === "field" ? "md:grid-cols-1 md:gap-6" : "md:grid-cols-[minmax(0,1fr)_420px]")}>
+        <div className={cn("grid gap-5 py-6 md:gap-14 md:py-10", spotStep && "max-md:gap-2 max-md:py-2", current.kind === "field" ? "md:grid-cols-1 md:gap-6" : "md:grid-cols-[minmax(0,1fr)_420px]")}>
           <figure className="relative m-0 self-start bg-[#1d2125]">
             {current.kind === "field" && main && panoSize && corners ? (
               <FieldCheck key={current.videoId} src={`/v1/orgs/${orgId}/videos/${current.videoId}/panorama`} alt={t("fieldAlt")} size={panoSize} corners={corners} onChange={setMoved} />
@@ -561,7 +565,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
               // the second half's throw-off: the player starts where the second half's file starts
               <VideoPlayer ref={player} key={`kickoff-${current.period}`} src={`${media}/hls/master.m3u8`} window={kickoffFrom(current.period)} />
             ) : current.kind === "goal" && media ? (
-              <VideoPlayer ref={player} key={current.c.id} src={`${media}/hls/master.m3u8`} window={goalWindow(current.c)} autoPlay />
+              <VideoPlayer ref={player} key={current.c.id} src={`${media}/hls/master.m3u8`} window={goalWindow(current.c)} autoPlay bare={spotStep != null} />
             ) : null}
             {current.kind === "person" && (
               <figcaption className="bg-[rgb(10_13_17/0.9)] px-3 py-2 font-mono text-[13px] font-semibold text-[#eef2f5]">
@@ -577,7 +581,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
               </figcaption>
             )}
             {current.kind === "goal" && (
-              <figcaption className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 bg-[rgb(10_13_17/0.9)] px-3 py-1.5 text-[#eef2f5]">
+              <figcaption className={cn("flex flex-wrap items-center justify-between gap-x-3 gap-y-1 bg-[rgb(10_13_17/0.9)] px-3 py-1.5 text-[#eef2f5]", spotStep && "max-md:hidden")}>
                 <span className="font-mono text-[13px] font-semibold">{current.c.clock_s != null ? t("goalCaption", { clock: clock(current.c.clock_s), video: clock(current.c.goal_ms / 1000) }) : t("videoAt", { video: clock(current.c.goal_ms / 1000) })}</span>
                 {/* the coach sees the throw again while answering «Von wo?» (H7) */}
                 <button type="button" onClick={replay} className="min-h-11 cursor-pointer border-[1.5px] border-[#8d97a1] bg-transparent px-3 text-[15px] font-bold text-white" data-testid="check-replay">
@@ -587,7 +591,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
             )}
           </figure>
           <div>
-            <p className="m-0 flex flex-wrap items-center justify-between gap-3 text-[15px] font-semibold text-ink-2">
+            <p className={cn("m-0 flex flex-wrap items-center justify-between gap-3 text-[15px] font-semibold text-ink-2", spotStep && "max-md:hidden")}>
               <span>{spotStep?.fromList ? `${ts("change")} · ${spotStep.goal}` : revisit != null ? t("changing", { answer: answered[revisit]?.label ?? "" }) : t("questionOf", { n: total - open.length + 1, total })}</span>
               {/* «Zurück» only where there is a question before this one (fourth real-video test H10) */}
               {!spotStep && answered.length > 0 && (revisit != null ? revisit > 0 : total - open.length > 0) && (
@@ -599,16 +603,26 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
             {spotStep ? (
               // «Von wo?»: the goal is saved; one tap on the court saves the place and goes on (H7)
               <section aria-labelledby="spot-question" data-testid="spot-step">
-                {!spotStep.fromList && (
-                <p role="status" className="m-0 mt-2 text-[17px] font-semibold">
-                  <Check aria-hidden className="mr-1.5 inline size-5 align-[-3px] text-win" strokeWidth={3} />
-                  {ts("saved", { goal: spotStep.goal })}
+                <p role="status" className="m-0 text-[15px] font-semibold md:mt-2 md:text-[17px]">
+                  {spotStep.fromList ? (
+                    `${ts("change")} · ${spotStep.goal}`
+                  ) : (
+                    <>
+                      <Check aria-hidden className="mr-1.5 inline size-5 align-[-3px] text-win" strokeWidth={3} />
+                      {ts("saved", { goal: spotStep.goal })}
+                    </>
+                  )}
                 </p>
-                )}
-                <h1 id="spot-question" tabIndex={-1} className="mt-2 mb-2 text-[40px] leading-[.95] outline-none md:text-[58px]">
-                  {ts("question")}
-                </h1>
-                <p className="mt-3 max-w-[54ch] text-[17px] text-ink-2">
+                <div className="flex items-end justify-between gap-3">
+                  <h1 id="spot-question" tabIndex={-1} className="mt-1 mb-0 text-[32px] leading-[.95] outline-none md:mt-2 md:text-[58px]">
+                    {ts("question")}
+                  </h1>
+                  {/* on a phone the caption under the video gives way: the replay sits here */}
+                  <button type="button" onClick={replay} className="min-h-11 shrink-0 cursor-pointer border-2 border-ink bg-transparent px-3 text-[15px] font-bold text-ink md:hidden" data-testid="spot-replay">
+                    {ts("replay")}
+                  </button>
+                </div>
+                <p className="mt-1 mb-0 max-w-[54ch] text-[15px] text-ink-2 md:mt-3 md:text-[17px]">
                   {ts("why")} {spotStep.suggestion?.kind === "estimated" ? ts("suggestedWhy") : ""}
                 </p>
                 {failed && (
@@ -616,7 +630,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
                     {t("saveFailed")} <span className="block text-[15px] font-normal text-ink-2">{failed}</span>
                   </p>
                 )}
-                <div className="mt-4">
+                <div className="mt-2 md:mt-4">
                   <ShotSpotPicker key={`${spotStep.eventId}-${spotStep.index}`} suggestion={spotStep.suggestion} onPick={(spot, point) => void pickSpot(spotStep, spot, point)} />
                 </div>
               </section>

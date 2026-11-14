@@ -66,7 +66,11 @@ describe("places for the three things", () => {
     const g = graphics([goal("a", "opp", "rl"), goal("b", "opp", "rl"), goal("c", "opp", "rl"), goal("d", "own", null)]);
     const runs = goalRuns(g);
     expect(runs).toHaveLength(3);
-    expect(runs[0]!.shot).toEqual(ZONE_AT.rl);
+    // three goals at the zone's point are three dots, set apart, the same each time
+    const spots = runs.map((r) => r.shot.join(","));
+    expect(new Set(spots).size).toBe(3);
+    expect(goalRuns(g).map((r) => r.shot)).toEqual(runs.map((r) => r.shot));
+    for (const r of runs) expect(Math.hypot(r.shot[0] - ZONE_AT.rl![0], r.shot[1] - ZONE_AT.rl![1])).toBeCloseTo(1.1, 5);
     const things = threeThings(runs);
     expect(things.map((x) => [x.key, x.zone, x.value])).toEqual([["conceded_zone", "rl", 3]]);
   });

@@ -52,8 +52,20 @@ test("a confirmed goal asks «Von wo?»; three from one place make a thing; the 
     const step = page.getByTestId("spot-step");
     await expect(step).toContainText("Tor HC Wurfort ist gespeichert.");
     await expect(step.getByRole("heading", { name: "Von wo?" })).toBeVisible();
-    await expect(page.getByTestId("check-replay")).toBeVisible();
+    // on a phone «Nochmal ansehen» sits beside «Von wo?»
+    await expect(page.getByTestId("spot-replay")).toBeVisible();
     if (n === 0) {
+      // one screen on a phone: the bottom of the video and «Weiss nicht» are in view together, no scrolling
+      for (const size of [{ width: 390, height: 844 }, { width: 360, height: 740 }]) {
+        await page.setViewportSize(size);
+        await expect(page.getByTestId("spot-unknown")).toBeVisible();
+        await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+        const video = (await page.getByTestId("video").boundingBox())!;
+        const unknown = (await page.getByTestId("spot-unknown").boundingBox())!;
+        expect(video.y).toBeGreaterThanOrEqual(0);
+        expect(video.y + video.height).toBeLessThanOrEqual(size.height);
+        expect(unknown.y + unknown.height).toBeLessThanOrEqual(size.height);
+      }
       await expectAccessible(page);
       // every place is a target of at least 44 px for a thumb
       for (const z of ["la", "kr", "ra", "rl", "rm", "rr"]) {

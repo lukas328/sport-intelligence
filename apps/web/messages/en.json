@@ -3587,7 +3587,7 @@
   },
   "spot": {
     "question": "From where?",
-    "why": "Tap the spot the shot came from. One tap is enough, then it goes on. The goal is at the top; left in the picture is the attack's left.",
+    "why": "Tap where the shot came from.",
     "courtLabel": "Attacked half, goal at the top. Left and right as the attack sees them.",
     "zone": {
       "la": "Left wing",
@@ -3612,7 +3612,7 @@
     "unknown": "Don't know",
     "replay": "Watch again",
     "saved": "{goal} is saved.",
-    "suggestedWhy": "Yellow is the suggestion from the video. If it is right, tap it.",
+    "suggestedWhy": "Yellow is our suggestion.",
     "estimated": "estimated",
     "missing": "No shot spot",
     "of": "Shot from: {zone}",
@@ -3633,6 +3633,7 @@
     "noPattern": "No spot has three goals yet.",
     "soFar": "{n, plural, one {One thing so far.} other {# things so far.}}",
     "dialogTitle": "Where was this goal thrown from?",
-    "close": "Close"
+    "close": "Close",
+    "sideNote": "Goal at the top. Left and right as the attack sees them."
   }
 }
