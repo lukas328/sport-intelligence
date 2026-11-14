@@ -36,6 +36,7 @@ import { MatchTimeline } from "./match-timeline";
 import { OfficialGoalsPanel, useOfficialGoals } from "./official-goals";
 import { OfficialReportImport } from "./official-report";
 import { WorkRail, type Pane } from "./work-rail";
+import { usePartMarkers } from "./parts-panel";
 import { useGameTime } from "./game-time";
 import { TeamFeedView } from "./feed-views";
 
@@ -185,13 +186,16 @@ export function Workspace({
         .data ?? [],
   });
 
+  const partMarkers = usePartMarkers(match.videos);
   const markers: Marker[] = useMemo(
     () => [
+      // where the second half (a further file of the match) starts
+      ...partMarkers,
       ...(comments.data ?? []).map((c) => ({ t_ms: c.t_ms, kind: "comment" as const, label: c.body })),
       ...(clips.data ?? []).map((c) => ({ t_ms: c.start_ms, kind: "clip" as const, label: c.title ?? "" })),
       ...(annotations.data ?? []).map((a) => ({ t_ms: a.t_ms, kind: "drawing" as const })),
     ],
-    [comments.data, clips.data, annotations.data],
+    [comments.data, clips.data, annotations.data, partMarkers],
   );
 
   const addComment = useMutation({

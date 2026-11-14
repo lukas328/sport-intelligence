@@ -22,12 +22,13 @@ import { buttonClass } from "@/components/ui/button";
 import { goalWindow, sameGoal } from "@/lib/goal-window";
 import { openMoments, useMatchGraphics } from "@/lib/graphics";
 import { useRouter } from "next/navigation";
+import { partName, partsOf, partStarts, timelineVideo } from "@/lib/video-parts";
 
 type Match = Schemas["MatchOut"];
 type Candidate = Schemas["GoalCandidateRow"];
 
 type Track = Schemas["TrackOut"];
-type Question = { kind: "field"; videoId: string } | { kind: "kickoff"; period: number } | { kind: "goal"; c: Candidate } | { kind: "person"; tr: Track; at: number };
+type Question = { kind: "field"; videoId: string; part: number | null; copyFrom: string | null } | { kind: "kickoff"; period: number } | { kind: "goal"; c: Candidate } | { kind: "person"; tr: Track; at: number };
 
 // a person question: own tracks without a name, long enough to recognise someone, at most six
 const PERSON_MIN_MS = 5000;
@@ -46,13 +47,15 @@ const clock = (s: number | null | undefined) => (s == null ? "" : `${Math.floor(
 export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
   const t = useTranslations("check");
   const ta = useTranslations("anlauf");
+  const tParts = useTranslations("parts");
   const qc = useQueryClient();
   const router = useRouter();
   const { org, teams } = useShell();
   // our side as everywhere else: the team's own name, the club's for «Herren 1» (UX test A06)
   const own = ownName(teams.find((x) => x.id === match.team_id)?.name, org.name);
   const oppName = useOpponentName()(match);
-  const main = match.videos.find((v) => v.role === "main" && v.status === "ready") ?? null;
+  const main = timelineVideo(match.videos) ?? null;
+  const parts = partsOf(match.videos);
   const path = { org_id: orgId, match_id: match.id };
   const analysis = useQuery({
     queryKey: ["analysis", main?.id],
@@ -79,7 +82,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
   const [verified, setVerified] = useState(false);
   // questions left with «Weiss nicht»: not asked again in this round
   const skipped = useRef(new Set<string>());
-  const keyOf = (c: Schemas["CheckOut"]) => (c.kind === "field" ? (main ? `field:${main.id}` : "field") : c.kind === "kickoff" ? `kickoff:${c.frame_ref}` : c.id);
+  const keyOf = (c: Schemas["CheckOut"]) => (c.kind === "field" ? `field:${c.id}` : c.kind === "kickoff" ? `kickoff:${c.frame_ref}` : c.id);
   const fetchChecks = useCallback(async () => {
     const r = await api.GET("/v1/orgs/{org_id}/matches/{match_id}/graphics", { params: { path: { org_id: orgId, match_id: match.id } } });
     return r.data ?? null;
@@ -107,7 +110,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
         setReloading(false);
       }
     },
-    [fetchChecks, qc, match.id], // eslint-disable-line react-hooks/exhaustive-deps
+    [fetchChecks, qc, match.id],
   );
   const cal0 = analysis.data?.calibration;
   // a person box needs the homography of the very frame: with a panning camera only the hall
@@ -124,12 +127,15 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
   const toQuestions = useCallback(
     (list: Schemas["CheckOut"][]): Question[] =>
       list.flatMap((c): Question[] => {
-        if (c.kind === "field") return main ? [{ kind: "field", videoId: main.id }] : [];
+        // the court of each part of the match (the second half asked only when it was not
+        // carried over from the first); the first half's court can be taken over
+        if (c.kind === "field")
+          return main ? [{ kind: "field", videoId: c.id, part: parts.find((p) => p.id === c.id)?.part ?? null, copyFrom: c.copy_from ?? null }] : [];
         if (c.kind === "kickoff") return [{ kind: "kickoff", period: c.frame_ref }];
         const cand = candidates.data?.candidates.find((x) => x.id === c.id && x.status === "open");
         return cand ? [{ kind: "goal", c: cand }] : [];
       }),
-    [candidates.data, main],
+    [candidates.data, main, parts],
   );
   const questions = useMemo<Question[]>(() => {
     if (!asked) return [];
@@ -149,10 +155,18 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
   const total = questions.length;
   const next = useCallback((q: Question) => setDone((d) => [...d, id(q)]), []);
 
-  // the court on the hall image: the stored court projected back, four handles (UX test B13, B14)
-  const pano = analysis.data?.panorama ?? null;
+  // the court on the hall image: the stored court projected back, four handles (UX test B13, B14);
+  // a further part of the match has its own hall image and court
+  const fieldVideo = current?.kind === "field" ? current.videoId : (main?.id ?? null);
+  const partField = useQuery({
+    queryKey: ["analysis", fieldVideo],
+    enabled: fieldVideo != null && fieldVideo !== main?.id,
+    queryFn: async () => (await api.GET("/v1/orgs/{org_id}/videos/{video_id}/analysis", { params: { path: { org_id: orgId, video_id: fieldVideo! } } })).data ?? null,
+  });
+  const fieldData = fieldVideo != null && fieldVideo !== main?.id ? partField.data : analysis.data;
+  const pano = fieldData?.panorama ?? null;
   const panoSize: [number, number] | null = pano ? [pano.width, pano.height] : null;
-  const cal = analysis.data?.calibration;
+  const cal = fieldData?.calibration;
   const inPano = cal && panoSize && cal.image_size[0] === panoSize[0] && cal.image_size[1] === panoSize[1];
   const startCorners = panoSize ? cornersOf(inPano ? (cal.homography as Homography) : null, panoSize) : null;
   const [moved, setMoved] = useState<Pt[] | null>(null);
@@ -235,6 +249,24 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
               if (wasMoved) await reload(true);
             },
           },
+          ...(current.copyFrom
+            ? [
+                {
+                  key: "2",
+                  label: t("fieldTakeOver"),
+                  run: async () => {
+                    must(
+                      await api.POST("/v1/orgs/{org_id}/videos/{video_id}/calibration/from/{source_id}", {
+                        params: { path: { org_id: orgId, video_id: current.videoId, source_id: current.copyFrom! } },
+                      }),
+                    );
+                    setMoved(null);
+                    // this part is analysed again with the first half's court: then the rest
+                    await reload(true);
+                  },
+                },
+              ]
+            : []),
         ]
       : earlier
       ? [
@@ -321,6 +353,11 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
   });
 
   const media = main ? `/v1/orgs/${orgId}/videos/${main.id}/media` : null;
+  // where a half's file starts in the match video: the throw-off of the second half is near there
+  const kickoffFrom = (period: number) => {
+    const start = period > 1 ? partStarts(match.videos).find((p) => p.part === period)?.start_ms : undefined;
+    return start != null ? { start_ms: start, end_ms: Number.MAX_SAFE_INTEGER } : undefined;
+  };
   const back = `/app/${orgId}/matches/${match.id}`;
   const loading = candidates.isLoading || graphics.isLoading || !asked || (main != null && analysis.isLoading);
   // the list of this round is done: ask the server whether anything is left before saying so
@@ -413,10 +450,10 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
         <div className={cn("grid gap-5 py-6 md:gap-14 md:py-10", current.kind === "field" ? "md:grid-cols-1 md:gap-6" : "md:grid-cols-[minmax(0,1fr)_420px]")}>
           <figure className="relative m-0 self-start bg-[#1d2125]">
             {current.kind === "field" && main && panoSize && corners ? (
-              <FieldCheck src={`/v1/orgs/${orgId}/videos/${main.id}/panorama`} alt={t("fieldAlt")} size={panoSize} corners={corners} onChange={setMoved} />
+              <FieldCheck key={current.videoId} src={`/v1/orgs/${orgId}/videos/${current.videoId}/panorama`} alt={t("fieldAlt")} size={panoSize} corners={corners} onChange={setMoved} />
             ) : current.kind === "field" && main ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={`/v1/orgs/${orgId}/videos/${main.id}/panorama`} alt={t("fieldAlt")} className="block w-full outline-[3.5px] outline-attn outline-dashed -outline-offset-8" />
+              <img src={`/v1/orgs/${orgId}/videos/${current.videoId}/panorama`} alt={t("fieldAlt")} className="block w-full outline-[3.5px] outline-attn outline-dashed -outline-offset-8" />
             ) : current.kind === "person" && media && analysis.data?.calibration ? (
               <VideoPlayer
                 ref={player}
@@ -437,7 +474,8 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
                 }
               />
             ) : current.kind === "kickoff" && media ? (
-              <VideoPlayer ref={player} key={`kickoff-${current.period}`} src={`${media}/hls/master.m3u8`} />
+              // the second half's throw-off: the player starts where the second half's file starts
+              <VideoPlayer ref={player} key={`kickoff-${current.period}`} src={`${media}/hls/master.m3u8`} window={kickoffFrom(current.period)} />
             ) : current.kind === "goal" && media ? (
               <VideoPlayer key={current.c.id} src={`${media}/hls/master.m3u8`} window={goalWindow(current.c)} autoPlay />
             ) : null}
@@ -469,9 +507,9 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
                 </button>
               )}
             </p>
-            <h1 className="mb-2 text-[40px] leading-[.95] md:text-[58px]">{current.kind === "field" ? t("fieldQuestion") : current.kind === "kickoff" ? t("kickoffQuestion", { n: current.period }) : current.kind === "person" ? t("personQuestion") : t("goalQuestion")}</h1>
+            <h1 className="mb-2 text-[40px] leading-[.95] md:text-[58px]">{current.kind === "field" ? (current.part && current.part > 1 ? t("fieldQuestionPart", { name: tParts(partName(current.part, parts.length).key, { n: current.part }) }) : t("fieldQuestion")) : current.kind === "kickoff" ? t("kickoffQuestion", { n: current.period }) : current.kind === "person" ? t("personQuestion") : t("goalQuestion")}</h1>
             <p className="mt-4 max-w-[54ch] text-[17px] text-ink-2">
-              {current.kind === "field" ? t("fieldWhy") : current.kind === "kickoff" ? t("kickoffWhy") : current.kind === "person" ? t("personWhy") : earlier ? t("sameGoalWhy", { time: clock(earlier.t_ms! / 1000) }) : t("goalWhy")}
+              {current.kind === "field" ? (current.copyFrom ? t("fieldWhyPart") : t("fieldWhy")) : current.kind === "kickoff" ? t("kickoffWhy") : current.kind === "person" ? t("personWhy") : earlier ? t("sameGoalWhy", { time: clock(earlier.t_ms! / 1000) }) : t("goalWhy")}
             </p>
 
             {failed && (

@@ -152,7 +152,6 @@ const de = {
       "Paraden und Fehlwürfe erkennen. Die markierst du von Hand, wenn du sie willst.",
       "Tore allein aus dem Bild erkennen, wenn es weder Spielbericht noch Anzeige gibt.",
       "Laufdistanzen genau messen. Aus einer Kamera sind es Schätzungen.",
-      "Ein Spiel aus zwei Dateien auswerten.",
     ],
     note: "Was geschätzt ist, zeichnen wir gestrichelt und schreiben «geschätzt» dazu.",
   },
@@ -229,14 +228,14 @@ const de = {
         title: "Während dem Spiel",
         items: [
           "Nicht schwenken und nicht zoomen. Einfach laufen lassen.",
-          "Film in der Pause weiter. Wenn du stoppst, entsteht eine zweite Datei, und die zweite Halbzeit wird nicht ausgewertet.",
+          "Am besten in der Pause weiterfilmen. Hast du gestoppt, ist das kein Problem: Lade beide Dateien hoch, sie werden als ein Spiel ausgewertet.",
         ],
       },
       {
         title: "Danach",
         items: [
           "In der App das Spiel öffnen und die Datei hochladen.",
-          "Am besten das ganze Spiel in einer Datei (MP4, MOV oder MKV). Eine zweite Datei, etwa die zweite Halbzeit, wird gespeichert und abgespielt, ausgewertet wird aber nur die erste.",
+          "Am besten das ganze Spiel in einer Datei (MP4, MOV oder MKV). Zwei Dateien, etwa die beiden Halbzeiten, wählst du zusammen aus; die zweite kannst du auch später nachreichen. Ausgewertet wird das ganze Spiel.",
           "Ein direkter Link auf eine Videodatei geht auch, zum Beispiel der Download-Link von Veo oder Spiideo.",
         ],
       },
@@ -334,7 +333,7 @@ const de = {
     items: [
       { q: "Reicht mein Handy?", a: "Ja. Jedes Handy, das in Full HD (1080p) filmt, reicht. Wichtiger als die Kamera ist, wo sie steht." },
       { q: "Wo stelle ich die Kamera hin?", a: "Auf Höhe der Mittellinie, so hoch wie möglich, ab etwa 3 Metern: Tribüne, Galerie oder ein hohes Stativ. Das ganze Feld muss im Bild sein, mit beiden Torräumen." },
-      { q: "Welche Datei kann ich hochladen?", a: "Die Videodatei, so wie das Handy sie speichert. Am besten das ganze Spiel in einer Datei (MP4, MOV oder MKV). Eine zweite Datei, etwa die zweite Halbzeit, wird gespeichert und abgespielt, ausgewertet wird aber nur die erste. Ein direkter Link auf eine Videodatei geht auch, zum Beispiel der Download-Link von Veo oder Spiideo." },
+      { q: "Welche Datei kann ich hochladen?", a: "Die Videodatei, so wie das Handy sie speichert. Am besten das ganze Spiel in einer Datei (MP4, MOV oder MKV). Zwei Dateien, etwa die beiden Halbzeiten, wählst du zusammen aus; die zweite kannst du auch später nachreichen. Ausgewertet wird das ganze Spiel. Ein direkter Link auf eine Videodatei geht auch, zum Beispiel der Download-Link von Veo oder Spiideo." },
       { q: "Wie lange dauert die Analyse?", a: "Das hängt von der Länge des Videos ab. Du musst nicht dabeibleiben: du bekommst eine Mail, wenn die drei Dinge da sind." },
       { q: "Muss ich etwas von Hand eintragen?", a: "Nein. Die drei Dinge und die Szenen kommen ohne Eintippen. Wo die Analyse unsicher ist, fragt sie dich kurz. Paraden und Fehlwürfe markierst du nur, wenn du sie willst." },
       { q: "Was kostet es?", a: "Ein Team kostet CHF {month} im Monat oder CHF {year} im Jahr. Die Preise sind noch nicht endgültig." },

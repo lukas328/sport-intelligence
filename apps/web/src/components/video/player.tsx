@@ -17,7 +17,8 @@ import { drawShapes, type Shape } from "./shapes";
 
 export interface Marker {
   t_ms: number;
-  kind: "comment" | "clip" | "drawing" | "event";
+  /** "part": where the next file of the match starts (the second half), a line across the bar */
+  kind: "comment" | "clip" | "drawing" | "event" | "part";
   label?: string;
 }
 
@@ -297,7 +298,7 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
               className={cn(
                 // one ink on the scrubber, told apart by shape: a clip is wider, a drawing shorter
                 "pointer-events-none absolute bottom-0 -translate-x-1/2 bg-white",
-                m.kind === "clip" ? "h-2.5 w-0.5" : m.kind === "drawing" ? "h-1.5 w-0.5" : "h-2 w-0.5",
+                m.kind === "part" ? "h-6 w-1" : m.kind === "clip" ? "h-2.5 w-0.5" : m.kind === "drawing" ? "h-1.5 w-0.5" : "h-2 w-0.5",
               )}
               style={{ left: `${pct(m.t_ms)}%` }}
             />

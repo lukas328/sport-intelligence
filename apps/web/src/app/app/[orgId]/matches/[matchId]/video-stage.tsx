@@ -14,6 +14,7 @@ import { api } from "@/lib/client";
 import { goalRuns, reportGoals, thingSequence, type MatchGraphics } from "@/lib/graphics";
 import { threeThings } from "@/lib/three-things";
 import { cn } from "@/lib/utils";
+import { usePartMarkers } from "./parts-panel";
 
 type Match = Schemas["MatchOut"];
 type Video = Schemas["VideoOut"];
@@ -60,6 +61,7 @@ export function VideoStage({
   const t = useTranslations("anlauf");
   const tz = useTranslations("seasonPage");
   const text = useThingText();
+  const partMarkers = usePartMarkers(match.videos);
   const goals = graphics.goals.filter((g) => g.has_video || g.source === "demo");
   const things = threeThings(goalRuns(graphics));
   const chosen = thing != null ? (things[thing - 1] ?? null) : null;
@@ -155,7 +157,7 @@ export function VideoStage({
               autoPlay={all}
             />
           ) : (
-            <VideoPlayer ref={player} src={`${media}/hls/master.m3u8`} poster={video.has_poster ? `${media}/poster.jpg` : undefined} fps={video.fps} />
+            <VideoPlayer ref={player} src={`${media}/hls/master.m3u8`} poster={video.has_poster ? `${media}/poster.jpg` : undefined} fps={video.fps} markers={partMarkers} />
           )}
           <div className="flex flex-wrap items-center gap-2.5 bg-court-bar px-3 py-2 font-mono text-[13px] font-semibold text-court-text">
             {toggle}

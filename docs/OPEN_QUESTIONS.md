@@ -299,16 +299,40 @@ The app uses the new colours; Archivo is not yet bundled in the Expo build (syst
   then had to start over (UX test round 2, N15). Now 24 hours, still single use and void once
   used (setting `magic_link_ttl_minutes`). Trade-off: a mailbox someone else can read stays a way
   in for longer. Alternative if that is too long: a six-digit code next to the link.
-- **Q-VIDEO-PARTS Two files for one match (Lukas to decide, product).** Many coaches stop the
-  recording at half-time. Today a match takes several main files, all stored and playable, but
-  the match's timeline and the whole analysis (three things, scenes, Prüfen, positions) use only
-  the first one (`timeline_video`): the second half in a second file is not analysed. The app
-  says so where a second file is added and in the upload tips; the website says the same
-  (UX test round 2, N28). To merge two files into one match: effort (one timeline across files
-  with an offset per file, or joining the files before the analysis), order (by upload or by the
-  recording time in the file, with a way to swap), the time axis (the break between the files is
-  unknown: from the throw-off of the second half, which Prüfen already asks for). Until then: one
-  file per match is the recommendation.
+- **Q-VIDEO-PARTS Two files for one match. Decided (2026-11-13), built on `claude/video-parts`.**
+  A match has *parts* in a fixed order (usually the two halves; three or four when a phone splits
+  the recording). The match timeline is the parts one after the other; every event, scene, goal
+  candidate, possession, clip and throw-off time lies on it (`services/matches.parts_of`,
+  `services/timeline.py`). Order: the camera clock in the file's metadata, else upload order
+  (several files chosen at once go up in recording order); «Reihenfolge stimmt nicht? Tauschen»
+  swaps without a new upload. *Way chosen: an offset per file, not joining the files before the
+  analysis.* Each part is analysed on its own and its results are placed at the part's start, so a
+  part added hours later analyses only itself, nothing is re-encoded or stored twice, and the
+  court, the camera and a failure stay per part. For playback the API serves the first part's HLS
+  playlists joined over all parts (segments of each file, a discontinuity between files): every
+  player that plays the match video (Video tab, scenes, Prüfen, share links, the native app) plays
+  across the break without a change. A change of the parts (added, deleted, failed, swapped) moves
+  every match row with its part; the coach's answers are kept. The second half (second of two
+  parts, or after a break of 5 min or more) tells the event baseline which side the home team
+  defends (`side_hint`); its court tries the other part's confirmed court first and is asked in
+  Prüfen only when it was not carried over, with «Ecken der 1. Halbzeit übernehmen». The second
+  half's first throw-off opens half 2 of the match clock (`kickoff_ms["2"]`); without one Prüfen
+  asks for it and starts the player at the second file. Existing matches with several files keep
+  the first uploaded file at the start (migration 0044); their further files were never analysed
+  into the match and show «noch nicht ausgewertet» with «Auswerten». Still open:
+  - **Q-PARTS-MARKS** Courtside marks are synced with one offset per mark session; over a break
+    that is not in any file, the marks of the second half are off by the break. A piecewise sync
+    (one offset per part) is not built.
+  - **Q-PARTS-OVERLAY** The workbench overlays (spotlight, mini court) read the first part's
+    tracks; in the second half they show nothing instead of wrong positions. The tactics camera,
+    the runs of the three things, shot positions and the physical load already read each part.
+  - **Q-PARTS-RENDITIONS** Playback across files assumes they are encoded alike (same phone); a
+    part without audio next to one with audio, or very different resolutions, is untested in
+    Safari (the nearest rendition is chosen per file).
+  - **Q-PARTS-REELS** A highlight reel or export cut by the worker from the proxy uses the first
+    part's proxy: scenes of the second half are left out of reels until the worker reads parts.
+  - **Q-PARTS-ORDER-RERUN** After a swap the side hint of the part that is now second is not
+    recomputed; «Erneut versuchen» on that part runs it with the new hint.
 
 ## UX test round 3 (2026-11-13)
 
