@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { type ReactNode, useState } from "react";
 import { SectionHead } from "@/components/anlauf/blocks";
+import { SceneSpot } from "@/components/anlauf/spot-parts";
 import { SceneCamera, clockOf, useThingText } from "@/components/anlauf/three-things-view";
 import { buttonClass } from "@/components/ui/button";
 import { goalRuns, type MatchGraphics } from "@/lib/graphics";
@@ -53,6 +54,7 @@ export function PointOpen({ orgId, matchId, graphics, oppName }: { orgId: string
     <section data-testid="point-open">
       <SectionHead title={t("pointOpen")} note={of} />
       <SceneCamera key={goal.eventId} orgId={orgId} matchId={matchId} eventId={goal.eventId!} label={label} view={phone ? "halfB" : "camL"} width={phone ? 390 : 900} caption={`${label} · ${text(thing)}`} />
+      <SceneSpot orgId={orgId} matchId={matchId} graphics={graphics} eventId={goal.eventId!} label={label} />
       <div className="mt-2 flex flex-wrap gap-2.5">
         <button type="button" className={buttonClass("secondary", "sm")} disabled={at === 0} onClick={() => setAt((x) => Math.max(0, x - 1))}>
           {t("prevScene")}

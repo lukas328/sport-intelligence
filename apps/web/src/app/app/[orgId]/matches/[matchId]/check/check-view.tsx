@@ -175,6 +175,22 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
   const spotView = useGoalView(orgId, match.id, spotStep?.eventId ?? null);
   const lastReview = useRef<Candidate | null>(null);
   const current = spotStep?.q ?? (revisit != null ? (answered[revisit]?.q ?? null) : (open[0] ?? null));
+  // «Beantwortet» from the saved answers, also after a reload (V5): the goal moments already
+  // answered, with their place, ahead of what this round adds
+  const restored = useRef(false);
+  useEffect(() => {
+    if (restored.current || !candidates.data || !graphics.data) return;
+    restored.current = true;
+    const saved = candidates.data.candidates
+      .filter((c) => c.status !== "open")
+      .map((c): Answered => {
+        const goal = c.event_id ? graphics.data!.goals.find((x) => x.event_id === c.event_id) : undefined;
+        const label = c.status === "rejected" ? t("noGoal") : t("goalOf", { team: c.side === "own" ? own : oppName });
+        const spot: SpotAnswer | undefined = goal?.by_coach && goal.zone ? (goal.zone as SpotZone) : goal?.zone_source === "unknown" ? "unknown" : undefined;
+        return { q: { kind: "goal", c }, label, ...(c.status === "confirmed" && c.outcome === "goal" && c.event_id ? { eventId: c.event_id } : {}), ...(spot ? { spot } : {}) };
+      });
+    if (saved.length) setAnswered((list) => [...saved.filter((s) => !list.some((x) => id(x.q) === id(s.q))), ...list]);
+  }, [candidates.data, graphics.data, t, own, oppName]);
   const total = questions.length;
   const next = useCallback((q: Question) => setDone((d) => [...d, id(q)]), []);
 

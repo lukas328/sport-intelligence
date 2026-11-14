@@ -122,3 +122,16 @@ export function SpotStatus({ orgId, matchId, graphics, things, compact }: { orgI
     </section>
   );
 }
+
+/** Under the scene of a goal (a thing's scene, Punkt 1): its place and «Wurfort ändern» (V4). */
+export function SceneSpot({ orgId, matchId, graphics, eventId, label }: { orgId: string; matchId: string; graphics: MatchGraphics; eventId: string; label: string }) {
+  const text = useSpotText();
+  const goal = graphics.goals.find((x) => x.event_id === eventId);
+  if (!goal) return null;
+  return (
+    <p className="m-0 mt-1.5 flex flex-wrap items-center gap-x-3 text-[15px]" data-testid="scene-spot">
+      <span className="text-ink-2">{text(goal)}</span>
+      <SpotChange orgId={orgId} matchId={matchId} goal={goal} label={label} />
+    </p>
+  );
+}

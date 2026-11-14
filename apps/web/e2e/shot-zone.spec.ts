@@ -84,6 +84,10 @@ test("a confirmed goal asks «Von wo?»; three from one place make a thing; the 
   }
   await expect(page.getByTestId("check-answered")).toContainText("Wurfort: Rückraum links");
   await expect(page.getByTestId("check-failed")).toHaveCount(0);
+  // «Beantwortet» comes from the saved answers: still there after a reload, with «Wurfort ändern» (V5)
+  await page.reload();
+  await expect(page.getByTestId("check-answered")).toContainText("Wurfort: Rückraum links", { timeout: 30_000 });
+  await expect(page.getByTestId("check-spot-change")).toHaveCount(3);
   // an opponent goal confirmed without a place (as in a match before «Von wo?»)
   const old = await page.request.post(`/v1/orgs/${org}/matches/${match.id}/events`, { headers, data: { type: "shot", side: "opponent", outcome: "goal", t_ms: 8000 } });
   expect(old.status()).toBe(201);
@@ -96,6 +100,9 @@ test("a confirmed goal asks «Von wo?»; three from one place make a thing; the 
   const status = page.getByTestId("spot-status");
   await expect(status).toContainText("Ein Ding bisher.");
   await expect(status).toContainText("Bei 1 Tor fehlt, von wo geworfen wurde.");
+  // every goal stays reachable under the thing, folded (V4)
+  await page.getByTestId("all-goals").locator("summary").click();
+  await expect(page.getByTestId("all-goals").getByTestId("video-goal")).toHaveCount(4);
 
   // «nachtragen»: only «Von wo?», with the count
   await status.getByTestId("spot-fill").click();
