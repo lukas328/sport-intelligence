@@ -4953,6 +4953,31 @@
             ],
             "title": "Player Id"
           },
+          "shot_zone": {
+            "anyOf": [
+              {
+                "enum": [
+                  "la",
+                  "rl",
+                  "rm",
+                  "rr",
+                  "ra",
+                  "kr",
+                  "m7",
+                  "gs"
+                ],
+                "type": "string"
+              },
+              {
+                "const": "unknown",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Shot Zone"
+          },
           "side": {
             "anyOf": [
               {
@@ -4982,6 +5007,32 @@
               }
             ],
             "title": "Status"
+          },
+          "x": {
+            "anyOf": [
+              {
+                "maximum": 42.0,
+                "minimum": -2.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "X"
+          },
+          "y": {
+            "anyOf": [
+              {
+                "maximum": 22.0,
+                "minimum": -2.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Y"
           }
         },
         "required": [
@@ -5084,6 +5135,27 @@
             "title": "Score",
             "type": "number"
           },
+          "shot_zone": {
+            "anyOf": [
+              {
+                "enum": [
+                  "la",
+                  "rl",
+                  "rm",
+                  "rr",
+                  "ra",
+                  "kr",
+                  "m7",
+                  "gs"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Shot Zone"
+          },
           "side": {
             "anyOf": [
               {
@@ -5145,6 +5217,22 @@
             "format": "uuid",
             "title": "Video Asset Id",
             "type": "string"
+          },
+          "zone_source": {
+            "anyOf": [
+              {
+                "enum": [
+                  "coach",
+                  "estimated",
+                  "unknown"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Zone Source"
           }
         },
         "required": [
@@ -5450,6 +5538,12 @@
             ],
             "title": "Source"
           },
+          "spot_missing": {
+            "default": false,
+            "description": "a goal in the video whose shot place nobody gave yet (asked in Pr\u00fcfen)",
+            "title": "Spot Missing",
+            "type": "boolean"
+          },
           "t_ms": {
             "anyOf": [
               {
@@ -5481,6 +5575,23 @@
             ],
             "description": "la, ra, rl, rm, rr, kr, m7 or gs",
             "title": "Zone"
+          },
+          "zone_source": {
+            "anyOf": [
+              {
+                "enum": [
+                  "coach",
+                  "estimated",
+                  "unknown"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "who gave the zone: the coach, an estimate from the tracks, the coach did not know (unknown); null: nobody yet",
+            "title": "Zone Source"
           }
         },
         "required": [
@@ -15303,6 +15414,142 @@
         "title": "SharePreview",
         "type": "object"
       },
+      "ShotSpotIn": {
+        "description": "Where a goal's shot came from, as the coach tapped it in Pr\u00fcfen (fourth real-video test\nH7): a zone of the three things (left and right from the attacker's view; m7 Siebenmeter, gs\nGegenstoss) or \"unknown\" (Weiss nicht: the estimate from the tracks stands), and the tapped\npoint in court metres with the attacked goal at x = 40, when there is one.",
+        "properties": {
+          "shot_zone": {
+            "anyOf": [
+              {
+                "enum": [
+                  "la",
+                  "rl",
+                  "rm",
+                  "rr",
+                  "ra",
+                  "kr",
+                  "m7",
+                  "gs"
+                ],
+                "type": "string"
+              },
+              {
+                "const": "unknown",
+                "type": "string"
+              }
+            ],
+            "title": "Shot Zone"
+          },
+          "x": {
+            "anyOf": [
+              {
+                "maximum": 42.0,
+                "minimum": -2.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "X"
+          },
+          "y": {
+            "anyOf": [
+              {
+                "maximum": 22.0,
+                "minimum": -2.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Y"
+          }
+        },
+        "required": [
+          "shot_zone"
+        ],
+        "title": "ShotSpotIn",
+        "type": "object"
+      },
+      "ShotSpotOut": {
+        "properties": {
+          "event_id": {
+            "format": "uuid",
+            "title": "Event Id",
+            "type": "string"
+          },
+          "shot_zone": {
+            "anyOf": [
+              {
+                "enum": [
+                  "la",
+                  "rl",
+                  "rm",
+                  "rr",
+                  "ra",
+                  "kr",
+                  "m7",
+                  "gs"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "zone of the three things; null: none known",
+            "title": "Shot Zone"
+          },
+          "x": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "X"
+          },
+          "y": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Y"
+          },
+          "zone_source": {
+            "anyOf": [
+              {
+                "enum": [
+                  "coach",
+                  "estimated",
+                  "unknown"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Zone Source"
+          }
+        },
+        "required": [
+          "event_id",
+          "shot_zone",
+          "zone_source",
+          "x",
+          "y"
+        ],
+        "title": "ShotSpotOut",
+        "type": "object"
+      },
       "SlideIn": {
         "description": "Content per type (addendum 01, 4.1):\n\n- clip: video_id, in_ms, out_ms, holds [{t_ms, duration_ms, shapes}], slow [{from_ms, to_ms,\n  rate}], spotlight [track ids], notes\n- tactics_board: play_id (field), notes\n- text: title, body, notes\n- stat_card: title, rows [{label, value, n}], notes\n- image: caption, notes (image uploaded separately)",
         "properties": {
@@ -24271,6 +24518,80 @@
           }
         },
         "summary": "Review Goal Candidate",
+        "tags": [
+          "events"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/matches/{match_id}/goals/{event_id}/spot": {
+      "put": {
+        "description": "Where a goal's shot came from, as the coach tapped it (Pr\u00fcfen \u00abVon wo?\u00bb, the list\n\u00abBeantwortet\u00bb, the scene, \u00abWurfort nachtragen\u00bb): a zone of the three things or \"unknown\",\nand the tapped point in court metres. Works for any goal of the match, report goals too.",
+        "operationId": "set_shot_spot_v1_orgs__org_id__matches__match_id__goals__event_id__spot_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "match_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Match Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "event_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Event Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShotSpotIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShotSpotOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Set Shot Spot",
         "tags": [
           "events"
         ]

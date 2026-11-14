@@ -44,7 +44,14 @@ from handball_api.services.matches import (
     timeline_duration_ms,
     timeline_video,
 )
-from handball_api.services.shot_positions import _rows
+from handball_api.services.shot_positions import (
+    COACH,
+    GRAPHIC_ZONE,
+    UNKNOWN,
+    _rows,
+    zone_of,
+    zone_source,
+)
 from handball_api.services.timeline import Files
 
 LENGTH, WIDTH = 40.0, 20.0
@@ -58,28 +65,37 @@ SAMPLE_MS = 110  # about 9 positions per second
 ESTIMATED_SOURCES = {"heuristic", "scoreboard_ocr"}
 TEAM_OF_TRACK = {"home": "own", "home_gk": "own", "away": "opp", "away_gk": "opp", "referee": "ref"}
 
-# shot zones of the events (left/right from the attacker's view) as zones of the graphics
-ZONE = {
-    "wing_left": "la",
-    "back_left": "rl",
-    "half_left": "rl",
-    "back_centre": "rm",
-    "half_centre": "rm",
-    "back_right": "rr",
-    "half_right": "rr",
-    "wing_right": "ra",
-    "circle_left": "kr",
-    "circle_centre": "kr",
-    "circle_right": "kr",
-}
+# shot zones of the events (left/right from the attacker's view) as zones of the graphics, and
+# the zone of a goal (shot_positions: one rule for the review, the graphics and the estimate)
+ZONE = GRAPHIC_ZONE
 
 
-def zone_of(e: Event) -> str | None:
-    if e.shot_type == "penalty":
-        return "m7"
-    if e.shot_type == "fast_break":
-        return "gs"
-    return ZONE.get(e.shot_zone or "")
+def spot_estimated(e: Event) -> bool:
+    """The shot spot comes from the tracks or the scoreboard, not from a person."""
+    source = (e.attributes or {}).get("position_source")
+    return (bool(source) and source != COACH) or e.source in ESTIMATED_SOURCES
+
+
+def zone_said(e: Event) -> str | None:
+    """Who gave the zone: "coach", "estimated", "unknown" (the coach did not know) or None.
+    A zone marked by hand (tagging, a corrected event, a report's penalty) counts as the coach's."""
+    said = zone_source(e)
+    if said is not None:
+        return said
+    if zone_of(e) is None:
+        return None
+    return "estimated" if spot_estimated(e) and e.shot_type is None else COACH
+
+
+def spot_missing(e: Event, length_ms: int | None) -> bool:
+    """A goal in the video whose place nobody gave: asked in «Wurfort nachtragen». Report goals
+    count once the throw-off places them in the video; a goal only guessed from a throw-off is not
+    asked (Prüfen asks whether it is one)."""
+    if e.source == "heuristic" or e.t_ms is None or e.t_ms < 0:
+        return False
+    if length_ms is not None and e.t_ms > length_ms:
+        return False
+    return zone_of(e) is None and zone_source(e) != UNKNOWN
 
 
 def to_half(x: float, y: float) -> tuple[float, float]:
@@ -320,8 +336,7 @@ async def match_graphics(ctx: Ctx, match_id: uuid.UUID) -> dict[str, Any]:
     runs: list[dict[str, Any]] = []
     part_cache: dict[uuid.UUID, list[Track] | None] = {}
     for e in goals:
-        attrs = e.attributes or {}
-        estimated_spot = bool(attrs.get("position_source")) or e.source in ESTIMATED_SOURCES
+        estimated_spot = spot_estimated(e)
         run: list[tuple[float, float]] = []
         shot = to_half(e.x, e.y) if e.x is not None and e.y is not None else None
         source = "marked" if shot else None
@@ -348,6 +363,8 @@ async def match_graphics(ctx: Ctx, match_id: uuid.UUID) -> dict[str, Any]:
                 "number": e.number,
                 "player_id": e.player_id,
                 "zone": zone_of(e),
+                "zone_source": zone_said(e),
+                "spot_missing": (not demo) and spot_missing(e, length),
                 "run": run,
                 "shot": shot,
                 # where on the goal is only marked by hand (goal_zone); never drawn as a flight
@@ -767,9 +784,7 @@ async def camera_of(ctx: Ctx, match: Match, e: Event) -> dict[str, Any]:
         "ball": [],
         "scorer": {"team": _team(e.side), "number": e.number} if e.number is not None else None,
         "shot": None,
-        "confirmed": not (
-            bool((e.attributes or {}).get("position_source")) or e.source in ESTIMATED_SOURCES
-        ),
+        "confirmed": not (spot_estimated(e)),
         "source": "demo" if demo else "analysis",
     }
     if demo and field:

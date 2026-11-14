@@ -2026,6 +2026,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/matches/{match_id}/goals/{event_id}/spot": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Set Shot Spot
+         * @description Where a goal's shot came from, as the coach tapped it (Prüfen «Von wo?», the list
+         *     «Beantwortet», the scene, «Wurfort nachtragen»): a zone of the three things or "unknown",
+         *     and the tapped point in court metres. Works for any goal of the match, report goals too.
+         */
+        put: operations["set_shot_spot_v1_orgs__org_id__matches__match_id__goals__event_id__spot_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/matches/{match_id}/graphics": {
         parameters: {
             query?: never;
@@ -6702,10 +6724,16 @@ export interface components {
             outcome?: ("goal" | "save" | "miss" | "post" | "blocked") | null;
             /** Player Id */
             player_id?: string | null;
+            /** Shot Zone */
+            shot_zone?: ("la" | "rl" | "rm" | "rr" | "ra" | "kr" | "m7" | "gs") | "unknown" | null;
             /** Side */
             side?: ("own" | "opponent") | null;
             /** Status */
             status: ("confirmed" | "rejected") | null;
+            /** X */
+            x?: number | null;
+            /** Y */
+            y?: number | null;
         };
         /**
          * GoalCandidateRow
@@ -6740,6 +6768,8 @@ export interface components {
             rate: number;
             /** Score */
             score: number;
+            /** Shot Zone */
+            shot_zone?: ("la" | "rl" | "rm" | "rr" | "ra" | "kr" | "m7" | "gs") | null;
             /** Side */
             side: ("own" | "opponent") | null;
             /** Start Ms */
@@ -6759,6 +6789,8 @@ export interface components {
              * Format: uuid
              */
             video_asset_id: string;
+            /** Zone Source */
+            zone_source?: ("coach" | "estimated" | "unknown") | null;
         };
         /** GoalComparison */
         GoalComparison: {
@@ -6849,6 +6881,12 @@ export interface components {
             /** Source */
             source: ("tracking" | "marked" | "demo") | null;
             /**
+             * Spot Missing
+             * @description a goal in the video whose shot place nobody gave yet (asked in Prüfen)
+             * @default false
+             */
+            spot_missing?: boolean;
+            /**
              * T Ms
              * @description video time of the goal
              */
@@ -6863,6 +6901,11 @@ export interface components {
              * @description la, ra, rl, rm, rr, kr, m7 or gs
              */
             zone: string | null;
+            /**
+             * Zone Source
+             * @description who gave the zone: the coach, an estimate from the tracks, the coach did not know (unknown); null: nobody yet
+             */
+            zone_source?: ("coach" | "estimated" | "unknown") | null;
         };
         /** GraphicsPartOut */
         GraphicsPartOut: {
@@ -10312,6 +10355,40 @@ export interface components {
             team: string;
             /** Title */
             title: string;
+        };
+        /**
+         * ShotSpotIn
+         * @description Where a goal's shot came from, as the coach tapped it in Prüfen (fourth real-video test
+         *     H7): a zone of the three things (left and right from the attacker's view; m7 Siebenmeter, gs
+         *     Gegenstoss) or "unknown" (Weiss nicht: the estimate from the tracks stands), and the tapped
+         *     point in court metres with the attacked goal at x = 40, when there is one.
+         */
+        ShotSpotIn: {
+            /** Shot Zone */
+            shot_zone: ("la" | "rl" | "rm" | "rr" | "ra" | "kr" | "m7" | "gs") | "unknown";
+            /** X */
+            x?: number | null;
+            /** Y */
+            y?: number | null;
+        };
+        /** ShotSpotOut */
+        ShotSpotOut: {
+            /**
+             * Event Id
+             * Format: uuid
+             */
+            event_id: string;
+            /**
+             * Shot Zone
+             * @description zone of the three things; null: none known
+             */
+            shot_zone: ("la" | "rl" | "rm" | "rr" | "ra" | "kr" | "m7" | "gs") | null;
+            /** X */
+            x: number | null;
+            /** Y */
+            y: number | null;
+            /** Zone Source */
+            zone_source: ("coach" | "estimated" | "unknown") | null;
         };
         /**
          * SlideIn
@@ -15299,6 +15376,43 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["GoalCandidateRow"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    set_shot_spot_v1_orgs__org_id__matches__match_id__goals__event_id__spot_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: string;
+                event_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ShotSpotIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShotSpotOut"];
                 };
             };
             /** @description Validation Error */

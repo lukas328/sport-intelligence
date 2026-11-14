@@ -557,6 +557,15 @@ class GoalRunOut(ApiModel):
     number: int | None
     player_id: uuid.UUID | None = None
     zone: str | None = Field(description="la, ra, rl, rm, rr, kr, m7 or gs")
+    zone_source: Literal["coach", "estimated", "unknown"] | None = Field(
+        default=None,
+        description="who gave the zone: the coach, an estimate from the tracks, the coach did "
+        "not know (unknown); null: nobody yet",
+    )
+    spot_missing: bool = Field(
+        default=False,
+        description="a goal in the video whose shot place nobody gave yet (asked in Prüfen)",
+    )
     run: list[tuple[float, float]] = Field(
         description="the scorer's way before the shot, half court (goal at the top, metres); "
         "empty without tracking"
