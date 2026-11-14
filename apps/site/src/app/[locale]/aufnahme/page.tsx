@@ -15,6 +15,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return pageMeta(locale, "aufnahme", messages(locale).seo.filming.title, messages(locale).seo.filming.description);
 }
 
+/** Fixed line breaks: each line of the text on its own line, so the notice breaks the same in print. */
+function lines(text: string) {
+  return text.split("\n").map((l) => (
+    <span key={l} className="block">
+      {l}
+    </span>
+  ));
+}
+
 /** The filming guide with a plan of the hall and the printable notice (addendum 01, 8). */
 export default async function Filming({ params }: Props) {
   const { locale } = await params;
@@ -70,7 +79,10 @@ export default async function Filming({ params }: Props) {
           </div>
           {/* the notice: readable from three metres, one A4 page, no hyphenation, a line to fill in by hand */}
           <div className="notice-sheet mt-6 flex flex-col border-4 border-ink bg-paper px-6 py-12 md:px-16 md:py-20">
-            <p className="font-slant notice-text text-[2.25rem] leading-[1.1] [hyphens:none] [overflow-wrap:normal] [text-wrap:balance] md:text-[3.5rem]">{t.notice}</p>
+            <p className="font-slant notice-text text-[2.25rem] leading-[1.1] [hyphens:none] [overflow-wrap:normal] md:text-[3.5rem]">
+              {lines(t.notice)}
+            </p>
+            <p className="notice-sub mt-8 text-[1.5rem] leading-[1.25] font-bold [hyphens:none] [overflow-wrap:normal] md:text-[2.25rem]">{lines(t.noticeSub)}</p>
             <p className="notice-ask mt-12 flex items-end gap-3 text-[1.25rem] font-bold">
               <span className="shrink-0">{t.noticeAsk}</span>
               <span aria-hidden className="h-8 flex-1 border-b-2 border-ink" />

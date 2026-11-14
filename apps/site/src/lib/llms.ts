@@ -6,9 +6,9 @@
  */
 import plans from "@handball/plans";
 import { factRows } from "@/lib/facts";
-import { fileVars, notList } from "@/lib/files";
+import { fileVars, launchState, notList } from "@/lib/files";
 import { fmt, messages, type Locale } from "@/lib/i18n";
-import { SITE_NAME, SITE_UPDATED, pageUrl } from "@/lib/site";
+import { LAUNCHED, SITE_NAME, SITE_UPDATED, pageUrl } from "@/lib/site";
 import { BLOG } from "../../content/blog";
 import { GUIDES } from "../../content/ratgeber";
 import { HELP } from "../../content/help";
@@ -42,6 +42,7 @@ export function llmsTxt(): string {
     "",
     `> ${de.facts.lead}`,
     "",
+    ...(LAUNCHED ? [] : [launchState(de), ""]),
     `Stand: ${SITE_UPDATED}. Sprachen: Deutsch (de-CH), Französisch (fr-CH), Englisch. Für wen: ${get("Für wen")}`,
     "",
     `Wer dahinter steht: ${de.us.homeText}`,

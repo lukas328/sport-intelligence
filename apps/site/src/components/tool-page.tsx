@@ -71,7 +71,7 @@ export function Sheet({ children }: { children: ReactNode }) {
 /** A line to write on, with its label underneath. */
 export function WriteLine({ label }: { label: string }) {
   return (
-    <div className="mt-8">
+    <div className="mt-8 print:mt-[5mm]">
       <div className="h-8 border-b-2 border-ink print:h-[11mm]" />
       <p className="mt-1 text-base text-ink-2 print:text-[11pt]">{label}</p>
     </div>

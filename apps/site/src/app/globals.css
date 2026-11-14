@@ -413,6 +413,11 @@
     font-size: 50pt;
     line-height: 1.12;
   }
+  .notice-sub {
+    margin-top: 14mm;
+    font-size: 26pt;
+    line-height: 1.25;
+  }
   .notice-ask {
     margin-top: 40mm;
     font-size: 16pt;

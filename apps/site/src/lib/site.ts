@@ -28,6 +28,13 @@ export const PRICES_FINAL = false;
  */
 export const MULTI_FILE = false;
 
+/**
+ * Public launch. While false, Fakten, Über uns, llms.txt and the question «Kann ich es heute schon
+ * nutzen?» say that the site is before the launch and that operator details, terms and privacy
+ * policy follow (m.facts.launchPre, dated with SITE_UPDATED). Set to true on launch day.
+ */
+export const LAUNCHED = false;
+
 /** Operating company for the imprint; left empty until it is known (OPEN_QUESTIONS Q-ADD-3). */
 export const COMPANY = {
   name: process.env.NEXT_PUBLIC_COMPANY_NAME ?? "",

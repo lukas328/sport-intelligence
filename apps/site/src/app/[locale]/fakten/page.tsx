@@ -8,7 +8,8 @@ import { factRows } from "@/lib/facts";
 import { HTML_LANG, fmt, messages, type Locale } from "@/lib/i18n";
 import { APP_ID, graph, organization, softwareApplication, webPage, website } from "@/lib/schema";
 import { pageMeta } from "@/lib/seo";
-import { SITE_UPDATED, pageUrl } from "@/lib/site";
+import { LAUNCHED, SITE_UPDATED, pageUrl } from "@/lib/site";
+import { launchState } from "@/lib/files";
 
 type Props = { params: Promise<{ locale: Locale }> };
 
@@ -51,6 +52,7 @@ export default async function Facts({ params }: Props) {
         <p className="mt-5 text-[1.0625rem] text-ink-2">
           <time dateTime={SITE_UPDATED}>{fmt(m.guides.updated, { date })}</time>
         </p>
+        {!LAUNCHED && <p className="mt-4 max-w-[40rem] border-l-4 border-attn bg-paper px-4 py-2 text-[1.0625rem]">{launchState(m)}</p>}
       </PageHead>
       <div className="wrap">
         <section aria-labelledby="fakten" className="mt-12">

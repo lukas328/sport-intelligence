@@ -8,6 +8,8 @@ import { PageHead, SectionHead, Updated } from "@/components/wurf-head";
 import { APP_LOCALE, messages, type Locale } from "@/lib/i18n";
 import { ORG_ID, graph, organization, webPage } from "@/lib/schema";
 import { pageMeta } from "@/lib/seo";
+import { launchState } from "@/lib/files";
+import { LAUNCHED } from "@/lib/site";
 
 type Props = { params: Promise<{ locale: Locale }> };
 
@@ -30,6 +32,7 @@ export default async function AboutUs({ params }: Props) {
       <JsonLd data={graph(organization(), { ...webPage(locale, "ueber-uns", t.metaTitle, t.description, undefined, "AboutPage"), about: { "@id": ORG_ID } })} />
       <PageHead kick={t.title} title={t.head} lead={t.lead}>
         <Updated locale={locale} />
+        {!LAUNCHED && <p className="mt-4 max-w-[40rem] border-l-4 border-attn bg-paper px-4 py-2 text-[1.0625rem]">{launchState(m)}</p>}
       </PageHead>
       <div className="wrap">
         <div className="mt-12 grid grid-cols-1 gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)]">

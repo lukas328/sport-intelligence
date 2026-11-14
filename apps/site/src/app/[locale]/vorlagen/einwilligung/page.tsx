@@ -31,6 +31,11 @@ export default async function ConsentTemplate({ params }: Props) {
         <h2 className="text-[1.75rem] md:text-[2rem]">{t.sheetTitle}</h2>
         <WriteLine label={t.team} />
         <p className="measure mt-4 leading-[1.6]">{t.intro}</p>
+        <WriteLine label={t.responsible} />
+        <div className="grid grid-cols-1 gap-x-10 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] print:grid-cols-[2fr_1fr]">
+          <WriteLine label={t.storage} />
+          <WriteLine label={t.deletion} />
+        </div>
         <p className="mt-6 font-bold">{t.agree}</p>
         <ul className="mt-2">
           {t.items.map((x) => (
@@ -46,7 +51,10 @@ export default async function ConsentTemplate({ params }: Props) {
           <WriteLine label={t.name} />
           <WriteLine label={t.date} />
         </div>
-        <WriteLine label={t.sign} />
+        <div className="grid grid-cols-1 gap-x-10 md:grid-cols-2 print:grid-cols-2">
+          <WriteLine label={t.sign} />
+          <WriteLine label={t.signParent} />
+        </div>
         <p className="mt-8 text-base print:mt-[10mm] print:text-[12.5pt]">{t.contact}</p>
       </Sheet>
       <PrintButton label={m.tools.print} />
