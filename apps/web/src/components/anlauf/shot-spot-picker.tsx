@@ -74,7 +74,21 @@ export function ShotSpotPicker({
                 )}
                 {...NS}
               />
-              <text x={lx} y={ly} textAnchor="middle" fontSize={0.95} fontWeight={700} fill="var(--ink)" pointerEvents="none" aria-hidden>
+              <text
+                x={lx}
+                y={ly}
+                textAnchor="middle"
+                fontSize={0.95}
+                fontWeight={700}
+                fill="var(--ink)"
+                // a halo in the area's colour: the court lines do not run through the words
+                stroke={word ? "var(--attn)" : "var(--ground)"}
+                strokeWidth={0.28}
+                strokeLinejoin="round"
+                paintOrder="stroke"
+                pointerEvents="none"
+                aria-hidden
+              >
                 <tspan x={lx} dy={0}>
                   {l1}
                 </tspan>

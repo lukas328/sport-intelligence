@@ -256,11 +256,12 @@ export function VideoGoals({ orgId, matchId, graphics, oppName, onScene }: { org
               <span className="min-w-0 flex-1">
                 {t("goalBy", { team: who(g) })}
                 {g.number != null && ` · #${g.number}`}
-                <span className="block text-[15px] text-ink-2" data-testid="video-goal-spot">
-                  {spotText(g)}
+                {/* the place and its change on their own line: on a phone the row stays readable */}
+                <span className="flex flex-wrap items-center gap-x-3 text-[15px] text-ink-2">
+                  <span data-testid="video-goal-spot">{spotText(g)}</span>
+                  <SpotChange orgId={orgId} matchId={matchId} goal={g} label={`${t("goalBy", { team: who(g) })} · ${when(g)}`} />
                 </span>
               </span>
-              <SpotChange orgId={orgId} matchId={matchId} goal={g} label={`${t("goalBy", { team: who(g) })} ${when(g)}`} />
               {g.has_video && g.t_ms != null && (
                 <button type="button" onClick={() => (onScene ? onScene(g.event_id) : setOpen(g.event_id))} aria-pressed={onScene ? undefined : open === g.event_id} data-testid="scene-show" className="min-h-11 cursor-pointer border-0 bg-transparent p-0 text-[15px] font-bold text-ink underline decoration-[1.5px] underline-offset-4">
                   {t("sceneShow")}

@@ -3587,7 +3587,7 @@
   },
   "spot": {
     "question": "D'où?",
-    "why": "Touche l'endroit du tir. Le but est en haut, la gauche de l'image est la gauche de l'attaque.",
+    "why": "Touche l'endroit du tir. Un seul toucher suffit, puis on continue. Le but est en haut, la gauche de l'image est la gauche de l'attaque.",
     "courtLabel": "Demi-terrain attaqué, but en haut. Gauche et droite vues par l'attaque.",
     "zone": {
       "la": "Ailier gauche",

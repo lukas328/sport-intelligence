@@ -3587,7 +3587,7 @@
   },
   "spot": {
     "question": "Von wo?",
-    "why": "Tipp auf die Stelle, von der geworfen wurde. Das Tor ist oben, links im Bild ist links aus Sicht des Angriffs.",
+    "why": "Tipp auf die Stelle, von der geworfen wurde. Ein Tipp genügt, dann geht es weiter. Das Tor ist oben, links im Bild ist links aus Sicht des Angriffs.",
     "courtLabel": "Angegriffene Hälfte, Tor oben. Links und rechts aus Sicht des Angriffs.",
     "zone": {
       "la": "Aussen links",

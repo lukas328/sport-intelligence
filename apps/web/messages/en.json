@@ -3587,7 +3587,7 @@
   },
   "spot": {
     "question": "From where?",
-    "why": "Tap the spot the shot came from. The goal is at the top; left in the picture is the attack's left.",
+    "why": "Tap the spot the shot came from. One tap is enough, then it goes on. The goal is at the top; left in the picture is the attack's left.",
     "courtLabel": "Attacked half, goal at the top. Left and right as the attack sees them.",
     "zone": {
       "la": "Left wing",

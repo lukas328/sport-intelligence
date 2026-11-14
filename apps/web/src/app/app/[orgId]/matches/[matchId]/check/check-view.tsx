@@ -588,7 +588,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
           </figure>
           <div>
             <p className="m-0 flex flex-wrap items-center justify-between gap-3 text-[15px] font-semibold text-ink-2">
-              <span>{revisit != null ? t("changing", { answer: answered[revisit]?.label ?? "" }) : t("questionOf", { n: total - open.length + 1, total })}</span>
+              <span>{spotStep?.fromList ? `${ts("change")} · ${spotStep.goal}` : revisit != null ? t("changing", { answer: answered[revisit]?.label ?? "" }) : t("questionOf", { n: total - open.length + 1, total })}</span>
               {/* «Zurück» only where there is a question before this one (fourth real-video test H10) */}
               {!spotStep && answered.length > 0 && (revisit != null ? revisit > 0 : total - open.length > 0) && (
                 <button type="button" onClick={() => setRevisit((revisit ?? answered.length) - 1)} className="min-h-11 cursor-pointer border-0 bg-transparent p-0 font-bold text-ink underline underline-offset-4" data-testid="check-back">
@@ -599,10 +599,12 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
             {spotStep ? (
               // «Von wo?»: the goal is saved; one tap on the court saves the place and goes on (H7)
               <section aria-labelledby="spot-question" data-testid="spot-step">
+                {!spotStep.fromList && (
                 <p role="status" className="m-0 mt-2 text-[17px] font-semibold">
                   <Check aria-hidden className="mr-1.5 inline size-5 align-[-3px] text-win" strokeWidth={3} />
                   {ts("saved", { goal: spotStep.goal })}
                 </p>
+                )}
                 <h1 id="spot-question" tabIndex={-1} className="mt-2 mb-2 text-[40px] leading-[.95] outline-none md:text-[58px]">
                   {ts("question")}
                 </h1>
@@ -673,7 +675,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
                         });
                       }}
                     >
-                      <fieldset className="m-0 border-0 p-0">
+                      <fieldset className="m-0 mb-4 border-0 p-0">
                         <legend className="mb-1 block p-0 text-[17px] font-semibold">{t("kickoffStartMinute")}</legend>
                         <span className="mb-2 block text-[15px] text-ink-2">{t("kickoffStartMinuteHint")}</span>
                         <span className="flex items-end gap-2">
@@ -743,12 +745,16 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
               </>
             )}
             {current.kind === "person" && <p className="mt-4 text-[15px] text-ink-2 max-md:hidden">{t("personKeys")}</p>}
+            {!spotStep?.fromList && (
+            <>
             <div className="mt-7 flex gap-[3px]" role="progressbar" aria-valuemin={0} aria-valuemax={total} aria-valuenow={total - open.length} aria-label={t("progress", { done: total - open.length, total })}>
               {questions.map((q, i) => (
                 <i key={i} className={cn("block h-1.5 flex-1", done.includes(id(q)) ? "bg-ink" : "bg-rule")} />
               ))}
             </div>
             <p className="mt-2 text-[15px] text-ink-2">{t("progress", { done: total - open.length, total })}</p>
+            </>
+            )}
           </div>
         </div>
       )}
