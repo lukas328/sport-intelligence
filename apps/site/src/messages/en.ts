@@ -472,7 +472,7 @@ const en: Messages = {
   },
   guides: {
     toc: "On this page",
-    try: "Try it with your next match. Looking at your team needs no account.",
+    try: "Looking at your team needs no account.",
     homeTitle: "From the guides",
     title: "Guides",
     metaTitle: "Guides for handball coaches",

@@ -18,7 +18,7 @@ export default async function TallyTemplate({ params }: Props) {
   const m = messages(locale);
   const t = m.tools.tally;
   const table = (caption: string) => (
-    <div className="mt-6 overflow-x-auto">
+    <div className="mt-6 overflow-x-auto" role="region" aria-label={caption} tabIndex={0}>
       <table className="w-full min-w-[30rem] border-collapse text-[1.0625rem]">
         <caption className="pb-2 text-left font-bold">{caption}</caption>
         <thead>

@@ -38,9 +38,9 @@ export const GUIDES: Guide[] = [
     },
     metaTitle: { de: "Handballspiel mit dem Handy filmen", fr: "Filmer un match de handball au téléphone", en: "Filming a handball match with a phone" },
     answer: {
-      de: "Stell das Handy quer auf ein Stativ, so hoch wie möglich und auf Höhe der Mittellinie, so dass das ganze Feld mit beiden Torräumen im Bild ist. Starte vor dem Anpfiff, zoome und schwenke nicht, und lass die Aufnahme bis zum Schluss laufen, auch in der Pause.",
-      fr: "Pose le téléphone à l'horizontale sur un trépied, le plus haut possible et à hauteur de la ligne médiane, avec tout le terrain et les deux zones de but dans l'image. Lance l'enregistrement avant le coup d'envoi, ne zoome pas, ne pivote pas, et laisse tourner jusqu'à la fin, pause comprise.",
-      en: "Put the phone in landscape on a tripod, as high as possible and level with the halfway line, so the whole court with both goal areas is in the picture. Start before throw-off, do not zoom or pan, and let it run to the end, half-time included.",
+      de: "Stell das Handy quer auf ein Stativ, so hoch wie möglich und auf Höhe der Mittellinie, und nimm den Weitwinkel (0,5×), damit beide Tore und Torräume im Bild sind. Starte vor dem Anpfiff, zoome und schwenke nicht, und lass die Aufnahme bis zum Schluss laufen.",
+      fr: "Pose le téléphone à l'horizontale sur un trépied, le plus haut possible et à hauteur de la ligne médiane, et prends le grand-angle (0,5×) pour avoir les deux buts et les zones de but dans l'image. Lance l'enregistrement avant le coup d'envoi, ne zoome pas, ne pivote pas, et laisse tourner jusqu'à la fin.",
+      en: "Put the phone in landscape on a tripod, as high as possible and level with the halfway line, and use the wide angle (0.5×) so both goals and goal areas are in the picture. Start before throw-off, do not zoom or pan, and let it run to the end.",
     },
     description: {
       de: "Standort, Höhe, Stativ, Einstellungen, Akku und Speicher: so filmst du ein Handballspiel mit dem Handy, damit du es danach auswerten kannst.",
@@ -192,13 +192,14 @@ export const GUIDES: Guide[] = [
     group: "wissen",
     published: "2026-11-13",
     updated: "2026-11-13",
-    locales: ["de"],
-    title: { de: "Welche Wege zur Videoanalyse gibt es für ein Handballteam?" },
-    metaTitle: { de: "Wege zur Videoanalyse im Vergleich" },
+    locales: ["de", "fr"],
+    title: { de: "Welche Wege zur Videoanalyse gibt es für ein Handballteam?", fr: "Quelles solutions d'analyse vidéo pour une équipe de handball ?" },
+    metaTitle: { de: "Wege zur Videoanalyse im Vergleich", fr: "Analyse vidéo : les solutions comparées" },
     answer: {
       de: "Vier Wege: das Video von Hand durchsehen und schneiden, eine automatische Kamera, eine Analyse-Software zum Markieren und eine automatische Analyse wie Handball Intelligence. Welcher passt, hängt von deiner Zeit, deinem Budget und deiner Halle ab.",
+      fr: "Quatre solutions : revoir et découper la vidéo à la main, une caméra automatique, un logiciel pour marquer les scènes et une analyse automatique comme Handball Intelligence. Le bon choix dépend de ton temps, de ton budget et de ta salle.",
     },
-    description: { de: "Von Hand schneiden, automatische Kamera, Analyse-Software oder automatische Analyse: die Wege zur Videoanalyse im Handball ehrlich verglichen." },
+    description: { de: "Von Hand schneiden, automatische Kamera, Analyse-Software oder automatische Analyse: die Wege zur Videoanalyse im Handball ehrlich verglichen.", fr: "À la main, caméra automatique, logiciel d'analyse ou analyse automatique : les solutions d'analyse vidéo au handball, comparées honnêtement." },
     related: ["videoanalyse-amateurteam", "handballspiel-filmen", "spiel-auswerten-20-minuten"],
   },
 ];

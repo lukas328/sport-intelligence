@@ -24,7 +24,7 @@ export default async function StoragePage({ params }: Props) {
         <p className="mt-4">{t.resultNote}</p>
         <p className="mt-2 font-bold">{t.formula}</p>
         <h2 className="section-head mt-12 text-[1.75rem]">{t.tableTitle}</h2>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto" role="region" aria-label={t.tableTitle} tabIndex={0}>
           <table className="w-full border-collapse text-[1.0625rem] tabular-nums">
             <thead>
               <tr>

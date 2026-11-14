@@ -470,7 +470,7 @@ const de = {
   },
   guides: {
     toc: "Auf dieser Seite",
-    try: "Probier es mit deinem nächsten Spiel. Dein Team ansehen geht ohne Konto.",
+    try: "Dein Team ansehen geht ohne Konto.",
     homeTitle: "Aus dem Ratgeber",
     title: "Ratgeber",
     metaTitle: "Ratgeber für Handballtrainer",

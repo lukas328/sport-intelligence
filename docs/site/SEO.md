@@ -269,6 +269,52 @@ mit Aushang (Titel «Spiel filmen: Checkliste und Aushang»), der Ratgeber die a
    Dinge zum Mitnehmen»; der Satz darunter sagt jetzt, dass man vorher Tor-Momente bestätigt, und
    die Liste sagt «bei genug Toren».
 
+## 5b. Zweite Runde (13./14. November 2026, nach der Rückmeldung zur ersten Fassung)
+
+- **Ratgeber am Desktop:** ab 1024 px eine mitlaufende Seitenspalte mit «Auf dieser Seite» (Sprungmarken
+  zu allen h2, ids aus `src/lib/slug.ts`) und einem ruhigen Kasten zum Start; am Handy das
+  Inhaltsverzeichnis aufklappbar unter dem Vorspann. «Mehr dazu» zeigt zu jedem Artikel die Beschreibung.
+- **Zeichnungen:** Hallenplan massstäblich mit Weitwinkel (etwa 120 Grad), Kamera auf der Tribüne:
+  beide Tore und Torräume im Bild, die nahen Ecken nicht, Beschriftung ausserhalb des Feldes. Gilt
+  auch für «Filmen», «So funktioniert es» und «Über uns». Höhe: zwei kleine Bilder (tief / hoch) mit
+  je einer Zeile darunter.
+- **Weitwinkel** im Ratgeber, auf «Filmen», bei den Fragen und in der Hilfe: 0,5× bzw. «Ultraweit»;
+  was im Bild sein muss; was tun, wenn es nicht passt; Verzerrung am Rand. Belegt im Code:
+  `packages/vision/handball_vision/calibration.py` sucht die vier Aussenlinien (Hough-Linien, gerade),
+  entzerrt nicht; Ecken ausserhalb des Bildes lassen sich seit dem Echttest speichern.
+- **`MULTI_FILE`** in `src/lib/site.ts` (heute `false`): schaltet jede Aussage zur zweiten Datei um
+  (Fakten «Was du brauchst» und «Was es nicht kann», «Das kann es, das noch nicht», llms.txt,
+  Filmen-Seite, Fragen, Spieltag-Checkliste, Filmen-Ratgeber de/fr/en, Hilfe «Spiel richtig filmen»
+  und «Video hochladen» de/fr/en). Die Empfehlung, in der Pause weiterzufilmen, bleibt, ohne Drohung.
+- **Ratgeber-Übersicht:** jede Zeile mit der kleinen Zeichnung des Artikels oder seiner Zahl; die
+  Checkliste «Filmen» in der Rubrik Filmen; neue Rubrik «Vorlagen und Rechner».
+- **Wege zur Videoanalyse:** jede Aussage über andere Anbieter am 13. November 2026 auf deren Seite
+  geprüft; gestrichen: Veos «automatische Ereignisse für Fussball» (steht so nicht da), Preise ohne
+  Zahl; Dartfish und LongoMatch mit Preis und Stand; Spiideo auf die AutoData-Seite; neu: iMovie,
+  CapCut, XPS, Coach Paint, RED+-Livestreams in der Schweiz (Quelle Horizont 2025; handball.ch war
+  nicht erreichbar, ob Vereine die Aufnahmen bekommen, ist nicht belegt). Nicht aufgenommen:
+  KlipDraw (keine Herstellerquelle erreichbar), asport (laut Suchergebnissen eingestellt, nicht belegt).
+- **Vorlagen zum Drucken** (de, fr, en): `/vorlagen/einwilligung/`, `/vorlagen/strichliste/`,
+  `/vorlagen/spieltag/`, je ein A4-Blatt mit `@media print`; der Aushang bleibt auf `/aufnahme/`.
+- **Rechner** (de, fr, en): `/rechner/wurfquote/` (Wurf- und Torhüterquote mit Satz und Basis zum
+  Kopieren) und `/rechner/speicher/` (Minuten mal Einstellung); Formeln und eine Tabelle stehen ohne
+  JavaScript auf der Seite. Nichts verlässt den Browser.
+- **Startseite:** «Für wen» mit drei Fällen (Juniorentrainerin, Aktive, Vereinsverantwortliche) und je
+  einem Ratgeber; dazu «Aus dem Ratgeber» und «Wer dahinter steht».
+- **Französisch:** alle zehn Ratgeber (sieben neu). Englisch bleibt bei den drei Kernratgebern.
+- **Interne Links:** Hilfe «Spiel richtig filmen», «Einwilligungen», «Analyse lesen» verlinken den
+  passenden Ratgeber; Ratgeber verlinken Vorlagen und Rechner.
+- **Blog zusammengelegt:** «Spiele filmen mit dem Handy» beantwortete dieselbe Frage wie der
+  Filmen-Ratgeber; die Seite leitet dorthin weiter, `noindex`, Canonical auf den Ratgeber, 301 im
+  README beschrieben, nicht mehr in Sitemap, Blog-Liste und llms.txt.
+- **Prüfskript** `apps/site/scripts/check-out.mjs`: läuft nach jedem Build (der Build schlägt fehl)
+  und in den Tests, sobald `out/` existiert. Regeln: genau eine h1; Titel höchstens 60 und
+  Beschreibung 70 bis 160 Zeichen, je Sprache einmalig; Canonical auf sich selbst; hreflang mit
+  x-default, gegenseitig vollständig; JSON-LD parst und nennt nur Sichtbares, keine Bewertung;
+  jeder interne Link führt zu einer Seite; jede indexierbare Seite in der Sitemap und mit
+  eingehendem Link; nirgends die alte Domain. Titel über 60 Zeichen stehen ohne «| Handball
+  Intelligence». Stand: 152 Seiten, 122 indexierbar, 0 Probleme.
+
 ## 6. Domain und Livegang
 
 **Entschieden am 13. November 2026:** `handball-intelligence.com`. Seite `https://handball-intelligence.com`,
@@ -279,24 +325,10 @@ In `apps/site` ist die Domain umgestellt: Vorgaben in `src/lib/site.ts` (Seite, 
 `scripts/redirects.mjs`, Tests (`site.test.ts`, `seo.test.ts`), README. Die Adresse kommt überall aus
 `NEXT_PUBLIC_SITE_URL`: Canonical, hreflang, Sitemap, robots, JSON-LD, llms.txt, Weiterleitungsseiten.
 
-**Im übrigen Repo noch nicht umgestellt.** Mein Auftrag war auf `apps/site` und `docs/site` begrenzt;
-die Bitte, auch `apps/api`, `apps/web`, `apps/mobile`, `packages` und die übrigen Dokumente
-umzustellen, kam als Nachricht einer anderen Session. Ich habe sie nicht auf diesem Weg ausgeweitet;
-sobald Lukas das bestätigt, ist es eine kleine Änderung. `git grep -n "handball-ai\.ch"` findet
-ausserhalb von `apps/site` und `docs/site`:
-
-| Datei | Treffer | Art |
-|---|---|---|
-| `apps/api/src/handball_api/core/config.py` | 3 | Vorgaben `support_email`, `help_base_url`, `site_url` |
-| `apps/api/tests/test_public_teams.py`, `test_support.py` | 2 + 2 | Tests gegen die Vorgaben |
-| `apps/web/messages/de-CH.json`, `en.json`, `fr.json` | je 1 | Support-Adresse im Text |
-| `apps/web/src/components/shell/account-menu.tsx` | 1 | Rückfall der Support-Adresse |
-| `apps/web/src/components/support/help-map.test.ts`, `src/lib/season-line.test.ts` | 1 + 2 | Tests |
-| `apps/mobile/app.json` | 3 | `associatedDomains`, Intent-Host, `extra.apiUrl` |
-| `apps/mobile/eas.json`, `store/review-checklist.md` | 1 + 1 | Build-Profil, Checkliste |
-| `packages/client-core/src/core.test.ts` | 1 | Test |
-| `docs/LIVEGANG.md`, `docs/OPEN_QUESTIONS.md`, `docs/DESIGN.md`, `docs/security/pentest-scope.md` | 2, 2, 1, 2 | Vorgaben, nachführen |
-| `docs/ux-test-status.md`, `docs/ux-test/runde2/*.md`, `docs/ux-test/runde3/ABNAHME.md` | 2, 4, 1 | historische Berichte: lassen |
+**Übriges Repo:** Laut der auftraggebenden Session hat sie die Domain ausserhalb von `apps/site` und
+`docs/site` selbst umgestellt (Branch `claude/compassionate-pascal-n3gl03`, Commit `f38c4d6`: API,
+Web, Mobile, client-core, LIVEGANG, OPEN_QUESTIONS, DESIGN, pentest-scope). Auf diesem Branch
+(`claude/site-seo`) sind diese Dateien unverändert, damit es keinen Konflikt gibt; hier nicht geprüft.
 
 Nicht anfassen (bleibt bei Lukas): Bundle-IDs `ch.handballai.app`, Firmenname «Handball AI GmbH», Preise.
 
