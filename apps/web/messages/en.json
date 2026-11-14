@@ -3635,7 +3635,7 @@
     "status": "{placed} of {total} goals with a shot spot.",
     "missingLine": "{n, plural, one {For 1 goal we don't know where it was thrown from.} other {For # goals we don't know where they were thrown from.}}",
     "fill": "{minutes, plural, one {Add them in a minute} other {Add them in # minutes}}",
-    "rule": "A thing appears as soon as three goals come from the same spot.",
+    "rule": "A thing appears as soon as three goals come from the same spot. In the season, the goals of all matches with video count together.",
     "noPattern": "No spot has three goals yet.",
     "soFar": "{n, plural, one {One thing so far.} other {# things so far.}}",
     "dialogTitle": "Where was this goal thrown from?",

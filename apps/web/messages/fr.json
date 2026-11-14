@@ -3635,7 +3635,7 @@
     "status": "{placed} buts sur {total} avec lieu de tir.",
     "missingLine": "{n, plural, one {Pour 1 but, on ne sait pas d'où il a été tiré.} other {Pour # buts, on ne sait pas d'où ils ont été tirés.}}",
     "fill": "{minutes, plural, one {Compléter en une minute} other {Compléter en # minutes}}",
-    "rule": "Un point apparaît dès que trois buts viennent du même endroit.",
+    "rule": "Un point apparaît dès que trois buts viennent du même endroit. Dans la saison, les buts de tous les matchs avec vidéo comptent ensemble.",
     "noPattern": "Aucun endroit n'atteint encore trois buts.",
     "soFar": "{n, plural, one {Un point pour l'instant.} other {# points pour l'instant.}}",
     "dialogTitle": "D'où ce but a-t-il été tiré?",

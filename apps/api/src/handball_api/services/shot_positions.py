@@ -184,6 +184,23 @@ async def _attack(
     return attackers, gx, number_of
 
 
+def goal_by_sides(asset: VideoAsset, local_ms: int, own: bool) -> float | None:
+    """The goal a team attacks at `local_ms` of this file (x = 0 or 40), from the ends the
+    analysis found for the half (the goalkeepers). Where the attackers stood in the seconds before
+    says the wrong end for a fast break: they were defending at the other goal (seventh real-video
+    test). None when the analysis found no ends."""
+    sides = ((asset.analysis or {}).get("auto_events") or {}).get("sides") or []
+    known = [s for s in sides if isinstance(s, dict) and s.get("home_defends") in ("left", "right")]
+    if not known:
+        return None
+    cur = known[0]
+    for s in known:
+        if int(s.get("from_ms") or 0) <= local_ms:
+            cur = s
+    # the own kit is "home" in the analysis; the home team attacks right while it defends left
+    return LENGTH if own == (cur["home_defends"] == "left") else 0.0
+
+
 def side_in_image(homography: list[list[float]], goal_x: float) -> str | None:
     """Where the goal at `goal_x` (0 or 40) stands in the camera's picture, "left" or "right",
     from the court-to-image homography (any panning keeps the order of the two ends)."""
@@ -205,8 +222,8 @@ def side_in_image(homography: list[list[float]], goal_x: float) -> str | None:
 async def goal_view(ctx: Ctx, g: Event) -> str | None:
     """Where the goal a shot went at stands in the video, "left" or "right", for drawing «Von wo?»
     as the camera sees the court (real-clip test of «Von wo?»): needs a court a person confirmed
-    on that part of the match and tracks of the attackers; None otherwise (the court is drawn with
-    the goal at the top)."""
+    on that part of the match and the ends the analysis found for the half (or, without them,
+    tracks of the attackers); None otherwise (the court is drawn with the goal at the top)."""
     files = await Files.of(ctx, g.match_id)
     hit = files.at(g.t_ms) if g.t_ms is not None else None
     if hit is None:
@@ -219,8 +236,11 @@ async def goal_view(ctx: Ctx, g: Event) -> str | None:
     )
     if cal is None or cal.source != "user_correction":
         return None
-    found = await _attack(ctx, g, files, {})
-    return side_in_image(cal.homography, found[1]) if found is not None else None
+    goal_x = goal_by_sides(hit[0], hit[1], g.side == "own")
+    if goal_x is None:
+        found = await _attack(ctx, g, files, {})
+        goal_x = found[1] if found is not None else None
+    return side_in_image(cal.homography, goal_x) if goal_x is not None else None
 
 
 async def fill_one(

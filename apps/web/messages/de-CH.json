@@ -3635,7 +3635,7 @@
     "status": "{placed} von {total} Toren mit Wurfort.",
     "missingLine": "{n, plural, one {Bei 1 Tor fehlt, von wo geworfen wurde.} other {Bei # Toren fehlt, von wo geworfen wurde.}}",
     "fill": "{minutes, plural, one {In einer Minute nachtragen} other {In # Minuten nachtragen}}",
-    "rule": "Ein Ding entsteht, sobald drei Tore aus derselben Ecke kommen.",
+    "rule": "Ein Ding entsteht, sobald drei Tore aus derselben Ecke kommen. In der Saison zählen die Tore aller Spiele mit Video zusammen.",
     "noPattern": "Noch kommt keine Ecke auf drei Tore.",
     "soFar": "{n, plural, one {Ein Ding bisher.} other {# Dinge bisher.}}",
     "dialogTitle": "Von wo wurde dieses Tor geworfen?",

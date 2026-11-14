@@ -561,11 +561,12 @@ def in_video(t_ms: int | None, duration: int | None) -> bool:
 
 # The scene of an event, one rule for Szenen, Sammlung, Zusammenschnitt, the player's feed, the
 # tactics camera and the Video tab (real-clip test of «Von wo?», V6): 6 s before to 3 s after; a
-# goal confirmed from a goal candidate from 12 s before its time to 2 s after, because candidate
-# times lie 4 to 7 s after the goal (Q-REC-CANDTIME). Report goals and goals marked by hand keep
-# 6 s and 3 s.
+# goal confirmed from a goal candidate from 12 s before its time to 5 s after, because candidate
+# times mostly lie 4 to 7 s after the goal but sometimes a few seconds before it (Q-REC-CANDTIME;
+# seventh real-video test: a fast break scored 3 s after its candidate). Report goals and goals
+# marked by hand keep 6 s and 3 s.
 SCENE_PRE_MS, SCENE_POST_MS = 6_000, 3_000
-CANDIDATE_PRE_MS, CANDIDATE_POST_MS = 12_000, 2_000
+CANDIDATE_PRE_MS, CANDIDATE_POST_MS = 12_000, 5_000
 
 
 def from_candidate(e: Any) -> bool:
