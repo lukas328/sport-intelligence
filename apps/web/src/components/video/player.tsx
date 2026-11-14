@@ -74,6 +74,9 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
   const [thumbs, setThumbs] = useState<ThumbCue[]>([]);
   const [hover, setHover] = useState<{ x: number; t: number } | null>(null);
   const frame = 1 / (fps && fps > 0 ? fps : 25);
+  // where the further files of a match start: a stall near there loads again
+  const partStarts = useRef<number[]>([]);
+  partStarts.current = markers.filter((m) => m.kind === "part").map((m) => m.t_ms);
 
   useImperativeHandle(ref, () => ({
     seek: (ms) => {
@@ -91,24 +94,84 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
     if (!video) return;
     let destroy: (() => void) | undefined;
     setError(false);
+    // a match in several files plays as one stream with a break between the files: should a
+    // file not continue cleanly there (another resolution, frame rate or sound), the player loads
+    // again at the same moment instead of hanging (Q-VIDEO-PARTS)
+    let reloads = 0;
+    const reloadAt = (load: () => void) => {
+      if (reloads++ >= 3) return setError(true);
+      const at = video.currentTime;
+      const wasPlaying = !video.paused;
+      load();
+      const back = () => {
+        video.currentTime = at + 0.1;
+        if (wasPlaying) void video.play().catch(() => undefined);
+      };
+      video.addEventListener("loadedmetadata", back, { once: true });
+    };
+    // stuck at the break between two files (waiting, no error): load again there
+    let stall: number | undefined;
+    const onWaiting = () => {
+      window.clearTimeout(stall);
+      const near = partStarts.current.some((t) => Math.abs(video.currentTime * 1000 - t) < 8000);
+      if (near) stall = window.setTimeout(() => !video.paused && reloadAt(reload.current), 6000);
+    };
+    const onPlaying = () => window.clearTimeout(stall);
+    video.addEventListener("waiting", onWaiting);
+    video.addEventListener("playing", onPlaying);
+    const reload = { current: () => {} };
     if (video.canPlayType("application/vnd.apple.mpegurl")) {
       video.src = src;
+      reload.current = () => {
+        video.src = src;
+        video.load();
+      };
+      const onError = () =>
+        reloadAt(() => {
+          video.src = src;
+          video.load();
+        });
+      video.addEventListener("error", onError);
+      destroy = () => video.removeEventListener("error", onError);
     } else {
       void import("hls.js").then(({ default: Hls }) => {
         if (!Hls.isSupported()) {
           setError(true);
           return;
         }
-        const hls = new Hls({ maxBufferLength: 30, enableWorker: true }); // same origin: cookies are sent
-        hls.on(Hls.Events.ERROR, (_e, data) => {
-          if (data.fatal) setError(true);
-        });
+        let hls = new Hls({ maxBufferLength: 30, enableWorker: true }); // same origin: cookies are sent
+        let recovered = false;
+        const attach = (h: typeof hls) => {
+          h.on(Hls.Events.ERROR, (_e, data) => {
+            if (!data.fatal) return;
+            if (data.type === Hls.ErrorTypes.MEDIA_ERROR && !recovered) {
+              recovered = true;
+              h.recoverMediaError();
+              return;
+            }
+            reloadAt(reload.current);
+          });
+        };
+        reload.current = () => {
+          hls.destroy();
+          hls = new Hls({ maxBufferLength: 30, enableWorker: true });
+          recovered = false;
+          attach(hls);
+          hls.loadSource(src);
+          hls.attachMedia(video);
+        };
+        attach(hls);
         hls.loadSource(src);
         hls.attachMedia(video);
         destroy = () => hls.destroy();
       });
     }
-    return () => destroy?.();
+    return () => {
+      window.clearTimeout(stall);
+      video.removeEventListener("waiting", onWaiting);
+      video.removeEventListener("playing", onPlaying);
+      destroy?.();
+    };
   }, [src]);
 
   useEffect(() => {

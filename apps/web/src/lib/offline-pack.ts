@@ -14,6 +14,8 @@ export interface Segment {
   uri: string;
   start: number;
   end: number;
+  /** the init segment of the file this segment belongs to (a joined playlist has one per file) */
+  init?: string | null;
 }
 
 /** Segments of a media playlist with their time range in seconds, plus the init segment. */
@@ -24,14 +26,15 @@ export function parseMediaPlaylist(text: string): { init: string | null; segment
   const segments: Segment[] = [];
   for (const raw of text.split(/\r?\n/)) {
     const line = raw.trim();
+    // a match in several files: each file after a discontinuity has its own init segment
     if (line.startsWith("#EXT-X-MAP:")) init = /URI="([^"]+)"/.exec(line)?.[1] ?? null;
     else if (line.startsWith("#EXTINF:")) dur = parseFloat(line.slice(8));
     else if (line && !line.startsWith("#")) {
-      segments.push({ uri: line, start: t, end: t + dur });
+      segments.push({ uri: line, start: t, end: t + dur, init });
       t += dur;
     }
   }
-  return { init, segments };
+  return { init: segments[0]?.init ?? init, segments };
 }
 
 /** The variant with the lowest bandwidth (smallest download for the cabin laptop). */
@@ -70,8 +73,14 @@ export async function packPresentation(
     const { init, segments } = parseMediaPlaylist(await (await fetch(playlistUrl)).text());
     urls.add(playlistUrl);
     const dir = playlistUrl.slice(0, playlistUrl.lastIndexOf("/") + 1);
-    if (init) urls.add(dir + init);
-    for (const s of segments) if (s.end > c.in_ms / 1000 && s.start < c.out_ms / 1000) urls.add(dir + s.uri);
+    // the cache is asked with the URL the player resolves: "../" of a joined playlist resolved
+    const at = (uri: string) => new URL(uri, location.origin + dir).pathname;
+    if (init) urls.add(at(init));
+    for (const s of segments)
+      if (s.end > c.in_ms / 1000 && s.start < c.out_ms / 1000) {
+        urls.add(at(s.uri));
+        if (s.init) urls.add(at(s.init));
+      }
   }
   const list = [...urls];
   let done = 0;

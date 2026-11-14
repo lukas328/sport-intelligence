@@ -146,7 +146,9 @@ def test_ladder_and_hls_command(tmp_path: Path) -> None:
     silent = " ".join(
         transcode.hls_command(Path("in.mp4"), tmp_path, info(has_audio=False), "ffmpeg", "fast", 4)
     )
-    assert "-c:a" not in silent
+    # a silent sound track: the files of a match are built alike (Q-VIDEO-PARTS)
+    assert "anullsrc" in silent and "-map 1:a:0" in silent and "-shortest" in silent
+    assert "v:0,a:0,name:" in silent
     assert transcode._ts(3725.5) == "01:02:05.500"
 
 

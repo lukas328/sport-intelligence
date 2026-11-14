@@ -39,7 +39,7 @@ from handball_api.schemas.presentations import (
     SlideIn,
     SlidePatch,
 )
-from handball_api.services import audit
+from handball_api.services import audit, timeline
 from handball_api.services.context import Ctx
 from handball_api.services.matches import timeline_video
 from handball_api.services.orgs import get_team
@@ -363,6 +363,38 @@ def slide_lines(slide: PresentationSlide, lang: str = "de-CH") -> list[str]:
     return [x for x in lines if x] or [""]
 
 
+async def _in_its_file(
+    ctx: Ctx, video: VideoAsset, c: dict[str, Any]
+) -> tuple[VideoAsset, dict[str, Any]]:
+    """A clip slide of a match in several files (Q-VIDEO-PARTS): its times are on the match
+    timeline of the first part; the export cuts it from the file of its half, at the time in that
+    file. A clip over the break ends where that file ends."""
+    if c.get("in_ms") is None:
+        return video, c
+    files = await timeline.Files.of(ctx, video.match_id)
+    if len(files.parts) < 2 or files.parts[0].video_id != video.id:
+        return video, c
+    hit = files.at(int(c["in_ms"]))
+    if hit is None or not hit[0].proxy_key:
+        return video, c
+    part, _ = hit
+    offset = next(int(p.offset_ms or 0) for p in files.parts if p.video_id == part.id)
+    length = round(part.duration_s * 1000) if part.duration_s else None
+    out = dict(c, video_id=str(part.id))
+    for key in ("in_ms", "out_ms"):
+        if isinstance(out.get(key), int | float):
+            t = int(out[key]) - offset
+            out[key] = max(0, t if length is None else min(length, t))
+    if isinstance(out.get("holds"), list):
+        out["holds"] = [int(h) - offset for h in out["holds"] if isinstance(h, int | float)]
+    if isinstance(out.get("slow"), list):
+        out["slow"] = [
+            [int(a) - offset, int(b) - offset]
+            for a, b in (x for x in out["slow"] if isinstance(x, list) and len(x) == 2)
+        ]
+    return part, out
+
+
 async def start_export(ctx: Ctx, pres_id: uuid.UUID) -> Presentation:
     p, slides, _ = await detail(ctx, pres_id)
     await get_team(ctx, p.team_id, Action.CLIP_WRITE)
@@ -374,7 +406,8 @@ async def start_export(ctx: Ctx, pres_id: uuid.UUID) -> Presentation:
             v = await ctx.db.get(VideoAsset, uuid.UUID(str(c["video_id"])))
             if v is None or not v.proxy_key:
                 continue
-            sources[str(v.id)] = v.proxy_key
+            v, c = await _in_its_file(ctx, v, c)
+            sources[str(v.id)] = v.proxy_key or ""
             payload_slides.append({"type": "clip", **c})
         elif s.type in (SlideType.TEXT, SlideType.STAT_CARD):
             payload_slides.append({"type": str(s.type), "lines": slide_lines(s)})
