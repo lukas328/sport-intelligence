@@ -37,9 +37,10 @@ export function WurfHead({
   goals,
   flightLabels,
   titleAs = "h1",
+  scoreNote,
   children,
 }: {
-  kick: ReactNode;
+  kick?: ReactNode;
   title: ReactNode;
   lead?: ReactNode;
   own: number;
@@ -50,6 +51,8 @@ export function WurfHead({
   goals: readonly ReportGoal[];
   flightLabels: FlightLabels;
   titleAs?: "h1" | "h2";
+  /** over the score: says the example match is made up (start page) */
+  scoreNote?: ReactNode;
   /** under the lead: the team field on the start page */
   children?: ReactNode;
 }) {
@@ -60,12 +63,13 @@ export function WurfHead({
       className="on-club relative grid grid-cols-1 bg-club px-4 pt-6 pb-[4.5rem] text-club-ink shadow-[inset_0_0_0_2px_var(--club-edge)] [clip-path:polygon(0_0,100%_0,100%_93%,0_100%)] md:grid-cols-[minmax(0,1fr)_minmax(0,34rem)] md:gap-8 md:px-8 md:pt-10 md:pb-[11rem] md:[clip-path:polygon(0_0,100%_0,100%_calc(100%-6rem),0_100%)] lg:px-[max(2rem,calc((100vw-76rem)/2+2rem))]"
     >
       <div className="min-w-0">
-        <p className="mb-3 text-base font-semibold md:mb-4 md:text-[1.0625rem]">{kick}</p>
+        {kick && <p className="mb-3 text-base font-semibold md:mb-4 md:text-[1.0625rem]">{kick}</p>}
         <T className="text-[2.5rem] leading-[.96] md:text-[4.25rem]">{title}</T>
         {lead && <p className="mt-4 max-w-[34rem] text-[1.125rem] leading-normal font-medium md:mt-6 md:text-[1.375rem]">{lead}</p>}
         {children && <div className="mt-6 md:mt-8">{children}</div>}
       </div>
       <div className="mt-6 flex min-w-0 flex-col md:mt-0">
+        {scoreNote && <p className="mb-2 text-base font-semibold md:text-right md:text-[1.0625rem]">{scoreNote}</p>}
         <p className="font-slant flex flex-wrap gap-x-6 gap-y-1 text-base md:justify-end md:text-[1.0625rem]" aria-hidden>
           <span>{ownName}</span>
           <span>

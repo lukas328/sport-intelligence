@@ -17,9 +17,9 @@ export const HELP: HelpEntry[] = [
     group: "start",
     title: { de: "Erste Schritte", fr: "Premiers pas", en: "Getting started" },
     summary: {
-      de: "Vom Konto bis zu den ersten drei Dingen.",
-      fr: "Du compte aux trois premiers points.",
-      en: "From your account to your first three things.",
+      de: "Vom Konto bis zur ersten Auswertung.",
+      fr: "Du compte à la première analyse.",
+      en: "From your account to your first analysis.",
     },
     keywords: { de: "start konto team anmelden demo", fr: "début compte équipe inscription démo", en: "start account team sign up demo" },
   },

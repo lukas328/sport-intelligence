@@ -1,9 +1,9 @@
 /** Site texts, de-CH (source of truth; fr and en must have the same shape). No sharp s, no long dashes. */
 const de = {
   meta: {
-    title: "Handball Intelligence: Spiel filmen, drei Dinge mitnehmen",
+    title: "Handball Intelligence: Videoanalyse für dein Handballteam",
     description:
-      "Handballspiel mit dem Handy filmen, hochladen, die Tor-Momente in ein paar Minuten bestätigen: Szenen, Spielverlauf und drei Dinge zum Mitnehmen.",
+      "Videoanalyse für Handballteams: Spiel mit dem Handy filmen, Tor-Momente bestätigen, jedes Tor als Szene, Spielverlauf und Positionen von oben.",
   },
   nav: {
     crumbs: "Du bist hier",
@@ -70,23 +70,17 @@ const de = {
     flightEnd: "Schluss {v}",
   },
   things: {
-    title: "Drei Dinge, so wie die App sie zeigt",
+    title: "Drei Dinge zum Mitnehmen",
     side: "Drei Dinge zum Mitnehmen",
     index: "{i} von 3",
-    againstUnit: "von {total}",
-    againstText: "Gegentore {zone}",
-    againstSubFirst: "{n} davon vor der Pause",
-    againstSubSecond: "{n} davon nach der Pause",
-    fastUnit: "von {total}",
-    fastText: "Tore nach Gegenstoss",
-    fastSub: "{first} in der ersten, {second} in der zweiten Halbzeit",
-    turnUnit: "Ballverluste",
-    turnText: "Aus dem Spielbericht",
-    turnSub: "{n} davon zwischen der {from}. und der {to}. Minute",
-    turnNote: "Nur der Zeitpunkt: wo es passiert ist, steht nicht im Spielbericht.",
+    ofUnit: "von {total}",
+    concededText: "Gegentore {zone}",
+    fastText: "Gegentore nach Gegenstoss",
+    scoredText: "Eigene Tore {zone}",
+    halves: "{first} in der ersten, {second} in der zweiten Halbzeit",
+    condition: "Sie entstehen aus den bestätigten Toren und ihrer Wurfposition, ab drei Toren aus derselben Zone. Bei wenigen Toren gibt es weniger als drei.",
     scenes: "{n} Szenen",
     bundleLabel: "{n} Tore als Anläufe auf dem halben Feld, Tor oben. {est} davon geschätzt.",
-    turnLabel: "{n} Ballverluste auf der Zeitleiste von 60 Minuten.",
     legendSolid: "Anlauf bis zur Wurfposition, von dir bestätigt",
     legendDashed: "geschätzt",
     legendThin: "dünner Strich: zum Tor",
@@ -115,15 +109,17 @@ const de = {
     legendBall: "Den Ball erkennt die Analyse noch nicht",
   },
   home: {
-    title: "Dein Spiel. Und drei Dinge zum Mitnehmen.",
+    title: "Videoanalyse für dein Handballteam.",
     teamLabel: "Wie heisst dein Team?",
     teamButton: "Zeigen",
     teamExample: "Der Vereinsname oder der Ort reicht.",
-    lead: "Du filmst das Spiel mit dem Handy und lädst es hoch. Die Analyse schlägt die Tor-Momente vor, du bestätigst sie in ein paar Minuten. Dann siehst du jedes Tor als Szene und drei Dinge zum Mitnehmen.",
+    lead: "Du filmst das Spiel mit dem Handy und bestätigst die Tor-Momente, die die Analyse vorschlägt, Tor für Tor. Dann siehst du jedes Tor als Szene, den Spielverlauf und die Positionen von oben.",
+    leadPrice: "Ab CHF {price} im Monat für ein Team, {days} Tage gratis.",
+    teamAfter: "Nach «Zeigen» siehst du dein Team mit Spielplan und Resultaten aus den Verbandsdaten, ohne Konto.",
     moreTitle: "Und dazu",
     more: [
       { title: "Alle Szenen", text: "Jedes Tor als kurze Szene, nach Spiel und Thema geordnet. Ein Tipp, und das Video springt an die Stelle." },
-      { title: "Die Taktikkamera", text: "Die Szene von oben, als Punkte auf dem Feld. So siehst du, wo eine Lücke aufging." },
+      { title: "Die Taktikkamera", text: "Die Szene von oben, als Punkte auf dem Feld. Die Positionen sind geschätzt." },
       { title: "Die Zahlen", text: "Aus dem Spielbericht und dem, was du bestätigst oder markierst. Bei jeder Zahl steht, woher sie kommt." },
       { title: "Ein Link fürs Team", text: "Szenen zusammenstellen und den Link in den Gruppenchat schicken. Die Spieler brauchen kein Konto." },
     ],
@@ -131,12 +127,12 @@ const de = {
     steps: [
       { title: "Filmen", text: "Handy aufs Stativ, hoch oben an der Mittellinie, beide Tore im Bild." },
       { title: "Hochladen", text: "Video in der App wählen. Du bekommst eine Mail, wenn die Analyse fertig ist." },
-      { title: "Prüfen und teilen", text: "Die Analyse schlägt die Tor-Momente vor, du bestätigst sie in ein paar Minuten. Dann schickst du dem Team den Link." },
+      { title: "Prüfen und teilen", text: "Die Analyse schlägt die Tor-Momente vor, du bestätigst sie, Tor für Tor. Dann schickst du dem Team den Link." },
     ],
     forWhoTitle: "Für wen",
     forWho: [
       { title: "Juniorentrainerin", text: "Du willst deinem Team zeigen, was gut läuft, ohne das halbe Training zu verlieren. Zehn Minuten, wenige Szenen, ein Thema.", link: "Szenen im Training zeigen" },
-      { title: "Aktive, 2. bis 4. Liga", text: "Du willst nach dem Spiel wissen, woher die Gegentore kamen, und dafür nicht das ganze Video schauen.", link: "Ein Spiel in 20 Minuten auswerten" },
+      { title: "Aktive, von der 1. Liga abwärts", text: "Du willst nach dem Spiel wissen, woher die Gegentore kamen, und dafür nicht das ganze Video schauen.", link: "Ein Spiel in 20 Minuten auswerten" },
       { title: "Vereinsverantwortliche", text: "Du willst wissen, was beim Filmen im Verein gilt, was es kostet und was mit dem Video passiert.", link: "Filmen im Verein: Einwilligung und Kinder" },
     ],
     boardTitle: "Für den Vorstand",
@@ -152,7 +148,7 @@ const de = {
     canTitle: "Das kann es",
     can: [
       "Das Spielfeld im Video finden und Spielerinnen und Spieler verfolgen. Ob das Feld passt, bestätigst oder korrigierst du beim Prüfen.",
-      "Die Momente vorschlagen, in denen ein Tor gefallen sein könnte. Du bestätigst sie in ein paar Minuten. Gibt es einen Spielbericht, übernimmt sie Tore und Torschützen daraus.",
+      "Die Momente vorschlagen, in denen ein Tor gefallen sein könnte. Du bestätigst sie, Tor für Tor. Gibt es einen Spielbericht, übernimmt sie Tore und Torschützen daraus.",
       "Nach dem Prüfen: Resultat, Spielverlauf, jedes Tor als Szene im Video und die Positionen von oben auf der Taktikkamera.",
       "Rückennummern lesen, wo sie gut zu sehen sind. Oft sind das nur wenige.",
       "Aus genug bestätigten Toren drei Dinge zum Mitnehmen machen, mit den Szenen dazu.",
@@ -162,7 +158,8 @@ const de = {
       "Den Ball verfolgen. Darum zeigt es keine Pässe und keine Wurfbahnen.",
       "Tore sicher von selbst erkennen. Darum schlägt es Momente vor, und du bestätigst. Die Anzeigetafel der Halle liest es noch nicht.",
       "Paraden und Fehlwürfe erkennen. Die markierst du von Hand, wenn du sie willst.",
-      "Spieler sicher von Zuschauern und Bank trennen. Die Positionen sind geschätzt.",
+      "Spieler sicher von Zuschauern und Bank trennen. Die Positionen sind geschätzt und können Leute neben dem Feld enthalten.",
+      "Die Szene immer genau vor dem Tor beginnen lassen. Manchmal zeigt sie den Rückweg nach dem Tor.",
       "Laufdistanzen genau messen. Aus einer Kamera sind es Schätzungen.",
     ],
     notFiles: "Ein Spiel aus zwei Dateien auswerten. Ausgewertet wird nur die erste.",
@@ -170,8 +167,8 @@ const de = {
   },
   how: {
     title: "So funktioniert es",
-    head: "In drei Schritten vom Spiel zu den drei Dingen.",
-    lead: "Du filmst, lädst hoch und bestätigst danach in ein paar Minuten die Tor-Momente, die die Analyse vorschlägt. Dann bekommst du Resultat, Spielverlauf, die Tore als Szenen und die Positionen von oben.",
+    head: "In drei Schritten vom Spiel zur Auswertung.",
+    lead: "Du filmst, lädst hoch und bestätigst danach die Tor-Momente, die die Analyse vorschlägt, Tor für Tor. Dann bekommst du Resultat, Spielverlauf, die Tore als Szenen und die Positionen von oben.",
     steps: [
       {
         title: "Filmen",
@@ -187,7 +184,7 @@ const de = {
       },
       {
         title: "Prüfen",
-        text: "Dann bist du dran, für ein paar Minuten. Die App zeigt dir jeden vorgeschlagenen Tor-Moment als kurze Szene: Tor oder nicht, und für wen? Dazu fragt sie, ob das Spielfeld passt. Grosse Tasten, eine Frage nach der anderen, jede Antwort ist sofort gespeichert. Beantworte auch die freiwilligen Fragen am Schluss, sonst kann ein Tor fehlen.",
+        text: "Dann bist du dran. Die App zeigt dir jeden vorgeschlagenen Tor-Moment als kurze Szene: Tor oder nicht, und für wen? Dazu fragt sie, ob das Spielfeld passt. Grosse Tasten, eine Frage nach der anderen, jede Antwort ist sofort gespeichert. Beantworte auch die freiwilligen Fragen am Schluss, sonst kann ein Tor fehlen. Im Test mit einem Spielausschnitt waren es 22 Fragen in rund sieben Minuten für neun Tore; für ein ganzes Spiel haben wir es noch nicht gemessen. Gibt es einen Spielbericht, zum Beispiel von handball.ch, kommen Tore und Torschützen daraus; die App rechnet ihre Zeit im Video über den Anwurf, den du beim Prüfen bestätigst, und fragt solche Tore nicht noch einmal. Diesen Weg haben wir noch nicht an echtem Video geprüft.",
       },
       {
         title: "Anschauen und teilen",
@@ -279,7 +276,7 @@ const de = {
   demo: {
     title: "Demo-Spiel",
     banner: "Erfundenes Spiel.",
-    bannerText: "Mannschaften, Tore und Laufwege sind erfunden, damit du siehst, wie eine Auswertung aussieht. Die Zahlen sind mit demselben Code gerechnet wie in der App.",
+    bannerText: "Mannschaften, Tore und Laufwege sind erfunden, damit du siehst, wie eine Auswertung aussieht. Die drei Dinge sind nach derselben Regel gerechnet wie in der App.",
     sources: "Quellen: Tore aus dem Spielbericht · Laufwege aus dem Video, geschätzt · Würfe und Paraden von Hand markiert",
     pick: "Tipp auf einen Punkt, um seine Szenen zu sehen.",
     scenesOf: "Szenen zu Punkt {i}",
@@ -287,7 +284,6 @@ const de = {
     sceneRow: "{clock} · Nummer {number}",
     sceneRowNoNumber: "{clock} · Nummer nicht gelesen",
     estimated: "geschätzt",
-    turnRow: "{clock} · Ballverlust",
     noVideo: "In der App öffnet jede Szene das Video an dieser Stelle. Im erfundenen Spiel gibt es kein Video, nur die eine Szene oben auf der Taktikkamera.",
     flowTitle: "Spielverlauf",
     flowLabel: "Zeitleiste über 60 Minuten: Tore von {own} nach oben, Tore von {opp} nach unten.",
@@ -296,7 +292,6 @@ const de = {
     figures: {
       goals: "Tore",
       sevenM: "7 m verwandelt",
-      turnovers: "Ballverluste",
       shots: "Würfe",
       shootingPct: "Wurfquote",
       saves: "Paraden",
@@ -327,7 +322,7 @@ const de = {
     matchesN: "{count} Spiele pro Saison",
     matchesUnlimited: "Alle Spiele der Saison (faire Nutzung)",
     storage: "{gb} GB für Videos",
-    withAnalysis: "Automatische Analyse: drei Dinge, Szenen, Taktikkamera",
+    withAnalysis: "Automatische Analyse: Resultat, Verlauf, jedes Tor als Szene, Taktikkamera, bei genug Toren drei Dinge",
     withoutAnalysis: "Ohne automatische Analyse",
     featureNames: {
       events: "Spielbericht und Spieltag erfassen",
@@ -352,13 +347,13 @@ const de = {
   faq: {
     title: "Fragen",
     head: "Fragen und Antworten.",
-    lead: "Ein Handy reicht. Die Analyse schlägt die Tor-Momente vor, du bestätigst sie in ein paar Minuten. Das Video sieht nur dein Trainerteam. Mehr dazu in den Fragen unten, darunter die Anleitungen zur App.",
+    lead: "Ein Handy reicht. Die Analyse schlägt die Tor-Momente vor, du bestätigst sie, Tor für Tor. Das Video sieht nur dein Trainerteam. Mehr dazu in den Fragen unten, darunter die Anleitungen zur App.",
     items: [
       { q: "Reicht mein Handy?", a: "Ja. Jedes Handy, das in Full HD (1080p) filmt, reicht. Wichtiger als die Kamera ist, wo sie steht." },
       { q: "Wo stelle ich die Kamera hin?", a: "Auf Höhe der Mittellinie, so hoch wie möglich, ab etwa 3 Metern: Tribüne, Galerie oder ein hohes Stativ. Mit dem Weitwinkel (0,5×) sind beide Tore und Torräume im Bild." },
       { q: "Welche Datei kann ich hochladen?", a: "Die Videodatei, so wie das Handy sie speichert. {upload} Ein direkter Link auf eine Videodatei geht auch, zum Beispiel der Download-Link von Veo oder Spiideo." },
-      { q: "Wie lange dauert die Analyse?", a: "Das hängt von der Länge des Videos ab. Du musst nicht dabeibleiben: du bekommst eine Mail, wenn sie fertig ist. Danach prüfst du ein paar Minuten." },
-      { q: "Muss ich etwas von Hand eintragen?", a: "Eintippen musst du nichts, aber kurz prüfen. Die Analyse schlägt die Momente vor, in denen ein Tor gefallen sein könnte, und du bestätigst sie mit einem Tipp. Das dauert ein paar Minuten. Paraden und Fehlwürfe markierst du nur, wenn du sie willst." },
+      { q: "Wie lange dauert die Analyse?", a: "Wir nennen die Dauer, sobald wir sie im Betrieb gemessen haben. Du musst nicht dabeibleiben: du bekommst eine Mail, wenn sie fertig ist. Danach bestätigst du die Tor-Momente." },
+      { q: "Muss ich etwas von Hand eintragen?", a: "Eintippen musst du nichts, aber kurz prüfen. Die Analyse schlägt die Momente vor, in denen ein Tor gefallen sein könnte, und du bestätigst sie mit einem Tipp. Im Test mit einem Spielausschnitt waren es 22 Fragen in rund sieben Minuten für neun Tore; für ein ganzes Spiel haben wir es noch nicht gemessen. Paraden und Fehlwürfe markierst du nur, wenn du sie willst." },
       { q: "Was kostet es?", a: "Ein Team kostet CHF {month} im Monat oder CHF {year} im Jahr. Die Preise sind noch nicht endgültig." },
       { q: "Was passiert mit dem Video?", a: "Es gehört deinem Verein. Sehen kann es nur das Trainerteam, ausser du teilst einen Link. Das Originalvideo wird nach 90 Tagen gelöscht, eine kleinere Fassung für die Szenen bleibt, bis du sie löschst." },
       { q: "Müssen die Spielerinnen und Spieler einverstanden sein?", a: "Ja. Du schickst einen Link in den Teamchat, dort sagt jede und jeder für sich ja oder nein. Für Kinder unter 16 Jahren entscheiden die Eltern." },
@@ -457,7 +452,7 @@ const de = {
     uid: "UID",
   },
   seo: {
-    how: { title: "So funktioniert die Videoanalyse", description: "Filmen, hochladen, ein paar Minuten prüfen: Die Analyse schlägt die Tor-Momente vor, du bestätigst. Danach Szenen, Spielverlauf und Positionen von oben." },
+    how: { title: "So funktioniert die Videoanalyse", description: "Filmen, hochladen, prüfen: Die Analyse schlägt die Tor-Momente vor, du bestätigst sie, Tor für Tor. Danach Szenen, Spielverlauf und Positionen von oben." },
     filming: { title: "Spiel filmen: Checkliste und Aushang", description: "Die Checkliste für den Spieltag: Handy hoch an der Mittellinie, ganzes Feld, nicht schwenken, in der Pause weiterfilmen. Mit Hallenplan und Aushang zum Drucken." },
     demo: { title: "Demo-Spiel: so sieht eine Auswertung aus", description: "Ein erfundenes Spiel zum Anfassen, ohne Konto: drei Dinge, Szenen, Taktikkamera, Zahlen mit Quelle und Gegentore nach Position." },
     pricing: { title: "Preise für Teams und Vereine", description: "Gratis ohne automatische Analyse, Team und Verein mit Analyse. Preise in Franken, Jahresrechnung per QR-Rechnung. Die Preise sind noch nicht endgültig." },
@@ -487,7 +482,7 @@ const de = {
     related: "Mehr dazu",
     faqTitle: "Kurze Antworten",
     productTitle: "Und Handball Intelligence?",
-    productText: "Die App nimmt dir einen Teil dieser Arbeit ab. Sie findet Feld und Spieler und schlägt die Momente vor, in denen ein Tor gefallen sein könnte. Nach ein paar Minuten Prüfen hast du jedes Tor als Szene und die Positionen von oben. Den Ball verfolgt sie nicht.",
+    productText: "Die App nimmt dir einen Teil dieser Arbeit ab. Sie findet Feld und Spieler und schlägt die Momente vor, in denen ein Tor gefallen sein könnte. Sobald du sie bestätigt hast, hast du jedes Tor als Szene und die Positionen von oben. Den Ball verfolgt sie nicht.",
     productLink: "So funktioniert es",
     all: "Alle Ratgeber",
   },
@@ -499,16 +494,19 @@ const de = {
     metaTitle: "Fakten auf einen Blick",
     description: "Handball Intelligence in Kürze: was es ist, für wen, was du brauchst, was es kann und was nicht, Preisstand, Datenstandort und Kontakt. Zum Zitieren.",
     head: "Handball Intelligence in Kürze.",
-    lead: "Handball Intelligence ist eine Web-App zur Videoanalyse für Handballtrainerinnen und -trainer. Du filmst ein Spiel mit dem Handy, lädst es hoch und bestätigst in ein paar Minuten die Tor-Momente, die die Analyse vorschlägt. Danach siehst du jedes Tor als Szene, den Spielverlauf und die Positionen von oben.",
+    lead: "Handball Intelligence ist eine Web-App zur Videoanalyse für Handballtrainerinnen und -trainer. Du filmst ein Spiel mit dem Handy, lädst es hoch und bestätigst die Tor-Momente, die die Analyse vorschlägt, Tor für Tor. Danach siehst du jedes Tor als Szene, den Spielverlauf und die Positionen von oben.",
     tableTitle: "Die Fakten",
     tableCaption: "Handball Intelligence: die wichtigsten Angaben",
     rows: [
       { k: "Was es ist", v: "Eine Web-App zur Videoanalyse von Handballspielen. Sie läuft im Browser, am Handy und am Computer." },
-      { k: "Für wen", v: "Trainerinnen und Trainer von Amateur- und Nachwuchsteams, zuerst in der Schweiz. Spielerinnen, Spieler und Eltern brauchen kein Konto." },
+      { k: "Für wen", v: "Trainerinnen und Trainer im Amateurhandball, Junioren und Aktive; zuerst in der Schweiz, dort von der 1. Liga abwärts. Spielerinnen, Spieler und Eltern brauchen kein Konto." },
       { k: "Was du brauchst", v: "Ein Handy, das in Full HD (1080p) filmt, einen erhöhten Platz an der Mittellinie und {fileNeed}." },
-      { k: "Wie es abläuft", v: "Filmen, hochladen, auf die Mail warten, dann ein paar Minuten prüfen: Die Analyse schlägt Momente vor, in denen ein Tor gefallen sein könnte, und du bestätigst sie." },
+      { k: "Wie es abläuft", v: "Filmen, hochladen, auf die Mail warten, dann prüfen: Die Analyse schlägt Momente vor, in denen ein Tor gefallen sein könnte, und du bestätigst sie. Beantworte auch die freiwilligen Fragen am Schluss, sonst kann ein Tor fehlen. Im Test mit einem Spielausschnitt waren es 22 Fragen in rund sieben Minuten für neun Tore; für ein ganzes Spiel haben wir es noch nicht gemessen." },
+      { k: "Mit Spielbericht", v: "Gibt es einen Spielbericht, zum Beispiel von handball.ch, kommen Tore und Torschützen daraus; die App rechnet ihre Zeit im Video über den Anwurf, den du beim Prüfen bestätigst, und fragt solche Tore nicht noch einmal. Diesen Weg haben wir noch nicht an echtem Video geprüft." },
+      { k: "Dauer der Analyse", v: "Wir nennen die Dauer, sobald wir sie im Betrieb gemessen haben. Du bekommst eine Mail, wenn sie fertig ist." },
       { k: "Was du bekommst", v: "Resultat und Spielverlauf, jedes bestätigte Tor als Szene im Video, die Positionen von oben (geschätzt), bei genug Toren drei Dinge zum Mitnehmen und einen Link fürs Team." },
       { k: "Was es nicht kann", v: "Den Ball verfolgen (darum keine Pässe und keine Wurfbahnen), Tore sicher von selbst erkennen, Paraden und Fehlwürfe erkennen{fileNot}." },
+      { k: "Andere Wege", v: "Kameras wie Veo oder Pixellot filmen mit eigener Kamera und meist mit Abo. Handball Intelligence braucht nur ein Handy und wertet Videos aus, auch über einen Download-Link von Veo. Ob Veo bei Handball Ereignisse automatisch erkennt, gibt Veo nicht an (Stand 13. November 2026). Mehr im Ratgeber «Welche Wege zur Videoanalyse gibt es für ein Handballteam?»." },
       { k: "Preisstand", v: "Gratis ohne automatische Analyse. Team: CHF {team} im Monat. Verein: CHF {club} im Monat für bis zu {clubTeams} Teams. Die Preise sind noch nicht endgültig." },
       { k: "Datenstandort", v: "Vorgesehen: App und Datenbank in der Schweiz, Videos in einem Speicher in der EU. Die Anbieter stehen vor dem Start in der Datenschutzerklärung." },
       { k: "Einwilligung", v: "Per Link im Teamchat, ohne Konto, für jeden Zweck einzeln, jederzeit änderbar. Für Kinder unter 16 entscheiden die Eltern." },
@@ -525,7 +523,7 @@ const de = {
     metaTitle: "Über uns: Videoanalyse für Vereinshandball",
     description: "Wir bauen Handball Intelligence, damit Trainerinnen und Trainer im Vereinshandball nach dem Spiel wissen, was passiert ist: mit Handy und Stativ.",
     head: "Videoanalyse für den Vereinshandball.",
-    lead: "Wir bauen Handball Intelligence, damit jede Trainerin und jeder Trainer im Vereinshandball am Abend nach dem Spiel weiss, was wirklich passiert ist. Mit einem Handy, einem Stativ und ein paar Minuten Zeit, nicht mit einem Kamerasystem und einem Analysten.",
+    lead: "Wir bauen Handball Intelligence, damit jede Trainerin und jeder Trainer im Vereinshandball am Abend nach dem Spiel weiss, was wirklich passiert ist. Mit einem Handy, einem Stativ und etwas Zeit, nicht mit einem Kamerasystem und einem Analysten.",
     sections: [
       {
         title: "Warum es uns gibt",
@@ -537,8 +535,8 @@ const de = {
       {
         title: "Für wen wir es bauen",
         text: [
-          "Für Trainerinnen und Trainer von den Junioren bis zur 1. Liga, die das im Ehrenamt machen, neben Beruf und Familie. Viele haben keine Zeit für ein neues Programm und keine Lust auf hundert Zahlen.",
-          "Darum gibt es wenige Schritte, grosse Knöpfe und am Ende drei Dinge zum Mitnehmen statt einer Tabelle. Die Spielerinnen und Spieler brauchen kein Konto: Was du teilst, öffnet sich mit einem Link.",
+          "Für Trainerinnen und Trainer im Amateurhandball, Junioren und Aktive, von der 1. Liga abwärts, die das im Ehrenamt machen, neben Beruf und Familie. Viele haben keine Zeit für ein neues Programm und keine Lust auf hundert Zahlen.",
+          "Darum gibt es wenige Schritte, grosse Knöpfe und am Ende, bei genug Toren, drei Dinge zum Mitnehmen statt einer Tabelle. Die Spielerinnen und Spieler brauchen kein Konto: Was du teilst, öffnet sich mit einem Link.",
         ],
       },
       {

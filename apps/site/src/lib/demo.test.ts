@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import data from "../../public/demo/match.json";
 import de from "@/messages/de";
-import { demoFigures, demoGoals, demoScene, demoThings, halfSpot, reportGoals, zoneOf, type DemoMatch } from "./demo";
+import { demoFigures, demoGoals, demoScene, halfSpot, reportGoals, zoneOf, type DemoMatch } from "./demo";
+import { threeThings } from "./three-things";
 import { demoView } from "./things";
 
 const match = data as unknown as DemoMatch;
@@ -37,19 +38,18 @@ describe("demo match", () => {
     expect(zoneOf("penalty", halfSpot(33, 10))).toBe("m7");
   });
 
-  it("computes the three things from the data, not by hand", () => {
-    const t = demoThings(match);
-    expect(t.against.n).toBe(t.against.goals.length);
-    expect(t.against.total).toBe(match.stats.opponent.goals);
-    expect(["m7", "gs"]).not.toContain(t.against.zone);
-    expect(t.fastBreak.n).toBe(match.stats.own.fast_break_goals);
-    expect(t.turnovers.n).toBe(match.stats.own.turnovers);
-    expect(t.turnovers.window.n).toBeGreaterThan(1);
+  it("computes the three things from the data with the app's rule, not by hand", () => {
+    const t = threeThings(demoGoals(match));
+    expect(t.map((x) => x.key)).toEqual(["conceded_zone", "conceded_fast_breaks", "scored_zone"]);
+    expect(t[0]!.of).toBe(match.stats.opponent.goals);
+    expect(["m7", "gs"]).not.toContain(t[0]!.zone);
+    expect(t[1]!.value).toBe(match.stats.opponent.fast_break_goals);
+    expect(match.events.some((e) => e.type === "turnover")).toBe(false);
   });
 
   it("draws no ball in the scene: the analysis does not find it yet", () => {
-    const t = demoThings(match);
-    const scene = demoScene(t.against.goals[0]!, "x");
+    const t = threeThings(demoGoals(match));
+    const scene = demoScene(t[0]!.goals[0] as ReturnType<typeof demoGoals>[number], "x");
     expect(scene.ball).toEqual([]);
     expect(scene.tracks.filter((x) => x.team === "own")).toHaveLength(7);
     expect(scene.tracks.filter((x) => x.team === "opp")).toHaveLength(6);
@@ -57,13 +57,14 @@ describe("demo match", () => {
 
   it("gives every figure a source and the match's own numbers", () => {
     const f = demoFigures(match);
-    expect(f.find((x) => x.key === "goals")).toMatchObject({ own: 25, opp: 24, source: "report" });
+    expect(f.find((x) => x.key === "goals")).toMatchObject({ own: match.stats.own.goals, opp: match.stats.opponent.goals, source: "report" });
+    expect(f.map((x) => x.key)).not.toContain("turnovers");
     expect(f.find((x) => x.key === "saves")?.source).toBe("marked");
   });
 
   it("fills in the texts without leftover placeholders", () => {
     const v = demoView(de);
     for (const t of v.things) for (const s of [t.index, t.unit, t.text, t.sub, t.label, t.scenesLabel]) expect(s).not.toMatch(/\{\w+\}/);
-    expect(v.things.map((t) => t.numeral)).toEqual([demoThings(match).against.n, 7, 8]);
+    expect(v.things.map((t) => t.numeral)).toEqual(threeThings(demoGoals(match)).map((t) => t.value));
   });
 });

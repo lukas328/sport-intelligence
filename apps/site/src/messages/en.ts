@@ -3,9 +3,9 @@ import type { Messages } from "./de";
 /** Site texts, English (same keys and placeholders as de.ts). */
 const en: Messages = {
   meta: {
-    title: "Handball Intelligence: film the match, get three things",
+    title: "Handball Intelligence: video analysis for your team",
     description:
-      "Film a handball match with your phone, upload it, confirm the goal moments in a few minutes: scenes, run of play and three things to take home.",
+      "Video analysis for handball teams: film with a phone, confirm the goal moments, every goal as a scene, the run of play and positions from above.",
   },
   nav: {
     crumbs: "You are here",
@@ -72,23 +72,17 @@ const en: Messages = {
     flightEnd: "Full time {v}",
   },
   things: {
-    title: "Three things, as the app shows them",
+    title: "Three things to take home",
     side: "Three things to take home",
     index: "{i} of 3",
-    againstUnit: "of {total}",
-    againstText: "Goals conceded {zone}",
-    againstSubFirst: "{n} of them before half time",
-    againstSubSecond: "{n} of them after half time",
-    fastUnit: "of {total}",
-    fastText: "Goals from fast breaks",
-    fastSub: "{first} in the first, {second} in the second half",
-    turnUnit: "turnovers",
-    turnText: "From the match report",
-    turnSub: "{n} of them between minute {from} and minute {to}",
-    turnNote: "Only the time: where it happened is not in the match report.",
+    ofUnit: "of {total}",
+    concededText: "Goals conceded {zone}",
+    fastText: "Goals conceded after fast breaks",
+    scoredText: "Own goals {zone}",
+    halves: "{first} in the first, {second} in the second half",
+    condition: "They come from the confirmed goals and their shooting position, from three goals out of the same zone. With few goals there are fewer than three.",
     scenes: "{n} scenes",
     bundleLabel: "{n} goals as runs on the half court, goal at the top. {est} of them estimated.",
-    turnLabel: "{n} turnovers on a 60-minute timeline.",
     legendSolid: "Run up to the shot position, confirmed by you",
     legendDashed: "estimated",
     legendThin: "thin line: to the goal",
@@ -117,15 +111,17 @@ const en: Messages = {
     legendBall: "The analysis does not detect the ball yet",
   },
   home: {
-    title: "Your match. And three things to take home.",
+    title: "Video analysis for your handball team.",
     teamLabel: "What is your team called?",
     teamButton: "Show",
     teamExample: "The club name or the town is enough.",
-    lead: "You film the match with your phone and upload it. The analysis suggests the goal moments, you confirm them in a few minutes. Then you see every goal as a scene and three things to take home.",
+    lead: "You film the match with your phone and confirm the goal moments the analysis suggests, goal by goal. Then you see every goal as a scene, the run of play and the positions from above.",
+    leadPrice: "From CHF {price} a month for one team, {days} days free.",
+    teamAfter: "After \"Show\" you see your team with fixtures and results from the federation's data, without an account.",
     moreTitle: "And also",
     more: [
       { title: "All scenes", text: "Every goal as a short scene, sorted by match and theme. One tap, and the video jumps to the spot." },
-      { title: "The tactics camera", text: "The scene from above, as dots on the court. So you see where a gap opened." },
+      { title: "The tactics camera", text: "The scene from above, as dots on the court. The positions are estimates." },
       { title: "The figures", text: "From the match report and what you confirm or mark. Every figure says where it comes from." },
       { title: "One link for the team", text: "Put scenes together and send the link to the group chat. Players need no account." },
     ],
@@ -133,12 +129,12 @@ const en: Messages = {
     steps: [
       { title: "Film", text: "Phone on a tripod, high up at the halfway line, both goals in the picture." },
       { title: "Upload", text: "Choose the video in the app. You get an e-mail when the analysis is done." },
-      { title: "Check and share", text: "The analysis suggests the goal moments, you confirm them in a few minutes. Then you send the team the link." },
+      { title: "Check and share", text: "The analysis suggests the goal moments, you confirm them, goal by goal. Then you send the team the link." },
     ],
     forWhoTitle: "Who it is for",
     forWho: [
       { title: "Youth coach", text: "You want to show your team what works without losing half of training. Ten minutes, a few scenes, one topic.", link: "What video analysis gives an amateur team" },
-      { title: "Senior teams, lower leagues", text: "You want to know after the match where the goals you conceded came from, without watching the whole video.", link: "Filming a handball match with a phone" },
+      { title: "Senior teams, from the 1st league down", text: "You want to know after the match where the goals you conceded came from, without watching the whole video.", link: "Filming a handball match with a phone" },
       { title: "Club officials", text: "You want to know what applies when filming in the club, what it costs and what happens to the video.", link: "Filming in a club: consent and children" },
     ],
     boardTitle: "For the club board",
@@ -154,7 +150,7 @@ const en: Messages = {
     canTitle: "What it can do",
     can: [
       "Find the court in the video and follow the players. You confirm or correct the court when checking.",
-      "Suggest the moments when a goal may have been scored. You confirm them in a few minutes. If there is a match report, it takes the goals and scorers from it.",
+      "Suggest the moments when a goal may have been scored. You confirm them, goal by goal. If there is a match report, it takes the goals and scorers from it.",
       "After checking: result, run of play, every goal as a scene in the video and the positions from above on the tactics camera.",
       "Read shirt numbers where they are clearly visible. Often only a few are.",
       "Turn enough confirmed goals into three things to take home, with the scenes behind them.",
@@ -164,7 +160,8 @@ const en: Messages = {
       "Track the ball. That is why it shows no passes and no shot paths.",
       "Reliably detect goals by itself. That is why it suggests moments and you confirm. It does not read the hall's scoreboard yet.",
       "Detect saves and missed shots. You mark them by hand if you want them.",
-      "Reliably tell players from spectators and the bench. The positions are estimates.",
+      "Reliably tell players from spectators and the bench. The positions are estimates and may include people beside the court.",
+      "Always start the scene just before the goal. Sometimes it shows the way back after the goal.",
       "Measure running distances exactly. From one camera they are estimates.",
     ],
     notFiles: "Analyse a match made of two files. Only the first one is analysed.",
@@ -172,8 +169,8 @@ const en: Messages = {
   },
   how: {
     title: "How it works",
-    head: "From the match to the three things in three steps.",
-    lead: "You film, upload and then confirm, in a few minutes, the goal moments the analysis suggests. Then you get the result, the run of play, the goals as scenes and the positions from above.",
+    head: "From the match to the analysis in three steps.",
+    lead: "You film, upload and then confirm the goal moments the analysis suggests, goal by goal. Then you get the result, the run of play, the goals as scenes and the positions from above.",
     steps: [
       {
         title: "Film",
@@ -189,7 +186,7 @@ const en: Messages = {
       },
       {
         title: "Check",
-        text: "Then it is your turn, for a few minutes. The app shows you each suggested goal moment as a short scene: goal or not, and for whom? It also asks whether the court is right. Big keys, one question after another, every answer saved at once. Answer the optional questions at the end too, or a goal may be missing.",
+        text: "Then it is your turn. The app shows you each suggested goal moment as a short scene: goal or not, and for whom? It also asks whether the court is right. Big keys, one question after another, every answer saved at once. Answer the optional questions at the end too, or a goal may be missing. In the test with a match clip it was 22 questions in about seven minutes for nine goals; for a whole match we have not measured it yet. If there is a match report, for example from handball.ch, goals and scorers come from it; the app works out their time in the video from the throw-off you confirm and does not ask about those goals again. We have not yet tested this path on real video.",
       },
       {
         title: "Watch and share",
@@ -281,7 +278,7 @@ const en: Messages = {
   demo: {
     title: "Demo match",
     banner: "Invented match.",
-    bannerText: "Teams, goals and paths are invented so you can see what an analysis looks like. The figures are computed with the same code as in the app.",
+    bannerText: "Teams, goals and paths are invented so you can see what an analysis looks like. The three things are computed by the same rule as in the app.",
     sources: "Sources: goals from the match report · paths from the video, estimated · shots and saves marked by hand",
     pick: "Tap a point to see its scenes.",
     scenesOf: "Scenes for point {i}",
@@ -289,7 +286,6 @@ const en: Messages = {
     sceneRow: "{clock} · number {number}",
     sceneRowNoNumber: "{clock} · number not read",
     estimated: "estimated",
-    turnRow: "{clock} · turnover",
     noVideo: "In the app every scene opens the video at that spot. The invented match has no video, only the one scene above on the tactics camera.",
     flowTitle: "Run of play",
     flowLabel: "Timeline over 60 minutes: goals by {own} upwards, goals by {opp} downwards.",
@@ -298,7 +294,6 @@ const en: Messages = {
     figures: {
       goals: "Goals",
       sevenM: "7 m scored",
-      turnovers: "Turnovers",
       shots: "Shots",
       shootingPct: "Shooting",
       saves: "Saves",
@@ -329,7 +324,7 @@ const en: Messages = {
     matchesN: "{count} matches per season",
     matchesUnlimited: "All matches of the season (fair use)",
     storage: "{gb} GB for videos",
-    withAnalysis: "Automatic analysis: three things, scenes, tactics camera",
+    withAnalysis: "Automatic analysis: result, run of play, every goal as a scene, tactics camera, with enough goals three things",
     withoutAnalysis: "No automatic analysis",
     featureNames: {
       events: "Record the match report and matchday",
@@ -354,13 +349,13 @@ const en: Messages = {
   faq: {
     title: "Questions",
     head: "Questions and answers.",
-    lead: "A phone is enough. The analysis suggests the goal moments, you confirm them in a few minutes. Only your coaching staff sees the video. Details in the questions below, then the guides to the app.",
+    lead: "A phone is enough. The analysis suggests the goal moments, you confirm them, goal by goal. Only your coaching staff sees the video. Details in the questions below, then the guides to the app.",
     items: [
       { q: "Is my phone good enough?", a: "Yes. Any phone that films in Full HD (1080p) is enough. Where it stands matters more than the camera." },
       { q: "Where do I put the camera?", a: "Level with the halfway line, as high as possible, from about 3 metres: stands, gallery or a tall tripod. With the wide angle (0.5×), both goals and goal areas are in the picture." },
       { q: "Which file can I upload?", a: "The video file as the phone saves it. {upload} A direct link to a video file works too, for example the download link from Veo or Spiideo." },
-      { q: "How long does the analysis take?", a: "That depends on the length of the video. You need not stay: you get an e-mail when it is done. Then you check for a few minutes." },
-      { q: "Do I have to enter anything by hand?", a: "No typing, but a short check. The analysis suggests the moments when a goal may have been scored, and you confirm them with a tap. That takes a few minutes. You mark saves and missed shots only if you want them." },
+      { q: "How long does the analysis take?", a: "We will give the time once we have measured it in operation. You need not stay: you get an e-mail when it is done. Then you confirm the goal moments." },
+      { q: "Do I have to enter anything by hand?", a: "No typing, but a short check. The analysis suggests the moments when a goal may have been scored, and you confirm them with a tap. In the test with a match clip it was 22 questions in about seven minutes for nine goals; for a whole match we have not measured it yet. You mark saves and missed shots only if you want them." },
       { q: "What does it cost?", a: "One team costs CHF {month} a month or CHF {year} a year. The prices are not final yet." },
       { q: "What happens to the video?", a: "It belongs to your club. Only the coaches can see it, unless you share a link. The original video is deleted after 90 days; a smaller version for the scenes stays until you delete it." },
       { q: "Do the players have to agree?", a: "Yes. You send a link to the team chat, where each player says yes or no for themselves. For children under 16, the parents decide." },
@@ -459,7 +454,7 @@ const en: Messages = {
     uid: "Company number",
   },
   seo: {
-    how: { title: "How the video analysis works", description: "Film, upload, check for a few minutes: the analysis suggests the goal moments, you confirm them. Then scenes, run of play and positions from above." },
+    how: { title: "How the video analysis works", description: "Film, upload, check: the analysis suggests the goal moments, you confirm them, goal by goal. Then scenes, run of play and positions from above." },
     filming: { title: "Filming a match: checklist and notice", description: "The matchday checklist: phone high at the halfway line, the whole court, no panning, keep filming at half-time. With a plan of the hall and a notice to print." },
     demo: { title: "Demo match: what an analysis looks like", description: "An invented match to explore, no account needed: three things, scenes, tactics camera, figures with their source and goals conceded by position." },
     pricing: { title: "Prices for teams and clubs", description: "Free without automatic analysis, Team and Club with analysis. Prices in Swiss francs, yearly QR invoice. The prices are not final yet." },
@@ -489,7 +484,7 @@ const en: Messages = {
     related: "Read on",
     faqTitle: "Short answers",
     productTitle: "And Handball Intelligence?",
-    productText: "The app takes part of this work off your hands. It finds the court and the players and suggests the moments when a goal may have been scored. After a few minutes of checking, you have every goal as a scene and the positions from above. It does not track the ball.",
+    productText: "The app takes part of this work off your hands. It finds the court and the players and suggests the moments when a goal may have been scored. Once confirmed, you have every goal as a scene and the positions from above. It does not track the ball.",
     productLink: "How it works",
     all: "All guides",
   },
@@ -501,16 +496,19 @@ const en: Messages = {
     metaTitle: "Facts at a glance",
     description: "Handball Intelligence in brief: what it is, who it is for, what you need, what it can and cannot do, prices, data location and contact. For quoting.",
     head: "Handball Intelligence in brief.",
-    lead: "Handball Intelligence is a web app for video analysis for handball coaches. You film a match with your phone, upload it and confirm, in a few minutes, the goal moments the analysis suggests. Then you see every goal as a scene, the run of play and the positions from above.",
+    lead: "Handball Intelligence is a web app for video analysis for handball coaches. You film a match with your phone, upload it and confirm the goal moments the analysis suggests, goal by goal. Then you see every goal as a scene, the run of play and the positions from above.",
     tableTitle: "The facts",
     tableCaption: "Handball Intelligence: the key facts",
     rows: [
       { k: "What it is", v: "A web app for video analysis of handball matches. It runs in the browser, on phones and computers." },
-      { k: "Who it is for", v: "Coaches of amateur and youth teams, starting in Switzerland. Players and parents need no account." },
+      { k: "Who it is for", v: "Coaches in amateur handball, youth and senior teams; starting in Switzerland, from the 1st league down. Players and parents need no account." },
       { k: "What you need", v: "A phone that films in Full HD (1080p), a raised spot at the halfway line and {fileNeed}." },
-      { k: "How it works", v: "Film, upload, wait for the e-mail, then check for a few minutes: the analysis suggests moments when a goal may have been scored, and you confirm them." },
+      { k: "How it works", v: "Film, upload, wait for the e-mail, then check: the analysis suggests moments when a goal may have been scored, and you confirm them. Answer the optional questions at the end too, or a goal may be missing. In the test with a match clip it was 22 questions in about seven minutes for nine goals; for a whole match we have not measured it yet." },
+      { k: "With a match report", v: "If there is a match report, for example from handball.ch, goals and scorers come from it; the app works out their time in the video from the throw-off you confirm and does not ask about those goals again. We have not yet tested this path on real video." },
+      { k: "Analysis time", v: "We will give the time once we have measured it in operation. You get an e-mail when it is done." },
       { k: "What you get", v: "Result and run of play, every confirmed goal as a scene in the video, positions from above (estimated), three things to take home when there are enough goals, and a link for the team." },
       { k: "What it cannot do", v: "Track the ball (so no passes and no shot paths), reliably detect goals by itself, detect saves and missed shots{fileNot}." },
+      { k: "Other ways", v: "Cameras such as Veo or Pixellot film with their own camera and usually a subscription. Handball Intelligence needs only a phone and analyses videos, also from a Veo download link. Whether Veo detects handball events automatically, Veo does not say (as of 13 November 2026). More in the German and French guide on ways to video analysis." },
       { k: "Prices", v: "Free without automatic analysis. Team: CHF {team} a month. Club: CHF {club} a month for up to {clubTeams} teams. The prices are not final yet." },
       { k: "Data location", v: "Planned: app and database in Switzerland, videos in storage in the EU. The providers will be named in the privacy policy before launch." },
       { k: "Consent", v: "By link in the team chat, no account, separately for each purpose, changeable at any time. For children under 16, the parents decide." },
@@ -525,9 +523,9 @@ const en: Messages = {
   us: {
     title: "About us",
     metaTitle: "About us: video analysis for club handball",
-    description: "We build Handball Intelligence so every club handball coach knows after the match what really happened: with a phone, a tripod and a few minutes.",
+    description: "We build Handball Intelligence so every club handball coach knows after the match what really happened: with a phone, a tripod and a little time.",
     head: "Video analysis for club handball.",
-    lead: "We build Handball Intelligence so that every coach in club handball knows, on the evening after the match, what really happened. With a phone, a tripod and a few minutes, not with a camera system and an analyst.",
+    lead: "We build Handball Intelligence so that every coach in club handball knows, on the evening after the match, what really happened. With a phone, a tripod and a little time, not with a camera system and an analyst.",
     sections: [
       {
         title: "Why we exist",
@@ -539,8 +537,8 @@ const en: Messages = {
       {
         title: "Who we build it for",
         text: [
-          "For coaches from youth teams up to the regional leagues who do it as volunteers, next to work and family. Many have no time for a new program and no wish for a hundred numbers.",
-          "That is why there are few steps, big buttons and, at the end, three things to take home instead of a table. Players need no account: what you share opens with a link.",
+          "For coaches in amateur handball, youth and senior teams, from the 1st league down, who do it as volunteers, next to work and family. Many have no time for a new program and no wish for a hundred numbers.",
+          "That is why there are few steps, big buttons and, at the end, with enough goals, three things to take home instead of a table. Players need no account: what you share opens with a link.",
         ],
       },
       {

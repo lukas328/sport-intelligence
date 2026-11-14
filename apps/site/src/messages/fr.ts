@@ -3,9 +3,9 @@ import type { Messages } from "./de";
 /** Site texts, français (Suisse), same keys and placeholders as de.ts. */
 const fr: Messages = {
   meta: {
-    title: "Handball Intelligence : filmer le match, trois points",
+    title: "Handball Intelligence : analyse vidéo pour ton équipe",
     description:
-      "Filmer un match de handball au téléphone, le téléverser, confirmer les moments de but en quelques minutes : scènes, évolution du score, trois points.",
+      "Analyse vidéo pour équipes de handball : filmer au téléphone, confirmer les moments de but, chaque but en séquence vidéo, évolution du score et positions.",
   },
   nav: {
     crumbs: "Tu es ici",
@@ -72,23 +72,17 @@ const fr: Messages = {
     flightEnd: "Fin {v}",
   },
   things: {
-    title: "Trois points, tels que l'app les montre",
+    title: "Trois points à retenir",
     side: "Trois points à retenir",
     index: "{i} sur 3",
-    againstUnit: "sur {total}",
-    againstText: "Buts encaissés {zone}",
-    againstSubFirst: "dont {n} avant la pause",
-    againstSubSecond: "dont {n} après la pause",
-    fastUnit: "sur {total}",
-    fastText: "Buts sur contre-attaque",
-    fastSub: "{first} en première, {second} en deuxième mi-temps",
-    turnUnit: "pertes de balle",
-    turnText: "Selon la feuille de match",
-    turnSub: "dont {n} entre la {from}e et la {to}e minute",
-    turnNote: "Seulement le moment : l'endroit ne figure pas sur la feuille de match.",
+    ofUnit: "sur {total}",
+    concededText: "Buts encaissés {zone}",
+    fastText: "Buts encaissés sur contre-attaque",
+    scoredText: "Buts marqués {zone}",
+    halves: "{first} en première, {second} en deuxième mi-temps",
+    condition: "Ils naissent des buts confirmés et de leur position de tir, à partir de trois buts depuis la même zone. Avec peu de buts, il y en a moins de trois.",
     scenes: "{n} scènes",
     bundleLabel: "{n} buts sous forme de courses sur le demi-terrain, but en haut. Dont {est} estimés.",
-    turnLabel: "{n} pertes de balle sur une ligne de 60 minutes.",
     legendSolid: "Course jusqu'à la position de tir, confirmée par toi",
     legendDashed: "estimé",
     legendThin: "trait fin : vers le but",
@@ -117,15 +111,17 @@ const fr: Messages = {
     legendBall: "L'analyse ne détecte pas encore le ballon",
   },
   home: {
-    title: "Ton match. Et trois points à retenir.",
+    title: "L'analyse vidéo pour ton équipe de handball.",
     teamLabel: "Comment s'appelle ton équipe ?",
     teamButton: "Afficher",
     teamExample: "Le nom du club ou la localité suffit.",
-    lead: "Tu filmes le match avec ton téléphone et tu le téléverses. L'analyse propose les moments de but, tu les confirmes en quelques minutes. Ensuite tu vois chaque but en scène et trois points à retenir.",
+    lead: "Tu filmes le match avec ton téléphone et tu confirmes les moments de but que l'analyse propose, but après but. Ensuite tu vois chaque but en séquence vidéo, l'évolution du score et les positions vues d'en haut.",
+    leadPrice: "Dès CHF {price} par mois pour une équipe, {days} jours gratuits.",
+    teamAfter: "Après « Afficher », tu vois ton équipe avec calendrier et résultats tirés des données de la fédération, sans compte.",
     moreTitle: "Et aussi",
     more: [
       { title: "Toutes les scènes", text: "Chaque but en courte scène, rangé par match et par thème. Un geste, et la vidéo saute au bon moment." },
-      { title: "La caméra tactique", text: "La scène vue d'en haut, en points sur le terrain. Tu vois où une brèche s'est ouverte." },
+      { title: "La caméra tactique", text: "La séquence vue d'en haut, en points sur le terrain. Les positions sont estimées." },
       { title: "Les chiffres", text: "Tirés de la feuille de match et de ce que tu confirmes ou marques. Chaque chiffre dit d'où il vient." },
       { title: "Un lien pour l'équipe", text: "Rassembler des scènes et envoyer le lien dans le chat de groupe. Les joueurs n'ont pas besoin de compte." },
     ],
@@ -133,12 +129,12 @@ const fr: Messages = {
     steps: [
       { title: "Filmer", text: "Téléphone sur trépied, en hauteur à la ligne médiane, les deux buts dans l'image." },
       { title: "Téléverser", text: "Choisir la vidéo dans l'app. Tu reçois un e-mail quand l'analyse est terminée." },
-      { title: "Vérifier et partager", text: "L'analyse propose les moments de but, tu les confirmes en quelques minutes. Ensuite tu envoies le lien à l'équipe." },
+      { title: "Vérifier et partager", text: "L'analyse propose les moments de but, tu les confirmes, but après but. Ensuite tu envoies le lien à l'équipe." },
     ],
     forWhoTitle: "Pour qui",
     forWho: [
       { title: "Entraîneuse de juniors", text: "Tu veux montrer à ton équipe ce qui marche, sans perdre la moitié de l'entraînement. Dix minutes, peu de scènes, un thème.", link: "Montrer des scènes à l'entraînement" },
-      { title: "Actifs, 2e à 4e ligue", text: "Tu veux savoir après le match d'où venaient les buts encaissés, sans revoir toute la vidéo.", link: "Analyser un match en 20 minutes" },
+      { title: "Actifs, de la 1re ligue vers le bas", text: "Tu veux savoir après le match d'où venaient les buts encaissés, sans revoir toute la vidéo.", link: "Analyser un match en 20 minutes" },
       { title: "Responsables de club", text: "Tu veux savoir ce qui vaut quand on filme au club, ce que ça coûte et ce que devient la vidéo.", link: "Filmer au club : consentement et enfants" },
     ],
     boardTitle: "Pour le comité",
@@ -154,7 +150,7 @@ const fr: Messages = {
     canTitle: "Ce que ça sait faire",
     can: [
       "Trouver le terrain dans la vidéo et suivre les joueuses et joueurs. Tu confirmes ou corriges le terrain en vérifiant.",
-      "Proposer les moments où un but a pu tomber. Tu les confirmes en quelques minutes. S'il y a une feuille de match, elle en reprend les buts et les buteurs.",
+      "Proposer les moments où un but a pu tomber. Tu les confirmes, but après but. S'il y a une feuille de match, elle en reprend les buts et les buteurs.",
       "Après la vérification : résultat, évolution du score, chaque but en scène dans la vidéo et les positions vues d'en haut sur la caméra tactique.",
       "Lire les numéros de maillot là où ils sont bien visibles. Souvent, ce n'en sont que quelques-uns.",
       "Avec assez de buts confirmés, en tirer trois points à retenir, avec les scènes.",
@@ -164,7 +160,8 @@ const fr: Messages = {
       "Suivre le ballon. C'est pourquoi il n'y a ni passes ni trajectoires de tir.",
       "Reconnaître les buts seule de manière sûre. C'est pourquoi elle propose des moments que tu confirmes. Elle ne lit pas encore le tableau d'affichage de la salle.",
       "Reconnaître les arrêts et les tirs manqués. Tu les marques à la main si tu les veux.",
-      "Séparer sûrement les joueurs du public et du banc. Les positions sont estimées.",
+      "Séparer sûrement les joueurs du public et du banc. Les positions sont estimées et peuvent inclure des personnes hors du terrain.",
+      "Faire commencer la séquence toujours juste avant le but. Parfois elle montre le repli après le but.",
       "Mesurer exactement les distances parcourues. Avec une seule caméra, ce sont des estimations.",
     ],
     notFiles: "Analyser un match composé de deux fichiers. Seul le premier est analysé.",
@@ -172,8 +169,8 @@ const fr: Messages = {
   },
   how: {
     title: "Comment ça marche",
-    head: "Du match aux trois points, en trois étapes.",
-    lead: "Tu filmes, tu téléverses, puis tu confirmes en quelques minutes les moments de but que l'analyse propose. Ensuite tu reçois le résultat, l'évolution du score, les buts en scènes et les positions vues d'en haut.",
+    head: "Du match à l'analyse, en trois étapes.",
+    lead: "Tu filmes, tu charges la vidéo, puis tu confirmes les moments de but que l'analyse propose, but après but. Ensuite tu reçois le résultat, l'évolution du score, les buts en scènes et les positions vues d'en haut.",
     steps: [
       {
         title: "Filmer",
@@ -189,7 +186,7 @@ const fr: Messages = {
       },
       {
         title: "Vérifier",
-        text: "Ensuite c'est à toi, pour quelques minutes. L'app te montre chaque moment de but proposé en courte scène : but ou pas, et pour qui ? Elle demande aussi si le terrain est juste. De grandes touches, une question après l'autre, chaque réponse est enregistrée tout de suite. Réponds aussi aux questions facultatives de la fin, sinon un but peut manquer.",
+        text: "Ensuite c'est à toi. L'app te montre chaque moment de but proposé en courte scène : but ou pas, et pour qui ? Elle demande aussi si le terrain est juste. De grandes touches, une question après l'autre, chaque réponse est enregistrée tout de suite. Réponds aussi aux questions facultatives de la fin, sinon un but peut manquer. Lors du test avec un extrait de match, il y avait 22 questions en environ sept minutes pour neuf buts ; pour un match entier, nous ne l'avons pas encore mesuré. S'il y a une feuille de match, par exemple de handball.ch, les buts et les buteurs en viennent ; l'app calcule leur moment dans la vidéo à partir de l'engagement que tu confirmes, et ne redemande pas ces buts. Nous n'avons pas encore testé ce cas avec une vraie vidéo.",
       },
       {
         title: "Regarder et partager",
@@ -281,7 +278,7 @@ const fr: Messages = {
   demo: {
     title: "Match de démo",
     banner: "Match inventé.",
-    bannerText: "Équipes, buts et trajets sont inventés, pour que tu voies à quoi ressemble une analyse. Les chiffres sont calculés avec le même code que dans l'app.",
+    bannerText: "Équipes, buts et trajets sont inventés, pour que tu voies à quoi ressemble une analyse. Les trois points sont calculés selon la même règle que dans l'app.",
     sources: "Sources : buts de la feuille de match · trajets de la vidéo, estimés · tirs et arrêts marqués à la main",
     pick: "Touche un point pour voir ses scènes.",
     scenesOf: "Scènes du point {i}",
@@ -289,7 +286,6 @@ const fr: Messages = {
     sceneRow: "{clock} · numéro {number}",
     sceneRowNoNumber: "{clock} · numéro non lu",
     estimated: "estimé",
-    turnRow: "{clock} · perte de balle",
     noVideo: "Dans l'app, chaque scène ouvre la vidéo à ce moment. Le match inventé n'a pas de vidéo, seulement la scène ci-dessus sur la caméra tactique.",
     flowTitle: "Évolution du match",
     flowLabel: "Ligne du temps sur 60 minutes : buts de {own} vers le haut, buts de {opp} vers le bas.",
@@ -298,7 +294,6 @@ const fr: Messages = {
     figures: {
       goals: "Buts",
       sevenM: "7 m réussis",
-      turnovers: "Pertes de balle",
       shots: "Tirs",
       shootingPct: "Réussite au tir",
       saves: "Arrêts",
@@ -329,7 +324,7 @@ const fr: Messages = {
     matchesN: "{count} matchs par saison",
     matchesUnlimited: "Tous les matchs de la saison (usage raisonnable)",
     storage: "{gb} Go pour les vidéos",
-    withAnalysis: "Analyse automatique : trois points, scènes, caméra tactique",
+    withAnalysis: "Analyse automatique : résultat, évolution du score, chaque but en séquence vidéo, caméra tactique, avec assez de buts trois points",
     withoutAnalysis: "Sans analyse automatique",
     featureNames: {
       events: "Saisir la feuille de match et le jour de match",
@@ -354,13 +349,13 @@ const fr: Messages = {
   faq: {
     title: "Questions",
     head: "Questions et réponses.",
-    lead: "Un téléphone suffit. L'analyse propose les moments de but, tu les confirmes en quelques minutes. Seul ton staff voit la vidéo. Les détails dans les questions ci-dessous, puis les guides de l'app.",
+    lead: "Un téléphone suffit. L'analyse propose les moments de but, tu les confirmes, but après but. Seul ton staff voit la vidéo. Les détails dans les questions ci-dessous, puis les guides de l'app.",
     items: [
       { q: "Mon téléphone suffit-il ?", a: "Oui. Tout téléphone qui filme en Full HD (1080p) suffit. L'endroit compte plus que la caméra." },
       { q: "Où placer la caméra ?", a: "À hauteur de la ligne médiane, le plus haut possible, dès 3 mètres environ : tribune, galerie ou trépied haut. Avec le grand-angle (0,5×), les deux buts et les zones de but sont dans l'image." },
       { q: "Quel fichier puis-je téléverser ?", a: "Le fichier vidéo tel que le téléphone l'enregistre. {upload} Un lien direct vers un fichier vidéo va aussi, par exemple le lien de téléchargement de Veo ou de Spiideo." },
-      { q: "Combien de temps dure l'analyse ?", a: "Cela dépend de la durée de la vidéo. Pas besoin de rester : tu reçois un e-mail quand elle est terminée. Ensuite tu vérifies quelques minutes." },
-      { q: "Dois-je saisir quelque chose à la main ?", a: "Rien à taper, mais une courte vérification. L'analyse propose les moments où un but a pu tomber, et tu les confirmes d'un geste. Cela prend quelques minutes. Tu marques les arrêts et les tirs manqués seulement si tu les veux." },
+      { q: "Combien de temps dure l'analyse ?", a: "Nous indiquerons la durée dès que nous l'aurons mesurée en service. Pas besoin de rester : tu reçois un e-mail quand elle est terminée. Ensuite tu confirmes les moments de but." },
+      { q: "Dois-je saisir quelque chose à la main ?", a: "Rien à taper, mais une courte vérification. L'analyse propose les moments où un but a pu tomber, et tu les confirmes d'un geste. Lors du test avec un extrait de match, il y avait 22 questions en environ sept minutes pour neuf buts ; pour un match entier, nous ne l'avons pas encore mesuré. Tu marques les arrêts et les tirs manqués seulement si tu les veux." },
       { q: "Combien ça coûte ?", a: "Une équipe coûte CHF {month} par mois ou CHF {year} par an. Les prix ne sont pas encore définitifs." },
       { q: "Que devient la vidéo ?", a: "Elle appartient à ton club. Seul le staff peut la voir, sauf si tu partages un lien. La vidéo originale est supprimée après 90 jours ; une version plus légère pour les scènes reste jusqu'à ce que tu la supprimes." },
       { q: "Les joueuses et joueurs doivent-ils être d'accord ?", a: "Oui. Tu envoies un lien dans le chat d'équipe, où chacune et chacun dit oui ou non. Pour les enfants de moins de 16 ans, les parents décident." },
@@ -459,7 +454,7 @@ const fr: Messages = {
     uid: "IDE",
   },
   seo: {
-    how: { title: "Comment fonctionne l'analyse vidéo", description: "Filmer, téléverser, vérifier quelques minutes : l'analyse propose les moments de but, tu confirmes. Puis scènes, évolution du score et positions." },
+    how: { title: "Comment fonctionne l'analyse vidéo", description: "Filmer, charger, vérifier : l'analyse propose les moments de but, tu les confirmes, but après but. Puis scènes, évolution du score et positions." },
     filming: { title: "Filmer un match : liste et affiche", description: "Pour le jour de match : téléphone en hauteur à la ligne médiane, tout le terrain, sans pivoter, pause comprise. Avec plan de la salle et affiche à imprimer." },
     demo: { title: "Match de démo : voir une analyse", description: "Un match inventé à explorer, sans compte : trois points, scènes, caméra tactique, chiffres avec leur source et buts encaissés par position." },
     pricing: { title: "Prix pour équipes et clubs", description: "Gratuit sans analyse automatique, Équipe et Club avec analyse. Prix en francs suisses, facture annuelle QR. Les prix ne sont pas encore définitifs." },
@@ -489,7 +484,7 @@ const fr: Messages = {
     related: "Pour aller plus loin",
     faqTitle: "Réponses courtes",
     productTitle: "Et Handball Intelligence ?",
-    productText: "L'app te décharge d'une partie de ce travail. Elle trouve le terrain et les joueurs et propose les moments où un but a pu tomber. Après quelques minutes de vérification, tu as chaque but en scène et les positions vues d'en haut. Elle ne suit pas le ballon.",
+    productText: "L'app te décharge d'une partie de ce travail. Elle trouve le terrain et les joueurs et propose les moments où un but a pu tomber. Une fois confirmés, tu as chaque but en séquence vidéo et les positions vues d'en haut. Elle ne suit pas le ballon.",
     productLink: "Comment ça marche",
     all: "Tous les guides",
   },
@@ -501,16 +496,19 @@ const fr: Messages = {
     metaTitle: "L'essentiel en bref",
     description: "Handball Intelligence en bref : ce que c'est, pour qui, ce qu'il faut, ce que ça sait faire et pas, état des prix, lieu des données et contact. À citer.",
     head: "Handball Intelligence en bref.",
-    lead: "Handball Intelligence est une app web d'analyse vidéo pour les entraîneuses et entraîneurs de handball. Tu filmes un match avec ton téléphone, tu le téléverses et tu confirmes en quelques minutes les moments de but que l'analyse propose. Ensuite tu vois chaque but en scène, l'évolution du score et les positions vues d'en haut.",
+    lead: "Handball Intelligence est une app web d'analyse vidéo pour les entraîneuses et entraîneurs de handball. Tu filmes un match avec ton téléphone, tu le charges et tu confirmes les moments de but que l'analyse propose, but après but. Ensuite tu vois chaque but en scène, l'évolution du score et les positions vues d'en haut.",
     tableTitle: "Les faits",
     tableCaption: "Handball Intelligence : les informations essentielles",
     rows: [
       { k: "Ce que c'est", v: "Une app web d'analyse vidéo des matchs de handball. Elle fonctionne dans le navigateur, sur téléphone et sur ordinateur." },
-      { k: "Pour qui", v: "Les entraîneuses et entraîneurs d'équipes amateurs et de jeunes, d'abord en Suisse. Joueuses, joueurs et parents n'ont pas besoin de compte." },
+      { k: "Pour qui", v: "Les entraîneuses et entraîneurs du handball amateur, juniors et actifs ; d'abord en Suisse, de la 1re ligue vers le bas. Joueuses, joueurs et parents n'ont pas besoin de compte." },
       { k: "Ce qu'il te faut", v: "Un téléphone qui filme en Full HD (1080p), une place en hauteur à la ligne médiane et {fileNeed}." },
-      { k: "Déroulement", v: "Filmer, téléverser, attendre l'e-mail, puis vérifier quelques minutes : l'analyse propose les moments où un but a pu tomber, et tu les confirmes." },
+      { k: "Déroulement", v: "Filmer, charger la vidéo, attendre l'e-mail, puis vérifier : l'analyse propose les moments où un but a pu tomber, et tu les confirmes. Réponds aussi aux questions facultatives de la fin, sinon un but peut manquer. Lors du test avec un extrait de match, il y avait 22 questions en environ sept minutes pour neuf buts ; pour un match entier, nous ne l'avons pas encore mesuré." },
+      { k: "Avec feuille de match", v: "S'il y a une feuille de match, par exemple de handball.ch, les buts et les buteurs en viennent ; l'app calcule leur moment dans la vidéo à partir de l'engagement que tu confirmes, et ne redemande pas ces buts. Nous n'avons pas encore testé ce cas avec une vraie vidéo." },
+      { k: "Durée de l'analyse", v: "Nous indiquerons la durée dès que nous l'aurons mesurée en service. Tu reçois un e-mail quand elle est terminée." },
       { k: "Ce que tu reçois", v: "Résultat et évolution du score, chaque but confirmé en scène dans la vidéo, les positions vues d'en haut (estimées), avec assez de buts trois points à retenir, et un lien pour l'équipe." },
       { k: "Ce que ça ne sait pas faire", v: "Suivre le ballon (donc ni passes ni trajectoires de tir), reconnaître les buts seule de manière sûre, reconnaître arrêts et tirs manqués{fileNot}." },
+      { k: "Autres solutions", v: "Des caméras comme Veo ou Pixellot filment avec leur propre caméra et le plus souvent un abonnement. Handball Intelligence n'a besoin que d'un téléphone et analyse des vidéos, aussi via un lien de téléchargement Veo. Veo n'indique pas s'il reconnaît automatiquement des actions de handball (état au 13 novembre 2026). Plus dans le guide « Quelles solutions d'analyse vidéo pour une équipe de handball ? »." },
       { k: "État des prix", v: "Gratuit sans analyse automatique. Équipe : CHF {team} par mois. Club : CHF {club} par mois jusqu'à {clubTeams} équipes. Les prix ne sont pas encore définitifs." },
       { k: "Lieu des données", v: "Prévu : app et base de données en Suisse, vidéos dans un stockage dans l'UE. Les fournisseurs seront nommés avant le lancement dans la déclaration de protection des données." },
       { k: "Consentement", v: "Par lien dans le chat d'équipe, sans compte, séparément pour chaque usage, modifiable à tout moment. Pour les enfants de moins de 16 ans, les parents décident." },
@@ -527,7 +525,7 @@ const fr: Messages = {
     metaTitle: "Qui sommes-nous : l'analyse vidéo pour les clubs",
     description: "Nous construisons Handball Intelligence pour que les entraîneurs de club sachent après le match ce qui s'est passé : avec un téléphone et un trépied.",
     head: "L'analyse vidéo pour le handball de club.",
-    lead: "Nous construisons Handball Intelligence pour que chaque entraîneuse et chaque entraîneur de club sache, le soir du match, ce qui s'est vraiment passé. Avec un téléphone, un trépied et quelques minutes, pas avec un système de caméras et un analyste.",
+    lead: "Nous construisons Handball Intelligence pour que chaque entraîneuse et chaque entraîneur de club sache, le soir du match, ce qui s'est vraiment passé. Avec un téléphone, un trépied et un peu de temps, pas avec un système de caméras et un analyste.",
     sections: [
       {
         title: "Pourquoi nous existons",
@@ -539,8 +537,8 @@ const fr: Messages = {
       {
         title: "Pour qui nous le construisons",
         text: [
-          "Pour les entraîneuses et entraîneurs, des juniors à la 1re ligue, qui le font bénévolement, à côté du travail et de la famille. Beaucoup n'ont pas le temps pour un nouveau programme ni envie de cent chiffres.",
-          "D'où peu d'étapes, de grands boutons et, à la fin, trois points à retenir plutôt qu'un tableau. Les joueuses et joueurs n'ont pas besoin de compte : ce que tu partages s'ouvre avec un lien.",
+          "Pour les entraîneuses et entraîneurs du handball amateur, juniors et actifs, de la 1re ligue vers le bas, qui le font bénévolement, à côté du travail et de la famille. Beaucoup n'ont pas le temps pour un nouveau programme ni envie de cent chiffres.",
+          "D'où peu d'étapes, de grands boutons et, à la fin, avec assez de buts, trois points à retenir plutôt qu'un tableau. Les joueuses et joueurs n'ont pas besoin de compte : ce que tu partages s'ouvre avec un lien.",
         ],
       },
       {

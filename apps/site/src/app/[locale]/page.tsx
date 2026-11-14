@@ -11,7 +11,7 @@ import { SectionHead, WurfHead } from "@/components/wurf-head";
 import { APP_LOCALE, fmt, messages, type Locale } from "@/lib/i18n";
 import { pageMeta } from "@/lib/seo";
 import { graph, organization, softwareApplication, webPage, website } from "@/lib/schema";
-import { SITE_UPDATED } from "@/lib/site";
+import { PRICES_FINAL, SITE_UPDATED } from "@/lib/site";
 import { demoView } from "@/lib/things";
 import { GUIDES } from "../../../content/ratgeber";
 
@@ -48,9 +48,14 @@ export default async function Home({ params }: Props) {
         )}
       />
       <WurfHead
-        kick={m.match.fictional}
+        scoreNote={m.match.fictional}
         title={t.title}
-        lead={t.lead}
+        lead={
+          <>
+            {t.lead} {fmt(t.leadPrice, { price: team.price_chf_month, days: team.trial_days })}
+            {!PRICES_FINAL && <> {m.pricing.draft}</>}
+          </>
+        }
         own={v.final.own}
         opp={v.final.opp}
         ownName={v.own}
@@ -60,6 +65,7 @@ export default async function Home({ params }: Props) {
         flightLabels={{ half: m.match.flightHalf, end: m.match.flightEnd }}
       >
         <TeamField id="team-top" label={t.teamLabel} button={t.teamButton} example={t.teamExample} appLocale={APP_LOCALE[locale]} onClub />
+        <p className="mt-3 max-w-[34rem] text-base">{t.teamAfter}</p>
       </WurfHead>
 
       <div className="wrap">
@@ -76,6 +82,7 @@ export default async function Home({ params }: Props) {
         <section aria-labelledby="things" className="mt-20">
           <SectionHead id="things" title={m.things.title} note={m.things.side} />
           <Things things={v.things} legend={{ solid: m.things.legendSolid, dashed: m.things.legendDashed, thin: m.things.legendThin }} scenesHref={`/${locale}/demo/`} />
+          <p className="measure mt-4 text-ink-2">{m.things.condition}</p>
         </section>
 
         <section aria-labelledby="more" className="mt-20">
