@@ -326,11 +326,12 @@ The app uses the new colours; Archivo is not yet bundled in the Expo build (syst
   - **Q-PARTS-OVERLAY** The workbench overlays (spotlight, mini court) read the first part's
     tracks; in the second half they show nothing instead of wrong positions. The tactics camera,
     the runs of the three things, shot positions and the physical load already read each part.
-  - **Q-PARTS-RENDITIONS** Playback across files assumes they are encoded alike (same phone); a
-    part without audio next to one with audio, or very different resolutions, is untested in
-    Safari (the nearest rendition is chosen per file).
-  - **Q-PARTS-REELS** A highlight reel or export cut by the worker from the proxy uses the first
-    part's proxy: scenes of the second half are left out of reels until the worker reads parts.
+  - **Q-PARTS-RENDITIONS** Playback across files: since this change every ingested file gets a
+    sound track (silent when it has none), and the player loads again at the same moment when a
+    file does not continue cleanly at the break (hls.js media error, native error, a stall near a
+    part start). Files ingested *before* without sound next to a file with sound, portrait next
+    to landscape, and native Safari on an iPhone are untested here (no Apple device): Lukas'
+    real test checks them. Reels and the presentation export cut each scene from its own file.
   - **Q-PARTS-ORDER-RERUN** After a swap the side hint of the part that is now second is not
     recomputed; «Erneut versuchen» on that part runs it with the new hint.
 
