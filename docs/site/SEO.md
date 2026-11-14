@@ -519,3 +519,12 @@ Befunde aus `docs/site/GEGENLESEN.md` (Branch `claude/site-review`), in dessen R
 
 Prüfungen nach der Runde: `pnpm build` mit check-out (152 Seiten, 122 indexierbar, 0 Probleme),
 Vitest 31 grün, `node scripts/check-print.mjs` 12/12 eine Seite, `make_demo.py --check` grün, ruff sauber.
+
+**Nachtrag 14. November 2026 (vierter Durchlauf, Q-REC-SHOTZONE, Q-VIDEO-PARTS):** Überall, wo die Seite
+erklärt, wie die drei Dinge entstehen, steht jetzt der Tipp «Von wo?» nach jedem bestätigten Tor (die
+App schlägt den Ort vor, wenn sie ihn schätzen kann; Bedingung «ab drei Toren aus derselben Zone»
+bleibt). Der gemessene Prüfsatz sagt, dass er ohne Wurfort gemessen ist und der Wurfort einen Tipp
+pro Tor dazugibt; keine neue Zahl. Mit `MULTI_FILE = true` nennen die Texte: alle Dateien zusammen
+auswählen oder die zweite Halbzeit später nachreichen, Seitenwechsel bei zwei Dateien, Bestätigtes
+bleibt. «Das noch nicht» neu: Wurfort-Vorschlag ist eine Schätzung und oft leer. check-out 0 Probleme,
+check-print 12/12, Vitest 31 grün.
