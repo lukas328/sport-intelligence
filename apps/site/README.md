@@ -56,6 +56,8 @@ centre lives at `{site}/{de|fr|en}/hilfe/{slug}/`; the app links there with `HB_
 - `404.html` in the site's look with Start, Demo-Spiel and Fragen, in the language of the path or the
   browser.
 
+Merged pages: a blog post with `movedTo` in `content/blog/index.ts` (today `spiele-filmen-mit-dem-handy`, merged into the guide «Handballspiel mit dem Handy filmen») forwards by meta refresh, is `noindex` and has its canonical on the guide; on the host answer `/{lang}/blog/spiele-filmen-mit-dem-handy/` with a 301 to `/{lang}/ratgeber/handballspiel-filmen/`.
+
 On the real host, set this up as well (the fallback pages above only work with a script or after a
 second):
 

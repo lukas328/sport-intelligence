@@ -128,7 +128,7 @@ export function llmsFullTxt(): string {
     "",
     "## Blog (Deutsch)",
     "",
-    ...BLOG.map((p) => link(p.title.de, pageUrl("de", `blog/${p.slug}`), p.summary.de)),
+    ...BLOG.filter((p) => !p.movedTo).map((p) => link(p.title.de, pageUrl("de", `blog/${p.slug}`), p.summary.de)),
     "",
   ].join("\n");
 }

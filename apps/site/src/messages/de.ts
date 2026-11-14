@@ -133,6 +133,12 @@ const de = {
       { title: "Hochladen", text: "Video in der App wählen. Du bekommst eine Mail, wenn die Analyse fertig ist." },
       { title: "Prüfen und teilen", text: "Die Analyse schlägt die Tor-Momente vor, du bestätigst sie in ein paar Minuten. Dann schickst du dem Team den Link." },
     ],
+    forWhoTitle: "Für wen",
+    forWho: [
+      { title: "Juniorentrainerin", text: "Du willst deinem Team zeigen, was gut läuft, ohne das halbe Training zu verlieren. Zehn Minuten, wenige Szenen, ein Thema.", link: "Szenen im Training zeigen" },
+      { title: "Aktive, 2. bis 4. Liga", text: "Du willst nach dem Spiel wissen, woher die Gegentore kamen, und dafür nicht das ganze Video schauen.", link: "Ein Spiel in 20 Minuten auswerten" },
+      { title: "Vereinsverantwortliche", text: "Du willst wissen, was beim Filmen im Verein gilt, was es kostet und was mit dem Video passiert.", link: "Filmen im Verein: Einwilligung und Kinder" },
+    ],
     boardTitle: "Für den Vorstand",
     board: [
       { title: "Was es kostet", text: "Ab CHF {price} im Monat für ein Team. Die Preise sind noch nicht endgültig." },

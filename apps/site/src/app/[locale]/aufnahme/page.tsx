@@ -58,9 +58,6 @@ export default async function Filming({ params }: Props) {
                 <Link href={`/${locale}/hilfe/aufnahme/`} className="link">
                   {m.nav.faq}: {m.filming.title}
                 </Link>
-                <Link href={`/${locale}/blog/spiele-filmen-mit-dem-handy/`} className="link">
-                  {m.nav.blog}
-                </Link>
               </div>
             </section>
           </div>

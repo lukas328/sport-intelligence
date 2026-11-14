@@ -17,6 +17,12 @@ import { GUIDES } from "../../../content/ratgeber";
 
 /** The three guides that exist in every language, shown on the start page. */
 const FEATURED = ["handballspiel-filmen", "videoanalyse-amateurteam", "video-im-verein-einwilligung"];
+/** «Für wen»: the guide for each case, in a guide that exists in that language. */
+const FOR_WHO: Record<Locale, string[]> = {
+  de: ["szenen-im-training-zeigen", "spiel-auswerten-20-minuten", "video-im-verein-einwilligung"],
+  fr: ["szenen-im-training-zeigen", "spiel-auswerten-20-minuten", "video-im-verein-einwilligung"],
+  en: ["videoanalyse-amateurteam", "handballspiel-filmen", "video-im-verein-einwilligung"],
+};
 
 type Props = { params: Promise<{ locale: Locale }> };
 
@@ -114,6 +120,21 @@ export default async function Home({ params }: Props) {
               {m.cta.how}
             </Link>
           </div>
+        </section>
+
+        <section aria-labelledby="forwho" className="mt-20">
+          <SectionHead id="forwho" title={t.forWhoTitle} />
+          <ul className="mt-2 grid grid-cols-1 md:grid-cols-3">
+            {t.forWho.map((c, i) => (
+              <li key={c.title} className="border-b border-rule py-6 md:border-b-0 md:px-6 md:first:pl-0 md:[&+li]:border-l md:[&+li]:border-l-rule">
+                <h3 className="font-slant text-[1.5rem]">{c.title}</h3>
+                <p className="mt-1">{c.text}</p>
+                <Link href={`/${locale}/ratgeber/${FOR_WHO[locale][i]}/`} className="link mt-1">
+                  {c.link}
+                </Link>
+              </li>
+            ))}
+          </ul>
         </section>
 
         <section aria-labelledby="honest" className="mt-20">

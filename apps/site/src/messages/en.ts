@@ -135,6 +135,12 @@ const en: Messages = {
       { title: "Upload", text: "Choose the video in the app. You get an e-mail when the analysis is done." },
       { title: "Check and share", text: "The analysis suggests the goal moments, you confirm them in a few minutes. Then you send the team the link." },
     ],
+    forWhoTitle: "Who it is for",
+    forWho: [
+      { title: "Youth coach", text: "You want to show your team what works without losing half of training. Ten minutes, a few scenes, one topic.", link: "What video analysis gives an amateur team" },
+      { title: "Senior teams, lower leagues", text: "You want to know after the match where the goals you conceded came from, without watching the whole video.", link: "Filming a handball match with a phone" },
+      { title: "Club officials", text: "You want to know what applies when filming in the club, what it costs and what happens to the video.", link: "Filming in a club: consent and children" },
+    ],
     boardTitle: "For the club board",
     board: [
       { title: "What it costs", text: "From CHF {price} a month for one team. The prices are not final yet." },

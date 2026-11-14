@@ -10,6 +10,8 @@ import { HTML_LANG, LOCALES, messages, type Locale } from "@/lib/i18n";
 import { pageMeta } from "@/lib/seo";
 import { pageUrl } from "@/lib/site";
 import { BLOG } from "../../../../../content/blog";
+import { GUIDES } from "../../../../../content/ratgeber";
+import Link from "next/link";
 
 type Props = { params: Promise<{ locale: Locale; slug: string }> };
 
@@ -22,13 +24,29 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, slug } = await params;
   const post = BLOG.find((p) => p.slug === slug);
-  return post ? pageMeta(locale, `blog/${slug}`, post.title[locale], post.summary[locale], { article: { published: post.date, modified: post.updated } }) : {};
+  if (!post) return {};
+  // merged into a guide: not indexed, canonical on the guide (the host should answer with a 301)
+  if (post.movedTo) return { title: post.title[locale], robots: { index: false, follow: true }, alternates: { canonical: pageUrl(locale, post.movedTo) } };
+  return pageMeta(locale, `blog/${slug}`, post.title[locale], post.summary[locale], { article: { published: post.date, modified: post.updated } });
 }
 
 export default async function BlogPost({ params }: Props) {
   const { locale, slug } = await params;
   const post = BLOG.find((p) => p.slug === slug);
   if (!post) notFound();
+  if (post.movedTo) {
+    const target = `/${locale}/${post.movedTo}/`;
+    const moved = messages(locale).moved;
+    return (
+      <div className="wrap py-16">
+        <meta httpEquiv="refresh" content={`0; url=${target}`} />
+        <h1 className="text-[2.5rem]">{moved.title}</h1>
+        <Link href={target} className="link mt-4">
+          {moved.text.replace("{page}", GUIDES.find((g) => `ratgeber/${g.slug}` === post.movedTo)?.title[locale] ?? target)}
+        </Link>
+      </div>
+    );
+  }
   const m = messages(locale);
   const Body = await blogBody(locale, slug);
   const date = new Intl.DateTimeFormat(HTML_LANG[locale], { dateStyle: "long", timeZone: "Europe/Zurich" });

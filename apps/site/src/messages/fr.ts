@@ -135,6 +135,12 @@ const fr: Messages = {
       { title: "Téléverser", text: "Choisir la vidéo dans l'app. Tu reçois un e-mail quand l'analyse est terminée." },
       { title: "Vérifier et partager", text: "L'analyse propose les moments de but, tu les confirmes en quelques minutes. Ensuite tu envoies le lien à l'équipe." },
     ],
+    forWhoTitle: "Pour qui",
+    forWho: [
+      { title: "Entraîneuse de juniors", text: "Tu veux montrer à ton équipe ce qui marche, sans perdre la moitié de l'entraînement. Dix minutes, peu de scènes, un thème.", link: "Montrer des scènes à l'entraînement" },
+      { title: "Actifs, 2e à 4e ligue", text: "Tu veux savoir après le match d'où venaient les buts encaissés, sans revoir toute la vidéo.", link: "Analyser un match en 20 minutes" },
+      { title: "Responsables de club", text: "Tu veux savoir ce qui vaut quand on filme au club, ce que ça coûte et ce que devient la vidéo.", link: "Filmer au club : consentement et enfants" },
+    ],
     boardTitle: "Pour le comité",
     board: [
       { title: "Ce que ça coûte", text: "Dès CHF {price} par mois pour une équipe. Les prix ne sont pas encore définitifs." },

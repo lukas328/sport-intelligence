@@ -17,7 +17,7 @@ export function sitemapEntries(): Entry[] {
   return [
     ...PAGES.map((path) => ({ path, available: LOCALES, modified: SITE_UPDATED })),
     ...HELP.filter((h) => h.listed !== false).map((h) => ({ path: `hilfe/${h.slug}`, available: LOCALES, modified: SITE_UPDATED })),
-    ...BLOG.map((p) => ({ path: `blog/${p.slug}`, available: LOCALES, modified: p.updated ?? p.date })),
+    ...BLOG.filter((p) => !p.movedTo).map((p) => ({ path: `blog/${p.slug}`, available: LOCALES, modified: p.updated ?? p.date })),
     ...GUIDES.map((g) => ({ path: `ratgeber/${g.slug}`, available: g.locales, modified: g.updated })),
   ];
 }
