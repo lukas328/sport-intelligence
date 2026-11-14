@@ -3434,6 +3434,7 @@
   },
   "numbersTab": {
     "intro": "Buts, 7 m et 2 minutes de la feuille de match et de la vidéo, tirs et arrêts des événements saisis.",
+    "introVideo": "Buts tirés de la vidéo tels que tu les as confirmés dans Vérifier ; tirs et arrêts tirés des événements marqués.",
     "field": "Terrain",
     "byGoals": "par buts",
     "numberName": "N° Nom",

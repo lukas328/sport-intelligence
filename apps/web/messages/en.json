@@ -3434,6 +3434,7 @@
   },
   "numbersTab": {
     "intro": "Goals, 7 m and 2 minutes from the match report and the video, shots and saves from the tagged events.",
+    "introVideo": "Goals from the video as you confirmed them in Prüfen; shots and saves from the marked events.",
     "field": "Court",
     "byGoals": "by goals",
     "numberName": "No. Name",
