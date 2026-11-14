@@ -35,7 +35,7 @@ export function useSaveSpot(orgId: string, matchId: string) {
 export function useSpotText() {
   const t = useTranslations("spot");
   return (g: { zone?: string | null; zone_source?: string | null }) =>
-    g.zone ? t(g.zone_source === "estimated" ? "ofEstimated" : "of", { zone: t(`zone.${g.zone}` as "zone.la") }) : t("missing");
+    g.zone ? t(g.zone_source === "estimated" || g.zone_source === "unknown" ? "ofEstimated" : "of", { zone: t(`zone.${g.zone}` as "zone.la") }) : t("missing");
 }
 
 /**

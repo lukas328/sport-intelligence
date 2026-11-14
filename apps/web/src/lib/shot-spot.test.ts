@@ -85,4 +85,9 @@ describe("places for the three things", () => {
     expect(goalsWithoutSpot(g).map((x) => x.event_id)).toEqual(["c", "b"]);
     expect(spotCounts(g)).toEqual({ placed: 1, missing: 2, total: 4 });
   });
+
+  it("does not count an estimate after «Weiss nicht» as a place the coach gave (Echtlauf 6)", () => {
+    const g = graphics([goal("a", "own", "la"), goal("b", "opp", "kr", { spot_missing: false, zone_source: "unknown" })]);
+    expect(spotCounts(g)).toEqual({ placed: 1, missing: 0, total: 2 });
+  });
 });

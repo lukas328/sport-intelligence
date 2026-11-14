@@ -90,7 +90,8 @@ export function goalsWithoutSpot(g: MatchGraphics): Goal[] {
 /** How far the places of a match's goals are: with a place, without one (askable), all. */
 export function spotCounts(g: MatchGraphics): { placed: number; missing: number; total: number } {
   const goals = g.goals.filter((x) => x.has_video || x.zone != null);
-  return { placed: goals.filter((x) => x.zone != null).length, missing: goalsWithoutSpot(g).length, total: goals.length };
+  // «Weiss nicht» with an estimate from the tracks is no place the coach gave (Echtlauf 6)
+  return { placed: goals.filter((x) => x.zone != null && x.zone_source !== "unknown").length, missing: goalsWithoutSpot(g).length, total: goals.length };
 }
 
 /** Minutes for Prüfen: goal moments with «Von wo?» about 23 s, other questions about 18 s, a place alone about 7 s (measured without the place: 22 questions in 6 to 7 minutes). */
