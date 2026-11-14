@@ -387,16 +387,28 @@ NO_BREAK_MS = 60_000
 MIN_HALF_MS = 60_000
 
 
+def stray(parts: list[Part], part: Part) -> bool:
+    """A few seconds started by mistake: under a minute, next to a part at least four times as
+    long (two short clips, as in tests, are not a mistake; the web says it the same way,
+    lib/video-parts.ts isShort)."""
+    if part.duration_ms is None or part.duration_ms >= MIN_HALF_MS:
+        return False
+    others = [p for p in parts if p.video_id != part.video_id]
+    if any(p.duration_ms is None for p in others):
+        return True
+    return max((int(p.duration_ms or 0) for p in others), default=0) >= 4 * part.duration_ms
+
+
 def real_parts(parts: list[Part]) -> list[Part]:
     """The parts that can be halves (not a few seconds started by mistake)."""
-    return [p for p in parts if p.duration_ms is None or p.duration_ms >= MIN_HALF_MS]
+    return [p for p in parts if not stray(parts, p)]
 
 
 def second_half(parts: list[Part], part: Part) -> bool:
     """A part after which the teams play on the other ends: what the coach said, else the second
     of two parts unless the recordings follow each other within a minute, or a part after a break
     as long as a half-time break."""
-    if part.position == 0 or (part.duration_ms is not None and part.duration_ms < MIN_HALF_MS):
+    if part.position == 0 or stray(parts, part):
         return False
     if part.side_change is not None:
         return part.side_change

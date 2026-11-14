@@ -310,11 +310,7 @@ def side_hint(parts: list[Part], part: Part, analyses: dict[uuid.UUID, Any]) -> 
     if not is_second_half(parts, part):
         return None
     prev = (
-        next(
-            p
-            for p in reversed(parts[: part.position])
-            if p.duration_ms is None or p.duration_ms >= matches.MIN_HALF_MS
-        )
+        next(p for p in reversed(parts[: part.position]) if not matches.stray(parts, p))
         if part.position
         else parts[0]
     )
