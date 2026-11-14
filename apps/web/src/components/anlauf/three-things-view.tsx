@@ -6,15 +6,17 @@ import { type ReactNode, useState } from "react";
 import { buttonClass } from "@/components/ui/button";
 import { cameraScene, goalRuns, useSceneCamera, type MatchGraphics } from "@/lib/graphics";
 import { threeThings, type Thing } from "@/lib/three-things";
+import { formatClock } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { LineKey } from "./blocks";
 import { Bundle, EmptyField } from "./bundle";
+import { SpotChange, SpotStatus, useSpotText } from "./spot-parts";
 import { TacticsCamera } from "./tactics-camera";
 
+/** The match clock of a minute, to the full second as a scoreboard shows it: one rounding on every screen (fourth real-video test H8). */
 export function clockOf(minute: number | null | undefined): string {
   if (minute == null) return "";
-  const s = Math.round(minute * 60);
-  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+  return formatClock(minute * 60_000 + 1);
 }
 
 /** The sentence of a thing, e.g. "Gegentore über rechts aussen". */
@@ -96,6 +98,8 @@ export function ThreeThingsView({
           </li>
         ))}
       </ol>
+      {/* goals still without their place: how many, and the way to add them (H7) */}
+      <SpotStatus orgId={orgId} matchId={matchId} graphics={graphics} things={things.length} compact />
       <LineKey
         className="mt-3"
         // only what is drawn: without a run (no confirmed court) no «Weg zum Wurf» in the key
@@ -223,7 +227,7 @@ export function SceneCamera({
   );
 }
 
-const mmss = (ms: number) => `${Math.floor(ms / 60000)}:${String(Math.floor((ms % 60000) / 1000)).padStart(2, "0")}`;
+const mmss = formatClock;
 
 /**
  * The goals of a match without three things yet: each with its time (match clock, else the place
@@ -238,9 +242,11 @@ export function VideoGoals({ orgId, matchId, graphics, oppName, onScene }: { org
   const shown = goals.find((g) => g.event_id === open);
   const when = (g: (typeof goals)[number]) => (g.minute != null ? clockOf(g.minute) : g.t_ms != null ? t("atVideo", { time: mmss(g.t_ms) }) : "");
   const who = (g: (typeof goals)[number]) => (g.team === "own" ? t("us") : oppName);
+  const spotText = useSpotText();
   return (
     <section className="border-t-2 border-ink pt-4" data-testid="video-goals">
-      <p className="m-0 max-w-[60ch] text-[17px] text-ink-2">{t("noThingsGoals", { n: goals.length })}</p>
+      {/* honest and with a way: how many goals have a place, what is missing, «nachtragen» (H7) */}
+      <SpotStatus orgId={orgId} matchId={matchId} graphics={graphics} things={0} />
       <div className="mt-4 grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,520px)]">
         <ol className="m-0 list-none p-0" aria-label={t("videoGoalsTitle")}>
           {goals.map((g) => (
@@ -250,8 +256,11 @@ export function VideoGoals({ orgId, matchId, graphics, oppName, onScene }: { org
               <span className="min-w-0 flex-1">
                 {t("goalBy", { team: who(g) })}
                 {g.number != null && ` · #${g.number}`}
-                {g.shot == null && <span className="ml-2 text-[15px] text-ink-2">{t("noSpot")}</span>}
+                <span className="block text-[15px] text-ink-2" data-testid="video-goal-spot">
+                  {spotText(g)}
+                </span>
               </span>
+              <SpotChange orgId={orgId} matchId={matchId} goal={g} label={`${t("goalBy", { team: who(g) })} ${when(g)}`} />
               {g.has_video && g.t_ms != null && (
                 <button type="button" onClick={() => (onScene ? onScene(g.event_id) : setOpen(g.event_id))} aria-pressed={onScene ? undefined : open === g.event_id} data-testid="scene-show" className="min-h-11 cursor-pointer border-0 bg-transparent p-0 text-[15px] font-bold text-ink underline decoration-[1.5px] underline-offset-4">
                   {t("sceneShow")}

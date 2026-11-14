@@ -105,7 +105,8 @@ def to_half(x: float, y: float) -> tuple[float, float]:
 
 
 def minute_of(e: Event) -> float | None:
-    return round(e.clock_s / 60, 2) if e.clock_s is not None else None
+    # four places: the screens show the clock to the second, one rounding everywhere (H8)
+    return round(e.clock_s / 60, 4) if e.clock_s is not None else None
 
 
 def _team(side: str) -> str:

@@ -21,6 +21,7 @@ import { checkCount, goalRuns, openMoments, reportGoals, useMatchGraphics, video
 import { freshMatch, openedMatches } from "@/lib/fresh-match";
 import { matchState } from "@/lib/match-state";
 import { threeThings } from "@/lib/three-things";
+import { checkMinutes } from "@/lib/shot-spot";
 import { cn } from "@/lib/utils";
 
 type Match = Schemas["MatchSummary"];
@@ -143,7 +144,7 @@ function LastMatch({ orgId, m, next, teamName, canWrite, club }: { orgId: string
             <AttnTag>{t("check")}</AttnTag>
             <Link href={`${base}/check`} className={linkClass}>
               {/* after the court come the people in the picture: say so instead of «1 Minute» (UX test N13) */}
-              {t("checksOpen", { count: checks, minutes: Math.max(1, Math.round(checks / 3)) })}
+              {t("checksOpen", { count: checks, minutes: g.data ? checkMinutes(g.data.checks.filter((c) => c.kind === "goal").length, checks - g.data.checks.filter((c) => c.kind === "goal").length) : 1 })}
             </Link>
           </span>
         )}

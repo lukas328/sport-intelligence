@@ -7,7 +7,7 @@ import type { Schemas } from "@handball/api-client";
 import { useQuery } from "@tanstack/react-query";
 import type { GoalRun } from "@/components/anlauf/bundle";
 import type { ReportGoal } from "@/components/anlauf/charts";
-import type { Pt } from "@/components/anlauf/geometry";
+import { type Pt, ZONE_AT } from "@/components/anlauf/geometry";
 import type { CameraScene } from "@/components/anlauf/tactics-camera";
 import { api } from "@/lib/client";
 
@@ -15,19 +15,20 @@ export type MatchGraphics = Schemas["MatchGraphicsOut"];
 export type SceneCamera = Schemas["SceneCameraOut"];
 
 /**
- * The goals that can be drawn: those with a shot spot. A confirmed goal without a spot counts in
- * the score, the course and the goal list (`spotless`), not in bundles and Minifelder (real-video
- * test E01).
+ * The goals that can be drawn: those with a shot spot, or with a place the coach gave without a
+ * point (tapped by keyboard, «Gegenstoss»): drawn at the zone's point, counted in the three things
+ * (fourth real-video test H7). A confirmed goal without either counts in the score, the course and
+ * the goal list (`spotless`), not in bundles and Minifelder (real-video test E01).
  */
 export function goalRuns(g: MatchGraphics, team?: "own" | "opp"): (GoalRun & { eventId: string })[] {
   return g.goals
-    .filter((x): x is typeof x & { shot: [number, number] } => x.shot != null && (!team || x.team === team))
+    .filter((x) => (x.shot != null || (x.zone != null && ZONE_AT[x.zone] != null)) && (!team || x.team === team))
     .map((x) => ({
       eventId: x.event_id,
       team: x.team,
       minute: x.minute ?? undefined,
       run: x.run.map((p) => [p[0], p[1]] as Pt),
-      shot: [x.shot[0], x.shot[1]] as Pt,
+      shot: (x.shot ? [x.shot[0], x.shot[1]] : ZONE_AT[x.zone!]!) as Pt,
       aim: x.aim ? ([x.aim[0], x.aim[1]] as Pt) : null,
       confirmed: x.confirmed,
       zone: x.zone,
@@ -36,7 +37,7 @@ export function goalRuns(g: MatchGraphics, team?: "own" | "opp"): (GoalRun & { e
 
 /** Goals without a shot spot: counted and listed, said honestly where drawings would be. */
 export function spotless(g: MatchGraphics, team?: "own" | "opp"): MatchGraphics["goals"] {
-  return g.goals.filter((x) => x.shot == null && (!team || x.team === team));
+  return g.goals.filter((x) => x.shot == null && x.zone == null && (!team || x.team === team));
 }
 
 /** The score the video's goals give, when the match itself has none (real-video test E10). */
