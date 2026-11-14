@@ -248,6 +248,30 @@ video; the court question on a phone (part of G9) was not fixed and is fixed now
 | H9 | Season: 12 matches in the head, 8 in the table, the last 10 in the course, unsaid | built: the head adds «8 davon in der Meisterschaft» when the table counts fewer; the course says «die letzten 10 von 12 (am Handy 6)» |
 | H10 | «Welche Spielminute zeigt der Anfang?» is ambiguous at 8:15; «Zurück» at question 1 | built: «Welche Spielzeit zeigt die Tafel am Anfang des Videos?» with Minute and Sekunde; «Zurück» only where a question was answered before this one |
 
+## Fifth and sixth real-video test (P1 to P9, V1 to V7)
+
+Report: docs/ux-test/echttest/BERICHT.md, «Fünfter Durchlauf» (a match in two files) and «Sechster
+Durchlauf» («Von wo?»). Fixed with tests but not seen in the browser again: P2, P7, P9, V3.
+
+| # | Finding | Status |
+|---|---|---|
+| P1 | Swap and swap back moved the throw-off before the video | fixed (4fcc7de) |
+| P2 | «Zur 2. Halbzeit» only without goals | fixed (a15bf6f) |
+| P3 | Two files together: no side hint for the second part | fixed (4fcc7de) |
+| P4 | Throw-off of the second half asked only for long videos | open |
+| P5 | «von dir bestätigt» counted goals with an unestimated spot | fixed (4fcc7de, a15bf6f) |
+| P6 | A short stray file changed the names and hid «Tauschen» | fixed (a15bf6f) |
+| P7 | Parts list while uploading | fixed (a15bf6f) |
+| P8 | Reel title card without umlauts | fixed (8af403f) |
+| P9 | Recording split within a half: no change of ends under 60 s gap, switch per part | built (4fcc7de, a15bf6f, migration 0045) |
+| V1 | «Weiss nicht» kept the estimate, counted as a place and into a thing | shown and counted right (2d6c862); things from the coach's taps only: in work |
+| V2 | The suggested place misleads | decided: no suggestion in the court, in work |
+| V3 | Start head lost the video match after Prüfen | fixed (2d6c862) |
+| V4 | No «Wurfort ändern» in a thing's scene; goal list hidden once a thing exists | in work |
+| V5 | «Beantwortet» empty after reload | in work |
+| V6 | Scenes of goal moments start too late | in work |
+| V7 | Still frame of «Von wo?» shows the other end; court as the camera sees it | in work |
+
 ## Tests
 
 Round 3: API 352 passed (3 deselected). Web unit tests 205 passed. ESLint clean again (11
