@@ -55,7 +55,8 @@ test("two halves in two files: one match, both analysed, one video", async ({ pa
   await expect(page.locator("body")).not.toContainText(/Zeitleiste|Versatz|nur die erste/);
 
   // the video plays both halves: one stream as long as both files
-  const line = page.getByTestId("parts-line");
+  // the jump stands at the visible player; the workbench (hidden here) carries its own
+  const line = page.getByTestId("plain-stage").getByTestId("parts-line");
   await expect(line).toContainText("beide Halbzeiten");
   const video = page.getByTestId("video").first();
   await expect.poll(async () => video.evaluate((v: HTMLVideoElement) => v.duration), { timeout: 60_000 }).toBeGreaterThan(28);
