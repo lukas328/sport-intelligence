@@ -1,6 +1,6 @@
 """Build the Kaggle kernel of prelabel_gpu.py for the gold standard clips.
 
-python ml/gold/kaggle/prelabel_push.py WORKDIR [--model ball_r8.pt]   # then: kaggle kernels push -p WORKDIR
+python ml/gold/kaggle/prelabel_push.py WORKDIR [--model ball_r8.pt] [--arch ballhr]   # then: kaggle kernels push -p WORKDIR
 """
 
 import argparse
@@ -13,6 +13,7 @@ ap.add_argument("work", type=Path)
 ap.add_argument("--model", default="ball_r8.pt")
 ap.add_argument("--clips", type=Path, default=here.parent / "gold_clips.json")
 ap.add_argument("--id", default="lukasde1000/handball-gold-prelabel")
+ap.add_argument("--arch", choices=("ballnet3", "ballhr"), default="ballnet3", help="ballhr: ml/ball/ballhr.py")
 a = ap.parse_args()
 clips = json.load(open(a.clips))["clips"]
 a.work.mkdir(parents=True, exist_ok=True)
@@ -22,6 +23,12 @@ src = (
     .replace("__MODEL__", a.model)
     .replace("__CLIPS__", json.dumps(clips))
 )
+if a.arch == "ballhr":  # the HRNet-style net (same input and output): inline its classes, build it
+    hr = (here.parents[1] / "ball" / "ballhr.py").read_text()
+    hr = hr[hr.index("def _bn") :]
+    assert src.count("net = BallNet3()") == 1 and src.count("class BallNet3(nn.Module):") == 1
+    src = src.replace("class BallNet3(nn.Module):", hr + "\n\nclass BallNet3(nn.Module):")
+    src = src.replace("net = BallNet3()", "net = BallHR()")
 (a.work / "kaggle_gold_prelabel.py").write_text(src)
 meta = {
     "id": a.id,
