@@ -21,6 +21,15 @@ old = 'INIT = (glob.glob(INP + "/**/ball_r8.pt", recursive=True)'
 assert src.count(old) == 1, "init anchor"
 src = src.replace(old, 'INIT = (glob.glob(INP + "/**/ball_r9.pt", recursive=True) or glob.glob(INP + "/**/ball_r8.pt", recursive=True)')
 src = src.replace('"""Round 9 (train_r9_push.py over round 8)', '"""Round 10 (train_r10_push.py over rounds 9 and 8)', 1)
+# the labels are embedded as JSON; with ~11 000 of them the script outgrows Kaggle's size limit,
+# so they travel zlib-compressed and base64-encoded
+import base64, zlib
+head = "HUMAN = json.loads(r" + "'" * 3
+a = src.index(head) + len(head)
+b = src.index("'" * 3 + ")", a)
+blob = base64.b64encode(zlib.compress(src[a:b].encode(), 9)).decode()
+src = (src[: a - len(head)] + "import base64 as _b64, zlib as _zl\nHUMAN = json.loads(_zl.decompress(_b64.b64decode('"
+       + blob + "')).decode())" + src[b + 4:])
 (work / "kaggle_r9.py").unlink()
 (work / "kaggle_r10.py").write_text(src)
 meta = json.loads((work / "kernel-metadata.json").read_text())
