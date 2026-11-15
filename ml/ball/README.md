@@ -318,3 +318,25 @@ taken from the round-8 gold run so only the net differs; `ml/gold/eval_ball.py`)
   Points within a clip are not independent, so the p values are optimistic.
 - Next: more clips and the owner's ball-or-not review of the unconfirmed (fast) points, then
   round 10; re-tune the tracker on round-9 output.
+
+## Round 10: all 171 training clips with the owner's review (2026-11-15)
+`kaggle/train_r10_push.py`: the round-9 recipe on 5767 ball points from 150 training clips (2935
+where Claude's two looks agree, 2832 of Claude's fast points confirmed by the owner, 55 rejected),
+4875 hard negatives, the owner's round-8 peaks without the basketball game (`ml/data/not_handball.json`),
+from round 9, 30 000 steps. Gold standard (same protocol as round 9):
+
+| Gold v1 | round 8 | round 9 | round 10 |
+|---|---|---|---|
+| Net top peak on the ball | 49.7 % | 51.5 % | 56.5 % |
+| Ball among the net's top 5 | 77.2 % | 78.5 % | 81.0 % |
+| Tracker v2 (net + OWLv2) | 69.0 % | 71.3 % | 73.4 % |
+| Tracker v2, fast balls only | 70.3 % | 73.6 % | 76.7 % |
+
+- Paired against round 9: top 1 157 balls gained, 79 lost (sign test p < 1e-6); top 5 95 / 57
+  (p 0.003); tracker 64 / 31 (p 0.001). The clearest gain of any round, with seven times the
+  labels of round 9.
+- A court mask from the product calibration was checked first and set aside: the automatic
+  calibration finds the court in only 8 of 42 gold clips, and only 57 of the 447 tracker misses
+  of round 9 lie above all gold balls of their clip (13 %, 28 of them in one clip).
+- Next: the HRNet-style nets on exactly this data (`ballhr.py` from scratch, `ballhrp.py`
+  ImageNet-pretrained), to separate architecture and pretraining from data.
