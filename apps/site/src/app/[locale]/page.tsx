@@ -9,6 +9,7 @@ import { JsonLd } from "@/components/json-ld";
 import { DemoLink, KitScope, ShirtPicker, StartLink } from "@/components/kit";
 import { Reveal } from "@/components/reveal";
 import { TeamField } from "@/components/team-field";
+import { shot } from "@/lib/app-shots";
 import { APP_LOCALE, fmt, messages, type Locale } from "@/lib/i18n";
 import { pageMeta } from "@/lib/seo";
 import { graph, organization, softwareApplication, webPage, website } from "@/lib/schema";
@@ -19,16 +20,16 @@ import { GUIDES } from "../../../content/ratgeber";
 /** The three guides that exist in every language, shown on the start page. */
 const FEATURED = ["handballspiel-filmen", "videoanalyse-amateurteam", "video-im-verein-einwilligung"];
 
-/** Pictures from the app (public/app, made by scripts/app-screens.mjs), with their pixel sizes. */
+/** Pictures from the app (public/app, made by scripts/app-screens.mjs). */
 const SHOT = {
-  phone: { src: "/app/ergebnis-phone.webp", width: 780, height: 3760 },
-  desktop: { src: "/app/ergebnis.webp", width: 1280, height: 1100 },
-  upload: { src: "/app/hochladen-phone.webp", width: 780, height: 616 },
-  check: { src: "/app/pruefen-phone.webp", width: 780, height: 1688 },
-  video: { src: "/app/video.webp", width: 1280, height: 1000 },
-  scenes: { src: "/app/szenen.webp", width: 1280, height: 940 },
-  season: { src: "/app/saison.webp", width: 1280, height: 820 },
-  share: { src: "/app/teilen-phone.webp", width: 780, height: 812 },
+  phone: shot("ergebnis-phone"),
+  desktop: shot("ergebnis"),
+  upload: shot("hochladen-phone"),
+  check: shot("pruefen-phone"),
+  video: shot("video"),
+  scenes: shot("szenen"),
+  season: shot("saison"),
+  share: shot("teilen-phone"),
 };
 
 type Props = { params: Promise<{ locale: Locale }> };
@@ -89,7 +90,7 @@ export default async function Home({ params }: Props) {
             </p>
           </div>
           <div className="relative min-w-0">
-            <Browser {...SHOT.desktop} alt={t.heroDesktopAlt} crop={1280 / 820} priority className="rise ml-auto hidden w-[92%] lg:block" />
+            <Browser {...SHOT.desktop} alt={t.heroDesktopAlt} crop={1280 / 820} className="rise ml-auto hidden w-[92%] lg:block" />
             <div className="rise lg:absolute lg:-bottom-14 lg:-left-2 lg:w-[38%]" style={{ "--d": 2 } as CSSProperties}>
               <Phone {...SHOT.phone} alt={t.heroPhoneAlt} scroll priority className="max-w-[17rem] lg:max-w-none" />
             </div>
@@ -339,7 +340,7 @@ export default async function Home({ params }: Props) {
           </h2>
           <div className="mt-8 grid grid-cols-1 items-end gap-8 md:grid-cols-[minmax(0,34rem)_auto]">
             <TeamField id="team-end" label={t.teamLabel} button={t.teamButton} example={t.teamExample} appLocale={app} />
-            <DemoLink href={`/${locale}/demo/`} className="btn btn-line md:mb-9">
+            <DemoLink href={`/${locale}/demo/`} className="btn btn-line md:mb-9 md:justify-self-start">
               {m.cta.demo}
             </DemoLink>
           </div>

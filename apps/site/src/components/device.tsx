@@ -48,7 +48,6 @@ export function Phone({
           height={height}
           loading={priority ? "eager" : "lazy"}
           decoding="async"
-          fetchPriority={priority ? "high" : undefined}
           className={cn("block h-auto w-full", scroll && "phone-scroll")}
           style={scroll ? style : undefined}
         />
@@ -98,7 +97,6 @@ export function Browser({
           height={height}
           loading={priority ? "eager" : "lazy"}
           decoding="async"
-          fetchPriority={priority ? "high" : undefined}
           className="block h-auto w-full"
         />
       </div>

@@ -13,13 +13,15 @@
  * PLAYWRIGHT_CHROMIUM_PATH (optional, a Chromium binary under /opt/pw-browsers).
  * Selectors go by role, visible text and test ids, so small layout changes do not break it.
  */
-import { mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const OUT = join(here, "..", "public", "app");
+/** Pixel sizes of the pictures, read by the pages (src/lib/app-shots.ts), so they always match. */
+const SIZES = join(here, "..", "src", "lib", "app-shots.json");
 const APP = (process.env.HB_APP_URL ?? "http://localhost:3000").replace(/\/$/, "");
 const EMAIL = process.env.HB_DEMO_EMAIL ?? "demo@handball-demo.ch";
 const PASSWORD = process.env.HB_DEMO_PASSWORD ?? "demo-handball-2026";
@@ -65,6 +67,8 @@ const SHOTS = [
     // taller than the phone: the website lets it scroll slowly from the result to the three things
     name: "ergebnis-phone",
     size: PHONE,
+    // shown at most about 280 px wide: 600 pixels are sharp on any phone and keep the file small
+    maxWidth: 600,
     async open(p) {
       await p.evaluate(() => {
         window.scrollTo(0, 0);
@@ -128,8 +132,9 @@ const SHOTS = [
     size: PHONE,
     async open(p) {
       await openMatch(p);
-      await p.getByTestId("check-link").first().click();
-      await p.waitForURL(/\/check/, { timeout: 15000 });
+      const check = await p.getByTestId("check-link").first().getAttribute("href");
+      if (!check) throw new Error("no link «Prüfen»");
+      await p.goto(new URL(check, APP).toString(), { waitUntil: "networkidle" });
       await p
         .getByRole("heading", { level: 1 })
         .or(p.getByRole("heading", { level: 2 }))
@@ -203,18 +208,18 @@ async function settle(p) {
 
 async function nav(p, name) {
   await p.goto(p.__team, { waitUntil: "networkidle" });
+  // follow the link's address instead of clicking: a client-side change has no load to wait for
   const link = p.getByRole("link", { name, exact: true }).filter({ visible: true }).first();
-  await link.click();
-  await p.waitForLoadState("networkidle");
+  const href = await link.getAttribute("href");
+  if (!href) throw new Error(`no link «${name}»`);
+  await p.goto(new URL(href, APP).toString(), { waitUntil: "networkidle" });
 }
 
 async function openMatch(p) {
   await p.goto(p.__team, { waitUntil: "networkidle" });
-  await p
-    .getByRole("link", { name: /Spiel öffnen/ })
-    .first()
-    .click();
-  await p.waitForURL(/\/matches\/[0-9a-f-]{36}/, { timeout: 15000 });
+  const href = await p.getByRole("link", { name: /Spiel öffnen/ }).first().getAttribute("href");
+  if (!href) throw new Error("no link «Spiel öffnen»");
+  await p.goto(new URL(href, APP).toString(), { waitUntil: "networkidle" });
   await settle(p);
 }
 
@@ -249,24 +254,27 @@ async function login(browser) {
   return { state, team: `${team}/matches` };
 }
 
-/** PNG to WebP in the browser (no image library needed). */
-async function toWebp(browser, png) {
+/** PNG to WebP in the browser (no image library needed), at most `maxWidth` pixels wide. */
+async function toWebp(browser, png, maxWidth = Infinity) {
   const p = await browser.newPage();
   const data = await p.evaluate(
-    async ({ b64, q }) => {
+    async ({ b64, q, max }) => {
       const img = new Image();
       img.src = `data:image/png;base64,${b64}`;
       await img.decode();
+      const k = Math.min(1, max / img.naturalWidth);
       const c = document.createElement("canvas");
-      c.width = img.naturalWidth;
-      c.height = img.naturalHeight;
-      c.getContext("2d").drawImage(img, 0, 0);
-      return c.toDataURL("image/webp", q).split(",")[1];
+      c.width = Math.round(img.naturalWidth * k);
+      c.height = Math.round(img.naturalHeight * k);
+      const g = c.getContext("2d");
+      g.imageSmoothingQuality = "high";
+      g.drawImage(img, 0, 0, c.width, c.height);
+      return { b64: c.toDataURL("image/webp", q).split(",")[1], width: c.width, height: c.height };
     },
-    { b64: png.toString("base64"), q: QUALITY },
+    { b64: png.toString("base64"), q: QUALITY, max: Number.isFinite(maxWidth) ? maxWidth : 1e9 },
   );
   await p.close();
-  return Buffer.from(data, "base64");
+  return { buf: Buffer.from(data.b64, "base64"), width: data.width, height: data.height };
 }
 
 async function main() {
@@ -275,6 +283,7 @@ async function main() {
   const exe = process.env.PLAYWRIGHT_CHROMIUM_PATH;
   const browser = await chromium.launch(exe ? { executablePath: exe } : {});
   mkdirSync(OUT, { recursive: true });
+  const sizes = existsSync(SIZES) ? JSON.parse(readFileSync(SIZES, "utf8")) : {};
   const { state, team } = await login(browser);
   const failed = [];
   for (const shot of SHOTS.filter((s) => !only.length || only.includes(s.name))) {
@@ -328,9 +337,10 @@ async function main() {
       } else {
         png = await p.screenshot({ animations: "disabled" });
       }
-      const webp = await toWebp(browser, png);
-      writeFileSync(join(OUT, `${shot.name}.webp`), webp);
-      console.log(`${shot.name}.webp  ${(webp.length / 1024).toFixed(0)} KB`);
+      const webp = await toWebp(browser, png, shot.maxWidth);
+      writeFileSync(join(OUT, `${shot.name}.webp`), webp.buf);
+      sizes[shot.name] = { width: webp.width, height: webp.height };
+      console.log(`${shot.name}.webp  ${webp.width} x ${webp.height}  ${(webp.buf.length / 1024).toFixed(0)} KB`);
     } catch (e) {
       failed.push(shot.name);
       console.error(`${shot.name}: ${e instanceof Error ? e.message.split("\n")[0] : e}`);
@@ -339,6 +349,8 @@ async function main() {
     }
   }
   await browser.close();
+  const sorted = Object.fromEntries(Object.entries(sizes).sort(([a], [b]) => a.localeCompare(b)));
+  writeFileSync(SIZES, `${JSON.stringify(sorted, null, 2)}\n`);
   if (failed.length) {
     console.error(`not updated: ${failed.join(", ")} (the old pictures stay)`);
     process.exit(1);

@@ -5,7 +5,7 @@ the seeded demo club (HC Zürichsee, invented players, synthetic videos), never 
 
 | File | Screen | Size |
 |---|---|---|
-| `ergebnis-phone.webp` | team start page on a phone, from the result down to the three things (taller than the screen; the site lets it scroll) | 390 px wide, 2x |
+| `ergebnis-phone.webp` | team start page on a phone, from the result down to the three things (taller than the screen; the site lets it scroll) | 600 px wide |
 | `ergebnis.webp` | the same page on a computer | 1280 px |
 | `hochladen-phone.webp` | «Video hochladen»: which match is the video from? | 390 px wide, 2x |
 | `pruefen-phone.webp` | a question while checking (today «Passt das Spielfeld?») | 390 px wide, 2x |

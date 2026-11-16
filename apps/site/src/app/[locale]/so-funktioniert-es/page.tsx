@@ -9,6 +9,7 @@ import { KitScope, StartLink } from "@/components/kit";
 import { JsonLd } from "@/components/json-ld";
 import { PageHead, SectionHead, Updated } from "@/components/wurf-head";
 import { graph, howTo } from "@/lib/schema";
+import { shot } from "@/lib/app-shots";
 import { APP_LOCALE, messages, type Locale } from "@/lib/i18n";
 import type { Messages } from "@/messages/de";
 import { pageMeta } from "@/lib/seo";
@@ -17,10 +18,10 @@ type Props = { params: Promise<{ locale: Locale }> };
 
 /** Pictures from the app (public/app, scripts/app-screens.mjs) under «So sieht es in der App aus». */
 const SHOTS = [
-  { src: "/app/video.webp", width: 1280, height: 1000, phone: false },
-  { src: "/app/szenen.webp", width: 1280, height: 940, phone: false },
-  { src: "/app/saison.webp", width: 1280, height: 820, phone: false },
-  { src: "/app/teilen-phone.webp", width: 780, height: 812, phone: true },
+  { ...shot("video"), phone: false },
+  { ...shot("szenen"), phone: false },
+  { ...shot("saison"), phone: false },
+  { ...shot("teilen-phone"), phone: true },
 ];
 
 /** K9: each step with a picture from the app (the first with the hall plan: filming happens outside it). */
@@ -29,11 +30,11 @@ function StepPicture({ i, alt, plan }: { i: number; alt: string; plan: Messages[
   if (i === 1)
     return (
       <div className="border-2 border-ink bg-paper p-4">
-        <img src="/app/hochladen-phone.webp" alt={alt} width={780} height={616} loading="lazy" decoding="async" className="block h-auto w-full" />
+        <img {...shot("hochladen-phone")} alt={alt} loading="lazy" decoding="async" className="block h-auto w-full" />
       </div>
     );
-  if (i === 2) return <Phone src="/app/pruefen-phone.webp" alt={alt} width={780} height={1688} className="max-w-[17rem]" />;
-  return <Phone src="/app/ergebnis-phone.webp" alt={alt} width={780} height={3760} scroll className="max-w-[17rem]" />;
+  if (i === 2) return <Phone {...shot("pruefen-phone")} alt={alt} className="max-w-[17rem]" />;
+  return <Phone {...shot("ergebnis-phone")} alt={alt} scroll className="max-w-[17rem]" />;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

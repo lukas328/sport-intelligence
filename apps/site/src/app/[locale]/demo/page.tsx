@@ -76,7 +76,7 @@ export default async function Demo({ params }: Props) {
         </nav>
 
         <section aria-labelledby="things" className="mt-14">
-          <SectionHead id="things" title={m.things.side} note={<span className="font-num text-club-text">1</span>} />
+          <SectionHead id="things" title={m.things.side} />
           <p className="measure mt-3 text-[1.0625rem] text-ink-2">{t.thingsNote}</p>
           <Things
             things={v.things}
@@ -94,7 +94,7 @@ export default async function Demo({ params }: Props) {
         </section>
 
         <section aria-labelledby="scene" className="mt-16">
-          <SectionHead id="scene" title={m.camera.title} note={<span className="font-num text-club-text">2</span>} />
+          <SectionHead id="scene" title={m.camera.title} note={v.sceneGoal.clock} />
           <p className="measure mt-3">{t.cameraText}</p>
           <div className="mt-6">
             <DemoCamera
@@ -106,7 +106,7 @@ export default async function Demo({ params }: Props) {
         </section>
 
         <section aria-labelledby="flow" className="mt-16">
-          <SectionHead id="flow" title={t.flowTitle} note={<span className="font-num text-club-text">3</span>} />
+          <SectionHead id="flow" title={t.flowTitle} />
           <p className="mt-3 text-[1.0625rem] text-ink-2">{fmt(t.flowLabel, { own: v.own, opp: v.opp })}</p>
           <div className="mt-4">
             <Rail goals={v.report} label={fmt(t.flowLabel, { own: v.own, opp: v.opp })} />
@@ -120,7 +120,7 @@ export default async function Demo({ params }: Props) {
 
         <div id="zahlen" className="mt-16 grid grid-cols-1 gap-16 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
           <section aria-labelledby="figures">
-            <SectionHead id="figures" title={t.figuresTitle} note={<span className="font-num text-club-text">4</span>} />
+            <SectionHead id="figures" title={t.figuresTitle} />
             <div>
               <table className="sheet mt-2">
                 <thead>
