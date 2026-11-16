@@ -80,3 +80,11 @@ Status-Abfrage über den Workflow `deploy.yml`, Modus `status` (nur lesen).
 | B2 | Die Analyse läuft auf `hb-stg-gpu-worker` ohne Grafikkarte (4 CPU, 8 GB, `HB_GPU_BACKEND=local`). Ein 5-Minuten-Clip braucht so etwa 20 Minuten, ein ganzes Spiel also mehrere Stunden. Für echte Trainer nicht tragbar | Azure, Analyse | offen: GPU-Entscheid (Lukas), z. B. Modal oder eine GPU in Azure |
 | B3 | Redis trennt Verbindungen: die API meldet `event_publish_failed` (Live-Fortschritt erreicht den Browser nicht), der Analyse-Worker alle paar Minuten «could not connect to Redis instance». Der Fix aus #42 (Keepalive, Health-Check) deckt die RQ-Worker und den Rate-Limiter nicht ganz ab | API, Worker, Redis | offen: Wiederholen bei Verbindungsfehlern für alle Redis-Clients (`apps/worker`, `apps/gpu-worker`, `core/ratelimit.py`), Redis-Neustart prüfen |
 | B4 | Zwei Videos eines Spiels laufen nacheinander durch Einlesen und Analyse; während die erste Datei analysiert wird, wird die zweite eingelesen. Der Trainer sieht davon nichts (gehört zu K6 und K13) | Spiel | offen |
+
+## Recherche-Aufträge
+
+| # | Auftrag | Gehört zu | Stand |
+|---|---|---|---|
+| R1 | Übungsbibliotheken für Handball finden, die wir nutzen dürfen: offene oder lizenzierbare Sammlungen mit Video und Erklärung (Jugend+Sport, SHV, DHB, EHF, IHF, Verbände anderer Länder, Plattformen für Trainer, Creative-Commons-Material, Trainer oder Vereine als Partner). Je Quelle: Inhalt und Umfang, Sprache, Lizenz und ob Einbetten oder Übernehmen erlaubt ist, Kosten, Ansprechpartner. Ergebnis: kurze Liste mit Empfehlung | K21 | offen |
+| R2 | Teilen im Teamchat: wie zeigen WhatsApp, Signal, Telegram und Instagram Links (Vorschaubild, Titel, Video direkt), was machen andere Sport-Apps beim Teilen, welche Formate werden im Chat wirklich angeschaut (Bild, kurzes Video, Link) | K20 | offen |
+
