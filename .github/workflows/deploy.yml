@@ -107,7 +107,9 @@ jobs:
         run: |
           pg=$(terraform output -raw postgres_server)
           db=$(az postgres flexible-server show -g "$rg" -n "$pg" --query state -o tsv)
-          paused=$(sed -n 's/^paused *= *\(true\|false\).*/\1/p' staging.tfvars)
+          # «keep» means what runs now in Azure, not what the settings file remembers
+          api=$(az containerapp show -g "$rg" -n "$(terraform output -raw web_app | sed 's/-web$/-api/')" -o json)
+          paused=$(jq -r '((.properties.template.scale.minReplicas // 1) == 0)' <<<"$api")
           want="${{ steps.mode.outputs.state }}"
           case "$want" in resume) paused=false ;; pause) paused=true ;; esac
           echo "database $pg: $db; paused after this run: $paused"
@@ -122,6 +124,22 @@ jobs:
           fi
           # a stopped server cannot be read: plan without refreshing then (README, «Pause»)
           refresh=$([ "$db" = Ready ] && echo true || echo false)
+          # settings changed by hand in Azure that the settings file does not know yet (the mail
+          # backend «console» while no mail provider is set up): keep them through extra_env
+          python3 - "$api" <<'PY'
+          import json, re, sys
+          live = {e["name"]: e.get("value") for e in json.loads(sys.argv[1])["properties"]["template"]["containers"][0]["env"]}
+          text = open("staging.tfvars").read()
+          m = re.search(r"^extra_env\s*=\s*(\{.*\})\s*$", text, re.M)
+          extra = json.loads(m.group(1)) if m else {}
+          for key, default in {"HB_EMAIL_BACKEND": "smtp", "HB_PWNED_CHECK": "true"}.items():
+              if live.get(key) not in (None, default) and key not in extra:
+                  extra[key] = live[key]
+                  print(f"keep {key}={live[key]} from the running app")
+          line = "extra_env        = " + json.dumps(extra)
+          text = re.sub(r"^extra_env\s*=.*$", line, text, flags=re.M) if m else text + line + "\n"
+          open("staging.tfvars", "w").write(text)
+          PY
           echo "PAUSED=$paused" >>"$GITHUB_ENV"
           echo "REFRESH=$refresh" >>"$GITHUB_ENV"
           echo "PG=$pg" >>"$GITHUB_ENV"
