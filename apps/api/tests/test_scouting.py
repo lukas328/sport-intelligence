@@ -99,7 +99,7 @@ async def test_report_facts_pdfs_and_access(
     card = await coach.get(f"/v1/orgs/{org}/scouting/{rep['id']}/goalkeeper-card")
     assert card.content.startswith(b"%PDF")
 
-    # goalkeepers get the shooter card, not the full report; field players get neither
+    # players see everything of the team (K18): the report and the shooter card
     async def member(role: str) -> Api:
         await coach.post(
             f"/v1/orgs/{org}/invitations",
@@ -113,12 +113,15 @@ async def test_report_facts_pdfs_and_access(
 
     gk = await member("goalkeeper")
     assert (await gk.get(f"/v1/orgs/{org}/scouting/{rep['id']}/goalkeeper-card")).status_code == 200
-    assert (await gk.get(f"/v1/orgs/{org}/scouting/{rep['id']}/pdf")).status_code == 403
+    assert (await gk.get(f"/v1/orgs/{org}/scouting/{rep['id']}/pdf")).status_code == 200
     player = await member("player")
     assert (
         await player.get(f"/v1/orgs/{org}/scouting/{rep['id']}/goalkeeper-card")
-    ).status_code == 403
-    assert (await player.get(url)).status_code in (403, 404)
+    ).status_code == 200
+    assert (await player.get(url)).status_code == 200
+    # guests see shared links only, not the team's preparation
+    parent = await member("guest")
+    assert (await parent.get(f"/v1/orgs/{org}/scouting/{rep['id']}/pdf")).status_code in (403, 404)
 
 
 async def test_reports_are_created_72h_before(make_api: Callable[[], Api]) -> None:

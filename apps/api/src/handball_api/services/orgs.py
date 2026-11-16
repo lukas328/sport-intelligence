@@ -12,7 +12,7 @@ from handball_api.core.db import disable_system_access, enable_system_access, se
 from handball_api.core.errors import ProblemError
 from handball_api.core.storage import ObjectNotFoundError
 from handball_api.models import Membership, Organization, OrgMembership, Season, Team, User
-from handball_api.models.enums import OrgRole, Plan, TeamRole
+from handball_api.models.enums import OrgRole, PersonRole, Plan, TeamRole
 from handball_api.schemas.orgs import (
     OrgCreate,
     OrgUpdate,
@@ -24,7 +24,14 @@ from handball_api.schemas.orgs import (
 from handball_api.services import audit, billing
 from handball_api.services.context import Ctx
 from handball_api.services.plans import PLANS
-from handball_api.services.policies import Action, Actor, authorize, visible_team_ids
+from handball_api.services.policies import (
+    Action,
+    Actor,
+    authorize,
+    person_role,
+    stored_roles,
+    visible_team_ids,
+)
 
 LOGO_TYPES = {
     b"\x89PNG\r\n\x1a\n": "image/png",
@@ -351,15 +358,64 @@ async def set_org_role(ctx: Ctx, user_id: uuid.UUID, role: OrgRole) -> OrgRole:
     return role
 
 
-async def list_team_members(ctx: Ctx, team_id: uuid.UUID) -> list[tuple[User, TeamRole]]:
+async def list_team_members(
+    ctx: Ctx, team_id: uuid.UUID
+) -> list[tuple[User, TeamRole, OrgRole | None]]:
+    """The team's people with their team role and their role in the club (a Trainer is a coach
+    who is club admin, K18)."""
     await get_team(ctx, team_id, Action.TEAM_MEMBERS_READ)
     rows = await ctx.db.execute(
-        select(User, Membership.role)
+        select(User, Membership.role, OrgMembership.role)
         .join(Membership, Membership.user_id == User.id)
+        .outerjoin(
+            OrgMembership,
+            (OrgMembership.user_id == User.id)
+            & (OrgMembership.organization_id == Membership.organization_id),
+        )
         .where(Membership.team_id == team_id)
         .order_by(User.name)
     )
-    return [(u, r) for u, r in rows]
+    return [(u, r, o) for u, r, o in rows]
+
+
+async def _guard_trainer(ctx: Ctx, user_id: uuid.UUID) -> None:
+    """A Trainer (club admin) is changed or removed by a club admin only, never by a Co-Trainer."""
+    role = await ctx.db.scalar(select(OrgMembership.role).where(OrgMembership.user_id == user_id))
+    if role == OrgRole.ORG_ADMIN and not ctx.require_actor().is_org_admin:
+        raise ProblemError(403, "forbidden", "Only a club admin changes a Trainer")
+
+
+async def set_person_role(
+    ctx: Ctx, team_id: uuid.UUID, user_id: uuid.UUID, role: PersonRole
+) -> tuple[OrgRole, TeamRole]:
+    """Gives a team member one of the product's roles (K18): Trainer (coach and club admin),
+    Co-Trainer (coach rights in the team) or Spieler. Parents are made by invitation, with their
+    child. Older specialist roles stay as they are when they already mean the asked role."""
+    actor = ctx.require_actor()
+    await get_team(ctx, team_id, Action.TEAM_MEMBERS_MANAGE)
+    if role == PersonRole.PARENT:
+        raise ProblemError(422, "parent-needs-player", "A parent is invited for a child")
+    m = await _team_membership(ctx, team_id, user_id)
+    om = await ctx.db.scalar(select(OrgMembership).where(OrgMembership.user_id == user_id))
+    if om is None:
+        raise ProblemError(404, "not-found", "Member not found")
+    want_org, want_team = stored_roles(role)
+    if role == PersonRole.TRAINER or om.role == OrgRole.ORG_ADMIN:
+        # making or unmaking a club admin is the club admins' decision
+        authorize(actor, Action.INVITE_ORG, two_factor=ctx.two_factor)
+    if om.role != want_org:
+        await set_org_role(ctx, user_id, want_org)
+    old = m.role
+    if person_role(want_org, m.role) != role:
+        m.role = want_team
+        await audit.record(
+            ctx,
+            "team.member_role_changed",
+            target_type="user",
+            target_id=user_id,
+            data={"team_id": str(team_id), "from": old, "to": m.role},
+        )
+    return want_org, m.role
 
 
 async def _team_membership(ctx: Ctx, team_id: uuid.UUID, user_id: uuid.UUID) -> Membership:
@@ -375,6 +431,7 @@ async def update_team_member(
     ctx: Ctx, team_id: uuid.UUID, user_id: uuid.UUID, data: TeamMemberUpdate
 ) -> Membership:
     await get_team(ctx, team_id, Action.TEAM_MEMBERS_MANAGE)
+    await _guard_trainer(ctx, user_id)
     m = await _team_membership(ctx, team_id, user_id)
     old = m.role
     m.role = data.role
@@ -390,6 +447,7 @@ async def update_team_member(
 
 async def remove_team_member(ctx: Ctx, team_id: uuid.UUID, user_id: uuid.UUID) -> None:
     await get_team(ctx, team_id, Action.TEAM_MEMBERS_MANAGE)
+    await _guard_trainer(ctx, user_id)
     m = await _team_membership(ctx, team_id, user_id)
     await ctx.db.delete(m)
     await audit.record(

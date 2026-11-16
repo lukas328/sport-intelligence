@@ -33,7 +33,7 @@ from handball_api.services.context import Ctx
 from handball_api.services.insights import insights
 from handball_api.services.matches import scene_window
 from handball_api.services.orgs import get_team
-from handball_api.services.policies import Action
+from handball_api.services.policies import Action, is_coach
 
 Source = Literal["collection", "playlist", "presentation", "assignment"]
 # a scene made from an event: a little before the moment and a little after
@@ -265,6 +265,9 @@ async def _native(ctx: Ctx, collection_id: uuid.UUID) -> Collection:
             409, "read-only-source", f"A {source} is read as a collection and changed where it is"
         )
     await get_team(ctx, row.team_id, Action.PLAYLIST_WRITE)
+    # players build their own collections; the staff change any (K18)
+    if not is_coach(ctx.require_actor(), row.team_id) and row.created_by_id != ctx.user_id:
+        raise ProblemError(403, "forbidden", "Players change only their own collections")
     return row  # type: ignore[no-any-return]
 
 

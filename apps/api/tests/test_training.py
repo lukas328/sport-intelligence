@@ -168,9 +168,10 @@ async def test_assignment_progress_for_staff(
     listing = (await coach.get(f"/v1/orgs/{org}/teams/{team}/assignments")).json()
     assert listing[0]["done"] == 1 and len(listing[0]["still_open"]) == 2
 
-    # players never see other players' progress; outside the video staff no detail
-    for api in (alia, bea, manager):
+    # players never see other players' progress; every Co-Trainer does (K18)
+    for api in (alia, bea):
         assert (await api.get(detail_url)).status_code == 403
+    assert (await manager.get(detail_url)).status_code == 200
     assert (await coach.get(f"/v1/orgs/{org}/assignments/{ids['team']}")).status_code == 404
     other = make_api()
     await setup_club(other, "other@hc-test.ch")

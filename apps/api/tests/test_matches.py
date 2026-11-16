@@ -344,7 +344,7 @@ async def test_clips_playlists_comments_annotations(
     assert [i["clip"]["start_ms"] for i in detail["items"]] == [20000, 1000]
     assert (await coach.put(f"{base}/order", json={"item_ids": ids_rev[:1]})).status_code == 422
 
-    # a player sees only shared playlists, can comment, cannot draw or clip
+    # a player sees everything of the team (K18), comments and marks scenes
     await coach.post(
         f"/v1/orgs/{org}/invitations",
         json={"email": "p@hc-test.ch", "team_id": ids["team"], "team_role": "player"},
@@ -352,16 +352,13 @@ async def test_clips_playlists_comments_annotations(
     token = re.search(r"/invite/([\w-]+)", outbox.outbox[-1].text).group(1)  # type: ignore[union-attr]
     player = make_api()
     await player.register("p@hc-test.ch", invitation_token=token)
-    assert (await player.get(f"/v1/orgs/{org}/teams/{ids['team']}/playlists")).json() == []
-    assert (await player.get(base)).status_code == 404
-    await coach.patch(base, json={"shared_with_players": True})
     assert len((await player.get(f"/v1/orgs/{org}/teams/{ids['team']}/playlists")).json()) == 1
     assert (await player.get(base)).status_code == 200
     assert (
         await player.post(
             f"/v1/orgs/{org}/clips", json={"match_id": m["id"], "start_ms": 0, "end_ms": 10}
         )
-    ).status_code == 403
+    ).status_code == 201
 
     c = (
         await player.post(
@@ -394,8 +391,8 @@ async def test_clips_playlists_comments_annotations(
         await player.post(
             f"/v1/orgs/{org}/matches/{m['id']}/annotations", json={"t_ms": 1, "shapes": [shape]}
         )
-    ).status_code == 403
-    assert len((await player.get(f"/v1/orgs/{org}/matches/{m['id']}/annotations")).json()) == 1
+    ).status_code == 201
+    assert len((await player.get(f"/v1/orgs/{org}/matches/{m['id']}/annotations")).json()) == 2
     assert (await coach.delete(f"/v1/orgs/{org}/annotations/{a.json()['id']}")).status_code == 204
 
     assert (await coach.delete(f"{base}/items/{detail['items'][0]['id']}")).status_code == 204

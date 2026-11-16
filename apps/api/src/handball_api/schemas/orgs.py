@@ -10,6 +10,7 @@ from handball_api.models.enums import (
     DataRegion,
     MatchFormatKey,
     OrgRole,
+    PersonRole,
     Plan,
     TeamGender,
     TeamRole,
@@ -133,10 +134,18 @@ class TeamMemberOut(ApiModel):
     name: str
     email: str
     role: TeamRole
+    # one of the product's four roles (K18): Trainer is a coach who is club admin
+    person_role: PersonRole | None = None
 
 
 class TeamMemberUpdate(ApiModel):
     role: TeamRole
+
+
+class PersonRoleIn(ApiModel):
+    """Trainer, Co-Trainer or Spieler; parents come by invitation with their child."""
+
+    role: PersonRole
 
 
 class InvitationCreate(ApiModel):

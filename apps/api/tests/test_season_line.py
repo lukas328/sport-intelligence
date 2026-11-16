@@ -159,21 +159,23 @@ async def test_season_line(
     assert totals["goals"] == 2 and totals["shots"] == 3 and totals["yellow_cards"] == 1
     assert totals["shooting_pct"] == round(2 / 3, 4) and totals["save_pct"] is None
 
-    # players read their own line only; the staff every player of the team
+    # players see everything of the team (K18): every player's line, like the staff
     player = await _join(make_api, coach, ids, outbox, "lena@hc-test.ch", player_id=lp)
     analyst = await _join(make_api, coach, ids, outbox, "an@hc-test.ch", "analyst")
     assert (await player.get(f"{base}/{lp}/line")).status_code == 200
     r = await player.get(f"{base}/{gk}/line")
-    assert r.status_code == 403
+    assert r.status_code == 200
     assert (await analyst.get(f"{base}/{gk}/line")).json()["matches"][0]["figures"]["saves"] == 1
 
     # an entry from the official data without account or consent: only for the organisers
+    # (Trainer and Co-Trainer), not for players
     await owner_conn.execute(
         "UPDATE roster_entries SET official_provider = 'handball_ch', official_player_id = 77 "
         "WHERE player_id = $1",
         uuid.UUID(nora["player_id"]),
     )
-    assert (await analyst.get(f"{base}/{nora['player_id']}/line")).status_code == 404
+    assert (await analyst.get(f"{base}/{nora['player_id']}/line")).status_code == 200
+    assert (await player.get(f"{base}/{nora['player_id']}/line")).status_code == 404
     assert (await coach.get(f"{base}/{nora['player_id']}/line")).status_code == 200
 
     # unknown player or season, another club

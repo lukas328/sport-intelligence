@@ -93,9 +93,7 @@ def video_out(v: VideoAsset, part: Part | None = None, half: int | None = None) 
 
 def _require_staff(ctx: Ctx) -> None:
     if not is_staff_somewhere(ctx.require_actor()):
-        raise ProblemError(
-            403, "forbidden", "Only coaches, analysts, team managers and admins manage opponents"
-        )
+        raise ProblemError(403, "forbidden", "Only members of a team manage opponents")
 
 
 async def list_opponents(ctx: Ctx) -> list[Opponent]:
@@ -732,7 +730,7 @@ async def update_match(ctx: Ctx, match_id: uuid.UUID, data: MatchUpdate) -> Matc
 
 async def delete_match(ctx: Ctx, match_id: uuid.UUID) -> None:
     """Deletes the match with all videos, derived files and data (BRIEF 12, deletion)."""
-    match = await get_match(ctx, match_id, Action.MATCH_WRITE)
+    match = await get_match(ctx, match_id, Action.MATCH_DELETE)
     videos = (await ctx.db.scalars(select(VideoAsset).where(VideoAsset.match_id == match.id))).all()
     for v in videos:
         if v.upload_id and v.status == "uploading":

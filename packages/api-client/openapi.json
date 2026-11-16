@@ -11207,6 +11207,30 @@
         "title": "PasswordResetIn",
         "type": "object"
       },
+      "PersonRole": {
+        "description": "The four roles the product shows (K18); not stored, read from the organisation and team\nrole (`services.policies.person_role`).",
+        "enum": [
+          "trainer",
+          "co_trainer",
+          "player",
+          "parent"
+        ],
+        "title": "PersonRole",
+        "type": "string"
+      },
+      "PersonRoleIn": {
+        "description": "Trainer, Co-Trainer or Spieler; parents come by invitation with their child.",
+        "properties": {
+          "role": {
+            "$ref": "#/components/schemas/PersonRole"
+          }
+        },
+        "required": [
+          "role"
+        ],
+        "title": "PersonRoleIn",
+        "type": "object"
+      },
       "PhaseOut": {
         "properties": {
           "count": {
@@ -12540,6 +12564,10 @@
       },
       "PublicConfig": {
         "properties": {
+          "mail_enabled": {
+            "title": "Mail Enabled",
+            "type": "boolean"
+          },
           "site_url": {
             "title": "Site Url",
             "type": "string"
@@ -12551,7 +12579,8 @@
         },
         "required": [
           "site_url",
-          "support_email"
+          "support_email",
+          "mail_enabled"
         ],
         "title": "PublicConfig",
         "type": "object"
@@ -16427,6 +16456,16 @@
           "name": {
             "title": "Name",
             "type": "string"
+          },
+          "person_role": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PersonRole"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "role": {
             "$ref": "#/components/schemas/TeamRole"
@@ -32226,6 +32265,81 @@
           }
         },
         "summary": "Update Team Member",
+        "tags": [
+          "teams",
+          "members"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/teams/{team_id}/members/{user_id}/person-role": {
+      "put": {
+        "description": "Trainer (coach and club admin), Co-Trainer or Spieler for a member of the team (K18).\nMaking or unmaking a Trainer is for club admins.",
+        "operationId": "set_person_role_v1_orgs__org_id__teams__team_id__members__user_id__person_role_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "User Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PersonRoleIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamMemberOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Set Person Role",
         "tags": [
           "teams",
           "members"
