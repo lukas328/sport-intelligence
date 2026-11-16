@@ -22,8 +22,16 @@ chain through the candidates (dynamic programming over frames):
   score, agreement, static spot, moving support (a moving pair one or two frames before and after
   with this point in the middle) and slow persistence (candidates nearby in most of +-10 frames);
   trained on the training clips with candidates of a net that never saw their labels;
+  a clip without any OWLv2 output (the shippable case: the product cannot run OWLv2) uses weights
+  learned without OWLv2 (data/tracker_rescore_noowl.json, `tracker_rescore.py --noowl`);
 - spots that stay put for most of the clip (lamps, a spare ball at the bench) earn no reward.
 Gaps inside a segment are filled linearly when `fill` is set.
+
+Confidence ("don't know"): `track_clip_conf` also returns a confidence per output point, the
+geometric mean of the point's ball probability (rescoring; for a filled frame the lower of its two
+ends) and the mean probability of its whole segment (a path on a wrong object is usually weak along
+its length, a single weak point inside a good flight is not). With `conf_min` > 0, `track_clip`
+leaves points below it out (None). Default 0: output unchanged.
 
     from tracker import track_clip   # pre clip (prelabel kernel output) -> per frame [x, y] | None
 """
@@ -57,6 +65,8 @@ class Params:
     gap_fast: int = 4  # longer gaps for a fast ball: predecessor speed at least v_fast (px/frame at 30 fps)
     v_fast: float = 8.0
     rescore: float = 3.0  # > 0: reward = rescore * ball probability of tracker_rescore.py (0 = hand-set reward)
+    rescore_w: str = "auto"  # "auto": no-OWLv2 weights for a clip without OWLv2 output; "owl" / "noowl" to force
+    conf_min: float = 0.0  # > 0: leave out points whose confidence is below (track_clip_conf)
     extra: dict = field(default_factory=dict)
 
 
@@ -109,19 +119,24 @@ def candidates(c: dict, p: Params) -> list[list[Cand]]:
     return frames
 
 
-_W = None
+_W: dict = {}
 
 
-def _rescore(frames, scale, p) -> None:
-    global _W
+def _weights(kind: str) -> list:
     import json
     from pathlib import Path
 
+    if kind not in _W:
+        name = "tracker_rescore_noowl.json" if kind == "noowl" else "tracker_rescore.json"
+        _W[kind] = json.loads((Path(__file__).resolve().parent / "data" / name).read_text())["w"]
+    return _W[kind]
+
+
+def _rescore(frames, scale, p, has_owl: bool) -> None:
     from tracker_rescore import features
 
-    if _W is None:
-        _W = json.loads((Path(__file__).resolve().parent / "data" / "tracker_rescore.json").read_text())["w"]
-    w = p.extra.get("rescore_w", _W)
+    kind = p.rescore_w if p.rescore_w != "auto" else ("owl" if has_owl else "noowl")
+    w = p.extra.get("rescore_w", _weights(kind))
     F = features(frames, [[q.static for q in cs] for cs in frames], scale)
     for cs, fs in zip(frames, F):
         for q, f in zip(cs, fs):
@@ -131,11 +146,21 @@ def _rescore(frames, scale, p) -> None:
 
 def track_clip(c: dict, p: Params | None = None) -> list:
     p = p or Params()
+    out, conf = track_clip_conf(c, p)
+    if p.conf_min > 0:
+        out = [q if q is not None and cf >= p.conf_min else None for q, cf in zip(out, conf)]
+    return out
+
+
+def track_clip_conf(c: dict, p: Params | None = None) -> tuple[list, list]:
+    """Per frame [x, y] or None, and a confidence in 0..1 per frame (0 where None)."""
+    p = p or Params()
     frames = candidates(c, p)
     n = len(frames)
     scale = c["w"] / 1280 * 30 / c.get("fps_read", c.get("fps", 30))  # px per frame at this clip
     if p.rescore > 0:
-        _rescore(frames, scale, p)
+        _rescore(frames, scale, p, any(r.get("owl") for r in c["pre"]))
+    norm = p.rescore if p.rescore > 0 else max(p.w_net, p.w_owl) + p.both
     vmax = p.vmax * scale
     gfast = p.gap_fast
     INF = float("inf")
@@ -190,15 +215,20 @@ def track_clip(c: dict, p: Params | None = None) -> list:
             if c0 < F[k]:
                 F[k], Fb[k] = c0, (k, j)
     out: list = [None] * n
+    pt = [0.0] * n  # ball probability of the point (filled frames: the lower end)
+    conf = [0.0] * n
     k = n - 1
     while k >= 0:
         if Fb[k] is None:
             k -= 1
             continue
         kk, j = Fb[k]
+        seg = []  # frames of this segment and the probabilities of its chosen candidates
         while True:
             q = frames[kk][j]
-            out[kk] = [q.x, q.y]
+            prob = min(1.0, max(0.0, q.r / norm))
+            out[kk], pt[kk] = [q.x, q.y], prob
+            seg.append(kk)
             back = best[kk][j][1]
             if back[0] == "F":
                 k = back[1]
@@ -206,8 +236,15 @@ def track_clip(c: dict, p: Params | None = None) -> list:
             kp, i = back
             if p.fill and kk - kp > 1:
                 a = frames[kp][i]
+                pa = min(1.0, max(0.0, a.r / norm))
                 for t in range(kp + 1, kk):
                     u = (t - kp) / (kk - kp)
-                    out[t] = [a.x + u * (q.x - a.x), a.y + u * (q.y - a.y)]
+                    out[t], pt[t] = [a.x + u * (q.x - a.x), a.y + u * (q.y - a.y)], min(prob, pa)
+                    seg.append(t)
             kk, j = kp, i
-    return out
+        detected = [pt[t] for t in seg]
+        mean = sum(detected) / len(detected)
+        mode = p.extra.get("conf_mode", "geo")
+        for t in seg:
+            conf[t] = {"point": pt[t], "segment": mean}.get(mode, math.sqrt(pt[t] * mean))
+    return out, conf

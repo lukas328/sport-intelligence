@@ -5,7 +5,13 @@ ml/gold/data/train_ball_v1.json, candidates of the round-8 net and OWLv2 that ne
 labels: scratchpad train1/out/pre.json), gives each candidate a ball probability that replaces the
 hand-set detector reward of tracker.py when Params.rescore is set.
 
-    python ml/gold/tracker_rescore.py TRAIN_PRE_JSON   # writes ml/gold/data/tracker_rescore.json
+    python ml/gold/tracker_rescore.py TRAIN_PRE_JSON           # writes ml/gold/data/tracker_rescore.json
+    python ml/gold/tracker_rescore.py TRAIN_PRE_JSON --noowl   # writes ml/gold/data/tracker_rescore_noowl.json
+
+--noowl: the shippable variant. The product cannot run OWLv2 (about 1.4 s per frame on a T4), so
+the OWLv2 boxes are removed from the training candidates before the features are computed; the
+OWLv2 columns are then zero and get weight zero. tracker.py picks these weights automatically for a
+clip without any OWLv2 output.
 """
 
 import json
@@ -63,7 +69,12 @@ def main() -> None:
     sys.path.insert(0, str(HERE))
     from tracker import Params, candidates
 
+    noowl = "--noowl" in sys.argv
     pre = json.loads(Path(sys.argv[1]).read_text())["clips"]
+    if noowl:
+        for c in pre.values():
+            for r in c["pre"]:
+                r.pop("owl", None)
     lab = json.loads((HERE / "data" / "train_ball_v1.json").read_text())["clips"]
     p = Params()
     X, Y = [], []
@@ -84,7 +95,7 @@ def main() -> None:
     w = fit(X, Y)
     print(len(Y), "candidates", int(Y.sum()), "on the ball")
     print(dict(zip(NAMES, np.round(w, 3))))
-    (HERE / "data" / "tracker_rescore.json").write_text(json.dumps({"names": NAMES, "w": [round(float(v), 4) for v in w],
+    (HERE / "data" / ("tracker_rescore_noowl.json" if noowl else "tracker_rescore.json")).write_text(json.dumps({"names": NAMES, "w": [round(float(v), 4) for v in w],
                                                                      "n": len(Y), "pos": int(Y.sum())}, indent=1) + "\n")
 
 

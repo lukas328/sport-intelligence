@@ -149,6 +149,48 @@ So the headline is about +-5 points uncertain (fast about +-8): the large steps 
 differences of 1 to 2 points are noise. OWLv2 is worth about 5 points but is not shippable (cost,
 section 4); the rescoring was learned with OWLv2 features and has not been retrained without them.
 
+**Shippable tracker without OWLv2 and confidence (2026-11-16, `ml/gold/tracker_eval_conf.py`).**
+The rescoring was relearned without OWLv2 (`tracker_rescore.py --noowl`, weights
+`ml/gold/data/tracker_rescore_noowl.json`: training clips, round-8 net candidates with the OWLv2 boxes
+removed, 27 627 candidates, 4 703 on a ball; bias -3.86, net +3.48, top1 +1.62, move +2.43, slow -1.69,
+OWLv2 columns and static 0). `tracker.py` picks these weights automatically for a clip without OWLv2
+output (`Params.rescore_w = "auto"`). Gold v1, hr1 + hrp1, 12 px, 95 % clip bootstrap:
+
+| Tracker | all | fast | 50/60 fps |
+|---|---|---|---|
+| with OWLv2 (reference, not shippable) | 84.0 % [78.7, 88.6] | 86.0 % [77.0, 93.0] | 76.4 % [65.0, 87.6] |
+| no OWLv2, OWLv2-trained weights | 78.6 % [72.6, 83.7] | 81.8 % [72.1, 89.7] | 74.7 % [63.4, 87.5] |
+| **no OWLv2, no-OWLv2 weights (shippable, new headline)** | **80.0 % [74.7, 84.9]** | **83.3 % [75.2, 90.1]** | 75.3 % [63.1, 86.6] |
+| same without the repeated-frame step | 78.2 % [72.7, 82.9] | 79.7 % [70.1, 87.3] | 70.8 % [60.7, 82.5] |
+| same without the fast-ball gaps | 78.4 % [72.7, 83.3] | 80.4 % [71.7, 87.6] | 74.7 % [64.1, 86.3] |
+
+Paired (all balls): no-OWLv2 weights against OWLv2-trained weights +31 / -9 (sign p 7e-4, difference
+[+0.5, +2.4] points); the repeated-frame step +39 / -10 ([+0.2, +4.5]); the fast-ball gaps +34 / -8
+([+0.2, +3.3]). Both steps still help without OWLv2. The cost of dropping OWLv2 is now 4 points
+overall and 2.7 fast.
+
+Confidence: `track_clip_conf` gives each point the geometric mean of its ball probability
+(rescoring; filled frames the lower end) and the mean probability of its segment; `Params.conf_min`
+leaves points below it out (default 0, output unchanged). Precision = hits / output points on
+labelled frames (1 553 ball frames, 14 "out" frames, so it measures right against wrong points far
+more than invented balls); recall = hits / ball frames. Shippable tracker:
+
+| threshold | 0 | 0.1 | 0.2 | 0.3 | 0.4 | 0.5 | 0.6 | 0.7 |
+|---|---|---|---|---|---|---|---|---|
+| precision | 81.9 % | 84.5 % | 87.4 % | 89.5 % | 92.1 % | 93.2 % | 95.5 % | 98.0 % |
+| recall | 80.0 % | 75.5 % | 67.9 % | 63.0 % | 55.8 % | 45.1 % | 32.6 % | 15.8 % |
+
+Threshold chosen on one half of the clips, applied to the other (both ways): for 95 % precision held
+out 93.9 % precision at 40.5 % recall (threshold about 0.6; on all clips at 0.59: precision [91.3,
+98.3], recall [23.7, 45.2]); for 90 % precision held out 90.3 % at 61.4 % recall (threshold about
+0.3; on all clips at 0.32: precision [85.8, 93.5], recall [51.8, 70.6]). With OWLv2 for reference:
+95 %: 94.7 % / 39.5 %; 90 %: 90.0 % / 69.6 %. Point-only and segment-only confidence give the same
+picture within noise (95 %: recall 37.6 % and 44.3 %; 90 %: 58.0 % and 66.6 %, held out). Reading:
+the confidence separates right from wrong points only moderately; a "sure" output at 90 % precision
+keeps about 60 % of the balls. A better confidence (e.g. from player boxes or a learned segment
+classifier) is open; whether 90 % precision is the right operating point depends on the use (shot
+analysis vs. ball possession).
+
 Error budget after rescoring (hr1 + hrp1, fast balls, `tracking-strategie.md` section 9): 8.5 % tracker
 picks the wrong candidate, 5.4 % no detector sees the ball. Before rescoring (README "repeated frames",
 357 misses of 1555): 8.2 % of balls on the net's top peak and 5.6 % among its top 5 but another
@@ -377,9 +419,9 @@ and the tracker and evaluation code; gold recomputed by the reviewer)
 | 1 | Gold v1 is thin and clustered: 1 553 of 11 752 frames labelled, 10 clips hold 47 % of the points, 5 clips 45 % of the fast ones | justified | clip bootstrap: +-5 points overall, +-8 fast (section 5) | intervals with every result; no decisions on differences under about 4 points |
 | 2 | Headline uncertainty about +-4 points | justified (it is about +-5 / +-8) | section 5 | as 1 |
 | 3 | Gold labels depend on the detectors: points mostly where a candidate was on the ball, many rows left open; "no detector" is a lower bound | justified, now shown on gold v1 itself, not only the pilot | section 6: 80 % / 66 % of given points are candidates, about half the rows open | blind check: label 5 gold clips without candidate rings and compare; shot gold labelled with visibility levels and a no-ball answer per row |
-| 4 | Precision unknown: the tracker almost always outputs a point, 87 % of frames unjudged | justified | recall = precision = 84.0 % (section 8, metric 1); only 14 no-ball labels | confidence per point and a "don't know" output (metric 2); no-ball frames labelled in shot gold |
+| 4 | Precision unknown: the tracker almost always outputs a point, 87 % of frames unjudged | justified | recall = precision = 84.0 % (section 8, metric 1); only 14 no-ball labels | confidence per point and a "don't know" output (metric 2); no-ball frames labelled in shot gold. Done 2026-11-16 (section 5): 90 % precision held out at 61 % recall, 95 % at 41 %; precision on no-ball frames still not measurable (14 frames) |
 | 5 | DeepSport (non-commercial) in every net since round 3, its benefit never measured | justified | section 2 D5 | next net generation trained without DeepSport, with one comparison run with it |
-| 6 | OWLv2 carries the largest rescoring weight, no ablation and no runtime in the log | justified; the "2 min per frame on CPU" in this file was wrong (about 1.4 s per frame on a T4) | ablation in section 5: -5.4 points overall, -4.2 fast; cost in section 4 | rescoring retrained without OWLv2; the net has to close the gap; OWLv2 stays a labelling tool |
+| 6 | OWLv2 carries the largest rescoring weight, no ablation and no runtime in the log | justified; the "2 min per frame on CPU" in this file was wrong (about 1.4 s per frame on a T4) | ablation in section 5: -5.4 points overall, -4.2 fast; cost in section 4 | rescoring retrained without OWLv2; the net has to close the gap; OWLv2 stays a labelling tool. Done 2026-11-16 (section 5): shippable tracker 80.0 % [74.7, 84.9] all, 83.3 % [75.2, 90.1] fast; gap to OWLv2 now 4 / 2.7 points |
 | 7 | Calibration finds the court in only 8 of 42 gold clips, a bigger blocker for tactics board and shot zones than the ball | justified (outside the ball work) | section 7 (court mask row) | owner to prioritise as its own track |
 | 8 | Shot test too small (20 shots, 4 halls); 46 of 61 shot clips are 50/60 fps, where the tracker is weaker | justified | `ml/gold/shot_clips.json`: fps 60 x 36, 50 x 10, 30 x 15 | the 61 logged shots become a development set; new frozen test of at least 100 shots from at least 15 never-trained halls (gold and test set 2 halls), found by viewing, not by a detector |
 | 9 | Players are ignored by the tracker although 78 % of the balls lie in a player box | justified (number from the reviewer, not rechecked here) | - | player boxes as tracker evidence, after metric 2 |
