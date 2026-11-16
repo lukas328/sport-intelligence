@@ -9,6 +9,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { destOf, sectionOf, sectionsFor, type Dest, type Section } from "@/lib/nav-model";
 import { LinkTabs } from "@/components/anlauf/blocks";
 import { useShell } from "./context";
+import { LifeHint } from "./life-hint";
 
 /** Second (and last) level of navigation: slanted tabs below the page title, all widths. */
 export function SubNav({ label, items, active }: { label: string; items: { key: string; href: string; label: ReactNode }[]; active: string | null }) {
@@ -26,10 +27,11 @@ function useArea() {
   return { dest, items, active: sectionOf(path), page, org, team, mode };
 }
 
-const SUBNAV_LABEL: Partial<Record<Dest, "matchSections" | "scenesSections" | "teamSections">> = {
+const SUBNAV_LABEL: Partial<Record<Dest, "matchSections" | "scenesSections" | "teamSections" | "lifeSections">> = {
   matches: "matchSections",
   scenes: "scenesSections",
   team: "teamSections",
+  life: "lifeSections",
 };
 
 /** Second level of the current destination (the top bar holds only the four destinations). */
@@ -70,6 +72,8 @@ export function AreaHeader({ actions, title: fallbackTitle }: { actions?: ReactN
       <PageHeader eyebrow={heading.eyebrow} title={heading.title} actions={actions} />
       {leaf?.older && <OlderArea />}
       {dest && items.length > 0 && !leaf && <SubNav label={t(SUBNAV_LABEL[dest] ?? "teamSections")} items={items} active={active} />}
+      {/* the first visit of an area of Teamleben says what it is for (K16) */}
+      {dest === "life" && <LifeHint />}
     </div>
   );
 }
@@ -105,8 +109,9 @@ export function TeamChrome() {
 
 /** Header for org-level pages that sit in a destination for staff and stand alone for others. */
 export function AreaOrPageHeader({ title }: { title: string }) {
-  const { mode, dest, team } = useArea();
-  if (mode === "staff" && dest === "team" && team) return <AreaHeader title={title} />;
+  const { mode, dest, team, items } = useArea();
+  // Teamleben for everyone with its tabs (K16); Team for the staff with the team in the eyebrow
+  if ((dest === "life" && items.length > 0) || (mode === "staff" && dest === "team" && team)) return <AreaHeader title={title} />;
   return <PageHeader title={title} />;
 }
 

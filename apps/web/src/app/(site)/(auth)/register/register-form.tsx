@@ -29,7 +29,7 @@ export function RegisterForm({
   const [busy, setBusy] = useState(false);
   // the legal pages live on the public site, per language
   const site = useSiteConfig();
-  const legal = (page: string) => (site ? sitePage(site.site_url, locale, page) : undefined);
+  const legal = (page: string) => sitePage(site?.site_url, locale, page);
 
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();

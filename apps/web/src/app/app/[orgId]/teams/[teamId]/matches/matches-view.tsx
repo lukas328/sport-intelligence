@@ -13,6 +13,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { matchState } from "@/lib/match-state";
 import { cn } from "@/lib/utils";
 import { NewMatchForm } from "./new-match-form";
+import { NextSteps } from "@/components/people/next-steps";
 import { StartView } from "./start-view";
 import { PaperImport } from "./paper-import";
 import { PaperView } from "../paper/paper-view";
@@ -113,6 +114,10 @@ export function MatchesView({ orgId, teamId, matches, canWrite }: { orgId: strin
             <div className="space-y-3 lg:pt-8">
               <p className="text-sm text-muted">{t("matches.otherWays")}</p>
               {extra}
+              {/* the coach's next steps after taking over the team (K17) */}
+              <div className="pt-6">
+                <NextSteps hasVideo={false} />
+              </div>
             </div>
           </div>
         ) : (

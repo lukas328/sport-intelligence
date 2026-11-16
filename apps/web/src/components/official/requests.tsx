@@ -90,8 +90,10 @@ export function JoinRequests({ orgId, teamId }: { orgId: string; teamId: string 
   );
 }
 
-/** A second person of a club already in the app asks for access (club admins decide). */
-export function AccessRequests({ orgId, teams }: { orgId: string; teams: { id: string; name: string }[] }) {
+/** A second person of a club already in the app asks for access (club admins decide, K17): as
+ * Co-Trainer (coach rights in the team) or as Trainer (also club admin). `teamId`: only the
+ * requests for that team, and nothing at all while there are none (the Team page). */
+export function AccessRequests({ orgId, teams, teamId }: { orgId: string; teams: { id: string; name: string }[]; teamId?: string }) {
   const t = useTranslations("requests");
   const tr = useTranslations();
   const format = useFormatter();
@@ -122,11 +124,13 @@ export function AccessRequests({ orgId, teams }: { orgId: string; teams: { id: s
     },
     onError: (e) => setError(errorKey(e)),
   });
-  const rows = (q.data ?? []).filter((r) => r.status === "pending");
+  const rows = (q.data ?? []).filter((r) => r.status === "pending" && (!teamId || r.team_id === teamId));
   const teamName = (id: string | null) => teams.find((x) => x.id === id)?.name;
+  if (teamId && rows.length === 0 && !said) return null;
   return (
     <div className="space-y-3" id="access-requests" data-testid="access-requests">
       <h3 className="font-semibold">{t("accessTitle")}</h3>
+      {rows.length > 0 && <p className="m-0 text-[15px] text-ink-2">{t("accessExplain")}</p>}
       <div aria-live="polite" className="space-y-2">
         {said && <p className="text-sm text-ok">{said}</p>}
         {error && <Alert>{tr(`errors.${error}`)}</Alert>}

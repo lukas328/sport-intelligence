@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { serverApi } from "@/lib/api";
+import { coachRights } from "@/lib/roles";
 import type { ClubAccess } from "@/lib/settings-model";
 
 /** Org, teams and the signed-in person for the pages "Ich" and "Verein". */
@@ -10,6 +11,6 @@ export async function loadSettings(orgId: string) {
   if (!org.data || !me.data) notFound();
   const all = teams.data ?? [];
   const isAdmin = org.data.my_role === "org_admin";
-  const access: ClubAccess = { isAdmin, coachOf: all.filter((x) => x.my_role === "coach").length, official: org.data.official_club_id != null };
+  const access: ClubAccess = { isAdmin, coachOf: all.filter((x) => coachRights(org.data.my_role, x.my_role)).length, official: org.data.official_club_id != null };
   return { org: org.data, teams: all, me: me.data, isAdmin, access };
 }

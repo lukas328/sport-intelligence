@@ -69,6 +69,7 @@ export const KNOWN_ERRORS = [
   "suggestion-resolved",
   "suggestion-stale",
   "email-unavailable",
+  "mail-unavailable",
 ] as const;
 
 export type ErrorKey = (typeof KNOWN_ERRORS)[number] | "generic";

@@ -23,6 +23,7 @@ import { matchState } from "@/lib/match-state";
 import { threeThings } from "@/lib/three-things";
 import { checkMinutes } from "@/lib/shot-spot";
 import { cn } from "@/lib/utils";
+import { NextSteps } from "@/components/people/next-steps";
 
 type Match = Schemas["MatchSummary"];
 
@@ -72,7 +73,11 @@ export function StartView({
             ))}
           </ul>
         </section>
-        <aside className="flex min-w-0 flex-col gap-8">{next && <NextOpponent orgId={orgId} teamId={team?.id} next={next} played={played} />}</aside>
+        <aside className="flex min-w-0 flex-col gap-8">
+          {/* after taking over the team: the coach's next steps (K17) */}
+          <NextSteps hasVideo={played.some((m) => m.has_video)} />
+          {next && <NextOpponent orgId={orgId} teamId={team?.id} next={next} played={played} />}
+        </aside>
       </div>
     </div>
   );

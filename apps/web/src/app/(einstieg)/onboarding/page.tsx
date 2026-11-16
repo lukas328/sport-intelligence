@@ -23,5 +23,8 @@ export default async function OnboardingPage() {
     const { data: org } = await client.GET("/v1/orgs/{org_id}", { params: { path: { org_id: adminOrg.id } } });
     return <OnboardingWizard existingOrg={org} />;
   }
-  return <OnboardingWizard />;
+  // a coach who asked to join a team already in the app sees that it waits (K17)
+  const { data: requests = [] } = await client.GET("/v1/me/access-requests");
+  const waiting = requests.filter((r) => r.status === "pending").map((r) => r.organization_name);
+  return <OnboardingWizard waiting={waiting} />;
 }

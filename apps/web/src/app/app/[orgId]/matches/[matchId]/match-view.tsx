@@ -75,7 +75,7 @@ type Sub = "shots" | "keepers" | "physical" | "report";
 const SUBS: Sub[] = ["report", "shots", "keepers", "physical"];
 
 
-export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; initial: Match; teamName: string; staff: boolean }) {
+export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }: { orgId: string; initial: Match; teamName: string; staff: boolean; /** players work with the video but do not delete (K18) */ canDelete?: boolean }) {
   const t = useTranslations();
   const oppName = useOpponentName();
   const format = useFormatter();
@@ -437,7 +437,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
                     {t("matches.edit")}
                   </MenuItem>
                 )}
-                {staff && (
+                {canDelete && (
                   <MenuItem
                     danger
                     icon={<Trash2 />}
@@ -467,8 +467,9 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
         </div>
       )}
 
-      {/* who is coming: the players' replies, from before the match until shortly after it */}
-      {staff && teamFeatures && match.kind !== "training" && Date.parse(match.kickoff_at) > Date.now() - 6 * 3600_000 && (
+      {/* who is coming: the players' replies, from before the match until shortly after it; for the
+          staff (coach rights, like deleting: K18) */}
+      {canDelete && teamFeatures && match.kind !== "training" && Date.parse(match.kickoff_at) > Date.now() - 6 * 3600_000 && (
         <details className="group border-y border-foreground/15 py-3" data-testid="match-attendance">
           <summary className="cursor-pointer list-none font-semibold [&::-webkit-details-marker]:hidden">
             {t("matches.attendance")}
@@ -560,7 +561,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
             <UploadPanel orgId={orgId} matchId={match.id} onUploaded={() => void qc.invalidateQueries({ queryKey: key })} />
           </section>
         )}
-        <PartsPanel orgId={orgId} match={match} jobs={jobs} staff={staff} onChanged={() => void qc.invalidateQueries({ queryKey: key })} />
+        <PartsPanel orgId={orgId} match={match} jobs={jobs} staff={staff} canDelete={canDelete} onChanged={() => void qc.invalidateQueries({ queryKey: key })} />
         {/* a further file (the second half, another camera): right in the Video tab, not only
             in the workbench (Q-VIDEO-PARTS) */}
         {main && staff && match.source !== "paper_report" && (
@@ -928,4 +929,3 @@ function MatchAdmin({ orgId, match, teamName, onSaved }: { orgId: string; match:
 
 /** The two teams as rows of a scoreboard: name left, goals right, our row in full strength. */
 // a share above 100 % means the sources disagree (e.g. goals from a report, attacks from a clip)
-

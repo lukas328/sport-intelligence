@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { TeamFeaturesSection } from "@/components/settings/team-features";
+import { coachRights } from "@/lib/roles";
 import { PeopleSection } from "../../settings/settings-view";
 import { loadSettings } from "../../settings/load";
 
@@ -12,7 +13,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function ClubTeamsPage({ params }: { params: Promise<{ orgId: string }> }) {
   const { orgId } = await params;
   const { org, teams, isAdmin } = await loadSettings(orgId);
-  const own = teams.filter((tm) => isAdmin || tm.my_role === "coach");
+  const own = teams.filter((tm) => isAdmin || coachRights(org.my_role, tm.my_role));
   return (
     <>
       <div id="people-section">

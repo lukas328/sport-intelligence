@@ -24,13 +24,22 @@ export interface ShellOrg {
   my_role: string;
 }
 
+export interface ShellMe {
+  name: string;
+  email: string;
+  /** the club asks for two-factor and it is not set up */
+  two_factor_due?: boolean;
+  /** past the grace period: club settings are blocked until two-factor is set up */
+  two_factor_overdue?: boolean;
+}
+
 export interface ShellValue {
   org: ShellOrg;
   orgs: { id: string; name: string }[];
   teams: ShellTeam[];
   team: ShellTeam | null;
   mode: Mode;
-  me: { name: string; email: string; /** the club asks for two-factor and it is not set up */ two_factor_due?: boolean };
+  me: ShellMe;
   setTeam: (id: string) => void;
 }
 

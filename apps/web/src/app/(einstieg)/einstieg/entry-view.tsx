@@ -16,7 +16,8 @@ import { clubStyle, SHIRTS } from "@/lib/color";
 import { goalRuns, type MatchGraphics } from "@/lib/graphics";
 import { threeThings } from "@/lib/three-things";
 import { cn } from "@/lib/utils";
-import { sitePage, useSiteConfig } from "@/lib/site-config";
+import { sitePage, useMailEnabled, useSiteConfig } from "@/lib/site-config";
+import { enterApp } from "@/lib/nav";
 import { ENTRY_EMAIL, remember } from "@/lib/offline";
 
 type Hit = Schemas["PublicTeamHit"];
@@ -164,11 +165,20 @@ function SearchStep({ initial, onPick, onName }: { initial: string; onPick: (h: 
           )}
         </div>
       )}
-      <p className="text-[15px]">
-        {t("haveAccount")}{" "}
-        <Link href="/login" className="font-bold text-ink underline decoration-[1.5px] underline-offset-4">
-          {t("login")}
-        </Link>
+      {/* both ways in, also with a password from the start (L12) */}
+      <p className="flex flex-wrap gap-x-6 gap-y-1 text-[15px]">
+        <span>
+          {t("haveAccount")}{" "}
+          <Link href="/login" className="font-bold text-ink underline decoration-[1.5px] underline-offset-4">
+            {t("login")}
+          </Link>
+        </span>
+        <span>
+          {t("noTeamYet")}{" "}
+          <Link href="/register" className="font-bold text-ink underline decoration-[1.5px] underline-offset-4" data-testid="entry-register-link">
+            {t("registerWithPassword")}
+          </Link>
+        </span>
       </p>
     </section>
   );
@@ -265,7 +275,7 @@ function TeamStep({ club, team, known, colour, onColour, onSave, onBack }: { clu
       )}
       {/* the one action right where the coach has seen his team; again at the end */}
       <button type="button" className={buttonClass("primary", "lg")} onClick={onSave}>
-        {t("save")}
+        {p.in_app ? t("saveInApp") : t("save")}
       </button>
       <TeamFacts p={full.data ? { ...p, scorers: full.data.scorers, scorer_games: full.data.scorer_games } : p} />
       {full.isLoading && <p className="m-0 text-[15px] text-ink-2" aria-live="polite">{t("scorersLoading")}</p>}
@@ -274,7 +284,7 @@ function TeamStep({ club, team, known, colour, onColour, onSave, onBack }: { clu
       <div className="space-y-2 border-t-2 border-ink pt-5">
         <div className="flex flex-wrap items-center gap-4">
           <button type="button" className={buttonClass("primary", "lg")} onClick={onSave} data-testid="entry-save">
-            {t("save")}
+            {p.in_app ? t("saveInApp") : t("save")}
           </button>
           <button type="button" className="min-h-11 cursor-pointer border-0 bg-transparent p-0 text-[17px] font-bold underline decoration-[1.5px] underline-offset-4" onClick={onBack}>
             {t("back")}
@@ -397,25 +407,59 @@ function Example() {
 function SaveStep({ club, team, name, colour, onBack }: { club: number | null; team: number | null; name: string | null; colour: string; onBack: () => void }) {
   const t = useTranslations("entry");
   const locale = useLocale();
+  const mail = useMailEnabled();
+  // without mail delivery a sign-in link never arrives (L2): saving makes an account with a
+  // password; with mail the coach may still prefer a password (L12)
+  const [withPassword, setWithPassword] = useState(false);
+  const usePassword = mail === false || withPassword;
   const [sent, setSent] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [fields, setFields] = useState<Record<string, string>>({});
+  const [taken, setTaken] = useState(false);
   const [busy, setBusy] = useState(false);
   const farbe = WORD_OF[colour] ?? "blau";
   // the team's name travels along: an occupied team's page names it and offers a club of one's own
   const teamName = typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("n");
   const next = team && club ? `/einstieg/speichern?club=${club}&team=${team}&farbe=${farbe}${teamName ? `&n=${encodeURIComponent(teamName)}` : ""}` : `/einstieg/speichern?name=${encodeURIComponent(name ?? "")}&farbe=${farbe}`;
-  // the legal pages on the website, its address from the configuration
+  // the legal pages on the website: absolute from the start (L9), the address from the configuration
   const site = useSiteConfig();
-  const legal = (page: string) => sitePage(site?.site_url ?? "", locale, page);
+  const legal = (page: string) => sitePage(site?.site_url, locale, page);
+  const lang = (["de-CH", "fr", "en"].includes(locale) ? locale : "de-CH") as "de-CH";
   async function send(email: string) {
     setBusy(true);
     remember(ENTRY_EMAIL, email);
-    const r = await api.POST("/v1/auth/start", { body: { email, locale: (["de-CH", "fr", "en"].includes(locale) ? locale : "de-CH") as "de-CH", next } });
+    const r = await api.POST("/v1/auth/start", { body: { email, locale: lang, next } });
     setBusy(false);
+    // the server has no mail delivery after all: on with a password
+    if (r.error && (r.error as { type?: string }).type?.endsWith("mail-unavailable")) return setWithPassword(true);
     if (r.error) return setError(t("needEmail"));
     setSent(email);
   }
-  useEffect(() => setError(null), [sent]);
+  async function register(f: FormData) {
+    const email = String(f.get("email") ?? "").trim();
+    const local: Record<string, string> = {};
+    if (!String(f.get("name") ?? "").trim()) local.name = t("needName");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) local.email = t("needEmail");
+    if (String(f.get("password") ?? "").length < 10) local.password = t("needPassword");
+    setFields(local);
+    setTaken(false);
+    if (Object.keys(local).length) return;
+    setBusy(true);
+    remember(ENTRY_EMAIL, email);
+    const r = await api.POST("/v1/auth/register", {
+      body: { name: String(f.get("name")).trim(), email, password: String(f.get("password")), accept_terms: true, locale: lang, invitation_token: null },
+    });
+    if (r.error) {
+      setBusy(false);
+      const code = (r.error as { type?: string }).type ?? "";
+      if (code.endsWith("email-taken")) return setTaken(true);
+      if (code.endsWith("weak-password")) return setFields({ password: t("weakPassword") });
+      return setError(t("savingFailed"));
+    }
+    // signed in: straight on to saving the team
+    enterApp(next);
+  }
+  useEffect(() => setError(null), [sent, usePassword]);
   if (sent) {
     return (
       <section className="mx-auto max-w-xl space-y-4 [overflow-wrap:anywhere]" role="status" data-testid="entry-sent">
@@ -425,6 +469,108 @@ function SaveStep({ club, team, name, colour, onBack }: { club: number | null; t
           {t("resend")}
         </button>
       </section>
+    );
+  }
+  const field = "min-h-14 w-full border-2 border-ink bg-transparent px-4 text-[19px]";
+  const terms = (
+    <p className="m-0 text-[15px] text-ink-2">
+      {t.rich("terms", {
+        terms: (c) => (
+          <a href={legal("agb")} target="_blank" rel="noreferrer" className="font-semibold text-ink underline underline-offset-4">
+            {c}
+          </a>
+        ),
+        privacy: (c) => (
+          <a href={legal("datenschutz")} target="_blank" rel="noreferrer" className="font-semibold text-ink underline underline-offset-4">
+            {c}
+          </a>
+        ),
+      })}
+    </p>
+  );
+  const back = (
+    <button type="button" className="min-h-11 cursor-pointer border-0 bg-transparent p-0 text-[17px] font-bold underline decoration-[1.5px] underline-offset-4" onClick={onBack}>
+      {t("back")}
+    </button>
+  );
+  if (mail === null) {
+    // a moment until it is known whether mails go out: no promise either way
+    return (
+      <section className="mx-auto max-w-xl space-y-5" aria-busy="true" data-testid="entry-mail-wait">
+        <h1 className="font-slant text-[34px] leading-tight md:text-[44px]">{t("saveTitle")}</h1>
+        <span aria-hidden className="block h-14 animate-pulse bg-rule" />
+      </section>
+    );
+  }
+  if (usePassword) {
+    return (
+      <form
+        className="mx-auto max-w-xl space-y-5"
+        data-testid="entry-password"
+        noValidate
+        onSubmit={(e: FormEvent<HTMLFormElement>) => {
+          e.preventDefault();
+          void register(new FormData(e.currentTarget));
+        }}
+      >
+        <h1 className="font-slant text-[34px] leading-tight md:text-[44px]">{t("saveTitle")}</h1>
+        <p className="m-0 text-[17px] text-ink-2">{t("passwordIntro")}</p>
+        {[
+          { key: "name", label: t("name"), type: "text", auto: "name" },
+          { key: "email", label: t("email"), type: "email", auto: "email" },
+          { key: "password", label: t("password"), type: "password", auto: "new-password" },
+        ].map((x) => (
+          <label key={x.key} className="block">
+            <span className="mb-1 block text-[17px] font-bold">{x.label}</span>
+            <input
+              name={x.key}
+              type={x.type}
+              autoComplete={x.auto}
+              inputMode={x.type === "email" ? "email" : undefined}
+              required
+              aria-invalid={fields[x.key] ? true : undefined}
+              aria-describedby={fields[x.key] ? `entry-${x.key}-error` : x.key === "password" ? "entry-password-hint" : undefined}
+              className={field}
+            />
+            {fields[x.key] && (
+              <span id={`entry-${x.key}-error`} className="mt-1 block text-[15px] font-bold text-error">
+                {fields[x.key]}
+              </span>
+            )}
+            {x.key === "password" && !fields.password && (
+              <span id="entry-password-hint" className="mt-1 block text-[15px] text-ink-2">
+                {t("passwordHint")}
+              </span>
+            )}
+          </label>
+        ))}
+        {taken && (
+          <p className="m-0 text-[17px]" role="alert" data-testid="entry-taken">
+            {t("taken")}{" "}
+            <Link href={`/login?next=${encodeURIComponent(next)}`} className="font-bold text-ink underline decoration-[1.5px] underline-offset-4">
+              {t("loginAndSave")}
+            </Link>
+          </p>
+        )}
+        {error && (
+          <p className="m-0 text-[17px] font-bold text-error" role="alert">
+            {error}
+          </p>
+        )}
+        <p className="m-0 text-[17px] font-bold">{t("trial")}</p>
+        <button type="submit" className={buttonClass("primary", "lg")} disabled={busy} data-testid="entry-register">
+          {t("sendPassword")}
+        </button>
+        {terms}
+        <div className="flex flex-wrap gap-x-6 gap-y-2">
+          {mail && (
+            <button type="button" className="min-h-11 cursor-pointer border-0 bg-transparent p-0 text-[17px] font-bold underline decoration-[1.5px] underline-offset-4" onClick={() => setWithPassword(false)}>
+              {t("useLink")}
+            </button>
+          )}
+          {back}
+        </div>
+      </form>
     );
   }
   return (
@@ -442,7 +588,7 @@ function SaveStep({ club, team, name, colour, onBack }: { club: number | null; t
       <h1 className="font-slant text-[34px] leading-tight md:text-[44px]">{t("emailTitle")}</h1>
       <label className="block">
         <span className="mb-1 block text-[17px] font-bold">{t("email")}</span>
-        <input name="email" type="email" autoComplete="email" inputMode="email" required aria-invalid={error ? true : undefined} aria-describedby="entry-mail-hint" className="min-h-14 w-full border-2 border-ink bg-transparent px-4 text-[19px]" />
+        <input name="email" type="email" autoComplete="email" inputMode="email" required aria-invalid={error ? true : undefined} aria-describedby="entry-mail-hint" className={field} />
       </label>
       {error && (
         <p className="m-0 text-[17px] font-bold text-error" role="alert">
@@ -456,23 +602,13 @@ function SaveStep({ club, team, name, colour, onBack }: { club: number | null; t
       <button type="submit" className={buttonClass("primary", "lg")} disabled={busy} data-testid="entry-send">
         {t("send")}
       </button>
-      <p className="m-0 text-[15px] text-ink-2">
-        {t.rich("terms", {
-          terms: (c) => (
-            <a href={legal("agb")} target="_blank" rel="noreferrer" className="font-semibold text-ink underline underline-offset-4">
-              {c}
-            </a>
-          ),
-          privacy: (c) => (
-            <a href={legal("datenschutz")} target="_blank" rel="noreferrer" className="font-semibold text-ink underline underline-offset-4">
-              {c}
-            </a>
-          ),
-        })}
-      </p>
-      <button type="button" className="min-h-11 cursor-pointer border-0 bg-transparent p-0 text-[17px] font-bold underline decoration-[1.5px] underline-offset-4" onClick={onBack}>
-        {t("back")}
-      </button>
+      {terms}
+      <div className="flex flex-wrap gap-x-6 gap-y-2">
+        <button type="button" className="min-h-11 cursor-pointer border-0 bg-transparent p-0 text-[17px] font-bold underline decoration-[1.5px] underline-offset-4" onClick={() => setWithPassword(true)} data-testid="entry-use-password">
+          {t("usePassword")}
+        </button>
+        {back}
+      </div>
     </form>
   );
 }

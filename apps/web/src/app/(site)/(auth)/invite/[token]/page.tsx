@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { Alert } from "@/components/ui/card";
 import { serverApi } from "@/lib/api";
 import { AcceptButton } from "./accept-button";
+import { personRole } from "@/lib/roles";
 
 export default async function InvitePage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
@@ -19,14 +20,16 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
       </div>
     );
   }
-  const role = inv.team_role ?? inv.org_role;
+  // one of the four roles, with one sentence of what the person will see and do (K18)
+  const role = personRole(inv.org_role, inv.team_role) ?? "guest";
   return (
     <div className="space-y-4 border-t-2 border-ink pt-6">
       <h1 className="text-2xl font-bold sm:text-[1.75rem]">{t("invite.title")}</h1>
       <p>{t("invite.intro", { org: inv.organization_name })}</p>
       <ul className="space-y-1 text-sm text-muted">
         {inv.team_name && <li>{t("invite.team", { team: inv.team_name })}</li>}
-        <li>{t("invite.role", { role: t(`roles.${role}`) })}</li>
+        <li>{t("invite.role", { role: t(`personRoles.${role}`) })}</li>
+        {role !== "guest" && <li>{t(`people.roleText_${role}`)}</li>}
         <li>{t("invite.forEmail", { email: inv.email })}</li>
       </ul>
       {inv.status !== "pending" ? (
