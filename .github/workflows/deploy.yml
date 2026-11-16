@@ -126,7 +126,9 @@ jobs:
           if [ "$missing" = 0 ]; then echo "images $TAG exist"; exit 0; fi
           ctx=$(mktemp -d)
           git archive HEAD | tar -x -C "$ctx"
-          az acr run -r "$registry" -f infra/terraform/azure/acr-build.yaml --set "tag=$TAG" --timeout 7200 "$ctx"
+          # .dockerignore leaves out infra/: the task file goes to the root of the upload
+          cp infra/terraform/azure/acr-build.yaml "$ctx/"
+          az acr run -r "$registry" -f acr-build.yaml --set "tag=$TAG" --timeout 7200 "$ctx"
 
       - name: Migrations
         if: steps.mode.outputs.mode == 'deploy'
