@@ -9,6 +9,7 @@ import { useEffect, useState, type ComponentProps, type CSSProperties, type Reac
 import { AttnTag, linkClass, SectionHead } from "@/components/anlauf/blocks";
 import { Bundle, EmptyField } from "@/components/anlauf/bundle";
 import { WurfHead } from "@/components/anlauf/heads";
+import { LeagueTable } from "@/components/season/league-table";
 import { ThreeThingsView, useThingText } from "@/components/anlauf/three-things-view";
 import { FromMatchButton } from "@/components/collections/from-match";
 import { useShell } from "@/components/shell/context";
@@ -404,9 +405,8 @@ export function NextOpponent({ orgId, teamId, next, played }: { orgId: string; t
   if (row?.won != null && row.drawn != null && row.lost != null) facts.push(t("oppRecord", { won: row.won, drawn: row.drawn, lost: row.lost }));
   if (row?.goalsFor != null && row.goalsAgainst != null && row.games) facts.push(t("oppGoals", { scored: Math.round(row.goalsFor / row.games), conceded: Math.round(row.goalsAgainst / row.games) }));
   if (duel) facts.push(t("lastMeeting", { score: `${duel.score_own}:${duel.score_opponent}` }) + (met && first ? `, ${text(first)}` : ""));
-  // the table around both teams: at most six rows, own and opponent marked
-  const marked = (r: Row) => (ownId != null && r.teamId === ownId) || r === row;
-  const around = table.length <= 6 ? table : table.filter((r, i) => table.slice(Math.max(0, i - 1), i + 2).some(marked)).slice(0, 6);
+  // the table around both teams, own and opponent marked; the whole table a tap away (K1)
+  const rows = table.map((r) => ({ key: `${r.rank}-${r.name}`, rank: r.rank ?? null, name: r.name ?? "", games: r.games ?? null, diff: r.goalDifference ?? null, points: r.points ?? null, own: ownId != null && r.teamId === ownId, marked: r === row }));
   return (
     <section data-testid="next-opponent">
       <p className="m-0 text-[15px] font-semibold text-ink-2">
@@ -433,28 +433,10 @@ export function NextOpponent({ orgId, teamId, next, played }: { orgId: string; t
       ) : (
         <p className="m-0 border-t border-rule py-2.5 text-base text-ink-2">{t("noVideoAgainst", { opponent: next.opponent_name })}</p>
       )}
-      {around.length > 0 && (
-        <table className="mt-4 w-full border-collapse text-[15px]" data-testid="next-table">
-          <caption className="mb-1 text-left text-[15px] font-semibold text-ink-2">{link.data?.league || link.data?.group_name || t("table")}</caption>
-          <thead className="sr-only">
-            <tr>
-              <th scope="col">{t("tableRank")}</th>
-              <th scope="col">{t("tableTeam")}</th>
-              <th scope="col">{t("tableGames")}</th>
-              <th scope="col">{t("tablePoints")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {around.map((r) => (
-              <tr key={`${r.rank}-${r.name}`} className={cn("border-t border-rule", marked(r) && "font-bold")}>
-                <td className="w-8 py-2 tabular-nums">{r.rank}</td>
-                <td className="py-2">{r.name}</td>
-                <td className="py-2 text-right text-ink-2 tabular-nums">{r.games}</td>
-                <td className="w-10 py-2 text-right tabular-nums">{r.points}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {rows.length > 0 && (
+        <div className="mt-4">
+          <LeagueTable rows={rows} caption={link.data?.league || link.data?.group_name || t("table")} excerpt={6} size="sm" testid="next-table" />
+        </div>
       )}
     </section>
   );

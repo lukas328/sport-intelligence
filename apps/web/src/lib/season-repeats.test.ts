@@ -31,6 +31,10 @@ describe("seasonRepeats", () => {
     expect(seasonRepeats([m("a", [], 10), m("b", [], 15), m("c", [], 11)]).turnovers).toMatchObject({ median: 11, outlier: 1 });
     expect(seasonRepeats([m("a", [], 10), m("b", [], 12), m("c", [], 11)]).turnovers?.outlier).toBeNull();
   });
+  it("says nothing about turnovers a match did not record (K14)", () => {
+    const missing: SeasonMatch = { id: "x", label: "x", goals: [], turnovers: null };
+    expect(seasonRepeats([m("a", [], 10), missing, m("c", [], 11)]).turnovers).toBeNull();
+  });
   it("shortens opponent names", () => {
     expect(shortName("BSV Stäfa-Uerikon")).toBe("Stäfa");
     expect(shortName("TSV Thalwil-Gattikon")).toBe("Thalwil");

@@ -14738,6 +14738,11 @@
       },
       "SeasonLineMatch": {
         "properties": {
+          "analysed": {
+            "default": false,
+            "title": "Analysed",
+            "type": "boolean"
+          },
           "attendance": {
             "anyOf": [
               {
@@ -14886,6 +14891,11 @@
       },
       "SeasonLineTotals": {
         "properties": {
+          "analysed_matches": {
+            "default": 0,
+            "title": "Analysed Matches",
+            "type": "integer"
+          },
           "assists": {
             "title": "Assists",
             "type": "integer"

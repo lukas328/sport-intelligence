@@ -354,6 +354,53 @@ async def delete_assignment(ctx: Ctx, assignment_id: uuid.UUID) -> None:
     await ctx.db.delete(a)
 
 
+QUESTIONS = "analysis_questions"
+CHECKED = "analysis_checked"  # every question of the note answered
+LIVE_MATCHES = 10  # matches whose questions are counted afresh per call (the newest notes)
+
+
+async def _questions_now(ctx: Ctx, items: list[Notification]) -> None:
+    """«n Fragen an dich» counts the questions as they are now, from the one source Prüfen, the
+    start and the mail use (graphics.open_checks), not as they were when the analysis ended
+    (livegang L13). Once none is left the note says so, counts as read and leads to the match."""
+    from handball_api.services.graphics import more_checks, open_checks
+
+    live: dict[str, tuple[int, int] | None] = {}
+    for n in items:
+        mid = (n.params or {}).get("match_id")
+        if n.kind != QUESTIONS or not isinstance(mid, str):
+            continue
+        if mid not in live:
+            if len(live) >= LIVE_MATCHES:
+                continue
+            try:
+                match = await ctx.db.get(Match, uuid.UUID(mid))
+            except ValueError:
+                match = None
+            if match is None:  # another club's match (row security) or deleted
+                live[mid] = None
+                continue
+            questions = len(await open_checks(ctx, match))
+            more = len(await more_checks(ctx, match))
+            # as the mail counts them: with none of the most important left, the further moments
+            if questions == 0:
+                questions, more = more, 0
+            live[mid] = (questions, more)
+        now = live[mid]
+        if now is None:
+            continue
+        questions, more = now
+        if questions == 0:
+            n.kind = CHECKED
+            n.params = {k: v for k, v in n.params.items() if k not in ("questions", "more_moments")}
+            n.link = f"/app/{n.organization_id}/matches/{mid}"
+            if n.read_at is None:
+                n.read_at = _now()
+        elif (n.params.get("questions"), n.params.get("more_moments")) != (questions, more):
+            n.params = {**n.params, "questions": questions, "more_moments": more}
+    await ctx.db.flush()
+
+
 async def notifications(ctx: Ctx) -> NotificationList:
     base = Notification.user_id == ctx.user_id
     items = (
@@ -361,6 +408,7 @@ async def notifications(ctx: Ctx) -> NotificationList:
             select(Notification).where(base).order_by(Notification.created_at.desc()).limit(50)
         )
     ).all()
+    await _questions_now(ctx, list(items))
     unread = await ctx.db.scalar(
         select(func.count(Notification.id)).where(base, Notification.read_at.is_(None))
     )

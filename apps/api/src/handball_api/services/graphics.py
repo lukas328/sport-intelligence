@@ -35,6 +35,7 @@ from handball_api.models import (
     Track,
     VideoAsset,
 )
+from handball_api.models.enums import VideoStatus
 from handball_api.services.context import Ctx
 from handball_api.services.events import clock_from_video
 from handball_api.services.matches import (
@@ -610,9 +611,15 @@ async def _open_checks(
     length = await timeline_duration_ms(ctx, match.id)
     return (
         fields
-        + (_kickoff_check(match, length) if asset is not None and not match.is_demo else [])
+        # the throw-off is set in the playing video: asked only once the video plays (while it
+        # is still uploaded or converted the question would show an empty player, livegang K5)
+        + (_kickoff_check(match, length) if _plays(asset) and not match.is_demo else [])
         + await _checks(ctx, match)
     )
+
+
+def _plays(asset: VideoAsset | None) -> bool:
+    return asset is not None and asset.status == VideoStatus.READY
 
 
 def _carried_over(asset: VideoAsset, siblings: set[str] | None = None) -> bool:

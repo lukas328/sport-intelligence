@@ -62,14 +62,18 @@ export function SeasonLineView({ orgId, teamId, playerId }: { orgId: string; tea
         { key: "goals", label: t("goals"), value: (f) => String(f.goals), filter: "type=shot&outcome=goal" },
         // one count for shots and rate: the attempts without blocked ones (UX test N12)
         { key: "shots", label: t("shots"), value: (f) => String(lineShots(f)), filter: "type=shot" },
-        { key: "pct", label: t("shootingPct"), value: (f) => lineRate(f) },
+        // the season's rate from the analysed matches only (the report's goals are no shots)
+        { key: "pct", label: t("shootingPct"), value: (f, m) => (m ? lineRate(f) : pct(l.totals.shooting_pct)) },
         { key: "seven", label: t("sevenM"), value: (f) => lineSevenM(f) },
         // no «Torvorlagen»: passes are not measured (UX test B34, Z5)
         { key: "turnovers", label: t("turnovers"), value: (f) => String(f.turnovers), filter: "type=turnover" },
         { key: "suspensions", label: t("suspensions"), value: (f) => String(f.suspensions), filter: "type=suspension_2min" },
       ];
   const search = (filter: string, matchId?: string) => `/app/${orgId}/teams/${teamId}/scenes?player=${playerId}${matchId ? `&match=${matchId}` : ""}&${filter}`;
+  // what the official report knows of a match without analysis: goals and suspensions (K15)
+  const REPORT = new Set(["goals", "suspensions"]);
   const cell = (c: (typeof cols)[number], f: Figures, m?: Schemas["SeasonLineMatch"]) => {
+    if (m && !m.analysed && !REPORT.has(c.key)) return "-";
     const v = c.value(f, m);
     // a count leads to its scenes; zeros and rates do not
     return staff && c.filter && v !== "0" ? (
@@ -107,6 +111,11 @@ export function SeasonLineView({ orgId, teamId, playerId }: { orgId: string; tea
           </div>
         ))}
       </dl>
+      )}
+      {l.totals.matches > 0 && (l.totals.analysed_matches ?? 0) < l.totals.matches && (
+        <p className="text-[15px] text-ink-2" data-testid="season-line-basis">
+          {t("analysedBasis", { k: l.totals.analysed_matches ?? 0, n: l.totals.matches })}
+        </p>
       )}
       {l.matches.length === 0 ? null : (
         <div className="overflow-x-auto" tabIndex={0} role="region" aria-label={t("matches")}>
