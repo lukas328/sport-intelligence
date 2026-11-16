@@ -8,6 +8,7 @@ import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { type ComponentProps, type CSSProperties, type FormEvent, useEffect, useState } from "react";
 import { SectionHead } from "@/components/anlauf/blocks";
 import { Bundle } from "@/components/anlauf/bundle";
+import { LeagueTable } from "@/components/season/league-table";
 import { Breakable, WurfHead } from "@/components/anlauf/heads";
 import { useThingText } from "@/components/anlauf/three-things-view";
 import { buttonClass } from "@/components/ui/button";
@@ -295,35 +296,14 @@ function EntryHead(props: ComponentProps<typeof WurfHead>) {
 export function TeamFacts({ p, hideNext = false }: { p: Preview; hideNext?: boolean }) {
   const t = useTranslations("entry");
   const format = useFormatter();
-  const ownRow = p.table.findIndex((r) => r.own);
-  const rows = ownRow < 0 ? p.table.slice(0, 5) : p.table.slice(Math.max(0, ownRow - 2), ownRow + 3);
+  // the table: an excerpt around the own team, the whole one a tap away (livegang K1)
+  const rows = p.table.map((r) => ({ key: `${r.rank}-${r.name}`, rank: r.rank ?? null, name: r.name ?? "", games: r.games ?? null, diff: r.goal_difference ?? null, points: r.points ?? null, own: Boolean(r.own) }));
   return (
       <div className="grid gap-10 md:grid-cols-2">
       {rows.length > 0 && (
         <section>
           <SectionHead title={t("table")} note={p.league ?? p.group_name ?? undefined} />
-          <table className="w-full border-collapse text-[17px]" data-testid="entry-table">
-            <thead>
-              <tr className="border-b-2 border-ink text-[15px] text-ink-2">
-                <th scope="col" className="py-1.5 text-left font-semibold" />
-                <th scope="col" className="py-1.5 text-left font-semibold" />
-                <th scope="col" className="py-1.5 text-right font-semibold">{t("games")}</th>
-                <th scope="col" className="py-1.5 text-right font-semibold">{t("diff")}</th>
-                <th scope="col" className="py-1.5 text-right font-semibold">{t("points")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((r) => (
-                <tr key={`${r.rank}-${r.name}`} className={cn("border-b border-rule", r.own && "font-bold")}>
-                  <td className="py-2 pr-2 tabular-nums">{r.rank}</td>
-                  <td className="py-2">{r.name}</td>
-                  <td className="py-2 text-right tabular-nums">{r.games}</td>
-                  <td className="py-2 text-right tabular-nums">{r.goal_difference}</td>
-                  <td className="py-2 text-right tabular-nums">{r.points}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <LeagueTable rows={rows} testid="entry-table" />
         </section>
       )}
       <div className="space-y-10">

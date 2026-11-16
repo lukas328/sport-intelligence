@@ -1257,9 +1257,11 @@
     "video_failed": "Ein Video liess sich nicht lesen.",
     "video_failed_match": "Das Video gegen {opponent} liess sich nicht lesen. Wähl eine andere Datei.",
     "analysis_questions": "Die Analyse ist fertig. Ein paar Fragen an dich, dann zeigt sie mehr.",
-    "analysis_questions_match": "Die Analyse gegen {opponent} ist fertig. {questions} Fragen an dich, dann zeigt sie mehr.",
+    "analysis_questions_match": "Die Analyse gegen {opponent} ist fertig. {questions, plural, one {1 Frage} other {# Fragen}} an dich, dann zeigt sie mehr.",
     "analysis_no_goals": "Die Analyse ist fertig. Sie hat keine Tore gefunden.",
-    "analysis_no_goals_match": "Die Analyse gegen {opponent} ist fertig. Sie hat keine Tore gefunden."
+    "analysis_no_goals_match": "Die Analyse gegen {opponent} ist fertig. Sie hat keine Tore gefunden.",
+    "analysis_checked": "Alles geprüft. Die Analyse rechnet mit deinen Antworten.",
+    "analysis_checked_match": "Alles geprüft gegen {opponent}. Die Analyse rechnet mit deinen Antworten."
   },
   "assignments": {
     "title": "Aufgaben",
@@ -2891,7 +2893,8 @@
     "source": "Aus den Spielberichten und dem, was erfasst wurde, wie auf den Spielseiten. Spielminuten werden nicht erfasst. Würfe ohne geblockte.",
     "noMatchesYet": "Noch kein gespieltes Spiel in dieser Saison. Die Zahlen erscheinen nach dem ersten Spiel mit Spielbericht oder Erfassung.",
     "summaryPlayed": "{matches, plural, one {1 Spiel} other {# Spiele}}, an {involved} beteiligt",
-    "number": "Nummer"
+    "number": "Nummer",
+    "analysedBasis": "Tore und Strafen aus allen Spielen, alles andere nur aus {k} von {n, plural, one {# Spiel} other {# Spielen}} mit Analyse."
   },
   "slots": {
     "title": "Trainingszeiten {season}",
@@ -3310,7 +3313,14 @@
     "fieldTakeOver": "Ecken der 1. Halbzeit übernehmen",
     "openCount": "{n, plural, one {1 Frage offen} other {# Fragen offen}}, etwa {minutes, plural, one {1 Minute} other {# Minuten}}",
     "kickoffMinute": "Minute",
-    "kickoffSecond": "Sekunde"
+    "kickoffSecond": "Sekunde",
+    "fieldConfirmed": "bestätigt",
+    "kickoffAbsentAt": "nicht im Video, Spielzeit am Anfang {clock}",
+    "peopleNeedRoster": "Im Video {n, plural, one {ist 1 Person} other {sind # Personen}} ohne Namen. Trag zuerst deinen Kader ein, dann kannst du sie hier benennen.",
+    "rosterAdd": "Kader eintragen",
+    "videoSoon": "Das Video ist gleich bereit.",
+    "videoSoonText": "Es wird noch hochgeladen oder umgewandelt. Die Frage wartet so lange; die Seite schaut alle paar Sekunden nach.",
+    "questionsLeft": "{n, plural, one {1 Frage bleibt offen} other {# Fragen bleiben offen}}. Sie wartet hier, wann immer du magst."
   },
   "scenesPage": {
     "searchLabel": "Szenen suchen",
@@ -3482,7 +3492,23 @@
     "moreNote": "Zahlen, Bestwerte, alle Spiele im Detail, Läufe und Auswertungen",
     "rankKick": "Rang {rank}, {points} Punkte",
     "kickLeague": "{n, plural, one {1 davon in der Meisterschaft} other {# davon in der Meisterschaft}}",
-    "trendNoteLast": "Tordifferenz pro Spiel, die letzten {shown} von {n} (am Handy {phone})"
+    "trendNoteLast": "Tordifferenz pro Spiel, die letzten {shown} von {n} (am Handy {phone})",
+    "basis": "aus {k} von {n, plural, one {# Spiel} other {# Spielen}}",
+    "basisNone": "noch aus keinem Spiel: kommt mit der Analyse eines Videos",
+    "basisAll": "aus {n, plural, one {dem einen Spiel} other {allen # Spielen}}",
+    "bestBasis": "Tore aus allen Spielen, Wurfquote, Paraden und Ballverluste nur aus Spielen mit Analyse ({k} von {n})",
+    "dataCount": "{k} von {n} mit Analyse",
+    "legend": "Resultat und Tore kommen von handball.ch oder so, wie du sie eingetragen hast. Wurfquote, gehaltene Würfe und Ballverluste kommen aus deinen Videos (Analyse und was du markierst); Spiele ohne diese Daten zählen dort nicht mit.",
+    "colData": "Daten",
+    "dataVideo": "Video analysiert",
+    "dataTagged": "von Hand erfasst",
+    "dataVideoOnly": "Video da, Analyse offen",
+    "dataOfficial": "Resultat von handball.ch",
+    "dataResult": "nur Resultat",
+    "uploadVideo": "Video hochladen",
+    "noAnalysisYet": "noch keine Analyse",
+    "noVideoShort": "kein Video",
+    "dataReport": "aus dem Spielbericht"
   },
   "numbersTab": {
     "intro": "Tore, 7 m und 2 Minuten aus Spielbericht und Video, Würfe und Paraden aus den markierten Ereignissen.",
@@ -3646,5 +3672,19 @@
     "sideVideoRight": "So wie im Video: das Tor rechts.",
     "pause": "Anhalten",
     "play": "Abspielen"
+  },
+  "leagueTable": {
+    "rank": "Rang",
+    "rankShort": "Rg.",
+    "team": "Team",
+    "games": "Spiele",
+    "gamesShort": "Sp.",
+    "diff": "Tordifferenz",
+    "diffShort": "Diff.",
+    "points": "Punkte",
+    "pointsShort": "Pkt.",
+    "own": "dein Team",
+    "showAll": "Ganze Tabelle ({n} Teams)",
+    "showLess": "Nur den Ausschnitt zeigen"
   }
 }

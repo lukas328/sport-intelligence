@@ -272,6 +272,9 @@ async def _season_stats(ctx: Ctx, team: Team, season_id: uuid.UUID) -> dict[str,
                 "has_analysis": analysed,
                 "official": m.official_game_id is not None
                 or any(src in OFFICIAL_SOURCES for src in s["quality"]["sources"]),
+                # the analysis came from a filled-in match report (no video behind it)
+                "from_report": analysed
+                and set(s["quality"]["sources"]) <= {"paper_report", *OFFICIAL_SOURCES},
                 "goals": goals,
                 "goals_against": against,
                 "shots": own["shots"] if analysed else None,
@@ -321,6 +324,8 @@ async def _season_stats(ctx: Ctx, team: Team, season_id: uuid.UUID) -> dict[str,
                     "saves": 0,
                     "assists": 0,
                     "xg": 0.0,
+                    # the goals of the analysed matches: what `shots` are set against
+                    "shot_goals": 0,
                     # shots behind the shooting percentage: only matches with misses recorded
                     "pct_goals": 0,
                     "pct_shots": 0,
@@ -330,6 +335,7 @@ async def _season_stats(ctx: Ctx, team: Team, season_id: uuid.UUID) -> dict[str,
             for k in ("goals", "suspensions"):
                 row[k] += p.get(k, 0)
             if analysed:
+                row["shot_goals"] += p.get("goals", 0)
                 for k in ("shots", "turnovers", "saves", "assists"):
                     row[k] += p.get(k, 0)
                 row["xg"] = round(row["xg"] + p.get("xg", 0.0), 2)

@@ -1257,9 +1257,11 @@
     "video_failed": "A video could not be read.",
     "video_failed_match": "The video against {opponent} could not be read. Choose another file.",
     "analysis_questions": "The analysis is done. A few questions for you, then it shows more.",
-    "analysis_questions_match": "The analysis against {opponent} is done. {questions} questions for you, then it shows more.",
+    "analysis_questions_match": "The analysis against {opponent} is done. {questions, plural, one {1 question} other {# questions}} for you, then it shows more.",
     "analysis_no_goals": "The analysis is done. It found no goals.",
-    "analysis_no_goals_match": "The analysis against {opponent} is done. It found no goals."
+    "analysis_no_goals_match": "The analysis against {opponent} is done. It found no goals.",
+    "analysis_checked": "All checked. The analysis works with your answers.",
+    "analysis_checked_match": "All checked against {opponent}. The analysis works with your answers."
   },
   "assignments": {
     "title": "Assignments",
@@ -2891,7 +2893,8 @@
     "source": "From the match reports and what was tagged, as on the match pages. Playing minutes are not recorded. Shots without blocked ones.",
     "noMatchesYet": "No match played this season yet. The figures appear after the first match with a match report or tagging.",
     "summaryPlayed": "{matches, plural, one {1 match} other {# matches}}, involved in {involved}",
-    "number": "Number"
+    "number": "Number",
+    "analysedBasis": "Goals and suspensions from all matches, everything else only from {k} of {n, plural, one {# match} other {# matches}} with analysis."
   },
   "slots": {
     "title": "Training times {season}",
@@ -3310,7 +3313,14 @@
     "fieldTakeOver": "Take over the first half's corners",
     "openCount": "{n, plural, one {1 question open} other {# questions open}}, about {minutes, plural, one {1 minute} other {# minutes}}",
     "kickoffMinute": "Minute",
-    "kickoffSecond": "Second"
+    "kickoffSecond": "Second",
+    "fieldConfirmed": "confirmed",
+    "kickoffAbsentAt": "not in the video, match clock at the start {clock}",
+    "peopleNeedRoster": "{n, plural, one {1 person} other {# people}} in the video {n, plural, one {has} other {have}} no name. Add your squad first, then you can name them here.",
+    "rosterAdd": "Add the squad",
+    "videoSoon": "The video is almost ready.",
+    "videoSoonText": "It is still being uploaded or converted. The question waits until then; the page checks every few seconds.",
+    "questionsLeft": "{n, plural, one {1 question stays open} other {# questions stay open}}. It waits here whenever you like."
   },
   "scenesPage": {
     "searchLabel": "Search scenes",
@@ -3482,7 +3492,23 @@
     "moreNote": "Figures, bests, all matches in detail, runs and reports",
     "rankKick": "Rank {rank}, {points} points",
     "kickLeague": "{n, plural, one {1 of them in the league} other {# of them in the league}}",
-    "trendNoteLast": "Goal difference per match, the last {shown} of {n} ({phone} on a phone)"
+    "trendNoteLast": "Goal difference per match, the last {shown} of {n} ({phone} on a phone)",
+    "basis": "from {k} of {n, plural, one {# match} other {# matches}}",
+    "basisNone": "from no match yet: comes with the analysis of a video",
+    "basisAll": "from {n, plural, one {the one match} other {all # matches}}",
+    "bestBasis": "Goals from all matches, shooting, saves and turnovers only from analysed matches ({k} of {n})",
+    "dataCount": "{k} of {n} analysed",
+    "legend": "Results and goals come from handball.ch or as you entered them. Shooting, saves and turnovers come from your videos (the analysis and what you mark); matches without that data do not count there.",
+    "colData": "Data",
+    "dataVideo": "video analysed",
+    "dataTagged": "entered by hand",
+    "dataVideoOnly": "video there, analysis open",
+    "dataOfficial": "result from handball.ch",
+    "dataResult": "result only",
+    "uploadVideo": "Upload video",
+    "noAnalysisYet": "no analysis yet",
+    "noVideoShort": "no video",
+    "dataReport": "from the match report"
   },
   "numbersTab": {
     "intro": "Goals, 7 m and 2 minutes from the match report and the video, shots and saves from the tagged events.",
@@ -3646,5 +3672,19 @@
     "sideVideoRight": "As in the video: the goal on the right.",
     "pause": "Pause",
     "play": "Play"
+  },
+  "leagueTable": {
+    "rank": "Rank",
+    "rankShort": "Pos",
+    "team": "Team",
+    "games": "Games",
+    "gamesShort": "P",
+    "diff": "Goal difference",
+    "diffShort": "Diff",
+    "points": "Points",
+    "pointsShort": "Pts",
+    "own": "your team",
+    "showAll": "Full table ({n} teams)",
+    "showLess": "Show only the excerpt"
   }
 }

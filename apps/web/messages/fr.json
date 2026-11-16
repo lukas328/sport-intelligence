@@ -1257,9 +1257,11 @@
     "video_failed": "Une vidéo n'a pas pu être lue.",
     "video_failed_match": "La vidéo contre {opponent} n'a pas pu être lue. Choisis un autre fichier.",
     "analysis_questions": "L'analyse est terminée. Quelques questions pour toi, ensuite elle en montre plus.",
-    "analysis_questions_match": "L'analyse contre {opponent} est terminée. {questions} questions pour toi, ensuite elle en montre plus.",
+    "analysis_questions_match": "L'analyse contre {opponent} est terminée. {questions, plural, one {1 question} other {# questions}} pour toi, ensuite elle en montre plus.",
     "analysis_no_goals": "L'analyse est terminée. Elle n'a trouvé aucun but.",
-    "analysis_no_goals_match": "L'analyse contre {opponent} est terminée. Elle n'a trouvé aucun but."
+    "analysis_no_goals_match": "L'analyse contre {opponent} est terminée. Elle n'a trouvé aucun but.",
+    "analysis_checked": "Tout est vérifié. L'analyse calcule avec tes réponses.",
+    "analysis_checked_match": "Tout est vérifié contre {opponent}. L'analyse calcule avec tes réponses."
   },
   "assignments": {
     "title": "Tâches",
@@ -2891,7 +2893,8 @@
     "source": "Selon les feuilles de match et la saisie, comme sur les pages de match. Les minutes de jeu ne sont pas saisies. Tirs sans les tirs contrés.",
     "noMatchesYet": "Pas encore de match joué cette saison. Les chiffres apparaissent après le premier match avec feuille de match ou saisie.",
     "summaryPlayed": "{matches, plural, one {1 match} other {# matchs}}, impliqué dans {involved}",
-    "number": "Numéro"
+    "number": "Numéro",
+    "analysedBasis": "Buts et pénalités sur tous les matchs, le reste seulement sur {k} de {n, plural, one {# match} other {# matchs}} analysés."
   },
   "slots": {
     "title": "Horaires d'entraînement {season}",
@@ -3310,7 +3313,14 @@
     "fieldTakeOver": "Reprendre les coins de la 1re mi-temps",
     "openCount": "{n, plural, one {1 question ouverte} other {# questions ouvertes}}, environ {minutes, plural, one {1 minute} other {# minutes}}",
     "kickoffMinute": "Minute",
-    "kickoffSecond": "Seconde"
+    "kickoffSecond": "Seconde",
+    "fieldConfirmed": "confirmé",
+    "kickoffAbsentAt": "pas dans la vidéo, temps de jeu au début {clock}",
+    "peopleNeedRoster": "Dans la vidéo, {n, plural, one {1 personne n'a} other {# personnes n'ont}} pas de nom. Saisis d'abord ton effectif, ensuite tu pourras les nommer ici.",
+    "rosterAdd": "Saisir l'effectif",
+    "videoSoon": "La vidéo est bientôt prête.",
+    "videoSoonText": "Elle est encore en cours d'envoi ou de conversion. La question attend; la page vérifie toutes les quelques secondes.",
+    "questionsLeft": "{n, plural, one {1 question reste ouverte} other {# questions restent ouvertes}}. Elle t'attend ici quand tu veux."
   },
   "scenesPage": {
     "searchLabel": "Chercher des scènes",
@@ -3482,7 +3492,23 @@
     "moreNote": "Chiffres, records, tous les matchs en détail, séries et analyses",
     "rankKick": "Rang {rank}, {points} points",
     "kickLeague": "{n, plural, one {dont 1 en championnat} other {dont # en championnat}}",
-    "trendNoteLast": "Différence de buts par match, les {shown} derniers sur {n} (sur mobile {phone})"
+    "trendNoteLast": "Différence de buts par match, les {shown} derniers sur {n} (sur mobile {phone})",
+    "basis": "sur {k} de {n, plural, one {# match} other {# matchs}}",
+    "basisNone": "encore aucun match: vient avec l'analyse d'une vidéo",
+    "basisAll": "sur {n, plural, one {le seul match} other {les # matchs}}",
+    "bestBasis": "Buts sur tous les matchs, réussite au tir, arrêts et pertes de balle seulement sur les matchs analysés ({k} de {n})",
+    "dataCount": "{k} de {n} analysés",
+    "legend": "Le résultat et les buts viennent de handball.ch ou de ce que tu as saisi. La réussite au tir, les tirs arrêtés et les pertes de balle viennent de tes vidéos (analyse et ce que tu marques); les matchs sans ces données n'y comptent pas.",
+    "colData": "Données",
+    "dataVideo": "vidéo analysée",
+    "dataTagged": "saisi à la main",
+    "dataVideoOnly": "vidéo là, analyse à faire",
+    "dataOfficial": "résultat de handball.ch",
+    "dataResult": "résultat seul",
+    "uploadVideo": "Envoyer la vidéo",
+    "noAnalysisYet": "pas encore d'analyse",
+    "noVideoShort": "pas de vidéo",
+    "dataReport": "de la feuille de match"
   },
   "numbersTab": {
     "intro": "Buts, 7 m et 2 minutes de la feuille de match et de la vidéo, tirs et arrêts des événements saisis.",
@@ -3646,5 +3672,19 @@
     "sideVideoRight": "Comme dans la vidéo : le but à droite.",
     "pause": "Pause",
     "play": "Lecture"
+  },
+  "leagueTable": {
+    "rank": "Rang",
+    "rankShort": "Rg",
+    "team": "Équipe",
+    "games": "Matchs",
+    "gamesShort": "J.",
+    "diff": "Différence de buts",
+    "diffShort": "Diff.",
+    "points": "Points",
+    "pointsShort": "Pts",
+    "own": "ton équipe",
+    "showAll": "Tout le classement ({n} équipes)",
+    "showLess": "Montrer seulement l'extrait"
   }
 }

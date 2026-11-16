@@ -231,6 +231,7 @@ async def test_matches_without_analysis_do_not_count_in_averages(
     totals = season["totals"]
     assert totals["matches"] == 3 and totals["analysed_matches"] == 1
     assert rows[analysed]["has_analysis"] is True and rows[analysed]["turnovers"] == 2
+    assert rows[analysed]["from_report"] is False and rows[official]["from_report"] is False
     for mid in (official, result):
         row = rows[mid]
         assert row["has_analysis"] is False and row["has_video"] is False
