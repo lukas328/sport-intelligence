@@ -1,5 +1,5 @@
 {
- "note": "Shot gold: shots from the official logs, clips 7 s before to 3 s after the logged time (ml/gold/pick_shots.py). Fixed once labelling starts.",
+ "note": "Shot gold: shots from the official logs, clips 7 s before to 3 s after the logged time (ml/gold/pick_shots.py). Fixed once labelling starts. split 'test' is the frozen final test (whole home halls): no development, tuning or looking at results on it before the end.",
  "clips": [
   {
    "id": "w00",
@@ -15,7 +15,8 @@
     "kind": "goal",
     "log_ms": 7000,
     "team": "home"
-   }
+   },
+   "split": "test"
   },
   {
    "id": "w01",
@@ -31,7 +32,8 @@
     "kind": "shot_saved",
     "log_ms": 7000,
     "team": "away"
-   }
+   },
+   "split": "test"
   },
   {
    "id": "w02",
@@ -47,7 +49,8 @@
     "kind": "shot_missed",
     "log_ms": 7000,
     "team": "away"
-   }
+   },
+   "split": "test"
   },
   {
    "id": "w03",
@@ -63,7 +66,8 @@
     "kind": "shot_missed",
     "log_ms": 7000,
     "team": "home"
-   }
+   },
+   "split": "test"
   },
   {
    "id": "w04",
@@ -79,7 +83,8 @@
     "kind": "shot_saved",
     "log_ms": 7000,
     "team": "away"
-   }
+   },
+   "split": "test"
   },
   {
    "id": "w05",
@@ -95,7 +100,8 @@
     "kind": "shot_saved",
     "log_ms": 7000,
     "team": "home"
-   }
+   },
+   "split": "test"
   },
   {
    "id": "w06",
@@ -111,7 +117,8 @@
     "kind": "shot_missed",
     "log_ms": 7000,
     "team": "home"
-   }
+   },
+   "split": "test"
   },
   {
    "id": "w07",
@@ -127,7 +134,8 @@
     "kind": "goal",
     "log_ms": 7000,
     "team": "home"
-   }
+   },
+   "split": "test"
   },
   {
    "id": "w08",
@@ -143,7 +151,8 @@
     "kind": "shot_missed",
     "log_ms": 7000,
     "team": "home"
-   }
+   },
+   "split": "test"
   },
   {
    "id": "w09",
@@ -159,7 +168,8 @@
     "kind": "shot_saved",
     "log_ms": 7000,
     "team": "away"
-   }
+   },
+   "split": "test"
   },
   {
    "id": "w10",
@@ -175,7 +185,8 @@
     "kind": "shot_missed",
     "log_ms": 7000,
     "team": "home"
-   }
+   },
+   "split": "dev"
   },
   {
    "id": "w11",
@@ -191,7 +202,8 @@
     "kind": "shot_saved",
     "log_ms": 7000,
     "team": "home"
-   }
+   },
+   "split": "dev"
   },
   {
    "id": "w12",
@@ -207,7 +219,8 @@
     "kind": "goal",
     "log_ms": 7000,
     "team": "home"
-   }
+   },
+   "split": "dev"
   },
   {
    "id": "w13",
@@ -223,7 +236,8 @@
     "kind": "shot_missed",
     "log_ms": 7000,
     "team": "home"
-   }
+   },
+   "split": "dev"
   },
   {
    "id": "w14",
@@ -239,7 +253,8 @@
     "kind": "shot_saved",
     "log_ms": 7000,
     "team": "home"
-   }
+   },
+   "split": "dev"
   },
   {
    "id": "w15",
@@ -255,7 +270,8 @@
     "kind": "goal",
     "log_ms": 7000,
     "team": "away"
-   }
+   },
+   "split": "test"
   },
   {
    "id": "w16",
@@ -271,7 +287,8 @@
     "kind": "shot_missed",
     "log_ms": 7000,
     "team": "home"
-   }
+   },
+   "split": "test"
   },
   {
    "id": "w17",
@@ -287,7 +304,8 @@
     "kind": "shot_saved",
     "log_ms": 7000,
     "team": "home"
-   }
+   },
+   "split": "test"
   },
   {
    "id": "w18",
@@ -303,7 +321,8 @@
     "kind": "shot_saved",
     "log_ms": 7000,
     "team": "away"
-   }
+   },
+   "split": "test"
   },
   {
    "id": "w19",
@@ -319,7 +338,8 @@
     "kind": "goal",
     "log_ms": 7000,
     "team": "away"
-   }
+   },
+   "split": "test"
   },
   {
    "id": "w20",
@@ -335,7 +355,8 @@
     "kind": "shot_missed",
     "log_ms": 7000,
     "team": "home"
-   }
+   },
+   "split": "dev"
   },
   {
    "id": "w21",
@@ -351,7 +372,8 @@
     "kind": "goal",
     "log_ms": 7000,
     "team": "away"
-   }
+   },
+   "split": "dev"
   },
   {
    "id": "w22",
@@ -367,7 +389,8 @@
     "kind": "goal",
     "log_ms": 7000,
     "team": "home"
-   }
+   },
+   "split": "dev"
   },
   {
    "id": "w23",
@@ -383,7 +406,8 @@
     "kind": "shot_saved",
     "log_ms": 7000,
     "team": "away"
-   }
+   },
+   "split": "dev"
   },
   {
    "id": "w24",
@@ -399,7 +423,8 @@
     "kind": "shot_saved",
     "log_ms": 7000,
     "team": "home"
-   }
+   },
+   "split": "dev"
   },
   {
    "id": "w25",
@@ -415,7 +440,8 @@
     "kind": "goal",
     "log_ms": 7000,
     "team": "away"
-   }
+   },
+   "split": "test"
   },
   {
    "id": "w26",
@@ -431,7 +457,8 @@
     "kind": "goal",
     "log_ms": 7000,
     "team": "home"
-   }
+   },
+   "split": "test"
   },
   {
    "id": "w27",
@@ -447,7 +474,8 @@
     "kind": "shot_saved",
     "log_ms": 7000,
     "team": "away"
-   }
+   },
+   "split": "test"
   },
   {
    "id": "w28",
@@ -463,7 +491,8 @@
     "kind": "shot_saved",
     "log_ms": 7000,
     "team": "away"
-   }
+   },
+   "split": "test"
   },
   {
    "id": "w29",
@@ -479,7 +508,8 @@
     "kind": "shot_missed",
     "log_ms": 7000,
     "team": "home"
-   }
+   },
+   "split": "test"
   },
   {
    "id": "w30",
@@ -495,7 +525,8 @@
     "kind": "goal",
     "log_ms": 7000,
     "team": "home"
-   }
+   },
+   "split": "dev"
   },
   {
    "id": "w31",
@@ -511,7 +542,8 @@
     "kind": "shot_missed",
     "log_ms": 7000,
     "team": "away"
-   }
+   },
+   "split": "dev"
   },
   {
    "id": "w32",
@@ -527,7 +559,8 @@
     "kind": "shot_missed",
     "log_ms": 7000,
     "team": "home"
-   }
+   },
+   "split": "dev"
   },
   {
    "id": "w33",
@@ -543,7 +576,8 @@
     "kind": "goal",
     "log_ms": 7000,
     "team": "away"
-   }
+   },
+   "split": "dev"
   },
   {
    "id": "w34",
@@ -559,7 +593,8 @@
     "kind": "shot_saved",
     "log_ms": 7000,
     "team": "home"
-   }
+   },
+   "split": "dev"
   },
   {
    "id": "w35",
@@ -575,7 +610,8 @@
     "kind": "shot_saved",
     "log_ms": 7000,
     "team": "away"
-   }
+   },
+   "split": "dev"
   },
   {
    "id": "w36",
@@ -591,7 +627,8 @@
     "kind": "shot_missed",
     "log_ms": 7000,
     "team": "away"
-   }
+   },
+   "split": "dev"
   },
   {
    "id": "w37",
@@ -607,7 +644,8 @@
     "kind": "goal",
     "log_ms": 7000,
     "team": "home"
-   }
+   },
+   "split": "dev"
   },
   {
    "id": "w38",
@@ -623,7 +661,8 @@
     "kind": "shot_saved",
     "log_ms": 7000,
     "team": "away"
-   }
+   },
+   "split": "dev"
   },
   {
    "id": "w39",
@@ -639,7 +678,8 @@
     "kind": "shot_missed",
     "log_ms": 7000,
     "team": "home"
-   }
+   },
+   "split": "dev"
   },
   {
    "id": "w40",
@@ -655,7 +695,8 @@
     "kind": "goal",
     "log_ms": 7000,
     "team": "away"
-   }
+   },
+   "split": "dev"
   },
   {
    "id": "w41",
@@ -671,7 +712,8 @@
     "kind": "goal",
     "log_ms": 7000,
     "team": "home"
-   }
+   },
+   "split": "dev"
   },
   {
    "id": "w42",
@@ -687,7 +729,8 @@
     "kind": "shot_saved",
     "log_ms": 7000,
     "team": "away"
-   }
+   },
+   "split": "dev"
   },
   {
    "id": "w43",
@@ -703,7 +746,8 @@
     "kind": "shot_saved",
     "log_ms": 7000,
     "team": "home"
-   }
+   },
+   "split": "dev"
   },
   {
    "id": "w44",
@@ -719,7 +763,8 @@
     "kind": "shot_saved",
     "log_ms": 7000,
     "team": "away"
-   }
+   },
+   "split": "dev"
   },
   {
    "id": "w45",
@@ -735,7 +780,8 @@
     "kind": "shot_saved",
     "log_ms": 7000,
     "team": "away"
-   }
+   },
+   "split": "dev"
   },
   {
    "id": "w46",
@@ -751,7 +797,8 @@
     "kind": "goal",
     "log_ms": 7000,
     "team": "away"
-   }
+   },
+   "split": "dev"
   },
   {
    "id": "w47",
@@ -767,7 +814,8 @@
     "kind": "shot_missed",
     "log_ms": 7000,
     "team": "away"
-   }
+   },
+   "split": "dev"
   },
   {
    "id": "w48",
@@ -783,7 +831,8 @@
     "kind": "goal",
     "log_ms": 7000,
     "team": "away"
-   }
+   },
+   "split": "dev"
   },
   {
    "id": "w49",
@@ -799,7 +848,8 @@
     "kind": "goal",
     "log_ms": 7000,
     "team": "away"
-   }
+   },
+   "split": "dev"
   },
   {
    "id": "w50",
@@ -815,7 +865,8 @@
     "kind": "shot_saved",
     "log_ms": 7000,
     "team": "away"
-   }
+   },
+   "split": "dev"
   },
   {
    "id": "w51",
@@ -831,7 +882,8 @@
     "kind": "shot_saved",
     "log_ms": 7000,
     "team": "home"
-   }
+   },
+   "split": "dev"
   },
   {
    "id": "w52",
@@ -847,7 +899,8 @@
     "kind": "goal",
     "log_ms": 7000,
     "team": "away"
-   }
+   },
+   "split": "dev"
   },
   {
    "id": "w53",
@@ -863,7 +916,8 @@
     "kind": "shot_missed",
     "log_ms": 7000,
     "team": "away"
-   }
+   },
+   "split": "dev"
   },
   {
    "id": "w54",
@@ -879,7 +933,8 @@
     "kind": "goal",
     "log_ms": 7000,
     "team": "away"
-   }
+   },
+   "split": "dev"
   },
   {
    "id": "w55",
@@ -895,7 +950,8 @@
     "kind": "goal",
     "log_ms": 7000,
     "team": "home"
-   }
+   },
+   "split": "dev"
   },
   {
    "id": "w56",
@@ -911,7 +967,8 @@
     "kind": "shot_saved",
     "log_ms": 7000,
     "team": "away"
-   }
+   },
+   "split": "dev"
   },
   {
    "id": "w57",
@@ -927,7 +984,8 @@
     "kind": "goal",
     "log_ms": 7000,
     "team": "away"
-   }
+   },
+   "split": "dev"
   },
   {
    "id": "w58",
@@ -943,7 +1001,8 @@
     "kind": "shot_saved",
     "log_ms": 7000,
     "team": "away"
-   }
+   },
+   "split": "dev"
   },
   {
    "id": "w59",
@@ -959,7 +1018,8 @@
     "kind": "shot_saved",
     "log_ms": 7000,
     "team": "away"
-   }
+   },
+   "split": "dev"
   },
   {
    "id": "w60",
@@ -975,7 +1035,8 @@
     "kind": "goal",
     "log_ms": 7000,
     "team": "home"
-   }
+   },
+   "split": "dev"
   }
  ]
 }

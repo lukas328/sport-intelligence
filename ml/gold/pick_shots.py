@@ -20,6 +20,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 PRE, POST = 7000, 3000
 KINDS = ("shot_saved", "shot_missed", "goal")
+TEST_HALLS = 4
 
 
 def main() -> None:
@@ -74,11 +75,24 @@ def main() -> None:
                 "fps": g["fps"], "width": 1280, "height": 720,
                 "shot": {"kind": e["kind"], "log_ms": PRE, "team": e.get("team")},
             })
+    # frozen final test: all shots of TEST_HALLS home halls (drawn with the seed among the halls
+    # with a single game; one home team holds most games and stays in dev), never used for
+    # development or tuning, measured once at the end. Split by hall, so no hall is on both sides.
+    games = sorted({c["game"] for c in clips})
+    teams = {g["name"]: g.get("teams") for g in json.loads((HERE.parent / "data" / "catalog.json").read_text())["games"]}
+    hall = {g: teams[g][0] for g in games}  # home team (catalog), i.e. its hall
+    per = {h: sum(hall[g] == h for g in games) for h in set(hall.values())}
+    test = set(random.Random(a.seed + 1).sample(sorted(h for h, n in per.items() if n == 1), TEST_HALLS))
+    for c in clips:
+        c["split"] = "test" if hall[c["game"]] in test else "dev"
     out = {"note": "Shot gold: shots from the official logs, clips 7 s before to 3 s after the logged time "
-                   "(ml/gold/pick_shots.py). Fixed once labelling starts.", "clips": clips}
+                   "(ml/gold/pick_shots.py). Fixed once labelling starts. split 'test' is the frozen final "
+                   "test (whole home halls): no development, tuning or looking at results on it before the end.",
+           "clips": clips}
     (HERE / "shot_clips.json").write_text(json.dumps(out, indent=1) + "\n")
     kinds = [c["shot"]["kind"] for c in clips]
-    print(len(clips), "clips", {k: kinds.count(k) for k in KINDS}, len({c["game"] for c in clips}), "games")
+    print(len(clips), "clips", {k: kinds.count(k) for k in KINDS}, len(games), "games;",
+          sum(c["split"] == "test" for c in clips), "in the frozen test, halls:", sorted(test))
 
 
 if __name__ == "__main__":
