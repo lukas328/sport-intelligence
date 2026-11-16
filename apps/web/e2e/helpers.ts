@@ -45,11 +45,14 @@ export async function register(page: Page, email: string, name = "Test Trainerin
   await page.waitForURL((url) => !url.pathname.startsWith("/register"), { timeout: 30_000 });
 }
 
-/** Team area: "Team" in the main navigation, then a tab (Termine needs Teamfunktionen). */
+/** Team area: "Team" in the main navigation; Termine are in «Teamleben» (K16, needs the team
+ * setting). */
 export async function openTeam(page: Page, section?: "Team" | "Termine") {
+  if (section === "Termine") {
+    await follow(page, page.getByRole("link", { name: "Teamleben", exact: true }).first(), /\/schedule$/);
+    return;
+  }
   await follow(page, page.getByRole("link", { name: "Team", exact: true }), /\/teams\/[^/]+$/);
-  if (!section || section === "Team") return;
-  await follow(page, page.getByRole("link", { name: section, exact: true }), /\/schedule$/);
 }
 
 /** Spiele in the main navigation (the start for staff). Saison is a destination of its own;
