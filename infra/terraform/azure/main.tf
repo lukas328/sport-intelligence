@@ -179,13 +179,13 @@ locals {
   dsn_owner = "postgresql://${local.pg_admin}:${random_password.pg_admin.result}@${local.pg_host}:5432/handball?sslmode=require"
 
   generated_secrets = {
-    "hb-secret-key"        = random_password.secret_key.result
-    "hb-encryption-key"    = local.fernet
-    "hb-internal-token"    = random_password.internal_token.result
-    "hb-database-url"      = local.db_app
-    "hb-migration-db-url"  = local.db_owner
-    "hb-admin-dsn"         = local.dsn_owner
-    "hb-app-db-password"   = random_password.pg_app.result
+    "hb-secret-key"       = random_password.secret_key.result
+    "hb-encryption-key"   = local.fernet
+    "hb-internal-token"   = random_password.internal_token.result
+    "hb-database-url"     = local.db_app
+    "hb-migration-db-url" = local.db_owner
+    "hb-admin-dsn"        = local.dsn_owner
+    "hb-app-db-password"  = random_password.pg_app.result
   }
 
   # set by hand after the first apply (README, step 4); terraform never overwrites them
@@ -409,10 +409,10 @@ resource "azurerm_container_app" "redis" {
     }
 
     container {
-      name    = "redis"
-      image   = "docker.io/library/redis:7-alpine"
-      cpu     = 0.25
-      memory  = "0.5Gi"
+      name   = "redis"
+      image  = "docker.io/library/redis:7-alpine"
+      cpu    = 0.25
+      memory = "0.5Gi"
       # via sh: the azurerm provider cannot read back an empty argument ("--save" "")
       command = ["sh", "-c", "exec redis-server --save '' --appendonly no --maxmemory 384mb"]
     }
