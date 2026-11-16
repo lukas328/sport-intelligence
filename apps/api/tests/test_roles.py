@@ -187,6 +187,25 @@ async def test_trainer_invitation_makes_club_admin(
     assert {m["email"]: m["person_role"] for m in members}["zweit@hc-test.ch"] == "trainer"
 
 
+async def test_invitation_hands_the_link_to_the_inviter(
+    make_api: Callable[[], Api], outbox: MemoryEmailSender
+) -> None:
+    trainer = make_api()
+    ids = await setup_club(trainer)
+    r = await trainer.post(
+        f"/v1/orgs/{ids['org']}/invitations",
+        json={"email": "lea@hc-test.ch", "team_id": ids["team"], "team_role": "player"},
+    )
+    assert r.status_code == 201, r.text
+    body = r.json()
+    assert body["mailed"] is True
+    assert body["link"].startswith("http://web.test/invite/")
+    assert body["link"].rsplit("/", 1)[1] in outbox.outbox[-1].text
+    # the list does not carry links
+    listed = (await trainer.get(f"/v1/orgs/{ids['org']}/invitations")).json()
+    assert "link" not in listed[0]
+
+
 async def test_public_config_says_whether_mail_goes_out(make_api: Callable[[], Api]) -> None:
     api = make_api()
     cfg = (await api.get("/v1/public/config")).json()

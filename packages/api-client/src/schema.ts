@@ -1632,7 +1632,11 @@ export interface paths {
         /** List Invitations */
         get: operations["list_invitations_v1_orgs__org_id__invitations_get"];
         put?: never;
-        /** Create Invitation */
+        /**
+         * Create Invitation
+         * @description The invitation, and its link for the inviter: to send it in the team chat as well, or
+         *     instead of the mail while no mail goes out (`mailed`, finding L2).
+         */
         post: operations["create_invitation_v1_orgs__org_id__invitations_post"];
         delete?: never;
         options?: never;
@@ -7127,6 +7131,35 @@ export interface components {
             team_id?: string | null;
             team_role?: components["schemas"]["TeamRole"] | null;
         };
+        /** InvitationCreated */
+        InvitationCreated: {
+            /** Accepted At */
+            accepted_at: string | null;
+            /** Email */
+            email: string;
+            /**
+             * Expires At
+             * Format: date-time
+             */
+            expires_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Link */
+            link: string;
+            /** Mailed */
+            mailed: boolean;
+            org_role: components["schemas"]["OrgRole"];
+            /** Player Id */
+            player_id: string | null;
+            /** Revoked At */
+            revoked_at: string | null;
+            /** Team Id */
+            team_id: string | null;
+            team_role: components["schemas"]["TeamRole"] | null;
+        };
         /** InvitationOut */
         InvitationOut: {
             /** Accepted At */
@@ -8719,6 +8752,11 @@ export interface components {
              * @default false
              */
             something_to_protect?: boolean;
+            /**
+             * Two Factor Overdue
+             * @default false
+             */
+            two_factor_overdue?: boolean;
             /** Two Factor Required */
             two_factor_required: boolean;
             /**
@@ -14613,7 +14651,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["InvitationOut"];
+                    "application/json": components["schemas"]["InvitationCreated"];
                 };
             };
             /** @description Validation Error */

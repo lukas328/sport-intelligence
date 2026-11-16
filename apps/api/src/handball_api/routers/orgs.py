@@ -11,6 +11,7 @@ from handball_api.routers.deps import AuthedDep, CtxDep, OrgDep, OrgScope
 from handball_api.schemas.common import ApiModel
 from handball_api.schemas.orgs import (
     InvitationCreate,
+    InvitationCreated,
     InvitationOut,
     InvitationPreview,
     MemberOut,
@@ -21,6 +22,7 @@ from handball_api.schemas.orgs import (
 )
 from handball_api.services import invitations as invitation_service
 from handball_api.services import orgs as service
+from handball_api.services.policies import two_factor_missing
 
 router = APIRouter(prefix="/v1", tags=["organizations"])
 
@@ -41,6 +43,9 @@ def org_out(scope: OrgScope, org: Organization | None = None) -> OrgOut:
         two_factor_required=actor.is_org_admin
         and scope.ctx.settings.org_admin_2fa_required
         and not actor.has_2fa,
+        # past the grace period: club settings are blocked until it is set up (the account
+        # shows a dot only then, K4)
+        two_factor_overdue=two_factor_missing(actor, scope.ctx.two_factor),
         created_at=org.created_at,
         verification=org.verification,
         official_club_id=org.official_club_id,
@@ -122,13 +127,21 @@ async def set_member_role(user_id: uuid.UUID, data: OrgRoleIn, scope: OrgDep) ->
 
 @router.post(
     "/orgs/{org_id}/invitations",
-    response_model=InvitationOut,
+    response_model=InvitationCreated,
     status_code=status.HTTP_201_CREATED,
     tags=["invitations"],
 )
-async def create_invitation(data: InvitationCreate, scope: OrgDep) -> Invitation:
-    inv, _token = await invitation_service.create(scope.ctx, scope.org, scope.user, data)
-    return inv
+async def create_invitation(data: InvitationCreate, scope: OrgDep) -> InvitationCreated:
+    """The invitation, and its link for the inviter: to send it in the team chat as well, or
+    instead of the mail while no mail goes out (`mailed`, finding L2)."""
+    inv, token = await invitation_service.create(scope.ctx, scope.org, scope.user, data)
+    return InvitationCreated.model_validate(
+        {
+            **InvitationOut.model_validate(inv).model_dump(),
+            "link": f"{scope.ctx.settings.web_base_url}/invite/{token}",
+            "mailed": scope.ctx.settings.mail_delivers,
+        }
+    )
 
 
 @router.get("/orgs/{org_id}/invitations", response_model=list[InvitationOut], tags=["invitations"])
