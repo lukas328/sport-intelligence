@@ -4,7 +4,7 @@ import uuid
 from datetime import datetime
 from typing import Any, Literal
 
-from fastapi import APIRouter, Depends, Response
+from fastapi import APIRouter, Depends, Request, Response
 from pydantic import Field
 
 from handball_api.routers.deps import CtxDep, OrgDep, rate_limit
@@ -49,6 +49,23 @@ async def create(team_id: uuid.UUID, data: ShareCreate, scope: OrgDep) -> ShareC
     )
 
 
+class ShareOptions(ApiModel):
+    """What may be shared publicly for the team, per kind; a reason instead of a failed attempt."""
+
+    youth: bool
+    default_days: int
+    kinds: dict[str, str | None] = Field(
+        description="per kind: null when allowed, else forbidden, plan, unverified or "
+        "youth-protection"
+    )
+
+
+@router.get("/v1/orgs/{org_id}/teams/{team_id}/share-options", response_model=ShareOptions)
+async def options(team_id: uuid.UUID, scope: OrgDep) -> dict[str, Any]:
+    """The share dialog asks first, so it can explain the youth rule or a missing right (K20)."""
+    return await service.options(scope.ctx, team_id)
+
+
 @router.get("/v1/orgs/{org_id}/teams/{team_id}/share-links", response_model=list[ShareOut])
 async def list_links(team_id: uuid.UUID, scope: OrgDep) -> list[Any]:
     links = await service.list_links(scope.ctx, team_id)
@@ -76,8 +93,25 @@ async def public(token: str, ctx: CtxDep) -> dict[str, Any]:
     return await service.public(ctx, token)
 
 
+class PreviewGoal(ApiModel):
+    team: Literal["own", "opp"]
+    zone: str | None
+    minute: float | None
+
+
+class PreviewPlay(ApiModel):
+    category: str
+    formation: str | None
+    doc: dict[str, Any]
+
+
+class PreviewReel(ApiModel):
+    format: str
+
+
 class SharePreview(ApiModel):
-    """What a chat shows for the link (Open Graph): no names of people, nothing behind a login."""
+    """What a chat shows for the link (Open Graph): no names of people, nothing behind a login.
+    The match fields are set when the shared content belongs to one match."""
 
     kind: str
     title: str
@@ -87,6 +121,18 @@ class SharePreview(ApiModel):
     duration_s: int | None
     kit: dict[str, str]
     expires_at: datetime
+    opponent: str | None = None
+    opp_kit: str | None = None
+    score: list[int] | None = None
+    halftime: list[int] | None = None
+    kickoff_at: datetime | None = None
+    is_home: bool | None = None
+    # a shared goal scene: its minute, side and zone
+    goal: PreviewGoal | None = None
+    # a shared match: its goals by side and zone (the three things of the match card)
+    goals: list[PreviewGoal] | None = None
+    play: PreviewPlay | None = None
+    reel: PreviewReel | None = None
 
 
 @router.get(
@@ -115,6 +161,42 @@ async def public_media(token: str, video_id: uuid.UUID, path: str, ctx: CtxDep) 
     response_class=Response,
     responses={200: {"content": {"video/mp4": {}}}},
 )
-async def public_reel(token: str, ctx: CtxDep) -> Response:
+async def public_reel(token: str, ctx: CtxDep, request: Request) -> Response:
+    """The reel as one MP4. Byte ranges are served: Safari and the iMessage preview (og:video)
+    play an MP4 inline only from a server that answers ranges."""
     data = await service.public_reel(ctx, token)
-    return Response(data, media_type="video/mp4", headers={"cache-control": "private, max-age=60"})
+    headers = {"cache-control": "private, max-age=60", "accept-ranges": "bytes"}
+    part = byte_range(request.headers.get("range"), len(data))
+    if part is None:
+        return Response(data, media_type="video/mp4", headers=headers)
+    if part == "invalid":
+        return Response(
+            status_code=416, headers={**headers, "content-range": f"bytes */{len(data)}"}
+        )
+    start, end = part
+    return Response(
+        data[start : end + 1],
+        status_code=206,
+        media_type="video/mp4",
+        headers={**headers, "content-range": f"bytes {start}-{end}/{len(data)}"},
+    )
+
+
+def byte_range(header: str | None, size: int) -> tuple[int, int] | Literal["invalid"] | None:
+    """One range of a `Range: bytes=a-b` header (a-, -n and a-b); None: the whole file."""
+    if not header or not header.startswith("bytes=") or "," in header:
+        return None
+    first, _, last = header[6:].strip().partition("-")
+    try:
+        if first == "":
+            n = int(last)
+            if n <= 0:
+                return "invalid"
+            return max(0, size - n), size - 1
+        start = int(first)
+        end = int(last) if last else size - 1
+    except ValueError:
+        return None
+    if start >= size or end < start:
+        return "invalid"
+    return start, min(end, size - 1)

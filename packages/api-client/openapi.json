@@ -12371,6 +12371,91 @@
         "title": "PresentationPatch",
         "type": "object"
       },
+      "PreviewGoal": {
+        "properties": {
+          "minute": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Minute"
+          },
+          "team": {
+            "enum": [
+              "own",
+              "opp"
+            ],
+            "title": "Team",
+            "type": "string"
+          },
+          "zone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Zone"
+          }
+        },
+        "required": [
+          "team",
+          "zone",
+          "minute"
+        ],
+        "title": "PreviewGoal",
+        "type": "object"
+      },
+      "PreviewPlay": {
+        "properties": {
+          "category": {
+            "title": "Category",
+            "type": "string"
+          },
+          "doc": {
+            "additionalProperties": true,
+            "title": "Doc",
+            "type": "object"
+          },
+          "formation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Formation"
+          }
+        },
+        "required": [
+          "category",
+          "formation",
+          "doc"
+        ],
+        "title": "PreviewPlay",
+        "type": "object"
+      },
+      "PreviewReel": {
+        "properties": {
+          "format": {
+            "title": "Format",
+            "type": "string"
+          }
+        },
+        "required": [
+          "format"
+        ],
+        "title": "PreviewReel",
+        "type": "object"
+      },
       "ProfileIn": {
         "properties": {
           "active": {
@@ -15374,6 +15459,41 @@
         "title": "ShareCreated",
         "type": "object"
       },
+      "ShareOptions": {
+        "description": "What may be shared publicly for the team, per kind; a reason instead of a failed attempt.",
+        "properties": {
+          "default_days": {
+            "title": "Default Days",
+            "type": "integer"
+          },
+          "kinds": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "description": "per kind: null when allowed, else forbidden, plan, unverified or youth-protection",
+            "title": "Kinds",
+            "type": "object"
+          },
+          "youth": {
+            "title": "Youth",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "youth",
+          "default_days",
+          "kinds"
+        ],
+        "title": "ShareOptions",
+        "type": "object"
+      },
       "ShareOut": {
         "properties": {
           "created_at": {
@@ -15446,7 +15566,7 @@
         "type": "object"
       },
       "SharePreview": {
-        "description": "What a chat shows for the link (Open Graph): no names of people, nothing behind a login.",
+        "description": "What a chat shows for the link (Open Graph): no names of people, nothing behind a login.\nThe match fields are set when the shared content belongs to one match.",
         "properties": {
           "club": {
             "title": "Club",
@@ -15468,6 +15588,67 @@
             "title": "Expires At",
             "type": "string"
           },
+          "goal": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PreviewGoal"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "goals": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/PreviewGoal"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Goals"
+          },
+          "halftime": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Halftime"
+          },
+          "is_home": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Home"
+          },
+          "kickoff_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kickoff At"
+          },
           "kind": {
             "title": "Kind",
             "type": "string"
@@ -15479,9 +15660,65 @@
             "title": "Kit",
             "type": "object"
           },
+          "opp_kit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Opp Kit"
+          },
+          "opponent": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Opponent"
+          },
+          "play": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PreviewPlay"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reel": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PreviewReel"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "scenes": {
             "title": "Scenes",
             "type": "integer"
+          },
+          "score": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score"
           },
           "team": {
             "title": "Team",
@@ -35240,6 +35477,60 @@
         ]
       }
     },
+    "/v1/orgs/{org_id}/teams/{team_id}/share-options": {
+      "get": {
+        "description": "The share dialog asks first, so it can explain the youth rule or a missing right (K20).",
+        "operationId": "options_v1_orgs__org_id__teams__team_id__share_options_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShareOptions"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Options",
+        "tags": [
+          "sharing"
+        ]
+      }
+    },
     "/v1/orgs/{org_id}/teams/{team_id}/tag-sets": {
       "get": {
         "operationId": "list_tag_sets_v1_orgs__org_id__teams__team_id__tag_sets_get",
@@ -36834,6 +37125,7 @@
     },
     "/v1/share/{token}/reel.mp4": {
       "get": {
+        "description": "The reel as one MP4. Byte ranges are served: Safari and the iMessage preview (og:video)\nplay an MP4 inline only from a server that answers ranges.",
         "operationId": "public_reel_v1_share__token__reel_mp4_get",
         "parameters": [
           {
