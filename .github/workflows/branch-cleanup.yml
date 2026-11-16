@@ -1,0 +1,70 @@
+name: Branch cleanup
+
+# Deletes branches that are fully contained in main, have no open pull request and whose last
+# commit is older than MIN_AGE_DAYS. Branches merged through a pull request are already removed by
+# the repository setting "Automatically delete head branches"; this catches the rest (pushed
+# straight to main, merged before the setting). Every deletion is listed in the job log, and a
+# deleted branch can be restored from its last commit (shown in the log) as long as main holds it.
+on:
+  schedule:
+    - cron: "17 3 * * 1" # Mondays 03:17 UTC
+  workflow_dispatch:
+    inputs:
+      min_age_days:
+        description: "Only branches whose last commit is at least this many days old"
+        default: "7"
+      dry_run:
+        description: "List only, delete nothing"
+        type: boolean
+        default: false
+      also_delete:
+        description: "Comma-separated extra branches to delete although not ancestors of main (content landed another way); still never with an open PR"
+        default: ""
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete merged branches
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          MIN_AGE_DAYS: ${{ inputs.min_age_days || '7' }}
+          DRY_RUN: ${{ inputs.dry_run || false }}
+          ALSO: ${{ inputs.also_delete || '' }}
+        run: |
+          set -euo pipefail
+          default=$(gh api "repos/$REPO" --jq .default_branch)
+          cutoff=$(date -u -d "-${MIN_AGE_DAYS} days" +%s)
+          open_heads=$(gh pr list --repo "$REPO" --state open --limit 200 --json headRefName --jq '.[].headRefName')
+          extra=",${ALSO// /},"
+          deleted=0
+          for b in $(gh api --paginate "repos/$REPO/branches" --jq '.[].name'); do
+            [ "$b" = "$default" ] && continue
+            if grep -qxF "$b" <<< "$open_heads"; then echo "keep  $b (open pull request)"; continue; fi
+            enc=$(jq -rn --arg s "$b" '$s|@uri')
+            info=$(gh api "repos/$REPO/compare/$default...$enc" --jq '[.status, .ahead_by] | @tsv')
+            status=$(cut -f1 <<< "$info"); ahead=$(cut -f2 <<< "$info")
+            sha=$(gh api "repos/$REPO/branches/$enc" --jq .commit.sha)
+            when=$(gh api "repos/$REPO/commits/$sha" --jq .commit.committer.date)
+            if [[ "$extra" == *",$b,"* ]]; then
+              reason="listed in also_delete"
+            elif [ "$ahead" != "0" ]; then
+              echo "keep  $b ($ahead commits not in $default)"; continue
+            elif [ "$(date -u -d "$when" +%s)" -gt "$cutoff" ]; then
+              echo "keep  $b (last commit $when, younger than $MIN_AGE_DAYS days)"; continue
+            else
+              reason="fully in $default ($status)"
+            fi
+            if [ "$DRY_RUN" = "true" ]; then
+              echo "would delete $b at $sha: $reason"
+            else
+              gh api -X DELETE "repos/$REPO/git/refs/heads/$enc" && echo "deleted $b at $sha: $reason"
+              deleted=$((deleted + 1))
+            fi
+          done
+          echo "$deleted branches deleted"
