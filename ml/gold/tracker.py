@@ -14,6 +14,14 @@ chain through the candidates (dynamic programming over frames):
   its predecessor one frame back is taken as such a repeat: it keeps the predecessor's velocity
   instead of zeroing it, at most `dup_max` times in a row (a ball held still is then an ordinary
   still step with velocity zero);
+- a fast ball (predecessor speed at least `v_fast`, px per frame at 30 fps) may skip up to
+  `gap_fast` frames: the nets often see a flying ball only every second or third frame, while a
+  slow wrong object (a scrolling banner, a lamp moving with the pan) is seen in every frame;
+- with `rescore` set, a candidate's reward is `rescore` times its ball probability from a logistic
+  regression (tracker_rescore.py, weights in data/tracker_rescore.json) on net score, top-1, OWLv2
+  score, agreement, static spot, moving support (a moving pair one or two frames before and after
+  with this point in the middle) and slow persistence (candidates nearby in most of +-10 frames);
+  trained on the training clips with candidates of a net that never saw their labels;
 - spots that stay put for most of the clip (lamps, a spare ball at the bench) earn no reward.
 Gaps inside a segment are filled linearly when `fill` is set.
 
@@ -46,6 +54,9 @@ class Params:
     fill: bool = True
     dup_px: float = 5.0  # a repeated frame: the candidate within this many px of the previous one
     dup_max: int = 1  # repeats in a row that keep the velocity (0 = off)
+    gap_fast: int = 4  # longer gaps for a fast ball: predecessor speed at least v_fast (px/frame at 30 fps)
+    v_fast: float = 8.0
+    rescore: float = 3.0  # > 0: reward = rescore * ball probability of tracker_rescore.py (0 = hand-set reward)
     extra: dict = field(default_factory=dict)
 
 
@@ -56,6 +67,7 @@ class Cand:
     net: float = 0.0
     owl: float = 0.0
     r: float = 0.0
+    static: bool = False
 
 
 def candidates(c: dict, p: Params) -> list[list[Cand]]:
@@ -90,10 +102,31 @@ def candidates(c: dict, p: Params) -> list[list[Cand]]:
             static = any(
                 len(holds[src].get(g, ())) > p.static_frac * max(1, ran[src]) for src in holds
             )
+            q.static = static
             q.r = (p.static_keep if static else 1.0) * (
                 p.w_net * q.net + p.w_owl * q.owl + (p.both if q.net and q.owl else 0.0)
             )
     return frames
+
+
+_W = None
+
+
+def _rescore(frames, scale, p) -> None:
+    global _W
+    import json
+    from pathlib import Path
+
+    from tracker_rescore import features
+
+    if _W is None:
+        _W = json.loads((Path(__file__).resolve().parent / "data" / "tracker_rescore.json").read_text())["w"]
+    w = p.extra.get("rescore_w", _W)
+    F = features(frames, [[q.static for q in cs] for cs in frames], scale)
+    for cs, fs in zip(frames, F):
+        for q, f in zip(cs, fs):
+            z = sum(a * b for a, b in zip(w, f))
+            q.r = p.rescore / (1 + math.exp(-z))
 
 
 def track_clip(c: dict, p: Params | None = None) -> list:
@@ -101,7 +134,10 @@ def track_clip(c: dict, p: Params | None = None) -> list:
     frames = candidates(c, p)
     n = len(frames)
     scale = c["w"] / 1280 * 30 / c.get("fps_read", c.get("fps", 30))  # px per frame at this clip
+    if p.rescore > 0:
+        _rescore(frames, scale, p)
     vmax = p.vmax * scale
+    gfast = p.gap_fast
     INF = float("inf")
     # best[k][j] = (cost, back, vx, vy, reps); back = (k', i) or ("F", k-1) for a segment start;
     # reps = repeated frames in a row that ended here
@@ -116,11 +152,13 @@ def track_clip(c: dict, p: Params | None = None) -> list:
             back: tuple = ("F", k - 1)
             vel = (0.0, 0.0)
             reps = 0
-            for kp in range(max(0, k - p.gap), k):
+            for kp in range(max(0, k - max(p.gap, gfast)), k):
                 dt = k - kp
                 skip = p.miss * (dt - 1)
                 for i, (c0, _b, vx, vy, rp) in enumerate(best[kp]):
                     if c0 == INF:
+                        continue
+                    if dt > p.gap and (_b[0] == "F" or math.hypot(vx, vy) < p.v_fast * scale):
                         continue
                     a = frames[kp][i]
                     dx, dy = q.x - a.x, q.y - a.y

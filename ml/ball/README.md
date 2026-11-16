@@ -405,3 +405,37 @@ the fast subset is now the main measure (about 80 % overall is enough if those a
 - A wider hit radius changes little now that repeated frames are handled (hr1 + hrp1, all / fast):
   12 px 78.2 / 79.5 %, 16 px 78.8 / 80.1 %, 20 px 79.2 / 80.5 %, 25 px 79.6 / 81.0 %. The near misses
   the owner saw on the check page were the tracker before this fix; 12 px stays.
+
+## Tracker: fast-ball gaps and learned candidate rescoring (2026-11-16)
+After the repeated-frame step, most tracker misses with hr1 + hrp1 were frames where the ball was
+a candidate but the path sat on another object, usually a smooth slow one (a scrolling banner,
+something moving with the pan: net 0.3 to 0.45 in every frame, often OWLv2 too) while the flying
+ball was seen only every second or third frame and could not be chained with a gap of 2.
+Two changes in `ml/gold/tracker.py`, both on by default:
+- **Fast-ball gaps** (`gap_fast` 4, `v_fast` 8 px per frame at 30 fps): a predecessor moving at
+  least that fast may lie up to 4 frames back. Larger values or a gap in seconds instead of frames
+  change nothing.
+- **Learned rescoring** (`rescore` 3, `ml/gold/tracker_rescore.py`, weights in
+  `ml/gold/data/tracker_rescore.json`): the detector reward becomes 3 times a ball probability
+  from a logistic regression on net score, top-1, OWLv2 score, agreement, static spot, moving
+  support (a moving pair of candidates one or two frames before and after with this point in the
+  middle) and slow persistence (candidates near this point in most of +-10 frames). Trained on
+  the training clips (39 375 candidates, 5241 on a ball) with the candidates of the round-8 net,
+  which never saw those labels; not fitted on gold. Weights: OWLv2 +6.8, net +3.3, top-1 +1.6,
+  moving +2.5, static -4.1, slow persistence -1.6.
+- The scale 3 was the only choice made on gold; chosen per half of the clips and tested on the
+  other half (2-fold by clip) the gain stays: hr1 + hrp1 held-out all 83.9 %, fast 86.2 %.
+
+| Gold v1, tracker (12 px) | all, before | all, after | fast, before | fast, after | 50/60 fps, before | after | paired all (p) | paired fast (p) |
+|---|---|---|---|---|---|---|---|---|
+| round 10 | 75.5 % | 75.8 % | 80.4 % | 80.4 % | 68.0 % | 67.7 % | +94 / -90 (0.83) | +43 / -43 (1) |
+| hr1 | 75.8 % | 79.1 % | 78.7 % | 83.1 % | 66.3 % | 67.1 % | +109 / -58 (1e-4) | +51 / -19 (2e-4) |
+| hrp1 | 75.3 % | 80.1 % | 74.0 % | 80.6 % | 67.1 % | 71.1 % | +119 / -44 (4e-9) | +69 / -20 (2e-7) |
+| **hr1 + hrp1** | 78.2 % | **84.0 %** | 79.5 % | **86.0 %** | 67.4 % | 76.4 % | +124 / -34 (3e-13) | +62 / -14 (2e-8) |
+
+("before" = repeated-frame step on, gap 2, hand-set reward.) Each part matters on top of the
+other: without the fast-ball gaps hr1 + hrp1 drop to 82.2 % (fast 83.1 %), without the
+repeated-frame step to 81.3 % (fast 81.3 %). Round 10 does not gain: the rescoring is calibrated
+on BallNet3 round-8 scores, round 10 is the same architecture but more confident on wrong peaks;
+the HRNet nets, which are the ones in use, gain clearly. Retrain the weights when the candidate
+source changes (new nets on fresh, unseen clips).
