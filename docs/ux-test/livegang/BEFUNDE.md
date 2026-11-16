@@ -48,3 +48,11 @@ Schwere: 🔴 blockiert einen Trainer · 🟡 stört · ⚪ Kleinigkeit. Stand: 
 
 | # | Befund | Wo | Stand |
 |---|---|---|---|
+| K1 | Liga-Tabelle zeigt nur einen Ausschnitt um das eigene Team; die ganze Tabelle sollte sich anzeigen lassen | Start, Saison | offen |
+| K2 | Beim Video-Hochladen fehlt die eigene Trikotfarbe (Heim- oder Auswärtstrikot); dieselbe Auswahl wie bei «Spiel anlegen» anbieten | Video hochladen | offen |
+| K3 | «Video hochladen» wird auch für Videos des Gegners genutzt (Gegner beobachten, das eigene Team spielt nicht): mitdenken (wer spielt, welche Farben, was die Analyse daraus macht) | Video hochladen, Spiel | offen, Konzept nötig |
+| K4 | Konto-Menü wirkt komisch: «In sieben Tagen wieder erinnern» steht ohne Symbol als eigener Punkt unter «Zwei-Faktor-Anmeldung einrichten», roter Punkt am Kürzel, Gruppen unklar | Kopf, Konto-Menü | offen |
+| K5 | Prüfen «Wann ist der Anwurf der 1. Halbzeit?»: links kein Video, die Fläche bleibt leer (vermutlich weil die Analyse noch läuft und das Video noch nicht abspielbar ist; dann muss die Frage warten oder es sagen) | Prüfen | offen, Ursache prüfen |
+| K6 | Laufender Upload und laufende Analyse zu wenig sichtbar: Fortschritt (wie weit, wie lange noch) gehört gut sichtbar nach oben, im Kopf oder als schwebender Hinweis auf jeder Seite, nicht nur im Spiel | Kopf, Start | offen |
+| K7 | Im Kopf steht «TV Thalwil» zweimal (Verein und Team heissen gleich) | Kopf | offen |
+| K8 | Leere Seiten zeigen zu viel: «Szenen» mit 0 Szenen zeigt Suche, Filter, Sammlungen und Highlights; besser ein klarer nächster Schritt («Lade ein Video hoch, dann siehst du hier deine Szenen») | Szenen und andere leere Zustände | offen |
