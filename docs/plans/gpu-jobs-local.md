@@ -35,7 +35,7 @@ Cloud-Sitzung nach einem Benchmark.
 4. Die Cloud-Sitzung holt das Ergebnis, wertet aus und entscheidet den nächsten Auftrag.
 
 ## Regeln gegen Konflikte
-- Vor jedem Commit `git pull --rebase` auf `vision/real-footage`, danach sofort pushen.
+- Vor jedem Commit `git pull --rebase` auf `main` (oder auf den Zweig, den der Auftrag in `ml/gpu/JOBS.md` nennt), danach sofort pushen.
 - Jede Seite ändert nur ihre Dateien (Tabelle oben). `ml/gpu/JOBS.md`: die Cloud-Sitzung schreibt
   nur unter "Offen", die lokale Sitzung verschiebt Einträge nach "Erledigt".
 - Kein Force-Push, kein Merge nach `main`, keine Löschungen auf Kaggle oder GitHub ohne Lukas.

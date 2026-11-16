@@ -12,6 +12,17 @@ für den Upload. Jeder Auftrag ist für sich, sie dürfen parallel laufen (Modal
 alle zusammen: etwa 33 USD). Vorher `git pull` (Auftrag 3 braucht `--resume-from`). Bei
 "budget"/"spend limit" abbrechen und melden.
 
+### 12. Vorlabels für den Wurf-Goldstandard (61 Wurf-Clips), 2026-11-16, Vorrang
+- Wozu: Würfe aufs Tor sind das neue Hauptmass für den Balltracker. Die 61 Clips
+  (`ml/gold/shot_clips.json`, Würfe aus den offiziellen Spielprotokollen, `ml/gold/pick_shots.py`)
+  brauchen die Kandidaten der vier neuen Ballnetze und OWLv2. Kaggle-GPU ist bis Samstag
+  aufgebraucht, Lukas gibt dafür Modal-Guthaben frei (23 CHF übrig).
+- Befehl: `modal run --detach ml/gpu/prelabel_clips.py --clips ml/gold/shot_clips.json --tag shots`
+- Eingaben: `handball-segs-l01`, `-l02`, `-b01`, `-b03`, `-b04`, `handball-ball-hrmodels` (die
+  Netze hr1, hrp1, hr2, hrp2). Ergebnis: Dataset `handball-gpu-prelabel-shots-<datum>`.
+- Dauer etwa 4.5 h auf einer T4, Kosten etwa 3 USD. Bei "budget"/"spend limit" abbrechen und
+  melden. Die Cloud-Sitzung holt das Ergebnis selbst ab.
+
 ### 3. OWLv2 Rest von l01 bis l03 (111 Segmente: 11 aus l02, 100 aus l03)
 - Befehl: `modal run --detach ml/gpu/owl_pseudo.py --datasets handball-segs-l02,handball-segs-l03 --resume-from handball-gpu-owl-20261105-1449 --gpu T4 --budget-h 8`
 - `--resume-from` übernimmt die 189 fertigen Segmente (zuerst vom Modal-Volume, sonst aus dem

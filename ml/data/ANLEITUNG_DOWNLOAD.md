@@ -7,7 +7,7 @@ hochladen. Google Drive braucht es dafür nicht mehr (Drive sperrt Downloads nac
 Den Rest macht die Cloud-Seite: Spieluhr pro Segment lesen, Labels aus den offiziellen
 Spielprotokollen (handball.ch), Training auf der Kaggle-GPU. Von Hand labeln ist nicht nötig.
 
-## Was vorbereitet ist (Branch `vision/real-footage`)
+## Was vorbereitet ist (auf `main`)
 - `ml/data/local_ingest.py`: schneidet pro Spiel fünf 3-Minuten-Segmente (bei 15/30/50/70/85 %
   der Spielzeit, 1280 breit), genau wie die Cloud-Pipeline, und lädt je 20 Spiele als ein privates
   Kaggle-Dataset `handball-segs-l01`, `-l02`, ... hoch. Die ganzen Videos bleiben auf dem Computer.
@@ -17,8 +17,8 @@ Spielprotokollen (handball.ch), Training auf der Kaggle-GPU. Von Hand labeln ist
   offiziellem Protokoll herunterzuladen (Teil B).
 
 ## Teil A: die Spiele auf dem Computer hochladen
-1. Repo holen bzw. aktualisieren: `git fetch origin vision/real-footage`, `git checkout
-   vision/real-footage`, `git pull`.
+1. Repo holen bzw. aktualisieren: `git checkout main`, `git pull` (der frühere Zweig
+   `vision/real-footage` ist in `main` aufgegangen und gelöscht).
 2. Werkzeuge prüfen:
    - Python 3.10 oder neuer (`python --version`)
    - ffmpeg und ffprobe (`ffmpeg -version`; sonst `winget install Gyan.FFmpeg`, dann neues Fenster)

@@ -4,6 +4,9 @@ Finding the ball across halls, cameras and ball colours. Nothing here ships yet;
 reproducible trail of the experiments. **Models trained with non-commercial data (DeepSport, see
 below) are research models and must not go into the product.**
 
+Lineage (every model version, dataset, test set, tracker step and decision, with commits):
+[`LINEAGE.md`](LINEAGE.md). Add a row there in the same commit as any new model, data or test set.
+
 ## Approach
 1. **Three frames as input** (t-G, t, t+G; TrackNet principle): a ball moves against the hall, a
    spot on the wall or a lamp does not. `train_ballnet3.py` (CPU) and `kaggle/train_gpu.py` (Kaggle
@@ -297,3 +300,145 @@ round 7 (3.7 h of training on Kaggle). Kept as `ball_r8.pt` in `handball-ball-mo
   through the net, peaks linked with balltrack, fixed and background-glued spots dropped, tracklet
   tiles saved for review.
 Kaggle allows two GPU jobs at a time; a small queue script pushes the next kernel when a slot frees.
+
+## Round 9: Claude's training clip labels (2026-11-14)
+`kaggle/train_r9_push.py` over round 8: the owner's 1000 peaks plus 834 ball points Claude placed in
+46 training clips without the owner's rough track (`ml/gold/export_train.py`, tiers sure / track;
+on 8 pilot gold clips 98 % of such points lay within 12 px) and 741 hard negatives (the net's
+strongest peak >= 0.3 at least 40 px from the labelled ball, `ml/gold/train_labels_r9.py`).
+Started from round 8. Measured on the gold standard (42 clips, 1555 points, 12 px; OWLv2 boxes
+taken from the round-8 gold run so only the net differs; `ml/gold/eval_ball.py`):
+
+| Gold v1 | round 8 | round 9 | only r9 / only r8 hits | sign test p |
+|---|---|---|---|---|
+| Net top peak on the ball | 49.7 % | 51.5 % | 124 / 96 | 0.07 |
+| Ball among the net's top 5 | 77.2 % | 78.5 % | 83 / 62 | 0.10 |
+| Tracker v2 (net + OWLv2) | 69.0 % | 71.3 % | 70 / 35 | 0.001 |
+| Product ball path (balltrack) | 32.1 % | 35.8 % | | |
+
+- The first gain since round 7, small on the net alone and clear through the tracker (its
+  parameters were tuned on round-8 output, so the round-9 number is if anything conservative).
+  Points within a clip are not independent, so the p values are optimistic.
+- Next: more clips and the owner's ball-or-not review of the unconfirmed (fast) points, then
+  round 10; re-tune the tracker on round-9 output.
+
+## Round 10: all 171 training clips with the owner's review (2026-11-15)
+`kaggle/train_r10_push.py`: the round-9 recipe on 5767 ball points from 150 training clips (2935
+where Claude's two looks agree, 2832 of Claude's fast points confirmed by the owner, 55 rejected),
+4875 hard negatives, the owner's round-8 peaks without the basketball game (`ml/data/not_handball.json`),
+from round 9, 30 000 steps. Gold standard (same protocol as round 9):
+
+| Gold v1 | round 8 | round 9 | round 10 |
+|---|---|---|---|
+| Net top peak on the ball | 49.7 % | 51.5 % | 56.5 % |
+| Ball among the net's top 5 | 77.2 % | 78.5 % | 81.0 % |
+| Tracker v2 (net + OWLv2) | 69.0 % | 71.3 % | 73.4 % |
+| Tracker v2, fast balls only | 70.3 % | 73.6 % | 76.7 % |
+
+- Paired against round 9: top 1 157 balls gained, 79 lost (sign test p < 1e-6); top 5 95 / 57
+  (p 0.003); tracker 64 / 31 (p 0.001). The clearest gain of any round, with seven times the
+  labels of round 9.
+- A court mask from the product calibration was checked first and set aside: the automatic
+  calibration finds the court in only 8 of 42 gold clips, and only 57 of the 447 tracker misses
+  of round 9 lie above all gold balls of their clip (13 %, 28 of them in one clip).
+- Next: the HRNet-style nets on exactly this data (`ballhr.py` from scratch, `ballhrp.py`
+  ImageNet-pretrained), to separate architecture and pretraining from data.
+
+## HRNet-style nets on the round-10 data (2026-11-16)
+Same kernel, data and gold protocol as round 10, only the net differs (`kaggle/train_hr_push.py`):
+- **hr1** `ballhr.py`: own HRNet-style net after the WASB idea (branches at strides 4 / 8 / 16,
+  7.7 M parameters), from scratch, 21 183 steps (1.23 s per step).
+- **hrp1** `ballhrp.py`: timm `hrnet_w18` with ImageNet weights, first conv widened to 3 frames,
+  9.7 M parameters, 13 094 steps (1.65 s per step, 8 h budget).
+- round 10 (BallNet3, ResNet-18 layers 1 to 2) for comparison: 30 000 steps, but started from
+  round 9 and thus from all earlier rounds.
+
+| Gold v1 | round 10 | hr1 | hrp1 | hr1 + hrp1 |
+|---|---|---|---|---|
+| Net top peak on the ball | 56.5 % | 63.2 % | 65.7 % | 73.8 % |
+| Ball among the net's top 5 | 81.0 % | 83.9 % | 86.2 % | |
+| Tracker v2 (net + OWLv2) | 73.4 % | 74.5 % | 74.0 % | 77.0 % |
+| Tracker v2, fast balls only | 76.7 % | 76.6 % | 72.1 % | 77.0 % |
+
+- Net top 1, paired: hr1 against round 10 261 gained / 157 lost (p 4e-7), hrp1 against round 10
+  313 / 171 (p 1e-10), hrp1 against hr1 238 / 200 (p 0.08). Architecture: the high-resolution
+  branches are a clear gain over BallNet3. Pretraining: a further small gain in fewer steps, not
+  significant on gold, clearer on the human validation set (0.71 against 0.63 at threshold 0.5).
+- The tracker gains far less than the net (hr1 106 / 88, p 0.22; hrp1 120 / 110, p 0.55).
+  Re-tuning the tracker per net with 2-fold cross-validation (`ml/gold/tune_tracker.py`, 150 random
+  settings) does not change that: held-out 74.4 % -> 75.1 % for hrp1, 74.2 % -> 74.4 % for hr1. So the
+  defaults stay.
+- **hr1 + hrp1**: both nets' top-5 candidates merged (within 8 px, mean score), no parameter
+  fitted. Tracker 77.0 %, against round 10 130 / 73 (p 8e-5), against hr1 73 / 34 (p 2e-4),
+  against hrp1 78 / 31 (p 8e-6). The two nets make different errors; the best path on gold so far.
+  Adding round 10 as a third net makes it worse (75.6 %).
+- Both nets were still improving when the budget ended (human validation over the last
+  checkpoints 0.61 -> 0.63 and 0.67 -> 0.71). Next: `kaggle/train_hr2_push.py` continues both from
+  round 1 with half the learning rates (hr2, hrp2), then the same comparison and the ensemble again.
+
+## Tracker: repeated frames (2026-11-16)
+Where the tracker misses with hr1 + hrp1 (357 of 1555 gold balls): 8.2 % of all balls are on the
+net's top peak and 5.6 % among its top 5, but the tracker takes another candidate; 2.4 % only
+OWLv2 has; 6.2 % no detector has. So the tracker, not the net, makes most of the remaining errors.
+By frame rate, the tracker was worse than the net's top peak on 50 fps clips (58 % against 70 %;
+25 and 30 fps about 81 %), in g08 52 % against 95 %.
+
+Cause: many videos repeat frames (25 fps stored as 50: the ball stands two frames on one spot;
+25 as 30: every 6th frame twice; also irregular). The constant-velocity step zeroed the velocity
+on a repeat, so the next real step looked like a jump; the tracker skipped every repeated frame
+and filled it with the midpoint, 12 to 20 px off. New step (`dup_px`, `dup_max` in `tracker.py`):
+a candidate within 5 px of its predecessor one frame back, while the ball moves, keeps the
+predecessor's velocity, at most once in a row.
+
+| Gold v1, tracker | all, before | all, after | fast, before | fast, after | 50/60 fps, before | after |
+|---|---|---|---|---|---|---|
+| round 10 | 73.4 % | 75.5 % | 76.7 % | 80.4 % | 62.8 % | 67.9 % |
+| hr1 | 74.5 % | 75.8 % | 76.6 % | 78.7 % | 62.0 % | 66.2 % |
+| hrp1 | 74.0 % | 75.2 % | 72.1 % | 74.0 % | 63.7 % | 67.0 % |
+| hr1 + hrp1 | 77.0 % | 78.2 % | 77.0 % | 79.5 % | 64.0 % | 67.3 % |
+
+Paired (after against before): round 10 +39 / -6 (p 5e-7), hr1 +23 / -4, hrp1 +33 / -14,
+hr1 + hrp1 +23 / -5 (p 9e-4). No parameter fitted on gold; two repeats in a row change little.
+Goal set with the owner: fast balls (shots, hard passes) carry the game-deciding information, so
+the fast subset is now the main measure (about 80 % overall is enough if those are right).
+- The owner checked all 194 gold points of the three clips with the most tracker misses (g34, g08,
+  g03): 192 right, 2 wrong (g08 frame 126, g34 frame 108; now tier "rejected" in
+  `ml/gold/data/gold_ball_v1.json`). So the misses there are real, e.g. g34 frames 28 to 45: a high
+  ball in front of the wall the nets do not see.
+- A wider hit radius changes little now that repeated frames are handled (hr1 + hrp1, all / fast):
+  12 px 78.2 / 79.5 %, 16 px 78.8 / 80.1 %, 20 px 79.2 / 80.5 %, 25 px 79.6 / 81.0 %. The near misses
+  the owner saw on the check page were the tracker before this fix; 12 px stays.
+
+## Tracker: fast-ball gaps and learned candidate rescoring (2026-11-16)
+After the repeated-frame step, most tracker misses with hr1 + hrp1 were frames where the ball was
+a candidate but the path sat on another object, usually a smooth slow one (a scrolling banner,
+something moving with the pan: net 0.3 to 0.45 in every frame, often OWLv2 too) while the flying
+ball was seen only every second or third frame and could not be chained with a gap of 2.
+Two changes in `ml/gold/tracker.py`, both on by default:
+- **Fast-ball gaps** (`gap_fast` 4, `v_fast` 8 px per frame at 30 fps): a predecessor moving at
+  least that fast may lie up to 4 frames back. Larger values or a gap in seconds instead of frames
+  change nothing.
+- **Learned rescoring** (`rescore` 3, `ml/gold/tracker_rescore.py`, weights in
+  `ml/gold/data/tracker_rescore.json`): the detector reward becomes 3 times a ball probability
+  from a logistic regression on net score, top-1, OWLv2 score, agreement, static spot, moving
+  support (a moving pair of candidates one or two frames before and after with this point in the
+  middle) and slow persistence (candidates near this point in most of +-10 frames). Trained on
+  the training clips (39 375 candidates, 5241 on a ball) with the candidates of the round-8 net,
+  which never saw those labels; not fitted on gold. Weights: OWLv2 +6.8, net +3.3, top-1 +1.6,
+  moving +2.5, static -4.1, slow persistence -1.6.
+- The scale 3 was the only choice made on gold; chosen per half of the clips and tested on the
+  other half (2-fold by clip) the gain stays: hr1 + hrp1 held-out all 83.9 %, fast 86.2 %.
+
+| Gold v1, tracker (12 px) | all, before | all, after | fast, before | fast, after | 50/60 fps, before | after | paired all (p) | paired fast (p) |
+|---|---|---|---|---|---|---|---|---|
+| round 10 | 75.5 % | 75.8 % | 80.4 % | 80.4 % | 68.0 % | 67.7 % | +94 / -90 (0.83) | +43 / -43 (1) |
+| hr1 | 75.8 % | 79.1 % | 78.7 % | 83.1 % | 66.3 % | 67.1 % | +109 / -58 (1e-4) | +51 / -19 (2e-4) |
+| hrp1 | 75.3 % | 80.1 % | 74.0 % | 80.6 % | 67.1 % | 71.1 % | +119 / -44 (4e-9) | +69 / -20 (2e-7) |
+| **hr1 + hrp1** | 78.2 % | **84.0 %** | 79.5 % | **86.0 %** | 67.4 % | 76.4 % | +124 / -34 (3e-13) | +62 / -14 (2e-8) |
+
+("before" = repeated-frame step on, gap 2, hand-set reward.) Each part matters on top of the
+other: without the fast-ball gaps hr1 + hrp1 drop to 82.2 % (fast 83.1 %), without the
+repeated-frame step to 81.3 % (fast 81.3 %). Round 10 does not gain: the rescoring is calibrated
+on BallNet3 round-8 scores, round 10 is the same architecture but more confident on wrong peaks;
+the HRNet nets, which are the ones in use, gain clearly. Retrain the weights when the candidate
+source changes (new nets on fresh, unseen clips).
