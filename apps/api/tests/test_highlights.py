@@ -113,3 +113,9 @@ async def test_reels_selection_consent_rendering_and_sharing(make_api: Callable[
         "scenes"
     ] == 4
     assert (await anon.get(f"/v1/share/{shared.json()['token']}/reel.mp4")).content == b"mp4"
+    # byte ranges for Safari and the iMessage preview (K20)
+    part = await anon.get(
+        f"/v1/share/{shared.json()['token']}/reel.mp4", headers={"range": "bytes=1-"}
+    )
+    assert part.status_code == 206 and part.content == b"p4"
+    assert part.headers["content-range"] == "bytes 1-2/3"

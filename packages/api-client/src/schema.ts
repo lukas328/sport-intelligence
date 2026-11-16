@@ -4536,6 +4536,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/teams/{team_id}/share-options": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Options
+         * @description The share dialog asks first, so it can explain the youth rule or a missing right (K20).
+         */
+        get: operations["options_v1_orgs__org_id__teams__team_id__share_options_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/teams/{team_id}/tag-sets": {
         parameters: {
             query?: never;
@@ -5007,7 +5027,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Public Reel */
+        /**
+         * Public Reel
+         * @description The reel as one MP4. Byte ranges are served: Safari and the iMessage preview (og:video)
+         *     play an MP4 inline only from a server that answers ranges.
+         */
         get: operations["public_reel_v1_share__token__reel_mp4_get"];
         put?: never;
         post?: never;
@@ -9343,6 +9367,34 @@ export interface components {
             /** Title */
             title?: string | null;
         };
+        /** PreviewGoal */
+        PreviewGoal: {
+            /** Minute */
+            minute: number | null;
+            /**
+             * Team
+             * @enum {string}
+             */
+            team: "own" | "opp";
+            /** Zone */
+            zone: string | null;
+        };
+        /** PreviewPlay */
+        PreviewPlay: {
+            /** Category */
+            category: string;
+            /** Doc */
+            doc: {
+                [key: string]: unknown;
+            };
+            /** Formation */
+            formation: string | null;
+        };
+        /** PreviewReel */
+        PreviewReel: {
+            /** Format */
+            format: string;
+        };
         /** ProfileIn */
         ProfileIn: {
             /**
@@ -10377,6 +10429,23 @@ export interface components {
             /** Views */
             views: number;
         };
+        /**
+         * ShareOptions
+         * @description What may be shared publicly for the team, per kind; a reason instead of a failed attempt.
+         */
+        ShareOptions: {
+            /** Default Days */
+            default_days: number;
+            /**
+             * Kinds
+             * @description per kind: null when allowed, else forbidden, plan, unverified or youth-protection
+             */
+            kinds: {
+                [key: string]: string | null;
+            };
+            /** Youth */
+            youth: boolean;
+        };
         /** ShareOut */
         ShareOut: {
             /**
@@ -10413,6 +10482,7 @@ export interface components {
         /**
          * SharePreview
          * @description What a chat shows for the link (Open Graph): no names of people, nothing behind a login.
+         *     The match fields are set when the shared content belongs to one match.
          */
         SharePreview: {
             /** Club */
@@ -10424,14 +10494,31 @@ export interface components {
              * Format: date-time
              */
             expires_at: string;
+            goal?: components["schemas"]["PreviewGoal"] | null;
+            /** Goals */
+            goals?: components["schemas"]["PreviewGoal"][] | null;
+            /** Halftime */
+            halftime?: number[] | null;
+            /** Is Home */
+            is_home?: boolean | null;
+            /** Kickoff At */
+            kickoff_at?: string | null;
             /** Kind */
             kind: string;
             /** Kit */
             kit: {
                 [key: string]: string;
             };
+            /** Opp Kit */
+            opp_kit?: string | null;
+            /** Opponent */
+            opponent?: string | null;
+            play?: components["schemas"]["PreviewPlay"] | null;
+            reel?: components["schemas"]["PreviewReel"] | null;
             /** Scenes */
             scenes: number;
+            /** Score */
+            score?: number[] | null;
             /** Team */
             team: string;
             /** Title */
@@ -21468,6 +21555,38 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ShareCreated"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    options_v1_orgs__org_id__teams__team_id__share_options_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShareOptions"];
                 };
             };
             /** @description Validation Error */
