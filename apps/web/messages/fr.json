@@ -676,6 +676,7 @@
     "stalledNext": "Si rien ne bouge d'ici {time} environ, nous relançons cette étape automatiquement. Tu n'as rien à faire.",
     "stalledNextLast": "Cette étape a déjà été relancée une fois. Si rien ne bouge d'ici {time} environ, nous l'arrêtons et te le disons ici; tu pourras alors la relancer toi-même.",
     "interruptedText": "Plus rien n'arrive depuis {m} min ({done} sur {total}). Choisis à nouveau le même fichier, et cela reprend là où cela s'est arrêté.",
+    "interruptedTextNoBytes": "Plus rien n'arrive depuis {m} min. Choisis à nouveau le même fichier, et cela reprend là où cela s'est arrêté.",
     "resumeUpload": "Reprendre le téléversement",
     "waitingPart": "Attend que {name} soit analysée: elle reprend ses côtés et son terrain.",
     "earlierPart": "la partie précédente",
@@ -1526,7 +1527,8 @@
     "awayGame": "Extérieur",
     "xgPerMatch": "xG par match (estimé)",
     "xgThin": "xG : trop peu de tirs avec position ({n} sur {of}).",
-    "noScorers": "Aucun tir avec numéro de maillot saisi."
+    "noScorers": "Aucun tir avec numéro de maillot saisi.",
+    "watchedAgainst": "observé contre {other}"
   },
   "billing": {
     "title": "Abonnement et factures",

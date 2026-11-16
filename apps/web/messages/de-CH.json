@@ -676,6 +676,7 @@
     "stalledNext": "Bewegt sich bis etwa {time} nichts, starten wir diesen Schritt automatisch neu. Du musst nichts tun.",
     "stalledNextLast": "Dieser Schritt wurde schon einmal neu gestartet. Bewegt sich bis etwa {time} nichts, brechen wir ab und sagen es dir hier; dann kannst du ihn selbst neu starten.",
     "interruptedText": "Seit {m} Min. kommt nichts mehr an ({done} von {total}). Wähl dieselbe Datei nochmals, dann geht es dort weiter, wo es aufgehört hat.",
+    "interruptedTextNoBytes": "Seit {m} Min. kommt nichts mehr an. Wähl dieselbe Datei nochmals, dann geht es dort weiter, wo es aufgehört hat.",
     "resumeUpload": "Upload fortsetzen",
     "waitingPart": "Wartet, bis {name} analysiert ist: sie übernimmt deren Seiten und Spielfeld.",
     "earlierPart": "der Teil davor",
@@ -1526,7 +1527,8 @@
     "awayGame": "Auswärts",
     "xgPerMatch": "xG pro Spiel (geschätzt)",
     "xgThin": "xG: zu wenige Würfe mit Position ({n} von {of}).",
-    "noScorers": "Noch keine Würfe mit Rückennummer erfasst."
+    "noScorers": "Noch keine Würfe mit Rückennummer erfasst.",
+    "watchedAgainst": "beobachtet gegen {other}"
   },
   "billing": {
     "title": "Abo und Rechnungen",

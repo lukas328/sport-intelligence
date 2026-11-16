@@ -112,7 +112,7 @@ function Colours({ legend, value, onChange, name }: { legend: string; value: str
           </label>
         ))}
         <label className={cn("flex h-12 cursor-pointer items-center gap-2 border-2 px-2 text-[15px] font-bold", value && !known ? "border-ink" : "border-transparent")}>
-          <input type="color" value={value && !known ? value : SHIRTS[3][1]} onChange={(e) => onChange(e.target.value)} className="size-8 cursor-pointer border-0 bg-transparent p-0" aria-label={t("scoutingUpload.otherColour")} />
+          <input type="color" value={value && !known ? value : SHIRTS[3][1]} onChange={(e) => onChange(e.target.value)} className={cn("size-8 cursor-pointer border-0 bg-transparent p-0", !(value && !known) && "opacity-40")} aria-label={t("scoutingUpload.otherColour")} />
           {t("scoutingUpload.otherColour")}
         </label>
       </div>

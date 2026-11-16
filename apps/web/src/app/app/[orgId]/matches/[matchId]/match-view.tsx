@@ -518,7 +518,8 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
           onOtherFile={toUpload}
           onResumeUpload={toUpload}
           aside={
-            isActive(progress) ? (
+            // what is known and what comes, once the video is in (during the upload the way on counts)
+            isActive(progress) && progress.stage !== "upload" ? (
               <KnownFacts orgId={orgId} match={match} ownName={own} oppName={oppName(match)} stats={stats.data ?? null} names={names} hasReport={graphics.data?.has_report ?? false} checks={checks} staff={staff} onAttach={toAttachments} />
             ) : undefined
           }
@@ -601,7 +602,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
                 <AskColour orgId={orgId} matchId={match.id} opponent={oppName(match)} />
               </div>
             )}
-            <UploadPanel orgId={orgId} matchId={match.id} kits={ownKits} stuck={stuckUploads} progressFiles={progress?.files ?? []} onUploaded={() => void qc.invalidateQueries({ queryKey: key })} />
+            <UploadPanel orgId={orgId} matchId={match.id} kits={scouting ? null : ownKits} stuck={stuckUploads} progressFiles={progress?.files ?? []} onUploaded={() => void qc.invalidateQueries({ queryKey: key })} />
           </section>
         )}
         <PartsPanel orgId={orgId} match={match} jobs={jobs} staff={staff} onChanged={() => void qc.invalidateQueries({ queryKey: key })} />

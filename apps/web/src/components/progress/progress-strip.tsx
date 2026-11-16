@@ -73,7 +73,7 @@ export function ProgressStrip({ orgId }: { orgId: string }) {
           onClick={() => !isActive(p) && close()}
         >
           <span className="min-w-0 flex-1 truncate">
-            <b className="font-bold">{w.headline(p)}:</b> {w.matchName(p)}
+            <b className="font-bold">{w.headline(p).endsWith("?") ? w.headline(p) : `${w.headline(p)}:`}</b> {w.matchName(p)}
             {detail.length > 0 && <span className="max-sm:hidden"> · {detail.join(" · ")}</span>}
             {/* on a phone the time comes in a second short part, the rest is in the match */}
             {phone && <span className="sm:hidden"> · {phone}</span>}

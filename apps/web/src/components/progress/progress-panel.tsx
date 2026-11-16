@@ -56,7 +56,13 @@ export function ProgressPanel({
             <p className="m-0 mt-1 text-[19px] font-bold" aria-live="polite" data-testid="progress-when">
               {p.state === "stalled" || p.state === "interrupted" ? w.percent(p.overall) : (when ?? t("noEta"))}
             </p>
-            {when && basis && <p className="m-0 text-[15px] text-ink-2">{t(basis === "history" ? "basisHistory" : "basisMeasured")}</p>}
+            {when && (
+              <p className="m-0 text-[15px] text-ink-2">
+                {/* the clock time above, the time left here (a finish tomorrow is easier to read so) */}
+                {p.eta_s != null && p.stage !== "upload" ? `${w.left(p.eta_s)} · ` : ""}
+                {basis ? t(basis === "history" ? "basisHistory" : "basisMeasured") : ""}
+              </p>
+            )}
             <div className="mt-3 h-1.5 bg-rule" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.floor(p.overall * 100)} aria-label={w.headline(p)}>
               <div className="h-full bg-ink transition-[width] duration-700" style={{ width: `${Math.max(2, p.overall * 100)}%` }} />
             </div>
@@ -170,11 +176,13 @@ function FileNote({
     return (
       <div className="mt-2 space-y-2" data-testid="progress-interrupted">
         <p className={cn(base, "mt-0")}>
-          {t("interruptedText", {
-            m: minutes(f.idle_s),
-            done: formatBytes(f.uploaded_bytes ?? 0),
-            total: formatBytes(f.size_bytes ?? 0),
-          })}
+          {f.uploaded_bytes != null
+            ? t("interruptedText", {
+                m: minutes(f.idle_s),
+                done: formatBytes(f.uploaded_bytes),
+                total: formatBytes(f.size_bytes ?? 0),
+              })
+            : t("interruptedTextNoBytes", { m: minutes(f.idle_s) })}
         </p>
         {staff && onResumeUpload && (
           <button type="button" className={buttonClass("primary", "sm")} onClick={onResumeUpload}>

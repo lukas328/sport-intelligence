@@ -277,7 +277,8 @@ function MiniField({ orgId, m, width = 128 }: { orgId: string; m: Match; width?:
       </span>
     );
   }
-  const word = running ? t("miniRunning") : !m.has_video ? t("miniNoVideo") : null;
+  // an upload on its way is not «Analyse läuft» yet (its row says how far the upload is)
+  const word = state.label === "matches.status_processing" ? t("miniRunning") : !m.has_video && !running ? t("miniNoVideo") : null;
   return (
     <span className="relative block w-full" style={{ maxWidth: width }}>
       <EmptyField />
@@ -339,6 +340,13 @@ function GameRow({ orgId, m, canWrite }: { orgId: string; m: Match; canWrite: bo
           <span className="md:hidden">{format.dateTime(date, { day: "2-digit", month: "2-digit" })} · </span>
           {["matches.status_processing", "matches.status_uploading", "matches.status_failed"].includes(state.label) ? (
             <ProgressLine orgId={orgId} matchId={m.id} className="max-md:inline" fallback={tm(state.label.replace("matches.", "") as "status_processing")} />
+          ) : !m.has_video && m.kind === "scouting" ? (
+            // a scouting match is nothing without its video
+            canWrite ? (
+              <Link href={`${base}?tab=video`} className={cn(linkClass, "inline-flex min-h-11 items-center")}>
+                {t("uploadVideo")}
+              </Link>
+            ) : null
           ) : !m.has_video ? (
             <>
               {t("reportOnly")}

@@ -676,6 +676,7 @@
     "stalledNext": "If nothing moves by about {time}, we restart this step automatically. You need not do anything.",
     "stalledNextLast": "This step was restarted once already. If nothing moves by about {time}, we stop it and say so here; then you can start it again yourself.",
     "interruptedText": "Nothing has arrived for {m} min ({done} of {total}). Choose the same file again and it goes on where it stopped.",
+    "interruptedTextNoBytes": "Nothing has arrived for {m} min. Choose the same file again and it goes on where it stopped.",
     "resumeUpload": "Resume the upload",
     "waitingPart": "Waits until {name} is analysed: it takes over its sides and court.",
     "earlierPart": "the part before",
@@ -1526,7 +1527,8 @@
     "awayGame": "Away",
     "xgPerMatch": "xG per match (estimated)",
     "xgThin": "xG: too few shots with a position ({n} of {of}).",
-    "noScorers": "No shots with a shirt number tagged yet."
+    "noScorers": "No shots with a shirt number tagged yet.",
+    "watchedAgainst": "watched against {other}"
   },
   "billing": {
     "title": "Plan and billing",
