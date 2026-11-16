@@ -341,7 +341,10 @@ detector. Target agreed with the owner: 85 to 90 % for fast balls and shots; 95 
   training check points, whether the latest numbers use 1 553 or 1 555 gold points).
 
 **Next steps**: adjusted after review 1 (section 11); the binding plan is
-`docs/plans/tracking-strategie.md` section 9. Before the adjustment: step 0 shot gold labels with visibility
+`docs/plans/tracking-strategie.md` section 9. Prioritised on 2026-11-16 (now: shot end test of at least 100 shots
+labelled without candidate rings, shippable tracker without OWLv2 as the headline, confidence and
+"don't know"; then nets without DeepSport in 2 folds; parked or dropped: OWLv2 in the product, a
+separate DeepSport ablation, further gold v1 tuning, TOTNet until the end test can resolve 2 points). Before the adjustment: step 0 shot gold labels with visibility
 levels and pre-labels from Modal job 12; step 1 tracker confidence per point (metric 2), more "ball
 among candidates, wrong choice" cases, retrain rescoring for each net generation; step 2 targeted data
 (ensemble over training clips, label where unsure: shots, hard passes, high balls in front of a wall

@@ -166,21 +166,42 @@ schnellen Bällen: 8.5 % Tracker wählt falsch, 5.4 % kein Detektor sieht den Ba
 4. Pro Wurf: Anteil der Würfe, deren Flug vom Abwurf bis Tor oder Torhüter durchgehend verfolgt
    wird; Fehler am Abwurf- und am Zielpunkt; Spurwechsel auf ein anderes Objekt pro Wurf.
 
-**Schritte (angepasst nach Prüfung 1 am 2026-11-16, von Lukas bestätigt; Begründung pro Einwand in
-`ml/ball/LINEAGE.md` Abschnitt 11):**
-| Schritt | Inhalt | Wann | Wer |
-|---|---|---|---|
-| 0. Messen ehrlich machen | Jede Gold-Zahl mit 95 %-Intervall (Bootstrap über Clips); hr2 und hrp2 messen; Verzerrungstest der Labels: 5 Gold-Clips ohne Kandidatenringe labeln und vergleichen | diese Woche | Hauptsitzung |
-| 1. Wurf-Testsatz | Die 61 Würfe aus den Protokollen (`ml/gold/shot_clips.json`) werden Entwicklungssatz, vorgelabelt mit Sichtbarkeitsstufen. Neuer eingefrorener Endtest: mindestens 100 Würfe aus mindestens 15 Hallen, die nie im Training waren (Gold- und Testset-2-Hallen), gefunden durch Anschauen, nicht durch einen Detektor. Lukas prüft Ja/Nein | diese Woche, Endtest vor dem Labeln festlegen | Hauptsitzung, Lukas |
-| 2. Tracker | Sicherheit pro Punkt und "weiss nicht" (Metrik 2); Bewertung ohne OWLv2 neu lernen (OWLv2 ist im Produkt zu teuer, ohne OWLv2 heute 78.6 % statt 84.0 %); Spielerboxen als Hinweis | diese Woche, CPU | Hauptsitzung |
-| 3. GPU-Woche ab Samstag | Netze **ohne DeepSport** (auslieferbar), in 2 Folds über die Trainings-Clips (saubere Kandidaten für die Tracker-Bewertung, zugleich Ensemble), ein Vergleichslauf mit DeepSport; danach Bewertung neu lernen | ab Samstag, Kaggle-Kontingent (vorher mit Lukas klären) | Hauptsitzung |
-| 4. Gezielte Daten | Ensemble über die Trainings-Clips, gelabelt wird wo es unsicher ist oder nichts findet; Würfe, harte Pässe, hohe Bälle vor Wand oder Tribüne, Doppelbild-Videos; neue Hallen (heute 57 von 226 Spielen) | parallel | Hauptsitzung, Lukas Ja/Nein |
-| 5. Netz-Generation 2 | TOTNet-Ideen (5 Bilder, 3D-Faltungen, künstliche Verdeckungen, Gewichtung nach Sichtbarkeit), TOTNet selbst im fairen Vergleich | erst wenn der Wurf-Endtest Unterschiede von etwa 2 Punkten auflösen kann | Hauptsitzung |
-| 6. Zwischenfazit | Gold v1 (Entwicklung) und Wurf-Endtest (einmal) mit allen Metriken | nach Schritt 3 | Lukas und Hauptsitzung |
-| 7. Produkt | Netze ohne DeepSport und Tracker ohne OWLv2 sauber mit Tests ins Produkt | wenn Würfe im Endtest bei etwa 85 % | Hauptsitzung |
+**Priorisierung (2026-11-16, Hauptsitzung im Auftrag von Lukas).** Massstab: Würfe und schnelle
+Bälle verlässlich verfolgen, mit einem auslieferbaren System (ohne OWLv2, ohne DeepSport), ehrlich
+gemessen. Was nicht darauf einzahlt, wird geparkt oder verworfen. Begründungen zu den Einwänden:
+`ml/ball/LINEAGE.md` Abschnitt 11.
 
-Daneben, von Lukas zu priorisieren: Kalibrierung (findet das Feld nur in 8 von 42 Gold-Clips, Blocker
-für Taktiktafel und Wurfzonen), Spieler-Tracking messen, Auftrag 11 (Originalauflösung).
+**Jetzt (diese Woche, nur CPU und Labeln):**
+| Prio | Was | Warum zuerst |
+|---|---|---|
+| 1 | **Wurf-Endtest festlegen und labeln:** mindestens 100 Würfe aus mindestens 15 nie trainierten Hallen (Gold- und Testset-2-Hallen), durch Anschauen gefunden; gelabelt **ohne Kandidatenringe** und mit Sichtbarkeitsstufen; Lukas prüft Ja/Nein | Ohne ihn ist keine Entscheidung belastbar. Ohne Ringe zu labeln misst zugleich die Verzerrung der Labels (ersetzt den separaten Verzerrungstest). |
+| 2 | **Auslieferbarer Tracker:** Bewertung ohne OWLv2 neu lernen; das ist ab jetzt die Hauptzahl (heute 78.6 % statt 84.0 % mit OWLv2) | Nur was ins Produkt kann, zählt. |
+| 3 | **Sicherheit pro Punkt und "weiss nicht"** im Tracker, mit Precision-Recall-Kurve | Ein falscher Punkt mitten im Wurf ist schlimmer als eine Lücke; ohne das ist keine Analyse verlässlich. |
+| 4 | Entwicklungssatz: die 61 protokollierten Würfe vorlabeln (Lukas prüft danach) | Zum Verbessern des Trackers auf Würfen, ohne den Endtest zu verbrauchen. |
+| 5 | hr2 und hrp2 messen (läuft schon, nur auswerten) | billig, schliesst einen offenen Punkt |
+
+**Danach (GPU-Woche ab Samstag, Kontingent vorher mit Lukas klären):**
+| Prio | Was |
+|---|---|
+| 6 | Netze **ohne DeepSport**, in 2 Folds über die Trainings-Clips (auslieferbar, saubere Kandidaten für die Tracker-Bewertung, zusammen ein Ensemble); ein Vergleichslauf mit DeepSport |
+| 7 | Tracker-Bewertung auf den Fold-Kandidaten neu lernen; Messung auf Gold v1 und einmal auf dem Wurf-Endtest; Zwischenfazit mit Lukas |
+
+**Später (nur wenn das Zwischenfazit es verlangt):** gezielte Daten aus neuen Hallen und schwierigen
+Szenen; Spielerboxen im Tracker; Netz-Generation 2 mit TOTNet-Ideen (erst wenn der Endtest 2 Punkte
+auflösen kann); Übernahme ins Produkt mit Tests.
+
+**Geparkt oder verworfen:**
+- OWLv2 im Tracker fürs Produkt: verworfen (zu teuer). Bleibt Werkzeug fürs Vorlabeln.
+- Eigene DeepSport-Ablation: verworfen, steckt in Prio 6.
+- Separater Verzerrungstest mit 5 Gold-Clips: verworfen, steckt in Prio 1.
+- Gold v1 erweitern oder weiter darauf feinjustieren: verworfen. Gold v1 bleibt Entwicklungssatz,
+  Unterschiede unter etwa 4 Punkten werden dort nicht mehr entschieden.
+- Ensembles mit mehr als zwei Netzen, Runde 10 im Ensemble, weitere Parameter-Suchen: verworfen.
+- Verifier, Spielfeldmaske: bleiben verworfen (Abschnitt 7 der Lineage).
+- Auftrag 11 (Originalauflösung): geparkt, bis Würfe im Endtest gemessen sind.
+- 95 % als Ziel: verworfen; Zielmarke Würfe 85 bis 90 % im Endtest.
+- Kalibrierung (findet das Feld nur in 8 von 42 Gold-Clips): eigene Baustelle ausserhalb des Balls,
+  Lukas entscheidet, wann.
 
 **Quelle der Wahrheit:** `ml/ball/LINEAGE.md`. Jede Prüfung unseres Vorgehens arbeitet von dort aus;
 was eine Prüfung erschliessen musste, weil es fehlte, wird dort nachgetragen, und jeder Einwand
