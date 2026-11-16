@@ -1,0 +1,255 @@
+# Deploys the Azure environment (infra/terraform/azure) from GitHub Actions with OIDC: no password is
+# stored anywhere. Set up once with infra/azure/setup-github-deploy.sh in Azure Cloud Shell.
+#
+#   - Actions → Deploy → Run workflow: «plan» shows what would change, «deploy» rolls out this commit.
+#   - A push to the working branch whose commit message contains [deploy] or [deploy-plan] does the same.
+#   - A paused environment (README, «Pause») stays paused: only «resume» ([resume] in the commit
+#     message) starts the database and scales the apps up again; «pause» ([pause]) does the reverse.
+#
+# Order of a deploy: images are built in the registry, the migration job gets the new image and runs,
+# then the apps get the new image, the custom domain is bound, and the health checks must pass.
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: plan or deploy
+        type: choice
+        options: [plan, deploy]
+        default: plan
+      state:
+        description: keep the environment as it is, resume a paused one, or pause it
+        type: choice
+        options: [keep, resume, pause]
+        default: keep
+  push:
+    branches: [claude/compassionate-pascal-n3gl03]
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false
+
+env:
+  # identifiers from infra/azure/setup-github-deploy.sh (none of them is a secret)
+  ARM_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID || '0a334e89-9561-447e-98be-9d431fdb3d85' }}
+  ARM_TENANT_ID: ${{ vars.AZURE_TENANT_ID || '23ee75d0-37f8-49fc-8971-abf225b907a3' }}
+  ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID || 'aac801cd-121f-4174-b5b5-29801d81d0a7' }}
+  ARM_USE_OIDC: "true"
+  TFSTATE_RG: rg-hb-tfstate
+  TFSTATE_ACCOUNT: ${{ vars.TFSTATE_ACCOUNT || 'sthbtfstate72432' }}
+  TFSTATE_KEY: ${{ vars.TFSTATE_KEY || 'staging.tfstate' }}
+  APP_DOMAIN: app.handball-intelligence.com
+  TF_IN_AUTOMATION: "true"
+
+jobs:
+  deploy:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[deploy')
+    name: Deploy (staging)
+    runs-on: ubuntu-latest
+    environment: staging
+    timeout-minutes: 180
+    defaults:
+      run:
+        # explicit bash runs with -o pipefail: a failing terraform in `| tee` fails the step
+        shell: bash
+        working-directory: infra/terraform/azure
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Mode
+        id: mode
+        run: |
+          if [ "${{ github.event_name }}" = workflow_dispatch ]; then mode="${{ inputs.mode }}";
+          elif ${{ contains(github.event.head_commit.message, '[deploy-plan]') }}; then mode=plan;
+          else mode=deploy; fi
+          if [ "${{ github.event_name }}" = workflow_dispatch ]; then state="${{ inputs.state }}";
+          elif ${{ contains(github.event.head_commit.message, '[resume]') }}; then state=resume;
+          elif ${{ contains(github.event.head_commit.message, '[pause]') }}; then state=pause;
+          else state=keep; fi
+          echo "mode=$mode" >>"$GITHUB_OUTPUT"
+          echo "state=$state" >>"$GITHUB_OUTPUT"
+          echo "tag=$(git rev-parse --short=7 HEAD)" >>"$GITHUB_OUTPUT"
+          echo "Mode: $mode, environment: $state, commit $(git rev-parse --short=7 HEAD)"
+
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ env.ARM_CLIENT_ID }}
+          tenant-id: ${{ env.ARM_TENANT_ID }}
+          subscription-id: ${{ env.ARM_SUBSCRIPTION_ID }}
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          # 1.9 evaluates plantimestamp() as year 1 while validating and rejects the budget
+          terraform_version: 1.17.2
+          terraform_wrapper: false
+
+      - name: Settings and state
+        run: |
+          az storage blob download --account-name "$TFSTATE_ACCOUNT" -c tfstate -n staging.tfvars \
+            -f staging.tfvars --auth-mode login -o none
+          terraform init -input=false \
+            -backend-config="resource_group_name=$TFSTATE_RG" \
+            -backend-config="storage_account_name=$TFSTATE_ACCOUNT" \
+            -backend-config="container_name=tfstate" \
+            -backend-config="key=$TFSTATE_KEY" \
+            -backend-config="use_azuread_auth=true" \
+            -backend-config="use_oidc=true"
+          echo "rg=$(terraform output -raw resource_group)" >>"$GITHUB_ENV"
+          echo "registry=$(terraform output -raw registry_name)" >>"$GITHUB_ENV"
+
+      - name: Paused or running
+        id: state
+        run: |
+          pg=$(terraform output -raw postgres_server)
+          db=$(az postgres flexible-server show -g "$rg" -n "$pg" --query state -o tsv)
+          # «keep» means what runs now in Azure, not what the settings file remembers
+          api=$(az containerapp show -g "$rg" -n "$(terraform output -raw web_app | sed 's/-web$/-api/')" -o json)
+          # paused: the cron rule «paused» on the api (README, «Pause»), or the database stopped
+          paused=$(jq -r '[.properties.template.scale.rules // [] | .[] | select(.name == "paused")] | length > 0' <<<"$api")
+          [ "$db" = Ready ] || paused=true
+          want="${{ steps.mode.outputs.state }}"
+          case "$want" in resume) paused=false ;; pause) paused=true ;; esac
+          echo "database $pg: $db; paused after this run: $paused"
+          if [ "$want" = resume ] && [ "$db" != Ready ] && [ "${{ steps.mode.outputs.mode }}" = deploy ]; then
+            az postgres flexible-server start -g "$rg" -n "$pg" -o none
+            db=$(az postgres flexible-server show -g "$rg" -n "$pg" --query state -o tsv)
+            echo "database started: $db"
+          fi
+          if [ "$db" != Ready ] && [ "${{ steps.mode.outputs.mode }}" = deploy ]; then
+            echo "::error::The environment is paused (database $db). Deploy with state «resume» ([resume] in the commit message) to start it."
+            exit 1
+          fi
+          # a stopped server cannot be read: plan without refreshing then (README, «Pause»)
+          refresh=$([ "$db" = Ready ] && echo true || echo false)
+          # settings changed by hand in Azure that the settings file does not know yet (the mail
+          # backend «console» while no mail provider is set up): keep them through extra_env
+          python3 - "$api" <<'PY'
+          import json, re, sys
+          live = {e["name"]: e.get("value") for e in json.loads(sys.argv[1])["properties"]["template"]["containers"][0]["env"]}
+          text = open("staging.tfvars").read()
+          m = re.search(r"^extra_env\s*=\s*(\{.*\})\s*$", text, re.M)
+          extra = json.loads(m.group(1)) if m else {}
+          for key, default in {"HB_EMAIL_BACKEND": "smtp", "HB_PWNED_CHECK": "true"}.items():
+              if live.get(key) not in (None, default) and key not in extra:
+                  extra[key] = live[key]
+                  print(f"keep {key}={live[key]} from the running app")
+          line = "extra_env        = " + json.dumps(extra)
+          text = re.sub(r"^extra_env\s*=.*$", line, text, flags=re.M) if m else text + line + "\n"
+          open("staging.tfvars", "w").write(text)
+          PY
+          echo "PAUSED=$paused" >>"$GITHUB_ENV"
+          echo "REFRESH=$refresh" >>"$GITHUB_ENV"
+          echo "PG=$pg" >>"$GITHUB_ENV"
+
+      - name: DNS records for the app domain
+        id: dns
+        run: |
+          fqdn=$(terraform output -raw web_default_fqdn)
+          asuid=$(terraform output -raw custom_domain_verification_id)
+          echo "CNAME ${APP_DOMAIN%%.*} -> $fqdn (DNS only)"
+          echo "TXT asuid.${APP_DOMAIN%%.*} -> $asuid"
+          ok=false
+          if [ "$(dig +short CNAME "$APP_DOMAIN" | sed 's/\.$//')" = "$fqdn" ] && \
+             dig +short TXT "asuid.$APP_DOMAIN" | grep -q "$asuid"; then ok=true; fi
+          echo "ready=$ok" >>"$GITHUB_OUTPUT"
+          echo "DNS ready: $ok"
+
+      - name: Plan
+        run: |
+          tag=$([ "${{ steps.mode.outputs.mode }}" = deploy ] && echo "${{ steps.mode.outputs.tag }}" || sed -n 's/^image_tag *= *"\(.*\)"/\1/p' staging.tfvars)
+          echo "TAG=$tag" >>"$GITHUB_ENV"
+          echo "BIND=${{ steps.dns.outputs.ready }}" >>"$GITHUB_ENV"
+          terraform plan -input=false -no-color -var-file=staging.tfvars \
+            -var "image_tag=$tag" -var "app_domain=$APP_DOMAIN" \
+            -var "bind_custom_domain=${{ steps.dns.outputs.ready }}" -var "paused=$PAUSED" \
+            -refresh=$REFRESH -out=tfplan | tee plan.txt
+          {
+            echo '### Terraform plan (staging)'
+            echo '```'
+            grep -E '^(  # |Plan:|No changes)' plan.txt || true
+            echo '```'
+          } >>"$GITHUB_STEP_SUMMARY"
+
+      - name: Images
+        if: steps.mode.outputs.mode == 'deploy'
+        working-directory: .
+        run: |
+          missing=0
+          for app in api worker web gpu-worker; do
+            az acr repository show-tags -n "$registry" --repository "hb-$app" -o tsv 2>/dev/null | grep -qx "$TAG" || missing=1
+          done
+          if [ "$missing" = 0 ]; then echo "images $TAG exist"; exit 0; fi
+          ctx=$(mktemp -d)
+          git archive HEAD | tar -x -C "$ctx"
+          # .dockerignore leaves out infra/: the task file goes to the root of the upload
+          cp infra/terraform/azure/acr-build.yaml "$ctx/"
+          az acr run -r "$registry" -f acr-build.yaml --set "tag=$TAG" --timeout 7200 "$ctx"
+
+      - name: Migrations
+        if: steps.mode.outputs.mode == 'deploy'
+        run: |
+          terraform apply -input=false -auto-approve -no-color -var-file=staging.tfvars \
+            -var "image_tag=$TAG" -var "app_domain=$APP_DOMAIN" -var "bind_custom_domain=$BIND" \
+            -var "paused=$PAUSED" -target=azurerm_container_app_job.migrate
+          job=$(terraform output -raw migrate_job)
+          run=$(az containerapp job start -n "$job" -g "$rg" --query name -o tsv)
+          echo "migration run $run"
+          for i in $(seq 1 90); do
+            status=$(az containerapp job execution show -n "$job" -g "$rg" --job-execution-name "$run" --query properties.status -o tsv)
+            echo "$(date -u +%T) $status"
+            case "$status" in Succeeded) exit 0 ;; Failed|Stopped|Degraded) exit 1 ;; esac
+            sleep 20
+          done
+          echo "migration did not finish in 30 minutes"; exit 1
+
+      - name: Apply
+        if: steps.mode.outputs.mode == 'deploy'
+        run: |
+          terraform apply -input=false -auto-approve -no-color -var-file=staging.tfvars \
+            -var "image_tag=$TAG" -var "app_domain=$APP_DOMAIN" -var "bind_custom_domain=$BIND" \
+            -var "paused=$PAUSED"
+
+      - name: Managed certificate for the app domain
+        if: steps.mode.outputs.mode == 'deploy' && env.BIND == 'true'
+        run: |
+          web=$(terraform output -raw web_app)
+          binding=$(az containerapp hostname list -g "$rg" -n "$web" --query "[?name=='$APP_DOMAIN'].bindingType | [0]" -o tsv)
+          if [ "$binding" = SniEnabled ]; then echo "certificate bound"; exit 0; fi
+          az containerapp hostname bind -g "$rg" -n "$web" --hostname "$APP_DOMAIN" \
+            --environment "$(terraform output -raw container_app_environment)" --validation-method CNAME -o none
+
+      - name: Remember what is deployed
+        if: steps.mode.outputs.mode == 'deploy'
+        run: |
+          sed -i -e "s/^image_tag *=.*/image_tag             = \"$TAG\"/" \
+                 -e "s/^app_domain *=.*/app_domain            = \"$APP_DOMAIN\"/" \
+                 -e "s/^bind_custom_domain *=.*/bind_custom_domain    = $BIND/" \
+                 -e "s/^paused *=.*/paused            = $PAUSED/" staging.tfvars
+          az storage blob upload --account-name "$TFSTATE_ACCOUNT" -c tfstate -n staging.tfvars \
+            -f staging.tfvars --auth-mode login --overwrite -o none
+
+      - name: Stop the database (pause)
+        if: steps.mode.outputs.mode == 'deploy' && env.PAUSED == 'true'
+        run: |
+          az postgres flexible-server stop -g "$rg" -n "$PG" -o none
+          echo "Paused: apps at 0, database stopped (Azure starts it again by itself after 7 days)" >>"$GITHUB_STEP_SUMMARY"
+
+      - name: Health checks
+        if: steps.mode.outputs.mode == 'deploy' && env.PAUSED != 'true'
+        run: |
+          host=$([ "$BIND" = true ] && echo "$APP_DOMAIN" || terraform output -raw web_default_fqdn)
+          for path in /api/healthz /v1/public/config; do
+            for i in $(seq 1 30); do
+              code=$(curl -s -o /tmp/body -w '%{http_code}' "https://$host$path" || true)
+              [ "$code" = 200 ] && break
+              sleep 10
+            done
+            echo "https://$host$path -> $code: $(head -c 200 /tmp/body)"
+            [ "$code" = 200 ]
+          done
+          echo "Deployed ${{ steps.mode.outputs.tag }} to https://$host" >>"$GITHUB_STEP_SUMMARY"

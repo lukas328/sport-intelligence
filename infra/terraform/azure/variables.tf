@@ -40,6 +40,12 @@ variable "bind_custom_domain" {
   default     = false
 }
 
+variable "kv_deployer_object_id" {
+  description = "Object id of the person who keeps the Key Vault role «Secrets Officer» (empty: whoever runs terraform). Set when GitHub Actions deploys, so the owner keeps access."
+  type        = string
+  default     = ""
+}
+
 variable "image_tag" {
   description = "Tag of the images hb-api, hb-worker, hb-gpu-worker and hb-web in the registry."
   type        = string
