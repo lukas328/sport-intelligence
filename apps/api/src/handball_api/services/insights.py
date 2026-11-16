@@ -318,7 +318,11 @@ async def opponent_profile(ctx: Ctx, opponent_id: uuid.UUID) -> dict[str, Any]:
         raise ProblemError(404, "not-found", "Opponent not found")
     await billing.require_feature(ctx, "season", opponent.organization_id)
     visible = visible_team_ids(ctx.require_actor())
-    q = select(Match).where(Match.opponent_id == opponent.id).order_by(Match.kickoff_at)
+    q = (
+        select(Match)
+        .where(Match.opponent_id == opponent.id, Match.kind.in_(("match", "scouting")))
+        .order_by(Match.kickoff_at)
+    )
     if visible is not None:
         q = q.where(Match.team_id.in_(visible))
     matches = list((await ctx.db.scalars(q)).all())
@@ -340,7 +344,8 @@ async def opponent_profile(ctx: Ctx, opponent_id: uuid.UUID) -> dict[str, Any]:
     rows = []
     tagged = 0
     for m in matches:
-        if m.score_own is not None and m.score_opponent is not None:
+        # the record is against us; a scouting match (them against others, K3) adds what they do
+        if m.kind == "match" and m.score_own is not None and m.score_opponent is not None:
             key = (
                 "won"
                 if m.score_own > m.score_opponent
@@ -358,6 +363,8 @@ async def opponent_profile(ctx: Ctx, opponent_id: uuid.UUID) -> dict[str, Any]:
                 "score_own": m.score_own,
                 "score_opponent": m.score_opponent,
                 "events": s["quality"]["events"],
+                "kind": m.kind,
+                "scouting_other": m.scouting_other,
             }
         )
         if not s["quality"]["events"]:

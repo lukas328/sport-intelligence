@@ -24,6 +24,7 @@ from handball_api.services import (
     monitoring,
     official,
     presentations,
+    progress,
     scouting,
     support,
     videos,
@@ -39,6 +40,17 @@ async def job_update(
     if not constant_time_equals(x_internal_token, ctx.settings.internal_token.get_secret_value()):
         raise ProblemError(403, "forbidden", "Invalid internal token")
     return JobOut.model_validate(await videos.apply_job_update(ctx, job_id, data))
+
+
+@router.post("/watchdog")
+async def job_watchdog(
+    ctx: CtxDep, x_internal_token: Annotated[str, Header()] = ""
+) -> dict[str, int]:
+    """Worker tick (every few minutes): jobs whose worker went silent are restarted once, the
+    second time ended as failed (services/progress.watchdog)."""
+    if not constant_time_equals(x_internal_token, ctx.settings.internal_token.get_secret_value()):
+        raise ProblemError(403, "forbidden", "Invalid internal token")
+    return await progress.watchdog(ctx)
 
 
 @router.get("/stats")

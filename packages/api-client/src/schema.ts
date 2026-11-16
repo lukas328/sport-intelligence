@@ -1218,6 +1218,58 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/attachments/{attachment_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete Attachment */
+        delete: operations["delete_attachment_v1_orgs__org_id__attachments__attachment_id__delete"];
+        options?: never;
+        head?: never;
+        /** Update Attachment */
+        patch: operations["update_attachment_v1_orgs__org_id__attachments__attachment_id__patch"];
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/attachments/{attachment_id}/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Complete Attachment */
+        post: operations["complete_attachment_v1_orgs__org_id__attachments__attachment_id__complete_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/attachments/{attachment_id}/file": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Attachment File */
+        get: operations["attachment_file_v1_orgs__org_id__attachments__attachment_id__file_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/attendance/{kind}/{target_id}": {
         parameters: {
             query?: never;
@@ -1743,6 +1795,27 @@ export interface paths {
         put?: never;
         /** Add Annotation */
         post: operations["add_annotation_v1_orgs__org_id__matches__match_id__annotations_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/matches/{match_id}/attachments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Attachments */
+        get: operations["list_attachments_v1_orgs__org_id__matches__match_id__attachments_get"];
+        put?: never;
+        /**
+         * Create Attachment
+         * @description Starts the upload: PUT the file to `upload_url`, then complete with the ETag.
+         */
+        post: operations["create_attachment_v1_orgs__org_id__matches__match_id__attachments_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3257,6 +3330,27 @@ export interface paths {
         put?: never;
         /** Add Slide */
         post: operations["add_slide_v1_orgs__org_id__presentations__pres_id__slides_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/progress": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Org Progress
+         * @description Uploads and processing of the matches the person sees, while they run and a while after
+         *     (the progress in the head of every page, on Spiele and in the match: K6, K13).
+         */
+        get: operations["org_progress_v1_orgs__org_id__progress_get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -5372,6 +5466,86 @@ export interface components {
             /** Done */
             done: boolean;
         };
+        /** AttachmentComplete */
+        AttachmentComplete: {
+            /**
+             * Etag
+             * @description ETag storage answered the PUT
+             */
+            etag: string;
+        };
+        /** AttachmentCreate */
+        AttachmentCreate: {
+            /**
+             * Content Type
+             * @description image/jpeg, image/png, image/webp, image/heic or PDF
+             */
+            content_type: string;
+            /** Filename */
+            filename: string;
+            /** Note */
+            note?: string | null;
+            /**
+             * Size Bytes
+             * @description at most 25 MB
+             */
+            size_bytes: number;
+        };
+        /** AttachmentOut */
+        AttachmentOut: {
+            /** Content Type */
+            content_type: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Created By
+             * @description the name of who added it
+             */
+            created_by?: string | null;
+            /** Filename */
+            filename: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Is Image */
+            is_image: boolean;
+            /**
+             * Match Id
+             * Format: uuid
+             */
+            match_id: string;
+            /** Note */
+            note: string | null;
+            /** Size Bytes */
+            size_bytes: number;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "uploading" | "ready";
+        };
+        /** AttachmentUpdate */
+        AttachmentUpdate: {
+            /**
+             * Note
+             * @description null or empty clears it
+             */
+            note?: string | null;
+        };
+        /** AttachmentUploadOut */
+        AttachmentUploadOut: {
+            attachment: components["schemas"]["AttachmentOut"];
+            /**
+             * Upload Url
+             * @description PUT the file here (presigned, one part), then complete
+             */
+            upload_url: string;
+        };
         /** AttendanceIn */
         AttendanceIn: {
             /** Records */
@@ -6566,6 +6740,107 @@ export interface components {
              */
             screenshot?: string | null;
         };
+        /**
+         * FileProgressOut
+         * @description Where one file of a match is (services/progress): its step in the coach's words, how far
+         *     the step is, how long it probably takes, and whether it moves.
+         */
+        FileProgressOut: {
+            /** Duration S */
+            duration_s?: number | null;
+            /**
+             * Error
+             * @description failed: a stable failure code
+             */
+            error?: string | null;
+            /**
+             * Eta Basis
+             * @description measured: from the pace of this run; history: from video length and the pace of the latest runs
+             */
+            eta_basis?: ("measured" | "history") | null;
+            /**
+             * Eta S
+             * @description seconds left in the current stage; null: cannot be estimated
+             */
+            eta_s?: number | null;
+            /** Filename */
+            filename: string;
+            /**
+             * Finish S
+             * @description seconds until the file is done with all its stages; null while unknown
+             */
+            finish_s?: number | null;
+            /**
+             * Fraction
+             * @description how far the current stage is; null while unknown
+             */
+            fraction?: number | null;
+            /**
+             * Half
+             * @description 1 or 2 when the parts are two halves
+             */
+            half?: number | null;
+            /**
+             * Idle S
+             * @description seconds without a sign of life (stalled, interrupted, queued)
+             */
+            idle_s?: number | null;
+            /**
+             * Last Activity At
+             * @description the last sign of life: a part uploaded, a worker report
+             */
+            last_activity_at?: string | null;
+            /**
+             * Overall
+             * @description the whole way of this file, all stages
+             */
+            overall: number;
+            /**
+             * Part
+             * @description its number on the match timeline, from 1
+             */
+            part?: number | null;
+            /**
+             * Restart At
+             * @description stalled: when the watchdog restarts the step at the latest
+             */
+            restart_at?: string | null;
+            /**
+             * Restarted
+             * @description this step was restarted once already after it went silent
+             * @default false
+             */
+            restarted?: boolean;
+            role: components["schemas"]["VideoRole"];
+            /** Size Bytes */
+            size_bytes?: number | null;
+            /**
+             * Stage
+             * @description upload: hochladen; ingest: einlesen (converting for playback and analysis); analysis: analysieren; done: fertig
+             * @enum {string}
+             */
+            stage: "upload" | "ingest" | "analysis" | "done";
+            /** Stage Started At */
+            stage_started_at?: string | null;
+            /**
+             * State
+             * @description running; queued: waits for a free worker; waiting: waits for the analysis of an earlier part; stalled: no report from the worker for a while; interrupted: the upload stopped (closed tab, lost connection); done; failed
+             * @enum {string}
+             */
+            state: "running" | "queued" | "waiting" | "stalled" | "interrupted" | "done" | "failed";
+            /**
+             * Step
+             * @description the technical sub-step (download, transcode, observe, ...)
+             */
+            step?: string | null;
+            /** Uploaded Bytes */
+            uploaded_bytes?: number | null;
+            /**
+             * Video Id
+             * Format: uuid
+             */
+            video_id: string;
+        };
         /** FocusIn */
         FocusIn: {
             /**
@@ -7680,11 +7955,11 @@ export interface components {
             kickoff_at: string;
             /**
              * Kind
-             * @description training: training video without opponent (4.8)
+             * @description training: training video without opponent (4.8); scouting: a video of the opponent playing another team (the own team does not play, K3)
              * @default match
              * @enum {string}
              */
-            kind?: "match" | "training";
+            kind?: "match" | "training" | "scouting";
             /**
              * Kit Opponent
              * @default #dc2626
@@ -7723,6 +7998,11 @@ export interface components {
             period_s?: number | null;
             /** Periods */
             periods?: number | null;
+            /**
+             * Scouting Other
+             * @description scouting: the team the opponent plays against; it takes the own side in the analysis (kit_own is its shirt colour)
+             */
+            scouting_other?: string | null;
             /** Season Id */
             season_id?: string | null;
             /** Venue */
@@ -7862,6 +8142,8 @@ export interface components {
             period_s: number;
             /** Periods */
             periods: number;
+            /** @description uploads and processing while they run and a while after (services/progress); only in the single match read */
+            progress?: components["schemas"]["MatchProgressOut"] | null;
             /** Report Extra */
             report_extra: {
                 [key: string]: unknown;
@@ -7870,6 +8152,11 @@ export interface components {
             score_opponent: number | null;
             /** Score Own */
             score_own: number | null;
+            /**
+             * Scouting Other
+             * @description scouting: the team the opponent plays against
+             */
+            scouting_other?: string | null;
             /**
              * Season Id
              * Format: uuid
@@ -7887,6 +8174,61 @@ export interface components {
             venue: string | null;
             /** Videos */
             videos: components["schemas"]["VideoOut"][];
+        };
+        /**
+         * MatchProgressOut
+         * @description Uploads and processing of one match, for the progress in the head, on Spiele and in the
+         *     match (K6, K13, B4). Present while something runs and a while after it ended.
+         */
+        MatchProgressOut: {
+            /**
+             * Eta S
+             * @description seconds until everything is done; null: cannot be estimated
+             */
+            eta_s?: number | null;
+            /** Files */
+            files: components["schemas"]["FileProgressOut"][];
+            /**
+             * Finished At
+             * @description done or failed: when the last step ended
+             */
+            finished_at?: string | null;
+            /** Is Home */
+            is_home: boolean;
+            /**
+             * Kickoff At
+             * Format: date-time
+             */
+            kickoff_at: string;
+            /** Kind */
+            kind: string;
+            /**
+             * Match Id
+             * Format: uuid
+             */
+            match_id: string;
+            /** Opponent Name */
+            opponent_name: string;
+            /** Overall */
+            overall: number;
+            /** Scouting Other */
+            scouting_other?: string | null;
+            /**
+             * Stage
+             * @description the step of the file furthest behind
+             * @enum {string}
+             */
+            stage: "upload" | "ingest" | "analysis" | "done";
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "running" | "queued" | "waiting" | "stalled" | "interrupted" | "done" | "failed";
+            /**
+             * Team Id
+             * Format: uuid
+             */
+            team_id: string;
         };
         /**
          * MatchStatus
@@ -7935,6 +8277,11 @@ export interface components {
             score_opponent: number | null;
             /** Score Own */
             score_own: number | null;
+            /**
+             * Scouting Other
+             * @description scouting: the team the opponent plays against
+             */
+            scouting_other?: string | null;
             status: components["schemas"]["MatchStatus"];
             /**
              * Team Id
@@ -7992,6 +8339,11 @@ export interface components {
             score_opponent?: number | null;
             /** Score Own */
             score_own?: number | null;
+            /**
+             * Scouting Other
+             * @description scouting matches only: the other team's name
+             */
+            scouting_other?: string | null;
             /** Venue */
             venue?: string | null;
         };
@@ -11093,6 +11445,12 @@ export interface components {
             part_count: number;
             /** Part Size */
             part_size: number;
+            /**
+             * Resumed
+             * @description the unfinished upload of the same file: list its parts and send the rest
+             * @default false
+             */
+            resumed?: boolean;
             video: components["schemas"]["VideoOut"];
         };
         /** UploadedPartOut */
@@ -13566,6 +13924,144 @@ export interface operations {
             };
         };
     };
+    delete_attachment_v1_orgs__org_id__attachments__attachment_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                attachment_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_attachment_v1_orgs__org_id__attachments__attachment_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                attachment_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AttachmentUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttachmentOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    complete_attachment_v1_orgs__org_id__attachments__attachment_id__complete_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                attachment_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AttachmentComplete"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttachmentOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    attachment_file_v1_orgs__org_id__attachments__attachment_id__file_get: {
+        parameters: {
+            query?: {
+                /** @description as a download, also for photos */
+                download?: boolean;
+            };
+            header?: never;
+            path: {
+                attachment_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/pdf": unknown;
+                    "image/*": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     attendance_v1_orgs__org_id__attendance__kind___target_id__get: {
         parameters: {
             query?: never;
@@ -14916,6 +15412,74 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AnnotationOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_attachments_v1_orgs__org_id__matches__match_id__attachments_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttachmentOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_attachment_v1_orgs__org_id__matches__match_id__attachments_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AttachmentCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttachmentUploadOut"];
                 };
             };
             /** @description Validation Error */
@@ -18086,6 +18650,37 @@ export interface operations {
             };
         };
     };
+    org_progress_v1_orgs__org_id__progress_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MatchProgressOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     delete_filter_v1_orgs__org_id__saved_filters__filter_id__delete: {
         parameters: {
             query?: never;
@@ -19612,6 +20207,8 @@ export interface operations {
         parameters: {
             query?: {
                 season_id?: string | null;
+                /** @description also the videos of an opponent against another team (K3); they are no matches of the team (season figures, table) and are left out by default */
+                scouting?: boolean;
             };
             header?: never;
             path: {

@@ -472,6 +472,62 @@ async def game_players(db: AsyncSession | None, game_id: int) -> list[GameAppear
     rows = (
         await query(Q_GAME_PLAYERS, {"gameId": game_id, "isLive": False}, db=db, max_age=None)
     ).get("gamePlayerStats") or []
+    return _appearances(rows)
+
+
+GAME_PLAYERS_PARALLEL = 4
+
+
+async def game_players_many(
+    db: AsyncSession, game_ids: list[int]
+) -> dict[int, list[GameAppearance]]:
+    """game_players for several played games: the cached ones from the database, the others
+    asked at the same time (the pacing between requests stays), so the scorers of a team come in
+    about the time of one request instead of twelve in a row (L15). A game handball.ch does not
+    answer is left out."""
+    out: dict[int, list[GameAppearance]] = {}
+    missing: list[int] = []
+    for gid in game_ids:
+        hit = await db.get(OfficialCache, cache_key(Q_GAME_PLAYERS, _gp_vars(gid)))
+        if hit is not None:
+            out[gid] = _appearances(dict(hit.data).get("gamePlayerStats") or [])
+        else:
+            missing.append(gid)
+    gate = asyncio.Semaphore(GAME_PLAYERS_PARALLEL)
+
+    async def fetch(gid: int) -> tuple[int, dict[str, Any] | None]:
+        async with gate:
+            try:
+                return gid, await _post(Q_GAME_PLAYERS, _gp_vars(gid))
+            except UpstreamUnavailableError:
+                return gid, None
+
+    for gid, data in await asyncio.gather(*(fetch(g) for g in missing)):
+        if data is None:
+            continue
+        stmt = insert(OfficialCache).values(
+            key=cache_key(Q_GAME_PLAYERS, _gp_vars(gid)),
+            provider=PROVIDER,
+            operation=_operation(Q_GAME_PLAYERS),
+            variables=_gp_vars(gid),
+            data=data,
+            fetched_at=datetime.now(UTC),
+        )
+        await db.execute(
+            stmt.on_conflict_do_update(
+                index_elements=[OfficialCache.key],
+                set_={"data": stmt.excluded.data, "fetched_at": stmt.excluded.fetched_at},
+            )
+        )
+        out[gid] = _appearances(data.get("gamePlayerStats") or [])
+    return out
+
+
+def _gp_vars(game_id: int) -> dict[str, Any]:
+    return {"gameId": game_id, "isLive": False}
+
+
+def _appearances(rows: list[dict[str, Any]]) -> list[GameAppearance]:
     return [
         GameAppearance(
             player_id=int(p["playerId"]),
