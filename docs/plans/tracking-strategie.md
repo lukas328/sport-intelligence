@@ -149,7 +149,7 @@ danach gezielt nachtrainieren).
 Information. Etwa 80 % über alle Bälle reichen, wenn diese Szenen stimmen. Zielmarke für schnelle
 Bälle und Würfe: 85 bis 90 %. 95 % ist kein Ziel (Verdeckung, Messgrenze).
 
-**Stand (Gold v1, 42 Clips, 12 px, Tracker mit hr1 + hrp1, Details `ml/ball/README.md`):**
+**Stand (Gold v1, 42 Clips, 12 px, Tracker mit hr1 + hrp1, Details `ml/ball/README.md`, Herkunft aller Versionen `ml/ball/LINEAGE.md`):**
 alle Bälle 84.0 %, schnelle 86.0 % (Mittag: je 77 %). Gebracht haben es die Doppelbild-Korrektur,
 längere Lücken für schnelle Bälle und die gelernte Bewertung der Kandidaten. Restfehler bei
 schnellen Bällen: 8.5 % Tracker wählt falsch, 5.4 % kein Detektor sieht den Ball.
@@ -174,9 +174,11 @@ schnellen Bällen: 8.5 % Tracker wählt falsch, 5.4 % kein Detektor sieht den Ba
 | 2. Gezielte Daten | Ensemble über die Trainings-Clips, gelabelt wird wo es unsicher ist oder nichts findet; Schwerpunkt Würfe, harte Pässe, hohe Bälle vor Wand oder Tribüne (g34), Videos mit Doppelbildern; neue Hallen | parallel | Hauptsitzung, Lukas Ja/Nein |
 | 3. Netz-Generation 2 | Ideen aus TOTNet (arXiv 2508.09650, MIT): 5 Bilder Eingabe, Bewegung über die Zeit (3D-Faltungen), künstliche Verdeckungen im Training, Verlust gewichtet nach Sichtbarkeit. Kandidaten im fairen Vergleich auf denselben Daten: HRNet vortrainiert mit 5 Bildern, TOTNet selbst trainiert, eventuell die eigene HRNet-Bauart. Danach Tracker-Bewertung neu trainieren | ab Samstag (Kaggle-Kontingent 30 h, vorher Kontingent mit Lukas klären) | Hauptsitzung |
 | 4. Zwischenfazit | Gold v1 und Wurf-Gold mit allen Metriken; Entscheid über Bauart und ob die Werte fürs Produkt reichen | nach Schritt 3 | Lukas und Hauptsitzung |
-| 5. Produkt | Netze und Tracker aus `ml/` sauber mit Tests ins Produkt | wenn Würfe bei etwa 85 % | Hauptsitzung |
+| 5. Produkt | Netze und Tracker aus `ml/` sauber mit Tests ins Produkt. Vorher Lizenz: alle Netze ab Runde 3 (auch hr1, hrp1) sind mit DeepSport (CC BY-NC-SA, nur Forschung) trainiert, das Produktnetz braucht ein Training ohne DeepSport und eine Prüfung der ImageNet-Gewichte (`ml/ball/LINEAGE.md`) | wenn Würfe bei etwa 85 % | Hauptsitzung |
 
 **Grundsätze:** Gold wird nicht zum Anpassen verwendet (höchstens mit Kreuzvalidierung über
 Clips), Lernen auf den Trainings-Clips. GPU zuerst Kaggle, Modal nur mit Freigabe von Lukas über
 die lokale Sitzung. Würfe aus Hallen, die im Training vorkamen, sind etwas leichter als Gold v1
-(lauter neue Hallen); das wird bei jedem Wurf-Ergebnis erwähnt.
+(lauter neue Hallen); das wird bei jedem Wurf-Ergebnis erwähnt. Gold v1 ist seit 2026-11-16 ein
+Entwicklungssatz (stark für den Tracker benutzt); sauberer Endtest ist der eingefrorene Teil des
+Wurf-Goldstandards (20 Würfe, 4 Hallen, `split: test` in `ml/gold/shot_clips.json`).
