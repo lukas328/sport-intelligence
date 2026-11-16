@@ -251,6 +251,59 @@ def test_rq_queue_has_socket_timeouts() -> None:
     q = RqJobQueue("redis://127.0.0.1:1/0")
     kwargs = q._conn.connection_pool.connection_kwargs
     assert (kwargs["socket_timeout"], kwargs["socket_connect_timeout"]) == (5, 5)
+    assert kwargs["health_check_interval"] == 30
+
+
+async def test_event_publish_survives_a_dropped_redis_connection() -> None:
+    """A proxy dropped the idle connection: the job update must still commit (staging, 11-2026)."""
+    from redis.exceptions import ConnectionError as RedisConnectionError
+
+    from handball_api.core.jobs import RedisEventBus
+
+    bus = RedisEventBus("redis://127.0.0.1:1/0")
+    assert bus._redis.connection_pool.connection_kwargs["health_check_interval"] == 30
+
+    class Dropped:
+        async def publish(self, *_: object) -> None:
+            raise RedisConnectionError("Connection closed by server.")
+
+    bus._redis = Dropped()  # type: ignore[assignment]
+    await bus.publish("match:x", {"status": "succeeded"})  # no exception
+
+
+async def test_event_subscribe_pings_while_idle(monkeypatch: pytest.MonkeyPatch) -> None:
+    import asyncio
+    from collections.abc import AsyncGenerator
+    from typing import Any, cast
+
+    import fakeredis
+    from redis.asyncio.client import PubSub
+
+    from handball_api.core import jobs
+
+    server = fakeredis.FakeServer()
+    monkeypatch.setattr(
+        "redis.asyncio.Redis.from_url",
+        lambda *_a, **_k: fakeredis.FakeAsyncRedis(server=server),
+    )
+    monkeypatch.setattr(jobs, "SUBSCRIBE_PING_S", 0.05)
+    pings = 0
+    real_ping = PubSub.ping
+
+    async def counting_ping(self: PubSub, *a: Any, **k: Any) -> Any:
+        nonlocal pings
+        pings += 1
+        return await real_ping(self, *a, **k)
+
+    monkeypatch.setattr(PubSub, "ping", counting_ping)
+    bus = jobs.RedisEventBus("redis://ignored")
+    events = cast(AsyncGenerator[dict[str, Any]], bus.subscribe("match:y"))
+    nxt = asyncio.ensure_future(anext(events))
+    await asyncio.sleep(0.2)
+    assert pings >= 1 and not nxt.done()
+    await fakeredis.FakeAsyncRedis(server=server).publish("match:y", '{"status": "running"}')
+    assert await asyncio.wait_for(nxt, 2) == {"status": "running"}
+    await events.aclose()
 
 
 async def test_ctx_enqueue_runs_off_the_event_loop() -> None:
