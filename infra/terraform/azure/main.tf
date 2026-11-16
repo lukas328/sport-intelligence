@@ -347,8 +347,12 @@ locals {
         c = await asyncpg.connect(os.environ["HB_ADMIN_DSN"])
         pw = os.environ["HB_APP_DB_PASSWORD"]
         exists = await c.fetchval("SELECT 1 FROM pg_roles WHERE rolname = 'handball_app'")
-        verb = "ALTER" if exists else "CREATE"
-        await c.execute(f"{verb} ROLE handball_app LOGIN PASSWORD '{pw}' NOSUPERUSER NOBYPASSRLS")
+        # The Azure admin is no superuser: it may set the attributes when it creates the role,
+        # but naming them again in ALTER ROLE fails, so a rerun only refreshes the password.
+        if exists:
+            await c.execute(f"ALTER ROLE handball_app LOGIN PASSWORD '{pw}'")
+        else:
+            await c.execute(f"CREATE ROLE handball_app LOGIN PASSWORD '{pw}' NOSUPERUSER NOBYPASSRLS")
         await c.execute("GRANT CONNECT ON DATABASE handball TO handball_app")
         await c.execute("GRANT USAGE ON SCHEMA public TO handball_app")
         await c.close()
