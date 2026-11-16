@@ -3,6 +3,8 @@
 #
 #   - Actions → Deploy → Run workflow: «plan» shows what would change, «deploy» rolls out this commit.
 #   - A push to the working branch whose commit message contains [deploy] or [deploy-plan] does the same.
+#   - A paused environment (README, «Pause») stays paused: only «resume» ([resume] in the commit
+#     message) starts the database and scales the apps up again; «pause» ([pause]) does the reverse.
 #
 # Order of a deploy: images are built in the registry, the migration job gets the new image and runs,
 # then the apps get the new image, the custom domain is bound, and the health checks must pass.
@@ -16,6 +18,11 @@ on:
         type: choice
         options: [plan, deploy]
         default: plan
+      state:
+        description: keep the environment as it is, resume a paused one, or pause it
+        type: choice
+        options: [keep, resume, pause]
+        default: keep
   push:
     branches: [claude/compassionate-pascal-n3gl03]
 
@@ -58,9 +65,14 @@ jobs:
           if [ "${{ github.event_name }}" = workflow_dispatch ]; then mode="${{ inputs.mode }}";
           elif ${{ contains(github.event.head_commit.message, '[deploy-plan]') }}; then mode=plan;
           else mode=deploy; fi
+          if [ "${{ github.event_name }}" = workflow_dispatch ]; then state="${{ inputs.state }}";
+          elif ${{ contains(github.event.head_commit.message, '[resume]') }}; then state=resume;
+          elif ${{ contains(github.event.head_commit.message, '[pause]') }}; then state=pause;
+          else state=keep; fi
           echo "mode=$mode" >>"$GITHUB_OUTPUT"
+          echo "state=$state" >>"$GITHUB_OUTPUT"
           echo "tag=$(git rev-parse --short=7 HEAD)" >>"$GITHUB_OUTPUT"
-          echo "Mode: $mode, commit $(git rev-parse --short=7 HEAD)"
+          echo "Mode: $mode, environment: $state, commit $(git rev-parse --short=7 HEAD)"
 
       - uses: azure/login@v2
         with:
@@ -87,6 +99,30 @@ jobs:
           echo "rg=$(terraform output -raw resource_group)" >>"$GITHUB_ENV"
           echo "registry=$(terraform output -raw registry_name)" >>"$GITHUB_ENV"
 
+      - name: Paused or running
+        id: state
+        run: |
+          pg=$(terraform output -raw postgres_server)
+          db=$(az postgres flexible-server show -g "$rg" -n "$pg" --query state -o tsv)
+          paused=$(sed -n 's/^paused *= *\(true\|false\).*/\1/p' staging.tfvars)
+          want="${{ steps.mode.outputs.state }}"
+          case "$want" in resume) paused=false ;; pause) paused=true ;; esac
+          echo "database $pg: $db; paused after this run: $paused"
+          if [ "$want" = resume ] && [ "$db" != Ready ] && [ "${{ steps.mode.outputs.mode }}" = deploy ]; then
+            az postgres flexible-server start -g "$rg" -n "$pg" -o none
+            db=$(az postgres flexible-server show -g "$rg" -n "$pg" --query state -o tsv)
+            echo "database started: $db"
+          fi
+          if [ "$db" != Ready ] && [ "${{ steps.mode.outputs.mode }}" = deploy ]; then
+            echo "::error::The environment is paused (database $db). Deploy with state «resume» ([resume] in the commit message) to start it."
+            exit 1
+          fi
+          # a stopped server cannot be read: plan without refreshing then (README, «Pause»)
+          refresh=$([ "$db" = Ready ] && echo true || echo false)
+          echo "PAUSED=$paused" >>"$GITHUB_ENV"
+          echo "REFRESH=$refresh" >>"$GITHUB_ENV"
+          echo "PG=$pg" >>"$GITHUB_ENV"
+
       - name: DNS records for the app domain
         id: dns
         run: |
@@ -107,7 +143,8 @@ jobs:
           echo "BIND=${{ steps.dns.outputs.ready }}" >>"$GITHUB_ENV"
           terraform plan -input=false -no-color -var-file=staging.tfvars \
             -var "image_tag=$tag" -var "app_domain=$APP_DOMAIN" \
-            -var "bind_custom_domain=${{ steps.dns.outputs.ready }}" -out=tfplan | tee plan.txt
+            -var "bind_custom_domain=${{ steps.dns.outputs.ready }}" -var "paused=$PAUSED" \
+            -refresh=$REFRESH -out=tfplan | tee plan.txt
           {
             echo '### Terraform plan (staging)'
             echo '```'
@@ -135,7 +172,7 @@ jobs:
         run: |
           terraform apply -input=false -auto-approve -no-color -var-file=staging.tfvars \
             -var "image_tag=$TAG" -var "app_domain=$APP_DOMAIN" -var "bind_custom_domain=$BIND" \
-            -target=azurerm_container_app_job.migrate
+            -var "paused=$PAUSED" -target=azurerm_container_app_job.migrate
           job=$(terraform output -raw migrate_job)
           run=$(az containerapp job start -n "$job" -g "$rg" --query name -o tsv)
           echo "migration run $run"
@@ -151,7 +188,8 @@ jobs:
         if: steps.mode.outputs.mode == 'deploy'
         run: |
           terraform apply -input=false -auto-approve -no-color -var-file=staging.tfvars \
-            -var "image_tag=$TAG" -var "app_domain=$APP_DOMAIN" -var "bind_custom_domain=$BIND"
+            -var "image_tag=$TAG" -var "app_domain=$APP_DOMAIN" -var "bind_custom_domain=$BIND" \
+            -var "paused=$PAUSED"
 
       - name: Managed certificate for the app domain
         if: steps.mode.outputs.mode == 'deploy' && env.BIND == 'true'
@@ -167,12 +205,19 @@ jobs:
         run: |
           sed -i -e "s/^image_tag *=.*/image_tag             = \"$TAG\"/" \
                  -e "s/^app_domain *=.*/app_domain            = \"$APP_DOMAIN\"/" \
-                 -e "s/^bind_custom_domain *=.*/bind_custom_domain    = $BIND/" staging.tfvars
+                 -e "s/^bind_custom_domain *=.*/bind_custom_domain    = $BIND/" \
+                 -e "s/^paused *=.*/paused            = $PAUSED/" staging.tfvars
           az storage blob upload --account-name "$TFSTATE_ACCOUNT" -c tfstate -n staging.tfvars \
             -f staging.tfvars --auth-mode login --overwrite -o none
 
+      - name: Stop the database (pause)
+        if: steps.mode.outputs.mode == 'deploy' && env.PAUSED == 'true'
+        run: |
+          az postgres flexible-server stop -g "$rg" -n "$PG" -o none
+          echo "Paused: apps at 0, database stopped (Azure starts it again by itself after 7 days)" >>"$GITHUB_STEP_SUMMARY"
+
       - name: Health checks
-        if: steps.mode.outputs.mode == 'deploy'
+        if: steps.mode.outputs.mode == 'deploy' && env.PAUSED != 'true'
         run: |
           host=$([ "$BIND" = true ] && echo "$APP_DOMAIN" || terraform output -raw web_default_fqdn)
           for path in /api/healthz /v1/public/config; do
