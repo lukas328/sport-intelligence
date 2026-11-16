@@ -10,7 +10,10 @@ around, exactly like the owner's.
     python ml/gold/llm_overview.py sheets CLIPS_JSON CLIPS_DIR CLIP OUT_DIR [--every 0.2]
     python ml/gold/llm_overview.py apply OUT_DIR CLIP ANSWERS_JSON LABELS_DIR
 Answer per keyframe: candidate number, "x,y" in full-picture pixels (read off the grid), "h" suffix
-when held, "-" when no game ball is in the picture, "?" when unsure.
+when held, "p" suffix when partly hidden, "-" when no game ball is in the picture ("-out": outside
+the picture, "-occ": inside but fully hidden), "?" when unsure. Optional keys "release" and "end"
+(row numbers) mark a shot: the row of the release and the row where the ball reaches the goal, the
+goalkeeper or the boundary.
 """
 
 import argparse
@@ -77,16 +80,18 @@ def apply(a: argparse.Namespace) -> None:
         t = str(ans.get(str(r["row"]), "?")).strip()
         if t in ("?", ""):
             continue
-        if t == "-":
-            pts[r["frame"]] = {"s": "out"}
+        if t.startswith("-"):
+            pts[r["frame"]] = {"s": "occ" if t == "-occ" else "out"}
             continue
+        vis = "partial" if t.endswith("p") else None
+        t = t.rstrip("p")
         st = "held" if t.endswith("h") else "free"
         t = t.rstrip("h")
         if "," in t:
             x, y = (float(v) / r["scale"] for v in t.split(","))
         else:
             x, y = r["cands"][int(t) - 1]
-        pts[r["frame"]] = {"x": round(x, 1), "y": round(y, 1), "s": st}
+        pts[r["frame"]] = {"x": round(x, 1), "y": round(y, 1), "s": st, **({"vis": vis} if vis else {})}
     # a rough point on every frame between two neighbouring keyframes with a ball (linear)
     keys = sorted(f for f, v in pts.items() if "x" in v)
     step = meta[1]["frame"] - meta[0]["frame"] if len(meta) > 1 else 1
@@ -103,7 +108,11 @@ def apply(a: argparse.Namespace) -> None:
                 "s": p0["s"],
             }
     a.labels.mkdir(parents=True, exist_ok=True)
-    doc = {"labels": labels, "shots": [], "done": False, "pdone": False, "src": "llm-overview"}
+    shots = []
+    if "release" in ans and "end" in ans:
+        fr = {str(r["row"]): r["frame"] for r in meta}
+        shots.append({"release": fr.get(str(ans["release"])), "end": fr.get(str(ans["end"])), "src": "llm-overview"})
+    doc = {"labels": labels, "shots": shots, "done": False, "pdone": False, "src": "llm-overview"}
     (a.labels / f"{a.clip}.json").write_text(json.dumps(doc))
     print(a.clip, len(pts), "overview answers,", len(labels), "rough points")
 
