@@ -29,13 +29,13 @@ concurrency:
 
 env:
   # identifiers from infra/azure/setup-github-deploy.sh (none of them is a secret)
-  ARM_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID || 'SET-ME' }}
-  ARM_TENANT_ID: ${{ vars.AZURE_TENANT_ID || 'SET-ME' }}
-  ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID || 'SET-ME' }}
+  ARM_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID || '0a334e89-9561-447e-98be-9d431fdb3d85' }}
+  ARM_TENANT_ID: ${{ vars.AZURE_TENANT_ID || '23ee75d0-37f8-49fc-8971-abf225b907a3' }}
+  ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID || 'aac801cd-121f-4174-b5b5-29801d81d0a7' }}
   ARM_USE_OIDC: "true"
   TFSTATE_RG: rg-hb-tfstate
-  TFSTATE_ACCOUNT: ${{ vars.TFSTATE_ACCOUNT || 'SET-ME' }}
-  TFSTATE_KEY: ${{ vars.TFSTATE_KEY || 'SET-ME' }}
+  TFSTATE_ACCOUNT: ${{ vars.TFSTATE_ACCOUNT || 'sthbtfstate72432' }}
+  TFSTATE_KEY: ${{ vars.TFSTATE_KEY || 'staging.tfstate' }}
   APP_DOMAIN: app.handball-intelligence.com
   TF_IN_AUTOMATION: "true"
 
