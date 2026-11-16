@@ -119,6 +119,26 @@ channels from the single-frame weights, neighbours zero). Results are copied fro
 | YOLOX-S "sports ball" (product) | in product before this research | YOLOX-S COCO (Apache-2.0), class 32 | COCO | - | - | `packages/vision/handball_vision/detection.py` | not measured on gold v1 | the product's ball detector today (see section 5) |
 | ball holder classifier | 2026-11-04 (PR #3 `2c4e95f`) | per-player crop classifier | unverified | holder crops (`holder_crops.py`) | not recorded | `train_holder.py` | not recorded | side track, not pursued in the sources since |
 
+**hr2 and hrp2 on gold v1** (2026-11-16, CPU gold kernels `handball-gold-hr2-cpu`, `-hrp2-cpu`; the
+CPU kernel of hrp1 reproduced the GPU run's top peak on all 11 752 frames, so the CPU numbers compare
+directly). Current tracker (repeated frames, fast gaps, rescoring; net only, the shippable path),
+95 % clip bootstrap, paired against hr1 + hrp1:
+
+| Candidates | all | fast | paired all vs hr1 + hrp1 |
+|---|---|---|---|
+| hr1 / hr2 | 70.9 % / 70.1 % | 79.3 % / 79.3 % | |
+| hrp1 / hrp2 | 76.1 % / 73.1 % | 78.3 % / 75.1 % | |
+| **hr1 + hrp1** | **80.0 % [74.4, 84.9]** | **83.3 % [75.3, 90.1]** | |
+| hr2 + hrp2 | 78.8 % [72.7, 84.1] | 83.7 % [74.9, 90.8] | +52 / -71 (p 0.10) |
+| hr2 + hrp1 | 80.3 % [74.3, 85.5] | 85.1 % [76.4, 91.9] | +39 / -35 (p 0.73) |
+| hr1 + hrp2 | 78.3 % [72.6, 83.5] | 82.0 % [73.5, 89.2] | +43 / -70 (p 0.014) |
+
+With OWLv2 the same order (hr1 + hrp1 84.0 %, hr2 + hrp2 82.4 %, p 0.007). So continuing the training
+(half learning rate, same data) did not help: the gains on the human validation set (0.63 -> 0.64,
+0.71 -> 0.73) did not carry over to gold, hrp2 is even worse. hr1 + hrp1 stays the candidate source
+(also in the product integration). Possible reasons (unverified): the rescoring is calibrated on the
+score distribution it was learned for; overfitting to the training halls.
+
 ## 5. Tracker lineage
 
 All gold numbers: gold v1, 12 px, one point per frame.
