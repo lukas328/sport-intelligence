@@ -438,6 +438,7 @@ ENDPOINTS += [
         lambda a, w: a.post(w.t("/sessions"), json={"on_date": "2026-12-01"}),
     ),
     ("GET focus plans", READERS, lambda a, w: a.get(w.t("/focus"))),
+    ("GET training tips", READERS, lambda a, w: a.get(w.t("/training-tips"))),
     ("POST calendar link", TRAINING, lambda a, w: a.post(w.t("/calendar"))),
     (
         "POST matrix template",

@@ -25,6 +25,11 @@ test("play library: template, edit on the board, animate, save, find", async ({ 
   const before = await d6.getAttribute("transform");
   await page.keyboard.press("Shift+ArrowLeft");
   await expect(d6).not.toHaveAttribute("transform", before!);
+  // every step can be undone and redone
+  await page.getByRole("button", { name: "Rückgängig" }).click();
+  await expect(d6).toHaveAttribute("transform", before!);
+  await page.getByRole("button", { name: "Wiederholen" }).click();
+  await expect(d6).not.toHaveAttribute("transform", before!);
 
   // a run arrow with the pointer, then a second phase that follows it
   await page.getByRole("button", { name: "Laufweg" }).click();
@@ -45,6 +50,9 @@ test("play library: template, edit on the board, animate, save, find", async ({ 
   await page.getByRole("button", { name: "Spielzug speichern" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Abwehr 5:1" })).toBeVisible();
   await expect(page.getByRole("button", { name: "2", exact: true })).toBeVisible();
+  // a saved play opens to look at; staff switch to editing
+  await expect(page.getByRole("button", { name: "Bearbeiten" })).toBeVisible();
+  await expect(page.getByRole("toolbar", { name: "Werkzeuge" })).toHaveCount(0);
 
   // read-only public link, opened without a session
   await page.getByRole("button", { name: "Teilen" }).click();

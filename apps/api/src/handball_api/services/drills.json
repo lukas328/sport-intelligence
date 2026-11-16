@@ -10,18 +10,128 @@
     "level": "basic",
     "name": {
       "de-CH": "Flügelwürfe unter Druck",
-      "en": "Wing shots under pressure",
-      "fr": "Tirs à l'aile sous pression"
+      "fr": "Tirs à l'aile sous pression",
+      "en": "Wing shots under pressure"
     },
     "setup": {
       "de-CH": "Zwei Kolonnen auf den Flügeln, Zuspiel aus dem Rückraum, ein passiver Verteidiger engt den Winkel ein.",
-      "en": "Two lines on the wings, pass from the back court, one passive defender narrows the angle.",
-      "fr": "Deux colonnes aux ailes, passe depuis la base arrière, un défenseur passif réduit l'angle."
+      "fr": "Deux colonnes aux ailes, passe depuis la base arrière, un défenseur passif réduit l'angle.",
+      "en": "Two lines on the wings, pass from the back court, one passive defender narrows the angle."
+    },
+    "procedure": {
+      "de-CH": "Der Flügel startet, wenn RM den Ball hat, fängt im Lauf und springt aus dem Winkel ab. Danach wechselt er auf die andere Seite in die Kolonne.",
+      "fr": "L'ailier démarre quand le DC a le ballon, reçoit en course et prend son appel dans l'angle. Ensuite il rejoint la colonne de l'autre côté.",
+      "en": "The wing starts when the centre back has the ball, catches on the run and takes off from the angle. Then he joins the line on the other side."
     },
     "coaching": {
       "de-CH": "Absprung möglichst nah an der Seitenlinie, Wurfbild variieren (kurze und lange Ecke).",
-      "en": "Take off close to the side line, vary the target (near and far corner).",
-      "fr": "Appel près de la ligne de touche, varier la cible (premier et second poteau)."
+      "fr": "Appel près de la ligne de touche, varier la cible (premier et second poteau).",
+      "en": "Take off close to the side line, vary the target (near and far corner)."
+    },
+    "variants": {
+      "de-CH": "Verteidiger wird aktiv; Abschluss nur mit Dreher oder Heber; nach jedem Wurf zählt der Torhüter mit.",
+      "fr": "Le défenseur devient actif ; finir seulement en roucoulette ou lob ; le gardien compte les arrêts.",
+      "en": "The defender becomes active; finish only with a spin or a lob; the goalkeeper counts the saves."
+    },
+    "sketch": {
+      "court": "half",
+      "tokens": [
+        {
+          "id": "tw",
+          "side": "own",
+          "label": "TW",
+          "x": 39.3,
+          "y": 10
+        },
+        {
+          "id": "a1",
+          "side": "own",
+          "label": "LA",
+          "x": 31.5,
+          "y": 18.8
+        },
+        {
+          "id": "a2",
+          "side": "own",
+          "label": "LA",
+          "x": 29.6,
+          "y": 18.8
+        },
+        {
+          "id": "a3",
+          "side": "own",
+          "label": "RA",
+          "x": 31.5,
+          "y": 1.2
+        },
+        {
+          "id": "a4",
+          "side": "own",
+          "label": "RA",
+          "x": 29.6,
+          "y": 1.2
+        },
+        {
+          "id": "a5",
+          "side": "own",
+          "label": "RM",
+          "x": 29,
+          "y": 10
+        },
+        {
+          "id": "d1",
+          "side": "opp",
+          "label": "1",
+          "x": 36.98,
+          "y": 17.81
+        }
+      ],
+      "arrows": [
+        {
+          "kind": "run",
+          "points": [
+            [
+              31.5,
+              18.8
+            ],
+            [
+              35.2,
+              17.2
+            ]
+          ]
+        },
+        {
+          "kind": "pass",
+          "points": [
+            [
+              29,
+              10
+            ],
+            [
+              35.2,
+              17.2
+            ]
+          ]
+        },
+        {
+          "kind": "pass",
+          "points": [
+            [
+              35.2,
+              17.2
+            ],
+            [
+              39.6,
+              11.1
+            ]
+          ]
+        }
+      ],
+      "ball": {
+        "x": 29,
+        "y": 10
+      },
+      "cones": []
     }
   },
   {
@@ -35,18 +145,114 @@
     "level": "basic",
     "name": {
       "de-CH": "Rückraumwurf aus dem Lauf",
-      "en": "Back court shot on the run",
-      "fr": "Tir de la base arrière en course"
+      "fr": "Tir de la base arrière en course",
+      "en": "Back court shot on the run"
     },
     "setup": {
       "de-CH": "Drei Rückraumpositionen, Stossbewegung auf die Lücke, Sprungwurf über einen Blockspieler.",
-      "en": "Three back court positions, attack the gap, jump shot over a blocking defender.",
-      "fr": "Trois postes arrière, attaque de l'intervalle, tir en suspension au-dessus d'un contreur."
+      "fr": "Trois postes arrière, attaque de l'intervalle, tir en suspension au-dessus d'un contreur.",
+      "en": "Three back court positions, attack the gap, jump shot over a blocking defender."
+    },
+    "procedure": {
+      "de-CH": "RL spielt RM im Lauf an, RM stösst in drei Schritten auf den Block zu und wirft aus 9 m. Danach rotieren die Positionen.",
+      "fr": "L'arrière gauche passe au DC lancé, qui attaque le contreur en trois appuis et tire à 9 m. Puis les postes tournent.",
+      "en": "LB passes to the running centre back, who drives at the block in three steps and shoots from 9 m. Then the positions rotate."
     },
     "coaching": {
       "de-CH": "Wurfarm früh oben, Wurf am höchsten Punkt, nicht immer in die gleiche Ecke.",
-      "en": "Throwing arm up early, release at the highest point, do not always pick the same corner.",
-      "fr": "Bras armé tôt, lâcher au point le plus haut, varier les angles."
+      "fr": "Bras armé tôt, lâcher au point le plus haut, varier les angles.",
+      "en": "Throwing arm up early, release at the highest point, do not always pick the same corner."
+    },
+    "variants": {
+      "de-CH": "Wurf am Block vorbei (Hüftwurf); der Blockspieler darf einen Schritt heraustreten; Serie von fünf Würfen auf Zeit.",
+      "fr": "Tir à côté du contreur (à la hanche) ; le contreur peut avancer d'un pas ; série de cinq tirs chronométrée.",
+      "en": "Shot past the block (hip shot); the blocker may step out once; a timed series of five shots."
+    },
+    "sketch": {
+      "court": "half",
+      "tokens": [
+        {
+          "id": "tw",
+          "side": "own",
+          "label": "TW",
+          "x": 39.3,
+          "y": 10
+        },
+        {
+          "id": "a1",
+          "side": "own",
+          "label": "RL",
+          "x": 30.4,
+          "y": 16.45
+        },
+        {
+          "id": "a2",
+          "side": "own",
+          "label": "RM",
+          "x": 29,
+          "y": 10
+        },
+        {
+          "id": "a3",
+          "side": "own",
+          "label": "RR",
+          "x": 30.4,
+          "y": 3.55
+        },
+        {
+          "id": "d1",
+          "side": "opp",
+          "label": "1",
+          "x": 33,
+          "y": 10
+        }
+      ],
+      "arrows": [
+        {
+          "kind": "pass",
+          "points": [
+            [
+              30.4,
+              16.45
+            ],
+            [
+              31.2,
+              10.6
+            ]
+          ]
+        },
+        {
+          "kind": "run",
+          "points": [
+            [
+              29,
+              10
+            ],
+            [
+              31.2,
+              10.6
+            ]
+          ]
+        },
+        {
+          "kind": "pass",
+          "points": [
+            [
+              31.2,
+              10.6
+            ],
+            [
+              39.6,
+              11.1
+            ]
+          ]
+        }
+      ],
+      "ball": {
+        "x": 30.4,
+        "y": 16.45
+      },
+      "cones": []
     }
   },
   {
@@ -60,18 +266,1436 @@
     "level": "basic",
     "name": {
       "de-CH": "Kreisanspiel und Abschluss",
-      "en": "Pivot pass and finish",
-      "fr": "Passe au pivot et finition"
+      "fr": "Passe au pivot et finition",
+      "en": "Pivot pass and finish"
     },
     "setup": {
       "de-CH": "Kreisläufer sperrt gegen einen Verteidiger, Rückraum spielt in den Lauf, Abschluss mit Fallwurf.",
-      "en": "Pivot screens a defender, back court passes into the run, finish with a falling shot.",
-      "fr": "Le pivot fait écran, la base arrière passe dans la course, finition en tir en chute."
+      "fr": "Le pivot fait écran, la base arrière passe dans la course, finition en tir en chute.",
+      "en": "Pivot screens a defender, back court passes into the run, finish with a falling shot."
+    },
+    "procedure": {
+      "de-CH": "Der Kreisläufer löst sich vom Verteidiger zur Ballseite, RM spielt den Bodenpass oder hoch in die Hand, Abschluss aus der Drehung.",
+      "fr": "Le pivot se démarque côté ballon, le DC joue à terre ou en l'air dans la main, finition en pivotant.",
+      "en": "The pivot gets free towards the ball, the centre back plays a bounce pass or high into the hand, finish out of the turn."
     },
     "coaching": {
       "de-CH": "Sicher fangen vor dem Drehen, Torhüter mit Täuschung bewegen.",
-      "en": "Secure the catch before turning, move the goalkeeper with a feint.",
-      "fr": "Sécuriser la réception avant de pivoter, faire bouger le gardien par une feinte."
+      "fr": "Sécuriser la réception avant de pivoter, faire bouger le gardien par une feinte.",
+      "en": "Secure the catch before turning, move the goalkeeper with a feint."
+    },
+    "variants": {
+      "de-CH": "Verteidiger aktiv mit Körperkontakt; Anspiel von beiden Halbpositionen; Abschluss nach Wurftäuschung.",
+      "fr": "Défenseur actif avec contact ; passes des deux postes arrière ; finition après feinte de tir.",
+      "en": "Active defender with contact; passes from both half positions; finish after a shot feint."
+    },
+    "sketch": {
+      "court": "half",
+      "tokens": [
+        {
+          "id": "tw",
+          "side": "own",
+          "label": "TW",
+          "x": 39.3,
+          "y": 10
+        },
+        {
+          "id": "a1",
+          "side": "own",
+          "label": "KM",
+          "x": 33.6,
+          "y": 11.16
+        },
+        {
+          "id": "a2",
+          "side": "own",
+          "label": "RM",
+          "x": 28.6,
+          "y": 10
+        },
+        {
+          "id": "d1",
+          "side": "opp",
+          "label": "1",
+          "x": 32.81,
+          "y": 13.26
+        }
+      ],
+      "arrows": [
+        {
+          "kind": "run",
+          "points": [
+            [
+              33.6,
+              11.16
+            ],
+            [
+              33.6,
+              8.61
+            ]
+          ]
+        },
+        {
+          "kind": "pass",
+          "points": [
+            [
+              28.6,
+              10
+            ],
+            [
+              33.6,
+              8.61
+            ]
+          ]
+        },
+        {
+          "kind": "pass",
+          "points": [
+            [
+              33.6,
+              8.61
+            ],
+            [
+              39.6,
+              8.9
+            ]
+          ]
+        }
+      ],
+      "ball": {
+        "x": 28.6,
+        "y": 10
+      },
+      "cones": []
+    }
+  },
+  {
+    "id": "finishing_feint_keeper",
+    "focus": [
+      "finishing"
+    ],
+    "minutes": 12,
+    "players": "4-10",
+    "level": "basic",
+    "name": {
+      "de-CH": "Wurftäuschung gegen den Torhüter",
+      "fr": "Feinte de tir contre le gardien",
+      "en": "Shot feint against the goalkeeper"
+    },
+    "setup": {
+      "de-CH": "Werfer in einer Kolonne auf 13 m, ein Zuspieler auf der Gegenseite, Torhüter im Tor.",
+      "fr": "Tireurs en colonne à 13 m, un passeur de l'autre côté, gardien dans le but.",
+      "en": "Shooters in a line at 13 m, one passer on the other side, goalkeeper in goal."
+    },
+    "procedure": {
+      "de-CH": "Der Werfer läuft an, bekommt den Ball auf 9 m, täuscht einen Wurf an und schliesst aus 7 bis 8 m in die andere Ecke ab.",
+      "fr": "Le tireur s'élance, reçoit à 9 m, feinte un tir et finit à 7 ou 8 m dans l'autre coin.",
+      "en": "The shooter runs in, gets the ball at 9 m, feints a shot and finishes from 7 to 8 m into the other corner."
+    },
+    "coaching": {
+      "de-CH": "Die Täuschung muss echt aussehen (Arm und Blick), dann ruhig bleiben und den Torhüter laufen lassen.",
+      "fr": "La feinte doit être crédible (bras et regard), puis rester calme et laisser le gardien bouger.",
+      "en": "The feint must look real (arm and eyes), then stay calm and let the goalkeeper move."
+    },
+    "variants": {
+      "de-CH": "Torhüter ruft vor dem Wurf eine Ecke; nur Bodenwürfe; Werfer entscheidet selbst zwischen Wurf und Täuschung.",
+      "fr": "Le gardien annonce un coin ; seulement des tirs au sol ; le tireur choisit entre tir et feinte.",
+      "en": "The goalkeeper calls a corner; ground shots only; the shooter chooses between shot and feint."
+    },
+    "sketch": {
+      "court": "half",
+      "tokens": [
+        {
+          "id": "tw",
+          "side": "own",
+          "label": "TW",
+          "x": 39.3,
+          "y": 10
+        },
+        {
+          "id": "a1",
+          "side": "own",
+          "label": "1",
+          "x": 27.32,
+          "y": 14.36
+        },
+        {
+          "id": "a2",
+          "side": "own",
+          "label": "2",
+          "x": 25.72,
+          "y": 15.4
+        },
+        {
+          "id": "a3",
+          "side": "own",
+          "label": "Z",
+          "x": 31.01,
+          "y": 4.13
+        }
+      ],
+      "arrows": [
+        {
+          "kind": "run",
+          "points": [
+            [
+              27.32,
+              14.36
+            ],
+            [
+              30.45,
+              12.49
+            ],
+            [
+              32.4,
+              11.08
+            ]
+          ]
+        },
+        {
+          "kind": "pass",
+          "points": [
+            [
+              31.01,
+              4.13
+            ],
+            [
+              30.45,
+              12.49
+            ]
+          ]
+        },
+        {
+          "kind": "pass",
+          "points": [
+            [
+              32.4,
+              11.08
+            ],
+            [
+              39.6,
+              8.9
+            ]
+          ]
+        }
+      ],
+      "ball": {
+        "x": 31.01,
+        "y": 4.13
+      },
+      "cones": []
+    }
+  },
+  {
+    "id": "finishing_tired",
+    "focus": [
+      "finishing",
+      "back_court"
+    ],
+    "minutes": 12,
+    "players": "6-12",
+    "level": "advanced",
+    "name": {
+      "de-CH": "Abschluss unter Belastung",
+      "fr": "Finition sous fatigue",
+      "en": "Finishing under fatigue"
+    },
+    "setup": {
+      "de-CH": "Zwei Hütchen an der Mittellinie, ein Zuspieler auf der Halbposition, Torhüter im Tor.",
+      "fr": "Deux plots à la ligne médiane, un passeur au poste arrière, gardien dans le but.",
+      "en": "Two cones at the centre line, a passer at the half position, goalkeeper in goal."
+    },
+    "procedure": {
+      "de-CH": "Sprint um das Hütchen, Pass im Lauf auf 10 m, sofort Wurf. Fünf Durchgänge ohne Pause, dann wechseln.",
+      "fr": "Sprint autour du plot, passe en course à 10 m, tir immédiat. Cinq passages sans pause, puis changer.",
+      "en": "Sprint round the cone, pass on the run at 10 m, shoot at once. Five runs without a break, then swap."
+    },
+    "coaching": {
+      "de-CH": "Auch müde die Wurftechnik halten: Schritte zählen, Arm hoch, Ziel vor dem Fangen wählen.",
+      "fr": "Garder la technique même fatigué : compter les appuis, bras haut, choisir la cible avant la réception.",
+      "en": "Keep the technique when tired: count the steps, arm up, pick the target before the catch."
+    },
+    "variants": {
+      "de-CH": "Mit Gegenspieler, der nach dem Hütchen nachläuft; Wurf nur in die Ecken unten; Wettkampf zwei Gruppen.",
+      "fr": "Avec un défenseur qui poursuit après le plot ; tirs seulement en bas ; concours à deux groupes.",
+      "en": "With a defender chasing after the cone; shots only low; competition between two groups."
+    },
+    "sketch": {
+      "court": "half",
+      "tokens": [
+        {
+          "id": "tw",
+          "side": "own",
+          "label": "TW",
+          "x": 39.3,
+          "y": 10
+        },
+        {
+          "id": "a1",
+          "side": "own",
+          "label": "1",
+          "x": 22.5,
+          "y": 13.5
+        },
+        {
+          "id": "a2",
+          "side": "own",
+          "label": "2",
+          "x": 21.2,
+          "y": 15.4
+        },
+        {
+          "id": "a3",
+          "side": "own",
+          "label": "Z",
+          "x": 30.58,
+          "y": 3.87
+        }
+      ],
+      "arrows": [
+        {
+          "kind": "run",
+          "points": [
+            [
+              22.5,
+              13.5
+            ],
+            [
+              24.6,
+              15.4
+            ],
+            [
+              26.6,
+              13.4
+            ],
+            [
+              30.58,
+              14.19
+            ]
+          ]
+        },
+        {
+          "kind": "pass",
+          "points": [
+            [
+              30.58,
+              3.87
+            ],
+            [
+              30.58,
+              14.19
+            ]
+          ]
+        },
+        {
+          "kind": "pass",
+          "points": [
+            [
+              30.58,
+              14.19
+            ],
+            [
+              39.6,
+              11.1
+            ]
+          ]
+        }
+      ],
+      "ball": {
+        "x": 30.58,
+        "y": 3.87
+      },
+      "cones": [
+        [
+          24.6,
+          15.9
+        ],
+        [
+          24.6,
+          4.1
+        ]
+      ]
+    }
+  },
+  {
+    "id": "wings_run_in",
+    "focus": [
+      "wings",
+      "pivot"
+    ],
+    "minutes": 15,
+    "players": "6-12",
+    "level": "advanced",
+    "name": {
+      "de-CH": "Einlaufen Aussen zum zweiten Kreis",
+      "fr": "Entrée de l'ailier en second pivot",
+      "en": "Wing runs in as a second pivot"
+    },
+    "setup": {
+      "de-CH": "Linksaussen, Rückraum links und Kreisläufer gegen drei Verteidiger an der 6-m-Linie, Torhüter.",
+      "fr": "Ailier gauche, arrière gauche et pivot contre trois défenseurs sur les 6 m, gardien.",
+      "en": "Left wing, left back and pivot against three defenders at the 6 m line, goalkeeper."
+    },
+    "procedure": {
+      "de-CH": "Mit dem Pass zu RL läuft LA entlang der 6-m-Linie zwischen die Verteidiger 1 und 2 ein. RL spielt ihn an oder wirft, wenn die Abwehr zurückweicht.",
+      "fr": "Sur la passe à l'arrière gauche, l'ailier entre le long des 6 m entre les défenseurs 1 et 2. L'arrière le sert ou tire si la défense recule.",
+      "en": "On the pass to LB, the left wing runs in along the 6 m line between defenders 1 and 2. LB passes to him or shoots if the defence drops back."
+    },
+    "coaching": {
+      "de-CH": "Einlaufen im Rücken des Verteidigers, Hände früh zeigen, nicht in den Torraum treten.",
+      "fr": "Entrer dans le dos du défenseur, montrer les mains tôt, ne pas marcher dans la zone.",
+      "en": "Run in behind the defender, show the hands early, do not step into the goal area."
+    },
+    "variants": {
+      "de-CH": "Auch von rechts; mit Kreuzen RL und RM davor; Abwehr darf übergeben und übernehmen.",
+      "fr": "Aussi à droite ; avec croisé arrière gauche et DC avant ; la défense peut se transmettre l'ailier.",
+      "en": "From the right too; with a cross of LB and centre back first; the defence may switch."
+    },
+    "sketch": {
+      "court": "half",
+      "tokens": [
+        {
+          "id": "tw",
+          "side": "own",
+          "label": "TW",
+          "x": 39.3,
+          "y": 10
+        },
+        {
+          "id": "a1",
+          "side": "own",
+          "label": "LA",
+          "x": 36.2,
+          "y": 19.2
+        },
+        {
+          "id": "a2",
+          "side": "own",
+          "label": "RL",
+          "x": 30.4,
+          "y": 16.45
+        },
+        {
+          "id": "a3",
+          "side": "own",
+          "label": "KM",
+          "x": 33.7,
+          "y": 8.63
+        },
+        {
+          "id": "d1",
+          "side": "opp",
+          "label": "1",
+          "x": 36.73,
+          "y": 17.46
+        },
+        {
+          "id": "d2",
+          "side": "opp",
+          "label": "2",
+          "x": 34.02,
+          "y": 14.74
+        },
+        {
+          "id": "d3",
+          "side": "opp",
+          "label": "3",
+          "x": 33.2,
+          "y": 10.97
+        }
+      ],
+      "arrows": [
+        {
+          "kind": "run",
+          "points": [
+            [
+              36.2,
+              19.2
+            ],
+            [
+              35.1,
+              17.6
+            ],
+            [
+              35.42,
+              15.83
+            ]
+          ]
+        },
+        {
+          "kind": "pass",
+          "points": [
+            [
+              30.4,
+              16.45
+            ],
+            [
+              35.42,
+              15.83
+            ]
+          ]
+        }
+      ],
+      "ball": {
+        "x": 30.4,
+        "y": 16.45
+      },
+      "cones": []
+    }
+  },
+  {
+    "id": "wings_1v1_line",
+    "focus": [
+      "wings"
+    ],
+    "minutes": 12,
+    "players": "4-10",
+    "level": "basic",
+    "name": {
+      "de-CH": "Aussen 1 gegen 1 an der Seitenlinie",
+      "fr": "Ailier 1 contre 1 le long de la touche",
+      "en": "Wing 1 on 1 at the side line"
+    },
+    "setup": {
+      "de-CH": "Auf beiden Flügeln ein Angreifer mit Ball gegen einen Verteidiger vor der 6-m-Linie, Torhüter.",
+      "fr": "Sur chaque aile un attaquant avec ballon contre un défenseur devant les 6 m, gardien.",
+      "en": "On each wing an attacker with the ball against a defender in front of the 6 m line, goalkeeper."
+    },
+    "procedure": {
+      "de-CH": "Der Aussen täuscht nach innen an und geht aussen an der Seitenlinie vorbei, oder umgekehrt. Abschluss aus dem Winkel, dann die andere Seite.",
+      "fr": "L'ailier feinte vers l'intérieur et passe le long de la touche, ou l'inverse. Finition dans l'angle, puis l'autre côté.",
+      "en": "The wing feints inside and goes past along the side line, or the other way round. Finish from the angle, then the other side."
+    },
+    "coaching": {
+      "de-CH": "Tempo erst nach der Täuschung, Körper zwischen Ball und Verteidiger, Absprung weg vom Verteidiger.",
+      "fr": "Accélérer après la feinte, corps entre ballon et défenseur, appel loin du défenseur.",
+      "en": "Speed up only after the feint, body between ball and defender, take off away from the defender."
+    },
+    "variants": {
+      "de-CH": "Verteidiger startet erst auf Zuruf; maximal drei Sekunden; mit Anspiel aus dem Rückraum statt Ball in der Hand.",
+      "fr": "Le défenseur part au signal ; trois secondes maximum ; avec passe de la base arrière.",
+      "en": "The defender starts on a call; three seconds at most; with a pass from the back court instead."
+    },
+    "sketch": {
+      "court": "half",
+      "tokens": [
+        {
+          "id": "tw",
+          "side": "own",
+          "label": "TW",
+          "x": 39.3,
+          "y": 10
+        },
+        {
+          "id": "a1",
+          "side": "own",
+          "label": "LA",
+          "x": 33,
+          "y": 18.8
+        },
+        {
+          "id": "a2",
+          "side": "own",
+          "label": "RA",
+          "x": 33,
+          "y": 1.2
+        },
+        {
+          "id": "d1",
+          "side": "opp",
+          "label": "1",
+          "x": 36.65,
+          "y": 17.64
+        },
+        {
+          "id": "d2",
+          "side": "opp",
+          "label": "2",
+          "x": 36.65,
+          "y": 2.36
+        }
+      ],
+      "arrows": [
+        {
+          "kind": "dribble",
+          "points": [
+            [
+              33,
+              18.8
+            ],
+            [
+              34.4,
+              17.2
+            ],
+            [
+              35.6,
+              19
+            ]
+          ]
+        },
+        {
+          "kind": "pass",
+          "points": [
+            [
+              35.6,
+              19
+            ],
+            [
+              39.6,
+              11.1
+            ]
+          ]
+        },
+        {
+          "kind": "dribble",
+          "points": [
+            [
+              33,
+              1.2
+            ],
+            [
+              34.6,
+              2.4
+            ],
+            [
+              35.6,
+              3.4
+            ]
+          ]
+        }
+      ],
+      "ball": {
+        "x": 33,
+        "y": 18.8
+      },
+      "cones": []
+    }
+  },
+  {
+    "id": "wings_fast_break_finish",
+    "focus": [
+      "wings",
+      "fast_break"
+    ],
+    "minutes": 12,
+    "players": "6-14",
+    "level": "basic",
+    "name": {
+      "de-CH": "Gegenstoss-Abschluss auf dem Flügel",
+      "fr": "Finition de contre-attaque à l'aile",
+      "en": "Fast break finish on the wing"
+    },
+    "setup": {
+      "de-CH": "Flügelspieler an der Mittellinie, ein Zuspieler im Mittelkreis, Torhüter im Tor.",
+      "fr": "Ailiers à la ligne médiane, un passeur au centre, gardien dans le but.",
+      "en": "Wings at the centre line, a passer in the centre circle, goalkeeper in goal."
+    },
+    "procedure": {
+      "de-CH": "Der Flügel sprintet entlang der Seitenlinie, bekommt den langen Ball in den Lauf und schliesst ohne Prellen aus dem Winkel ab.",
+      "fr": "L'ailier sprinte le long de la touche, reçoit la longue passe dans la course et finit dans l'angle sans dribbler.",
+      "en": "The wing sprints along the side line, gets the long ball into the run and finishes from the angle without bouncing."
+    },
+    "coaching": {
+      "de-CH": "Blick über die Schulter zum Ball, Pass vor den Läufer, im Vollsprint fangen.",
+      "fr": "Regard par-dessus l'épaule, passe devant le coureur, réception en plein sprint.",
+      "en": "Look over the shoulder to the ball, pass ahead of the runner, catch at full speed."
+    },
+    "variants": {
+      "de-CH": "Torhüter spielt den Pass; ein Verteidiger läuft hinterher; Abschluss mit Heber.",
+      "fr": "Le gardien fait la passe ; un défenseur poursuit ; finition en lob.",
+      "en": "The goalkeeper plays the pass; a defender chases; finish with a lob."
+    },
+    "sketch": {
+      "court": "half",
+      "tokens": [
+        {
+          "id": "tw",
+          "side": "own",
+          "label": "TW",
+          "x": 39.3,
+          "y": 10
+        },
+        {
+          "id": "a1",
+          "side": "own",
+          "label": "LA",
+          "x": 21.4,
+          "y": 18.6
+        },
+        {
+          "id": "a2",
+          "side": "own",
+          "label": "LA",
+          "x": 21.4,
+          "y": 16.6
+        },
+        {
+          "id": "a3",
+          "side": "own",
+          "label": "Z",
+          "x": 21.4,
+          "y": 10
+        }
+      ],
+      "arrows": [
+        {
+          "kind": "run",
+          "points": [
+            [
+              21.4,
+              18.6
+            ],
+            [
+              30,
+              18.6
+            ],
+            [
+              35.4,
+              16.6
+            ]
+          ]
+        },
+        {
+          "kind": "pass",
+          "points": [
+            [
+              21.4,
+              10
+            ],
+            [
+              31.5,
+              18.2
+            ]
+          ]
+        },
+        {
+          "kind": "pass",
+          "points": [
+            [
+              35.4,
+              16.6
+            ],
+            [
+              39.6,
+              11.1
+            ]
+          ]
+        }
+      ],
+      "ball": {
+        "x": 21.4,
+        "y": 10
+      },
+      "cones": []
+    }
+  },
+  {
+    "id": "back_1v1_breakthrough",
+    "focus": [
+      "back_court"
+    ],
+    "minutes": 15,
+    "players": "4-12",
+    "level": "basic",
+    "name": {
+      "de-CH": "Durchbruch 1 gegen 1 aus dem Rückraum",
+      "fr": "Débordement 1 contre 1 de la base arrière",
+      "en": "Back court 1 on 1 breakthrough"
+    },
+    "setup": {
+      "de-CH": "Ein Rückraumspieler mit Ball gegen einen Verteidiger in einer 4 m breiten Gasse (Hütchen), Torhüter.",
+      "fr": "Un arrière avec ballon contre un défenseur dans un couloir de 4 m (plots), gardien.",
+      "en": "A back court player with the ball against a defender in a 4 m wide lane (cones), goalkeeper."
+    },
+    "procedure": {
+      "de-CH": "Der Angreifer läuft mit Tempo an, täuscht zur einen Seite und bricht auf der anderen durch. Gelingt der Durchbruch, schliesst er ab.",
+      "fr": "L'attaquant arrive lancé, feinte d'un côté et déborde de l'autre. S'il passe, il tire.",
+      "en": "The attacker comes in at speed, feints one way and breaks through on the other. If he gets past, he shoots."
+    },
+    "coaching": {
+      "de-CH": "Tempo vor der Täuschung, Stemmschritt kurz und tief, Ball weg vom Verteidiger führen.",
+      "fr": "Vitesse avant la feinte, appui de démarrage court et bas, ballon loin du défenseur.",
+      "en": "Speed before the feint, short and low plant step, keep the ball away from the defender."
+    },
+    "variants": {
+      "de-CH": "Mit Zuspiel in den Lauf; Verteidiger startet auf 6 m und tritt heraus; Gasse enger machen.",
+      "fr": "Avec passe dans la course ; le défenseur part des 6 m et sort ; couloir plus étroit.",
+      "en": "With a pass into the run; the defender starts at 6 m and steps out; a narrower lane."
+    },
+    "sketch": {
+      "court": "half",
+      "tokens": [
+        {
+          "id": "tw",
+          "side": "own",
+          "label": "TW",
+          "x": 39.3,
+          "y": 10
+        },
+        {
+          "id": "a1",
+          "side": "own",
+          "label": "RM",
+          "x": 28.5,
+          "y": 10
+        },
+        {
+          "id": "d1",
+          "side": "opp",
+          "label": "1",
+          "x": 32,
+          "y": 10
+        }
+      ],
+      "arrows": [
+        {
+          "kind": "dribble",
+          "points": [
+            [
+              28.5,
+              10
+            ],
+            [
+              29.6,
+              8.8
+            ],
+            [
+              31,
+              11.4
+            ]
+          ]
+        },
+        {
+          "kind": "pass",
+          "points": [
+            [
+              31,
+              11.4
+            ],
+            [
+              39.6,
+              11.1
+            ]
+          ]
+        }
+      ],
+      "ball": {
+        "x": 28.5,
+        "y": 10
+      },
+      "cones": [
+        [
+          30.67,
+          13.27
+        ],
+        [
+          30.67,
+          6.73
+        ],
+        [
+          28.16,
+          13.45
+        ],
+        [
+          28.16,
+          6.55
+        ]
+      ]
+    }
+  },
+  {
+    "id": "back_cross_2v2",
+    "focus": [
+      "back_court",
+      "passing"
+    ],
+    "minutes": 15,
+    "players": "4-12",
+    "level": "advanced",
+    "name": {
+      "de-CH": "Kreuzen im Rückraum 2 gegen 2",
+      "fr": "Croisé de la base arrière à 2 contre 2",
+      "en": "Back court cross 2 on 2"
+    },
+    "setup": {
+      "de-CH": "RM und RL gegen zwei Verteidiger vor der 6-m-Linie, Torhüter.",
+      "fr": "DC et arrière gauche contre deux défenseurs devant les 6 m, gardien.",
+      "en": "Centre back and left back against two defenders in front of the 6 m line, goalkeeper."
+    },
+    "procedure": {
+      "de-CH": "RM stösst mit Ball schräg nach links, RL kreuzt hinter ihm durch. RM spielt ab oder wirft selbst, je nachdem, wie die Verteidiger übergeben.",
+      "fr": "Le DC part en biais vers la gauche, l'arrière gauche croise derrière lui. Le DC passe ou tire selon la réaction des défenseurs.",
+      "en": "The centre back drives diagonally left, the left back crosses behind him. The centre back passes or shoots, depending on how the defenders switch."
+    },
+    "coaching": {
+      "de-CH": "Der Ballführer muss den Verteidiger binden (Torgefahr), der Kreuzende startet spät und mit Tempo.",
+      "fr": "Le porteur doit fixer son défenseur (menace de tir), le croiseur part tard et vite.",
+      "en": "The ball carrier must tie his defender (threat to score), the crossing player starts late and fast."
+    },
+    "variants": {
+      "de-CH": "Mit Kreisläufer (3 gegen 3); Kreuzen auf der rechten Seite; nach dem Kreuzen Rückpass (Gegenkreuzen).",
+      "fr": "Avec pivot (3 contre 3) ; croisé à droite ; après le croisé, passe en retour (contre-croisé).",
+      "en": "With a pivot (3 on 3); cross on the right side; after the cross a pass back (counter cross)."
+    },
+    "sketch": {
+      "court": "half",
+      "tokens": [
+        {
+          "id": "tw",
+          "side": "own",
+          "label": "TW",
+          "x": 39.3,
+          "y": 10
+        },
+        {
+          "id": "a1",
+          "side": "own",
+          "label": "RM",
+          "x": 29,
+          "y": 10
+        },
+        {
+          "id": "a2",
+          "side": "own",
+          "label": "RL",
+          "x": 30.4,
+          "y": 16.45
+        },
+        {
+          "id": "d1",
+          "side": "opp",
+          "label": "1",
+          "x": 32.4,
+          "y": 11.34
+        },
+        {
+          "id": "d2",
+          "side": "opp",
+          "label": "2",
+          "x": 33.5,
+          "y": 15.44
+        }
+      ],
+      "arrows": [
+        {
+          "kind": "dribble",
+          "points": [
+            [
+              29,
+              10
+            ],
+            [
+              30.4,
+              12.4
+            ]
+          ]
+        },
+        {
+          "kind": "run",
+          "points": [
+            [
+              30.4,
+              16.45
+            ],
+            [
+              28.4,
+              15.4
+            ],
+            [
+              28.8,
+              13.8
+            ]
+          ]
+        },
+        {
+          "kind": "pass",
+          "points": [
+            [
+              30.4,
+              12.4
+            ],
+            [
+              28.8,
+              13.8
+            ]
+          ]
+        }
+      ],
+      "ball": {
+        "x": 29,
+        "y": 10
+      },
+      "cones": []
+    }
+  },
+  {
+    "id": "back_long_shot_block",
+    "focus": [
+      "back_court",
+      "finishing"
+    ],
+    "minutes": 12,
+    "players": "4-10",
+    "level": "advanced",
+    "name": {
+      "de-CH": "Fernwurf über den Block",
+      "fr": "Tir de loin au-dessus du contre",
+      "en": "Long shot over the block"
+    },
+    "setup": {
+      "de-CH": "Werfer auf 11 m, Zuspieler auf der Halbposition, ein Blockspieler auf 8 m, Torhüter.",
+      "fr": "Tireur à 11 m, passeur au poste arrière, un contreur à 8 m, gardien.",
+      "en": "Shooter at 11 m, passer at the half position, a blocker at 8 m, goalkeeper."
+    },
+    "procedure": {
+      "de-CH": "Pass in den Lauf, ein bis zwei Schritte Anlauf, Sprungwurf über oder neben den Block. Der Block bewegt sich mit dem Wurfarm.",
+      "fr": "Passe dans la course, un ou deux appuis d'élan, tir en suspension au-dessus ou à côté du contre. Le contreur suit le bras.",
+      "en": "Pass into the run, one or two steps of run-up, jump shot over or past the block. The blocker follows the throwing arm."
+    },
+    "coaching": {
+      "de-CH": "Hoch abspringen und spät werfen, Wurfarm am Block vorbei führen, Torhüter hinter dem Block beachten.",
+      "fr": "Sauter haut et lâcher tard, bras à côté du contre, attention au gardien derrière le contre.",
+      "en": "Jump high and release late, take the arm past the block, mind the goalkeeper behind the block."
+    },
+    "variants": {
+      "de-CH": "Schlagwurf ohne Sprung; zwei Blockspieler; Werfer darf auch durchbrechen, wenn der Block zu früh springt.",
+      "fr": "Tir à l'appui sans saut ; deux contreurs ; le tireur peut déborder si le contreur saute trop tôt.",
+      "en": "Set shot without jump; two blockers; the shooter may break through if the block jumps too early."
+    },
+    "sketch": {
+      "court": "half",
+      "tokens": [
+        {
+          "id": "tw",
+          "side": "own",
+          "label": "TW",
+          "x": 39.3,
+          "y": 10
+        },
+        {
+          "id": "a1",
+          "side": "own",
+          "label": "RM",
+          "x": 28,
+          "y": 10
+        },
+        {
+          "id": "a2",
+          "side": "own",
+          "label": "RL",
+          "x": 30.4,
+          "y": 16.45
+        },
+        {
+          "id": "d1",
+          "side": "opp",
+          "label": "1",
+          "x": 31.6,
+          "y": 10
+        }
+      ],
+      "arrows": [
+        {
+          "kind": "pass",
+          "points": [
+            [
+              30.4,
+              16.45
+            ],
+            [
+              29.2,
+              10.3
+            ]
+          ]
+        },
+        {
+          "kind": "run",
+          "points": [
+            [
+              28,
+              10
+            ],
+            [
+              29.2,
+              10.3
+            ]
+          ]
+        },
+        {
+          "kind": "pass",
+          "points": [
+            [
+              29.2,
+              10.3
+            ],
+            [
+              39.6,
+              11.1
+            ]
+          ]
+        }
+      ],
+      "ball": {
+        "x": 30.4,
+        "y": 16.45
+      },
+      "cones": []
+    }
+  },
+  {
+    "id": "back_parallel",
+    "focus": [
+      "back_court",
+      "passing"
+    ],
+    "minutes": 15,
+    "players": "5-12",
+    "level": "advanced",
+    "name": {
+      "de-CH": "Parallelstoss 3 gegen 2",
+      "fr": "Attaque en parallèle à 3 contre 2",
+      "en": "Parallel drive 3 on 2"
+    },
+    "setup": {
+      "de-CH": "Drei Rückraumspieler gegen zwei Verteidiger auf 8 m, Torhüter.",
+      "fr": "Trois arrières contre deux défenseurs à 8 m, gardien.",
+      "en": "Three back court players against two defenders at 8 m, goalkeeper."
+    },
+    "procedure": {
+      "de-CH": "RM stösst in die Lücke zwischen die Verteidiger und bindet beide. RR stösst parallel mit und bekommt den Ball in den Lauf zum Abschluss.",
+      "fr": "Le DC attaque l'intervalle et fixe les deux défenseurs. L'arrière droit attaque en parallèle et reçoit dans la course pour finir.",
+      "en": "The centre back drives into the gap and ties both defenders. The right back drives in parallel and gets the ball on the run to finish."
+    },
+    "coaching": {
+      "de-CH": "Jeder Angreifer zieht zum Tor, nicht quer; Pass erst, wenn der Verteidiger gebunden ist.",
+      "fr": "Chaque attaquant va vers le but, pas en travers ; passer seulement quand le défenseur est fixé.",
+      "en": "Every attacker goes towards the goal, not across; pass only once the defender is tied."
+    },
+    "variants": {
+      "de-CH": "3 gegen 3; Start mit Pass von der anderen Seite; maximal zwei Pässe bis zum Wurf.",
+      "fr": "3 contre 3 ; départ avec passe de l'autre côté ; deux passes maximum avant le tir.",
+      "en": "3 on 3; start with a pass from the other side; at most two passes before the shot."
+    },
+    "sketch": {
+      "court": "half",
+      "tokens": [
+        {
+          "id": "tw",
+          "side": "own",
+          "label": "TW",
+          "x": 39.3,
+          "y": 10
+        },
+        {
+          "id": "a1",
+          "side": "own",
+          "label": "RL",
+          "x": 30.4,
+          "y": 16.45
+        },
+        {
+          "id": "a2",
+          "side": "own",
+          "label": "RM",
+          "x": 29,
+          "y": 10
+        },
+        {
+          "id": "a3",
+          "side": "own",
+          "label": "RR",
+          "x": 30.4,
+          "y": 3.55
+        },
+        {
+          "id": "d1",
+          "side": "opp",
+          "label": "1",
+          "x": 32.16,
+          "y": 13.08
+        },
+        {
+          "id": "d2",
+          "side": "opp",
+          "label": "2",
+          "x": 32.16,
+          "y": 6.92
+        }
+      ],
+      "arrows": [
+        {
+          "kind": "dribble",
+          "points": [
+            [
+              29,
+              10
+            ],
+            [
+              30.8,
+              9.6
+            ]
+          ]
+        },
+        {
+          "kind": "run",
+          "points": [
+            [
+              30.4,
+              3.55
+            ],
+            [
+              31.2,
+              4.6
+            ]
+          ]
+        },
+        {
+          "kind": "pass",
+          "points": [
+            [
+              30.8,
+              9.6
+            ],
+            [
+              31.2,
+              4.6
+            ]
+          ]
+        }
+      ],
+      "ball": {
+        "x": 29,
+        "y": 10
+      },
+      "cones": []
+    }
+  },
+  {
+    "id": "pivot_position_fight",
+    "focus": [
+      "pivot"
+    ],
+    "minutes": 10,
+    "players": "3-8",
+    "level": "basic",
+    "name": {
+      "de-CH": "Kreisläufer: Position erkämpfen",
+      "fr": "Pivot : gagner sa position",
+      "en": "Pivot: win the position"
+    },
+    "setup": {
+      "de-CH": "Kreisläufer gegen einen Verteidiger an der 6-m-Linie, zwei Zuspieler im Rückraum.",
+      "fr": "Pivot contre un défenseur sur les 6 m, deux passeurs à la base arrière.",
+      "en": "Pivot against a defender at the 6 m line, two passers in the back court."
+    },
+    "procedure": {
+      "de-CH": "Die Zuspieler passen sich den Ball zu; der Kreisläufer verschiebt mit und sucht die Lücke neben dem Verteidiger. Ist er frei, kommt der Ball.",
+      "fr": "Les passeurs se font des passes ; le pivot se déplace et cherche l'espace à côté du défenseur. S'il est libre, il reçoit.",
+      "en": "The passers pass to each other; the pivot shifts along and looks for the space beside the defender. When he is free, the ball comes."
+    },
+    "coaching": {
+      "de-CH": "Tiefer Schwerpunkt, mit Hüfte und Rücken den Platz sichern, Arm als Ziel zeigen.",
+      "fr": "Centre de gravité bas, garder la place avec hanches et dos, montrer la main comme cible.",
+      "en": "Low centre of gravity, secure the space with hips and back, show the arm as a target."
+    },
+    "variants": {
+      "de-CH": "Verteidiger spielt aktiv mit Hand am Körper; zwei Verteidiger; Abschluss mit Fallwurf.",
+      "fr": "Défenseur actif avec la main au corps ; deux défenseurs ; finition en chute.",
+      "en": "Defender plays actively with a hand on the body; two defenders; finish with a falling shot."
+    },
+    "sketch": {
+      "court": "half",
+      "tokens": [
+        {
+          "id": "tw",
+          "side": "own",
+          "label": "TW",
+          "x": 39.3,
+          "y": 10
+        },
+        {
+          "id": "a1",
+          "side": "own",
+          "label": "KM",
+          "x": 33.7,
+          "y": 10
+        },
+        {
+          "id": "a2",
+          "side": "own",
+          "label": "RM",
+          "x": 28.6,
+          "y": 10
+        },
+        {
+          "id": "a3",
+          "side": "own",
+          "label": "RL",
+          "x": 30.4,
+          "y": 16.45
+        },
+        {
+          "id": "d1",
+          "side": "opp",
+          "label": "1",
+          "x": 32,
+          "y": 10.8
+        }
+      ],
+      "arrows": [
+        {
+          "kind": "screen",
+          "points": [
+            [
+              33.7,
+              10
+            ],
+            [
+              33.5,
+              12.1
+            ]
+          ]
+        },
+        {
+          "kind": "pass",
+          "points": [
+            [
+              30.4,
+              16.45
+            ],
+            [
+              28.6,
+              10
+            ]
+          ]
+        },
+        {
+          "kind": "pass",
+          "points": [
+            [
+              28.6,
+              10
+            ],
+            [
+              33.5,
+              12.1
+            ]
+          ]
+        }
+      ],
+      "ball": {
+        "x": 30.4,
+        "y": 16.45
+      },
+      "cones": []
+    }
+  },
+  {
+    "id": "pivot_screen_roll",
+    "focus": [
+      "pivot",
+      "back_court"
+    ],
+    "minutes": 15,
+    "players": "4-10",
+    "level": "advanced",
+    "name": {
+      "de-CH": "Sperren und Abrollen 2 gegen 2",
+      "fr": "Écran et roulé à 2 contre 2",
+      "en": "Screen and roll 2 on 2"
+    },
+    "setup": {
+      "de-CH": "Rückraum links und Kreisläufer gegen zwei Verteidiger, Torhüter.",
+      "fr": "Arrière gauche et pivot contre deux défenseurs, gardien.",
+      "en": "Left back and pivot against two defenders, goalkeeper."
+    },
+    "procedure": {
+      "de-CH": "Der Kreisläufer stellt die Sperre innen am Verteidiger von RL. RL stösst an der Sperre vorbei; hilft der zweite Verteidiger, rollt der Kreisläufer ab und bekommt den Ball.",
+      "fr": "Le pivot pose l'écran à l'intérieur du défenseur de l'arrière gauche. L'arrière passe l'écran ; si le second défenseur aide, le pivot roule et reçoit.",
+      "en": "The pivot sets the screen on the inside of LB's defender. LB drives past the screen; if the second defender helps, the pivot rolls off and gets the ball."
+    },
+    "coaching": {
+      "de-CH": "Sperre breit und ruhig stellen (kein Stoss), Timing: RL startet, wenn die Sperre steht.",
+      "fr": "Écran large et immobile (sans pousser), timing : l'arrière part quand l'écran est posé.",
+      "en": "Set the screen wide and still (no push), timing: LB starts when the screen stands."
+    },
+    "variants": {
+      "de-CH": "Sperre aussen statt innen; mit RM als drittem Angreifer; Abwehr darf tauschen.",
+      "fr": "Écran extérieur au lieu d'intérieur ; avec le DC en troisième attaquant ; la défense peut changer.",
+      "en": "Screen on the outside instead; with the centre back as a third attacker; the defence may switch."
+    },
+    "sketch": {
+      "court": "half",
+      "tokens": [
+        {
+          "id": "tw",
+          "side": "own",
+          "label": "TW",
+          "x": 39.3,
+          "y": 10
+        },
+        {
+          "id": "a1",
+          "side": "own",
+          "label": "RL",
+          "x": 30.4,
+          "y": 16.45
+        },
+        {
+          "id": "a2",
+          "side": "own",
+          "label": "KM",
+          "x": 33.7,
+          "y": 10
+        },
+        {
+          "id": "d1",
+          "side": "opp",
+          "label": "1",
+          "x": 34.11,
+          "y": 15.28
+        },
+        {
+          "id": "d2",
+          "side": "opp",
+          "label": "2",
+          "x": 32.4,
+          "y": 8.39
+        }
+      ],
+      "arrows": [
+        {
+          "kind": "screen",
+          "points": [
+            [
+              33.7,
+              10
+            ],
+            [
+              33.5,
+              13.6
+            ]
+          ]
+        },
+        {
+          "kind": "dribble",
+          "points": [
+            [
+              30.4,
+              16.45
+            ],
+            [
+              31.4,
+              13
+            ]
+          ]
+        }
+      ],
+      "ball": {
+        "x": 30.4,
+        "y": 16.45
+      },
+      "cones": []
     }
   },
   {
@@ -84,18 +1708,184 @@
     "level": "basic",
     "name": {
       "de-CH": "7-m-Routine mit Druck",
-      "en": "Penalty routine under pressure",
-      "fr": "Routine de 7 m sous pression"
+      "fr": "Routine de 7 m sous pression",
+      "en": "Penalty routine under pressure"
     },
     "setup": {
       "de-CH": "Jeder Werfer hat eine feste Routine, nach einem Sprint direkt an die Linie, Serie von fünf Würfen.",
-      "en": "Each shooter has a fixed routine, straight to the line after a sprint, series of five shots.",
-      "fr": "Chaque tireur a une routine fixe, directement à la ligne après un sprint, série de cinq tirs."
+      "fr": "Chaque tireur a une routine fixe, directement à la ligne après un sprint, série de cinq tirs.",
+      "en": "Each shooter has a fixed routine, straight to the line after a sprint, series of five shots."
+    },
+    "procedure": {
+      "de-CH": "Sprint von der Mittellinie um das Hütchen, Ball holen, Routine (Atmen, Ziel, Wurf) an der 7-m-Linie. Treffer werden gezählt.",
+      "fr": "Sprint depuis la ligne médiane autour du plot, prendre le ballon, routine (respirer, viser, tirer) aux 7 m. On compte les buts.",
+      "en": "Sprint from the centre line round the cone, take the ball, routine (breathe, target, shot) at the 7 m line. Goals are counted."
     },
     "coaching": {
       "de-CH": "Ziel vor dem Pfiff festlegen, ruhiger Atem, Torhüter nicht anschauen.",
-      "en": "Decide the target before the whistle, calm breathing, do not watch the goalkeeper.",
-      "fr": "Choisir la cible avant le coup de sifflet, respiration calme, ne pas regarder le gardien."
+      "fr": "Choisir la cible avant le coup de sifflet, respiration calme, ne pas regarder le gardien.",
+      "en": "Decide the target before the whistle, calm breathing, do not watch the goalkeeper."
+    },
+    "variants": {
+      "de-CH": "Team zuschauend mit Lärm; nach jedem Fehlwurf Strafrunde; der Torhüter darf sich vorher bewegen.",
+      "fr": "L'équipe regarde et fait du bruit ; tour de pénalité après chaque échec ; le gardien peut bouger avant.",
+      "en": "The team watches and makes noise; a penalty lap after each miss; the goalkeeper may move beforehand."
+    },
+    "sketch": {
+      "court": "half",
+      "tokens": [
+        {
+          "id": "tw",
+          "side": "own",
+          "label": "TW",
+          "x": 39.3,
+          "y": 10
+        },
+        {
+          "id": "a1",
+          "side": "own",
+          "label": "1",
+          "x": 32.4,
+          "y": 10
+        },
+        {
+          "id": "a2",
+          "side": "own",
+          "label": "2",
+          "x": 23.4,
+          "y": 14.6
+        }
+      ],
+      "arrows": [
+        {
+          "kind": "run",
+          "points": [
+            [
+              23.4,
+              14.6
+            ],
+            [
+              21.6,
+              12.6
+            ],
+            [
+              27,
+              10.8
+            ]
+          ]
+        },
+        {
+          "kind": "pass",
+          "points": [
+            [
+              32.4,
+              10
+            ],
+            [
+              39.6,
+              8.9
+            ]
+          ]
+        }
+      ],
+      "ball": {
+        "x": 32.4,
+        "y": 10
+      },
+      "cones": [
+        [
+          21.4,
+          14.6
+        ]
+      ]
+    }
+  },
+  {
+    "id": "seven_m_duel",
+    "focus": [
+      "seven_m",
+      "goalkeeping"
+    ],
+    "minutes": 10,
+    "players": "3-8",
+    "level": "basic",
+    "name": {
+      "de-CH": "7-m-Duell Werfer gegen Torhüter",
+      "fr": "Duel de 7 m tireur contre gardien",
+      "en": "Penalty duel shooter against goalkeeper"
+    },
+    "setup": {
+      "de-CH": "Werfer in einer Kolonne hinter der 9-m-Linie, ein Torhüter im Tor, ein Schreiber für die Punkte.",
+      "fr": "Tireurs en colonne derrière les 9 m, un gardien dans le but, un marqueur pour les points.",
+      "en": "Shooters in a line behind the 9 m line, a goalkeeper in goal, someone to keep score."
+    },
+    "procedure": {
+      "de-CH": "Jeder Werfer hat einen Wurf, der Torhüter kennt die Reihenfolge. Treffer ein Punkt für die Werfer, Parade ein Punkt für den Torhüter. Bis zehn.",
+      "fr": "Chaque tireur a un tir, le gardien connaît l'ordre. Un but : un point pour les tireurs, un arrêt : un point pour le gardien. Jusqu'à dix.",
+      "en": "Each shooter has one shot, the goalkeeper knows the order. A goal is a point for the shooters, a save a point for the goalkeeper. First to ten."
+    },
+    "coaching": {
+      "de-CH": "Werfer: nicht die Ecke wechseln, weil der Torhüter sich bewegt. Torhüter: spät reagieren, Werfer lesen.",
+      "fr": "Tireur : ne pas changer de coin parce que le gardien bouge. Gardien : réagir tard, lire le tireur.",
+      "en": "Shooter: do not change corners because the goalkeeper moves. Goalkeeper: react late, read the shooter."
+    },
+    "variants": {
+      "de-CH": "Zwei Torhüter abwechselnd; Werfer müssen vorher die Ecke einem Mitspieler zeigen; Wurf nach Belastung.",
+      "fr": "Deux gardiens en alternance ; le tireur montre le coin à un partenaire avant ; tir après effort.",
+      "en": "Two goalkeepers in turn; shooters show the corner to a team-mate beforehand; shot after a sprint."
+    },
+    "sketch": {
+      "court": "half",
+      "tokens": [
+        {
+          "id": "tw",
+          "side": "own",
+          "label": "TW",
+          "x": 39.3,
+          "y": 10
+        },
+        {
+          "id": "a1",
+          "side": "own",
+          "label": "1",
+          "x": 32.4,
+          "y": 10
+        },
+        {
+          "id": "a2",
+          "side": "own",
+          "label": "2",
+          "x": 29.6,
+          "y": 12.6
+        },
+        {
+          "id": "a3",
+          "side": "own",
+          "label": "3",
+          "x": 29.6,
+          "y": 7.4
+        }
+      ],
+      "arrows": [
+        {
+          "kind": "pass",
+          "points": [
+            [
+              32.4,
+              10
+            ],
+            [
+              39.6,
+              11.1
+            ]
+          ]
+        }
+      ],
+      "ball": {
+        "x": 32.4,
+        "y": 10
+      },
+      "cones": []
     }
   },
   {
@@ -108,18 +1898,94 @@
     "level": "basic",
     "name": {
       "de-CH": "Torhüter: Reaktion und Stellung",
-      "en": "Goalkeeper: reaction and position",
-      "fr": "Gardien : réaction et placement"
+      "fr": "Gardien : réaction et placement",
+      "en": "Goalkeeper: reaction and position"
     },
     "setup": {
       "de-CH": "Würfe aus wechselnden Positionen in schneller Folge, Fokus auf die Zone mit den meisten Gegentoren.",
-      "en": "Shots from changing positions in quick succession, focus on the zone with most goals against.",
-      "fr": "Tirs de positions variées en succession rapide, priorité à la zone la plus touchée."
+      "fr": "Tirs de positions variées en succession rapide, priorité à la zone la plus touchée.",
+      "en": "Shots from changing positions in quick succession, focus on the zone with most goals against."
+    },
+    "procedure": {
+      "de-CH": "Drei Werfer mit je fünf Bällen auf RL, RM und RR. Sie werfen nacheinander, der Torhüter stellt sich nach jedem Wurf neu zum nächsten Werfer.",
+      "fr": "Trois tireurs avec cinq ballons chacun aux postes arrière. Ils tirent l'un après l'autre, le gardien se replace face au suivant.",
+      "en": "Three shooters with five balls each at LB, CB and RB. They shoot one after the other, the goalkeeper resets towards the next shooter."
     },
     "coaching": {
       "de-CH": "Grundstellung auf der Winkelhalbierenden, Arme und Beine gleichzeitig, schnell zurück in die Mitte.",
-      "en": "Base position on the bisector, arms and legs together, quickly back to the centre.",
-      "fr": "Position de base sur la bissectrice, bras et jambes ensemble, retour rapide au centre."
+      "fr": "Position de base sur la bissectrice, bras et jambes ensemble, retour rapide au centre.",
+      "en": "Base position on the bisector, arms and legs together, quickly back to the centre."
+    },
+    "variants": {
+      "de-CH": "Würfe nur in die Zone mit den meisten Gegentoren; Werfer täuschen an; Reihenfolge der Werfer zufällig.",
+      "fr": "Tirs seulement dans la zone la plus touchée ; les tireurs feintent ; ordre des tireurs au hasard.",
+      "en": "Shots only into the zone with most goals against; shooters feint; random order of shooters."
+    },
+    "sketch": {
+      "court": "half",
+      "tokens": [
+        {
+          "id": "tw",
+          "side": "own",
+          "label": "TW",
+          "x": 39.3,
+          "y": 10
+        },
+        {
+          "id": "a1",
+          "side": "own",
+          "label": "1",
+          "x": 30.4,
+          "y": 16.45
+        },
+        {
+          "id": "a2",
+          "side": "own",
+          "label": "2",
+          "x": 29,
+          "y": 10
+        },
+        {
+          "id": "a3",
+          "side": "own",
+          "label": "3",
+          "x": 30.4,
+          "y": 3.55
+        }
+      ],
+      "arrows": [
+        {
+          "kind": "pass",
+          "points": [
+            [
+              30.4,
+              16.45
+            ],
+            [
+              39.6,
+              8.9
+            ]
+          ]
+        },
+        {
+          "kind": "pass",
+          "points": [
+            [
+              30.4,
+              3.55
+            ],
+            [
+              39.6,
+              11.1
+            ]
+          ]
+        }
+      ],
+      "ball": {
+        "x": 30.4,
+        "y": 16.45
+      },
+      "cones": []
     }
   },
   {
@@ -133,18 +1999,455 @@
     "level": "advanced",
     "name": {
       "de-CH": "Torhüter gegen Flügelwürfe",
-      "en": "Goalkeeper against wing shots",
-      "fr": "Gardien contre tirs à l'aile"
+      "fr": "Gardien contre tirs à l'aile",
+      "en": "Goalkeeper against wing shots"
     },
     "setup": {
       "de-CH": "Flügelspieler werfen aus spitzem Winkel, Torhüter übt das Abdecken der kurzen Ecke und das Nachrücken.",
-      "en": "Wings shoot from a narrow angle, the goalkeeper practises covering the near post and stepping out.",
-      "fr": "Les ailiers tirent avec un angle fermé, le gardien travaille le premier poteau et la sortie."
+      "fr": "Les ailiers tirent avec un angle fermé, le gardien travaille le premier poteau et la sortie.",
+      "en": "Wings shoot from a narrow angle, the goalkeeper practises covering the near post and stepping out."
+    },
+    "procedure": {
+      "de-CH": "RM spielt abwechselnd auf LA und RA, der Flügel schliesst nach drei Schritten ab. Der Torhüter geht mit dem Pass an den kurzen Pfosten.",
+      "fr": "Le DC sert à tour de rôle l'ailier gauche et droit, qui finit après trois appuis. Le gardien va au premier poteau sur la passe.",
+      "en": "The centre back serves the left and right wing in turn, the wing finishes after three steps. The goalkeeper moves to the near post with the pass."
     },
     "coaching": {
       "de-CH": "Kurzen Pfosten zu, Schritt dem Werfer entgegen, spät reagieren.",
-      "en": "Close the near post, step towards the shooter, react late.",
-      "fr": "Fermer le premier poteau, avancer vers le tireur, réagir tard."
+      "fr": "Fermer le premier poteau, avancer vers le tireur, réagir tard.",
+      "en": "Close the near post, step towards the shooter, react late."
+    },
+    "variants": {
+      "de-CH": "Flügel dürfen Heber und Dreher werfen; Pass aus dem Gegenstoss; zwei Torhüter im Wechsel.",
+      "fr": "Les ailiers peuvent lober et roucouler ; passe en contre-attaque ; deux gardiens en alternance.",
+      "en": "Wings may lob and spin; the pass comes from a fast break; two goalkeepers in turn."
+    },
+    "sketch": {
+      "court": "half",
+      "tokens": [
+        {
+          "id": "tw",
+          "side": "own",
+          "label": "TW",
+          "x": 39.3,
+          "y": 10
+        },
+        {
+          "id": "a1",
+          "side": "own",
+          "label": "LA",
+          "x": 34.4,
+          "y": 19
+        },
+        {
+          "id": "a2",
+          "side": "own",
+          "label": "RA",
+          "x": 34.4,
+          "y": 1
+        },
+        {
+          "id": "a3",
+          "side": "own",
+          "label": "RM",
+          "x": 29,
+          "y": 10
+        }
+      ],
+      "arrows": [
+        {
+          "kind": "run",
+          "points": [
+            [
+              34.4,
+              19
+            ],
+            [
+              36.4,
+              16.9
+            ]
+          ]
+        },
+        {
+          "kind": "pass",
+          "points": [
+            [
+              29,
+              10
+            ],
+            [
+              36.4,
+              16.9
+            ]
+          ]
+        },
+        {
+          "kind": "pass",
+          "points": [
+            [
+              36.4,
+              16.9
+            ],
+            [
+              39.6,
+              11.1
+            ]
+          ]
+        }
+      ],
+      "ball": {
+        "x": 29,
+        "y": 10
+      },
+      "cones": []
+    }
+  },
+  {
+    "id": "keeper_angle_back",
+    "focus": [
+      "goalkeeping"
+    ],
+    "minutes": 12,
+    "players": "2-6",
+    "level": "basic",
+    "name": {
+      "de-CH": "Torhüter: Winkel gegen Rückraumwürfe",
+      "fr": "Gardien : angle contre les tirs de loin",
+      "en": "Goalkeeper: angle against back court shots"
+    },
+    "setup": {
+      "de-CH": "Drei Werfer auf 10 m (links, Mitte, rechts), Hütchen auf der 6-m-Linie zeigen die Winkel.",
+      "fr": "Trois tireurs à 10 m (gauche, centre, droite), des plots sur les 6 m montrent les angles.",
+      "en": "Three shooters at 10 m (left, centre, right), cones on the 6 m line show the angles."
+    },
+    "procedure": {
+      "de-CH": "Der Trainer zeigt auf einen Werfer, der Torhüter stellt sich in dessen Winkel, erst dann wird geworfen. Nach jedem Wurf zur Mitte zurück.",
+      "fr": "L'entraîneur désigne un tireur, le gardien se place dans son angle, puis le tir part. Après chaque tir, retour au centre.",
+      "en": "The coach points to a shooter, the goalkeeper moves into his angle, only then the shot comes. Back to the centre after each shot."
+    },
+    "coaching": {
+      "de-CH": "Kleine schnelle Schritte auf dem Halbkreis vor dem Tor, Schultern zum Werfer, nicht zu weit heraus.",
+      "fr": "Petits pas rapides sur l'arc devant le but, épaules face au tireur, ne pas trop sortir.",
+      "en": "Small quick steps on the arc in front of the goal, shoulders to the shooter, do not come out too far."
+    },
+    "variants": {
+      "de-CH": "Pass zwischen den Werfern vor dem Wurf; Würfe mit Block; Torhüter wirft nach der Parade sofort ab.",
+      "fr": "Passes entre les tireurs avant le tir ; tirs avec contre ; relance immédiate après l'arrêt.",
+      "en": "Passes between the shooters before the shot; shots with a block; quick throw-out after the save."
+    },
+    "sketch": {
+      "court": "half",
+      "tokens": [
+        {
+          "id": "tw",
+          "side": "own",
+          "label": "TW",
+          "x": 39.3,
+          "y": 10
+        },
+        {
+          "id": "a1",
+          "side": "own",
+          "label": "1",
+          "x": 31.08,
+          "y": 16.02
+        },
+        {
+          "id": "a2",
+          "side": "own",
+          "label": "2",
+          "x": 30,
+          "y": 10
+        },
+        {
+          "id": "a3",
+          "side": "own",
+          "label": "3",
+          "x": 31.08,
+          "y": 3.98
+        }
+      ],
+      "arrows": [
+        {
+          "kind": "run",
+          "points": [
+            [
+              39.3,
+              10
+            ],
+            [
+              38.6,
+              11.3
+            ]
+          ]
+        },
+        {
+          "kind": "pass",
+          "points": [
+            [
+              31.08,
+              16.02
+            ],
+            [
+              39.6,
+              11.1
+            ]
+          ]
+        }
+      ],
+      "ball": {
+        "x": 31.08,
+        "y": 16.02
+      },
+      "cones": [
+        [
+          34.67,
+          14.26
+        ],
+        [
+          34,
+          10
+        ],
+        [
+          34.67,
+          5.74
+        ]
+      ]
+    }
+  },
+  {
+    "id": "keeper_seven_m",
+    "focus": [
+      "goalkeeping",
+      "seven_m"
+    ],
+    "minutes": 10,
+    "players": "2-8",
+    "level": "advanced",
+    "name": {
+      "de-CH": "Torhüter gegen 7 m: Werfer lesen",
+      "fr": "Gardien contre le 7 m : lire le tireur",
+      "en": "Goalkeeper against penalties: read the shooter"
+    },
+    "setup": {
+      "de-CH": "Werfer nacheinander an der 7-m-Linie, Torhüter im Tor, ein Mitspieler notiert Ecke und Ergebnis.",
+      "fr": "Tireurs l'un après l'autre aux 7 m, gardien dans le but, un partenaire note le coin et le résultat.",
+      "en": "Shooters one after the other at the 7 m line, goalkeeper in goal, a team-mate notes corner and result."
+    },
+    "procedure": {
+      "de-CH": "Der Torhüter steht etwa auf der 4-m-Linie (Torhütergrenzlinie) oder auf der Torlinie und probiert beides. Er wartet, bis der Wurfarm nach vorne kommt, und reagiert dann.",
+      "fr": "Le gardien se place vers la ligne des 4 m ou sur sa ligne et essaie les deux. Il attend que le bras du tireur avance, puis réagit.",
+      "en": "The goalkeeper stands near the 4 m line (goalkeeper restraining line) or on the goal line and tries both. He waits until the throwing arm comes forward, then reacts."
+    },
+    "coaching": {
+      "de-CH": "Ruhig stehen, Gewicht auf den Fussballen, nicht vor dem Wurf in eine Ecke springen; nach jedem Wurf kurz auswerten.",
+      "fr": "Rester calme, poids sur l'avant des pieds, ne pas plonger avant le tir ; analyser brièvement après chaque tir.",
+      "en": "Stand still, weight on the balls of the feet, do not dive before the shot; review briefly after each shot."
+    },
+    "variants": {
+      "de-CH": "Torhüter bewegt sich vor dem Wurf seitlich; Werfer müssen eine Täuschung einbauen; Wettkampf mit dem zweiten Torhüter.",
+      "fr": "Le gardien bouge latéralement avant le tir ; les tireurs doivent feinter ; concours avec le second gardien.",
+      "en": "The goalkeeper moves sideways before the shot; shooters must include a feint; competition with the second goalkeeper."
+    },
+    "sketch": {
+      "court": "half",
+      "tokens": [
+        {
+          "id": "tw",
+          "side": "own",
+          "label": "TW",
+          "x": 39.3,
+          "y": 10
+        },
+        {
+          "id": "a1",
+          "side": "own",
+          "label": "1",
+          "x": 32.4,
+          "y": 10
+        },
+        {
+          "id": "a2",
+          "side": "own",
+          "label": "2",
+          "x": 29.6,
+          "y": 12.8
+        },
+        {
+          "id": "a3",
+          "side": "own",
+          "label": "3",
+          "x": 29.6,
+          "y": 7.2
+        }
+      ],
+      "arrows": [
+        {
+          "kind": "run",
+          "points": [
+            [
+              39.3,
+              10
+            ],
+            [
+              37.2,
+              10
+            ]
+          ]
+        },
+        {
+          "kind": "pass",
+          "points": [
+            [
+              32.4,
+              10
+            ],
+            [
+              39.6,
+              8.9
+            ]
+          ]
+        }
+      ],
+      "ball": {
+        "x": 32.4,
+        "y": 10
+      },
+      "cones": []
+    }
+  },
+  {
+    "id": "keeper_outlet",
+    "focus": [
+      "goalkeeping",
+      "fast_break"
+    ],
+    "minutes": 12,
+    "players": "4-12",
+    "level": "basic",
+    "name": {
+      "de-CH": "Torhüter: schneller Abwurf zum Gegenstoss",
+      "fr": "Gardien : relance rapide pour la contre-attaque",
+      "en": "Goalkeeper: quick outlet for the fast break"
+    },
+    "setup": {
+      "de-CH": "Ganzes Feld. Ein Werfer am eigenen Tor, Flügelspieler an der Seitenlinie bei 8 m, Torhüter im Tor.",
+      "fr": "Terrain entier. Un tireur devant notre but, des ailiers le long de la touche à 8 m, gardien dans le but.",
+      "en": "Full court. A shooter at our goal, wings at the side line at 8 m, goalkeeper in goal."
+    },
+    "procedure": {
+      "de-CH": "Nach dem Wurf (Parade oder Ball vom Trainer) starten die Flügel. Der Torhüter spielt den langen Ball in den Lauf vor die Mittellinie.",
+      "fr": "Après le tir (arrêt ou ballon de l'entraîneur), les ailiers partent. Le gardien joue long dans la course devant la ligne médiane.",
+      "en": "After the shot (save or a ball from the coach), the wings start. The goalkeeper plays the long ball into the run ahead of the centre line."
+    },
+    "coaching": {
+      "de-CH": "Torhüter: zuerst lang schauen, Pass flach und vor den Läufer. Flügel: Start mit dem Wurf, nicht mit der Parade.",
+      "fr": "Gardien : regarder loin d'abord, passe tendue devant le coureur. Ailiers : partir au tir, pas à l'arrêt.",
+      "en": "Goalkeeper: look long first, pass flat and ahead of the runner. Wings: start with the shot, not with the save."
+    },
+    "variants": {
+      "de-CH": "Ein Verteidiger stört den Abwurf; Abschluss gegen den zweiten Torhüter; kurzer Pass, wenn lang zu ist.",
+      "fr": "Un défenseur gêne la relance ; finition contre le second gardien ; passe courte si le long est fermé.",
+      "en": "A defender disturbs the outlet; finish against the second goalkeeper; a short pass when the long one is closed."
+    },
+    "sketch": {
+      "court": "full",
+      "tokens": [
+        {
+          "id": "tw",
+          "side": "own",
+          "label": "TW",
+          "x": 0.7,
+          "y": 10
+        },
+        {
+          "id": "a1",
+          "side": "own",
+          "label": "LA",
+          "x": 8,
+          "y": 18.5
+        },
+        {
+          "id": "a2",
+          "side": "own",
+          "label": "RA",
+          "x": 8,
+          "y": 1.5
+        },
+        {
+          "id": "d1",
+          "side": "opp",
+          "label": "1",
+          "x": 9.6,
+          "y": 12.4
+        },
+        {
+          "id": "otw",
+          "side": "opp",
+          "label": "TW",
+          "x": 39.3,
+          "y": 10
+        }
+      ],
+      "arrows": [
+        {
+          "kind": "pass",
+          "points": [
+            [
+              9.6,
+              12.4
+            ],
+            [
+              0.4,
+              10.9
+            ]
+          ]
+        },
+        {
+          "kind": "run",
+          "points": [
+            [
+              8,
+              18.5
+            ],
+            [
+              26,
+              17.6
+            ]
+          ]
+        },
+        {
+          "kind": "run",
+          "points": [
+            [
+              8,
+              1.5
+            ],
+            [
+              26,
+              2.4
+            ]
+          ]
+        },
+        {
+          "kind": "pass",
+          "points": [
+            [
+              0.7,
+              10
+            ],
+            [
+              26,
+              17.6
+            ]
+          ]
+        }
+      ],
+      "ball": {
+        "x": 0.7,
+        "y": 10
+      },
+      "cones": []
     }
   },
   {
@@ -157,18 +2460,528 @@
     "level": "basic",
     "name": {
       "de-CH": "Passspiel gegen offensive Abwehr",
-      "en": "Passing against an aggressive defence",
-      "fr": "Passes contre une défense agressive"
+      "fr": "Passes contre une défense agressive",
+      "en": "Passing against an aggressive defence"
     },
     "setup": {
-      "de-CH": "4 gegen 2 im Feld 15 x 15 m, maximal drei Sekunden Ballbesitz, Fehlpässe zählen als Punkt für die Abwehr.",
-      "en": "4 against 2 in a 15 x 15 m area, at most three seconds on the ball, bad passes score for the defence.",
-      "fr": "4 contre 2 sur 15 x 15 m, trois secondes maximum avec le ballon, une mauvaise passe donne un point à la défense."
+      "de-CH": "4 gegen 2 im Feld 12 x 14 m (Hütchen), maximal drei Sekunden Ballbesitz, Fehlpässe zählen als Punkt für die Abwehr.",
+      "fr": "4 contre 2 sur 12 x 14 m (plots), trois secondes maximum avec le ballon, une mauvaise passe donne un point à la défense.",
+      "en": "4 against 2 in a 12 x 14 m area (cones), at most three seconds on the ball, bad passes score for the defence."
+    },
+    "procedure": {
+      "de-CH": "Die vier Angreifer halten den Ball, die zwei Verteidiger versuchen ihn abzufangen. Nach jedem Ballgewinn tauscht der Fehlerverursacher mit dem Verteidiger.",
+      "fr": "Les quatre attaquants gardent le ballon, les deux défenseurs tentent de l'intercepter. Après chaque interception, le fautif prend la place du défenseur.",
+      "en": "The four attackers keep the ball, the two defenders try to intercept. After every interception the player at fault swaps with the defender."
     },
     "coaching": {
       "de-CH": "Freilaufen vor dem Pass, Blickkontakt, Pass in die Laufrichtung.",
-      "en": "Get open before the pass, eye contact, pass into the running direction.",
-      "fr": "Se démarquer avant la passe, contact visuel, passe dans la course."
+      "fr": "Se démarquer avant la passe, contact visuel, passe dans la course.",
+      "en": "Get open before the pass, eye contact, pass into the running direction."
+    },
+    "variants": {
+      "de-CH": "Nur Bodenpässe; Pass mit der schwachen Hand; 5 gegen 3 in grösserem Feld.",
+      "fr": "Seulement des passes à terre ; passe de la main faible ; 5 contre 3 sur un terrain plus grand.",
+      "en": "Bounce passes only; pass with the weak hand; 5 against 3 in a bigger area."
+    },
+    "sketch": {
+      "court": "half",
+      "tokens": [
+        {
+          "id": "a1",
+          "side": "own",
+          "label": "1",
+          "x": 22.4,
+          "y": 4.4
+        },
+        {
+          "id": "a2",
+          "side": "own",
+          "label": "2",
+          "x": 31.6,
+          "y": 4.4
+        },
+        {
+          "id": "a3",
+          "side": "own",
+          "label": "3",
+          "x": 31.6,
+          "y": 15.6
+        },
+        {
+          "id": "a4",
+          "side": "own",
+          "label": "4",
+          "x": 22.4,
+          "y": 15.6
+        },
+        {
+          "id": "d1",
+          "side": "opp",
+          "label": "1",
+          "x": 26,
+          "y": 8
+        },
+        {
+          "id": "d2",
+          "side": "opp",
+          "label": "2",
+          "x": 28,
+          "y": 12
+        }
+      ],
+      "arrows": [
+        {
+          "kind": "pass",
+          "points": [
+            [
+              22.4,
+              4.4
+            ],
+            [
+              31.6,
+              4.4
+            ]
+          ]
+        },
+        {
+          "kind": "run",
+          "points": [
+            [
+              31.6,
+              15.6
+            ],
+            [
+              30.2,
+              12.8
+            ]
+          ]
+        }
+      ],
+      "ball": {
+        "x": 22.4,
+        "y": 4.4
+      },
+      "cones": [
+        [
+          21,
+          3
+        ],
+        [
+          33,
+          3
+        ],
+        [
+          33,
+          17
+        ],
+        [
+          21,
+          17
+        ]
+      ]
+    }
+  },
+  {
+    "id": "passing_triangle_move",
+    "focus": [
+      "passing"
+    ],
+    "minutes": 10,
+    "players": "6-15",
+    "level": "basic",
+    "name": {
+      "de-CH": "Passdreieck in Bewegung",
+      "fr": "Triangle de passes en mouvement",
+      "en": "Passing triangle on the move"
+    },
+    "setup": {
+      "de-CH": "Drei Hütchen im Dreieck (6 m Seitenlänge), an jedem Hütchen zwei bis drei Spieler, ein Ball.",
+      "fr": "Trois plots en triangle (6 m de côté), deux ou trois joueurs à chaque plot, un ballon.",
+      "en": "Three cones in a triangle (6 m sides), two or three players at each cone, one ball."
+    },
+    "procedure": {
+      "de-CH": "Pass zum nächsten Hütchen und dem Ball nachlaufen. Nach einer Minute die Richtung wechseln, dann einen zweiten Ball dazu.",
+      "fr": "Passe au plot suivant et suivre son ballon. Après une minute changer de sens, puis ajouter un second ballon.",
+      "en": "Pass to the next cone and follow the ball. After a minute change direction, then add a second ball."
+    },
+    "coaching": {
+      "de-CH": "Ball im Lauf fangen, höchstens drei Schritte, Pass auf Brusthöhe vor den Mitspieler.",
+      "fr": "Recevoir en course, trois appuis au plus, passe à hauteur de poitrine devant le partenaire.",
+      "en": "Catch on the run, three steps at most, pass at chest height ahead of the team-mate."
+    },
+    "variants": {
+      "de-CH": "Sprungpass; Pass hinter dem Rücken; als Wettkampf: wie viele Pässe in einer Minute ohne Fehler.",
+      "fr": "Passe en suspension ; passe dans le dos ; en concours : combien de passes en une minute sans faute.",
+      "en": "Jump pass; behind-the-back pass; as a competition: how many passes in a minute without a mistake."
+    },
+    "sketch": {
+      "court": "half",
+      "tokens": [
+        {
+          "id": "a1",
+          "side": "own",
+          "label": "1",
+          "x": 23.4,
+          "y": 6.6
+        },
+        {
+          "id": "a2",
+          "side": "own",
+          "label": "2",
+          "x": 29.2,
+          "y": 10
+        },
+        {
+          "id": "a3",
+          "side": "own",
+          "label": "3",
+          "x": 23.4,
+          "y": 13.4
+        },
+        {
+          "id": "a4",
+          "side": "own",
+          "label": "4",
+          "x": 22,
+          "y": 5.2
+        }
+      ],
+      "arrows": [
+        {
+          "kind": "pass",
+          "points": [
+            [
+              23.4,
+              6.6
+            ],
+            [
+              29.2,
+              10
+            ]
+          ]
+        },
+        {
+          "kind": "run",
+          "points": [
+            [
+              23.4,
+              6.6
+            ],
+            [
+              27.4,
+              8.6
+            ]
+          ]
+        },
+        {
+          "kind": "pass",
+          "points": [
+            [
+              29.2,
+              10
+            ],
+            [
+              23.4,
+              13.4
+            ]
+          ]
+        }
+      ],
+      "ball": {
+        "x": 23.4,
+        "y": 6.6
+      },
+      "cones": [
+        [
+          23.4,
+          7.8
+        ],
+        [
+          30.4,
+          10
+        ],
+        [
+          23.4,
+          12.2
+        ]
+      ]
+    }
+  },
+  {
+    "id": "passing_circulation",
+    "focus": [
+      "passing",
+      "back_court"
+    ],
+    "minutes": 10,
+    "players": "6-12",
+    "level": "basic",
+    "name": {
+      "de-CH": "Ballzirkulation 6 gegen 0 mit Tempowechsel",
+      "fr": "Circulation du ballon à 6 contre 0 avec changement de rythme",
+      "en": "Ball circulation 6 on 0 with change of pace"
+    },
+    "setup": {
+      "de-CH": "Angriff in der 3:3-Aufstellung ohne Abwehr, Torhüter im Tor.",
+      "fr": "Attaque en 3-3 sans défense, gardien dans le but.",
+      "en": "Attack in a 3-3 set-up without defence, goalkeeper in goal."
+    },
+    "procedure": {
+      "de-CH": "Ball langsam von Aussen zu Aussen, auf Zuruf des Trainers volles Tempo: Stossbewegung zum Tor vor jedem Pass. Nach drei Zirkulationen Abschluss.",
+      "fr": "Le ballon circule lentement d'une aile à l'autre ; au signal, plein rythme : attaque du but avant chaque passe. Après trois circulations, tir.",
+      "en": "Ball slowly from wing to wing; on the coach's call full speed: a drive towards the goal before every pass. Finish after three circulations."
+    },
+    "coaching": {
+      "de-CH": "Jeder Spieler stösst zum Tor, bevor er passt (Torgefahr), Ball nicht stehend annehmen.",
+      "fr": "Chaque joueur attaque le but avant de passer (menace), ne pas recevoir à l'arrêt.",
+      "en": "Every player drives at the goal before he passes (threat), never receive standing still."
+    },
+    "variants": {
+      "de-CH": "Mit passiver Abwehr; Kreisanspiel nach jeder zweiten Zirkulation; Pässe nur mit Sprung.",
+      "fr": "Avec défense passive ; passe au pivot toutes les deux circulations ; passes seulement en suspension.",
+      "en": "With a passive defence; a pass to the pivot after every second circulation; jump passes only."
+    },
+    "sketch": {
+      "court": "half",
+      "tokens": [
+        {
+          "id": "otw",
+          "side": "opp",
+          "label": "TW",
+          "x": 39.3,
+          "y": 10
+        },
+        {
+          "id": "a1",
+          "side": "own",
+          "label": "LA",
+          "x": 36.2,
+          "y": 19.2
+        },
+        {
+          "id": "a2",
+          "side": "own",
+          "label": "RL",
+          "x": 30.4,
+          "y": 16.45
+        },
+        {
+          "id": "a3",
+          "side": "own",
+          "label": "RM",
+          "x": 29,
+          "y": 10
+        },
+        {
+          "id": "a4",
+          "side": "own",
+          "label": "RR",
+          "x": 30.4,
+          "y": 3.55
+        },
+        {
+          "id": "a5",
+          "side": "own",
+          "label": "RA",
+          "x": 36.2,
+          "y": 0.8
+        },
+        {
+          "id": "a6",
+          "side": "own",
+          "label": "KM",
+          "x": 33.7,
+          "y": 10
+        }
+      ],
+      "arrows": [
+        {
+          "kind": "pass",
+          "points": [
+            [
+              29,
+              10
+            ],
+            [
+              30.4,
+              16.45
+            ]
+          ]
+        },
+        {
+          "kind": "pass",
+          "points": [
+            [
+              30.4,
+              16.45
+            ],
+            [
+              36.2,
+              19.2
+            ]
+          ]
+        },
+        {
+          "kind": "run",
+          "points": [
+            [
+              29,
+              10
+            ],
+            [
+              30.4,
+              10.4
+            ]
+          ]
+        }
+      ],
+      "ball": {
+        "x": 29,
+        "y": 10
+      },
+      "cones": []
+    }
+  },
+  {
+    "id": "passing_ten_passes",
+    "focus": [
+      "passing",
+      "transition_defence"
+    ],
+    "minutes": 12,
+    "players": "8-14",
+    "level": "basic",
+    "name": {
+      "de-CH": "Zehnerball",
+      "fr": "Jeu des dix passes",
+      "en": "Ten passes game"
+    },
+    "setup": {
+      "de-CH": "Zwei Teams in einer Feldhälfte (ohne Torraum), ein Ball, Leibchen.",
+      "fr": "Deux équipes dans un demi-terrain (sans la zone), un ballon, chasubles.",
+      "en": "Two teams in one half (without the goal area), one ball, bibs."
+    },
+    "procedure": {
+      "de-CH": "Das Team mit Ball sammelt zehn Pässe ohne Ballverlust für einen Punkt. Bei Ballverlust sofort umschalten: das andere Team zählt.",
+      "fr": "L'équipe en possession enchaîne dix passes sans perte pour un point. En cas de perte, transition immédiate : l'autre équipe compte.",
+      "en": "The team with the ball collects ten passes without losing it for a point. On a turnover switch at once: the other team counts."
+    },
+    "coaching": {
+      "de-CH": "Freie Räume suchen, kurze Pässe unter Druck, nach Ballverlust sofort den Ballführer stören.",
+      "fr": "Chercher les espaces libres, passes courtes sous pression, après la perte presser tout de suite le porteur.",
+      "en": "Look for free space, short passes under pressure, after a turnover pressure the ball carrier at once."
+    },
+    "variants": {
+      "de-CH": "Kein Rückpass zum Passgeber; nur drei Schritte; Punkt auch für Ballgewinn innerhalb von fünf Sekunden.",
+      "fr": "Pas de retour au passeur ; trois appuis seulement ; un point aussi pour une récupération en cinq secondes.",
+      "en": "No pass back to the passer; three steps only; a point also for winning the ball within five seconds."
+    },
+    "sketch": {
+      "court": "half",
+      "tokens": [
+        {
+          "id": "a1",
+          "side": "own",
+          "label": "1",
+          "x": 23,
+          "y": 4
+        },
+        {
+          "id": "a2",
+          "side": "own",
+          "label": "2",
+          "x": 29,
+          "y": 6
+        },
+        {
+          "id": "a3",
+          "side": "own",
+          "label": "3",
+          "x": 30,
+          "y": 14
+        },
+        {
+          "id": "a4",
+          "side": "own",
+          "label": "4",
+          "x": 23,
+          "y": 15
+        },
+        {
+          "id": "d1",
+          "side": "opp",
+          "label": "1",
+          "x": 26,
+          "y": 6.5
+        },
+        {
+          "id": "d2",
+          "side": "opp",
+          "label": "2",
+          "x": 27,
+          "y": 11
+        },
+        {
+          "id": "d3",
+          "side": "opp",
+          "label": "3",
+          "x": 24,
+          "y": 10
+        },
+        {
+          "id": "d4",
+          "side": "opp",
+          "label": "4",
+          "x": 28.5,
+          "y": 16
+        }
+      ],
+      "arrows": [
+        {
+          "kind": "pass",
+          "points": [
+            [
+              23,
+              4
+            ],
+            [
+              29,
+              6
+            ]
+          ]
+        },
+        {
+          "kind": "pass",
+          "points": [
+            [
+              29,
+              6
+            ],
+            [
+              30,
+              14
+            ]
+          ]
+        },
+        {
+          "kind": "run",
+          "points": [
+            [
+              23,
+              15
+            ],
+            [
+              25.6,
+              13.2
+            ]
+          ]
+        }
+      ],
+      "ball": {
+        "x": 23,
+        "y": 4
+      },
+      "cones": []
     }
   },
   {
@@ -181,18 +2994,468 @@
     "level": "advanced",
     "name": {
       "de-CH": "Schnelles Rückzugsverhalten",
-      "en": "Fast transition back",
-      "fr": "Repli défensif rapide"
+      "fr": "Repli défensif rapide",
+      "en": "Fast transition back"
     },
     "setup": {
       "de-CH": "Angriff 6 gegen 6, nach Abschluss oder Ballverlust sofort Gegenstoss des Gegners; Rückzug im Sprint.",
-      "en": "Attack 6 against 6, after a shot or turnover the opponent counters at once; sprint back.",
-      "fr": "Attaque 6 contre 6, après tir ou perte de balle contre-attaque immédiate ; repli en sprint."
+      "fr": "Attaque 6 contre 6, après tir ou perte de balle contre-attaque immédiate ; repli en sprint.",
+      "en": "Attack 6 against 6, after a shot or turnover the opponent counters at once; sprint back."
+    },
+    "procedure": {
+      "de-CH": "Das Angriffsteam spielt bis zum Abschluss. Mit dem Wurf oder Ballverlust startet der Gegner über das ganze Feld, das Angriffsteam sprintet zurück und stellt die Abwehr.",
+      "fr": "L'équipe en attaque joue jusqu'au tir. Au tir ou à la perte, l'adversaire part sur tout le terrain, l'équipe revient en sprint et organise la défense.",
+      "en": "The attacking team plays until the shot. With the shot or turnover the opponent goes over the full court, the attacking team sprints back and sets the defence."
     },
     "coaching": {
       "de-CH": "Der Spieler nach dem Ballverlust stört den ersten Pass, alle anderen zuerst zum eigenen 9 m.",
-      "en": "The player who lost the ball disrupts the first pass, everybody else back to their own 9 m first.",
-      "fr": "Le joueur qui perd le ballon gêne la première passe, les autres reviennent d'abord aux 9 m."
+      "fr": "Le joueur qui perd le ballon gêne la première passe, les autres reviennent d'abord aux 9 m.",
+      "en": "The player who lost the ball disrupts the first pass, everybody else back to their own 9 m first."
+    },
+    "variants": {
+      "de-CH": "Gegner startet mit einem Spieler mehr; Rückzug mit Blick zum Ball (rückwärts laufen verboten); Punkte für verhinderte Gegenstösse.",
+      "fr": "L'adversaire part avec un joueur de plus ; repli en regardant le ballon ; points pour chaque contre empêché.",
+      "en": "The opponent starts with one player more; run back watching the ball; points for every fast break stopped."
+    },
+    "sketch": {
+      "court": "full",
+      "tokens": [
+        {
+          "id": "tw",
+          "side": "own",
+          "label": "TW",
+          "x": 0.7,
+          "y": 10
+        },
+        {
+          "id": "a1",
+          "side": "own",
+          "label": "1",
+          "x": 30.5,
+          "y": 15
+        },
+        {
+          "id": "a2",
+          "side": "own",
+          "label": "2",
+          "x": 29.2,
+          "y": 10
+        },
+        {
+          "id": "a3",
+          "side": "own",
+          "label": "3",
+          "x": 30.5,
+          "y": 5
+        },
+        {
+          "id": "d1",
+          "side": "opp",
+          "label": "1",
+          "x": 33.5,
+          "y": 16.5
+        },
+        {
+          "id": "d2",
+          "side": "opp",
+          "label": "2",
+          "x": 31.6,
+          "y": 7.6
+        }
+      ],
+      "arrows": [
+        {
+          "kind": "run",
+          "points": [
+            [
+              30.5,
+              15
+            ],
+            [
+              11,
+              13.4
+            ]
+          ]
+        },
+        {
+          "kind": "run",
+          "points": [
+            [
+              29.2,
+              10
+            ],
+            [
+              10.6,
+              9.6
+            ]
+          ]
+        },
+        {
+          "kind": "run",
+          "points": [
+            [
+              30.5,
+              5
+            ],
+            [
+              12,
+              6
+            ]
+          ]
+        },
+        {
+          "kind": "pass",
+          "points": [
+            [
+              31.6,
+              7.6
+            ],
+            [
+              15,
+              16.6
+            ]
+          ]
+        },
+        {
+          "kind": "run",
+          "points": [
+            [
+              33.5,
+              16.5
+            ],
+            [
+              15,
+              16.6
+            ]
+          ]
+        }
+      ],
+      "ball": {
+        "x": 31.6,
+        "y": 7.6
+      },
+      "cones": []
+    }
+  },
+  {
+    "id": "transition_3v2_back",
+    "focus": [
+      "transition_defence"
+    ],
+    "minutes": 12,
+    "players": "6-12",
+    "level": "basic",
+    "name": {
+      "de-CH": "Rückzug 3 gegen 2 nach Ballverlust",
+      "fr": "Repli à 2 contre 3 après la perte",
+      "en": "Getting back 2 against 3 after a turnover"
+    },
+    "setup": {
+      "de-CH": "Ganzes Feld. Drei Angreifer an der Mittellinie mit Ball, zwei Verteidiger einen Schritt weiter vorne, Torhüter.",
+      "fr": "Terrain entier. Trois attaquants à la ligne médiane avec ballon, deux défenseurs un pas plus loin, gardien.",
+      "en": "Full court. Three attackers at the centre line with the ball, two defenders a step further up, goalkeeper."
+    },
+    "procedure": {
+      "de-CH": "Auf Pfiff greifen die drei an, die zwei sprinten zurück und verteidigen in Unterzahl bis zum Abschluss.",
+      "fr": "Au coup de sifflet, les trois attaquent, les deux reviennent en sprint et défendent en infériorité jusqu'au tir.",
+      "en": "On the whistle the three attack, the two sprint back and defend outnumbered until the shot."
+    },
+    "coaching": {
+      "de-CH": "Zuerst die Mitte und den Ball sichern, Zeit gewinnen, bis Hilfe kommt; nicht zu früh herausgehen.",
+      "fr": "D'abord protéger l'axe et le ballon, gagner du temps jusqu'au retour des autres ; ne pas sortir trop tôt.",
+      "en": "Protect the middle and the ball first, win time until help arrives; do not step out too early."
+    },
+    "variants": {
+      "de-CH": "Dritter Verteidiger startet zwei Sekunden später; Angreifer müssen in acht Sekunden abschliessen.",
+      "fr": "Un troisième défenseur part deux secondes plus tard ; les attaquants doivent finir en huit secondes.",
+      "en": "A third defender starts two seconds later; attackers must finish within eight seconds."
+    },
+    "sketch": {
+      "court": "full",
+      "tokens": [
+        {
+          "id": "tw",
+          "side": "own",
+          "label": "TW",
+          "x": 0.7,
+          "y": 10
+        },
+        {
+          "id": "a1",
+          "side": "own",
+          "label": "1",
+          "x": 23.4,
+          "y": 13
+        },
+        {
+          "id": "a2",
+          "side": "own",
+          "label": "2",
+          "x": 24.6,
+          "y": 7
+        },
+        {
+          "id": "d1",
+          "side": "opp",
+          "label": "1",
+          "x": 20.6,
+          "y": 16.4
+        },
+        {
+          "id": "d2",
+          "side": "opp",
+          "label": "2",
+          "x": 20.2,
+          "y": 10
+        },
+        {
+          "id": "d3",
+          "side": "opp",
+          "label": "3",
+          "x": 20.6,
+          "y": 3.6
+        }
+      ],
+      "arrows": [
+        {
+          "kind": "run",
+          "points": [
+            [
+              23.4,
+              13
+            ],
+            [
+              8.4,
+              12
+            ]
+          ]
+        },
+        {
+          "kind": "run",
+          "points": [
+            [
+              24.6,
+              7
+            ],
+            [
+              8.8,
+              7.8
+            ]
+          ]
+        },
+        {
+          "kind": "dribble",
+          "points": [
+            [
+              20.2,
+              10
+            ],
+            [
+              11.6,
+              10
+            ]
+          ]
+        },
+        {
+          "kind": "run",
+          "points": [
+            [
+              20.6,
+              16.4
+            ],
+            [
+              12.6,
+              16.2
+            ]
+          ]
+        },
+        {
+          "kind": "run",
+          "points": [
+            [
+              20.6,
+              3.6
+            ],
+            [
+              12.6,
+              3.8
+            ]
+          ]
+        }
+      ],
+      "ball": {
+        "x": 20.2,
+        "y": 10
+      },
+      "cones": []
+    }
+  },
+  {
+    "id": "transition_waves_game",
+    "focus": [
+      "transition_defence",
+      "fast_break"
+    ],
+    "minutes": 15,
+    "players": "8-14",
+    "level": "advanced",
+    "name": {
+      "de-CH": "Wellenspiel: Angriff, Ballverlust, Rückzug",
+      "fr": "Jeu de vagues : attaque, perte, repli",
+      "en": "Waves game: attack, turnover, back"
+    },
+    "setup": {
+      "de-CH": "Ganzes Feld, 3 gegen 3, zwei Torhüter, weitere Dreiergruppen an den Seitenlinien.",
+      "fr": "Terrain entier, 3 contre 3, deux gardiens, d'autres trios le long des touches.",
+      "en": "Full court, 3 on 3, two goalkeepers, more groups of three at the side lines."
+    },
+    "procedure": {
+      "de-CH": "Team A greift an. Nach dem Abschluss wirft der Torhüter sofort ab, Team B kontert, Team A läuft zurück. Danach kommt Team C gegen B.",
+      "fr": "L'équipe A attaque. Après le tir, le gardien relance tout de suite, l'équipe B contre, A revient. Puis l'équipe C affronte B.",
+      "en": "Team A attacks. After the shot the goalkeeper throws out at once, team B counters, team A runs back. Then team C plays against B."
+    },
+    "coaching": {
+      "de-CH": "Umschalten im Kopf vor dem Wurf: wer wirft, wer sichert. Rückzug auf dem kürzesten Weg zum eigenen Tor.",
+      "fr": "Penser la transition avant le tir : qui tire, qui assure. Repli par le chemin le plus court.",
+      "en": "Switch in the head before the shot: who shoots, who covers. Run back on the shortest way to the own goal."
+    },
+    "variants": {
+      "de-CH": "4 gegen 4; Tor im Gegenstoss zählt doppelt; Trainer bestimmt mit Zuruf, wer zurückläuft.",
+      "fr": "4 contre 4 ; un but en contre compte double ; l'entraîneur désigne qui revient.",
+      "en": "4 on 4; a fast break goal counts double; the coach calls who runs back."
+    },
+    "sketch": {
+      "court": "full",
+      "tokens": [
+        {
+          "id": "tw",
+          "side": "own",
+          "label": "TW",
+          "x": 0.7,
+          "y": 10
+        },
+        {
+          "id": "a1",
+          "side": "own",
+          "label": "1",
+          "x": 30,
+          "y": 14
+        },
+        {
+          "id": "a2",
+          "side": "own",
+          "label": "2",
+          "x": 29.2,
+          "y": 10
+        },
+        {
+          "id": "a3",
+          "side": "own",
+          "label": "3",
+          "x": 30,
+          "y": 6
+        },
+        {
+          "id": "d1",
+          "side": "opp",
+          "label": "1",
+          "x": 33.5,
+          "y": 16.5
+        },
+        {
+          "id": "d2",
+          "side": "opp",
+          "label": "2",
+          "x": 32.8,
+          "y": 10
+        },
+        {
+          "id": "d3",
+          "side": "opp",
+          "label": "3",
+          "x": 33.5,
+          "y": 3.5
+        },
+        {
+          "id": "otw",
+          "side": "opp",
+          "label": "TW",
+          "x": 39.3,
+          "y": 10
+        }
+      ],
+      "arrows": [
+        {
+          "kind": "pass",
+          "points": [
+            [
+              29.2,
+              10
+            ],
+            [
+              39.6,
+              11.1
+            ]
+          ]
+        },
+        {
+          "kind": "run",
+          "points": [
+            [
+              30,
+              14
+            ],
+            [
+              11,
+              13
+            ]
+          ]
+        },
+        {
+          "kind": "run",
+          "points": [
+            [
+              30,
+              6
+            ],
+            [
+              11,
+              7
+            ]
+          ]
+        },
+        {
+          "kind": "pass",
+          "points": [
+            [
+              39.3,
+              10
+            ],
+            [
+              15,
+              16.4
+            ]
+          ]
+        },
+        {
+          "kind": "run",
+          "points": [
+            [
+              33.5,
+              16.5
+            ],
+            [
+              15,
+              16.4
+            ]
+          ]
+        }
+      ],
+      "ball": {
+        "x": 29.2,
+        "y": 10
+      },
+      "cones": []
     }
   },
   {
@@ -205,18 +3468,587 @@
     "level": "basic",
     "name": {
       "de-CH": "Gegenstoss in drei Wellen",
-      "en": "Fast break in three waves",
-      "fr": "Contre-attaque en trois vagues"
+      "fr": "Contre-attaque en trois vagues",
+      "en": "Fast break in three waves"
     },
     "setup": {
       "de-CH": "Nach Parade langer Pass auf die Flügel (1. Welle), Rückraum folgt (2. Welle), Kreis zuletzt.",
-      "en": "After a save a long pass to the wings (first wave), back court follows (second wave), pivot last.",
-      "fr": "Après un arrêt longue passe aux ailiers (1re vague), la base arrière suit (2e vague), le pivot en dernier."
+      "fr": "Après un arrêt longue passe aux ailiers (1re vague), la base arrière suit (2e vague), le pivot en dernier.",
+      "en": "After a save a long pass to the wings (first wave), back court follows (second wave), pivot last."
+    },
+    "procedure": {
+      "de-CH": "Der Torhüter pariert und spielt lang auf einen Flügel. Ist der zu, kommt der Ball über die Rückraumspieler der 2. Welle, der Kreisläufer läuft in die Mitte nach.",
+      "fr": "Le gardien arrête et joue long sur une aile. Si elle est fermée, le ballon passe par les arrières de la 2e vague, le pivot suit dans l'axe.",
+      "en": "The goalkeeper saves and plays long to a wing. If that is closed, the ball goes through the back court players of the second wave, the pivot follows in the middle."
     },
     "coaching": {
       "de-CH": "Flügel starten beim Wurf des Gegners, Torhüter schaut zuerst lang.",
-      "en": "Wings start when the opponent shoots, goalkeeper looks long first.",
-      "fr": "Les ailiers partent au tir adverse, le gardien regarde d'abord loin."
+      "fr": "Les ailiers partent au tir adverse, le gardien regarde d'abord loin.",
+      "en": "Wings start when the opponent shoots, goalkeeper looks long first."
+    },
+    "variants": {
+      "de-CH": "Mit zwei zurücklaufenden Verteidigern; Abschluss spätestens nach zehn Sekunden; Start nach Gegentor (Schnelle Mitte).",
+      "fr": "Avec deux défenseurs qui reviennent ; finir en dix secondes ; départ après un but encaissé (engagement rapide).",
+      "en": "With two defenders running back; finish within ten seconds; start after a goal against (quick throw-off)."
+    },
+    "sketch": {
+      "court": "full",
+      "tokens": [
+        {
+          "id": "tw",
+          "side": "own",
+          "label": "TW",
+          "x": 0.7,
+          "y": 10
+        },
+        {
+          "id": "a1",
+          "side": "own",
+          "label": "LA",
+          "x": 7,
+          "y": 18.5
+        },
+        {
+          "id": "a2",
+          "side": "own",
+          "label": "RA",
+          "x": 7,
+          "y": 1.5
+        },
+        {
+          "id": "a3",
+          "side": "own",
+          "label": "RL",
+          "x": 9,
+          "y": 13
+        },
+        {
+          "id": "a4",
+          "side": "own",
+          "label": "RR",
+          "x": 9,
+          "y": 7
+        },
+        {
+          "id": "a5",
+          "side": "own",
+          "label": "KM",
+          "x": 8,
+          "y": 10
+        }
+      ],
+      "arrows": [
+        {
+          "kind": "run",
+          "points": [
+            [
+              7,
+              18.5
+            ],
+            [
+              30,
+              17.6
+            ]
+          ]
+        },
+        {
+          "kind": "run",
+          "points": [
+            [
+              7,
+              1.5
+            ],
+            [
+              30,
+              2.4
+            ]
+          ]
+        },
+        {
+          "kind": "run",
+          "points": [
+            [
+              9,
+              13
+            ],
+            [
+              24,
+              13
+            ]
+          ]
+        },
+        {
+          "kind": "run",
+          "points": [
+            [
+              9,
+              7
+            ],
+            [
+              24,
+              7
+            ]
+          ]
+        },
+        {
+          "kind": "run",
+          "points": [
+            [
+              8,
+              10
+            ],
+            [
+              20,
+              10
+            ]
+          ]
+        },
+        {
+          "kind": "pass",
+          "points": [
+            [
+              0.7,
+              10
+            ],
+            [
+              30,
+              17.6
+            ]
+          ]
+        }
+      ],
+      "ball": {
+        "x": 0.7,
+        "y": 10
+      },
+      "cones": []
+    }
+  },
+  {
+    "id": "fast_break_2v1",
+    "focus": [
+      "fast_break"
+    ],
+    "minutes": 12,
+    "players": "6-12",
+    "level": "basic",
+    "name": {
+      "de-CH": "Gegenstoss 2 gegen 1",
+      "fr": "Contre-attaque à 2 contre 1",
+      "en": "Fast break 2 on 1"
+    },
+    "setup": {
+      "de-CH": "Zwei Angreifer an der Mittellinie, ein Verteidiger auf 9 m, Torhüter.",
+      "fr": "Deux attaquants à la ligne médiane, un défenseur à 9 m, gardien.",
+      "en": "Two attackers at the centre line, one defender at 9 m, goalkeeper."
+    },
+    "procedure": {
+      "de-CH": "Der Ballführer läuft auf den Verteidiger zu und bindet ihn, der Mitspieler hält Abstand. Pass im richtigen Moment, Abschluss ohne Prellen.",
+      "fr": "Le porteur fonce sur le défenseur pour le fixer, le partenaire garde la distance. Passe au bon moment, finition sans dribble.",
+      "en": "The ball carrier runs at the defender to tie him, the team-mate keeps his distance. Pass at the right moment, finish without bouncing."
+    },
+    "coaching": {
+      "de-CH": "Breite halten (mindestens 4 m), auf den Verteidiger zulaufen, nicht am Verteidiger vorbei passen, wenn er schon entschieden hat.",
+      "fr": "Garder la largeur (au moins 4 m), aller vers le défenseur, ne pas passer s'il a déjà choisi.",
+      "en": "Keep the width (at least 4 m), run at the defender, do not pass once he has already decided."
+    },
+    "variants": {
+      "de-CH": "3 gegen 2; Verteidiger startet hinter den Angreifern; Torhüter spielt den ersten Pass.",
+      "fr": "3 contre 2 ; le défenseur part derrière les attaquants ; le gardien fait la première passe.",
+      "en": "3 on 2; the defender starts behind the attackers; the goalkeeper plays the first pass."
+    },
+    "sketch": {
+      "court": "half",
+      "tokens": [
+        {
+          "id": "otw",
+          "side": "opp",
+          "label": "TW",
+          "x": 39.3,
+          "y": 10
+        },
+        {
+          "id": "a1",
+          "side": "own",
+          "label": "1",
+          "x": 21.2,
+          "y": 13
+        },
+        {
+          "id": "a2",
+          "side": "own",
+          "label": "2",
+          "x": 21.2,
+          "y": 7
+        },
+        {
+          "id": "d1",
+          "side": "opp",
+          "label": "1",
+          "x": 31,
+          "y": 10
+        }
+      ],
+      "arrows": [
+        {
+          "kind": "dribble",
+          "points": [
+            [
+              21.2,
+              13
+            ],
+            [
+              28.4,
+              12.4
+            ]
+          ]
+        },
+        {
+          "kind": "run",
+          "points": [
+            [
+              21.2,
+              7
+            ],
+            [
+              31.4,
+              6.6
+            ]
+          ]
+        },
+        {
+          "kind": "pass",
+          "points": [
+            [
+              28.4,
+              12.4
+            ],
+            [
+              31.4,
+              6.6
+            ]
+          ]
+        },
+        {
+          "kind": "pass",
+          "points": [
+            [
+              31.4,
+              6.6
+            ],
+            [
+              39.6,
+              8.9
+            ]
+          ]
+        }
+      ],
+      "ball": {
+        "x": 21.2,
+        "y": 13
+      },
+      "cones": []
+    }
+  },
+  {
+    "id": "fast_break_quick_throwoff",
+    "focus": [
+      "fast_break"
+    ],
+    "minutes": 12,
+    "players": "8-14",
+    "level": "advanced",
+    "name": {
+      "de-CH": "Schnelle Mitte",
+      "fr": "Engagement rapide",
+      "en": "Quick throw-off"
+    },
+    "setup": {
+      "de-CH": "Ganzes Feld. Nach einem Gegentor holt der Torhüter den Ball, ein Spieler steht am Mittelpunkt.",
+      "fr": "Terrain entier. Après un but encaissé, le gardien récupère le ballon, un joueur se place au centre.",
+      "en": "Full court. After a goal against the goalkeeper gets the ball, one player stands at the centre spot."
+    },
+    "procedure": {
+      "de-CH": "Der Torhüter spielt sofort zum Spieler am Mittelpunkt, der mit einem Fuss auf der Mittellinie anwirft. Die Flügel und der Rückraum laufen schon an und greifen die noch ungeordnete Abwehr an.",
+      "fr": "Le gardien passe tout de suite au joueur au centre, qui engage un pied sur la ligne. Ailiers et arrières sont déjà lancés et attaquent la défense pas encore en place.",
+      "en": "The goalkeeper passes at once to the player at the centre spot, who throws off with one foot on the centre line. Wings and back court are already running and attack the defence that is not set yet."
+    },
+    "coaching": {
+      "de-CH": "Regel: beim Anwurf alle Mitspieler in der eigenen Hälfte. Wer die Mitte macht, ist vorher klar.",
+      "fr": "Règle : à l'engagement tous les partenaires dans leur moitié. Celui qui engage est désigné à l'avance.",
+      "en": "Rule: at the throw-off all team-mates in their own half. Who takes the throw-off is clear beforehand."
+    },
+    "variants": {
+      "de-CH": "Gegner läuft mit drei Spielern zurück; Abschluss in acht Sekunden; Mitte auch nach Ballgewinn im Feld.",
+      "fr": "L'adversaire revient avec trois joueurs ; finir en huit secondes ; engagement rapide aussi après une récupération.",
+      "en": "The opponent runs back with three players; finish within eight seconds; quick restart also after winning the ball."
+    },
+    "sketch": {
+      "court": "full",
+      "tokens": [
+        {
+          "id": "tw",
+          "side": "own",
+          "label": "TW",
+          "x": 0.7,
+          "y": 10
+        },
+        {
+          "id": "a1",
+          "side": "own",
+          "label": "1",
+          "x": 19.4,
+          "y": 10
+        },
+        {
+          "id": "a2",
+          "side": "own",
+          "label": "2",
+          "x": 17,
+          "y": 14.6
+        },
+        {
+          "id": "a3",
+          "side": "own",
+          "label": "3",
+          "x": 17,
+          "y": 5.4
+        },
+        {
+          "id": "d1",
+          "side": "opp",
+          "label": "1",
+          "x": 25,
+          "y": 12.8
+        },
+        {
+          "id": "d2",
+          "side": "opp",
+          "label": "2",
+          "x": 26,
+          "y": 7
+        },
+        {
+          "id": "otw",
+          "side": "opp",
+          "label": "TW",
+          "x": 39.3,
+          "y": 10
+        }
+      ],
+      "arrows": [
+        {
+          "kind": "pass",
+          "points": [
+            [
+              0.7,
+              10
+            ],
+            [
+              19.4,
+              10
+            ]
+          ]
+        },
+        {
+          "kind": "run",
+          "points": [
+            [
+              17,
+              14.6
+            ],
+            [
+              29,
+              14.6
+            ]
+          ]
+        },
+        {
+          "kind": "run",
+          "points": [
+            [
+              17,
+              5.4
+            ],
+            [
+              30,
+              5.4
+            ]
+          ]
+        },
+        {
+          "kind": "pass",
+          "points": [
+            [
+              19.4,
+              10
+            ],
+            [
+              29,
+              14.6
+            ]
+          ]
+        },
+        {
+          "kind": "run",
+          "points": [
+            [
+              25,
+              12.8
+            ],
+            [
+              32,
+              12.6
+            ]
+          ]
+        }
+      ],
+      "ball": {
+        "x": 0.7,
+        "y": 10
+      },
+      "cones": []
+    }
+  },
+  {
+    "id": "fast_break_3v2",
+    "focus": [
+      "fast_break",
+      "passing"
+    ],
+    "minutes": 15,
+    "players": "6-12",
+    "level": "basic",
+    "name": {
+      "de-CH": "Zweite Welle 3 gegen 2",
+      "fr": "Deuxième vague à 3 contre 2",
+      "en": "Second wave 3 on 2"
+    },
+    "setup": {
+      "de-CH": "Drei Rückraumspieler kommen von der Mittellinie gegen zwei Verteidiger auf 8 bis 9 m, Torhüter.",
+      "fr": "Trois arrières arrivent de la ligne médiane contre deux défenseurs à 8 ou 9 m, gardien.",
+      "en": "Three back court players come from the centre line against two defenders at 8 to 9 m, goalkeeper."
+    },
+    "procedure": {
+      "de-CH": "Die drei passen sich im Lauf den Ball zu und stossen auf die Lücken. Ziel: in maximal drei Pässen einen freien Wurf herausspielen.",
+      "fr": "Les trois se passent le ballon en course et attaquent les intervalles. Objectif : un tir libre en trois passes au plus.",
+      "en": "The three pass to each other on the run and drive at the gaps. Aim: a free shot within three passes at most."
+    },
+    "coaching": {
+      "de-CH": "Tempo halten, Pässe nach vorne in den Lauf, der Ballführer bindet immer einen Verteidiger.",
+      "fr": "Garder le rythme, passes vers l'avant dans la course, le porteur fixe toujours un défenseur.",
+      "en": "Keep the speed, passes forward into the run, the ball carrier always ties a defender."
+    },
+    "variants": {
+      "de-CH": "Mit Kreisläufer der nachkommt (4 gegen 3); Verteidiger dürfen offensiv herausgehen; Start nach Pass des Torhüters.",
+      "fr": "Avec un pivot qui arrive (4 contre 3) ; les défenseurs peuvent sortir ; départ sur passe du gardien.",
+      "en": "With a pivot arriving (4 on 3); defenders may step out; start after a pass from the goalkeeper."
+    },
+    "sketch": {
+      "court": "half",
+      "tokens": [
+        {
+          "id": "otw",
+          "side": "opp",
+          "label": "TW",
+          "x": 39.3,
+          "y": 10
+        },
+        {
+          "id": "a1",
+          "side": "own",
+          "label": "RL",
+          "x": 22,
+          "y": 15
+        },
+        {
+          "id": "a2",
+          "side": "own",
+          "label": "RM",
+          "x": 21,
+          "y": 10
+        },
+        {
+          "id": "a3",
+          "side": "own",
+          "label": "RR",
+          "x": 22,
+          "y": 5
+        },
+        {
+          "id": "d1",
+          "side": "opp",
+          "label": "1",
+          "x": 31.53,
+          "y": 12.99
+        },
+        {
+          "id": "d2",
+          "side": "opp",
+          "label": "2",
+          "x": 31.53,
+          "y": 7.01
+        }
+      ],
+      "arrows": [
+        {
+          "kind": "run",
+          "points": [
+            [
+              22,
+              15
+            ],
+            [
+              28.4,
+              14.6
+            ]
+          ]
+        },
+        {
+          "kind": "dribble",
+          "points": [
+            [
+              21,
+              10
+            ],
+            [
+              28,
+              10
+            ]
+          ]
+        },
+        {
+          "kind": "run",
+          "points": [
+            [
+              22,
+              5
+            ],
+            [
+              28.6,
+              5.4
+            ]
+          ]
+        },
+        {
+          "kind": "pass",
+          "points": [
+            [
+              28,
+              10
+            ],
+            [
+              28.4,
+              14.6
+            ]
+          ]
+        }
+      ],
+      "ball": {
+        "x": 21,
+        "y": 10
+      },
+      "cones": []
     }
   },
   {
@@ -229,18 +4061,836 @@
     "level": "basic",
     "name": {
       "de-CH": "6:0 Verschieben und Helfen",
-      "en": "6-0 shifting and help",
-      "fr": "6-0 coulisser et aider"
+      "fr": "6-0 coulisser et aider",
+      "en": "6-0 shifting and help"
     },
     "setup": {
       "de-CH": "Angriff spielt den Ball schnell um den Kreis, Abwehr verschiebt ballorientiert und hilft zur Mitte.",
-      "en": "The attack passes quickly around, the defence shifts to the ball and helps to the centre.",
-      "fr": "L'attaque fait circuler vite, la défense coulisse côté ballon et aide vers le centre."
+      "fr": "L'attaque fait circuler vite, la défense coulisse côté ballon et aide vers le centre.",
+      "en": "The attack passes quickly around, the defence shifts to the ball and helps to the centre."
+    },
+    "procedure": {
+      "de-CH": "Erst ohne Torwurf: der Verteidiger am Ball tritt heraus, die Nachbarn sichern nach innen. Danach darf der Angriff nach fünf Pässen werfen.",
+      "fr": "D'abord sans tir : le défenseur face au ballon sort, ses voisins couvrent vers l'intérieur. Ensuite l'attaque peut tirer après cinq passes.",
+      "en": "First without shots: the defender at the ball steps out, his neighbours cover inside. Then the attack may shoot after five passes."
     },
     "coaching": {
       "de-CH": "Kommunikation, Arme oben, Nebenmann sichert ab.",
-      "en": "Talk, arms up, the neighbour covers.",
-      "fr": "Communication, bras levés, le voisin couvre."
+      "fr": "Communication, bras levés, le voisin couvre.",
+      "en": "Talk, arms up, the neighbour covers."
+    },
+    "variants": {
+      "de-CH": "Mit Kreisläufer, der wandert; Angriff mit Kreuzen; Abwehr spielt aktiv mit Ballgewinn als Punkt.",
+      "fr": "Avec un pivot qui se déplace ; attaque avec croisés ; défense active, une interception vaut un point.",
+      "en": "With a pivot who moves; attack with crosses; active defence, winning the ball scores a point."
+    },
+    "sketch": {
+      "court": "half",
+      "tokens": [
+        {
+          "id": "tw",
+          "side": "own",
+          "label": "TW",
+          "x": 39.3,
+          "y": 10
+        },
+        {
+          "id": "d1",
+          "side": "own",
+          "label": "1",
+          "x": 37.85,
+          "y": 17.95
+        },
+        {
+          "id": "d2",
+          "side": "own",
+          "label": "2",
+          "x": 34.62,
+          "y": 15.65
+        },
+        {
+          "id": "d3",
+          "side": "own",
+          "label": "3",
+          "x": 33.21,
+          "y": 11.95
+        },
+        {
+          "id": "d4",
+          "side": "own",
+          "label": "4",
+          "x": 33.21,
+          "y": 8.05
+        },
+        {
+          "id": "d5",
+          "side": "own",
+          "label": "5",
+          "x": 34.62,
+          "y": 4.35
+        },
+        {
+          "id": "d6",
+          "side": "own",
+          "label": "6",
+          "x": 37.85,
+          "y": 2.05
+        },
+        {
+          "id": "la",
+          "side": "opp",
+          "label": "LA",
+          "x": 36.2,
+          "y": 19.2
+        },
+        {
+          "id": "rl",
+          "side": "opp",
+          "label": "RL",
+          "x": 30.4,
+          "y": 16.45
+        },
+        {
+          "id": "rm",
+          "side": "opp",
+          "label": "RM",
+          "x": 29,
+          "y": 10
+        },
+        {
+          "id": "rr",
+          "side": "opp",
+          "label": "RR",
+          "x": 30.4,
+          "y": 3.55
+        },
+        {
+          "id": "ra",
+          "side": "opp",
+          "label": "RA",
+          "x": 36.2,
+          "y": 0.8
+        },
+        {
+          "id": "km",
+          "side": "opp",
+          "label": "KM",
+          "x": 33.7,
+          "y": 10
+        }
+      ],
+      "arrows": [
+        {
+          "kind": "pass",
+          "points": [
+            [
+              29,
+              10
+            ],
+            [
+              30.4,
+              16.45
+            ]
+          ]
+        },
+        {
+          "kind": "run",
+          "points": [
+            [
+              34.62,
+              15.65
+            ],
+            [
+              32.87,
+              15.93
+            ]
+          ]
+        },
+        {
+          "kind": "run",
+          "points": [
+            [
+              33.21,
+              11.95
+            ],
+            [
+              33.54,
+              13.62
+            ]
+          ]
+        },
+        {
+          "kind": "run",
+          "points": [
+            [
+              33.21,
+              8.05
+            ],
+            [
+              33.2,
+              10.49
+            ]
+          ]
+        }
+      ],
+      "ball": {
+        "x": 29,
+        "y": 10
+      },
+      "cones": []
+    }
+  },
+  {
+    "id": "defence_1v1_footwork",
+    "focus": [
+      "defence"
+    ],
+    "minutes": 10,
+    "players": "2-14",
+    "level": "basic",
+    "name": {
+      "de-CH": "Abwehr 1 gegen 1: Beinarbeit",
+      "fr": "Défense 1 contre 1 : travail des appuis",
+      "en": "Defence 1 on 1: footwork"
+    },
+    "setup": {
+      "de-CH": "Paare in einer 4 m breiten Gasse zwischen Hütchen, ein Angreifer mit Ball, ein Verteidiger.",
+      "fr": "Par paires dans un couloir de 4 m entre plots, un attaquant avec ballon, un défenseur.",
+      "en": "Pairs in a 4 m wide lane between cones, one attacker with the ball, one defender."
+    },
+    "procedure": {
+      "de-CH": "Der Angreifer versucht mit Prellen und Täuschungen durch die Gasse zu kommen, der Verteidiger stellt ihn mit Seitschritten und drängt ihn zur Seite ab. Nach drei Versuchen tauschen.",
+      "fr": "L'attaquant tente de passer le couloir en dribblant et feintant, le défenseur le contient en pas chassés et l'oriente vers le côté. Changer après trois essais.",
+      "en": "The attacker tries to get through the lane with bounces and feints, the defender stops him with side steps and forces him to the side. Swap after three tries."
+    },
+    "coaching": {
+      "de-CH": "Tief und breit stehen, Seitschritte statt Überkreuzen, Arm auf der Wurfarmseite, Körper vor den Angreifer.",
+      "fr": "Rester bas et large, pas chassés sans croiser, bras du côté du bras de tir, corps devant l'attaquant.",
+      "en": "Stand low and wide, side steps instead of crossing the feet, arm on the throwing-arm side, body in front of the attacker."
+    },
+    "variants": {
+      "de-CH": "Angreifer ohne Ball (nur Beinarbeit); Gasse breiter; mit Torwurf, wenn der Angreifer durch ist.",
+      "fr": "Attaquant sans ballon (seulement les appuis) ; couloir plus large ; avec tir si l'attaquant passe.",
+      "en": "Attacker without the ball (footwork only); a wider lane; with a shot when the attacker gets through."
+    },
+    "sketch": {
+      "court": "half",
+      "tokens": [
+        {
+          "id": "tw",
+          "side": "own",
+          "label": "TW",
+          "x": 39.3,
+          "y": 10
+        },
+        {
+          "id": "a1",
+          "side": "own",
+          "label": "1",
+          "x": 31.6,
+          "y": 10
+        },
+        {
+          "id": "d1",
+          "side": "opp",
+          "label": "1",
+          "x": 28.6,
+          "y": 10
+        }
+      ],
+      "arrows": [
+        {
+          "kind": "run",
+          "points": [
+            [
+              31.6,
+              10
+            ],
+            [
+              31.4,
+              11.8
+            ]
+          ]
+        },
+        {
+          "kind": "dribble",
+          "points": [
+            [
+              28.6,
+              10
+            ],
+            [
+              29.8,
+              11.6
+            ],
+            [
+              30.6,
+              12.6
+            ]
+          ]
+        }
+      ],
+      "ball": {
+        "x": 28.6,
+        "y": 10
+      },
+      "cones": [
+        [
+          30.67,
+          13.27
+        ],
+        [
+          30.67,
+          6.73
+        ],
+        [
+          28.16,
+          13.45
+        ],
+        [
+          28.16,
+          6.55
+        ]
+      ]
+    }
+  },
+  {
+    "id": "defence_step_out",
+    "focus": [
+      "defence"
+    ],
+    "minutes": 12,
+    "players": "6-12",
+    "level": "basic",
+    "name": {
+      "de-CH": "Heraustreten und Zurücksinken",
+      "fr": "Sortir et reculer",
+      "en": "Step out and drop back"
+    },
+    "setup": {
+      "de-CH": "Drei Verteidiger an der 6-m-Linie gegen drei Rückraumspieler, die sich den Ball zupassen.",
+      "fr": "Trois défenseurs sur les 6 m contre trois arrières qui se font des passes.",
+      "en": "Three defenders at the 6 m line against three back court players passing the ball."
+    },
+    "procedure": {
+      "de-CH": "Der Verteidiger gegenüber dem Ball tritt bis 9 m heraus und stört, sobald der Ball weg ist, sinkt er zurück. Der nächste Verteidiger tritt zum neuen Ballführer heraus.",
+      "fr": "Le défenseur face au ballon sort jusqu'à 9 m et gêne ; dès que le ballon part, il recule. Le suivant sort sur le nouveau porteur.",
+      "en": "The defender facing the ball steps out to 9 m and disturbs; as soon as the ball has gone he drops back. The next defender steps out to the new ball carrier."
+    },
+    "coaching": {
+      "de-CH": "Heraustreten mit dem Pass, nicht danach; schräg zurück zur Mitte sinken; Arme oben gegen den Pass.",
+      "fr": "Sortir sur la passe, pas après ; reculer en biais vers le centre ; bras levés contre la passe.",
+      "en": "Step out with the pass, not after it; drop back diagonally to the centre; arms up against the pass."
+    },
+    "variants": {
+      "de-CH": "Angreifer dürfen nach fünf Pässen werfen; mit Kreisläufer; vier gegen vier über die ganze Breite.",
+      "fr": "Les attaquants peuvent tirer après cinq passes ; avec pivot ; quatre contre quatre sur toute la largeur.",
+      "en": "Attackers may shoot after five passes; with a pivot; four on four across the full width."
+    },
+    "sketch": {
+      "court": "half",
+      "tokens": [
+        {
+          "id": "tw",
+          "side": "own",
+          "label": "TW",
+          "x": 39.3,
+          "y": 10
+        },
+        {
+          "id": "a1",
+          "side": "own",
+          "label": "1",
+          "x": 33.8,
+          "y": 14.3
+        },
+        {
+          "id": "a2",
+          "side": "own",
+          "label": "2",
+          "x": 33.2,
+          "y": 10
+        },
+        {
+          "id": "a3",
+          "side": "own",
+          "label": "3",
+          "x": 33.8,
+          "y": 5.7
+        },
+        {
+          "id": "d1",
+          "side": "opp",
+          "label": "RL",
+          "x": 30.4,
+          "y": 16.45
+        },
+        {
+          "id": "d2",
+          "side": "opp",
+          "label": "RM",
+          "x": 28.4,
+          "y": 10
+        },
+        {
+          "id": "d3",
+          "side": "opp",
+          "label": "RR",
+          "x": 30.4,
+          "y": 3.55
+        }
+      ],
+      "arrows": [
+        {
+          "kind": "run",
+          "points": [
+            [
+              33.2,
+              10
+            ],
+            [
+              30.6,
+              10
+            ]
+          ]
+        },
+        {
+          "kind": "pass",
+          "points": [
+            [
+              28.4,
+              10
+            ],
+            [
+              30.4,
+              16.45
+            ]
+          ]
+        },
+        {
+          "kind": "run",
+          "points": [
+            [
+              33.8,
+              14.3
+            ],
+            [
+              31.97,
+              15.1
+            ]
+          ]
+        }
+      ],
+      "ball": {
+        "x": 28.4,
+        "y": 10
+      },
+      "cones": []
+    }
+  },
+  {
+    "id": "defence_pivot_handover",
+    "focus": [
+      "defence",
+      "pivot"
+    ],
+    "minutes": 12,
+    "players": "6-10",
+    "level": "advanced",
+    "name": {
+      "de-CH": "Kreisläufer übergeben und übernehmen",
+      "fr": "Transmettre et reprendre le pivot",
+      "en": "Hand over and take over the pivot"
+    },
+    "setup": {
+      "de-CH": "Zwei Innenverteidiger gegen einen Kreisläufer, zwei Rückraumspieler spielen ihn an, Torhüter.",
+      "fr": "Deux défenseurs centraux contre un pivot, deux arrières cherchent à le servir, gardien.",
+      "en": "Two central defenders against a pivot, two back court players try to find him, goalkeeper."
+    },
+    "procedure": {
+      "de-CH": "Der Kreisläufer wandert entlang der 6-m-Linie. Der Verteidiger, in dessen Raum er ist, übernimmt ihn, der andere gibt ihn mit einem Zuruf ab und sichert vorne.",
+      "fr": "Le pivot se déplace le long des 6 m. Le défenseur dont il entre dans la zone le reprend, l'autre le transmet à la voix et couvre devant.",
+      "en": "The pivot moves along the 6 m line. The defender whose space he enters takes him over, the other hands him over with a call and covers in front."
+    },
+    "coaching": {
+      "de-CH": "Laut übergeben («hab ihn»), Kreisläufer nie in den Rücken lassen, Körperkontakt halten.",
+      "fr": "Transmettre à voix haute (« je l'ai »), ne jamais laisser le pivot dans le dos, garder le contact.",
+      "en": "Hand over loudly ('got him'), never let the pivot get behind you, keep body contact."
+    },
+    "variants": {
+      "de-CH": "Mit Sperre des Kreisläufers für einen Rückraumspieler; drei Verteidiger; Angriff darf werfen.",
+      "fr": "Avec écran du pivot pour un arrière ; trois défenseurs ; l'attaque peut tirer.",
+      "en": "With the pivot screening for a back court player; three defenders; the attack may shoot."
+    },
+    "sketch": {
+      "court": "half",
+      "tokens": [
+        {
+          "id": "tw",
+          "side": "own",
+          "label": "TW",
+          "x": 39.3,
+          "y": 10
+        },
+        {
+          "id": "a1",
+          "side": "own",
+          "label": "1",
+          "x": 33.37,
+          "y": 13.03
+        },
+        {
+          "id": "a2",
+          "side": "own",
+          "label": "2",
+          "x": 33.37,
+          "y": 6.97
+        },
+        {
+          "id": "d1",
+          "side": "opp",
+          "label": "KM",
+          "x": 33.7,
+          "y": 10.6
+        },
+        {
+          "id": "d2",
+          "side": "opp",
+          "label": "RM",
+          "x": 29,
+          "y": 10
+        },
+        {
+          "id": "d3",
+          "side": "opp",
+          "label": "RL",
+          "x": 30.4,
+          "y": 16.45
+        }
+      ],
+      "arrows": [
+        {
+          "kind": "run",
+          "points": [
+            [
+              33.7,
+              10.6
+            ],
+            [
+              33.7,
+              8.4
+            ]
+          ]
+        },
+        {
+          "kind": "pass",
+          "points": [
+            [
+              30.4,
+              16.45
+            ],
+            [
+              29,
+              10
+            ]
+          ]
+        }
+      ],
+      "ball": {
+        "x": 30.4,
+        "y": 16.45
+      },
+      "cones": []
+    }
+  },
+  {
+    "id": "defence_block",
+    "focus": [
+      "defence",
+      "goalkeeping"
+    ],
+    "minutes": 10,
+    "players": "3-8",
+    "level": "basic",
+    "name": {
+      "de-CH": "Block gegen den Rückraumwurf",
+      "fr": "Contre sur le tir de loin",
+      "en": "Blocking the back court shot"
+    },
+    "setup": {
+      "de-CH": "Ein Werfer auf 10 m, ein Blockspieler auf 8 m, Torhüter. Block und Torhüter sprechen ab, wer welche Ecke nimmt.",
+      "fr": "Un tireur à 10 m, un contreur à 8 m, gardien. Contreur et gardien se partagent les coins.",
+      "en": "A shooter at 10 m, a blocker at 8 m, goalkeeper. Blocker and goalkeeper agree who takes which corner."
+    },
+    "procedure": {
+      "de-CH": "Der Werfer bekommt den Ball und wirft. Der Blockspieler springt mit beiden Armen auf der Wurfarmseite, der Torhüter deckt die andere Ecke.",
+      "fr": "Le tireur reçoit et tire. Le contreur saute bras tendus du côté du bras de tir, le gardien couvre l'autre coin.",
+      "en": "The shooter gets the ball and shoots. The blocker jumps with both arms on the throwing-arm side, the goalkeeper covers the other corner."
+    },
+    "coaching": {
+      "de-CH": "Spät springen (erst mit dem Wurfarm), Arme eng und hoch, Augen offen.",
+      "fr": "Sauter tard (avec le bras de tir), bras serrés et hauts, yeux ouverts.",
+      "en": "Jump late (with the throwing arm), arms close together and high, eyes open."
+    },
+    "variants": {
+      "de-CH": "Werfer darf auch durchbrechen; zwei Werfer im Wechsel; Block ohne Sprung gegen Schlagwurf.",
+      "fr": "Le tireur peut aussi déborder ; deux tireurs en alternance ; contre sans saut contre un tir à l'appui.",
+      "en": "The shooter may also break through; two shooters in turn; a block without jumping against a set shot."
+    },
+    "sketch": {
+      "court": "half",
+      "tokens": [
+        {
+          "id": "tw",
+          "side": "own",
+          "label": "TW",
+          "x": 39.3,
+          "y": 10
+        },
+        {
+          "id": "a1",
+          "side": "own",
+          "label": "1",
+          "x": 32.2,
+          "y": 10
+        },
+        {
+          "id": "d1",
+          "side": "opp",
+          "label": "1",
+          "x": 28.8,
+          "y": 10
+        },
+        {
+          "id": "d2",
+          "side": "opp",
+          "label": "2",
+          "x": 30.4,
+          "y": 16.45
+        }
+      ],
+      "arrows": [
+        {
+          "kind": "pass",
+          "points": [
+            [
+              30.4,
+              16.45
+            ],
+            [
+              28.8,
+              10
+            ]
+          ]
+        },
+        {
+          "kind": "run",
+          "points": [
+            [
+              32.2,
+              10
+            ],
+            [
+              31.4,
+              10
+            ]
+          ]
+        },
+        {
+          "kind": "pass",
+          "points": [
+            [
+              28.8,
+              10
+            ],
+            [
+              39.6,
+              11.1
+            ]
+          ]
+        }
+      ],
+      "ball": {
+        "x": 30.4,
+        "y": 16.45
+      },
+      "cones": []
+    }
+  },
+  {
+    "id": "defence_5_1_advanced",
+    "focus": [
+      "defence"
+    ],
+    "minutes": 15,
+    "players": "12",
+    "level": "advanced",
+    "name": {
+      "de-CH": "5:1: der Vorgezogene stört",
+      "fr": "5-1 : l'avancé gêne",
+      "en": "5-1: the advanced defender disrupts"
+    },
+    "setup": {
+      "de-CH": "Abwehr 5:1 gegen einen Angriff 3:3, Torhüter.",
+      "fr": "Défense 5-1 contre une attaque 3-3, gardien.",
+      "en": "A 5-1 defence against a 3-3 attack, goalkeeper."
+    },
+    "procedure": {
+      "de-CH": "Der vorgezogene Verteidiger 6 stört RM und den Pass in die Mitte, die fünf an der Linie verschieben mit. Wechselt der Ball auf die Seite, bleibt 6 zwischen Ball und Mitte.",
+      "fr": "L'avancé 6 gêne le DC et la passe dans l'axe, les cinq sur la ligne coulissent. Quand le ballon change de côté, 6 reste entre ballon et centre.",
+      "en": "The advanced defender 6 disrupts the centre back and the pass into the middle, the five on the line shift along. When the ball goes to the side, 6 stays between ball and centre."
+    },
+    "coaching": {
+      "de-CH": "Der Vorgezogene arbeitet mit den Beinen, nicht mit den Händen; die Halbverteidiger sichern seinen Rücken.",
+      "fr": "L'avancé travaille avec les jambes, pas les mains ; les demis couvrent son dos.",
+      "en": "The advanced defender works with the legs, not the hands; the half defenders cover his back."
+    },
+    "variants": {
+      "de-CH": "Mit Kreuzen RM und RL; Vorgezogener darf den Pass abfangen und Gegenstoss laufen; 5:1 gegen 2 Kreisläufer.",
+      "fr": "Avec croisé DC et arrière gauche ; l'avancé peut intercepter et partir en contre ; 5-1 contre deux pivots.",
+      "en": "With a cross of centre back and left back; the advanced defender may intercept and run the fast break; 5-1 against two pivots."
+    },
+    "sketch": {
+      "court": "half",
+      "tokens": [
+        {
+          "id": "tw",
+          "side": "own",
+          "label": "TW",
+          "x": 39.3,
+          "y": 10
+        },
+        {
+          "id": "d1",
+          "side": "own",
+          "label": "1",
+          "x": 37.62,
+          "y": 17.87
+        },
+        {
+          "id": "d2",
+          "side": "own",
+          "label": "2",
+          "x": 34.02,
+          "y": 14.74
+        },
+        {
+          "id": "d3",
+          "side": "own",
+          "label": "3",
+          "x": 33.2,
+          "y": 10
+        },
+        {
+          "id": "d4",
+          "side": "own",
+          "label": "4",
+          "x": 34.02,
+          "y": 5.26
+        },
+        {
+          "id": "d5",
+          "side": "own",
+          "label": "5",
+          "x": 37.62,
+          "y": 2.13
+        },
+        {
+          "id": "d6",
+          "side": "own",
+          "label": "6",
+          "x": 30.2,
+          "y": 10
+        },
+        {
+          "id": "la",
+          "side": "opp",
+          "label": "LA",
+          "x": 36.2,
+          "y": 19.2
+        },
+        {
+          "id": "rl",
+          "side": "opp",
+          "label": "RL",
+          "x": 30.4,
+          "y": 16.45
+        },
+        {
+          "id": "rm",
+          "side": "opp",
+          "label": "RM",
+          "x": 28.1,
+          "y": 10
+        },
+        {
+          "id": "rr",
+          "side": "opp",
+          "label": "RR",
+          "x": 30.4,
+          "y": 3.55
+        },
+        {
+          "id": "ra",
+          "side": "opp",
+          "label": "RA",
+          "x": 36.2,
+          "y": 0.8
+        },
+        {
+          "id": "km",
+          "side": "opp",
+          "label": "KM",
+          "x": 33.65,
+          "y": 12.31
+        }
+      ],
+      "arrows": [
+        {
+          "kind": "pass",
+          "points": [
+            [
+              28.1,
+              10
+            ],
+            [
+              30.4,
+              16.45
+            ]
+          ]
+        },
+        {
+          "kind": "run",
+          "points": [
+            [
+              30.2,
+              10
+            ],
+            [
+              30.6,
+              12.8
+            ]
+          ]
+        },
+        {
+          "kind": "run",
+          "points": [
+            [
+              34.02,
+              14.74
+            ],
+            [
+              33.04,
+              15.45
+            ]
+          ]
+        }
+      ],
+      "ball": {
+        "x": 28.1,
+        "y": 10
+      },
+      "cones": []
     }
   },
   {
@@ -249,22 +4899,494 @@
       "powerplay"
     ],
     "minutes": 12,
-    "players": "13",
+    "players": "12",
     "level": "advanced",
     "name": {
       "de-CH": "Überzahl 6 gegen 5",
-      "en": "Powerplay 6 against 5",
-      "fr": "Supériorité 6 contre 5"
+      "fr": "Supériorité 6 contre 5",
+      "en": "Powerplay 6 against 5"
     },
     "setup": {
       "de-CH": "Angriff in Überzahl mit zwei Kreisläufern, Ziel: freier Wurf aus der Nahdistanz innert 30 Sekunden.",
-      "en": "Attack in powerplay with two pivots, aim: a free close-range shot within 30 seconds.",
-      "fr": "Attaque en supériorité avec deux pivots, objectif : tir libre de près en 30 secondes."
+      "fr": "Attaque en supériorité avec deux pivots, objectif : tir libre de près en 30 secondes.",
+      "en": "Attack in powerplay with two pivots, aim: a free close-range shot within 30 seconds."
+    },
+    "procedure": {
+      "de-CH": "Vier Spieler aussen, zwei am Kreis gegen eine 5:0-Abwehr. Der Ball läuft schnell, bis ein Verteidiger zwei Angreifer decken muss; dort wird abgeschlossen.",
+      "fr": "Quatre joueurs à l'extérieur, deux pivots contre une défense 5-0. Le ballon circule vite jusqu'à ce qu'un défenseur doive couvrir deux attaquants ; on finit là.",
+      "en": "Four players outside, two at the line against a 5-0 defence. The ball moves fast until one defender has to cover two attackers; that is where the shot comes."
     },
     "coaching": {
       "de-CH": "Ball schnell bewegen, Überzahl auf einer Seite schaffen, Geduld bis zur klaren Chance.",
-      "en": "Move the ball fast, create the extra player on one side, be patient until the clear chance.",
-      "fr": "Faire circuler vite, créer le surnombre d'un côté, patience jusqu'à l'occasion nette."
+      "fr": "Faire circuler vite, créer le surnombre d'un côté, patience jusqu'à l'occasion nette.",
+      "en": "Move the ball fast, create the extra player on one side, be patient until the clear chance."
+    },
+    "variants": {
+      "de-CH": "Gegen 4:1; Abschluss nur vom Kreis oder Flügel; Zeit auf 20 Sekunden kürzen.",
+      "fr": "Contre 4-1 ; finir seulement au pivot ou à l'aile ; réduire le temps à 20 secondes.",
+      "en": "Against 4-1; finish only from the line or the wing; cut the time to 20 seconds."
+    },
+    "sketch": {
+      "court": "half",
+      "tokens": [
+        {
+          "id": "otw",
+          "side": "opp",
+          "label": "TW",
+          "x": 39.3,
+          "y": 10
+        },
+        {
+          "id": "a1",
+          "side": "own",
+          "label": "LA",
+          "x": 36.2,
+          "y": 19.2
+        },
+        {
+          "id": "a2",
+          "side": "own",
+          "label": "RL",
+          "x": 30.4,
+          "y": 16.45
+        },
+        {
+          "id": "a3",
+          "side": "own",
+          "label": "RR",
+          "x": 30.4,
+          "y": 3.55
+        },
+        {
+          "id": "a4",
+          "side": "own",
+          "label": "RA",
+          "x": 36.2,
+          "y": 0.8
+        },
+        {
+          "id": "a5",
+          "side": "own",
+          "label": "KM",
+          "x": 33.72,
+          "y": 12.05
+        },
+        {
+          "id": "a6",
+          "side": "own",
+          "label": "K2",
+          "x": 33.72,
+          "y": 7.95
+        },
+        {
+          "id": "d1",
+          "side": "opp",
+          "label": "1",
+          "x": 37.06,
+          "y": 17.63
+        },
+        {
+          "id": "d2",
+          "side": "opp",
+          "label": "2",
+          "x": 33.85,
+          "y": 14.41
+        },
+        {
+          "id": "d3",
+          "side": "opp",
+          "label": "3",
+          "x": 33.2,
+          "y": 10
+        },
+        {
+          "id": "d4",
+          "side": "opp",
+          "label": "4",
+          "x": 33.85,
+          "y": 5.59
+        },
+        {
+          "id": "d5",
+          "side": "opp",
+          "label": "5",
+          "x": 37.06,
+          "y": 2.37
+        }
+      ],
+      "arrows": [
+        {
+          "kind": "pass",
+          "points": [
+            [
+              30.4,
+              16.45
+            ],
+            [
+              30.4,
+              3.55
+            ]
+          ]
+        },
+        {
+          "kind": "pass",
+          "points": [
+            [
+              30.4,
+              3.55
+            ],
+            [
+              33.72,
+              12.05
+            ]
+          ]
+        }
+      ],
+      "ball": {
+        "x": 30.4,
+        "y": 16.45
+      },
+      "cones": []
+    }
+  },
+  {
+    "id": "powerplay_shorthanded",
+    "focus": [
+      "powerplay",
+      "defence"
+    ],
+    "minutes": 12,
+    "players": "12",
+    "level": "advanced",
+    "name": {
+      "de-CH": "Unterzahl 5 gegen 6 verteidigen",
+      "fr": "Défendre à 5 contre 6",
+      "en": "Defending 5 against 6"
+    },
+    "setup": {
+      "de-CH": "Fünf Verteidiger und Torhüter gegen einen vollständigen Angriff, zwei Minuten auf der Uhr.",
+      "fr": "Cinq défenseurs et le gardien contre une attaque complète, deux minutes au chrono.",
+      "en": "Five defenders and the goalkeeper against a complete attack, two minutes on the clock."
+    },
+    "procedure": {
+      "de-CH": "Die Abwehr steht eng 5:0 und verschiebt kurz. Weit gestellte Flügel werden bewusst offen gelassen, die Mitte bleibt zu. Ziel: zwei Minuten mit höchstens einem Gegentor.",
+      "fr": "La défense joue serrée en 5-0 et coulisse court. Les ailiers très écartés sont laissés libres exprès, l'axe reste fermé. Objectif : deux minutes avec un but au plus.",
+      "en": "The defence stands tight in a 5-0 and shifts short. Wings who stand wide are left open on purpose, the middle stays closed. Aim: two minutes with at most one goal against."
+    },
+    "coaching": {
+      "de-CH": "Mitte zu, Würfe aus spitzem Winkel zulassen; der Torhüter weiss, welcher Flügel offen ist.",
+      "fr": "Fermer l'axe, accepter les tirs dans l'angle fermé ; le gardien sait quelle aile est ouverte.",
+      "en": "Close the middle, allow shots from narrow angles; the goalkeeper knows which wing is open."
+    },
+    "variants": {
+      "de-CH": "Angriff mit zwei Kreisläufern; 4 gegen 6 für 30 Sekunden; nach Ballgewinn sofort Gegenstoss.",
+      "fr": "Attaque avec deux pivots ; 4 contre 6 pendant 30 secondes ; contre immédiat après récupération.",
+      "en": "Attack with two pivots; 4 against 6 for 30 seconds; a fast break straight after winning the ball."
+    },
+    "sketch": {
+      "court": "half",
+      "tokens": [
+        {
+          "id": "tw",
+          "side": "own",
+          "label": "TW",
+          "x": 39.3,
+          "y": 10
+        },
+        {
+          "id": "a1",
+          "side": "own",
+          "label": "1",
+          "x": 37.06,
+          "y": 17.63
+        },
+        {
+          "id": "a2",
+          "side": "own",
+          "label": "2",
+          "x": 33.85,
+          "y": 14.41
+        },
+        {
+          "id": "a3",
+          "side": "own",
+          "label": "3",
+          "x": 33.2,
+          "y": 10
+        },
+        {
+          "id": "a4",
+          "side": "own",
+          "label": "4",
+          "x": 33.85,
+          "y": 5.59
+        },
+        {
+          "id": "a5",
+          "side": "own",
+          "label": "5",
+          "x": 37.06,
+          "y": 2.37
+        },
+        {
+          "id": "d1",
+          "side": "opp",
+          "label": "LA",
+          "x": 36.2,
+          "y": 19.2
+        },
+        {
+          "id": "d2",
+          "side": "opp",
+          "label": "RL",
+          "x": 30.4,
+          "y": 16.45
+        },
+        {
+          "id": "d3",
+          "side": "opp",
+          "label": "RM",
+          "x": 29,
+          "y": 10
+        },
+        {
+          "id": "d4",
+          "side": "opp",
+          "label": "RR",
+          "x": 30.4,
+          "y": 3.55
+        },
+        {
+          "id": "d5",
+          "side": "opp",
+          "label": "RA",
+          "x": 36.2,
+          "y": 0.8
+        },
+        {
+          "id": "d6",
+          "side": "opp",
+          "label": "KM",
+          "x": 33.72,
+          "y": 12.05
+        }
+      ],
+      "arrows": [
+        {
+          "kind": "pass",
+          "points": [
+            [
+              29,
+              10
+            ],
+            [
+              30.4,
+              16.45
+            ]
+          ]
+        },
+        {
+          "kind": "run",
+          "points": [
+            [
+              33.85,
+              14.41
+            ],
+            [
+              32.57,
+              15.42
+            ]
+          ]
+        },
+        {
+          "kind": "run",
+          "points": [
+            [
+              33.2,
+              10
+            ],
+            [
+              33.2,
+              11.71
+            ]
+          ]
+        }
+      ],
+      "ball": {
+        "x": 29,
+        "y": 10
+      },
+      "cones": []
+    }
+  },
+  {
+    "id": "powerplay_empty_goal",
+    "focus": [
+      "powerplay"
+    ],
+    "minutes": 15,
+    "players": "14",
+    "level": "advanced",
+    "name": {
+      "de-CH": "7 gegen 6 mit leerem Tor",
+      "fr": "7 contre 6 avec le but vide",
+      "en": "7 against 6 with an empty goal"
+    },
+    "setup": {
+      "de-CH": "Der Torhüter geht für einen siebten Feldspieler raus: zwei Kreisläufer, fünf aussen, gegen eine 6:0-Abwehr.",
+      "fr": "Le gardien sort pour un septième joueur de champ : deux pivots, cinq à l'extérieur, contre une défense 6-0.",
+      "en": "The goalkeeper comes off for a seventh court player: two pivots, five outside, against a 6-0 defence."
+    },
+    "procedure": {
+      "de-CH": "Der Angriff spielt geduldig, bis der Wurf frei ist. Nach Ballverlust oder Fehlwurf sofort zurück, der Torhüter kommt wieder herein; die Abwehr versucht den Wurf aufs leere Tor.",
+      "fr": "L'attaque joue patiemment jusqu'au tir libre. Après une perte ou un tir manqué, retour immédiat, le gardien revient ; la défense tente le tir dans le but vide.",
+      "en": "The attack plays patiently until the shot is free. After a turnover or a miss everybody goes back at once and the goalkeeper comes back in; the defence tries the shot at the empty goal."
+    },
+    "coaching": {
+      "de-CH": "Sichere Pässe vor Risiko, klare Wechselregel für den Torhüter, der siebte Spieler trägt ein Leibchen.",
+      "fr": "Passes sûres avant le risque, règle de changement claire pour le gardien, le septième porte une chasuble.",
+      "en": "Safe passes before risk, a clear substitution rule for the goalkeeper, the seventh player wears a bib."
+    },
+    "variants": {
+      "de-CH": "Gegen 5:1; Ballverlust zählt als Gegentor; nur 40 Sekunden Angriffszeit.",
+      "fr": "Contre 5-1 ; une perte compte comme un but encaissé ; seulement 40 secondes d'attaque.",
+      "en": "Against 5-1; a turnover counts as a goal against; only 40 seconds of attack."
+    },
+    "sketch": {
+      "court": "half",
+      "tokens": [
+        {
+          "id": "a1",
+          "side": "own",
+          "label": "LA",
+          "x": 36.2,
+          "y": 19.2
+        },
+        {
+          "id": "a2",
+          "side": "own",
+          "label": "RL",
+          "x": 30.4,
+          "y": 16.45
+        },
+        {
+          "id": "a3",
+          "side": "own",
+          "label": "RM",
+          "x": 29,
+          "y": 10
+        },
+        {
+          "id": "a4",
+          "side": "own",
+          "label": "RR",
+          "x": 30.4,
+          "y": 3.55
+        },
+        {
+          "id": "a5",
+          "side": "own",
+          "label": "RA",
+          "x": 36.2,
+          "y": 0.8
+        },
+        {
+          "id": "a6",
+          "side": "own",
+          "label": "KM",
+          "x": 33.7,
+          "y": 10
+        },
+        {
+          "id": "a7",
+          "side": "own",
+          "label": "K2",
+          "x": 36.37,
+          "y": 16.65
+        },
+        {
+          "id": "tw",
+          "side": "opp",
+          "label": "TW",
+          "x": 39.3,
+          "y": 10
+        },
+        {
+          "id": "d1",
+          "side": "opp",
+          "label": "1",
+          "x": 37.85,
+          "y": 17.95
+        },
+        {
+          "id": "d2",
+          "side": "opp",
+          "label": "2",
+          "x": 34.62,
+          "y": 15.65
+        },
+        {
+          "id": "d3",
+          "side": "opp",
+          "label": "3",
+          "x": 33.21,
+          "y": 11.95
+        },
+        {
+          "id": "d4",
+          "side": "opp",
+          "label": "4",
+          "x": 33.21,
+          "y": 8.05
+        },
+        {
+          "id": "d5",
+          "side": "opp",
+          "label": "5",
+          "x": 34.62,
+          "y": 4.35
+        },
+        {
+          "id": "d6",
+          "side": "opp",
+          "label": "6",
+          "x": 37.85,
+          "y": 2.05
+        }
+      ],
+      "arrows": [
+        {
+          "kind": "pass",
+          "points": [
+            [
+              29,
+              10
+            ],
+            [
+              30.4,
+              16.45
+            ]
+          ]
+        },
+        {
+          "kind": "pass",
+          "points": [
+            [
+              30.4,
+              16.45
+            ],
+            [
+              36.37,
+              16.65
+            ]
+          ]
+        }
+      ],
+      "ball": {
+        "x": 29,
+        "y": 10
+      },
+      "cones": []
     }
   }
 ]

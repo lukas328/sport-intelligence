@@ -22,13 +22,19 @@ test("drills, notifications and team assignments", async ({ page }, info) => {
 
   // drill library with focus filter
   await openTraining(page);
-  await page.getByRole("link", { name: "Übungen", exact: true }).click();
-  await expect(page.getByTestId("drills").getByRole("listitem")).toHaveCount(11);
-  await page.getByRole("link", { name: "Torhüter", exact: true }).click();
+  // training tips from the analysis: honest without an analysed match
+  await expect(page.getByTestId("tips-empty")).toContainText("Lade ein Spiel hoch, dann schlagen wir dir Übungen vor.");
+  await expectAccessible(page);
+  await page.getByRole("link", { name: "Alle Übungen", exact: true }).click();
+  await expect(page.getByTestId("drills").getByRole("listitem")).toHaveCount(41);
+  await page.getByRole("button", { name: "Torhüter", exact: true }).click();
+  await expect(page.getByTestId("drills").getByRole("listitem")).toHaveCount(7);
+  await page.getByLabel("Stufe").selectOption("advanced");
   await expect(page.getByTestId("drills").getByRole("listitem")).toHaveCount(2);
+  await page.getByLabel("Stufe").selectOption("");
 
   // an own drill, shared in the club: it sits above the library and in the unit's drill list
-  await page.getByRole("link", { name: "Alle", exact: true }).click();
+  await page.getByRole("button", { name: "Alle", exact: true }).click();
   await page.getByTestId("drill-new").click();
   const drill = page.getByRole("form", { name: "Neue Übung" });
   await drill.getByLabel("Name").fill("Kreuzen im Rückraum");

@@ -40,6 +40,7 @@ const COLOUR_FILES = new Set([
   "components/video/draw-layer.tsx",
   "components/video/shapes.ts",
   "components/tactics/board.tsx",
+  "components/tactics/board-theme.ts",
   "components/analysis/court-half.tsx",
   "components/analysis/court-calibration.tsx",
   "components/analysis/court-full.tsx",

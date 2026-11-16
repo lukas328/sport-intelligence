@@ -4574,6 +4574,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/teams/{team_id}/training-tips": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Tips
+         * @description What to train next: weaknesses of the last matches with evidence and drills (K21).
+         */
+        get: operations["tips_v1_orgs__org_id__teams__team_id__training_tips_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/training-slots/{slot_id}": {
         parameters: {
             query?: never;
@@ -10968,6 +10988,35 @@ export interface components {
              */
             team_id: string;
         };
+        /** TipMatch */
+        TipMatch: {
+            /**
+             * Kickoff At
+             * Format: date-time
+             */
+            kickoff_at: string;
+            /**
+             * Match Id
+             * Format: uuid
+             */
+            match_id: string;
+            /** Opponent */
+            opponent: string | null;
+        };
+        /** TipScene */
+        TipScene: {
+            /** Clock S */
+            clock_s: number | null;
+            /**
+             * Event Id
+             * Format: uuid
+             */
+            event_id: string;
+            /** Period */
+            period: number | null;
+            /** T Ms */
+            t_ms: number;
+        };
         /** ToolCall */
         ToolCall: {
             /** Error */
@@ -11158,6 +11207,66 @@ export interface components {
             valid_until: string | null;
             /** Weekday */
             weekday: number;
+        };
+        /**
+         * TrainingTip
+         * @description A weakness of the last matches with a training topic (K21).
+         */
+        TrainingTip: {
+            /**
+             * Drills
+             * @description Library drill ids for the topics
+             */
+            drills: string[];
+            /** Evidence */
+            evidence: {
+                [key: string]: unknown;
+            };
+            /** Id */
+            id: string;
+            /** Key */
+            key: string;
+            /**
+             * Match Id
+             * Format: uuid
+             * @description The latest match the weakness came up in
+             */
+            match_id: string;
+            /**
+             * Matches
+             * @description In how many of the analysed matches it came up
+             */
+            matches: number;
+            /** Metric */
+            metric: string;
+            /**
+             * Of
+             * @description Matches analysed
+             */
+            of: number;
+            /** Params */
+            params: {
+                [key: string]: unknown;
+            };
+            /** Sample */
+            sample: number | null;
+            /** Scenes */
+            scenes: components["schemas"]["TipScene"][];
+            /** Score */
+            score: number;
+            /** Topics */
+            topics: string[];
+        };
+        /** TrainingTipsOut */
+        TrainingTipsOut: {
+            /** Matches */
+            matches: components["schemas"]["TipMatch"][];
+            /** Matches Analysed */
+            matches_analysed: number;
+            /** Plan Required */
+            plan_required: boolean;
+            /** Tips */
+            tips: components["schemas"]["TrainingTip"][];
         };
         /** TrialIn */
         TrialIn: {
@@ -21665,6 +21774,38 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TagSetOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    tips_v1_orgs__org_id__teams__team_id__training_tips_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TrainingTipsOut"];
                 };
             };
             /** @description Validation Error */

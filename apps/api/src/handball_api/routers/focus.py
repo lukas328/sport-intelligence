@@ -9,8 +9,9 @@ from fastapi import APIRouter
 
 from handball_api.models import FocusPlan
 from handball_api.routers.deps import OrgDep
-from handball_api.schemas.focus import FocusIn, FocusOut
+from handball_api.schemas.focus import FocusIn, FocusOut, TrainingTipsOut
 from handball_api.services import focus as service
+from handball_api.services import training_tips
 
 router = APIRouter(prefix="/v1/orgs/{org_id}", tags=["training"])
 
@@ -36,3 +37,9 @@ async def plans(team_id: uuid.UUID, scope: OrgDep) -> list[FocusOut]:
 @router.post("/focus/{plan_id}/close", response_model=FocusOut)
 async def close(plan_id: uuid.UUID, scope: OrgDep) -> FocusOut:
     return _out(await service.close(scope.ctx, plan_id))
+
+
+@router.get("/teams/{team_id}/training-tips", response_model=TrainingTipsOut)
+async def tips(team_id: uuid.UUID, scope: OrgDep) -> TrainingTipsOut:
+    """What to train next: weaknesses of the last matches with evidence and drills (K21)."""
+    return TrainingTipsOut.model_validate(await training_tips.tips(scope.ctx, team_id))
