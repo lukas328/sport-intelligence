@@ -280,7 +280,7 @@ export function AppShell({
                     href={it.key === "scenes" && searchHref ? searchHref : it.href}
                     aria-current={on ? "page" : undefined}
                     // five destinations with Teamleben (K16): a size smaller, a long word may break into two lines
-                    className={cn(navLink(on), "min-h-14 justify-center px-0.5 text-center leading-tight", items.length > 4 ? "text-[15px] tracking-tight" : "text-base")}
+                    className={cn(navLink(on), "min-h-14 justify-center px-0.5 text-center leading-tight", items.length > 4 ? "text-[14px] tracking-tight" : "text-base")}
                   >
                     {on && (
                       <span

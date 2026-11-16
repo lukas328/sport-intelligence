@@ -484,7 +484,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
 
       <div hidden={view !== "video"} className="space-y-6">
         {/* a player's own scenes of this match, one step away */}
-        {!staff && <MyScenesLine orgId={orgId} matchId={match.id} />}
+        {!canDelete && <MyScenesLine orgId={orgId} matchId={match.id} />}
         {stage && main && graphics.data && (
           <VideoStage
             orgId={orgId}
@@ -670,7 +670,8 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
           {stats.data && stats.data.quality.events > 0 && <OverviewView orgId={orgId} match={match} teamName={teamName} stats={stats.data} names={names} staff={staff} onPlay={main ? onPlay : undefined} parts={["timeline"]} span={graphics.data && !graphics.data.has_report ? (graphics.data.span ?? null) : null} />}
           <div className="space-y-8">
             <div id="highlights" className="scroll-mt-24"><HighlightsView orgId={orgId} matchId={match.id} teamId={match.team_id} staff={staff} names={names} /></div>
-            {staff && !main && <TeamFeedView orgId={orgId} matchId={match.id} kickoff={match.kickoff_ms} periodS={match.period_s} />}
+            {/* the players' personal scenes are the staff's overview (K18) */}
+            {canDelete && !main && <TeamFeedView orgId={orgId} matchId={match.id} kickoff={match.kickoff_ms} periodS={match.period_s} />}
             {staff && <MarksPanel orgId={orgId} matchId={match.id} onPlay={main ? onPlay : undefined} />}
           </div>
             </div>
