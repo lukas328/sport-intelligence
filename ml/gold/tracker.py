@@ -9,6 +9,11 @@ chain through the candidates (dynamic programming over frames):
   (constant velocity), scaled by a tolerance that grows with the speed (bounces, catches and
   deflections change the velocity); steps faster than `vmax` are impossible;
 - a predecessor may lie up to `gap` frames back (short occlusions keep the velocity);
+- repeated frames: many videos repeat frames (25 fps stored as 50, 24/25 fps as 30 or 60), so a
+  flying ball stands still for one frame and then jumps two steps. A candidate within `dup_px` of
+  its predecessor one frame back is taken as such a repeat: it keeps the predecessor's velocity
+  instead of zeroing it, at most `dup_max` times in a row (a ball held still is then an ordinary
+  still step with velocity zero);
 - spots that stay put for most of the clip (lamps, a spare ball at the bench) earn no reward.
 Gaps inside a segment are filled linearly when `fill` is set.
 
@@ -39,6 +44,8 @@ class Params:
     static_px: float = 5.0
     static_keep: float = 0.6  # share of the reward a static spot keeps (a ball held still is static too)
     fill: bool = True
+    dup_px: float = 5.0  # a repeated frame: the candidate within this many px of the previous one
+    dup_max: int = 1  # repeats in a row that keep the velocity (0 = off)
     extra: dict = field(default_factory=dict)
 
 
@@ -96,7 +103,8 @@ def track_clip(c: dict, p: Params | None = None) -> list:
     scale = c["w"] / 1280 * 30 / c.get("fps_read", c.get("fps", 30))  # px per frame at this clip
     vmax = p.vmax * scale
     INF = float("inf")
-    # best[k][j] = (cost, back, vx, vy); back = (k', i) or ("F", k-1) for a segment start
+    # best[k][j] = (cost, back, vx, vy, reps); back = (k', i) or ("F", k-1) for a segment start;
+    # reps = repeated frames in a row that ended here
     best: list[list[tuple]] = []
     F = [0.0] * n  # cheapest solution of frames 0..k (frame k may be empty)
     Fb: list = [None] * n  # (k, j) when frame k ends on candidate j, else None (miss)
@@ -107,15 +115,24 @@ def track_clip(c: dict, p: Params | None = None) -> list:
             cost = prevF + p.start - q.r
             back: tuple = ("F", k - 1)
             vel = (0.0, 0.0)
+            reps = 0
             for kp in range(max(0, k - p.gap), k):
                 dt = k - kp
                 skip = p.miss * (dt - 1)
-                for i, (c0, _b, vx, vy) in enumerate(best[kp]):
+                for i, (c0, _b, vx, vy, rp) in enumerate(best[kp]):
                     if c0 == INF:
                         continue
                     a = frames[kp][i]
                     dx, dy = q.x - a.x, q.y - a.y
                     if math.hypot(dx, dy) > vmax * dt:
+                        continue
+                    if (dt == 1 and rp < p.dup_max and _b[0] != "F" and math.hypot(dx, dy) <= p.dup_px * c["w"] / 1280
+                            and math.hypot(vx, vy) > p.dup_px * c["w"] / 1280):
+                        # a repeated frame of a moving ball: keep its velocity
+                        s = p.sigma0 * scale
+                        tot = c0 + (dx * dx + dy * dy) / (2 * s * s) - q.r
+                        if tot < cost:
+                            cost, back, vel, reps = tot, (kp, i), (vx, vy), rp + 1
                         continue
                     if _b[0] == "F":  # no velocity yet
                         s = p.sigma_new * scale * dt
@@ -126,8 +143,8 @@ def track_clip(c: dict, p: Params | None = None) -> list:
                         m = (ex * ex + ey * ey) / (2 * s * s)
                     tot = c0 + skip + m - q.r
                     if tot < cost:
-                        cost, back, vel = tot, (kp, i), (dx / dt, dy / dt)
-            row.append((cost, back, vel[0], vel[1]))
+                        cost, back, vel, reps = tot, (kp, i), (dx / dt, dy / dt), 0
+            row.append((cost, back, vel[0], vel[1], reps))
         best.append(row)
         F[k] = prevF + p.miss
         Fb[k] = None

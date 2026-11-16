@@ -372,3 +372,29 @@ Same kernel, data and gold protocol as round 10, only the net differs (`kaggle/t
 - Both nets were still improving when the budget ended (human validation over the last
   checkpoints 0.61 -> 0.63 and 0.67 -> 0.71). Next: `kaggle/train_hr2_push.py` continues both from
   round 1 with half the learning rates (hr2, hrp2), then the same comparison and the ensemble again.
+
+## Tracker: repeated frames (2026-11-16)
+Where the tracker misses with hr1 + hrp1 (357 of 1555 gold balls): 8.2 % of all balls are on the
+net's top peak and 5.6 % among its top 5, but the tracker takes another candidate; 2.4 % only
+OWLv2 has; 6.2 % no detector has. So the tracker, not the net, makes most of the remaining errors.
+By frame rate, the tracker was worse than the net's top peak on 50 fps clips (58 % against 70 %;
+25 and 30 fps about 81 %), in g08 52 % against 95 %.
+
+Cause: many videos repeat frames (25 fps stored as 50: the ball stands two frames on one spot;
+25 as 30: every 6th frame twice; also irregular). The constant-velocity step zeroed the velocity
+on a repeat, so the next real step looked like a jump; the tracker skipped every repeated frame
+and filled it with the midpoint, 12 to 20 px off. New step (`dup_px`, `dup_max` in `tracker.py`):
+a candidate within 5 px of its predecessor one frame back, while the ball moves, keeps the
+predecessor's velocity, at most once in a row.
+
+| Gold v1, tracker | all, before | all, after | fast, before | fast, after | 50/60 fps, before | after |
+|---|---|---|---|---|---|---|
+| round 10 | 73.4 % | 75.5 % | 76.7 % | 80.4 % | 62.8 % | 67.9 % |
+| hr1 | 74.5 % | 75.8 % | 76.6 % | 78.7 % | 62.0 % | 66.2 % |
+| hrp1 | 74.0 % | 75.2 % | 72.1 % | 74.0 % | 63.7 % | 67.0 % |
+| hr1 + hrp1 | 77.0 % | 78.2 % | 77.0 % | 79.5 % | 64.0 % | 67.3 % |
+
+Paired (after against before): round 10 +39 / -6 (p 5e-7), hr1 +23 / -4, hrp1 +33 / -14,
+hr1 + hrp1 +23 / -5 (p 9e-4). No parameter fitted on gold; two repeats in a row change little.
+Goal set with the owner: fast balls (shots, hard passes) carry the game-deciding information, so
+the fast subset is now the main measure (about 80 % overall is enough if those are right).
