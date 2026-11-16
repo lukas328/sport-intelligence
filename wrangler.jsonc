@@ -17,5 +17,7 @@
     { "pattern": "handball-intelligence.com", "custom_domain": true },
     { "pattern": "www.handball-intelligence.com", "custom_domain": true }
   ],
-  "observability": { "enabled": true }
+  "observability": { "enabled": true },
+  // branch builds run `npx wrangler preview`, which needs this block (it may stay empty)
+  "previews": {}
 }
