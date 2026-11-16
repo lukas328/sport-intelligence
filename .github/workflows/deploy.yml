@@ -109,7 +109,9 @@ jobs:
           db=$(az postgres flexible-server show -g "$rg" -n "$pg" --query state -o tsv)
           # «keep» means what runs now in Azure, not what the settings file remembers
           api=$(az containerapp show -g "$rg" -n "$(terraform output -raw web_app | sed 's/-web$/-api/')" -o json)
-          paused=$(jq -r '((.properties.template.scale.minReplicas // 1) == 0)' <<<"$api")
+          # paused: the cron rule «paused» on the api (README, «Pause»), or the database stopped
+          paused=$(jq -r '[.properties.template.scale.rules // [] | .[] | select(.name == "paused")] | length > 0' <<<"$api")
+          [ "$db" = Ready ] || paused=true
           want="${{ steps.mode.outputs.state }}"
           case "$want" in resume) paused=false ;; pause) paused=true ;; esac
           echo "database $pg: $db; paused after this run: $paused"
