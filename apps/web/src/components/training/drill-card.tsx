@@ -11,12 +11,16 @@ export const asLang = (locale: string): Lang => (["de-CH", "fr", "en"].includes(
 export function DrillSketchView({ drill, lang, className }: { drill: Drill; lang: Lang; className?: string }) {
   const t = useTranslations("drills");
   const s = drill.sketch;
+  // show the part of the half that is used: from 2 m behind the furthest mark, never less than 13 m
+  const xs = [...s.tokens.map((k) => k.x), ...s.arrows.flatMap((a) => a.points.map((p) => p[0])), ...s.cones.map((c) => c[0]), ...(s.ball ? [s.ball.x] : [])];
+  const from = Math.floor(Math.min(27, ...xs.map((x) => x - 2)));
   return (
     <div className={cn("pointer-events-none", className)}>
       <Board
         frame={{ tokens: s.tokens, ball: s.ball, arrows: s.arrows, note: "", duration_ms: 2000 }}
         court={s.court}
         cones={s.cones}
+        from={s.court === "half" ? from : undefined}
         orientation={s.court === "full" ? "landscape" : "portrait"}
         label={t("sketchLabel", { name: drill.name[lang] })}
       />

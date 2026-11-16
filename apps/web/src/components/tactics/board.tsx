@@ -34,12 +34,14 @@ interface Props {
   orientation?: Orientation;
   /** markers for drill sketches (court metres) */
   cones?: readonly (readonly [number, number])[];
+  /** half court only: start the view at this x (a sketch near the goal does not need the whole half) */
+  from?: number;
 }
 
 type View = { portrait: boolean; x0: number; x1: number; w: number; h: number };
 
-function viewOf(court: "half" | "full", portrait: boolean): View {
-  const x0 = court === "half" ? 20 : 0;
+function viewOf(court: "half" | "full", portrait: boolean, from?: number): View {
+  const x0 = court === "half" ? Math.min(30, Math.max(20, from ?? 20)) : 0;
   const x1 = COURT.length;
   const span = x1 - x0;
   return portrait ? { portrait, x0, x1, w: COURT.width + 2 * PAD, h: span + 2 * PAD } : { portrait, x0, x1, w: span + 2 * PAD, h: COURT.width + 2 * PAD };
@@ -72,6 +74,7 @@ export function Board({
   className,
   orientation = "auto",
   cones,
+  from,
 }: Props) {
   const t = useTranslations("tactics");
   const uid = useId().replace(/:/g, "");
@@ -90,7 +93,7 @@ export function Board({
 
   const width = box?.w ?? null;
   const portrait = orientation === "portrait" || (orientation === "auto" && (court === "half" || (width != null && width < 640)));
-  const view = viewOf(court, portrait);
+  const view = viewOf(court, portrait, from);
   const { S, C } = project(view);
   // CSS pixels per metre (the drawing keeps its aspect ratio inside the box: the smaller scale wins)
   const pxPerM = box && box.w > 0 ? Math.min(box.w / view.w, box.h > 0 ? box.h / view.h : Infinity) : 24;
@@ -114,7 +117,7 @@ export function Board({
   /** tokens stay on the board: the centre at most a little outside the lines */
   const keepIn = (x: number, y: number): [number, number] => {
     const [cx, cy] = clampToCourt(x, y);
-    return [Math.min(COURT.length + 0.4, Math.max(court === "half" ? 20.4 : -0.4, cx)), Math.min(COURT.width + 0.4, Math.max(-0.4, cy))];
+    return [Math.min(COURT.length + 0.4, Math.max(court === "half" ? view.x0 + 0.4 : -0.4, cx)), Math.min(COURT.width + 0.4, Math.max(-0.4, cy))];
   };
 
   function update(next: Partial<Frame>) {
@@ -283,7 +286,8 @@ export function Board({
         <path key={`ga-${s}`} d={`${poly(L[`goal_area_${s}`] ?? [])} Z`} fill={BOARD_THEME.goalArea} />
       ))}
       <g fill="none" stroke={BOARD_THEME.line} strokeWidth={lineW} strokeLinecap="round">
-        <rect x={Math.min(bx0, bx1)} y={Math.min(by0, by1)} width={Math.abs(bx1 - bx0)} height={Math.abs(by1 - by0)} />
+        {/* the side lines and goal line; the line at the near end only where the court really ends there */}
+        <path d={`${poly([[view.x0, COURT.width], [view.x1, COURT.width], [view.x1, 0], [view.x0, 0]])}${view.x0 === 0 || view.x0 === 20 ? " Z" : ""}`} />
         {court === "full" && <path d={poly(L.center_line ?? [])} />}
         {sides.map((s) => (
           <g key={s}>
