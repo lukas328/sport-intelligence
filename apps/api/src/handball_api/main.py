@@ -4,6 +4,7 @@ import uuid
 from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
 
+import sentry_sdk
 import structlog
 from fastapi import Depends, FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
@@ -18,7 +19,7 @@ from handball_api.core.email import (
     MemoryEmailSender,
     SmtpEmailSender,
 )
-from handball_api.core.errors import install_error_handlers
+from handball_api.core.errors import install_error_handlers, internal_error_response
 from handball_api.core.jobs import EventBus, JobQueue, RedisEventBus, RqJobQueue
 from handball_api.core.logging import configure_logging, get_logger
 from handball_api.core.oidc import OidcClient
@@ -195,9 +196,17 @@ def create_app(
         request: Request, call_next: Callable[[Request], Awaitable[Response]]
     ) -> Response:
         request_id = request.headers.get("x-request-id") or uuid.uuid4().hex
+        request.state.request_id = request_id
         structlog.contextvars.bind_contextvars(request_id=request_id)
         try:
             response = await call_next(request)
+        except Exception as exc:
+            # An unexpected error becomes a problem+json 500 here, logged as one structured line
+            # with the request id. Left alone it would reach Starlette's server error middleware,
+            # which answers without the id and re-raises, so the server prints a bare traceback.
+            log.exception("unhandled_exception", method=request.method, path=request.url.path)
+            sentry_sdk.capture_exception(exc)  # no-op without Sentry; deduplicated with it
+            response = internal_error_response(request, request_id)
         finally:
             structlog.contextvars.clear_contextvars()
         response.headers["x-request-id"] = request_id
