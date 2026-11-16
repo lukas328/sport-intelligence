@@ -1,0 +1,21 @@
+// Cloudflare Workers Builds runs `npx wrangler deploy` in the repository root after `pnpm run build`:
+// this publishes the marketing site (apps/site/out) on handball-intelligence.com and www.
+// The app runs on Azure (app.handball-intelligence.com, infra/terraform/azure).
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "sport-intelligence",
+  "main": "infra/cloudflare/site-worker.js",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    "directory": "./apps/site/out",
+    "binding": "ASSETS",
+    "run_worker_first": true,
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page"
+  },
+  "routes": [
+    { "pattern": "handball-intelligence.com", "custom_domain": true },
+    { "pattern": "www.handball-intelligence.com", "custom_domain": true }
+  ],
+  "observability": { "enabled": true }
+}
