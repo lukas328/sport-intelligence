@@ -14,9 +14,9 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: plan or deploy
+        description: "plan, deploy, or status (read only: apps, jobs, recent logs)"
         type: choice
-        options: [plan, deploy]
+        options: [plan, deploy, status]
         default: plan
       state:
         description: keep the environment as it is, resume a paused one, or pause it
@@ -102,7 +102,33 @@ jobs:
           echo "rg=$(terraform output -raw resource_group)" >>"$GITHUB_ENV"
           echo "registry=$(terraform output -raw registry_name)" >>"$GITHUB_ENV"
 
+      - name: Status (read only)
+        if: steps.mode.outputs.mode == 'status'
+        run: |
+          echo "== apps"
+          az containerapp list -g "$rg" --query "[].{name:name, running:properties.runningStatus, revision:properties.latestRevisionName, image:properties.template.containers[0].image, min:properties.template.scale.minReplicas, max:properties.template.scale.maxReplicas, cpu:properties.template.containers[0].resources.cpu, mem:properties.template.containers[0].resources.memory}" -o table
+          for app in $(az containerapp list -g "$rg" --query "[].name" -o tsv); do
+            echo "== replicas $app"
+            az containerapp replica list -g "$rg" -n "$app" --query "[].{name:name, created:properties.createdTime, state:properties.runningState, restarts:properties.containers[0].restartCount}" -o table || true
+          done
+          for app in $(az containerapp list -g "$rg" --query "[?contains(name,'worker') || contains(name,'api')].name" -o tsv); do
+            echo "== last 150 log lines $app"
+            az containerapp logs show -g "$rg" -n "$app" --type console --tail 150 --format text 2>&1 | cut -c1-400 || true
+            echo "== system events $app"
+            az containerapp logs show -g "$rg" -n "$app" --type system --tail 40 --format text 2>&1 | cut -c1-300 || true
+          done
+          ws=$(az monitor log-analytics workspace list -g "$rg" --query "[0].customerId" -o tsv)
+          if [ -n "$ws" ]; then
+            echo "== errors in the last 8 hours (Log Analytics)"
+            az monitor log-analytics query -w "$ws" -o table --analytics-query "ContainerAppConsoleLogs_CL | where TimeGenerated > ago(8h) | where Log_s has_any ('error','Error','ERROR','Traceback','exception','Killed','OOM','failed') | project TimeGenerated, ContainerAppName_s, Log=substring(Log_s, 0, 300) | order by TimeGenerated desc | take 80" 2>&1 | cut -c1-420 || true
+            echo "== restarts and OOM (system log)"
+            az monitor log-analytics query -w "$ws" -o table --analytics-query "ContainerAppSystemLogs_CL | where TimeGenerated > ago(8h) | where Reason_s has_any ('OOM','Kill','BackOff','Failed','Crash','Terminated') or Log_s has_any ('OOM','killed','Killed','exit code') | project TimeGenerated, ContainerAppName_s, Reason_s, Log=substring(Log_s, 0, 250) | order by TimeGenerated desc | take 40" 2>&1 | cut -c1-400 || true
+          fi
+          echo "== migration job runs"
+          az containerapp job execution list -g "$rg" -n "$(terraform output -raw migrate_job)" --query "[0:3].{name:name, status:properties.status, start:properties.startTime}" -o table || true
+
       - name: Paused or running
+        if: steps.mode.outputs.mode != 'status'
         id: state
         run: |
           pg=$(terraform output -raw postgres_server)
@@ -147,6 +173,7 @@ jobs:
           echo "PG=$pg" >>"$GITHUB_ENV"
 
       - name: DNS records for the app domain
+        if: steps.mode.outputs.mode != 'status'
         id: dns
         run: |
           fqdn=$(terraform output -raw web_default_fqdn)
@@ -160,6 +187,7 @@ jobs:
           echo "DNS ready: $ok"
 
       - name: Plan
+        if: steps.mode.outputs.mode != 'status'
         run: |
           tag=$([ "${{ steps.mode.outputs.mode }}" = deploy ] && echo "${{ steps.mode.outputs.tag }}" || sed -n 's/^image_tag *= *"\(.*\)"/\1/p' staging.tfvars)
           echo "TAG=$tag" >>"$GITHUB_ENV"
