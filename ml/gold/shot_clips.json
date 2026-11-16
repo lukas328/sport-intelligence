@@ -1,0 +1,981 @@
+{
+ "note": "Shot gold: shots from the official logs, clips 7 s before to 3 s after the logged time (ml/gold/pick_shots.py). Fixed once labelling starts.",
+ "clips": [
+  {
+   "id": "w00",
+   "game": "CH_Cup_RTVBasel_Kadetten_2024-04-27",
+   "dataset": "handball-segs-l01",
+   "file": "CH_Cup_RTVBasel_Kadetten_2024-04-27_s0.mp4",
+   "start_ms": 12240,
+   "dur_ms": 10000,
+   "fps": 50.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "goal",
+    "log_ms": 7000,
+    "team": "home"
+   }
+  },
+  {
+   "id": "w01",
+   "game": "CH_Cup_RTVBasel_Kadetten_2024-04-27",
+   "dataset": "handball-segs-l01",
+   "file": "CH_Cup_RTVBasel_Kadetten_2024-04-27_s1.mp4",
+   "start_ms": 75500,
+   "dur_ms": 10000,
+   "fps": 50.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "shot_saved",
+    "log_ms": 7000,
+    "team": "away"
+   }
+  },
+  {
+   "id": "w02",
+   "game": "CH_Cup_RTVBasel_Kadetten_2024-04-27",
+   "dataset": "handball-segs-l01",
+   "file": "CH_Cup_RTVBasel_Kadetten_2024-04-27_s1.mp4",
+   "start_ms": 119500,
+   "dur_ms": 10000,
+   "fps": 50.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "shot_missed",
+    "log_ms": 7000,
+    "team": "away"
+   }
+  },
+  {
+   "id": "w03",
+   "game": "CH_Cup_RTVBasel_Kadetten_2024-04-27",
+   "dataset": "handball-segs-l01",
+   "file": "CH_Cup_RTVBasel_Kadetten_2024-04-27_s3.mp4",
+   "start_ms": 55000,
+   "dur_ms": 10000,
+   "fps": 50.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "shot_missed",
+    "log_ms": 7000,
+    "team": "home"
+   }
+  },
+  {
+   "id": "w04",
+   "game": "CH_Cup_RTVBasel_Kadetten_2024-04-27",
+   "dataset": "handball-segs-l01",
+   "file": "CH_Cup_RTVBasel_Kadetten_2024-04-27_s3.mp4",
+   "start_ms": 160000,
+   "dur_ms": 10000,
+   "fps": 50.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "shot_saved",
+    "log_ms": 7000,
+    "team": "away"
+   }
+  },
+  {
+   "id": "w05",
+   "game": "CH_Cup_RedDragonsUster_SeenTigersPfadi_ca2024",
+   "dataset": "handball-segs-l01",
+   "file": "CH_Cup_RedDragonsUster_SeenTigersPfadi_ca2024_s1.mp4",
+   "start_ms": 136500,
+   "dur_ms": 10000,
+   "fps": 30.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "shot_saved",
+    "log_ms": 7000,
+    "team": "home"
+   }
+  },
+  {
+   "id": "w06",
+   "game": "CH_Cup_RedDragonsUster_SeenTigersPfadi_ca2024",
+   "dataset": "handball-segs-l01",
+   "file": "CH_Cup_RedDragonsUster_SeenTigersPfadi_ca2024_s2.mp4",
+   "start_ms": 7267,
+   "dur_ms": 10000,
+   "fps": 30.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "shot_missed",
+    "log_ms": 7000,
+    "team": "home"
+   }
+  },
+  {
+   "id": "w07",
+   "game": "CH_Cup_RedDragonsUster_SeenTigersPfadi_ca2024",
+   "dataset": "handball-segs-l01",
+   "file": "CH_Cup_RedDragonsUster_SeenTigersPfadi_ca2024_s3.mp4",
+   "start_ms": 160000,
+   "dur_ms": 10000,
+   "fps": 30.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "goal",
+    "log_ms": 7000,
+    "team": "home"
+   }
+  },
+  {
+   "id": "w08",
+   "game": "CH_Cup_RedDragonsUster_SeenTigersPfadi_ca2024",
+   "dataset": "handball-segs-l01",
+   "file": "CH_Cup_RedDragonsUster_SeenTigersPfadi_ca2024_s4.mp4",
+   "start_ms": 79000,
+   "dur_ms": 10000,
+   "fps": 30.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "shot_missed",
+    "log_ms": 7000,
+    "team": "home"
+   }
+  },
+  {
+   "id": "w09",
+   "game": "CH_Cup_RedDragonsUster_SeenTigersPfadi_ca2024",
+   "dataset": "handball-segs-l01",
+   "file": "CH_Cup_RedDragonsUster_SeenTigersPfadi_ca2024_s4.mp4",
+   "start_ms": 164733,
+   "dur_ms": 10000,
+   "fps": 30.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "shot_saved",
+    "log_ms": 7000,
+    "team": "away"
+   }
+  },
+  {
+   "id": "w10",
+   "game": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19",
+   "dataset": "handball-segs-l01",
+   "file": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19_s1.mp4",
+   "start_ms": 23000,
+   "dur_ms": 10000,
+   "fps": 60.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "shot_missed",
+    "log_ms": 7000,
+    "team": "home"
+   }
+  },
+  {
+   "id": "w11",
+   "game": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19",
+   "dataset": "handball-segs-l01",
+   "file": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19_s2.mp4",
+   "start_ms": 6250,
+   "dur_ms": 10000,
+   "fps": 60.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "shot_saved",
+    "log_ms": 7000,
+    "team": "home"
+   }
+  },
+  {
+   "id": "w12",
+   "game": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19",
+   "dataset": "handball-segs-l01",
+   "file": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19_s2.mp4",
+   "start_ms": 87250,
+   "dur_ms": 10000,
+   "fps": 60.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "goal",
+    "log_ms": 7000,
+    "team": "home"
+   }
+  },
+  {
+   "id": "w13",
+   "game": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19",
+   "dataset": "handball-segs-l01",
+   "file": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19_s3.mp4",
+   "start_ms": 109750,
+   "dur_ms": 10000,
+   "fps": 60.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "shot_missed",
+    "log_ms": 7000,
+    "team": "home"
+   }
+  },
+  {
+   "id": "w14",
+   "game": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19",
+   "dataset": "handball-segs-l01",
+   "file": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19_s3.mp4",
+   "start_ms": 160750,
+   "dur_ms": 10000,
+   "fps": 60.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "shot_saved",
+    "log_ms": 7000,
+    "team": "home"
+   }
+  },
+  {
+   "id": "w15",
+   "game": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02",
+   "dataset": "handball-segs-l02",
+   "file": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02_s0.mp4",
+   "start_ms": 82033,
+   "dur_ms": 10000,
+   "fps": 30.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "goal",
+    "log_ms": 7000,
+    "team": "away"
+   }
+  },
+  {
+   "id": "w16",
+   "game": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02",
+   "dataset": "handball-segs-l02",
+   "file": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02_s0.mp4",
+   "start_ms": 94033,
+   "dur_ms": 10000,
+   "fps": 30.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "shot_missed",
+    "log_ms": 7000,
+    "team": "home"
+   }
+  },
+  {
+   "id": "w17",
+   "game": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02",
+   "dataset": "handball-segs-l02",
+   "file": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02_s1.mp4",
+   "start_ms": 55500,
+   "dur_ms": 10000,
+   "fps": 30.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "shot_saved",
+    "log_ms": 7000,
+    "team": "home"
+   }
+  },
+  {
+   "id": "w18",
+   "game": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02",
+   "dataset": "handball-segs-l02",
+   "file": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02_s3.mp4",
+   "start_ms": 37767,
+   "dur_ms": 10000,
+   "fps": 30.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "shot_saved",
+    "log_ms": 7000,
+    "team": "away"
+   }
+  },
+  {
+   "id": "w19",
+   "game": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02",
+   "dataset": "handball-segs-l02",
+   "file": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02_s4.mp4",
+   "start_ms": 11533,
+   "dur_ms": 10000,
+   "fps": 30.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "goal",
+    "log_ms": 7000,
+    "team": "away"
+   }
+  },
+  {
+   "id": "w20",
+   "game": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27",
+   "dataset": "handball-segs-l02",
+   "file": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27_s0.mp4",
+   "start_ms": 79870,
+   "dur_ms": 10000,
+   "fps": 50.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "shot_missed",
+    "log_ms": 7000,
+    "team": "home"
+   }
+  },
+  {
+   "id": "w21",
+   "game": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27",
+   "dataset": "handball-segs-l02",
+   "file": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27_s0.mp4",
+   "start_ms": 143980,
+   "dur_ms": 10000,
+   "fps": 50.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "goal",
+    "log_ms": 7000,
+    "team": "away"
+   }
+  },
+  {
+   "id": "w22",
+   "game": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27",
+   "dataset": "handball-segs-l02",
+   "file": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27_s0.mp4",
+   "start_ms": 157980,
+   "dur_ms": 10000,
+   "fps": 50.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "goal",
+    "log_ms": 7000,
+    "team": "home"
+   }
+  },
+  {
+   "id": "w23",
+   "game": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27",
+   "dataset": "handball-segs-l02",
+   "file": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27_s3.mp4",
+   "start_ms": 240,
+   "dur_ms": 10000,
+   "fps": 50.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "shot_saved",
+    "log_ms": 7000,
+    "team": "away"
+   }
+  },
+  {
+   "id": "w24",
+   "game": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27",
+   "dataset": "handball-segs-l02",
+   "file": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27_s3.mp4",
+   "start_ms": 126760,
+   "dur_ms": 10000,
+   "fps": 50.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "shot_saved",
+    "log_ms": 7000,
+    "team": "home"
+   }
+  },
+  {
+   "id": "w25",
+   "game": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16",
+   "dataset": "handball-segs-l02",
+   "file": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16_s3.mp4",
+   "start_ms": 1033,
+   "dur_ms": 10000,
+   "fps": 30.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "goal",
+    "log_ms": 7000,
+    "team": "away"
+   }
+  },
+  {
+   "id": "w26",
+   "game": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16",
+   "dataset": "handball-segs-l02",
+   "file": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16_s3.mp4",
+   "start_ms": 59033,
+   "dur_ms": 10000,
+   "fps": 30.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "goal",
+    "log_ms": 7000,
+    "team": "home"
+   }
+  },
+  {
+   "id": "w27",
+   "game": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16",
+   "dataset": "handball-segs-l02",
+   "file": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16_s3.mp4",
+   "start_ms": 103033,
+   "dur_ms": 10000,
+   "fps": 30.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "shot_saved",
+    "log_ms": 7000,
+    "team": "away"
+   }
+  },
+  {
+   "id": "w28",
+   "game": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16",
+   "dataset": "handball-segs-l02",
+   "file": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16_s4.mp4",
+   "start_ms": 117267,
+   "dur_ms": 10000,
+   "fps": 30.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "shot_saved",
+    "log_ms": 7000,
+    "team": "away"
+   }
+  },
+  {
+   "id": "w29",
+   "game": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16",
+   "dataset": "handball-segs-l02",
+   "file": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16_s4.mp4",
+   "start_ms": 168267,
+   "dur_ms": 10000,
+   "fps": 30.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "shot_missed",
+    "log_ms": 7000,
+    "team": "home"
+   }
+  },
+  {
+   "id": "w30",
+   "game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+   "dataset": "handball-segs-b01",
+   "file": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03_s0.mp4",
+   "start_ms": 57733,
+   "dur_ms": 10000,
+   "fps": 60.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "goal",
+    "log_ms": 7000,
+    "team": "home"
+   }
+  },
+  {
+   "id": "w31",
+   "game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+   "dataset": "handball-segs-b01",
+   "file": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03_s0.mp4",
+   "start_ms": 99733,
+   "dur_ms": 10000,
+   "fps": 60.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "shot_missed",
+    "log_ms": 7000,
+    "team": "away"
+   }
+  },
+  {
+   "id": "w32",
+   "game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+   "dataset": "handball-segs-b01",
+   "file": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03_s1.mp4",
+   "start_ms": 13500,
+   "dur_ms": 10000,
+   "fps": 60.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "shot_missed",
+    "log_ms": 7000,
+    "team": "home"
+   }
+  },
+  {
+   "id": "w33",
+   "game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+   "dataset": "handball-segs-b01",
+   "file": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03_s3.mp4",
+   "start_ms": 112233,
+   "dur_ms": 10000,
+   "fps": 60.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "goal",
+    "log_ms": 7000,
+    "team": "away"
+   }
+  },
+  {
+   "id": "w34",
+   "game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+   "dataset": "handball-segs-b01",
+   "file": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03_s4.mp4",
+   "start_ms": 34500,
+   "dur_ms": 10000,
+   "fps": 60.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "shot_saved",
+    "log_ms": 7000,
+    "team": "home"
+   }
+  },
+  {
+   "id": "w35",
+   "game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
+   "dataset": "handball-segs-b03",
+   "file": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23.f298_s0.mp4",
+   "start_ms": 131000,
+   "dur_ms": 10000,
+   "fps": 60.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "shot_saved",
+    "log_ms": 7000,
+    "team": "away"
+   }
+  },
+  {
+   "id": "w36",
+   "game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
+   "dataset": "handball-segs-b03",
+   "file": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23.f298_s1.mp4",
+   "start_ms": 50000,
+   "dur_ms": 10000,
+   "fps": 60.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "shot_missed",
+    "log_ms": 7000,
+    "team": "away"
+   }
+  },
+  {
+   "id": "w37",
+   "game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
+   "dataset": "handball-segs-b03",
+   "file": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23.f298_s1.mp4",
+   "start_ms": 168000,
+   "dur_ms": 10000,
+   "fps": 60.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "goal",
+    "log_ms": 7000,
+    "team": "home"
+   }
+  },
+  {
+   "id": "w38",
+   "game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
+   "dataset": "handball-segs-b03",
+   "file": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23.f298_s4.mp4",
+   "start_ms": 14250,
+   "dur_ms": 10000,
+   "fps": 60.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "shot_saved",
+    "log_ms": 7000,
+    "team": "away"
+   }
+  },
+  {
+   "id": "w39",
+   "game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
+   "dataset": "handball-segs-b03",
+   "file": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23.f298_s4.mp4",
+   "start_ms": 41250,
+   "dur_ms": 10000,
+   "fps": 60.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "shot_missed",
+    "log_ms": 7000,
+    "team": "home"
+   }
+  },
+  {
+   "id": "w40",
+   "game": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10",
+   "dataset": "handball-segs-b03",
+   "file": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10_s1.mp4",
+   "start_ms": 48250,
+   "dur_ms": 10000,
+   "fps": 60.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "goal",
+    "log_ms": 7000,
+    "team": "away"
+   }
+  },
+  {
+   "id": "w41",
+   "game": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10",
+   "dataset": "handball-segs-b03",
+   "file": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10_s1.mp4",
+   "start_ms": 120750,
+   "dur_ms": 10000,
+   "fps": 60.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "goal",
+    "log_ms": 7000,
+    "team": "home"
+   }
+  },
+  {
+   "id": "w42",
+   "game": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10",
+   "dataset": "handball-segs-b03",
+   "file": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10_s3.mp4",
+   "start_ms": 58233,
+   "dur_ms": 10000,
+   "fps": 60.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "shot_saved",
+    "log_ms": 7000,
+    "team": "away"
+   }
+  },
+  {
+   "id": "w43",
+   "game": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10",
+   "dataset": "handball-segs-b03",
+   "file": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10_s3.mp4",
+   "start_ms": 140250,
+   "dur_ms": 10000,
+   "fps": 60.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "shot_saved",
+    "log_ms": 7000,
+    "team": "home"
+   }
+  },
+  {
+   "id": "w44",
+   "game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+   "dataset": "handball-segs-b03",
+   "file": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19_s0.mp4",
+   "start_ms": 94000,
+   "dur_ms": 10000,
+   "fps": 60.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "shot_saved",
+    "log_ms": 7000,
+    "team": "away"
+   }
+  },
+  {
+   "id": "w45",
+   "game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+   "dataset": "handball-segs-b03",
+   "file": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19_s3.mp4",
+   "start_ms": 48500,
+   "dur_ms": 10000,
+   "fps": 60.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "shot_saved",
+    "log_ms": 7000,
+    "team": "away"
+   }
+  },
+  {
+   "id": "w46",
+   "game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+   "dataset": "handball-segs-b03",
+   "file": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19_s3.mp4",
+   "start_ms": 168500,
+   "dur_ms": 10000,
+   "fps": 60.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "goal",
+    "log_ms": 7000,
+    "team": "away"
+   }
+  },
+  {
+   "id": "w47",
+   "game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+   "dataset": "handball-segs-b03",
+   "file": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19_s4.mp4",
+   "start_ms": 14500,
+   "dur_ms": 10000,
+   "fps": 60.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "shot_missed",
+    "log_ms": 7000,
+    "team": "away"
+   }
+  },
+  {
+   "id": "w48",
+   "game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+   "dataset": "handball-segs-b03",
+   "file": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19_s4.mp4",
+   "start_ms": 122750,
+   "dur_ms": 10000,
+   "fps": 60.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "goal",
+    "log_ms": 7000,
+    "team": "away"
+   }
+  },
+  {
+   "id": "w49",
+   "game": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02",
+   "dataset": "handball-segs-b04",
+   "file": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02_s1.mp4",
+   "start_ms": 6500,
+   "dur_ms": 10000,
+   "fps": 60.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "goal",
+    "log_ms": 7000,
+    "team": "away"
+   }
+  },
+  {
+   "id": "w50",
+   "game": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02",
+   "dataset": "handball-segs-b04",
+   "file": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02_s3.mp4",
+   "start_ms": 116233,
+   "dur_ms": 10000,
+   "fps": 60.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "shot_saved",
+    "log_ms": 7000,
+    "team": "away"
+   }
+  },
+  {
+   "id": "w51",
+   "game": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02",
+   "dataset": "handball-segs-b04",
+   "file": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02_s3.mp4",
+   "start_ms": 163733,
+   "dur_ms": 10000,
+   "fps": 60.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "shot_saved",
+    "log_ms": 7000,
+    "team": "home"
+   }
+  },
+  {
+   "id": "w52",
+   "game": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02",
+   "dataset": "handball-segs-b04",
+   "file": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02_s4.mp4",
+   "start_ms": 157233,
+   "dur_ms": 10000,
+   "fps": 60.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "goal",
+    "log_ms": 7000,
+    "team": "away"
+   }
+  },
+  {
+   "id": "w53",
+   "game": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09",
+   "dataset": "handball-segs-b04",
+   "file": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09_s0.mp4",
+   "start_ms": 13250,
+   "dur_ms": 10000,
+   "fps": 60.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "shot_missed",
+    "log_ms": 7000,
+    "team": "away"
+   }
+  },
+  {
+   "id": "w54",
+   "game": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09",
+   "dataset": "handball-segs-b04",
+   "file": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09_s0.mp4",
+   "start_ms": 94750,
+   "dur_ms": 10000,
+   "fps": 60.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "goal",
+    "log_ms": 7000,
+    "team": "away"
+   }
+  },
+  {
+   "id": "w55",
+   "game": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09",
+   "dataset": "handball-segs-b04",
+   "file": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09_s1.mp4",
+   "start_ms": 108233,
+   "dur_ms": 10000,
+   "fps": 60.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "goal",
+    "log_ms": 7000,
+    "team": "home"
+   }
+  },
+  {
+   "id": "w56",
+   "game": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09",
+   "dataset": "handball-segs-b04",
+   "file": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09_s4.mp4",
+   "start_ms": 158500,
+   "dur_ms": 10000,
+   "fps": 60.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "shot_saved",
+    "log_ms": 7000,
+    "team": "away"
+   }
+  },
+  {
+   "id": "w57",
+   "game": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14",
+   "dataset": "handball-segs-b04",
+   "file": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14_s3.mp4",
+   "start_ms": 29250,
+   "dur_ms": 10000,
+   "fps": 60.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "goal",
+    "log_ms": 7000,
+    "team": "away"
+   }
+  },
+  {
+   "id": "w58",
+   "game": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14",
+   "dataset": "handball-segs-b04",
+   "file": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14_s3.mp4",
+   "start_ms": 91983,
+   "dur_ms": 10000,
+   "fps": 60.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "shot_saved",
+    "log_ms": 7000,
+    "team": "away"
+   }
+  },
+  {
+   "id": "w59",
+   "game": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14",
+   "dataset": "handball-segs-b04",
+   "file": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14_s4.mp4",
+   "start_ms": 96733,
+   "dur_ms": 10000,
+   "fps": 60.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "shot_saved",
+    "log_ms": 7000,
+    "team": "away"
+   }
+  },
+  {
+   "id": "w60",
+   "game": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14",
+   "dataset": "handball-segs-b04",
+   "file": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14_s4.mp4",
+   "start_ms": 134733,
+   "dur_ms": 10000,
+   "fps": 60.0,
+   "width": 1280,
+   "height": 720,
+   "shot": {
+    "kind": "goal",
+    "log_ms": 7000,
+    "team": "home"
+   }
+  }
+ ]
+}
