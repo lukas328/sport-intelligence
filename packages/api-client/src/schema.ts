@@ -10145,6 +10145,11 @@ export interface components {
         };
         /** SeasonLineMatch */
         SeasonLineMatch: {
+            /**
+             * Analysed
+             * @default false
+             */
+            analysed?: boolean;
             attendance: components["schemas"]["AttendanceStatus"] | null;
             /** Competition */
             competition: string | null;
@@ -10183,6 +10188,11 @@ export interface components {
         };
         /** SeasonLineTotals */
         SeasonLineTotals: {
+            /**
+             * Analysed Matches
+             * @default 0
+             */
+            analysed_matches?: number;
             /** Assists */
             assists: number;
             /** Blocked */

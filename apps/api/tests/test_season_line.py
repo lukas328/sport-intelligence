@@ -158,6 +158,9 @@ async def test_season_line(
     assert totals["matches_involved"] == 1 and totals["matches_present"] == 1
     assert totals["goals"] == 2 and totals["shots"] == 3 and totals["yellow_cards"] == 1
     assert totals["shooting_pct"] == round(2 / 3, 4) and totals["save_pct"] is None
+    # only the first match has an analysis: the second has no rate, not 0 % (livegang K15)
+    assert one["analysed"] and not two["analysed"] and two["shooting_pct"] is None
+    assert totals["analysed_matches"] == 1
 
     # players read their own line only; the staff every player of the team
     player = await _join(make_api, coach, ids, outbox, "lena@hc-test.ch", player_id=lp)

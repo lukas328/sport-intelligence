@@ -169,6 +169,25 @@ async def test_prufen_asks_for_the_throw_off_until_it_is_set(make_api: Callable[
     assert all(c["kind"] != "kickoff" for c in g["checks"])
 
 
+async def test_the_throw_off_waits_until_the_video_plays(make_api: Callable[[], Api]) -> None:
+    """Livegang K5: while the video is still uploaded or converted the throw-off question would
+    show an empty player; it is asked once the video plays."""
+    from .test_matches import upload
+    from .test_themes import ready_video
+
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    m = await new_match(api, ids)
+    await upload(api, ids, m["id"], b"v" * 100)
+    g = (await api.get(f"/v1/orgs/{org}/matches/{m['id']}/graphics")).json()
+    assert all(c["kind"] != "kickoff" for c in g["checks"])
+    other = await new_match(api, ids, opponent_name="TV Bereit")
+    await ready_video(api, ids, other["id"])
+    g = (await api.get(f"/v1/orgs/{org}/matches/{other['id']}/graphics")).json()
+    assert [c["kind"] for c in g["checks"]].count("kickoff") == 1
+
+
 async def test_a_throw_off_not_in_the_video_is_not_asked_again(
     make_api: Callable[[], Api],
 ) -> None:

@@ -11,7 +11,7 @@ from handball_metrics.model import Event, EventType, Side
 from handball_metrics.xg import VERSION as XG_VERSION
 from handball_metrics.xg import expected_goal
 
-METRICS_VERSION = "0.6.0"  # bump on any change of definitions: invalidates stats caches
+METRICS_VERSION = "0.6.1"  # bump on any change of definitions: invalidates stats caches
 
 SUSPENSION_S = 120
 # GSAx needs positions for most saves and for most goals: overlay, tracking and report goals often
@@ -19,6 +19,10 @@ SUSPENSION_S = 120
 MIN_XG_COVERAGE = 0.7
 
 OFFICIAL = "official_report"
+# what the federation delivers: the result and the goals (scorer, minute), never shots, saves or
+# turnovers. A match with only these events has no analysis: its figures beyond the goals are not
+# known and must not count as 0 in an average (livegang K14, K15)
+OFFICIAL_SOURCES = (OFFICIAL, "official_feed")
 # goals seen on video (apps/api services/official_report.AUTO_GOALS)
 AUTO_GOALS = ("heuristic", "model", "scoreboard_ocr", "goal_candidate")
 GOAL_WINDOW_S = 20.0  # as official_report.MATCH_WINDOW_S: the same goal, same side
@@ -555,9 +559,18 @@ def _timeline(events: list[Event]) -> dict[str, Any]:
     }
 
 
+def has_analysis(events: list[Event]) -> bool:
+    """The match has data of its own beyond the federation's report (video analysis, tagging,
+    a filled-in report): only such matches feed averages, best values and trends."""
+    return any(e.source not in OFFICIAL_SOURCES for e in events)
+
+
 def compute_match_stats(
     events: list[Event], possessions: dict[str, int] | None = None
 ) -> dict[str, Any]:
+    # before the goals are merged: a goal confirmed in the video stays analysis even where the
+    # official goal of the same moment wins
+    analysed = has_analysis(events)
     events = one_source_per_goal(events)
     sit = situations(events)
     poss = possessions or {}
@@ -572,6 +585,8 @@ def compute_match_stats(
             "events": len(events),
             # false when only goals are known (score overlay): shots, ratios and xG mean nothing
             "attempts_known": any(e.is_shot and e.outcome != "goal" for e in events),
+            # events beyond the official report: video analysis, tagging, a filled-in report
+            "analysed": analysed,
             "low_confidence": len(low_conf),
             "sources": dict(Counter(e.source for e in events)),
         },
