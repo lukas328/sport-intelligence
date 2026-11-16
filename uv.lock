@@ -787,6 +787,8 @@ dependencies = [
     { name = "boto3" },
     { name = "httpx" },
     { name = "pydantic-settings" },
+    { name = "redis" },
+    { name = "rq" },
     { name = "structlog" },
 ]
 
@@ -795,6 +797,8 @@ requires-dist = [
     { name = "boto3", specifier = ">=1.36" },
     { name = "httpx", specifier = ">=0.28" },
     { name = "pydantic-settings", specifier = ">=2.7" },
+    { name = "redis", specifier = ">=5.2" },
+    { name = "rq", specifier = ">=2.1" },
     { name = "structlog", specifier = ">=24.4" },
 ]
 
