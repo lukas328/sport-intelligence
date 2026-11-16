@@ -254,6 +254,16 @@ Work was done in snapshots (many "Training ball labels: snapshot" commits 2026-1
 a usage limit stopped the labelling agents, `551e49a`); 46 clips were ready for round 9 (`5ecbabe`),
 all 171 by `61b97bf`.
 
+**Shot end test** (2026-11-16, replaces the 20-shot frozen split as the final test after review 1,
+objection 8): shots in the 42 never-trained halls of test set 2, one segment per game
+(`ml/gold/shot_scan.py pick`, `shot_endtest_segments.json`). A pilot by eye at 1 fps (3 segments)
+found 1 shot: attacks fall between the tiles and the ball is too small in 426 px tiles. So the
+candidates come from the product's shot candidates (camera pan and people motion, no ball
+detector; 2 per minute; `shot_scan.py cands` on `ml/goals/product_path.py observe --cheap`), and
+the owner confirms each one in a video page (7 s clip, release time set by pausing, outcome). Claude's
+LLM labelling of the 61 logged dev shots on keyframe-only candidates found the shot in 1 of 10 clips
+and was stopped; it restarts on the full Modal pre-labels (job 12) with the training-clip pipeline.
+
 **Shot gold** (2026-11-16): picked (`82889c6`), split frozen (`1a40b6a`); pre-labels by Modal job 12
 (nets hr1, hrp1, hr2, hrp2 and OWLv2) planned; labelling with visibility levels and owner yes/no per
 `tracking-strategie.md` section 9 step 0. Not done yet.
