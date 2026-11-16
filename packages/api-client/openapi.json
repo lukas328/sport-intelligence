@@ -16758,6 +16758,81 @@
         "title": "TemplateOut",
         "type": "object"
       },
+      "TipMatch": {
+        "properties": {
+          "kickoff_at": {
+            "format": "date-time",
+            "title": "Kickoff At",
+            "type": "string"
+          },
+          "match_id": {
+            "format": "uuid",
+            "title": "Match Id",
+            "type": "string"
+          },
+          "opponent": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Opponent"
+          }
+        },
+        "required": [
+          "match_id",
+          "kickoff_at",
+          "opponent"
+        ],
+        "title": "TipMatch",
+        "type": "object"
+      },
+      "TipScene": {
+        "properties": {
+          "clock_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Clock S"
+          },
+          "event_id": {
+            "format": "uuid",
+            "title": "Event Id",
+            "type": "string"
+          },
+          "period": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Period"
+          },
+          "t_ms": {
+            "title": "T Ms",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "event_id",
+          "t_ms",
+          "period",
+          "clock_s"
+        ],
+        "title": "TipScene",
+        "type": "object"
+      },
       "ToolCall": {
         "properties": {
           "error": {
@@ -17377,6 +17452,137 @@
           "valid_until"
         ],
         "title": "TrainingSlotOut",
+        "type": "object"
+      },
+      "TrainingTip": {
+        "description": "A weakness of the last matches with a training topic (K21).",
+        "properties": {
+          "drills": {
+            "description": "Library drill ids for the topics",
+            "items": {
+              "type": "string"
+            },
+            "title": "Drills",
+            "type": "array"
+          },
+          "evidence": {
+            "additionalProperties": true,
+            "title": "Evidence",
+            "type": "object"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "match_id": {
+            "description": "The latest match the weakness came up in",
+            "format": "uuid",
+            "title": "Match Id",
+            "type": "string"
+          },
+          "matches": {
+            "description": "In how many of the analysed matches it came up",
+            "title": "Matches",
+            "type": "integer"
+          },
+          "metric": {
+            "title": "Metric",
+            "type": "string"
+          },
+          "of": {
+            "description": "Matches analysed",
+            "title": "Of",
+            "type": "integer"
+          },
+          "params": {
+            "additionalProperties": true,
+            "title": "Params",
+            "type": "object"
+          },
+          "sample": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sample"
+          },
+          "scenes": {
+            "items": {
+              "$ref": "#/components/schemas/TipScene"
+            },
+            "title": "Scenes",
+            "type": "array"
+          },
+          "score": {
+            "title": "Score",
+            "type": "number"
+          },
+          "topics": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Topics",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "params",
+          "evidence",
+          "sample",
+          "score",
+          "match_id",
+          "matches",
+          "of",
+          "topics",
+          "metric",
+          "drills",
+          "scenes"
+        ],
+        "title": "TrainingTip",
+        "type": "object"
+      },
+      "TrainingTipsOut": {
+        "properties": {
+          "matches": {
+            "items": {
+              "$ref": "#/components/schemas/TipMatch"
+            },
+            "title": "Matches",
+            "type": "array"
+          },
+          "matches_analysed": {
+            "title": "Matches Analysed",
+            "type": "integer"
+          },
+          "plan_required": {
+            "title": "Plan Required",
+            "type": "boolean"
+          },
+          "tips": {
+            "items": {
+              "$ref": "#/components/schemas/TrainingTip"
+            },
+            "title": "Tips",
+            "type": "array"
+          }
+        },
+        "required": [
+          "matches_analysed",
+          "plan_required",
+          "matches",
+          "tips"
+        ],
+        "title": "TrainingTipsOut",
         "type": "object"
       },
       "TrialIn": {
@@ -35345,6 +35551,60 @@
         "summary": "Create Tag Set",
         "tags": [
           "tags"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/teams/{team_id}/training-tips": {
+      "get": {
+        "description": "What to train next: weaknesses of the last matches with evidence and drills (K21).",
+        "operationId": "tips_v1_orgs__org_id__teams__team_id__training_tips_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrainingTipsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Tips",
+        "tags": [
+          "training"
         ]
       }
     },
