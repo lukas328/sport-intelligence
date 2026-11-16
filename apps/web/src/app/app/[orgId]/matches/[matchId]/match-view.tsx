@@ -1,23 +1,21 @@
 "use client";
 
-import { ShareButton } from "@/components/sharing/share-button";
+import { ShareButton, shareMatchCard } from "@/components/sharing/share-button";
 import type { Schemas } from "@handball/api-client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useFormatter, useLocale, useNow, useTranslations } from "next-intl";
+import { useLocale, useNow, useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent } from "react";
 import Link from "next/link";
 import { ArrowLeftRight, Check, ChevronDown, ChartNoAxesColumn, Clapperboard, FileDown, Hand, MoreHorizontal, Pencil, Plus, Radio, Shield, Trash2, Upload } from "lucide-react";
 import { useRosterNames } from "@/components/analysis/tagger";
 import { KitFields } from "@/components/domain/kit-fields";
 import { AttendancePanel } from "@/components/team/attendance-panel";
-import { cardFileName, drawMatchCard } from "@/lib/match-card";
 import { DEFAULT_CLUB, matchStyle } from "@/lib/color";
 import { markOpened } from "@/lib/fresh-match";
 import { checkCount, goalRuns, useMatchGraphics } from "@/lib/graphics";
-import { threeThings } from "@/lib/three-things";
 import { ownName } from "@/lib/own-name";
-import { ThreeThingsView, useThingText } from "@/components/anlauf/three-things-view";
+import { ThreeThingsView } from "@/components/anlauf/three-things-view";
 import { EmptyField } from "@/components/anlauf/bundle";
 import { MatchHead } from "./match-head";
 import { NextOpponent } from "@/app/app/[orgId]/teams/[teamId]/matches/start-view";
@@ -34,7 +32,7 @@ import { MenuContent, MenuItem, MenuRoot, MenuSeparator, MenuTrigger } from "@/c
 import { Segmented } from "@/components/ui/tabs";
 import { VideoPlayer, type PlayerHandle } from "@/components/video/player";
 import { FromMatchButton } from "@/components/collections/from-match";
-import { GameActions, PointOpen, Telegram, ThreeFigures, chatPicture } from "./game-tab";
+import { GameActions, PointOpen, Telegram, ThreeFigures } from "./game-tab";
 import { OverviewView, ReportView, ShotsView, useStats } from "./analysis-views";
 import dynamic from "next/dynamic";
 import { Button, buttonClass } from "@/components/ui/button";
@@ -78,7 +76,6 @@ const SUBS: Sub[] = ["report", "shots", "keepers", "physical"];
 export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; initial: Match; teamName: string; staff: boolean }) {
   const t = useTranslations();
   const oppName = useOpponentName();
-  const format = useFormatter();
   const locale = useLocale();
   const qc = useQueryClient();
   const confirm = useConfirm();
@@ -192,7 +189,6 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
   const ta = useTranslations("anlauf");
   const tParts = useTranslations("parts");
   const plainPlayer = useRef<PlayerHandle>(null);
-  const thingText = useThingText();
   const own = ownName(teamName, shell?.org.name ?? teamName);
   const more = useRef<HTMLDetailsElement>(null);
   const roster = useRosterNames(orgId, match.team_id, match.season_id);
@@ -232,7 +228,6 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
   }, [stats.data, main, hasEvents, match.kickoff_at]);
   const pendingVideos = match.videos.filter((v) => v.status !== "ready");
   const kickoff = new Date(match.kickoff_at);
-  const result = match.opponent && match.score_own != null && match.score_opponent != null ? (match.score_own > match.score_opponent ? "won" : match.score_own < match.score_opponent ? "lost" : "draw") : null;
   const soon = kickoff.getTime() > Date.now() - 3 * 3600_000;
   const liveFirst = staff && match.score_own == null && !main && soon && match.source !== "paper_report";
   const uploadFirst = staff && !main && !liveFirst && match.source !== "paper_report";
@@ -255,35 +250,6 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
   }, [adding]);
   // RSVP belongs to "Teamfunktionen" (ADR 029): hidden while the team has them off
   const teamFeatures = shell?.teams.find((x) => x.id === match.team_id)?.team_features ?? false;
-
-  /** Match card (4:5 PNG), drawn locally: club, team, date, score, opponent, two figures. */
-  async function downloadCard() {
-    if (match.score_own == null || match.score_opponent == null) return;
-    await document.fonts?.ready;
-    const pctOf = (v: number | null | undefined) => (v == null ? null : `${Math.round(v * 100)} %`);
-    const shots = pctOf(stats.data?.own.shooting_pct);
-    const saves = pctOf(stats.data?.own.save_pct);
-    const date = format.dateTime(kickoff, { day: "2-digit", month: "2-digit", year: "2-digit" });
-    const canvas = drawMatchCard(document.createElement("canvas"), {
-      club: shell?.org.name ?? "",
-      team: teamName,
-      date,
-      own: match.score_own,
-      opp: match.score_opponent,
-      opponent: oppName(match),
-      line: t(`voice.${result === "won" ? "won" : result === "lost" ? "lost" : "draw"}`, { opponent: oppName(match) }).replace(/\.$/, ""),
-      figures: [shots && t("matches.cardShots", { value: shots }), saves && t("matches.cardSaves", { value: saves })].filter((x): x is string => Boolean(x)),
-      colour: shell?.org.primary_color ?? DEFAULT_CLUB,
-      tag: match.is_demo ? t("matches.cardDemo") : null,
-    });
-    const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/png"));
-    if (!blob) return;
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = cardFileName(teamName, oppName(match), date);
-    a.click();
-    window.setTimeout(() => URL.revokeObjectURL(a.href), 2000);
-  }
 
   // numbers in the analysis and scenes views jump to a moment: bring the player into view, the
   // focus stays where it is
@@ -624,19 +590,10 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
               if (more.current) more.current.open = true;
               requestAnimationFrame(() => document.getElementById("highlights")?.scrollIntoView({ behavior: "smooth", block: "start" }));
             }}
+            // the Spielkarte, rendered on the server: into the chat by the share sheet, else saved (K20)
             onPicture={
               match.score_own != null && match.score_opponent != null
-                ? () =>
-                    staff && match.opponent
-                      ? void downloadCard()
-                      : chatPicture({
-                      title: `${own} ${ta("vsShort")} ${oppName(match)}`,
-                      sub: [format.dateTime(new Date(match.kickoff_at), { dateStyle: "long" }), match.venue].filter(Boolean).join(" · "),
-                      score: `${match.score_own}:${match.score_opponent}`,
-                      heading: ta("chatHeading"),
-                      things: graphics.data ? threeThings(goalRuns(graphics.data)).map((x) => ({ value: x.value, text: thingText(x) })) : [],
-                      file: `${oppName(match)}-${match.score_own}-${match.score_opponent}.png`.replace(/\s+/g, "-"),
-                    })
+                ? () => void shareMatchCard(orgId, match.id, `${t("share.card.file")}-${oppName(match)}-${match.score_own}-${match.score_opponent}.png`.replace(/\s+/g, "-"))
                 : undefined
             }
           />
@@ -928,4 +885,3 @@ function MatchAdmin({ orgId, match, teamName, onSaved }: { orgId: string; match:
 
 /** The two teams as rows of a scoreboard: name left, goals right, our row in full strength. */
 // a share above 100 % means the sources disagree (e.g. goals from a report, attacks from a clip)
-
