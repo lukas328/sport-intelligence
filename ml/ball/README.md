@@ -4,6 +4,9 @@ Finding the ball across halls, cameras and ball colours. Nothing here ships yet;
 reproducible trail of the experiments. **Models trained with non-commercial data (DeepSport, see
 below) are research models and must not go into the product.**
 
+Lineage (every model version, dataset, test set, tracker step and decision, with commits):
+[`LINEAGE.md`](LINEAGE.md). Add a row there in the same commit as any new model, data or test set.
+
 ## Approach
 1. **Three frames as input** (t-G, t, t+G; TrackNet principle): a ball moves against the hall, a
    spot on the wall or a lamp does not. `train_ballnet3.py` (CPU) and `kaggle/train_gpu.py` (Kaggle
