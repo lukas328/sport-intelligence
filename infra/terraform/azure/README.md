@@ -90,10 +90,11 @@ Set `image_tag` in `terraform.tfvars` to that tag.
 
 Without Docker (no admin rights on the PC), let the registry build the images. `az acr build` has no
 BuildKit (the Dockerfiles use `RUN --mount`), so use the task file, and upload a clean export of the
-tracked files only (the working tree holds `.terraform/` with 250 MB of providers and your tfvars):
+tracked files only (the working tree holds `.terraform/` with 250 MB of providers and your tfvars).
+`.dockerignore` leaves out `infra/`, so copy the task file to the root of the export:
 
 ```bash
-TAG=$(git rev-parse --short HEAD) CTX=$(mktemp -d) && git archive HEAD | tar -x -C $CTX && az acr run -r $(terraform -chdir=infra/terraform/azure output -raw registry_name) -f infra/terraform/azure/acr-build.yaml --set tag=$TAG --timeout 7200 $CTX
+TAG=$(git rev-parse --short HEAD) CTX=$(mktemp -d) && git archive HEAD | tar -x -C $CTX && cp infra/terraform/azure/acr-build.yaml $CTX/ && az acr run -r $(terraform -chdir=infra/terraform/azure output -raw registry_name) -f acr-build.yaml --set tag=$TAG --timeout 7200 $CTX
 ```
 
 ## 4. External secrets

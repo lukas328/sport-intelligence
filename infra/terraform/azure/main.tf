@@ -177,13 +177,13 @@ locals {
   dsn_owner = "postgresql://${local.pg_admin}:${random_password.pg_admin.result}@${local.pg_host}:5432/handball?sslmode=require"
 
   generated_secrets = {
-    "hb-secret-key"        = random_password.secret_key.result
-    "hb-encryption-key"    = local.fernet
-    "hb-internal-token"    = random_password.internal_token.result
-    "hb-database-url"      = local.db_app
-    "hb-migration-db-url"  = local.db_owner
-    "hb-admin-dsn"         = local.dsn_owner
-    "hb-app-db-password"   = random_password.pg_app.result
+    "hb-secret-key"       = random_password.secret_key.result
+    "hb-encryption-key"   = local.fernet
+    "hb-internal-token"   = random_password.internal_token.result
+    "hb-database-url"     = local.db_app
+    "hb-migration-db-url" = local.db_owner
+    "hb-admin-dsn"        = local.dsn_owner
+    "hb-app-db-password"  = random_password.pg_app.result
   }
 
   # set by hand after the first apply (README, step 4); terraform never overwrites them
@@ -345,8 +345,12 @@ locals {
         c = await asyncpg.connect(os.environ["HB_ADMIN_DSN"])
         pw = os.environ["HB_APP_DB_PASSWORD"]
         exists = await c.fetchval("SELECT 1 FROM pg_roles WHERE rolname = 'handball_app'")
-        verb = "ALTER" if exists else "CREATE"
-        await c.execute(f"{verb} ROLE handball_app LOGIN PASSWORD '{pw}' NOSUPERUSER NOBYPASSRLS")
+        # The Azure admin is no superuser: it may set the attributes when it creates the role,
+        # but naming them again in ALTER ROLE fails, so a rerun only refreshes the password.
+        if exists:
+            await c.execute(f"ALTER ROLE handball_app LOGIN PASSWORD '{pw}'")
+        else:
+            await c.execute(f"CREATE ROLE handball_app LOGIN PASSWORD '{pw}' NOSUPERUSER NOBYPASSRLS")
         await c.execute("GRANT CONNECT ON DATABASE handball TO handball_app")
         await c.execute("GRANT USAGE ON SCHEMA public TO handball_app")
         await c.close()
@@ -407,10 +411,10 @@ resource "azurerm_container_app" "redis" {
     }
 
     container {
-      name    = "redis"
-      image   = "docker.io/library/redis:7-alpine"
-      cpu     = 0.25
-      memory  = "0.5Gi"
+      name   = "redis"
+      image  = "docker.io/library/redis:7-alpine"
+      cpu    = 0.25
+      memory = "0.5Gi"
       # via sh: the azurerm provider cannot read back an empty argument ("--save" "")
       command = ["sh", "-c", "exec redis-server --save '' --appendonly no --maxmemory 384mb"]
     }
