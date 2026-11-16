@@ -80,7 +80,7 @@ dafür aber für alle).
 | Überlappen verhindern | Vorlagen mit Mindestabstand (Test), Marken bleiben im Feld, Trefferfläche 44 px |
 | Vorlagen fachlich korrekt | alle Positionen aus der Geometrie von `@handball/court` (6-m- und 9-m-Linie um die Pfosten), nur Torhüter im Torraum, Test dafür |
 | Spieler hinzufügen und entfernen | «+ Wir», «+ Gegner», Löschen, Beschriftung ändern |
-| Spiegeln | nicht in diesem Schritt; vorgemerkt |
+| Spiegeln | «Spiegeln» tauscht links und rechts (Positionen, Laufwege, Beschriftung LA und RA, RL und RR) |
 | Teilen als Video | gehört zu K20 und Teilen (Strom E1); die Tafel ist dafür vorbereitet (gleiche Darstellung im geteilten Link) |
 
 ## Quellen

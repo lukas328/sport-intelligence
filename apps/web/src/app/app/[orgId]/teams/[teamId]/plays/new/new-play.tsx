@@ -1,8 +1,8 @@
 "use client";
 
-import { TEMPLATES, validate, type PlayDoc } from "@handball/tactics";
+import { TEMPLATES, templateDoc, validate, type PlayDoc } from "@handball/tactics";
 import { useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { EMPTY_DOC, PlayEditor } from "@/components/tactics/play-editor";
 import { FROM_VIDEO_KEY } from "@/lib/play-from-video";
@@ -10,6 +10,7 @@ import { FROM_VIDEO_KEY } from "@/lib/play-from-video";
 /** New play from scratch, from a template (?template=id) or from a video moment (?from=video). */
 export function NewPlay({ orgId, teamId }: { orgId: string; teamId: string }) {
   const t = useTranslations("tactics");
+  const locale = useLocale();
   const params = useSearchParams();
   const tpl = TEMPLATES.find((x) => x.id === params.get("template"));
   const [video, setVideo] = useState<{ doc: PlayDoc; match_id: string; t_ms: number } | null | undefined>(undefined);
@@ -29,7 +30,7 @@ export function NewPlay({ orgId, teamId }: { orgId: string; teamId: string }) {
       orgId={orgId}
       teamId={teamId}
       editable
-      initialDoc={video?.doc ?? tpl?.doc ?? EMPTY_DOC}
+      initialDoc={video?.doc ?? (tpl ? templateDoc(tpl, locale) : EMPTY_DOC)}
       initialMeta={tpl ? { name: t(`tpl_${tpl.id}`), category: tpl.category, formation: tpl.formation, tags: tpl.tags } : undefined}
       source={video ? { match_id: video.match_id, t_ms: video.t_ms } : null}
     />
