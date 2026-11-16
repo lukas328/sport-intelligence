@@ -136,11 +136,13 @@ resource "azurerm_role_assignment" "kv_apps" {
   principal_id         = azurerm_user_assigned_identity.apps.principal_id
 }
 
-# whoever runs terraform writes the generated secrets
+# writes the generated secrets: whoever runs terraform, or the person named in kv_deployer_object_id
+# when GitHub Actions deploys (its own identity gets the role from infra/azure/setup-github-deploy.sh,
+# so that it can read the vault before terraform runs)
 resource "azurerm_role_assignment" "kv_deployer" {
   scope                = azurerm_key_vault.this.id
   role_definition_name = "Key Vault Secrets Officer"
-  principal_id         = data.azurerm_client_config.current.object_id
+  principal_id         = coalesce(var.kv_deployer_object_id, data.azurerm_client_config.current.object_id)
 }
 
 resource "random_password" "secret_key" {
