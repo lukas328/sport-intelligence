@@ -398,3 +398,10 @@ Paired (after against before): round 10 +39 / -6 (p 5e-7), hr1 +23 / -4, hrp1 +3
 hr1 + hrp1 +23 / -5 (p 9e-4). No parameter fitted on gold; two repeats in a row change little.
 Goal set with the owner: fast balls (shots, hard passes) carry the game-deciding information, so
 the fast subset is now the main measure (about 80 % overall is enough if those are right).
+- The owner checked all 194 gold points of the three clips with the most tracker misses (g34, g08,
+  g03): 192 right, 2 wrong (g08 frame 126, g34 frame 108; now tier "rejected" in
+  `ml/gold/data/gold_ball_v1.json`). So the misses there are real, e.g. g34 frames 28 to 45: a high
+  ball in front of the wall the nets do not see.
+- A wider hit radius changes little now that repeated frames are handled (hr1 + hrp1, all / fast):
+  12 px 78.2 / 79.5 %, 16 px 78.8 / 80.1 %, 20 px 79.2 / 80.5 %, 25 px 79.6 / 81.0 %. The near misses
+  the owner saw on the check page were the tracker before this fix; 12 px stays.
