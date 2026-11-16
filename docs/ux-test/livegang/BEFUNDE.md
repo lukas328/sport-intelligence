@@ -56,3 +56,4 @@ Schwere: 🔴 blockiert einen Trainer · 🟡 stört · ⚪ Kleinigkeit. Stand: 
 | K6 | Laufender Upload und laufende Analyse zu wenig sichtbar: Fortschritt (wie weit, wie lange noch) gehört gut sichtbar nach oben, im Kopf oder als schwebender Hinweis auf jeder Seite, nicht nur im Spiel | Kopf, Start | offen |
 | K7 | Im Kopf steht «TV Thalwil» zweimal (Verein und Team heissen gleich) | Kopf | offen |
 | K8 | Leere Seiten zeigen zu viel: «Szenen» mit 0 Szenen zeigt Suche, Filter, Sammlungen und Highlights; besser ein klarer nächster Schritt («Lade ein Video hoch, dann siehst du hier deine Szenen») | Szenen und andere leere Zustände | offen |
+| K9 | Website «So funktioniert es»: oben neben den Schritt-Zahlen fehlt ein Bild aus der App; der untere Teil ist gut, aber der Anfang muss uns von der besten Seite zeigen, auch visuell (je Schritt ein echtes App-Bild mit Beispieldaten: Filmen, Hochladen, Prüfen, Ergebnis) | Website | offen |
