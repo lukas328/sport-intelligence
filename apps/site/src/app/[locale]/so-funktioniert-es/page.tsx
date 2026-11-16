@@ -1,15 +1,41 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import type { CSSProperties } from "react";
+import { Browser, Phone } from "@/components/device";
 import { HallPlan } from "@/components/hall-plan";
+import { Reveal } from "@/components/reveal";
 import { Honest } from "@/components/honest";
 import { KitScope, StartLink } from "@/components/kit";
 import { JsonLd } from "@/components/json-ld";
 import { PageHead, SectionHead, Updated } from "@/components/wurf-head";
 import { graph, howTo } from "@/lib/schema";
+import { shot } from "@/lib/app-shots";
 import { APP_LOCALE, messages, type Locale } from "@/lib/i18n";
+import type { Messages } from "@/messages/de";
 import { pageMeta } from "@/lib/seo";
 
 type Props = { params: Promise<{ locale: Locale }> };
+
+/** Pictures from the app (public/app, scripts/app-screens.mjs) under «So sieht es in der App aus». */
+const SHOTS = [
+  { ...shot("video"), phone: false },
+  { ...shot("szenen"), phone: false },
+  { ...shot("saison"), phone: false },
+  { ...shot("teilen-phone"), phone: true },
+];
+
+/** K9: each step with a picture from the app (the first with the hall plan: filming happens outside it). */
+function StepPicture({ i, alt, plan }: { i: number; alt: string; plan: Messages["filming"] }) {
+  if (i === 0) return <HallPlan label={plan.planLabel} camera={plan.planCamera} field={plan.planField} corner={plan.planCorner} />;
+  if (i === 1)
+    return (
+      <div className="border-2 border-ink bg-paper p-4">
+        <img {...shot("hochladen-phone")} alt={alt} loading="lazy" decoding="async" className="block h-auto w-full" />
+      </div>
+    );
+  if (i === 2) return <Phone {...shot("pruefen-phone")} alt={alt} className="max-w-[17rem]" />;
+  return <Phone {...shot("ergebnis-phone")} alt={alt} scroll className="max-w-[17rem]" />;
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
@@ -33,17 +59,22 @@ export default async function How({ params }: Props) {
           }),
         )}
       />
+      <Reveal />
       <PageHead kick={t.title} title={t.head} lead={t.lead}>
         <Updated locale={locale} />
       </PageHead>
       <div className="wrap">
         <ol className="mt-12">
           {t.steps.map((s, i) => (
-            <li key={s.title} id={`schritt-${i + 1}`} className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-5 border-t-2 border-ink py-8 md:grid-cols-[7rem_minmax(0,1fr)_minmax(0,24rem)] md:gap-x-10">
+            <li
+              key={s.title}
+              id={`schritt-${i + 1}`}
+              className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-5 border-t-2 border-ink py-10 md:grid-cols-[6rem_minmax(0,1fr)_minmax(0,26rem)] md:gap-x-10"
+            >
               <span aria-hidden className="font-num text-[4.5rem] leading-[.85] text-club-text md:text-[6.5rem]">
                 {i + 1}
               </span>
-              <div>
+              <div data-reveal>
                 <h2 className="text-[2rem] md:text-[2.5rem]">{s.title}</h2>
                 <p className="measure mt-3">{s.text}</p>
                 {i === 0 && (
@@ -52,26 +83,33 @@ export default async function How({ params }: Props) {
                   </Link>
                 )}
               </div>
-              {i === 0 && (
-                <div className="col-span-2 mt-6 md:col-span-1 md:mt-0">
-                  <HallPlan label={m.filming.planLabel} camera={m.filming.planCamera} field={m.filming.planField} corner={m.filming.planCorner} />
-                </div>
-              )}
+              <div data-reveal style={{ "--d": 1 } as CSSProperties} className="col-span-2 mt-6 md:col-span-1 md:mt-0">
+                <StepPicture i={i} alt={s.alt} plan={m.filming} />
+              </div>
             </li>
           ))}
         </ol>
 
         <section aria-labelledby="shots" className="mt-16">
           <SectionHead id="shots" title={t.shotsTitle} note={t.shotsNote} />
-          <ul className="mt-8 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            {t.shots.map((s) => (
-              <li key={s.src}>
-                <figure className="m-0">
-                  <img src={s.src} alt={s.alt} width={390} height={730} loading="lazy" className="block h-auto w-full border-2 border-ink" />
-                  <figcaption className="mt-3 text-[1.0625rem]">{s.caption}</figcaption>
-                </figure>
-              </li>
-            ))}
+          <ul className="mt-8 grid grid-cols-1 gap-10 md:grid-cols-2">
+            {t.shots.map((s, i) => {
+              const pic = SHOTS[i]!;
+              return (
+                <li key={pic.src} data-reveal style={{ "--d": i % 2 } as CSSProperties}>
+                  <figure className="m-0">
+                    {pic.phone ? (
+                      <div className="border-2 border-ink bg-paper">
+                        <img src={pic.src} alt={s.alt} width={pic.width} height={pic.height} loading="lazy" decoding="async" className="mx-auto block h-auto w-full max-w-[26rem]" />
+                      </div>
+                    ) : (
+                      <Browser src={pic.src} alt={s.alt} width={pic.width} height={pic.height} crop={1280 / 760} />
+                    )}
+                    <figcaption className="mt-3 text-[1.0625rem]">{s.caption}</figcaption>
+                  </figure>
+                </li>
+              );
+            })}
           </ul>
         </section>
 

@@ -26,15 +26,17 @@ export default async function Help({ params }: Props) {
   const m = messages(locale);
   const t = m.faq;
   const team = plans.plans.find((p) => p.plan === "team")!;
+  const answer = (a: string) => fmt(a, { month: team.price_chf_month, year: team.price_chf_year, ...fileVars(m) });
   const links: Record<number, [string, string]> = {
-    1: [`/${locale}/aufnahme/`, m.cta.filming],
-    6: [`/${locale}/daten/`, m.cta.data],
-    7: [`/${locale}/daten/`, m.cta.data],
-    5: [`/${locale}/preise/`, m.cta.pricing],
+    2: [`/${locale}/aufnahme/`, m.cta.filming],
+    7: [`/${locale}/demo/`, m.cta.demo],
+    9: [`/${locale}/preise/`, m.cta.pricing],
+    10: [`/${locale}/daten/`, m.cta.data],
+    11: [`/${locale}/daten/`, m.cta.data],
   };
   return (
     <KitScope>
-      <JsonLd data={graph(faqPage(locale, "hilfe", t.items.map((f) => ({ q: f.q, a: fmt(f.a, { month: team.price_chf_month, year: team.price_chf_year, ...fileVars(m) }) }))))} />
+      <JsonLd data={graph(faqPage(locale, "hilfe", t.items.map((f) => ({ q: f.q, a: f.hi ? `${answer(f.a)} ${t.hiLabel} ${f.hi}` : answer(f.a) }))))} />
       <PageHead kick={t.title} title={t.head} lead={t.lead}>
         <Updated locale={locale} />
       </PageHead>
@@ -45,7 +47,13 @@ export default async function Help({ params }: Props) {
               q: f.q,
               a: (
                 <>
-                  <p>{fmt(f.a, { month: team.price_chf_month, year: team.price_chf_year, ...fileVars(m) })}</p>
+                  <p>{answer(f.a)}</p>
+                  {/* K12: first the answer, then what the product takes off the coach's hands */}
+                  {f.hi && (
+                    <p className="mt-3 border-l-4 border-club-text bg-paper px-4 py-3">
+                      <b>{t.hiLabel}</b> {f.hi}
+                    </p>
+                  )}
                   {links[i] && (
                     <Link href={links[i][0]} className="link">
                       {links[i][1]}

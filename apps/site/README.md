@@ -39,8 +39,16 @@ centre lives at `{site}/{de|fr|en}/hilfe/{slug}/`; the app links there with `HB_
   `make plans`; CI fails when it is out of date.
 - Demo match: `public/demo/match.json`, a fictional match from `scripts/make_demo.py` (seeded random
   events, statistics from `handball_metrics`); regenerate with `make plans`. `src/lib/demo.ts` turns it
-  into what the pages draw (zones, invented runs, the three things, one scene without a ball); the
-  page says «Erfundenes Spiel» at the top. The visitor's colour comes in with `?kit=red` (no storage).
+  into what the pages draw (zones, invented runs, the three things, one scene on the tactics camera);
+  the page says «Erfundenes Spiel» at the top. Everything invented is handball-typical: shot spots
+  and runs stay outside the goal area, the scene has a 6:0 defence in front of 6 m, the attack
+  around 9 m, only the goalkeeper in the goal area, and the ball in every frame (tested in
+  `src/lib/demo.test.ts`). The visitor's colour comes in with `?kit=red` (no storage).
+- Pictures from the app: `public/app/*.webp`, made by `scripts/app-screens.mjs` from the local app
+  with the seeded demo club (how: `public/app/README.md`); their sizes in `src/lib/app-shots.json`.
+- Start page: short blocks in the order of `docs/research/R4-websites.md`; blocks marked
+  `data-reveal` glide in once (`src/components/reveal.tsx`), the phone picture scrolls slowly;
+  with `prefers-reduced-motion` nothing moves.
 - Help guides outside the core have `listed: false` in `content/help/index.ts`: reachable for the app's
   links, not listed, not in the sitemap, `noindex`.
 

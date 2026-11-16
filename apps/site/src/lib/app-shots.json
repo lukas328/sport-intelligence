@@ -1,0 +1,34 @@
+{
+  "ergebnis": {
+    "width": 1280,
+    "height": 1100
+  },
+  "ergebnis-phone": {
+    "width": 600,
+    "height": 2892
+  },
+  "hochladen-phone": {
+    "width": 780,
+    "height": 616
+  },
+  "pruefen-phone": {
+    "width": 780,
+    "height": 1688
+  },
+  "saison": {
+    "width": 1280,
+    "height": 820
+  },
+  "szenen": {
+    "width": 1280,
+    "height": 940
+  },
+  "teilen-phone": {
+    "width": 780,
+    "height": 812
+  },
+  "video": {
+    "width": 1280,
+    "height": 1000
+  }
+}

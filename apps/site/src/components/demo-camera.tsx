@@ -8,16 +8,19 @@ export function DemoCamera({
   text,
   legend,
   view = "camL",
+  desktopWidth = 1000,
 }: {
   scene: CameraScene;
   text: CameraText;
   legend: { own: string; opp: string; ref: string; number: string; ball: string };
   view?: "camL" | "halfB";
+  /** the width the desktop picture is drawn for (dots keep their size in pixels) */
+  desktopWidth?: number;
 }) {
   return (
     <div className="on-court">
       <div className="hidden md:block">
-        <TacticsCamera scene={scene} view={view} width={1000} dot={13} text={text} />
+        <TacticsCamera scene={scene} view={view} width={desktopWidth} dot={13} text={text} />
       </div>
       <div className="md:hidden">
         <TacticsCamera scene={scene} view="halfB" width={358} dot={10} text={text} showLabels={false} />

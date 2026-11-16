@@ -295,6 +295,45 @@
       animation: appear 0.5s ease-out forwards;
       animation-delay: calc(var(--i, 0) * 140ms + 0.4s);
     }
+    /* start page: blocks glide in once (components/reveal.tsx), the hero pictures rise on load */
+    [data-reveal] {
+      transition:
+        opacity 0.7s cubic-bezier(0.2, 0.7, 0.2, 1),
+        transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+      transition-delay: calc(var(--d, 0) * 110ms);
+    }
+    [data-reveal].pre {
+      opacity: 0;
+      transform: translateY(2rem);
+    }
+    .rise {
+      animation: rise 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+      animation-delay: calc(var(--d, 0) * 140ms + 0.1s);
+    }
+    /* a tall picture of the app runs slowly down and back; it stops while pointed at */
+    .phone-scroll {
+      animation: phone-scroll 16s ease-in-out 1.2s infinite alternate;
+    }
+    .phone:hover .phone-scroll {
+      animation-play-state: paused;
+    }
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(2.5rem);
+  }
+}
+@keyframes phone-scroll {
+  0%,
+  16% {
+    transform: translateY(0);
+  }
+  84%,
+  100% {
+    transform: translateY(var(--scroll-to, 0));
   }
 }
 
