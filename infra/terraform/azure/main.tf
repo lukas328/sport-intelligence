@@ -556,6 +556,11 @@ resource "azurerm_container_app" "web" {
         name  = "HB_S3_PUBLIC_URL"
         value = var.s3_endpoint_url
       }
+      # absolute URLs in the link previews of shared pages (og:image, og:url)
+      env {
+        name  = "HB_WEB_BASE_URL"
+        value = local.web_base_url
+      }
     }
   }
 

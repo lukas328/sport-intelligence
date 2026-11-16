@@ -21,6 +21,7 @@ from sqlalchemy import select
 from handball_api.core.db import disable_system_access, enable_system_access, set_tenant
 from handball_api.core.errors import ProblemError
 from handball_api.core.security import SecretBox, hash_token, new_token
+from handball_api.core.storage import ObjectNotFoundError
 from handball_api.models import (
     Clip,
     Event,
@@ -556,5 +557,8 @@ async def public_reel(ctx: Ctx, token: str) -> bytes:
     reel = await ctx.db.get(HighlightReel, link.target_id)
     if reel is None or reel.status != ReelStatus.READY or not reel.output_key:
         raise ProblemError(404, "not-found", "Not found")
-    data, _ = await ctx.storage.get(ctx.settings.s3_bucket_artifacts, reel.output_key)
+    try:
+        data, _ = await ctx.storage.get(ctx.settings.s3_bucket_artifacts, reel.output_key)
+    except ObjectNotFoundError:
+        raise ProblemError(404, "not-found", "Not found") from None
     return data
