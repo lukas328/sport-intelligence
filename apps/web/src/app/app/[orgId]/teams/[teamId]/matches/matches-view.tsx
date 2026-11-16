@@ -1,21 +1,20 @@
 "use client";
 
 import type { Schemas } from "@handball/api-client";
-import { Camera, ChevronRight, Plus } from "lucide-react";
+import { ChevronRight, Plus } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useFormatter, useNow, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Alert, Card } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Dialog } from "@/components/ui/dialog";
 import { PageHeader } from "@/components/ui/page-header";
 import { matchState } from "@/lib/match-state";
 import { cn } from "@/lib/utils";
 import { NewMatchForm } from "./new-match-form";
+import { ScoutingForm } from "./scouting-form";
 import { StartView } from "./start-view";
-import { PaperImport } from "./paper-import";
-import { PaperView } from "../paper/paper-view";
 
 type Match = Schemas["MatchSummary"];
 
@@ -27,81 +26,29 @@ export function MatchesView({ orgId, teamId, matches, canWrite }: { orgId: strin
   // "Video hochladen" from the frame: pick the match the video belongs to, or create it
   const [upload, setUpload] = useState(params.get("upload") === "1");
   useEffect(() => setUpload(params.get("upload") === "1"), [params]);
-  // "Spielbericht hinzufügen": photo, file or link, one dialog (SPEC section 6)
-  const [report, setReport] = useState(params.get("report") === "1");
-  useEffect(() => setReport(params.get("report") === "1"), [params]);
-  // kept here: the import refreshes the list, which swaps the layout below
-  const [warnings, setWarnings] = useState<string[]>([]);
-  const notice = warnings.length > 0 && (
-    <Alert kind="info">
-      <p className="font-medium">
-        {t("paper.done")} {t("paper.warnings")}:
-      </p>
-      <ul className="list-disc pl-5">
-        {warnings.map((w) => (
-          <li key={w}>{w}</li>
-        ))}
-      </ul>
-    </Alert>
-  );
   const now = useNow({ updateInterval: 60_000 });
-  const upcoming = matches.filter((m) => new Date(m.kickoff_at) > now && m.score_own == null).sort((a, b) => a.kickoff_at.localeCompare(b.kickoff_at));
+  const upcoming = matches.filter((m) => new Date(m.kickoff_at) > now && m.score_own == null && m.kind !== "scouting").sort((a, b) => a.kickoff_at.localeCompare(b.kickoff_at));
   const played = matches.filter((m) => !upcoming.includes(m)).sort((a, b) => b.kickoff_at.localeCompare(a.kickoff_at));
-  // «Spielbericht hinzufügen» only while a played match has none (UX test A02)
-  const extra = canWrite && (played.length === 0 || played.some((m) => m.kind !== "training" && !m.has_report)) && (
-    <p className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted">
-      <Link href={`/app/${orgId}/teams/${teamId}/matches?report=1`} onClick={() => setReport(true)} className="inline-flex items-center gap-1.5 font-medium text-foreground hover:text-accent" data-testid="add-report">
-        <Camera aria-hidden className="size-4" />
-        {t("matches.addReport")}
-      </Link>
-    </p>
+  // the paper report is no import any more (K19): a file at the match; the official report of
+  // handball.ch comes by itself
+  const picker = canWrite && (
+    <UploadPicker
+      open={upload}
+      onOpenChange={(o) => {
+        setUpload(o);
+        if (!o && params.get("upload")) router.replace(`/app/${orgId}/teams/${teamId}/matches`);
+      }}
+      orgId={orgId}
+      teamId={teamId}
+      matches={matches}
+    />
   );
 
   if (matches.length === 0) {
     return (
       <div className="space-y-8">
         <PageHeader title={t("matches.title")} />
-        {notice}
-        {canWrite && (
-        <Dialog
-          open={report}
-          onOpenChange={(o) => {
-            setReport(o);
-            if (!o && params.get("report")) router.replace(`/app/${orgId}/teams/${teamId}/matches`);
-          }}
-          title={t("matches.addReport")}
-          wide
-        >
-          <div className="space-y-8" data-testid="report-dialog">
-            <PaperView orgId={orgId} teamId={teamId} />
-            <p className="flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-foreground/15 pt-4 text-sm text-muted">
-              {t("matches.reportFile")}
-              <PaperImport
-                orgId={orgId}
-                teamId={teamId}
-                onWarnings={(w) => {
-                  // imported: the dialog closes and the list shows the notes
-                  setWarnings(w);
-                  setReport(false);
-                }}
-              />
-            </p>
-          </div>
-        </Dialog>
-      )}
-      {canWrite && (
-        <UploadPicker
-          open={upload}
-          onOpenChange={(o) => {
-            setUpload(o);
-            if (!o && params.get("upload")) router.replace(`/app/${orgId}/teams/${teamId}/matches`);
-          }}
-          orgId={orgId}
-          teamId={teamId}
-          matches={matches}
-        />
-      )}
-
+        {picker}
         <p className="sr-only">{t("matches.empty")}</p>
         {canWrite ? (
           <div className="grid gap-8 lg:grid-cols-[1fr_20rem]">
@@ -111,8 +58,7 @@ export function MatchesView({ orgId, teamId, matches, canWrite }: { orgId: strin
               <NewMatchForm orgId={orgId} teamId={teamId} />
             </Card>
             <div className="space-y-3 lg:pt-8">
-              <p className="text-sm text-muted">{t("matches.otherWays")}</p>
-              {extra}
+              <p className="text-sm text-muted">{t("matches.otherWaysFile")}</p>
             </div>
           </div>
         ) : (
@@ -144,80 +90,30 @@ export function MatchesView({ orgId, teamId, matches, canWrite }: { orgId: strin
 
   return (
     <div className="space-y-10">
-      <StartView
-        orgId={orgId}
-        played={played}
-        upcoming={upcoming}
-        canWrite={canWrite}
-        actions={
-          canWrite && (
-            <>
-              {newMatch}
-              {extra}
-            </>
-          )
-        }
-      />
-      {notice}
-      {canWrite && (
-        <Dialog
-          open={report}
-          onOpenChange={(o) => {
-            setReport(o);
-            if (!o && params.get("report")) router.replace(`/app/${orgId}/teams/${teamId}/matches`);
-          }}
-          title={t("matches.addReport")}
-          wide
-        >
-          <div className="space-y-8" data-testid="report-dialog">
-            <PaperView orgId={orgId} teamId={teamId} />
-            <p className="flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-foreground/15 pt-4 text-sm text-muted">
-              {t("matches.reportFile")}
-              <PaperImport
-                orgId={orgId}
-                teamId={teamId}
-                onWarnings={(w) => {
-                  // imported: the dialog closes and the list shows the notes
-                  setWarnings(w);
-                  setReport(false);
-                }}
-              />
-            </p>
-          </div>
-        </Dialog>
-      )}
-      {canWrite && (
-        <UploadPicker
-          open={upload}
-          onOpenChange={(o) => {
-            setUpload(o);
-            if (!o && params.get("upload")) router.replace(`/app/${orgId}/teams/${teamId}/matches`);
-          }}
-          orgId={orgId}
-          teamId={teamId}
-          matches={matches}
-        />
-      )}
-
+      <StartView orgId={orgId} played={played} upcoming={upcoming} canWrite={canWrite} actions={canWrite && newMatch} />
+      {picker}
     </div>
   );
 }
 
 /** The upload starts from a match (UX test H07): first only the list, the last played match on
- * top and marked; a new match is a second step of its own. */
+ * top and marked; a new match is a second step of its own, and so is a video of the opponent
+ * against another team (K3). */
 function UploadPicker({ open, onOpenChange, orgId, teamId, matches }: { open: boolean; onOpenChange: (o: boolean) => void; orgId: string; teamId: string; matches: Match[] }) {
   const t = useTranslations();
   const format = useFormatter();
-  const [other, setOther] = useState(false);
+  const [step, setStep] = useState<"list" | "new" | "scouting">("list");
   const now = Date.now();
   const candidates = matches
-    .filter((m) => !m.has_video && m.kind !== "training" && new Date(m.kickoff_at).getTime() < now + 86_400_000)
+    .filter((m) => !m.has_video && m.kind === "match" && new Date(m.kickoff_at).getTime() < now + 86_400_000)
     .sort((a, b) => b.kickoff_at.localeCompare(a.kickoff_at))
     .slice(0, 5);
+  const shown = step === "list" && candidates.length === 0 ? "new" : step;
+  const linkClass = "min-h-11 cursor-pointer border-0 bg-transparent p-0 text-left text-[17px] font-bold underline decoration-[1.5px] underline-offset-4";
   return (
-    <Dialog open={open} onOpenChange={(o) => (setOther(false), onOpenChange(o))} title={t("matches.uploadVideo")} wide>
+    <Dialog open={open} onOpenChange={(o) => (setStep("list"), onOpenChange(o))} title={shown === "scouting" ? t("scoutingUpload.title") : t("matches.uploadVideo")} wide>
       <div className="space-y-6" data-testid="upload-picker">
-        {!other && candidates.length > 0 && (
+        {shown === "list" && (
           <section className="space-y-2">
             <h3 className="text-[17px] font-bold">{t("matches.uploadFor")}</h3>
             <ul className="m-0 list-none border-t-2 border-ink p-0">
@@ -232,16 +128,30 @@ function UploadPicker({ open, onOpenChange, orgId, teamId, matches }: { open: bo
             </ul>
           </section>
         )}
-        {!other && candidates.length > 0 ? (
-          <button type="button" onClick={() => setOther(true)} className="min-h-11 cursor-pointer border-0 bg-transparent p-0 text-[17px] font-bold underline decoration-[1.5px] underline-offset-4" data-testid="upload-other">
-            {t("matches.uploadOther")}
-          </button>
-        ) : (
+        {shown === "new" && (
           <section className="space-y-3">
             <h3 className="text-[17px] font-bold">{t("matches.new")}</h3>
             <NewMatchForm orgId={orgId} teamId={teamId} />
           </section>
         )}
+        {shown === "scouting" && <ScoutingForm orgId={orgId} teamId={teamId} matches={matches} />}
+        <div className="flex flex-col items-start gap-1 border-t border-rule pt-3">
+          {shown !== "new" && (
+            <button type="button" onClick={() => setStep("new")} className={linkClass} data-testid="upload-other">
+              {t("matches.uploadOther")}
+            </button>
+          )}
+          {shown !== "scouting" && (
+            <button type="button" onClick={() => setStep("scouting")} className={linkClass} data-testid="upload-scouting">
+              {t("scoutingUpload.entry")}
+            </button>
+          )}
+          {shown !== "list" && candidates.length > 0 && (
+            <button type="button" onClick={() => setStep("list")} className={linkClass}>
+              {t("matches.uploadBackToList")}
+            </button>
+          )}
+        </div>
       </div>
     </Dialog>
   );

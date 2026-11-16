@@ -83,6 +83,11 @@ export function OppChip({ className }: { className?: string }) {
   return <i aria-hidden className={cn("inline-block size-3 bg-opp align-[-1px] shadow-[0_0_0_1.5px_var(--club-ink)]", className)} />;
 }
 
+/** The same square in our shirt colour of the match (K22: both teams have one). */
+export function OwnChip({ color, className }: { color: string; className?: string }) {
+  return <i aria-hidden className={cn("inline-block size-3 align-[-1px] shadow-[0_0_0_1.5px_var(--club-ink)]", className)} style={{ background: color }} />;
+}
+
 /**
  * Wurf: the result head of the start and of the tab Spiel. Club colour, lower edge slanted,
  * slanted title, the result large, the run of the match as a line underneath.
@@ -102,6 +107,7 @@ export function WurfHead({
   pending,
   span,
   scoreNote,
+  ownColor,
 }: {
   kick?: ReactNode;
   title: ReactNode;
@@ -121,6 +127,8 @@ export function WurfHead({
   span?: readonly [number, number] | null;
   /** a word under the result when it is not the match's own («Tore im Video») */
   scoreNote?: ReactNode;
+  /** our shirt colour in this match: a square before our name like the opponent's */
+  ownColor?: string | null;
 }) {
   const from = span ? span[0] : 0;
   const length = span ? span[1] : 60;
@@ -152,7 +160,10 @@ export function WurfHead({
           </p>
         )}
         <p className="font-slant mt-2 flex flex-wrap gap-[18px] text-[15px] md:order-first md:mt-0 md:mb-3.5 md:justify-end md:gap-7 md:text-[15px]">
-          <span>{ownName}</span>
+          <span>
+            {ownColor && <OwnChip color={ownColor} className="mr-2" />}
+            {ownName}
+          </span>
           <span>
             <OppChip className="mr-2" />
             {oppName}

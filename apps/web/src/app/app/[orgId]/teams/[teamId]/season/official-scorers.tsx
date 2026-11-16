@@ -23,7 +23,24 @@ export function OfficialScorers({ club, team, fallback }: { club: number | null;
   });
   const p = q.data;
   if (club == null || team == null || q.isError || (q.isSuccess && (!p || p.scorers.length === 0))) return <>{fallback}</>;
-  if (!p) return <p className="m-0 text-[15px] text-ink-2" aria-live="polite">{t("scorersLoading")}</p>;
+  // their place kept while they load, no jumping text (L15)
+  if (!p)
+    return (
+      <section aria-busy data-testid="season-scorers-loading">
+        <SectionHead title={t("scorers")} />
+        <span className="sr-only" aria-live="polite">
+          {t("scorersLoading")}
+        </span>
+        <ol className="m-0 list-none p-0" aria-hidden>
+        {[78, 64, 56, 48, 40].map((w) => (
+          <li key={w} className="flex justify-between border-b border-rule py-2.5">
+            <span className="block h-5 animate-pulse bg-rule" style={{ width: `${w}%` }} />
+            <span className="block h-5 w-6 animate-pulse bg-rule" />
+          </li>
+        ))}
+        </ol>
+      </section>
+    );
   return (
     <section data-testid="season-scorers-official">
       <SectionHead title={t("scorers")} note={t("scorersBasis", { n: p.scorer_games })} />

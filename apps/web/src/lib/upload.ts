@@ -4,7 +4,8 @@
  * The browser asks the API for part URLs, PUTs file slices straight to storage (4 in parallel),
  * and finally tells the API which parts (ETags) make up the file. The upload id is remembered per
  * file fingerprint, so after a closed tab, crash or lost connection the same file continues where it
- * stopped: the API lists the parts that already arrived.
+ * stopped: the API lists the parts that already arrived. Without that memory (another device, a
+ * cleared browser) the API itself answers the same file with its unfinished upload (`resumed`).
  */
 
 export interface UploadApi {
@@ -12,6 +13,8 @@ export interface UploadApi {
     videoId: string;
     partSize: number;
     partCount: number;
+    /** the API's unfinished upload of the same file: its parts are listed and only the rest sent */
+    resumed?: boolean;
   }>;
   listParts(videoId: string): Promise<{ number: number; etag: string; size: number }[]>;
   presign(videoId: string, numbers: number[]): Promise<{ number: number; url: string }[]>;
@@ -37,6 +40,8 @@ export interface UploadOptions {
   concurrency?: number;
   retries?: number;
   onProgress?: (uploadedBytes: number, totalBytes: number) => void;
+  /** the video id as soon as it is known (the progress in the head shows the upload by it) */
+  onStarted?: (videoId: string) => void;
   signal?: AbortSignal;
   scope: string; // e.g. match id + role, so the same file can go to different matches
 }
@@ -52,7 +57,7 @@ export class UploadAbortedError extends Error {
 }
 
 export async function uploadFile(file: File, role: string, opts: UploadOptions): Promise<{ videoId: string; resumed: boolean }> {
-  const { api, store, putPart, concurrency = 4, retries = 3, onProgress, signal } = opts;
+  const { api, store, putPart, concurrency = 4, retries = 3, onProgress, onStarted, signal } = opts;
   const key = fingerprint(file, opts.scope);
   let state = store.get(key);
   let done = new Map<number, { etag: string; size: number }>();
@@ -76,7 +81,12 @@ export async function uploadFile(file: File, role: string, opts: UploadOptions):
     });
     state = { videoId: created.videoId, partSize: created.partSize, partCount: created.partCount };
     store.set(key, state);
+    if (created.resumed) {
+      for (const p of await api.listParts(created.videoId)) done.set(p.number, { etag: p.etag, size: p.size });
+      resumed = true;
+    }
   }
+  onStarted?.(state.videoId);
   const { videoId, partSize, partCount } = state;
   const expected = (n: number) => Math.min(partSize, file.size - (n - 1) * partSize);
   // a part that arrived only partially is uploaded again

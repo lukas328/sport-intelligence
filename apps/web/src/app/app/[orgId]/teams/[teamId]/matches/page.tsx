@@ -11,7 +11,8 @@ export default async function MatchesPage({ params }: { params: Promise<{ orgId:
   const client = await serverApi();
   const path = { params: { path: { org_id: orgId, team_id: teamId } } };
   const [matches, team, org] = await Promise.all([
-    client.GET("/v1/orgs/{org_id}/teams/{team_id}/matches", path),
+    // with the videos of opponents against other teams (K3): listed here, not in the season
+    client.GET("/v1/orgs/{org_id}/teams/{team_id}/matches", { params: { ...path.params, query: { scouting: true } } }),
     client.GET("/v1/orgs/{org_id}/teams/{team_id}", path),
     client.GET("/v1/orgs/{org_id}", { params: { path: { org_id: orgId } } }),
   ]);

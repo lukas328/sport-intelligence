@@ -10,6 +10,7 @@ import { destOf, modeFor, navFor, startHref, teamInPath, uploadHref } from "@/li
 import { buttonClass } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { AppMark } from "@/components/brand";
+import { ProgressStrip } from "@/components/progress/progress-strip";
 import { AccountMenu } from "./account-menu";
 import { ClubMark } from "./club-mark";
 import { CommandPalette } from "./command-palette";
@@ -242,6 +243,7 @@ export function AppShell({
               )}
               <AccountMenu compact />
             </div>
+            <ProgressStrip orgId={org.id} />
           </header>
 
           {banner}

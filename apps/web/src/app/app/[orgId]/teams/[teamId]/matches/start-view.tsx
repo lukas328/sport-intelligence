@@ -23,6 +23,7 @@ import { matchState } from "@/lib/match-state";
 import { threeThings } from "@/lib/three-things";
 import { checkMinutes } from "@/lib/shot-spot";
 import { cn } from "@/lib/utils";
+import { ProgressLine } from "@/components/progress/progress-line";
 
 type Match = Schemas["MatchSummary"];
 
@@ -50,9 +51,11 @@ export function StartView({
   // match has no result of its own, its goals are in the video: Echtlauf 6, after Prüfen the head
   // jumped back to an older match without video)
   const fresh = useFreshMatch(orgId, played);
-  const last = played.find((m) => m.id === fresh) ?? played.find((m) => m.kind !== "training" && (m.score_own != null || m.has_video)) ?? played[0] ?? null;
-  const next = upcoming.find((m) => m.kind !== "training") ?? null;
-  const withoutVideo = played.filter((m) => !m.has_video).length;
+  // a video of the opponent against others (K3) is listed, but never our last match or the next
+  const ours = played.filter((m) => m.kind !== "scouting");
+  const last = ours.find((m) => m.id === fresh) ?? ours.find((m) => m.kind !== "training" && (m.score_own != null || m.has_video)) ?? ours[0] ?? null;
+  const next = upcoming.find((m) => m.kind === "match") ?? null;
+  const withoutVideo = ours.filter((m) => !m.has_video).length;
   return (
     <div className="space-y-8">
       <LastMatch orgId={orgId} m={last} next={next} teamName={ownName(team?.name, org.name)} canWrite={canWrite} club={[org.primary_color, org.secondary_color ?? null]} />
@@ -60,7 +63,7 @@ export function StartView({
         <section aria-labelledby="all-matches">
           <SectionHead
             title={<span id="all-matches">{t("allMatches")}</span>}
-            note={withoutVideo > 0 ? t("withoutVideo", { count: withoutVideo, total: played.length }) : undefined}
+            note={withoutVideo > 0 ? t("withoutVideo", { count: withoutVideo, total: ours.length }) : undefined}
           />
           {/* a new match and a report are not actions on the last match: they belong to the list */}
           {actions && <div className="-mt-1 mb-2 flex flex-wrap items-center gap-3">{actions}</div>}
@@ -72,7 +75,7 @@ export function StartView({
             ))}
           </ul>
         </section>
-        <aside className="flex min-w-0 flex-col gap-8">{next && <NextOpponent orgId={orgId} teamId={team?.id} next={next} played={played} />}</aside>
+        <aside className="flex min-w-0 flex-col gap-8">{next && <NextOpponent orgId={orgId} teamId={team?.id} next={next} played={ours} />}</aside>
       </div>
     </div>
   );
@@ -118,6 +121,7 @@ function LastMatch({ orgId, m, next, teamName, canWrite, club }: { orgId: string
       <div className="bleed-x -mt-6 lg:-mt-8">
         <WurfHead {...head} />
       </div>
+      {m && running && <ProgressLine orgId={orgId} matchId={m.id} className="max-w-xl text-[17px] font-bold" />}
       <div className="flex flex-wrap items-center gap-3">
         {/* the last match without video: the task is the video, the demo shows what comes (UX test B26) */}
         {m && base && canWrite && !m.has_video ? (
@@ -162,17 +166,13 @@ function LastMatch({ orgId, m, next, teamName, canWrite, club }: { orgId: string
               <Link href={`${base}/check`} className={buttonClass("primary")} data-testid="start-step">
                 {t("plainToCheck")}
               </Link>
-            ) : canWrite && !g.data.has_report ? (
-              <Link href={`/app/${orgId}/teams/${m.team_id}/matches?report=1`} className={buttonClass("primary")} data-testid="start-step">
-                {t("nextStepAddReport")}
-              </Link>
             ) : (
               <Link href={base} className={buttonClass("primary")} data-testid="start-step">
                 {t("openMatch")}
               </Link>
             )}
             {/* the match stays one tap away, as a plain link beside the step */}
-            {(checks > 0 || !g.data.has_report) && canWrite && (
+            {checks > 0 && canWrite && (
               <Link href={base} className={linkClass} data-testid="open-match">
                 {t("openMatch")}
               </Link>
@@ -314,7 +314,8 @@ function GameRow({ orgId, m, canWrite }: { orgId: string; m: Match; canWrite: bo
   const tm = useTranslations("matches");
   const format = useFormatter();
   const date = new Date(m.kickoff_at);
-  const result = resultOf(m);
+  // a scouting video: no win or loss of ours (K3)
+  const result = m.kind === "scouting" ? null : resultOf(m);
   const state = matchState(m);
   const base = `/app/${orgId}/matches/${m.id}`;
   return (
@@ -330,13 +331,14 @@ function GameRow({ orgId, m, canWrite }: { orgId: string; m: Match; canWrite: bo
       <div className="min-w-0">
         <h3 className="m-0">
           <Link href={base} className="font-slant text-[17px] leading-tight text-ink no-underline hover:underline md:text-[22px]">
-            {m.kind === "training" ? tm("training") : m.opponent_name}
+            {m.kind === "training" ? tm("training") : m.kind === "scouting" ? t("scoutingRow", { opponent: m.opponent_name, other: m.scouting_other ?? "" }) : m.opponent_name}
           </Link>
+          {m.kind === "scouting" && <span className="ml-2 align-middle text-sm font-bold text-ink-2">{t("scoutingTag")}</span>}
         </h3>
         <p className="m-0 text-[15px] text-ink-2 md:text-[15px]">
           <span className="md:hidden">{format.dateTime(date, { day: "2-digit", month: "2-digit" })} · </span>
           {["matches.status_processing", "matches.status_uploading", "matches.status_failed"].includes(state.label) ? (
-            tm(state.label.replace("matches.", "") as "status_processing")
+            <ProgressLine orgId={orgId} matchId={m.id} className="max-md:inline" fallback={tm(state.label.replace("matches.", "") as "status_processing")} />
           ) : !m.has_video ? (
             <>
               {t("reportOnly")}
