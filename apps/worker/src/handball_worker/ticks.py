@@ -14,11 +14,16 @@ import structlog
 from redis import Redis
 from rq import Queue
 
+from handball_jobkit.redisconn import sync_redis
 from handball_worker.config import WorkerSettings
 
 log = structlog.get_logger("worker.ticks")
 TICK_JOB_ID = "tick-scouting"
 EVERY = timedelta(hours=1)
+# The tick re-schedules itself under its own job id while it runs; when it then finishes, RQ
+# saves it as finished and lets the job hash expire after `result_ttl` (default 500 s). That hash
+# is the one the scheduler needs an hour later, so it has to outlive the gap between two ticks.
+TICK_RESULT_TTL_S = int(3 * EVERY.total_seconds())
 
 
 def scouting_tick(client: httpx.Client | None = None, reschedule: bool = True) -> int:
@@ -50,17 +55,22 @@ def scouting_tick(client: httpx.Client | None = None, reschedule: bool = True) -
         log.warning("scouting_tick_failed", error=str(exc))
     finally:
         if reschedule:
-            schedule(Redis.from_url(settings.redis_url))
+            schedule(sync_redis(settings.redis_url))
     return created
 
 
 def schedule(conn: Redis, delay: timedelta = EVERY) -> None:
     """Idempotent: one pending tick at a time (fixed job id)."""
     q = Queue("default", connection=conn)
-    q.enqueue_in(delay, scouting_tick, job_id=TICK_JOB_ID)
+    q.enqueue_in(delay, scouting_tick, job_id=TICK_JOB_ID, result_ttl=TICK_RESULT_TTL_S)
 
 
 def ensure_scheduled(conn: Redis) -> None:
+    """Schedule the tick unless it is waiting for its time or in the queue. Runs at worker start
+    and on RQ's maintenance schedule: after a Redis restart (no persistence) or a tick that
+    could not re-schedule itself, the chain starts again within minutes. A leftover job hash
+    (finished or failed) does not count as scheduled."""
     q = Queue("default", connection=conn)
-    if q.fetch_job(TICK_JOB_ID) is None:
-        schedule(conn, timedelta(minutes=1))
+    if TICK_JOB_ID in q.scheduled_job_registry or TICK_JOB_ID in q.get_job_ids():
+        return
+    schedule(conn, timedelta(minutes=1))
