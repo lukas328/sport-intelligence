@@ -166,15 +166,25 @@ schnellen Bällen: 8.5 % Tracker wählt falsch, 5.4 % kein Detektor sieht den Ba
 4. Pro Wurf: Anteil der Würfe, deren Flug vom Abwurf bis Tor oder Torhüter durchgehend verfolgt
    wird; Fehler am Abwurf- und am Zielpunkt; Spurwechsel auf ein anderes Objekt pro Wurf.
 
-**Schritte:**
+**Schritte (angepasst nach Prüfung 1 am 2026-11-16, von Lukas bestätigt; Begründung pro Einwand in
+`ml/ball/LINEAGE.md` Abschnitt 11):**
 | Schritt | Inhalt | Wann | Wer |
 |---|---|---|---|
-| 0. Wurf-Goldstandard | 61 Würfe aus den offiziellen Protokollen (`ml/gold/shot_clips.json`, 13 Spiele, 22 Tore, 24 Paraden, 15 Fehlwürfe), vorgelabelt mit Sichtbarkeitsstufen, Lukas prüft Ja/Nein; Kandidaten aller Netze und OWLv2 über Modal (Auftrag 12) | diese Woche | Hauptsitzung, Lukas 1 bis 2 h |
-| 1. Tracker | Sicherheit pro Punkt (Metrik 2); weitere Fälle "Ball unter den Kandidaten, falsche Wahl"; Bewertung bei jeder neuen Netz-Generation neu trainieren (sie ist auf die Score-Verteilung der Netze abgestimmt) | laufend, CPU | Hauptsitzung |
-| 2. Gezielte Daten | Ensemble über die Trainings-Clips, gelabelt wird wo es unsicher ist oder nichts findet; Schwerpunkt Würfe, harte Pässe, hohe Bälle vor Wand oder Tribüne (g34), Videos mit Doppelbildern; neue Hallen | parallel | Hauptsitzung, Lukas Ja/Nein |
-| 3. Netz-Generation 2 | Ideen aus TOTNet (arXiv 2508.09650, MIT): 5 Bilder Eingabe, Bewegung über die Zeit (3D-Faltungen), künstliche Verdeckungen im Training, Verlust gewichtet nach Sichtbarkeit. Kandidaten im fairen Vergleich auf denselben Daten: HRNet vortrainiert mit 5 Bildern, TOTNet selbst trainiert, eventuell die eigene HRNet-Bauart. Danach Tracker-Bewertung neu trainieren | ab Samstag (Kaggle-Kontingent 30 h, vorher Kontingent mit Lukas klären) | Hauptsitzung |
-| 4. Zwischenfazit | Gold v1 und Wurf-Gold mit allen Metriken; Entscheid über Bauart und ob die Werte fürs Produkt reichen | nach Schritt 3 | Lukas und Hauptsitzung |
-| 5. Produkt | Netze und Tracker aus `ml/` sauber mit Tests ins Produkt. Vorher Lizenz: alle Netze ab Runde 3 (auch hr1, hrp1) sind mit DeepSport (CC BY-NC-SA, nur Forschung) trainiert, das Produktnetz braucht ein Training ohne DeepSport und eine Prüfung der ImageNet-Gewichte (`ml/ball/LINEAGE.md`) | wenn Würfe bei etwa 85 % | Hauptsitzung |
+| 0. Messen ehrlich machen | Jede Gold-Zahl mit 95 %-Intervall (Bootstrap über Clips); hr2 und hrp2 messen; Verzerrungstest der Labels: 5 Gold-Clips ohne Kandidatenringe labeln und vergleichen | diese Woche | Hauptsitzung |
+| 1. Wurf-Testsatz | Die 61 Würfe aus den Protokollen (`ml/gold/shot_clips.json`) werden Entwicklungssatz, vorgelabelt mit Sichtbarkeitsstufen. Neuer eingefrorener Endtest: mindestens 100 Würfe aus mindestens 15 Hallen, die nie im Training waren (Gold- und Testset-2-Hallen), gefunden durch Anschauen, nicht durch einen Detektor. Lukas prüft Ja/Nein | diese Woche, Endtest vor dem Labeln festlegen | Hauptsitzung, Lukas |
+| 2. Tracker | Sicherheit pro Punkt und "weiss nicht" (Metrik 2); Bewertung ohne OWLv2 neu lernen (OWLv2 ist im Produkt zu teuer, ohne OWLv2 heute 78.6 % statt 84.0 %); Spielerboxen als Hinweis | diese Woche, CPU | Hauptsitzung |
+| 3. GPU-Woche ab Samstag | Netze **ohne DeepSport** (auslieferbar), in 2 Folds über die Trainings-Clips (saubere Kandidaten für die Tracker-Bewertung, zugleich Ensemble), ein Vergleichslauf mit DeepSport; danach Bewertung neu lernen | ab Samstag, Kaggle-Kontingent (vorher mit Lukas klären) | Hauptsitzung |
+| 4. Gezielte Daten | Ensemble über die Trainings-Clips, gelabelt wird wo es unsicher ist oder nichts findet; Würfe, harte Pässe, hohe Bälle vor Wand oder Tribüne, Doppelbild-Videos; neue Hallen (heute 57 von 226 Spielen) | parallel | Hauptsitzung, Lukas Ja/Nein |
+| 5. Netz-Generation 2 | TOTNet-Ideen (5 Bilder, 3D-Faltungen, künstliche Verdeckungen, Gewichtung nach Sichtbarkeit), TOTNet selbst im fairen Vergleich | erst wenn der Wurf-Endtest Unterschiede von etwa 2 Punkten auflösen kann | Hauptsitzung |
+| 6. Zwischenfazit | Gold v1 (Entwicklung) und Wurf-Endtest (einmal) mit allen Metriken | nach Schritt 3 | Lukas und Hauptsitzung |
+| 7. Produkt | Netze ohne DeepSport und Tracker ohne OWLv2 sauber mit Tests ins Produkt | wenn Würfe im Endtest bei etwa 85 % | Hauptsitzung |
+
+Daneben, von Lukas zu priorisieren: Kalibrierung (findet das Feld nur in 8 von 42 Gold-Clips, Blocker
+für Taktiktafel und Wurfzonen), Spieler-Tracking messen, Auftrag 11 (Originalauflösung).
+
+**Quelle der Wahrheit:** `ml/ball/LINEAGE.md`. Jede Prüfung unseres Vorgehens arbeitet von dort aus;
+was eine Prüfung erschliessen musste, weil es fehlte, wird dort nachgetragen, und jeder Einwand
+bekommt in Abschnitt 11 eine Bewertung, Belege und eine Massnahme.
 
 **Grundsätze:** Gold wird nicht zum Anpassen verwendet (höchstens mit Kreuzvalidierung über
 Clips), Lernen auf den Trainings-Clips. GPU zuerst Kaggle, Modal nur mit Freigabe von Lukas über
