@@ -19,6 +19,13 @@ class JobSettings(BaseSettings):
     # the file the classical background detector runs (ADR 012)
     detector_model: str = "/models/yolox_s.onnx"
     detect_every: int = 3
+    # 3-frame ball net(s) (docs/plans/produkt-analyse-integration.md step 2): comma-separated
+    # ONNX files (ml/ball/export_onnx.py), two files = ensemble. Empty or a file missing: the
+    # YOLOX "sports ball" path stays. TEST PHASE: the nets hr1/hrp1 contain DeepSport data
+    # (non-commercial) and must be replaced before a real go-live.
+    ball_model: str = ""
+    ball_every: int = 1  # every 2nd frame costs about 6 points on gold v1 (11 on fast balls)
+    ball_batch: int = 8
     detector_threads: int = 0
     # shirt numbers (PP-OCRv4 text models) and re-identification (person appearance network);
     # each step runs only when its model files are installed

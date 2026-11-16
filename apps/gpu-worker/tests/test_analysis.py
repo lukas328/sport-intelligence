@@ -784,3 +784,36 @@ def test_side_hint_reaches_the_event_baseline() -> None:
     assert payload["sides"] == [{"from_ms": 0, "home_defends": "right"}]
     analysis.events_payload(Result())  # type: ignore[arg-type]
     assert seen == ["right", None]
+
+
+def test_ball_net_switch(tmp_path: Path) -> None:
+    """HB_BALL_MODEL: empty or a missing file keeps the YOLOX ball path; installed files load the
+    ball net(s), and the result names the path it used."""
+    import onnx
+    from onnx import TensorProto, helper
+
+    assert analysis.load_ball_net(JobSettings(ball_model="")) is None
+    assert analysis.load_ball_net(JobSettings(ball_model=str(tmp_path / "missing.onnx"))) is None
+    x = helper.make_tensor_value_info("frames", TensorProto.FLOAT, ["n", 9, "h", "w"])
+    y = helper.make_tensor_value_info("heatmap", TensorProto.FLOAT, ["n", 1, "h4", "w4"])
+    nodes = [
+        helper.make_node("ReduceMean", ["frames"], ["m"], axes=[1], keepdims=1),
+        helper.make_node("AveragePool", ["m"], ["heatmap"], kernel_shape=[4, 4], strides=[4, 4]),
+    ]
+    model = helper.make_model(
+        helper.make_graph(nodes, "tiny", [x], [y]), opset_imports=[helper.make_opsetid("", 17)]
+    )
+    model.ir_version = 8
+    for name in ("hr1.onnx", "hrp1.onnx"):
+        onnx.save(model, str(tmp_path / name))
+    both = f"{tmp_path / 'hr1.onnx'}, {tmp_path / 'hrp1.onnx'}"
+    net = analysis.load_ball_net(JobSettings(ball_model=both))
+    assert net is not None and len(net.sessions) == 2
+    # one of two files missing: no half ensemble, the old path stays
+    part = f"{tmp_path / 'hr1.onnx'},{tmp_path / 'nope.onnx'}"
+    assert analysis.load_ball_net(JobSettings(ball_model=part)) is None
+    settings = JobSettings(ball_model=both)
+    empty: Any = SimpleNamespace(ball_cands={})
+    with_cands: Any = SimpleNamespace(ball_cands={3: [(1.0, 2.0, 0.5)]})
+    assert analysis._ball_version(empty, settings) == "yolox"
+    assert analysis._ball_version(with_cands, settings) == "hr1+hrp1"

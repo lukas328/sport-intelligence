@@ -29,6 +29,7 @@ from handball_jobkit import TRANSFER, JobSettings, Reporter, s3_client, upload_d
 from handball_vision import __version__ as vision_version
 from handball_vision import formation, goalcandidates, hallmatch, scoreboard
 from handball_vision import observe as learned
+from handball_vision.ballnet import BallNet
 from handball_vision.calibration import (
     Calibration,
     CalibrationError,
@@ -70,6 +71,25 @@ def load_detector(settings: JobSettings) -> YoloxDetector | None:
     if not path.is_file():
         return None
     return YoloxDetector(path, threads=settings.detector_threads or None)
+
+
+def load_ball_net(settings: JobSettings) -> BallNet | None:
+    """The 3-frame ball net(s) of `HB_BALL_MODEL` when all files are installed, else None (the
+    YOLOX ball path stays). Test phase: the nets contain DeepSport data, see ballnet.py."""
+    paths = [Path(p.strip()) for p in settings.ball_model.split(",") if p.strip()]
+    if not paths or not all(p.is_file() for p in paths):
+        if paths:
+            log.warning("ball_model_missing", paths=[str(p) for p in paths])
+        return None
+    return BallNet(paths, threads=settings.detector_threads or None)
+
+
+def _ball_version(obs: learned.Observations, settings: JobSettings) -> str:
+    """Which ball path the result used: the ball net files' names, or the YOLOX boxes."""
+    if not getattr(obs, "ball_cands", None):
+        return "yolox"
+    names = [Path(p.strip()).stem for p in settings.ball_model.split(",") if p.strip()]
+    return "+".join(names) or "ballnet"
 
 
 def load_number_reader(settings: JobSettings) -> NumberReader | None:
@@ -584,6 +604,7 @@ def _run_learned(
             reader = _overlay_reader(spread, fps, total / fps if fps else 0.0)
             del spread
             numbers = load_number_reader(settings)
+            ball_net = load_ball_net(settings)
             # no overlay: the hall's own scoreboard, when the camera shows it (raw recordings)
             board = (
                 HallBoardReader(
@@ -608,6 +629,9 @@ def _run_learned(
                 embed_every=max(1, settings.reid_every),
                 roles=load_role_classifier(settings),
                 role_every=max(1, settings.role_every),
+                ball_net=ball_net,
+                ball_every=max(1, settings.ball_every),
+                ball_batch=max(1, settings.ball_batch),
             )
             overlay = _overlay_summary(reader)
             play = clock_play(reader, board)
@@ -678,7 +702,11 @@ def _run_learned(
                 "chunks": 0,
                 "chunk_ms": CHUNK_MS,
                 "detector": "model",
-                "versions": {"vision": vision_version, "detector": detector.model},
+                "versions": {
+                    "vision": vision_version,
+                    "detector": detector.model,
+                    "ball": _ball_version(obs, settings),
+                },
                 "timings_s": {k: round(v, 2) for k, v in obs.timings_s.items()},
                 "elapsed_s": round(time.perf_counter() - started, 1),
                 "stats": {"camera": view["camera"], "motion": obs.motion.stats},
@@ -730,7 +758,11 @@ def _run_learned(
             "chunks": chunks,
             "chunk_ms": CHUNK_MS,
             "detector": result.detector_source,
-            "versions": {"vision": vision_version, "detector": detector.model},
+            "versions": {
+                "vision": vision_version,
+                "detector": detector.model,
+                "ball": _ball_version(obs, settings),
+            },
             "timings_s": {k: round(v, 2) for k, v in result.timings_s.items()},
             "elapsed_s": round(time.perf_counter() - started, 1),
             "stats": result.extra,
