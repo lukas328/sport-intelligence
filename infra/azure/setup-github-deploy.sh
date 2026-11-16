@@ -43,15 +43,22 @@ SP_ID=$(az ad sp show --id "$APP_ID" --query id -o tsv 2>/dev/null || true)
 if [ -z "$SP_ID" ]; then
   SP_ID=$(az ad sp create --id "$APP_ID" --query id -o tsv)
 fi
-if ! az ad app federated-credential list --id "$APP_ID" --query "[?name=='github-$GH_ENV'].name" -o tsv | grep -q .; then
-  az ad app federated-credential create --id "$APP_ID" -o none --parameters "{
-    \"name\": \"github-$GH_ENV\",
-    \"issuer\": \"https://token.actions.githubusercontent.com\",
-    \"subject\": \"repo:$REPO:environment:$GH_ENV\",
-    \"audiences\": [\"api://AzureADTokenExchange\"]
-  }"
-fi
-echo "app: $APP_NAME ($APP_ID), trusts repo:$REPO:environment:$GH_ENV"
+# GitHub sends the subject either by name or, for newer repositories, with the fixed ids of owner
+# and repository (repo:owner@123/name@456:...); trust both
+ids=$(curl -fsSL "https://api.github.com/repos/$REPO" | jq -r '"\(.owner.login)@\(.owner.id)/\(.name)@\(.id)"')
+trust() { # name subject
+  if ! az ad app federated-credential list --id "$APP_ID" --query "[?name=='$1'].name" -o tsv | grep -q .; then
+    az ad app federated-credential create --id "$APP_ID" -o none --parameters "{
+      \"name\": \"$1\",
+      \"issuer\": \"https://token.actions.githubusercontent.com\",
+      \"subject\": \"$2\",
+      \"audiences\": [\"api://AzureADTokenExchange\"]
+    }"
+  fi
+}
+trust "github-$GH_ENV" "repo:$REPO:environment:$GH_ENV"
+trust "github-$GH_ENV-ids" "repo:$ids:environment:$GH_ENV"
+echo "app: $APP_NAME ($APP_ID), trusts repo:$REPO and repo:$ids, environment $GH_ENV"
 
 assign() { # role scope
   if [ -z "$(az role assignment list --assignee "$SP_ID" --role "$1" --scope "$2" --query "[0].id" -o tsv)" ]; then
