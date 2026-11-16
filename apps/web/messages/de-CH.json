@@ -645,7 +645,7 @@
     "headUpload": "Video wird hochgeladen",
     "headIngest": "Video wird eingelesen",
     "headAnalysis": "Analyse läuft",
-    "headQueued": "Analyse wartet auf einen freien Rechner",
+    "headQueued": "Wartet auf einen freien Rechner",
     "headStalled": "Hängt die Analyse?",
     "headStalledIngest": "Hängt das Einlesen?",
     "headInterrupted": "Upload unterbrochen",

@@ -20,6 +20,7 @@ import { formatBytes } from "@/lib/format";
 import type { Kits } from "@/lib/kit";
 import { progressKey, type FileProgress } from "@/lib/progress";
 import { fingerprint, localStore, uploadFile, UploadAbortedError, xhrPutPart, type UploadApi } from "@/lib/upload";
+import { useStoredUploads } from "@/components/progress/words";
 import { dropUpload, putUpload, useLocalUploads } from "@/lib/upload-store";
 import { recordingOrder } from "@/lib/video-parts";
 
@@ -113,6 +114,7 @@ export function UploadPanel({
   const videoOf = useRef<Map<File, string>>(new Map());
   const input = useRef<HTMLInputElement>(null);
   const local = useLocalUploads();
+  const stored = useStoredUploads(local);
   const uploading = state.kind === "uploading";
   const scope = `${matchId}:${role}`;
 
@@ -315,7 +317,8 @@ export function UploadPanel({
       {!busyHere &&
         open.map((v) => {
           const f = progressFiles.find((x) => x.video_id === v.id);
-          const elsewhere = f?.state === "running";
+          // running elsewhere only when this browser did not start it (after a reload it stopped)
+          const elsewhere = f?.state === "running" && !stored.has(v.id);
           return (
             <div key={v.id} className="max-w-[62ch] space-y-2 border-l-4 border-attn pl-3" data-testid="upload-stuck" data-elsewhere={elsewhere || undefined}>
               <p className="m-0 text-[17px] font-bold">{t(elsewhere ? "upload.elsewhereTitle" : "upload.stuckTitle", { name: v.filename })}</p>

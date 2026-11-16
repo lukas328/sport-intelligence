@@ -77,15 +77,23 @@ function summarise(p: MatchProgress, files: FileProgress[]): MatchProgress {
   return { ...p, files, state, stage, overall, eta_s: state === "running" ? eta : null };
 }
 
-/** The API's progress with the uploads of this tab laid over (same video id). */
-export function withLocal(list: MatchProgress[], local: LocalUpload[], now = Date.now()): MatchProgress[] {
-  if (!local.length) return list;
+/** The API's progress with the uploads of this tab laid over (same video id). `stored`: the
+ * unfinished uploads this browser started; one of them not running in this tab has stopped (a
+ * reload after a failure), even while the storage's last part is only a minute old (L4). */
+export function withLocal(list: MatchProgress[], local: LocalUpload[], now = Date.now(), stored: ReadonlySet<string> = new Set()): MatchProgress[] {
+  if (!local.length && !stored.size) return list;
   return list.map((p) => {
     const mine = local.filter((u) => u.matchId === p.match_id && u.videoId);
-    if (!mine.length) return p;
+    const stopped = (f: FileProgress) => f.stage === "upload" && f.state === "running" && f.step !== "link" && stored.has(f.video_id) && !mine.some((u) => u.videoId === f.video_id);
+    if (!mine.length && !p.files.some(stopped)) return p;
     const files = p.files.map((f) => {
       const u = mine.find((x) => x.videoId === f.video_id);
-      return u ? fileWithLocal(f, u, now) : f;
+      if (u) return fileWithLocal(f, u, now);
+      if (stopped(f)) {
+        const idle = f.last_activity_at ? Math.max(0, Math.round((now - Date.parse(f.last_activity_at)) / 1000)) : null;
+        return { ...f, state: "interrupted" as const, eta_s: null, finish_s: null, eta_basis: null, idle_s: idle };
+      }
+      return f;
     });
     return summarise(p, files);
   });
@@ -111,9 +119,10 @@ export function headlineKey(p: Pick<MatchProgress, "state" | "stage" | "files">)
   if (p.state === "failed") return "headFailed";
   if (p.state === "done") return "headDone";
   if (p.stage === "upload") return "headUpload";
-  if (p.stage === "ingest") return "headIngest";
+  // nothing runs yet, everything waits for a worker: said so, not «wird eingelesen»
   const active = p.files.filter(isActive);
   if (active.length && active.every((f) => f.state === "queued")) return "headQueued";
+  if (p.stage === "ingest") return "headIngest";
   return "headAnalysis";
 }
 

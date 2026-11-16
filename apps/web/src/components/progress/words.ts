@@ -1,7 +1,17 @@
 "use client";
 
 import { useFormatter, useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
+import { storedUploadIds } from "@/lib/upload";
+import type { LocalUpload } from "@/lib/upload-store";
 import { durationParts, finishAt, headlineKey, isActive, type FileProgress, type MatchProgress } from "@/lib/progress";
+
+/** The unfinished uploads this browser started, read after mount and when the uploads change. */
+export function useStoredUploads(local: LocalUpload[]): Set<string> {
+  const [ids, setIds] = useState<Set<string>>(() => new Set());
+  useEffect(() => setIds(storedUploadIds()), [local]);
+  return ids;
+}
 
 /** The sentences of the progress, one place for the head, Spiele and the match. */
 export function useProgressWords() {

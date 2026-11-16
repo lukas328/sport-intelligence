@@ -92,4 +92,13 @@ describe("the uploads of this tab over the API's view", () => {
     const other = match([file({ video_id: "v9" })], { match_id: "m2" });
     expect(withLocal([other], [u()], now)).toEqual([other]);
   });
+
+  it("says an upload this browser started and no longer runs is interrupted after a reload (L4)", () => {
+    const f = file({ last_activity_at: new Date(now - 60_000).toISOString() });
+    const [p] = withLocal([match([f])], [], now, new Set(["v1"]));
+    expect(p!.state).toBe("interrupted");
+    expect(p!.files[0]!.idle_s).toBe(60);
+    // started elsewhere: it may well run there
+    expect(withLocal([match([f])], [], now, new Set())[0]!.state).toBe("running");
+  });
 });

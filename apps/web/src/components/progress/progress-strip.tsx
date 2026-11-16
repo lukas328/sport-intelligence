@@ -7,6 +7,7 @@ import { useNow, useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import { isActive, markSeen, seenDone, tone, useProgress, withLocal, type MatchProgress } from "@/lib/progress";
 import { useLocalUploads } from "@/lib/upload-store";
+import { useStoredUploads } from "./words";
 import { cn } from "@/lib/utils";
 import { useProgressWords } from "./words";
 
@@ -19,6 +20,7 @@ import { useProgressWords } from "./words";
 export function ProgressStrip({ orgId }: { orgId: string }) {
   const path = usePathname();
   const local = useLocalUploads();
+  const stored = useStoredUploads(local);
   const q = useProgress(orgId);
   const now = useNow({ updateInterval: 15_000 }).getTime();
   const w = useProgressWords();
@@ -32,9 +34,9 @@ export function ProgressStrip({ orgId }: { orgId: string }) {
   }, [unknown]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const items = useMemo(() => {
-    const all = withLocal(q.data ?? [], local, now);
+    const all = withLocal(q.data ?? [], local, now, stored);
     return all.filter((p) => !path.includes(`/matches/${p.match_id}`) && (isActive(p) || (seen != null && !seen.has(p.match_id))));
-  }, [q.data, local, now, path, seen]);
+  }, [q.data, local, now, path, seen, stored]);
   if (!items.length) return null;
   const p: MatchProgress = items[0]!;
   const tn = tone(p);

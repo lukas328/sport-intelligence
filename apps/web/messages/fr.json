@@ -645,7 +645,7 @@
     "headUpload": "Vidéo en cours de téléversement",
     "headIngest": "Lecture de la vidéo",
     "headAnalysis": "Analyse en cours",
-    "headQueued": "L'analyse attend un ordinateur libre",
+    "headQueued": "En attente d'un ordinateur libre",
     "headStalled": "L'analyse est-elle bloquée ?",
     "headStalledIngest": "La lecture est-elle bloquée ?",
     "headInterrupted": "Téléversement interrompu",

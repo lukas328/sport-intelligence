@@ -39,6 +39,7 @@ export function ProgressPanel({
   const tn = tone(p);
   const many = p.files.length > 1;
   const basis = p.files.find((f) => f.stage === p.stage && isActive(f))?.eta_basis;
+  const trouble = p.files.find((f) => f.state === "stalled" || f.state === "interrupted");
   return (
     <section
       className={cn("grid gap-8", aside && "md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]")}
@@ -54,7 +55,8 @@ export function ProgressPanel({
         {isActive(p) && (
           <>
             <p className="m-0 mt-1 text-[19px] font-bold" aria-live="polite" data-testid="progress-when">
-              {p.state === "stalled" || p.state === "interrupted" ? w.percent(p.overall) : (when ?? t("noEta"))}
+              {/* in trouble: how far the step that holds got («Hochladen: 2 %»), not the whole way */}
+              {trouble ? `${t(`step_${trouble.stage}`)}: ${w.percent(trouble.fraction ?? 0)}` : (when ?? t("noEta"))}
             </p>
             {when && (
               <p className="m-0 text-[15px] text-ink-2">
@@ -81,7 +83,8 @@ export function ProgressPanel({
             </li>
           ))}
         </ol>
-        {isActive(p) && <p className="m-0 mt-4 max-w-[60ch] text-[15px] text-ink-2" data-testid="may-close">{t("mayClose")}</p>}
+        {/* a stopped upload does not go on by itself: no «läuft von selbst weiter» then */}
+        {isActive(p) && p.state !== "interrupted" && <p className="m-0 mt-4 max-w-[60ch] text-[15px] text-ink-2" data-testid="may-close">{t("mayClose")}</p>}
       </div>
       {aside && <div className="min-w-0 space-y-8">{aside}</div>}
     </section>

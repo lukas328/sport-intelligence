@@ -159,6 +159,23 @@ export function xhrPutPart(url: string, body: Blob, signal: AbortSignal): Promis
   });
 }
 
+/** The video ids of the unfinished uploads this browser started (its resume memory). After a
+ * reload none of them runs here any more: they stopped, whatever the storage's last part says. */
+export function storedUploadIds(): Set<string> {
+  const ids = new Set<string>();
+  try {
+    for (let i = 0; i < window.localStorage.length; i++) {
+      const key = window.localStorage.key(i);
+      if (!key?.startsWith("hb-upload:")) continue;
+      const v = JSON.parse(window.localStorage.getItem(key) ?? "null") as StoredUpload | null;
+      if (v?.videoId) ids.add(v.videoId);
+    }
+  } catch {
+    /* no storage: nothing known */
+  }
+  return ids;
+}
+
 export const localStore: Store = {
   get(key) {
     try {

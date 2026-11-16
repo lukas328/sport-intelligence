@@ -52,6 +52,7 @@ import { latestJobs, partsOf, timelineVideo } from "@/lib/video-parts";
 import { ProgressPanel } from "@/components/progress/progress-panel";
 import { isActive, progressKey, useProgress, withLocal } from "@/lib/progress";
 import { useLocalUploads } from "@/lib/upload-store";
+import { storedUploadIds } from "@/lib/upload";
 import { KnownFacts } from "./known-facts";
 import { AttachmentsPanel } from "./attachments-panel";
 
@@ -247,9 +248,12 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
   // the progress of the uploads and the processing (K13, B4): the API's view, with the uploads of
   // this tab laid over; shown while it runs, and when something failed
   const local = useLocalUploads();
+  // read after mount (the server knows no browser storage)
+  const [stored, setStored] = useState<Set<string>>(() => new Set());
+  useEffect(() => setStored(storedUploadIds()), [local]);
   const allProgress = useProgress(orgId);
   const listed = allProgress.data?.find((p) => p.match_id === match.id);
-  const progress = withLocal(listed ? [listed] : match.progress ? [match.progress] : [], local)[0] ?? null;
+  const progress = withLocal(listed ? [listed] : match.progress ? [match.progress] : [], local, Date.now(), stored)[0] ?? null;
   const progressShown = progress != null && (isActive(progress) || progress.state === "failed");
   // the analysis is done, nothing open in Prüfen, no goal found and no result known (L6)
   const noGoals = Boolean(

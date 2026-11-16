@@ -4,6 +4,7 @@ import { useNow, useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { isActive, tone, useProgress, withLocal } from "@/lib/progress";
 import { useLocalUploads } from "@/lib/upload-store";
+import { useStoredUploads } from "./words";
 import { cn } from "@/lib/utils";
 import { useProgressWords } from "./words";
 
@@ -14,10 +15,11 @@ import { useProgressWords } from "./words";
 export function ProgressLine({ orgId, matchId, bar = true, className, fallback = null }: { orgId: string; matchId: string; bar?: boolean; className?: string; fallback?: ReactNode }) {
   const q = useProgress(orgId);
   const local = useLocalUploads();
+  const stored = useStoredUploads(local);
   const now = useNow({ updateInterval: 15_000 }).getTime();
   const w = useProgressWords();
   const t = useTranslations("progress");
-  const p = withLocal((q.data ?? []).filter((x) => x.match_id === matchId), local, now)[0];
+  const p = withLocal((q.data ?? []).filter((x) => x.match_id === matchId), local, now, stored)[0];
   if (!p || !isActive(p)) return <>{fallback}</>;
   const tn = tone(p);
   const when = w.when(p, now);
