@@ -100,3 +100,64 @@ Deploy vorher über die Hauptsitzung abstimmen.
    - Rückennummern und ReID ins Image.
 
 Jeder Schritt: Pull Request mit grüner CI, Messwerte im PR und hier nachgetragen.
+
+## 4. Stand und Messwerte (nachgeführt)
+
+### Schritt 1: die heutige Kette gemessen (2026-11-16)
+
+**Ball auf Gold v1** (`ml/gold/eval_product_ball.py`, 42 Clips, 12 px, 95 % Bootstrap über Clips):
+`observe()` mit YOLOX-S "sports ball" (Schwelle 0.15, jedes 3. Bild wie im CPU-Image), Ballpfad genau
+wie `ballpossession.from_observations` (Leinwand, `balltrack`, `min_score` 0.35), ohne Uhr-Filter.
+
+| Mass | alle | schnelle |
+|---|---|---|
+| Ballpfad trifft den Ball | **0.2 %** [0.0, 0.7] | 0.3 % [0.0, 1.0] |
+| Pfad gibt überhaupt einen Punkt | 1.0 % | 0.7 % |
+| YOLOX-Box am Ball (beobachtete Bilder) | 2.7 % [0.8, 5.0] | 6.6 % [2.1, 11.7] |
+
+Die heutige Kette liefert also praktisch keinen Ball. YOLOX auf jedem Bild (CUDA-Image) wurde nicht
+gerechnet: bei 2.7 % Detektor-Treffern kann daraus kein brauchbarer Pfad werden.
+
+**Laufzeit pro Stufe** (`ml/integration/profile_analysis.py`: `run_analysis` lokal, S3 und Reporter
+durch lokale Attrappen ersetzt, Einstellungen des CPU-Images; 4 CPU-Kerne; Video: 15 min aus
+AT_Cup_Feldkirch_Bregenz_2021, 5 Segmente zu 3 min, mit der Produkt-Umwandlung auf 1280 px / 25 fps):
+(läuft noch, Zahlen folgen in diesem PR)
+
+### Schritt 2: Ball v2 hinter dem Schalter (Code fertig, gleicher PR)
+
+- **Tracker-Port** `packages/vision/handball_vision/balltrack2.py` (Tracker v2 mit Bewertung ohne
+  OWLv2): auf allen 11 752 Gold-Bildern dieselben Punkte wie `ml/gold/tracker.py`
+  (`ml/integration/parity_tracker.py`; Regressionstest mit Clip g10 in
+  `packages/vision/tests/test_balltrack2.py`). Über ganze Videos läuft er in 8-s-Fenstern
+  (`track_windows`, so lang wie die Gold-Clips): auf Gold identisch.
+
+| Variante (Gold v1, ohne OWLv2) | alle | schnelle | 50/60 fps |
+|---|---|---|---|
+| hr1 + hrp1, jedes Bild (Standard) | **80.0 %** [74.1, 85.0] | **83.3 %** [74.9, 90.0] | 75.3 % |
+| hr1 + hrp1, Netz nur jedes 2. Bild | 74.4 % [68.4, 79.7] | 72.5 % [63.4, 80.7] | 66.9 % |
+| nur hrp1 | 76.1 % [70.1, 81.4] | 78.3 % [67.8, 86.6] | 69.9 % |
+| nur hrp1, jedes 2. Bild | 69.2 % | 67.5 % | 63.2 % |
+| nur hr1 | 70.9 % [63.5, 77.4] | 79.3 % [69.8, 87.0] | 62.1 % |
+
+  Folgerung: Das Ballnetz läuft auf jedem Bild (`HB_BALL_EVERY=1`); jedes 2. Bild kostet 6 Punkte,
+  bei schnellen Bällen 11.
+- **ONNX-Export** `ml/ball/export_onnx.py` (Sigmoid im Graphen, Batch und Grösse dynamisch,
+  Checkpoint mit `weights_only=True`): Abweichung zu torch 1e-7 (fp32), 1e-4 (hr1 fp16) und 6e-4
+  (hrp1 fp16). Gegenprobe auf Gold-Clip g10 mit dem Produkt-Pfad (`ballnet.BallCandidates` auf dem
+  Clip-Video): stärkster ONNX-Punkt in 382 von 394 Bildern unter den 5 Kaggle-Kandidaten, der
+  Tracker trifft gleich viele Gold-Bälle (7 von 27, nur hr1, schwerer Clip). Die Abweichungen kommen
+  vom neu kodierten Clip-Video (crf 20). CPU: hr1 etwa 1.6 s pro Bild mit einem Thread.
+- **Schalter** `HB_BALL_MODEL` (Entscheid Hauptsitzung 2026-11-16): lokale Dateien oder Schlüssel im
+  Artifacts-Bucket (z. B. `models/ball/ball_hrp1-<sha12>.onnx`), `HB_BALL_MODEL_SHA256` in derselben
+  Reihenfolge (für Schlüssel Pflicht), Cache in `HB_BALL_CACHE_DIR`. Zwei Einträge = Ensemble, einer =
+  Einzelnetz. Fehlt etwas oder stimmt die SHA nicht: alter YOLOX-Weg, Warnung im Log und
+  `stats.ball_model_status`. Kein Download im Image-Build, keine Änderung an Build, CI oder ACR.
+- **Ballkandidaten in `observe()`** (`ballnet.BallCandidates`: Ringpuffer für Bild t-G, t, t+G,
+  Stapel von `HB_BALL_BATCH`), gespeichert in `observations.npz` (`ball_cands`, gerundet auf 0.01 px
+  und 1e-4, damit eine Neuberechnung denselben Pfad gibt). `ballpossession` nimmt sie, wenn
+  vorhanden (`ball_model: "ballnet"`), sonst YOLOX (`"yolox"`); `versions.ball` nennt die Netze.
+- **Lizenz (Testphase):** hr1 und hrp1 enthalten DeepSport (nicht kommerziell). Vermerkt in
+  `ballnet.py`, `export_onnx.py` und den Settings; vor einem Livegang durch Netze ohne DeepSport
+  ersetzen (`tracking-strategie.md` Abschnitt 9, Prio 6).
+- **Offen in Schritt 2:** Ballpfad speichern (Parquet) und an `graphics.py` liefern; Netze in den
+  Staging-Bucket laden (Skript, nur mit Freigabe von Lukas); GPU-Laufzeit messen.
