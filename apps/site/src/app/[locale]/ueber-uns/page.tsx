@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Phone } from "@/components/device";
 import { HallCamera } from "@/components/figures";
 import { JsonLd } from "@/components/json-ld";
 import { KitScope, StartLink } from "@/components/kit";
@@ -64,7 +65,7 @@ export default async function AboutUs({ params }: Props) {
             <div className="lg:sticky lg:top-6">
               <HallCamera label={m.filming.planLabel} camera={m.filming.planCamera} field={m.filming.planField} corner={m.filming.planCorner} caption={t.pictureCaption} />
               <figure className="m-0 mt-8 max-w-[18rem]">
-                <img src="/screens/start.jpg" alt={t.shotAlt} width={390} height={730} loading="lazy" className="block h-auto w-full border-2 border-ink" />
+                <Phone src="/app/ergebnis-phone.webp" width={780} height={3760} alt={t.shotAlt} />
                 <figcaption className="mt-3 text-[1.0625rem] text-ink-2">{t.shotCaption}</figcaption>
               </figure>
             </div>

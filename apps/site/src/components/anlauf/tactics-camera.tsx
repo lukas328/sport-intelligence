@@ -2,6 +2,7 @@
 
 import { type CSSProperties, type ReactNode, useEffect, useRef, useState } from "react";
 import { CourtLines } from "./court";
+import { ballAt, PASS_MAX_S } from "./ball";
 import { inView, pathOf, type Pt, sampleAt, trailOf, VIEWS, type ViewName } from "./geometry";
 
 const NS = { vectorEffect: "non-scaling-stroke" } as const;
@@ -14,6 +15,8 @@ export interface SceneTrack {
   team: "own" | "opp" | "ref";
   /** shirt number, only where it was read */
   number?: number | null;
+  /** the goalkeeper (the only one who may stand in the goal area) */
+  keeper?: boolean;
   xy: readonly Pt[];
 }
 
@@ -48,11 +51,6 @@ export function clockAt(scene: Pick<CameraScene, "clock" | "duration">, t: numbe
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 }
 
-function holderAt(scene: CameraScene, t: number): BallStretch | null {
-  const sec = t * scene.duration;
-  return scene.ball.find((b) => sec >= b.from && sec <= b.to) ?? null;
-}
-
 /** One frame of the tactics camera at t (0 to 1). */
 export function CameraFrame({ scene, view, width, dot = 12, t, labels = false }: { scene: CameraScene; view: ViewName; width: number; dot?: number; t: number; labels?: boolean }) {
   const V = VIEWS[view];
@@ -82,10 +80,9 @@ export function CameraFrame({ scene, view, width, dot = 12, t, labels = false }:
     });
   };
   const players = scene.tracks.filter((x) => x.team !== "ref");
-  const hold = holderAt(scene, t);
-  // the ball only at the player who holds it, and only while it was found in the picture
-  const holder = hold ? players.find((x) => x.team === hold.team && x.number === hold.number) : undefined;
-  const ballAt: Pt | null = holder ? f(sampleAt(holder.xy, t)) : null;
+  // the ball at the player who holds it (or on a pass), and only while it was found in the picture
+  const ballRaw = ballAt(scene, t);
+  const ballPt: Pt | null = ballRaw ? f(ballRaw) : null;
   const done = t >= 1;
   const tf = V.turn ? "matrix(0 1 1 0 0 0)" : undefined;
   return (
@@ -131,7 +128,7 @@ export function CameraFrame({ scene, view, width, dot = 12, t, labels = false }:
           </g>
         );
       })}
-      {ballAt && <Ball at={ballAt} r={r} />}
+      {ballPt && <Ball at={ballPt} r={r} />}
       {done && labels && scene.shot && scene.label && (
         <g>
           <rect x={f(scene.shot)[0] + r * 2.4} y={f(scene.shot)[1] - 11 / kk} width={(scene.label.length * 7.4 + 16) / kk} height={22 / kk} fill={INK_DARK} />
@@ -144,7 +141,7 @@ export function CameraFrame({ scene, view, width, dot = 12, t, labels = false }:
   );
 }
 
-/** The ball at the player who holds it: white with a seam, upper right of the dot. Never a flight. */
+/** The ball at the player who holds it: white with a seam, upper right of the dot. */
 function Ball({ at, r }: { at: Pt; r: number }) {
   const bx = at[0] + r * 0.95;
   const by = at[1] - r * 0.95;
@@ -274,8 +271,8 @@ export function TacticsCamera({
 
 /** Who held the ball, only where it was found; the gaps say so. */
 export function BallLine({ scene, t = 1, notFound, noBall }: { scene: Pick<CameraScene, "ball" | "duration">; t?: number; notFound: string; noBall: string }) {
-  const gap = (flex: number, key: string, word: boolean) => (
-    <span
+  const gap = (flex: number, key: string, word: boolean, pass = false) => (
+    pass ? <span key={key} style={{ flex }} /> : <span
       key={key}
       className="grid place-items-center text-base font-semibold text-ink-2"
       style={{ flex, background: "repeating-linear-gradient(-60deg, transparent 0 5px, color-mix(in srgb, var(--ink) 14%, transparent) 5px 6px)" }}
@@ -294,7 +291,8 @@ export function BallLine({ scene, t = 1, notFound, noBall }: { scene: Pick<Camer
   const parts = [];
   let at = 0;
   for (const [i, b] of scene.ball.entries()) {
-    if (b.from > at) parts.push(gap(b.from - at, `g${i}`, b.from - at >= 1.5));
+    // a short gap between two holders is a pass, not a stretch where the ball was lost
+    if (b.from > at) parts.push(gap(b.from - at, `g${i}`, b.from - at >= 1.5, i > 0 && b.from - at <= PASS_MAX_S));
     parts.push(
       <span
         key={`s${i}`}

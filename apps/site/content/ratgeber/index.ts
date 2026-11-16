@@ -21,6 +21,8 @@ export interface Guide {
   metaTitle: Partial<Record<HelpLocale, string>> & { de: string };
   answer: Partial<Record<HelpLocale, string>> & { de: string };
   description: Partial<Record<HelpLocale, string>> & { de: string };
+  /** what Handball Intelligence takes off the coach's hands for this question (honest, only what it can do) */
+  product?: Partial<Record<HelpLocale, string>>;
   related: string[];
 }
 
@@ -32,21 +34,22 @@ export const GUIDES: Guide[] = [
     updated: "2026-11-13",
     locales: ["de", "fr", "en"],
     title: {
-      de: "Wie filme ich ein Handballspiel mit dem Handy?",
-      fr: "Comment filmer un match de handball avec un téléphone ?",
-      en: "How do I film a handball match with a phone?",
+      de: "Wie filme ich ein Handballspiel mit Handy oder Kamera?",
+      fr: "Comment filmer un match de handball avec un téléphone ou une caméra ?",
+      en: "How do I film a handball match with a phone or camera?",
     },
-    metaTitle: { de: "Handballspiel mit dem Handy filmen", fr: "Filmer un match de handball au téléphone", en: "Filming a handball match with a phone" },
+    metaTitle: { de: "Handballspiel filmen mit Handy oder Kamera", fr: "Filmer un match de handball : téléphone ou caméra", en: "Filming a handball match: phone or camera" },
     answer: {
-      de: "Stell das Handy quer auf ein Stativ, so hoch wie möglich und auf Höhe der Mittellinie, und nimm den Weitwinkel (0,5×), damit beide Tore und Torräume im Bild sind. Starte vor dem Anpfiff, zoome und schwenke nicht, und lass die Aufnahme bis zum Schluss laufen.",
-      fr: "Pose le téléphone à l'horizontale sur un trépied, le plus haut possible et à hauteur de la ligne médiane, et prends le grand-angle (0,5×) pour avoir les deux buts et les zones de but dans l'image. Lance l'enregistrement avant le coup d'envoi, ne zoome pas, ne pivote pas, et laisse tourner jusqu'à la fin.",
-      en: "Put the phone in landscape on a tripod, as high as possible and level with the halfway line, and use the wide angle (0.5×) so both goals and goal areas are in the picture. Start before throw-off, do not zoom or pan, and let it run to the end.",
+      de: "Stell Handy oder Kamera quer auf ein Stativ, so hoch wie möglich und auf Höhe der Mittellinie, so dass beide Tore und Torräume im Bild sind; am Handy hilft der Weitwinkel (0,5×). Starte vor dem Anpfiff, zoome nicht, und lass die Aufnahme bis zum Schluss laufen. Am besten steht die Kamera fest; schwenken geht auch, dann findet die Analyse das Feld schwerer.",
+      fr: "Pose le téléphone ou la caméra à l'horizontale sur un trépied, le plus haut possible et à hauteur de la ligne médiane, pour avoir les deux buts et les zones de but dans l'image ; au téléphone, le grand-angle (0,5×) aide. Lance l'enregistrement avant le coup d'envoi, ne zoome pas, et laisse tourner jusqu'à la fin. Le mieux, c'est fixe ; suivre le jeu marche aussi, l'analyse trouve alors le terrain plus difficilement.",
+      en: "Put the phone or camera in landscape on a tripod, as high as possible and level with the halfway line, so both goals and goal areas are in the picture; on a phone the wide angle (0.5×) helps. Start before throw-off, do not zoom, and let it run to the end. Fixed is best; panning works too, the analysis then finds the court harder.",
     },
     description: {
-      de: "Standort, Höhe, Stativ, Einstellungen, Akku und Speicher: so filmst du ein Handballspiel mit dem Handy, damit du es danach auswerten kannst.",
-      fr: "Emplacement, hauteur, trépied, réglages, batterie et mémoire : comment filmer un match de handball au téléphone pour pouvoir l'analyser ensuite.",
-      en: "Position, height, tripod, settings, battery and storage: how to film a handball match with a phone so you can analyse it afterwards.",
+      de: "Standort, Höhe, Stativ, Einstellungen, Akku und Speicher: so filmst du ein Handballspiel mit Handy oder Kamera, damit du es danach auswerten kannst.",
+      fr: "Emplacement, hauteur, trépied, réglages, batterie et mémoire : comment filmer un match de handball au téléphone ou à la caméra pour pouvoir l'analyser ensuite.",
+      en: "Position, height, tripod, settings, battery and storage: how to film a handball match with a phone or camera so you can analyse it afterwards.",
     },
+    product: { de: "Die App nimmt die Datei so, wie Handy oder Kamera sie speichern, auch mehrere Dateien pro Spiel oder einen Download-Link von Veo. Die Analyse findet das Feld selbst und folgt auch einer Kamera, die mitschwenkt; ob das Feld passt, bestätigst du mit einem Tipp. Beim Hochladen erinnert dich die App an die wichtigsten Punkte.", fr: "L'app prend le fichier tel que le téléphone ou la caméra l'enregistre, aussi plusieurs fichiers par match ou un lien de téléchargement de Veo. L'analyse trouve le terrain elle-même et suit aussi une caméra qui pivote ; s'il est juste, tu le confirmes d'une touche. Au téléversement, l'app te rappelle les points importants.", en: "The app takes the file as the phone or camera saves it, also several files per match or a download link from Veo. The analysis finds the court by itself and also follows a camera that pans; whether it is right, you confirm with one tap. When you upload, the app reminds you of the key points." },
     related: ["spiel-auswerten-20-minuten", "video-im-verein-einwilligung", "wege-zur-videoanalyse"],
   },
   {
@@ -71,6 +74,7 @@ export const GUIDES: Guide[] = [
       fr: "Ce que l'analyse vidéo apporte vraiment à une équipe de handball amateur, ce qu'elle n'apporte pas, combien de temps elle prend et comment commencer.",
       en: "What video analysis really gives an amateur handball team, what it does not, how much time it takes and how to start small.",
     },
+    product: { de: "Handball Intelligence nimmt dir das Suchen und Schneiden ab: Die Analyse schlägt die Tore vor, du bestätigst sie und hast jedes Tor als Szene. Bei genug Toren zeigt sie drei Dinge zum Mitnehmen, über die Saison, was sich wiederholt. Was das Team sehen soll, schickst du als Sammlung per Link in den Teamchat, ohne Konto für die Spieler.", fr: "Handball Intelligence t'épargne la recherche et le montage : l'analyse propose les buts, tu les confirmes et tu as chaque but en séquence. Avec assez de buts, elle montre trois choses à retenir, et sur la saison ce qui se répète. Ce que l'équipe doit voir, tu l'envoies en sélection par lien dans le chat de l'équipe, sans compte pour les joueurs.", en: "Handball Intelligence takes the searching and cutting off your hands: the analysis suggests the goals, you confirm them and have every goal as a scene. With enough goals it shows three things to take away, and over the season what repeats. What the team should see, you send as a collection by link to the team chat, with no account for the players." },
     related: ["spiel-auswerten-20-minuten", "szenen-im-training-zeigen", "wege-zur-videoanalyse"],
   },
   {
@@ -86,6 +90,7 @@ export const GUIDES: Guide[] = [
       fr: "Ne revois pas tout le match. Prends une question, saute aux buts marqués et encaissés et fais un bâton pour chaque séquence. Après 20 minutes, tu as une tendance et trois séquences pour l'équipe.",
     },
     description: { de: "Eine Frage, der Spielverlauf, die Gegentore, eine Strichliste und drei Szenen: so wertest du ein Handballspiel in 20 Minuten aus. Mit Vorlage.", fr: "Une question, l'évolution du score, les buts encaissés, une feuille de pointage et trois séquences : analyser un match de handball en 20 minutes." },
+    product: { de: "Mit Handball Intelligence fällt das Spulen weg: Nach dem Prüfen springst du mit einem Tipp zu jedem Tor. Die Strichliste nach Position führt die App für dich, aus dem Wurfort, den du pro Tor antippst, und die drei Szenen fürs Team legst du in eine Sammlung und schickst den Link.", fr: "Avec Handball Intelligence, plus besoin de rembobiner : après la vérification, tu sautes d'une touche à chaque but. La feuille de pointage par poste, l'app la tient pour toi, à partir du lieu de tir que tu indiques pour chaque but, et les trois séquences pour l'équipe vont dans une sélection dont tu envoies le lien." },
     related: ["gegentore-nach-position", "gegenstoss-und-ballverluste", "szenen-im-training-zeigen"],
   },
   {
@@ -101,6 +106,7 @@ export const GUIDES: Guide[] = [
       fr: "Compte les buts encaissés selon l'endroit d'où le tir est parti : ailes, arrière gauche, demi-centre, arrière droit, pivot, jet de 7 mètres, contre-attaque. Une accumulation te montre où regarder en premier. Si c'est la défense, le gardien ou les pertes de balle, seule la séquence te le dit.",
     },
     description: { de: "Gegentore nach Wurfposition zählen, Häufungen richtig lesen und typische Ursachen erkennen: Rückraum, Aussen, Kreis, Siebenmeter, Gegenstoss.", fr: "Compter les buts encaissés selon la position du tir, bien lire les accumulations et reconnaître les causes : arrières, ailes, pivot, 7 mètres." },
+    product: { de: "Handball Intelligence zählt die Gegentore nach Position für dich, aus dem Wurfort, den du beim Prüfen pro Tor antippst. Zu jeder Häufung gibt es die Szenen mit einem Tipp, und die Saison zeigt, ob sie in mehreren Spielen auftaucht.", fr: "Handball Intelligence compte les buts encaissés par poste pour toi, à partir du lieu de tir que tu indiques pour chaque but à la vérification. Chaque accumulation a ses séquences à une touche, et la saison montre si elle revient sur plusieurs matchs." },
     related: ["spiel-auswerten-20-minuten", "wurfquote-torhueterquote", "handball-begriffe"],
   },
   {
@@ -116,6 +122,7 @@ export const GUIDES: Guide[] = [
       fr: "Compte combien de buts les deux équipes marquent sur contre-attaque, et regarde les pertes de balle juste avant. Le plus souvent, la cause n'est pas dans le repli, mais quelques secondes plus tôt : une mauvaise passe, un marcher, un tir précipité.",
     },
     description: { de: "Gegenstoss, zweite Welle, Ballverlust: was du zählst, wo du im Video hinschaust und was daraus fürs Training folgt.", fr: "Contre-attaque, deuxième vague, perte de balle : ce que tu comptes, où regarder dans la vidéo et ce que ça donne pour l'entraînement." },
+    product: { de: "Handball Intelligence zeigt Gegentore nach Gegenstoss als eigenes Ding, mit den Szenen dazu. Ballverluste kommen aus dem Spielbericht, oder du markierst sie im Video; von jeder Szene aus spulst du ein paar Sekunden zurück und siehst, was davor passiert ist.", fr: "Handball Intelligence montre les buts encaissés sur contre-attaque comme un point à part, avec les séquences. Les pertes de balle viennent de la feuille de match, ou tu les marques dans la vidéo ; depuis chaque séquence, tu reviens quelques secondes en arrière pour voir ce qui s'est passé avant." },
     related: ["spiel-auswerten-20-minuten", "gegentore-nach-position", "szenen-im-training-zeigen"],
   },
   {
@@ -131,6 +138,7 @@ export const GUIDES: Guide[] = [
       fr: "Pourcentage de réussite au tir : buts divisés par tirs, fois 100. Pourcentage d'arrêts du gardien : arrêts divisés par arrêts plus buts encaissés, fois 100. Écris toujours la base, par exemple « 12 sur 20, 60 % », et compte chaque fois de la même façon.",
     },
     description: { de: "Wurfquote und Torhüterquote im Handball richtig berechnen: Formeln, was als Wurf zählt, eine Tabelle zum Übernehmen und fünf Regeln für ehrliche Zahlen.", fr: "Pourcentage de réussite au tir et d'arrêts au handball : les formules, ce qui compte comme tir, un tableau et cinq règles pour des chiffres honnêtes." },
+    product: { de: "Handball Intelligence rechnet die Quoten mit ihrer Basis und schreibt bei jeder Zahl dazu, woher sie kommt. Tore kommen aus dem Prüfen oder dem Spielbericht; Würfe und Paraden markierst du im Video, wenn du die Quoten willst.", fr: "Handball Intelligence calcule les pourcentages avec leur base et indique pour chaque chiffre d'où il vient. Les buts viennent de la vérification ou de la feuille de match ; les tirs et les arrêts, tu les marques dans la vidéo si tu veux les pourcentages." },
     related: ["gegentore-nach-position", "handball-begriffe", "spiel-auswerten-20-minuten"],
   },
   {
@@ -146,6 +154,7 @@ export const GUIDES: Guide[] = [
       fr: "Montre au plus cinq séquences sur un thème, en dix minutes. Commence par une bonne séquence, dis avant à quoi tout le monde doit faire attention, et passe ensuite tout de suite à l'exercice qui va avec.",
     },
     description: { de: "Eine Videositzung in zehn Minuten: ein Thema, drei bis fünf Szenen, wie du darüber sprichst und was bei Kindern und Jugendlichen gilt.", fr: "Une séance vidéo en dix minutes : un thème, trois à cinq séquences, comment en parler et ce qui vaut avec des enfants et des jeunes." },
+    product: { de: "In Handball Intelligence legst du die Szenen mit einem Tipp in eine Sammlung, schreibst eine Notiz dazu und zeigst sie am Bildschirm oder Beamer, Szene für Szene. Für zu Hause schickst du denselben Link in den Teamchat, ohne Konto für die Spieler.", fr: "Dans Handball Intelligence, tu mets les séquences d'une touche dans une sélection, tu ajoutes une note et tu les montres à l'écran ou au projecteur, séquence après séquence. Pour la maison, tu envoies le même lien dans le chat de l'équipe, sans compte pour les joueurs." },
     related: ["spiel-auswerten-20-minuten", "videoanalyse-amateurteam", "video-im-verein-einwilligung"],
   },
   {
@@ -170,6 +179,7 @@ export const GUIDES: Guide[] = [
       fr: "Filmer les matchs au club : ce qui vaut en Suisse (PFPDT, Swiss Olympic), consentement des enfants et des jeunes, conservation, et un modèle de texte.",
       en: "Filming matches in a club: what applies in Switzerland (FDPIC, Swiss Olympic), consent of children and young people, retention, and a sample text.",
     },
+    product: { de: "Handball Intelligence fragt die Einwilligung per Link im Teamchat ab, für jeden Zweck einzeln und ohne Konto; bis 16 entscheiden die Eltern. Wer nein sagt, erscheint nicht in Highlights, und geteilte Links zeigen Rückennummern statt Namen. Das Originalvideo wird nach 90 Tagen gelöscht.", fr: "Handball Intelligence demande le consentement par lien dans le chat de l'équipe, pour chaque usage séparément et sans compte ; jusqu'à 16 ans, les parents décident. Qui dit non n'apparaît pas dans les highlights, et les liens partagés montrent les numéros au lieu des noms. La vidéo originale est supprimée après 90 jours.", en: "Handball Intelligence asks for consent by link in the team chat, for each purpose separately and without an account; up to 16, the parents decide. Whoever says no does not appear in highlights, and shared links show shirt numbers instead of names. The original video is deleted after 90 days." },
     related: ["handballspiel-filmen", "szenen-im-training-zeigen", "videoanalyse-amateurteam"],
   },
   {
