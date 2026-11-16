@@ -340,3 +340,35 @@ from round 9, 30 000 steps. Gold standard (same protocol as round 9):
   of round 9 lie above all gold balls of their clip (13 %, 28 of them in one clip).
 - Next: the HRNet-style nets on exactly this data (`ballhr.py` from scratch, `ballhrp.py`
   ImageNet-pretrained), to separate architecture and pretraining from data.
+
+## HRNet-style nets on the round-10 data (2026-11-16)
+Same kernel, data and gold protocol as round 10, only the net differs (`kaggle/train_hr_push.py`):
+- **hr1** `ballhr.py`: own HRNet-style net after the WASB idea (branches at strides 4 / 8 / 16,
+  7.7 M parameters), from scratch, 21 183 steps (1.23 s per step).
+- **hrp1** `ballhrp.py`: timm `hrnet_w18` with ImageNet weights, first conv widened to 3 frames,
+  9.7 M parameters, 13 094 steps (1.65 s per step, 8 h budget).
+- round 10 (BallNet3, ResNet-18 layers 1 to 2) for comparison: 30 000 steps, but started from
+  round 9 and thus from all earlier rounds.
+
+| Gold v1 | round 10 | hr1 | hrp1 | hr1 + hrp1 |
+|---|---|---|---|---|
+| Net top peak on the ball | 56.5 % | 63.2 % | 65.7 % | 73.8 % |
+| Ball among the net's top 5 | 81.0 % | 83.9 % | 86.2 % | |
+| Tracker v2 (net + OWLv2) | 73.4 % | 74.5 % | 74.0 % | 77.0 % |
+| Tracker v2, fast balls only | 76.7 % | 76.6 % | 72.1 % | 77.0 % |
+
+- Net top 1, paired: hr1 against round 10 261 gained / 157 lost (p 4e-7), hrp1 against round 10
+  313 / 171 (p 1e-10), hrp1 against hr1 238 / 200 (p 0.08). Architecture: the high-resolution
+  branches are a clear gain over BallNet3. Pretraining: a further small gain in fewer steps, not
+  significant on gold, clearer on the human validation set (0.71 against 0.63 at threshold 0.5).
+- The tracker gains far less than the net (hr1 106 / 88, p 0.22; hrp1 120 / 110, p 0.55).
+  Re-tuning the tracker per net with 2-fold cross-validation (`ml/gold/tune_tracker.py`, 150 random
+  settings) does not change that: held-out 74.4 % -> 75.1 % for hrp1, 74.2 % -> 74.4 % for hr1. So the
+  defaults stay.
+- **hr1 + hrp1**: both nets' top-5 candidates merged (within 8 px, mean score), no parameter
+  fitted. Tracker 77.0 %, against round 10 130 / 73 (p 8e-5), against hr1 73 / 34 (p 2e-4),
+  against hrp1 78 / 31 (p 8e-6). The two nets make different errors; the best path on gold so far.
+  Adding round 10 as a third net makes it worse (75.6 %).
+- Both nets were still improving when the budget ended (human validation over the last
+  checkpoints 0.61 -> 0.63 and 0.67 -> 0.71). Next: `kaggle/train_hr2_push.py` continues both from
+  round 1 with half the learning rates (hr2, hrp2), then the same comparison and the ensemble again.
