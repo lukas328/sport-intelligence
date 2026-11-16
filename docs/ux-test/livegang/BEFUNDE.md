@@ -13,7 +13,7 @@ Schwere: 🔴 blockiert einen Trainer · 🟡 stört · ⚪ Kleinigkeit. Stand: 
 |---|---|---|---|
 | L1 | Upload aus dem Browser scheitert: der Video-Bucket `handball-testdata` erlaubte Uploads (CORS) nur für `test.` | R2 | behoben 16.11. (CORS für `app.` gesetzt), von Lukas nachprüfen |
 | L2 | Kein Mail-Versand (`HB_EMAIL_BACKEND=console`), aber die App sagt «Link geschickt» / «Du bekommst eine Mail»: Einstieg «Speichern», «Passwort vergessen», «Ohne Passwort anmelden», Video-Tab und Fortschritt. Wer über «Speichern» kommt, hat ein Konto ohne Passwort und keinen Weg hinein (`services/auth.py` `start`) | App, Mail | offen: braucht einen Mail-Anbieter (Entscheid Lukas), bis dahin ehrliche Sätze |
-| L3 | Sporadisch HTTP 500 (8×): `POST /v1/auth/login` 2×, `POST /v1/auth/magic-link` 1×, `GET /v1/public/teams` 5×; die Wiederholung klappt. Der Einstieg zeigt dann «handball.ch antwortet gerade nicht» (`entry-view.tsx` zeigt jeden Fehler ausser 429 so) | API | offen: Ursache in den Azure-Logs suchen (Verdacht: Rate-Limiter/Redis nach dem Aufwachen) |
+| L3 | Sporadisch HTTP 500 (8×): `POST /v1/auth/login` 2×, `POST /v1/auth/magic-link` 1×, `GET /v1/public/teams` 5×; die Wiederholung klappt. Der Einstieg zeigt dann «handball.ch antwortet gerade nicht» (`entry-view.tsx` zeigt jeden Fehler ausser 429 so) | API | offen, Ursache gefunden: die Verbindungen zu Redis werden immer wieder getrennt («Connection closed by server», einmal «Connection refused»). Der Rate-Limiter (`core/ratelimit.py`) fängt das nicht ab, die Anfrage endet mit 500. Lösung: Redis-Aufrufe wiederholen (`retry_on_error`) und den Rate-Limiter bei Redis-Fehlern durchlassen statt abbrechen; siehe B3 |
 
 ## Stört
 
@@ -61,3 +61,14 @@ Schwere: 🔴 blockiert einen Trainer · 🟡 stört · ⚪ Kleinigkeit. Stand: 
 | K11 | Website Demo-Spiel: alles etwas unübersichtlich, es muss sofort klar werden, was man sieht. Die Taktikkamera im Demo stimmt nicht: im eigenen Beispiel «Ball in dieser Szene nicht erkannt» geht nicht (das Demo ist erfunden, also zeigt es den Ball), und Spieler laufen durch den Torraum (Kreis), was im Handball nicht vorkommt. Die erfundenen Läufe und Positionen müssen handballtypisch sein (Abwehr vor dem 6-m-Raum, Angriff um 9 m, nur der Torhüter im Torraum) | Website, Demo (`apps/site/scripts/make_demo.py`, `public/demo/match.json`) | offen |
 | K12 | Website, Fragen und Antworten zum Auswerten (und die Ratgeber unter «Auswerten»): es kommt so rüber, als müsse der Trainer alles selbst machen. Dort unsere Funktionen zeigen und sagen, wo wir helfen, z. B. «Wie teile ich Szenen mit dem Team?» → «Stell eine Sammlung zusammen und teil sie per Link im Teamchat, ohne Konto für die Spieler». Jede Antwort: zuerst die Antwort, dann wie Handball Intelligence es abnimmt (ehrlich, nur was es kann) | Website (Fragen, Ratgeber «Auswerten») | offen |
 | K13 | Analyse eines ganzen Spiels: nach 3 bis 4 Stunden noch nicht fertig, und der Trainer erfährt nicht, wie es steht. Mehr Transparenz: wie weit (Schritt, Prozent), wie lange noch (geschätzt aus Videolänge und bisherigem Tempo), ob sie läuft oder hängt, und was er bis dahin tun kann. Gehört zu K6 (Fortschritt sichtbar oben). Ursache der Dauer prüfen (CPU ohne Grafikkarte, siehe GPU-Entscheid) | Spiel, Start, Kopf | offen, Ursache wird geprüft |
+
+## Betrieb (aus den Azure-Logs, 16.11.)
+
+Status-Abfrage über den Workflow `deploy.yml`, Modus `status` (nur lesen).
+
+| # | Befund | Wo | Stand |
+|---|---|---|---|
+| B1 | Ganzes Spiel einlesen (Video umwandeln) dauerte 1 h 39 min (15:07 bis 17:46 UTC), weil `hb-stg-worker` nur 1 CPU und 2 GB hat. Etwa 1,5-mal so lang wie das Spiel selbst, bevor die Analyse überhaupt beginnt | Azure, Worker | offen: Worker grösser (2 bis 4 CPU) oder Umwandeln auf den Analyse-Worker legen |
+| B2 | Die Analyse läuft auf `hb-stg-gpu-worker` ohne Grafikkarte (4 CPU, 8 GB, `HB_GPU_BACKEND=local`). Ein 5-Minuten-Clip braucht so etwa 20 Minuten, ein ganzes Spiel also mehrere Stunden. Für echte Trainer nicht tragbar | Azure, Analyse | offen: GPU-Entscheid (Lukas), z. B. Modal oder eine GPU in Azure |
+| B3 | Redis trennt Verbindungen: die API meldet `event_publish_failed` (Live-Fortschritt erreicht den Browser nicht), der Analyse-Worker alle paar Minuten «could not connect to Redis instance». Der Fix aus #42 (Keepalive, Health-Check) deckt die RQ-Worker und den Rate-Limiter nicht ganz ab | API, Worker, Redis | offen: Wiederholen bei Verbindungsfehlern für alle Redis-Clients (`apps/worker`, `apps/gpu-worker`, `core/ratelimit.py`), Redis-Neustart prüfen |
+| B4 | Zwei Videos eines Spiels laufen nacheinander durch Einlesen und Analyse; während die erste Datei analysiert wird, wird die zweite eingelesen. Der Trainer sieht davon nichts (gehört zu K6 und K13) | Spiel | offen |
