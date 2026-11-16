@@ -142,3 +142,41 @@ danach gezielt nachtrainieren).
 4. **Originale:** ja, Originalvideos werden gespeichert, wenn es nötig ist.
 5. **Zeit:** Dauert eine Phase länger, dauert sie länger. Massstab ist der Goldstandard, nicht
    der Kalender.
+
+## 9. Ball-Roadmap (Stand 2026-11-16, mit Lukas abgestimmt)
+
+**Ziel:** Würfe aufs Tor und harte Pässe richtig verfolgen, denn dort steckt die spielentscheidende
+Information. Etwa 80 % über alle Bälle reichen, wenn diese Szenen stimmen. Zielmarke für schnelle
+Bälle und Würfe: 85 bis 90 %. 95 % ist kein Ziel (Verdeckung, Messgrenze).
+
+**Stand (Gold v1, 42 Clips, 12 px, Tracker mit hr1 + hrp1, Details `ml/ball/README.md`):**
+alle Bälle 84.0 %, schnelle 86.0 % (Mittag: je 77 %). Gebracht haben es die Doppelbild-Korrektur,
+längere Lücken für schnelle Bälle und die gelernte Bewertung der Kandidaten. Restfehler bei
+schnellen Bällen: 8.5 % Tracker wählt falsch, 5.4 % kein Detektor sieht den Ball.
+
+**Metriken (gelten ab jetzt für jede Auswertung):**
+1. Recall, Precision und F1 bei 12 px, dazu 25 px; für alle, schnelle und gehaltene Bälle.
+   Heute gibt der Tracker fast immer einen Punkt aus (Recall = Precision), er sagt nie "weiss
+   nicht". Darum:
+2. Sicherheit pro Tracker-Punkt und Precision-Recall-Kurve; berichtet wird zusätzlich der Recall
+   bei 95 % Precision.
+3. Bilder ohne Ball werden mitgelabelt, mit Sichtbarkeitsstufe (sichtbar, teilweise verdeckt, ganz
+   verdeckt, ausserhalb des Bildes). Gold v1 hat nur 14 solche Bilder, erfundene Bälle sind dort
+   kaum messbar.
+4. Pro Wurf: Anteil der Würfe, deren Flug vom Abwurf bis Tor oder Torhüter durchgehend verfolgt
+   wird; Fehler am Abwurf- und am Zielpunkt; Spurwechsel auf ein anderes Objekt pro Wurf.
+
+**Schritte:**
+| Schritt | Inhalt | Wann | Wer |
+|---|---|---|---|
+| 0. Wurf-Goldstandard | 61 Würfe aus den offiziellen Protokollen (`ml/gold/shot_clips.json`, 13 Spiele, 22 Tore, 24 Paraden, 15 Fehlwürfe), vorgelabelt mit Sichtbarkeitsstufen, Lukas prüft Ja/Nein; Kandidaten aller Netze und OWLv2 über Modal (Auftrag 12) | diese Woche | Hauptsitzung, Lukas 1 bis 2 h |
+| 1. Tracker | Sicherheit pro Punkt (Metrik 2); weitere Fälle "Ball unter den Kandidaten, falsche Wahl"; Bewertung bei jeder neuen Netz-Generation neu trainieren (sie ist auf die Score-Verteilung der Netze abgestimmt) | laufend, CPU | Hauptsitzung |
+| 2. Gezielte Daten | Ensemble über die Trainings-Clips, gelabelt wird wo es unsicher ist oder nichts findet; Schwerpunkt Würfe, harte Pässe, hohe Bälle vor Wand oder Tribüne (g34), Videos mit Doppelbildern; neue Hallen | parallel | Hauptsitzung, Lukas Ja/Nein |
+| 3. Netz-Generation 2 | Ideen aus TOTNet (arXiv 2508.09650, MIT): 5 Bilder Eingabe, Bewegung über die Zeit (3D-Faltungen), künstliche Verdeckungen im Training, Verlust gewichtet nach Sichtbarkeit. Kandidaten im fairen Vergleich auf denselben Daten: HRNet vortrainiert mit 5 Bildern, TOTNet selbst trainiert, eventuell die eigene HRNet-Bauart. Danach Tracker-Bewertung neu trainieren | ab Samstag (Kaggle-Kontingent 30 h, vorher Kontingent mit Lukas klären) | Hauptsitzung |
+| 4. Zwischenfazit | Gold v1 und Wurf-Gold mit allen Metriken; Entscheid über Bauart und ob die Werte fürs Produkt reichen | nach Schritt 3 | Lukas und Hauptsitzung |
+| 5. Produkt | Netze und Tracker aus `ml/` sauber mit Tests ins Produkt | wenn Würfe bei etwa 85 % | Hauptsitzung |
+
+**Grundsätze:** Gold wird nicht zum Anpassen verwendet (höchstens mit Kreuzvalidierung über
+Clips), Lernen auf den Trainings-Clips. GPU zuerst Kaggle, Modal nur mit Freigabe von Lukas über
+die lokale Sitzung. Würfe aus Hallen, die im Training vorkamen, sind etwas leichter als Gold v1
+(lauter neue Hallen); das wird bei jedem Wurf-Ergebnis erwähnt.
