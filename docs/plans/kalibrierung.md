@@ -37,6 +37,29 @@ Produkt importiert nichts daraus).
   Bilder werden getrennt gezählt.
 - Zwei Runden: zuerst die Entwicklungs-Stücke, später der Endtest.
 
+Klickseiten (privat, Lukas öffnet sie): Runde 1 Entwicklung
+https://claude.ai/artifact/FzGnPSymLMh4WXNKc78Af2 (63 Bilder, 10 mit Vorschlag des Produkts), Runde 2
+Endtest https://claude.ai/artifact/Ja1U5iHdYxrprRicPxHVfE (69 Bilder, bewusst ohne Vorschläge, damit
+nichts die Wahrheit zum heutigen Stand hinzieht). Runde 2 wird erst nach Runde 1 freigegeben.
+
+### Ablauf nach den Klicks (Minuten)
+
+1. Antworten holen: Artifact-Datenbank, Sammlung `truth`, als Dateien nach `<scratch>/answers1`.
+2. `ml/calib/truth.py pull <scratch>/answers1/truth ml/calib/truth_dev.json --cache <cache> --overlays <scratch>/ov1`
+   (Verfeinerung an den Linien, Overlays zur Kontrolle).
+3. `ml/calib/evaluate.py ml/calib/results_base.json ml/calib/truth_dev.json --split dev --rows`
+   (Klassen pro Stück, Anteile mit Intervallen).
+4. `ml/calib/features.py ml/calib/results_base.json <cache> <scratch>/feat.json`, dann
+   `ml/calib/features.py separate <scratch>/feat.json ml/calib/results_base.json ml/calib/truth_dev.json`:
+   wie gut jedes Merkmal richtige von falschen Feldern trennt (AUC, Schwelle, die alle richtigen
+   behält). Merkmale: die eigenen Prüfwerte des Produkts (Torpfosten, Linien, Boden, Leute auf
+   dem Feld, Kamerahöhe, Blickwinkel), Übereinstimmung der projizierten Feldlinien mit den Linien
+   jedes Bildes (Median und Minimum über die Bilder, also auch die Schwenkenden) und deren Spitze
+   gegen das um 1.5 m verschobene Feld.
+
+Geprüft mit künstlichen Klicks (Produkt-Felder als Wahrheit): die Kette läuft in unter einer
+Minute und ergibt für diese Felder 0.1 m.
+
 ## 3. Metrik (`ml/calib/evaluate.py`)
 
 - Fehler pro Wahrheitspunkt: Bildpunkt → Kamerabewegung → Kalibrierung → Feld, Abstand zur wahren
@@ -83,6 +106,35 @@ Vorläufige Sichtprüfung der 6 heute akzeptierten Entwicklungs-Felder (keine Wa
 Entwickeln): c008 und c061 falsch, c040 und c067 plausibel, c025 und c039 in der Schwenkmitte nah,
 an den Schwenkenden daneben. Die heutigen Prüfungen (Kamerahöhe, Leute auf dem Feld, Torpfosten)
 lassen also falsche Felder durch.
+
+### 4.3 Konzept: tiefe Kameras (`flat_view`), noch kein Code
+
+Heute: Bodenlage aus den Linienrichtungen, Massstab aus der Grösse der Leute, dann eine Draufsicht
+und die Feldsuche darin. Unter etwa 10 Grad Blickwinkel ist das schlecht gestellt: ein Zehntelgrad
+Fehler in der Bodenlage verschiebt Punkte in 25 m Entfernung um Meter, und die ferne Hälfte ist in
+der Draufsicht auf wenige Pixel gestaucht. 7 der 33 Entwicklungs-Stücke (Bankhöhe, Tribüne unten,
+Fernsehkamera mit Schnitten) betrifft das.
+
+Vorschlag: das Feld direkt **im Bild** anpassen, pro Linienbild.
+- Unbekannte: Kameraort (x, y, z) und Verzeichnung k1 gemeinsam für das Stück; Drehung und
+  Brennweite pro Bild, Startwert aus der Kamerabewegung. Für eine feste Kamera ein Satz.
+- Ziel: zweiseitiger Chamfer-Abstand zwischen den projizierten Handball-Linien und den Linien des
+  Bildes (nur die Linienfarbe des Handballfeldes; die Farbe ist Teil der Hypothese), dazu Torpfosten
+  und Spielerfüsse im Feld als weiche Bedingungen.
+- Start: ein Raster von Kameraorten entlang der nahen Seitenlinie (x 0 bis 40 m, y -2 bis -12 m,
+  z 2 bis 6 m), Blick zur Feldmitte, plus der Kandidat der Draufsicht, wo es einen gibt; jeweils
+  lokal optimieren (mehrere Starts, weil die Linien entlang einander gleiten).
+- Handball-eigene Formen gegen Verwechslungen auf Mehrsport-Böden: 6-m-Bogen mit geradem Stück,
+  gestrichelte 9-m-Linie, Tore.
+- Prüfung: dieselben Merkmale wie in 2 (Übereinstimmung mit den Bildlinien, scharfe Spitze,
+  Schwenkenden), geeicht an der Wahrheit.
+- Nebeneffekt: eine Anpassung pro Bild braucht keine über alle Bilder stimmige Kamerabewegung und
+  kann darum auch bei `no_floor` helfen (Abschnitt 4.2).
+
+Aufwand grob: klassische Anpassung im Bild 3 bis 5 Arbeitstage plus Messung auf der Wahrheit.
+Langfristig robuster wäre ein gelerntes Modell für Feldlinien oder Feld-Keypoints (synthetische
+Hallenbilder plus etwa 300 gelabelte Bilder, einige GPU-Stunden): 1 bis 2 Wochen, GPU nur nach
+Rücksprache.
 
 ## 5. Was nicht geholfen hat
 

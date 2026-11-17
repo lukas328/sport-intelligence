@@ -244,6 +244,15 @@ def _model_points(step: float = 0.2) -> np.ndarray:
 MODEL_PTS = _model_points()
 
 
+def _sample(img: np.ndarray, pts: np.ndarray) -> np.ndarray:
+    """Bilinear lookup of `img` at pixel points (empty for no points)."""
+    if len(pts) == 0:
+        return np.zeros(0, np.float32)
+    return cv2.remap(
+        img, pts[:, 0:1].astype(np.float32), pts[:, 1:2].astype(np.float32), cv2.INTER_LINEAR
+    )[:, 0]
+
+
 def fit_model(
     img: np.ndarray, rough: dict[str, list[float]], distortion: bool = True, sigma_px: float = 10.0
 ) -> tuple[dict[str, Any], dict[str, float]]:
@@ -282,9 +291,7 @@ def fit_model(
         qi = q[inside]
         d[inside] = np.minimum(
             trunc,
-            cv2.remap(
-                dt, qi[:, 0:1].astype(np.float32), qi[:, 1:2].astype(np.float32), cv2.INTER_LINEAR
-            )[:, 0],
+            _sample(dt, qi),
         )
         anchor = (_distort(cv2.perspectiveTransform(src[None], hh)[0], k, size) - dst) / sigma_px
         reg = [v[8] * 2.0, v[9] * 2.0] if distortion else []
@@ -299,9 +306,7 @@ def fit_model(
     q = _distort(cv2.perspectiveTransform(MODEL_PTS[None], hh)[0], k, size)
     inside = (q[:, 0] >= 1) & (q[:, 0] < wid - 2) & (q[:, 1] >= 1) & (q[:, 1] < hgt - 2)
     qi = q[inside]
-    d = cv2.remap(
-        dt, qi[:, 0:1].astype(np.float32), qi[:, 1:2].astype(np.float32), cv2.INTER_LINEAR
-    )[:, 0]
+    d = _sample(dt, qi)
     anchor = np.linalg.norm(
         _distort(cv2.perspectiveTransform(src[None], hh)[0], k, size) - dst, axis=1
     )
@@ -377,7 +382,11 @@ def proposal(
     """The product's court in this frame as keypoints inside the frame (None when no court)."""
     if not r or not r.get("ok") or str(frame) not in r.get("frame_to_court", {}):
         return None
-    inv = np.linalg.inv(np.array(r["frame_to_court"][str(frame)], np.float64))
+    m = np.array(r["frame_to_court"][str(frame)], np.float64)
+    sys.path.insert(0, str(HERE))
+    from evaluate import front_sign
+
+    inv = np.linalg.inv(m * front_sign(m))  # court -> frame, w > 0 in front
     out = {}
     for n, (x, y) in KEYPOINTS.items():
         q = inv @ np.array([x, y, 1.0])
@@ -421,10 +430,17 @@ def items(a: argparse.Namespace) -> None:
 
 
 def pull(a: argparse.Namespace) -> None:
-    """Answers of the page (a JSON list of {id, data} rows from the artifact's db) -> truth JSON,
-    each frame refined on its line pixels (homography plus radial distortion); the refined
-    points are kept only when the fit stays near the clicks (median shift <= 6 px)."""
-    rows = json.loads(a.answers.read_text())
+    """Answers of the page -> truth JSON, each frame refined on its line pixels (homography plus
+    radial distortion); the refined points are kept only when the fit stays near the clicks
+    (median shift <= 6 px). `answers`: a JSON list of {id, data} rows, or the directory the
+    artifact database export writes (one `<frame id>.json` per document)."""
+    if a.answers.is_dir():
+        rows = []
+        for f in sorted(a.answers.glob("*.json")):
+            d = json.loads(f.read_text())
+            rows.append({"id": d.get("id", f.stem), "data": d.get("data", d)})
+    else:
+        rows = json.loads(a.answers.read_text())
     truth = json.loads(a.truth.read_text()) if a.truth.exists() else {}
     for row in rows:
         doc = row.get("data", row)

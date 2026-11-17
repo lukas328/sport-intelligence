@@ -44,8 +44,21 @@ def truth_points(entry: dict[str, Any]) -> tuple[np.ndarray, np.ndarray] | None:
     )
 
 
+# a pixel near the bottom middle of every proxy frame (1280 x 720, one source gives 1280 x 596):
+# the floor right in front of the camera, so its sign marks "in front"
+FLOOR_PX = (640.0, 590.0)
+
+
+def front_sign(frame_to_court: np.ndarray) -> float:
+    """Sign of the homogeneous scale for floor points in front of the camera (a homography is
+    defined up to its sign, so "w > 0" alone says nothing)."""
+    w = frame_to_court[2] @ np.array([FLOOR_PX[0], FLOOR_PX[1], 1.0])
+    return 1.0 if w >= 0 else -1.0
+
+
 def errors_m(m: list[list[float]], px: np.ndarray, court: np.ndarray) -> np.ndarray:
     h = np.array(m, np.float64)
+    h = h * front_sign(h)
     q = np.c_[px, np.ones(len(px))] @ h.T
     with np.errstate(divide="ignore", invalid="ignore"):
         xy = q[:, :2] / q[:, 2:3]
