@@ -125,6 +125,24 @@ variable "smtp_username" {
   default = ""
 }
 
+variable "mail_domain" {
+  description = "Domain mail is sent from through Azure Communication Services; empty: the domain of app_domain."
+  type        = string
+  default     = ""
+}
+
+variable "mail_sender" {
+  description = "Local part of the sender address, e.g. noreply."
+  type        = string
+  default     = "noreply"
+}
+
+variable "mail_live" {
+  description = "Set by the deploy once Azure verified the sending domain: links it and switches the apps to it."
+  type        = bool
+  default     = false
+}
+
 # --- Settings -----------------------------------------------------------------------------------
 
 variable "operator_emails" {

@@ -14,6 +14,7 @@ from handball_api.core.assistant_llm import AssistantModel, ClaudeAssistantModel
 from handball_api.core.config import Settings, get_settings
 from handball_api.core.db import database_unavailable, dispose_engine, init_engine
 from handball_api.core.email import (
+    AcsEmailSender,
     ConsoleEmailSender,
     EmailSender,
     MemoryEmailSender,
@@ -86,6 +87,12 @@ def _email_sender(settings: Settings) -> EmailSender:
         return MemoryEmailSender()
     if settings.email_backend == "console":
         return ConsoleEmailSender(full=settings.env == "local")
+    if settings.email_backend == "acs":
+        if settings.acs_connection_string is None:
+            raise RuntimeError("HB_EMAIL_BACKEND=acs needs HB_ACS_CONNECTION_STRING")
+        return AcsEmailSender(
+            settings.acs_connection_string.get_secret_value(), settings.email_from
+        )
     return SmtpEmailSender(
         settings.smtp_host,
         settings.smtp_port,

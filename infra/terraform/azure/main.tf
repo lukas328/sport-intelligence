@@ -13,7 +13,9 @@ locals {
     managed_by  = "terraform"
   }
   web_base_url = "https://${var.app_domain}"
-  registry     = azurerm_container_registry.this.login_server
+  # the sending domain: by default the site's domain (app.example.ch -> example.ch)
+  mail_domain = var.mail_domain != "" ? var.mail_domain : join(".", slice(split(".", var.app_domain), 1, length(split(".", var.app_domain))))
+  registry    = azurerm_container_registry.this.login_server
 }
 
 resource "random_string" "suffix" {
@@ -117,6 +119,46 @@ resource "azurerm_role_assignment" "acr_pull" {
   principal_id         = azurerm_user_assigned_identity.apps.principal_id
 }
 
+# --- E-mail: Azure Communication Services (ADR 009) --------------------------------------------
+# The sending domain is the site's domain, managed by us: its DNS records (domain, SPF, DKIM) are
+# set by hand from the output mail_verification_records, the deploy then asks Azure to verify
+# them. Only once all are verified does mail_live link the domain and switch the apps to it.
+
+resource "azurerm_email_communication_service" "this" {
+  name                = "${local.prefix}-email"
+  resource_group_name = azurerm_resource_group.this.name
+  data_location       = "Switzerland"
+  tags                = local.tags
+}
+
+resource "azurerm_email_communication_service_domain" "this" {
+  name                             = local.mail_domain
+  email_service_id                 = azurerm_email_communication_service.this.id
+  domain_management                = "CustomerManaged"
+  user_engagement_tracking_enabled = false
+  tags                             = local.tags
+}
+
+resource "azurerm_email_communication_service_domain_sender_username" "this" {
+  name                    = var.mail_sender
+  email_service_domain_id = azurerm_email_communication_service_domain.this.id
+  display_name            = "Handball Intelligence"
+}
+
+resource "azurerm_communication_service" "this" {
+  name                = "${local.prefix}-acs-${local.unique}"
+  resource_group_name = azurerm_resource_group.this.name
+  data_location       = "Switzerland"
+  tags                = local.tags
+}
+
+# only a verified domain can be linked (the deploy sets mail_live once Azure verified it)
+resource "azurerm_communication_service_email_domain_association" "this" {
+  count                    = var.mail_live ? 1 : 0
+  communication_service_id = azurerm_communication_service.this.id
+  email_service_domain_id  = azurerm_email_communication_service_domain.this.id
+}
+
 # --- Secrets ------------------------------------------------------------------------------------
 
 resource "azurerm_key_vault" "this" {
@@ -186,6 +228,8 @@ locals {
     "hb-migration-db-url" = local.db_owner
     "hb-admin-dsn"        = local.dsn_owner
     "hb-app-db-password"  = random_password.pg_app.result
+    # the access key of the mail service: used only once mail_live switches the backend
+    "hb-acs-connection-string" = azurerm_communication_service.this.primary_connection_string
   }
 
   # set by hand after the first apply (README, step 4); terraform never overwrites them
@@ -326,7 +370,15 @@ locals {
     HB_BILLING_ENFORCE        = var.billing_enforce ? "true" : "false"
     HB_OPERATOR_EMAILS        = jsonencode(var.operator_emails)
     HB_GPU_BACKEND            = var.gpu_backend
-  }, var.extra_env)
+  }, var.extra_env, local.mail_env)
+
+  # once the sending domain is verified and linked, mail goes through it; this overrides a
+  # «console» backend kept in extra_env from the time without a provider
+  mail_env = var.mail_live ? {
+    HB_EMAIL_BACKEND = "acs"
+    HB_EMAIL_FROM    = "Handball Intelligence <${var.mail_sender}@${local.mail_domain}>"
+    HB_MAIL_ENABLED  = "true"
+  } : {}
 
   # env var -> Key Vault secret name
   python_secrets = merge({
@@ -336,6 +388,9 @@ locals {
     HB_INTERNAL_TOKEN = "hb-internal-token"
     HB_S3_SECRET_KEY  = "hb-s3-secret-key"
     HB_SMTP_PASSWORD  = "hb-smtp-password"
+    }, {
+    # the mail service's access key (Key Vault, written by Terraform)
+    HB_ACS_CONNECTION_STRING = "hb-acs-connection-string"
   }, { for v in var.optional_secrets : v => lower(replace(v, "_", "-")) })
 
   kv_uri = azurerm_key_vault.this.vault_uri

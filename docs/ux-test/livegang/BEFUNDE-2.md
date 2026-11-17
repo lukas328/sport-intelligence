@@ -111,6 +111,33 @@ Priorität: P1 vor dem nächsten Test, P2 bald, P3 wenn Zeit, ✗ nicht überneh
 | R40 | Seitenwechsel 2 bis 4 s ohne Ladeanzeige | P2 | stimmt: Skelette bzw. loading.tsx je Bereich. **behoben (Stream Y, 71e96548): Lade-Skelette für Spiele, Szenen, Saison, Team, Spiel, Sammlung, Verein, Ich; 404 für unbekannte Spiele und Sammlungen bleibt (Prüfung im Layout über dem Skelett)** |
 | R41 | Handy-Ansicht nicht getestet | P1 | nächste Runde auf 390 px |
 
+## Website-Review (externe Sitzung, Desktop, 17.11.)
+
+Gesamteindruck des Reviews: Konzept, Schrift, Farben und die Geschichte entlang der Woche tragen.
+Die Seite ist aber fast ganz statisch und gezeichnet: kein Videobild, keine echte Halle, nie die
+echte Oberfläche. Umsetzung im Strang S (eigener PR). Grenzen: keine erfundenen Zitate oder
+Zahlen zu Testteams (W32 erlaubt die Vision des Produkts, nicht erfundene Belege), keine Bilder
+von Personen aus Fremdvideos (Datenschutz). Jede Bewegung respektiert `prefers-reduced-motion`.
+
+| # | Befund | Prio | Einschätzung und Massnahme | Stand |
+|---|---|---|---|---|
+| S1 | Menü klappt auf Desktop wie ein Handy-Menü auf; «Anmelden» nur im aufgeklappten Menü | P1 | stimmt: ab Desktop die fünf Links direkt in der Leiste, «Anmelden» sichtbar neben «Kostenlos starten»; Handy behält das Menü | offen |
+| S2 | Logo klein, im Footer leicht unscharf | P2 | prüfen: Logo als SVG in passender Grösse (keine skalierte Rastergrafik), Header etwas grösser | offen |
+| S3 | Hero-Karte «1 von 3» blättert nicht, keine Punkte, keine Pfeile | P1 | stimmt: Karte blättert selbst durch die drei Dinge (etwa 6 s, Pause bei Hover und Fokus), mit Punkten zum Wählen; ohne Bewegung (reduced motion) Punkte allein | offen |
+| S4 | Tabs «Alle 9 / Szene 7:46» sehen klickbar aus, tun nichts; Knöpfe «Szenen» bei den drei Dingen ebenso | P1 | stimmt: Was auf Bildern wie ein Knopf aussieht, ist entweder klar Teil des Bildes (Rahmen, kein Hover, kein Zeiger) oder tut etwas Sinnvolles | offen |
+| S5 | Gelber Hinweis «Hier kamen die Gegentore her» ist eine Website-Erklärung, darunter steht «Bilder aus der App» | P2 | stimmt: Website-Hinweise als Beschriftung ausserhalb des App-Bildes, «Bilder aus der App» nur unter echten App-Bildern | offen |
+| S6 | Hero-Karte schneidet das Spielfeld unten ab | P2 | stimmt: ganzes Feld oder bewusster Ausschnitt mit Verlauf | offen |
+| S7 | Im Hero konkurrieren drei Aktionen («Kostenlos starten», «Zeigen», «Demo-Spiel ansehen»); was «Zeigen» macht, steht erst ganz unten | P1 | stimmt: eine Hauptaktion; Teamsuche bleibt als Haken mit dem Satz «Dein Team mit Spielplan und Resultaten aus den Verbandsdaten, ohne Konto» direkt darunter; Demo als Textlink | offen |
+| S8 | 16:18-Karte (Video «nie angeschaut») könnte leben: Balken bleibt bei 0:00, «nie angeschaut» erscheint verzögert | P3 | gute kleine Pointe, mit wenig Aufwand: beim Einblenden einmal, dezent | offen |
+| S9 | «Drei Dinge»: Wurfbahnen dick und krakelig über grauem Liniengewirr, drei Felder unterschiedlich hoch, Knöpfe auf drei Höhen | P1 | stimmt, Kern der Seite: Grafiken neu, dünne saubere Bahnen, klare Wurfpunkte, Hintergrund ruhig, alle drei exakt gleich gross; Bahnen zeichnen sich beim Scrollen nacheinander | offen |
+| S10 | Taktikansicht in Dunkelblau wie aus einem anderen Produkt; Balken «9 / 14 / 7» unbeschriftet; linke Spalte zu zwei Dritteln leer | P1 | stimmt: Farben der Marke (Grün, Creme, Schwarz), Balken beschriften oder weglassen, Spalten ausgleichen. Der Vorschlag, den Player in den Hero zu holen: nicht übernommen, der Hero bleibt schnell (S3 bringt dort Bewegung) | offen |
+| S11 | «Filmen. Hochladen. Prüfen.»: drei Stile (flaches Diagramm, Handys mit kräftigem Blau), unterschiedlicher Beschnitt, Stichpunkte nur unter zwei Bildern | P1 | stimmt, grösster Stilbruch: ein Stil, gleicher Beschnitt, Stichpunkte unter allen drei; das Blau ist die Vereinsfarbe des Beispielvereins (Seed `#1f4fd6`), die App selbst ist nicht blau. **Entscheid Lukas (17.11.):** Die Website bleibt in unserem eigenen Design und wechselt nicht je nach Verein; der Beispielverein bekommt eine Vereinsfarbe, die zur Website passt (Creme, Grün, Schwarz), und die App-Bilder werden damit neu aufgenommen | offen |
+| S12 | Vorher-Nachher «9 von 18 wird 3 von 22» zu klein, der Höhepunkt der Geschichte wird verschenkt | P1 | stimmt: volle Breite, grosse Zahlen, die beim Scrollen zählen, beide Felder gross nebeneinander; als grüner oder dunkler Block (S14) | offen |
+| S13 | Kein echtes Bild: kein Videoframe, keine Halle, nie die echte Desktop-Oberfläche | P1 / P2 | teilweise: echte Desktop-Oberfläche (Szenenliste mit Video, Demo-Spiel) jetzt aufnehmen (P1). Echte Hallenbilder und Videoframes nur mit Rechten und ohne erkennbare Personen: braucht Material von Lukas (z. B. leere Halle, eigener Verein mit Einwilligung), bis dahin nicht (P2) | offen |
+| S14 | Rhythmus: nach Hero und einem dunklen Block fünf Abschnitte in Creme | P2 | stimmt: ein zweiter grüner oder dunkler Block, am besten der Vorher-Nachher-Moment (S12) | offen |
+| S15 | Belege: «Läuft mit drei Teams aus dem Raum Zürich» oder Satz eines Testtrainers | P2 | nur mit echten Aussagen: Lukas liefert Zitat oder Zahl, sobald es sie gibt; nichts erfinden | Lukas |
+| S16 | Handy-Ansicht noch nicht geprüft | P1 | gehört zu jeder Änderung: alles auch bei 390 px prüfen | offen |
+
 ## Noch offen aus der ersten Runde
 
 | # | Punkt | Wo | Stand |
