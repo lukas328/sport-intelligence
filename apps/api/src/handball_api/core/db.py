@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+import socket
 import uuid
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from datetime import datetime
 
+import asyncpg
 from sqlalchemy import DateTime, ForeignKey, MetaData, func, text
+from sqlalchemy import exc as sa_exc
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
@@ -60,11 +63,53 @@ _engine: AsyncEngine | None = None
 _sessionmaker: async_sessionmaker[AsyncSession] | None = None
 
 
-def init_engine(database_url: str) -> AsyncEngine:
+def init_engine(
+    database_url: str, pool_size: int = 5, max_overflow: int = 5, pool_timeout_s: float = 10.0
+) -> AsyncEngine:
     global _engine, _sessionmaker
-    _engine = create_async_engine(database_url, pool_pre_ping=True, pool_size=10)
+    _engine = create_async_engine(
+        database_url,
+        pool_pre_ping=True,
+        pool_size=pool_size,
+        max_overflow=max_overflow,
+        pool_timeout=pool_timeout_s,
+    )
     _sessionmaker = async_sessionmaker(_engine, expire_on_commit=False)
     return _engine
+
+
+# The server refuses or drops the connection: too many connections (class 53), connection
+# failure (class 08), shutting down or starting (57P01 to 57P03), the network.
+_UNREACHABLE: tuple[type[BaseException], ...] = (
+    asyncpg.exceptions.InsufficientResourcesError,
+    asyncpg.exceptions.PostgresConnectionError,
+    asyncpg.exceptions.AdminShutdownError,
+    asyncpg.exceptions.CrashShutdownError,
+    asyncpg.exceptions.CannotConnectNowError,
+    OSError,
+    TimeoutError,
+)
+
+
+def database_unavailable(exc: BaseException) -> bool:
+    """True when a request failed because the database could not be reached (no free connection
+    in the pool, the server refusing one, the connection lost), not because of the request."""
+    if isinstance(exc, sa_exc.TimeoutError):  # the pool stayed full for pool_timeout
+        return True
+    if isinstance(exc, ConnectionError | socket.gaierror):  # connecting failed outright
+        return True
+    if not isinstance(exc, sa_exc.DBAPIError):
+        return False
+    if exc.connection_invalidated:
+        return True
+    cause: BaseException | None = exc.orig
+    for _ in range(4):  # the driver's error, then asyncpg's beneath the adapter
+        if cause is None:
+            return False
+        if isinstance(cause, _UNREACHABLE):
+            return True
+        cause = cause.__cause__
+    return False
 
 
 def get_engine() -> AsyncEngine:

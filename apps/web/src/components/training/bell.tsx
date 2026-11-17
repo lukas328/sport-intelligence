@@ -7,6 +7,7 @@ import { Bell } from "lucide-react";
 import Link from "next/link";
 import { useFormatter, useNow, useTranslations } from "next-intl";
 import { api } from "@/lib/client";
+import { checkMinutes } from "@/lib/shot-spot";
 import { cn } from "@/lib/utils";
 
 type Note = Schemas["NotificationOut"];
@@ -36,7 +37,10 @@ export function NotificationBell({ orgId }: { orgId: string }) {
   // with the match's name where the note carries it (UX test H06, B29)
   const text = (n: Note) => {
     const named = `${n.kind}_match`;
-    if ((n.params as { opponent?: string } | null)?.opponent && t.has(named as "assignment")) return t(named as "assignment", n.params as never);
+    // the questions with about how long they take: «3 Fragen, etwa 1 Minute» (second round A6)
+    const questions = Number((n.params as { questions?: number } | null)?.questions ?? 0);
+    const params = { ...(n.params as object), minutes: checkMinutes(questions, 0) };
+    if ((n.params as { opponent?: string } | null)?.opponent && t.has(named as "assignment")) return t(named as "assignment", params as never);
     // who asks for which team (K17); older notes without a name keep the plain text
     const person = `${n.kind}_${(n.params as { team?: string } | null)?.team ? "team" : "named"}`;
     if ((n.params as { name?: string } | null)?.name && t.has(person as "assignment")) return t(person as "assignment", n.params as never);

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { durationParts, headlineKey, isActive, stepState, tone, withLocal, type FileProgress, type MatchProgress } from "./progress";
+import { barValue, durationParts, fileActions, filesLine, headlineKey, isActive, onlyDismissed, stepState, tone, withLocal, type FileProgress, type MatchProgress } from "./progress";
 import { localEta, type LocalUpload } from "./upload-store";
 
 const file = (extra: Partial<FileProgress> = {}): FileProgress => ({
@@ -100,5 +100,46 @@ describe("the uploads of this tab over the API's view", () => {
     expect(p!.files[0]!.idle_s).toBe(60);
     // started elsewhere: it may well run there
     expect(withLocal([match([f])], [], now, new Set())[0]!.state).toBe("running");
+  });
+});
+
+describe("the progress block of several files and its actions (second round A1, A2, A9)", () => {
+  it("sums up the files in one line that matches each file", () => {
+    const files = [file({ stage: "done", state: "done" }), file({ video_id: "v2", state: "interrupted" }), file({ video_id: "v3", stage: "analysis", state: "failed" })];
+    expect(filesLine(files)).toEqual([
+      { word: "interrupted", n: 1 },
+      { word: "failed", n: 1 },
+      { word: "done", n: 1 },
+    ]);
+    expect(filesLine([file(), file({ video_id: "v2" })])).toEqual([{ word: "upload", n: 2 }]);
+  });
+
+  it("draws no bar while a file holds, the upload's own share while uploading", () => {
+    expect(barValue(match([file({ state: "interrupted", fraction: 0.01 }), file({ video_id: "v2", stage: "done", state: "done", overall: 1 })]))).toBeNull();
+    // uploading: the bar is how far the upload is (what the time beside it says), not the whole way
+    expect(barValue(match([file({ fraction: 0.4, overall: 0.04 })], { stage: "upload", state: "running", overall: 0.04 }))).toBeCloseTo(0.4);
+    expect(barValue(match([file({ stage: "analysis", fraction: 0.5, overall: 0.7 })], { stage: "analysis", state: "running", overall: 0.7 }))).toBeCloseTo(0.7);
+  });
+
+  it("offers cancel while uploading and remove once arrived or failed, by role", () => {
+    const staff = { staff: true, canDelete: true, own: false };
+    const player = { staff: false, canDelete: false, own: true };
+    const other = { staff: false, canDelete: false, own: false };
+    expect(fileActions(file({ state: "interrupted" }), staff)).toBe("cancel");
+    expect(fileActions(file(), player)).toBe("cancel");
+    expect(fileActions(file(), other)).toBeNull();
+    expect(fileActions(file({ step: "link" }), staff)).toBeNull();
+    expect(fileActions(file({ stage: "analysis", state: "failed" }), staff)).toBe("remove");
+    expect(fileActions(file({ stage: "upload", state: "failed" }), staff)).toBe("remove");
+    expect(fileActions(file({ stage: "done", state: "done" }), player)).toBeNull();
+    expect(fileActions(file({ stage: "analysis", state: "running" }), staff)).toBeNull();
+  });
+
+  it("keeps a dismissed stopped upload out of the head", () => {
+    const p = match([file({ state: "interrupted" })]);
+    expect(onlyDismissed(p, new Set(["v1"]))).toBe(true);
+    expect(onlyDismissed(p, new Set())).toBe(false);
+    // another file still runs: the line stays
+    expect(onlyDismissed(match([file({ state: "interrupted" }), file({ video_id: "v2", stage: "analysis" })]), new Set(["v1"]))).toBe(false);
   });
 });

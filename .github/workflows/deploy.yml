@@ -121,6 +121,12 @@ jobs:
           if [ -n "$ws" ]; then
             echo "== errors in the last 8 hours (Log Analytics)"
             az monitor log-analytics query -w "$ws" -o table --analytics-query "ContainerAppConsoleLogs_CL | where TimeGenerated > ago(8h) | where Log_s has_any ('error','Error','ERROR','Traceback','exception','Killed','OOM','failed') | project TimeGenerated, ContainerAppName_s, Log=substring(Log_s, 0, 300) | order by TimeGenerated desc | take 80" 2>&1 | cut -c1-420 || true
+            # The API logs every unexpected 500 as one JSON line (event unhandled_exception) whose
+            # exception field holds the whole traceback. Print it in full: the queries above cut
+            # lines, which loses the frame that raised.
+            echo "== last 20 unhandled exceptions of the API, full traceback (Log Analytics, 48 hours)"
+            az monitor log-analytics query -w "$ws" -o json --analytics-query "ContainerAppConsoleLogs_CL | where TimeGenerated > ago(48h) | where ContainerAppName_s contains 'api' | where Log_s has 'unhandled_exception' | extend j = parse_json(Log_s) | project TimeGenerated, method=tostring(j.method), path=tostring(j.path), request_id=tostring(j.request_id), exception=iff(isempty(tostring(j.exception)), Log_s, tostring(j.exception)) | order by TimeGenerated desc | take 20" >"$RUNNER_TEMP/unhandled.json" 2>&1 || true
+            jq -r '.[] | "--- \(.TimeGenerated) \(.method) \(.path) request_id=\(.request_id)\n\(.exception)\n"' "$RUNNER_TEMP/unhandled.json" 2>/dev/null || cat "$RUNNER_TEMP/unhandled.json"
             echo "== restarts and OOM (system log)"
             az monitor log-analytics query -w "$ws" -o table --analytics-query "ContainerAppSystemLogs_CL | where TimeGenerated > ago(8h) | where Reason_s has_any ('OOM','Kill','BackOff','Failed','Crash','Terminated') or Log_s has_any ('OOM','killed','Killed','exit code') | project TimeGenerated, ContainerAppName_s, Reason_s, Log=substring(Log_s, 0, 250) | order by TimeGenerated desc | take 40" 2>&1 | cut -c1-400 || true
           fi

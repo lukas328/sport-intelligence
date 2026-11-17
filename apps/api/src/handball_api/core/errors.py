@@ -68,6 +68,25 @@ def internal_error_response(request: Request, request_id: str | None = None) -> 
     return response
 
 
+def unavailable_response(request: Request, request_id: str | None = None) -> JSONResponse:
+    """The 503 when the database could not be reached: worth trying again in a moment."""
+    rid = request_id or getattr(request.state, "request_id", None)
+    response = _response(
+        Problem(
+            type=PROBLEM_BASE + "database-unavailable",
+            title="Service Unavailable",
+            status=503,
+            detail="The service is briefly unavailable, please try again",
+            instance=request.url.path,
+            request_id=rid,
+        )
+    )
+    response.headers["retry-after"] = "2"
+    if rid:
+        response.headers["x-request-id"] = rid
+    return response
+
+
 def install_error_handlers(app: FastAPI) -> None:
     @app.exception_handler(ProblemError)
     async def _problem(request: Request, exc: ProblemError) -> JSONResponse:

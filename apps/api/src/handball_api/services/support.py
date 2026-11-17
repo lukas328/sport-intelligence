@@ -49,6 +49,10 @@ SERIES_LINKS = {0: "/app", 1: "/hilfe/aufnahme", 3: "/hilfe/videositzung", 7: "/
 def failure_code(error: str | None) -> str:
     """Stable code for an analysis error; the UI explains it and suggests the next step."""
     e = (error or "").lower()
+    # the watchdog ended a job whose worker went silent twice (services/progress.STALLED_ERROR):
+    # a lost worker, not a video too long; starting again can help
+    if e.startswith("stalled"):
+        return "stalled"
     if "calibration" in e:
         return "calibration"
     if "no video stream" in e or "unknown duration" in e or "probe" in e or "decode" in e:
