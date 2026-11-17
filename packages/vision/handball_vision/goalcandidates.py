@@ -29,13 +29,17 @@ No play (`no_play`): an operated camera that stands still for 2.5 minutes is par
 before and after the game), and people bunched together for 40 s do not play (time-outs, the
 huddle around an injured player, a stoppage, the line-ups before the game): the median spread of
 the people on court (`spread`, 10 to 90 % of their x in body heights) below 3.5 body heights,
-against 5 to 7.5 in play. No candidates there, and the quota counts minutes of play only.
+against 5 to 7.5 in play. With match clock readings (`from_observations(play=...)`, the
+stretches where the clock runs) the warm-up before the first real run of the clock (`warm_up`)
+is no play as well; later gaps in the clock are not used, the hall scoreboard is often out of the
+picture for minutes. No candidates there, and the quota counts minutes of play only.
 
 Candidates (`pick`): a fixed number per minute of play, not a score threshold (score scales vary
 per game): per 3-minute block the best peaks with 8 s non-maximum suppression, none in the first
 and last 2 s. Every candidate carries the lowest rate (1, 2 or 4 per minute) at which it is proposed, so
 the coach can ask for more without a re-run; the clip runs from 10 s before to 4 s after the peak,
-which lies a median 1.5 s after the goal.
+which lies a median 1.5 s after the goal. A weak peak (score below `MIN_DEFAULT_SCORE`) is not in
+the default list: it keeps only the largest rate.
 
 Shot candidates (`shot_score`, `from_observations`'s "shots"): the same channels and selection
 for every shot (goal, save, miss, block). Saves and misses end an attack just like goals, so the
@@ -76,6 +80,15 @@ SHOT_RATES = (2, 4, 6)  # shot candidates per minute
 SHOT_DEFAULT_RATE = 4
 SHOT_CLIP_BEFORE_S, SHOT_CLIP_AFTER_S = 8.0, 4.0
 MIN_DURATION_S = 30.0
+# a candidate of the default list (rate <= DEFAULT_RATE) needs at least this score, else it moves
+# to the largest rate (still there when the coach asks for more): on the 25 dev shot segments
+# (ml/goals) no logged goal is lost, on a 99-minute club video 11 % fewer questions
+MIN_DEFAULT_SCORE = 1.2
+# warm-up: before the match clock first runs for WARMUP_RUN_S (hall scoreboard or overlay), when
+# that is at least WARMUP_MIN_S into the video, with WARMUP_MARGIN_S of slack before it
+WARMUP_RUN_S = 30.0
+WARMUP_MIN_S = 120.0
+WARMUP_MARGIN_S = 20.0
 # static people (bench, spectators, table): canvas spot occupied in `STATIC_SHARE` of the frames
 STATIC_WIN_S, STATIC_RX, STATIC_RY, STATIC_SHARE = 15.0, 25.0, 15.0, 0.6
 MIN_BOX_PX = 18.0  # reference px
@@ -541,6 +554,27 @@ def no_play(s: dict[str, F64], moving: bool) -> NDArray[np.bool_]:
     return parked(s, moving) | bunched(s)
 
 
+def warm_up(t: F64, play_ms: list[tuple[int, int]] | None) -> NDArray[np.bool_]:
+    """Before the first stretch of running match clock that lasts `WARMUP_RUN_S` (the throw-off),
+    minus `WARMUP_MARGIN_S`; nothing when that is less than `WARMUP_MIN_S` into the video or
+    there is no such stretch (no clock readings: no warm-up known)."""
+    first = next(((a / 1000) for a, b in play_ms or [] if (b - a) / 1000 >= WARMUP_RUN_S), None)
+    if first is None or first < WARMUP_MIN_S:
+        return np.zeros(len(t), bool)
+    return np.asarray(t < first - WARMUP_MARGIN_S)
+
+
+def demote_weak(found: list[Candidate], rates: tuple[int, ...] = RATES) -> list[Candidate]:
+    """Candidates of the default list below `MIN_DEFAULT_SCORE` keep only the largest rate."""
+    top = max(rates)
+    return [
+        Candidate(c.t, c.score, top, c.rank)
+        if c.rate <= DEFAULT_RATE and c.score < MIN_DEFAULT_SCORE
+        else c
+        for c in found
+    ]
+
+
 def intervals(t: F64, mask: NDArray[np.bool_]) -> list[tuple[float, float]]:
     """[start, end) times of the runs of True."""
     if not mask.any():
@@ -703,18 +737,23 @@ def shot_candidates(
 
 
 def from_observations(
-    obs: Any, tmpl: Template | None = None, shots: ShotModel | None = None
+    obs: Any,
+    tmpl: Template | None = None,
+    shots: ShotModel | None = None,
+    play: list[tuple[int, int]] | None = None,
 ) -> dict[str, Any] | None:
     """Goal candidates (and shot candidates under "shots") for the analysis payload, or None
-    when the video is too short or the detector saw (almost) nobody."""
+    when the video is too short or the detector saw (almost) nobody. `play`: where the match
+    clock runs (ms), for the warm-up."""
     t0 = time.perf_counter()
     tmpl = tmpl or load_template()
     cam_t, cam_x, pt, px, py, ph, duration = inputs_from_observations(obs)
     if duration < MIN_DURATION_S or len(np.unique(pt)) < 20:
         return None
     s = signals(cam_t, cam_x, pt, px, py, ph, duration)
-    idle = no_play(s, bool(obs.motion.moving))
-    found = pick(s["t"], score(s, tmpl), play=~idle)
+    warm = warm_up(s["t"], play)
+    idle = no_play(s, bool(obs.motion.moving)) | warm
+    found = demote_weak(pick(s["t"], score(s, tmpl), play=~idle))
     return {
         "template": tmpl.version,
         "default_rate": DEFAULT_RATE,
@@ -722,6 +761,7 @@ def from_observations(
         "duration_s": round(duration, 1),
         "play_s": round(float((~idle).sum()) * DT, 1),
         "no_play_ms": [[round(a * 1000), round(b * 1000)] for a, b in intervals(s["t"], idle)],
+        "warm_up_ms": [[round(a * 1000), round(b * 1000)] for a, b in intervals(s["t"], warm)],
         "clip_s": [-CLIP_BEFORE_S, CLIP_AFTER_S],
         "candidates": [c.to_dict(duration) for c in found],
         "shots": shot_candidates(s, ~idle, duration, tmpl, shots),
