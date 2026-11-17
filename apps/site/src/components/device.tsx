@@ -2,12 +2,14 @@ import type { CSSProperties } from "react";
 import { cn } from "@/lib/cn";
 
 /**
- * Frames for the pictures from the app (public/app, scripts/app-screens.mjs). A phone with
- * rounded corners (the only rounded thing on the site: phones are round) and a browser window
- * with square corners and the app's address. Plain markup, no script.
+ * The phone frame for a screen of the app that runs slowly down and back (public/product,
+ * scripts/product-shots): rounded corners (the only rounded thing on the site: phones are round).
+ * Plain markup, no script. The other product pictures carry their frames in the picture.
  */
 export function Phone({
   src,
+  srcSet,
+  sizes,
   alt,
   width,
   height,
@@ -16,6 +18,9 @@ export function Phone({
   className,
 }: {
   src: string;
+  /** the same picture at 1x and 2x, with the width it is shown at */
+  srcSet?: string;
+  sizes?: string;
   alt: string;
   /** size of the picture in pixels */
   width: number;
@@ -43,6 +48,8 @@ export function Phone({
       >
         <img
           src={src}
+          srcSet={srcSet}
+          sizes={sizes}
           alt={alt}
           width={width}
           height={height}
@@ -50,54 +57,6 @@ export function Phone({
           decoding="async"
           className={cn("block h-auto w-full", scroll && "phone-scroll")}
           style={scroll ? style : undefined}
-        />
-      </div>
-    </div>
-  );
-}
-
-export function Browser({
-  src,
-  alt,
-  width,
-  height,
-  crop,
-  priority = false,
-  className,
-}: {
-  src: string;
-  alt: string;
-  width: number;
-  height: number;
-  /** show only the top of the picture, at this width to height ratio */
-  crop?: number;
-  priority?: boolean;
-  className?: string;
-}) {
-  return (
-    <div
-      className={cn(
-        "border-2 border-ink bg-paper shadow-[0_30px_60px_-24px_rgb(10_13_17/0.4)]",
-        className,
-      )}
-    >
-      <div aria-hidden className="flex h-7 items-center gap-1.5 bg-ink px-3">
-        <i className="size-2 bg-[#5c6168]" style={{ borderRadius: "50%" }} />
-        <i className="size-2 bg-[#5c6168]" style={{ borderRadius: "50%" }} />
-        <i className="size-2 bg-[#5c6168]" style={{ borderRadius: "50%" }} />
-        <span className="ml-3 truncate font-mono text-[0.8125rem] font-medium text-[#aab2ba]">
-          app.handball-intelligence.com
-        </span>
-      </div>
-      <div className="overflow-hidden" style={crop ? { aspectRatio: String(crop) } : undefined}>
-        <img
-          src={src}
-          alt={alt}
-          width={width}
-          height={height}
-          loading={priority ? "eager" : "lazy"}
-          decoding="async"
-          className="block h-auto w-full"
         />
       </div>
     </div>

@@ -121,7 +121,7 @@ const de = {
     steps: [
       { title: "Filmen", text: "Handy oder Kamera hoch an die Mittellinie, beide Tore im Bild. Fest ist am besten, schwenken geht auch." },
       { title: "Hochladen", text: "Video wählen, fertig. Die App zeigt, wie weit die Analyse ist, und meldet sich, wenn sie fertig ist.", alt: "Die App fragt beim Hochladen: Zu welchem Spiel gehört das Video? Darunter zwei Spiele zur Auswahl." },
-      { title: "Prüfen", text: "Die Analyse schlägt Tore und Spielfeld vor. Du bestätigst mit einem Tipp.", alt: "Eine Frage beim Prüfen: Passt das Spielfeld? Mit den Knöpfen Passt und Weiss nicht." },
+      { title: "Prüfen", text: "Die Analyse schlägt Tore und Spielfeld vor. Du bestätigst mit einem Tipp.", alt: "Die App am Handy beim Prüfen: das Bild aus dem Video mit vier gelben Punkten an den Ecken des Feldes, darunter die Frage Passt das Spielfeld? und die Knöpfe Passt und Weiss nicht." },
     ],
     getTitle: "Was du nach jedem Spiel bekommst",
     get: [
@@ -133,12 +133,12 @@ const de = {
       {
         title: "Antworten statt Spulen",
         text: "Such «Gegentor, aussen rechts, letzte 3 Spiele» und schau alle Szenen am Stück.",
-        alt: "Szenen in der App: die Suche Gegentor, aussen rechts, letzte 3 mit Video, die Antwort 24 von 66 Gegentoren und darunter die Szenen.",
+        alt: "Szenen in der App: die Suche Gegentor, aussen rechts, letzte 3 mit Video, die Antwort 24 von 66 Gegentoren, der Knopf Alle 24 abspielen und darunter die Szenen.",
       },
       {
         title: "Die Saison im Blick",
         text: "Was sich Spiel für Spiel wiederholt, mit den Szenen dazu.",
-        alt: "Die Saison in der App: Fünf Spiele. Und aussen rechts bleibt offen. Darunter, was sich wiederholt, mit einem Balken pro Spiel.",
+        alt: "Die Saison in der App: Fünf Spiele. Und aussen rechts bleibt offen. Darunter, was sich wiederholt, mit einem Balken pro Spiel, und rechts das halbe Feld mit den Würfen von aussen rechts.",
       },
     ],
     demoKick: "Zum Ausprobieren",
@@ -149,7 +149,7 @@ const de = {
     shareTitle: "Ein Link in den Teamchat.",
     shareText: "Stell die wichtigen Szenen zu einer Sammlung zusammen und schick den Link in den Teamchat. Die Spieler schauen im Browser.",
     sharePoints: ["Kein Konto für Spieler und Eltern", "Rückennummern statt Namen", "Der Link läuft ab, und du kannst ihn jederzeit sperren"],
-    shareAlt: "So kommt eine Sammlung im Chat an: eine Karte in der Vereinsfarbe mit dem Titel Rückzug und rechter Flügel, darunter das Team und 24 Szenen.",
+    shareAlt: "So kommt eine Sammlung im Chat an: eine Karte in der Vereinsfarbe mit dem Titel Rückzug und rechter Flügel, darunter das Team und 24 Szenen. Weiter unten der Knopf Link teilen.",
     storyKick: "Warum es uns gibt",
     storyTitle: "Profis haben Analysten. Du hast den Samstagabend.",
     storyText: "Videoanalyse war etwas für Profiteams, mit Kamerasystem und jemandem, der stundenlang Szenen schneidet. Wir bringen sie in den Vereinshandball: für Trainerinnen und Trainer, die das neben Beruf und Familie machen. Die Analyse sucht, du entscheidest, was du dem Team zeigst.",
@@ -222,16 +222,16 @@ const de = {
       {
         title: "Anschauen und teilen",
         text: "Du siehst Resultat, Spielverlauf, jedes Tor als Szene und die Positionen von oben. Bei genug Toren mit Wurfort kommen drei Dinge zum Mitnehmen dazu. Was das Team sehen soll, stellst du zu einer Sammlung zusammen und schickst den Link in den Teamchat.",
-        alt: "Die App nach dem Spiel: Gewonnen. Und drei Dinge zum Mitnehmen. Resultat 26:18 und der Spielverlauf als Linie.",
+        alt: "Das erste der drei Dinge am Handy: 9 von 18 Gegentoren über aussen rechts, darunter das halbe Feld mit den Würfen, alle aussen rechts.",
       },
     ],
     shotsTitle: "So sieht es in der App aus",
     shotsNote: "Bilder aus der App, mit einem erfundenen Beispielverein.",
     shots: [
       { alt: "Ein Spiel in der App: links das Video mit der Zeitleiste aller Tore, rechts die Liste der Szenen, die laufende gelb markiert.", caption: "Jedes Tor als Szene: ein Tipp, und das Video springt hin." },
-      { alt: "Szenen in der App: Suche nach Gegentor, aussen rechts, letzte 3 mit Video, Antwort 24 von 66 Gegentoren über aussen rechts.", caption: "Szenen suchen: die Antwort mit ihrer Basis." },
-      { alt: "Saison in der App: Titel Fünf Spiele. Und aussen rechts bleibt offen. Darunter Themen, die sich wiederholen, mit einem Balken pro Spiel.", caption: "Die Saison: was sich wiederholt." },
-      { alt: "So kommt eine Sammlung im Chat an: eine Karte in der Vereinsfarbe mit dem Titel Rückzug und rechter Flügel, darunter das Team und 24 Szenen.", caption: "Ein Link fürs Team, ohne Konto für die Spieler." },
+      { alt: "Szenen in der App: Suche nach Gegentor, aussen rechts, letzte 3 mit Video, Antwort 24 von 66 Gegentoren über aussen rechts und der Knopf Alle 24 abspielen.", caption: "Szenen suchen: die Antwort mit ihrer Basis." },
+      { alt: "Saison in der App: Titel Fünf Spiele. Und aussen rechts bleibt offen. Darunter Themen, die sich wiederholen, mit einem Balken pro Spiel, rechts das halbe Feld mit den Würfen.", caption: "Die Saison: was sich wiederholt." },
+      { alt: "So kommt eine Sammlung im Chat an: eine Karte in der Vereinsfarbe mit dem Titel Rückzug und rechter Flügel, darunter das Team und 24 Szenen. Weiter unten der Knopf Link teilen.", caption: "Ein Link fürs Team, ohne Konto für die Spieler." },
     ],
   },
   filming: {
@@ -748,6 +748,17 @@ const de = {
   moved: {
     title: "Diese Seite ist umgezogen",
     text: "Weiter zu «{page}».",
+  },
+  /** callouts on the product pictures (components/product-shot.tsx), by picture and callout */
+  product: {
+    "hero-laptop": { where: "Woher die Gegentore kamen" },
+    "step-upload": { pick: "Spiel wählen, dann das Video" },
+    "step-check": { propose: "Die Analyse schlägt das Feld vor", confirm: "Ein Tipp genügt" },
+    "step-result": { things: "Drei Dinge fürs nächste Training", dots: "Hier kamen die Gegentore her" },
+    "get-video": { tap: "Jede Szene mit einem Tipp", timeline: "Alle Tore auf einer Linie" },
+    "get-search": { answer: "Die Antwort mit ihrer Basis", play: "Alle am Stück abspielen" },
+    "get-season": { bars: "Ein Balken pro Spiel", dots: "Drei Spiele, dieselbe Seite" },
+    share: { chat: "So kommt es im Teamchat an", nologin: "Ein Link, kein Konto nötig" },
   },
 };
 

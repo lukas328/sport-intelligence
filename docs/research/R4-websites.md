@@ -48,7 +48,7 @@ eingestellt) und taugt nicht mehr als Vorbild.
 | Übernehmen | So bei uns |
 |---|---|
 | Versprechen plus ein Satz | «Nach dem Spiel wissen, woher die Tore kamen.» Ein Satz darunter: Handy oder Kamera, jedes Tor als Szene, drei Dinge fürs Training. |
-| Echtes Produktbild im ersten Bildschirm | Startseite der App im Handy-Rahmen, das Bild läuft langsam nach unten (Resultat, dann die drei Dinge), dahinter das Spiel am Computer. Echte Bildschirmfotos aus der App mit dem Demo-Verein (`apps/site/scripts/app-screens.mjs`). |
+| Echtes Produktbild im ersten Bildschirm | Startseite der App im Handy-Rahmen, das Bild läuft langsam nach unten (Resultat, dann die drei Dinge), dahinter das Spiel am Computer. Echte Bildschirmfotos aus der App mit dem Demo-Verein, gestaltet zu Produktbildern mit Ring, Pfeil und kurzer Beschriftung (`apps/site/scripts/product-shots`). |
 | Ein Hauptknopf | «Kostenlos starten» oben, in der Mitte und unten; «Demo-Spiel ansehen» als zweiter Knopf. Die Team-Suche ohne Konto bleibt, aber am Schluss. |
 | Drei Schritte mit Bild | «Filmen. Hochladen. Prüfen.»: Hallenplan, Upload-Dialog, Prüf-Frage aus der App. |
 | Abschnitt = Überschrift, ein Satz, Bild | «Was du nach jedem Spiel bekommst»: Szene im Video, Szenen-Suche, Saison. Je ein Satz. |

@@ -44,8 +44,10 @@ centre lives at `{site}/{de|fr|en}/hilfe/{slug}/`; the app links there with `HB_
   and runs stay outside the goal area, the scene has a 6:0 defence in front of 6 m, the attack
   around 9 m, only the goalkeeper in the goal area, and the ball in every frame (tested in
   `src/lib/demo.test.ts`). The visitor's colour comes in with `?kit=red` (no storage).
-- Pictures from the app: `public/app/*.webp`, made by `scripts/app-screens.mjs` from the local app
-  with the seeded demo club (how: `public/app/README.md`); their sizes in `src/lib/app-shots.json`.
+- Product pictures: `public/product/*.webp` (1x and @2x), made by `scripts/product-shots` from the
+  local app with the seeded demo club: `pnpm --filter @handball/site shots` (how:
+  `scripts/product-shots/README.md`); sizes and callouts in `src/lib/product-shots.json`, the
+  callout texts in `src/messages/*.ts` (`product`).
 - Start page: short blocks in the order of `docs/research/R4-websites.md`; blocks marked
   `data-reveal` glide in once (`src/components/reveal.tsx`), the phone picture scrolls slowly;
   with `prefers-reduced-motion` nothing moves.

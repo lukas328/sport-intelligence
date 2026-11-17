@@ -123,7 +123,7 @@ const en: Messages = {
     steps: [
       { title: "Film", text: "Phone or camera high up at the halfway line, both goals in the picture. Fixed is best, panning works too." },
       { title: "Upload", text: "Pick the video, done. The app shows how far the analysis is and tells you when it is done.", alt: "The app asks when uploading: which match is this video from? Two matches to choose from." },
-      { title: "Check", text: "The analysis suggests goals and the court. You confirm with one tap.", alt: "A question while checking: is the court right? With the buttons Fits and Not sure." },
+      { title: "Check", text: "The analysis suggests goals and the court. You confirm with one tap.", alt: "The app on a phone while checking: the picture from the video with four yellow points on the corners of the court, below it the question is the court right? and the buttons Fits and Not sure." },
     ],
     getTitle: "What you get from every match",
     get: [
@@ -135,12 +135,12 @@ const en: Messages = {
       {
         title: "Answers instead of scrubbing",
         text: "Search \"goal conceded, right wing, last 3 matches\" and watch all the scenes in a row.",
-        alt: "Scenes in the app: the search goal conceded, right wing, last 3 with video, the answer 24 of 66 goals conceded and the scenes below.",
+        alt: "Scenes in the app: the search goal conceded, right wing, last 3 with video, the answer 24 of 66 goals conceded, the button to play all 24 and the scenes below.",
       },
       {
         title: "The season at a glance",
         text: "What keeps coming back match after match, with the scenes.",
-        alt: "The season in the app: five matches, and the right wing stays open. Below, what repeats, with one bar per match.",
+        alt: "The season in the app: five matches, and the right wing stays open. Below, what repeats, with one bar per match, and on the right the half court with the shots from the right wing.",
       },
     ],
     demoKick: "Try it",
@@ -151,7 +151,7 @@ const en: Messages = {
     shareTitle: "One link in the team chat.",
     shareText: "Put the important scenes into a collection and send the link to the team chat. The players watch in the browser.",
     sharePoints: ["No account for players and parents", "Shirt numbers instead of names", "The link expires, and you can block it at any time"],
-    shareAlt: "How a collection arrives in the chat: a card in the club colour titled Retreat and right wing, below it the team and 24 scenes.",
+    shareAlt: "How a collection arrives in the chat: a card in the club colour titled Retreat and right wing, below it the team and 24 scenes. Further down the button to share the link.",
     storyKick: "Why we exist",
     storyTitle: "The pros have analysts. You have Saturday night.",
     storyText: "Video analysis used to be for professional teams, with a camera system and someone cutting scenes for hours. We bring it to club handball: for coaches who do this alongside work and family. The analysis searches, you decide what to show the team.",
@@ -224,16 +224,16 @@ const en: Messages = {
       {
         title: "Watch and share",
         text: "You see the score, the run of the match, every goal as a scene and the positions from above. With enough goals and their shot spots, three things to take away are added. What the team should see, you put into a collection and send the link to the team chat.",
-        alt: "The app after the match: Won. And three things to take away. Score 26:18 and the run of the match as a line.",
+        alt: "The first of the three things on a phone: 9 of 18 goals conceded on the right wing, below it the half court with the shots, all from the right wing.",
       },
     ],
     shotsTitle: "What it looks like in the app",
     shotsNote: "Pictures from the app, with an invented example club.",
     shots: [
       { alt: "A match in the app: the video with a timeline of all goals on the left, the list of scenes on the right, the current one in yellow.", caption: "Every goal as a scene: one tap, and the video jumps there." },
-      { alt: "Scenes in the app: search for goal conceded, right wing, last 3 with video, answer 24 of 66 goals conceded on the right wing.", caption: "Searching scenes: the answer with its basis." },
-      { alt: "The season in the app: five matches, and the right wing stays open. Below, the topics that repeat, with one bar per match.", caption: "The season: what repeats." },
-      { alt: "How a collection arrives in the chat: a card in the club colour titled Retreat and right wing, below it the team and 24 scenes.", caption: "One link for the team, no account for the players." },
+      { alt: "Scenes in the app: search for goal conceded, right wing, last 3 with video, answer 24 of 66 goals conceded on the right wing and the button to play all 24.", caption: "Searching scenes: the answer with its basis." },
+      { alt: "The season in the app: five matches, and the right wing stays open. Below, the topics that repeat, with one bar per match, on the right the half court with the shots.", caption: "The season: what repeats." },
+      { alt: "How a collection arrives in the chat: a card in the club colour titled Retreat and right wing, below it the team and 24 scenes. Further down the button to share the link.", caption: "One link for the team, no account for the players." },
     ],
   },
   filming: {
@@ -750,6 +750,16 @@ const en: Messages = {
   moved: {
     title: "This page has moved",
     text: "Go to \"{page}\".",
+  },
+  product: {
+    "hero-laptop": { where: "Where the goals conceded came from" },
+    "step-upload": { pick: "Pick the match, then the video" },
+    "step-check": { propose: "The analysis suggests the court", confirm: "One tap is enough" },
+    "step-result": { things: "Three things for the next training", dots: "The goals conceded came from here" },
+    "get-video": { tap: "Every scene in one tap", timeline: "All goals on one line" },
+    "get-search": { answer: "The answer with its basis", play: "Play them all in a row" },
+    "get-season": { bars: "One bar per match", dots: "Three matches, the same side" },
+    share: { chat: "How it arrives in the team chat", nologin: "One link, no account needed" },
   },
 };
 

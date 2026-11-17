@@ -1,40 +1,32 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { CSSProperties } from "react";
-import { Browser, Phone } from "@/components/device";
 import { HallPlan } from "@/components/hall-plan";
+import { ProductShot } from "@/components/product-shot";
 import { Reveal } from "@/components/reveal";
 import { Honest } from "@/components/honest";
 import { KitScope, StartLink } from "@/components/kit";
 import { JsonLd } from "@/components/json-ld";
 import { PageHead, SectionHead, Updated } from "@/components/wurf-head";
 import { graph, howTo } from "@/lib/schema";
-import { shot } from "@/lib/app-shots";
 import { APP_LOCALE, messages, type Locale } from "@/lib/i18n";
 import type { Messages } from "@/messages/de";
 import { pageMeta } from "@/lib/seo";
 
 type Props = { params: Promise<{ locale: Locale }> };
 
-/** Pictures from the app (public/app, scripts/app-screens.mjs) under «So sieht es in der App aus». */
-const SHOTS = [
-  { ...shot("video"), phone: false },
-  { ...shot("szenen"), phone: false },
-  { ...shot("saison"), phone: false },
-  { ...shot("teilen-phone"), phone: true },
-];
+/**
+ * Product pictures (public/product, scripts/product-shots): one per step after filming, and under
+ * «So sieht es in der App aus» the same pictures as on the start page plus sharing.
+ */
+const STEPS = ["step-upload", "step-check", "step-result"] as const;
+const SHOTS = ["get-video", "get-search", "get-season", "share"] as const;
 
 /** K9: each step with a picture from the app (the first with the hall plan: filming happens outside it). */
-function StepPicture({ i, alt, plan }: { i: number; alt: string; plan: Messages["filming"] }) {
-  if (i === 0) return <HallPlan label={plan.planLabel} camera={plan.planCamera} field={plan.planField} corner={plan.planCorner} />;
-  if (i === 1)
-    return (
-      <div className="border-2 border-ink bg-paper p-4">
-        <img {...shot("hochladen-phone")} alt={alt} loading="lazy" decoding="async" className="block h-auto w-full" />
-      </div>
-    );
-  if (i === 2) return <Phone {...shot("pruefen-phone")} alt={alt} className="max-w-[17rem]" />;
-  return <Phone {...shot("ergebnis-phone")} alt={alt} scroll className="max-w-[17rem]" />;
+function StepPicture({ i, alt, m }: { i: number; alt: string; m: Messages }) {
+  if (i === 0) return <HallPlan label={m.filming.planLabel} camera={m.filming.planCamera} field={m.filming.planField} corner={m.filming.planCorner} />;
+  const name = STEPS[i - 1]!;
+  return <ProductShot name={name} alt={alt} labels={m.product[name]} sizes="(min-width: 768px) 26rem, calc(100vw - 2rem)" />;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -84,7 +76,7 @@ export default async function How({ params }: Props) {
                 )}
               </div>
               <div data-reveal style={{ "--d": 1 } as CSSProperties} className="col-span-2 mt-6 md:col-span-1 md:mt-0">
-                <StepPicture i={i} alt={s.alt} plan={m.filming} />
+                <StepPicture i={i} alt={s.alt} m={m} />
               </div>
             </li>
           ))}
@@ -94,19 +86,16 @@ export default async function How({ params }: Props) {
           <SectionHead id="shots" title={t.shotsTitle} note={t.shotsNote} />
           <ul className="mt-8 grid grid-cols-1 gap-10 md:grid-cols-2">
             {t.shots.map((s, i) => {
-              const pic = SHOTS[i]!;
+              const name = SHOTS[i]!;
               return (
-                <li key={pic.src} data-reveal style={{ "--d": i % 2 } as CSSProperties}>
-                  <figure className="m-0">
-                    {pic.phone ? (
-                      <div className="border-2 border-ink bg-paper">
-                        <img src={pic.src} alt={s.alt} width={pic.width} height={pic.height} loading="lazy" decoding="async" className="mx-auto block h-auto w-full max-w-[26rem]" />
-                      </div>
-                    ) : (
-                      <Browser src={pic.src} alt={s.alt} width={pic.width} height={pic.height} crop={1280 / 760} />
-                    )}
-                    <figcaption className="mt-3 text-[1.0625rem]">{s.caption}</figcaption>
-                  </figure>
+                <li key={name} data-reveal style={{ "--d": i % 2 } as CSSProperties}>
+                  <ProductShot
+                    name={name}
+                    alt={s.alt}
+                    labels={m.product[name]}
+                    caption={s.caption}
+                    sizes="(min-width: 1216px) 540px, (min-width: 768px) 45vw, calc(100vw - 2rem)"
+                  />
                 </li>
               );
             })}

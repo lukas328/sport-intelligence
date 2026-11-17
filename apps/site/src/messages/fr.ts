@@ -123,7 +123,7 @@ const fr: Messages = {
     steps: [
       { title: "Filmer", text: "Téléphone ou caméra en hauteur à la ligne médiane, les deux buts dans l'image. Fixe, c'est le mieux, mais tu peux suivre le jeu." },
       { title: "Téléverser", text: "Choisis la vidéo, c'est tout. L'app montre où en est l'analyse et te prévient quand elle est terminée.", alt: "L'app demande au téléversement : à quel match appartient la vidéo ? Deux matchs au choix." },
-      { title: "Vérifier", text: "L'analyse propose les buts et le terrain. Tu confirmes d'une touche.", alt: "Une question de la vérification : le terrain est-il juste ? Avec les boutons C'est bon et Je ne sais pas." },
+      { title: "Vérifier", text: "L'analyse propose les buts et le terrain. Tu confirmes d'une touche.", alt: "L'app sur le téléphone pendant la vérification : l'image de la vidéo avec quatre points jaunes aux coins du terrain, puis la question le terrain est-il juste ? et les boutons C'est bon et Je ne sais pas." },
     ],
     getTitle: "Ce que tu reçois après chaque match",
     get: [
@@ -135,12 +135,12 @@ const fr: Messages = {
       {
         title: "Des réponses, pas du rembobinage",
         text: "Cherche « but encaissé, aile droite, 3 derniers matchs » et regarde toutes les séquences d'affilée.",
-        alt: "Séquences dans l'app : la recherche but encaissé, aile droite, 3 derniers avec vidéo, la réponse 24 buts encaissés sur 66 et les séquences en dessous.",
+        alt: "Séquences dans l'app : la recherche but encaissé, aile droite, 3 derniers avec vidéo, la réponse 24 buts encaissés sur 66, le bouton pour toutes les regarder et les séquences en dessous.",
       },
       {
         title: "La saison en un coup d'œil",
         text: "Ce qui revient de match en match, avec les séquences.",
-        alt: "La saison dans l'app : cinq matchs, et l'aile droite reste ouverte. En dessous, ce qui se répète, avec une barre par match.",
+        alt: "La saison dans l'app : cinq matchs, et l'aile droite reste ouverte. En dessous, ce qui se répète, avec une barre par match, et à droite le demi-terrain avec les tirs de l'aile droite.",
       },
     ],
     demoKick: "À essayer",
@@ -151,7 +151,7 @@ const fr: Messages = {
     shareTitle: "Un lien dans le chat de l'équipe.",
     shareText: "Réunis les séquences importantes dans une sélection et envoie le lien dans le chat de l'équipe. Les joueurs regardent dans le navigateur.",
     sharePoints: ["Pas de compte pour les joueurs et les parents", "Des numéros de maillot au lieu des noms", "Le lien expire, et tu peux le bloquer à tout moment"],
-    shareAlt: "Voici comment une sélection arrive dans le chat : une carte aux couleurs du club avec le titre Repli et aile droite, puis l'équipe et 24 séquences.",
+    shareAlt: "Voici comment une sélection arrive dans le chat : une carte aux couleurs du club avec le titre Repli et aile droite, puis l'équipe et 24 séquences. Plus bas, le bouton pour partager le lien.",
     storyKick: "Pourquoi nous existons",
     storyTitle: "Les pros ont des analystes. Toi, tu as le samedi soir.",
     storyText: "L'analyse vidéo, c'était pour les équipes pros, avec un système de caméras et quelqu'un qui coupe des séquences pendant des heures. Nous l'apportons au handball de club : pour les entraîneuses et entraîneurs qui font ça à côté du travail et de la famille. L'analyse cherche, toi tu décides ce que tu montres à l'équipe.",
@@ -224,16 +224,16 @@ const fr: Messages = {
       {
         title: "Regarder et partager",
         text: "Tu vois le résultat, le déroulement, chaque but en séquence et les positions vues d'en haut. Avec assez de buts et leur lieu de tir, trois choses à retenir s'ajoutent. Ce que l'équipe doit voir, tu le réunis dans une sélection et tu envoies le lien dans le chat de l'équipe.",
-        alt: "L'app après le match : Gagné. Et trois choses à retenir. Résultat 26:18 et le déroulement en ligne.",
+        alt: "La première des trois choses sur le téléphone : 9 buts encaissés sur 18 par l'aile droite, en dessous le demi-terrain avec les tirs, tous à l'aile droite.",
       },
     ],
     shotsTitle: "Voici à quoi ça ressemble dans l'app",
     shotsNote: "Images de l'app, avec un club d'exemple inventé.",
     shots: [
       { alt: "Un match dans l'app : à gauche la vidéo avec la frise de tous les buts, à droite la liste des séquences, celle en cours en jaune.", caption: "Chaque but en séquence : une touche, et la vidéo saute au bon endroit." },
-      { alt: "Séquences dans l'app : recherche but encaissé, aile droite, 3 derniers avec vidéo, réponse 24 buts encaissés sur 66 par l'aile droite.", caption: "Chercher des séquences : la réponse avec sa base." },
-      { alt: "La saison dans l'app : cinq matchs, et l'aile droite reste ouverte. En dessous, les thèmes qui se répètent, avec une barre par match.", caption: "La saison : ce qui se répète." },
-      { alt: "Voici comment une sélection arrive dans le chat : une carte aux couleurs du club avec le titre Repli et aile droite, puis l'équipe et 24 séquences.", caption: "Un lien pour l'équipe, sans compte pour les joueurs." },
+      { alt: "Séquences dans l'app : recherche but encaissé, aile droite, 3 derniers avec vidéo, réponse 24 buts encaissés sur 66 par l'aile droite et le bouton pour toutes les regarder.", caption: "Chercher des séquences : la réponse avec sa base." },
+      { alt: "La saison dans l'app : cinq matchs, et l'aile droite reste ouverte. En dessous, les thèmes qui se répètent, avec une barre par match, à droite le demi-terrain avec les tirs.", caption: "La saison : ce qui se répète." },
+      { alt: "Voici comment une sélection arrive dans le chat : une carte aux couleurs du club avec le titre Repli et aile droite, puis l'équipe et 24 séquences. Plus bas, le bouton pour partager le lien.", caption: "Un lien pour l'équipe, sans compte pour les joueurs." },
     ],
   },
   filming: {
@@ -750,6 +750,16 @@ const fr: Messages = {
   moved: {
     title: "Cette page a déménagé",
     text: "Aller à « {page} ».",
+  },
+  product: {
+    "hero-laptop": { where: "D'où venaient les buts encaissés" },
+    "step-upload": { pick: "Choisir le match, puis la vidéo" },
+    "step-check": { propose: "L'analyse propose le terrain", confirm: "Une touche suffit" },
+    "step-result": { things: "Trois choses pour le prochain entraînement", dots: "C'est d'ici que venaient les buts encaissés" },
+    "get-video": { tap: "Chaque séquence en une touche", timeline: "Tous les buts sur une ligne" },
+    "get-search": { answer: "La réponse avec sa base", play: "Tout regarder d'affilée" },
+    "get-season": { bars: "Une barre par match", dots: "Trois matchs, le même côté" },
+    share: { chat: "Ce qui arrive dans le chat de l'équipe", nologin: "Un lien, sans compte" },
   },
 };
 

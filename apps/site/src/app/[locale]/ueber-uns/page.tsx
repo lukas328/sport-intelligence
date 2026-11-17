@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Phone } from "@/components/device";
-import { shot } from "@/lib/app-shots";
+import { productShot } from "@/lib/product-shots";
 import { HallCamera } from "@/components/figures";
 import { JsonLd } from "@/components/json-ld";
 import { KitScope, StartLink } from "@/components/kit";
@@ -14,6 +14,9 @@ import { launchState } from "@/lib/files";
 import { LAUNCHED } from "@/lib/site";
 
 type Props = { params: Promise<{ locale: Locale }> };
+
+/** the team's start page on the phone (public/product, scripts/product-shots) */
+const phone = productShot("hero-phone");
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
@@ -66,7 +69,7 @@ export default async function AboutUs({ params }: Props) {
             <div className="lg:sticky lg:top-6">
               <HallCamera label={m.filming.planLabel} camera={m.filming.planCamera} field={m.filming.planField} corner={m.filming.planCorner} caption={t.pictureCaption} />
               <figure className="m-0 mt-8 max-w-[18rem]">
-                <Phone {...shot("ergebnis-phone")} alt={t.shotAlt} />
+                <Phone src={phone.src} srcSet={phone.srcSet} sizes="18rem" width={phone.width} height={phone.height} alt={t.shotAlt} />
                 <figcaption className="mt-3 text-[1.0625rem] text-ink-2">{t.shotCaption}</figcaption>
               </figure>
             </div>

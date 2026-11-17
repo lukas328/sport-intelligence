@@ -3,13 +3,14 @@ import type { CSSProperties } from "react";
 import Link from "next/link";
 import plans from "@handball/plans";
 import { DemoCamera } from "@/components/demo-camera";
-import { Browser, Phone } from "@/components/device";
+import { Phone } from "@/components/device";
 import { HallPlan } from "@/components/hall-plan";
+import { ProductShot } from "@/components/product-shot";
 import { JsonLd } from "@/components/json-ld";
 import { DemoLink, KitScope, ShirtPicker, StartLink } from "@/components/kit";
 import { Reveal } from "@/components/reveal";
 import { TeamField } from "@/components/team-field";
-import { shot } from "@/lib/app-shots";
+import { productShot } from "@/lib/product-shots";
 import { APP_LOCALE, fmt, messages, type Locale } from "@/lib/i18n";
 import { pageMeta } from "@/lib/seo";
 import { graph, organization, softwareApplication, webPage, website } from "@/lib/schema";
@@ -20,17 +21,14 @@ import { GUIDES } from "../../../content/ratgeber";
 /** The three guides that exist in every language, shown on the start page. */
 const FEATURED = ["handballspiel-filmen", "videoanalyse-amateurteam", "video-im-verein-einwilligung"];
 
-/** Pictures from the app (public/app, made by scripts/app-screens.mjs). */
-const SHOT = {
-  phone: shot("ergebnis-phone"),
-  desktop: shot("ergebnis"),
-  upload: shot("hochladen-phone"),
-  check: shot("pruefen-phone"),
-  video: shot("video"),
-  scenes: shot("szenen"),
-  season: shot("saison"),
-  share: shot("teilen-phone"),
-};
+/**
+ * Product pictures (public/product, made by scripts/product-shots from the real app with the
+ * invented demo club): the hero phone's screen, and the three pictures of «Was du bekommst».
+ */
+const HERO_PHONE = productShot("hero-phone");
+const GET = ["get-video", "get-search", "get-season"] as const;
+/** shown width of a picture in a step card (three columns from md) */
+const STEP_SIZES = "(min-width: 1216px) 362px, (min-width: 768px) 30vw, calc(100vw - 2rem)";
 
 type Props = { params: Promise<{ locale: Locale }> };
 
@@ -51,7 +49,6 @@ export default async function Home({ params }: Props) {
   const v = demoView(m);
   const team = plans.plans.find((p) => p.plan === "team")!;
   const app = APP_LOCALE[locale];
-  const getShots = [SHOT.video, SHOT.scenes, SHOT.season];
   return (
     <KitScope>
       <JsonLd
@@ -90,11 +87,18 @@ export default async function Home({ params }: Props) {
             </p>
           </div>
           <div className="relative min-w-0">
-            <Browser {...SHOT.desktop} alt={t.heroDesktopAlt} crop={1280 / 820} className="rise ml-auto hidden w-[92%] lg:block" />
-            <div className="rise lg:absolute lg:-bottom-14 lg:-left-2 lg:w-[38%]" style={{ "--d": 2 } as CSSProperties}>
-              <Phone {...SHOT.phone} alt={t.heroPhoneAlt} scroll priority className="max-w-[17rem] lg:max-w-none" />
+            <ProductShot
+              name="hero-laptop"
+              alt={t.heroDesktopAlt}
+              labels={m.product["hero-laptop"]}
+              framed={false}
+              sizes="(min-width: 1216px) 560px, 46vw"
+              className="rise -ml-4 hidden w-[98%] lg:block"
+            />
+            <div className="rise lg:absolute lg:-right-1 lg:-bottom-12 lg:w-[35%]" style={{ "--d": 2 } as CSSProperties}>
+              <Phone src={HERO_PHONE.src} srcSet={HERO_PHONE.srcSet} sizes="(min-width: 1024px) 13rem, 17rem" width={HERO_PHONE.width} height={HERO_PHONE.height} alt={t.heroPhoneAlt} scroll priority className="max-w-[17rem] lg:max-w-none" />
             </div>
-            <p className="mt-4 text-center text-base font-medium lg:mt-3 lg:ml-[42%] lg:text-left">{t.shotNote}</p>
+            <p className="mt-4 text-center text-base font-medium lg:mt-3 lg:mr-[40%] lg:text-left">{t.shotNote}</p>
           </div>
         </div>
       </section>
@@ -108,24 +112,25 @@ export default async function Home({ params }: Props) {
             </h2>
             <p className="mt-3 text-[1.1875rem] text-ink-2 md:text-[1.3125rem]">{t.stepsLead}</p>
           </div>
-          <ol className="mt-10 grid grid-cols-1 gap-12 md:grid-cols-3 md:gap-8">
+          {/* picture, title and text in rows shared by the three steps, so the titles line up */}
+          <ol className="mt-10 grid grid-cols-1 gap-12 md:grid-cols-3 md:grid-rows-[auto_auto_1fr] md:gap-x-8 md:gap-y-0">
             {t.steps.map((s, i) => (
-              <li key={s.title} data-reveal style={{ "--d": i } as CSSProperties} className="flex flex-col">
-                <div className="relative aspect-[4/3.5] overflow-hidden border-2 border-ink bg-paper">
-                  {i === 0 ? (
-                    <div className="absolute inset-0 grid place-items-center p-3">
-                      <div className="w-full max-w-[16.5rem]">
-                        <HallPlan label={m.filming.planLabel} camera={m.filming.planCamera} field={m.filming.planField} corner={m.filming.planCorner} />
-                      </div>
+              <li key={s.title} data-reveal style={{ "--d": i } as CSSProperties} className="flex flex-col md:row-span-3 md:grid md:grid-rows-subgrid">
+                {i === 0 ? (
+                  <div className="relative grid aspect-[640/620] place-items-center self-start border-2 border-ink bg-paper p-3">
+                    <div className="w-full max-w-[16.5rem]">
+                      <HallPlan label={m.filming.planLabel} camera={m.filming.planCamera} field={m.filming.planField} corner={m.filming.planCorner} />
                     </div>
-                  ) : i === 1 ? (
-                    <div className="absolute inset-0 grid place-items-center p-4">
-                      <img {...SHOT.upload} alt={"alt" in s ? s.alt : ""} loading="lazy" decoding="async" className="block h-auto w-full max-w-[22rem] border border-rule" />
-                    </div>
-                  ) : (
-                    <img {...SHOT.check} alt={"alt" in s ? s.alt : ""} loading="lazy" decoding="async" className="absolute inset-0 block h-full w-full object-cover object-[center_80%]" />
-                  )}
-                </div>
+                  </div>
+                ) : (
+                  <ProductShot
+                    name={i === 1 ? "step-upload" : "step-check"}
+                    alt={("alt" in s && s.alt) || ""}
+                    labels={i === 1 ? m.product["step-upload"] : m.product["step-check"]}
+                    sizes={STEP_SIZES}
+                    className="self-start"
+                  />
+                )}
                 <div className="mt-5 flex items-baseline gap-4">
                   <span aria-hidden className="font-num text-[3.5rem] leading-[.8] text-club-text">
                     {i + 1}
@@ -155,7 +160,7 @@ export default async function Home({ params }: Props) {
             {t.get.map((g, i) => (
               <li key={g.title} className="grid grid-cols-1 items-center gap-6 md:grid-cols-12 md:gap-10">
                 <div data-reveal className={i % 2 ? "md:order-2 md:col-span-7 md:col-start-6" : "md:col-span-7"}>
-                  <Browser {...getShots[i]!} alt={g.alt} crop={1280 / 760} />
+                  <ProductShot name={GET[i]!} alt={g.alt} labels={m.product[GET[i]!]} sizes="(min-width: 1216px) 650px, (min-width: 768px) 56vw, calc(100vw - 2rem)" />
                 </div>
                 <div data-reveal style={{ "--d": 1 } as CSSProperties} className={i % 2 ? "md:order-1 md:col-span-4 md:col-start-1" : "md:col-span-4 md:col-start-9"}>
                   <span aria-hidden className="font-num block text-[3rem] leading-[.8] text-club-text">
@@ -202,9 +207,13 @@ export default async function Home({ params }: Props) {
         <section aria-labelledby="share" className="mt-24 md:mt-32">
           <div className="grid grid-cols-1 items-center gap-10 md:grid-cols-2 md:gap-16">
             <div data-reveal className="order-2 md:order-1">
-              <div className="mx-auto max-w-[26rem] border-2 border-ink bg-paper shadow-[0_30px_60px_-24px_rgb(10_13_17/0.4)]">
-                <img {...SHOT.share} alt={t.shareAlt} loading="lazy" decoding="async" className="block h-auto w-full" />
-              </div>
+              <ProductShot
+                name="share"
+                alt={t.shareAlt}
+                labels={m.product.share}
+                sizes="(min-width: 768px) 30rem, calc(100vw - 2rem)"
+                className="mx-auto max-w-[30rem]"
+              />
             </div>
             <div data-reveal style={{ "--d": 1 } as CSSProperties} className="order-1 md:order-2">
               <p className="text-[1.0625rem] font-semibold text-ink-2">{t.shareKick}</p>
