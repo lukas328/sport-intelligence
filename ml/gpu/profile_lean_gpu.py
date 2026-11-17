@@ -190,6 +190,9 @@ def _run(minutes: int, slug: str, budget_min: int, variants: str) -> str:
         except subprocess.TimeoutExpired:
             print(f"hard deadline: {name} stopped, not finished", flush=True)
             break
+        except subprocess.CalledProcessError as e:  # one failing variant must not cost the upload
+            print(f"variant {name} failed (exit {e.returncode}), going on", flush=True)
+            (out / f"{name}.failed.txt").write_text(f"exit {e.returncode}\n")
         out_vol.commit()
     shutil.rmtree(out / "work", ignore_errors=True)
     pub = Path("/tmp/pub")
