@@ -3875,7 +3875,9 @@
     "emptyTitle": "Upload a video, then you see your scenes here.",
     "emptyText": "After the analysis every goal, every shot and every turnover is a scene. You search them with a sentence and put them together into collections.",
     "emptyPlays": "Drawing plays works already:",
-    "emptySearch": "Search finds scenes from your first video on."
+    "emptySearch": "Search finds scenes from your first video on.",
+    "emptyAnswer": "No scenes yet. Upload a video, then you find every goal here.",
+    "emptyAnswerRead": "No scenes yet. As soon as a video of your team is uploaded, you find every goal here."
   },
   "teamPage": {
     "kick": "{team} · {source}",

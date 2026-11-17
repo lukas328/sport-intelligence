@@ -3875,7 +3875,9 @@
     "emptyTitle": "Télécharge une vidéo, tu verras ensuite tes scènes ici.",
     "emptyText": "Après l'analyse, chaque but, chaque tir et chaque perte de balle est une scène. Tu les cherches avec une phrase et tu les réunis en sélections.",
     "emptyPlays": "Dessiner des systèmes de jeu, c'est déjà possible :",
-    "emptySearch": "La recherche trouve des scènes dès la première vidéo."
+    "emptySearch": "La recherche trouve des scènes dès la première vidéo.",
+    "emptyAnswer": "Pas encore de scènes. Télécharge une vidéo, tu trouveras ensuite ici chaque but.",
+    "emptyAnswerRead": "Pas encore de scènes. Dès qu'une vidéo de votre équipe est téléchargée, tu trouveras ici chaque but."
   },
   "teamPage": {
     "kick": "{team} · {source}",

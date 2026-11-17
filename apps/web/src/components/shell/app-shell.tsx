@@ -1,5 +1,6 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -9,6 +10,7 @@ import { NotificationBell } from "@/components/training/bell";
 import { analyses, destOf, modeFor, navFor, startHref, teamInPath, uploadHref } from "@/lib/nav-model";
 import { clubNameShown } from "@/lib/own-name";
 import { buttonClass } from "@/components/ui/button";
+import { api } from "@/lib/client";
 import { cn } from "@/lib/utils";
 import { AppMark } from "@/components/brand";
 import { ProgressStrip } from "@/components/progress/progress-strip";
@@ -77,6 +79,15 @@ export function AppShell({
   const upload = analyses(mode) ? uploadHref(org.id, team?.id ?? null) : null;
   const [palette, setPalette] = useState(false);
   const searchHref = analyses(mode) && team ? `/app/${org.id}/teams/${team.id}/scenes?focus=1` : null;
+  // «Suchen» in the head only once the team has scenes, that is a match with video (finding A6):
+  // before, it led to an empty page; «Szenen» in the navigation says what is coming there
+  const teamMatches = useQuery({
+    queryKey: ["team-matches", team?.id],
+    enabled: Boolean(searchHref),
+    staleTime: 60_000,
+    queryFn: async () => (await api.GET("/v1/orgs/{org_id}/teams/{team_id}/matches", { params: { path: { org_id: org.id, team_id: team!.id } } })).data ?? [],
+  });
+  const headSearch = searchHref && (teamMatches.data ?? []).some((m) => m.has_video) ? searchHref : null;
   // the club's name only when it says more than the team's (K7: «TV Farnwil» once, not twice)
   const clubName = clubNameShown(org.name, team?.name ?? null);
 
@@ -185,11 +196,11 @@ export function AppShell({
               </nav>
               <div className="ml-auto flex items-center gap-4">
                 {/* «Suchen» is the scene search (SPEC 9); the palette stays on Ctrl+K */}
-                {searchHref ? (
-                  <Link href={searchHref} className="min-h-11 content-center font-bold text-ink underline decoration-[1.5px] underline-offset-4" data-testid="search-open">
+                {headSearch ? (
+                  <Link href={headSearch} className="min-h-11 content-center font-bold text-ink underline decoration-[1.5px] underline-offset-4" data-testid="search-open">
                     {t("search")}
                   </Link>
-                ) : (
+                ) : !searchHref ? (
                   <button
                     type="button"
                     onClick={() => setPalette(true)}
@@ -198,7 +209,7 @@ export function AppShell({
                   >
                     {t("search")}
                   </button>
-                )}
+                ) : null}
                 {/* the frame's action in outline: the one filled button is the page's own
                     (review R32: «Video hochladen» stood as strong as the page's main action) */}
                 {upload && (
@@ -227,10 +238,10 @@ export function AppShell({
               </div>
               <NotificationBell orgId={org.id} />
               {/* «Suchen» with its word on the phone too (SPEC 6, UX test B18/N08) */}
-              {searchHref && (
+              {headSearch && (
                 // below 360 px (large text) the magnifier gives way too: «Szenen» in the tab bar
                 // opens the same search with the cursor in it
-                <Link href={searchHref} className="flex h-11 min-w-11 shrink-0 items-center justify-center gap-1 text-[15px] font-bold text-ink underline decoration-[1.5px] underline-offset-4 max-[359px]:hidden" data-testid="search-open-compact">
+                <Link href={headSearch} className="flex h-11 min-w-11 shrink-0 items-center justify-center gap-1 text-[15px] font-bold text-ink underline decoration-[1.5px] underline-offset-4 max-[359px]:hidden" data-testid="search-open-compact">
                   <Search aria-hidden className="size-4 max-[439px]:size-5" strokeWidth={2.6} />
                   {/* with very large text the word gives way to the team name, the magnifier stays */}
                   <span className="max-[439px]:sr-only">{t("search")}</span>

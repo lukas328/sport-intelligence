@@ -3875,7 +3875,9 @@
     "emptyTitle": "Lade ein Video hoch, dann siehst du hier deine Szenen.",
     "emptyText": "Nach der Analyse ist jedes Tor, jeder Wurf und jeder Ballverlust eine Szene. Du suchst sie mit einem Satz und stellst sie zu Sammlungen zusammen.",
     "emptyPlays": "Spielzüge zeichnen geht schon jetzt:",
-    "emptySearch": "Die Suche findet Szenen ab dem ersten Video."
+    "emptySearch": "Die Suche findet Szenen ab dem ersten Video.",
+    "emptyAnswer": "Noch keine Szenen. Lade ein Video hoch, dann findest du hier jedes Tor.",
+    "emptyAnswerRead": "Noch keine Szenen. Sobald ein Video eures Teams hochgeladen ist, findest du hier jedes Tor."
   },
   "teamPage": {
     "kick": "{team} · {source}",
