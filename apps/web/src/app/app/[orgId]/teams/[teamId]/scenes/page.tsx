@@ -129,28 +129,19 @@ export default async function ScenesPage({
   );
   // before the first video there is nothing to search (K8, UX test B28): one sentence, what comes,
   // one action; no search, chips, collections or highlights. Spielzüge work without video.
-  // the first video is in, its analysis not done yet: no search over nothing, the same calm page
-  // saying that the scenes come with the analysis (K8)
-  const running = withVideo.length > 0 && withVideo.every((m) => m.status !== "ready");
-  if (withVideo.length === 0 || running) {
+  if (withVideo.length === 0) {
     const { data: org } = await client.GET("/v1/orgs/{org_id}", { params: { path: { org_id: orgId } } });
     const canWrite = worksWithVideo(org?.my_role, team?.my_role);
     return (
       <div>
         <PageHeader title={(await getTranslations("shell"))("scenes")} />
-        <section className="max-w-[60ch] space-y-4" data-testid={running ? "scenes-running" : "scenes-empty"}>
-          <p className="font-slant m-0 text-[28px] leading-tight md:text-[34px]">{t(running ? "runningTitle" : "emptyTitle")}</p>
-          <p className="m-0 text-[17px]">{t(running ? "runningText" : "emptyText")}</p>
-          {running && last ? (
-            <Link href={`/app/${orgId}/matches/${last.id}`} className={buttonClass("primary")}>
-              {t("runningOpen")}
+        <section className="max-w-[60ch] space-y-4" data-testid="scenes-empty">
+          <p className="font-slant m-0 text-[28px] leading-tight md:text-[34px]">{t("emptyTitle")}</p>
+          <p className="m-0 text-[17px]">{t("emptyText")}</p>
+          {canWrite && (
+            <Link href={`${base}/matches?upload=1`} className={buttonClass("primary")}>
+              {ta("uploadVideo")}
             </Link>
-          ) : (
-            canWrite && (
-              <Link href={`${base}/matches?upload=1`} className={buttonClass("primary")}>
-                {ta("uploadVideo")}
-              </Link>
-            )
           )}
           <p className="m-0 pt-4 text-[15px] text-ink-2">
             {t("emptyPlays")}{" "}

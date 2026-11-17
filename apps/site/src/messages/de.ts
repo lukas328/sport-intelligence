@@ -85,8 +85,8 @@ const de = {
     legendDashed: "geschätzt",
     legendThin: "dünner Strich: zum Tor",
     zones: {
-      la: "über links aussen",
-      ra: "über rechts aussen",
+      la: "über aussen links",
+      ra: "über aussen rechts",
       rl: "aus dem Rückraum links",
       rm: "aus dem Rückraum Mitte",
       rr: "aus dem Rückraum rechts",

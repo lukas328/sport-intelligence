@@ -9,6 +9,7 @@ import { Alert, Card } from "@/components/ui/card";
 import { Input, Select } from "@/components/ui/field";
 import { api } from "@/lib/client";
 import { errorKey, type ErrorKey } from "@/lib/errors";
+import { useMailEnabled } from "@/lib/site-config";
 
 const chf = (cents: number) => `CHF ${(cents / 100).toFixed(2)}`;
 
@@ -18,6 +19,8 @@ export function InvoiceOrder({ orgId, goalkeepers }: { orgId: string; goalkeeper
   const tr = useTranslations();
   const format = useFormatter();
   const qc = useQueryClient();
+  // no promise of a mail while none goes out (L2): the PDF is in the list below
+  const mail = useMailEnabled();
   const [plan, setPlan] = useState<"team" | "club">("team");
   const [error, setError] = useState<ErrorKey | null>(null);
   const [done, setDone] = useState<string | null>(null);
@@ -39,7 +42,7 @@ export function InvoiceOrder({ orgId, goalkeepers }: { orgId: string; goalkeeper
     },
     onSuccess: (inv) => {
       setError(null);
-      setDone(t("ordered", { number: inv?.number ?? "" }));
+      setDone(t(mail === false ? "orderedNoMail" : "ordered", { number: inv?.number ?? "" }));
       void qc.invalidateQueries({ queryKey: ["invoices", orgId] });
       void qc.invalidateQueries({ queryKey: ["billing", orgId] });
     },

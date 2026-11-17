@@ -1496,7 +1496,7 @@
   },
   "drills": {
     "title": "Übungen",
-    "hint": "Eigene Übungen von Handball Intelligence mit Aufbau, Ablauf, Coaching-Punkten, Varianten und Skizze. Auf der Skizze üben die blauen Spieler, orange sind ihre Gegenspieler.",
+    "hint": "Übungen von Handball Intelligence mit Aufbau, Ablauf, Coaching-Punkten, Varianten und Skizze. Auf der Skizze üben die blauen Spieler, orange sind ihre Gegenspieler.",
     "minutes": "{minutes} min",
     "players": "{players} Spieler/innen",
     "level_basic": "Grundlage",
@@ -2234,7 +2234,8 @@
     "paid": "bezahlt",
     "open": "offen",
     "reminded": "erinnert",
-    "dunned": "gemahnt"
+    "dunned": "gemahnt",
+    "orderedNoMail": "Rechnung {number} wurde erstellt. Du findest sie unten als PDF. Das Abo ist aktiv."
   },
   "support": {
     "help": "Hilfe",
@@ -3760,10 +3761,7 @@
     "chipNumber": "Nummer {n}",
     "emptyTitle": "Lade ein Video hoch, dann siehst du hier deine Szenen.",
     "emptyText": "Nach der Analyse ist jedes Tor, jeder Wurf und jeder Ballverlust eine Szene. Du suchst sie mit einem Satz und stellst sie zu Sammlungen zusammen.",
-    "emptyPlays": "Spielzüge zeichnen geht schon jetzt:",
-    "runningTitle": "Die Analyse läuft. Danach stehen hier deine Szenen.",
-    "runningText": "Jedes Tor, jeder Wurf und jeder Ballverlust wird eine Szene. Wie weit die Analyse ist, steht oben auf jeder Seite.",
-    "runningOpen": "Spiel ansehen"
+    "emptyPlays": "Spielzüge zeichnen geht schon jetzt:"
   },
   "teamPage": {
     "kick": "{team} · {source}",
@@ -4109,7 +4107,7 @@
     "datesTitle": "Termine und Zusagen",
     "datesText": "Trainings und Spiele. Spieler sagen zu oder ab, du siehst, wer kommt.",
     "planTitle": "Training",
-    "planText": "Einheiten planen, mit Übungen und Dauer.",
+    "planText": "Tipps aus euren Spielen mit passenden Übungen, daraus Einheiten mit Dauer.",
     "tasksTitle": "Aufgaben",
     "tasksText": "Szenen oder Sammlungen zum Anschauen bis zu einem Datum. Du siehst, wer sie gesehen hat.",
     "ownTitle": "Bereiche für Spieler und Eltern",

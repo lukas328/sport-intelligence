@@ -1496,7 +1496,7 @@
   },
   "drills": {
     "title": "Drills",
-    "hint": "Handball Intelligence's own drills with set-up, procedure, coaching points, variants and a sketch. On the sketch the blue players practise, orange are their opponents.",
+    "hint": "Drills by Handball Intelligence with set-up, procedure, coaching points, variants and a sketch. On the sketch the blue players practise, orange are their opponents.",
     "minutes": "{minutes} min",
     "players": "{players} players",
     "level_basic": "Basic",
@@ -2234,7 +2234,8 @@
     "paid": "paid",
     "open": "open",
     "reminded": "reminded",
-    "dunned": "final notice"
+    "dunned": "final notice",
+    "orderedNoMail": "Invoice {number} has been created. You find it below as a PDF. The subscription is active."
   },
   "support": {
     "help": "Help",
@@ -3760,10 +3761,7 @@
     "chipNumber": "Number {n}",
     "emptyTitle": "Upload a video, then you see your scenes here.",
     "emptyText": "After the analysis every goal, every shot and every turnover is a scene. You search them with a sentence and put them together into collections.",
-    "emptyPlays": "Drawing plays works already:",
-    "runningTitle": "The analysis is running. Your scenes will be here afterwards.",
-    "runningText": "Every goal, shot and turnover becomes a scene. How far the analysis is shows at the top of every page.",
-    "runningOpen": "Open the match"
+    "emptyPlays": "Drawing plays works already:"
   },
   "teamPage": {
     "kick": "{team} · {source}",
@@ -4109,7 +4107,7 @@
     "datesTitle": "Dates and replies",
     "datesText": "Training sessions and matches. Players reply yes or no, you see who is coming.",
     "planTitle": "Training",
-    "planText": "Plan sessions, with drills and duration.",
+    "planText": "Tips from your matches with matching drills, turned into sessions with duration.",
     "tasksTitle": "Tasks",
     "tasksText": "Scenes or collections to watch by a date. You see who has watched them.",
     "ownTitle": "Areas for players and parents",

@@ -2234,7 +2234,8 @@
     "paid": "payée",
     "open": "ouverte",
     "reminded": "rappel envoyé",
-    "dunned": "sommation envoyée"
+    "dunned": "sommation envoyée",
+    "orderedNoMail": "La facture {number} a été créée. Tu la trouves ci-dessous en PDF. L'abonnement est actif."
   },
   "support": {
     "help": "Aide",
@@ -3760,10 +3761,7 @@
     "chipNumber": "Numéro {n}",
     "emptyTitle": "Télécharge une vidéo, tu verras ensuite tes scènes ici.",
     "emptyText": "Après l'analyse, chaque but, chaque tir et chaque perte de balle est une scène. Tu les cherches avec une phrase et tu les réunis en sélections.",
-    "emptyPlays": "Dessiner des systèmes de jeu, c'est déjà possible :",
-    "runningTitle": "L'analyse est en cours. Ensuite, tes scènes seront ici.",
-    "runningText": "Chaque but, chaque tir et chaque perte de balle devient une scène. L'avancement de l'analyse s'affiche en haut de chaque page.",
-    "runningOpen": "Voir le match"
+    "emptyPlays": "Dessiner des systèmes de jeu, c'est déjà possible :"
   },
   "teamPage": {
     "kick": "{team} · {source}",
@@ -4109,7 +4107,7 @@
     "datesTitle": "Rendez-vous et réponses",
     "datesText": "Entraînements et matchs. Les joueurs confirment ou se désinscrivent, tu vois qui vient.",
     "planTitle": "Entraînement",
-    "planText": "Planifier les séances, avec exercices et durée.",
+    "planText": "Des conseils tirés de vos matchs avec les exercices qui vont avec, et des séances avec leur durée.",
     "tasksTitle": "Tâches",
     "tasksText": "Des scènes ou des sélections à regarder jusqu'à une date. Tu vois qui les a vues.",
     "ownTitle": "Espaces pour joueurs et parents",
