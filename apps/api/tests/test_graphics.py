@@ -514,3 +514,27 @@ def test_scene_shows_only_the_court_unmirrored() -> None:
     ours = next(t for t in tracks if t["team"] == "own")
     assert ours["xy"][0] == (30.0, 10.0) and ours["xy"][-1] == (34.5, 10.0)
     assert ours["ts"][0] == 0.0 and ours["ts"][-1] == round(4500 / SCENE_MS, 4)
+
+
+def test_ball_holder_stretches_only_from_the_ball_net() -> None:
+    from handball_api.services.graphics import ball_stretches
+
+    teams = {1: ("home", 7), 2: ("away", 11), 3: ("home", None), 4: ("referee", None)}
+    poss = [
+        {"track_id": 1, "team": "home", "start_ms": 9_000, "end_ms": 11_500},
+        {"track_id": 2, "team": "away", "start_ms": 12_000, "end_ms": 13_000},
+        {"track_id": 3, "team": "home", "start_ms": 13_500, "end_ms": 14_000},  # no number
+        {"track_id": 2, "team": "away", "start_ms": 30_000, "end_ms": 31_000},  # after the scene
+    ]
+    net = {"stats": {"ball": {"ball_model": "ballnet", "possessions": poss}}}
+    out = ball_stretches(net, teams, start=10_000, length=8_000)
+    assert out == [
+        {"from_s": 0.0, "to_s": 1.5, "team": "own", "number": 7},
+        {"from_s": 2.0, "to_s": 3.0, "team": "opp", "number": 11},
+    ]
+    # the YOLOX path or an analysis without ball: nothing is drawn
+    yolox = {"stats": {"ball": {"ball_model": "yolox", "possessions": poss}}}
+    assert ball_stretches(yolox, teams, 10_000, 8_000) == []
+    old = {"stats": {"ball": {"possessions": poss}}}
+    assert ball_stretches(old, teams, 10_000, 8_000) == []
+    assert ball_stretches(None, teams, 10_000, 8_000) == []

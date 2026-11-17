@@ -70,6 +70,8 @@ class AnalysisResult:
     version: str = __version__
     detections_per_frame: float = 0.0
     extra: dict[str, Any] = field(default_factory=dict)
+    # ball path of the ball net (ballpossession.path_rows: t_ms, x, y, confidence), or None
+    ball_rows: Any = None
 
     def detect_events(self, side_hint: str | None = None) -> EventResult:
         """Automatic event baseline from the tracks (throw-offs, goals, possession, sides);

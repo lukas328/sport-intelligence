@@ -7,8 +7,9 @@ breaks, and the questions for Prüfen. Per scene: the positions for the tactics 
 
 Only what is measured is returned. Runs come from the tracking (positions 8 to 10 per second,
 the 2 to 4 s before the shot of the track that scores); without a confirmed court there are no
-positions. The ball is not detected here: `ball` stays empty until the ball and its holder come
-from the analysis (docs/OPEN_QUESTIONS.md, Q-UX-15).
+positions. The ball: who holds it, from the analysis's ball possessions, only when they come from
+the ball net (`stats.ball.ball_model == "ballnet"`, docs/plans/produkt-analyse-integration.md);
+the older YOLOX ball path finds the ball in well under 1 % of frames, so it is not shown.
 
 Demo matches (`is_demo`, seeded) have no real tracking (their video is synthetic): their runs
 and positions are drawn from the marked events and a fixed seed, and every one of them says
@@ -734,7 +735,8 @@ async def more_checks(ctx: Ctx, match: Match) -> list[dict[str, Any]]:
 
 async def scene_camera(ctx: Ctx, match_id: uuid.UUID, event_id: uuid.UUID) -> dict[str, Any]:
     """Positions of the 6 s before a goal for the tactics camera, in court metres (goal of the
-    attack at x = 0, the left half). Only with a confirmed court; the ball stays empty."""
+    attack at x = 0, the left half). Only with a confirmed court; the ball holder only where the
+    ball net found the ball (`ball_stretches`)."""
     match = await get_match(ctx, match_id)
     e = await ctx.db.get(Event, event_id)
     if e is None or e.match_id != match.id:
@@ -781,6 +783,43 @@ def scene_tracks(
             {"team": team, "number": number if team != "ref" else None, "xy": xy, "ts": times[n]}
         )
     return tracks, right
+
+
+def ball_stretches(
+    analysis: dict[str, Any] | None,
+    teams: dict[int, tuple[str, int | None]],
+    start: float,
+    length: float,
+) -> list[dict[str, Any]]:
+    """Who holds the ball in the scene: the analysis's ball possessions (track, start_ms,
+    end_ms in the file) cut to the scene, in seconds from its start. Only from the ball net;
+    a holder without a team of ours or theirs, or without a shirt number, is left out (the ball
+    line then shows a gap there)."""
+    ball = ((analysis or {}).get("stats") or {}).get("ball") or {}
+    if not isinstance(ball, dict) or ball.get("ball_model") != "ballnet":
+        return []
+    out: list[dict[str, Any]] = []
+    for p in ball.get("possessions") or []:
+        try:
+            tid, a0, b0 = int(p["track_id"]), float(p["start_ms"]), float(p["end_ms"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        a, b = max(a0, start), min(b0, start + length)
+        if b <= a:
+            continue
+        kind, number = teams.get(tid, ("", None))
+        team = TEAM_OF_TRACK.get(kind)
+        if team not in ("own", "opp") or number is None:
+            continue
+        out.append(
+            {
+                "from_s": round((a - start) / 1000, 2),
+                "to_s": round((b - start) / 1000, 2),
+                "team": team,
+                "number": number,
+            }
+        )
+    return sorted(out, key=lambda s: s["from_s"])
 
 
 def on_court(x: float, y: float) -> bool:
@@ -838,6 +877,7 @@ async def camera_of(ctx: Ctx, match: Match, e: Event) -> dict[str, Any]:
         for no, t in meta.items()
     }
     base["tracks"], base["right"] = scene_tracks(rows, teams, start, e.side == "own", pre + post)
+    base["ball"] = ball_stretches(asset.analysis, teams, start, pre + post)
     base["tracks"] = unique_numbers(base["tracks"])
     scorer = next(
         (

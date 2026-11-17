@@ -6,6 +6,26 @@ Dauer, Kosten, Auffälligkeiten). Vor dem Commit `git pull --rebase`, danach pus
 
 ## Offen
 
+### 13. Laufzeit und Kosten der Produkt-Analyse auf einer T4, 2026-11-17 (Integrations-Sitzung)
+- Wozu: Entscheid GPU-Verarbeitung (Plan `docs/plans/produkt-analyse-integration.md` Schritte 3 und
+  4). Die CPU-Kette braucht 4.4 x Videolänge (Plan Abschnitt 4); gesucht sind die Zeiten pro Stufe
+  auf einer T4 mit und ohne Ballnetze und daraus die Kosten pro 60-Minuten-Spiel.
+- Was läuft: `ml/integration/profile_variants.py` (der echte `run_analysis` mit lokalen Attrappen
+  für S3 und API) auf 5 Minuten von AT_Cup_Feldkirch_Bregenz_2021 (`handball-segs-l10`), fünf
+  Einstellungen nacheinander (cuda_image, cuda_ball_ens, cuda_ball_hrp1, cuda_ball_ens_lean,
+  cpu_image) plus Kurzmessung der Ballnetze (fp32/fp16, Stapel 1/4/8). Die Ballnetze werden im
+  Container aus `handball-ball-hrmodels` nach ONNX exportiert. Testphase: hr1/hrp1 enthalten
+  DeepSport, hier wird nur gemessen.
+- Befehl: `modal run --detach ml/gpu/profile_gpu.py --minutes 5 --tag game1`
+- Fortsetzbar: jede fertige Einstellung liegt auf dem Volume `handball-gpu-out`
+  (`handball-gpu-profile-game1/`); derselbe Befehl setzt fort. `--budget-min 90` hält vor einer
+  weiteren Einstellung an, wenn 90 Minuten verbraucht sind.
+- Erwartet: etwa 1 h auf einer T4, rund 0.70 USD (Obergrenze mit Budget: 1.5 h, etwa 1 USD).
+- Ergebnis: Kaggle-Dataset `handball-gpu-profile-game1` (summary.json, je Einstellung ein JSON,
+  bench_nets.json). Die Integrations-Sitzung holt es ab und trägt die Zahlen in den Plan ein.
+- Bei "budget"/"spend limit" abbrechen und melden.
+
+
 Gemeinsam für 3 bis 10: OWLv2 wie Auftrag 2, Rechnung mit den gemessenen ~210 s pro Segment auf
 einer T4 (inkl. Download) und 0.66 USD/h (7.23 USD für 11.0 h). `--budget-h 10` lässt Luft bis 11 h
 für den Upload. Jeder Auftrag ist für sich, sie dürfen parallel laufen (Modal-Ausgabenlimit für
@@ -17,11 +37,16 @@ alle zusammen: etwa 33 USD). Vorher `git pull` (Auftrag 3 braucht `--resume-from
   (`ml/gold/shot_clips.json`, Würfe aus den offiziellen Spielprotokollen, `ml/gold/pick_shots.py`)
   brauchen die Kandidaten der vier neuen Ballnetze und OWLv2. Kaggle-GPU ist bis Samstag
   aufgebraucht, Lukas gibt dafür Modal-Guthaben frei (23 CHF übrig).
+- **Neu ab 2026-11-16 abends (nach drei Abbrüchen durch Modal-Preemption ohne Ergebnis):** Das Skript
+  schreibt jetzt nach jedem Paket von 5 Clips auf das Volume `handball-gpu-out` und macht nach einer
+  Unterbrechung dort weiter. Derselbe Befehl nochmals setzt ebenfalls fort. Nur noch hr1 und hrp1,
+  OWLv2 auf jedem 4. Bild. Erwartet etwa 3.5 h auf einer T4, rund 2.5 USD.
 - Befehl: `modal run --detach ml/gpu/prelabel_clips.py --clips ml/gold/shot_clips.json --tag shots`
+  (Ergebnis-Dataset `handball-gpu-prelabel-shots`, ohne Datum). Unterbricht Modal den Lauf und startet
+  ihn nicht selbst neu: denselben Befehl nochmals ausführen.
 - Eingaben: `handball-segs-l01`, `-l02`, `-b01`, `-b03`, `-b04`, `handball-ball-hrmodels` (die
   Netze hr1, hrp1, hr2, hrp2). Ergebnis: Dataset `handball-gpu-prelabel-shots-<datum>`.
-- Dauer etwa 4.5 h auf einer T4, Kosten etwa 3 USD. Bei "budget"/"spend limit" abbrechen und
-  melden. Die Cloud-Sitzung holt das Ergebnis selbst ab.
+- Bei "budget"/"spend limit" abbrechen und melden. Die Cloud-Sitzung holt das Ergebnis selbst ab.
 
 ### 3. OWLv2 Rest von l01 bis l03 (111 Segmente: 11 aus l02, 100 aus l03)
 - Befehl: `modal run --detach ml/gpu/owl_pseudo.py --datasets handball-segs-l02,handball-segs-l03 --resume-from handball-gpu-owl-20261105-1449 --gpu T4 --budget-h 8`

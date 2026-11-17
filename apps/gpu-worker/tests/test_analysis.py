@@ -784,3 +784,93 @@ def test_side_hint_reaches_the_event_baseline() -> None:
     assert payload["sides"] == [{"from_ms": 0, "home_defends": "right"}]
     analysis.events_payload(Result())  # type: ignore[arg-type]
     assert seen == ["right", None]
+
+
+def _tiny_ball_net(path: Path) -> Path:
+    import onnx
+    from onnx import TensorProto, helper
+
+    x = helper.make_tensor_value_info("frames", TensorProto.FLOAT, ["n", 9, "h", "w"])
+    y = helper.make_tensor_value_info("heatmap", TensorProto.FLOAT, ["n", 1, "h4", "w4"])
+    nodes = [
+        helper.make_node("ReduceMean", ["frames"], ["m"], axes=[1], keepdims=1),
+        helper.make_node("AveragePool", ["m"], ["heatmap"], kernel_shape=[4, 4], strides=[4, 4]),
+    ]
+    model = helper.make_model(
+        helper.make_graph(nodes, "tiny", [x], [y]), opset_imports=[helper.make_opsetid("", 17)]
+    )
+    model.ir_version = 8
+    onnx.save(model, str(path))
+    return path
+
+
+def test_ball_net_switch(tmp_path: Path) -> None:
+    """HB_BALL_MODEL: empty or a missing file keeps the YOLOX ball path; installed files load the
+    ball net(s) (two = ensemble, one = single net), and the result names the path it used."""
+    assert analysis.load_ball_net(JobSettings(ball_model="")) == (None, "off")
+    missing = JobSettings(ball_model=str(tmp_path / "missing.onnx"))
+    assert analysis.load_ball_net(missing) == (None, "missing")
+    hr1 = _tiny_ball_net(tmp_path / "hr1.onnx")
+    hrp1 = _tiny_ball_net(tmp_path / "hrp1.onnx")
+    both = f"{hr1}, {hrp1}"
+    net, status = analysis.load_ball_net(JobSettings(ball_model=both))
+    assert status == "ok" and net is not None and len(net.sessions) == 2
+    single, _ = analysis.load_ball_net(JobSettings(ball_model=str(hrp1)))
+    assert single is not None and len(single.sessions) == 1
+    # one of two files missing: no half ensemble, the old path stays
+    part = f"{hr1},{tmp_path / 'nope.onnx'}"
+    assert analysis.load_ball_net(JobSettings(ball_model=part))[0] is None
+    # a local file with a wrong checksum is not used
+    bad = JobSettings(ball_model=str(hr1), ball_model_sha256="0" * 64)
+    assert analysis.load_ball_net(bad) == (None, "sha_mismatch")
+    settings = JobSettings(ball_model=both)
+    empty: Any = SimpleNamespace(ball_cands={})
+    with_cands: Any = SimpleNamespace(ball_cands={3: [(1.0, 2.0, 0.5)]})
+    assert analysis._ball_version(empty, settings) == "yolox"
+    assert analysis._ball_version(with_cands, settings) == "hr1+hrp1"
+
+
+class _BucketS3:
+    """download_file from a dict bucket/key -> local file; counts downloads."""
+
+    def __init__(self, objects: dict[tuple[str, str], Path]) -> None:
+        self.objects = objects
+        self.downloads = 0
+
+    def download_file(self, bucket: str, key: str, dest: str, Config: Any = None) -> None:  # noqa: N803
+        if (bucket, key) not in self.objects:
+            raise FileNotFoundError(key)
+        self.downloads += 1
+        shutil.copyfile(self.objects[(bucket, key)], dest)
+
+
+def test_ball_net_from_bucket_with_checksum(tmp_path: Path) -> None:
+    src = _tiny_ball_net(tmp_path / "src.onnx")
+    sha = analysis._sha256(src)
+    key = f"models/ball/ball_hrp1-{sha[:12]}.onnx"
+    s3 = _BucketS3({("artifacts", key): src})
+    cache = tmp_path / "cache"
+    ok = JobSettings(ball_model=key, ball_model_sha256=sha, ball_cache_dir=str(cache))
+    net, status = analysis.load_ball_net(ok, s3)
+    assert status == "ok" and net is not None
+    # cached: the second job does not download again
+    assert analysis.load_ball_net(ok, s3)[1] == "ok"
+    assert s3.downloads == 1
+    # wrong checksum: nothing kept, old path
+    wrong = JobSettings(ball_model=key, ball_model_sha256="f" * 64, ball_cache_dir=str(cache))
+    assert analysis.load_ball_net(wrong, s3) == (None, "sha_mismatch")
+    assert not list(cache.glob("ffffffffffff-*"))
+    # a bucket key needs its checksum; an unknown key falls back
+    assert analysis.load_ball_net(JobSettings(ball_model=key), s3) == (None, "sha_missing")
+    nokey = JobSettings(ball_model="models/ball/x.onnx", ball_model_sha256=sha)
+    assert analysis.load_ball_net(nokey, s3) == (None, "missing")
+
+
+def test_ball_path_file(tmp_path: Path) -> None:
+    rows = np.array([[0.0, 100.0, 200.0, 0.9], [40.0, 104.0, 199.0, 0.8]], np.float32)
+    result: Any = SimpleNamespace(ball_rows=rows)
+    assert analysis.write_ball_path(result, tmp_path) == 2
+    back = np.frombuffer((tmp_path / "ball.bin").read_bytes(), "<f4").reshape(-1, 4)
+    assert np.array_equal(back, rows)
+    none: Any = SimpleNamespace(ball_rows=None)
+    assert analysis.write_ball_path(none, tmp_path / "x") == 0

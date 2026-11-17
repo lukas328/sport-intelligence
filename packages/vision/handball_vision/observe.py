@@ -61,6 +61,8 @@ class Observations:
     detector_source: str = "model"
     # frame pixels whose edges stay put while a moving camera turns: score bug, logo, "LIVE"
     static: U8 | None = None
+    # ball net candidates (HB_BALL_MODEL): frame index -> [(x, y, score)] in frame pixels
+    ball_cands: dict[int, list[tuple[float, float, float]]] = field(default_factory=dict)
 
 
 def static_edges(frames: list[U8], min_share: float = 0.6) -> U8 | None:
@@ -116,9 +118,13 @@ def observe(
     embed_every: int = 30,
     roles: Any = None,  # handball_vision.roles.RoleClassifier
     role_every: int = 30,
+    ball_net: Any = None,  # handball_vision.ballnet.BallNet
+    ball_every: int = 1,
+    ball_batch: int = 8,
 ) -> Observations:
     """`on_frame(index, frame)` sees every decoded frame (e.g. the score overlay reader), so the
-    video is decoded only once."""
+    video is decoded only once. With `ball_net` the 3-frame ball net runs on every `ball_every`-th
+    frame (`Observations.ball_cands`)."""
     from handball_vision.pipeline import _open, iter_frames
 
     _, _, fps, total = _open(path)
@@ -128,6 +134,11 @@ def observe(
     frames: list[FrameObservation] = []
     segments: dict[int, F64] = {}
     timings: dict[str, float] = defaultdict(float)
+    balls_net = None
+    if ball_net is not None:
+        from handball_vision.ballnet import BallCandidates
+
+        balls_net = BallCandidates(ball_net, fps, every=ball_every, batch=ball_batch)
     for n, frame in enumerate(iter_frames(path)):
         if max_frames is not None and n >= max_frames:
             break
@@ -138,6 +149,10 @@ def observe(
             t0 = time.perf_counter()
             on_frame(n, frame)
             timings["overlay"] += time.perf_counter() - t0
+        if balls_net is not None:
+            t0 = time.perf_counter()
+            balls_net.add(n, frame)
+            timings["ball_net"] += time.perf_counter() - t0
         if n % detect_every == 0:
             t0 = time.perf_counter()
             found = detector.detect([frame])[0]
@@ -170,6 +185,10 @@ def observe(
                 timings["markings"] += time.perf_counter() - t0
         if progress and total and n % 100 == 0:
             progress("observe", min(1.0, n / total))
+    if balls_net is not None:
+        t0 = time.perf_counter()
+        balls_net.flush()
+        timings["ball_net"] += time.perf_counter() - t0
     t0 = time.perf_counter()
     motion = est.finish()
     timings["camera_motion"] += time.perf_counter() - t0
@@ -178,7 +197,15 @@ def observe(
         motion.samples = [motion.samples[int(k * step)] for k in range(30)]
     static = static_edges([f for _, f in motion.samples]) if motion.moving else None
     return Observations(
-        motion, frames, segments, fps, n, dict(timings), detector.source, static=static
+        motion,
+        frames,
+        segments,
+        fps,
+        n,
+        dict(timings),
+        detector.source,
+        static=static,
+        ball_cands=balls_net.result if balls_net is not None else {},
     )
 
 
@@ -248,6 +275,13 @@ def save_observations(obs: Observations, path: Path) -> None:
         role_idx=np.array(role_idx, np.int32).reshape(-1, 2),
         role_p=np.array(role_p, np.float16).reshape(-1, 3),
         static=obs.static if obs.static is not None else np.zeros((0, 0), np.uint8),
+        # ball net candidates: frame, x, y, score (a re-run computes the ball path without a GPU)
+        ball_cands=np.array(
+            [(f, x, y, sc) for f, row in sorted(obs.ball_cands.items()) for x, y, sc in row]
+            or np.zeros((0, 4)),
+            np.float32,
+        ).reshape(-1, 4),
+        ball_frames=np.array(sorted(obs.ball_cands), np.int32),
     )
 
 
@@ -289,6 +323,13 @@ def load_observations(path: Path, motion: CameraMotion, source: str = "model") -
         segments[int(i)] = np.asarray(z["segs"][z["seg_idx"] == i], dtype=np.float64)
     fps, total = z["meta"]
     static = np.asarray(z["static"]) if "static" in z.files and z["static"].size else None
+    ball_cands: dict[int, list[tuple[float, float, float]]] = {}
+    if "ball_frames" in z.files:
+        from handball_vision.ballnet import rounded
+
+        ball_cands = {int(f): [] for f in z["ball_frames"]}
+        for f, x, y, sc in z["ball_cands"]:
+            ball_cands.setdefault(int(f), []).append(rounded((float(x), float(y), float(sc))))
     return Observations(
         motion,
         [by[k] for k in sorted(by)],
@@ -298,6 +339,7 @@ def load_observations(path: Path, motion: CameraMotion, source: str = "model") -
         {},
         source,
         static=static,
+        ball_cands=ball_cands,
     )
 
 
@@ -762,6 +804,7 @@ def track(
     t0 = time.perf_counter()
     ball = from_observations(obs, result, play=play)
     if ball is not None:
+        result.ball_rows = ball.pop("path_rows", None)
         result.extra["ball"] = ball
     result.timings_s["ball"] = time.perf_counter() - t0
     from handball_vision.goalcandidates import from_observations as goal_candidates

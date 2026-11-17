@@ -1058,6 +1058,7 @@ async def _apply_analysis_result(
             "calibration_error",
             "calibration_info",
             "scoreboard",
+            "ball_path",
         )
     }
     if clicked is not None:
