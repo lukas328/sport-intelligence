@@ -59,15 +59,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends tesseract-ocr \
     && rm -rf /var/lib/apt/lists/* && useradd --system --uid 10001 app
 COPY --from=build /app/.venv /app/.venv
 COPY --from=models /models /models
-# GPU settings (docs/plans/produkt-analyse-integration.md): detection on every frame; shirt numbers
-# dense again (no gate, no CPU time budget: on the GPU the run time is not the bottleneck,
-# decision 2026-11-17; to be checked against the measured cost per game, Modal job 13). The ball
-# nets (HB_BALL_MODEL, HB_BALL_MODEL_SHA256) come from the artifacts bucket at run time, not from
-# this image; without them the YOLOX ball path stays. Ball net at 960 px on every frame (hrp1 with
-# uint8 input on its worker thread, Modal job 15: gold 73.0 %, 0.87 USD per game with detection on
-# every 3rd frame and number budget 0.3).
-ENV PATH="/app/.venv/bin:$PATH" HB_DETECT_EVERY=1 HB_NUMBER_EVERY=3 HB_NUMBER_GATE=false \
-    HB_NUMBER_BUDGET=0 HB_BALL_EVERY=1 HB_BALL_WIDTH=960 HB_BALL_CACHE_DIR=/tmp/handball-models
+# GPU settings for the test phase, decided by Lukas on 2026-11-17 (docs/plans/
+# produkt-analyse-integration.md, "Rückennummern und Spuren: GPU-Einstellung"): detection on every
+# 3rd frame, shirt numbers with the gate and a time budget of 1.0 (estimated 1.27 USD per game on a
+# Modal T4); the full reading (every frame, no gate, no budget) found more numbers but cost about
+# 2.9 USD. Ball net at 960 px on every frame (hrp1 with uint8 input on its worker thread, Modal job
+# 15: gold 73.0 %); the nets (HB_BALL_MODEL, HB_BALL_MODEL_SHA256) come from the artifacts bucket at
+# run time, not from this image; without them the YOLOX ball path stays.
+ENV PATH="/app/.venv/bin:$PATH" HB_DETECT_EVERY=3 HB_NUMBER_EVERY=3 HB_NUMBER_GATE=true \
+    HB_NUMBER_BUDGET=1.0 HB_BALL_EVERY=1 HB_BALL_WIDTH=960 HB_BALL_CACHE_DIR=/tmp/handball-models
 USER app
 HEALTHCHECK --interval=15s --timeout=5s --retries=5 CMD ["handball-gpu-worker", "healthcheck"]
 CMD ["handball-gpu-worker"]
