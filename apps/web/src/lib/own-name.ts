@@ -1,6 +1,6 @@
 /**
  * The name of our side in heads, telegram and camera (UX test H11): the team's own name when it
- * is one («SG Lärchenwil/Felsegg», a joint team), else the club's («HC Tannengrün» for «Herren 1»).
+ * is one («SG Lärchenwil/Kalvenegg», a joint team), else the club's («HC Tannengrün» for «Herren 1»).
  */
 const GENERIC = /^(herren|damen|männer|frauen|junior(en|innen)?|mixed|u\s?\d+|[a-e]-junior|hommes|femmes|men|women)\b/i;
 

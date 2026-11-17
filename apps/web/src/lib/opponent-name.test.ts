@@ -3,13 +3,13 @@ import { findTeamRow, opponentKey, sameOpponent } from "./opponent-name";
 
 describe("opponentKey", () => {
   it("drops case, accents, punctuation and a bracketed addition", () => {
-    expect(opponentKey("SG Felsegg/Lärchenwil (M2)")).toBe("sgfelsegglarchenwil");
-    expect(opponentKey("sg felsegg-lärchenwil")).toBe("sgfelsegglarchenwil");
+    expect(opponentKey("SG Kalvenegg/Lärchenwil (M2)")).toBe("sgkalvenegglarchenwil");
+    expect(opponentKey("sg kalvenegg-lärchenwil")).toBe("sgkalvenegglarchenwil");
   });
 
   it("treats the first team like the club, a second team as its own", () => {
-    expect(opponentKey("SG Felsegg/Lärchenwil 1")).toBe("sgfelsegglarchenwil");
-    expect(opponentKey("SG Felsegg/Lärchenwil 2")).toBe("sgfelsegglarchenwil2");
+    expect(opponentKey("SG Kalvenegg/Lärchenwil 1")).toBe("sgkalvenegglarchenwil");
+    expect(opponentKey("SG Kalvenegg/Lärchenwil 2")).toBe("sgkalvenegglarchenwil2");
     expect(opponentKey("HC 11 Freunde")).toBe("hc11freunde");
   });
 
@@ -21,22 +21,22 @@ describe("opponentKey", () => {
 
 describe("sameOpponent", () => {
   it("matches the variants of one team (R7)", () => {
-    expect(sameOpponent("SG Felsegg/Lärchenwil 1", "SG Felsegg/Lärchenwil (M2)")).toBe(true);
+    expect(sameOpponent("SG Kalvenegg/Lärchenwil 1", "SG Kalvenegg/Lärchenwil (M2)")).toBe(true);
     expect(sameOpponent("TV Mürli", "TV Murli")).toBe(true);
   });
 
   it("keeps different teams apart", () => {
-    expect(sameOpponent("SG Felsegg/Lärchenwil 1", "SG Felsegg/Lärchenwil 2")).toBe(false);
+    expect(sameOpponent("SG Kalvenegg/Lärchenwil 1", "SG Kalvenegg/Lärchenwil 2")).toBe(false);
     expect(sameOpponent("", "")).toBe(false);
   });
 });
 
 describe("findTeamRow", () => {
-  const rows = [{ name: "HC Farnwil" }, { name: "HC Farnwil 2" }, { name: "SG Felsegg/Lärchenwil" }, { name: "TV Mürli" }];
+  const rows = [{ name: "HC Farnwil" }, { name: "HC Farnwil 2" }, { name: "SG Kalvenegg/Lärchenwil" }, { name: "TV Mürli" }];
 
   it("prefers the same key", () => {
     expect(findTeamRow(rows, "HC Farnwil 1")).toBe(rows[0]);
-    expect(findTeamRow(rows, "SG Felsegg/Lärchenwil (M2)")).toBe(rows[2]);
+    expect(findTeamRow(rows, "SG Kalvenegg/Lärchenwil (M2)")).toBe(rows[2]);
   });
 
   it("takes a shortened name only when one row fits", () => {

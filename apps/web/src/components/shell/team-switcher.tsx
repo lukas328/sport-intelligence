@@ -15,7 +15,7 @@ export function TeamSwitcher({ compact }: { compact?: boolean }) {
   const router = useRouter();
   const label = team ? team.name : t("shell.noTeam");
   // in the phone bar: without additions in brackets, and a line may break after «/» or «-»
-  // (UX test A01: «SG Lärchenwil/Felsegg», never «S / G.»)
+  // (UX test A01: «SG Lärchenwil/Kalvenegg», never «S / G.»)
   const short = compact ? headName(label) : label;
   const sub = team?.season ?? null;
   if (teams.length <= 1 && orgs.length <= 1) {

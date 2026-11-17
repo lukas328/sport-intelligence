@@ -12,7 +12,7 @@ const t = tr(deCH, "de-CH");
 
 const base: SharePreview = {
   kind: "scene",
-  title: "TV Farnwil - SG Felsegg",
+  title: "TV Farnwil - SG Kalvenegg",
   club: "TV Farnwil",
   team: "Herren 1",
   scenes: 1,
@@ -26,15 +26,15 @@ describe("chat text", () => {
     const cases = [
       chatText(t, { kind: "scene", title: "Gegenstoss 3:2" }),
       chatText(t, { kind: "collection", title: "Rückzug", scenes: 5 }),
-      chatText(t, { kind: "highlight", title: "Highlights", team: "TV Farnwil", opponent: "SG Felsegg", score: [28, 24] }),
-      chatText(t, { kind: "match", title: "TV Farnwil - SG Felsegg", team: "TV Farnwil", opponent: "SG Felsegg", score: [28, 24] }),
+      chatText(t, { kind: "highlight", title: "Highlights", team: "TV Farnwil", opponent: "SG Kalvenegg", score: [28, 24] }),
+      chatText(t, { kind: "match", title: "TV Farnwil - SG Kalvenegg", team: "TV Farnwil", opponent: "SG Kalvenegg", score: [28, 24] }),
       chatText(t, { kind: "play", title: "Kreuzen" }),
     ];
     expect(cases).toEqual([
       "▶️ Schaut euch diese Szene an: Gegenstoss 3:2",
       "▶️ Rückzug: 5 Szenen. Schaut sie euch bis zum nächsten Training an.",
-      "🔥 Unsere Highlights gegen SG Felsegg (28:24)",
-      "TV Farnwil 28:24 SG Felsegg: der Spielbericht mit allen Zahlen.",
+      "🔥 Unsere Highlights gegen SG Kalvenegg (28:24)",
+      "TV Farnwil 28:24 SG Kalvenegg: der Spielbericht mit allen Zahlen.",
       "📋 Spielzug «Kreuzen»: bitte vor dem Training anschauen.",
     ]);
     for (const c of cases) {
@@ -46,7 +46,7 @@ describe("chat text", () => {
   });
 
   it("falls back without result and exists in every language for every kind", () => {
-    expect(chatText(t, { kind: "match", title: "TV Farnwil - SG Felsegg" })).toBe("Spielbericht TV Farnwil - SG Felsegg: alle Zahlen im Link.");
+    expect(chatText(t, { kind: "match", title: "TV Farnwil - SG Kalvenegg" })).toBe("Spielbericht TV Farnwil - SG Kalvenegg: alle Zahlen im Link.");
     expect(chatText(t, { kind: "highlight", title: "Highlights", team: "Herren 1" })).toBe("🔥 Highlights von Herren 1");
     for (const [m, l] of [[fr, "fr"], [en, "en"]] as const) {
       const tt = tr(m, l);
@@ -67,22 +67,22 @@ describe("open graph", () => {
     expect(matchMinute(22.97)).toBe(23);
     expect(matchMinute(0)).toBe(1);
     expect(matchMinute(null)).toBeNull();
-    const scene = { ...base, goal: { team: "own" as const, zone: "la", minute: 22.5 }, opponent: "SG Felsegg" };
+    const scene = { ...base, goal: { team: "own" as const, zone: "la", minute: 22.5 }, opponent: "SG Kalvenegg" };
     expect(ogTitle(t, scene)).toBe("Szene 23. Min: Tor von aussen links");
     expect(goalWords(t, { team: "opp", zone: "gs" })).toBe("Gegentor nach Gegenstoss");
-    expect(ogTitle(t, { ...base, opponent: "SG Felsegg" })).toBe("Szene gegen SG Felsegg");
+    expect(ogTitle(t, { ...base, opponent: "SG Kalvenegg" })).toBe("Szene gegen SG Kalvenegg");
     expect(ogTitle(t, { ...base, title: "Gegenstoss 3:2" })).toBe("Szene: Gegenstoss 3:2");
-    expect(ogDescription(t, scene)).toBe("TV Farnwil Herren 1 · gegen SG Felsegg · ohne Konto ansehen");
+    expect(ogDescription(t, scene)).toBe("TV Farnwil Herren 1 · gegen SG Kalvenegg · ohne Konto ansehen");
   });
 
   it("puts the result in the title of a match and the count in a collection", () => {
-    const match = { ...base, kind: "match", title: "Herren 1 - SG Felsegg", opponent: "SG Felsegg", score: [28, 24], halftime: [14, 11], kickoff_at: "2026-11-15T18:00:00Z" };
-    expect(ogTitle(t, match)).toBe("TV Farnwil Herren 1 28:24 SG Felsegg");
+    const match = { ...base, kind: "match", title: "Herren 1 - SG Kalvenegg", opponent: "SG Kalvenegg", score: [28, 24], halftime: [14, 11], kickoff_at: "2026-11-15T18:00:00Z" };
+    expect(ogTitle(t, match)).toBe("TV Farnwil Herren 1 28:24 SG Kalvenegg");
     expect(ogDescription(t, match)).toBe("TV Farnwil Herren 1 · 15. November 2026 · Halbzeit 14:11 · ohne Konto ansehen");
     expect(ogTitle(t, { ...base, kind: "collection", title: "Rückzug", scenes: 5, duration_s: 130 })).toBe("Rückzug: 5 Szenen");
     expect(ogDescription(t, { ...base, kind: "collection", title: "Rückzug", scenes: 5, duration_s: 130 })).toBe("TV Farnwil Herren 1 · 2 min · ohne Konto ansehen");
     expect(ogTitle(t, { ...base, kind: "play", title: "Kreuzen" })).toBe("Spielzug: Kreuzen");
-    expect(ogTitle(t, { ...base, kind: "highlight", title: "Highlights", opponent: "SG Felsegg", score: [28, 24] })).toBe("Highlights: TV Farnwil Herren 1 28:24 SG Felsegg");
+    expect(ogTitle(t, { ...base, kind: "highlight", title: "Highlights", opponent: "SG Kalvenegg", score: [28, 24] })).toBe("Highlights: TV Farnwil Herren 1 28:24 SG Kalvenegg");
   });
 
   it("keeps the description to one line", () => {

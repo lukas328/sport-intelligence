@@ -37,12 +37,12 @@ describe("seasonRepeats", () => {
   });
   it("shortens opponent names", () => {
     expect(shortName("BSV Sälmatt-Uferholz")).toBe("Sälmatt");
-    expect(shortName("TSV Farnwil-Rietli")).toBe("Farnwil");
+    expect(shortName("TSV Farnwil-Quellwil")).toBe("Farnwil");
     expect(shortName("TV Mürli")).toBe("Mürli");
     expect(shortName("TV Ey-Lärchenwil")).toBe("Lärchenwil");
-    // review R11: no «Handball», no «Felsegg/.»
+    // review R11: no «Handball», no «Kalvenegg/.»
     expect(shortName("Handball Kammhöhe")).toBe("Kammhöhe");
-    expect(shortName("SG Felsegg/Lärchenwil (M2)")).toBe("Felsegg");
+    expect(shortName("SG Kalvenegg/Lärchenwil (M2)")).toBe("Kalvenegg");
     expect(shortName("HC Gerstach-Seefurt 2")).toBe("Gerstach");
     expect(shortName("SG")).toBe("SG");
   });

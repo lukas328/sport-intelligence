@@ -23,10 +23,10 @@ describe("chipsFromText (B02, B19)", () => {
 describe("opponents and numbers in a sentence (UX test B19)", () => {
   it("finds the opponent among the team's opponents and a shirt number", async () => {
     const { extrasFromText } = await import("./scene-words");
-    const opps = ["Handball Sälmatt", "TV Farnwil-Rietli"];
+    const opps = ["Handball Sälmatt", "TV Farnwil-Quellwil"];
     expect(extrasFromText("Paraden gegen Sälmatt", opps)).toEqual({ opponent: "Handball Sälmatt" });
     expect(extrasFromText("Tore von Nummer 11", opps)).toEqual({ number: 11 });
-    expect(extrasFromText("Gegentore #7 gegen Farnwil", opps)).toEqual({ opponent: "TV Farnwil-Rietli", number: 7 });
+    expect(extrasFromText("Gegentore #7 gegen Farnwil", opps)).toEqual({ opponent: "TV Farnwil-Quellwil", number: 7 });
     expect(extrasFromText("Gegentore über rechts aussen", opps)).toEqual({});
   });
 });

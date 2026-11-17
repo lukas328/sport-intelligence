@@ -1,7 +1,7 @@
 /**
  * One opponent, several spellings (review R7): handball.ch writes the same team as
- * «SG Felsegg/Lärchenwil 1» in the league and «SG Felsegg/Lärchenwil (M2)» in the cup, and a coach
- * may type «sg felsegg-lärchenwil». The key drops case, accents, punctuation, a bracketed
+ * «SG Kalvenegg/Lärchenwil 1» in the league and «SG Kalvenegg/Lärchenwil (M2)» in the cup, and a coach
+ * may type «sg kalvenegg-lärchenwil». The key drops case, accents, punctuation, a bracketed
  * addition and the «1» of a club's first team; a second team («… 2») stays a team of its own.
  * Same rule as `opponent_key` in the API (integrations/handball_ch.py).
  */

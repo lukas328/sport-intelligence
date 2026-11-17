@@ -183,15 +183,15 @@ def test_reel_of_a_match_in_two_files(tmp_path: Path) -> None:
 
 
 def test_title_card_writes_umlauts() -> None:
-    """Echtlauf 5 P8: «SG Lärchenwil/Felsegg - Seehasen Sälmatt» came out as «L?rchenwil … S?lmatt»
-    (Pillow's built-in font has no umlauts). The card uses the app's own typeface, shipped with
-    the worker."""
+    """Echtlauf 5 P8: «SG Lärchenwil/Kalvenegg - Seehasen Sälmatt» came out as
+    «L?rchenwil … S?lmatt» (Pillow's built-in font has no umlauts). The card uses the app's own
+    typeface, shipped with the worker."""
     face = reels.font(40)
     assert reels.FONT.is_file() and isinstance(face, ImageFont.FreeTypeFont)
     missing = face.getmask("￿").getbbox()  # what a glyph the font lacks looks like
     for ch in "äöüéÄÖÜè":
         assert face.getmask(ch).getbbox() != missing, ch
     card = reels.intro_card(
-        ["SG Lärchenwil/Felsegg - Seehasen Sälmatt"], "#d3202e", None, (640, 360)
+        ["SG Lärchenwil/Kalvenegg - Seehasen Sälmatt"], "#d3202e", None, (640, 360)
     )
     assert card.size == (640, 360)
