@@ -201,19 +201,20 @@ function FromReport({ orgId, teamId, hideNext }: { orgId: string; teamId: string
   const club = link.data?.official_club_id;
   const team = link.data?.official_team_id;
   const preview = useQuery({
-    queryKey: ["public-team", club, team],
+    queryKey: ["public-team", club, team, "facts"],
     enabled: Boolean(club && team),
     retry: false,
     staleTime: 3_600_000,
-    queryFn: async () => (await api.GET("/v1/public/clubs/{club_id}/teams/{official_id}", { params: { path: { club_id: club!, official_id: team! } } })).data ?? null,
+    queryFn: async () => (await api.GET("/v1/public/clubs/{club_id}/teams/{official_id}", { params: { path: { club_id: club!, official_id: team! }, query: { scorers: false } } })).data ?? null,
   });
   const standing = useStanding(preview.data);
   if (!preview.data) return null;
   return (
     <section className="space-y-6" data-testid="start-from-report">
       {standing && <p className="font-slant m-0 text-[28px] leading-tight md:text-[34px]">{standing}</p>}
-      {/* the next opponent stands once, at the side (UX test B40) */}
-      <TeamFacts p={preview.data} hideNext={hideNext} />
+      {/* the next opponent stands once, at the side (UX test B40); the scorers stand in the
+          season, counted from the match reports in the app like the roster (app review R3) */}
+      <TeamFacts p={preview.data} hideNext={hideNext} hideScorers />
       <p className="m-0 text-[15px] text-ink-2">{t("source")}</p>
     </section>
   );
