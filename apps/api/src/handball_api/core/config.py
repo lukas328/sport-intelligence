@@ -22,6 +22,13 @@ class Settings(BaseSettings):
 
     # Runtime connection uses the non-superuser role so that RLS applies (ADR 005).
     database_url: str = "postgresql+asyncpg://handball_app:handball_app@localhost:5432/handball"
+    # Connections per API process: the pool keeps db_pool_size open and opens up to
+    # db_max_overflow more under load. All processes of all replicas together must stay below
+    # the server's connection limit (processes x replicas x (size + overflow)); a request that
+    # finds the pool full waits up to db_pool_timeout_s, then gets a 503.
+    db_pool_size: int = 5
+    db_max_overflow: int = 5
+    db_pool_timeout_s: float = 10.0
     # Owner connection for migrations only.
     migration_database_url: str | None = None
     redis_url: str = "redis://localhost:6379/0"

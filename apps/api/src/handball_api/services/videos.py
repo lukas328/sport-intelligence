@@ -35,7 +35,16 @@ from handball_api.models import (
 )
 from handball_api.models.enums import JobStatus, MatchStatus, VideoRole, VideoStatus
 from handball_api.schemas.matches import JobUpdate, LinkImport, UploadComplete, UploadCreate
-from handball_api.services import audit, auto_events, billing, feed, halls, timeline, training
+from handball_api.services import (
+    audit,
+    auto_events,
+    billing,
+    checks,
+    feed,
+    halls,
+    timeline,
+    training,
+)
 from handball_api.services.context import Ctx
 from handball_api.services.mail_templates import render
 from handball_api.services.matches import DUPLICATE, Part, get_match, parts_of
@@ -232,14 +241,11 @@ async def _ready_note(ctx: Ctx, match: Match) -> tuple[str, dict[str, Any]]:
     if (goals or 0) >= THREE_THINGS_MIN_GOALS:
         return "analysis_ready", {}
     # the same questions the start and Prüfen show (UX test A02: one count, not two)
-    from handball_api.services.graphics import more_checks, open_checks
+    from handball_api.services.graphics import open_checks
 
+    # the budget of the main round only (second round A6): «Mehr prüfen» is never promised
     questions = len(await open_checks(ctx, match))
-    # further moments after the most important ones (third real-video test G1); with none of
-    # the most important left, the other moments are the questions
-    more = len(await more_checks(ctx, match))
-    if questions == 0:
-        questions, more = more, 0
+    more = 0
     return ("analysis_questions" if questions else "analysis_no_goals"), {
         "questions": questions,
         "more_moments": more,
@@ -332,7 +338,44 @@ async def abort_upload(ctx: Ctx, asset_id: uuid.UUID) -> None:
         await timeline.settle(ctx, match, before)
         await _whole_match(ctx, match)
         await start_waiting(ctx, match)
+    if match is not None:
+        # the last file gone, or only a failed one left: the match no longer says «wird
+        # hochgeladen» or «Analyse läuft» (second round A1)
+        await settle_status(ctx, match)
     await audit.record(ctx, "video.deleted", target_type="video", target_id=asset_id)
+
+
+async def settle_status(ctx: Ctx, match: Match) -> None:
+    """The match's status from its files, after one was removed or given up: playable when one
+    plays, being processed or uploaded while one is, failed when all failed; with no file left
+    it waits for a video again."""
+    if match.status not in (
+        MatchStatus.UPLOADING,
+        MatchStatus.PROCESSING,
+        MatchStatus.READY,
+        MatchStatus.FAILED,
+    ):
+        return
+    rows = (
+        await ctx.db.scalars(
+            select(VideoAsset.status).where(
+                VideoAsset.match_id == match.id, VideoAsset.role == VideoRole.MAIN
+            )
+        )
+    ).all()
+    states = set(rows)
+    if VideoStatus.READY in states:
+        match.status = MatchStatus.READY
+    elif states & {VideoStatus.UPLOADED, VideoStatus.PROCESSING}:
+        match.status = MatchStatus.PROCESSING
+    elif VideoStatus.UPLOADING in states:
+        match.status = MatchStatus.UPLOADING
+    elif states:
+        match.status = MatchStatus.FAILED
+    elif match.status != MatchStatus.READY:
+        # no video left: a match with a report stays as it is, one without waits for a video
+        match.status = MatchStatus.SCHEDULED
+    await ctx.db.flush()
 
 
 async def _whole_match(ctx: Ctx, match: Match) -> None:
@@ -1061,6 +1104,9 @@ async def _apply_analysis_result(
             "ball_path",
         )
     }
+    # how much the analysis found (play time, people seen): Prüfen asks nothing when it is too
+    # little and says why instead (services/checks)
+    asset.analysis["signals"] = checks.signals(r)
     if clicked is not None:
         asset.analysis[CLICKED] = clicked
     if pending is not None:  # a newer run with clicked points is still running

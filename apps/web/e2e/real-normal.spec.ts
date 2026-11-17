@@ -58,7 +58,7 @@ test("no goal found by the analysis: after Prüfen the result, course, goals and
   // the start counts the court, the throw-off and the three goals: one count
   await page.goto(`/app/${org}/teams/${team}/matches`);
   // the fresh analysis stands in the head, ahead of the newer match
-  await expect(page.getByTestId("start-next-step")).toContainText("5 Fragen helfen");
+  await expect(page.getByTestId("start-next-step")).toContainText("5 gezielte Fragen");
   await expect(page.locator("[data-zone=wurf]")).toContainText("TV Kandidat");
 
   // the Spiel tab right after the analysis: the sentence and the step, not an empty tab (in a
@@ -93,8 +93,9 @@ test("no goal found by the analysis: after Prüfen the result, course, goals and
   const third = await page.context().browser()!.newContext({ baseURL: info.project.use.baseURL, storageState: await page.context().storageState() });
   const look = await third.newPage();
   await look.goto(`/app/${org}/matches/${match.id}`);
-  await expect(look.getByTestId("score-note")).toHaveText("bisher bestätigt · 1 Moment offen");
-  await expect(look.getByTestId("check-link")).toContainText("1");
+  // the weaker moment waits behind «Mehr prüfen»: never counted (second round A6)
+  await expect(look.getByTestId("score-note")).toHaveText("Tore im Video");
+  await expect(look.getByTestId("check-link")).toHaveCount(0);
   await third.close();
   await page.reload();
   await expect(page.getByTestId("check-main-done")).toBeVisible({ timeout: 30_000 });

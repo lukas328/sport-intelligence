@@ -12,14 +12,18 @@ from fastapi.middleware.cors import CORSMiddleware
 from handball_api import __version__
 from handball_api.core.assistant_llm import AssistantModel, ClaudeAssistantModel
 from handball_api.core.config import Settings, get_settings
-from handball_api.core.db import dispose_engine, init_engine
+from handball_api.core.db import database_unavailable, dispose_engine, init_engine
 from handball_api.core.email import (
     ConsoleEmailSender,
     EmailSender,
     MemoryEmailSender,
     SmtpEmailSender,
 )
-from handball_api.core.errors import install_error_handlers, internal_error_response
+from handball_api.core.errors import (
+    install_error_handlers,
+    internal_error_response,
+    unavailable_response,
+)
 from handball_api.core.jobs import EventBus, JobQueue, RedisEventBus, RqJobQueue
 from handball_api.core.logging import configure_logging, get_logger
 from handball_api.core.oidc import OidcClient
@@ -140,7 +144,12 @@ def create_app(
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-        engine = init_engine(settings.database_url)
+        engine = init_engine(
+            settings.database_url,
+            pool_size=settings.db_pool_size,
+            max_overflow=settings.db_max_overflow,
+            pool_timeout_s=settings.db_pool_timeout_s,
+        )
         instrument_engine(app, engine)
         log.info("startup", env=settings.env, version=__version__)
         yield
@@ -205,9 +214,22 @@ def create_app(
             # An unexpected error becomes a problem+json 500 here, logged as one structured line
             # with the request id. Left alone it would reach Starlette's server error middleware,
             # which answers without the id and re-raises, so the server prints a bare traceback.
-            log.exception("unhandled_exception", method=request.method, path=request.url.path)
+            # The database out of reach (no free connection, the server refusing one) is no fault
+            # of the request: 503 with Retry-After. Logged the same way, so it is not missed.
+            unavailable = database_unavailable(exc)
+            log.exception(
+                "unhandled_exception",
+                method=request.method,
+                path=request.url.path,
+                status=503 if unavailable else 500,
+                kind="database-unavailable" if unavailable else "error",
+            )
             sentry_sdk.capture_exception(exc)  # no-op without Sentry; deduplicated with it
-            response = internal_error_response(request, request_id)
+            response = (
+                unavailable_response(request, request_id)
+                if unavailable
+                else internal_error_response(request, request_id)
+            )
         finally:
             structlog.contextvars.clear_contextvars()
         response.headers["x-request-id"] = request_id

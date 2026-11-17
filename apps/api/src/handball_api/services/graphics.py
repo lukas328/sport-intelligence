@@ -24,7 +24,7 @@ import uuid
 from typing import Any
 
 import numpy as np
-from sqlalchemy import select
+from sqlalchemy import func, select
 
 from handball_api.core.errors import ProblemError
 from handball_api.models import (
@@ -36,10 +36,12 @@ from handball_api.models import (
     Track,
     VideoAsset,
 )
-from handball_api.models.enums import VideoStatus
+from handball_api.models.enums import JobStatus, VideoRole, VideoStatus
+from handball_api.services import checks
 from handball_api.services.context import Ctx
 from handball_api.services.events import clock_from_video
 from handball_api.services.matches import (
+    DUPLICATE,
     REPORT_SOURCES,
     clip_window,
     duration_ms,
@@ -411,6 +413,8 @@ async def match_graphics(ctx: Ctx, match_id: uuid.UUID) -> dict[str, Any]:
         }
         for a, start in (files.all() if len(files.parts) > 1 else [])
     ]
+    rounds = await _rounds(ctx, match, asset, tracking, confirmed_field)
+    files_out = await _files_state(ctx, match)
     state = _job_state(job)
     if any(p["analysis"] == "running" for p in parts):
         state = "running"  # a further part is still being analysed: the match is not done
@@ -429,12 +433,43 @@ async def match_graphics(ctx: Ctx, match_id: uuid.UUID) -> dict[str, Any]:
         "phases": await _phases(ctx, match, goals),
         # the court first: until it is confirmed the analysis draws no positions (demo matches
         # show invented ones, the real court of their video is still asked)
-        "checks": await _open_checks(ctx, match, asset, tracking, confirmed_field),
+        "checks": rounds.checks,
         # the files of the match (two halves, a split recording): where each starts (Q-VIDEO-PARTS)
         "parts": parts,
-        "more_checks": await more_checks(ctx, match),
+        "more_checks": rounds.more,
+        # why there is little or nothing to ask (court not recognised, the analysis failed)
+        "notice": rounds.notice,
+        "goals_missing": rounds.goals_missing,
+        "skipped": rounds.skipped,
+        "files": files_out,
         "source": "demo" if demo else "analysis",
     }
+
+
+async def _files_state(ctx: Ctx, match: Match) -> list[dict[str, Any]]:
+    """Every file of the match that is a part of it (main camera, not the same file twice), with
+    how far it is: the list of matches sums them up («1 von 2 Teilen analysiert», A8)."""
+    rows = (
+        await ctx.db.scalars(
+            select(VideoAsset)
+            .where(VideoAsset.match_id == match.id, VideoAsset.role == VideoRole.MAIN)
+            .order_by(VideoAsset.created_at)
+        )
+    ).all()
+    out: list[dict[str, Any]] = []
+    for a in rows:
+        if a.status == VideoStatus.FAILED and (a.error or "").startswith(DUPLICATE):
+            continue
+        if a.status == VideoStatus.FAILED:
+            state = "failed"
+        elif a.status == VideoStatus.UPLOADING:
+            state = "uploading"  # not all of it arrived (it may be stuck)
+        elif a.status != VideoStatus.READY:
+            state = "running"
+        else:
+            state = await analysis_status(ctx, a)
+        out.append({"video_id": a.id, "filename": a.filename, "state": state})
+    return out
 
 
 async def _part_tracking(
@@ -590,11 +625,15 @@ def _kickoff_check(match: Match, length_ms: int | None) -> list[dict[str, Any]]:
     ]
 
 
-async def _open_checks(
+async def _rounds(
     ctx: Ctx, match: Match, asset: VideoAsset | None, tracking: bool, confirmed_field: bool | None
-) -> list[dict[str, Any]]:
-    """Every open question of Prüfen, in the order they are asked: the court (of each part of
-    the match), the throw-off, then the goal and shot candidates."""
+) -> checks.Rounds:
+    """Every question of Prüfen within the budget (services/checks): the court (of each part of
+    the match), the throw-off, then the goal moments; the rest offered as «Mehr prüfen»; and
+    the notice when the analysis found too little to ask about."""
+    from handball_api.services.support import failure_code
+
+    skipped = checks.skipped_keys(match)
     fields = (
         [_field_check(asset)] if asset is not None and tracking and confirmed_field is False else []
     )
@@ -610,13 +649,74 @@ async def _open_checks(
         check["copy_from"] = asset.id if asset is not None and first_ok else None
         fields.append(check)
     length = await timeline_duration_ms(ctx, match.id)
-    return (
-        fields
-        # the throw-off is set in the playing video: asked only once the video plays (while it
-        # is still uploaded or converted the question would show an empty player, livegang K5)
-        + (_kickoff_check(match, length) if _plays(asset) and not match.is_demo else [])
-        + await _checks(ctx, match)
+    # the throw-off is set in the playing video: asked only once the video plays (while it
+    # is still uploaded or converted the question would show an empty player, livegang K5)
+    kicks = (
+        _kickoff_check(match, length)[: checks.KICKOFFS_MAX]
+        if _plays(asset) and not match.is_demo
+        else []
     )
+    # what each part found: too little, and the analysis of the match's video failed
+    little: dict[uuid.UUID, str] = {}
+    out = checks.Rounds()
+    parts = files.all() or ([(asset, 0)] if asset is not None else [])
+    for a, _ in parts:
+        if a is None or match.is_demo:
+            continue
+        reason = checks.little_found(a, await _court_ok(ctx, a, files))
+        if reason is not None:
+            little[a.id] = reason
+            if out.notice is None or (asset is not None and a.id == asset.id):
+                out.notice = checks.little_notice(reason, a)
+    job = await _analysis_job(ctx, asset)
+    if asset is not None and not match.is_demo and _job_state(job) == "failed" and job is not None:
+        from handball_api.services.videos import job_budget_s
+
+        code = failure_code(job.error)
+        limit = job_budget_s("analysis", asset.duration_s) if code == "timeout" else None
+        out.notice = checks.failure_notice(code, asset, limit)
+    main_little = asset is not None and asset.id in little
+
+    def keep(c: dict[str, Any]) -> bool:
+        return checks.check_key(c) not in skipped
+
+    first = [c for c in fields if keep(c)]
+    later = [c for c in fields if not keep(c)]
+    for k in kicks:
+        (first if keep(k) and not main_little else later).append(k)
+    goals = await _goals(ctx, match)
+    out.goals_missing = checks.goals_missing(match, goals, length)
+    ranked, used = await _goal_questions(ctx, match, length)
+    # a question left with «Weiss nicht» keeps its place in the budget: leaving one never
+    # pulls the next one in (the throw-off of a file that found little is not left, only moved)
+    left_here = sum(1 for c in later if not keep(c))
+    room = checks.goal_limit(out.goals_missing, checks.BUDGET - len(first) - left_here - used)
+    from handball_api.services.goal_candidates import DEFAULT_RATE
+
+    asked: list[GoalCandidate] = []
+    rest: list[GoalCandidate] = []
+    for cand, left in ranked:
+        if (
+            len(asked) < room
+            and not left
+            and cand.video_asset_id not in little
+            and cand.rate <= DEFAULT_RATE["goal"]
+        ):
+            asked.append(cand)
+        else:
+            rest.append(cand)
+    out.skipped = len(later) + sum(1 for _, left in ranked if left)
+    order = lambda c: c.goal_ms  # noqa: E731
+    out.checks = first + [_check_of(c) for c in sorted(asked, key=order)]
+    out.more = later + [_check_of(c) for c in sorted(rest, key=order)]
+    return out
+
+
+async def _open_checks(
+    ctx: Ctx, match: Match, asset: VideoAsset | None, tracking: bool, confirmed_field: bool | None
+) -> list[dict[str, Any]]:
+    """The questions of the main round, in the order they are asked."""
+    return (await _rounds(ctx, match, asset, tracking, confirmed_field)).checks
 
 
 def _plays(asset: VideoAsset | None) -> bool:
@@ -643,12 +743,16 @@ async def _court_ok(ctx: Ctx, asset: VideoAsset | None, files: Files) -> bool | 
     return bool(others) and _carried_over(asset, others)
 
 
-async def open_checks(ctx: Ctx, match: Match) -> list[dict[str, Any]]:
-    """The open questions of a match: the one count the mail, the start and Prüfen share (UX
-    test A02)."""
+async def rounds_of(ctx: Ctx, match: Match) -> checks.Rounds:
     asset = await timeline_video(ctx, match.id)
     tracking = _has_tracking(asset)
-    return await _open_checks(ctx, match, asset, tracking, await _field_confirmed(ctx, asset))
+    return await _rounds(ctx, match, asset, tracking, await _field_confirmed(ctx, asset))
+
+
+async def open_checks(ctx: Ctx, match: Match) -> list[dict[str, Any]]:
+    """The open questions of a match: the one count the bell, the mail, the start and Prüfen
+    share (UX test A02), within the budget (second round A6)."""
+    return (await rounds_of(ctx, match)).checks
 
 
 SAME_MOMENT_MS = 5000  # two candidates this close, for the same side, are one goal
@@ -677,32 +781,56 @@ def _windows(rows: list[GoalCandidate]) -> list[list[GoalCandidate]]:
     return groups
 
 
+async def _round_start(ctx: Ctx, match: Match) -> Any:
+    """When the latest analysis of the match ended: what was answered or left since then is
+    this round's (None: no analysis ended, every answer counts)."""
+    return await ctx.db.scalar(
+        select(func.max(ProcessingJob.finished_at)).where(
+            ProcessingJob.match_id == match.id,
+            ProcessingJob.kind == "analysis",
+            ProcessingJob.status == JobStatus.SUCCEEDED,
+        )
+    )
+
+
 async def _goal_questions(
-    ctx: Ctx, match: Match
-) -> tuple[list[GoalCandidate], list[GoalCandidate]]:
-    """The goal candidates to ask: one per moment, none where a goal of that moment is already
-    confirmed. First those of the default rate (the strongest, what three things need), the
-    others as «Wenn du magst» (E07). Shot candidates are not asked in Prüfen and not counted."""
-    from handball_api.services.goal_candidates import DEFAULT_RATE
+    ctx: Ctx, match: Match, length: int | None
+) -> tuple[list[tuple[GoalCandidate, bool]], int]:
+    """The goal moments still to ask, the most useful first (rate, then score, then rank): one
+    per moment, none where a goal of that moment is already confirmed or known (a goal read
+    from the scoreboard, a report goal at that time, a goal marked by hand); each with whether
+    it was left («Weiss nicht»). And how many goal moments this round already used up
+    (answered or left since the analysis ended). Shot candidates are not asked in Prüfen."""
+    from handball_api.services.goal_candidates import _covered, _shots
 
     rows = (
         await ctx.db.scalars(
             select(GoalCandidate).where(
-                GoalCandidate.match_id == match.id,
-                GoalCandidate.kind == "goal",
-                GoalCandidate.status.in_(("open", "confirmed")),
+                GoalCandidate.match_id == match.id, GoalCandidate.kind == "goal"
             )
         )
     ).all()
-    asked: list[GoalCandidate] = []
-    for group in _windows(list(rows)):
+    since = await _round_start(ctx, match)
+    used = sum(
+        1
+        for c in rows
+        if c.status != "open"
+        and c.reviewed_at is not None
+        and (since is None or c.reviewed_at >= since)
+    )
+    shots = await _shots(ctx, match.id)
+    lengths: dict[uuid.UUID, int | None] = {c.video_asset_id: length for c in rows}
+    live = [c for c in rows if c.status in ("open", "skipped", "confirmed")]
+    asked: list[tuple[GoalCandidate, bool]] = []
+    for group in _windows(live):
         if any(c.status == "confirmed" for c in group):
             continue
-        asked.append(min(group, key=lambda c: (c.rate, -c.score, c.rank)))
-    first = [c for c in asked if c.rate <= DEFAULT_RATE["goal"]]
-    more = [c for c in asked if c.rate > DEFAULT_RATE["goal"]]
-    order = lambda c: c.goal_ms  # noqa: E731
-    return sorted(first, key=order), sorted(more, key=order)
+        best = min(group, key=lambda c: (c.rate, -c.score, c.rank))
+        if any(_covered(c, shots, lengths) is not None for c in group):
+            continue
+        asked.append((best, any(c.status == "skipped" for c in group)))
+    asked.sort(key=lambda x: (x[0].rate, -x[0].score, x[0].rank, x[0].goal_ms))
+    return asked, used
 
 
 def _check_of(c: GoalCandidate) -> dict[str, Any]:
@@ -717,17 +845,10 @@ def _check_of(c: GoalCandidate) -> dict[str, Any]:
     }
 
 
-async def _checks(ctx: Ctx, match: Match) -> list[dict[str, Any]]:
-    """Questions for Prüfen: the goal candidates worth asking first. A question about a person
-    needs a box in the picture, which the analysis does not deliver yet: not asked here."""
-    first, _ = await _goal_questions(ctx, match)
-    return [_check_of(c) for c in first]
-
-
 async def more_checks(ctx: Ctx, match: Match) -> list[dict[str, Any]]:
-    """The goal candidates of a lower rank: offered as «Wenn du magst: n weitere», not counted."""
-    _, more = await _goal_questions(ctx, match)
-    return [_check_of(c) for c in more]
+    """Everything beyond the main round, offered behind «Mehr prüfen», never counted: further
+    goal moments, questions left with «Weiss nicht», what a part that found little proposed."""
+    return (await rounds_of(ctx, match)).more
 
 
 # ---- one scene ------------------------------------------------------------------------------

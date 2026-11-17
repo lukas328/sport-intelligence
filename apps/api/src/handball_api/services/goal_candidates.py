@@ -50,7 +50,7 @@ from handball_api.core.clock import format_clock
 from handball_api.core.errors import ProblemError
 from handball_api.models import Event, GoalCandidate, Match, Possession, VideoAsset
 from handball_api.schemas.events import EventIn
-from handball_api.services import audit, match_clock, roster, shot_positions, timeline
+from handball_api.services import audit, checks, match_clock, roster, shot_positions, timeline
 from handball_api.services import events as event_service
 from handball_api.services.auto_events import (
     CANDIDATE,
@@ -72,6 +72,7 @@ KINDS = ("goal", "shot")
 RATES = {"goal": (1, 2, 4), "shot": (2, 4, 6)}
 DEFAULT_RATE = {"goal": 2, "shot": 4}
 REVIEWED = ("confirmed", "rejected")
+OPEN = ("open", "skipped")  # skipped: left with «Weiss nicht» in Prüfen, still unanswered
 SIDES = ("own", "opponent")
 OUTCOMES = ("goal", "save", "miss", "post", "blocked")
 SUGGEST_MS = 8000  # report shot - estimated shot time, when the clock maps exactly
@@ -95,11 +96,14 @@ async def store(
     """Candidates of a new analysis of the match's main video (`found` is the worker's
     `goal_candidates`, with the shot candidates under "shots"; None when the video was too short
     or nobody was seen)."""
+    # a new round: the open candidates of the video and those left with «Weiss nicht» go (their
+    # moments are proposed afresh), and its court is asked again (services/checks)
     await ctx.db.execute(
         delete(GoalCandidate).where(
-            GoalCandidate.video_asset_id == asset.id, GoalCandidate.status == "open"
+            GoalCandidate.video_asset_id == asset.id, GoalCandidate.status.in_(OPEN)
         )
     )
+    checks.forget_skipped(match, {f"field:{asset.id}"})
     reviewed: dict[str, list[int]] = {k: [] for k in KINDS}
     for c in (
         await ctx.db.scalars(select(GoalCandidate).where(GoalCandidate.video_asset_id == asset.id))
@@ -324,6 +328,8 @@ def _row(
     ev: Event | None = None,
 ) -> dict[str, Any]:
     derived = clock_from_video(match, c.goal_ms)
+    # left with «Weiss nicht» in Prüfen: still open for every list, marked as such
+    status = "open" if c.status in OPEN else c.status
     goal = ev if ev is not None and c.status == "confirmed" and ev.outcome == "goal" else None
     return {
         "id": c.id,
@@ -336,14 +342,15 @@ def _row(
         "score": round(c.score, 3),
         "rate": c.rate,
         "suggested_side": c.suggested_side,
-        "status": c.status,
+        "status": status,
+        "skipped": c.status == "skipped",
         "side": c.side,
         "outcome": c.outcome,
         "event_id": c.event_id,
         "period": derived[0] if derived else None,
         "clock_s": derived[1] if derived else None,
         "known": None
-        if known is None or c.status != "open"
+        if known is None or status != "open"
         else {
             "event_id": known.id,
             "source": known.source,
@@ -351,7 +358,7 @@ def _row(
             "t_ms": _video_ms(known),
             "outcome": known.outcome,
         },
-        "suggestion": suggestion if c.status == "open" and known is None else None,
+        "suggestion": suggestion if status == "open" and known is None else None,
         "shot_zone": shot_positions.zone_of(goal) if goal is not None else None,
         "zone_source": shot_positions.zone_source(goal) if goal is not None else None,
     }
@@ -397,7 +404,7 @@ async def _report(
     rep.visible = await roster.visible_players(ctx, match.team_id, match.season_id)
     length = await timeline_duration_ms(ctx, match.id) if assets else None
     lengths: dict[uuid.UUID, int | None] = dict.fromkeys(assets, length)
-    rep.suggest([c for c in cands if c.status == "open" and _covered(c, shots, lengths) is None])
+    rep.suggest([c for c in cands if c.status in OPEN and _covered(c, shots, lengths) is None])
     return rep, length
 
 
@@ -554,7 +561,7 @@ async def review(
         outcome = outcome or ("goal" if c.kind == "goal" else None)
         if outcome not in OUTCOMES:
             raise ProblemError(422, "invalid-outcome", "A confirmed shot needs its outcome")
-        if c.status == "open":
+        if c.status in OPEN:
             known = _covered(c, shots, await _lengths(ctx, [c]))
             if known is not None and (c.kind == "shot" or known.outcome == "goal"):
                 raise ProblemError(409, "already-a-goal", "This moment is already a known shot")
@@ -656,7 +663,7 @@ async def review(
     )
     shots = await _shots(ctx, match.id)
     sugg = None
-    if c.kind == "shot" and c.status == "open":
+    if c.kind == "shot" and c.status in OPEN:
         rep, _ = await _report(ctx, match, await _candidates(ctx, match, c.kind), shots)
         sugg = rep.suggestion(c)
     ev = await ctx.db.get(Event, c.event_id) if c.event_id else None

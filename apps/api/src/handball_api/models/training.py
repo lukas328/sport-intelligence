@@ -68,7 +68,7 @@ class FocusPlan(Base, EntityMixin, TenantMixin):
         ForeignKey("teams.id", ondelete="CASCADE"), index=True, nullable=False
     )
     match_id: Mapped[uuid.UUID | None] = mapped_column(
-        ForeignKey("matches.id", ondelete="SET NULL")
+        ForeignKey("matches.id", ondelete="SET NULL"), index=True
     )
     insight_key: Mapped[str] = mapped_column(String(60), nullable=False)
     params: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False, default=dict)

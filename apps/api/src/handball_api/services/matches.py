@@ -10,6 +10,8 @@ from sqlalchemy import delete, func, select
 
 from handball_api.core.colors import kit_warnings
 from handball_api.core.errors import ProblemError
+from handball_api.core.logging import get_logger
+from handball_api.core.storage import ObjectStorage
 from handball_api.models import (
     Event,
     Match,
@@ -20,6 +22,7 @@ from handball_api.models import (
     Organization,
     ProcessingJob,
     Season,
+    StatsCache,
     VideoAsset,
 )
 from handball_api.models.enums import MatchFormatKey, VideoRole, VideoStatus
@@ -41,6 +44,8 @@ from handball_api.services import audit, billing, match_formats
 from handball_api.services.context import Ctx
 from handball_api.services.orgs import current_seasons, get_team
 from handball_api.services.policies import Action, authorize, is_staff_somewhere, visible_team_ids
+
+log = get_logger("handball_api.matches")
 
 # where events come from when a match report brought them (handball.ch, a paper report)
 REPORT_SOURCES = ("official_feed", "paper_report", "official_report")
@@ -736,35 +741,70 @@ async def update_match(ctx: Ctx, match_id: uuid.UUID, data: MatchUpdate) -> Matc
     return match
 
 
-async def delete_match(ctx: Ctx, match_id: uuid.UUID) -> None:
-    """Deletes the match with all videos, derived files and data (BRIEF 12, deletion)."""
+@dataclass
+class MatchFiles:
+    """The stored files of a deleted match, removed after its rows are gone (`remove`)."""
+
+    storage: ObjectStorage
+    buckets: tuple[str, ...]
+    prefix: str
+    uploads: list[tuple[str, str, str]]  # bucket, key, upload id of uploads still open
+
+    async def remove(self) -> int:
+        """Aborts open uploads and removes every object below the match's prefix. Runs after
+        the response: a big match has thousands of video segments, which took long enough to
+        hold a request (and its database transaction) open for a long time. A failure is logged
+        with the prefix to remove by hand; the rows are gone either way."""
+        removed = 0
+        try:
+            for bucket, key, upload_id in self.uploads:
+                await self.storage.abort_multipart(bucket, key, upload_id)
+            for bucket in self.buckets:
+                removed += await self.storage.delete_prefix(bucket, self.prefix)
+        except Exception:
+            log.exception("match_files_left", prefix=self.prefix, removed=removed)
+            return removed
+        log.info("match_files_removed", prefix=self.prefix, removed=removed)
+        return removed
+
+
+async def delete_match(ctx: Ctx, match_id: uuid.UUID) -> MatchFiles:
+    """Deletes the match with all videos, derived data (BRIEF 12, deletion) in one short
+    transaction; the files go afterwards with the returned `MatchFiles.remove`. The rows go
+    by the database's ON DELETE CASCADE in one statement."""
     match = await get_match(ctx, match_id, Action.MATCH_DELETE)
     videos = (await ctx.db.scalars(select(VideoAsset).where(VideoAsset.match_id == match.id))).all()
-    for v in videos:
-        if v.upload_id and v.status == "uploading":
-            await ctx.storage.abort_multipart(
-                ctx.settings.s3_bucket_videos, v.storage_key, v.upload_id
+    bucket = ctx.settings.s3_bucket_videos
+    uploads = [
+        (bucket, v.storage_key, v.upload_id)
+        for v in videos
+        if v.upload_id and v.status == "uploading"
+    ]
+    # an attachment still uploading has parts only (stored files go with the prefix)
+    uploads += [
+        (bucket, a.storage_key, str(a.upload_id))
+        for a in (
+            await ctx.db.scalars(
+                select(MatchAttachment).where(
+                    MatchAttachment.match_id == match.id, MatchAttachment.upload_id.is_not(None)
+                )
             )
-    # an attachment still uploading has parts only (stored files go with the prefix below)
-    for a in (
-        await ctx.db.scalars(
-            select(MatchAttachment).where(
-                MatchAttachment.match_id == match.id, MatchAttachment.upload_id.is_not(None)
-            )
-        )
-    ).all():
-        await ctx.storage.abort_multipart(
-            ctx.settings.s3_bucket_videos, a.storage_key, str(a.upload_id)
-        )
-    prefix = f"{match.organization_id}/{match.id}/"
-    removed = 0
-    for bucket in (ctx.settings.s3_bucket_videos, ctx.settings.s3_bucket_artifacts):
-        removed += await ctx.storage.delete_prefix(bucket, prefix)
+        ).all()
+    ]
+    files = MatchFiles(
+        storage=ctx.storage,
+        buckets=(ctx.settings.s3_bucket_videos, ctx.settings.s3_bucket_artifacts),
+        prefix=f"{match.organization_id}/{match.id}/",
+        uploads=uploads,
+    )
+    # the cached statistics of the match (scope_id is no foreign key, so no cascade)
+    await ctx.db.execute(delete(StatsCache).where(StatsCache.scope_id == match.id))
     await ctx.db.delete(match)
     await audit.record(
         ctx,
         "match.deleted",
         target_type="match",
         target_id=match_id,
-        data={"objects_removed": removed, "videos": len(videos)},
+        data={"videos": len(videos), "files_prefix": files.prefix},
     )
+    return files

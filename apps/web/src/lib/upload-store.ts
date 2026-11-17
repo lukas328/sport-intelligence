@@ -63,3 +63,25 @@ export function localEta(u: LocalUpload, now = Date.now()): number | null {
   if (u.state !== "uploading" || u.done <= 0 || took < 10 || u.done / u.total < 0.01) return null;
   return Math.max(0, Math.round((u.total - u.done) / (u.done / took) - (now - u.movedAt) / 1000));
 }
+
+/** How to stop an upload running in this tab, by its video (the progress block's «Upload
+ * abbrechen», second round A1): the upload panel that runs it registers it. */
+const stoppers = new Map<string, () => void>();
+
+export function registerStop(videoId: string, stop: () => void): () => void {
+  stoppers.set(videoId, stop);
+  return () => {
+    if (stoppers.get(videoId) === stop) stoppers.delete(videoId);
+  };
+}
+
+/** Stops the upload of this video if it runs in this tab; true when it did. */
+export function stopLocalUpload(videoId: string): boolean {
+  const stop = stoppers.get(videoId);
+  stoppers.delete(videoId);
+  stop?.();
+  const before = uploads.length;
+  uploads = uploads.filter((u) => u.videoId !== videoId);
+  if (uploads.length !== before) emit();
+  return stop != null;
+}

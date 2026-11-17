@@ -1846,6 +1846,48 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/matches/{match_id}/checks/skip": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Skip Check
+         * @description «Weiss nicht» in Prüfen, kept: the question is not asked again in this round and waits
+         *     behind «Mehr prüfen»; it no longer counts in the bell.
+         */
+        post: operations["skip_check_v1_orgs__org_id__matches__match_id__checks_skip_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/matches/{match_id}/checks/skip-all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Skip All Checks
+         * @description «Für dieses Spiel fertig»: every open question of the match is left at once; the bell
+         *     clears, the questions stay behind «Mehr prüfen».
+         */
+        post: operations["skip_all_checks_v1_orgs__org_id__matches__match_id__checks_skip_all_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/matches/{match_id}/clips": {
         parameters: {
             query?: never;
@@ -5328,7 +5370,7 @@ export interface components {
             error: string | null;
             /**
              * Error Code
-             * @description calibration, unreadable, too_short, timeout or generic
+             * @description calibration, unreadable, too_short, timeout, stalled or generic
              */
             error_code?: string | null;
             /** Formations */
@@ -5855,6 +5897,39 @@ export interface components {
             /** Values */
             values: number[];
         };
+        /**
+         * CheckNoticeOut
+         * @description Why Prüfen asks little or nothing (second round A6, A7): the analysis found too little,
+         *     or it failed. The web says it in the coach's words with what helps.
+         */
+        CheckNoticeOut: {
+            /**
+             * Duration S
+             * @description length of that video
+             */
+            duration_s?: number | null;
+            /**
+             * Failed
+             * @description the analysis failed
+             * @default false
+             */
+            failed?: boolean;
+            /**
+             * Limit S
+             * @description timeout: how long the analysis of this video may compute
+             */
+            limit_s?: number | null;
+            /**
+             * Reason
+             * @description found little: camera_motion, no_floor, flat_view, few_people, court (court not recognised), no_play; failed: calibration, unreadable, too_short, timeout, stalled, generic
+             */
+            reason: string;
+            /**
+             * Video Id
+             * Format: uuid
+             */
+            video_id: string;
+        };
         /** CheckOut */
         CheckOut: {
             /** Box */
@@ -5884,6 +5959,35 @@ export interface components {
             seconds_in_view: number | null;
             /** Suggested Side */
             suggested_side: string | null;
+        };
+        /** CheckSkipAllOut */
+        CheckSkipAllOut: {
+            /**
+             * Moments
+             * @description goal moments of every rank left with them
+             */
+            moments: number;
+            /**
+             * Skipped
+             * @description questions of the main round left
+             */
+            skipped: number;
+        };
+        /**
+         * CheckSkipIn
+         * @description «Weiss nicht» in Prüfen: a goal moment (its candidate id), the court of a file (its video
+         *     id) or the throw-off of a half.
+         */
+        CheckSkipIn: {
+            /** Id */
+            id?: string | null;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "goal" | "field" | "kickoff";
+            /** Period */
+            period?: number | null;
         };
         /** ChecklistItem */
         ChecklistItem: {
@@ -6860,6 +6964,11 @@ export interface components {
              */
             last_activity_at?: string | null;
             /**
+             * Limit S
+             * @description failed with timeout: how long the step may compute
+             */
+            limit_s?: number | null;
+            /**
              * Overall
              * @description the whole way of this file, all stages
              */
@@ -6880,6 +6989,12 @@ export interface components {
              * @default false
              */
             restarted?: boolean;
+            /**
+             * Retry
+             * @description failed: whether starting the step again can help (not after a timeout on the same file, an unreadable or too short file, an abandoned upload)
+             * @default true
+             */
+            retry?: boolean;
             role: components["schemas"]["VideoRole"];
             /** Size Bytes */
             size_bytes?: number | null;
@@ -7157,6 +7272,11 @@ export interface components {
             shot_zone?: ("la" | "rl" | "rm" | "rr" | "ra" | "kr" | "m7" | "gs") | null;
             /** Side */
             side: ("own" | "opponent") | null;
+            /**
+             * Skipped
+             * @default false
+             */
+            skipped?: boolean;
             /** Start Ms */
             start_ms: number;
             /**
@@ -7324,6 +7444,21 @@ export interface components {
              * @description where the goal the shot went at stands in the video; null without a court a person confirmed or without tracks (the small court is drawn with the goal at the top)
              */
             goal_in_video: ("left" | "right") | null;
+        };
+        /** GraphicsFileOut */
+        GraphicsFileOut: {
+            /** Filename */
+            filename: string;
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "none" | "uploading" | "running" | "ready" | "failed";
+            /**
+             * Video Id
+             * Format: uuid
+             */
+            video_id: string;
         };
         /** GraphicsPartOut */
         GraphicsPartOut: {
@@ -8141,8 +8276,18 @@ export interface components {
              * @description null without a video
              */
             field_confirmed: boolean | null;
+            /**
+             * Files
+             * @description every file of the match that is a part of it
+             */
+            files?: components["schemas"]["GraphicsFileOut"][];
             /** Goals */
             goals: components["schemas"]["GoalRunOut"][];
+            /**
+             * Goals Missing
+             * @description goals of the final score without a place in the video yet; null without a final score
+             */
+            goals_missing?: number | null;
             /**
              * Has Report
              * @description goals from a match report exist
@@ -8153,9 +8298,11 @@ export interface components {
             has_video: boolean;
             /**
              * More Checks
-             * @description lower-ranked goal candidates, offered, not counted
+             * @description beyond the budget of the main round: further goal moments, questions left with «Weiss nicht», what a file that found little proposed; offered, never counted
              */
             more_checks?: components["schemas"]["CheckOut"][];
+            /** @description why there is little or nothing to ask */
+            notice?: components["schemas"]["CheckNoticeOut"] | null;
             /**
              * Parts
              * @description the files of the match on its timeline (two halves, a split recording)
@@ -8165,6 +8312,12 @@ export interface components {
             phases: components["schemas"]["PhaseOut"][];
             /** Report Goals */
             report_goals: components["schemas"]["ReportGoalOut"][];
+            /**
+             * Skipped
+             * @description questions left with «Weiss nicht» this round
+             * @default 0
+             */
+            skipped?: number;
             /**
              * Source
              * @enum {string}
@@ -15798,6 +15951,72 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["BoundaryOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    skip_check_v1_orgs__org_id__matches__match_id__checks_skip_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CheckSkipIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    skip_all_checks_v1_orgs__org_id__matches__match_id__checks_skip_all_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CheckSkipAllOut"];
                 };
             };
             /** @description Validation Error */

@@ -263,7 +263,9 @@ class Comment(Base, EntityMixin, TenantMixin):
     author_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
     t_ms: Mapped[int] = mapped_column(Integer, nullable=False)
     body: Mapped[str] = mapped_column(Text, nullable=False)
-    clip_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("clips.id", ondelete="CASCADE"))
+    clip_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("clips.id", ondelete="CASCADE"), index=True
+    )
 
 
 class Annotation(Base, EntityMixin, TenantMixin):

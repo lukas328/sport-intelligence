@@ -3,10 +3,14 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useNow, useTranslations } from "next-intl";
 import { useState, type ReactNode } from "react";
+import { AnalysisNotice } from "@/components/analysis/analysis-notice";
 import { Button, buttonClass } from "@/components/ui/button";
+import { useConfirm } from "@/components/ui/confirm";
 import { api } from "@/lib/client";
 import { formatBytes } from "@/lib/format";
-import { STEPS, isActive, progressKey, stepState, tone, type FileProgress, type MatchProgress } from "@/lib/progress";
+import { STEPS, barValue, fileActions, filesLine, isActive, progressKey, stepState, tone, type FileProgress, type MatchProgress } from "@/lib/progress";
+import { storedUploadIds } from "@/lib/upload";
+import { stopLocalUpload, useLocalUploads } from "@/lib/upload-store";
 import { cn } from "@/lib/utils";
 import { useProgressWords } from "./words";
 
@@ -20,15 +24,20 @@ export function ProgressPanel({
   orgId,
   progress,
   staff,
+  canDelete = staff,
   onOtherFile,
   onResumeUpload,
+  onRemoved,
   aside,
 }: {
   orgId: string;
   progress: MatchProgress;
   staff: boolean;
+  /** removing a file that arrived is the staff's (players upload, they do not delete: K18) */
+  canDelete?: boolean;
   onOtherFile?: () => void;
   onResumeUpload?: () => void;
+  onRemoved?: () => void;
   aside?: ReactNode;
 }) {
   const w = useProgressWords();
@@ -40,6 +49,9 @@ export function ProgressPanel({
   const many = p.files.length > 1;
   const basis = p.files.find((f) => f.stage === p.stage && isActive(f))?.eta_basis;
   const trouble = p.files.find((f) => f.state === "stalled" || f.state === "interrupted");
+  // one line that sums up every file, never one file's step for all of them (second round A2)
+  const summary = many ? filesLine(p.files) : null;
+  const bar = barValue(p);
   return (
     <section
       className={cn("grid gap-8", aside && "md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]")}
@@ -55,20 +67,34 @@ export function ProgressPanel({
         {isActive(p) && (
           <>
             <p className="m-0 mt-1 text-[19px] font-bold" aria-live="polite" data-testid="progress-when">
-              {/* in trouble: how far the step that holds got («Hochladen: 2 %»), not the whole way */}
-              {trouble ? `${t(`step_${trouble.stage}`)}: ${w.percent(trouble.fraction ?? 0)}` : (when ?? t("noEta"))}
+              {/* several files: what each does, in one line (the files below say more); one file
+                  in trouble: how far its step got; otherwise until when */}
+              {summary
+                ? t("filesSummary", { n: p.files.length, list: summary.map((x) => t(`fileState_${x.word}`, { n: x.n })).join(", ") })
+                : trouble
+                  ? `${t(`step_${trouble.stage}`)}: ${w.percent(trouble.fraction ?? 0)}`
+                  : (when ?? t("noEta"))}
             </p>
-            {when && (
+            {when && !trouble && (
               <p className="m-0 text-[15px] text-ink-2">
                 {/* the clock time above, the time left here (a finish tomorrow is easier to read so) */}
                 {p.eta_s != null && p.stage !== "upload" ? `${w.left(p.eta_s)} · ` : ""}
                 {basis ? t(basis === "history" ? "basisHistory" : "basisMeasured") : ""}
               </p>
             )}
-            <div className="mt-3 h-1.5 bg-rule" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.floor(p.overall * 100)} aria-label={w.headline(p)}>
-              <div className="h-full bg-ink transition-[width] duration-700" style={{ width: `${Math.max(2, p.overall * 100)}%` }} />
-            </div>
+            {/* the bar goes with the line above: the upload while uploading, else the whole way;
+                none while something holds (it would promise a progress that does not happen) */}
+            {bar != null && (
+              <div className="mt-3 h-1.5 bg-rule" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.floor(bar * 100)} aria-label={w.headline(p)}>
+                <div className="h-full bg-ink transition-[width] duration-700" style={{ width: `${Math.max(2, bar * 100)}%` }} />
+              </div>
+            )}
           </>
+        )}
+        {!isActive(p) && summary && (
+          <p className="m-0 mt-1 text-[19px] font-bold" data-testid="progress-when">
+            {t("filesSummary", { n: p.files.length, list: summary.map((x) => t(`fileState_${x.word}`, { n: x.n })).join(", ") })}
+          </p>
         )}
         <ol className="m-0 mt-4 list-none space-y-5 p-0">
           {p.files.map((f) => (
@@ -80,6 +106,7 @@ export function ProgressPanel({
               )}
               <Steps f={f} />
               <FileNote f={f} files={p.files} orgId={orgId} staff={staff} now={now} onOtherFile={onOtherFile} onResumeUpload={onResumeUpload} />
+              <FileActions f={f} name={w.fileName(f, p.files)} orgId={orgId} staff={staff} canDelete={canDelete} onRemoved={onRemoved} />
             </li>
           ))}
         </ol>
@@ -153,15 +180,22 @@ function FileNote({
       void qc.invalidateQueries({ queryKey: progressKey(orgId) });
       void qc.invalidateQueries({ queryKey: ["match"] });
     };
+    // the reason in the coach's words and what helps (second round A3); «Analyse neu starten»
+    // only where it can help (not after a timeout on the same file)
+    const reason = f.stage === "analysis" || (f.stage === "ingest" && f.error && f.error !== "generic") ? f.error : null;
     return (
-      <div className="mt-2 space-y-2" role="alert" data-testid="progress-failed">
-        <p className={cn(base, "mt-0 text-[17px]")}>{t(f.stage === "analysis" ? "failedAnalysis" : f.stage === "upload" ? "failedUpload" : "failedIngest")}</p>
-        {staff && f.stage === "analysis" && (
-          <Button size="sm" onClick={() => void retry()} loading={busy}>
+      <div className="mt-2 space-y-2" role="alert" data-testid="progress-failed" data-error={f.error ?? undefined}>
+        {reason ? (
+          <AnalysisNotice notice={{ reason, failed: true, duration_s: f.duration_s, limit_s: f.limit_s }} className="mt-3" plain testId="progress-failed-reason" />
+        ) : (
+          <p className={cn(base, "mt-0 text-[17px]")}>{t(f.stage === "upload" ? (f.error === "abandoned" ? "failedAbandoned" : "failedUpload") : "failedIngest")}</p>
+        )}
+        {staff && f.stage === "analysis" && f.retry !== false && (
+          <Button size="sm" onClick={() => void retry()} loading={busy} data-testid="progress-retry">
             {t("retryAnalysis")}
           </Button>
         )}
-        {staff && f.stage !== "analysis" && onOtherFile && (
+        {staff && f.stage !== "analysis" && f.error !== "abandoned" && onOtherFile && (
           <button type="button" className={buttonClass("primary", "sm")} onClick={onOtherFile}>
             {t("otherFile")}
           </button>
@@ -227,5 +261,55 @@ function FileNote({
       {f.stage === "ingest" && <span className="block text-ink-2">{t("explainIngest")}</span>}
       {f.stage === "analysis" && f.step && <span className="block text-ink-2">{t.has(`sub_${f.step}`) ? t(`sub_${f.step}` as "sub_observe") : null}</span>}
     </p>
+  );
+}
+
+/**
+ * What can be done with one file (second round A1): «Upload abbrechen» while it is uploaded or
+ * stuck (whoever uploads may cancel a running upload; the staff any), «Datei entfernen» once it
+ * arrived or failed (the staff only, K18). Always asked first; also with a single file.
+ */
+function FileActions({ f, name, orgId, staff, canDelete, onRemoved }: { f: FileProgress; name: string; orgId: string; staff: boolean; canDelete: boolean; onRemoved?: () => void }) {
+  const t = useTranslations("progress");
+  const qc = useQueryClient();
+  const confirm = useConfirm();
+  const local = useLocalUploads();
+  const [busy, setBusy] = useState(false);
+  const [failed, setFailed] = useState(false);
+  // an upload this browser started (running here or remembered to resume): the uploader's own
+  const own = local.some((u) => u.videoId === f.video_id) || (typeof window !== "undefined" && storedUploadIds().has(f.video_id));
+  const action = fileActions(f, { staff, canDelete, own });
+  if (!action) return null;
+  const cancel = action === "cancel";
+  async function run() {
+    const ok = await confirm({
+      title: t(cancel ? "cancelTitle" : "removeTitle", { name }),
+      body: t(cancel ? "cancelBody" : "removeBody"),
+      confirm: t(cancel ? "cancelUpload" : "removeFile"),
+      danger: true,
+    });
+    if (!ok) return;
+    setBusy(true);
+    setFailed(false);
+    stopLocalUpload(f.video_id);
+    const r = await api.DELETE("/v1/orgs/{org_id}/videos/{video_id}", { params: { path: { org_id: orgId, video_id: f.video_id } } });
+    setBusy(false);
+    if (r.error || !r.response.ok) return setFailed(true);
+    void qc.invalidateQueries({ queryKey: progressKey(orgId) });
+    void qc.invalidateQueries({ queryKey: ["match"] });
+    void qc.invalidateQueries({ queryKey: ["graphics"] });
+    onRemoved?.();
+  }
+  return (
+    <div className="mt-2 flex flex-wrap items-center gap-3">
+      <Button size="sm" variant="secondary" onClick={() => void run()} loading={busy} data-testid={cancel ? "progress-cancel-upload" : "progress-remove-file"} aria-label={`${t(cancel ? "cancelUpload" : "removeFile")}: ${name}`}>
+        {t(cancel ? "cancelUpload" : "removeFile")}
+      </Button>
+      {failed && (
+        <span role="alert" className="text-[15px] font-bold">
+          {t("removeFailed")}
+        </span>
+      )}
+    </div>
   );
 }
