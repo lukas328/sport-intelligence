@@ -379,22 +379,30 @@ class NumberGate:
     it is worth it:
     - a new box: at once;
     - after a confident reading: again at the next number frame, until the number is settled
-      (`sure_reads` confident readings of one number, at least 70 % of them);
+      (`sure_reads` confident readings of one number, at least 70 % of them; the vote per track
+      needs at least 3, and a track can lose its readings to an identity split);
     - a settled box: again only after `recheck_s` (identity switches still show up in the
       readings of `split_points`);
     - after a read without a confident number: back off, doubling from one number step up to
-      `max_wait_s` (a player turns his back again within a second or two);
+      `max_wait_s` (readable moments are short: a longer back-off loses them);
     - at most `max_per_frame` boxes per number frame: unsettled first, then the box read longest
       ago, then the tallest.
-    The readings themselves and the vote per track are unchanged."""
+    The readings themselves and the vote per track are unchanged.
+
+    Measured by replaying the gate on runs that read every torso (3 minutes Feldkirch-Bregenz,
+    15 minutes Bregenz-Schwaz, docs/plans/produkt-analyse-integration.md): no gate setting reads
+    fewer crops without losing numbers (readable moments are short and not predictable); these
+    defaults keep the most numbers per crop, about half the crops for three quarters of the
+    numbers with three or more sure readings. Plain sparser reading (NUMBER_EVERY doubled) keeps
+    fewer at the same cost."""
 
     def __init__(
         self,
         fps: float,
         step: int,
         recheck_s: float = 5.0,
-        max_wait_s: float = 2.0,
-        sure_reads: int = 2,
+        max_wait_s: float = 0.5,
+        sure_reads: int = 6,
         max_per_frame: int = 6,
         lost_s: float = 1.0,
     ) -> None:

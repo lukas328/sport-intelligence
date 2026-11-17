@@ -691,6 +691,7 @@ def _run_learned(
                 numbers=numbers,
                 number_every=max(1, settings.number_every),
                 number_gate=settings.number_gate,
+                number_budget=settings.number_budget,
                 embedder=load_embedder(settings),
                 embed_every=max(1, settings.reid_every),
                 roles=load_role_classifier(settings),

@@ -301,7 +301,7 @@ def _box(
 def test_gate_reads_new_boxes_and_settles_a_number() -> None:
     from handball_vision.numbers import NumberGate, Reading
 
-    g = NumberGate(fps=25, step=6, recheck_s=5.0)
+    g = NumberGate(fps=25, step=6, recheck_s=5.0, sure_reads=2, max_wait_s=2.0)
     assert g.pick(0, [_box(100), _box(400)]) == [0, 1]
     g.note(0, 0, Reading(7, 0.95))
     g.note(0, 1, Reading(9, 0.9))
@@ -348,7 +348,7 @@ def test_gate_caps_reads_per_frame_unsettled_and_tall_first() -> None:
 def test_gate_forgets_lost_boxes() -> None:
     from handball_vision.numbers import NumberGate, Reading
 
-    g = NumberGate(fps=25, step=6, lost_s=1.0)
+    g = NumberGate(fps=25, step=6, lost_s=1.0, sure_reads=2)
     g.pick(0, [_box(100)])
     g.note(0, 0, Reading(5, 0.95))
     g.pick(6, [_box(100)])

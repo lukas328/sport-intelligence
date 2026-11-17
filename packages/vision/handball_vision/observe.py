@@ -124,11 +124,14 @@ def observe(
     ball_every: int = 1,
     ball_batch: int = 8,
     number_gate: bool = True,
+    number_budget: float = 0.0,
 ) -> Observations:
     """`on_frame(index, frame)` sees every decoded frame (e.g. the score overlay reader), so the
     video is decoded only once. With `ball_net` the 3-frame ball net runs on every `ball_every`-th
     frame (`Observations.ball_cands`). `number_gate`: read shirt numbers only where it is worth it
-    (`numbers.NumberGate`); off: every eligible torso on every number frame."""
+    (`numbers.NumberGate`); off: every eligible torso on every number frame. `number_budget`: at
+    most this many CPU seconds of shirt-number reading per second of video so far (0: no limit);
+    number frames beyond it are left out (`counters["number_frames_skipped"]`)."""
     from handball_vision.pipeline import _open, iter_frames
 
     _, _, fps, total = _open(path)
@@ -138,6 +141,7 @@ def observe(
     frames: list[FrameObservation] = []
     segments: dict[int, F64] = {}
     timings: dict[str, float] = defaultdict(float)
+    skipped_numbers = 0
     gate = None
     if numbers is not None and number_gate:
         from handball_vision.numbers import NumberGate
@@ -173,9 +177,12 @@ def observe(
             frames.append(fo)
             timings["appearance"] += time.perf_counter() - t0
             if numbers is not None and n % number_every == 0:
-                t0 = time.perf_counter()
-                fo.numbers = read_numbers(numbers, frame, people, gate, n)
-                timings["numbers"] += time.perf_counter() - t0
+                if number_budget > 0 and timings["numbers"] > number_budget * n / (fps or 25.0):
+                    skipped_numbers += 1
+                else:
+                    t0 = time.perf_counter()
+                    fo.numbers = read_numbers(numbers, frame, people, gate, n)
+                    timings["numbers"] += time.perf_counter() - t0
             if embedder is not None and n % embed_every == 0:
                 t0 = time.perf_counter()
                 vecs = embedder.embed(frame, [(d.x1, d.y1, d.x2, d.y2) for d in people])
@@ -205,7 +212,11 @@ def observe(
         step = len(motion.samples) / 30
         motion.samples = [motion.samples[int(k * step)] for k in range(30)]
     static = static_edges([f for _, f in motion.samples]) if motion.moving else None
-    counters = {"number_crops": getattr(numbers, "calls", 0)} if numbers is not None else {}
+    counters = (
+        {"number_crops": getattr(numbers, "calls", 0), "number_frames_skipped": skipped_numbers}
+        if numbers is not None
+        else {}
+    )
     if gate is not None:
         counters |= {"number_boxes_offered": gate.offered, "number_boxes_read": gate.read}
     return Observations(
