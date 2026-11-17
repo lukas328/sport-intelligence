@@ -42,7 +42,9 @@ const SECOND = (hex: string) => (hex === SHIRTS[4][1] || hex === SHIRTS[2][1] ? 
  * The public entry (UX test, second delivery): one question, the own team at once from the
  * federation's data, an example of the three things, then «Speichern» with an e-mail. The website
  * hands over ?q= (team name), ?farbe= and ?lang= (the language is set by the middleware); what it
- * already asked is not asked again.
+ * already asked is not asked again. The federation data covers teams in Switzerland only: the search
+ * says so and offers the way by hand from the start; ?step=name (the website's «Team von Hand
+ * anlegen») opens it at once.
  */
 export function EntryView() {
   const params = useSearchParams();
@@ -66,14 +68,14 @@ export function EntryView() {
   };
   if (step === "mail" && (team || name)) return <SaveStep club={club} team={team} name={name} colour={colour} onBack={() => go({ step: null })} />;
   if (club && team) return <TeamStep club={club} team={team} known={{ name: params.get("n"), league: params.get("l") }} colour={colour} onColour={setColour} onSave={() => go({ step: "mail" })} onBack={() => go({ club: null, team: null })} />;
-  return <SearchStep initial={params.get("q") ?? ""} onPick={(h, q) => go({ club: String(h.club.id), team: String(h.official_id), q, n: h.name, l: h.league ?? null })} onName={(n) => go({ name: n, step: "mail", q: null })} />;
+  return <SearchStep initial={params.get("q") ?? ""} byHand={step === "name"} onPick={(h, q) => go({ club: String(h.club.id), team: String(h.official_id), q, n: h.name, l: h.league ?? null, step: null })} onName={(n) => go({ name: n, step: "mail", q: null })} />;
 }
 
-function SearchStep({ initial, onPick, onName }: { initial: string; onPick: (h: Hit, q: string) => void; onName: (name: string) => void }) {
+function SearchStep({ initial, byHand = false, onPick, onName }: { initial: string; byHand?: boolean; onPick: (h: Hit, q: string) => void; onName: (name: string) => void }) {
   const t = useTranslations("entry");
   const [text, setText] = useState(initial);
   const [q, setQ] = useState(initial.trim().length >= 3 ? initial.trim() : "");
-  const [byName, setByName] = useState(false);
+  const [byName, setByName] = useState(byHand);
   const hits = useQuery({
     queryKey: ["public-teams", q],
     enabled: q.length >= 3,
@@ -103,7 +105,7 @@ function SearchStep({ initial, onPick, onName }: { initial: string; onPick: (h: 
             onChange={(e) => setText(e.target.value)}
             placeholder={t("placeholder")}
             autoComplete="off"
-            autoFocus={!initial}
+            autoFocus={!initial && !byHand}
             aria-describedby="entry-q-hint"
             className="min-h-14 min-w-0 flex-1 border-2 border-ink bg-transparent px-4 text-[19px]"
           />
@@ -140,35 +142,34 @@ function SearchStep({ initial, onPick, onName }: { initial: string; onPick: (h: 
           ))}
         </ul>
       )}
-      {(hits.data || hits.error) && (
-        <div className="space-y-3 border-t border-rule pt-5">
-          {byName ? (
-            <form
-              onSubmit={(e: FormEvent<HTMLFormElement>) => {
-                e.preventDefault();
-                const n = String(new FormData(e.currentTarget).get("team") ?? "").trim();
-                if (n) onName(n);
-              }}
-              className="flex flex-wrap items-end gap-2"
-            >
-              <label className="min-w-0 flex-1">
-                <span className="mb-1 block text-[15px] font-semibold">{t("teamName")}</span>
-                <input name="team" required maxLength={120} defaultValue={q} className="min-h-12 w-full border-2 border-ink bg-transparent px-3 text-[17px]" />
-              </label>
-              <button type="submit" className={buttonClass("secondary", "lg")}>
-                {t("next")}
-              </button>
-            </form>
-          ) : (
-            <p className="m-0 text-[17px]">
-              {t("noneWay")}{" "}
-              <button type="button" onClick={() => setByName(true)} className="min-h-11 cursor-pointer border-0 bg-transparent p-0 font-bold underline decoration-2 underline-offset-4" data-testid="entry-by-name">
-                {t("byName")}
-              </button>
-            </p>
-          )}
-        </div>
-      )}
+      {/* what the search covers, and the way by hand for everyone else, also before any search */}
+      <div className="space-y-3 border-t border-rule pt-5" data-testid="entry-by-hand">
+        {byName ? (
+          <form
+            onSubmit={(e: FormEvent<HTMLFormElement>) => {
+              e.preventDefault();
+              const n = String(new FormData(e.currentTarget).get("team") ?? "").trim();
+              if (n) onName(n);
+            }}
+            className="flex flex-wrap items-end gap-2"
+          >
+            <label className="min-w-0 flex-1">
+              <span className="mb-1 block text-[15px] font-semibold">{t("teamName")}</span>
+              <input name="team" required maxLength={120} defaultValue={q || text.trim()} autoFocus className="min-h-12 w-full border-2 border-ink bg-transparent px-3 text-[17px]" />
+            </label>
+            <button type="submit" className={buttonClass("secondary", "lg")}>
+              {t("next")}
+            </button>
+          </form>
+        ) : (
+          <p className="m-0 max-w-[60ch] text-[17px]">
+            {hits.data && hits.data.length > 0 ? t("noneWay") : t("scope")}{" "}
+            <button type="button" onClick={() => setByName(true)} className="min-h-11 cursor-pointer border-0 bg-transparent p-0 font-bold underline decoration-2 underline-offset-4" data-testid="entry-by-name">
+              {t("byName")}
+            </button>
+          </p>
+        )}
+      </div>
       {/* both ways in, also with a password from the start (L12) */}
       <p className="flex flex-wrap gap-x-6 gap-y-1 text-[15px]">
         <span>
