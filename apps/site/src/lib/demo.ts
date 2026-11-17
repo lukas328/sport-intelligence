@@ -1,12 +1,11 @@
 /**
  * The fictional demo match (public/demo/match.json, scripts/make_demo.py) in the shape the app
- * draws: goals with zone, estimated shot spot and the scorer's run; the three things; one scene
+ * draws: goals with zone, shot spot and the scorer's run; the three things; one scene
  * for the tactics camera. Everything here is invented and marked so on the page. Shot positions,
  * goals, turnovers and the figures come from match.json (computed with the app's metrics code);
  * the runs and the scene are drawn from them by a seeded generator. Runs and positions are
  * handball-typical: no field player ever stands in a goal area (tested). The scene shows the ball
- * in every frame, because the match is invented; the page says that the analysis does not find
- * the ball in real video yet (OPEN_QUESTIONS Q-UX-15).
+ * in every frame.
  */
 import type { GoalRun } from "@/components/anlauf/bundle";
 import type { ReportGoal } from "@/components/anlauf/flight-layout";
@@ -145,11 +144,11 @@ function runTo(zone: Zone, shot: Pt, R: () => number): Pt[] {
   return pts.map((p, i) => (i === pts.length - 1 ? p : clamp(outsideArea(clamp(p)))));
 }
 
-/** Every goal of the match with its zone and run; about one in five is estimated (dashed). */
+/** Every goal of the match with its zone and run, all confirmed: the demo shows a match after «Prüfen». */
 export function demoGoals(match: DemoMatch): DemoGoal[] {
   return match.events
     .filter((e) => e.type === "shot" && e.outcome === "goal" && e.x !== null && e.y !== null)
-    .map((e, i) => {
+    .map((e) => {
       const R = rng(seedOf(e.id));
       const spot = clamp(halfSpot(e.x!, e.y!));
       const shot = e.shot_type === "penalty" ? spot : outsideArea(spot, SHOT_MIN);
@@ -165,7 +164,7 @@ export function demoGoals(match: DemoMatch): DemoGoal[] {
         run: runTo(zone, shot, R),
         shot,
         aim: [8.8 + R() * 2.4, 0] as Pt,
-        confirmed: i % 5 !== 3,
+        confirmed: true,
       };
     });
 }

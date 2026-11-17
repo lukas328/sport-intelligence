@@ -60,32 +60,55 @@ def outside_goal_area(x: float, y: float) -> tuple[float, float]:
     return nx, ny
 
 
-# chosen so that the app's rule for the three things (apps/web/src/lib/three-things.ts) gives all
-# three kinds in the demo: goals conceded from one zone, after fast breaks, own goals from one zone
+# The story of the start page (docs/ux-test/livegang/BEFUNDE-2.md, W22, W29): a Saturday home game,
+# lost 16:18, and the opponent scored 9 of its 18 goals over the right wing. The plan fixes what the
+# story needs (score, half-time, goals by position); the seeded generator places the shots, the
+# times, the misses and the numbers. With the app's rule for the three things
+# (apps/web/src/lib/three-things.ts) the match gives all three kinds: 9 of 18 conceded over the
+# right wing, 4 conceded after fast breaks, 6 of 16 own goals from the pivot.
 SEED = 2100
+# goals per half by kind: (own, opponent); the opponent's wing goals all come from its right wing
+PLAN: dict[int, dict[str, tuple[int, int]]] = {
+    1: {"wing": (2, 4), "back": (2, 1), "pivot": (3, 1), "fast_break": (1, 2), "penalty": (1, 0)},
+    2: {"wing": (1, 5), "back": (2, 1), "pivot": (3, 1), "fast_break": (0, 2), "penalty": (1, 1)},
+}
+# shots that did not go in, per half: (own, opponent)
+MISSES = {1: (8, 7), 2: (10, 8)}
+# the opponent's right wing: mostly number 7, three times the substitute 22
+RIGHT_WING = [7, 7, 22, 7, 7, 7, 22, 7, 22]
+
+
+def spot(rnd: random.Random, kind: str, side: Side) -> tuple[float, float]:
+    """A shot spot for a kind; the opponent's wing goals come from its right wing (y near 0)."""
+    if kind == "penalty":
+        return 33.0, 10.0
+    choices = [SPOTS["wing"][0]] if kind == "wing" and side == Side.OPPONENT else SPOTS[kind]
+    bx, by = rnd.choice(choices)
+    x = round(bx + rnd.uniform(-1, 1), 1)
+    y = round(min(19.5, max(0.5, by + rnd.uniform(-1.2, 1.2))), 1)
+    return outside_goal_area(x, y)
 
 
 def build(seed: int = SEED) -> dict[str, Any]:
     rnd = random.Random(seed)  # noqa: S311 (seeded demo data, not security)
     events: list[Event] = []
+    wing_numbers = iter(RIGHT_WING)
     for period in (1, 2):
-        clock = (period - 1) * 1800.0
-        while True:
-            clock += rnd.uniform(25, 45)
-            if clock >= period * 1800:
-                break
-            side = Side.OWN if rnd.random() < 0.52 else Side.OPPONENT
-            kind = rnd.choices(list(SPOTS), weights=[18, 45, 15, 12, 10])[0]
-            bx, by = rnd.choice(SPOTS[kind])
-            x = round(bx + rnd.uniform(-1, 1), 1)
-            y = round(min(19.5, max(0.5, by + rnd.uniform(-1.2, 1.2))), 1)
-            if kind == "penalty":
-                x, y = 33.0, 10.0
-            else:
-                x, y = outside_goal_area(x, y)
-            xg = expected_goal(x, y, TYPES[kind])
-            r = rnd.random()
-            outcome = "goal" if r < xg else rnd.choice(["save", "save", "miss", "blocked", "post"])
+        shots: list[tuple[Side, str, bool]] = []
+        for kind, (own, opp) in PLAN[period].items():
+            shots += [(Side.OWN, kind, True)] * own + [(Side.OPPONENT, kind, True)] * opp
+        for side, n in zip((Side.OWN, Side.OPPONENT), MISSES[period], strict=True):
+            kinds = rnd.choices(["wing", "back", "pivot"], weights=[2, 6, 2], k=n)
+            shots += [(side, kind, False) for kind in kinds]
+        rnd.shuffle(shots)
+        start = (period - 1) * 1800.0
+        clocks = sorted(rnd.uniform(start + 20, start + 1790) for _ in shots)
+        for clock, (side, kind, goal) in zip(clocks, shots, strict=True):
+            x, y = spot(rnd, kind, side)
+            number = rnd.choice([3, 5, 9, 11, 14, 18])
+            if goal and side == Side.OPPONENT and kind == "wing":
+                number = next(wing_numbers)
+            outcome = "goal" if goal else rnd.choice(["save", "save", "miss", "blocked", "post"])
             events.append(
                 Event(
                     id=f"e{len(events)}",
@@ -97,7 +120,7 @@ def build(seed: int = SEED) -> dict[str, Any]:
                     y=y,
                     outcome=outcome,
                     shot_type=TYPES[kind],
-                    number=rnd.choice([3, 5, 7, 9, 11, 14, 18, 22]),
+                    number=number,
                     goal_zone=rnd.choice(["TL", "TR", "BL", "BR", "MC", "BC", "ML", "MR"]),
                 )
             )
