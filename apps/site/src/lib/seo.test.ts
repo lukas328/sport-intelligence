@@ -43,6 +43,10 @@ describe("search engines", () => {
     expect(txt).toContain("Wenn du magst, nach einem Tor antippen, von wo geworfen wurde.");
     expect(txt).not.toMatch(/Tor für Tor|bei jedem Tor|freiwilligen Fragen/);
     expect(txt).toMatch(/Team: CHF \d+ im Monat/);
+    // for clubs across Europe, and honest about what the team search covers (L14)
+    expect(txt).toContain("für Vereine in ganz Europa");
+    expect(txt).toContain("Team und Spielplan: Für Teams aus der Schweiz");
+    expect(txt).not.toMatch(/Wir kommen aus der Schweiz|zuerst in der Schweiz/);
     expect(txt).not.toMatch(/noch nicht|vorgesehen|geschätzt|vor dem öffentlichen Start/i);
     expect(llmsFullTxt().length).toBeGreaterThan(txt.length);
   });

@@ -42,6 +42,14 @@ export function Footer({ locale }: { locale: Locale }) {
           {/* the vector word mark above its smallest size (brand: across from 220 px), so it stays sharp */}
           <img src="/brand/wortmarke-quer.svg" alt="Handball Intelligence" width={2150} height={512} className="h-14 w-auto" />
           <p className="mt-4 max-w-[18rem] text-base text-ink-2">{m.footer.note}</p>
+          {/* the one quality mark, here and on «Über uns», not in the head (EU4) */}
+          <p className="mt-4 flex items-center gap-2 text-base text-ink-2">
+            <svg viewBox="0 0 32 32" aria-hidden className="size-5 shrink-0">
+              <rect width="32" height="32" fill="#d52b1e" />
+              <path d="M13 6h6v7h7v6h-7v7h-6v-7H6v-6h7z" fill="#fff" />
+            </svg>
+            {m.footer.made}
+          </p>
         </div>
         {col(m.footer.product, [
           ["so-funktioniert-es", m.nav.how],

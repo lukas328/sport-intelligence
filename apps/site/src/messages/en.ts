@@ -38,6 +38,7 @@ const en: Messages = {
     imprint: "Imprint",
     status: "System status",
     note: "This website sets no cookies and loads nothing from other providers.",
+    made: "Developed in Switzerland",
   },
   cta: {
     start: "Start for free",
@@ -187,9 +188,8 @@ const en: Messages = {
     trust: [
       { title: "It belongs to your club", text: "Only the coaching staff can see it, unless you share a link." },
       { title: "Consent by link", text: "Every player says yes or no for themselves. Up to 16, the parents decide." },
-      { title: "Swiss data protection", text: "No ads, no selling of data. App and database in Switzerland, videos in the EU." },
+      { title: "GDPR and Swiss FADP", text: "No ads, no selling of data. The app and database run in Switzerland, the videos are kept in the EU." },
     ],
-    trustSwiss: "From Switzerland, with the data of handball.ch: your team, fixtures and results are already there.",
     trustLink: "About us",
     priceTitle: "Start for free, then from CHF {price} per team.",
     priceUnit: "days free, everything included",
@@ -197,7 +197,8 @@ const en: Messages = {
     teamLabel: "What is your team called?",
     teamButton: "Show",
     teamExample: "The club name or the town is enough.",
-    teamAfter: "After \"Show\" you see your team with fixtures and results from the federation data, without an account.",
+    teamAfter: "For teams in Switzerland, we bring in fixtures and results automatically. Everyone else sets up their team by hand in a minute.",
+    teamManual: "Set up your team by hand",
     finalTitle: "Try it with your next match.",
     film: { label: "A short film of the example match: a match video plays, the analysis puts the {of} goals conceded on the half court, {n} of them came on the right wing. That gives three things for your next training.", video: "Your match", status: ["Video", "Analysis", "Three things"], replay: "Play again", count: "{n} of {of} on the right wing", wait: ["Watching the video", "Analysis running"] },
   },
@@ -397,7 +398,7 @@ const en: Messages = {
       { q: "Where do I put the camera?", a: "Level with the halfway line, as high as possible, from about 3 metres: stands, gallery or a tall tripod. With the wide angle (0.5×), both goals and goal areas are in the picture. Fixed is best; panning works too, the analysis then finds the court harder.", hi: "The analysis finds the court by itself and follows the camera. Whether it is right, you confirm with a single tap while checking." },
       { q: "Which file can I upload?", a: "The video file as the phone or camera saves it. {upload} A direct link to a video file works too, for example the download link from Veo or Spiideo.", hi: "If the connection drops, the upload continues where it stopped." },
       { q: "How long does the analysis take?", a: "It runs in the background, you need not stay.", hi: "At the top of the app you see how far it is and roughly how long it still takes, the bell tells you when it is done. Then you answer the few questions where it is unsure." },
-      { q: "Do I have to enter anything by hand?", a: "No typing. Where the analysis is unsure, it asks you: at most ten questions per match, usually answered in a few minutes.", hi: "You answer each question with a single tap, and you can also skip them all. If there is a match report from handball.ch, the app takes goals and scorers from it. You tap the shot spot if you like; you mark saves and missed shots only if you want them." },
+      { q: "Do I have to enter anything by hand?", a: "No typing. Where the analysis is unsure, it asks you: at most ten questions per match, usually answered in a few minutes.", hi: "You answer each question with a single tap, and you can also skip them all. If there is an official match report, the app takes goals and scorers from it: automatically for teams in Switzerland, otherwise via the link to the report. You tap the shot spot if you like; you mark saves and missed shots only if you want them." },
       { q: "How do I share scenes with the team?", a: "Put together a collection and share it by link in the team chat, with no account for the players.", hi: "Tap once, and a scene goes into a collection, with a note if you like. The chat shows a preview with a title; the link shows shirt numbers instead of names, expires and can be blocked at any time." },
       { q: "How do I see where the goals conceded come from?", a: "Count them by shot position: wings, backcourt, pivot, 7 metres, fast break. A cluster shows you where to look first; what is behind it, only the scene shows.", hi: "The app counts for you, from the shot spot you tap after a goal if you like. With enough goals you see three things to take away with their scenes, and the season shows what repeats." },
       { q: "How do I show scenes at training?", a: "Short: ten minutes, one topic, three to five scenes, a good example first.", hi: "You play a collection on a screen or projector, scene by scene, with your notes in between." },
@@ -450,7 +451,7 @@ const en: Messages = {
       },
       {
         title: "Where the data lives",
-        text: "The app and its database run on servers in Switzerland, the videos are kept in storage in the EU. Swiss data protection law applies and, where needed, the GDPR.",
+        text: "The app and its database run on servers in Switzerland, the videos are kept in storage in the EU. We follow the GDPR and the Swiss Federal Act on Data Protection (FADP). The EU recognises Switzerland as a country with adequate data protection.",
       },
       {
         title: "How long",
@@ -547,16 +548,17 @@ const en: Messages = {
     tableCaption: "Handball Intelligence: the key facts",
     rows: [
       { k: "What it is", v: "A web app for video analysis of handball matches. It runs in the browser, on phones and computers." },
-      { k: "Who it is for", v: "Coaches in amateur handball, youth and senior teams; starting in Switzerland, from the 1st league down. Players and parents need no account." },
+      { k: "Who it is for", v: "Coaches in amateur and youth handball, for clubs across Europe. Players and parents need no account." },
+      { k: "Team and fixtures", v: "For teams in Switzerland, the app brings in fixtures, results, roster and league table automatically from handball.ch. Everyone else sets up their team by hand in a minute; video, analysis and scenes work the same for everyone." },
       { k: "What you need", v: "A phone or camera that films in Full HD (1080p), a raised spot at the halfway line and {fileNeed}." },
       { k: "How it works", v: "Film, upload, wait until the app says it is done, then check: where the analysis is unsure, it asks you, such as whether the court is right or whether a goal was scored in a moment. At most ten questions per match, usually answered in a few minutes; you can also skip them all. If the camera stands the same way in the same hall again, the analysis takes the court over for the next video. You tap the shot spot of a goal if you like." },
-      { k: "With a match report", v: "If there is a match report, for example from handball.ch, goals and scorers come from it; the app works out their time in the video from the throw-off you confirm and does not ask about those goals again." },
+      { k: "With a match report", v: "If there is an official match report, goals and scorers come from it: automatically for teams in Switzerland, otherwise via the link to the report (handball.ch, DHB, nuLiga or HLA). The app works out their time in the video from the throw-off you confirm and does not ask about those goals again." },
       { k: "Analysis time", v: "The analysis runs in the background. The app shows how far it is and roughly how long it still takes, and tells you when it is done." },
       { k: "What you get", v: "Result and run of play, every confirmed goal as a scene in the video, positions from above, three things to take home when there are enough goals with a shot spot, and a link for the team." },
       { k: "What you do", v: "Answer a few questions where the analysis is unsure, confirm the court with a single tap, tap the shot spot if you like, mark saves and missed shots if you want them, and decide which scenes the team sees." },
       { k: "Other ways", v: "Cameras such as Veo or Pixellot film with their own camera and usually a subscription. Handball Intelligence needs no camera of its own: a phone or an existing camera is enough, and it analyses videos, also from a Veo download link. Whether Veo detects handball events automatically, Veo does not say (as of 13 November 2026). More in the German and French guide on ways to video analysis." },
       { k: "Prices", v: "Free without automatic analysis. Team: CHF {team} a month. Club: CHF {club} a month for up to {clubTeams} teams. 30 days free." },
-      { k: "Data location", v: "App and database in Switzerland, videos in storage in the EU." },
+      { k: "Data location", v: "App and database in Switzerland, videos in storage in the EU. Data protection under the GDPR and the Swiss FADP." },
       { k: "Consent", v: "By link in the team chat, no account, separately for each purpose, changeable at any time. The law has no fixed age; it depends on capacity of judgement. In the app the parents decide up to 16, because that is simple and cautious." },
       { k: "Languages", v: "German, French and English." },
       { k: "Contact", v: "{email}" },
@@ -582,7 +584,7 @@ const en: Messages = {
       {
         title: "Who we build it for",
         text: [
-          "For coaches in amateur handball, youth and senior teams, from the 1st league down, volunteering next to work and family. So: few steps, big buttons and three things to take away instead of a hundred numbers.",
+          "For coaches in amateur and youth handball, in clubs across Europe, volunteering next to work and family. So: few steps, big buttons and three things to take away instead of a hundred numbers.",
         ],
       },
       {
@@ -598,9 +600,10 @@ const en: Messages = {
         ],
       },
       {
-        title: "From Switzerland",
+        title: "Developed in Switzerland",
         text: [
-          "For Swiss club handball first, in German, French and English, with the data from handball.ch: you find your team by its name, fixtures and results are already there.",
+          "We develop Handball Intelligence in Switzerland, for clubs across Europe. The data stays in Switzerland and the EU, and data protection follows the GDPR and the Swiss FADP. The app is available in German, French and English.",
+          "For teams in Switzerland, the app brings in fixtures and results automatically from handball.ch. Everyone else sets up their team by hand in a minute; video, analysis and scenes work the same for everyone.",
         ],
       },
       {
@@ -615,7 +618,7 @@ const en: Messages = {
     contactTitle: "Write to us",
     contact: "Questions, criticism or a match where the analysis gets stuck: write to us at {email}.",
     homeTitle: "Who is behind it",
-    homeText: "We come from Switzerland and build video analysis for coaches who do it as volunteers. The analysis suggests and only asks where it is unsure, and the video belongs to your club.",
+    homeText: "We build video analysis for club handball coaches who do it as volunteers. The analysis suggests and only asks where it is unsure, and the video belongs to your club.",
     homeLink: "About us",
   },
   tools: {
@@ -655,7 +658,7 @@ const en: Messages = {
       contact: "Withdrawal and questions to: [name, phone or e-mail of the coaching staff]",
       team: "Team / club",
       withdraw: "To withdraw: a short message to the coaching staff is enough, spoken or written. From then on they show no new scenes with you, and scenes with you are no longer shared.",
-      more: "What applies in Switzerland when filming in a club",
+      more: "What applies when filming in a club, in Switzerland and Germany",
     },
     tally: {
       title: "Tally sheet for match analysis",

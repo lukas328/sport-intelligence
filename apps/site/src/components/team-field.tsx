@@ -1,12 +1,14 @@
 "use client";
 
 import { FARBE, useShirt } from "@/components/kit";
-import { START_ACTION } from "@/lib/site";
+import { START_ACTION, byHandUrl } from "@/lib/site";
 
 /**
  * «Wie heisst dein Team?»: the main way in. One field, one button, the label above the field and
  * an example below. A plain GET form to the app's team preview (`/einstieg?q=`), no script, no
- * account; the app shows the team from the federation data and offers to save it.
+ * account; the app shows the team from the federation data and offers to save it. The federation
+ * data covers teams in Switzerland only, so `after` says so and `manual` links straight to the way by
+ * hand, without a search that finds nothing first.
  */
 export function TeamField({
   id,
@@ -14,6 +16,7 @@ export function TeamField({
   button,
   example,
   after,
+  manual,
   appLocale,
   onClub = false,
 }: {
@@ -23,6 +26,8 @@ export function TeamField({
   example: string;
   /** what «Zeigen» brings, right under the field (S7) */
   after?: string;
+  /** the link to the way by hand, right after `after` */
+  manual?: string;
   appLocale: string;
   onClub?: boolean;
 }) {
@@ -52,13 +57,20 @@ export function TeamField({
       </div>
       <p id={`${id}-example`} className={`mt-2 text-[1.0625rem] ${onClub ? "text-club-ink" : "text-ink-2"}`}>
         {example}
-        {after && (
-          <>
-            {" "}
-            {after}
-          </>
-        )}
       </p>
+      {after && (
+        <p className={`mt-2 max-w-[34rem] text-[1.0625rem] ${onClub ? "text-club-ink" : "text-ink-2"}`}>
+          {after}
+          {manual && (
+            <>
+              {" "}
+              <a href={byHandUrl(appLocale, chosen && shirt ? FARBE[shirt] : undefined)} className={`font-bold underline decoration-2 underline-offset-4 ${onClub ? "text-club-ink" : "text-ink"}`}>
+                {manual}
+              </a>
+            </>
+          )}
+        </p>
+      )}
     </form>
   );
 }

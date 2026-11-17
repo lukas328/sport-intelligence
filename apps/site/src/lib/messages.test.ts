@@ -40,6 +40,24 @@ describe("site messages", () => {
     expect(de.filming.rules.map((r) => r.title)).toEqual(["Handy oder Kamera", "Hoch an die Mittellinie", "Beide Tore im Bild", "Fest ist am besten", "Schwenken geht"]);
   });
 
+  // Europe (L14, EU4): for clubs across Europe; «Entwickelt in der Schweiz» in the footer and on
+  // «Über uns» only, and the team search says honestly that it covers teams in Switzerland.
+  it("positions for clubs across Europe, with the Swiss mark only in the footer and on Über uns", () => {
+    const swiss = /Schweiz|Suisse|Switzerland|Swiss/;
+    for (const msgs of [de, fr, en]) {
+      for (const [k, v] of leaves({ meta: msgs.meta, kick: msgs.home.kick, title: msgs.home.title, lead: msgs.home.lead, trustTitle: msgs.home.trustTitle, homeText: msgs.us.homeText, us: msgs.us.head, usLead: msgs.us.lead, usMeta: msgs.us.description })) {
+        expect(v, k).not.toMatch(swiss);
+      }
+      expect(msgs.footer.made).toMatch(swiss);
+      expect(msgs.us.sections.map((s) => s.title)).toContain(msgs.footer.made);
+      expect(msgs.home.teamAfter).toMatch(swiss);
+      expect(msgs.home.teamManual.length).toBeGreaterThan(0);
+    }
+    expect(de.home.trust.map((t) => t.title)).toContain("DSGVO und Schweizer DSG");
+    expect(fr.home.trust.map((t) => t.title)).toContain("RGPD et LPD suisse");
+    expect(en.home.trust.map((t) => t.title)).toContain("GDPR and Swiss FADP");
+  });
+
   it("uses no long dashes and no sharp s", () => {
     for (const msgs of [de, fr, en]) for (const [k, v] of leaves(msgs)) expect(v, k).not.toMatch(/[–—]/);
     for (const [k, v] of ref) expect(v, k).not.toContain("ß");

@@ -11,7 +11,7 @@ export const SITE_NAME = "Handball Intelligence";
  * Date of the last content review of the core pages («Stand» on the page, lastmod in the sitemap,
  * dateModified in structured data). Change it when the texts are reviewed again.
  */
-export const SITE_UPDATED = "2026-11-16";
+export const SITE_UPDATED = "2026-11-17";
 
 /**
  * The prices of packages/plans go into structured data as offers. The website describes the
@@ -49,6 +49,12 @@ export function startUrl(appLocale: string, team?: string, farbe?: string): stri
 
 /** Form target of the team field (GET; the query is added by the browser). */
 export const START_ACTION = `${APP_URL}/einstieg`;
+
+/** The app's entry with the way by hand open at once, for teams the federation data does not cover. */
+export function byHandUrl(appLocale: string, farbe?: string): string {
+  const f = farbe ? `&farbe=${encodeURIComponent(farbe)}` : "";
+  return `${APP_URL}/einstieg?step=name${f}&lang=${encodeURIComponent(appLocale)}`;
+}
 
 export function loginUrl(appLocale: string): string {
   return `${APP_URL}/login?lang=${encodeURIComponent(appLocale)}`;
