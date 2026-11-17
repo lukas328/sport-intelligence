@@ -314,14 +314,14 @@ export default async function Home({ params }: Props) {
         <section aria-labelledby="price" className="mt-20 md:mt-28">
           <div data-reveal className="grid grid-cols-1 items-end gap-6 border-2 border-ink bg-paper p-6 md:grid-cols-[auto_minmax(0,1fr)_auto] md:gap-10 md:p-10">
             <p className="flex items-baseline gap-3">
-              <b className="font-num text-[5rem] leading-[.8] text-club-text md:text-[7rem]">{team.price_chf_month}</b>
+              <b className="font-num text-[5rem] leading-[.8] text-club-text md:text-[7rem]">{team.trial_days}</b>
               <span className="text-[1.0625rem] font-semibold text-ink-2">{t.priceUnit}</span>
             </p>
             <div>
               <h2 id="price" className="text-[2rem] md:text-[2.5rem]">
                 {fmt(t.priceTitle, { price: team.price_chf_month })}
               </h2>
-              <p className="mt-2">{fmt(t.priceText, { days: team.trial_days })}</p>
+              <p className="mt-2">{fmt(t.priceText, { days: team.trial_days, price: team.price_chf_month })}</p>
             </div>
             <div className="flex flex-col gap-2">
               <StartLink appLocale={app} className="btn btn-ink">
