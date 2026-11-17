@@ -158,6 +158,8 @@ Umsetzung im Strang W2 (eigener PR). Grenzen wie beim Website-Review: keine erfu
 | L8 | Das App-Bild am Computer muss richtig gut aussehen: in der Mitte eine echte Aufnahme, unkenntlich verwischt, mit Schriftzug wie «Dein Spiel»; die Oberfläche im Rahmen wirkt noch nicht top | P1 | teilweise: Bild aus einem Testclip, stark verwischt (keine Personen, Schrift, Logos erkennbar), mit Schriftzug; Komposition und Ausschnitt neu, damit die Oberfläche gut aussieht. Quelle wird Lukas genannt; eigenes Material seines Vereins wäre besser, sobald es da ist | offen |
 | L9 | «Filmen. Hochladen. Prüfen.»: anders darstellen, mit Bildern, die Lust machen, auch mit der Halle; die Kamera-Zeichnung funktioniert nicht | P1 | stimmt: Schritt 1 als Hallenbild mit Kamera statt Diagramm, alle drei als starke Bilder in einem Stil | offen |
 | L10 | Preise: Oben muss «gratis starten» stehen, nicht CHF 39 | P1 | stimmt: oben der Gratis-Einstieg (30 Tage alles, dann Gratis-Plan oder CHF 39), CHF 39 als zweiter Schritt | offen |
+| L11 | Alle Beispielbilder, auch «So funktioniert es», wirken nach Demo; sie müssen richtig gut aussehen | P1 | stimmt: hochwertige Produktbilder in einem Stil, mit Halle und echtem Kontext | offen |
+| L12 | Teamchat-Abschnitt: statt der gezeichneten Karte ein Handy mit echt wirkendem Teamchat, wie in Produktion | P1 | stimmt: Handy-Mockup mit der echten Link-Vorschau unseres Teilen-Links, andere Nachrichten leicht verwischt; allgemeiner Messenger im WhatsApp-Stil, ohne WhatsApp-Namen, -Logo oder exakte Kopie (fremde Marke) | offen |
 
 ## Noch offen aus der ersten Runde
 
