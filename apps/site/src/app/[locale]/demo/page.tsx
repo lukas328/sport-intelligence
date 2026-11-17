@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Zones } from "@/components/anlauf/bundle";
 import { Rail } from "@/components/anlauf/charts";
 import { DemoCamera } from "@/components/demo-camera";
+import { DemoGuide } from "@/components/demo-guide";
 import { KitScope, ShirtPicker, StartLink } from "@/components/kit";
 import { Things } from "@/components/things";
 import { SectionHead, WurfHead } from "@/components/wurf-head";
@@ -13,17 +13,22 @@ import { demoView, MATCH } from "@/lib/things";
 
 type Props = { params: Promise<{ locale: Locale }> };
 
-/** Where the four lines of «Was du hier siehst» lead. */
+/** Where the four pictures of «Was du hier siehst» lead. */
 const GUIDE_IDS = ["things", "scene", "flow", "zahlen"];
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
-  return pageMeta(locale, "demo", messages(locale).seo.demo.title, messages(locale).seo.demo.description);
+  return pageMeta(
+    locale,
+    "demo",
+    messages(locale).seo.demo.title,
+    messages(locale).seo.demo.description,
+  );
 }
 
 /**
  * The demo match: invented and marked so at the top (never hidden), drawn with the app's
- * building blocks. A short guide says what is on the page (K11). No account, no video; one scene
+ * building blocks. Four small pictures say what is on the page and jump there (K11, L6). No account, no video; one scene
  * on the tactics camera, with the ball (invented) and handball-typical positions.
  */
 export default async function Demo({ params }: Props) {
@@ -32,10 +37,28 @@ export default async function Demo({ params }: Props) {
   const t = m.demo;
   const v = demoView(m);
   const figures = demoFigures(MATCH);
-  const opp = v.goals.filter((g) => g.team === "opp" && g.zone !== "m7" && g.zone !== "gs");
+  // goals conceded by position, most first; the zone of the first thing is drawn strong
+  const opp = v.goals.filter((g) => g.team === "opp");
+  const conceded = opp.length;
+  const first = v.things.find((x) => x.team === "opp")?.goals[0]?.zone;
+  const zones = (Object.keys(t.zoneNames) as (keyof typeof t.zoneNames)[])
+    .map((key) => ({
+      key,
+      label: t.zoneNames[key],
+      n: opp.filter((g) => g.zone === key).length,
+      strong: key === first,
+    }))
+    .filter((z) => z.n > 0)
+    .sort((a, b) => b.n - a.n);
+  // the score at half-time, from the match report
+  const halfScore = MATCH.stats.timeline.score.filter((x) => x.clock_s <= 1800).at(-1);
+  const half = `${halfScore?.own ?? 0}:${halfScore?.opp ?? 0}`;
   return (
     <KitScope>
-      <p role="note" className="border-b-2 border-ink bg-attn px-4 py-4 text-[1.0625rem] text-ink md:px-8">
+      <p
+        role="note"
+        className="border-b-2 border-ink bg-attn px-4 py-4 text-[1.0625rem] text-ink md:px-8"
+      >
         <span className="wrap block !px-0">
           <b>{t.banner}</b> {t.bannerText}
         </span>
@@ -47,33 +70,28 @@ export default async function Demo({ params }: Props) {
         opp={v.final.opp}
         ownName={v.own}
         oppName={v.opp}
-        scoreLabel={fmt(m.match.resultLabel, { own: v.own, opp: v.opp, a: v.final.own, b: v.final.opp })}
+        scoreLabel={fmt(m.match.resultLabel, {
+          own: v.own,
+          opp: v.opp,
+          a: v.final.own,
+          b: v.final.opp,
+        })}
         goals={v.report}
         flightLabels={{ half: m.match.flightHalf, end: m.match.flightEnd }}
       />
       <div className="wrap">
-        {/* what is on this page, in four lines: the visitor knows where to look first */}
-        <nav aria-labelledby="guide" className="mt-8 border-2 border-ink bg-paper p-5 md:p-6">
-          <h2 id="guide" className="text-[1.5rem] md:text-[1.75rem]">
-            {t.guideTitle}
-          </h2>
-          <ol className="mt-3 grid grid-cols-1 gap-x-8 sm:grid-cols-2 lg:grid-cols-4">
-            {t.guide.map((g, i) => (
-              <li key={g.title} className="border-t border-rule py-3">
-                <a href={`#${GUIDE_IDS[i]}`} className="group flex gap-3">
-                  <span aria-hidden className="font-num text-[2.25rem] leading-[.85] text-club-text">
-                    {i + 1}
-                  </span>
-                  <span>
-                    <b className="block underline decoration-2 underline-offset-4 group-hover:decoration-[3px]">{g.title}</b>
-                    <span className="mt-1 block text-[1.0625rem] text-ink-2">{g.text}</span>
-                  </span>
-                </a>
-              </li>
-            ))}
-          </ol>
-          <p className="mt-3 border-t border-rule pt-3 text-base text-ink-2">{t.sources}</p>
-        </nav>
+        {/* what is on this page, as four small pictures that jump there (L6) */}
+        <DemoGuide
+          title={t.guideTitle}
+          lead={t.guideLead}
+          tiles={t.guide.map((g, i) => ({ ...g, id: GUIDE_IDS[i]! }))}
+          thing={v.things[0]!}
+          scene={v.scene}
+          report={v.report}
+          zones={zones}
+          score={`${v.final.own}:${v.final.opp}`}
+        />
+        <p className="mt-6 text-base text-ink-2">{t.sources}</p>
 
         <section aria-labelledby="things" className="mt-14">
           <SectionHead id="things" title={m.things.side} />
@@ -98,30 +116,65 @@ export default async function Demo({ params }: Props) {
           <div className="mt-6">
             <DemoCamera
               scene={v.scene}
-              text={{ label: m.camera.label, pause: m.camera.pause, play: m.camera.play, notFound: m.camera.notFound, noBall: m.camera.noBall, caption: v.scene.label, ballLine: m.camera.ballLine }}
-              legend={{ own: v.own, opp: v.opp, ref: m.camera.legendRef, number: m.camera.legendNumber, ball: m.camera.legendBall }}
+              text={{
+                label: m.camera.label,
+                pause: m.camera.pause,
+                play: m.camera.play,
+                notFound: m.camera.notFound,
+                noBall: m.camera.noBall,
+                caption: v.scene.label,
+                ballLine: m.camera.ballLine,
+              }}
+              legend={{
+                own: v.own,
+                opp: v.opp,
+                ref: m.camera.legendRef,
+                number: m.camera.legendNumber,
+                ball: m.camera.legendBall,
+              }}
             />
           </div>
         </section>
 
-        <section aria-labelledby="flow" className="mt-16">
-          <SectionHead id="flow" title={t.flowTitle} />
-          <p className="mt-3 text-[1.0625rem] text-ink-2">{fmt(t.flowLabel, { own: v.own, opp: v.opp })}</p>
-          <div className="mt-4">
-            <Rail goals={v.report} label={fmt(t.flowLabel, { own: v.own, opp: v.opp })} />
-            <p className="mt-2 flex justify-between text-base text-ink-2" aria-hidden>
-              <span>0</span>
-              <span>30</span>
-              <span>60</span>
+        {/* the match in figures (L7): one head, the run of the match across, figures and positions
+            side by side below it, both as rows on the same rhythm */}
+        <section aria-labelledby="stats" className="mt-20">
+          <SectionHead id="stats" title={t.statsTitle} />
+          <div id="flow" className="mt-8 scroll-mt-4">
+            <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
+              <h3 className="text-[1.375rem] md:text-[1.5rem]">{t.flowTitle}</h3>
+              <p className="flex flex-wrap gap-x-5 gap-y-1 text-base font-semibold" aria-hidden>
+                <span className="inline-flex items-center gap-2">
+                  <i className="inline-block h-4 w-2 bg-[var(--club-line)]" />
+                  {v.own} {v.final.own}
+                </span>
+                <span className="inline-flex items-center gap-2">
+                  <i className="inline-block h-4 w-2 bg-[var(--opp-line)]" />
+                  {v.opp} {v.final.opp}
+                </span>
+              </p>
+            </div>
+            <div className="mt-4 border-y border-rule py-3">
+              <Rail goals={v.report} label={fmt(t.flowLabel, { own: v.own, opp: v.opp })} />
+            </div>
+            <p className="mt-2 grid grid-cols-3 text-base text-ink-2" aria-hidden>
+              <span>{t.flowStart}</span>
+              <span className="text-center">{fmt(t.flowHalf, { score: half })}</span>
+              <span className="text-right">
+                {fmt(t.flowEnd, { score: `${v.final.own}:${v.final.opp}` })}
+              </span>
             </p>
           </div>
-        </section>
 
-        <div id="zahlen" className="mt-16 grid grid-cols-1 gap-16 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
-          <section aria-labelledby="figures">
-            <SectionHead id="figures" title={t.figuresTitle} />
+          <div
+            id="zahlen"
+            className="mt-14 grid scroll-mt-4 grid-cols-1 gap-x-16 gap-y-14 lg:grid-cols-2"
+          >
             <div>
-              <table className="sheet mt-2">
+              <h3 id="figures" className="text-[1.375rem] md:text-[1.5rem]">
+                {t.figuresTitle}
+              </h3>
+              <table className="sheet mt-3">
                 <thead>
                   <tr>
                     <th scope="col">
@@ -139,25 +192,62 @@ export default async function Demo({ params }: Props) {
                     <tr key={f.key}>
                       <th scope="row" className="font-semibold">
                         {t.figures[f.key]}
-                        <span className="block text-base font-normal text-ink-2 sm:hidden">{t.source[f.source]}</span>
+                        <span className="block text-base font-normal text-ink-2 sm:hidden">
+                          {t.source[f.source]}
+                        </span>
                       </th>
-                      <td className="font-num text-[1.5rem]">{f.key === "shootingPct" && f.own != null ? fmt(t.pct, { v: f.own }) : f.own}</td>
-                      <td className="font-num text-[1.5rem]">{f.key === "shootingPct" && f.opp != null ? fmt(t.pct, { v: f.opp }) : f.opp}</td>
-                      <td className="hidden !pl-4 text-left text-base text-ink-2 sm:table-cell">{t.source[f.source]}</td>
+                      <td className="font-num text-[1.5rem]">
+                        {f.key === "shootingPct" && f.own != null
+                          ? fmt(t.pct, { v: f.own })
+                          : f.own}
+                      </td>
+                      <td className="font-num text-[1.5rem]">
+                        {f.key === "shootingPct" && f.opp != null
+                          ? fmt(t.pct, { v: f.opp })
+                          : f.opp}
+                      </td>
+                      <td className="hidden !pl-4 text-left text-base text-ink-2 sm:table-cell">
+                        {t.source[f.source]}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-          </section>
-          <section aria-labelledby="zones">
-            <SectionHead id="zones" title={t.zonesTitle} />
-            <div className="mx-auto mt-6 max-w-[26rem]">
-              <Zones goals={opp} team="opp" width={400} label={fmt(t.zonesLabel, { opp: v.opp })} zoneNames={m.things.zoneShort} />
+            <div>
+              <div className="flex flex-wrap items-baseline justify-between gap-x-6">
+                <h3 id="zones" className="text-[1.375rem] md:text-[1.5rem]">
+                  {t.zonesTitle}
+                </h3>
+                <p className="text-base font-semibold text-ink-2">
+                  {fmt(t.zonesTotal, { n: conceded })}
+                </p>
+              </div>
+              {/* one row per position, the same rhythm as the figures; the biggest is thing 1 */}
+              <ul
+                className="mt-3 border-t-2 border-ink"
+                aria-label={fmt(t.zonesLabel, { opp: v.opp })}
+              >
+                {zones.map((z) => (
+                  <li
+                    key={z.key}
+                    className="grid min-h-[3.25rem] grid-cols-[minmax(0,9.5rem)_minmax(0,1fr)_2.5rem] items-center gap-x-4 border-b border-rule"
+                  >
+                    <span className={z.strong ? "font-semibold" : undefined}>{z.label}</span>
+                    <span aria-hidden className="block h-4">
+                      <i
+                        className={z.strong ? "block h-full bg-ink" : "block h-full bg-ink/25"}
+                        style={{ width: `${(z.n / zones[0]!.n) * 100}%` }}
+                      />
+                    </span>
+                    <span className="font-num text-right text-[1.5rem]">{z.n}</span>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-3 text-base text-ink-2">{t.zonesNote}</p>
             </div>
-            <p className="mt-3 text-base text-ink-2">{t.zonesNote}</p>
-          </section>
-        </div>
+          </div>
+        </section>
 
         <section aria-labelledby="end" className="mt-20 border-t-2 border-ink pt-10">
           <h2 id="end" className="text-[2.25rem] md:text-[3.25rem]">
