@@ -10,7 +10,10 @@ Variants (JobSettings overrides on top of the CPU image settings):
 - cuda_ball_ens: cuda_image + ball nets hr1 + hrp1 (fp16) on every frame;
 - cuda_ball_hrp1: cuda_image + hrp1 only (fp16);
 - cuda_ball_ens_lean: the ensemble with detection every 3rd frame and numbers every 6th (the
-  cheapest setting that keeps the ball on every frame).
+  cheapest setting that keeps the ball on every frame);
+- cuda_lean: detection every 3rd frame, numbers on every detection frame with budget 0.3, no ball
+  net (job 14: the GPU job without the full-rate detection of cuda_image);
+- cuda_lean_hrp1: cuda_lean + hrp1 (fp16) on every frame.
 `bench_nets` also times the ball nets alone (fp32/fp16, batch 1/4/8) on real triplets.
 
 The cost per game is wall time x price per second, scaled from the profiled minutes to 60
@@ -39,12 +42,15 @@ PRICE_USD_H = {"modal_t4": 0.66, "azure_t4_4vcpu_16gib": 0.90}
 def variants(models: Path) -> dict[str, dict[str, object]]:
     ens = f"{models / 'ball_hr1_fp16.onnx'},{models / 'ball_hrp1_fp16.onnx'}"
     cuda = {"detect_every": 1, "number_every": 3}
+    lean = {"detect_every": 3, "number_every": 3, "number_budget": 0.3}
     return {
         "cpu_image": {},
         "cuda_image": cuda,
         "cuda_ball_ens": {**cuda, "ball_model": ens},
         "cuda_ball_hrp1": {**cuda, "ball_model": str(models / "ball_hrp1_fp16.onnx")},
         "cuda_ball_ens_lean": {"ball_model": ens},
+        "cuda_lean": lean,
+        "cuda_lean_hrp1": {**lean, "ball_model": str(models / "ball_hrp1_fp16.onnx")},
     }
 
 

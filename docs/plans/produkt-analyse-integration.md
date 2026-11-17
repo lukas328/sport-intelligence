@@ -423,3 +423,62 @@ Lesart:
   10 min). Dazu 165 mit Rate 4 und 466 Wurf-Kandidaten.
 - **Uhr und Spielstand:** 924 Uhr-Lesungen, aber Spielphasen nur von 12:50 bis 40:50 und von
   87:30 bis 92:10. Ohne Spielstand-Verlauf gibt es auch keine Tore aus der Tafel.
+
+### GPU-Profil auf einer T4 (Modal-Auftrag 13, Dataset `handball-gpu-profile-game1-gpu`, 2026-11-17)
+
+5 min von AT_Cup_Feldkirch_Bregenz_2021, `run_analysis` wie im Produkt. ONNX Runtime lief für alle
+Netze auf CUDA (geprüft). Das erste Dataset ohne `-gpu` sind CPU-Zahlen und gilt nicht.
+Kosten pro 60-min-Spiel: Modal T4 0.66 USD/h, Azure T4 mit 4 vCPU und 16 GiB 0.90 USD/h.
+
+| Einstellung | s für 5 min | Ballnetz | YOLOX | Rückennummern | Kamera | USD Modal / Azure |
+|---|---|---|---|---|---|---|
+| `cuda_image` (YOLOX jedes Bild, kein Ball) | 496 | | 126 | 216 | 84 | 1.09 / 1.49 |
+| + hrp1 jedes Bild | 1 378 | 890 | 106 | 216 | 93 | 3.03 / 4.13 |
+| + Ensemble jedes Bild | 1 873 | 1 369 | 109 | 216 | 103 | 4.12 / 5.62 |
+| Ensemble, YOLOX jedes 3. Bild | 1 755 | 1 347 | 37 | 216 | 84 | 3.86 / 5.26 |
+
+- Die Rückennummern liefen mit Gate und Budget 0.75. Das Modal-Image nimmt die ENV-Werte aus
+  `Dockerfile.cuda` nicht; dort wären Gate und Budget aus, dann wäre es noch teurer.
+  216 s für 300 s Video ist genau das Budget.
+- **Ballnetz auf der T4:** hr1 80 ms und hrp1 99 ms pro Bild (fp16, Stapel 1). Grössere Stapel
+  sind nicht schneller. Lokal kostet die Vorbereitung eines Bildes auf der CPU 21 ms (3
+  Farbumwandlungen, 32 MB float32 pro Bild). Die GPU ist also kaum ausgelastet; für dieses Netz
+  sind 10 bis 20 ms zu erwarten.
+- **Ziel unter 1 Euro** (etwa 1.08 USD; auf Azure etwa 72 min Rechenzeit pro Spiel, also etwa
+  360 s pro 5 min Video). Hebel, grob geschätzt:
+  1. YOLOX nur jedes 3. Bild: 126 auf 37 s.
+  2. Rückennummern-Budget auf der GPU 0.3 statt 0.75: 216 auf etwa 90 s. Der Nummernverlust
+     ist zu messen; heute halbiert schon das Budget von 0.75 die Nummernbilder.
+  3. Ballnetz schneller machen, Ziel unter 20 ms pro Bild für beide Netze:
+     - Vorbereitung in den Graphen verlegen (uint8-Eingabe, Umordnen und Normieren auf der GPU);
+     - IO-Binding;
+     - TensorRT-Ausführung prüfen.
+     Ohne das kostet das Ensemble auf jedem Bild allein etwa 3 USD pro Spiel.
+  4. Kamerabewegung (84 s) läuft auf der CPU, bleibt fix.
+
+  Ohne Ball liegt man mit 1 und 2 bei etwa 290 s pro 5 min, also 0.63 USD auf Modal und
+  0.86 USD auf Azure. Mit Ball geht es nur mit 3.
+- **Nächster GPU-Auftrag** (Vorschlag, braucht Freigabe): Kurzmessung des Ballnetzes auf der T4
+  in den Varianten CUDA, CUDA mit IO-Binding, TensorRT fp16, uint8-Eingabe mit Vorbereitung im
+  Graphen. Etwa 15 min, unter 0.20 USD.
+
+### Offen: lückenhafte Pausenerkennung über die Hallentafel
+
+- Die Spielphasen (`play.json`) kommen aus den Uhr-Lesungen der Hallentafel. Ist die Tafel lange
+  nicht im Bild, fehlen Lesungen, und die Phasen haben Lücken:
+  - Testclip H1: 54 % des Clips gelten als Spiel, obwohl der ganze Clip im Spiel liegt.
+  - Testclip H2: 1 %.
+  - Lukas' 99-min-Video: die zweite Halbzeit fast ganz ohne Spielphase.
+- Folgen:
+  - Ballpfad und Ballbesitz werden ausserhalb der Phasen verworfen; seit #61 nur, wenn die
+    Phasen mindestens 20 % des Videos abdecken.
+  - Die Tor-Kandidaten nutzen eigene Regeln ohne Ball (Kamera geparkt, Spieler zusammen).
+- Einschätzung: Die Uhr nur als Beleg für Pausen verwenden, nicht als Bedingung für Spiel. Also
+  als Spiel gilt alles ausser:
+  - Zeiten, in denen die Uhr nachweislich steht (zwei Lesungen mit gleicher Zeit mehr als einige
+    Sekunden auseinander);
+  - der `no_play`-Regel der Tor-Kandidaten (Kamera geparkt, Spieler zusammengedrängt).
+
+  Das ist ein eigener kleiner Schritt in `scoreboard.play_intervals`; dort arbeitet heute niemand
+  sonst. Messbar auf den Testclips und auf den Dev-Segmenten mit Protokollzeiten (Pausen kennt das
+  Protokoll als Timeouts und Halbzeit).
