@@ -446,6 +446,7 @@ const fr: Messages = {
         text: "Tu peux demander à tout moment ce qui est enregistré sur toi et exiger sa suppression. Écris au club ou à nous à {email}.",
       },
     ],
+    shareCaption: "Joueurs et parents ouvrent le lien dans le navigateur, sans compte. Il montre les numéros de maillot au lieu des noms.",
     boardTitle: "Pour le comité",
     board: "Le club est responsable des vidéos qu'il téléverse ; nous les traitons sur son mandat. Le contrat de sous-traitance suit avant le lancement, de même que la déclaration de protection des données vérifiée.",
     privacyLink: "Protection des données (projet)",

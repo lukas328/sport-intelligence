@@ -446,6 +446,7 @@ const en: Messages = {
         text: "You can ask at any time what is stored about you and request that it be deleted. Write to the club or to us at {email}.",
       },
     ],
+    shareCaption: "Players and parents open the link in the browser, no account needed. It shows shirt numbers instead of names.",
     boardTitle: "For the club board",
     board: "The club is responsible for the videos it uploads; we process them on its behalf. The data processing agreement follows before launch, as does the reviewed privacy policy.",
     privacyLink: "Privacy policy (draft)",

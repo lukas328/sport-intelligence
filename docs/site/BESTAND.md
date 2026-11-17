@@ -26,7 +26,7 @@ statisch aus `out/`), alle Seitentypen auf Deutsch bei 1280 und 390 px. Bilder i
 | Preise | Zahlen aus der Plantabelle, QR-Rechnung, Fair Use, Fragen zur Testphase | Merkmalslisten mit Assistent, Taktiktafel, PDF-Berichten; «Free» ohne Hinweis, dass dort nichts analysiert wird |
 | Beispielanalyse | erfundenes Spiel, sichtbar so gekennzeichnet, Zahlen mit dem echten Kennzahlen-Code | sieht nicht aus wie die App: Wurfbild in Bunt, xG, Filter-Selects. Kein Kopf, keine drei Dinge, keine Szene |
 | Hilfe | Suche, Gruppen, viele Antworten | Artikel zum alten Umfang (Training, Taktiktafel, Assistent, Präsentation, Rollen); Wörter vor dem neuen Vokabular (Erkenntnisse, Ereignisse, Playlist). «Erste Schritte» lädt Spieler ein und erfasst Kader per CSV |
-| Aufnahmeanleitung | knapp, praktisch, Aushang zum Drucken | kein Bild, wo die Kamera steht; sagt «nicht schwenken» ohne zu sagen, was beim Schwenken passiert |
+| Aufnahmeanleitung | knapp, praktisch, Aushang zum Drucken | kein Bild, wo die Kamera steht; sagt «nicht schwenken» ohne zu sagen, was beim Schwenken passiert (behoben: Hallenplan, fünf Regeln, «Schwenken geht», siehe KONZEPT) |
 | Blog | zwei echte Beiträge, beide passen zum Kern (Filmen, Unsicherheit) | erwähnt xG |
 | Kontakt | E-Mail, Antwortzeit | keine Antwort auf «wer seid ihr?» |
 | AGB, Datenschutz, Impressum | sauber als Entwurf markiert, Firma per Build-Variable | bleibt so (Lukas entscheidet) |

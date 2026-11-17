@@ -444,6 +444,7 @@ const de = {
         text: "Du kannst jederzeit fragen, was über dich gespeichert ist, und verlangen, dass es gelöscht wird. Schreib dem Verein oder uns an {email}.",
       },
     ],
+    shareCaption: "Spieler und Eltern öffnen den Link im Browser, ohne Konto. Er zeigt Rückennummern statt Namen.",
     boardTitle: "Für den Vorstand",
     board: "Für die Videos, die er hochlädt, ist der Verein verantwortlich; wir bearbeiten sie in seinem Auftrag. Der Vertrag dazu (Auftragsbearbeitung) folgt vor dem Start, ebenso die geprüfte Datenschutzerklärung.",
     privacyLink: "Datenschutzerklärung (Entwurf)",
