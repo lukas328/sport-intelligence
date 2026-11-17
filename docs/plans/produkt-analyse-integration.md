@@ -301,3 +301,32 @@ Lesart:
   unseren Clips Spieler in dunklen Trikots oft für Schiedsrichter hält (`ml/roles/README.md`);
   vor einem Einsatz braucht er die Abstimmung über die ganze Spur.
 - Hochladen in den Staging-Bucket (mit den Ballnetzen) erst nach Lukas' Freigabe.
+
+### Schritt 5, Wurf-Ereignisse: erster Befund (2026-11-17)
+
+Frage: Ist der Wurf der schnellste Ball seines Clips?
+- Daten: die 41 Entwicklungs-Würfe aus `ml/gold/shot_clips.json`. Die Test-Würfe werden vor allem
+  anderen verworfen und nie gelesen.
+- Ballpfad: der Produkt-Tracker (`balltrack2`, ohne OWLv2) auf den Kandidaten von hr1 und hrp1
+  aus Modal-Auftrag 12.
+- Prüfung: Liegt der schnellste anhaltende Ball im Fenster von 3 s vor bis 1 s nach der
+  Protokollzeit? Das Fenster deckt 4 der 9 bis 10 s ab, Zufall ergibt also etwa 0.4.
+- Skript: `ml/integration/shot_speed_check.py`.
+
+| Raum | Sicherheit | anhaltend über | schnellster Ball nahe der Protokollzeit |
+|---|---|---|---|
+| Bild | alle | 1 Schritt | 18 / 41 |
+| Bild | ab 0.3 | 4 Schritte | 5 / 41 |
+| Leinwand (Kamera herausgerechnet) | alle | 4 Schritte | 19 / 41 |
+| Leinwand | ab 0.3 | 8 Schritte | 14 / 41 |
+
+Lesart:
+- **Ergebnis:** Die Geschwindigkeit allein erkennt den Wurf nicht, nicht besser als Zufall.
+- **Mögliche Gründe:**
+  - Pässe, Gegenstösse und Kameraschwenks sind ebenso schnell.
+  - Der Tracker ist auf den 50/60-fps-Würfen schwächer.
+  - Die Protokollzeit ist nur auf Sekunden genau und sagt nicht, wo der Abwurf liegt.
+- **Nächster Schritt mit Lukas' Ja/Nein-Antworten:** Abwurfbild und Zielpunkt als Wahrheit nehmen
+  und eine Wurfform prüfen: Flug in Richtung Tor, endet am Tor oder beim Torhüter, dazu die
+  Wurf-Kandidaten aus `goalcandidates` (Kamera und Spieler).
+- **Bis dahin:** keine Produktänderung, weil Raten ohne Wahrheit nichts bringt.
