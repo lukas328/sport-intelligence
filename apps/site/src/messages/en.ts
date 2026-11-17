@@ -199,7 +199,7 @@ const en: Messages = {
     teamExample: "The club name or the town is enough.",
     teamAfter: "After \"Show\" you see your team with fixtures and results from the federation data, without an account.",
     finalTitle: "Try it with your next match.",
-    film: { label: "A short film of the example match: a match video plays, the analysis puts the {of} goals conceded on the half court, {n} of them came on the right wing. That gives three things for your next training.", video: "Your match", status: ["Video", "Analysis", "Three things"], replay: "Play again", count: "{n} of {of} on the right wing" },
+    film: { label: "A short film of the example match: a match video plays, the analysis puts the {of} goals conceded on the half court, {n} of them came on the right wing. That gives three things for your next training.", video: "Your match", status: ["Video", "Analysis", "Three things"], replay: "Play again", count: "{n} of {of} on the right wing", wait: ["Watching the video", "Analysis running"] },
   },
   honest: {
     title: "What the analysis does, what you do",

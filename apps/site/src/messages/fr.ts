@@ -199,7 +199,7 @@ const fr: Messages = {
     teamExample: "Le nom du club ou la localité suffit.",
     teamAfter: "Après « Afficher », tu vois ton équipe avec le calendrier et les résultats des données de la fédération, sans compte.",
     finalTitle: "Essaie avec ton prochain match.",
-    film: { label: "Court film du match d'exemple : une vidéo de match défile, l'analyse place les {of} buts encaissés sur le demi-terrain, dont {n} venus de l'aile droite. Il en sort trois choses pour le prochain entraînement.", video: "Ton match", status: ["Vidéo", "Analyse", "Trois points"], replay: "Revoir", count: "{n} sur {of} par l'aile droite" },
+    film: { label: "Court film du match d'exemple : une vidéo de match défile, l'analyse place les {of} buts encaissés sur le demi-terrain, dont {n} venus de l'aile droite. Il en sort trois choses pour le prochain entraînement.", video: "Ton match", status: ["Vidéo", "Analyse", "Trois points"], replay: "Revoir", count: "{n} sur {of} par l'aile droite", wait: ["Lecture de la vidéo", "Analyse en cours"] },
   },
   honest: {
     title: "Ce que fait l'analyse, ce que tu fais",

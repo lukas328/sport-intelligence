@@ -21,6 +21,8 @@ export interface HeroFilmText {
   /** the score line in the bar */
   score: string;
   replay: string;
+  /** the first loading row while the film runs: «Video wird angeschaut», «Analyse läuft» */
+  wait: readonly string[];
   /** the count over the court once the goals are down: «11 von 29 über aussen rechts» */
   count: string;
   note: string;
@@ -174,7 +176,7 @@ export function HeroFilm({
                 className="film-pan absolute inset-0 h-full w-full object-cover"
               />
               <div className="absolute inset-0 bg-[linear-gradient(180deg,rgb(22_23_26/.05)_40%,rgb(22_23_26/.55))]" />
-              <p className="absolute inset-x-0 top-[38%] text-center font-slant text-[2.75rem] leading-none text-white [text-shadow:0_3px_18px_rgb(0_0_0/.45)] md:text-[3.75rem]">
+              <p className="film-word absolute inset-x-0 top-[38%] text-center font-slant text-[2.75rem] leading-none text-white [text-shadow:0_3px_18px_rgb(0_0_0/.45)] md:text-[3.75rem]">
                 {text.video}
               </p>
               <div className="film-scan absolute inset-y-0 w-1/3 bg-[linear-gradient(90deg,transparent,rgb(255_210_60/.55),transparent)]" />
@@ -206,11 +208,26 @@ export function HeroFilm({
                   aria-hidden
                   className="film-ghost absolute inset-0 grid grid-cols-[4.5rem_minmax(0,1fr)] items-center gap-x-3 px-4 md:grid-cols-[5.25rem_minmax(0,1fr)] md:px-5"
                 >
-                  <i className="film-shimmer block h-7 w-10 bg-ink/10" />
-                  <span className="grid gap-2">
-                    <i className="film-shimmer block h-3.5 w-[70%] bg-ink/10" />
-                    <i className="film-shimmer block h-3 w-[45%] bg-ink/[.07]" />
-                  </span>
+                  <i className="film-shimmer block h-8 w-11 bg-ink/15" />
+                  {i === 0 ? (
+                    // the first row says, calmly, what is going on: the video is watched, then analysed
+                    <span className="grid gap-2">
+                      <span className="grid text-base leading-tight font-semibold text-ink-2">
+                        {text.wait.map((w, k) => (
+                          <span key={w} className={cn("film-wait flex items-center gap-2 [grid-area:1/1]", `film-wait-${k}`)}>
+                            <i className="film-shimmer inline-block size-2 shrink-0 bg-club" style={{ borderRadius: "50%" }} />
+                            {w}
+                          </span>
+                        ))}
+                      </span>
+                      <i className="film-shimmer block h-3 w-[45%] bg-ink/10" />
+                    </span>
+                  ) : (
+                    <span className="grid gap-2">
+                      <i className="film-shimmer block h-3.5 w-[70%] bg-ink/15" />
+                      <i className="film-shimmer block h-3 w-[45%] bg-ink/10" />
+                    </span>
+                  )}
                 </span>
                 <div className="film-row">
                   <button

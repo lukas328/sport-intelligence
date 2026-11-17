@@ -459,6 +459,8 @@
 .film-video,
 .film-scan,
 .film-ghost,
+.film-wait-0,
+.film-wait-1,
 .film-status-0,
 .film-status-1 {
   opacity: 0;
@@ -472,8 +474,12 @@
   transform-origin: center;
 }
 @media (prefers-reduced-motion: no-preference) {
+  /* the video fades before the goals come; its word goes first, so it never lies over the court */
   .film-video {
-    animation: film-out 3.9s ease-in both;
+    animation: film-out 3.4s ease-in both;
+  }
+  .film-word {
+    animation: film-out 2.9s ease-in both;
   }
   .film-pan {
     animation: film-pan 3.9s cubic-bezier(0.3, 0.1, 0.3, 1) both;
@@ -492,7 +498,7 @@
   }
   .film-dot {
     animation: film-pop 0.36s cubic-bezier(0.3, 1.6, 0.5, 1) both;
-    animation-delay: calc(3.5s + var(--i, 0) * 60ms);
+    animation-delay: calc(3.6s + var(--i, 0) * 60ms);
   }
   .film-rest {
     animation: film-rest 0.6s ease-out 5.6s both;
@@ -511,7 +517,13 @@
     animation: film-s0 calc(6.6s + var(--i, 0) * 350ms) linear both;
   }
   .film-shimmer {
-    animation: film-blink 1.2s ease-in-out infinite;
+    animation: film-breathe 1.6s ease-in-out infinite alternate;
+  }
+  .film-wait-0 {
+    animation: film-s0 2.6s linear both;
+  }
+  .film-wait-1 {
+    animation: film-s1 4.2s linear 2.4s both;
   }
   .film-status-0 {
     animation: film-s0 2.6s linear both;
@@ -520,13 +532,13 @@
     animation: film-s1 4s linear 2.4s both;
   }
   .film-status-2 {
-    animation: film-in 0.4s ease-out 6.3s both;
+    animation: film-in 0.4s ease-out 6.45s both;
   }
   .film-replay {
     animation: film-in 0.5s ease-out 7.8s both;
   }
   /* below the first screen the film waits until it is seen (components/hero-film.tsx) */
-  .film-hold :is(.film-video, .film-pan, .film-progress, .film-scan, .film-rec, .film-ghost, .film-lines, .film-dot, .film-rest, .film-zone, .film-count, .film-row, .film-status, .film-replay) {
+  .film-hold :is(.film-video, .film-word, .film-pan, .film-progress, .film-scan, .film-rec, .film-ghost, .film-wait, .film-lines, .film-dot, .film-rest, .film-zone, .film-count, .film-row, .film-status, .film-replay) {
     animation-play-state: paused;
   }
 }
@@ -567,6 +579,14 @@
     opacity: 1;
     visibility: visible;
     transform: translateX(320%);
+  }
+}
+@keyframes film-breathe {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.55;
   }
 }
 @keyframes film-blink {

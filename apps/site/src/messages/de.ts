@@ -197,7 +197,7 @@ const de = {
     teamExample: "Der Vereinsname oder der Ort reicht.",
     teamAfter: "Nach «Zeigen» siehst du dein Team mit Spielplan und Resultaten aus den Verbandsdaten, ohne Konto.",
     finalTitle: "Probier es mit deinem nächsten Spiel.",
-    film: { label: "Kurzer Film zum Beispielspiel: Ein Spielvideo läuft, die Analyse setzt die {of} Gegentore aufs halbe Feld, {n} davon kamen über aussen rechts. Daraus werden drei Dinge fürs nächste Training.", video: "Dein Spiel", status: ["Video", "Analyse", "Drei Dinge"], replay: "Nochmals abspielen", count: "{n} von {of} über aussen rechts" },
+    film: { label: "Kurzer Film zum Beispielspiel: Ein Spielvideo läuft, die Analyse setzt die {of} Gegentore aufs halbe Feld, {n} davon kamen über aussen rechts. Daraus werden drei Dinge fürs nächste Training.", video: "Dein Spiel", status: ["Video", "Analyse", "Drei Dinge"], replay: "Nochmals abspielen", count: "{n} von {of} über aussen rechts", wait: ["Video wird angeschaut", "Analyse läuft"] },
   },
   honest: {
     title: "Was die Analyse macht, was du machst",
