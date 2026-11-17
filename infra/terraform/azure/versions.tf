@@ -24,4 +24,6 @@ provider "azurerm" {
     }
   }
   subscription_id = var.subscription_id
+  # the mail service (Azure Communication Services) is not among the default registrations
+  resource_providers_to_register = ["Microsoft.Communication"]
 }

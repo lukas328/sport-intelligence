@@ -119,7 +119,9 @@ class Settings(BaseSettings):
     rate_limit_auth: str = "10/60"
 
     # E-mail (ADR 009)
-    email_backend: Literal["smtp", "memory", "console"] = "smtp"
+    email_backend: Literal["smtp", "acs", "memory", "console"] = "smtp"
+    # Azure Communication Services: "endpoint=https://…;accesskey=…" (backend acs)
+    acs_connection_string: SecretStr | None = None
     email_from: str = "Handball Intelligence <noreply@localhost>"
     smtp_host: str = "localhost"
     smtp_port: int = 1025

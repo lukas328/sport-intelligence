@@ -46,3 +46,13 @@ output "postgres_server" {
 output "container_app_environment" {
   value = azurerm_container_app_environment.this.name
 }
+
+output "mail_domain_id" {
+  description = "Azure id of the sending domain (the deploy verifies it)."
+  value       = azurerm_email_communication_service_domain.this.id
+}
+
+output "mail_verification_records" {
+  description = "DNS records Azure needs to verify the sending domain (domain, SPF, DKIM, DKIM2, DMARC)."
+  value       = azurerm_email_communication_service_domain.this.verification_records
+}
