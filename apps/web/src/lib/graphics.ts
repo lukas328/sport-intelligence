@@ -89,16 +89,18 @@ export function videoScore(g: MatchGraphics): { own: number; opp: number } | nul
 }
 
 /**
- * Goal moments still open in Prüfen, the most important and the further ones: while there are
- * any, the score from the video is an interim one (third real-video test G1).
+ * Goal moments still open in the main round of Prüfen: while there are any, the score from the
+ * video is an interim one (third real-video test G1). What waits behind «Mehr prüfen» is not
+ * counted (second round A6).
  */
 export function openMoments(g: MatchGraphics): number {
-  return g.checks.filter((c) => c.kind === "goal").length + (g.more_checks ?? []).length;
+  return g.checks.filter((c) => c.kind === "goal").length;
 }
 
-/** The count next to «Prüfen»: the most important questions, then the further moments. */
+/** The count next to «Prüfen», in the bell and on the start: the budget of the main round only
+ * (at most ten), never the moments behind «Mehr prüfen» (second round A6). */
 export function checkCount(g: MatchGraphics): number {
-  return g.checks.length > 0 ? g.checks.length : (g.more_checks ?? []).length;
+  return g.checks.length;
 }
 
 /** The goals that have a place in the video (confirmed there or pinned to it). */

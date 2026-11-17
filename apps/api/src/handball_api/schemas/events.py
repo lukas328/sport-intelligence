@@ -299,6 +299,7 @@ class GoalCandidateRow(ApiModel):
     rate: int  # lowest candidates-per-minute rate (goals 1, 2, 4; shots 2, 4, 6) proposing it
     suggested_side: Side | None  # whose attack ended just before it
     status: CandidateStatus
+    skipped: bool = False  # open, left with «Weiss nicht» in Prüfen (waits behind «Mehr prüfen»)
     side: Side | None  # confirmed: whose shot
     outcome: ShotOutcome | None  # confirmed: the shot's outcome
     event_id: uuid.UUID | None  # confirmed: the shot event (or the report entry it pinned)
@@ -408,6 +409,20 @@ class GoalCandidateReviewIn(ApiModel):
         if self.x is not None and self.shot_zone is None:
             raise ValueError("a point needs its zone")
         return self
+
+
+class CheckSkipIn(ApiModel):
+    """«Weiss nicht» in Prüfen: a goal moment (its candidate id), the court of a file (its video
+    id) or the throw-off of a half."""
+
+    kind: Literal["goal", "field", "kickoff"]
+    id: uuid.UUID | None = None
+    period: int | None = Field(default=None, ge=1, le=2)
+
+
+class CheckSkipAllOut(ApiModel):
+    skipped: int = Field(description="questions of the main round left")
+    moments: int = Field(description="goal moments of every rank left with them")
 
 
 class FeedImportResult(ApiModel):

@@ -144,7 +144,7 @@ async def create_match(team_id: uuid.UUID, data: MatchCreate, scope: OrgDep) -> 
 async def get_match(match_id: uuid.UUID, scope: OrgDep) -> MatchOut:
     match = await service.get_match(scope.ctx, match_id)
     out = await service.match_out(scope.ctx, match)
-    out.progress = await progress.for_match(scope.ctx, match)
+    out.progress = await progress.for_match(scope.ctx, match, keep_failed=True)
     return out
 
 

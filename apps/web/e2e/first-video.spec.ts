@@ -38,7 +38,7 @@ test("start after a first video without goals: one sentence, one step", async ({
   await expect(step).toBeVisible();
   // one sentence with the count of the questions, one button
   await expect(step.locator("p")).toHaveCount(1);
-  await expect(step.locator("p")).toHaveText(/^Die Analyse hat noch keine Tore gefunden\. (1 Frage hilft|\d+ Fragen helfen) ihr weiter\.$/);
+  await expect(step.locator("p")).toHaveText(/^Noch keine Tore bestätigt\. (1 gezielte Frage|\d+ gezielte Fragen), etwa (1 Minute|\d+ Minuten), dann zeigt die Analyse mehr\.$/);
   await expect(step.getByTestId("start-step")).toHaveText("Fragen beantworten");
   // nothing that says the same again, no collection without scenes
   await expect(page.getByTestId("collection-from-match")).toHaveCount(0);

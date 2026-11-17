@@ -233,7 +233,7 @@ function RunShare({ run, media, days, single = false }: { run: SharedRun; media:
   const titleOf = (sc: NonNullable<SharedRun["items"][number]["scene"]>) => {
     const g = sc.goal;
     if (!g) return sc.title ?? t("scene");
-    return `${g.minute != null ? `${clockOf(g.minute)} ` : ""}${g.team === "opp" ? tc("goalAgainst") : tc("goalFor")}${g.zone ? ` ${ta(`zoneFrom.${g.zone}` as "zoneFrom.la")}` : ""}`;
+    return `${g.minute != null ? `${clockOf(g.minute)} ` : ""}${g.team === "opp" ? tc("goalAgainst") : tc("goalFor")}${g.zone ? ` ${tc(`sceneZone.${g.zone}` as "sceneZone.la")}` : ""}`;
   };
   const camOf = (i: (typeof scenes)[number] | undefined) => (i?.scene?.camera ? cameraScene(i.scene.camera, i.scene.title) : null);
   const cam = camOf(cur);
