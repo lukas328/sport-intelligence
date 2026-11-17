@@ -45,6 +45,17 @@ Website-Feedback (aus einer anderen Sitzung, von Lukas weitergegeben, 17.11.):
 | W32 | **Entscheid Lukas (17.11.):** Die Website beschreibt das Produkt so, wie es beim Release sein wird: keine Hinweise wie «kommt bald», «noch nicht verfügbar», «noch nicht erkannt», «Preise noch nicht endgültig». Begründung: Testphase, Release erst, wenn alles passt. Bis zum Release gilt: Website nicht bewerben; Claude schlägt vor, Suchmaschinen bis dahin auszusperren (noindex) oder den Einstieg als Testphase zu kennzeichnen, damit niemand Funktionen erwartet, die noch nicht laufen | Website | offen, Schutz bis Release mit Lukas klären |
 | W31 | Zeit als Anker «Samstag filmen, Sonntag wissen», nur wenn die Analysedauer es hergibt | Website | zurückgestellt, bis die Dauer gemessen ist |
 
+App, Analyse und Prüfen (Lukas' echter Lauf, 17.11.):
+
+| # | Befund | Wo | Stand |
+|---|---|---|---|
+| A1 | Während und nach der Analyse lässt sich nichts löschen oder abbrechen: kein «Upload abbrechen» für den hängenden Upload (DE_3Liga_HSGKonstanz…mp4, «seit 1070 Min. kommt nichts mehr an, 32 MB von 3.1 GB»), kein «Datei entfernen» für den gescheiterten Lauf (CH_NLB_SGHorgen…mp4). Die API kann es (`DELETE /v1/orgs/{org}/videos/{id}`), die App bietet es nur versteckt in «Das Spiel in N Teilen» und nicht für hängende Uploads. Nötig: pro Datei im Fortschritt «Upload abbrechen» bzw. «Datei entfernen», mit Rückfrage | Spiel, Fortschritt | offen 🔴 |
+| A2 | Kopfzeile «Upload unterbrochen, Hochladen: 1 %» widerspricht dem Balken (etwa 40 %) und mischt beide Dateien: pro Datei eine klare Zeile, oben eine stimmige Zusammenfassung | Fortschrittsleiste | offen 🟡 |
+| A3 | Fehlermeldung zu allgemein: Grund in Nutzersprache («Video zu lang für die Testumgebung: 99 Min., Grenze 6 h Rechenzeit») und was hilft (kürzer schneiden); «Analyse neu starten» nicht anbieten, wenn es sicher wieder scheitert | Spiel, Fortschritt | offen 🟡 |
+| A4 | Hängender Upload (1070 Min. ohne neuen Teil) gilt nicht von selbst als abgebrochen: nach einer Frist als abgebrochen markieren und entfernen lassen | Upload, Watchdog | offen 🟡 |
+| A5 | Zwei verschiedene Spiele (Horgen und Konstanz) hängen am selben Spiel: gewollt (mehrere Dateien pro Spiel) oder Bedienfehler? Beim Hochladen auf ein Spiel mit anderer Datei warnen, wenn Dateiname oder Länge nicht passen | Upload | offen, prüfen |
+| A6 | 150 offene Fragen, obwohl die Analyse «nichts gefunden» hat; kein «alle überspringen». Konzept: höchstens etwa 10 Fragen pro Spiel, nach Nutzen sortiert, gebündelt (eine Frage pro Spieler statt pro Szene), «alle überspringen», keine Fragen wenn kaum etwas gefunden wurde, dafür klare Meldung, was fehlt (z. B. Spielfeld nicht erkannt) | Prüfen, Glocke | offen 🔴, Konzept folgt |
+
 ## Noch offen aus der ersten Runde
 
 | # | Punkt | Wo | Stand |
