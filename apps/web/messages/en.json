@@ -547,7 +547,9 @@
     "kitHome": "Home shirt",
     "kitAway": "Away shirt",
     "otherWaysFile": "No video? Create the match and enter the result. Attach the paper report to the match as a photo or PDF; the official report from handball.ch comes by itself.",
-    "uploadBackToList": "Back to the list of matches"
+    "uploadBackToList": "Back to the list of matches",
+    "newHint": "Friendly or opponent video",
+    "newOwnMatch": "Add a match of your own"
   },
   "upload": {
     "title": "Upload video",

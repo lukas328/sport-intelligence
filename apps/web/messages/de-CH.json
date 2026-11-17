@@ -547,7 +547,9 @@
     "kitHome": "Heimtrikot",
     "kitAway": "Auswärtstrikot",
     "otherWaysFile": "Ohne Video? Leg das Spiel an und trag das Resultat ein. Den Papierbericht hängst du im Spiel als Foto oder PDF an; der offizielle Bericht von handball.ch kommt von selbst.",
-    "uploadBackToList": "Zurück zur Liste der Spiele"
+    "uploadBackToList": "Zurück zur Liste der Spiele",
+    "newHint": "Testspiel oder Gegner-Video",
+    "newOwnMatch": "Ein eigenes Spiel anlegen"
   },
   "upload": {
     "title": "Video hochladen",

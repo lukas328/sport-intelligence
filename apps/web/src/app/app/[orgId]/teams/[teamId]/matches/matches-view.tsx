@@ -25,6 +25,7 @@ export function MatchesView({ orgId, teamId, matches, canWrite }: { orgId: strin
   const params = useSearchParams();
   const router = useRouter();
   const [open, setOpen] = useState(params.get("new") === "1");
+  const [newKind, setNewKind] = useState<"match" | "scouting">("match");
   // "Video hochladen" from the frame: pick the match the video belongs to, or create it
   const [upload, setUpload] = useState(params.get("upload") === "1");
   useEffect(() => setUpload(params.get("upload") === "1"), [params]);
@@ -74,24 +75,44 @@ export function MatchesView({ orgId, teamId, matches, canWrite }: { orgId: strin
     );
   }
 
+  // the fixtures come from the schedule by themselves: «Neues Spiel» is for a test match or a video
+  // of the opponent against others, and says so (finding A10)
   const newMatch = canWrite && (
-    <Dialog
-      open={open}
-      onOpenChange={(o) => {
-        setOpen(o);
-        if (!o && params.get("new")) router.replace(`/app/${orgId}/teams/${teamId}/matches`);
-      }}
-      title={t("matches.new")}
-      wide
-      trigger={
-        <Button variant="secondary" data-testid="new-match">
-          <Plus aria-hidden />
-          {t("matches.newShort")}
-        </Button>
-      }
-    >
-      <NewMatchForm orgId={orgId} teamId={teamId} />
-    </Dialog>
+    <>
+      <Dialog
+        open={open}
+        onOpenChange={(o) => {
+          setOpen(o);
+          if (!o) setNewKind("match");
+          if (!o && params.get("new")) router.replace(`/app/${orgId}/teams/${teamId}/matches`);
+        }}
+        title={newKind === "scouting" ? t("scoutingUpload.title") : t("matches.new")}
+        wide
+        trigger={
+          <Button variant="secondary" data-testid="new-match" aria-describedby="new-match-hint">
+            <Plus aria-hidden />
+            {t("matches.newShort")}
+          </Button>
+        }
+      >
+        <div className="space-y-6">
+          {newKind === "scouting" ? <ScoutingForm orgId={orgId} teamId={teamId} matches={matches} /> : <NewMatchForm orgId={orgId} teamId={teamId} />}
+          <div className="border-t border-rule pt-3">
+            <button
+              type="button"
+              onClick={() => setNewKind(newKind === "scouting" ? "match" : "scouting")}
+              className="min-h-11 cursor-pointer border-0 bg-transparent p-0 text-left text-[17px] font-bold underline decoration-[1.5px] underline-offset-4"
+              data-testid="new-match-kind"
+            >
+              {newKind === "scouting" ? t("matches.newOwnMatch") : t("scoutingUpload.entry")}
+            </button>
+          </div>
+        </div>
+      </Dialog>
+      <span id="new-match-hint" className="text-[15px] text-ink-2">
+        {t("matches.newHint")}
+      </span>
+    </>
   );
 
   return (

@@ -547,7 +547,9 @@
     "kitHome": "Maillot domicile",
     "kitAway": "Maillot extérieur",
     "otherWaysFile": "Sans vidéo ? Crée le match et saisis le résultat. Le rapport papier se joint au match en photo ou PDF; le rapport officiel de handball.ch arrive tout seul.",
-    "uploadBackToList": "Retour à la liste des matchs"
+    "uploadBackToList": "Retour à la liste des matchs",
+    "newHint": "Match amical ou vidéo de l'adversaire",
+    "newOwnMatch": "Créer un match de ton équipe"
   },
   "upload": {
     "title": "Téléverser la vidéo",
