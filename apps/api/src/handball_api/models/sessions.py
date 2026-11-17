@@ -108,7 +108,7 @@ class LiveTagSession(Base, EntityMixin, TenantMixin):
     sync_confidence: Mapped[float | None] = mapped_column(Float)
     sync_source: Mapped[str | None] = mapped_column(String(20))  # events, metadata, manual
     video_id: Mapped[uuid.UUID | None] = mapped_column(
-        ForeignKey("video_assets.id", ondelete="SET NULL")
+        ForeignKey("video_assets.id", ondelete="SET NULL"), index=True
     )
 
 
@@ -124,7 +124,9 @@ class LiveTag(Base, EntityMixin, TenantMixin):
     device_time: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     key: Mapped[str] = mapped_column(String(40), nullable=False)
     note: Mapped[str | None] = mapped_column(String(300))
-    event_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("events.id", ondelete="SET NULL"))
+    event_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("events.id", ondelete="SET NULL"), index=True
+    )
 
 
 class TrainingSession(Base, EntityMixin, TenantMixin):

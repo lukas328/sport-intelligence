@@ -367,7 +367,15 @@ locals {
       min     = 1
       max     = 3
       ingress = true
-      env     = { FORWARDED_ALLOW_IPS = "*" }
+      # Database connections: processes (2 at cpu 0.5) x replicas (max 3) x (pool + overflow)
+      # = 2 x 3 x 5 = 30, below the 50 of the B1ms server with room for the migration job. With
+      # more replicas, processes or a bigger server, size these again.
+      env = {
+        FORWARDED_ALLOW_IPS = "*"
+        HB_WORKERS          = "2"
+        HB_DB_POOL_SIZE     = "4"
+        HB_DB_MAX_OVERFLOW  = "1"
+      }
     }
     worker = {
       image   = "hb-worker"

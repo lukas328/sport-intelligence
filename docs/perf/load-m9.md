@@ -11,7 +11,9 @@ plays, match list. Open loop (Poisson arrivals) so queueing shows up honestly.
 1. **Bug:** concurrent first views of a match raced on inserting the stats cache (unique key, HTTP 500
    under load). Fixed with an atomic `INSERT ... ON CONFLICT DO UPDATE`; regression test added.
 2. **One API process** used one of four cores (49 rps, p50 750 ms closed loop). Now one Uvicorn worker
-   per core (`HB_WORKERS`, default min(4, cores)): 136 rps closed loop, no errors.
+   per core (`HB_WORKERS`, default min(4, cores)): 136 rps closed loop, no errors. Since 2026-11-17
+   the default counts the cores of the container's CPU limit (cgroup), not the host's: at least two,
+   at most four.
 3. **Insights and season stats** read the cached stats of every match of the season per request
    (p95 1.1 to 1.3 s at 100 rps). Now cached as a whole, keyed by one aggregated version query over the
    season's matches and events: p95 47 ms at 100 rps.
@@ -73,7 +75,10 @@ error rate 0.01%, worst p95 2564 ms (budget 300 ms)
   far above the expected peak (Sunday evening after matchdays).
 - At 200 requests per second the machine saturates at about 120 requests per second (the load
   generator itself takes a core). The API is stateless: production scales horizontally behind the
-  load balancer, Postgres connections stay bounded by `pool_size` per worker.
+  load balancer, Postgres connections stay bounded by `HB_DB_POOL_SIZE` + `HB_DB_MAX_OVERFLOW` per
+  worker. Processes x replicas x (size + overflow) must stay below the server's connection limit (50 on
+  the B1ms of staging): a refused connection answered 500 on random reads in production; it is now a
+  503 with Retry-After, and the Azure app sets the budget explicitly (infra/terraform/azure/main.tf).
 - Not covered here: uploads (bandwidth bound, direct to object storage) and SSE streams (one idle
   connection per open match page).
 
