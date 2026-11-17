@@ -98,11 +98,10 @@ function RowTools({ n, last, edit }: { n: number; last: number; edit: RunEdit })
 function SceneRow({ orgId, n, item, scene, tools }: { orgId: string; n: number; item: Item; scene: Schemas["SceneOut"]; tools?: React.ReactNode }) {
   const t = useTranslations("collections");
   const g = useMatchGraphics(orgId, scene.match_id);
-  const ta = useTranslations("anlauf");
   // the goal the scene was made from: its run is the Minifeld, its minute and zone the title
   const goal = g.data && scene.event_id ? goalRuns(g.data).find((x) => x.eventId === scene.event_id) : undefined;
   const title = goal
-    ? `${goal.minute != null ? `${clockOf(goal.minute)} ` : ""}${goal.team === "opp" ? t("goalAgainst") : t("goalFor")}${goal.zone ? ` ${ta(`zoneFrom.${goal.zone}` as "zoneFrom.la")}` : ""}`
+    ? `${goal.minute != null ? `${clockOf(goal.minute)} ` : ""}${goal.team === "opp" ? t("goalAgainst") : t("goalFor")}${goal.zone ? ` ${t(`sceneZone.${goal.zone}` as "sceneZone.la")}` : ""}`
     : scene.title || t("scene");
   return (
     <li className="grid grid-cols-[40px_84px_minmax(0,1fr)_auto] items-center gap-4 border-t border-rule py-3.5 md:grid-cols-[40px_112px_minmax(0,1fr)_auto]" data-testid="collection-item">

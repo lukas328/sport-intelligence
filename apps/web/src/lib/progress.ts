@@ -126,6 +126,48 @@ export function headlineKey(p: Pick<MatchProgress, "state" | "stage" | "files">)
   return "headAnalysis";
 }
 
+/** The words of a file's state for the summary line of several files (second round A2). */
+export type FileWord = "done" | "failed" | "interrupted" | "stalled" | "upload" | "ingest" | "analysis" | "waiting";
+
+export function fileWord(f: Pick<FileProgress, "state" | "stage">): FileWord {
+  if (f.state === "done") return "done";
+  if (f.state === "failed") return "failed";
+  if (f.state === "interrupted") return "interrupted";
+  if (f.state === "stalled") return "stalled";
+  if (f.state === "queued" || f.state === "waiting") return "waiting";
+  return f.stage === "done" ? "done" : f.stage;
+}
+
+/** Several files in one line: how many do what, in a fixed order («1 fertig, 1 Upload
+ * unterbrochen»). */
+export function filesLine(files: Pick<FileProgress, "state" | "stage">[]): { word: FileWord; n: number }[] {
+  const order: FileWord[] = ["upload", "ingest", "analysis", "waiting", "interrupted", "stalled", "failed", "done"];
+  const counts = new Map<FileWord, number>();
+  for (const f of files) counts.set(fileWord(f), (counts.get(fileWord(f)) ?? 0) + 1);
+  return order.filter((w) => counts.has(w)).map((word) => ({ word, n: counts.get(word)! }));
+}
+
+/** The bar of the progress block: while uploading how far the uploads are (what the time beside
+ * it says), else the whole way; null while a file holds (stopped, silent, failed), when a bar
+ * would promise progress that does not happen (second round A2). */
+export function barValue(p: Pick<MatchProgress, "stage" | "state" | "overall" | "files">): number | null {
+  if (p.files.some((f) => f.state === "interrupted" || f.state === "stalled" || f.state === "failed")) return null;
+  if (p.stage === "upload") {
+    const up = p.files.filter((f) => f.stage === "upload");
+    return up.length ? up.reduce((s, f) => s + (f.fraction ?? 0), 0) / up.length : p.overall;
+  }
+  return p.overall;
+}
+
+/** What a file offers in the progress block (second round A1): «Upload abbrechen» while it is
+ * uploaded or stuck (its uploader or the staff), «Datei entfernen» once it arrived or failed (the
+ * staff who may delete), nothing while a worker has it. */
+export function fileActions(f: Pick<FileProgress, "stage" | "state" | "step">, who: { staff: boolean; canDelete: boolean; own: boolean }): "cancel" | "remove" | null {
+  if (f.stage === "upload" && f.state !== "failed") return f.step !== "link" && (who.staff || who.own) ? "cancel" : null;
+  if (f.state === "failed" || f.state === "done") return who.canDelete ? "remove" : null;
+  return null;
+}
+
 /** The tone of the progress: running, needs a look (stalled, stopped), done, failed. */
 export function tone(p: { state: State }): "run" | "attn" | "done" | "fail" {
   if (p.state === "stalled" || p.state === "interrupted") return "attn";
@@ -160,4 +202,32 @@ export function markSeen(matchId: string): void {
   } catch {
     /* private mode: shown again until it ages out */
   }
+}
+
+/** Stopped uploads whose yellow line the coach dismissed («Verwerfen», second round A9), by
+ * video; the line goes for good once the server gives the upload up (after 6 hours). */
+const DISMISSED = "hb-upload-dismissed";
+
+export function dismissedUploads(): Set<string> {
+  try {
+    return new Set(JSON.parse(window.localStorage.getItem(DISMISSED) ?? "[]") as string[]);
+  } catch {
+    return new Set();
+  }
+}
+
+export function dismissUploads(ids: string[]): void {
+  try {
+    const all = [...new Set([...dismissedUploads(), ...ids])].slice(-50);
+    window.localStorage.setItem(DISMISSED, JSON.stringify(all));
+  } catch {
+    /* private mode: the line stays until the upload is given up */
+  }
+}
+
+/** A match whose only trouble is stopped uploads the coach dismissed: the line in the head stays
+ * away (its own page still shows the files). */
+export function onlyDismissed(p: Pick<MatchProgress, "files">, dismissed: ReadonlySet<string>): boolean {
+  const active = p.files.filter(isActive);
+  return active.length > 0 && active.every((f) => f.state === "interrupted" && dismissed.has(f.video_id));
 }

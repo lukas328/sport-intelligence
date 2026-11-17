@@ -605,7 +605,8 @@
     "failedText": "What arrived stays. “Resume” sends the rest.",
     "failedAgain": "If it fails again, it is mostly the connection. Try later on Wi-Fi, or start over.",
     "ownKit": "Which shirt do you wear in this match?",
-    "ownKitSaved": "Saved."
+    "ownKitSaved": "Saved.",
+    "otherGame": "“{name}” is named quite differently from “{first}”, which is already in this match. Does the file really belong here? Another game gets a match of its own. The upload goes on."
   },
   "processing": {
     "title": "Processing",
@@ -727,7 +728,28 @@
     "meanwhile": "Meanwhile you can",
     "doRoster": "check the squad (shirt numbers help the analysis)",
     "doOpponent": "look at {opponent}",
-    "doAttach": "attach the paper report or notes"
+    "doAttach": "attach the paper report or notes",
+    "filesSummary": "{n} files: {list}",
+    "fileState_done": "{n} done",
+    "fileState_failed": "{n} failed",
+    "fileState_interrupted": "{n} upload stopped",
+    "fileState_stalled": "{n} not answering",
+    "fileState_upload": "{n} uploading",
+    "fileState_ingest": "{n} being read in",
+    "fileState_analysis": "{n} being analysed",
+    "fileState_waiting": "{n} waiting",
+    "cancelUpload": "Cancel upload",
+    "cancelTitle": "Cancel the upload of “{name}”?",
+    "cancelBody": "What has arrived so far is deleted. You can upload the file again later.",
+    "removeFile": "Remove file",
+    "removeTitle": "Remove “{name}”?",
+    "removeBody": "The video and what the analysis found in it are deleted. What you entered by hand and the match report stay.",
+    "removeFailed": "That could not be removed. Try again.",
+    "failedAbandoned": "Nothing arrived for this upload for 6 hours, it was given up. Remove the file and upload it again if you need it.",
+    "discard": "Dismiss",
+    "discardTitle": "Cancel the upload as well?",
+    "discardBody": "The notice is gone. The stopped upload for {name} is kept so you can go on with the same file. Cancelling deletes what has arrived. Otherwise it is given up by itself after 6 hours without new parts.",
+    "discardKeep": "No, just hide it"
   },
   "attachments": {
     "title": "Files of the match",
@@ -1451,7 +1473,7 @@
     "video_failed": "A video could not be read.",
     "video_failed_match": "The video against {opponent} could not be read. Choose another file.",
     "analysis_questions": "The analysis is done. A few questions for you, then it shows more.",
-    "analysis_questions_match": "The analysis against {opponent} is done. {questions, plural, one {1 question} other {# questions}} for you, then it shows more.",
+    "analysis_questions_match": "The analysis against {opponent} is done: {questions, plural, one {1 question} other {# questions}} for you, about {minutes, plural, one {1 minute} other {# minutes}}.",
     "analysis_no_goals": "The analysis is done. It found no goals.",
     "analysis_no_goals_match": "The analysis against {opponent} is done. It found no goals.",
     "noneHint": "The app tells you here when an analysis is done, questions are waiting for you or someone wants to join the team.",
@@ -2211,7 +2233,8 @@
     "videoAll": "The video shows all {n} parts one after the other.",
     "jump": "To the {name}",
     "jumpPart": "To part {n}",
-    "marker": "{name} starts"
+    "marker": "{name} starts",
+    "removeFile": "Remove file"
   },
   "invoices": {
     "title": "Annual subscription by invoice",
@@ -3361,7 +3384,17 @@
     "moveUpItem": "Move item {n} up",
     "moveDownItem": "Move item {n} down",
     "moreItem": "More for item {n}",
-    "more": "More"
+    "more": "More",
+    "sceneZone": {
+      "la": "from the left wing",
+      "ra": "from the right wing",
+      "rl": "from left back",
+      "rm": "from centre back",
+      "rr": "from right back",
+      "kr": "from the circle",
+      "gs": "on a fast break",
+      "m7": "from the 7 m line"
+    }
   },
   "consentLink": {
     "invalid": "This link is no longer valid. Ask the team for the new one.",
@@ -3444,7 +3477,7 @@
     "kickDone": "Analysis done {when}",
     "openMatch": "Open match",
     "collect": "Put together for the team",
-    "checksOpen": "{count, plural, one {1 question open} other {# questions open}}, {minutes, plural, one {1 minute} other {# minutes}}",
+    "checksOpen": "{count, plural, one {1 question} other {# questions}}, about {minutes, plural, one {1 minute} other {# minutes}}",
     "allMatches": "All matches",
     "withoutVideo": "{count} of {total} without video",
     "miniNoVideo": "no video",
@@ -3593,7 +3626,7 @@
     "plainBench": "Events and comments by hand",
     "plainComments": "Comments on the video",
     "nextStepTitle": "The analysis is done, no three things yet.",
-    "nextStepChecks": "The analysis found no goals yet. {n, plural, one {1 question helps} other {# questions help}} it on.",
+    "nextStepChecks": "No goals confirmed yet. {n, plural, one {1 targeted question} other {# targeted questions}}, about {minutes, plural, one {1 minute} other {# minutes}}, then the analysis shows more.",
     "nextStepReport": "The analysis found no goals in the video. In the match you can enter the result and mark goals in the video.",
     "nextStepNoGoals": "The analysis found no goals in the video. The video and the goals from the report are in the match.",
     "nextStepAddReport": "Add the match report",
@@ -3628,7 +3661,11 @@
     "howCountedVideo": "The goals come from the video, as you confirmed them in Check. The runs are the scorer's ways in the three seconds before the goal, measured in the video. Estimated shot spots are dashed until you confirm them.",
     "allGoals": "{n, plural, one {The goal} other {All # goals}}",
     "scoutingRow": "{opponent} against {other}",
-    "scoutingTag": "Watched"
+    "scoutingTag": "Watched",
+    "noticeLead": "The analysis is done, but it saw too little to ask you anything.",
+    "rowParts": "{done} of {total} parts analysed",
+    "rowPartsFailed": "{n, plural, one {1 part failed} other {# parts failed}}",
+    "rowNotice": "Analysis done, no questions: {reason}"
   },
   "check": {
     "top": "Check · {opponent}",
@@ -3676,7 +3713,7 @@
     "reloading": "The court is being taken over and the video analysed again with it. This takes a few minutes. You can close the page; the new questions will be here afterwards.",
     "mainDone": "The most important moments are checked.",
     "mainDoneText": "{n, plural, one {1 more moment could be a goal.} other {# more could be goals.}} With «From where?» that takes about {minutes, plural, one {1 minute} other {# minutes}}.",
-    "goOn": "Keep checking",
+    "goOn": "Check more",
     "roundDone": "Checked for today.",
     "leftOpen": "{n, plural, one {1 moment stays open.} other {# moments stay open.}} Until they are answered, the score is an interim one.",
     "sameGoal": "No, the same goal",
@@ -3698,7 +3735,13 @@
     "rosterAdd": "Add the squad",
     "videoSoon": "The video is almost ready.",
     "videoSoonText": "It is still being uploaded or converted. The question waits until then; the page checks every few seconds.",
-    "questionsLeft": "{n, plural, one {1 question stays open} other {# questions stay open}}. It waits here whenever you like."
+    "questionsLeft": "{n, plural, one {1 question stays open} other {# questions stay open}}. It waits here whenever you like.",
+    "noticeLead": "That is why the analysis asks no questions about goals:",
+    "finishedTitle": "Done for this match.",
+    "finishedText": "{n, plural, one {1 question waits} other {# questions wait}} under “Check more”, whenever you like. The bell is quiet.",
+    "finishedTextNone": "The other questions are put aside. The bell is quiet.",
+    "skippedLeft": "{n, plural, one {You skipped 1 question. It waits} other {You skipped # questions. They wait}} under “Check more”, whenever you like.",
+    "skipAll": "Done for this match: skip all the others"
   },
   "scenesPage": {
     "searchLabel": "Search scenes",
@@ -4212,5 +4255,48 @@
     "own": "your team",
     "showAll": "Full table ({n} teams)",
     "showLess": "Show only the excerpt"
+  },
+  "analysisNotice": {
+    "title_camera_motion": "The camera zooms or cuts too much, so the court is missing.",
+    "help_camera_motion": "To film better: keep the camera fixed, both goals in the picture, no zooming. For this video you can set the four corners of the court by hand.",
+    "title_no_floor": "The analysis cannot find the hall floor, so the court is missing.",
+    "help_no_floor": "To film better: from a raised spot, the whole court with all its lines in the picture. For this video you can set the four corners by hand.",
+    "title_flat_view": "The camera stands too low, the court lies too flat in the picture.",
+    "help_flat_view": "To film better: higher up, from the stand or on a tall tripod. For this video you can set the four corners by hand.",
+    "title_few_people": "The analysis sees hardly any players in the video.",
+    "help_few_people": "To film better: the whole court in the picture, not too far away, good light. Without players in the picture it cannot propose any goals.",
+    "title_court": "The court was not recognised.",
+    "help_court": "To film better: camera fixed and raised, both goals and all lines in the picture. For this video you can set the four corners by hand.",
+    "title_calibration": "The court was not recognised.",
+    "help_calibration": "Set the four corners of the court by hand, then the analysis runs again. For the next match: camera fixed and raised, both goals in the picture.",
+    "title_no_play": "There is hardly any play in the video.",
+    "help_no_play": "The analysis only looks for goals where there is play. Upload the match itself, without long breaks, warm-up or time-outs before it.",
+    "title_timeout": "The video is too long for the analysis: {minutes} min of video, it may compute for at most {hours} h.",
+    "title_timeoutNoLength": "The video is too long for the analysis: it may compute for at most {hours} h.",
+    "help_timeout": "Here is how: cut the video shorter, for example one half or 10 minutes, and upload it again. Starting again does not help, it would take too long again.",
+    "title_stalled": "The computer stopped answering twice.",
+    "help_stalled": "It is not your video. Start the analysis again; if it fails again, we already know.",
+    "title_unreadable": "The video file could not be read.",
+    "help_unreadable": "Upload the camera's original file again (MP4 or MOV).",
+    "title_too_short": "The video is too short for an analysis.",
+    "help_too_short": "Upload the whole match or at least a few minutes in one go. Several files are possible.",
+    "title_generic": "The analysis did not work.",
+    "help_generic": "The video stays playable, and everything you entered stays. Start the analysis again; if it fails again, we already know.",
+    "filmLink": "How to film well",
+    "corners": "Set the corners",
+    "noQuestions": "That is why the analysis asks no questions about goals.",
+    "noGoals": "No goals found",
+    "short_camera_motion": "the camera zooms too much",
+    "short_no_floor": "court not recognised",
+    "short_flat_view": "camera too low",
+    "short_court": "court not recognised",
+    "short_calibration": "court not recognised",
+    "short_few_people": "hardly any players seen",
+    "short_no_play": "hardly any play in the video",
+    "short_timeout": "video too long",
+    "short_stalled": "the computer did not answer",
+    "short_unreadable": "file unreadable",
+    "short_too_short": "video too short",
+    "short_generic": "did not work"
   }
 }

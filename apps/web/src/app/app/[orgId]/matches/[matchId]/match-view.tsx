@@ -42,6 +42,7 @@ import { coverage } from "@/lib/match-workflow";
 import { MyScenesLine, TeamFeedView } from "./feed-views";
 import { officialGoalsKey } from "./official-goals";
 import { PartsLine, PartsPanel, usePartMarkers } from "./parts-panel";
+import { AnalysisNotice } from "@/components/analysis/analysis-notice";
 import { latestJobs, partsOf, timelineVideo } from "@/lib/video-parts";
 import { isActive, progressKey, useProgress, withLocal } from "@/lib/progress";
 import { useLocalUploads } from "@/lib/upload-store";
@@ -501,8 +502,10 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
           orgId={orgId}
           progress={progress}
           staff={staff}
+          canDelete={canDelete}
           onOtherFile={toUpload}
           onResumeUpload={toUpload}
+          onRemoved={() => (void qc.invalidateQueries({ queryKey: key }), router.refresh())}
           aside={
             // what is known and what comes, once the video is in (during the upload the way on counts)
             isActive(progress) && progress.stage !== "upload" ? (
@@ -540,7 +543,12 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
             <VideoPlayer ref={plainPlayer} src={`/v1/orgs/${orgId}/videos/${main.id}/media/hls/master.m3u8`} markers={partMarkers} />
             <PartsLine videos={match.videos} onJump={(ms) => (plainPlayer.current?.seek(ms), plainPlayer.current?.play())} />
             {/* «fertig» only once the analysis is done, never while it runs (E06) */}
-            <p className="m-0 max-w-[60ch] text-[17px]">{graphics.data?.analysis === "running" ? ta("plainRunning") : graphics.data?.analysis !== "ready" ? ta("plainVideoOnly") : staff && checks > 0 ? ta("plainChecks", { n: checks }) : ta("plainNoGoals")}</p>
+            {/* found too little to ask about: why and what helps (second round A6) */}
+            {graphics.data?.analysis === "ready" && graphics.data.notice && !graphics.data.notice.failed ? (
+              <AnalysisNotice notice={graphics.data.notice} cornersHref={staff && graphics.data.checks.some((c) => c.kind === "field") ? `${base}/check` : null} testId="plain-notice" />
+            ) : (
+              <p className="m-0 max-w-[60ch] text-[17px]">{graphics.data?.analysis === "running" ? ta("plainRunning") : graphics.data?.analysis !== "ready" ? ta("plainVideoOnly") : staff && checks > 0 ? ta("plainChecks", { n: checks }) : ta("plainNoGoals")}</p>
+            )}
             <div className="flex flex-wrap gap-3">
               {staff && checks > 0 && (
                 <Link href={`${base}/check`} className={buttonClass("primary")}>
@@ -588,7 +596,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
                 <AskColour orgId={orgId} matchId={match.id} opponent={oppName(match)} />
               </div>
             )}
-            <UploadPanel orgId={orgId} matchId={match.id} kits={scouting ? null : ownKits} stuck={stuckUploads} progressFiles={progress?.files ?? []} onUploaded={() => void qc.invalidateQueries({ queryKey: key })} />
+            <UploadPanel orgId={orgId} matchId={match.id} kits={scouting ? null : ownKits} stuck={stuckUploads} progressFiles={progress?.files ?? []} existing={match.videos.filter((v) => v.role === "main" && !v.duplicate_of).map((v) => v.filename)} onUploaded={() => void qc.invalidateQueries({ queryKey: key })} />
           </section>
         )}
         <PartsPanel orgId={orgId} match={match} jobs={jobs} staff={staff} canDelete={canDelete} onChanged={() => void qc.invalidateQueries({ queryKey: key })} />
@@ -601,7 +609,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
               {t("upload.addCamera")}
             </summary>
             <div className="pt-3">
-              <UploadPanel orgId={orgId} matchId={match.id} hasMain stuck={stuckUploads} progressFiles={progress?.files ?? []} onUploaded={() => void qc.invalidateQueries({ queryKey: key })} />
+              <UploadPanel orgId={orgId} matchId={match.id} hasMain stuck={stuckUploads} progressFiles={progress?.files ?? []} existing={match.videos.filter((v) => v.role === "main" && !v.duplicate_of).map((v) => v.filename)} onUploaded={() => void qc.invalidateQueries({ queryKey: key })} />
             </div>
           </details>
         )}

@@ -9,6 +9,8 @@ interface Ask {
   title: string;
   body?: string;
   confirm?: string;
+  /** the words of the other button (default «Abbrechen») */
+  cancel?: string;
   danger?: boolean;
 }
 
@@ -49,8 +51,8 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
             <D.Title className="text-lg font-semibold">{ask?.title}</D.Title>
             <D.Description className={ask?.body ? "mt-2 text-sm text-muted" : "sr-only"}>{ask?.body ?? ask?.title}</D.Description>
             <div className="mt-6 flex justify-end gap-2">
-              <Button variant="secondary" onClick={() => close(false)}>
-                {t("cancel")}
+              <Button variant="secondary" onClick={() => close(false)} data-testid="confirm-cancel">
+                {ask?.cancel ?? t("cancel")}
               </Button>
               <Button variant={ask?.danger ? "danger" : "primary"} onClick={() => close(true)} data-testid="confirm-ok">
                 {ask?.confirm ?? t("confirm")}

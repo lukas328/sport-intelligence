@@ -26,6 +26,8 @@ import { checkMinutes } from "@/lib/shot-spot";
 import { cn } from "@/lib/utils";
 import { ProgressLine } from "@/components/progress/progress-line";
 import { NextSteps } from "@/components/people/next-steps";
+import { AnalysisNotice, noticeKey } from "@/components/analysis/analysis-notice";
+import { filesSummary } from "@/lib/check-budget";
 
 type Match = Schemas["MatchSummary"];
 
@@ -113,6 +115,9 @@ function LastMatch({ orgId, m, next, teamName, canWrite, club }: { orgId: string
   const g = useMatchGraphics(orgId, m?.id ?? "");
   const head = useHeadProps(m, next, g.data ?? null, teamName);
   const checks = g.data ? checkCount(g.data) : 0;
+  const goalChecks = g.data ? g.data.checks.filter((c) => c.kind === "goal").length : 0;
+  const minutes = checkMinutes(goalChecks, checks - goalChecks);
+  const notice = g.data?.notice ?? null;
   const base = m ? `/app/${orgId}/matches/${m.id}` : null;
   // the analysis runs after the video is ready: «running» until it is done too (E06)
   const running = m ? ["matches.status_processing", "matches.status_uploading"].includes(matchState(m).label) || g.data?.analysis === "running" : false;
@@ -156,7 +161,7 @@ function LastMatch({ orgId, m, next, teamName, canWrite, club }: { orgId: string
             <AttnTag>{t("check")}</AttnTag>
             <Link href={`${base}/check`} className={linkClass}>
               {/* after the court come the people in the picture: say so instead of «1 Minute» (UX test N13) */}
-              {t("checksOpen", { count: checks, minutes: g.data ? checkMinutes(g.data.checks.filter((c) => c.kind === "goal").length, checks - g.data.checks.filter((c) => c.kind === "goal").length) : 1 })}
+              {t("checksOpen", { count: checks, minutes })}
             </Link>
           </span>
         )}
@@ -164,9 +169,24 @@ function LastMatch({ orgId, m, next, teamName, canWrite, club }: { orgId: string
       {/* before the first video: what the federation's data already says (UX test H02) */}
       {!m?.has_video && m && <FromReport orgId={orgId} teamId={m.team_id} hideNext={next != null} />}
       {/* the analysis is done without three things: say so and name the next step (UX test N05) */}
-      {quiet && m && g.data && base && (
+      {/* the analysis found too little or failed: the reason and what helps, never a pile of
+          questions (second round A7); the court question stays one tap away */}
+      {quiet && m && g.data && base && notice && (
+        <div className="space-y-3" data-testid="start-next-step">
+          <AnalysisNotice
+            notice={notice}
+            lead={t("noticeLead")}
+            cornersHref={canWrite && g.data.checks.some((c) => c.kind === "field") ? `${base}/check` : null}
+            testId="start-notice"
+          />
+          <Link href={base} className={linkClass} data-testid="open-match">
+            {t("openMatch")}
+          </Link>
+        </div>
+      )}
+      {quiet && m && g.data && base && !notice && (
         <section className="max-w-[60ch] space-y-3 border-l-4 border-attn pl-4" data-testid="start-next-step">
-          <p className="m-0 text-[19px] font-bold">{checks > 0 ? t("nextStepChecks", { n: checks }) : !g.data.has_report ? t("nextStepReport") : t("nextStepNoGoals")}</p>
+          <p className="m-0 text-[19px] font-bold">{checks > 0 ? t("nextStepChecks", { n: checks, minutes }) : !g.data.has_report ? t("nextStepReport") : t("nextStepNoGoals")}</p>
           <div className="flex flex-wrap items-center gap-4">
             {canWrite && checks > 0 ? (
               <Link href={`${base}/check`} className={buttonClass("primary")} data-testid="start-step">
@@ -296,9 +316,15 @@ function MiniField({ orgId, m, width = 128 }: { orgId: string; m: Match; width?:
 /** The second line of a match with video: its things, its scenes and Punkt 1. */
 function RowSummary({ orgId, m }: { orgId: string; m: Match }) {
   const t = useTranslations("anlauf");
+  const tn = useTranslations("analysisNotice");
   const text = useThingText();
   const g = useMatchGraphics(orgId, m.id);
   if (!g.data) return <>{m.competition}</>;
+  // several files: what all of them did, never the first file's state alone (second round A8)
+  const files = filesSummary(g.data.files ?? []);
+  if (files && files.ready < files.total) {
+    return <>{[files.running > 0 ? t("rowRunning") : null, t("rowParts", { done: files.ready, total: files.total }), files.failed > 0 ? t("rowPartsFailed", { n: files.failed }) : null].filter(Boolean).join(", ")}</>;
+  }
   // «Analyse fertig» only when it is (E06)
   if (g.data.analysis === "running") return <>{t("rowRunning")}</>;
   if (g.data.analysis === "failed") return <>{t("rowFailed")}</>;
@@ -306,6 +332,9 @@ function RowSummary({ orgId, m }: { orgId: string; m: Match }) {
   const scenes = g.data.goals.filter((x) => x.has_video || x.source === "demo").length;
   // no things yet: the state in words, not «Kein Ding · 0 Szenen» (UX test A02)
   if (things.length === 0 && g.data.analysis !== "ready") return <>{t("rowVideoOnly")}</>;
+  // found too little to ask: the reason in a few words, not «0 Fragen» (second round A6)
+  if (things.length === 0 && !g.data.goals.some((x) => x.has_video) && g.data.notice && !g.data.notice.failed && checkCount(g.data) === 0)
+    return <>{t("rowNotice", { reason: tn(`short_${noticeKey(g.data.notice.reason)}` as "short_court") })}</>;
   if (things.length === 0 && !g.data.goals.some((x) => x.has_video)) return <>{checkCount(g.data) > 0 ? t("rowChecks", { n: checkCount(g.data) }) : t("rowNoGoals")}</>;
   // while goal moments are open the count is an interim one, also in the list (fourth real-video test)
   if (things.length === 0) {

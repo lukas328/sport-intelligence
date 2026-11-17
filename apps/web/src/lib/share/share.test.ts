@@ -68,8 +68,8 @@ describe("open graph", () => {
     expect(matchMinute(0)).toBe(1);
     expect(matchMinute(null)).toBeNull();
     const scene = { ...base, goal: { team: "own" as const, zone: "la", minute: 22.5 }, opponent: "SG Horgen" };
-    expect(ogTitle(t, scene)).toBe("Szene 23. Min: Tor über aussen links");
-    expect(goalWords(t, { team: "opp", zone: "gs" })).toBe("Gegentor aus Gegenstössen");
+    expect(ogTitle(t, scene)).toBe("Szene 23. Min: Tor von aussen links");
+    expect(goalWords(t, { team: "opp", zone: "gs" })).toBe("Gegentor nach Gegenstoss");
     expect(ogTitle(t, { ...base, opponent: "SG Horgen" })).toBe("Szene gegen SG Horgen");
     expect(ogTitle(t, { ...base, title: "Gegenstoss 3:2" })).toBe("Szene: Gegenstoss 3:2");
     expect(ogDescription(t, scene)).toBe("TV Thalwil Herren 1 · gegen SG Horgen · ohne Konto ansehen");
