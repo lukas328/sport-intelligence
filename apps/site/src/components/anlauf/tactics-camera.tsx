@@ -175,7 +175,9 @@ export function TacticsCamera({
   const [paused, setPaused] = useState(true);
   // the website plays the scene only while it is on screen (and never while hidden)
   const [seen, setSeen] = useState(false);
-  const start = useRef<number | null>(null);
+  // how far the loop has run: kept across pauses, so the dots go on where they stopped instead of
+  // jumping back to the start whenever the camera leaves and enters the screen (U11)
+  const elapsed = useRef(0);
   const box = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -185,7 +187,9 @@ export function TacticsCamera({
   useEffect(() => {
     const el = box.current;
     if (!el || typeof IntersectionObserver === "undefined") return;
-    const io = new IntersectionObserver(([e]) => setSeen(Boolean(e?.isIntersecting)), { rootMargin: "100px" });
+    // paused only when it is really gone: half a screen of margin, so the phone's address bar
+    // sliding in and out while scrolling does not stop and start it
+    const io = new IntersectionObserver(([e]) => setSeen(Boolean(e?.isIntersecting)), { rootMargin: "50% 0px" });
     io.observe(el);
     return () => io.disconnect();
   }, []);
@@ -194,14 +198,14 @@ export function TacticsCamera({
     if (paused || !seen) return;
     let raf = 0;
     let last = 0;
-    start.current = null;
+    let begin: number | null = null;
     const tick = (ts: number) => {
-      if (start.current == null) start.current = ts;
+      if (begin == null) begin = ts - elapsed.current;
       // 25 frames a second are enough for dots on a court and keep slow phones calm
       if (ts - last >= 40) {
         last = ts;
-        const e = (ts - start.current) % CYCLE_MS;
-        setT(Math.min(1, e / PLAY_MS));
+        elapsed.current = (ts - begin) % CYCLE_MS;
+        setT(Math.min(1, elapsed.current / PLAY_MS));
       }
       raf = requestAnimationFrame(tick);
     };
