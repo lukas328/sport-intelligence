@@ -26,7 +26,8 @@ const SHOTS = ["get-video", "get-search", "get-season", "share"] as const;
 function StepPicture({ i, alt, m }: { i: number; alt: string; m: Messages }) {
   if (i === 0) return <HallPlan label={m.filming.planLabel} camera={m.filming.planCamera} field={m.filming.planField} corner={m.filming.planCorner} />;
   const name = STEPS[i - 1]!;
-  return <ProductShot name={name} alt={alt} labels={m.product[name]} sizes="(min-width: 768px) 26rem, calc(100vw - 2rem)" />;
+  // flat cut-outs of the app, in one look with the start page's steps (S11); the text says the rest
+  return <ProductShot name={name} alt={alt} labels={{}} sizes="(min-width: 768px) 26rem, calc(100vw - 2rem)" />;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

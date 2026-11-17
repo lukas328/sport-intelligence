@@ -8,7 +8,7 @@ import { cn } from "@/lib/cn";
 export function NavLinks({ locale, links, stacked = false }: { locale: string; links: [string, string][]; stacked?: boolean }) {
   const path = usePathname() ?? "";
   return (
-    <ul className={cn(stacked ? "flex flex-col" : "flex flex-wrap items-center gap-x-1")}>
+    <ul className={cn(stacked ? "flex flex-col" : "flex items-center xl:gap-x-1")}>
       {links.map(([slug, label]) => {
         const href = `/${locale}/${slug}/`;
         const on = path.startsWith(`/${locale}/${slug}`);
@@ -18,8 +18,8 @@ export function NavLinks({ locale, links, stacked = false }: { locale: string; l
               href={href}
               aria-current={on ? "page" : undefined}
               className={cn(
-                "relative inline-flex min-h-12 items-center whitespace-nowrap px-2.5 text-[1.125rem] font-semibold text-ink hover:underline",
-                stacked && "w-full border-b border-rule px-0 text-[1.375rem]",
+                "relative inline-flex min-h-12 items-center whitespace-nowrap px-2 text-base font-semibold text-ink hover:underline xl:px-2.5 xl:text-[1.125rem]",
+                stacked && "w-full border-b border-rule px-0 text-[1.375rem] xl:px-0 xl:text-[1.375rem]",
               )}
             >
               {label}

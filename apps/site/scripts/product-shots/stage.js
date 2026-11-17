@@ -33,7 +33,7 @@
 
   /**
    * the stage: size in CSS px of the 1x picture; `clear` leaves the background transparent,
-   * `budget2x` sets a smaller weight for the 2x file than compose.mjs's default
+   * `budget1x` and `budget2x` set another weight than compose.mjs's default
    */
   function stage(width, height, opts = {}) {
     const el = document.getElementById("stage");
@@ -43,9 +43,15 @@
       el.classList.add("clear");
       shot.transparent = true;
     }
+    // a flat cut-out of the app: on the app's own paper, no device, no Keil
+    if (opts.paper) el.classList.add("paper");
+    // or on the app's cloth, for pieces of a page (not a sheet)
+    if (opts.cloth) el.classList.add("cloth");
     shot.width = width;
     shot.height = height;
-    // a lower weight for a picture the page loads at once (bytes of the 2x file)
+    // another weight than compose.mjs's default (bytes of the 1x and the 2x file): lower for a
+    // picture the page loads at once, higher for a wide screen full of small text
+    if (opts.budget1x) shot.budget1x = opts.budget1x;
     if (opts.budget2x) shot.budget2x = opts.budget2x;
     return el;
   }
@@ -112,6 +118,18 @@
     return screen(scr, name, crop);
   }
 
+  /**
+   * A flat piece of a capture on the stage, without a device: `crop` = [x, y, w, h] in app CSS px,
+   * placed at `left`, `top` and `width` in stage px. Returns the map like `screen`.
+   */
+  function piece(name, crop, { left, top, width }) {
+    const el = document.createElement("div");
+    el.className = "screen piece";
+    Object.assign(el.style, { position: "absolute", left: `${left}px`, top: `${top}px`, width: `${width}px` });
+    document.getElementById("stage").append(el);
+    return screen(el, name, crop);
+  }
+
   /** where a box inside `el` sits on the stage */
   function onStage(el, [x, y, w, h]) {
     const s = document.getElementById("stage").getBoundingClientRect();
@@ -175,5 +193,5 @@
     window.READY = shot;
   }
 
-  window.S = { cap, rect, stage, screen, phone, browser, onStage, ring, spot, at, callout, done };
+  window.S = { cap, rect, stage, screen, piece, phone, browser, onStage, ring, spot, at, callout, done };
 })();

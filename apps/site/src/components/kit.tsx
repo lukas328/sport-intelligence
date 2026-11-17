@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { createContext, type CSSProperties, type ReactNode, useContext, useEffect, useMemo, useState } from "react";
 import { cn } from "@/lib/cn";
-import { kit, kitVars, SHIRTS } from "@/lib/color";
+import { DEMO_CLUB, kit, kitVars, SHIRTS } from "@/lib/color";
+import { withKit } from "@/lib/links";
 import { startUrl } from "@/lib/site";
 
 /** The demo opponent: black with white (TV Muster). The clash rule decides how it shows. */
@@ -20,8 +21,9 @@ function second(hex: string): string {
   return hex === "#ffffff" || hex === "#f6c500" ? "#17191c" : "#ffffff";
 }
 
-export function kitStyle(key: ShirtKey): CSSProperties {
-  const hex = SHIRTS.find(([k]) => k === key)![1];
+/** The colours of a picked shirt, or with none picked the demo club's own (the website's green). */
+export function kitStyle(key: ShirtKey | null): CSSProperties {
+  const hex = key ? SHIRTS.find(([k]) => k === key)![1] : DEMO_CLUB;
   return kitVars(kit([hex, second(hex)], DEMO_OPPONENT)) as CSSProperties;
 }
 
@@ -29,21 +31,23 @@ export function kitStyle(key: ShirtKey): CSSProperties {
 export const FARBE: Record<ShirtKey, string> = { blue: "blau", red: "rot", yellow: "gelb", black: "schwarz", white: "weiss", green: "gruen", orange: "orange", purple: "violett" };
 
 interface KitState {
-  shirt: ShirtKey;
+  /** null: nobody picked a colour, the demo club plays in its own green */
+  shirt: ShirtKey | null;
   /** true once the visitor picked a colour (or came with ?kit=): only then it goes to the app */
   chosen: boolean;
   setShirt: (k: ShirtKey) => void;
   inScope: boolean;
 }
-const Ctx = createContext<KitState>({ shirt: "blue", chosen: false, setShirt: () => {}, inScope: false });
+const Ctx = createContext<KitState>({ shirt: null, chosen: false, setShirt: () => {}, inScope: false });
 
 /**
- * The visitor's colour for the demo match. Starts blue, or with `?kit=` from a link (the start
- * page hands the choice to the demo that way); nothing is stored in the browser.
+ * The visitor's colour for the demo match. Starts with the demo club's green (the website's own
+ * colour, the same on every page), or with `?kit=` from a link (the start page hands the choice to
+ * the demo that way); nothing is stored in the browser.
  */
 export function KitScope({ children, className }: { children: ReactNode; className?: string }) {
   const outer = useContext(Ctx);
-  const [shirt, setShirtState] = useState<ShirtKey>("blue");
+  const [shirt, setShirtState] = useState<ShirtKey | null>(null);
   const [chosen, setChosen] = useState(false);
   useEffect(() => {
     const q = new URLSearchParams(window.location.search).get("kit");
@@ -109,7 +113,7 @@ function Shirt({ hex, on }: { hex: string; on: boolean }) {
 export function DemoLink({ href, className, children }: { href: string; className?: string; children: ReactNode }) {
   const { shirt, chosen } = useShirt();
   return (
-    <Link href={chosen ? `${href}?kit=${shirt}` : href} className={className}>
+    <Link href={chosen && shirt ? withKit(href, shirt) : href} className={className}>
       {children}
     </Link>
   );
@@ -119,7 +123,7 @@ export function DemoLink({ href, className, children }: { href: string; classNam
 export function StartLink({ appLocale, className, children }: { appLocale: string; className?: string; children: ReactNode }) {
   const { shirt, chosen } = useShirt();
   return (
-    <a href={startUrl(appLocale, undefined, chosen ? FARBE[shirt] : undefined)} className={className}>
+    <a href={startUrl(appLocale, undefined, chosen && shirt ? FARBE[shirt] : undefined)} className={className}>
       {children}
     </a>
   );

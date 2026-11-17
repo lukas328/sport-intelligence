@@ -131,7 +131,7 @@ async function main() {
         omitBackground: shot.transparent,
         animations: "disabled",
       });
-      const one = await encode(encoder, png, shot.width, BUDGET["1x"]);
+      const one = await encode(encoder, png, shot.width, shot.budget1x ?? BUDGET["1x"]);
       const two = await encode(encoder, png, shot.width * 2, shot.budget2x ?? BUDGET["2x"]);
       writeFileSync(join(OUT, `${name}.webp`), Buffer.from(one.b64, "base64"));
       writeFileSync(join(OUT, `${name}-2x.webp`), Buffer.from(two.b64, "base64"));

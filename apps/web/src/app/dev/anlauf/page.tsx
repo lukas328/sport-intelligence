@@ -37,7 +37,7 @@ export default async function AnlaufPage({ searchParams }: { searchParams: Promi
       <div className="px-4 py-6 md:px-8">
         <h1 className="text-[34px]">Anlauf: Bausteine</h1>
         <p className="mt-2 text-[15px] text-ink-2">
-          Sechs Vereinsfarben gegen TSV Thalwil (schwarz und weiss){against ? "" : ", Gegner hier ohne bekannte Farbe"}. Alle Daten sind Demo-Daten.
+          Sechs Vereinsfarben gegen TSV Seewald (schwarz und weiss){against ? "" : ", Gegner hier ohne bekannte Farbe"}. Alle Daten sind Demo-Daten.
         </p>
         <p className="mt-2 flex flex-wrap gap-3 text-[15px]">
           {Object.keys(CHECK_KITS).map((n) => (
@@ -55,17 +55,17 @@ export default async function AnlaufPage({ searchParams }: { searchParams: Promi
         return (
           <section key={n} data-club={n} style={kitVars(k) as CSSProperties} className="border-t-2 border-ink pt-8 pb-14" aria-label={`Verein ${n}`}>
             <WurfHead
-              kick="Samstag gegen TSV Thalwil, Analyse fertig seit Sonntag, 9:40"
+              kick="Samstag gegen TSV Seewald, Analyse fertig seit Sonntag, 9:40"
               title="Gewonnen. Und drei Dinge zum Mitnehmen."
               own={DEMO_RESULT.own}
               opp={DEMO_RESULT.opp}
               ownName="HC Zürichsee"
-              oppName="TSV Thalwil"
+              oppName="TSV Seewald"
               goals={DEMO_REPORT}
               flightLabels={{ half: "Halbzeit {v}", end: "Schluss {v}", halfLevel: "Halbzeit, Gleichstand", endLevel: "Schluss, Gleichstand" }}
             />
             <div className="mt-6 grid gap-8 px-4 md:grid-cols-2 md:px-8">
-              <Strip name="HC Zürichsee gegen TSV Thalwil" sub="Samstag, Meisterschaft" own={DEMO_RESULT.own} opp={DEMO_RESULT.opp} />
+              <Strip name="HC Zürichsee gegen TSV Seewald" sub="Samstag, Meisterschaft" own={DEMO_RESULT.own} opp={DEMO_RESULT.opp} />
               <PageHead kick="Herren 1" title="Szenen" figure={142} figureLabel="Szenen aus 3 Spielen" />
             </div>
 
@@ -97,9 +97,9 @@ export default async function AnlaufPage({ searchParams }: { searchParams: Promi
                 <TacticsCamera
                   scene={DEMO_SCENE_RA}
                   still={n !== "blau"}
-                  text={{ ...CAMERA_TEXT, label: "Taktikkamera: Gegentor über rechts aussen", caption: "Thalwil 5 trifft von rechts aussen", captionSmall: "Positionen aus dem Video" }}
+                  text={{ ...CAMERA_TEXT, label: "Taktikkamera: Gegentor über rechts aussen", caption: "Seewald 5 trifft von rechts aussen", captionSmall: "Positionen aus dem Video" }}
                 />
-                <CameraKey us="Wir" them="Thalwil" referee="Schiedsrichter" ball="Ball, wo erkannt" />
+                <CameraKey us="Wir" them="Seewald" referee="Schiedsrichter" ball="Ball, wo erkannt" />
               </div>
               <div>
                 <SectionHead title="Ohne Ball" />

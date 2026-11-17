@@ -172,9 +172,18 @@ def _scene(x: int | None, y: int, w: int = 1280, h: int = 720) -> NDArray[np.uin
     return img
 
 
+def _still_clock() -> float:
+    """Time for the reader's budget: always 0, so only the test's own logic decides what is read
+    (with time.perf_counter a loaded CI machine made the budget skip reads)."""
+    return 0.0
+
+
 def test_reader_locks_the_board_and_reads_it_cheaply() -> None:
     ocr = _FakeOcr()
-    reader = hb.HallBoardReader(ocr, fps=10, every_s=1.0, full_every_s=4.0, probe_every_s=0.5)
+    # a clock that stands still: the time budget never skips a read, however loaded the machine
+    reader = hb.HallBoardReader(
+        ocr, fps=10, every_s=1.0, full_every_s=4.0, probe_every_s=0.5, clock=_still_clock
+    )
     ocr.text = "16 32:10 11"
     still = _scene(500, 200)
     for k in range(5):  # a fixed camera: recognition alone after the first read
@@ -237,7 +246,9 @@ def test_layout_known_a_misread_clock_does_not_make_the_score_the_clock() -> Non
 def test_whole_frame_search_backs_off_without_a_board() -> None:
     ocr = _FakeOcr()
     ocr.text = "WERBUNG"  # text, but never a board
-    reader = hb.HallBoardReader(ocr, fps=10, every_s=1.0, full_every_s=4.0, full_max_s=60.0)
+    reader = hb.HallBoardReader(
+        ocr, fps=10, every_s=1.0, full_every_s=4.0, full_max_s=60.0, clock=_still_clock
+    )
     blank = _scene(None, 0)
     for i in range(0, 10 * 600, 10):  # ten minutes, one frame a second
         reader.add(i, blank)

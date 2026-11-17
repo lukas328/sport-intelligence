@@ -4,7 +4,7 @@ import { HALF_BOX, pathOf, type Pt, smooth, ZONE_AT } from "./geometry";
 
 const NS = { vectorEffect: "non-scaling-stroke" } as const;
 // the site shows the whole half (runs of fast breaks start near the middle line)
-const BOX = "-0.6 -1.2 21.2 21.6";
+export const BOX = "-0.6 -1.2 21.2 21.6";
 
 /** One goal as the analysis gives it, in half-court coordinates (goal at the top). */
 export interface GoalRun {
@@ -31,13 +31,21 @@ function colours(team: GoalRun["team"]) {
 /**
  * Bundle: every goal of one kind as the scorer's run, then a thin straight line to the goal.
  * `rest` are the other goals of the match, faint, for context. `width` is the drawn width in px
- * (line widths and dot sizes depend on it). `play` draws the lines in order.
+ * (line widths and dot sizes depend on it). `play` draws the lines in order, starting with the
+ * step `from` (so several bundles can draw one after the other).
+ *
+ * `clean` is the start page's quiet form (BEFUNDE-2 S9): only this thing's runs as thin, calm
+ * curves from where the run began to the shot spot, a clear dot at each shot, no other goals and
+ * no lines to the goal. `box` crops the half court (viewBox in field metres).
  */
 export function Bundle({
   goals,
   rest = [],
   width = 360,
   play = false,
+  from = 0,
+  clean = false,
+  box = BOX,
   label,
   className,
 }: {
@@ -45,13 +53,17 @@ export function Bundle({
   rest?: readonly GoalRun[];
   width?: number;
   play?: boolean;
+  from?: number;
+  clean?: boolean;
+  box?: string;
   label: string;
   className?: string;
 }) {
   const kk = width / HALF_BOX[2];
   const small = width < 160;
+  if (clean) return <CleanBundle goals={goals} kk={kk} small={small} play={play} from={from} box={box} label={label} className={className} />;
   return (
-    <svg viewBox={BOX} role="img" aria-label={label} className={[play ? "play" : "", "block w-full", className].filter(Boolean).join(" ")}>
+    <svg viewBox={box} role="img" aria-label={label} className={[play ? "play" : "", "block w-full", className].filter(Boolean).join(" ")}>
       <HalfCourtLines />
       {rest.map((g, i) =>
         g.run.length > 1 ? <path key={`r${i}`} d={pathOf(smooth(g.run, 6))} fill="none" stroke="var(--ink)" strokeOpacity={0.13} strokeWidth={1} {...NS} /> : null,
@@ -67,7 +79,7 @@ export function Bundle({
             {d && (
               <path
                 className={est ? "ln-e" : "ln"}
-                style={{ "--i": i } as CSSProperties}
+                style={{ "--i": from + i } as CSSProperties}
                 pathLength={est ? undefined : 1}
                 d={d}
                 fill="none"
@@ -95,6 +107,73 @@ export function Bundle({
           </g>
         );
       })}
+    </svg>
+  );
+}
+
+/**
+ * The quiet bundle: one gentle curve per goal (from where the run began, bent towards its first
+ * turn, to the shot spot; the wiggles before the shot are left out), about 1.7 px, and the shot spot as a dot
+ * with a paper edge, so dots on top of each other stay countable. The court lines step back.
+ */
+function CleanBundle({
+  goals,
+  kk,
+  small,
+  play,
+  from,
+  box,
+  label,
+  className,
+}: {
+  goals: readonly GoalRun[];
+  kk: number;
+  small: boolean;
+  play: boolean;
+  from: number;
+  box: string;
+  label: string;
+  className?: string;
+}) {
+  // in field units: the drawn lines use pathLength, which does not mix with non-scaling strokes
+  const w = (small ? 1.3 : 1.7) / kk;
+  const r = (small ? 2.8 : 4.2) / kk;
+  return (
+    <svg viewBox={box} role="img" aria-label={label} className={[play ? "play" : "", "block w-full", className].filter(Boolean).join(" ")}>
+      <HalfCourtLines opacity={0.3} />
+      {goals.map((g, i) => {
+        // one bend: from where the run began, pulled towards its first turn, to the shot spot
+        const [p0, p1] = [g.run[0], g.run[1]];
+        const d = !p0 || g.run.length < 2 ? null : g.run.length > 2 && p1 ? `M${p0[0]} ${p0[1]}Q${p1[0]} ${p1[1]} ${g.shot[0]} ${g.shot[1]}` : pathOf([p0, g.shot]);
+        return d ? (
+          <path
+            key={`l${i}`}
+            className="ln"
+            style={{ "--i": from + i } as CSSProperties}
+            pathLength={1}
+            d={d}
+            fill="none"
+            stroke={colours(g.team).line}
+            strokeWidth={w}
+            strokeOpacity={g.confirmed ? 0.8 : 0.45}
+            strokeLinecap="round"
+          />
+        ) : null;
+      })}
+      {goals.map((g, i) => (
+        <circle
+          key={`d${i}`}
+          className="ln-dot"
+          style={{ "--i": from + i } as CSSProperties}
+          cx={g.shot[0]}
+          cy={g.shot[1]}
+          r={r}
+          fill={g.confirmed ? colours(g.team).line : "var(--paper)"}
+          stroke={g.confirmed ? "var(--paper)" : colours(g.team).line}
+          strokeWidth={1.5}
+          {...NS}
+        />
+      ))}
     </svg>
   );
 }
