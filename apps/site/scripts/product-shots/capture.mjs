@@ -278,16 +278,28 @@ const SHOTS = [
     hide: ["Noch keine Notiz zu dieser Phase.", /^\d+:\d\d \/ \d+:\d\d$/],
     async open(p) {
       await openMatch(p);
-      await p.getByRole("tab", { name: "Video", exact: true }).click();
+      // the second goal over the right wing (the 6th minute of the website's match), opened as
+      // «Szene zeigen» opens it (?tab=video&scene=): a phase early in the match with its goals
+      const scene = await p.evaluate(async () => {
+        const [, org, match] = location.pathname.match(/\/app\/([^/]+)\/matches\/([^/?]+)/) ?? [];
+        const r = await fetch(`/v1/orgs/${org}/matches/${match}/graphics`, { credentials: "include" });
+        const goals = ((await r.json()).goals ?? [])
+          .filter((g) => g.team === "opp" && g.zone === "ra" && g.t_ms != null)
+          .sort((a, b) => a.minute - b.minute);
+        return goals[1]?.event_id ?? null;
+      });
+      if (!scene) throw new Error("no second goal over the right wing");
+      const url = new URL(p.url());
+      url.search = `?tab=video&scene=${scene}`;
+      await p.goto(url.toString(), { waitUntil: "load", timeout: 90000 });
       await p
         .getByTestId("next-scene")
         .or(p.getByRole("button", { name: /Szene merken/ }))
         .first()
         .waitFor({ timeout: 15000 });
       await settle(p);
-      // the player stands where the app puts it: at the start of the first scene of the first
-      // thing (a goal over the right wing in the 1st minute), so the seek bar, the timeline and the
-      // scene list agree (templates: `at` 0); the hall recording covers the clip's picture
+      // the player stands where the app puts it, at the start of that scene; the hall recording
+      // covers the clip's picture and draws the line of a 60-minute video there (templates: `at`)
       await p.waitForTimeout(1200);
       await p
         .locator('[role="tablist"]')

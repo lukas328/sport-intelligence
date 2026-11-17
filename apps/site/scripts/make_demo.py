@@ -137,6 +137,14 @@ def own_number(kind: str, y: float, used: dict[str, int]) -> int:
     return numbers[n % len(numbers)]
 
 
+def even_out(raw: list[float], start: float) -> list[float]:
+    """Shot times of a half, drawn at random but closer to an even pace: pure chance put seven goals
+    into the first four minutes, which no coach believes. The order (and so every count) stays."""
+    n = len(raw)
+    even = [start + 90 + (k + 0.5) * 1690 / n for k in range(n)]
+    return [0.3 * r + 0.7 * e for r, e in zip(raw, even, strict=True)]
+
+
 def build(seed: int = SEED) -> dict[str, Any]:
     rnd = random.Random(seed)  # noqa: S311 (seeded demo data, not security)
     events: list[Event] = []
@@ -151,7 +159,7 @@ def build(seed: int = SEED) -> dict[str, Any]:
             shots += [(side, kind, False) for kind in kinds]
         rnd.shuffle(shots)
         start = (period - 1) * 1800.0
-        clocks = sorted(rnd.uniform(start + 20, start + 1790) for _ in shots)
+        clocks = even_out(sorted(rnd.uniform(start + 20, start + 1790) for _ in shots), start)
         for clock, (side, kind, goal) in zip(clocks, shots, strict=True):
             x, y = spot(rnd, kind, side)
             number = rnd.choice([3, 5, 9, 11, 14, 18])

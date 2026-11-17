@@ -20,7 +20,7 @@
     },
   );
   // the video: the hall recording, blurred past recognition; the website writes «Dein Spiel» on it
-  S.lettering(S.video(s, video, { cut: 78, bar: 63, at: 0 }));
+  S.lettering(S.video(s, video, { cut: 78, bar: 63, at: 0.082 }));
   S.ring(s, active, 3);
   // the label sits on the dark hall wall of the video, the arrow goes to the scene in the list
   S.callout("tap", S.at(s, video, 0.5, 0.16), S.at(s, active, -0.02, 0.5), "t", 0.22);
