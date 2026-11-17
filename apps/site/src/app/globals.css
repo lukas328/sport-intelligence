@@ -100,15 +100,16 @@
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;
-    scroll-padding-top: 1rem;
+    /* the pinned bar on the phone and the tablet (components/header-shell.tsx) covers 4 rem */
+    scroll-padding-top: 5rem;
   }
-  body {
-    color: var(--ink);
-    font-family: var(--font-sans);
-    font-size: 1.125rem;
-    line-height: 1.5;
-    /* long German words must not push the page wide with large system text */
-    overflow-wrap: break-word;
+  @media (min-width: 1024px) {
+    html {
+      scroll-padding-top: 1rem;
+    }
+  }
+  body,
+  .cloth {
     background-color: var(--ground);
     background-image:
       radial-gradient(rgb(22 23 26 / 0.07) 0.7px, transparent 0.9px),
@@ -119,6 +120,14 @@
     background-position:
       0 0,
       3px 3px;
+  }
+  body {
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 1.125rem;
+    line-height: 1.5;
+    /* long German words must not push the page wide with large system text */
+    overflow-wrap: break-word;
   }
   @media (min-width: 768px) {
     body {

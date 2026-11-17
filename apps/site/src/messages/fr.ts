@@ -11,7 +11,7 @@ const fr: Messages = {
     crumbs: "Tu es ici",
     how: "Comment ça marche",
     filming: "Filmer",
-    demo: "Match de démo",
+    demo: "Démo",
     pricing: "Prix",
     faq: "Questions",
     data: "Données et consentement",
