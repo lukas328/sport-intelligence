@@ -99,6 +99,58 @@ function pageHelpers() {
           el.style.display = "none";
       }
     },
+    /**
+     * The website's story (BEFUNDE-2 L7): the seeded club's last match is the website's demo
+     * match, so the few counts on a picture that belong to it are set to the story's numbers
+     * (scripts/make_demo.py). Each pair is [how, what, to]: "=" a text that is exactly `what`,
+     * "~" a text that contains `what`, "/" a regular expression; every text is changed once.
+     */
+    retext(pairs) {
+      const walk = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+      const nodes = [];
+      for (let n = walk.nextNode(); n; n = walk.nextNode()) nodes.push(n);
+      let done = 0;
+      for (const n of nodes) {
+        const v = n.nodeValue ?? "";
+        for (const [how, what, to] of pairs) {
+          if (how === "=" && v.trim() === what) n.nodeValue = v.replace(what, to);
+          else if (how === "~" && v.includes(what)) n.nodeValue = v.split(what).join(to);
+          else if (how === "/" && new RegExp(what).test(v)) n.nodeValue = v.replace(new RegExp(what, "g"), to);
+          else continue;
+          done++;
+          break;
+        }
+      }
+      return done;
+    },
+    /** hides (keeps its room) the block around a text, e.g. an empty «Notizen» */
+    hideBlock(text) {
+      const el = hb.text(text);
+      if (!el) return 0;
+      let b = el;
+      while (b.parentElement && b.parentElement.getBoundingClientRect().height < 260) b = b.parentElement;
+      b.style.visibility = "hidden";
+      return 1;
+    },
+    /** a small bar chart (svg named «<title>: …») redrawn with other values, scale as the app's */
+    bars(title, values) {
+      const svg = document.querySelector(`svg[aria-label^="${title}:"]`);
+      if (!svg) return 0;
+      const groups = Array.from(svg.querySelectorAll("g"));
+      const max = Math.max(1, ...values);
+      groups.forEach((g, i) => {
+        const v = values[i];
+        const rect = g.querySelector("rect");
+        const text = g.querySelector("text");
+        if (v == null || !rect || !text) return;
+        const h = (40 * v) / max;
+        rect.setAttribute("height", String(h));
+        rect.setAttribute("y", String(66 - h));
+        text.setAttribute("y", String(60 - h));
+        text.textContent = String(v);
+      });
+      return 1;
+    },
     /** the shot dots of the half court in the block that holds `label` */
     dots(label) {
       const el = hb.text(label);
@@ -165,10 +217,23 @@ const SHOTS = [
     // the first of the three things on the phone: the number, the words, the shots on the court
     name: "dinge-phone",
     size: PHONE_SHARP,
+    // the website's match: 11 of 29 over the right wing
+    story: [
+      ["=", "9", "11"],
+      ["=", "von 18", "von 29"],
+      ["=", "Alle 9", "Alle 11"],
+      // the second and third things below it: 5 after fast breaks, 9 of 27 own goals from the pivot
+      ["=", "4", "5"],
+      ["=", "11", "9"],
+      ["=", "von 26", "von 27"],
+      ["=", "9 Szenen", "11 Szenen"],
+    ],
     async open(p) {
       await p.evaluate(() => {
         const t = window.__hb.text("1 von 3") ?? window.__hb.text(/^1\s*von\s*3$/);
-        if (t) window.scrollTo(0, t.getBoundingClientRect().top + window.scrollY - 290);
+        // «1 von 3» high on the screen, so the half court and the scenes fit under it
+        if (t) window.scrollTo(0, t.getBoundingClientRect().top + window.scrollY - 110);
+        window.__hb.hideTabBar();
       });
       await p.waitForTimeout(400);
     },
@@ -255,6 +320,17 @@ const SHOTS = [
   {
     name: "video",
     size: { ...DESKTOP, height: 1000 },
+    // the website's match: 27:29, 56 goals, the three things 11, 5 and 9 (make_demo.py); the
+    // player's clock of the 1-minute synthetic clip reads as a match
+    story: [
+      ["/", "\\b44\\b(?= Tore von dir| mit Wurfort)", "56"],
+      ["=", "9 Szenen", "11 Szenen"],
+      ["=", "4 Szenen", "5 Szenen"],
+      ["=", "11 Szenen", "9 Szenen"],
+      ["/", "^\\d+:\\d\\d / \\d+:\\d\\d$", "7:46 / 61:12"],
+    ],
+    // a clean state: no empty «Noch keine Notiz» under the three things
+    hide: ["Noch keine Notiz zu dieser Phase."],
     async open(p) {
       await openMatch(p);
       await p.getByRole("tab", { name: "Video", exact: true }).click();
@@ -310,6 +386,16 @@ const SHOTS = [
   {
     name: "szenen",
     size: { ...DESKTOP, height: 940 },
+    // the last three matches with the website's match in place of the seeded one: 6 + 9 + 11
+    // of 22 + 26 + 29 goals conceded over the right wing
+    story: [
+      ["=", "24", "26"],
+      ["~", "von 66 Gegentoren", "von 77 Gegentoren"],
+      ["~", "36 Prozent", "34 Prozent"],
+      ["~", "9 von 18", "11 von 29"],
+      ["~", "Alle 24 abspielen", "Alle 26 abspielen"],
+      ["/", "^24 Szenen", "26 Szenen"],
+    ],
     async open(p) {
       await nav(p, "Szenen");
       await p.getByRole("heading", { level: 1 }).first().waitFor({ timeout: 15000 });
@@ -336,6 +422,19 @@ const SHOTS = [
   {
     name: "saison",
     size: { ...DESKTOP, height: 820 },
+    // the website's match in place of the seeded last one: 11 of 29 over the right wing, 9 own
+    // goals from the pivot (of 27)
+    story: [
+      ["~", "24 von 66.", "26 von 77."],
+      ["=", "24 Szenen", "26 Szenen"],
+      ["~", "24 Anläufe", "26 Anläufe"],
+      ["~", "15 von 72.", "13 von 73."],
+      ["=", "15 Szenen", "13 Szenen"],
+    ],
+    storyBars: [
+      ["Gegentore über aussen rechts", [6, 9, 11]],
+      ["Tore vom Kreis", [4, 0, 9]],
+    ],
     async open(p) {
       await nav(p, "Saison");
       await p.getByRole("heading", { level: 1 }).first().waitFor({ timeout: 15000 });
@@ -380,6 +479,11 @@ const SHOTS = [
   {
     name: "teilen-phone",
     size: PHONE,
+    // the collection of the website's Tuesday: four scenes over the right wing
+    story: [
+      ["=", "Rückzug und rechter Flügel", "Aussen rechts zumachen"],
+      ["~", "24 Szenen, kein Spielzug · 3:30", "4 Szenen, kein Spielzug · 0:58"],
+    ],
     async open(p) {
       await p.goto(p.__team.replace(/\/matches$/, "/collections"), { waitUntil: "networkidle" });
       const href = await p
@@ -488,7 +592,8 @@ async function openMatch(p) {
     .first()
     .getAttribute("href");
   if (!href) throw new Error("no link «Spiel öffnen»");
-  await p.goto(new URL(href, APP).toString(), { waitUntil: "networkidle" });
+  // "load", not "networkidle": a player that keeps fetching its video never lets the network rest
+  await p.goto(new URL(href, APP).toString(), { waitUntil: "load", timeout: 90000 });
   await settle(p);
 }
 
@@ -581,6 +686,19 @@ async function main() {
       await p.goto(team, { waitUntil: "networkidle" });
       await settle(p);
       await shot.open(p);
+      if (shot.story) {
+        const n = await p.evaluate((pairs) => window.__hb.retext(pairs), shot.story);
+        if (n < shot.story.length) console.warn(`${shot.name}: ${n} of ${shot.story.length} story texts found`);
+        for (const text of shot.hide ?? []) {
+          const ok = await p.evaluate((t) => window.__hb.hideBlock(t), text);
+          if (!ok) console.warn(`${shot.name}: nothing to hide for «${text}»`);
+        }
+        for (const [title, values] of shot.storyBars ?? []) {
+          const ok = await p.evaluate(([t, v]) => window.__hb.bars(t, v), [title, values]);
+          if (!ok) console.warn(`${shot.name}: no chart «${title}»`);
+        }
+        await p.waitForTimeout(150);
+      }
       const rects = {};
       const missing = [];
       for (const [key, fn] of Object.entries(shot.find)) {

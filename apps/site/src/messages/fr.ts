@@ -146,7 +146,7 @@ const fr: Messages = {
     stepsTitle: "Filmer. Téléverser. Vérifier.",
     stepsLead: "L'analyse propose et ne demande que là où elle hésite.",
     steps: [
-      { title: "Filmer", text: "Téléphone ou caméra en hauteur à la ligne médiane, les deux buts dans l'image. Fixe, c'est le mieux, mais tu peux suivre le jeu.", points: ["Caméra en hauteur, en grand angle", "Les deux buts et les surfaces de but dans l'image"] },
+      { title: "Filmer", text: "Téléphone ou caméra en hauteur à la ligne médiane, les deux buts dans l'image. Fixe, c'est le mieux, mais tu peux suivre le jeu.", alt: "Un téléphone à l'horizontale sur un trépied devant la salle : il filme le match en grand angle.", points: ["Caméra en hauteur, en grand angle", "Les deux buts et les surfaces de but dans l'image"] },
       { title: "Téléverser", text: "Choisis la vidéo. L'app montre où en est l'analyse et te prévient quand elle est terminée.", alt: "L'app au téléversement : à quel match appartient la vidéo ? En dessous, deux matchs au choix, le premier encadré de jaune.", points: ["Choisir le match, puis la vidéo", "La cloche te prévient quand c'est prêt"] },
       { title: "Vérifier", text: "L'analyse propose le terrain et les buts. Là où elle hésite, elle te demande : dix questions au plus par match, en général quelques minutes.", alt: "L'app pendant la vérification : l'image de la vidéo avec quatre points jaunes aux coins du terrain, puis la question le terrain est-il juste ? et le bouton C'est bon.", points: ["L'analyse propose le terrain", "Toucher une fois suffit"] },
     ],
@@ -154,7 +154,7 @@ const fr: Messages = {
     shareTitle: "Quatre scènes dans le chat de l'équipe.",
     shareText: "Tu envoies les quatre scènes les plus claires de l'aile droite par un lien. Les joueurs voient eux-mêmes où est le trou, au lieu de l'entendre de toi. À l'entraînement, vous travaillez exactement ça.",
     sharePoints: ["Pas de compte pour les joueurs et les parents", "Des numéros de maillot au lieu des noms", "Le lien expire, et tu peux le bloquer à tout moment"],
-    shareAlt: "Voici comment une sélection arrive dans le chat : une carte aux couleurs du club avec le titre Repli et aile droite, puis l'équipe et 24 scènes. Plus bas, le bouton pour partager le lien.",
+    shareAlt: "Voici comment une sélection arrive dans le chat : une carte aux couleurs du club avec le titre Fermer l'aile droite, puis l'équipe et 4 scènes. Plus bas, le bouton pour partager le lien.",
     chat: {
       label: "Voici comment le lien arrive dans le chat de l'équipe : ton message avec l'aperçu, une image aux couleurs du club titrée Fermer l'aile droite, 4 scènes, en dessous app.handball-intelligence.com. Le numéro 6 répond : Vu. Je suis arrivé trop tard.",
       group: "Hommes 1",
@@ -230,7 +230,7 @@ const fr: Messages = {
       {
         title: "Filmer",
         text: "Téléphone ou caméra en hauteur à la ligne médiane, les deux buts dans l'image grâce au grand-angle. Fixe, c'est le mieux, suivre le jeu, ça va aussi. Laisse tourner pendant la pause.",
-        alt: "",
+        alt: "Un téléphone à l'horizontale sur un trépied devant la salle : il filme le match en grand angle.",
       },
       {
         title: "Téléverser",
@@ -251,12 +251,8 @@ const fr: Messages = {
     honestAll: "La liste complète, point par point",
     shotsTitle: "Voici à quoi ça ressemble dans l'app",
     shotsNote: "Images de l'app, avec un club d'exemple inventé.",
-    shots: [
-      { alt: "Un match dans l'app : à gauche la vidéo avec la frise de tous les buts, à droite la liste des scènes, celle en cours en jaune.", caption: "Chaque but comme scène : tu touches, et la vidéo saute au bon endroit." },
-      { alt: "Scènes dans l'app : recherche but encaissé, aile droite, 3 derniers avec vidéo, réponse 24 buts encaissés sur 66 par l'aile droite et le bouton pour toutes les regarder.", caption: "Chercher des scènes : la réponse avec sa base." },
-      { alt: "La saison dans l'app : cinq matchs, et l'aile droite reste ouverte. En dessous, les thèmes qui se répètent, avec une barre par match, à droite le demi-terrain avec les tirs.", caption: "La saison : ce qui se répète." },
-      { alt: "Voici comment une sélection arrive dans le chat : une carte aux couleurs du club avec le titre Repli et aile droite, puis l'équipe et 24 scènes. Plus bas, le bouton pour partager le lien.", caption: "Un lien pour l'équipe, sans compte pour les joueurs." },
-    ],
+    shots: [{ alt: "Un match dans l'app : à gauche la vidéo avec la frise de tous les buts, à droite la liste des scènes, celle en cours en jaune.", caption: "Chaque but comme scène : tu touches, et la vidéo saute au bon endroit.", text: "À droite les scènes de la phase, en bas tous les buts du match sur une ligne. Tu touches, la vidéo démarre exactement là." }, { alt: "Scènes dans l'app : recherche but encaissé, aile droite, 3 derniers avec vidéo, réponse 26 buts encaissés sur 77 par l'aile droite et le bouton pour les regarder tous.", caption: "Chercher des scènes : la réponse avec sa base.", text: "Écris ce que tu cherches, par exemple but encaissé, aile droite, trois derniers matchs. Le chiffre arrive avec sa base, et toutes les scènes passent d'affilée." }, { alt: "La saison dans l'app : cinq matchs, et l'aile droite reste ouverte. En dessous, les thèmes qui se répètent, avec une barre par match, à droite le demi-terrain avec les tirs.", caption: "La saison : ce qui se répète.", text: "Une barre par match montre si un thème reste ou disparaît. À côté, les tirs de tous les matchs sur le demi-terrain." }, { alt: "Voici comment une sélection arrive dans le chat : une carte aux couleurs du club avec le titre Fermer l'aile droite, puis l'équipe et 4 scènes. Plus bas, le bouton pour partager le lien.", caption: "Un lien pour l'équipe, sans compte pour les joueurs.", text: "Les scènes importantes partent en sélection par lien dans le chat de l'équipe. Pour l'ouvrir, pas besoin de compte, et le lien expire." }],
+    tourLabel: "Les quatre images de l'app",
   },
   filming: {
     title: "Filmer",

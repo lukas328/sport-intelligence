@@ -330,6 +330,10 @@
   .shot-label[data-place="br"] {
     transform: translate(calc(-100% + 0.75rem), 2px);
   }
+  /* half over the picture's edge (product-shot.tsx `edge`, L13) */
+  .shot-label[data-place="edge"] {
+    transform: translate(-50%, -50%);
+  }
   /* the words as a list: for screen readers only, unless the picture is small (below) */
   .shot-legend {
     position: absolute;

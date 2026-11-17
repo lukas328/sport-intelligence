@@ -18,6 +18,8 @@ export function ProductShot({
   priority = false,
   framed = true,
   caption,
+  lettering,
+  edge = false,
   className,
 }: {
   name: ShotName;
@@ -31,13 +33,25 @@ export function ProductShot({
   framed?: boolean;
   /** a line under the picture */
   caption?: ReactNode;
+  /**
+   * the word over the match video («Dein Spiel», L8), written by the website in the visitor's
+   * language where the picture says (product-shots.json); part of the picture for screen readers
+   */
+  lettering?: string;
+  /**
+   * the labels half over the picture's left or right edge (whichever is nearer), so the picture
+   * keeps its air (BEFUNDE-2 L13); the place around the picture must leave them room
+   */
+  edge?: boolean;
   className?: string;
 }) {
   const shot = productShot(name);
-  const callouts = shot.callouts.filter((c) => labels[c.id]);
+  // at the edge, each label moves out to the nearer side at its height; its arrow starts there
+  const callouts = shot.callouts.filter((c) => labels[c.id]).map((c) => (edge ? { ...c, from: [c.from[0] < 50 ? 0 : 100, c.from[1]] as [number, number], place: "edge" as const } : c));
+  if (edge) spread(callouts, (24 / shot.height) * 100 + 9);
   return (
     <figure className={cn("shot m-0", className)}>
-      <div className={cn("relative", framed && "border-2 border-ink")}>
+      <div className={cn("relative [container-type:inline-size]", framed && "border-2 border-ink")}>
         <img
           src={shot.src}
           srcSet={shot.srcSet}
@@ -49,6 +63,21 @@ export function ProductShot({
           decoding="async"
           className="block h-auto w-full"
         />
+        {lettering && shot.lettering && (
+          <span
+            aria-hidden
+            className="pointer-events-none absolute grid place-items-center text-center font-slant leading-none text-white [text-shadow:0_.04em_.3em_rgb(0_0_0/.45)]"
+            style={{
+              left: `${shot.lettering[0]}%`,
+              top: `${shot.lettering[1]}%`,
+              width: `${shot.lettering[2]}%`,
+              height: `${shot.lettering[3]}%`,
+              fontSize: `${(shot.lettering[2] * 0.11).toFixed(2)}cqw`,
+            }}
+          >
+            {lettering}
+          </span>
+        )}
         {callouts.length > 0 && (
           <>
             <svg
@@ -58,7 +87,7 @@ export function ProductShot({
               className="shot-arrows pointer-events-none absolute inset-0 h-full w-full"
             >
               {callouts.map((c) => {
-                const a = arrow(c, shot.width, shot.height);
+                const a = arrow({ ...c, place: "r" }, shot.width, shot.height);
                 return (
                   <g key={c.id}>
                     <path d={a.line} pathLength={1} />
@@ -76,7 +105,7 @@ export function ProductShot({
                 style={{
                   left: `${c.from[0]}%`,
                   top: `${c.from[1]}%`,
-                  maxWidth: `${Math.min(room(c.place, c.from[0]), c.max ?? 46)}%`,
+                  maxWidth: c.place === "edge" ? "11rem" : `${Math.min(room(c.place, c.from[0]), c.max ?? 46)}%`,
                 }}
               >
                 {labels[c.id]}
@@ -97,6 +126,23 @@ export function ProductShot({
       {caption && <figcaption className="mt-3 text-[1.0625rem]">{caption}</figcaption>}
     </figure>
   );
+}
+
+/**
+ * Labels on the same edge never on top of each other: from the top down, each at least `gap`
+ * (per cent of the picture's height) under the one before; moved up again if the last runs out.
+ */
+function spread(cs: { from: [number, number] }[], gap: number) {
+  for (const side of [0, 100]) {
+    const on = cs.filter((c) => c.from[0] === side).sort((a, b) => a.from[1] - b.from[1]);
+    for (let i = 1; i < on.length; i++) {
+      const prev = on[i - 1]!.from[1];
+      if (on[i]!.from[1] - prev < gap) on[i]!.from = [side, prev + gap];
+    }
+    const last = on[on.length - 1];
+    const over = last ? last.from[1] - 94 : 0;
+    if (over > 0) for (const c of on) c.from = [side, c.from[1] - over];
+  }
 }
 
 /**

@@ -146,7 +146,7 @@ const en: Messages = {
     stepsTitle: "Film. Upload. Check.",
     stepsLead: "The analysis suggests and only asks where it is unsure.",
     steps: [
-      { title: "Film", text: "Phone or camera high up at the halfway line, both goals in the picture. Fixed is best, panning works too.", points: ["Camera high, with a wide angle", "Both goals and goal areas in the picture"] },
+      { title: "Film", text: "Phone or camera high up at the halfway line, both goals in the picture. Fixed is best, panning works too.", alt: "A phone on its side on a tripod in front of the hall, filming the match with the wide angle.", points: ["Camera high, with a wide angle", "Both goals and goal areas in the picture"] },
       { title: "Upload", text: "Pick the video. The app shows how far the analysis is and tells you when it is done.", alt: "The app when uploading: which match is this video from? Below it two matches to choose from, the first ringed in yellow.", points: ["Pick the match, then the video", "The bell tells you when it is ready"] },
       { title: "Check", text: "The analysis suggests the court and the goals. Where it is unsure, it asks you: at most ten questions per match, usually a few minutes.", alt: "The app while checking: the picture from the video with four yellow points on the corners of the court, below it the question is the court right? and the button Fits.", points: ["The analysis suggests the court", "Tap once, that is it"] },
     ],
@@ -154,7 +154,7 @@ const en: Messages = {
     shareTitle: "Four scenes in the team chat.",
     shareText: "You send the four clearest scenes from the right wing as a link. The players see for themselves where the gap is, instead of hearing it from you. In training you work on exactly that.",
     sharePoints: ["No account for players and parents", "Shirt numbers instead of names", "The link expires, and you can block it at any time"],
-    shareAlt: "How a collection arrives in the chat: a card in the club colour titled Retreat and right wing, below it the team and 24 scenes. Further down the button to share the link.",
+    shareAlt: "How a collection arrives in the chat: a card in the club colour titled Close the right wing, below it the team and 4 scenes. Further down the button to share the link.",
     chat: {
       label: "How the link arrives in the team chat: your message with the preview, a picture in the club colour titled Close the right wing, 4 scenes, below it app.handball-intelligence.com. Number 6 replies: Seen. I was too late getting across.",
       group: "Men 1",
@@ -230,7 +230,7 @@ const en: Messages = {
       {
         title: "Film",
         text: "Phone or camera high at the halfway line, both goals in the picture with the wide angle. Fixed is best, panning is fine too. Keep filming through half time.",
-        alt: "",
+        alt: "A phone on its side on a tripod in front of the hall, filming the match with the wide angle.",
       },
       {
         title: "Upload",
@@ -251,12 +251,8 @@ const en: Messages = {
     honestAll: "The full list, point by point",
     shotsTitle: "What it looks like in the app",
     shotsNote: "Pictures from the app, with an invented example club.",
-    shots: [
-      { alt: "A match in the app: the video with a timeline of all goals on the left, the list of scenes on the right, the current one in yellow.", caption: "Every goal as a scene: tap it, and the video jumps there." },
-      { alt: "Scenes in the app: search for goal conceded, right wing, last 3 with video, answer 24 of 66 goals conceded on the right wing and the button to play all 24.", caption: "Searching scenes: the answer with its basis." },
-      { alt: "The season in the app: five matches, and the right wing stays open. Below, the topics that repeat, with one bar per match, on the right the half court with the shots.", caption: "The season: what repeats." },
-      { alt: "How a collection arrives in the chat: a card in the club colour titled Retreat and right wing, below it the team and 24 scenes. Further down the button to share the link.", caption: "One link for the team, no account for the players." },
-    ],
+    shots: [{ alt: "A match in the app: the video with a timeline of all goals on the left, the list of scenes on the right, the current one in yellow.", caption: "Every goal as a scene: tap it, and the video jumps there.", text: "On the right the scenes of the phase, below all goals of the match on one line. You tap, the video plays right there." }, { alt: "Scenes in the app: search for goal conceded, right wing, last 3 with video, answer 26 of 77 goals conceded on the right wing and the button to play all 26.", caption: "Searching scenes: the answer with its basis.", text: "Type what you are looking for, say goal conceded, right wing, last three matches. The number comes with its basis, and all scenes play in a row." }, { alt: "The season in the app: five matches, and the right wing stays open. Below, the topics that repeat, with one bar per match, on the right the half court with the shots.", caption: "The season: what repeats.", text: "One bar per match shows whether a topic stays or goes away. Next to it the shots of all matches on the half court." }, { alt: "How a collection arrives in the chat: a card in the club colour titled Close the right wing, below it the team and 4 scenes. Further down the button to share the link.", caption: "One link for the team, no account for the players.", text: "The key scenes go to the team chat as a collection by link. Opening it needs no account, and the link expires." }],
+    tourLabel: "The four pictures from the app",
   },
   filming: {
     title: "Filming",

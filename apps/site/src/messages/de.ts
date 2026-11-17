@@ -144,7 +144,7 @@ const de = {
     stepsTitle: "Filmen. Hochladen. Prüfen.",
     stepsLead: "Die Analyse schlägt vor und fragt nur, wo sie unsicher ist.",
     steps: [
-      { title: "Filmen", text: "Handy oder Kamera hoch an die Mittellinie, beide Tore im Bild. Fest ist am besten, schwenken geht auch.", points: ["Kamera hoch, mit Weitwinkel", "Beide Tore und Torräume im Bild"] },
+      { title: "Filmen", text: "Handy oder Kamera hoch an die Mittellinie, beide Tore im Bild. Fest ist am besten, schwenken geht auch.", alt: "Ein Handy quer auf einem Stativ vor der Halle: Es filmt das Spiel, mit Weitwinkel.", points: ["Kamera hoch, mit Weitwinkel", "Beide Tore und Torräume im Bild"] },
       { title: "Hochladen", text: "Video wählen. Die App zeigt, wie weit die Analyse ist, und meldet sich, wenn sie fertig ist.", alt: "Die App beim Hochladen: Zu welchem Spiel gehört das Video? Darunter zwei Spiele zur Auswahl, das erste gelb umrandet.", points: ["Spiel wählen, dann das Video", "Die Glocke meldet, wenn es fertig ist"] },
       { title: "Prüfen", text: "Die Analyse schlägt Spielfeld und Tore vor. Wo sie unsicher ist, fragt sie dich: höchstens zehn Fragen pro Spiel, meist ein paar Minuten.", alt: "Die App beim Prüfen: das Bild aus dem Video mit vier gelben Punkten an den Ecken des Feldes, darunter die Frage Passt das Spielfeld? und der Knopf Passt.", points: ["Die Analyse schlägt das Feld vor", "Einmal tippen genügt"] },
     ],
@@ -152,7 +152,7 @@ const de = {
     shareTitle: "Vier Szenen in den Teamchat.",
     shareText: "Du schickst die vier deutlichsten Szenen über aussen rechts als Link. Die Spieler sehen selbst, wo die Lücke ist, statt es von dir zu hören. Im Training übt ihr genau das.",
     sharePoints: ["Kein Konto für Spieler und Eltern", "Rückennummern statt Namen", "Der Link läuft ab, und du kannst ihn jederzeit sperren"],
-    shareAlt: "So kommt eine Sammlung im Chat an: eine Karte in der Vereinsfarbe mit dem Titel Rückzug und rechter Flügel, darunter das Team und 24 Szenen. Weiter unten der Knopf Link teilen.",
+    shareAlt: "So kommt eine Sammlung im Chat an: eine Karte in der Vereinsfarbe mit dem Titel Aussen rechts zumachen, darunter das Team und 4 Szenen. Weiter unten der Knopf Link teilen.",
     chat: {
       label: "So kommt der Link im Teamchat an: deine Nachricht mit der Vorschau, einem Bild in der Vereinsfarbe mit dem Titel Aussen rechts zumachen, 4 Szenen, darunter app.handball-intelligence.com. Nummer 6 antwortet: Gesehen. Ich bin zu spät rüber.",
       group: "Herren 1",
@@ -228,7 +228,7 @@ const de = {
       {
         title: "Filmen",
         text: "Handy oder Kamera hoch an die Mittellinie, mit Weitwinkel beide Tore im Bild. Fest ist am besten, schwenken geht auch. In der Pause weiterfilmen.",
-        alt: "",
+        alt: "Ein Handy quer auf einem Stativ vor der Halle: Es filmt das Spiel, mit Weitwinkel.",
       },
       {
         title: "Hochladen",
@@ -249,12 +249,8 @@ const de = {
     honestAll: "Die ganze Liste, Punkt für Punkt",
     shotsTitle: "So sieht es in der App aus",
     shotsNote: "Bilder aus der App, mit einem erfundenen Beispielverein.",
-    shots: [
-      { alt: "Ein Spiel in der App: links das Video mit der Zeitleiste aller Tore, rechts die Liste der Szenen, die laufende gelb markiert.", caption: "Jedes Tor als Szene: antippen, und das Video springt hin." },
-      { alt: "Szenen in der App: Suche nach Gegentor, aussen rechts, letzte 3 mit Video, Antwort 24 von 66 Gegentoren über aussen rechts und der Knopf Alle 24 abspielen.", caption: "Szenen suchen: die Antwort mit ihrer Basis." },
-      { alt: "Saison in der App: Titel Fünf Spiele. Und aussen rechts bleibt offen. Darunter Themen, die sich wiederholen, mit einem Balken pro Spiel, rechts das halbe Feld mit den Würfen.", caption: "Die Saison: was sich wiederholt." },
-      { alt: "So kommt eine Sammlung im Chat an: eine Karte in der Vereinsfarbe mit dem Titel Rückzug und rechter Flügel, darunter das Team und 24 Szenen. Weiter unten der Knopf Link teilen.", caption: "Ein Link fürs Team, ohne Konto für die Spieler." },
-    ],
+    shots: [{ alt: "Ein Spiel in der App: links das Video mit der Zeitleiste aller Tore, rechts die Liste der Szenen, die laufende gelb markiert.", caption: "Jedes Tor als Szene: antippen, und das Video springt hin.", text: "Rechts die Szenen der Phase, unten alle Tore des Spiels auf einer Linie. Du tippst, das Video läuft genau dort." }, { alt: "Szenen in der App: Suche nach Gegentor, aussen rechts, letzte 3 mit Video, Antwort 26 von 77 Gegentoren über aussen rechts und der Knopf Alle 26 abspielen.", caption: "Szenen suchen: die Antwort mit ihrer Basis.", text: "Schreib, was du suchst, zum Beispiel Gegentor, aussen rechts, letzte drei Spiele. Die Zahl steht mit ihrer Basis da, und alle Szenen laufen am Stück." }, { alt: "Saison in der App: Titel Fünf Spiele. Und aussen rechts bleibt offen. Darunter Themen, die sich wiederholen, mit einem Balken pro Spiel, rechts das halbe Feld mit den Würfen.", caption: "Die Saison: was sich wiederholt.", text: "Ein Balken pro Spiel zeigt, ob ein Thema bleibt oder weg ist. Daneben die Würfe aus allen Spielen auf dem halben Feld." }, { alt: "So kommt eine Sammlung im Chat an: eine Karte in der Vereinsfarbe mit dem Titel Aussen rechts zumachen, darunter das Team und 4 Szenen. Weiter unten der Knopf Link teilen.", caption: "Ein Link fürs Team, ohne Konto für die Spieler.", text: "Die wichtigsten Szenen kommen als Sammlung per Link in den Teamchat. Wer ihn öffnet, braucht kein Konto, und der Link läuft ab." }],
+    tourLabel: "Die vier Bilder aus der App",
   },
   filming: {
     title: "Filmen",

@@ -1,7 +1,9 @@
 <!doctype html>
-<!-- The real app on a computer (S13), start page under the three things: a match with its video,
-     the scenes of the phase (the one playing in yellow), the three things and all goals on the
-     timeline. The whole browser window, no Keil, no callouts: the page says what it is. -->
+<!-- The real app on a computer (S13, L8), start page under the three things: the match of the
+     website's story with its video (a real hall recording, blurred past recognition; the website
+     writes «Dein Spiel» over it in the visitor's language), the scenes of the phase (the one
+     playing in yellow), the three things and all goals on the timeline. The window is cut under
+     the timeline, so nothing half empty shows; no Keil, no callouts: the page says what it is. -->
 <meta charset="utf-8" />
 <link rel="stylesheet" href="../stage.css" />
 <div id="stage"></div>
@@ -9,10 +11,16 @@
 <script>
   const c = S.cap("video");
   const W = 1200;
+  const timeline = S.rect("video", "timeline", [32, 802, 844, 118]);
+  const vid = S.rect("video", "video", [32, 212, 844, 475]);
+  // from the app's head down to just under the timeline's words (Anwurf, Halbzeit, Schluss)
+  const crop = [0, 0, c.w, Math.min(c.h, timeline[1] + timeline[3] + 14)];
   const k = (W - 4) / c.w;
   // a wide screen full of small text: more weight than the default, still loaded only when seen
-  S.stage(W, Math.round(30 + c.h * k + 4), { budget1x: 170 * 1024, budget2x: 340 * 1024 });
-  S.browser("video", [0, 0, c.w, c.h], { left: 0, top: 0, width: W });
+  S.stage(W, Math.round(30 + crop[3] * k + 4), { budget1x: 170 * 1024, budget2x: 340 * 1024 });
+  const s = S.browser("video", crop, { left: 0, top: 0, width: W });
   document.querySelector(".browser").style.boxShadow = "none";
+  // the picture of the player (above its controls), and the player's line at minute 7:46 of 61
+  S.lettering(S.video(s, vid, { cut: 78, bar: 63, at: 0.127 }));
   S.done();
 </script>

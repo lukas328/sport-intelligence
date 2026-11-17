@@ -1,6 +1,6 @@
 <!doctype html>
-<!-- «Jedes Tor als Szene»: a match on the computer, the video, the scene that plays (yellow in the
-     list) and all goals on the timeline. -->
+<!-- «Jedes Tor als Szene»: a match on the computer, the video (a real hall recording, blurred past
+     recognition, L8), the scene that plays (yellow in the list) and all goals on the timeline. -->
 <meta charset="utf-8" />
 <link rel="stylesheet" href="../stage.css" />
 <div id="stage"><div class="keil" style="--from: 70%; --to: 40%"></div></div>
@@ -19,6 +19,8 @@
       width: 664,
     },
   );
+  // the video: the hall recording, blurred past recognition; the website writes «Dein Spiel» on it
+  S.lettering(S.video(s, video, { cut: 78, bar: 63, at: 0.127 }));
   S.ring(s, active, 3);
   // the label sits on the dark hall wall of the video, the arrow goes to the scene in the list
   S.callout("tap", S.at(s, video, 0.5, 0.16), S.at(s, active, -0.02, 0.5), "t", 0.22);

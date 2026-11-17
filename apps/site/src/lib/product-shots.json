@@ -1,8 +1,9 @@
 {
   "app-desktop": {
     "width": 1200,
-    "height": 968,
-    "callouts": []
+    "height": 907,
+    "callouts": [],
+    "lettering": [2.66, 25.37, 65.72, 40.9]
   },
   "get-search": {
     "width": 720,
@@ -62,7 +63,8 @@
         "place": "tl",
         "bend": -0.2
       }
-    ]
+    ],
+    "lettering": [5.34, 14.36, 61.99, 40.38]
   },
   "share": {
     "width": 640,
@@ -88,17 +90,22 @@
   },
   "step-check": {
     "width": 640,
-    "height": 620,
+    "height": 760,
+    "callouts": []
+  },
+  "step-film": {
+    "width": 640,
+    "height": 760,
     "callouts": []
   },
   "step-result": {
     "width": 640,
-    "height": 620,
+    "height": 760,
     "callouts": []
   },
   "step-upload": {
     "width": 640,
-    "height": 620,
+    "height": 760,
     "callouts": []
   }
 }
