@@ -302,9 +302,15 @@ def _log_rot(r: F64) -> F64:
     return np.asarray(vec.ravel(), np.float64)
 
 
+# log of the zoom between two registered frames: a broadcast zoom spans at most about 20 x; beyond
+# that the fit has diverged (few, collinear or wrong matches), and exp() would overflow
+LOG_ZOOM_MAX = 3.0
+STEP_MAX = 0.5  # Gauss-Newton step per parameter (rad, log zoom): no jumps off a bad linearisation
+
+
 def _project(params: F64, src: F64, f_dst: float) -> F64:
     r = _rodrigues(params[:3])
-    f_src = f_dst * float(np.exp(params[3]))
+    f_src = f_dst * float(np.exp(np.clip(params[3], -LOG_ZOOM_MAX, LOG_ZOOM_MAX)))
     rays = np.column_stack([src / f_src, np.ones(len(src))]) @ r.T
     z = np.where(np.abs(rays[:, 2]) < 1e-6, 1e-6, rays[:, 2])
     return np.asarray(f_dst * rays[:, :2] / z[:, None], np.float64)
@@ -316,7 +322,8 @@ def fit_rotation(
     """Rotation R (src camera -> dst camera) and zoom f_src / f_dst from point pairs.
 
     Gauss-Newton with Huber weights on the reprojection error (centred px). Returns (R, zoom, rms of
-    the inliers in px).
+    the inliers in px). The zoom stays within exp(+-LOG_ZOOM_MAX) and each step within STEP_MAX;
+    a fit that does not converge to finite numbers returns rms inf (the pair is not used).
     """
     p = np.zeros(4)
     if r0 is not None:
@@ -337,12 +344,18 @@ def fit_rotation(
             step = np.linalg.solve(jw.T @ jac + 1e-9 * np.eye(n_par), -(jw.T @ res))
         except np.linalg.LinAlgError:
             break
+        if not np.all(np.isfinite(step)):
+            break
+        step = np.clip(step, -STEP_MAX, STEP_MAX)
         p[:n_par] += step
+        p[3] = np.clip(p[3], -LOG_ZOOM_MAX, LOG_ZOOM_MAX)
         if float(np.abs(step).max()) < 1e-7:
             break
     err = np.linalg.norm(_project(p, src, f_dst) - dst, axis=1)
     inl = err < 3 * delta
     rms = float(np.sqrt(np.mean(err[inl] ** 2))) if inl.sum() >= 8 else float("inf")
+    if not np.isfinite(rms) or abs(p[3]) >= LOG_ZOOM_MAX:
+        rms = float("inf")  # diverged: the zoom bound was hit
     return _rodrigues(p[:3]), float(np.exp(p[3])), rms
 
 

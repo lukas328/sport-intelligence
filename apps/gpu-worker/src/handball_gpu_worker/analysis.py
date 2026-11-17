@@ -233,6 +233,24 @@ def write_ball_path(result: AnalysisResult, out: Path) -> int:
     return len(rows)
 
 
+def ball_summary(
+    ball_status: str, ball_rows: int, frames: int, play: dict[str, Any] | None
+) -> dict[str, Any]:
+    """Short ball figures for the job log and the stats, to judge a test run without reading
+    `ball.bin`: the model status, the share of frames with a ball point and how much of the video
+    the match clock counted as play (None without clock readings)."""
+    in_play = None
+    if play and play.get("intervals_ms"):
+        in_play = sum(b - a for a, b in play["intervals_ms"]) / 1000
+    return {
+        "ball_model_status": ball_status,
+        "ball_path_points": ball_rows,
+        "ball_path_coverage": round(ball_rows / frames, 3) if frames else None,
+        "clock_play_s": round(in_play, 1) if in_play is not None else None,
+        "clock_readings": (play or {}).get("clock_readings"),
+    }
+
+
 def write_chunks(result: AnalysisResult, out: Path) -> int:
     rows = np.array(
         [[round(p.frame * 1000 / result.fps), p.track_id, p.x, p.y] for p in result.points],
@@ -859,7 +877,13 @@ def _run_learned(
                 "goal_candidates": goal_candidates(obs, play),
             }
             rep.succeed(pending)
-            log.info("analysis_needs_calibration", job_id=job_id, reason=str(exc))
+            log.info(
+                "analysis_needs_calibration",
+                job_id=job_id,
+                reason=str(exc),
+                # no ball path without the court: only the model status and the clock
+                **ball_summary(ball_status, 0, 0, play),
+            )
             return pending
         # the motion is saved after calibration (a fixed camera's focal length is set there)
         _store_view(s3, settings.s3_bucket_artifacts, prefix, work, obs.motion)
@@ -891,6 +915,7 @@ def _run_learned(
         result.write_parquet(out / "tracks.parquet")
         chunks = write_chunks(result, out)
         ball_rows = write_ball_path(result, out)
+        ball_info = ball_summary(ball_status, ball_rows, result.frames, play)
         upload_dir(s3, settings.s3_bucket_artifacts, out, prefix + "analysis/")
         payload: dict[str, Any] = {
             **view,
@@ -916,6 +941,7 @@ def _run_learned(
                 "reid_model_status": reid_status,
                 "role_model_status": role_status,
                 "observe_counters": getattr(obs, "counters", {}),
+                "ball_summary": ball_info,
             },
             "formations": detect_formations(result),
             "events": events_payload(result, side_hint),
@@ -929,8 +955,8 @@ def _run_learned(
             job_id=job_id,
             tracks=len(payload["tracks"]),
             elapsed_s=payload["elapsed_s"],
-            ball_model_status=ball_status,
             reid_model_status=reid_status,
+            **ball_info,
             **getattr(obs, "counters", {}),
         )
         return payload

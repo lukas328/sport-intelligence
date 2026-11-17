@@ -887,6 +887,25 @@ def test_ball_path_file(tmp_path: Path) -> None:
     assert analysis.write_ball_path(none, tmp_path / "x") == 0
 
 
+def test_ball_summary_for_the_job_log() -> None:
+    play = {
+        "source": "hall_scoreboard",
+        "clock_readings": 13,
+        "intervals_ms": [[0, 60_000], [90_000, 144_000]],
+    }
+    assert analysis.ball_summary("ok", 750, 7500, play) == {
+        "ball_model_status": "ok",
+        "ball_path_points": 750,
+        "ball_path_coverage": 0.1,
+        "clock_play_s": 114.0,
+        "clock_readings": 13,
+    }
+    # no court (needs_calibration): no path, the clock still counts
+    assert analysis.ball_summary("cpu_test", 0, 0, play)["clock_play_s"] == 114.0
+    none = analysis.ball_summary("off", 0, 0, None)
+    assert none["ball_path_coverage"] is None and none["clock_play_s"] is None
+
+
 def test_reid_and_role_models_from_bucket_or_file(tmp_path: Path) -> None:
     """HB_REID_MODEL / HB_ROLE_MODEL: the image default without the file stays off; a bucket key
     with its checksum is fetched and loaded; a wrong checksum is not used."""
