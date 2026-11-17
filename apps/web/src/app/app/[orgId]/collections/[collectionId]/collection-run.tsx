@@ -4,7 +4,9 @@ import type { Schemas } from "@handball/api-client";
 import Link from "next/link";
 import { Fragment } from "react";
 import { useTranslations } from "next-intl";
+import { ArrowDown, ArrowUp, MoreHorizontal, StickyNote, Trash2 } from "lucide-react";
 import { Bundle, EmptyField } from "@/components/anlauf/bundle";
+import { MenuContent, MenuItem, MenuRoot, MenuSeparator, MenuTrigger } from "@/components/ui/menu";
 import { clockOf } from "@/components/anlauf/three-things-view";
 import { goalRuns, useMatchGraphics } from "@/lib/graphics";
 
@@ -58,24 +60,37 @@ export function CollectionRun({ orgId, items, edit, slot }: { orgId: string; ite
   );
 }
 
+/** Compact at phone width (24 scenes are a long list): up, down and «…» with the note and
+ * removing. Every button is named for screen readers with the entry's number. */
 function RowTools({ n, last, edit }: { n: number; last: number; edit: RunEdit }) {
   const t = useTranslations("collections");
-  const b = "min-h-11 cursor-pointer bg-transparent px-1 text-[15px] font-bold text-ink underline decoration-[1.5px] underline-offset-4 disabled:cursor-default disabled:text-ink-2 disabled:no-underline";
+  const b =
+    "inline-flex size-11 cursor-pointer items-center justify-center bg-transparent text-ink hover:bg-surface focus-visible:outline-2 focus-visible:outline-accent disabled:cursor-default disabled:text-ink-2/50 disabled:hover:bg-transparent [&_svg]:size-5";
   return (
-    <span className="mt-1 flex flex-wrap gap-x-3">
-      <button type="button" className={b} disabled={n === 0} onClick={() => edit.move(n, -1)}>
-        {t("moveUp")}
+    <span className="mt-1 -ml-2.5 flex items-center">
+      <button type="button" className={b} disabled={n === 0} onClick={() => edit.move(n, -1)} aria-label={t("moveUpItem", { n: n + 1 })} title={t("moveUp")}>
+        <ArrowUp aria-hidden />
       </button>
-      <button type="button" className={b} disabled={n === last} onClick={() => edit.move(n, 1)}>
-        {t("moveDown")}
+      <button type="button" className={b} disabled={n === last} onClick={() => edit.move(n, 1)} aria-label={t("moveDownItem", { n: n + 1 })} title={t("moveDown")}>
+        <ArrowDown aria-hidden />
       </button>
-      <button type="button" className={b} onClick={() => edit.noteAfter(n)} data-testid="item-note-after">
-        {t("noteHere")}
-      </button>
-      {/* apart from «Nach unten»: a slip of the thumb is undone with «Rückgängig» (UX test N30) */}
-      <button type="button" className={`${b} ml-3`} onClick={() => edit.remove(n)} data-testid="item-remove">
-        {t("remove")}
-      </button>
+      <MenuRoot>
+        <MenuTrigger asChild>
+          <button type="button" className={b} aria-label={t("moreItem", { n: n + 1 })} title={t("more")} data-testid="item-more">
+            <MoreHorizontal aria-hidden />
+          </button>
+        </MenuTrigger>
+        <MenuContent align="start">
+          <MenuItem icon={<StickyNote />} onSelect={() => edit.noteAfter(n)} testId="item-note-after">
+            {t("noteHere")}
+          </MenuItem>
+          <MenuSeparator />
+          {/* apart from the rest: a slip is undone with «Rückgängig» (UX test N30) */}
+          <MenuItem icon={<Trash2 />} danger onSelect={() => edit.remove(n)} testId="item-remove">
+            {t("remove")}
+          </MenuItem>
+        </MenuContent>
+      </MenuRoot>
     </span>
   );
 }

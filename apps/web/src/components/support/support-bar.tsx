@@ -8,6 +8,7 @@ import { Alert } from "@/components/ui/card";
 import { Dialog } from "@/components/ui/dialog";
 import { control } from "@/components/ui/field";
 import { api } from "@/lib/client";
+import { useMailEnabled } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
 import { FileField } from "@/components/ui/file-field";
 
@@ -24,6 +25,7 @@ type Chat = { provider?: string; website_id?: unknown; token_id?: unknown } | nu
 /** Feedback with page, match and browser attached; support chat loaded only on click (4.11). */
 export function FeedbackDialog({ orgId, open, onOpenChange, chat }: { orgId: string; open: boolean; onOpenChange: (o: boolean) => void; chat: Chat }) {
   const t = useTranslations("support");
+  const mail = useMailEnabled();
   const tf = useTranslations("file");
   const path = usePathname();
   const [sent, setSent] = useState(false);
@@ -76,7 +78,7 @@ export function FeedbackDialog({ orgId, open, onOpenChange, chat }: { orgId: str
       description={t("feedbackIntro")}
     >
       {sent ? (
-        <Alert kind="success">{t("thanks")}</Alert>
+        <Alert kind="success">{t(mail === false ? "thanksNoMail" : "thanks")}</Alert>
       ) : (
         <form onSubmit={submit} className="space-y-4">
           {error && <Alert>{t("failed")}</Alert>}

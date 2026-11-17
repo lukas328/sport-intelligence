@@ -10,6 +10,7 @@ import { StatusEditor, StatusLine } from "./player-status";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useRef, useState, type FormEvent } from "react";
+import { useEarlyFiles } from "@/lib/early-files";
 import { Button } from "@/components/ui/button";
 import { FileUp, Trash2, UserPlus, Users } from "lucide-react";
 import { Alert, Card, EmptyState, Skeleton } from "@/components/ui/card";
@@ -370,6 +371,8 @@ function CsvImport({
   const [result, setResult] = useState<ImportResult | null>(null);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState<number | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+  useEarlyFiles(fileRef, (files) => setFile(files[0] ?? null));
 
   async function run(dryRun: boolean) {
     if (!file) return;
@@ -406,6 +409,7 @@ function CsvImport({
           <span className="ml-1 bg-surface px-3 py-1 text-sm font-semibold">{t("roster.csvChoose")}</span>
           <span className="min-w-0 truncate text-muted">{file?.name ?? t("roster.csvNone")}</span>
           <input
+            ref={fileRef}
             type="file"
             accept=".csv,text/csv"
             aria-label={t("roster.csvFile")}

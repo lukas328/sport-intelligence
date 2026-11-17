@@ -62,21 +62,36 @@ Hydrations-Wartezeit für den Datei-Input, e35b081b).
 
 API-Tests: 430 bestanden. Web: Typecheck, Lint, 285 Unit-Tests grün. Website: Build und Tests grün.
 
+## Zweiter Durchgang (17.11., morgens)
+
+Alle offenen Punkte der Nacht behoben. Geprüft mit eigener API ohne Mailversand
+(`HB_MAIL_ENABLED=false`) und eigenem Web, bei 390 px und 1280 px.
+
+| Befund | Schwere | Was jetzt gilt | Commit |
+|---|---|---|---|
+| Datenbank-Commit nach der Antwort | 🟡 | `DbDep` nutzt `Depends(get_session, scope="function")`: FastAPI schreibt fest, wenn der Endpunkt und das Serialisieren der Antwort fertig sind, vor dem ersten Byte. Mandanten-Kontext bleibt transaktionslokal. Test prüft die Reihenfolge Endpunkt, Commit, Antwort; ganze API-Suite grün | ca945d6b |
+| Video vor der Hydration gewählt, geht still verloren | 🟡 | Upload, Dateien zum Spiel, Kader-CSV und alle Dateifelder lesen beim Start, was der Input schon hält, und machen damit weiter (einmal, auch unter StrictMode) | 24535eff |
+| Trainingstipps nur unter Teamleben | 🟡 | Entscheid: eigener Platz unter Saison, `…/season/tips` («Saison › Trainingstipps»), für Trainer und Co-Trainer, mit oder ohne Teamleben. Erreichbar über den Knopf im Saison-Kopf, «Trainingstipps dazu» unter «Was sich wiederholt» und die Suche. Im Trainingsplan (Teamleben) bleiben sie oben. Eine geplante Einheit verlinkt dorthin; «Als Aufgabe an die Spieler» nur mit Teamleben. Navigation unverändert: vier Ziele, Saison ohne Tabs | cd892a0a |
+| Eltern-Hinweis nennt Termine, wenn sie aus sind | ⚪ | Hinweis hängt an der Einstellung: ohne Teamfunktionen «neue Szenen aus den Spielen» | 38fb4fff |
+| «Spieler/innen» neben «Spieler» | ⚪ | Ein Wort pro Rolle (Trainer, Co-Trainer, Spieler, Eltern): Zähler, Beschriftungen, Hinweise, Positionen («Torhüter», «Feldspieler»), PDF-Spielbericht; fr «joueur» in Rollen und Zählern. Der Hilfeartikel «Rollen und Rechte» (Website, de/fr/en) listete noch elf Rollen, jetzt die vier | 955d685c |
+| Sammlung am Handy: vier Textlinks pro Eintrag | ⚪ | Zwei Pfeile und «…» mit «Notiz danach» und «Entfernen» (abgesetzt, «Rückgängig» bleibt). 44-px-Ziele, mit Tastatur bedienbar, Namen mit der Nummer des Eintrags für Screenreader | 3df1fb5a |
+| Anpfiff-Feld mit der aktuellen Minute | ⚪ | Entscheid: ein von Hand angelegtes Spiel ist meist das gerade gespielte (künftige kommen von handball.ch). Vorschlag liegt deshalb in der Vergangenheit, wo das Spiel auf den Upload öffnet: tagsüber die letzte volle Stunde, nachts und vor neun Uhr gestern 18:00. Pflichtfeld wie bisher | b0c65c08 |
+| «Spieltag starten» Tage vorher prominent | ⚪ | Vorn nur am Spieltag, ab drei Stunden vor bis drei Stunden nach dem Anpfiff; vorher in «Mehr» und ruhig unter «Vor dem Spiel» | 3edd8749, 6bb5d04f |
+| «Text für den Chat» leer bis zur Vorschau | ⚪ | Steht sofort aus dem, was die Seite weiss (Spiel: Teams, Gegner, Resultat; Szene, Spielzug, Liste, Szenen eines Spielers: Titel). Die Vorschau verfeinert ihn, solange nichts von Hand geändert wurde | 17d5a264 |
+| Durchgang ohne Mailversand | ⚪ | Einstieg «Speichern» mit Passwort, Anmelden ohne Link-Angebot, Passwort vergessen über den Support, Spieler einladen mit Link zum Kopieren, Abo, Ich, Sicherheit, Verein: ohne Mail-Versprechen. Gefunden und behoben: Aufgaben «Zusätzlich per E-Mail» (nur noch mit Mailversand, auch in der API), Feedback «Wir melden uns per E-Mail», Verbandseinladung «gesendet» ohne Mail und ohne anderen Weg (API gibt jetzt den Link zurück, ohne Mail zum Kopieren) | f3148a9b |
+| Toter Code: Startseiten von Trainer und Spieler («N Termine beantworten») | ⚪ | Die Vereinswurzel zeigt nur noch die Übersicht der Eltern und den Fall ohne Team; die unerreichbaren Startseiten von Trainer und Spieler sind entfernt, ein veralteter Teamwechsel leitet zum Start weiter. Spieler finden Termine, Aufgaben und Szenen in den Tabs von Teamleben | 38fb4fff |
+
+Tests: API 432 bestanden. Web: Typecheck, Lint, 293 Unit-Tests grün. Website: Build und 34 Tests
+grün. E2E gegen den eigenen Stand: `collection` und `official` grün; `live` bis zum Spieltag
+grün, danach rot beim Neuladen offline (im Dev-Server gibt es keinen Service Worker; im
+Produktions-Build prüfen).
+
 ## Offen
 
 | Befund | Schwere |
 |---|---|
-| Datenbank-Commit nach der Antwort: `get_session` ist eine Yield-Abhängigkeit mit Standard-Scope, FastAPI schreibt also erst nach dem Senden fest. Liest der Browser sofort danach, kann er den alten Stand sehen; lokal nicht nachgewiesen (0 von 20), Verdacht bei einem einmal fehlenden Eintrag im E2E. Lösung prüfen: `Depends(get_session, scope="function")`, ganze API-Suite laufen lassen | 🟡 |
-| Ein Video, das vor der Hydration gewählt wird (langsames Handy), geht still verloren | 🟡 |
-| Trainingstipps gehören fachlich zur Analyse, liegen aber unter Teamleben; ohne Teamfunktionen nur über Saison und Erkenntnisse erreichbar. Entscheid: eigener Platz unter Szenen oder Saison | 🟡 |
-| Eltern-Hinweis «Termine und neue Szenen» auch wenn Termine aus sind | ⚪ |
-| «Spieler/innen» (18 Stellen, z. B. Übungen, Kader-Übernahme) neben «Spieler» der vier Rollen | ⚪ |
-| Sammlung am Handy: vier Textlinks pro Eintrag (Nach oben, Nach unten, Notiz danach, Entfernen), bei 24 Szenen sehr lang | ⚪ |
-| Anpfiff-Feld schlägt die aktuelle Uhrzeit vor (nachts «00:57») | ⚪ |
-| «Spieltag starten» schon Tage vor dem Spiel prominent | ⚪ |
-| Teilen-Dialog: «Text für den Chat» bleibt leer, bis die Vorschau geladen ist | ⚪ |
-| Ohne Mailversand (Produktion) nur im Code geprüft; lokal ist Mail an. Ein Durchgang mit `HB_MAIL_ENABLED=false` steht aus | ⚪ |
 | Nur im Dev-Server gesehen, nicht reproduzierbar: einmal 500 auf `/s/…` (next-intl-Kontext), Turbopack-Modulfehler nach Dateiänderungen | ⚪ |
+| Szenentitel in Sammlungen heissen noch «Gegentor über aussen rechts» (Zonen-Text `zoneFrom`), sonst überall «aussen rechts» | ⚪ |
 
 Bilder (nur Demo- und synthetische Inhalte): `qa/eltern-uebersicht-390.png`,
 `qa/saison-ohne-zahlen-390.png`.

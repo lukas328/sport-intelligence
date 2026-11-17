@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+from collections.abc import AsyncIterator, MutableMapping
 from typing import Any
 
 import pytest
+from fastapi import FastAPI
 from sqlalchemy.orm import Mapped, mapped_column
 
 from handball_api.core import db
+from handball_api.routers.deps import DbDep
 
 
 class _Thing(db.Base, db.EntityMixin, db.TenantMixin):
@@ -62,3 +65,46 @@ async def test_foreign_keys_of_official_data_and_candidates_are_indexed(owner_co
     }
     assert {(t, c) for t, c in missing if t in checked} == set()
     assert ("organizations", "claimed_by_id") not in missing
+
+
+async def test_request_transaction_commits_before_the_response_is_sent() -> None:
+    """The browser often reads right after a write: the commit must happen before the
+    response starts, not after it was sent (default scope of yield dependencies)."""
+    order: list[str] = []
+
+    async def fake_session() -> AsyncIterator[object]:
+        yield object()
+        order.append("commit")
+
+    app = FastAPI()
+
+    @app.post("/write")
+    async def write(session: DbDep) -> dict[str, bool]:
+        order.append("endpoint")
+        return {"ok": True}
+
+    app.dependency_overrides[db.get_session] = fake_session
+
+    async def receive() -> dict[str, Any]:
+        return {"type": "http.request", "body": b"", "more_body": False}
+
+    async def send(message: MutableMapping[str, Any]) -> None:
+        if message["type"] == "http.response.start":
+            order.append("response")
+
+    scope = {
+        "type": "http",
+        "asgi": {"version": "3.0"},
+        "http_version": "1.1",
+        "method": "POST",
+        "path": "/write",
+        "raw_path": b"/write",
+        "query_string": b"",
+        "headers": [],
+        "scheme": "http",
+        "server": ("test", 80),
+        "client": ("test", 1),
+        "root_path": "",
+    }
+    await app(scope, receive, send)
+    assert order == ["endpoint", "commit", "response"]

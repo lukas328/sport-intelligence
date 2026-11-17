@@ -107,6 +107,23 @@ async def test_assignment_flow(make_api: Callable[[], Api], outbox: MemoryEmailS
         },
     )
     assert drill.status_code == 201 and drill.json()["recipients"] == 1
+    # without mail delivery (L2) «Zusätzlich per E-Mail» sends nothing; the bell still rings
+    sent = len(outbox.outbox)
+    coach.app.state.settings.mail_enabled = False
+    try:
+        quiet = await coach.post(
+            base,
+            json={
+                "kind": "drill",
+                "target_id": "finishing_wings",
+                "title": "Ohne Mail",
+                "user_ids": [tim.user["id"]],
+                "notify_email": True,
+            },
+        )
+    finally:
+        coach.app.state.settings.mail_enabled = None
+    assert quiet.status_code == 201 and len(outbox.outbox) == sent
     assert (
         await tim.put(f"/v1/orgs/{org}/assignments/{a['id']}/status", json={"done": False})
     ).json()["done_at"] is None

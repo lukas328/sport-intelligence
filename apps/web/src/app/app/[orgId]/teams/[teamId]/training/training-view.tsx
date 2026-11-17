@@ -178,7 +178,7 @@ function FocusList({ focus }: { focus: Focus[] }) {
   );
 }
 
-export function TrainingView({ orgId, teamId, canPlan }: { orgId: string; teamId: string; canPlan: boolean }) {
+export function TrainingView({ orgId, teamId, canPlan, tasks = true }: { orgId: string; teamId: string; canPlan: boolean; tasks?: boolean }) {
   const t = useTranslations("training");
   const tr = useTranslations();
   const locale = useLocale();
@@ -324,7 +324,7 @@ export function TrainingView({ orgId, teamId, canPlan }: { orgId: string; teamId
         </Link>
       </div>
       {/* first what to train, from the matches (K21); planning by hand comes after */}
-      {canPlan && <TrainingTips orgId={orgId} teamId={teamId} onPlanned={() => void qc.invalidateQueries({ queryKey: ["sessions", teamId] })} />}
+      {canPlan && <TrainingTips orgId={orgId} teamId={teamId} tasks={tasks} onPlanned={() => void qc.invalidateQueries({ queryKey: ["sessions", teamId] })} />}
       {error && <Alert>{tr(`errors.${error}`)}</Alert>}
       {canPlan && season && (
         <TrainingSlots orgId={orgId} teamId={teamId} season={season} onGenerated={() => void qc.invalidateQueries({ queryKey: ["sessions", teamId] })} />

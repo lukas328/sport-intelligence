@@ -58,7 +58,7 @@ export function PlaylistView({ orgId, initial, staff }: { orgId: string; initial
             {t("items", { count: pl.items.length })} · {pl.shared_with_players ? t("shared") : t("notShared")}
           </p>
         </div>
-        {staff && <ShareButton orgId={orgId} teamId={pl.team_id} kind="playlist" targetId={pl.id} />}
+        {staff && <ShareButton orgId={orgId} teamId={pl.team_id} kind="playlist" targetId={pl.id} info={{ title: pl.title, scenes: pl.items.length }} />}
         {staff && (
           <div className="flex gap-2">
             <Button

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { combine, formatDate, formatTime, isoDay, parseDate, parseTime } from "./date-input";
+import { combine, defaultKickoff, formatDate, formatTime, isoDay, parseDate, parseTime } from "./date-input";
 
 describe("date and time as written in Switzerland (L16)", () => {
   const today = new Date(2026, 10, 16);
@@ -35,5 +35,18 @@ describe("date and time as written in Switzerland (L16)", () => {
     expect(combine("16.11.2026", "", today)).toBeNull();
     expect(isoDay("6.1.2027")).toBe("2027-01-06");
     expect(isoDay("x")).toBe("");
+  });
+});
+
+describe("defaultKickoff", () => {
+  it("during the day: the last full hour, never the current minute", () => {
+    expect(defaultKickoff(new Date(2026, 10, 17, 14, 23))).toEqual({ day: "17.11.2026", clock: "14:00" });
+    expect(defaultKickoff(new Date(2026, 10, 17, 21, 40))).toEqual({ day: "17.11.2026", clock: "21:00" });
+  });
+
+  it("at night and early in the morning: last evening's match", () => {
+    expect(defaultKickoff(new Date(2026, 10, 17, 8, 59))).toEqual({ day: "16.11.2026", clock: "18:00" });
+    expect(defaultKickoff(new Date(2026, 10, 17, 0, 57))).toEqual({ day: "16.11.2026", clock: "18:00" });
+    expect(defaultKickoff(new Date(2026, 11, 1, 3, 0))).toEqual({ day: "30.11.2026", clock: "18:00" });
   });
 });

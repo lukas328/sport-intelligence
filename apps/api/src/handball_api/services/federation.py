@@ -216,8 +216,9 @@ async def invite(ctx: Ctx, federation_id: uuid.UUID, email: str) -> dict[str, An
     await ctx.db.flush()
     await disable_system_access(ctx.db)
     link = f"{ctx.settings.web_base_url.rstrip('/')}/federation/join?token={token}"
-    # the invite stays valid when the mail fails (logged)
-    await try_send(
+    # the invite stays valid when the mail fails (logged); without mail delivery the federation
+    # gets the link to pass on itself (L2)
+    sent = ctx.settings.mail_delivers and await try_send(
         ctx.email,
         Email(
             to=email,
@@ -238,7 +239,7 @@ async def invite(ctx: Ctx, federation_id: uuid.UUID, email: str) -> dict[str, An
         federation_id=str(f.id),
     )
     await audit.record(ctx, "federation.invited", target_type="federation", target_id=f.id)
-    return {"email": inv.email, "expires_at": inv.expires_at}
+    return {"email": inv.email, "expires_at": inv.expires_at, "link": link, "mailed": sent}
 
 
 async def remove_member(ctx: Ctx, federation_id: uuid.UUID, org_id: uuid.UUID) -> None:

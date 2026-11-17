@@ -237,7 +237,18 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
   return (
     <div>
       <AreaSubNav />
-      <PageHeader eyebrow={kick} title={title} />
+      {/* what to train next comes from the analysis: the tips sit with the season (K21) */}
+      <PageHeader
+        eyebrow={kick}
+        title={title}
+        actions={
+          staff ? (
+            <Link href={`${base}/season/tips`} className={buttonClass("secondary")} data-testid="season-tips">
+              {ts("tipsAction")}
+            </Link>
+          ) : null
+        }
+      />
       {/* the record in words for screen readers and the flows; the figure above is its short form */}
       <dl className="sr-only" data-testid="season-record">
         {([["won", wins], ["draw", draws], ["lost", losses]] as const).map(([k, v]) => (
@@ -283,10 +294,9 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
                 ))}
               </ul>
             )}
-            {/* what repeats is what to train: the tips from the analysis are one step away, also
-                while Teamleben (where the training page sits) is off (K21) */}
+            {/* what repeats is what to train: the tips from the analysis are one step away (K21) */}
             {staff && rows.length > 0 && (
-              <Link href={`${base}/training`} className={cn(linkClass, "mt-2 inline-flex min-h-11 items-center text-[15px]")} data-testid="season-training-tips">
+              <Link href={`${base}/season/tips`} className={cn(linkClass, "mt-2 inline-flex min-h-11 items-center text-[15px]")} data-testid="season-training-tips">
                 {ts("trainingTips")}
               </Link>
             )}

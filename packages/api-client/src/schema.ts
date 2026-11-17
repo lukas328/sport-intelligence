@@ -7539,6 +7539,10 @@ export interface components {
              * Format: date-time
              */
             expires_at: string;
+            /** Link */
+            link: string;
+            /** Mailed */
+            mailed: boolean;
         };
         /** InvoiceOrder */
         InvoiceOrder: {

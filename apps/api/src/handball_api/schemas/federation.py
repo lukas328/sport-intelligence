@@ -40,6 +40,10 @@ class InviteIn(ApiModel):
 class InviteOut(ApiModel):
     email: str
     expires_at: datetime
+    # the link for the federation to pass on itself (chat, its own mail) when no mail went out
+    # (`mailed` false, finding L2)
+    link: str
+    mailed: bool
 
 
 class JoinIn(ApiModel):

@@ -3,7 +3,7 @@
 import { Check, Copy, Download, Image as ImageIcon, MessageCircle, Share2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useFormatter, useTranslations } from "next-intl";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Button, buttonClass, type ButtonVariant } from "@/components/ui/button";
 import { Alert } from "@/components/ui/card";
 import { Dialog } from "@/components/ui/dialog";
@@ -11,7 +11,7 @@ import { control } from "@/components/ui/field";
 import { api } from "@/lib/client";
 import { errorKey } from "@/lib/errors";
 import { blockedReason, DEFAULT_DAYS, EXPIRY_DAYS, liveLink, reasonFromProblem, type ShareOptions, type ShareReason } from "@/lib/share/policy";
-import { chatText, shareUrl, whatsappHref, type ShareKind, type T } from "@/lib/share/text";
+import { chatText, shareUrl, whatsappHref, type ShareInfo, type ShareKind, type T } from "@/lib/share/text";
 import { cn } from "@/lib/utils";
 
 interface Link {
@@ -43,11 +43,14 @@ export function ShareButton({
   open: controlled,
   onOpenChange,
   trigger,
+  info,
 }: {
   orgId: string;
   teamId: string;
   kind: ShareKind;
   targetId: string;
+  /** what the page already knows (title, opponent, score): the chat text stands at once */
+  info?: Omit<ShareInfo, "kind">;
   /** the match of a match report: offers the Spielkarte too */
   matchId?: string;
   label?: string;
@@ -78,12 +81,12 @@ export function ShareButton({
         )
       }
     >
-      {open && <SharePanel orgId={orgId} teamId={teamId} kind={kind} targetId={targetId} matchId={matchId ?? (kind === "match" ? targetId : undefined)} />}
+      {open && <SharePanel orgId={orgId} teamId={teamId} kind={kind} targetId={targetId} matchId={matchId ?? (kind === "match" ? targetId : undefined)} info={info} />}
     </Dialog>
   );
 }
 
-function SharePanel({ orgId, teamId, kind, targetId, matchId }: { orgId: string; teamId: string; kind: ShareKind; targetId: string; matchId?: string | undefined }) {
+function SharePanel({ orgId, teamId, kind, targetId, matchId, info }: { orgId: string; teamId: string; kind: ShareKind; targetId: string; matchId?: string | undefined; info?: Omit<ShareInfo, "kind"> | undefined }) {
   const t = useTranslations("share");
   const te = useTranslations("errors");
   const router = useRouter();
@@ -190,7 +193,7 @@ function SharePanel({ orgId, teamId, kind, targetId, matchId }: { orgId: string;
         </div>
       )}
       {state === "ready" && link?.token && (
-        <ReadyLink link={link} kind={kind} reused={reused} busy={busy} onRevoke={() => void revoke()} />
+        <ReadyLink link={link} kind={kind} info={info} reused={reused} busy={busy} onRevoke={() => void revoke()} />
       )}
       {said && (
         <p role="status" className="text-[15px] text-ink-2">
@@ -204,16 +207,19 @@ function SharePanel({ orgId, teamId, kind, targetId, matchId }: { orgId: string;
   );
 }
 
-function ReadyLink({ link, kind, reused, busy, onRevoke }: { link: Link; kind: ShareKind; reused: boolean; busy: boolean; onRevoke: () => void }) {
+function ReadyLink({ link, kind, info, reused, busy, onRevoke }: { link: Link; kind: ShareKind; info?: Omit<ShareInfo, "kind"> | undefined; reused: boolean; busy: boolean; onRevoke: () => void }) {
   const t = useTranslations("share");
   const root = useTranslations() as unknown as T;
   const format = useFormatter();
   const url = shareUrl(window.location.origin, link.token!);
-  const [text, setText] = useState<string>("");
+  // at once from what the page knows; the preview of the link (what the chat will show) refines
+  // it, unless the coach has started to write
+  const [text, setText] = useState<string>(() => (info?.title || info?.opponent ? chatText(root, { kind, ...info }) : ""));
+  const edited = useRef(false);
   useEffect(() => {
     let live = true;
     void api.GET("/v1/share/{token}/preview", { params: { path: { token: link.token! } } }).then(({ data }) => {
-      if (!live) return;
+      if (!live || edited.current || !data) return;
       setText(
         chatText(root, {
           kind,
@@ -239,7 +245,7 @@ function ReadyLink({ link, kind, reused, busy, onRevoke }: { link: Link; kind: S
       </label>
       <label className="flex flex-col gap-1 text-[0.9375rem] font-semibold">
         {t("textLabel")}
-        <textarea value={text} onChange={(e) => setText(e.target.value)} rows={2} className={cn(control, "min-h-[4.5rem] resize-y py-2 font-normal")} data-testid="share-text" />
+        <textarea value={text} onChange={(e) => ((edited.current = true), setText(e.target.value))} rows={2} className={cn(control, "min-h-[4.5rem] resize-y py-2 font-normal")} data-testid="share-text" />
       </label>
       <ShareActions url={url} text={text} />
       <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[15px] text-ink-2" data-testid="share-status">

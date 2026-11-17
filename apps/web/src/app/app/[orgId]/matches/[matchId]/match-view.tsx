@@ -34,6 +34,7 @@ import dynamic from "next/dynamic";
 import { Button, buttonClass } from "@/components/ui/button";
 import { Input, Select } from "@/components/ui/field";
 import { api } from "@/lib/client";
+import { isMatchDay } from "@/lib/match-day";
 import { cn } from "@/lib/utils";
 import { useOpponentName } from "@/lib/opponent";
 import { formatClock } from "@/lib/format";
@@ -240,9 +241,10 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
     if (!linkedView.current && !new URLSearchParams(window.location.search).get("t")) setViewState(main || hasEvents || ahead ? "game" : "video");
   }, [stats.data, main, hasEvents, match.kickoff_at]);
   const pendingVideos = match.videos.filter((v) => v.status !== "ready");
-  const kickoff = new Date(match.kickoff_at);
-  const soon = kickoff.getTime() > Date.now() - 3 * 3600_000;
-  const liveFirst = staff && match.score_own == null && !main && soon && match.source !== "paper_report";
+  // «Spieltag starten» up front only on match day (from three hours before the kick-off); days
+  // before it is a quiet action in the menu and below the opponent
+  const matchDay = isMatchDay(match.kickoff_at);
+  const liveFirst = staff && match.score_own == null && !main && matchDay && match.source !== "paper_report";
   const uploadFirst = staff && !main && !liveFirst && match.source !== "paper_report";
   // the progress of the uploads and the processing (K13, B4): the API's view, with the uploads of
   // this tab laid over; shown while it runs, and when something failed
@@ -406,7 +408,15 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
               </Button>
             )}
             {/* before the match there is no report to share yet (UX test A05) */}
-            {staff && !upcoming && <ShareButton orgId={orgId} teamId={match.team_id} kind="match" targetId={match.id} />}
+            {staff && !upcoming && (
+              <ShareButton
+                orgId={orgId}
+                teamId={match.team_id}
+                kind="match"
+                targetId={match.id}
+                info={{ title: oppName(match), team: own, opponent: oppName(match), score: match.score_own != null && match.score_opponent != null ? [match.score_own, match.score_opponent] : null }}
+              />
+            )}
             <MenuRoot>
               {/* a word, not only the dots (UX test H09) */}
               <MenuTrigger className={buttonClass("secondary")} data-testid="match-menu">
@@ -608,7 +618,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
                 <h2 className="text-[26px]">{ta("beforeTitle")}</h2>
                 <p className="m-0 max-w-[60ch] text-[17px]">{ta("beforeText")}</p>
                 {staff && (
-                  <Link href={`${base}/matchday`} className={buttonClass("primary")} data-testid="before-matchday">
+                  <Link href={`${base}/matchday`} className={buttonClass(matchDay ? "primary" : "secondary")} data-testid="before-matchday">
                     <Radio aria-hidden />
                     {t("live.open")}
                   </Link>

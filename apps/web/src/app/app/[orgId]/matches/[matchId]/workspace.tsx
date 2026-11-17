@@ -775,7 +775,7 @@ export function Workspace({
                     {c.title}
                   </button>
                   {/* one scene as a link for the team chat (K20) */}
-                  {staff && <ShareButton orgId={orgId} teamId={match.team_id} kind="scene" targetId={c.id} trigger={<Button size="icon-sm" variant="ghost" aria-label={t("share.dialogTitle", { kind: "scene" })} data-testid="clip-share"><Share2 aria-hidden /></Button>} />}
+                  {staff && <ShareButton orgId={orgId} teamId={match.team_id} kind="scene" targetId={c.id} info={{ title: c.title ?? "" }} trigger={<Button size="icon-sm" variant="ghost" aria-label={t("share.dialogTitle", { kind: "scene" })} data-testid="clip-share"><Share2 aria-hidden /></Button>} />}
                 </li>
               ))}
             </ul>
