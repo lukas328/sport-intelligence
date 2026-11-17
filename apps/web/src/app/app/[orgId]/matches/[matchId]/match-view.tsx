@@ -9,15 +9,12 @@ import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, 
 import Link from "next/link";
 import { ArrowLeftRight, Check, ChevronDown, ChartNoAxesColumn, Clapperboard, FileDown, Hand, MoreHorizontal, Pencil, Plus, Radio, Shield, Trash2, Upload } from "lucide-react";
 import { useRosterNames } from "@/components/analysis/tagger";
-import { KitFields } from "@/components/domain/kit-fields";
-import { AttendancePanel } from "@/components/team/attendance-panel";
 import { DEFAULT_CLUB, matchStyle } from "@/lib/color";
 import { markOpened } from "@/lib/fresh-match";
 import { checkCount, goalRuns, useMatchGraphics } from "@/lib/graphics";
 import { ownName } from "@/lib/own-name";
 import { ThreeThingsView } from "@/components/anlauf/three-things-view";
 import { MatchHead } from "./match-head";
-import { NextOpponent } from "@/app/app/[orgId]/teams/[teamId]/matches/start-view";
 import { AskColour } from "./ask-colour";
 import { MatchZones } from "./match-graphics";
 import { VideoStage } from "./video-stage";
@@ -38,8 +35,6 @@ import { Button, buttonClass } from "@/components/ui/button";
 import { Input, Select } from "@/components/ui/field";
 import { api } from "@/lib/client";
 import { cn } from "@/lib/utils";
-import { UploadPanel } from "./upload-panel";
-import { Workspace } from "./workspace";
 import { useOpponentName } from "@/lib/opponent";
 import { formatClock } from "@/lib/format";
 import { coverage } from "@/lib/match-workflow";
@@ -47,15 +42,22 @@ import { MyScenesLine, TeamFeedView } from "./feed-views";
 import { officialGoalsKey } from "./official-goals";
 import { PartsLine, PartsPanel, usePartMarkers } from "./parts-panel";
 import { latestJobs, partsOf, timelineVideo } from "@/lib/video-parts";
-import { ProgressPanel } from "@/components/progress/progress-panel";
 import { isActive, progressKey, useProgress, withLocal } from "@/lib/progress";
 import { useLocalUploads } from "@/lib/upload-store";
 import { storedUploadIds } from "@/lib/upload";
-import { KnownFacts } from "./known-facts";
-import { AttachmentsPanel } from "./attachments-panel";
 
 // Loaded when shown, so the match page stays within the bundle budget (scripts/check-bundle.mjs).
 // Keepers and running distances sit deep in the Zahlen tab.
+// panels that only show in some states load on demand in the browser (bundle budget,
+// scripts/check-bundle.mjs; rendered on the server their useId values did not match)
+const Workspace = dynamic(() => import("./workspace").then((m) => m.Workspace), { ssr: false, loading: () => <Skeleton className="h-64" /> });
+const KitFields = dynamic(() => import("@/components/domain/kit-fields").then((m) => m.KitFields), { ssr: false });
+const NextOpponent = dynamic(() => import("@/app/app/[orgId]/teams/[teamId]/matches/start-view").then((m) => m.NextOpponent), { ssr: false });
+const AttendancePanel = dynamic(() => import("@/components/team/attendance-panel").then((m) => m.AttendancePanel), { ssr: false });
+const UploadPanel = dynamic(() => import("./upload-panel").then((m) => m.UploadPanel), { ssr: false });
+const ProgressPanel = dynamic(() => import("@/components/progress/progress-panel").then((m) => m.ProgressPanel), { ssr: false });
+const KnownFacts = dynamic(() => import("./known-facts").then((m) => m.KnownFacts), { ssr: false });
+const AttachmentsPanel = dynamic(() => import("./attachments-panel").then((m) => m.AttachmentsPanel), { ssr: false });
 const KeepersView = dynamic(() => import("./m5-views").then((m) => m.KeepersView));
 const PhysicalView = dynamic(() => import("./m5-views").then((m) => m.PhysicalView));
 // the Zahlen tab, the highlights, the match-day marks and the exchange: not on the first screen

@@ -2014,7 +2014,7 @@
    "timed": true
   },
   "versions": {
-   "metrics": "0.6.0",
+   "metrics": "0.6.1",
    "xg": "prior-1"
   }
  }
