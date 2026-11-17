@@ -779,6 +779,7 @@ def _run_learned(
                     "camera": view["camera"],
                     "motion": obs.motion.stats,
                     "ball_model_status": ball_status,
+                    "observe_counters": getattr(obs, "counters", {}),
                 },
                 "formations": [],
                 "scoreboard": overlay,
