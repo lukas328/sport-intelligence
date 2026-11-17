@@ -6,6 +6,26 @@ Dauer, Kosten, Auffälligkeiten). Vor dem Commit `git pull --rebase`, danach pus
 
 ## Offen
 
+### 13. Laufzeit und Kosten der Produkt-Analyse auf einer T4, 2026-11-17 (Integrations-Sitzung)
+- Wozu: Entscheid GPU-Verarbeitung (Plan `docs/plans/produkt-analyse-integration.md` Schritte 3 und
+  4). Die CPU-Kette braucht 4.4 x Videolänge (Plan Abschnitt 4); gesucht sind die Zeiten pro Stufe
+  auf einer T4 mit und ohne Ballnetze und daraus die Kosten pro 60-Minuten-Spiel.
+- Was läuft: `ml/integration/profile_variants.py` (der echte `run_analysis` mit lokalen Attrappen
+  für S3 und API) auf 5 Minuten von AT_Cup_Feldkirch_Bregenz_2021 (`handball-segs-l10`), fünf
+  Einstellungen nacheinander (cuda_image, cuda_ball_ens, cuda_ball_hrp1, cuda_ball_ens_lean,
+  cpu_image) plus Kurzmessung der Ballnetze (fp32/fp16, Stapel 1/4/8). Die Ballnetze werden im
+  Container aus `handball-ball-hrmodels` nach ONNX exportiert. Testphase: hr1/hrp1 enthalten
+  DeepSport, hier wird nur gemessen.
+- Befehl: `modal run --detach ml/gpu/profile_gpu.py --minutes 5 --tag game1`
+- Fortsetzbar: jede fertige Einstellung liegt auf dem Volume `handball-gpu-out`
+  (`handball-gpu-profile-game1/`); derselbe Befehl setzt fort. `--budget-min 90` hält vor einer
+  weiteren Einstellung an, wenn 90 Minuten verbraucht sind.
+- Erwartet: etwa 1 h auf einer T4, rund 0.70 USD (Obergrenze mit Budget: 1.5 h, etwa 1 USD).
+- Ergebnis: Kaggle-Dataset `handball-gpu-profile-game1` (summary.json, je Einstellung ein JSON,
+  bench_nets.json). Die Integrations-Sitzung holt es ab und trägt die Zahlen in den Plan ein.
+- Bei "budget"/"spend limit" abbrechen und melden.
+
+
 Gemeinsam für 3 bis 10: OWLv2 wie Auftrag 2, Rechnung mit den gemessenen ~210 s pro Segment auf
 einer T4 (inkl. Download) und 0.66 USD/h (7.23 USD für 11.0 h). `--budget-h 10` lässt Luft bis 11 h
 für den Upload. Jeder Auftrag ist für sich, sie dürfen parallel laufen (Modal-Ausgabenlimit für

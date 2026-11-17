@@ -864,3 +864,13 @@ def test_ball_net_from_bucket_with_checksum(tmp_path: Path) -> None:
     assert analysis.load_ball_net(JobSettings(ball_model=key), s3) == (None, "sha_missing")
     nokey = JobSettings(ball_model="models/ball/x.onnx", ball_model_sha256=sha)
     assert analysis.load_ball_net(nokey, s3) == (None, "missing")
+
+
+def test_ball_path_file(tmp_path: Path) -> None:
+    rows = np.array([[0.0, 100.0, 200.0, 0.9], [40.0, 104.0, 199.0, 0.8]], np.float32)
+    result: Any = SimpleNamespace(ball_rows=rows)
+    assert analysis.write_ball_path(result, tmp_path) == 2
+    back = np.frombuffer((tmp_path / "ball.bin").read_bytes(), "<f4").reshape(-1, 4)
+    assert np.array_equal(back, rows)
+    none: Any = SimpleNamespace(ball_rows=None)
+    assert analysis.write_ball_path(none, tmp_path / "x") == 0

@@ -168,6 +168,16 @@ def load_embedder(settings: JobSettings) -> Embedder | None:
 CHUNK_MS = 30_000
 
 
+def write_ball_path(result: AnalysisResult, out: Path) -> int:
+    """The ball net's path as `ball.bin` (little-endian float32 rows t_ms, x, y in proxy frame
+    pixels, confidence); the number of rows (0: no ball net path, no file)."""
+    rows = result.ball_rows
+    if rows is None or not len(rows):
+        return 0
+    (out / "ball.bin").write_bytes(np.asarray(rows, "<f4").tobytes())
+    return len(rows)
+
+
 def write_chunks(result: AnalysisResult, out: Path) -> int:
     rows = np.array(
         [[round(p.frame * 1000 / result.fps), p.track_id, p.x, p.y] for p in result.points],
@@ -805,6 +815,7 @@ def _run_learned(
         out.mkdir()
         result.write_parquet(out / "tracks.parquet")
         chunks = write_chunks(result, out)
+        ball_rows = write_ball_path(result, out)
         upload_dir(s3, settings.s3_bucket_artifacts, out, prefix + "analysis/")
         payload: dict[str, Any] = {
             **view,
@@ -829,6 +840,7 @@ def _run_learned(
             "events": events_payload(result, side_hint),
             "scoreboard": overlay,
             "goal_candidates": goals,
+            "ball_path": {"file": "ball.bin", "rows": ball_rows} if ball_rows else None,
         }
         rep.succeed(payload)
         log.info(

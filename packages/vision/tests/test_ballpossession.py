@@ -158,3 +158,20 @@ def test_yolox_path_says_its_model() -> None:
     obs, result = _observed()
     out = bp.from_observations(obs, result)
     assert out is not None and out["ball_model"] == "yolox"
+
+
+def test_ball_net_path_rows_for_storage() -> None:
+    obs, result = _observed()
+    out = bp.from_observations(_with_ball_net(obs), result, play=[(0, 6000)])
+    assert out is not None
+    rows = out["path_rows"]
+    assert rows.dtype == np.float32 and rows.shape[1] == 4
+    assert len(rows) > 100
+    # times in ms at 25 fps, inside play, frame pixels near the true ball, confidence 0..1
+    assert rows[:, 0].max() <= 6000 + 40
+    assert np.all((rows[:, 3] >= 0) & (rows[:, 3] <= 1))
+    first = rows[rows[:, 0] == 0]
+    assert len(first) == 0 or abs(first[0, 1] - 100) < 12
+    # the YOLOX path keeps no rows
+    plain, result2 = _observed()
+    assert "path_rows" not in (bp.from_observations(plain, result2) or {})
