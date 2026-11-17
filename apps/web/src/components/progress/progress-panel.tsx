@@ -84,7 +84,9 @@ export function ProgressPanel({
           ))}
         </ol>
         {/* a stopped upload does not go on by itself: no «läuft von selbst weiter» then */}
-        {isActive(p) && p.state !== "interrupted" && <p className="m-0 mt-4 max-w-[60ch] text-[15px] text-ink-2" data-testid="may-close">{t("mayClose")}</p>}
+        {/* nor while a file is still being sent from the browser: closing the window stops it (the
+            upload panel says so) */}
+        {isActive(p) && p.state !== "interrupted" && p.stage !== "upload" && <p className="m-0 mt-4 max-w-[60ch] text-[15px] text-ink-2" data-testid="may-close">{t("mayClose")}</p>}
       </div>
       {aside && <div className="min-w-0 space-y-8">{aside}</div>}
     </section>

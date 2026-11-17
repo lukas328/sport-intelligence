@@ -126,7 +126,7 @@ function Editor({ orgId, item }: { orgId: string; item: Mine }) {
       {p?.active && url && (
         <p className="text-sm">
           {t("link")}{" "}
-          <a className="break-all font-medium text-accent hover:underline" href={url}>{url}</a> · {t("views", { n: p.views })}
+          <a className="break-all font-medium text-accent underline decoration-[1.5px] underline-offset-4" href={url}>{url}</a> · {t("views", { n: p.views })}
         </p>
       )}
     </section>

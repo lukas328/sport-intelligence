@@ -154,7 +154,7 @@ export function VideoOverview({
                     </ul>
                     {rows.length === 0 && <p className="text-sm text-muted">{t("noneFiltered")}</p>}
                     {rows.length > 8 && (
-                      <button type="button" className="text-sm font-medium text-accent hover:underline" onClick={() => setShowAll((v) => !v)}>
+                      <button type="button" className="text-sm font-medium text-accent underline decoration-[1.5px] underline-offset-4" onClick={() => setShowAll((v) => !v)}>
                         {showAll ? t("showLess") : t("showAll", { n: rows.length })}
                       </button>
                     )}
@@ -164,7 +164,7 @@ export function VideoOverview({
             </div>
           </>
         )}
-        <button type="button" onClick={onPhysical} className="text-sm font-semibold text-accent hover:underline">
+        <button type="button" onClick={onPhysical} className="text-sm font-semibold text-accent underline decoration-[1.5px] underline-offset-4">
           {t("physical")}
         </button>
       </Sheet>

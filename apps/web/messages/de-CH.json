@@ -1419,7 +1419,8 @@
     "allMatches": "Alle Spiele im Detail",
     "unknownPlayer": "Nicht zugeordnet",
     "xgNote": "xG: erwartete Tore, geschätzt aus Wurfposition und Situation.",
-    "formLast": "{n, plural, one {Das letzte Spiel.} other {Die letzten # Spiele, das neueste rechts.}}"
+    "formLast": "{n, plural, one {Das letzte Spiel.} other {Die letzten # Spiele, das neueste rechts.}}",
+    "emptyText": "Mit jedem Spiel wächst hier die Saison: Resultate, was sich wiederholt und wer trifft. Leg dein erstes Spiel an und lade das Video hoch."
   },
   "notifications": {
     "title": "Mitteilungen",
@@ -3100,7 +3101,8 @@
     "notFound": "Team nicht gefunden oder ausserhalb der Schweiz?",
     "manual": "Verein von Hand anlegen",
     "showAll": "Alle {n} Teams von {club} zeigen",
-    "claiming": "Wir holen Spiele, Kader und Tabelle von handball.ch. Das dauert etwa 15 Sekunden."
+    "claiming": "Wir holen Spiele, Kader und Tabelle von handball.ch. Das dauert etwa 15 Sekunden.",
+    "searching": "Suche bei handball.ch läuft."
   },
   "official": {
     "eyebrow": "Offizielle Daten",
@@ -3758,7 +3760,10 @@
     "chipNumber": "Nummer {n}",
     "emptyTitle": "Lade ein Video hoch, dann siehst du hier deine Szenen.",
     "emptyText": "Nach der Analyse ist jedes Tor, jeder Wurf und jeder Ballverlust eine Szene. Du suchst sie mit einem Satz und stellst sie zu Sammlungen zusammen.",
-    "emptyPlays": "Spielzüge zeichnen geht schon jetzt:"
+    "emptyPlays": "Spielzüge zeichnen geht schon jetzt:",
+    "runningTitle": "Die Analyse läuft. Danach stehen hier deine Szenen.",
+    "runningText": "Jedes Tor, jeder Wurf und jeder Ballverlust wird eine Szene. Wie weit die Analyse ist, steht oben auf jeder Seite.",
+    "runningOpen": "Spiel ansehen"
   },
   "teamPage": {
     "kick": "{team} · {source}",
@@ -3876,7 +3881,8 @@
     "uploadVideo": "Video hochladen",
     "noAnalysisYet": "noch keine Analyse",
     "noVideoShort": "kein Video",
-    "dataReport": "aus dem Spielbericht"
+    "dataReport": "aus dem Spielbericht",
+    "trainingTips": "Trainingstipps dazu"
   },
   "numbersTab": {
     "intro": "Tore, 7 m und 2 Minuten aus Spielbericht und Video, Würfe und Paraden aus den markierten Ereignissen.",
@@ -4139,7 +4145,7 @@
     "hint_dates_player": "Hier stehen die Trainings und Spiele deines Teams. Sag zu oder ab, damit dein Trainer planen kann.",
     "hint_dates_family": "Hier stehen die Trainings und Spiele deines Kindes.",
     "hint_plan_title": "Training",
-    "hint_plan_staff": "Plan deine Einheiten mit Übungen und Dauer. Nur du und deine Co-Trainer sehen den Plan.",
+    "hint_plan_staff": "Tipps aus euren Spielen mit passenden Übungen. Mit einem Klick wird daraus eine Einheit. Nur du und deine Co-Trainer sehen den Plan.",
     "hint_plan_player": "Hier plant dein Trainer die Einheiten.",
     "hint_plan_family": "Hier plant der Trainer die Einheiten.",
     "hint_assignments_title": "Aufgaben",
@@ -4162,7 +4168,7 @@
   "nextSteps": {
     "title": "So geht es weiter",
     "videoTitle": "Lade dein erstes Video hoch",
-    "videoText": "Etwa 40 Minuten danach bekommst du die drei Dinge und alle Szenen.",
+    "videoText": "Danach bekommst du die drei Dinge und alle Szenen. Wie weit die Analyse ist, steht oben auf jeder Seite.",
     "videoAction": "Video hochladen",
     "coachTitle": "Lade deinen Co-Trainer ein",
     "coachText": "Er sieht und bearbeitet alles im Team, nur nicht Verein und Abo.",

@@ -56,7 +56,7 @@ export default function ForgotPage() {
           </Button>
         </form>
       )}
-      <Link href="/login" className="text-sm font-medium text-accent hover:underline">
+      <Link href="/login" className="text-sm font-medium text-accent underline decoration-[1.5px] underline-offset-4">
         {t("auth.toLogin")}
       </Link>
     </div>

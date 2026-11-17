@@ -540,7 +540,7 @@ export function PlayEditor({
           </div>
         )}
         {source && (
-          <a className="block text-sm font-medium text-accent hover:underline" href={`/app/${orgId}/matches/${source.match_id}?t=${source.t_ms}`}>
+          <a className="block text-sm font-medium text-accent underline decoration-[1.5px] underline-offset-4" href={`/app/${orgId}/matches/${source.match_id}?t=${source.t_ms}`}>
             {t("openSource")}
           </a>
         )}

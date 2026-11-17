@@ -347,7 +347,7 @@ async def public(ctx: Ctx, token: str) -> dict[str, Any]:
                         # Taktik and the Minifeld per scene); none without a confirmed court
                         "camera": camera,
                         # minute, side and position of the goal: the same title as in the
-                        # app («35:51 Gegentor über rechts aussen», UX test B15)
+                        # app («35:51 Gegentor über aussen rechts», UX test B15)
                         "goal": goal,
                     }
                     if sc

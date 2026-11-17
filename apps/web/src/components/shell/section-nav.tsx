@@ -47,7 +47,8 @@ export function AreaSubNav() {
 const LEAF: Record<string, { parent: Section; title: string; href?: string; older?: boolean }> = {
   playlists: { parent: "collections", title: "library.playlists", href: "collections", older: true },
   presentations: { parent: "collections", title: "library.presentations", href: "collections", older: true },
-  plays: { parent: "scenes", title: "library.plays", href: "scenes", older: true },
+  // the tactics board is current (K23): no «earlier version» line
+  plays: { parent: "scenes", title: "library.plays", href: "scenes" },
   assistant: { parent: "scenes", title: "palette.ask" },
   paper: { parent: "fixtures", title: "paper.photoTitle", href: "matches" },
 };

@@ -126,7 +126,7 @@ export function RegisterForm({
         {t("auth.haveAccount")}{" "}
         <Link
           href={invitationToken ? `/login?next=/invite/${invitationToken}` : "/login"}
-          className="font-medium text-accent hover:underline"
+          className="font-medium text-accent underline decoration-[1.5px] underline-offset-4"
         >
           {t("auth.toLogin")}
         </Link>

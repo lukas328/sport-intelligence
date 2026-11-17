@@ -272,8 +272,8 @@ async def _native(ctx: Ctx, collection_id: uuid.UUID) -> Collection:
 
 
 _ZONE_WORDS = {
-    "wing_right": "über rechts aussen",
-    "wing_left": "über links aussen",
+    "wing_right": "über aussen rechts",
+    "wing_left": "über aussen links",
     "back_left": "aus dem Rückraum links",
     "half_left": "aus dem Rückraum links",
     "back_centre": "aus dem Rückraum Mitte",
@@ -287,7 +287,7 @@ _ZONE_WORDS = {
 
 
 def _event_title(event: Event) -> str | None:
-    """A scene made from a goal says what it is: «7:46 Gegentor über rechts aussen» (UX test
+    """A scene made from a goal says what it is: «7:46 Gegentor über aussen rechts» (UX test
     B15; the shared page and the collection show it instead of «Szene»)."""
     if event.type != "shot" or event.outcome != "goal":
         return None

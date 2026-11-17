@@ -1419,7 +1419,8 @@
     "allMatches": "Tous les matchs en détail",
     "unknownPlayer": "Non attribué",
     "xgNote": "xG : buts attendus, estimés d'après la position et la situation du tir.",
-    "formLast": "{n, plural, one {Le dernier match.} other {Les # derniers matchs, le plus récent à droite.}}"
+    "formLast": "{n, plural, one {Le dernier match.} other {Les # derniers matchs, le plus récent à droite.}}",
+    "emptyText": "La saison grandit ici à chaque match : résultats, ce qui se répète et qui marque. Crée ton premier match et charge la vidéo."
   },
   "notifications": {
     "title": "Notifications",
@@ -3100,7 +3101,8 @@
     "notFound": "Équipe introuvable ou hors de Suisse ?",
     "manual": "Créer un club à la main",
     "showAll": "Afficher les {n} équipes de {club}",
-    "claiming": "Nous récupérons matchs, effectif et classement sur handball.ch. Cela prend environ 15 secondes."
+    "claiming": "Nous récupérons matchs, effectif et classement sur handball.ch. Cela prend environ 15 secondes.",
+    "searching": "Recherche sur handball.ch en cours."
   },
   "official": {
     "eyebrow": "Données officielles",
@@ -3758,7 +3760,10 @@
     "chipNumber": "Numéro {n}",
     "emptyTitle": "Télécharge une vidéo, tu verras ensuite tes scènes ici.",
     "emptyText": "Après l'analyse, chaque but, chaque tir et chaque perte de balle est une scène. Tu les cherches avec une phrase et tu les réunis en sélections.",
-    "emptyPlays": "Dessiner des systèmes de jeu, c'est déjà possible :"
+    "emptyPlays": "Dessiner des systèmes de jeu, c'est déjà possible :",
+    "runningTitle": "L'analyse est en cours. Ensuite, tes scènes seront ici.",
+    "runningText": "Chaque but, chaque tir et chaque perte de balle devient une scène. L'avancement de l'analyse s'affiche en haut de chaque page.",
+    "runningOpen": "Voir le match"
   },
   "teamPage": {
     "kick": "{team} · {source}",
@@ -3876,7 +3881,8 @@
     "uploadVideo": "Envoyer la vidéo",
     "noAnalysisYet": "pas encore d'analyse",
     "noVideoShort": "pas de vidéo",
-    "dataReport": "de la feuille de match"
+    "dataReport": "de la feuille de match",
+    "trainingTips": "Conseils d'entraînement à ce sujet"
   },
   "numbersTab": {
     "intro": "Buts, 7 m et 2 minutes de la feuille de match et de la vidéo, tirs et arrêts des événements saisis.",
@@ -4139,7 +4145,7 @@
     "hint_dates_player": "Ici se trouvent les entraînements et matchs de ton équipe. Réponds pour que ton entraîneur puisse planifier.",
     "hint_dates_family": "Ici se trouvent les entraînements et matchs de ton enfant.",
     "hint_plan_title": "Entraînement",
-    "hint_plan_staff": "Planifie tes séances avec exercices et durée. Seuls toi et tes adjoints voient le plan.",
+    "hint_plan_staff": "Des conseils tirés de vos matchs, avec les exercices qui vont avec. Un clic en fait une séance. Seuls toi et tes adjoints voient le plan.",
     "hint_plan_player": "Ici, ton entraîneur planifie les séances.",
     "hint_plan_family": "Ici, l'entraîneur planifie les séances.",
     "hint_assignments_title": "Tâches",
@@ -4162,7 +4168,7 @@
   "nextSteps": {
     "title": "La suite",
     "videoTitle": "Télécharge ta première vidéo",
-    "videoText": "Environ 40 minutes après, tu reçois les trois points et toutes les scènes.",
+    "videoText": "Ensuite, tu reçois les trois points et toutes les scènes. L'avancement de l'analyse s'affiche en haut de chaque page.",
     "videoAction": "Télécharger une vidéo",
     "coachTitle": "Invite ton entraîneur adjoint",
     "coachText": "Il voit et modifie tout dans l'équipe, sauf le club et l'abonnement.",

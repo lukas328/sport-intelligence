@@ -86,7 +86,7 @@ export function LoginForm({ oauth }: { oauth?: ReactNode }) {
               {mode === "password" && (
                 <>
                   <Input label={t("auth.password")} name="password" type="password" autoComplete="current-password" required />
-                  <Link href="/auth/forgot" className="block text-sm font-medium text-accent hover:underline">
+                  <Link href="/auth/forgot" className="block text-sm font-medium text-accent underline decoration-[1.5px] underline-offset-4">
                     {t("auth.forgot")}
                   </Link>
                 </>
@@ -103,7 +103,7 @@ export function LoginForm({ oauth }: { oauth?: ReactNode }) {
           {(mail || mode !== "password") && (
             <button
               type="button"
-              className="text-left font-medium text-accent hover:underline"
+              className="text-left font-medium text-accent underline decoration-[1.5px] underline-offset-4"
               onClick={() => {
                 setError(null);
                 setMode(mode === "password" ? "magic" : "password");
@@ -114,7 +114,7 @@ export function LoginForm({ oauth }: { oauth?: ReactNode }) {
           )}
           <p>
             {t("auth.noAccount")}{" "}
-            <Link href="/register" className="font-medium text-accent hover:underline">
+            <Link href="/register" className="font-medium text-accent underline decoration-[1.5px] underline-offset-4">
               {t("auth.toRegister")}
             </Link>
           </p>

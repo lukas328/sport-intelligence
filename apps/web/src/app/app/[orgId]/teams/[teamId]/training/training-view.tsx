@@ -292,11 +292,11 @@ export function TrainingView({ orgId, teamId, canPlan }: { orgId: string; teamId
           </p>
         )}
         <div className="flex flex-wrap gap-3 text-sm">
-          <a className="font-medium text-accent hover:underline" href={`/v1/orgs/${orgId}/sessions/${s.id}/pdf?lang=${locale}`}>{t("pdf")}</a>
+          <a className="font-medium text-accent underline decoration-[1.5px] underline-offset-4" href={`/v1/orgs/${orgId}/sessions/${s.id}/pdf?lang=${locale}`}>{t("pdf")}</a>
           {canPlan && (
             <>
-              <button type="button" className="font-medium text-accent hover:underline" onClick={() => setEditing(s.id)}>{t("edit")}</button>
-              <button type="button" className="font-medium text-accent hover:underline" onClick={() => setOpen(open === s.id ? null : s.id)}>{t("attendance")}</button>
+              <button type="button" className="font-medium text-accent underline decoration-[1.5px] underline-offset-4" onClick={() => setEditing(s.id)}>{t("edit")}</button>
+              <button type="button" className="font-medium text-accent underline decoration-[1.5px] underline-offset-4" onClick={() => setOpen(open === s.id ? null : s.id)}>{t("attendance")}</button>
               {/* apart from the everyday actions, and asked once: a thumb slip must not delete a unit */}
               <button
                 type="button"

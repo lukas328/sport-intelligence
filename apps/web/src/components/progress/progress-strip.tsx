@@ -74,7 +74,8 @@ export function ProgressStrip({ orgId }: { orgId: string }) {
           aria-live="polite"
           onClick={() => !isActive(p) && close()}
         >
-          <span className="min-w-0 flex-1 truncate">
+          {/* two lines on a phone: the finish time is the point and must not be cut off */}
+          <span className="min-w-0 flex-1 leading-snug max-sm:line-clamp-2 sm:truncate">
             <b className="font-bold">{w.headline(p).endsWith("?") ? w.headline(p) : `${w.headline(p)}:`}</b> {w.matchName(p)}
             {detail.length > 0 && <span className="max-sm:hidden"> · {detail.join(" · ")}</span>}
             {/* on a phone the time comes in a second short part, the rest is in the match */}

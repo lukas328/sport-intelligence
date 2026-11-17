@@ -653,8 +653,9 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
           )}
           <GameActions
             collect={staff && counted && match.opponent ? <FromMatchButton orgId={orgId} teamId={match.team_id} matchId={match.id} opponent={oppName(match)} /> : null}
-            // before the match there is nothing to share yet (UX test A05)
-            onHighlights={upcoming || noGoals ? undefined : () => {
+            // before the match there is nothing to share yet (UX test A05), nor before a goal is
+            // known (open questions alone make no reel, L6)
+            onHighlights={upcoming || noGoals || (graphics.data != null && graphics.data.goals.length === 0) ? undefined : () => {
               if (more.current) more.current.open = true;
               requestAnimationFrame(() => document.getElementById("highlights")?.scrollIntoView({ behavior: "smooth", block: "start" }));
             }}

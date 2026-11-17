@@ -71,7 +71,7 @@ export function NotificationBell({ orgId }: { orgId: string }) {
           <div className="flex items-center justify-between border-b border-border/70 px-4 py-3">
             <p className="font-semibold">{t("title")}</p>
             {unread > 0 && (
-              <button className="text-xs font-medium text-accent hover:underline" onClick={() => read.mutate([])}>
+              <button className="text-xs font-medium text-accent underline decoration-[1.5px] underline-offset-4" onClick={() => read.mutate([])}>
                 {t("markAll")}
               </button>
             )}

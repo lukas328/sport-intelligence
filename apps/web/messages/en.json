@@ -1419,7 +1419,8 @@
     "allMatches": "All matches in detail",
     "unknownPlayer": "Unassigned",
     "xgNote": "xG: expected goals, estimated from shot position and situation.",
-    "formLast": "{n, plural, one {The last match.} other {The last # matches, newest on the right.}}"
+    "formLast": "{n, plural, one {The last match.} other {The last # matches, newest on the right.}}",
+    "emptyText": "The season grows here with every match: results, what repeats and who scores. Create your first match and upload the video."
   },
   "notifications": {
     "title": "Notifications",
@@ -3100,7 +3101,8 @@
     "notFound": "Team not found or outside Switzerland?",
     "manual": "Create a club by hand",
     "showAll": "Show all {n} teams of {club}",
-    "claiming": "We are fetching matches, squad and table from handball.ch. This takes about 15 seconds."
+    "claiming": "We are fetching matches, squad and table from handball.ch. This takes about 15 seconds.",
+    "searching": "Searching handball.ch."
   },
   "official": {
     "eyebrow": "Official data",
@@ -3758,7 +3760,10 @@
     "chipNumber": "Number {n}",
     "emptyTitle": "Upload a video, then you see your scenes here.",
     "emptyText": "After the analysis every goal, every shot and every turnover is a scene. You search them with a sentence and put them together into collections.",
-    "emptyPlays": "Drawing plays works already:"
+    "emptyPlays": "Drawing plays works already:",
+    "runningTitle": "The analysis is running. Your scenes will be here afterwards.",
+    "runningText": "Every goal, shot and turnover becomes a scene. How far the analysis is shows at the top of every page.",
+    "runningOpen": "Open the match"
   },
   "teamPage": {
     "kick": "{team} · {source}",
@@ -3876,7 +3881,8 @@
     "uploadVideo": "Upload video",
     "noAnalysisYet": "no analysis yet",
     "noVideoShort": "no video",
-    "dataReport": "from the match report"
+    "dataReport": "from the match report",
+    "trainingTips": "Training tips for this"
   },
   "numbersTab": {
     "intro": "Goals, 7 m and 2 minutes from the match report and the video, shots and saves from the tagged events.",
@@ -4139,7 +4145,7 @@
     "hint_dates_player": "Here are your team's training sessions and matches. Reply so your coach can plan.",
     "hint_dates_family": "Here are your child's training sessions and matches.",
     "hint_plan_title": "Training",
-    "hint_plan_staff": "Plan your sessions with drills and duration. Only you and your assistant coaches see the plan.",
+    "hint_plan_staff": "Tips from your matches with matching drills. One click turns them into a session. Only you and your assistant coaches see the plan.",
     "hint_plan_player": "Here your coach plans the sessions.",
     "hint_plan_family": "Here the coach plans the sessions.",
     "hint_assignments_title": "Tasks",
@@ -4162,7 +4168,7 @@
   "nextSteps": {
     "title": "What comes next",
     "videoTitle": "Upload your first video",
-    "videoText": "About 40 minutes later you get the three things and all scenes.",
+    "videoText": "Then you get the three things and all scenes. How far the analysis is shows at the top of every page.",
     "videoAction": "Upload video",
     "coachTitle": "Invite your assistant coach",
     "coachText": "They see and edit everything in the team, just not the club and subscription.",
