@@ -874,3 +874,25 @@ def test_ball_path_file(tmp_path: Path) -> None:
     assert np.array_equal(back, rows)
     none: Any = SimpleNamespace(ball_rows=None)
     assert analysis.write_ball_path(none, tmp_path / "x") == 0
+
+
+def test_reid_and_role_models_from_bucket_or_file(tmp_path: Path) -> None:
+    """HB_REID_MODEL / HB_ROLE_MODEL: the image default without the file stays off; a bucket key
+    with its checksum is fetched and loaded; a wrong checksum is not used."""
+    src = _tiny_ball_net(tmp_path / "reid_src.onnx")  # any ONNX model loads for this check
+    sha = analysis._sha256(src)
+    key = f"models/reid/reid-{sha[:12]}.onnx"
+    s3 = _BucketS3({("artifacts", key): src})
+    cache = str(tmp_path / "cache")
+    default = JobSettings(reid_model="/models/reid.onnx", role_model="/models/roles.onnx")
+    assert analysis.load_embedder(default) == (None, "missing")
+    assert analysis.load_role_classifier(default) == (None, "missing")
+    ok = JobSettings(reid_model=key, reid_model_sha256=sha, ball_cache_dir=cache)
+    emb, status = analysis.load_embedder(ok, s3)
+    assert status == "ok" and emb is not None
+    roles = JobSettings(role_model=key, role_model_sha256=sha, ball_cache_dir=cache)
+    clf, status = analysis.load_role_classifier(roles, s3)
+    assert status == "ok" and clf is not None
+    assert s3.downloads == 1  # the same file from the cache
+    bad = JobSettings(reid_model=key, reid_model_sha256="0" * 64, ball_cache_dir=cache)
+    assert analysis.load_embedder(bad, s3) == (None, "sha_mismatch")
