@@ -78,10 +78,45 @@ class LocalReporter:
         }
 
 
-def make_proxy(sources: list[Path], work: Path) -> Path:
-    from handball_worker.config import WorkerSettings
-    from handball_worker.media.transcode import proxy_command
+def _proxy_cmd(src: Path, dst: Path) -> list[str]:
+    """The ingest's proxy command (`handball_worker.media.transcode.proxy_command`, preset of the
+    worker settings); the same arguments written out where the worker package is not installed
+    (the Modal job)."""
+    try:
+        from handball_worker.config import WorkerSettings
+        from handball_worker.media.transcode import proxy_command
 
+        ws = WorkerSettings()
+        cmd = proxy_command(src, dst, ws.ffmpeg, ws.x264_preset)
+        return [c for c in cmd if c not in ("-progress", "pipe:1")]
+    except ImportError:
+        return [
+            shutil.which("ffmpeg") or "ffmpeg",
+            "-hide_banner",
+            "-loglevel",
+            "error",
+            "-nostdin",
+            "-y",
+            "-i",
+            str(src),
+            "-vf",
+            "scale=1280:-2,fps=25",
+            "-an",
+            "-c:v",
+            "libx264",
+            "-preset",
+            "veryfast",
+            "-crf",
+            "26",
+            "-pix_fmt",
+            "yuv420p",
+            "-movflags",
+            "+faststart",
+            str(dst),
+        ]
+
+
+def make_proxy(sources: list[Path], work: Path) -> Path:
     joined = sources[0]
     if len(sources) > 1:
         lst = work / "list.txt"
@@ -89,7 +124,7 @@ def make_proxy(sources: list[Path], work: Path) -> Path:
         joined = work / "joined.mp4"
         subprocess.run(
             [
-                WorkerSettings().ffmpeg,
+                shutil.which("ffmpeg") or "ffmpeg",
                 "-loglevel",
                 "error",
                 "-y",
@@ -107,45 +142,34 @@ def make_proxy(sources: list[Path], work: Path) -> Path:
         )
     out = work / "proxy.mp4"
     t0 = time.perf_counter()
-    ws = WorkerSettings()
-    cmd = [
-        c
-        for c in proxy_command(joined, out, ws.ffmpeg, ws.x264_preset)
-        if c not in ("-progress", "pipe:1")
-    ]
-    subprocess.run(cmd, check=True)
+    subprocess.run(_proxy_cmd(joined, out), check=True)
     print(f"proxy {time.perf_counter() - t0:.1f}s", flush=True)
     return out
 
 
-def main() -> None:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("videos", type=Path, nargs="+")
-    ap.add_argument("--models", type=Path, required=True)
-    ap.add_argument("--transcode", action="store_true")
-    ap.add_argument("--work", type=Path)
-    ap.add_argument("--out", type=Path, required=True)
-    a = ap.parse_args()
+def run_once(video: Path, models: Path, work: Path, overrides: dict | None = None) -> dict:
+    """One run of the analysis job on a proxy video with the CPU-image settings changed by
+    `overrides` (JobSettings fields, e.g. detect_every, ball_model); the stage times and what
+    came out."""
+    import cv2
 
     from handball_gpu_worker import analysis
     from handball_jobkit import JobSettings
 
-    work = a.work or Path(tempfile.mkdtemp(prefix="profile-"))
     work.mkdir(parents=True, exist_ok=True)
-    t0 = time.perf_counter()
-    video = make_proxy(a.videos, work) if a.transcode else a.videos[0]
-    proxy_s = round(time.perf_counter() - t0, 1) if a.transcode else None
     s3root = work / "s3"
     LocalS3(s3root).upload_file(str(video), "media", "proxy.mp4")
     analysis.s3_client = lambda *_, **__: LocalS3(s3root)
-    settings = JobSettings(
-        work_dir=str(work / "jobs"),
-        detector_model=str(a.models / "yolox_s.onnx"),
-        number_det_model=str(a.models / "ch_PP-OCRv4_det_infer.onnx"),
-        number_rec_model=str(a.models / "ch_PP-OCRv4_rec_infer.onnx"),
-        reid_model=str(a.models / "reid.onnx"),
-        role_model=str(a.models / "roles.onnx"),
-    )
+    fields = {
+        "work_dir": str(work / "jobs"),
+        "detector_model": str(models / "yolox_s.onnx"),
+        "number_det_model": str(models / "ch_PP-OCRv4_det_infer.onnx"),
+        "number_rec_model": str(models / "ch_PP-OCRv4_rec_infer.onnx"),
+        "reid_model": str(models / "reid.onnx"),
+        "role_model": str(models / "roles.onnx"),
+        **(overrides or {}),
+    }
+    settings = JobSettings(**fields)
     rep = LocalReporter()
     t1 = time.perf_counter()
     try:
@@ -164,25 +188,48 @@ def main() -> None:
     except Exception as exc:  # report what ran
         result = rep.result or {"error": f"{type(exc).__name__}: {exc}"}
     wall = round(time.perf_counter() - t1, 1)
-    import cv2
-
     cap = cv2.VideoCapture(str(video))
     frames, fps = cap.get(cv2.CAP_PROP_FRAME_COUNT), cap.get(cv2.CAP_PROP_FPS)
     cap.release()
-    out = {
-        "videos": [str(v) for v in a.videos],
+    result = result or {}
+    stats = result.get("stats") or {}
+    return {
         "video_s": round(frames / fps, 1) if fps else None,
         "fps": fps,
-        "settings": {"detect_every": settings.detect_every, "number_every": settings.number_every},
-        "proxy_s": proxy_s,
+        "overrides": overrides or {},
         "wall_s": wall,
         "stage_wall_s": rep.stage_seconds(),
-        "timings_s": (result or {}).get("timings_s"),
-        "needs_calibration": (result or {}).get("needs_calibration"),
-        "calibration_info": (result or {}).get("calibration_info"),
-        "tracks": len((result or {}).get("tracks") or []),
-        "ball": ((result or {}).get("stats") or {}).get("ball"),
-        "error": rep.error or (result or {}).get("error"),
+        "timings_s": result.get("timings_s"),
+        "needs_calibration": result.get("needs_calibration"),
+        "calibration_info": result.get("calibration_info"),
+        "tracks": len(result.get("tracks") or []),
+        "versions": result.get("versions"),
+        "ball_model_status": stats.get("ball_model_status"),
+        "ball": stats.get("ball"),
+        "error": rep.error or result.get("error"),
+    }
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("videos", type=Path, nargs="+")
+    ap.add_argument("--models", type=Path, required=True)
+    ap.add_argument("--transcode", action="store_true")
+    ap.add_argument("--work", type=Path)
+    ap.add_argument("--out", type=Path, required=True)
+    ap.add_argument("--set", nargs="*", default=[], help="JobSettings overrides key=value")
+    a = ap.parse_args()
+
+    work = a.work or Path(tempfile.mkdtemp(prefix="profile-"))
+    work.mkdir(parents=True, exist_ok=True)
+    t0 = time.perf_counter()
+    video = make_proxy(a.videos, work) if a.transcode else a.videos[0]
+    proxy_s = round(time.perf_counter() - t0, 1) if a.transcode else None
+    overrides = dict(kv.split("=", 1) for kv in a.set)
+    out = {
+        "videos": [str(v) for v in a.videos],
+        "proxy_s": proxy_s,
+        **run_once(video, a.models, work, overrides),
     }
     a.out.write_text(json.dumps(out, indent=1, default=str))
     print(json.dumps({k: v for k, v in out.items() if k != "ball"}, indent=1, default=str))
