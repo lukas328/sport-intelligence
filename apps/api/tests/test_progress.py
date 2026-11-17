@@ -231,7 +231,7 @@ async def test_watchdog_restarts_a_silent_job_once_then_ends_it(
 
     await silence(first)
     r = await api.http.post("/internal/watchdog", headers=_token(api))
-    assert r.status_code == 200 and r.json() == {"restarted": 1, "failed": 0}
+    assert r.status_code == 200 and r.json() == {"restarted": 1, "failed": 0, "abandoned": 0}
     second = [j for j in _jobs(api).jobs if j[3].get("asset_id") == video["id"]][-1][2]
     assert second != first
     status = await owner_conn.fetchval(
@@ -249,7 +249,7 @@ async def test_watchdog_restarts_a_silent_job_once_then_ends_it(
     )
     await silence(second)
     r = await api.http.post("/internal/watchdog", headers=_token(api))
-    assert r.json() == {"restarted": 0, "failed": 1}
+    assert r.json() == {"restarted": 0, "failed": 1, "abandoned": 0}
     detail = (await api.get(f"/v1/orgs/{ids['org']}/matches/{m['id']}")).json()
     assert detail["progress"]["state"] == "failed"
     assert (await api.http.post("/internal/watchdog")).status_code in (403, 422)

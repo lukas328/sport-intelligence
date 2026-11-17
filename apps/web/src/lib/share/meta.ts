@@ -25,9 +25,9 @@ export function matchMinute(minute: number | null | undefined): number | null {
   return Math.floor(minute) + 1;
 }
 
-/** «Tor über aussen links», «Gegentor aus Gegenstössen». */
+/** «Tor von aussen links», «Gegentor nach Gegenstoss»: one goal, said as one (second round Q2). */
 export function goalWords(t: T, goal: { team: "own" | "opp"; zone: string | null }): string {
-  const zone = goal.zone ? t(`anlauf.zoneFrom.${goal.zone}`) : "";
+  const zone = goal.zone ? t(`collections.sceneZone.${goal.zone}`) : "";
   return t(goal.team === "opp" ? "share.og.goalAgainst" : "share.og.goalFor", { zone }).trim();
 }
 

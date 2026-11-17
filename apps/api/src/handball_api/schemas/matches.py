@@ -246,6 +246,14 @@ class FileProgressOut(ApiModel):
         default=False, description="this step was restarted once already after it went silent"
     )
     error: str | None = Field(default=None, description="failed: a stable failure code")
+    retry: bool = Field(
+        default=True,
+        description="failed: whether starting the step again can help (not after a timeout on "
+        "the same file, an unreadable or too short file, an abandoned upload)",
+    )
+    limit_s: int | None = Field(
+        default=None, description="failed with timeout: how long the step may compute"
+    )
 
 
 class MatchProgressOut(ApiModel):
@@ -618,7 +626,8 @@ class AnalysisOut(ApiModel):
     )
     hall: HallOut | None = None
     error_code: str | None = Field(
-        default=None, description="calibration, unreadable, too_short, timeout or generic"
+        default=None,
+        description="calibration, unreadable, too_short, timeout, stalled or generic",
     )
 
 
@@ -738,6 +747,29 @@ class GraphicsPartOut(ApiModel):
     analysis: Literal["none", "running", "ready", "failed"] = "none"
 
 
+class CheckNoticeOut(ApiModel):
+    """Why Prüfen asks little or nothing (second round A6, A7): the analysis found too little,
+    or it failed. The web says it in the coach's words with what helps."""
+
+    reason: str = Field(
+        description="found little: camera_motion, no_floor, flat_view, few_people, court "
+        "(court not recognised), no_play; failed: calibration, unreadable, too_short, timeout, "
+        "stalled, generic"
+    )
+    failed: bool = Field(default=False, description="the analysis failed")
+    video_id: uuid.UUID
+    duration_s: float | None = Field(default=None, description="length of that video")
+    limit_s: int | None = Field(
+        default=None, description="timeout: how long the analysis of this video may compute"
+    )
+
+
+class GraphicsFileOut(ApiModel):
+    video_id: uuid.UUID
+    filename: str
+    state: Literal["none", "uploading", "running", "ready", "failed"]
+
+
 class MatchGraphicsOut(ApiModel):
     has_video: bool
     analysis: Literal["none", "running", "ready", "failed"] = Field(
@@ -758,7 +790,21 @@ class MatchGraphicsOut(ApiModel):
         description="the questions of Prüfen, in order: what three things need (the one count)"
     )
     more_checks: list[CheckOut] = Field(
-        default_factory=list, description="lower-ranked goal candidates, offered, not counted"
+        default_factory=list,
+        description="beyond the budget of the main round: further goal moments, questions left "
+        "with «Weiss nicht», what a file that found little proposed; offered, never counted",
+    )
+    notice: CheckNoticeOut | None = Field(
+        default=None, description="why there is little or nothing to ask"
+    )
+    goals_missing: int | None = Field(
+        default=None,
+        description="goals of the final score without a place in the video yet; null without "
+        "a final score",
+    )
+    skipped: int = Field(default=0, description="questions left with «Weiss nicht» this round")
+    files: list[GraphicsFileOut] = Field(
+        default_factory=list, description="every file of the match that is a part of it"
     )
     source: GraphicsSource
     parts: list[GraphicsPartOut] = Field(

@@ -364,7 +364,7 @@ async def _questions_now(ctx: Ctx, items: list[Notification]) -> None:
     """«n Fragen an dich» counts the questions as they are now, from the one source Prüfen, the
     start and the mail use (graphics.open_checks), not as they were when the analysis ended
     (livegang L13). Once none is left the note says so, counts as read and leads to the match."""
-    from handball_api.services.graphics import more_checks, open_checks
+    from handball_api.services.graphics import open_checks
 
     live: dict[str, tuple[int, int] | None] = {}
     for n in items:
@@ -381,11 +381,10 @@ async def _questions_now(ctx: Ctx, items: list[Notification]) -> None:
             if match is None:  # another club's match (row security) or deleted
                 live[mid] = None
                 continue
+            # only the budget of the main round counts (second round A6): what waits behind
+            # «Mehr prüfen» is offered in Prüfen, never rung in the bell
             questions = len(await open_checks(ctx, match))
-            more = len(await more_checks(ctx, match))
-            # as the mail counts them: with none of the most important left, the further moments
-            if questions == 0:
-                questions, more = more, 0
+            more = 0
             live[mid] = (questions, more)
         now = live[mid]
         if now is None:

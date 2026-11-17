@@ -86,7 +86,8 @@ test("two halves in two files: one match, both analysed, one video", async ({ pa
   await list.getByTestId("part-remove").first().click();
   await page.getByRole("button", { name: "Entfernen" }).last().click();
   await expect.poll(async () => (await graphics()).parts.length).toBe(0);
-  await expect(page.getByTestId("parts")).toHaveCount(0);
+  // no list of parts any more; the remaining single file keeps only its «Datei entfernen» (A1)
+  await expect(page.getByTestId("parts")).not.toContainText("Das Spiel in");
 });
 
 test("the list of halves on a phone", async ({ page }, info) => {

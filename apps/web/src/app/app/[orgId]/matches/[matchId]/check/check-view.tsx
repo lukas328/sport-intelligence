@@ -7,6 +7,8 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { type CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRosterNames } from "@/components/analysis/tagger";
+import { AnalysisNotice } from "@/components/analysis/analysis-notice";
+import { personGroups } from "@/lib/check-budget";
 import { VideoPlayer, type PlayerHandle } from "@/components/video/player";
 import type { Homography } from "@/lib/spotlight";
 import { CORNERS, cornersOf, FieldCheck } from "./field-check";
@@ -34,11 +36,18 @@ type Match = Schemas["MatchOut"];
 type Candidate = Schemas["GoalCandidateRow"];
 
 type Track = Schemas["TrackOut"];
-type Question = { kind: "field"; videoId: string; part: number | null; copyFrom: string | null } | { kind: "kickoff"; period: number } | { kind: "goal"; c: Candidate } | { kind: "person"; tr: Track; at: number };
+type Question =
+  | { kind: "field"; videoId: string; part: number | null; copyFrom: string | null }
+  | { kind: "kickoff"; period: number }
+  | { kind: "goal"; c: Candidate }
+  | { kind: "person"; tr: Track; group: Track[]; at: number };
 
-// a person question: own tracks without a name, long enough to recognise someone, at most six
+// a person question: own tracks without a name, long enough to recognise someone; one question per
+// person (the tracks with the same shirt number), at most three (second round A6)
 const PERSON_MIN_MS = 5000;
-const PERSON_MAX = 6;
+const PERSON_MAX = 3;
+// «Mehr prüfen» takes the further questions ten at a time, then offers the next ten
+const MORE_BATCH = 10;
 /** `summary`: how the answer reads in «Beantwortet» when the button's words say too little
  * («Jetzt ist Anwurf» becomes «Video 0:42»), taken at the moment of the tap */
 type Answer = { key: string; label: string; first?: boolean; numeral?: string; summary?: () => string; run: () => Promise<void> };
@@ -127,6 +136,8 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
           const left = (list: Schemas["CheckOut"][]) => list.filter((c) => !skipped.current.has(keyOf(c)) && !seen.current.has(keyOf(c)));
           setAsked({ first: left(g.checks), more: left(g.more_checks ?? []) });
           setDone([]);
+          // a batch of «Mehr prüfen» is done: the next one only when asked for
+          setWantMore(false);
           setVerified(left(g.checks).length === 0);
         } else setVerified(true);
         return g;
@@ -141,12 +152,13 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
   // image's is known, so people are asked only with a fixed camera (E05)
   const people = useMemo<Question[]>(() => {
     if (!main || cal0?.source !== "user_correction" || !analysis.data?.chunk_ms || analysis.data.camera !== "fixed") return [];
-    return (analysis.data.tracks ?? [])
-      .filter((tr) => (tr.team === "home" || tr.team === "home_gk") && !tr.player_id && tr.last_ms - tr.first_ms >= PERSON_MIN_MS && !retired.has(`person:${tr.track_no}`))
-      .sort((a, b) => b.last_ms - b.first_ms - (a.last_ms - a.first_ms))
-      .slice(0, PERSON_MAX)
-      .sort((a, b) => a.first_ms - b.first_ms)
-      .map((tr) => ({ kind: "person" as const, tr, at: tr.first_ms + Math.min(2000, (tr.last_ms - tr.first_ms) / 2) }));
+    const own = (analysis.data.tracks ?? []).filter((tr) => (tr.team === "home" || tr.team === "home_gk") && !tr.player_id);
+    return personGroups(own, PERSON_MIN_MS, PERSON_MAX)
+      .filter((g) => !retired.has(`person:${g[0]!.track_no}`))
+      .map((group) => {
+        const tr = group[0]!;
+        return { kind: "person" as const, tr, group, at: tr.first_ms + Math.min(2000, (tr.last_ms - tr.first_ms) / 2) };
+      });
   }, [analysis.data, cal0, main, retired]);
   const toQuestions = useCallback(
     (list: Schemas["CheckOut"][]): Question[] =>
@@ -168,15 +180,18 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
   const questions = useMemo<Question[]>(() => {
     if (!asked) return [];
     // the further goal moments with «Weiter prüfen», the people in the picture on their own
-    return [...toQuestions(asked.first), ...(wantMore ? toQuestions(asked.more) : []), ...(peopleAsked ?? []).filter((q) => !retired.has(id(q)))];
+    return [...toQuestions(asked.first), ...(wantMore ? toQuestions(asked.more).slice(0, MORE_BATCH) : []), ...(peopleAsked ?? []).filter((q) => !retired.has(id(q)))];
   }, [asked, wantMore, peopleAsked, retired, toQuestions]);
   const moreCount = people.length;
   // goal moments beyond the most important ones: while any is open nothing looks final, «Alles
   // geprüft» only without (third real-video test G1)
   const moreGoals = asked ? toQuestions(asked.more).length : 0;
   const stillOpen = graphics.data ? openMoments(graphics.data) : 0;
-  // the court or a throw-off left with «Weiss nicht»: still open, so never «Alles geprüft»
+  // the court or a throw-off still asked, and what was left with «Weiss nicht» (kept on the
+  // server): never «Alles geprüft» while any is there
   const otherOpen = graphics.data ? graphics.data.checks.filter((c) => c.kind !== "goal").length : 0;
+  const leftOver = graphics.data?.skipped ?? 0;
+  const notice = graphics.data?.notice ?? null;
   const open = questions.filter((q) => !done.includes(id(q)));
   // what was answered in this round, to look at again and change (UX test H12)
   const [answered, setAnswered] = useState<Answered[]>([]);
@@ -264,17 +279,20 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
       throw new Error(p?.detail || p?.title || String(r.response.status));
     }
   };
-  async function identify(tr: Track, playerId: string) {
-    const r = await api.PUT("/v1/orgs/{org_id}/videos/{video_id}/tracks/{track_no}/identity", {
-      params: { path: { org_id: orgId, video_id: main!.id, track_no: tr.track_no } },
-      body: { player_id: playerId, number: null },
-    });
-    must(r);
+  // one answer names every track of the person (the same shirt number), not scene by scene
+  async function identify(group: Track[], playerId: string) {
+    for (const tr of group) {
+      const r = await api.PUT("/v1/orgs/{org_id}/videos/{video_id}/tracks/{track_no}/identity", {
+        params: { path: { org_id: orgId, video_id: main!.id, track_no: tr.track_no } },
+        body: { player_id: playerId, number: null },
+      });
+      must(r);
+    }
     void qc.invalidateQueries({ queryKey: ["analysis", main?.id] });
   }
 
   // a name for the person in the box: the same answer from a button, the list or the keys
-  const personAnswer = (tr: Track, r: (typeof players)[number]): Answer => ({ key: `#${r.jersey_number ?? r.player_id}`, label: `${r.first_name} ${r.last_name}`, run: () => identify(tr, r.player_id) });
+  const personAnswer = (group: Track[], r: (typeof players)[number]): Answer => ({ key: `#${r.jersey_number ?? r.player_id}`, label: `${r.first_name} ${r.last_name}`, run: () => identify(group, r.player_id) });
 
   // a goal already confirmed for the same side inside this question's clip: the same goal again
   // is the likely answer (third real-video test G2)
@@ -285,7 +303,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
       ? // the number the analysis read first, then the squad by number: a tap or the shirt number
         [...(read ? [read] : []), ...players.filter((r) => r !== read && r.jersey_number != null).sort((a, b) => a.jersey_number! - b.jersey_number!)]
           .slice(0, 6)
-          .map((r, i) => ({ ...personAnswer(current.tr, r), numeral: String(r.jersey_number), first: i === 0 && r === read }))
+          .map((r, i) => ({ ...personAnswer(current.group, r), numeral: String(r.jersey_number), first: i === 0 && r === read }))
       : current.kind === "kickoff"
       ? [
           {
@@ -461,12 +479,42 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
       v.pause();
     }
   };
+  // «Weiss nicht» is kept (second round A6): not asked again in this round, waits behind «Mehr
+  // prüfen» and leaves the bell; a person in the picture is only skipped on this screen
   const skip = (q: Question) => {
     if (spotStep) return void pickSpot(spotStep, "unknown");
     if (revisit != null) return setRevisit(null);
     skipped.current.add(id(q));
     next(q);
+    const body = q.kind === "goal" ? { kind: "goal" as const, id: q.c.id } : q.kind === "field" ? { kind: "field" as const, id: q.videoId } : q.kind === "kickoff" ? { kind: "kickoff" as const, period: q.period } : null;
+    if (!body) return;
+    void api.POST("/v1/orgs/{org_id}/matches/{match_id}/checks/skip", { params: { path }, body }).then(() => {
+      void qc.invalidateQueries({ queryKey: ["graphics", match.id] });
+      void qc.invalidateQueries({ queryKey: ["notifications", orgId] });
+    });
   };
+  // «Für dieses Spiel fertig»: every open question left at once, the bell clears; they wait behind
+  // «Mehr prüfen»
+  const [finishing, setFinishing] = useState(false);
+  const [finished, setFinished] = useState(false);
+  async function skipAll() {
+    setFinishing(true);
+    setFailed(null);
+    try {
+      must(await api.POST("/v1/orgs/{org_id}/matches/{match_id}/checks/skip-all", { params: { path } }));
+      setSpotStep(null);
+      setRevisit(null);
+      setWantMore(false);
+      setPeopleAsked(null);
+      setFinished(true);
+      void qc.invalidateQueries({ queryKey: ["notifications", orgId] });
+      await reload(false);
+    } catch (e) {
+      setFailed(e instanceof Error ? e.message : String(e));
+    } finally {
+      setFinishing(false);
+    }
+  }
 
   // keys 1 to 3 answer, 0 is «Weiss nicht» (desktop); a person: type the shirt number, space is
   // «Weiss nicht»
@@ -483,7 +531,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
         buf.timer = window.setTimeout(() => {
           const r = players.find((x) => x.jersey_number === Number(buf.digits));
           buf.digits = "";
-          if (r) void answer(personAnswer(current.tr, r));
+          if (r) void answer(personAnswer(current.group, r));
         }, 600);
         return;
       }
@@ -532,7 +580,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
       <div className={cn("bleed-x", spotStep && "max-md:hidden")}>
         <Strip
           name={own}
-          sub={`${ta("vsShort")} ${oppName} · ${left > 0 ? t("openCount", { n: left, minutes: leftMinutes }) : t("count", { n: total > 0 || wantMore ? total : moreGoals || otherOpen })}`}
+          sub={`${ta("vsShort")} ${oppName} · ${left > 0 ? t("openCount", { n: left, minutes: leftMinutes }) : total > 0 ? t("count", { n: total }) : otherOpen > 0 ? t("count", { n: otherOpen }) : t("noneOpen")}`}
           own={match.score_own}
           opp={match.score_opponent}
         />
@@ -545,10 +593,22 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
         </p>
       ) : !current ? (
         <div className="max-w-[60ch] space-y-4 py-10">
-          {!wantMore && moreGoals > 0 ? (
+          {/* the analysis found too little to ask about: said honestly, with what helps (A6, A7) */}
+          {notice && !wantMore && <AnalysisNotice notice={notice} lead={t("noticeLead")} />}
+          {finished && !wantMore ? (
+            <div className="space-y-4" data-testid="check-finished">
+              <h1 className="text-[40px] md:text-[58px]">{t("finishedTitle")}</h1>
+              <p className="text-[17px] text-ink-2">{moreGoals > 0 ? t("finishedText", { n: moreGoals }) : t("finishedTextNone")}</p>
+              {moreGoals > 0 && (
+                <button type="button" onClick={() => (setVerified(false), setWantMore(true))} className={buttonClass("secondary")} data-testid="check-more">
+                  {t("goOn")}
+                </button>
+              )}
+            </div>
+          ) : !wantMore && moreGoals > 0 ? (
             <div className="space-y-4" data-testid="check-main-done">
-              <h1 className="text-[40px] md:text-[58px]">{t("mainDone")}</h1>
-              <p className="text-[17px] text-ink-2">{t("mainDoneText", { n: moreGoals, minutes: checkMinutes(moreGoals, 0) })}</p>
+              <h1 className="text-[40px] md:text-[58px]">{leftOver > 0 ? t("finishedTitle") : t("mainDone")}</h1>
+              <p className="text-[17px] text-ink-2">{t("mainDoneText", { n: moreGoals, batch: Math.min(moreGoals, MORE_BATCH), minutes: checkMinutes(Math.min(moreGoals, MORE_BATCH), 0) })}</p>
               <div className="flex flex-wrap items-center gap-4">
                 <button
                   type="button"
@@ -566,13 +626,13 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
                 </Link>
               </div>
             </div>
-          ) : stillOpen > 0 || otherOpen > 0 ? (
+          ) : stillOpen > 0 || otherOpen > 0 || leftOver > 0 ? (
             // left with «Weiss nicht»: still open, said so, never «Alles geprüft»
             <div className="space-y-4" data-testid="check-left-open">
               <h1 className="text-[40px] md:text-[58px]">{t("roundDone")}</h1>
-              <p className="text-[17px] text-ink-2">{stillOpen > 0 ? t("leftOpen", { n: stillOpen }) : t("questionsLeft", { n: otherOpen })}</p>
+              <p className="text-[17px] text-ink-2">{stillOpen > 0 ? t("leftOpen", { n: stillOpen }) : otherOpen > 0 ? t("questionsLeft", { n: otherOpen }) : t("skippedLeft", { n: leftOver })}</p>
             </div>
-          ) : (
+          ) : notice ? null : (
             <>
               <h1 className="text-[40px] md:text-[58px]">{t("allDone")}</h1>
               <p className="text-[17px] text-ink-2">{t("allDoneText")}</p>
@@ -580,7 +640,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
           )}
           {/* the people in the picture, offered, not pressed on the coach (E07) */}
           {/* without a squad there is nobody to pick: first the squad, one tap away (livegang L5) */}
-          {!wantPeople && moreGoals === 0 && stillOpen === 0 && otherOpen === 0 && moreCount > 0 && roster.isSuccess && (players.length > 0 ? (
+          {!wantPeople && !finished && moreGoals === 0 && stillOpen === 0 && otherOpen === 0 && moreCount > 0 && roster.isSuccess && (players.length > 0 ? (
             <button type="button" onClick={() => (setVerified(false), setPeopleAsked(people))} className={buttonClass("secondary")} data-testid="check-people">
               {t("more", { n: moreCount })}
             </button>
@@ -632,6 +692,8 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
         </div>
       ) : (
         // the court gets the whole width: the hall image as large as possible (E04)
+        <>
+        {notice && current.kind === "field" && !notice.failed && <AnalysisNotice notice={notice} className="mt-6" testId="check-field-notice" />}
         <div className={cn("grid gap-5 py-6 md:gap-14 md:py-10", spotStep && "max-md:gap-2 max-md:py-2", current.kind === "field" ? "md:grid-cols-1 md:gap-6" : "md:grid-cols-[minmax(0,1fr)_420px]")}>
           <figure className="relative m-0 self-start bg-[#1d2125]">
             {current.kind === "field" && main && panoSize && corners ? (
@@ -844,7 +906,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
                         value=""
                         onChange={(e) => {
                           const r = players.find((x) => x.player_id === e.target.value);
-                          if (r) void answer(personAnswer(current.tr, r));
+                          if (r) void answer(personAnswer(current.group, r));
                         }}
                         className="min-h-14 w-full border-2 border-ink bg-transparent px-3 text-[17px] font-semibold"
                         data-testid="person-pick"
@@ -875,10 +937,17 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
               ))}
             </div>
             <p className="mt-2 text-[15px] text-ink-2">{t("progress", { done: total - open.length, total })}</p>
+            {/* enough for this match: every open question left at once, the bell clears (A6) */}
+            {!spotStep && revisit == null && open.length > 1 && (
+              <button type="button" onClick={() => void skipAll()} disabled={finishing} className="mt-3 min-h-11 cursor-pointer border-0 bg-transparent p-0 text-[15px] font-bold text-ink underline decoration-[1.5px] underline-offset-4 disabled:opacity-50" data-testid="check-skip-all">
+                {t("skipAll")}
+              </button>
+            )}
             </>
             )}
           </div>
         </div>
+        </>
       )}
     </div>
   );

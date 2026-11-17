@@ -58,7 +58,7 @@ test("no goal found by the analysis: after Prüfen the result, course, goals and
   // the start counts the court, the throw-off and the three goals: one count
   await page.goto(`/app/${org}/teams/${team}/matches`);
   // the fresh analysis stands in the head, ahead of the newer match
-  await expect(page.getByTestId("start-next-step")).toContainText("5 Fragen helfen");
+  await expect(page.getByTestId("start-next-step")).toContainText("5 gezielte Fragen");
   await expect(page.locator("[data-zone=wurf]")).toContainText("TV Kandidat");
 
   // the Spiel tab right after the analysis: the sentence and the step, not an empty tab (in a
@@ -83,26 +83,13 @@ test("no goal found by the analysis: after Prüfen the result, course, goals and
     // then «Von wo?» in the same question (H7): not seen here
     await page.getByTestId("spot-unknown").click();
   }
-  // one moment is still open: nothing looks final (third real-video test G1)
-  await expect(page.getByTestId("check-main-done")).toContainText("Die wichtigsten Momente sind geprüft.");
-  await expect(page.getByTestId("check-main-done")).toContainText("1 weiterer Moment könnte ein Tor sein.");
-  await expect(page.getByRole("heading", { name: "Alles geprüft." })).toHaveCount(0);
-  await expect(page.getByTestId("check-failed")).toHaveCount(0);
-  // the head says interim, the count stays (in a second browser: this one has not opened the
-  // match, so the start keeps it in its head below)
-  const third = await page.context().browser()!.newContext({ baseURL: info.project.use.baseURL, storageState: await page.context().storageState() });
-  const look = await third.newPage();
-  await look.goto(`/app/${org}/matches/${match.id}`);
-  await expect(look.getByTestId("score-note")).toHaveText("bisher bestätigt · 1 Moment offen");
-  await expect(look.getByTestId("check-link")).toContainText("1");
-  await third.close();
-  await page.reload();
-  await expect(page.getByTestId("check-main-done")).toBeVisible({ timeout: 30_000 });
-  await page.getByTestId("check-more").click();
-  // its clip holds the goal at 0:24 already confirmed: the question says so (real-video test G2)
-  await expect(page.getByText("In diesem Ausschnitt liegt das Tor von 0:24, das du schon bestätigt hast.")).toBeVisible();
-  await page.getByRole("button", { name: "Nein, dasselbe Tor" }).click();
+  // the weaker moment lies 5.6 s after the confirmed goal at 0:24: a goal already known is never
+  // asked again (A6), so the round is done; it is not counted anywhere
   await expect(page.getByRole("heading", { name: "Alles geprüft." })).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByTestId("check-failed")).toHaveCount(0);
+  const g = await (await page.request.get(`/v1/orgs/${org}/matches/${match.id}/graphics`)).json();
+  expect(g.checks).toHaveLength(0);
+  expect(g.more_checks.filter((c: { kind: string }) => c.kind === "goal")).toHaveLength(0);
 
   // the start: the result of the video in the head, the course, the goals and their scene
   await page.goto(`/app/${org}/teams/${team}/matches`);

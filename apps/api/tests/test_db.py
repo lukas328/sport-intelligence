@@ -67,6 +67,34 @@ async def test_foreign_keys_of_official_data_and_candidates_are_indexed(owner_co
     assert ("organizations", "claimed_by_id") not in missing
 
 
+# every table a match deletion reaches through ON DELETE CASCADE, and the foreign keys the
+# database then follows (CASCADE or SET NULL)
+_MATCH_CASCADE = """
+WITH RECURSIVE fk AS (
+  SELECT c.conrelid::regclass::text AS child, c.confrelid::regclass::text AS parent,
+         a.attname AS col, c.confdeltype AS del,
+         EXISTS (SELECT 1 FROM pg_index i
+                 WHERE i.indrelid = c.conrelid AND i.indkey[0] = c.conkey[1]) AS indexed
+  FROM pg_constraint c
+  JOIN pg_attribute a ON a.attrelid = c.conrelid AND a.attnum = c.conkey[1]
+  WHERE c.contype = 'f' AND array_length(c.conkey, 1) = 1
+), tree AS (
+  SELECT child, parent, col, del, indexed, 1 AS depth FROM fk WHERE parent = 'matches'
+  UNION
+  SELECT f.child, f.parent, f.col, f.del, f.indexed, t.depth + 1
+  FROM fk f JOIN tree t ON f.parent = t.child AND t.del = 'c' WHERE t.depth < 5
+)
+SELECT DISTINCT child, col FROM tree WHERE del IN ('c', 'n') AND NOT indexed
+"""
+
+
+async def test_deleting_a_match_follows_only_indexed_foreign_keys(owner_conn: Any) -> None:
+    """Deleting a match removes its clips, events, videos ... in one statement; for every row
+    removed the database looks up the rows pointing at it. Without an index each lookup reads
+    the whole table, and a big match (hundreds of clips and events) held its locks for long."""
+    assert {(t, c) for t, c in await owner_conn.fetch(_MATCH_CASCADE)} == set()
+
+
 async def test_request_transaction_commits_before_the_response_is_sent() -> None:
     """The browser often reads right after a write: the commit must happen before the
     response starts, not after it was sent (default scope of yield dependencies)."""

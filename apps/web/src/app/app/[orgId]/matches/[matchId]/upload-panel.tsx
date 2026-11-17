@@ -22,7 +22,8 @@ import type { Kits } from "@/lib/kit";
 import { progressKey, type FileProgress } from "@/lib/progress";
 import { fingerprint, localStore, uploadFile, UploadAbortedError, xhrPutPart, type UploadApi } from "@/lib/upload";
 import { useStoredUploads } from "@/components/progress/words";
-import { dropUpload, putUpload, useLocalUploads } from "@/lib/upload-store";
+import { dropUpload, putUpload, registerStop, useLocalUploads } from "@/lib/upload-store";
+import { otherGame } from "@/lib/file-match";
 import { recordingOrder } from "@/lib/video-parts";
 
 const ROLES = ["main", "goal_cam_left", "goal_cam_right", "other"] as const;
@@ -89,6 +90,7 @@ export function UploadPanel({
   kits,
   stuck = [],
   progressFiles = [],
+  existing = [],
 }: {
   orgId: string;
   matchId: string;
@@ -99,6 +101,8 @@ export function UploadPanel({
   /** uploads of this match the API holds as unfinished (after a reload, another device) */
   stuck?: Video[];
   progressFiles?: FileProgress[];
+  /** the names of the files already in the match: a file of another game is pointed out (A5) */
+  existing?: string[];
 }) {
   const t = useTranslations();
   const qc = useQueryClient();
@@ -113,6 +117,11 @@ export function UploadPanel({
   const [mismatch, setMismatch] = useState<Video | null>(null);
   const ctrl = useRef<AbortController | null>(null);
   const videoOf = useRef<Map<File, string>>(new Map());
+  // uploads stopped from the progress block («Upload abbrechen», A1): no «pausiert» afterwards
+  const stopped = useRef<Set<File>>(new Set());
+  const unregister = useRef<Map<File, () => void>>(new Map());
+  // a second file whose name looks like another game: pointed out, never blocked (A5)
+  const [otherOf, setOtherOf] = useState<{ file: string; first: string } | null>(null);
   const input = useRef<HTMLInputElement>(null);
   const local = useLocalUploads();
   const stored = useStoredUploads(local);
@@ -175,6 +184,17 @@ export function UploadPanel({
         signal: ctrl.current.signal,
         onStarted: (id) => {
           videoOf.current.set(file, id);
+          unregister.current.get(file)?.();
+          unregister.current.set(
+            file,
+            registerStop(id, () => {
+              stopped.current.add(file);
+              ctrl.current?.abort();
+              localStore.remove(localKey(file));
+              dropUpload(localKey(file));
+              videoOf.current.delete(file);
+            }),
+          );
           tell(file, sent, "uploading");
           void qc.invalidateQueries({ queryKey: progressKey(orgId) });
         },
@@ -200,7 +220,12 @@ export function UploadPanel({
         dropUpload(localKey(file));
         return "same";
       }
-      if (e instanceof UploadAbortedError) {
+      if (stopped.current.has(file)) {
+        // cancelled in the progress block: the file is gone, nothing to resume
+        stopped.current.delete(file);
+        setQueue([]);
+        setState({ kind: "idle" });
+      } else if (e instanceof UploadAbortedError) {
         setState({ kind: "paused", file });
         tell(file, sent, "paused");
       } else if (!navigator.onLine) {
@@ -240,6 +265,9 @@ export function UploadPanel({
       files.splice(0, files.length, same);
     }
     setMismatch(null);
+    // another game? said beside the upload, it goes on (several files per match are wanted)
+    const odd = role === "main" ? files.map((f) => ({ file: f.name, first: otherGame(f.name, existing) })).find((x) => x.first) : undefined;
+    setOtherOf(odd?.first ? { file: odd.file, first: odd.first } : null);
     const seen = new Set<string>();
     const items: Item[] = files.map((file) => {
       const key = `${file.name}:${file.size}`;
@@ -368,6 +396,11 @@ export function UploadPanel({
             </div>
           );
         })}
+      {otherOf && (
+        <p className="m-0 max-w-[62ch] border-l-4 border-attn pl-3 text-[17px]" role="status" data-testid="upload-other-game">
+          {t("upload.otherGame", { name: otherOf.file, first: otherOf.first })}
+        </p>
+      )}
       {mismatch && (
         <Alert data-testid="upload-mismatch">
           {t("upload.mismatch", { name: mismatch.filename, size: formatBytes(mismatch.size_bytes) })}
