@@ -258,7 +258,7 @@ def _clip_for(ctx: Ctx, match: Match, e: Event, duration: int | None) -> Clip:
 
 
 async def generate_now(ctx: Ctx, match_id: uuid.UUID) -> int:
-    match = await get_match(ctx, match_id, Action.CLIP_WRITE)
+    match = await get_match(ctx, match_id, Action.ASSIGNMENT_WRITE)
     n = await generate(ctx, match)
     await audit.record(ctx, "feed.generated", target_type="match", target_id=match.id)
     return n
@@ -419,7 +419,7 @@ async def assess(
 
 async def team_feed(ctx: Ctx, match_id: uuid.UUID) -> list[dict[str, Any]]:
     """Overview for the coach: scenes per player and the self-assessments."""
-    match = await get_match(ctx, match_id, Action.CLIP_WRITE)
+    match = await get_match(ctx, match_id, Action.ASSIGNMENT_WRITE)
     rows = (
         await ctx.db.execute(
             select(PlayerFeedItem, Clip, Player)
@@ -477,7 +477,7 @@ async def _item(ctx: Ctx, item_id: uuid.UUID) -> tuple[PlayerFeedItem, Match]:
     item = await ctx.db.get(PlayerFeedItem, item_id)
     if item is None:
         raise ProblemError(404, "not-found", "Scene not found")
-    match = await get_match(ctx, item.match_id, Action.CLIP_WRITE)
+    match = await get_match(ctx, item.match_id, Action.ASSIGNMENT_WRITE)
     return item, match
 
 

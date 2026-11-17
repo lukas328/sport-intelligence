@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { serverApi } from "@/lib/api";
+import { canDelete, worksWithVideo } from "@/lib/roles";
 import { MatchView } from "./match-view";
 
 type Params = { params: Promise<{ orgId: string; matchId: string }> };
@@ -31,14 +32,14 @@ export default async function MatchPage({ params }: Params) {
   const { orgId, matchId } = await params;
   const data = await load(orgId, matchId);
   if (!data?.team || !data.org) notFound();
-  const role = data.team.my_role;
-  const isAdmin = data.org.my_role === "org_admin";
+  // Trainer, Co-Trainer and players work with the video; deleting is for the staff (K18)
   return (
     <MatchView
       orgId={orgId}
       initial={data.match}
       teamName={data.team.name}
-      staff={isAdmin || role === "coach" || role === "analyst"}
+      staff={worksWithVideo(data.org.my_role, data.team.my_role)}
+      canDelete={canDelete(data.org.my_role, data.team.my_role)}
     />
   );
 }

@@ -36,19 +36,19 @@ TEAM_ROLES = (
 )
 ROLES = ("org_admin", *TEAM_ROLES, "outsider")
 ADMIN = {"org_admin"}
-ASSISTANTS = {"goalkeeper_coach", "athletic_coach"}
-MANAGER = {"team_manager"}
-STAFF = ADMIN | {"coach", "analyst"}
-READERS = STAFF | {"player", "goalkeeper"} | ASSISTANTS | MANAGER
+# the product's four roles (K18): Trainer = org admin and coach; the Co-Trainer roles have coach
+# rights in the team; players see everything and work with video; parents only their children
+COACHES = ADMIN | {"coach", "analyst", "team_manager", "goalkeeper_coach", "athletic_coach"}
+PLAYERS = {"player", "goalkeeper"}
+READERS = COACHES | PLAYERS
 # parents only see their own children (guardianships), not the team
 MEMBERS = READERS | {"guest", "parent"}
-COACHES = ADMIN | {"coach"}
-ORGANISE = COACHES | MANAGER
-SEASON = STAFF | MANAGER
-TEAM_MEMBERS = STAFF | ASSISTANTS | MANAGER
-MATCH_WRITE = STAFF | MANAGER
-VIDEO_WORK = STAFF | ASSISTANTS
-TRAINING = VIDEO_WORK | MANAGER
+ORGANISE = COACHES
+SEASON = COACHES
+TEAM_MEMBERS = COACHES
+MATCH_WRITE = READERS
+VIDEO_WORK = READERS
+TRAINING = COACHES
 
 PNG = b"\x89PNG\r\n\x1a\n" + b"\x00" * 16
 
@@ -286,6 +286,15 @@ async def _post_consent(a: Api, w: World) -> Any:
     )
 
 
+async def _delete_match(a: Api, w: World) -> Any:
+    r = await w.admin.post(
+        w.t("/matches"),
+        json={"opponent_name": f"Weg {_seq(w)}", "kickoff_at": "2026-10-01T18:00:00+02:00"},
+    )
+    assert r.status_code == 201, r.text
+    return await a.delete(f"/v1/orgs/{w.org}/matches/{r.json()['id']}")
+
+
 async def _delete_team(a: Api, w: World) -> Any:
     tid = await _new_team(w)
     return await a.delete(f"/v1/orgs/{w.org}/teams/{tid}")
@@ -368,7 +377,7 @@ ENDPOINTS += [
     ("GET events", READERS, lambda a, w: a.get(f"/v1/orgs/{w.org}/matches/{w.match}/events")),
     (
         "POST event",
-        STAFF,
+        READERS,
         lambda a, w: a.post(
             f"/v1/orgs/{w.org}/matches/{w.match}/events",
             json={"type": "shot", "side": "own", "outcome": "goal", "t_ms": 1000},
@@ -393,19 +402,19 @@ ENDPOINTS += [
     ("GET stats", READERS, lambda a, w: a.get(f"/v1/orgs/{w.org}/matches/{w.match}/stats")),
     (
         "PUT kickoff",
-        STAFF,
+        READERS,
         lambda a, w: a.put(
             f"/v1/orgs/{w.org}/matches/{w.match}/kickoff", json={"period": 1, "t_ms": 0}
         ),
     ),
     ("GET physical", READERS, lambda a, w: a.get(f"/v1/orgs/{w.org}/matches/{w.match}/physical")),
     ("GET plays", READERS, lambda a, w: a.get(w.t("/plays"))),
-    ("GET team assignments", VIDEO_WORK, lambda a, w: a.get(w.t("/assignments"))),
-    ("GET assignment progress", VIDEO_WORK, _get_assignment),
+    ("GET team assignments", COACHES, lambda a, w: a.get(w.t("/assignments"))),
+    ("GET assignment progress", COACHES, _get_assignment),
     ("GET player statuses", TRAINING, lambda a, w: a.get(w.t("/player-statuses"))),
     ("PUT player status", TRAINING, _put_status),
     ("DELETE player status", TRAINING, _delete_status),
-    ("GET assistant conversations", VIDEO_WORK, lambda a, w: a.get(w.t("/assistant"))),
+    ("GET assistant conversations", COACHES, lambda a, w: a.get(w.t("/assistant"))),
     ("GET matrix templates", READERS, lambda a, w: a.get(w.t("/matrix/templates"))),
     ("GET sessions", READERS, lambda a, w: a.get(w.t("/sessions"))),
     (
@@ -488,7 +497,7 @@ ENDPOINTS += [
     ("GET season stats", READERS, lambda a, w: a.get(w.t(f"/seasons/{w.season}/stats"))),
     (
         "POST play",
-        STAFF,
+        COACHES,
         lambda a, w: a.post(
             w.t("/plays"),
             json={
@@ -509,13 +518,15 @@ ENDPOINTS += [
     ("GET consents", ORGANISE, _get_consents),
     (
         "GET consent overview",
-        ORGANISE | {"analyst"},
+        COACHES,
         lambda a, w: a.get(w.t(f"/seasons/{w.season}/consents")),
     ),
     # players read only their own line (the matrix player has no roster entry)
-    ("GET season line", TRAINING, _get_season_line),
+    ("GET season line", READERS, _get_season_line),
     ("POST consent", ORGANISE, _post_consent),
     ("DELETE team", ADMIN, _delete_team),
+    # players upload, mark and share, but deleting is for the staff (K18)
+    ("DELETE match", COACHES, _delete_match),
 ]
 
 
@@ -603,6 +614,7 @@ async def test_unauthenticated_gets_401(
             "GET consents",
             "POST consent",
             "DELETE team",
+            "DELETE match",
         }:
             continue
         r = await call(anon, w)
@@ -614,7 +626,7 @@ async def test_analysis_review_endpoints(
     make_api: Callable[[], Api], outbox: MemoryEmailSender
 ) -> None:
     """The newer endpoints of the match workspace (official report, goal candidates, court,
-    track identities, referee kit) against every role: a player or parent cannot change them, a
+    track identities, referee kit) against every role: a parent or guest cannot change them, a
     coach of another club gets 404 for each of them."""
     from handball_api.core.jobs import MemoryJobQueue
 
@@ -651,27 +663,27 @@ async def test_analysis_review_endpoints(
         ("GET comparison", READERS, lambda a, w: a.get(f"{m}/official-report/comparison")),
         (
             "PUT official review",
-            STAFF,
+            READERS,
             lambda a, w: a.put(
                 f"{m}/official-report/review", json={"event_id": goal["event_id"], "status": None}
             ),
         ),
         (
             "POST official report",
-            STAFF,
+            READERS,
             lambda a, w: a.post(f"{m}/official-report", json={"url": CH_URL}),
         ),
         ("GET goal candidates", READERS, lambda a, w: a.get(f"{m}/goal-candidates")),
         (
             "PUT candidate review",
-            STAFF,
+            READERS,
             lambda a, w: a.put(f"{m}/goal-candidates/{cand['id']}/review", json={"status": None}),
         ),
         ("GET analysis", READERS, lambda a, w: a.get(f"{v}/analysis")),
         ("POST court confirm", MATCH_WRITE, lambda a, w: a.post(f"{v}/calibration/confirm")),
         (
             "PUT track identity",
-            STAFF,
+            READERS,
             lambda a, w: a.put(f"{v}/tracks/1/identity", json={"number": 7}),
         ),
         (

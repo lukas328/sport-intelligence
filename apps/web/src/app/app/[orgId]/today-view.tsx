@@ -12,6 +12,8 @@ import { useRosterNames } from "@/components/analysis/tagger";
 import { MatchScore } from "@/components/domain/match-score";
 import { Stage, StageTag, stageButton, stageLink } from "@/components/domain/stage";
 import { useShell } from "@/components/shell/context";
+import { AreaSubNav } from "@/components/shell/section-nav";
+import { LifeHint } from "@/components/shell/life-hint";
 import { IconAsk, IconScenes } from "@/components/shell/icons";
 import { OnboardingChecklist } from "@/components/support/checklist";
 import { Badge } from "@/components/ui/badge";
@@ -516,6 +518,9 @@ function FamilyToday({ orgId }: { orgId: string }) {
   return (
     <div className="space-y-12">
       <PageHeader title={greeting.split(" · ")[0]!} eyebrow={greeting.split(" · ")[1]} />
+      {/* parents: the overview is the first tab of Teamleben (K16) */}
+      <AreaSubNav />
+      <LifeHint />
       <Block title={t("today.myDates")} href={`/app/${orgId}/schedule`} linkLabel={t("today.allDates")}>
         {schedule.items.isLoading ? (
           <Skeleton className="h-32" />

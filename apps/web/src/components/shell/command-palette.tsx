@@ -21,6 +21,7 @@ import { useState, type ReactNode } from "react";
 import { api } from "@/lib/client";
 import { navFor, videoWork } from "@/lib/nav-model";
 import { useShell } from "./context";
+import { coachRights } from "@/lib/roles";
 import { DEST_ICON } from "./icons";
 
 const item =
@@ -96,8 +97,8 @@ export function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenCh
                 {teamBase && staff && row("collections", t("shell.collections"), <BookOpen />, `${teamBase}/collections`, ["playlists", "präsentationen", "presentations", "sammlung"])}
                 {teamBase && staff && row("plays", t("shell.plays"), <BookOpen />, `${teamBase}/plays`, ["spielzüge", "taktik", "tactics"])}
                 {row("me", t("shell.me"), <UserRound />, `${base}/me`, ["profil", "profile", "passwort", "password"])}
-                {(org.my_role === "org_admin" || teams.some((x) => x.my_role === "coach")) &&
-                  row("club", t("shell.club"), <Settings />, `${base}/club`, ["einstellungen", "settings", "teamfunktionen"])}
+                {(org.my_role === "org_admin" || teams.some((x) => coachRights(org.my_role, x.my_role))) &&
+                  row("club", t("shell.club"), <Settings />, `${base}/club`, ["einstellungen", "settings", "teamfunktionen", "teamleben"])}
               </Command.Group>
               {staff && teamBase && (
                 <Command.Group heading={t("palette.actions")} className={group}>

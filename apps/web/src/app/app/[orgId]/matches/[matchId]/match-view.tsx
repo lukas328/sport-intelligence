@@ -78,7 +78,7 @@ type Sub = "shots" | "keepers" | "physical" | "report";
 const SUBS: Sub[] = ["report", "shots", "keepers", "physical"];
 
 
-export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; initial: Match; teamName: string; staff: boolean }) {
+export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }: { orgId: string; initial: Match; teamName: string; staff: boolean; /** players work with the video but do not delete (K18) */ canDelete?: boolean }) {
   const t = useTranslations();
   const oppName = useOpponentName();
   const locale = useLocale();
@@ -438,7 +438,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
                     {t("matches.edit")}
                   </MenuItem>
                 )}
-                {staff && (
+                {canDelete && (
                   <MenuItem
                     danger
                     icon={<Trash2 />}
@@ -468,8 +468,9 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
         </div>
       )}
 
-      {/* who is coming: the players' replies, from before the match until shortly after it */}
-      {staff && teamFeatures && match.kind !== "training" && Date.parse(match.kickoff_at) > Date.now() - 6 * 3600_000 && (
+      {/* who is coming: the players' replies, from before the match until shortly after it; for the
+          staff (coach rights, like deleting: K18) */}
+      {canDelete && teamFeatures && match.kind !== "training" && Date.parse(match.kickoff_at) > Date.now() - 6 * 3600_000 && (
         <details className="group border-y border-foreground/15 py-3" data-testid="match-attendance">
           <summary className="cursor-pointer list-none font-semibold [&::-webkit-details-marker]:hidden">
             {t("matches.attendance")}
@@ -498,7 +499,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
 
       <div hidden={view !== "video"} className="space-y-6">
         {/* a player's own scenes of this match, one step away */}
-        {!staff && <MyScenesLine orgId={orgId} matchId={match.id} />}
+        {!canDelete && <MyScenesLine orgId={orgId} matchId={match.id} />}
         {stage && main && graphics.data && (
           <VideoStage
             orgId={orgId}
@@ -575,7 +576,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
             <UploadPanel orgId={orgId} matchId={match.id} kits={scouting ? null : ownKits} stuck={stuckUploads} progressFiles={progress?.files ?? []} onUploaded={() => void qc.invalidateQueries({ queryKey: key })} />
           </section>
         )}
-        <PartsPanel orgId={orgId} match={match} jobs={jobs} staff={staff} onChanged={() => void qc.invalidateQueries({ queryKey: key })} />
+        <PartsPanel orgId={orgId} match={match} jobs={jobs} staff={staff} canDelete={canDelete} onChanged={() => void qc.invalidateQueries({ queryKey: key })} />
         {/* a further file (the second half, another camera): right in the Video tab, not only
             in the workbench (Q-VIDEO-PARTS) */}
         {main && staff && match.source !== "paper_report" && (
@@ -691,7 +692,8 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
           {stats.data && stats.data.quality.events > 0 && <OverviewView orgId={orgId} match={match} teamName={teamName} stats={stats.data} names={names} staff={staff} onPlay={main ? onPlay : undefined} parts={["timeline"]} span={graphics.data && !graphics.data.has_report ? (graphics.data.span ?? null) : null} />}
           <div className="space-y-8">
             <div id="highlights" className="scroll-mt-24"><HighlightsView orgId={orgId} matchId={match.id} teamId={match.team_id} staff={staff} names={names} /></div>
-            {staff && !main && <TeamFeedView orgId={orgId} matchId={match.id} kickoff={match.kickoff_ms} periodS={match.period_s} />}
+            {/* the players' personal scenes are the staff's overview (K18) */}
+            {canDelete && !main && <TeamFeedView orgId={orgId} matchId={match.id} kickoff={match.kickoff_ms} periodS={match.period_s} />}
             {staff && <MarksPanel orgId={orgId} matchId={match.id} onPlay={main ? onPlay : undefined} />}
           </div>
             </div>

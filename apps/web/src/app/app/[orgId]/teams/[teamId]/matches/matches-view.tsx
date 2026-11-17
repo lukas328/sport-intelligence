@@ -14,6 +14,7 @@ import { matchState } from "@/lib/match-state";
 import { cn } from "@/lib/utils";
 import { NewMatchForm } from "./new-match-form";
 import { ScoutingForm } from "./scouting-form";
+import { NextSteps } from "@/components/people/next-steps";
 import { StartView } from "./start-view";
 
 type Match = Schemas["MatchSummary"];
@@ -59,6 +60,10 @@ export function MatchesView({ orgId, teamId, matches, canWrite }: { orgId: strin
             </Card>
             <div className="space-y-3 lg:pt-8">
               <p className="text-sm text-muted">{t("matches.otherWaysFile")}</p>
+              {/* the coach's next steps after taking over the team (K17) */}
+              <div className="pt-6">
+                <NextSteps hasVideo={false} />
+              </div>
             </div>
           </div>
         ) : (

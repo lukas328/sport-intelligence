@@ -19,8 +19,9 @@ test("player: the match page leads to the own scenes, assessment first", async (
   await page.goto(`/app/${orgId}/club/teams`);
   const playerEmail = uniqueEmail("player-scenes");
   await page.getByLabel("E-Mail").fill(playerEmail);
+  await page.getByRole("radio", { name: /^Spieler/ }).check();
   await page.getByRole("button", { name: "Einladung senden" }).click();
-  await expect(page.getByText(`Eingeladen: ${playerEmail}`)).toBeVisible();
+  await expect(page.getByText(`Einladung an ${playerEmail} geschickt.`)).toBeVisible();
   await page.goto(teamUrl0);
   await follow(page, page.getByRole("link", { name: "Spiele", exact: true }).first(), /\/matches$/);
   await page.getByLabel("Gegner", { exact: true }).fill("TV Testdorf");
@@ -153,6 +154,7 @@ test("player: the match page leads to the own scenes, assessment first", async (
   // the invitation offers the free squad entry for a player
   await page.goto(`/app/${orgId}/club/teams`);
   const invite = page.getByRole("form", { name: "Person einladen" });
+  await invite.getByRole("radio", { name: /^Spieler/ }).check();
   await expect(invite.getByLabel("Im Team").locator("option", { hasText: "#9 Lea Beispiel" })).toHaveCount(1);
 
   // Lea's season line from her name in the squad: no played match yet

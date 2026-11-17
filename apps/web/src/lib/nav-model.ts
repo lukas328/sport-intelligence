@@ -1,73 +1,80 @@
 /**
- * Navigation model (docs/design/ux-reset/SPEC.md, section 6; ADR 029): staff get four
+ * Navigation model (docs/design/ux-reset/SPEC.md, section 6; ADR 029): the team gets four
  * destinations, Spiele · Szenen · Saison · Team, the start is Spiele. Inside a destination there is
  * at most one level of tabs. Everything else is reached from inside them, the account menu or the
  * search.
+ *
+ * Players see everything of the team and work with the video like the staff (finding K18), so
+ * they get the same four destinations. «Teamleben» (finding K16) is the one place for what the
+ * team setting "Teamfunktionen" switches on: dates with RSVP, training, tasks and the areas of
+ * players and parents. It is a fifth destination only while the setting is on; parents have only
+ * it.
  */
+import { worksWithVideo, coachRights } from "./roles";
+
 export type Mode = "staff" | "player" | "family" | "guest";
-export type Dest = "today" | "matches" | "scenes" | "season" | "team" | "dates";
+export type Dest = "matches" | "scenes" | "season" | "team" | "life";
 
 export interface NavItem {
   key: Dest;
   href: string;
 }
 
-const STAFF_ROLES = new Set(["coach", "analyst", "team_manager", "goalkeeper_coach", "athletic_coach"]);
-
 export function modeFor(orgRole: string | null | undefined, teamRole: string | null | undefined): Mode {
-  if (orgRole === "org_admin" || STAFF_ROLES.has(teamRole ?? "")) return "staff";
+  if (coachRights(orgRole, teamRole)) return "staff";
   if (teamRole === "player" || teamRole === "goalkeeper") return "player";
   if (teamRole === "parent") return "family";
   return "guest";
 }
 
-/** Staff who work with video (analysis tools, collections, the data assistant). */
+/** Who works with video (analysis tools, collections, uploads): Trainer, Co-Trainer and players. */
 export function videoWork(orgRole: string | null | undefined, teamRole: string | null | undefined): boolean {
-  return orgRole === "org_admin" || STAFF_ROLES.has(teamRole ?? "");
+  return worksWithVideo(orgRole, teamRole);
 }
 
-/** Where a person lands in a club: Spiele for staff (and guests), the start page for everyone else. */
+/** Staff and players see the team's matches and scenes (K18). */
+export function analyses(mode: Mode): boolean {
+  return mode === "staff" || mode === "player";
+}
+
+/** Where a person lands in a club: Spiele for everyone in the team, Teamleben for parents. */
 export function startHref(mode: Mode, orgId: string, teamId: string | null): string {
   const org = `/app/${orgId}`;
-  if ((mode === "staff" || mode === "guest") && teamId) return `${org}/teams/${teamId}/matches`;
+  if (mode !== "family" && teamId) return `${org}/teams/${teamId}/matches`;
   return org;
 }
 
-/** The one action reachable from everywhere for staff: upload a match video. */
+/** The one action reachable from everywhere: upload a match video. */
 export function uploadHref(orgId: string, teamId: string | null): string | null {
   return teamId ? `/app/${orgId}/teams/${teamId}/matches?upload=1` : null;
 }
 
 /**
- * Team setting "Teamfunktionen" (ADR 029). Off: training, dates, RSVP, tasks and the destinations
- * of players and parents are out of the navigation and the search. Their routes stay reachable.
+ * Team setting "Teamfunktionen" (ADR 029). Off: Teamleben (dates, RSVP, training, tasks, the
+ * areas of players and parents) is out of the navigation and the search. Its routes stay.
  */
 export interface NavOptions {
   teamFunctions?: boolean;
+}
+
+/** Where «Teamleben» opens for a mode: the dates for the team, the overview for parents. */
+export function lifeHref(mode: Mode, orgId: string): string {
+  return mode === "family" ? `/app/${orgId}` : `/app/${orgId}/schedule`;
 }
 
 export function navFor(mode: Mode, orgId: string, teamId: string | null, opts: NavOptions = {}): NavItem[] {
   const org = `/app/${orgId}`;
   const on = Boolean(opts.teamFunctions);
   const team: string | null = teamId ? `${org}/teams/${teamId}` : null;
-  const items: (NavItem | null)[] =
-    mode === "staff"
-      ? [
-          { key: "matches", href: team ? `${team}/matches` : org },
-          team ? { key: "scenes", href: `${team}/scenes` } : null,
-          team ? { key: "season", href: `${team}/season` } : null,
-          team ? { key: "team", href: team } : null,
-        ]
-      : mode === "player"
-        ? [
-            { key: "today", href: org },
-            on ? { key: "scenes", href: `${org}/feed` } : null,
-            on ? { key: "dates", href: `${org}/schedule` } : null,
-            team ? { key: "team", href: team } : null,
-          ]
-        : mode === "family"
-          ? [{ key: "today", href: org }, on ? { key: "dates", href: `${org}/schedule` } : null, team ? { key: "team", href: team } : null]
-          : [{ key: "matches", href: team ? `${team}/matches` : org }, team ? { key: "team", href: team } : null];
+  if (mode === "family") return [{ key: "life", href: lifeHref(mode, orgId) }];
+  if (mode === "guest") return [{ key: "matches", href: team ? `${team}/matches` : org }, ...(team ? [{ key: "team" as const, href: team }] : [])];
+  const items: (NavItem | null)[] = [
+    { key: "matches", href: team ? `${team}/matches` : org },
+    team ? { key: "scenes", href: `${team}/scenes` } : null,
+    team ? { key: "season", href: `${team}/season` } : null,
+    team ? { key: "team", href: team } : null,
+    team && on ? { key: "life", href: lifeHref(mode, orgId) } : null,
+  ];
   return items.filter((i): i is NavItem => Boolean(i));
 }
 
@@ -82,9 +89,14 @@ export type Section =
   | "drills"
   | "assignments"
   | "roster"
-  | "dates";
+  | "dates"
+  | "overview"
+  | "myscenes"
+  | "consents";
 
 const SECTION_OF_PAGE: Record<string, Section> = {
+  // the club's root: the parents' overview (everyone else is sent on to Spiele)
+  "": "overview",
   matches: "fixtures",
   paper: "fixtures",
   upload: "fixtures",
@@ -109,6 +121,8 @@ const SECTION_OF_PAGE: Record<string, Section> = {
   drills: "drills",
   assignments: "assignments",
   schedule: "dates",
+  feed: "myscenes",
+  consents: "consents",
 };
 
 function firstSegment(path: string): { first: string; inTeam: boolean } {
@@ -121,20 +135,23 @@ function firstSegment(path: string): { first: string; inTeam: boolean } {
 /** Which destination a path belongs to (pages below a destination keep it highlighted). */
 export function destOf(path: string, mode: Mode): Dest | null {
   const rest = path.replace(/^\/app\/[^/]+/, "") || "/";
-  const staff = mode === "staff";
-  const fan = mode === "player" || mode === "family";
-  if (rest === "/") return fan ? "today" : "matches";
+  const team = analyses(mode);
+  const family = mode === "family";
+  if (rest === "/") return family ? "life" : "matches";
   const { first, inTeam } = firstSegment(path);
-  if (inTeam && first === "") return "team";
-  if (["matches", "paper", "upload"].includes(first)) return fan ? "scenes" : "matches";
-  if (first === "feed") return staff ? "matches" : "scenes";
-  if (["season", "opponents"].includes(first)) return staff ? "season" : "team";
+  if (inTeam && first === "") return family ? "life" : "team";
+  // Teamleben: dates, training, tasks, own scenes and consents of players and parents
+  if (["schedule", "training", "assignments"].includes(first)) return "life";
+  if (first === "feed") return mode === "staff" ? "matches" : "life";
+  if (first === "consents") return mode === "staff" ? "team" : "life";
+  if (family) return ["official", "join-requests", "players", "drills"].includes(first) ? null : "life";
+  if (["matches", "paper", "upload"].includes(first)) return "matches";
+  if (["season", "opponents"].includes(first)) return team ? "season" : "team";
   if (["scenes", "search", "assistant", "library", "collections", "playlists", "presentations", "plays", "matrix"].includes(first))
-    return staff ? "scenes" : "team";
-  // out of the navigation for staff (SPEC section 1, "Next"): the training plan, drills, tasks
-  if (["training", "assignments", "drills"].includes(first)) return staff ? "team" : "today";
-  if (first === "schedule") return staff ? "team" : "dates";
-  if (["official", "join-requests", "players", "consents"].includes(first)) return "team";
+    return team ? "scenes" : "team";
+  // drills are opened from «Dazu üben» (SPEC section 1, "Next"); they sit under Team
+  if (first === "drills") return "team";
+  if (["official", "join-requests", "players"].includes(first)) return "team";
   return null;
 }
 
@@ -156,16 +173,16 @@ export interface SubItem {
 }
 
 /**
- * The one level of tabs inside a destination, never more than four. Staff: Szenen = search,
- * collections, plays, table. Spiele and Saison have no tabs; Team has none either (a single tab is
- * no tab) unless "Teamfunktionen" is on: then squad, dates, training plan and tasks.
- * Players and parents: Team = squad and season.
+ * The one level of tabs inside a destination, never more than four. Szenen = search,
+ * collections, plays, table. Spiele, Saison and Team have no tabs (a single tab is no tab).
+ * Teamleben: for the staff dates, training plan and tasks; for players dates, tasks, own scenes
+ * and consents; for parents the overview, the dates and the consents.
  */
 export function sectionsFor(dest: Dest, mode: Mode, orgId: string, teamId: string | null, opts: NavOptions = {}): SubItem[] {
   const org = `/app/${orgId}`;
   const team = teamId ? `${org}/teams/${teamId}` : null;
-  const staff = mode === "staff";
-  if (dest === "scenes" && staff && team) {
+  const on = Boolean(opts.teamFunctions);
+  if (dest === "scenes" && analyses(mode) && team) {
     return [
       { key: "scenes", href: `${team}/scenes` },
       { key: "collections", href: `${team}/collections` },
@@ -173,18 +190,28 @@ export function sectionsFor(dest: Dest, mode: Mode, orgId: string, teamId: strin
       { key: "matrix", href: `${team}/matrix` },
     ];
   }
-  if (dest === "team" && team && staff && opts.teamFunctions) {
+  if (dest !== "life") return [];
+  if (mode === "staff" && team && on) {
     return [
-      { key: "roster", href: team },
       { key: "dates", href: `${org}/schedule` },
+      // the training plan (SPEC section 1, "Next")
       { key: "plan", href: `${team}/training` },
       { key: "assignments", href: `${team}/assignments` },
     ];
   }
-  if (dest === "team" && team && !staff) {
+  if (mode === "player" && on) {
     return [
-      { key: "roster", href: team },
-      { key: "season", href: `${team}/season` },
+      { key: "dates", href: `${org}/schedule` },
+      { key: "assignments", href: `${org}/assignments` },
+      { key: "myscenes", href: `${org}/feed` },
+      { key: "consents", href: `${org}/consents` },
+    ];
+  }
+  if (mode === "family") {
+    return [
+      { key: "overview", href: org },
+      ...(on ? [{ key: "dates" as const, href: `${org}/schedule` }] : []),
+      { key: "consents", href: `${org}/consents` },
     ];
   }
   return [];

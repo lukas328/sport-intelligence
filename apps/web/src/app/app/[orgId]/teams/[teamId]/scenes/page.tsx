@@ -6,6 +6,7 @@ import { CollectionList } from "@/components/collections/collection-list";
 import { buttonClass } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
 import { serverApi } from "@/lib/api";
+import { worksWithVideo } from "@/lib/roles";
 import { SearchView } from "../search/search-view";
 import { ScenesHead } from "./scenes-head";
 import { ScenesView } from "./scenes-view";
@@ -25,10 +26,9 @@ export default async function ScenesPage({
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
   const { orgId, teamId } = await params;
-  // a question asked from elsewhere (?q, ?chips, ?view) still gets the search and its answer
-  const asked = Object.keys(await searchParams).some((k) =>
-    ["q", "chips", "view", "focus"].includes(k),
-  );
+  // a question asked from elsewhere (?q, ?chips, ?view) is read by the search itself; without a
+  // video there is nothing to answer it with
+  await searchParams;
   const t = await getTranslations("scenesPage");
   const ta = await getTranslations("anlauf");
   const client = await serverApi();
@@ -127,29 +127,29 @@ export default async function ScenesPage({
       </div>
     </details>
   );
-  // before the first video there is nothing to search: one sentence and the way to the video,
-  // not «0 Szenen aus 0 Spielen» with chips (UX test B28)
-  if (withVideo.length === 0 && !asked) {
-    const canWrite =
-      team?.my_role === "coach" || team?.my_role === "analyst" || team?.my_role === "team_manager";
+  // before the first video there is nothing to search (K8, UX test B28): one sentence, what comes,
+  // one action; no search, chips, collections or highlights. Spielzüge work without video.
+  if (withVideo.length === 0) {
+    const { data: org } = await client.GET("/v1/orgs/{org_id}", { params: { path: { org_id: orgId } } });
+    const canWrite = worksWithVideo(org?.my_role, team?.my_role);
     return (
       <div>
         <PageHeader title={(await getTranslations("shell"))("scenes")} />
-        <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_340px]">
-          <section className="max-w-[60ch] space-y-4" data-testid="scenes-empty">
-            <p className="font-slant m-0 text-[28px] leading-tight md:text-[34px]">
-              {t("noneYet")}
-            </p>
-            {canWrite && (
-              <Link href={`${base}/matches?upload=1`} className={buttonClass("primary")}>
-                {ta("uploadVideo")}
-              </Link>
-            )}
-          </section>
-          {/* Sammlungen, plays and the table stay reachable */}
-          <aside className="flex min-w-0 flex-col gap-8">{side}</aside>
-        </div>
-        {more}
+        <section className="max-w-[60ch] space-y-4" data-testid="scenes-empty">
+          <p className="font-slant m-0 text-[28px] leading-tight md:text-[34px]">{t("emptyTitle")}</p>
+          <p className="m-0 text-[17px]">{t("emptyText")}</p>
+          {canWrite && (
+            <Link href={`${base}/matches?upload=1`} className={buttonClass("primary")}>
+              {ta("uploadVideo")}
+            </Link>
+          )}
+          <p className="m-0 pt-4 text-[15px] text-ink-2">
+            {t("emptyPlays")}{" "}
+            <Link href={`${base}/plays`} className={linkClass}>
+              {ta("plays")}
+            </Link>
+          </p>
+        </section>
       </div>
     );
   }

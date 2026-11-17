@@ -81,7 +81,7 @@ def _email_sender(settings: Settings) -> EmailSender:
     if settings.email_backend == "memory":
         return MemoryEmailSender()
     if settings.email_backend == "console":
-        return ConsoleEmailSender()
+        return ConsoleEmailSender(full=settings.env == "local")
     return SmtpEmailSender(
         settings.smtp_host,
         settings.smtp_port,

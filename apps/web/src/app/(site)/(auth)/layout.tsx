@@ -14,11 +14,12 @@ export default async function AuthLayout({ children }: { children: ReactNode }) 
   return (
     <div className="mx-auto grid w-full max-w-5xl gap-6 lg:grid-cols-[1.05fr_1fr] lg:gap-10">
       <section className="px-1 pt-2 pb-4 lg:self-center lg:pt-10">
-        {/* the only place before the app that shows the brand: the word mark large, two-coloured */}
-        {/* eslint-disable-next-line @next/next/no-img-element -- a static SVG mark */}
-        <img src="/brand/wortmarke-zweizeilig.svg" alt={t("name")} width={256} height={90} className="mb-8 h-[72px] w-auto sm:h-[90px]" />
+        {/* the word mark stands once, in the head above (L12: it was here a second time) */}
         {/* one sentence and the way to the website; the product is explained there (UX test Z2) */}
-        <p className="font-slant max-w-[22rem] text-[2.5rem] leading-[0.95] sm:text-[3.25rem]">{ta("claim")}</p>
+        <p className="font-slant max-w-[22rem] text-[2.5rem] leading-[0.95] sm:text-[3.25rem]">
+          <span className="sr-only">{t("name")}: </span>
+          {ta("claim")}
+        </p>
         {site && (
           <a href={sitePage(site, locale)} className="mt-4 inline-flex min-h-11 items-center text-[17px] font-bold text-ink underline decoration-[1.5px] underline-offset-4">
             {ta("toSite", { site: site.replace(/^https?:\/\//, "") })}

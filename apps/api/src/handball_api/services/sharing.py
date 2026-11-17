@@ -46,7 +46,7 @@ from handball_api.services.context import Ctx
 from handball_api.services.highlights import rank
 from handball_api.services.matches import opponent_of, timeline_video
 from handball_api.services.orgs import get_team
-from handball_api.services.policies import Action, can
+from handball_api.services.policies import Action, can, is_coach
 from handball_api.services.roster import consented
 from handball_api.services.videos import read_media_object
 
@@ -205,6 +205,9 @@ async def revoke(ctx: Ctx, link_id: uuid.UUID) -> None:
     if link is None:
         raise ProblemError(404, "not-found", "Link not found")
     await get_team(ctx, link.team_id, Action.PLAYLIST_WRITE)
+    # players share by link and take back their own links; the staff take back any (K18)
+    if not is_coach(ctx.require_actor(), link.team_id) and link.created_by_id != ctx.user_id:
+        raise ProblemError(403, "forbidden", "Only the staff revoke links made by others")
     link.revoked_at = link.revoked_at or _now()
     await audit.record(ctx, "share_link.revoked", target_type="share_link", target_id=link.id)
 

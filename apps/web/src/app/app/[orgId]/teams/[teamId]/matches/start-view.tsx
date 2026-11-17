@@ -25,6 +25,7 @@ import { threeThings } from "@/lib/three-things";
 import { checkMinutes } from "@/lib/shot-spot";
 import { cn } from "@/lib/utils";
 import { ProgressLine } from "@/components/progress/progress-line";
+import { NextSteps } from "@/components/people/next-steps";
 
 type Match = Schemas["MatchSummary"];
 
@@ -76,7 +77,11 @@ export function StartView({
             ))}
           </ul>
         </section>
-        <aside className="flex min-w-0 flex-col gap-8">{next && <NextOpponent orgId={orgId} teamId={team?.id} next={next} played={ours} />}</aside>
+        <aside className="flex min-w-0 flex-col gap-8">
+          {/* after taking over the team: the coach's next steps (K17) */}
+          <NextSteps hasVideo={ours.some((m) => m.has_video)} />
+          {next && <NextOpponent orgId={orgId} teamId={team?.id} next={next} played={ours} />}
+        </aside>
       </div>
     </div>
   );

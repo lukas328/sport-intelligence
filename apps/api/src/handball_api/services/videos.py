@@ -313,6 +313,10 @@ async def abort_upload(ctx: Ctx, asset_id: uuid.UUID) -> None:
     """Deletes a file of the match (an upload not finished, or a part): the parts after it move
     up, and what the analysis found in it goes with it."""
     asset = await get_asset(ctx, asset_id, Action.VIDEO_UPLOAD)
+    # cancelling an upload that is still running is part of uploading; a file that arrived is
+    # deleted by the staff only (players upload, they do not delete: K18)
+    if asset.status != VideoStatus.UPLOADING:
+        await get_asset(ctx, asset_id, Action.MATCH_DELETE)
     match = await ctx.db.get(Match, asset.match_id)
     before = await parts_of(ctx, asset.match_id)
     placed = any(p.video_id == asset.id for p in before)

@@ -1684,7 +1684,11 @@ export interface paths {
         /** List Invitations */
         get: operations["list_invitations_v1_orgs__org_id__invitations_get"];
         put?: never;
-        /** Create Invitation */
+        /**
+         * Create Invitation
+         * @description The invitation, and its link for the inviter: to send it in the team chat as well, or
+         *     instead of the mail while no mail goes out (`mailed`, finding L2).
+         */
         post: operations["create_invitation_v1_orgs__org_id__invitations_post"];
         delete?: never;
         options?: never;
@@ -4025,6 +4029,27 @@ export interface paths {
         head?: never;
         /** Update Team Member */
         patch: operations["update_team_member_v1_orgs__org_id__teams__team_id__members__user_id__patch"];
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/teams/{team_id}/members/{user_id}/person-role": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Set Person Role
+         * @description Trainer (coach and club admin), Co-Trainer or Spieler for a member of the team (K18).
+         *     Making or unmaking a Trainer is for club admins.
+         */
+        put: operations["set_person_role_v1_orgs__org_id__teams__team_id__members__user_id__person_role_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/v1/orgs/{org_id}/teams/{team_id}/official": {
@@ -7425,6 +7450,35 @@ export interface components {
             team_id?: string | null;
             team_role?: components["schemas"]["TeamRole"] | null;
         };
+        /** InvitationCreated */
+        InvitationCreated: {
+            /** Accepted At */
+            accepted_at: string | null;
+            /** Email */
+            email: string;
+            /**
+             * Expires At
+             * Format: date-time
+             */
+            expires_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Link */
+            link: string;
+            /** Mailed */
+            mailed: boolean;
+            org_role: components["schemas"]["OrgRole"];
+            /** Player Id */
+            player_id: string | null;
+            /** Revoked At */
+            revoked_at: string | null;
+            /** Team Id */
+            team_id: string | null;
+            team_role: components["schemas"]["TeamRole"] | null;
+        };
         /** InvitationOut */
         InvitationOut: {
             /** Accepted At */
@@ -9094,6 +9148,11 @@ export interface components {
              * @default false
              */
             something_to_protect?: boolean;
+            /**
+             * Two Factor Overdue
+             * @default false
+             */
+            two_factor_overdue?: boolean;
             /** Two Factor Required */
             two_factor_required: boolean;
             /**
@@ -9286,6 +9345,20 @@ export interface components {
             password: string;
             /** Token */
             token: string;
+        };
+        /**
+         * PersonRole
+         * @description The four roles the product shows (K18); not stored, read from the organisation and team
+         *     role (`services.policies.person_role`).
+         * @enum {string}
+         */
+        PersonRole: "trainer" | "co_trainer" | "player" | "parent";
+        /**
+         * PersonRoleIn
+         * @description Trainer, Co-Trainer or Spieler; parents come by invitation with their child.
+         */
+        PersonRoleIn: {
+            role: components["schemas"]["PersonRole"];
         };
         /** PhaseOut */
         PhaseOut: {
@@ -9833,6 +9906,8 @@ export interface components {
         };
         /** PublicConfig */
         PublicConfig: {
+            /** Mail Enabled */
+            mail_enabled: boolean;
             /** Site Url */
             site_url: string;
             /** Support Email */
@@ -11242,6 +11317,7 @@ export interface components {
             email: string;
             /** Name */
             name: string;
+            person_role?: components["schemas"]["PersonRole"] | null;
             role: components["schemas"]["TeamRole"];
             /**
              * User Id
@@ -15277,7 +15353,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["InvitationOut"];
+                    "application/json": components["schemas"]["InvitationCreated"];
                 };
             };
             /** @description Validation Error */
@@ -20701,6 +20777,43 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["TeamMemberUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamMemberOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    set_person_role_v1_orgs__org_id__teams__team_id__members__user_id__person_role_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+                user_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PersonRoleIn"];
             };
         };
         responses: {

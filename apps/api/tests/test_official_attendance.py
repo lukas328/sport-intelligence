@@ -1,10 +1,10 @@
 """Names from the official data in the attendance list of sessions and matches.
 
 The roster list shows entries taken over from the official data only to the team's organisers
-until the person joins or consents (`services/roster.py`); the attendance list, which analysts
-and assistant coaches (goalkeeper and athletic coach) also see (Action.TRAINING_WRITE), follows
-the same rule: such entries are left out for them, and recording attendance for one is refused
-like a player outside the roster (docs/plans/federation-onboarding.md, Datenschutz)."""
+until the person joins or consents (`services/roster.py`). Since the four roles (K18) every
+Co-Trainer organises the team: analysts and assistant coaches (goalkeeper and athletic coach)
+see every entry of the attendance list with its name, like the coach, and record attendance for
+it. Players do not read the attendance list (Action.TRAINING_WRITE)."""
 
 from __future__ import annotations
 
@@ -66,39 +66,13 @@ async def test_official_names_in_attendance_follow_the_roster_rule(
         rows = await seen(api, url)
         assert {ids["Luca"], ids["Noah"], mia} <= set(rows)
         assert rows[ids["Luca"]][0].startswith("Luca")
-    # analyst and assistant coaches see the own entry, none of the official-only ones
-    # (no name, no number), and cannot record attendance for one
+    # every Co-Trainer organises the team: every entry, with its name, like the coach
     for who in staff:
         for url in (session, match):
             rows = await seen(who, url)
-            assert mia in rows and not {ids["Luca"], ids["Noah"]} & set(rows)
-            assert not any(name.startswith(("Luca", "Noah")) for name, _ in rows.values())
-        hidden = await who.put(
+            assert {ids["Luca"], ids["Noah"], mia} <= set(rows)
+            assert rows[ids["Luca"]][0].startswith("Luca")
+        r = await who.put(
             session, json={"records": [{"player_id": ids["Luca"], "status": "present"}]}
         )
-        assert hidden.status_code == 422, hidden.text
-    # the coach records for everyone; the analyst's answer still leaves the hidden entry out
-    r = await api.put(session, json={"records": [{"player_id": ids["Luca"], "status": "present"}]})
-    assert r.status_code == 200, r.text
-    r = await analyst.put(session, json={"records": [{"player_id": mia, "status": "present"}]})
-    assert r.status_code == 200, r.text
-    assert ids["Luca"] not in {x["player_id"] for x in r.json()}
-
-    # a consent makes that person's entry visible, the other stays hidden
-    r = await api.post(
-        base(c) + f"/players/{ids['Luca']}/consents",
-        json={
-            "kind": "analysis",
-            "given_by": "self",
-            "given_by_name": "Volljährig",
-            "given_at": "2026-11-01T10:00:00+01:00",
-        },
-    )
-    assert r.status_code == 201, r.text
-    for who in staff:
-        for url in (session, match):
-            rows = await seen(who, url)
-            assert ids["Luca"] in rows and ids["Noah"] not in rows
-            assert rows[ids["Luca"]][0].startswith("Luca")
-    r = await analyst.put(session, json={"records": [{"player_id": ids["Luca"], "status": "late"}]})
-    assert r.status_code == 200, r.text
+        assert r.status_code == 200, r.text

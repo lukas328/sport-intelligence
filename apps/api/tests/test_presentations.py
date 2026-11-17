@@ -124,7 +124,7 @@ async def test_presentation_flow(
     det = (await coach.get(base)).json()
     assert det["slides"] == 5 and [s["position"] for s in det["slide_list"]] == [0, 1, 2, 3, 4]
 
-    # players see shared presentations only, read-only
+    # players see everything of the team (K18), shared or not
     await coach.post(
         f"{o}/invitations", json={"email": "p@hc-test.ch", "team_id": team, "team_role": "player"}
     )
@@ -132,9 +132,6 @@ async def test_presentation_flow(
     assert token
     player = make_api()
     await player.register("p@hc-test.ch", invitation_token=token.group(1))
-    assert (await player.get(f"{o}/teams/{team}/presentations")).json() == []
-    assert (await player.get(base)).status_code == 404
-    await coach.patch(base, json={"shared_with_players": True})
     assert [p["id"] for p in (await player.get(f"{o}/teams/{team}/presentations")).json()] == [
         pres["id"]
     ]

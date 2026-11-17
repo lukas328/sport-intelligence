@@ -54,6 +54,9 @@ async def team_preview(
 class PublicConfig(ApiModel):
     site_url: str
     support_email: str
+    # whether mails reach people (L2): without, the app promises no mail (no sign-in links,
+    # saving asks for a password, a forgotten password goes through the support)
+    mail_enabled: bool
 
 
 @router.get("/config", response_model=PublicConfig)
@@ -61,4 +64,8 @@ async def public_config(ctx: CtxDep) -> PublicConfig:
     """Addresses the pages link to (website, support), from the configuration: also before
     sign-in, for the entry and its legal links."""
     s = ctx.settings
-    return PublicConfig(site_url=s.site_url.rstrip("/"), support_email=s.support_email)
+    return PublicConfig(
+        site_url=s.site_url.rstrip("/"),
+        support_email=s.support_email,
+        mail_enabled=s.mail_delivers,
+    )
