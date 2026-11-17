@@ -1,0 +1,496 @@
+<title>Feldlinien Kalibrierung</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: working stage (frame + live court overlay) left, court diagram and actions right; one frame at a time. */
+:root {
+  --bg: #edf1ee; --panel: #ffffff; --ink: #15211b; --muted: #5b6b62; --line: #cfd9d3;
+  --court: #2f7d57; --pt: #ff9a1f; --sel: #1f6fe0; --good: #1f8a4c; --warn: #b25d00; --skip: #7b8794;
+  --display: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+  --body: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #0f1613; --panel: #18211d; --ink: #e5ece8; --muted: #9aaba2; --line: #2b3832;
+    --court: #5cc08d; --pt: #ffad47; --sel: #6aa6ff; --good: #4cc27f; --warn: #f0a24a; --skip: #8a96a3; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #0f1613; --panel: #18211d; --ink: #e5ece8; --muted: #9aaba2; --line: #2b3832;
+  --court: #5cc08d; --pt: #ffad47; --sel: #6aa6ff; --good: #4cc27f; --warn: #f0a24a; --skip: #8a96a3; color-scheme: dark; }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; margin: 0;
+  padding-block: 14px 24px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px; margin-bottom: 10px; }
+h1 { font-family: var(--display); font-weight: 700; font-size: 26px; margin: 0; letter-spacing: 0.01em; }
+.progress { font-family: var(--mono); font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.note { font-size: 13px; color: var(--warn); }
+main { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 14px; align-items: start; }
+@media (max-width: 960px) { main { grid-template-columns: minmax(0, 1fr); } }
+.stagewrap { position: relative; min-width: 0; }
+canvas#stage { display: block; width: 100%; height: auto; background: #000; border-radius: 6px; cursor: crosshair; touch-action: none; }
+canvas#loupe { position: absolute; top: 8px; right: 8px; width: 180px; height: 180px; border-radius: 6px; border: 2px solid var(--sel); pointer-events: none; background: #000; }
+.meta { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 8px; font-size: 13px; color: var(--muted); }
+.meta b { color: var(--ink); font-weight: 600; }
+aside { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px; display: grid; gap: 12px; min-width: 0; }
+aside h2 { font-family: var(--display); font-size: 17px; font-weight: 600; margin: 0; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+svg#court { width: 100%; height: auto; display: block; }
+svg#court .ln { stroke: var(--court); stroke-width: 0.25; fill: none; }
+svg#court .kp { fill: var(--panel); stroke: var(--muted); stroke-width: 0.25; cursor: pointer; }
+svg#court .kp.set { fill: var(--pt); stroke: var(--pt); }
+svg#court .kp.cur { stroke: var(--sel); stroke-width: 0.6; }
+svg#court text { font: 1.6px var(--body); fill: var(--muted); }
+.sel { font-size: 14px; min-height: 2.6em; }
+.sel b { color: var(--sel); }
+.row { display: flex; flex-wrap: wrap; gap: 8px; }
+button { font: 600 14px var(--body); padding: 8px 12px; border-radius: 6px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); cursor: pointer; }
+button:focus-visible { outline: 2px solid var(--sel); outline-offset: 2px; }
+button.primary { background: var(--good); border-color: var(--good); color: #fff; }
+button.ok { border-color: var(--good); color: var(--good); }
+button.skip { color: var(--skip); }
+button:disabled { opacity: 0.45; cursor: default; }
+kbd { font: 12px var(--mono); border: 1px solid var(--line); border-radius: 3px; padding: 0 4px; }
+ul.help { margin: 0; padding-left: 18px; font-size: 13px; color: var(--muted); display: grid; gap: 4px; }
+.status { font-size: 13px; font-weight: 600; }
+.status.ok, .status.corrected { color: var(--good); } .status.skip { color: var(--skip); } .status.open { color: var(--warn); }
+select { font: 14px var(--body); padding: 6px; border-radius: 6px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); max-width: 100%; }
+.toast { position: fixed; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 8px 14px; border-radius: 6px; font-size: 14px; }
+svg#court .hit { stroke: transparent; stroke-width: 1.6; fill: none; cursor: pointer; }
+svg#court .ln.set { stroke: var(--pt); stroke-width: 0.45; }
+svg#court .ln.cur { stroke: var(--sel); stroke-width: 0.6; }
+.modes { display: flex; gap: 6px; }
+.modes button[aria-pressed="true"] { background: var(--sel); border-color: var(--sel); color: #fff; }
+.chips { display: flex; flex-wrap: wrap; gap: 4px 6px; font-size: 12px; color: var(--muted); }
+.chips span { border: 1px solid var(--line); border-radius: 10px; padding: 1px 7px; }
+label.tog { font-size: 13px; color: var(--muted); display: flex; gap: 6px; align-items: center; }
+</style>
+
+<header>
+  <h1>Feldlinien · Runde 1b</h1>
+  <span class="progress" id="progress">lädt …</span>
+  <span class="note" id="note" hidden></span>
+</header>
+<main>
+  <div class="stagewrap">
+    <canvas id="stage" width="1280" height="720"></canvas>
+    <canvas id="loupe" width="180" height="180" hidden></canvas>
+    <div class="meta">
+      <span>Bild <b id="m-id">-</b></span><span id="m-game"></span><span>Status <span class="status open" id="m-status">offen</span></span>
+      <label for="pick">Springen <select id="pick"></select></label>
+    </div>
+  </div>
+  <aside>
+    <div class="modes" role="group" aria-label="Modus">
+      <button id="b-mline" aria-pressed="true">Linie <kbd>L</kbd></button>
+      <button id="b-mpoint" aria-pressed="false">Punkt <kbd>P</kbd></button>
+    </div>
+    <svg id="court" viewBox="-3 -3 46 26" role="img" aria-label="Spielfeld: Linie oder Punkt anklicken"></svg>
+    <div class="sel" id="sel"></div>
+    <div class="chips" id="chips"></div>
+    <label class="tog" for="snap"><input type="checkbox" id="snap" checked> Auf erkannte Linie einrasten <kbd>E</kbd></label>
+    <div class="row">
+      <button class="primary" id="b-save" title="Speichern und weiter (Enter)">Speichern <kbd>↵</kbd></button>
+      <button class="skip" id="b-skip" title="Nicht bestimmbar (X)">Nicht bestimmbar <kbd>X</kbd></button>
+    </div>
+    <div class="row">
+      <button id="b-undo" title="Letzten Klick zurück (Z)">Zurück <kbd>Z</kbd></button>
+      <button id="b-del" title="Gewählte Linie oder gewählten Punkt löschen (Entf)">Auswahl löschen</button>
+      <button id="b-clear">Alle löschen</button>
+    </div>
+    <div class="row">
+      <button id="b-prev">← Bild</button>
+      <button id="b-next">Bild →</button>
+    </div>
+    <ul class="help">
+      <li><b>Linie:</b> Linie wählen (Tasten <kbd>1</kbd> bis <kbd>9</kbd> oder im Feld), dann 2 oder mehr Klicks irgendwo auf diese Linie im Bild. Der Klick rastet auf die nächste erkannte Linie ein.</li>
+      <li>Am schnellsten: beide Seitenlinien und eine Torlinie oder die Mittellinie, je 2 bis 3 Klicks. Ab genug Klicks erscheint das Feld im Bild; liegt es auf den Linien: <kbd>↵</kbd>.</li>
+      <li><b>Punkt:</b> wenn eindeutig: Ecken sind die besten Anhalter, dazu Pfostenfuss, Wechselmarke, 7 m, 4 m.</li>
+      <li>Rastet ein Klick falsch ein: Punkt ziehen (bleibt dann, wo er ist) oder mit gedrückter <kbd>Shift</kbd> klicken.</li>
+      <li>x = 0 ist das Tor <b>links</b> im Bild; "nah" ist die Seite zur Kamera. Nur Handball-Linien. Unklar: <kbd>X</kbd>.</li>
+    </ul>
+  </aside>
+</main>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const FT = Math.sqrt(81 - 8.5 * 8.5);
+const KP = {
+  corner_bl: [0, 0, "Ecke links nah"], corner_tl: [0, 20, "Ecke links fern"],
+  corner_br: [40, 0, "Ecke rechts nah"], corner_tr: [40, 20, "Ecke rechts fern"],
+  center_bottom: [20, 0, "Mittellinie nah"], center_top: [20, 20, "Mittellinie fern"], center: [20, 10, "Mittelpunkt"],
+  post_left_low: [0, 8.5, "Pfostenfuss links, nah"], post_left_high: [0, 11.5, "Pfostenfuss links, fern"],
+  post_right_low: [40, 8.5, "Pfostenfuss rechts, nah"], post_right_high: [40, 11.5, "Pfostenfuss rechts, fern"],
+  goal_area_left_low: [0, 2.5, "6 m trifft Torlinie links, nah"], goal_area_left_high: [0, 17.5, "6 m trifft Torlinie links, fern"],
+  goal_area_right_low: [40, 2.5, "6 m trifft Torlinie rechts, nah"], goal_area_right_high: [40, 17.5, "6 m trifft Torlinie rechts, fern"],
+  goal_area_left_front_low: [6, 8.5, "6-m-Linie links, Ende gerades Stück nah"], goal_area_left_front_high: [6, 11.5, "6-m-Linie links, Ende gerades Stück fern"],
+  goal_area_right_front_low: [34, 8.5, "6-m-Linie rechts, Ende gerades Stück nah"], goal_area_right_front_high: [34, 11.5, "6-m-Linie rechts, Ende gerades Stück fern"],
+  free_throw_left_front_low: [9, 8.5, "9-m-Linie links, Ende gerades Stück nah"], free_throw_left_front_high: [9, 11.5, "9-m-Linie links, Ende gerades Stück fern"],
+  free_throw_right_front_low: [31, 8.5, "9-m-Linie rechts, Ende gerades Stück nah"], free_throw_right_front_high: [31, 11.5, "9-m-Linie rechts, Ende gerades Stück fern"],
+  free_throw_left_side_low: [FT, 0, "9 m trifft Seitenlinie links, nah"], free_throw_left_side_high: [FT, 20, "9 m trifft Seitenlinie links, fern"],
+  free_throw_right_side_low: [40 - FT, 0, "9 m trifft Seitenlinie rechts, nah"], free_throw_right_side_high: [40 - FT, 20, "9 m trifft Seitenlinie rechts, fern"],
+  penalty_mark_left: [7, 10, "7-m-Marke links (Mitte)"], penalty_mark_right: [33, 10, "7-m-Marke rechts (Mitte)"],
+  gk_line_left: [4, 10, "4-m-Torhütermarke links"], gk_line_right: [36, 10, "4-m-Torhütermarke rechts"],
+  subst_left_low: [15.5, 0, "Wechselmarke links, nah"], subst_right_low: [24.5, 0, "Wechselmarke rechts, nah"],
+  subst_left_high: [15.5, 20, "Wechselmarke links, fern"], subst_right_high: [24.5, 20, "Wechselmarke rechts, fern"],
+};
+function arc(cx, sx, r) {
+  const p = [];
+  for (let a = 0; a <= 90; a += 3) { const t = a * Math.PI / 180; p.push([cx + sx * r * Math.sin(t), 8.5 - r * Math.cos(t)]); }
+  for (let a = 90; a >= 0; a -= 3) { const t = a * Math.PI / 180; p.push([cx + sx * r * Math.sin(t), 11.5 + r * Math.cos(t)]); }
+  return p.filter((q) => q[1] >= 0 && q[1] <= 20);
+}
+const LINES = {  // name: [label, key, court polyline, straight?]
+  side_near: ["Seitenlinie nah", "1", [[0, 0], [40, 0]], true],
+  side_far: ["Seitenlinie fern", "2", [[0, 20], [40, 20]], true],
+  goal_left: ["Torlinie links", "3", [[0, 0], [0, 20]], true],
+  goal_right: ["Torlinie rechts", "4", [[40, 0], [40, 20]], true],
+  centre: ["Mittellinie", "5", [[20, 0], [20, 20]], true],
+  six_left: ["6-m-Linie links", "6", arc(0, 1, 6), false],
+  six_right: ["6-m-Linie rechts", "7", arc(40, -1, 6), false],
+  nine_left: ["9-m-Linie links (gestrichelt)", "8", arc(0, 1, 9), false],
+  nine_right: ["9-m-Linie rechts (gestrichelt)", "9", arc(40, -1, 9), false],
+};
+const KEYLINE = Object.fromEntries(Object.entries(LINES).map(([k, v]) => [v[1], k]));
+
+const st = { items: [], i: 0, mode: "line", cur: "side_near", pts: {}, lines: {}, hist: [], docs: {}, db: null,
+  img: new Image(), mask: null, drag: null, dirty: false, h: null };
+const cv = $("stage"), ctx = cv.getContext("2d"), lp = $("loupe"), lctx = lp.getContext("2d");
+function toast(t) { const el = $("toast"); el.textContent = t; el.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => el.hidden = true, 1800); }
+
+// ---- linear algebra ----
+function solve(A, b) {
+  const n = b.length; const M = A.map((r, i) => [...r, b[i]]);
+  for (let c = 0; c < n; c++) {
+    let p = c; for (let r = c + 1; r < n; r++) if (Math.abs(M[r][c]) > Math.abs(M[p][c])) p = r;
+    [M[c], M[p]] = [M[p], M[c]]; if (Math.abs(M[c][c]) < 1e-12) return null;
+    for (let r = 0; r < n; r++) if (r !== c) { const f = M[r][c] / M[c][c]; for (let k = c; k <= n; k++) M[r][k] -= f * M[c][k]; }
+  }
+  return M.map((r, i) => r[n] / r[i]);
+}
+function inv3(m) {
+  const [a, b, c, d, e, f, g, h, i] = m;
+  const A = e * i - f * h, B = -(d * i - f * g), C = d * h - e * g;
+  const det = a * A + b * B + c * C; if (Math.abs(det) < 1e-15) return null;
+  return [A / det, -(b * i - c * h) / det, (b * f - c * e) / det, B / det, (a * i - c * g) / det, -(a * f - c * d) / det, C / det, -(a * h - b * g) / det, (a * e - b * d) / det];
+}
+function mul3(p, q) { const r = []; for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) r.push(p[i * 3] * q[j] + p[i * 3 + 1] * q[3 + j] + p[i * 3 + 2] * q[6 + j]); return r; }
+function apply(h, [x, y]) { const w = h[6] * x + h[7] * y + h[8]; return [(h[0] * x + h[1] * y + h[2]) / w, (h[3] * x + h[4] * y + h[5]) / w, w]; }
+// court -> image from the clicks (see ml/calib/clicks.py, same method): linear equations on G =
+// H^-1 (a point gives two, a click on a straight court line one); on a pan end they leave up to
+// three directions open, which the arc clicks decide: the open directions are searched (grid, then
+// Nelder-Mead) for the court that explains all clicks, then a Gauss-Newton fit on all clicks.
+function jacobiEigen(A0) {
+  const n = A0.length, A = A0.map((r) => r.slice()), V = Array.from({ length: n }, (_, i) => Array.from({ length: n }, (_, j) => (i === j ? 1 : 0)));
+  for (let sweep = 0; sweep < 60; sweep++) {
+    let off = 0; for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) off += A[i][j] * A[i][j];
+    if (off < 1e-22) break;
+    for (let p = 0; p < n; p++) for (let q = p + 1; q < n; q++) {
+      if (Math.abs(A[p][q]) < 1e-300) continue;
+      const th = (A[q][q] - A[p][p]) / (2 * A[p][q]);
+      const t = Math.sign(th || 1) / (Math.abs(th) + Math.sqrt(th * th + 1)), c = 1 / Math.sqrt(t * t + 1), s = t * c;
+      for (let k = 0; k < n; k++) { const akp = A[k][p], akq = A[k][q]; A[k][p] = c * akp - s * akq; A[k][q] = s * akp + c * akq; }
+      for (let k = 0; k < n; k++) { const apk = A[p][k], aqk = A[q][k]; A[p][k] = c * apk - s * aqk; A[q][k] = s * apk + c * aqk; }
+      for (let k = 0; k < n; k++) { const vkp = V[k][p], vkq = V[k][q]; V[k][p] = c * vkp - s * vkq; V[k][q] = s * vkp + c * vkq; }
+    }
+  }
+  const idx = [...Array(n).keys()].sort((i, j) => A[i][i] - A[j][j]);
+  return idx.map((i) => V.map((row) => row[i]));  // eigenvectors, smallest eigenvalue first
+}
+function nelderMead(f, x0, step, iters) {
+  const n = x0.length; let pts = [x0.slice()];
+  for (let i = 0; i < n; i++) { const p = x0.slice(); p[i] += step; pts.push(p); }
+  let vals = pts.map(f);
+  for (let it = 0; it < iters; it++) {
+    const ord = [...pts.keys()].sort((i, j) => vals[i] - vals[j]); pts = ord.map((i) => pts[i]); vals = ord.map((i) => vals[i]);
+    if (Math.abs(vals[n] - vals[0]) < 1e-4) break;
+    const c = Array(n).fill(0); for (let i = 0; i < n; i++) for (let k = 0; k < n; k++) c[k] += pts[i][k] / n;
+    const at = (t) => c.map((v, k) => v + t * (pts[n][k] - v));
+    const r = at(-1), fr = f(r);
+    if (fr < vals[0]) { const e = at(-2), fe = f(e); if (fe < fr) { pts[n] = e; vals[n] = fe; } else { pts[n] = r; vals[n] = fr; } }
+    else if (fr < vals[n - 1]) { pts[n] = r; vals[n] = fr; }
+    else { const k = at(0.5), fk = f(k); if (fk < vals[n]) { pts[n] = k; vals[n] = fk; } else { for (let i = 1; i <= n; i++) { pts[i] = pts[i].map((v, j) => pts[0][j] + 0.5 * (v - pts[0][j])); vals[i] = f(pts[i]); } } }
+  }
+  const b = vals.indexOf(Math.min(...vals)); return [pts[b], vals[b]];
+}
+function clickCost(h) {  // mean distance of the clicks to the court, each capped at 50 px
+  const d = [];
+  for (const [n, p] of Object.entries(st.pts)) { const q = apply(h, KP[n]); d.push(Math.hypot(q[0] - p[0], q[1] - p[1])); }
+  for (const [n, cl] of Object.entries(st.lines)) {
+    const proj = COARSE[n].map((c) => apply(h, c));
+    for (const p of cl) { let bd = Infinity; for (const q of proj) { const e = (q[0] - p[0]) ** 2 + (q[1] - p[1]) ** 2; if (e < bd) bd = e; } d.push(Math.sqrt(bd)); }
+  }
+  let s = 0; for (const x of d) s += Number.isFinite(x) ? Math.min(x, 50) : 50; return d.length ? s / d.length : 1e9;
+}
+function fitH() {
+  const nEq = 2 * Object.keys(st.pts).length + Object.values(st.lines).reduce((a, c) => a + c.length, 0);
+  const nItems = Object.keys(st.pts).length + Object.keys(st.lines).length;
+  if (nEq < 8 || nItems < 3) return null;
+  const W = cv.width, Hh = cv.height;
+  const T = [2 / W, 0, -1, 0, 2 / W, -Hh / W, 0, 0, 1], C = [1 / 20, 0, -1, 0, 1 / 20, -0.5, 0, 0, 1];
+  const tn = (p) => [T[0] * p[0] + T[2], T[4] * p[1] + T[5], 1], cn = (p) => [C[0] * p[0] + C[2], C[4] * p[1] + C[5], 1];
+  const rows = [];
+  for (const [n, p] of Object.entries(st.pts)) {
+    const x = cn(KP[n]), u = tn(p);
+    rows.push([x[2] * u[0], x[2] * u[1], x[2] * u[2], 0, 0, 0, -x[0] * u[0], -x[0] * u[1], -x[0] * u[2]]);
+    rows.push([0, 0, 0, x[2] * u[0], x[2] * u[1], x[2] * u[2], -x[1] * u[0], -x[1] * u[1], -x[1] * u[2]]);
+  }
+  for (const [n, cl] of Object.entries(st.lines)) {
+    if (!LINES[n][3]) continue;
+    const [a, b] = LINES[n][2].map(cn);
+    const l = [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+    for (const p of cl) { const u = tn(p); rows.push([l[0] * u[0], l[0] * u[1], l[0] * u[2], l[1] * u[0], l[1] * u[1], l[1] * u[2], l[2] * u[0], l[2] * u[1], l[2] * u[2]]); }
+  }
+  if (rows.length < 4) return null;
+  const AtA = Array.from({ length: 9 }, (_, i) => Array.from({ length: 9 }, (_, j) => rows.reduce((a, r) => a + r[i] * r[j], 0)));
+  const V = jacobiEigen(AtA), Ti = inv3(T);
+  const toH = (g) => { const Hn = inv3(g); if (!Hn) return null; const h = mul3(mul3(Ti, Hn), C); return Math.abs(h[8]) > 1e-12 ? h.map((v) => v / h[8]) : null; };
+  const cands = [];
+  const h1 = toH(V[0]); if (h1) cands.push([clickCost(h1), h1]);
+  for (const dim of [2, 3]) {
+    const gOf = dim === 2 ? (a) => V[0].map((v, k) => Math.cos(a[0]) * v + Math.sin(a[0]) * V[1][k])
+      : (a) => V[0].map((v, k) => Math.cos(a[0]) * v + Math.sin(a[0]) * (Math.cos(a[1]) * V[1][k] + Math.sin(a[1]) * V[2][k]));
+    const cost = (a) => { const h = toH(gOf(a)); return h ? clickCost(h) : 1e9; };
+    const grid = [];
+    if (dim === 2) for (let i = 0; i < 180; i++) grid.push([i * Math.PI / 180]);
+    else for (let i = 0; i < 45; i++) for (let j = 0; j < 90; j++) grid.push([i * Math.PI / 45, j * 2 * Math.PI / 90]);
+    const best = grid.map((a) => [cost(a), a]).sort((x, y) => x[0] - y[0]).slice(0, 6);
+    for (const [, a0] of best) { const [a, v] = nelderMead(cost, a0, dim === 2 ? 0.01 : 0.03, 300); const h = toH(gOf(a)); if (h) cands.push([v, h]); }
+  }
+  if (!cands.length) return null;
+  cands.sort((x, y) => x[0] - y[0]);
+  return refine(cands[0][1]);
+}
+// a few Gauss-Newton steps on all clicks, arcs included (distance to the projected line)
+const DENSE = Object.fromEntries(Object.entries(LINES).map(([k, v]) => {
+  const pl = v[2], out = [];  // a sample every 10 cm along the line
+  for (let s = 0; s < pl.length - 1; s++) {
+    const n = Math.max(2, Math.ceil(Math.hypot(pl[s + 1][0] - pl[s][0], pl[s + 1][1] - pl[s][1]) / 0.1));
+    for (let i = 0; i < n; i++) { const t = i / n; out.push([pl[s][0] + t * (pl[s + 1][0] - pl[s][0]), pl[s][1] + t * (pl[s + 1][1] - pl[s][1])]); }
+  }
+  out.push(pl[pl.length - 1]); return [k, out];
+}));
+const COARSE = Object.fromEntries(Object.entries(DENSE).map(([k, v]) => [k, v.filter((_, i) => i % 4 === 0 || i === v.length - 1)]));
+function residuals(h) {
+  const r = [];
+  for (const [n, p] of Object.entries(st.pts)) { const q = apply(h, KP[n]); r.push(q[0] - p[0], q[1] - p[1]); }
+  for (const [n, cl] of Object.entries(st.lines)) {
+    const proj = DENSE[n].map((c) => apply(h, c));
+    for (const p of cl) {
+      let bd = Infinity, bq = null;
+      for (const q of proj) { const d = (q[0] - p[0]) ** 2 + (q[1] - p[1]) ** 2; if (d < bd) { bd = d; bq = q; } }
+      r.push(Math.sqrt(bd));
+    }
+  }
+  return r;
+}
+function refine(h0) {
+  let h = h0.slice(), r = residuals(h), cost = r.reduce((a, b) => a + b * b, 0), lam = 1e-3;
+  for (let it = 0; it < 15; it++) {
+    const J = [];
+    for (let k = 0; k < 8; k++) { const e = Math.abs(h[k]) * 1e-6 + 1e-9, hp = h.slice(); hp[k] += e; const rp = residuals(hp); J.push(rp.map((v, i) => (v - r[i]) / e)); }
+    const A = Array.from({ length: 8 }, (_, i) => Array.from({ length: 8 }, (_, j) => J[i].reduce((a, v, m) => a + v * J[j][m], 0)));
+    const g = Array.from({ length: 8 }, (_, i) => -J[i].reduce((a, v, m) => a + v * r[m], 0));
+    let improved = false;
+    for (let tries = 0; tries < 6 && !improved; tries++) {
+      const Ad = A.map((row, i) => row.map((v, j) => v + (i === j ? lam * (A[i][i] + 1e-12) : 0)));
+      const d = solve(Ad, g); if (!d) { lam *= 10; continue; }
+      const hn = h.map((v, k) => (k < 8 ? v + d[k] : v)); const rn = residuals(hn); const cn = rn.reduce((a, b) => a + b * b, 0);
+      if (cn < cost) { h = hn; r = rn; cost = cn; lam /= 3; improved = true; } else lam *= 10;
+    }
+    if (!improved) break;
+  }
+  return h;
+}
+
+// ---- court diagram ----
+function buildCourt() {
+  const s = $("court"); let html = "";
+  for (const [k, [, , pl]] of Object.entries(LINES)) {
+    const pts = pl.map(([x, y]) => `${x},${20 - y}`).join(" ");
+    html += `<polyline class="ln" data-l="${k}" points="${pts}"/><polyline class="hit" data-l="${k}" points="${pts}"><title>${LINES[k][0]} (${LINES[k][1]})</title></polyline>`;
+  }
+  html += `<polyline class="ln" points="0,8.5 -1,8.5 -1,11.5 0,11.5"/><polyline class="ln" points="40,8.5 41,8.5 41,11.5 40,11.5"/>`;
+  html += `<text x="14" y="22.6">nahe Seitenlinie (Kamera)</text>`;
+  for (const [k, [x, y]] of Object.entries(KP)) html += `<circle class="kp" data-k="${k}" cx="${x}" cy="${20 - y}" r="0.6"><title>${KP[k][2]}</title></circle>`;
+  s.innerHTML = html;
+  s.querySelectorAll(".hit").forEach((c) => c.addEventListener("click", () => { setMode("line"); st.cur = c.dataset.l; renderSide(); }));
+  s.querySelectorAll(".kp").forEach((c) => c.addEventListener("click", () => { setMode("point"); st.cur = c.dataset.k; renderSide(); }));
+}
+function setMode(m) {
+  st.mode = m; $("b-mline").setAttribute("aria-pressed", m === "line"); $("b-mpoint").setAttribute("aria-pressed", m === "point");
+  if (m === "line" && !(st.cur in LINES)) st.cur = "side_near";
+  if (m === "point" && !(st.cur in KP)) st.cur = null;
+  renderSide();
+}
+
+// ---- drawing ----
+function refit() { st.h = fitH(); draw(); renderSide(); }
+function draw() {
+  ctx.drawImage(st.img, 0, 0, cv.width, cv.height);
+  if (st.h) {
+    const h = st.h, sgn = Math.sign(apply(h, [20, 10])[2]) || 1;
+    ctx.strokeStyle = "rgba(255,0,255,0.85)"; ctx.lineWidth = 1.2;
+    const all = [...Object.values(LINES).map((v) => v[2]), [[0, 8.5], [-1, 8.5], [-1, 11.5], [0, 11.5]], [[40, 8.5], [41, 8.5], [41, 11.5], [40, 11.5]]];
+    for (const pl of all) {
+      ctx.beginPath(); let on = false;
+      for (let s = 0; s < pl.length - 1; s++) for (let t = 0; t <= 1; t += 0.05) {
+        const p = [pl[s][0] + t * (pl[s + 1][0] - pl[s][0]), pl[s][1] + t * (pl[s + 1][1] - pl[s][1])];
+        const q = apply(h, p); if (q[2] * sgn <= 0 || Math.abs(q[0]) > 1e5) { on = false; continue; }
+        if (!on) { ctx.moveTo(q[0], q[1]); on = true; } else ctx.lineTo(q[0], q[1]);
+      }
+      ctx.stroke();
+    }
+  }
+  ctx.font = "600 13px Barlow, sans-serif";
+  for (const [n, cl] of Object.entries(st.lines)) {
+    const col = n === st.cur && st.mode === "line" ? "#3b82ff" : "#2ee06b";
+    cl.forEach(([x, y], j) => {
+      ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x, y, 5, 0, 7); ctx.stroke();
+      if (j === 0) { ctx.lineWidth = 3; ctx.strokeStyle = "#000"; ctx.strokeText(LINES[n][0], x + 8, y - 8); ctx.fillStyle = col; ctx.fillText(LINES[n][0], x + 8, y - 8); }
+    });
+  }
+  for (const [n, [x, y]] of Object.entries(st.pts)) {
+    const col = n === st.cur && st.mode === "point" ? "#3b82ff" : "#ff9a1f";
+    ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x - 6, y - 6); ctx.lineTo(x + 6, y + 6); ctx.moveTo(x + 6, y - 6); ctx.lineTo(x - 6, y + 6); ctx.stroke();
+    ctx.lineWidth = 3; ctx.strokeStyle = "#000"; ctx.strokeText(KP[n][2], x + 9, y - 9); ctx.fillStyle = col; ctx.fillText(KP[n][2], x + 9, y - 9);
+  }
+}
+function drawLoupe(p) {
+  if (!p) { lp.hidden = true; return; }
+  lp.hidden = false; const z = 4, r = 180 / z / 2;
+  lctx.imageSmoothingEnabled = false;
+  lctx.drawImage(cv, p[0] - r, p[1] - r, 2 * r, 2 * r, 0, 0, 180, 180);
+  lctx.strokeStyle = "#3b82ff"; lctx.lineWidth = 1;
+  lctx.beginPath(); lctx.moveTo(90, 70); lctx.lineTo(90, 110); lctx.moveTo(70, 90); lctx.lineTo(110, 90); lctx.stroke();
+}
+// snap to the centre of the nearest detected line pixel run (mask: white = line)
+function snap(p) {
+  if (!$("snap").checked || !st.mask) return p;
+  const { data, width, height } = st.mask, R = 10;
+  const at = (x, y) => x >= 0 && y >= 0 && x < width && y < height && data[(y * width + x) * 4] > 127;
+  const x0 = Math.round(p[0]), y0 = Math.round(p[1]); let best = null, bd = R * R + 1;
+  for (let dy = -R; dy <= R; dy++) for (let dx = -R; dx <= R; dx++) { const d = dx * dx + dy * dy; if (d < bd && at(x0 + dx, y0 + dy)) { bd = d; best = [x0 + dx, y0 + dy]; } }
+  if (!best) return p;
+  let sx = 0, sy = 0, n = 0;
+  for (let dy = -3; dy <= 3; dy++) for (let dx = -3; dx <= 3; dx++) if (at(best[0] + dx, best[1] + dy)) { sx += best[0] + dx; sy += best[1] + dy; n++; }
+  return [sx / n, sy / n];
+}
+
+function item() { return st.items[st.i]; }
+function statusText(d) { return !d ? ["open", "offen"] : d.status === "skip" ? ["skip", "nicht bestimmbar"] : ["corrected", "gespeichert"]; }
+function renderSide() {
+  document.querySelectorAll("#court .kp").forEach((c) => { c.classList.toggle("set", c.dataset.k in st.pts); c.classList.toggle("cur", st.mode === "point" && c.dataset.k === st.cur); });
+  document.querySelectorAll("#court .ln[data-l]").forEach((c) => { c.classList.toggle("set", c.dataset.l in st.lines); c.classList.toggle("cur", st.mode === "line" && c.dataset.l === st.cur); });
+  $("sel").innerHTML = st.mode === "line"
+    ? `Linie: <b>${LINES[st.cur][0]}</b>. Klicke im Bild 2 oder mehr Stellen auf dieser Linie.`
+    : (st.cur ? `Punkt: <b>${KP[st.cur][2]}</b>. Klicke im Bild an die Stelle.` : "Wähle im Feld einen Punkt.");
+  const chips = [...Object.entries(st.lines).map(([n, c]) => `${LINES[n][0]} ×${c.length}`), ...Object.keys(st.pts).map((n) => KP[n][2])];
+  $("chips").innerHTML = chips.map((c) => `<span>${c}</span>`).join("") || "<span>noch nichts gesetzt</span>";
+  const done = st.items.filter((x) => st.docs[x.id]).length;
+  $("progress").textContent = `${st.i + 1} / ${st.items.length} · erledigt ${done}` + (st.h ? " · Feld sichtbar" : "");
+  const [cls, txt] = statusText(item() && st.docs[item().id]); const ms = $("m-status"); ms.className = "status " + cls; ms.textContent = txt;
+}
+function load(i) {
+  st.i = Math.max(0, Math.min(st.items.length - 1, i)); const it = item(); if (!it) return;
+  const d = st.docs[it.id] || it.prefill || {};
+  st.pts = JSON.parse(JSON.stringify(d.points || {})); st.lines = JSON.parse(JSON.stringify(d.lines || {}));
+  for (const n of Object.keys(st.pts)) if (!(n in KP)) delete st.pts[n];
+  st.hist = []; st.dirty = false; setMode("line"); st.cur = "side_near";
+  $("m-id").textContent = it.id; $("m-game").textContent = it.label || ""; $("pick").value = String(st.i);
+  st.mask = null;
+  st.h = null;
+  st.img.onload = () => { cv.width = st.img.naturalWidth; cv.height = st.img.naturalHeight; refit(); };
+  st.img.src = it.img;
+  const m = new Image();
+  m.onload = () => { const c = document.createElement("canvas"); c.width = m.naturalWidth; c.height = m.naturalHeight; const x = c.getContext("2d"); x.drawImage(m, 0, 0); st.mask = x.getImageData(0, 0, c.width, c.height); };
+  m.src = it.mask;
+  renderSide();
+}
+function pos(ev) { const r = cv.getBoundingClientRect(); return [(ev.clientX - r.left) * cv.width / r.width, (ev.clientY - r.top) * cv.height / r.height]; }
+function nearest(p) {
+  const lim = 10 * cv.width / cv.getBoundingClientRect().width; let best = null, bd = lim;
+  for (const [n, q] of Object.entries(st.pts)) { const d = Math.hypot(q[0] - p[0], q[1] - p[1]); if (d < bd) { bd = d; best = { kind: "p", n }; } }
+  for (const [n, cl] of Object.entries(st.lines)) cl.forEach((q, j) => { const d = Math.hypot(q[0] - p[0], q[1] - p[1]); if (d < bd) { bd = d; best = { kind: "l", n, j }; } });
+  return best;
+}
+cv.addEventListener("pointerdown", (ev) => {
+  const p = pos(ev); const hit = nearest(p);
+  if (hit) { st.drag = hit; if (hit.kind === "p") { setMode("point"); st.cur = hit.n; } else { setMode("line"); st.cur = hit.n; } cv.setPointerCapture(ev.pointerId); }
+  else if (st.mode === "line") { const q = ev.shiftKey ? p : snap(p); (st.lines[st.cur] ||= []).push(q); st.hist.push({ kind: "l", n: st.cur }); st.dirty = true; }
+  else if (st.cur) { st.pts[st.cur] = ev.shiftKey ? p : snap(p); st.hist.push({ kind: "p", n: st.cur }); st.dirty = true; }
+  else { toast("Zuerst rechts eine Linie oder einen Punkt wählen."); return; }
+  if (!st.drag) refit(); else draw();
+  drawLoupe(p); renderSide();
+});
+cv.addEventListener("pointermove", (ev) => {
+  const p = pos(ev);
+  if (st.drag) { const q = p; if (st.drag.kind === "p") st.pts[st.drag.n] = q; else st.lines[st.drag.n][st.drag.j] = q; st.dirty = true; draw(); }
+  drawLoupe(p);
+});
+cv.addEventListener("pointerup", () => { const was = st.drag; st.drag = null; if (was) refit(); else renderSide(); });  // a dragged click stays where it was put
+cv.addEventListener("pointerleave", () => { if (!st.drag) drawLoupe(null); });
+
+async function store(status) {
+  const it = item(); if (!it) return;
+  if (status !== "skip" && !st.h) { toast("Noch zu wenig: mindestens zwei Linien mit je 2 Klicks und eine dritte Linie, oder 4 Punkte."); return; }
+  const r1 = (v) => [Math.round(v[0] * 10) / 10, Math.round(v[1] * 10) / 10];
+  const doc = status === "skip" ? { status, points: {}, lines: {}, at: new Date().toISOString() } : {
+    status, at: new Date().toISOString(), h: st.h.map((v) => Math.round(v * 1e8) / 1e8),
+    points: Object.fromEntries(Object.entries(st.pts).map(([k, v]) => [k, r1(v)])),
+    lines: Object.fromEntries(Object.entries(st.lines).filter(([, c]) => c.length).map(([k, c]) => [k, c.map(r1)])),
+  };
+  st.docs[it.id] = doc;
+  if (st.db) { try { await st.db.collection("lines").doc(it.id).set(doc); } catch (e) { toast("Nicht gespeichert (" + (e.code || e.message) + ")."); return; } }
+  toast(status === "skip" ? "Als nicht bestimmbar gespeichert" : "Gespeichert");
+  const j = st.items.findIndex((x, k) => k > st.i && !st.docs[x.id]); load(j >= 0 ? j : st.i + 1);
+}
+function undo() {
+  const h = st.hist.pop(); if (!h) return;
+  if (h.kind === "p") delete st.pts[h.n]; else { st.lines[h.n].pop(); if (!st.lines[h.n].length) delete st.lines[h.n]; }
+  st.dirty = true; refit();
+}
+$("b-mline").onclick = () => setMode("line");
+$("b-mpoint").onclick = () => setMode("point");
+$("b-save").onclick = () => store("saved");
+$("b-skip").onclick = () => store("skip");
+$("b-undo").onclick = undo;
+$("b-del").onclick = () => { if (st.mode === "line") delete st.lines[st.cur]; else if (st.cur) delete st.pts[st.cur]; st.dirty = true; refit(); };
+$("b-clear").onclick = () => { st.pts = {}; st.lines = {}; st.hist = []; st.dirty = true; refit(); };
+$("b-prev").onclick = () => load(st.i - 1);
+$("b-next").onclick = () => load(st.i + 1);
+$("pick").onchange = (ev) => load(Number(ev.target.value));
+$("snap").onchange = () => renderSide();
+document.addEventListener("keydown", (ev) => {
+  if (ev.target.tagName === "SELECT" || ev.target.tagName === "INPUT" && ev.target.type !== "checkbox") return;
+  const k = ev.key;
+  if (k === "Enter") { ev.preventDefault(); $("b-save").click(); }
+  else if (k in KEYLINE) { setMode("line"); st.cur = KEYLINE[k]; draw(); renderSide(); }
+  else if (k === "l" || k === "L") setMode("line");
+  else if (k === "p" || k === "P") setMode("point");
+  else if (k === "x" || k === "X") $("b-skip").click();
+  else if (k === "z" || k === "Z") undo();
+  else if (k === "e" || k === "E") { $("snap").checked = !$("snap").checked; toast($("snap").checked ? "Einrasten an" : "Einrasten aus"); }
+  else if (k === "Delete" || k === "Backspace") $("b-del").click();
+  else if (k === "ArrowRight") load(st.i + 1);
+  else if (k === "ArrowLeft") load(st.i - 1);
+});
+
+async function start() {
+  buildCourt();
+  try { st.items = await (await fetch("items.json")).json(); }
+  catch (e) { $("progress").textContent = "Bildliste konnte nicht geladen werden."; return; }
+  $("pick").innerHTML = st.items.map((x, i) => `<option value="${i}">${i + 1}. ${x.id}</option>`).join("");
+  load(0);
+  const db = window.claude && window.claude.use ? await window.claude.use("db") : null;
+  if (!db) { const n = $("note"); n.hidden = false; n.textContent = "Speicher nicht verfügbar: bitte bei claude.ai angemeldet öffnen."; return; }
+  st.db = db;
+  const timer = setTimeout(() => { const n = $("note"); n.hidden = false; n.textContent = "Gespeicherte Klicks noch nicht erreichbar."; }, 10000);
+  let first = true;
+  db.collection("lines").onSnapshot((snap) => {
+    clearTimeout(timer); $("note").hidden = true;
+    for (const d of snap.docs) st.docs[d.id] = d.data();
+    if (first) { first = false; const j = st.items.findIndex((x) => !st.docs[x.id]); load(j >= 0 ? j : 0); return; }
+    renderSide();
+  }, (e) => { clearTimeout(timer); const n = $("note"); n.hidden = false; n.textContent = "Klicks konnten nicht geladen werden (" + e.code + ")."; });
+}
+start();
+</script>

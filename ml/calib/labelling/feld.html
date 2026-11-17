@@ -1,0 +1,299 @@
+<title>Feldpunkte Kalibrierung</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: working stage (frame + live court overlay) left, court diagram and actions right; one frame at a time. */
+:root {
+  --bg: #edf1ee; --panel: #ffffff; --ink: #15211b; --muted: #5b6b62; --line: #cfd9d3;
+  --court: #2f7d57; --pt: #ff9a1f; --sel: #1f6fe0; --good: #1f8a4c; --warn: #b25d00; --skip: #7b8794;
+  --display: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+  --body: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #0f1613; --panel: #18211d; --ink: #e5ece8; --muted: #9aaba2; --line: #2b3832;
+    --court: #5cc08d; --pt: #ffad47; --sel: #6aa6ff; --good: #4cc27f; --warn: #f0a24a; --skip: #8a96a3; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #0f1613; --panel: #18211d; --ink: #e5ece8; --muted: #9aaba2; --line: #2b3832;
+  --court: #5cc08d; --pt: #ffad47; --sel: #6aa6ff; --good: #4cc27f; --warn: #f0a24a; --skip: #8a96a3; color-scheme: dark; }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; margin: 0;
+  padding-block: 14px 24px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px; margin-bottom: 10px; }
+h1 { font-family: var(--display); font-weight: 700; font-size: 26px; margin: 0; letter-spacing: 0.01em; }
+.progress { font-family: var(--mono); font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.note { font-size: 13px; color: var(--warn); }
+main { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 14px; align-items: start; }
+@media (max-width: 960px) { main { grid-template-columns: minmax(0, 1fr); } }
+.stagewrap { position: relative; min-width: 0; }
+canvas#stage { display: block; width: 100%; height: auto; background: #000; border-radius: 6px; cursor: crosshair; touch-action: none; }
+canvas#loupe { position: absolute; top: 8px; right: 8px; width: 180px; height: 180px; border-radius: 6px; border: 2px solid var(--sel); pointer-events: none; background: #000; }
+.meta { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 8px; font-size: 13px; color: var(--muted); }
+.meta b { color: var(--ink); font-weight: 600; }
+aside { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px; display: grid; gap: 12px; min-width: 0; }
+aside h2 { font-family: var(--display); font-size: 17px; font-weight: 600; margin: 0; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+svg#court { width: 100%; height: auto; display: block; }
+svg#court .ln { stroke: var(--court); stroke-width: 0.25; fill: none; }
+svg#court .kp { fill: var(--panel); stroke: var(--muted); stroke-width: 0.25; cursor: pointer; }
+svg#court .kp.set { fill: var(--pt); stroke: var(--pt); }
+svg#court .kp.cur { stroke: var(--sel); stroke-width: 0.6; }
+svg#court text { font: 1.6px var(--body); fill: var(--muted); }
+.sel { font-size: 14px; min-height: 2.6em; }
+.sel b { color: var(--sel); }
+.row { display: flex; flex-wrap: wrap; gap: 8px; }
+button { font: 600 14px var(--body); padding: 8px 12px; border-radius: 6px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); cursor: pointer; }
+button:focus-visible { outline: 2px solid var(--sel); outline-offset: 2px; }
+button.primary { background: var(--good); border-color: var(--good); color: #fff; }
+button.ok { border-color: var(--good); color: var(--good); }
+button.skip { color: var(--skip); }
+button:disabled { opacity: 0.45; cursor: default; }
+kbd { font: 12px var(--mono); border: 1px solid var(--line); border-radius: 3px; padding: 0 4px; }
+ul.help { margin: 0; padding-left: 18px; font-size: 13px; color: var(--muted); display: grid; gap: 4px; }
+.status { font-size: 13px; font-weight: 600; }
+.status.ok, .status.corrected { color: var(--good); } .status.skip { color: var(--skip); } .status.open { color: var(--warn); }
+select { font: 14px var(--body); padding: 6px; border-radius: 6px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); max-width: 100%; }
+.toast { position: fixed; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 8px 14px; border-radius: 6px; font-size: 14px; }
+</style>
+
+<header>
+  <h1>Feldpunkte</h1>
+  <span class="progress" id="progress">lädt …</span>
+  <span class="note" id="note" hidden></span>
+</header>
+<main>
+  <div class="stagewrap">
+    <canvas id="stage" width="1280" height="720"></canvas>
+    <canvas id="loupe" width="180" height="180" hidden></canvas>
+    <div class="meta">
+      <span>Bild <b id="m-id">-</b></span><span id="m-game"></span><span>Status <span class="status open" id="m-status">offen</span></span>
+      <label for="pick">Springen <select id="pick"></select></label>
+    </div>
+  </div>
+  <aside>
+    <h2>Punkt wählen</h2>
+    <svg id="court" viewBox="-3 -3 46 26" role="img" aria-label="Spielfeld mit den Punkten zum Anklicken"></svg>
+    <div class="sel" id="sel">Wähle im Feld einen Punkt, dann klicke im Bild an die Stelle.</div>
+    <div class="row">
+      <button class="ok" id="b-ok" title="Vorschlag stimmt (S)">Stimmt <kbd>S</kbd></button>
+      <button class="primary" id="b-save" title="Speichern und weiter (Enter)">Speichern <kbd>↵</kbd></button>
+      <button class="skip" id="b-skip" title="Nicht bestimmbar (X)">Nicht bestimmbar <kbd>X</kbd></button>
+    </div>
+    <div class="row">
+      <button id="b-del" title="Gewählten Punkt löschen (Entf)">Punkt löschen</button>
+      <button id="b-clear">Alle löschen</button>
+      <button id="b-prev">← Zurück</button>
+      <button id="b-next">Weiter →</button>
+    </div>
+    <ul class="help">
+      <li>Feld: x = 0 ist das Tor <b>links</b> im Bild, die nahe Seitenlinie ist die zur Kamera.</li>
+      <li>Nur die <b>Handball</b>-Linien. 4 bis 6 Punkte reichen, gut verteilt; grob genügt, ich passe danach an die Linien an.</li>
+      <li>Ab 4 Punkten erscheinen die Feldlinien im Bild. Liegen sie auf den Linien: Speichern.</li>
+      <li>Punkte lassen sich ziehen. Wiederholung, Nahaufnahme oder andere Kamera: Nicht bestimmbar.</li>
+    </ul>
+  </aside>
+</main>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const L = 40, W = 20, FT = Math.sqrt(81 - 8.5 * 8.5);
+const KP = {
+  corner_bl: [0, 0, "Ecke links nah"], corner_tl: [0, 20, "Ecke links fern"],
+  corner_br: [40, 0, "Ecke rechts nah"], corner_tr: [40, 20, "Ecke rechts fern"],
+  center_bottom: [20, 0, "Mittellinie nah"], center_top: [20, 20, "Mittellinie fern"], center: [20, 10, "Mittelpunkt"],
+  post_left_low: [0, 8.5, "Pfosten links, nah (Fuss)"], post_left_high: [0, 11.5, "Pfosten links, fern (Fuss)"],
+  post_right_low: [40, 8.5, "Pfosten rechts, nah (Fuss)"], post_right_high: [40, 11.5, "Pfosten rechts, fern (Fuss)"],
+  goal_area_left_low: [0, 2.5, "6 m trifft Torlinie links, nah"], goal_area_left_high: [0, 17.5, "6 m trifft Torlinie links, fern"],
+  goal_area_right_low: [40, 2.5, "6 m trifft Torlinie rechts, nah"], goal_area_right_high: [40, 17.5, "6 m trifft Torlinie rechts, fern"],
+  goal_area_left_front_low: [6, 8.5, "6-m-Linie links, Ende nah"], goal_area_left_front_high: [6, 11.5, "6-m-Linie links, Ende fern"],
+  goal_area_right_front_low: [34, 8.5, "6-m-Linie rechts, Ende nah"], goal_area_right_front_high: [34, 11.5, "6-m-Linie rechts, Ende fern"],
+  free_throw_left_front_low: [9, 8.5, "9-m-Linie links, gerades Stück nah"], free_throw_left_front_high: [9, 11.5, "9-m-Linie links, gerades Stück fern"],
+  free_throw_right_front_low: [31, 8.5, "9-m-Linie rechts, gerades Stück nah"], free_throw_right_front_high: [31, 11.5, "9-m-Linie rechts, gerades Stück fern"],
+  free_throw_left_side_low: [FT, 0, "9 m trifft Seitenlinie links, nah"], free_throw_left_side_high: [FT, 20, "9 m trifft Seitenlinie links, fern"],
+  free_throw_right_side_low: [L - FT, 0, "9 m trifft Seitenlinie rechts, nah"], free_throw_right_side_high: [L - FT, 20, "9 m trifft Seitenlinie rechts, fern"],
+  penalty_mark_left: [7, 10, "7-m-Punkt links"], penalty_mark_right: [33, 10, "7-m-Punkt rechts"],
+};
+
+function arcLine(cx, sx, r) {  // goal area / free-throw line at goal x = cx (sx = +1 left goal, -1 right goal)
+  const pts = [];
+  for (let a = 0; a <= 90; a += 5) { const t = a * Math.PI / 180; pts.push([cx + sx * r * Math.sin(t), 8.5 - r * Math.cos(t)]); }
+  for (let a = 90; a >= 0; a -= 5) { const t = a * Math.PI / 180; pts.push([cx + sx * r * Math.sin(t), 11.5 + r * Math.cos(t)]); }
+  return pts.filter((p) => p[1] >= 0 && p[1] <= 20);
+}
+const LINES = [
+  [[0, 0], [40, 0], [40, 20], [0, 20], [0, 0]], [[20, 0], [20, 20]],
+  arcLine(0, 1, 6), arcLine(40, -1, 6), arcLine(0, 1, 9), arcLine(40, -1, 9),
+  [[6.9, 10], [7.1, 10]], [[32.9, 10], [33.1, 10]],
+];
+
+const st = { items: [], i: 0, cur: null, pts: {}, docs: {}, db: null, img: new Image(), drag: null, hover: null, dirty: false };
+const cv = $("stage"), ctx = cv.getContext("2d"), lp = $("loupe"), lctx = lp.getContext("2d");
+
+function toast(t) { const el = $("toast"); el.textContent = t; el.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => el.hidden = true, 1800); }
+
+// ---- homography (DLT, normalised) ----
+function solve(A, b) {
+  const n = b.length; const M = A.map((r, i) => [...r, b[i]]);
+  for (let c = 0; c < n; c++) {
+    let p = c; for (let r = c + 1; r < n; r++) if (Math.abs(M[r][c]) > Math.abs(M[p][c])) p = r;
+    [M[c], M[p]] = [M[p], M[c]]; if (Math.abs(M[c][c]) < 1e-12) return null;
+    for (let r = 0; r < n; r++) if (r !== c) { const f = M[r][c] / M[c][c]; for (let k = c; k <= n; k++) M[r][k] -= f * M[c][k]; }
+  }
+  return M.map((r, i) => r[n] / r[i]);
+}
+function homography(src, dst) {  // least squares over >= 4 points, h33 = 1
+  const AtA = Array.from({ length: 8 }, () => Array(8).fill(0)), Atb = Array(8).fill(0);
+  src.forEach(([x, y], k) => {
+    const [u, v] = dst[k];
+    const rows = [[x, y, 1, 0, 0, 0, -u * x, -u * y, u], [0, 0, 0, x, y, 1, -v * x, -v * y, v]];
+    for (const r of rows) for (let i = 0; i < 8; i++) { Atb[i] += r[i] * r[8]; for (let j = 0; j < 8; j++) AtA[i][j] += r[i] * r[j]; }
+  });
+  const h = solve(AtA, Atb); return h ? [...h, 1] : null;
+}
+function apply(h, [x, y]) { const w = h[6] * x + h[7] * y + h[8]; return [(h[0] * x + h[1] * y + h[2]) / w, (h[3] * x + h[4] * y + h[5]) / w, w]; }
+
+// ---- court diagram ----
+function buildCourt() {
+  const s = $("court"); let html = "";
+  for (const ln of LINES) html += `<polyline class="ln" points="${ln.map(([x, y]) => `${x},${20 - y}`).join(" ")}"/>`;
+  html += `<polyline class="ln" points="0,8.5 -1,8.5 -1,11.5 0,11.5"/><polyline class="ln" points="40,8.5 41,8.5 41,11.5 40,11.5"/>`;
+  html += `<text x="14" y="22.6">nahe Seitenlinie (Kamera)</text>`;
+  for (const [k, [x, y]] of Object.entries(KP)) html += `<circle class="kp" data-k="${k}" cx="${x}" cy="${20 - y}" r="0.75"><title>${KP[k][2]}</title></circle>`;
+  s.innerHTML = html;
+  s.querySelectorAll(".kp").forEach((c) => c.addEventListener("click", () => select(c.dataset.k)));
+}
+function select(k) { st.cur = k; renderSide(); }
+
+// ---- drawing ----
+function draw() {
+  ctx.drawImage(st.img, 0, 0, cv.width, cv.height);
+  const names = Object.keys(st.pts);
+  if (names.length >= 4) {
+    const h = homography(names.map((n) => KP[n].slice(0, 2)), names.map((n) => st.pts[n]));
+    if (h) {
+      ctx.strokeStyle = "rgba(255,0,255,0.85)"; ctx.lineWidth = 1.2;
+      for (const ln of LINES) {
+        ctx.beginPath(); let started = false;
+        for (let s = 0; s < ln.length - 1; s++) for (let t = 0; t <= 1; t += 0.05) {
+          const p = [ln[s][0] + t * (ln[s + 1][0] - ln[s][0]), ln[s][1] + t * (ln[s + 1][1] - ln[s][1])];
+          const q = apply(h, p); if (q[2] <= 0) { started = false; continue; }
+          if (!started) { ctx.moveTo(q[0], q[1]); started = true; } else ctx.lineTo(q[0], q[1]);
+        }
+        ctx.stroke();
+      }
+    }
+  }
+  ctx.font = "600 13px Barlow, sans-serif";
+  for (const n of names) {
+    const [x, y] = st.pts[n]; const col = n === st.cur ? "#3b82ff" : "#ff9a1f";
+    ctx.strokeStyle = col; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(x, y, 7, 0, 7); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x - 3, y); ctx.lineTo(x + 3, y); ctx.moveTo(x, y - 3); ctx.lineTo(x, y + 3); ctx.stroke();
+    ctx.lineWidth = 3; ctx.strokeStyle = "#000"; ctx.strokeText(KP[n][2], x + 9, y - 9); ctx.fillStyle = col; ctx.fillText(KP[n][2], x + 9, y - 9);
+  }
+}
+function drawLoupe(p) {
+  if (!p) { lp.hidden = true; return; }
+  lp.hidden = false; const z = 4, r = 180 / z / 2;
+  lctx.imageSmoothingEnabled = false;
+  lctx.drawImage(st.img, p[0] - r, p[1] - r, 2 * r, 2 * r, 0, 0, 180, 180);
+  lctx.strokeStyle = "#3b82ff"; lctx.lineWidth = 1;
+  lctx.beginPath(); lctx.moveTo(90, 70); lctx.lineTo(90, 110); lctx.moveTo(70, 90); lctx.lineTo(110, 90); lctx.stroke();
+}
+
+function item() { return st.items[st.i]; }
+function docOf(it) { return st.docs[it.id]; }
+function statusText(d) { return !d ? ["open", "offen"] : d.status === "ok" ? ["ok", "bestätigt"] : d.status === "skip" ? ["skip", "nicht bestimmbar"] : ["corrected", "gespeichert"]; }
+function renderSide() {
+  document.querySelectorAll("#court .kp").forEach((c) => {
+    c.classList.toggle("set", c.dataset.k in st.pts); c.classList.toggle("cur", c.dataset.k === st.cur);
+  });
+  $("sel").innerHTML = st.cur ? `Gewählt: <b>${KP[st.cur][2]}</b>. Klicke im Bild an die Stelle.` : "Wähle im Feld einen Punkt, dann klicke im Bild an die Stelle.";
+  const it = item(); $("b-ok").disabled = !(it && it.proposal && !st.dirty);
+  const done = st.items.filter((x) => docOf(x)).length;
+  $("progress").textContent = `${st.i + 1} / ${st.items.length} · erledigt ${done}`;
+  const [cls, txt] = statusText(it && docOf(it)); const ms = $("m-status"); ms.className = "status " + cls; ms.textContent = txt;
+}
+function load(i) {
+  st.i = Math.max(0, Math.min(st.items.length - 1, i)); const it = item(); if (!it) return;
+  const d = docOf(it);
+  st.pts = JSON.parse(JSON.stringify((d && d.points) || it.proposal || {}));
+  st.dirty = false; st.cur = null;
+  $("m-id").textContent = it.id; $("m-game").textContent = it.label || ""; $("pick").value = String(st.i);
+  st.img.onload = () => { cv.width = st.img.naturalWidth; cv.height = st.img.naturalHeight; draw(); };
+  st.img.src = it.img; renderSide();
+}
+function pos(ev) { const r = cv.getBoundingClientRect(); return [(ev.clientX - r.left) * cv.width / r.width, (ev.clientY - r.top) * cv.height / r.height]; }
+function nearest(p) {
+  let best = null, bd = 14 * cv.width / cv.getBoundingClientRect().width;
+  for (const [n, q] of Object.entries(st.pts)) { const d = Math.hypot(q[0] - p[0], q[1] - p[1]); if (d < bd) { bd = d; best = n; } }
+  return best;
+}
+cv.addEventListener("pointerdown", (ev) => {
+  const p = pos(ev); const n = nearest(p);
+  if (n) { st.drag = n; st.cur = n; cv.setPointerCapture(ev.pointerId); }
+  else if (st.cur) { st.pts[st.cur] = p; st.dirty = true; st.drag = st.cur; cv.setPointerCapture(ev.pointerId); }
+  else { toast("Zuerst rechts im Feld einen Punkt wählen."); return; }
+  draw(); drawLoupe(p); renderSide();
+});
+cv.addEventListener("pointermove", (ev) => {
+  const p = pos(ev);
+  if (st.drag) { st.pts[st.drag] = p; st.dirty = true; draw(); }
+  drawLoupe(p);
+});
+cv.addEventListener("pointerup", () => { st.drag = null; renderSide(); });
+cv.addEventListener("pointerleave", () => { if (!st.drag) drawLoupe(null); });
+
+async function store(status) {
+  const it = item(); if (!it) return;
+  const pts = status === "skip" ? {} : st.pts;
+  if (status !== "skip" && Object.keys(pts).length < 4) { toast("Mindestens 4 Punkte, oder Nicht bestimmbar."); return; }
+  const rounded = Object.fromEntries(Object.entries(pts).map(([k, v]) => [k, [Math.round(v[0] * 10) / 10, Math.round(v[1] * 10) / 10]]));
+  const doc = { points: rounded, status, proposal: !!it.proposal, at: new Date().toISOString() };
+  st.docs[it.id] = doc;
+  if (st.db) {
+    try { await st.db.collection("truth").doc(it.id).set(doc); }
+    catch (e) { toast("Nicht gespeichert (" + (e.code || e.message) + ")."); return; }
+  }
+  toast(status === "skip" ? "Als nicht bestimmbar gespeichert" : "Gespeichert");
+  const j = st.items.findIndex((x, k) => k > st.i && !docOf(x));
+  load(j >= 0 ? j : st.i + 1);
+}
+$("b-ok").onclick = () => store("ok");
+$("b-save").onclick = () => store(st.dirty || !item().proposal ? "corrected" : "ok");
+$("b-skip").onclick = () => store("skip");
+$("b-del").onclick = () => { if (st.cur && st.cur in st.pts) { delete st.pts[st.cur]; st.dirty = true; draw(); renderSide(); } };
+$("b-clear").onclick = () => { st.pts = {}; st.dirty = true; draw(); renderSide(); };
+$("b-prev").onclick = () => load(st.i - 1);
+$("b-next").onclick = () => load(st.i + 1);
+$("pick").onchange = (ev) => load(Number(ev.target.value));
+document.addEventListener("keydown", (ev) => {
+  if (ev.target.tagName === "SELECT") return;
+  if (ev.key === "Enter") { ev.preventDefault(); $("b-save").click(); }
+  else if (ev.key === "s" || ev.key === "S") { if (!$("b-ok").disabled) $("b-ok").click(); }
+  else if (ev.key === "x" || ev.key === "X") $("b-skip").click();
+  else if (ev.key === "Delete" || ev.key === "Backspace") $("b-del").click();
+  else if (ev.key === "ArrowRight") load(st.i + 1);
+  else if (ev.key === "ArrowLeft") load(st.i - 1);
+});
+
+async function start() {
+  buildCourt();
+  try { st.items = await (await fetch("items.json")).json(); }
+  catch (e) { $("progress").textContent = "Bildliste konnte nicht geladen werden."; return; }
+  $("pick").innerHTML = st.items.map((x, i) => `<option value="${i}">${i + 1}. ${x.id}</option>`).join("");
+  load(0);
+  const db = window.claude && window.claude.use ? await window.claude.use("db") : null;
+  if (!db) { const n = $("note"); n.hidden = false; n.textContent = "Speicher nicht verfügbar: bitte bei claude.ai angemeldet öffnen."; return; }
+  st.db = db;
+  const timer = setTimeout(() => { const n = $("note"); n.hidden = false; n.textContent = "Gespeicherte Punkte noch nicht erreichbar."; }, 10000);
+  let first = true;
+  db.collection("truth").onSnapshot((snap) => {
+    clearTimeout(timer); $("note").hidden = true;
+    for (const d of snap.docs) st.docs[d.id] = d.data();
+    if (first) { first = false; const j = st.items.findIndex((x) => !docOf(x)); load(j >= 0 ? j : 0); return; }
+    renderSide();
+  }, (e) => { clearTimeout(timer); const n = $("note"); n.hidden = false; n.textContent = "Punkte konnten nicht geladen werden (" + e.code + ")."; });
+}
+start();
+</script>

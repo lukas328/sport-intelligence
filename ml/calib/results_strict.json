@@ -1,0 +1,814 @@
+{
+ "results": [
+  {
+   "id": "c000",
+   "moving": false,
+   "ok": false,
+   "reason": "flat_view",
+   "error": "the camera sees the floor too flatly for an automatic court (players at a median 4 degrees below the horizon, at least 10 needed; camera about 4.9 m above the floor): click the court points",
+   "seconds": 23.8
+  },
+  {
+   "id": "c001",
+   "moving": true,
+   "ok": false,
+   "reason": "flat_view",
+   "error": "the camera sees the floor too flatly for an automatic court (players at a median 9 degrees below the horizon, at least 10 needed; camera about 3.2 m above the floor): click the court points",
+   "seconds": 1.1
+  },
+  {
+   "id": "c002",
+   "moving": true,
+   "ok": false,
+   "reason": "no_floor",
+   "error": "the hall's markings do not show a clear floor (only 29% of the line length runs along two floor directions, 35% needed; many lines on walls, nets or railings, a very low camera or a camera motion that was not followed well): click the court points",
+   "seconds": 1.9
+  },
+  {
+   "id": "c003",
+   "moving": true,
+   "ok": true,
+   "homography": [
+    [
+     84.25904134271289,
+     174.33796067284234,
+     221.1225721694404
+    ],
+    [
+     2.301126547737648,
+     26.994822300125605,
+     685.6059795855937
+    ],
+    [
+     0.005933029046369911,
+     0.10250828585184596,
+     1.0
+    ]
+   ],
+   "info": {
+    "goal_score": 0.618,
+    "line_score": 1.35,
+    "floor_fit": 0.464,
+    "people_on_court": 0.755,
+    "camera_height_m": 5.82,
+    "camera_x_m": 19.95,
+    "camera_y_m": -9.92,
+    "view_deg": 18.8,
+    "court_view": "all"
+   },
+   "focals": [
+    931.9561439240377
+   ],
+   "canvas_f": 710.8752632453883,
+   "frame_to_court": {
+    "1070": [
+     [
+      -0.026357947913844007,
+      -0.08118356187225619,
+      15.888321753272992
+     ],
+     [
+      0.019922171312197763,
+      0.04506571526276699,
+      -39.37076780325994
+     ],
+     [
+      -0.0003468242006562366,
+      -0.004302330745917716,
+      1.0
+     ]
+    ],
+    "1750": [
+     [
+      -0.031722546421822845,
+      -0.10596304207525302,
+      38.59738220726479
+     ],
+     [
+      0.0016284595493432255,
+      0.058581664302012164,
+      -41.947030584452726
+     ],
+     [
+      -1.1509164113702265e-05,
+      -0.005329158173307484,
+      1.0
+     ]
+    ],
+    "1960": [
+     [
+      -0.02366605829047277,
+      -0.13583758971352577,
+      62.29718638845429
+     ],
+     [
+      -0.0258586564158688,
+      0.06890783548688507,
+      -27.16446889762048
+     ],
+     [
+      0.00040491375855835113,
+      -0.006522332140144326,
+      1.0
+     ]
+    ]
+   },
+   "seconds": 48.8
+  },
+  {
+   "id": "c004",
+   "moving": true,
+   "ok": false,
+   "reason": "no_floor",
+   "error": "too few floor lines",
+   "seconds": 0.0
+  },
+  {
+   "id": "c005",
+   "moving": true,
+   "ok": false,
+   "reason": "court",
+   "error": "automatic court not trustworthy: goal frames do not fit ({'goal_score': 0.284, 'line_score': 0.794, 'floor_fit': 0.659, 'people_on_court': 0.929, 'camera_height_m': 5.68, 'camera_x_m': 20.29, 'camera_y_m': -3.52, 'view_deg': 18.1, 'court_view': 'all'}); blue lines: automatic court not trustworthy: goal frames do not fit ({'goal_score': 0.233, 'line_score': 0.398, 'floor_fit': 0.659, 'people_on_cou",
+   "seconds": 84.5
+  },
+  {
+   "id": "c006",
+   "moving": true,
+   "ok": false,
+   "reason": "flat_view",
+   "error": "the camera sees the floor too flatly for an automatic court (players at a median 4 degrees below the horizon, at least 10 needed; camera about 1.9 m above the floor): click the court points",
+   "seconds": 0.9
+  },
+  {
+   "id": "c007",
+   "moving": true,
+   "ok": false,
+   "reason": "court",
+   "error": "automatic court not trustworthy: goal frames do not fit ({'goal_score': 0.0, 'line_score': 0.444, 'floor_fit': 0.442, 'people_on_court': 0.688, 'camera_height_m': 4.82, 'camera_x_m': 42.42, 'camera_y_m': 4.11, 'view_deg': 16.2, 'court_view': 'all'}); yellow lines: automatic court not trustworthy: most players off the court ({'goal_score': 0.0, 'line_score': 0.271, 'floor_fit': 0.442, 'people_on_co",
+   "seconds": 107.8
+  },
+  {
+   "id": "c008",
+   "moving": true,
+   "ok": false,
+   "reason": "court",
+   "error": "automatic court not trustworthy: goal frames do not fit ({'goal_score': 0.318, 'line_score': 0.339, 'floor_fit': 0.456, 'people_on_court': 0.575, 'camera_height_m': 3.58, 'camera_x_m': 41.43, 'camera_y_m': 9.37, 'view_deg': 12.5, 'court_view': 'all'}); dark lines: automatic court not trustworthy: most players off the court ({'goal_score': 0.154, 'line_score': 0.187, 'floor_fit': 0.456, 'people_on_",
+   "seconds": 77.9
+  },
+  {
+   "id": "c009",
+   "moving": true,
+   "ok": false,
+   "reason": "court",
+   "error": "automatic court not trustworthy: goal frames do not fit ({'goal_score': 0.181, 'line_score': 0.245, 'floor_fit': 0.579, 'people_on_court': 0.818, 'camera_height_m': 13.63, 'camera_x_m': 29.68, 'camera_y_m': -0.59, 'view_deg': 43.8, 'court_view': 'all'}); white lines: automatic court not trustworthy: camera position implausible ({'goal_score': 0.069, 'line_score': 0.552, 'floor_fit': 0.579, 'people",
+   "seconds": 70.9
+  },
+  {
+   "id": "c010",
+   "moving": false,
+   "ok": false,
+   "reason": "no_floor",
+   "error": "no floor markings found",
+   "seconds": 17.6
+  },
+  {
+   "id": "c011",
+   "moving": false,
+   "ok": false,
+   "reason": "no_floor",
+   "error": "too few floor lines",
+   "seconds": 16.7
+  },
+  {
+   "id": "c012",
+   "moving": true,
+   "ok": false,
+   "reason": "camera_motion",
+   "error": "the camera motion could not be followed (focal length 4.0 frame widths, zoom x1.0: cuts between cameras, replays or a strong zoom), so the hall image is not reliable: a video from one camera without replays (or a fixed camera) gives positions",
+   "seconds": 0.0
+  },
+  {
+   "id": "c013",
+   "moving": true,
+   "ok": false,
+   "reason": "no_floor",
+   "error": "the hall's markings do not show a clear floor (only 30% of the line length runs along two floor directions, 35% needed; many lines on walls, nets or railings, a very low camera or a camera motion that was not followed well): click the court points",
+   "seconds": 1.9
+  },
+  {
+   "id": "c014",
+   "moving": true,
+   "ok": false,
+   "reason": "flat_view",
+   "error": "the camera sees the floor too flatly for an automatic court (players at a median 8 degrees below the horizon, at least 10 needed; camera about 3.6 m above the floor): click the court points",
+   "seconds": 0.9
+  },
+  {
+   "id": "c015",
+   "moving": true,
+   "ok": false,
+   "reason": "no_floor",
+   "error": "the hall's markings do not show a clear floor (only 28% of the line length runs along two floor directions, 35% needed; many lines on walls, nets or railings, a very low camera or a camera motion that was not followed well): click the court points",
+   "seconds": 2.2
+  },
+  {
+   "id": "c016",
+   "moving": true,
+   "ok": false,
+   "reason": "court",
+   "error": "automatic court not trustworthy: goal frames do not fit ({'goal_score': 0.27, 'line_score': 1.104, 'floor_fit': 0.357, 'people_on_court': 0.89, 'camera_height_m': 5.18, 'camera_x_m': 14.49, 'camera_y_m': -8.6, 'view_deg': 14.5, 'court_view': 'all'}); white lines: automatic court not trustworthy: goal frames do not fit ({'goal_score': 0.33, 'line_score': 0.246, 'floor_fit': 0.357, 'people_on_court'",
+   "seconds": 70.1
+  },
+  {
+   "id": "c017",
+   "moving": true,
+   "ok": false,
+   "reason": "no_floor",
+   "error": "the hall's markings do not show a clear floor (only 22% of the line length runs along two floor directions, 35% needed; many lines on walls, nets or railings, a very low camera or a camera motion that was not followed well): click the court points",
+   "seconds": 1.6
+  },
+  {
+   "id": "c018",
+   "moving": true,
+   "ok": false,
+   "reason": "court",
+   "error": "automatic court not trustworthy: goal frames do not fit ({'goal_score': 0.0, 'line_score': 0.249, 'floor_fit': 0.732, 'people_on_court': 0.845, 'camera_height_m': 5.22, 'camera_x_m': -7.7, 'camera_y_m': -8.63, 'view_deg': 13.8, 'court_view': 'all'}); yellow lines: automatic court not trustworthy: goal frames do not fit ({'goal_score': 0.055, 'line_score': 0.073, 'floor_fit': 0.732, 'people_on_cour",
+   "seconds": 27.8
+  },
+  {
+   "id": "c019",
+   "moving": true,
+   "ok": false,
+   "reason": "no_floor",
+   "error": "the hall's markings do not show a clear floor (only 23% of the line length runs along two floor directions, 35% needed; many lines on walls, nets or railings, a very low camera or a camera motion that was not followed well): click the court points",
+   "seconds": 2.1
+  },
+  {
+   "id": "c020",
+   "moving": true,
+   "ok": false,
+   "reason": "court",
+   "error": "automatic court not trustworthy: most players off the court ({'goal_score': 0.493, 'line_score': 0.444, 'floor_fit': 0.494, 'people_on_court': 0.457, 'camera_height_m': 3.58, 'camera_x_m': 45.68, 'camera_y_m': 8.75, 'view_deg': 11.1, 'floor_tolerance_deg': 2.0, 'court_view': 'all'}); white lines: automatic court not trustworthy: goal frames do not fit ({'goal_score': 0.42, 'line_score': 0.371, 'fl",
+   "seconds": 121.3
+  },
+  {
+   "id": "c021",
+   "moving": true,
+   "ok": false,
+   "reason": "no_floor",
+   "error": "the hall's markings do not show a clear floor (only 31% of the line length runs along two floor directions, 35% needed; many lines on walls, nets or railings, a very low camera or a camera motion that was not followed well): click the court points",
+   "seconds": 1.6
+  },
+  {
+   "id": "c022",
+   "moving": true,
+   "ok": false,
+   "reason": "court",
+   "error": "automatic court not trustworthy: goal frames do not fit ({'goal_score': 0.163, 'line_score': 1.106, 'floor_fit': 0.477, 'people_on_court': 0.817, 'camera_height_m': 4.61, 'camera_x_m': 15.7, 'camera_y_m': -7.15, 'view_deg': 13.9, 'floor_tolerance_deg': 2.0, 'court_view': 'all'}); white lines: automatic court not trustworthy: goal frames do not fit ({'goal_score': 0.0, 'line_score': 0.063, 'floor_f",
+   "seconds": 48.7
+  },
+  {
+   "id": "c023",
+   "moving": true,
+   "ok": false,
+   "reason": "flat_view",
+   "error": "the camera sees the floor too flatly for an automatic court (players at a median 10 degrees below the horizon, at least 10 needed; camera about 3.3 m above the floor): click the court points",
+   "seconds": 1.3
+  },
+  {
+   "id": "c024",
+   "moving": false,
+   "ok": false,
+   "reason": "court",
+   "error": "automatic court not trustworthy: goal frames do not fit ({'goal_score': 0.162, 'line_score': 0.152, 'floor_fit': 0.405, 'people_on_court': 0.854, 'camera_height_m': 5.73, 'camera_x_m': -20.08, 'camera_y_m': 7.78, 'view_deg': 11.0, 'court_view': 'all'}); dark lines: automatic court not trustworthy: goal frames do not fit ({'goal_score': 0.109, 'line_score': 0.618, 'floor_fit': 0.405, 'people_on_cou",
+   "seconds": 141.0
+  },
+  {
+   "id": "c025",
+   "moving": true,
+   "ok": false,
+   "reason": "court",
+   "error": "automatic court not trustworthy: goal frames do not fit ({'goal_score': 0.368, 'line_score': 0.415, 'floor_fit': 0.493, 'people_on_court': 0.855, 'camera_height_m': 5.7, 'camera_x_m': 27.78, 'camera_y_m': -5.95, 'view_deg': 15.8, 'floor_tolerance_deg': 2.0, 'court_view': 'all'}); white lines: automatic court not trustworthy: goal frames do not fit ({'goal_score': 0.314, 'line_score': 0.662, 'floor",
+   "seconds": 80.1
+  },
+  {
+   "id": "c026",
+   "moving": true,
+   "ok": false,
+   "reason": "court",
+   "error": "implausible camera height 1.0 m",
+   "seconds": 0.6
+  },
+  {
+   "id": "c027",
+   "moving": true,
+   "ok": false,
+   "reason": "no_floor",
+   "error": "no floor markings found",
+   "seconds": 0.0
+  },
+  {
+   "id": "c028",
+   "moving": true,
+   "ok": false,
+   "reason": "flat_view",
+   "error": "the camera sees the floor too flatly for an automatic court (players at a median 5 degrees below the horizon, at least 10 needed; camera about 2.0 m above the floor): click the court points",
+   "seconds": 1.2
+  },
+  {
+   "id": "c029",
+   "moving": true,
+   "ok": false,
+   "reason": "no_floor",
+   "error": "the hall's markings do not show a clear floor (only 30% of the line length runs along two floor directions, 35% needed; many lines on walls, nets or railings, a very low camera or a camera motion that was not followed well): click the court points",
+   "seconds": 1.8
+  },
+  {
+   "id": "c030",
+   "moving": true,
+   "ok": true,
+   "homography": [
+    [
+     79.42483531090811,
+     119.95381485296245,
+     -441.29467189809964
+    ],
+    [
+     -0.8423715383234398,
+     -5.073830197731572,
+     720.3918419519824
+    ],
+    [
+     -0.0047568998930857505,
+     0.07640672793943219,
+     1.0
+    ]
+   ],
+   "info": {
+    "goal_score": 0.496,
+    "line_score": 1.29,
+    "floor_fit": 0.506,
+    "people_on_court": 0.993,
+    "camera_height_m": 7.89,
+    "camera_x_m": 23.03,
+    "camera_y_m": -7.83,
+    "view_deg": 26.1,
+    "floor_tolerance_deg": 2.0,
+    "court_view": "all"
+   },
+   "focals": [
+    977.3153227004715
+   ],
+   "canvas_f": 1019.9264627323747,
+   "frame_to_court": {
+    "510": [
+     [
+      0.026483837650396098,
+      0.08132923641667679,
+      40.579486392903924
+     ],
+     [
+      -0.019356730863038928,
+      -0.03834966289884531,
+      50.19232436424974
+     ],
+     [
+      3.590829176157877e-05,
+      0.003819028113958849,
+      1.0
+     ]
+    ],
+    "1100": [
+     [
+      0.026341803022199427,
+      0.10727026010655209,
+      -37.15682461507082
+     ],
+     [
+      0.02400617379171401,
+      -0.04220580892129217,
+      25.60500177627686
+     ],
+     [
+      -2.6050841591511693e-05,
+      0.00432891934289283,
+      1.0
+     ]
+    ],
+    "1870": [
+     [
+      0.11738346788393977,
+      0.2993142596353379,
+      -54.35975175391965
+     ],
+     [
+      0.003386882706494877,
+      -0.15131212951827205,
+      100.46327007487429
+     ],
+     [
+      0.00016368864578920753,
+      0.012960743503902116,
+      1.0
+     ]
+    ]
+   },
+   "seconds": 29.2
+  },
+  {
+   "id": "c031",
+   "moving": false,
+   "ok": false,
+   "reason": "flat_view",
+   "error": "the camera sees the floor too flatly for an automatic court (players at a median 7 degrees below the horizon, at least 10 needed; camera about 3.6 m above the floor): click the court points",
+   "seconds": 25.3
+  },
+  {
+   "id": "c032",
+   "moving": false,
+   "ok": false,
+   "reason": "court",
+   "error": "automatic court not trustworthy: most players off the court ({'goal_score': 0.171, 'line_score': 0.427, 'floor_fit': 0.448, 'people_on_court': 0.496, 'camera_height_m': 4.38, 'camera_x_m': 59.05, 'camera_y_m': 2.55, 'view_deg': 10.4, 'court_view': 'all'}); white lines: automatic court not trustworthy: most players off the court ({'goal_score': 0.167, 'line_score': 0.286, 'floor_fit': 0.448, 'peopl",
+   "seconds": 98.8
+  },
+  {
+   "id": "c033",
+   "moving": false,
+   "ok": false,
+   "reason": "court",
+   "error": "automatic court not trustworthy: goal frames do not fit ({'goal_score': 0.032, 'line_score': 1.31, 'floor_fit': 0.412, 'people_on_court': 0.967, 'camera_height_m': 3.48, 'camera_x_m': 48.62, 'camera_y_m': 1.41, 'view_deg': 10.2, 'court_view': 'all'}); white lines: automatic court not trustworthy: goal frames do not fit ({'goal_score': 0.153, 'line_score': 0.278, 'floor_fit': 0.412, 'people_on_cour",
+   "seconds": 79.7
+  },
+  {
+   "id": "c034",
+   "moving": true,
+   "ok": false,
+   "reason": "no_floor",
+   "error": "the hall's markings do not show a clear floor (only 29% of the line length runs along two floor directions, 35% needed; many lines on walls, nets or railings, a very low camera or a camera motion that was not followed well): click the court points",
+   "seconds": 2.4
+  },
+  {
+   "id": "c035",
+   "moving": true,
+   "ok": false,
+   "reason": "flat_view",
+   "error": "the camera sees the floor too flatly for an automatic court (players at a median 7 degrees below the horizon, at least 10 needed; camera about 3.2 m above the floor): click the court points",
+   "seconds": 1.1
+  },
+  {
+   "id": "c036",
+   "moving": true,
+   "ok": false,
+   "reason": "no_floor",
+   "error": "the hall's markings do not show a clear floor (only 20% of the line length runs along two floor directions, 35% needed; many lines on walls, nets or railings, a very low camera or a camera motion that was not followed well): click the court points",
+   "seconds": 1.4
+  },
+  {
+   "id": "c037",
+   "moving": true,
+   "ok": false,
+   "reason": "no_floor",
+   "error": "the hall's markings do not show a clear floor (only 28% of the line length runs along two floor directions, 35% needed; many lines on walls, nets or railings, a very low camera or a camera motion that was not followed well): click the court points",
+   "seconds": 1.6
+  },
+  {
+   "id": "c038",
+   "moving": true,
+   "ok": false,
+   "reason": "flat_view",
+   "error": "the camera sees the floor too flatly for an automatic court (players at a median 8 degrees below the horizon, at least 10 needed; camera about 3.3 m above the floor): click the court points",
+   "seconds": 0.7
+  },
+  {
+   "id": "c039",
+   "moving": true,
+   "ok": false,
+   "reason": "court",
+   "error": "automatic court not trustworthy: floor markings unclear ({'goal_score': 0.568, 'line_score': 1.087, 'floor_fit': 0.351, 'people_on_court': 0.947, 'camera_height_m': 5.66, 'camera_x_m': 18.24, 'camera_y_m': -4.87, 'view_deg': 20.9, 'court_view': 'all'}); white lines: automatic court not trustworthy: court lines do not fit ({'goal_score': 0.688, 'line_score': 0.631, 'floor_fit': 0.351, 'people_on_co",
+   "seconds": 50.1
+  },
+  {
+   "id": "c040",
+   "moving": true,
+   "ok": false,
+   "reason": "court",
+   "error": "automatic court not trustworthy: goal frames do not fit ({'goal_score': 0.128, 'line_score': 1.171, 'floor_fit': 0.445, 'people_on_court': 0.972, 'camera_height_m': 5.52, 'camera_x_m': 22.47, 'camera_y_m': -6.66, 'view_deg': 15.6, 'court_view': 'all'}); white lines: automatic court not trustworthy: goal frames do not fit ({'goal_score': 0.278, 'line_score': 1.041, 'floor_fit': 0.445, 'people_on_co",
+   "seconds": 59.5
+  },
+  {
+   "id": "c041",
+   "moving": true,
+   "ok": false,
+   "reason": "camera_motion",
+   "error": "the camera motion could not be followed (focal length 0.4 frame widths, zoom x7.8: cuts between cameras, replays or a strong zoom), so the hall image is not reliable: a video from one camera without replays (or a fixed camera) gives positions",
+   "seconds": 0.0
+  },
+  {
+   "id": "c042",
+   "moving": true,
+   "ok": false,
+   "reason": "no_floor",
+   "error": "the hall's markings do not show a clear floor (only 26% of the line length runs along two floor directions, 35% needed; many lines on walls, nets or railings, a very low camera or a camera motion that was not followed well): click the court points",
+   "seconds": 1.5
+  },
+  {
+   "id": "c043",
+   "moving": true,
+   "ok": false,
+   "reason": "no_floor",
+   "error": "the hall's markings do not show a clear floor (only 23% of the line length runs along two floor directions, 35% needed; many lines on walls, nets or railings, a very low camera or a camera motion that was not followed well): click the court points",
+   "seconds": 1.6
+  },
+  {
+   "id": "c044",
+   "moving": true,
+   "ok": false,
+   "reason": "no_floor",
+   "error": "the hall's markings do not show a clear floor (only 15% of the line length runs along two floor directions, 35% needed; many lines on walls, nets or railings, a very low camera or a camera motion that was not followed well): click the court points",
+   "seconds": 1.7
+  },
+  {
+   "id": "c045",
+   "moving": true,
+   "ok": false,
+   "reason": "no_floor",
+   "error": "the hall's markings do not show a clear floor (only 15% of the line length runs along two floor directions, 35% needed; many lines on walls, nets or railings, a very low camera or a camera motion that was not followed well): click the court points",
+   "seconds": 2.4
+  },
+  {
+   "id": "c046",
+   "moving": true,
+   "ok": false,
+   "reason": "camera_motion",
+   "error": "the camera motion could not be followed (focal length 4.0 frame widths, zoom x1.0: cuts between cameras, replays or a strong zoom), so the hall image is not reliable: a video from one camera without replays (or a fixed camera) gives positions",
+   "seconds": 0.0
+  },
+  {
+   "id": "c047",
+   "moving": true,
+   "ok": false,
+   "reason": "flat_view",
+   "error": "the camera sees the floor too flatly for an automatic court (players at a median 8 degrees below the horizon, at least 10 needed; camera about 3.3 m above the floor): click the court points",
+   "seconds": 1.5
+  },
+  {
+   "id": "c048",
+   "moving": true,
+   "ok": false,
+   "reason": "court",
+   "error": "automatic court not trustworthy: most players off the court ({'goal_score': 0.0, 'line_score': 0.364, 'floor_fit': 0.521, 'people_on_court': 0.281, 'camera_height_m': 8.36, 'camera_x_m': 32.18, 'camera_y_m': -18.55, 'view_deg': 14.5, 'floor_tolerance_deg': 2.0, 'court_view': 'all'}); white lines: automatic court not trustworthy: most players off the court ({'goal_score': 0.123, 'line_score': 0.277",
+   "seconds": 43.1
+  },
+  {
+   "id": "c049",
+   "moving": true,
+   "ok": false,
+   "reason": "court",
+   "error": "automatic court not trustworthy: goal frames do not fit ({'goal_score': 0.0, 'line_score': 0.369, 'floor_fit': 0.464, 'people_on_court': 0.866, 'camera_height_m': 5.72, 'camera_x_m': 15.82, 'camera_y_m': -3.13, 'view_deg': 18.1, 'floor_tolerance_deg': 2.0, 'court_view': 'all'}); yellow lines: automatic court not trustworthy: goal frames do not fit ({'goal_score': 0.0, 'line_score': 0.151, 'floor_f",
+   "seconds": 72.8
+  },
+  {
+   "id": "c050",
+   "moving": true,
+   "ok": false,
+   "reason": "no_floor",
+   "error": "the hall's markings do not show a clear floor (only 22% of the line length runs along two floor directions, 35% needed; many lines on walls, nets or railings, a very low camera or a camera motion that was not followed well): click the court points",
+   "seconds": 1.5
+  },
+  {
+   "id": "c051",
+   "moving": true,
+   "ok": false,
+   "reason": "court",
+   "error": "automatic court not trustworthy: camera position implausible ({'goal_score': 0.657, 'line_score': 1.226, 'floor_fit': 0.429, 'people_on_court': 0.893, 'camera_height_m': 16.69, 'camera_x_m': 23.11, 'camera_y_m': 4.37, 'view_deg': 49.5, 'court_view': 'all'}); white lines: automatic court not trustworthy: camera position implausible ({'goal_score': 0.688, 'line_score': 0.754, 'floor_fit': 0.429, 'pe",
+   "seconds": 55.7
+  },
+  {
+   "id": "c052",
+   "moving": true,
+   "ok": false,
+   "reason": "no_floor",
+   "error": "the hall's markings do not show a clear floor (only 18% of the line length runs along two floor directions, 35% needed; many lines on walls, nets or railings, a very low camera or a camera motion that was not followed well): click the court points",
+   "seconds": 1.2
+  },
+  {
+   "id": "c053",
+   "moving": true,
+   "ok": false,
+   "reason": "court",
+   "error": "automatic court not trustworthy: goal frames do not fit ({'goal_score': 0.0, 'line_score': 0.177, 'floor_fit': 0.423, 'people_on_court': 0.691, 'camera_height_m': 6.68, 'camera_x_m': 18.93, 'camera_y_m': -11.15, 'view_deg': 14.6, 'court_view': 'all'}); white lines: automatic court not trustworthy: goal frames do not fit ({'goal_score': 0.0, 'line_score': 0.127, 'floor_fit': 0.423, 'people_on_court",
+   "seconds": 69.6
+  },
+  {
+   "id": "c054",
+   "moving": true,
+   "ok": false,
+   "reason": "flat_view",
+   "error": "the camera sees the floor too flatly for an automatic court (players at a median 7 degrees below the horizon, at least 10 needed; camera about 3.4 m above the floor): click the court points",
+   "seconds": 0.8
+  },
+  {
+   "id": "c055",
+   "moving": true,
+   "ok": false,
+   "reason": "flat_view",
+   "error": "the camera sees the floor too flatly for an automatic court (players at a median 7 degrees below the horizon, at least 10 needed; camera about 3.8 m above the floor): click the court points",
+   "seconds": 1.2
+  },
+  {
+   "id": "c056",
+   "moving": true,
+   "ok": false,
+   "reason": "court",
+   "error": "automatic court not trustworthy: goal frames do not fit ({'goal_score': 0.197, 'line_score': 1.078, 'floor_fit': 0.506, 'people_on_court': 0.847, 'camera_height_m': 6.64, 'camera_x_m': 19.32, 'camera_y_m': -6.53, 'view_deg': 20.6, 'floor_tolerance_deg': 2.0, 'court_view': 'all'}); yellow lines: automatic court not trustworthy: goal frames do not fit ({'goal_score': 0.204, 'line_score': 0.684, 'flo",
+   "seconds": 61.4
+  },
+  {
+   "id": "c057",
+   "moving": true,
+   "ok": false,
+   "reason": "court",
+   "error": "automatic court not trustworthy: court lines do not fit ({'goal_score': 0.519, 'line_score': 0.762, 'floor_fit': 0.392, 'people_on_court': 0.967, 'camera_height_m': 5.02, 'camera_x_m': 23.23, 'camera_y_m': -3.17, 'view_deg': 16.1, 'court_view': 'all'}); white lines: automatic court not trustworthy: court lines do not fit ({'goal_score': 0.607, 'line_score': 0.647, 'floor_fit': 0.392, 'people_on_co",
+   "seconds": 51.3
+  },
+  {
+   "id": "c058",
+   "moving": true,
+   "ok": false,
+   "reason": "flat_view",
+   "error": "the camera sees the floor too flatly for an automatic court (players at a median 10 degrees below the horizon, at least 10 needed; camera about 3.2 m above the floor): click the court points",
+   "seconds": 1.0
+  },
+  {
+   "id": "c059",
+   "moving": true,
+   "ok": false,
+   "reason": "no_floor",
+   "error": "the hall's markings do not show a clear floor (only 30% of the line length runs along two floor directions, 35% needed; many lines on walls, nets or railings, a very low camera or a camera motion that was not followed well): click the court points",
+   "seconds": 1.9
+  },
+  {
+   "id": "c060",
+   "moving": false,
+   "ok": false,
+   "reason": "few_people",
+   "error": "too few people to scale the floor",
+   "seconds": 20.5
+  },
+  {
+   "id": "c061",
+   "moving": true,
+   "ok": false,
+   "reason": "court",
+   "error": "automatic court not trustworthy: court lines do not fit ({'goal_score': 0.556, 'line_score': 0.58, 'floor_fit': 0.36, 'people_on_court': 0.677, 'camera_height_m': 4.68, 'camera_x_m': 24.18, 'camera_y_m': -10.98, 'view_deg': 13.2, 'court_view': 'all'}); white lines: automatic court not trustworthy: goal frames do not fit ({'goal_score': 0.386, 'line_score': 0.416, 'floor_fit': 0.36, 'people_on_cour",
+   "seconds": 101.4
+  },
+  {
+   "id": "c062",
+   "moving": true,
+   "ok": false,
+   "reason": "flat_view",
+   "error": "the camera sees the floor too flatly for an automatic court (players at a median 5 degrees below the horizon, at least 10 needed; camera about 2.5 m above the floor): click the court points",
+   "seconds": 0.9
+  },
+  {
+   "id": "c063",
+   "moving": true,
+   "ok": false,
+   "reason": "flat_view",
+   "error": "the camera sees the floor too flatly for an automatic court (players at a median 4 degrees below the horizon, at least 10 needed; camera about 1.6 m above the floor): click the court points",
+   "seconds": 1.0
+  },
+  {
+   "id": "c064",
+   "moving": true,
+   "ok": false,
+   "reason": "court",
+   "error": "automatic court not trustworthy: goal frames do not fit ({'goal_score': 0.0, 'line_score': 0.144, 'floor_fit': 0.503, 'people_on_court': 0.821, 'camera_height_m': 15.08, 'camera_x_m': 15.31, 'camera_y_m': -0.28, 'view_deg': 42.5, 'court_view': 'all'}); white lines: automatic court not trustworthy: goal frames do not fit ({'goal_score': 0.0, 'line_score': 0.091, 'floor_fit': 0.503, 'people_on_court",
+   "seconds": 66.6
+  },
+  {
+   "id": "c065",
+   "moving": true,
+   "ok": false,
+   "reason": "court",
+   "error": "automatic court not trustworthy: camera position implausible ({'goal_score': 0.558, 'line_score': 0.952, 'floor_fit': 0.528, 'people_on_court': 0.931, 'camera_height_m': 9.56, 'camera_x_m': 18.22, 'camera_y_m': 2.79, 'view_deg': 41.8, 'court_view': 'all'}); white lines: automatic court not trustworthy: camera position implausible ({'goal_score': 0.544, 'line_score': 0.878, 'floor_fit': 0.528, 'peo",
+   "seconds": 37.4
+  },
+  {
+   "id": "c066",
+   "moving": true,
+   "ok": false,
+   "reason": "flat_view",
+   "error": "the camera sees the floor too flatly for an automatic court (players at a median 9 degrees below the horizon, at least 10 needed; camera about 2.0 m above the floor): click the court points",
+   "seconds": 1.1
+  },
+  {
+   "id": "c067",
+   "moving": true,
+   "ok": true,
+   "homography": [
+    [
+     162.54843091496102,
+     383.66961212302454,
+     -2012.5901501461167
+    ],
+    [
+     0.7857780132433981,
+     9.043317871088323,
+     1092.708438820934
+    ],
+    [
+     -0.00588543281786966,
+     0.215761192339143,
+     1.0
+    ]
+   ],
+   "info": {
+    "goal_score": 0.488,
+    "line_score": 1.407,
+    "floor_fit": 0.668,
+    "people_on_court": 1.0,
+    "camera_height_m": 5.67,
+    "camera_x_m": 21.8,
+    "camera_y_m": -1.52,
+    "view_deg": 17.7,
+    "court_view": "all"
+   },
+   "focals": [
+    929.0527488464137
+   ],
+   "canvas_f": 732.3769214045781,
+   "frame_to_court": {
+    "425": [
+     [
+      0.07281893572318024,
+      0.3104942332171474,
+      41.63052491467681
+     ],
+     [
+      -0.0664010076980974,
+      -0.053317202616589086,
+      110.98169726054505
+     ],
+     [
+      7.98826372987314e-05,
+      0.015535234887912433,
+      1.0
+     ]
+    ],
+    "825": [
+     [
+      0.05693574233977158,
+      0.20223173428474053,
+      -17.77347426821827
+     ],
+     [
+      0.0023152095179863044,
+      -0.04042839350408353,
+      54.40289576405255
+     ],
+     [
+      -7.296378205990666e-05,
+      0.009212105227771333,
+      1.0
+     ]
+    ],
+    "960": [
+     [
+      -0.359249931643946,
+      -1.9940632508541773,
+      619.3201190677951
+     ],
+     [
+      -0.3644022263872658,
+      0.25716672386792383,
+      -135.11177401844233
+     ],
+     [
+      0.0004294507200170693,
+      -0.08555438294956176,
+      1.0
+     ]
+    ]
+   },
+   "seconds": 30.4
+  },
+  {
+   "id": "c068",
+   "moving": true,
+   "ok": false,
+   "reason": "no_floor",
+   "error": "the hall's markings do not show a clear floor (only 33% of the line length runs along two floor directions, 35% needed; many lines on walls, nets or railings, a very low camera or a camera motion that was not followed well): click the court points",
+   "seconds": 1.6
+  },
+  {
+   "id": "c069",
+   "moving": true,
+   "ok": false,
+   "reason": "camera_motion",
+   "error": "the camera motion could not be followed (focal length 4.0 frame widths, zoom x1.0: cuts between cameras, replays or a strong zoom), so the hall image is not reliable: a video from one camera without replays (or a fixed camera) gives positions",
+   "seconds": 0.0
+  }
+ ]
+}
