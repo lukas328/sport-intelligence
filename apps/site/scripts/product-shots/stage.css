@@ -196,3 +196,37 @@ body {
   inset: 0;
   pointer-events: none;
 }
+
+/* the match video (stage.js video): a real hall recording, blurred past recognition */
+.hall-video {
+  position: absolute;
+  background:
+    linear-gradient(180deg, rgb(22 23 26 / 0) 45%, rgb(22 23 26 / 0.5)),
+    url("assets/halle.webp") center / cover no-repeat;
+}
+/* the player's line over the app's own: a track, the part played, the playhead */
+.hall-bar {
+  position: absolute;
+  height: calc(6px * var(--k, 1));
+  border-radius: 3px;
+  background: linear-gradient(90deg, #fff var(--at), rgb(255 255 255 / 0.28) var(--at));
+  box-shadow: 0 0 0 calc(8px * var(--k, 1)) #000;
+}
+.hall-bar::after {
+  content: "";
+  position: absolute;
+  left: var(--at);
+  top: 50%;
+  width: calc(14px * var(--k, 1));
+  height: calc(14px * var(--k, 1));
+  border-radius: 50%;
+  background: #fff;
+  transform: translate(-50%, -50%);
+}
+
+/* the hall as a backdrop of a step: the same blurred recording, a little darker, in the site's green */
+#stage.hall {
+  background:
+    linear-gradient(180deg, rgb(16 104 74 / 0.08), rgb(9 46 33 / 0.55)),
+    url("assets/halle.webp") center / cover no-repeat;
+}

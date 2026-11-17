@@ -283,7 +283,7 @@ async def test_claim_creates_club_and_team_and_prefills(
     assert m["opponent_name"] == "Grün-Weiss Erlikofen 1"
     assert m["is_home"] is True and (m["score_own"], m["score_opponent"]) == (26, 19)
     assert m["kickoff_at"].startswith("2026-09-27T15:00:00")
-    away = [x for x in matches if x["opponent_name"] == "SG Felsegg/Lärchenwil 1"]
+    away = [x for x in matches if x["opponent_name"] == "SG Kalvenegg/Lärchenwil 1"]
     assert {x["is_home"] for x in away} == {True, False}
     row = await owner_conn.fetchrow(
         "SELECT venue, official_game_id, source FROM matches WHERE id = $1::uuid", m["id"]

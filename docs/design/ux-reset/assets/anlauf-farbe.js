@@ -26,8 +26,8 @@ var KITS = {
   blau: ["#1f4fd6", "#ffffff"], rot: ["#d3202e", "#ffffff"], gelb: ["#f6c500", "#17191c"],
   schwarz: ["#17191c", "#ffffff"], weiss: ["#ffffff", "#17191c"], gruen: ["#12804a", "#ffffff"],
   orange: ["#e2731c", "#ffffff"], violett: ["#5b2d8e", "#ffffff"],
-  thalwil: ["#17191c", "#ffffff"], staefa: ["#5b2d8e", "#ffffff"], meilen: ["#e2731c", "#ffffff"],
-  horgen: ["#0b7a8a", "#ffffff"], waedenswil: ["#1d3a8a", "#ffffff"], rheinau: ["#6b2fa3", "#ffffff"]
+  nachtwind: ["#17191c", "#ffffff"], staefa: ["#5b2d8e", "#ffffff"], sturmfalke: ["#e2731c", "#ffffff"],
+  blitzfang: ["#0b7a8a", "#ffffff"], waedenswil: ["#1d3a8a", "#ffffff"], glutwind: ["#6b2fa3", "#ffffff"]
 };
 
 /* everything colour-related for one club against one opponent on the cloth ground */

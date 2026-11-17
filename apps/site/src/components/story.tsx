@@ -1,6 +1,6 @@
 /**
  * The pieces of the start page's week (lib/story.ts): the time stamp over each part, the evening
- * after the defeat, the message in the team chat, and the right wing before and after.
+ * after the defeat and the right wing before and after (the team chat: components/phone-chat.tsx).
  */
 import type { ReactNode } from "react";
 import { HalfCourtLines } from "@/components/anlauf/court";
@@ -52,43 +52,6 @@ export function Evening({ t, score }: { t: Messages["home"]["problemCard"]; scor
             <span>60:00</span>
           </div>
           <p className="late mt-2 text-[1.0625rem] text-[#dcdfe2]">{t.video}</p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/** Tuesday: the link as it arrives in the team chat, and a player who saw it himself (W26, W28). */
-export function TeamChat({ t, team }: { t: Messages["home"]["chat"]; team: string }) {
-  return (
-    <div role="img" aria-label={t.label} className="mx-auto w-full max-w-[24rem] border-2 border-ink bg-paper shadow-[6px_6px_0_var(--ink)]">
-      <div aria-hidden>
-        <div className="flex items-center gap-3 bg-ink px-4 py-3 text-ground">
-          <span className="grid size-10 shrink-0 place-items-center bg-club font-bold text-club-ink">H1</span>
-          <span className="min-w-0">
-            <b className="block leading-tight">{t.group}</b>
-            <span className="block text-base text-[#b9bec4]">{t.members}</span>
-          </span>
-        </div>
-        <div className="flex flex-col gap-4 bg-[#e4e1da] px-3 py-5 sm:px-4">
-          <div className="ml-auto w-[88%] border-2 border-ink bg-paper">
-            <div className="m-1.5 bg-club px-3 pt-3 pb-6 [clip-path:polygon(0_0,100%_0,100%_78%,0_100%)]">
-              <p className="font-slant text-[1.375rem] leading-[1.05] text-club-ink">{t.card}</p>
-            </div>
-            <div className="px-3 pt-1 pb-2">
-              <p className="text-base font-semibold">{fmt(t.cardMeta, { team })}</p>
-              <p className="font-mono text-[0.9375rem] text-ink-2">app.handball-intelligence.com</p>
-            </div>
-            <p className="border-t border-rule px-3 py-2 text-[1.0625rem] leading-snug">{t.message}</p>
-            <p className="px-3 pb-2 text-right text-[0.9375rem] text-ink-2">
-              {t.you} · {t.time}
-            </p>
-          </div>
-          <div className="w-[80%] border-2 border-ink bg-ground px-3 py-2">
-            <p className="text-[0.9375rem] font-bold text-club-text">{t.replyFrom}</p>
-            <p className="text-[1.0625rem] leading-snug">{t.reply}</p>
-            <p className="text-right text-[0.9375rem] text-ink-2">{t.replyTime}</p>
-          </div>
         </div>
       </div>
     </div>

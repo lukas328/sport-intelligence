@@ -35,7 +35,7 @@ Die App hat nicht zu viele Funktionen. Sie hat drei Strukturprobleme und ein Ges
 
 ### Trainer: Übersicht
 
-- Die Bühne nimmt 480 px und sagt «Deutlich gewonnen gegen TSV Demo-Thalwil.» neben 26:18. Das
+- Die Bühne nimmt 480 px und sagt «Deutlich gewonnen gegen TSV Demo-Nachtwind.» neben 26:18. Das
   Spiel ist acht Tage her, heute ist Training um 19:00 mit 0 Übungen und zwei Ausfällen. Das
   steht ganz unten.
 - «Was auffällt: Für dieses Spiel gibt es noch keine Erkenntnisse.» ist die wichtigste Stelle der

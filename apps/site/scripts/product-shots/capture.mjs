@@ -99,6 +99,22 @@ function pageHelpers() {
           el.style.display = "none";
       }
     },
+    /**
+     * hides (keeps its room) the block around a text, e.g. an empty «Notizen»; a RegExp hides
+     * only the text that matches it, e.g. the clock of a video the picture covers
+     */
+    hide(text) {
+      const el = hb.text(text);
+      if (!el) return 0;
+      if (text instanceof RegExp) {
+        el.style.visibility = "hidden";
+        return 1;
+      }
+      let b = el;
+      while (b.parentElement && b.parentElement.getBoundingClientRect().height < 260) b = b.parentElement;
+      b.style.visibility = "hidden";
+      return 1;
+    },
     /** the shot dots of the half court in the block that holds `label` */
     dots(label) {
       const el = hb.text(label);
@@ -168,7 +184,9 @@ const SHOTS = [
     async open(p) {
       await p.evaluate(() => {
         const t = window.__hb.text("1 von 3") ?? window.__hb.text(/^1\s*von\s*3$/);
-        if (t) window.scrollTo(0, t.getBoundingClientRect().top + window.scrollY - 290);
+        // «1 von 3» high on the screen, so the half court and the scenes fit under it
+        if (t) window.scrollTo(0, t.getBoundingClientRect().top + window.scrollY - 110);
+        window.__hb.hideTabBar();
       });
       await p.waitForTimeout(400);
     },
@@ -255,25 +273,33 @@ const SHOTS = [
   {
     name: "video",
     size: { ...DESKTOP, height: 1000 },
+    // a clean state: no empty «Noch keine Notiz» under the three things. The picture of the
+    // synthetic clip is covered by the hall recording (stage.js), so its own clock goes with it
+    hide: ["Noch keine Notiz zu dieser Phase.", /^\d+:\d\d \/ \d+:\d\d$/],
     async open(p) {
       await openMatch(p);
-      await p.getByRole("tab", { name: "Video", exact: true }).click();
+      // the second goal over the right wing (the 6th minute of the website's match), opened as
+      // «Szene zeigen» opens it (?tab=video&scene=): a phase early in the match with its goals
+      const scene = await p.evaluate(async () => {
+        const [, org, match] = location.pathname.match(/\/app\/([^/]+)\/matches\/([^/?]+)/) ?? [];
+        const r = await fetch(`/v1/orgs/${org}/matches/${match}/graphics`, { credentials: "include" });
+        const goals = ((await r.json()).goals ?? [])
+          .filter((g) => g.team === "opp" && g.zone === "ra" && g.t_ms != null)
+          .sort((a, b) => a.minute - b.minute);
+        return goals[1]?.event_id ?? null;
+      });
+      if (!scene) throw new Error("no second goal over the right wing");
+      const url = new URL(p.url());
+      url.search = `?tab=video&scene=${scene}`;
+      await p.goto(url.toString(), { waitUntil: "load", timeout: 90000 });
       await p
         .getByTestId("next-scene")
         .or(p.getByRole("button", { name: /Szene merken/ }))
         .first()
         .waitFor({ timeout: 15000 });
       await settle(p);
-      // a moment with the players spread over the court, not the start picture with the play button
-      await p
-        .locator("video")
-        .first()
-        .evaluate(async (v) => {
-          v.muted = true;
-          v.currentTime = 4.5;
-          await v.play().catch(() => {});
-        })
-        .catch(() => {});
+      // the player stands where the app puts it, at the start of that scene; the hall recording
+      // covers the clip's picture and draws the line of a 60-minute video there (templates: `at`)
       await p.waitForTimeout(1200);
       await p
         .locator('[role="tablist"]')
@@ -350,11 +376,11 @@ const SHOTS = [
           hb.up(
             title,
             (e) =>
-              /Rebhalden|Bergtal|Seewald/.test(e.textContent) && e.getBoundingClientRect().height > 60,
+              /Rotdorn|Wirbelstern|Nachtwind/.test(e.textContent) && e.getBoundingClientRect().height > 60,
           );
         if (!row) return null;
         const names = Array.from(row.querySelectorAll("*")).filter(
-          (e) => e.children.length === 0 && /^(Rebhalden|Bergtal|Seewald)/.test(e.textContent.trim()),
+          (e) => e.children.length === 0 && /^(Rotdorn|Wirbelstern|Nachtwind)/.test(e.textContent.trim()),
         );
         const chart =
           names.length &&
@@ -488,7 +514,8 @@ async function openMatch(p) {
     .first()
     .getAttribute("href");
   if (!href) throw new Error("no link «Spiel öffnen»");
-  await p.goto(new URL(href, APP).toString(), { waitUntil: "networkidle" });
+  // "load", not "networkidle": a player that keeps fetching its video never lets the network rest
+  await p.goto(new URL(href, APP).toString(), { waitUntil: "load", timeout: 90000 });
   await settle(p);
 }
 
@@ -581,6 +608,15 @@ async function main() {
       await p.goto(team, { waitUntil: "networkidle" });
       await settle(p);
       await shot.open(p);
+      // what the app shows stays as it is: the seed tells the website's story (scripts/seed.py)
+      for (const text of shot.hide ?? []) {
+        const what = text instanceof RegExp ? { re: text.source } : { s: text };
+        const ok = await p.evaluate(
+          (w) => window.__hb.hide(w.re ? new RegExp(w.re) : w.s),
+          what,
+        );
+        if (!ok) console.warn(`${shot.name}: nothing to hide for «${text}»`);
+      }
       const rects = {};
       const missing = [];
       for (const [key, fn] of Object.entries(shot.find)) {

@@ -386,7 +386,7 @@ Left open (next round):
 - Phone: the work strip of four steps and four tools scrolls sideways and cuts the last label;
   the bottom navigation covers the end of the step panel.
 - Onboarding: progress segments in light mode are nearly invisible; a player joining sees the
-  coach's "Schritt 1 von 4"; "@ HSG Rheinau" in the inbox (away games) reads as an anglicism.
+  coach's "Schritt 1 von 4"; "@ HSG Glutwind" in the inbox (away games) reads as an anglicism.
 - After "Passt" the workspace stays on the court step instead of moving on to the next open step.
 
 ## Round 2 over the new screens (UI session, 2026-11-09)

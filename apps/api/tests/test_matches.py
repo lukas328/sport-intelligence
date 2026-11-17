@@ -58,19 +58,22 @@ async def upload(
 
 
 async def test_opponent_spellings_are_one_opponent(make_api: Callable[[], Api]) -> None:
-    """«SG Felsegg/Lärchenwil 1» from the league and «SG Felsegg/Lärchenwil (M2)» from the cup are
-    the same opponent; a club's second team stays its own (review R7)."""
+    """«SG Kalvenegg/Lärchenwil 1» from the league and «SG Kalvenegg/Lärchenwil (M2)» from the cup
+    are the same opponent; a club's second team stays its own (review R7)."""
     api = make_api()
     ids = await setup_club(api)
-    first = await new_match(api, ids, opponent_name="SG Felsegg/Lärchenwil 1")
+    first = await new_match(api, ids, opponent_name="SG Kalvenegg/Lärchenwil 1")
     cup = await new_match(
-        api, ids, opponent_name="SG Felsegg/Lärchenwil (M2)", kickoff_at="2026-11-14T18:00:00+01:00"
+        api,
+        ids,
+        opponent_name="SG Kalvenegg/Lärchenwil (M2)",
+        kickoff_at="2026-11-14T18:00:00+01:00",
     )
     second = await new_match(
-        api, ids, opponent_name="SG Felsegg/Lärchenwil 2", kickoff_at="2026-11-21T18:00:00+01:00"
+        api, ids, opponent_name="SG Kalvenegg/Lärchenwil 2", kickoff_at="2026-11-21T18:00:00+01:00"
     )
     assert cup["opponent"]["id"] == first["opponent"]["id"]
-    assert cup["opponent"]["name"] == "SG Felsegg/Lärchenwil 1"
+    assert cup["opponent"]["name"] == "SG Kalvenegg/Lärchenwil 1"
     assert second["opponent"]["id"] != first["opponent"]["id"]
 
 

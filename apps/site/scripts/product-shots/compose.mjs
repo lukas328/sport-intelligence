@@ -150,6 +150,14 @@ async function main() {
           bend: c.bend,
           ...(c.max ? { max: c.max } : {}),
         })),
+        ...(shot.lettering
+          ? {
+              lettering: [
+                ...pct([shot.lettering[0], shot.lettering[1]]),
+                ...pct([shot.lettering[2], shot.lettering[3]]),
+              ],
+            }
+          : {}),
       };
       const kb = (b) => ((b.length * 3) / 4 / 1024).toFixed(0);
       console.log(

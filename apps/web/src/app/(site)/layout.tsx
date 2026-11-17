@@ -4,9 +4,14 @@ import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 import { BrandWordmark } from "@/components/brand";
 import { LanguageSwitch } from "@/components/language-switch";
+import { SiteBackLink, SiteHomeMark } from "@/components/site-back";
 import { SiteLoginLink } from "@/components/site-login-link";
 
-/** Public pages, sign-in, onboarding and back office: a quiet header and centred content. */
+/**
+ * Public pages, sign-in, onboarding and back office: a quiet header and centred content. Signed
+ * out, the word mark and «Zur Website» lead back to the website in the visitor's language
+ * (BEFUNDE-2 L5; on the phone the mark, and the sign-in pages name the website under the claim).
+ */
 export default async function SiteLayout({ children }: { children: ReactNode }) {
   const t = await getTranslations();
   const signedIn = Boolean((await cookies()).get("hb_session"));
@@ -14,10 +19,17 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
     <div className="flex min-h-dvh flex-col">
       <header>
         <nav aria-label={t("shell.mainNav")} className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
-          <Link href="/" className="">
-            <BrandWordmark name={t("app.name")} />
-          </Link>
+          {signedIn ? (
+            <Link href="/" className="">
+              <BrandWordmark name={t("app.name")} />
+            </Link>
+          ) : (
+            <SiteHomeMark>
+              <BrandWordmark name={t("app.name")} />
+            </SiteHomeMark>
+          )}
           <div className="flex items-center gap-1 text-sm">
+            {!signedIn && <SiteBackLink className="mr-3 max-sm:hidden" />}
             <LanguageSwitch className="max-sm:hidden" />
             <SiteLoginLink signedIn={signedIn} label={signedIn ? t("nav.app") : t("nav.login")} />
           </div>

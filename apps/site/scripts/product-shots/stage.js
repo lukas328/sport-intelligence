@@ -84,7 +84,7 @@
    * down so that the app's line `y` (CSS px of the capture) sits at the stage's line `at`, or,
    * with `bottom`, so that the phone stands that far above the stage's bottom edge.
    */
-  function phone(name, { left, width = PHONE_SCREEN, y = 0, at = 0, bottom }) {
+  function phone(name, { left, width = PHONE_SCREEN, y = 0, at = 0, bottom, crop, top: fixedTop }) {
     const body = document.createElement("div");
     body.className = "phone";
     body.style.left = `${left}px`;
@@ -93,6 +93,13 @@
     scr.style.width = `${width}px`;
     body.append(scr);
     document.getElementById("stage").append(body);
+    // `crop` ([x, y, w, h] of the capture) with `top`: the phone's upper edge at `top`, its
+    // screen showing only that part (it may run out of the picture at the bottom)
+    if (crop) {
+      const map = screen(scr, name, crop);
+      body.style.top = `${fixedTop ?? 0}px`;
+      return map;
+    }
     const map = screen(scr, name);
     const pad = (body.offsetWidth - width) / 2;
     const top =
@@ -186,6 +193,37 @@
     shot.callouts.push({ id, from, to, place, bend, ...(max ? { max } : {}) });
   }
 
+  /**
+   * The match video in a screen (BEFUNDE-2 L8): over the app's player picture `r` (an app box),
+   * a real hall recording blurred past recognition (assets/halle.webp: no person, number, text
+   * or logo), darker at the foot. `bar` (app px from the box's foot) also draws the player's
+   * line with the playhead at `at` (0 to 1), as a running match. Returns the picture's box on the
+   * stage, where the website writes «Dein Spiel» in the visitor's language (lettering).
+   */
+  function video(map, r, { bar, at = 0.13, cut = 0 } = {}) {
+    const [x, y, w, h] = map(r);
+    const hh = h - cut * map.k;
+    const box = document.createElement("div");
+    box.className = "hall-video";
+    Object.assign(box.style, { left: `${x}px`, top: `${y}px`, width: `${w}px`, height: `${hh}px` });
+    map.el.append(box);
+    if (bar != null) {
+      const line = document.createElement("div");
+      line.className = "hall-bar";
+      const by = y + h - bar * map.k;
+      Object.assign(line.style, { left: `${x + 9 * map.k}px`, top: `${by}px`, width: `${w - 18 * map.k}px` });
+      line.style.setProperty("--at", `${at * 100}%`);
+      line.style.setProperty("--k", String(map.k));
+      map.el.append(line);
+    }
+    return onStage(map.el, [x, y, w, hh]);
+  }
+
+  /** where the website writes a word over the picture (a box on the stage, see `video`) */
+  function lettering(box) {
+    shot.lettering = box;
+  }
+
   /** waits for the pictures, then tells compose.mjs the stage is ready */
   async function done() {
     await document.fonts.ready;
@@ -193,5 +231,5 @@
     window.READY = shot;
   }
 
-  window.S = { cap, rect, stage, screen, piece, phone, browser, onStage, ring, spot, at, callout, done };
+  window.S = { cap, rect, stage, screen, piece, phone, browser, onStage, ring, spot, at, callout, video, lettering, done };
 })();

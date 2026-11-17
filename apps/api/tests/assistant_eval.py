@@ -20,7 +20,7 @@ from handball_api.core.assistant_llm import ModelTurn, Usage
 from handball_court.zones import shot_zone
 from handball_metrics.xg import expected_goal
 
-OPPONENTS = ["TV Muster", "HC Beispiel", "SG Probe", "TSV Test"]
+OPPONENTS = ["TV Kieselwind", "HC Beispiel", "SG Probe", "TSV Test"]
 NUMBERS = [2, 4, 7, 9, 11, 13, 17, 23]
 PLAYS = ["Kreuzung links", "Stoss Mitte"]
 SPOTS = {

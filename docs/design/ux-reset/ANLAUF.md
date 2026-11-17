@@ -43,7 +43,7 @@ Two tests for every element:
 
 - **Opponent colour** comes from the match (jersey colours asked in "Spiel anlegen") or what was
   chosen for this opponent before. **Unknown:** grey `#646b73` (on a black club `#8b9198`),
-  «Farbe offen» next to the name, and the head asks «Welche Farbe trägt Thalwil?» with five
+  «Farbe offen» next to the name, and the head asks «Welche Farbe trägt Nachtwind?» with five
   shirts. On the tactics camera the opponents are grey rings. Never guess.
 - **Clash rule on the ground:** if the opponent's hue is within 45 degrees of the club's (or both
   are greys of similar lightness), the opponent shows its second colour; if that clashes too, ink.

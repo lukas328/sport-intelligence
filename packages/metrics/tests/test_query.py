@@ -6,9 +6,11 @@ from handball_metrics import Event, EventType, Side
 from handball_metrics.query import Filter, MatchInfo, Row, aggregate, compare, compute, select
 
 OWN, OPP = Side.OWN, Side.OPPONENT
-M1 = MatchInfo("m1", "2026-10-01", "TV Muster", 20, 18, opponent_formations=((0, 60_000, "5-1"),))
+M1 = MatchInfo(
+    "m1", "2026-10-01", "TV Kieselwind", 20, 18, opponent_formations=((0, 60_000, "5-1"),)
+)
 M2 = MatchInfo("m2", "2026-10-08", "HC Beispiel", 25, 27)
-M3 = MatchInfo("m3", "2026-10-15", "TV Muster", 22, 22)
+M3 = MatchInfo("m3", "2026-10-15", "TV Kieselwind", 22, 22)
 
 
 def ev(i: int, match: MatchInfo, type_: EventType, side: Side, clock: float, **kw: object) -> Row:
@@ -45,7 +47,7 @@ ROWS = [
 def test_filters() -> None:
     assert len(select(ROWS, Filter(side="own", type="shot"))) == 6
     assert {r.match.id for r in select(ROWS, Filter(last_n_matches=1))} == {"m3"}
-    assert {r.match.id for r in select(ROWS, Filter(opponent="muster"))} == {"m1", "m3"}
+    assert {r.match.id for r in select(ROWS, Filter(opponent="kieselwind"))} == {"m1", "m3"}
     assert [r.event.id for r in select(ROWS, Filter(zone="wing_right"))] == ["e4", "e8"]
     assert [r.event.id for r in select(ROWS, Filter(number=7))] == ["e1", "e3"]
     assert [r.event.id for r in select(ROWS, Filter(period=2, side="opponent"))] == ["e10"]
@@ -88,7 +90,7 @@ def test_group_and_compare() -> None:
     c = compare(
         ROWS,
         "shooting_pct",
-        Filter(side="own", opponent="muster"),
+        Filter(side="own", opponent="kieselwind"),
         Filter(side="own", opponent="beispiel"),
     )
     assert c["a"]["value"] == 0.8 and c["b"]["value"] == 0.0 and c["difference"] == 0.8

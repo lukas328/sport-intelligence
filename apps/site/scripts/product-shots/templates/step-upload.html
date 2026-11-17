@@ -1,16 +1,20 @@
 <!doctype html>
-<!-- Step «Hochladen»: the upload sheet cut flat out of the phone (S11: the three steps in one look,
-     no device, no Keil), «Zu welchem Spiel gehört das Video?» with the first match ringed. -->
+<!-- Step «Hochladen» (L9, L11): the phone in front of the hall (the same blurred recording as
+     step 1, so the three steps are one picture story), «Video hochladen», which match is the
+     video from, the first match ringed. The phone comes in from the top edge and leaves at the
+     bottom: the screen is what matters. -->
 <meta charset="utf-8" />
 <link rel="stylesheet" href="../stage.css" />
-<div id="stage"></div>
+<div id="stage"><div class="keil" style="--from: 88%; --to: 70%"></div></div>
 <script src="../stage.js"></script>
 <script>
-  S.stage(640, 620, { paper: true });
-  const sheet = S.rect("hochladen-phone", "dialog", [0, 480, 390, 364]);
-  const row = S.rect("hochladen-phone", "first", [24, 583, 342, 56]);
-  // from the sheet's title down to the screen's bottom edge, a little narrower than the phone
-  const s = S.piece("hochladen-phone", [10, sheet[1] + 6, 370, 358], { left: 0, top: 0, width: 640 });
-  S.ring(s, row, 5);
+  S.stage(640, 760);
+  document.getElementById("stage").classList.add("hall");
+  const dialog = S.rect("hochladen-phone", "dialog", [0, 74, 390, 776]);
+  const first = S.rect("hochladen-phone", "first", [24, 176, 342, 56]);
+  // the screen from the sheet's top: the phone's upper edge in the picture, the rest runs out below
+  const c = S.cap("hochladen-phone");
+  const s = S.phone("hochladen-phone", { left: 117, width: 380, crop: [0, dialog[1], c.w, c.h - dialog[1]], top: 40 });
+  S.ring(s, first, 5);
   S.done();
 </script>

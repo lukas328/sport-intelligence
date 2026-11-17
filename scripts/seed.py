@@ -1,19 +1,24 @@
 """Demo data (BRIEF 15, docs/design/ux-reset/SPEC.md section 10): `make seed` against the running
 stack (docker compose up, or scripts/local-stack.sh).
 
-A club from the Zürichsee region that shows the product the way a coach would use it:
+An invented club that shows the product the way a coach would use it, and tells the website's
+story (apps/site, BEFUNDE-2 L7), so the app's pictures on the website need no retouching:
 
 - Herren 1 with a confirmed squad (numbers, positions) and its two club colours,
 - three matches with video (synthetic footage through the real pipeline) and their events: about
-  50 shots per side with places and goal corners, 7 m, turnovers, so each match has its three
-  things, a shot map, goals conceded by position and 30 or more scenes,
+  45 shots per side with places and goal corners, 7 m, so each match has its three things, a shot
+  map, goals conceded by position and 30 or more scenes. The last one is the website's demo match
+  (apps/site/public/demo/match.json, made by apps/site/scripts/make_demo.py): a home match on the
+  last Saturday, lost 27:29 (13:15), 11 of the 29 goals conceded over the right wing, 5 after fast
+  breaks, 9 of our 27 from the pivot. Over the three: 26 of 77 conceded over the right wing.
 - two older matches with a match report only (paper import),
 - two themes that repeat over the matches with video (the right wing stays open, 7 m are missed),
-- one collection made from the last match, and the opponents' colours.
+- the collection of the website's Tuesday, «Aussen rechts zumachen»: four scenes over the right
+  wing of the last match; the opponents' colours.
 
-Numbers are uneven and plausible; the club, its opponents, the hall and the people are invented.
-Everything is marked as demo. The videos are rendered by packages/vision (synthetic, not real
-footage).
+Numbers are uneven and plausible; the club, its opponents, the hall and the people are invented,
+and no name contains a real place. Everything is marked as demo. The videos are rendered by
+packages/vision (synthetic, not real footage).
 
     uv run python scripts/seed.py [--web http://localhost:3000]
 """
@@ -34,8 +39,14 @@ import httpx
 
 EMAIL = "demo@handball-demo.ch"
 PASSWORD = "demo-handball-2026"  # noqa: S105 (local demo account)
-CLUB = "HC Zürichsee"
+CLUB = "HC Tannengrün"
 VIDEO_SECONDS = 60
+# the website's demo match: its events are the last analysed match here
+SITE_MATCH = (
+    Path(__file__).resolve().parents[1] / "apps" / "site" / "public" / "demo" / "match.json"
+)
+# the website's Tuesday: four scenes over the right wing of that match go to the team chat
+COLLECTION = "Aussen rechts zumachen"
 
 # the squad of Herren 1: number, first name, last name, position, hand, birth year
 SQUAD = [
@@ -56,54 +67,6 @@ SQUAD = [
 ]
 # shirt numbers without a consent for video analysis yet
 NO_CONSENT = {14, 19}
-
-
-ZONE_FROM = {
-    "la": "über aussen links",
-    "ra": "über aussen rechts",
-    "rl": "aus dem Rückraum links",
-    "rm": "aus dem Rückraum Mitte",
-    "rr": "aus dem Rückraum rechts",
-    "kr": "vom Kreis",
-}
-
-
-def thing_items(graphics: dict[str, Any]) -> list[dict[str, Any]]:
-    """The three things of a match (as lib/three-things.ts): a note per thing, then its scenes."""
-    goals = [g for g in graphics.get("goals", []) if g.get("t_ms") is not None]
-    opp = [g for g in goals if g["team"] == "opp"]
-    own = [g for g in goals if g["team"] == "own"]
-
-    def top(side: list[dict[str, Any]], skip: set[str]) -> tuple[str, list[dict[str, Any]]] | None:
-        by: dict[str, list[dict[str, Any]]] = {}
-        for g in side:
-            if g.get("zone") and g["zone"] not in skip:
-                by.setdefault(g["zone"], []).append(g)
-        if not by:
-            return None
-        zone, hits = sorted(by.items(), key=lambda kv: (-len(kv[1]), kv[0]))[0]
-        ok = len(hits) >= 3 and len(hits) / max(1, len(side)) >= 0.25
-        return (zone, hits) if ok else None
-
-    things: list[tuple[str, list[dict[str, Any]]]] = []
-    conceded = top(opp, {"m7", "gs"})
-    if conceded:
-        things.append((f"Gegentore {ZONE_FROM.get(conceded[0], '')}", conceded[1]))
-    breaks = [g for g in opp if g.get("zone") == "gs"]
-    if len(breaks) >= 3:
-        things.append(("Gegentore aus Gegenstössen", breaks))
-    scored = top(own, {"m7"})
-    if scored:
-        things.append((f"Tore {ZONE_FROM.get(scored[0], '')}", scored[1]))
-    items: list[dict[str, Any]] = []
-    seen: set[str] = set()
-    for n, (text, hits) in enumerate(things[:3], start=1):
-        items.append({"kind": "note", "text": f"Punkt {n}: {text}"})
-        for g in sorted(hits, key=lambda x: x["t_ms"]):
-            if g["event_id"] not in seen:
-                seen.add(g["event_id"])
-                items.append({"kind": "scene", "event_id": g["event_id"]})
-    return items
 
 
 def consent(c: Client, team_url: str, player_id: str, name: str) -> None:
@@ -363,6 +326,49 @@ def match_events(
     return events
 
 
+def site_match_events(players: dict[int, str], keeper: str) -> list[dict[str, Any]]:
+    """The website's demo match as events: every shot with its half, clock, spot, kind and
+    outcome as in match.json, so the app counts what the website shows (27:29, 46 and 45 shots,
+    9 saves each, 7 m 2 of 2 and 3 of 3, the three things 11, 5 and 9). `players` maps our shirt
+    numbers (make_demo.py takes them from SQUAD) to roster player ids. The goal corners are not
+    in match.json; they are drawn here with their own seed."""
+    data = json.loads(SITE_MATCH.read_text(encoding="utf-8"))
+    rng = random.Random(2100)
+    shots = sorted(
+        (e for e in data["events"] if e["type"] == "shot"),
+        key=lambda e: (e["period"], e["clock_s"]),
+    )
+    events: list[dict[str, Any]] = []
+    for e in shots:
+        ev: dict[str, Any] = {
+            "type": "shot",
+            "side": e["side"],
+            "outcome": e["outcome"],
+            "shot_type": e["shot_type"],
+            "period": e["period"],
+            "clock_s": e["clock_s"],
+            "x": e["x"],
+            "y": e["y"],
+            # the 60 minutes on the synthetic clip: a moment in the video is the same share of
+            # the match as on the timeline (seek bar and timeline agree in the pictures)
+            "t_ms": int(1500 + e["clock_s"] / 3600 * (VIDEO_SECONDS - 3) * 1000),
+        }
+        if e["outcome"] in ("goal", "save"):
+            ev["goal_zone"] = rng.choice(CORNERS)
+        if e["side"] == "own":
+            ev["player_id"] = players[e["number"]]
+        else:
+            ev["number"] = e["number"]
+            ev["attributes"] = {"goalkeeper_id": keeper}
+        events.append(ev)
+    return events
+
+
+def last_saturday(now: datetime) -> int:
+    """Days back to the last Saturday before today (1 to 7): the website's match day."""
+    return (now.weekday() - 5) % 7 or 7
+
+
 def paper_report(
     rng: random.Random, when: datetime, opponent: str, home: bool, own: int, opp: int
 ) -> dict[str, Any]:
@@ -431,6 +437,7 @@ def main() -> None:
     season = herren["current_season"]["id"]
     roster_url = f"{o}/teams/{herren['id']}/seasons/{season}/roster"
     by_position: dict[str, list[str]] = {}
+    by_number: dict[int, str] = {}
     for number, first, last, pos, hand, born in SQUAD:
         entry = c.post(
             roster_url,
@@ -444,6 +451,7 @@ def main() -> None:
             },
         ).json()
         by_position.setdefault(pos, []).append(entry["player_id"])
+        by_number[number] = entry["player_id"]
         # SPEC.md section 10: twelve of the squad consented by link, two still missing
         if number not in NO_CONSENT:
             consent(c, f"{o}/teams/{herren['id']}", entry["player_id"], f"{first} {last}")
@@ -485,8 +493,8 @@ def main() -> None:
 
     # two older matches with a match report only
     for days, opponent, home, own, opp in (
-        (33, "TV Lindmatt", False, 24, 27),
-        (19, "SG Uferweg-Riet", True, 29, 19),
+        (33, "TV Silberpfeil", False, 24, 27),
+        (19, "SG Blitzfang", True, 29, 19),
     ):
         report = paper_report(rng, now - timedelta(days=days), opponent, home, own, opp)
         c.post(
@@ -494,13 +502,13 @@ def main() -> None:
             files={"file": ("spielbericht.json", json.dumps(report), "application/json")},
         )
 
-    # three matches with video and events; the right wing stays open, 7 m are missed
-    # SPEC.md section 10: the last match is the one of the Zielbild, 26:18 (13:9) against TSV
-    # Seewald in black; nine of their 18 goals over our right wing, our circle the strength
-    analysed = [
+    # three matches with video and events; the right wing stays open (6, 9 and 11 goals over it),
+    # 7 m are missed. The last match is the website's: 27:29 (13:15) at home against TSV
+    # Nachtwind in black, its events from match.json (site_match_events)
+    analysed: list[dict[str, Any]] = [
         dict(
             days=26,
-            opponent="TV Rebhalden",
+            opponent="TV Rotdorn",
             home=True,
             kit="#c8102e",
             own=27,
@@ -515,7 +523,7 @@ def main() -> None:
         ),
         dict(
             days=12,
-            opponent="BSV Bergtal",
+            opponent="BSV Wirbelstern",
             home=False,
             kit="#5b2d8e",
             own=19,
@@ -529,19 +537,11 @@ def main() -> None:
             focus="RM",
         ),
         dict(
-            days=5,
-            opponent="TSV Seewald",
+            days=last_saturday(now),
+            opponent="TSV Nachtwind",
             home=True,
             kit="#17191c",
-            own=26,
-            opp=18,
-            ht=(13, 9),
-            misses=17,
-            saves=16,
-            seven=(4, 2),
-            wing=9,
-            turnovers=11,
-            focus="KM",
+            site=True,
         ),
     ][: max(0, min(3, args.videos))]
     matches = []
@@ -553,7 +553,7 @@ def main() -> None:
                 "kickoff_at": (now - timedelta(days=spec["days"])).isoformat(),
                 "is_home": spec["home"],
                 "competition": "2. Liga Herren",
-                "venue": "Sporthalle Seeblick" if spec["home"] else None,
+                "venue": "Sporthalle Kieselgrund" if spec["home"] else None,
                 "kit_own": "#10684a",
                 "kit_own_gk": "#f28c00",
                 "opponent_kit": spec["kit"],
@@ -562,27 +562,33 @@ def main() -> None:
                 "is_demo": True,
             },
         ).json()
-        events = match_events(
-            rng,
-            players=by_position,
-            own_goals=spec["own"],
-            opp_goals=spec["opp"],
-            own_misses=spec["misses"],
-            keeper_saves=spec["saves"],
-            seven_m=spec["seven"],
-            opp_from_right_wing=spec["wing"],
-            turnovers=spec["turnovers"],
-            keeper=by_position["TW"][0],
-            halftime=spec["ht"],
-            focus=spec["focus"],
+        events = (
+            site_match_events(by_number, by_position["TW"][0])
+            if spec.get("site")
+            else match_events(
+                rng,
+                players=by_position,
+                own_goals=spec["own"],
+                opp_goals=spec["opp"],
+                own_misses=spec["misses"],
+                keeper_saves=spec["saves"],
+                seven_m=spec["seven"],
+                opp_from_right_wing=spec["wing"],
+                turnovers=spec["turnovers"],
+                keeper=by_position["TW"][0],
+                halftime=spec["ht"],
+                focus=spec["focus"],
+            )
         )
         for e in events:
             c.post(f"{o}/matches/{m['id']}/events", json=e)
         c.patch(
             f"{o}/matches/{m['id']}",
             json={
-                "score_own": spec["own"],
-                "score_opponent": spec["opp"],
+                "score_own": sum(e["side"] == "own" and e.get("outcome") == "goal" for e in events),
+                "score_opponent": sum(
+                    e["side"] == "opponent" and e.get("outcome") == "goal" for e in events
+                ),
                 # the half-time score as the events have it
                 "halftime_own": sum(
                     e["side"] == "own" and e.get("outcome") == "goal" and e["period"] == 1
@@ -601,7 +607,7 @@ def main() -> None:
     c.post(
         base,
         json={
-            "opponent_name": "HSG Moosbach",
+            "opponent_name": "HSG Sturmfalke",
             "kickoff_at": (now + timedelta(days=4)).isoformat(),
             "is_home": False,
             "competition": "2. Liga Herren",
@@ -629,14 +635,22 @@ def main() -> None:
             print(f"uploaded synthetic video for match {mid}")
 
     if matches:
-        # the draft holds the three things as the app shows them: a note, then exactly the
-        # scenes of each thing, every scene once (UX test B16)
+        # the website's Tuesday: four of the eleven goals over the right wing, spread over the
+        # match, for the team chat
+        graphics = c.get(f"{o}/matches/{matches[-1]}/graphics").json()
+        wing = sorted(
+            (g for g in graphics.get("goals", []) if g["team"] == "opp" and g.get("zone") == "ra"),
+            key=lambda g: g["t_ms"],
+        )
         coll = c.post(
             f"{o}/teams/{herren['id']}/collections/from-match",
             json={
                 "match_id": matches[-1],
-                "title": "Rückzug und rechter Flügel",
-                "items": thing_items(c.get(f"{o}/matches/{matches[-1]}/graphics").json()),
+                "title": COLLECTION,
+                "items": [
+                    {"kind": "scene", "event_id": g["event_id"]}
+                    for g in [wing[k] for k in (1, 4, 7, 10) if k < len(wing)]
+                ],
             },
         ).json()
         c.patch(f"{o}/collections/{coll['id']}", json={"draft": False})

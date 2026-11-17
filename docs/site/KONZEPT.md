@@ -93,11 +93,11 @@ Szenen, Sammlung, Spielbericht, Prüfen, Spieltag, Teilen). fr und en stehen in
    - Titel: «Dein Spiel. Und drei Dinge zum Mitnehmen.»
    - Text: «Du filmst das Spiel mit dem Handy und lädst das Video hoch. Die Analyse zeigt dir drei
      Dinge zum Mitnehmen, mit den Szenen dazu.»
-   - Resultat 25:24, Namen «HC Beispiel» und «TV Muster», Verlauf des Spiels als Linie.
+   - Resultat 25:24, Namen «HC Beispiel» und «TV Kieselwind», Verlauf des Spiels als Linie.
    - Farbwahl: «Welche Farbe trägt dein Team?» Blau, Rot, Gelb, Schwarz, Weiss, Grün, Orange,
      Violett.
 2. **Team-Feld im Kopf** (Nachtrag 13. November, aus `docs/ux-test/runde1/EINSTIEG.md`): «Wie
-   heisst dein Team?», ein Feld, Knopf «Zeigen», darunter «zum Beispiel: HC Zürichsee Herren 1».
+   heisst dein Team?», ein Feld, Knopf «Zeigen», darunter «zum Beispiel: HC Tannengrün Herren 1».
    Schickt per GET auf `<App-URL>/einstieg?q=…`, wo die App das Team aus den Verbandsdaten ohne
    Konto zeigt. Am Handy im ersten Bildschirm, über der Farbwahl. Daneben «Demo-Spiel ansehen»
    (Umriss), darunter «Dein Team ansehen geht ohne Konto.» «Kostenlos starten» in der Kopfzeile
