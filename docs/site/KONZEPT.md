@@ -131,17 +131,24 @@ Seitenkopf «In drei Schritten vom Spiel zu den drei Dingen.» Dann:
 - **4 Prüfen**: «Wo die Analyse unsicher ist, fragt sie dich: Wer ist das? Passt das Spielfeld?
   Jede Antwort ist sofort gespeichert. Du kannst jederzeit aufhören.»
 - **5 Anschauen und teilen**: drei echte App-Bilder (Start, Taktikkamera, geteilter Link).
-- **Das kann es, das noch nicht** (ganze Liste, siehe 5).
+- **Das kann es, das noch nicht**: je drei Punkte, die ganze Liste auf «Fakten auf einen Blick» (seit 17. November 2026). Die Schritte selbst: je zwei, drei Sätze.
 
 ### Filmen
 
-Seitenkopf «So filmst du ein Spiel.» Hallenplan von oben mit Kamera an der Mittellinie und
-Blickfeld. Abschnitte «Was du brauchst» (Handy, Stativ oder ein fester Platz auf der Tribüne,
-Powerbank, mindestens 10 GB frei), «Aufstellen» (hoch, ab etwa 3 Metern; Mittellinie; ganzes
-Feld; quer), «Einstellen» (1080p, wenn möglich 50 Bilder pro Sekunde; Flugmodus; Bildschirm an),
-«Während dem Spiel» (nicht schwenken, nicht zoomen; einfach laufen lassen, auch in der Pause),
-«Danach» (Datei hochladen, MP4 oder MOV), «Was weniger gut geht» (schwenkende Kamera: geht, aber
-das Feld wird schwerer erkannt; Gegenlicht; nur hinter dem Tor). Aushang zum Drucken.
+Stand 17. November 2026 (K24, zweiter Durchgang): zuerst die kurze Antwort als Bild, Details
+weiter unten zugeklappt oder im Ratgeber und in der Hilfe.
+
+1. Seitenkopf «So filmst du ein Spiel.», ein Satz: Handy oder Kamera hoch an die Mittellinie,
+   beide Tore im Bild, laufen lassen.
+2. Hallenplan von oben (Kamera an der Mittellinie, Blickfeld) neben fünf Regeln mit kleinem Bild:
+   Handy oder Kamera; Hoch an die Mittellinie; Beide Tore im Bild; Fest ist am besten; Schwenken
+   geht. Die Regeln sind die Schritte der HowTo-Daten und stehen in llms-full.txt.
+3. «Am Spieltag»: Checkliste in drei Spalten (Einpacken, Einstellen, Filmen), Link auf die
+   Vorlage zum Drucken.
+4. «Danach: hochladen.» mit dem Produktbild aus der App (Spiel wählen, dann das Video).
+5. «Genauer»: vier zugeklappte Fragen (passt nicht ins Bild, in der Pause gestoppt, welche
+   Datei, was weniger gut geht), Links auf Ratgeber, Hilfe und Speicher-Rechner.
+6. Aushang zum Drucken neben seinem Knopf.
 
 ### Demo-Spiel
 

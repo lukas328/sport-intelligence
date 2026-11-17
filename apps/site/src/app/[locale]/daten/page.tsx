@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { KitScope } from "@/components/kit";
 import { MailLine } from "@/components/mail-line";
+import { ProductShot } from "@/components/product-shot";
 import { PageHead, SectionHead, Updated } from "@/components/wurf-head";
 import { messages, type Locale } from "@/lib/i18n";
 import { pageMeta } from "@/lib/seo";
@@ -25,7 +26,7 @@ export default async function Data({ params }: Props) {
       </PageHead>
       <div className="wrap">
         <div className="mt-12 grid grid-cols-1 gap-x-16 md:grid-cols-2">
-          {t.sections.map((s) => (
+          {t.sections.map((s, i) => (
             <section key={s.title} className="border-t-2 border-ink py-8" aria-labelledby={`d-${s.title}`}>
               <h2 id={`d-${s.title}`} className="text-[1.75rem] md:text-[2rem]">
                 {s.title}
@@ -40,6 +41,17 @@ export default async function Data({ params }: Props) {
                     </li>
                   ))}
                 </ul>
+              )}
+              {/* what players and parents get: a link, nothing more (product picture from the app) */}
+              {i === 0 && (
+                <ProductShot
+                  name="share"
+                  alt={m.home.shareAlt}
+                  labels={m.product.share}
+                  caption={t.shareCaption}
+                  sizes="(min-width: 768px) 26rem, calc(100vw - 2rem)"
+                  className="mt-6 max-w-[26rem]"
+                />
               )}
             </section>
           ))}

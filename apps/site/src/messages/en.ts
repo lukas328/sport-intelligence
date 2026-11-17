@@ -204,29 +204,30 @@ const en: Messages = {
   how: {
     title: "How it works",
     head: "From the match to the analysis, in four steps.",
-    lead: "You film and upload, the analysis runs. Then you confirm what it suggests and get every goal as a scene, the run of the match and the positions from above.",
+    lead: "You film and upload, the analysis runs. You confirm with a few taps and get every goal as a scene.",
     steps: [
       {
         title: "Film",
-        text: "Phone or camera on a tripod, as high as possible, level with the halfway line. With the wide angle (0.5×) both goals and goal areas are in the picture. A fixed camera is best; if you pan, the analysis follows the camera but finds the court harder. Keep recording through half-time.",
+        text: "Phone or camera high at the halfway line, both goals in the picture with the wide angle. Fixed is best, panning is fine too. Keep filming through half time.",
         alt: "",
       },
       {
         title: "Upload",
-        text: "In the app you pick the match and the video file (MP4, MOV or MKV), ideally on Wi-Fi. If the connection drops, it continues where it stopped. Then the analysis runs: it finds the court, tracks the players, reads shirt numbers where it can and looks for the goal moments. You do not have to stay: at the top of the app you see how far it is and roughly how long it still takes, and the bell tells you when it is done.",
+        text: "In the app, pick the match, then the video, ideally on Wi-Fi. The analysis finds the court and the players and looks for the goal moments. You do not have to stay: the bell tells you when it is done.",
         alt: "Uploading a video in the app: which match is this video from? Two matches to choose from and \"Or create a new match\".",
       },
       {
         title: "Check",
-        text: "Then it is your turn. The app shows you each suggested goal moment as a short scene: goal or not, for whom, and shot from where? It also asks whether the court is right. One tap per answer, everything is saved at once. Answer the optional questions at the end too, otherwise a goal can be missing. In our test with five minutes of play: 22 questions in six to nine minutes. If there is a match report from handball.ch, goals and scorers come from it and the app does not ask about them again (not yet tested on real video).",
+        text: "The app shows each suggested goal moment as a short scene: goal or not, for whom, from where? One tap per answer, also for the optional questions at the end, or a goal may be missing. In the test with five minutes of play: 22 questions in six to nine minutes.",
         alt: "A question while checking: is the court right? Above, the picture from the video with four yellow dots on the corners of the court, below the buttons Fits and Not sure.",
       },
       {
         title: "Watch and share",
-        text: "You see the score, the run of the match, every goal as a scene and the positions from above. With enough goals and their shot spots, three things to take away are added. What the team should see, you put into a collection and send the link to the team chat.",
+        text: "Score, run of the match, every goal as a scene and the positions from above; with enough goals and their shot spots, three things to take away. The scenes that matter go to the team chat as a collection, by link.",
         alt: "The first of the three things on a phone: 9 of 18 goals conceded on the right wing, below it the half court with the shots, all from the right wing.",
       },
     ],
+    honestAll: "The full list, point by point",
     shotsTitle: "What it looks like in the app",
     shotsNote: "Pictures from the app, with an invented example club.",
     shots: [
@@ -239,66 +240,42 @@ const en: Messages = {
   filming: {
     title: "Filming",
     head: "How to film a match.",
-    lead: "A phone or a camera is enough. Put it high up at the halfway line with both goals in the picture (on a phone, use the wide angle, 0.5×), and let it run for the whole match. Fixed is best.",
+    lead: "Phone or camera high up at the halfway line, both goals in the picture, let it run. That is all it takes.",
     planLabel: "Plan of the hall from above: the camera stands raised at the halfway line, a few metres behind the sideline. With the wide angle it sees both goals and goal areas; the two near corners are outside the picture.",
     planCamera: "Camera high, wide angle",
     planField: "both goals and goal areas in the picture",
     planCorner: "missing",
-    sections: [
-      {
-        title: "What you need",
-        items: [
-          "A phone or camera that films in Full HD (1080p).",
-          "A tripod, ideally a tall one, or a fixed spot in the stands.",
-          "A power bank. A match takes about 90 minutes with breaks.",
-          "At least 10 GB of free storage.",
-        ],
-      },
-      {
-        title: "Set up",
-        items: [
-          "Level with the halfway line, so both goals are equally visible.",
-          "As high as possible, from about 3 metres: stands, gallery or a tall tripod.",
-          "Both goals and goal areas fully in the picture, the sidelines as far as possible. If the two near corners are missing, that is fine.",
-          "If it does not fit: higher, a few metres further back or wide angle. Better both goals with some margin than close and sharp.",
-          "Film in landscape, not upright.",
-        ],
-      },
-      {
-        title: "Settings",
-        items: [
-          "Choose the wide angle: \"0.5×\" or \"Ultra Wide\" in the camera app. Only then do both goals fit in from the halfway line.",
-          "1080p, if possible 50 frames per second.",
-          "Flight mode on, so no call stops the recording.",
-          "Screen lock off, sound does not matter.",
-        ],
-      },
-      {
-        title: "During the match",
-        items: [
-          "Ideally keep it fixed and do not zoom. Panning works too: the analysis follows the camera but finds the court harder.",
-          "{pause}",
-        ],
-      },
-      {
-        title: "Afterwards",
-        items: [
-          "Open the match in the app and upload the file.",
-          "{upload}",
-          "A direct link to a video file works too, for example the download link from Veo or Spiideo.",
-        ],
-      },
-      {
-        title: "What works less well",
-        items: [
-          "A camera that pans or zooms a lot: it works, but the court is harder to detect. The app then asks you whether it is right.",
-          "Strong backlight from windows.",
-          "Filming only from behind the goal, or a picture with part of the court missing.",
-        ],
-      },
+    rulesTitle: "Five rules",
+    rules: [
+      { title: "Phone or camera", text: "Anything that films in Full HD. Landscape, not portrait." },
+      { title: "High at the halfway line", text: "From about 3 metres: stand, gallery or a tall tripod." },
+      { title: "Both goals in the picture", text: "With the wide angle (0.5×). The near corners may be missing." },
+      { title: "Fixed is best", text: "On a tripod, no zoom, let it run." },
+      { title: "Panning is fine", text: "The analysis follows the camera, but finds the court harder then." },
     ],
+    tools: ["Phone or camera that films in Full HD (1080p)", "Tripod or a fixed spot in the stand"],
+    checkTitle: "On match day",
+    check: [
+      { title: "Pack", items: ["Battery full, power bank with you", "At least 10 GB free", "Tripod or a fixed spot up high"] },
+      { title: "Set", items: ["Wide angle: \"0.5×\" or \"Ultra Wide\"", "1080p, at 50 frames per second if you can", "Flight mode on, screen lock off"] },
+      { title: "Film", items: ["Start before the throw-off", "{pauseShort}", "Stop after the final whistle"] },
+    ],
+    checkPrint: "Checklist to print",
+    afterTitle: "Then: upload.",
+    afterText: "At home on Wi-Fi, open the match in the app and pick the video. The analysis does the rest.",
+    afterAlt: "Uploading a video in the app: which match is this video from? Two matches to choose from and \"Or create a new match\".",
+    moreTitle: "In detail",
+    more: [
+      { q: "Not everything fits in the picture?", a: "Higher, a few metres further back or more wide angle. Better both goals with some margin than close and sharp. If the two near corners are missing, that is fine." },
+      { q: "What if I stopped at half time?", a: "{pause}" },
+      { q: "Which file do I upload?", a: "{upload} A direct link to a video file works too, for example the download link from Veo or Spiideo." },
+      { q: "What works less well?", a: "Strong backlight through windows, filming only from behind the goal, a lot of zooming or a picture with part of the court missing. If the analysis finds the court hard, the app asks you whether it is right." },
+    ],
+    guideLink: "Guide: position, height and settings in detail",
+    helpLink: "How-to: filming a match",
+    storageLink: "Calculator: how much storage does a match need?",
     noticeTitle: "Notice for the hall",
-    noticeLead: "Tell the opponent and the hall that you are filming. Print this notice and put it on the door.",
+    noticeLead: "Tell the opponent and the hall that you are filming. Print the notice and put it on the door.",
     notice: "This match\nis being filmed.",
     noticeSub: "The recording is only\nfor match analysis in the team.",
     noticeAsk: "Questions to:",
@@ -309,8 +286,6 @@ const en: Messages = {
     pauseShortMulti: "Keep filming through half time; stopped? Upload both files to the match.",
     upload: "Best is the whole match in one file (MP4, MOV or MKV). A second file, such as the second half, is stored and can be played, but only the first file is analysed.",
     uploadMulti: "Best is the whole match in one file (MP4, MOV or MKV). If you have several files, such as one per half, choose them all together or add the second later; all of them are analysed. After a break the app assumes a change of ends; if the recordings follow on directly, it does not. You can change it in the list of parts. What you have already confirmed stays.",
-    guideLink: "position, height and settings in detail",
-    moreTitle: "More on this",
   },
   demo: {
     title: "Demo match",
@@ -395,7 +370,7 @@ const en: Messages = {
   faq: {
     title: "Questions",
     head: "Questions and answers.",
-    lead: "A phone or a camera is enough. The analysis suggests the goal moments, you confirm them with a tap. Only your coaching staff sees the video. Each answer also says what Handball Intelligence does for you; below, the guides to the app.",
+    lead: "Short answers, and what Handball Intelligence does for you. Below, the guides to the app.",
     hiLabel: "How Handball Intelligence helps:",
     items: [
       { q: "Can I use it today?", a: "{state} You can already look at the demo match on this site, without an account.", hi: "" },
@@ -471,6 +446,7 @@ const en: Messages = {
         text: "You can ask at any time what is stored about you and request that it be deleted. Write to the club or to us at {email}.",
       },
     ],
+    shareCaption: "Players and parents open the link in the browser, no account needed. It shows shirt numbers instead of names.",
     boardTitle: "For the club board",
     board: "The club is responsible for the videos it uploads; we process them on its behalf. The data processing agreement follows before launch, as does the reviewed privacy policy.",
     privacyLink: "Privacy policy (draft)",
@@ -506,7 +482,7 @@ const en: Messages = {
   },
   seo: {
     how: { title: "How the video analysis works", description: "Film, upload, check: the analysis suggests the goal moments, you confirm them, goal by goal. Then scenes, run of play and positions from above." },
-    filming: { title: "Filming a match: checklist and notice", description: "The matchday checklist: phone or camera high at the halfway line, the whole court, keep filming at half-time. With a hall plan and a notice to print." },
+    filming: { title: "Filming a match: checklist and notice", description: "Five rules and the match day checklist: phone or camera high at the halfway line, both goals in the picture. With a hall plan and a notice to print." },
     demo: { title: "Demo match: what an analysis looks like", description: "An invented match to explore, no account needed: three things, scenes, tactics camera, figures with their source and goals conceded by position." },
     pricing: { title: "Prices for teams and clubs", description: "Free without automatic analysis, Team and Club with analysis. Prices in Swiss francs, yearly QR invoice. The prices are not final yet." },
     faq: { title: "Questions and answers", description: "Phone or camera? Does the analysis find the goals by itself? How do I share scenes? The most common coaches' questions, answered briefly." },
@@ -578,50 +554,45 @@ const en: Messages = {
     metaTitle: "About us: video analysis for club handball",
     description: "We build Handball Intelligence so every club handball coach knows after the match what really happened: with a phone or camera, a tripod and a little time.",
     head: "Video analysis for club handball.",
-    lead: "We build Handball Intelligence so that every coach in club handball knows, on the evening after the match, what really happened. With a phone or camera, a tripod and a little time, not with a camera system and an analyst.",
+    lead: "So that every coach in club handball knows, on the evening after the match, what really happened. With a phone or camera, not with a camera system and an analyst.",
     sections: [
       {
         title: "Why we exist",
         text: [
-          "Until now, video analysis was something for professionals. If you wanted it, you needed a camera system in the hall and someone who spends hours in front of a screen cutting scenes.",
-          "In club handball, a coach stands on the sideline on Saturday evening and is back at the office on Monday. She saw the match, but only half of it: she was coaching, making changes, talking to the referee. What happened on the far side she does not really know. We build for exactly that evening.",
+          "Video analysis was something for professionals: a camera system in the hall and someone cutting scenes for hours. In club handball the coach is coaching, making changes, talking to the referee, and back at the office on Monday. What happened at the other end, she does not really know. We build for that evening.",
         ],
       },
       {
         title: "Who we build it for",
         text: [
-          "For coaches in amateur handball, youth and senior teams, from the 1st league down, who do it as volunteers, next to work and family. Many have no time for a new program and no wish for a hundred numbers.",
-          "That is why there are few steps, big buttons and, at the end, with enough goals, three things to take home instead of a table. Players need no account: what you share opens with a link.",
+          "For coaches in amateur handball, youth and senior teams, from the 1st league down, volunteering next to work and family. So: few steps, big buttons and three things to take away instead of a hundred numbers.",
         ],
       },
       {
         title: "Honest about limits",
         text: [
-          "An analysis from a single camera makes mistakes. We do not hide them. The analysis suggests, a person confirms: it shows you the moments when a goal may have been scored, and in a few minutes you say what is right.",
-          "What is estimated says \"estimated\". Today the analysis does not track the ball, so we show no passes. What it can and cannot do is stated openly on the website, not in the small print.",
+          "An analysis from one camera makes mistakes. So it suggests, and you confirm in a few minutes what is right. What is estimated is called \"estimated\". It does not track the ball today, which is why we show no passes.",
         ],
       },
       {
         title: "The video belongs to the club",
         text: [
-          "The video belongs to the club that uploads it. Players consent by link, for children the parents. We sell no data, show no ads, and this website uses no trackers.",
-          "Team communication stays where it is, usually in the group chat. We build no chat and no scheduling. We do the analysis and deliver something you can share in the chat.",
+          "Players consent by link, for children their parents. No ads, no selling of data, no trackers on this website. We do not build a chat: what you share is a link for the group chat you already have.",
         ],
       },
       {
-        title: "From Switzerland, for Swiss club handball first",
+        title: "From Switzerland",
         text: [
-          "We come from Switzerland and build for Swiss club handball first: in German, French and English, with the data from handball.ch. You find your team by its name; fixtures and results are already there.",
+          "For Swiss club handball first, in German, French and English, with the data from handball.ch: you find your team by its name, fixtures and results are already there.",
         ],
       },
       {
         title: "Where we are heading",
         text: [
-          "We want the analysis to recognise more by itself and ask you less, starting with the goals. Until it can do that reliably, it asks. We test every new detection on real matches before it enters anything automatically.",
+          "The analysis should recognise more by itself and ask you less, goals first. We test every new detection on real matches before it enters anything automatically.",
         ],
       },
     ],
-    pictureCaption: "How to film: a phone or camera, high up at the halfway line, both goals in the picture with the wide angle.",
     shotAlt: "Start page of the app with example data: at the top the last match in the club colour with result and run of play.",
     shotCaption: "Picture from the app, with example data (in German).",
     contactTitle: "Write to us",

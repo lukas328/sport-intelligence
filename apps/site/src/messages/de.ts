@@ -202,29 +202,30 @@ const de = {
   how: {
     title: "So funktioniert es",
     head: "Vom Spiel zur Auswertung, in vier Schritten.",
-    lead: "Du filmst und lädst hoch, die Analyse rechnet. Dann bestätigst du, was sie vorschlägt, und bekommst jedes Tor als Szene, den Spielverlauf und die Positionen von oben.",
+    lead: "Du filmst und lädst hoch, die Analyse rechnet. Du bestätigst mit ein paar Tipps und bekommst jedes Tor als Szene.",
     steps: [
       {
         title: "Filmen",
-        text: "Handy oder Kamera aufs Stativ, so hoch wie möglich, auf Höhe der Mittellinie. Mit dem Weitwinkel (0,5×) sind beide Tore und Torräume im Bild. Am besten steht die Kamera fest; schwenkst du mit, folgt die Analyse der Kamera, findet das Feld aber schwerer. Lass die Aufnahme auch in der Pause laufen.",
+        text: "Handy oder Kamera hoch an die Mittellinie, mit Weitwinkel beide Tore im Bild. Fest ist am besten, schwenken geht auch. In der Pause weiterfilmen.",
         alt: "",
       },
       {
         title: "Hochladen",
-        text: "In der App wählst du das Spiel und die Videodatei (MP4, MOV oder MKV), am besten im WLAN. Bricht die Verbindung ab, geht es dort weiter. Dann rechnet die Analyse: Sie findet das Spielfeld, verfolgt die Spieler, liest Rückennummern, wo es geht, und sucht die Tor-Momente. Du musst nicht dabeibleiben: Oben in der App siehst du, wie weit sie ist und wie lange es etwa noch dauert, und die Glocke meldet, wenn sie fertig ist.",
+        text: "In der App das Spiel wählen, dann das Video, am besten im WLAN. Die Analyse findet Feld und Spieler und sucht die Tor-Momente. Du musst nicht dabeibleiben: Die Glocke meldet, wenn sie fertig ist.",
         alt: "Video hochladen in der App: Zu welchem Spiel gehört das Video? Zwei Spiele zur Auswahl und «Oder ein neues Spiel anlegen».",
       },
       {
         title: "Prüfen",
-        text: "Dann bist du dran. Die App zeigt dir jeden vorgeschlagenen Tor-Moment als kurze Szene: Tor oder nicht, für wen, und von wo geworfen? Dazu fragt sie, ob das Spielfeld passt. Ein Tipp pro Antwort, alles ist sofort gespeichert. Beantworte auch die freiwilligen Fragen am Schluss, sonst kann ein Tor fehlen. Im Test mit fünf Minuten Spiel: 22 Fragen in sechs bis neun Minuten. Gibt es einen Spielbericht von handball.ch, kommen Tore und Torschützen daraus, und die App fragt sie nicht noch einmal (an echtem Video noch nicht geprüft).",
+        text: "Die App zeigt jeden vorgeschlagenen Tor-Moment als kurze Szene: Tor oder nicht, für wen, von wo? Ein Tipp pro Antwort, auch bei den freiwilligen Fragen am Schluss, sonst kann ein Tor fehlen. Im Test mit fünf Minuten Spiel: 22 Fragen in sechs bis neun Minuten.",
         alt: "Eine Frage beim Prüfen: Passt das Spielfeld? Darüber das Bild aus dem Video mit vier gelben Punkten an den Ecken des Feldes, darunter die Knöpfe Passt und Weiss nicht.",
       },
       {
         title: "Anschauen und teilen",
-        text: "Du siehst Resultat, Spielverlauf, jedes Tor als Szene und die Positionen von oben. Bei genug Toren mit Wurfort kommen drei Dinge zum Mitnehmen dazu. Was das Team sehen soll, stellst du zu einer Sammlung zusammen und schickst den Link in den Teamchat.",
+        text: "Resultat, Spielverlauf, jedes Tor als Szene und die Positionen von oben; bei genug Toren mit Wurfort drei Dinge zum Mitnehmen. Die wichtigsten Szenen schickst du als Sammlung per Link in den Teamchat.",
         alt: "Das erste der drei Dinge am Handy: 9 von 18 Gegentoren über aussen rechts, darunter das halbe Feld mit den Würfen, alle aussen rechts.",
       },
     ],
+    honestAll: "Die ganze Liste, Punkt für Punkt",
     shotsTitle: "So sieht es in der App aus",
     shotsNote: "Bilder aus der App, mit einem erfundenen Beispielverein.",
     shots: [
@@ -237,66 +238,42 @@ const de = {
   filming: {
     title: "Filmen",
     head: "So filmst du ein Spiel.",
-    lead: "Handy oder Kamera reicht. Stell sie hoch an die Mittellinie, so dass beide Tore im Bild sind (beim Handy mit dem Weitwinkel, 0,5×), und lass die Aufnahme das ganze Spiel durchlaufen. Am besten steht sie fest.",
+    lead: "Handy oder Kamera hoch an die Mittellinie, beide Tore im Bild, laufen lassen. Mehr braucht es nicht.",
     planLabel: "Plan der Halle von oben: die Kamera steht erhöht an der Mittellinie, ein paar Meter hinter der Seitenlinie. Mit Weitwinkel sieht sie beide Tore und Torräume; die zwei nahen Ecken liegen ausserhalb des Bildes.",
     planCamera: "Kamera hoch, mit Weitwinkel",
     planField: "beide Tore und Torräume im Bild",
     planCorner: "fehlt",
-    sections: [
-      {
-        title: "Was du brauchst",
-        items: [
-          "Ein Handy oder eine Kamera, die in Full HD (1080p) filmt.",
-          "Ein Stativ, am besten ein hohes, oder einen festen Platz auf der Tribüne.",
-          "Eine Powerbank. Ein Spiel dauert mit Pausen rund 90 Minuten.",
-          "Mindestens 10 GB freien Speicher.",
-        ],
-      },
-      {
-        title: "Aufstellen",
-        items: [
-          "Auf Höhe der Mittellinie, damit beide Tore gleich gut zu sehen sind.",
-          "So hoch wie möglich, ab etwa 3 Metern: Tribüne, Galerie oder ein hohes Stativ.",
-          "Beide Tore und Torräume ganz im Bild, die Seitenlinien so weit wie möglich. Fehlen die zwei nahen Ecken, ist das in Ordnung.",
-          "Passt es nicht: höher, ein paar Meter weiter zurück oder Weitwinkel. Lieber beide Tore mit etwas Rand als nah und scharf.",
-          "Quer filmen, nicht hochkant.",
-        ],
-      },
-      {
-        title: "Einstellen",
-        items: [
-          "Weitwinkel wählen: in der Kamera-App «0,5×» oder «Ultraweit». Nur damit passen von der Mittellinie aus beide Tore ins Bild.",
-          "1080p, wenn möglich 50 Bilder pro Sekunde.",
-          "Flugmodus an, damit kein Anruf die Aufnahme stoppt.",
-          "Bildschirmsperre aus, Ton egal.",
-        ],
-      },
-      {
-        title: "Während dem Spiel",
-        items: [
-          "Am besten fest stehen lassen und nicht zoomen. Schwenken geht auch: Die Analyse folgt der Kamera, findet das Feld aber schwerer.",
-          "{pause}",
-        ],
-      },
-      {
-        title: "Danach",
-        items: [
-          "In der App das Spiel öffnen und die Datei hochladen.",
-          "{upload}",
-          "Ein direkter Link auf eine Videodatei geht auch, zum Beispiel der Download-Link von Veo oder Spiideo.",
-        ],
-      },
-      {
-        title: "Was weniger gut geht",
-        items: [
-          "Eine Kamera, die viel schwenkt oder zoomt: geht, aber das Spielfeld wird schwerer erkannt. Dann fragt die App dich, ob es passt.",
-          "Starkes Gegenlicht durch Fenster.",
-          "Nur hinter dem Tor filmen, oder ein Bild, auf dem ein Teil des Feldes fehlt.",
-        ],
-      },
+    rulesTitle: "Fünf Regeln",
+    rules: [
+      { title: "Handy oder Kamera", text: "Alles, was in Full HD filmt. Quer, nicht hochkant." },
+      { title: "Hoch an die Mittellinie", text: "Ab etwa 3 Metern: Tribüne, Galerie oder hohes Stativ." },
+      { title: "Beide Tore im Bild", text: "Mit Weitwinkel (0,5×). Die nahen Ecken dürfen fehlen." },
+      { title: "Fest ist am besten", text: "Aufs Stativ, nicht zoomen, durchlaufen lassen." },
+      { title: "Schwenken geht", text: "Die Analyse folgt der Kamera, findet das Feld dann aber schwerer." },
     ],
+    tools: ["Handy oder Kamera, die in Full HD (1080p) filmt", "Stativ oder fester Platz auf der Tribüne"],
+    checkTitle: "Am Spieltag",
+    check: [
+      { title: "Einpacken", items: ["Akku voll, Powerbank dabei", "Mindestens 10 GB frei", "Stativ oder ein fester Platz oben"] },
+      { title: "Einstellen", items: ["Weitwinkel: «0,5×» oder «Ultraweit»", "1080p, wenn möglich 50 Bilder pro Sekunde", "Flugmodus an, Bildschirmsperre aus"] },
+      { title: "Filmen", items: ["Vor dem Anpfiff starten", "{pauseShort}", "Nach dem Schlusspfiff stoppen"] },
+    ],
+    checkPrint: "Checkliste zum Ausdrucken",
+    afterTitle: "Danach: hochladen.",
+    afterText: "Zu Hause im WLAN das Spiel in der App öffnen und das Video wählen. Den Rest macht die Analyse.",
+    afterAlt: "Video hochladen in der App: Zu welchem Spiel gehört das Video? Zwei Spiele zur Auswahl und «Oder ein neues Spiel anlegen».",
+    moreTitle: "Genauer",
+    more: [
+      { q: "Es passt nicht alles ins Bild?", a: "Höher, ein paar Meter weiter zurück oder mehr Weitwinkel. Lieber beide Tore mit etwas Rand als nah und scharf. Fehlen die zwei nahen Ecken, ist das in Ordnung." },
+      { q: "Und wenn ich in der Pause gestoppt habe?", a: "{pause}" },
+      { q: "Welche Datei lade ich hoch?", a: "{upload} Ein direkter Link auf eine Videodatei geht auch, zum Beispiel der Download-Link von Veo oder Spiideo." },
+      { q: "Was geht weniger gut?", a: "Starkes Gegenlicht durch Fenster, nur hinter dem Tor filmen, viel zoomen oder ein Bild, auf dem ein Teil des Feldes fehlt. Findet die Analyse das Feld schwer, fragt dich die App, ob es passt." },
+    ],
+    guideLink: "Ratgeber: Standort, Höhe und Einstellungen ausführlich",
+    helpLink: "Anleitung: Spiel richtig filmen",
+    storageLink: "Rechner: Wie viel Speicher braucht ein Spiel?",
     noticeTitle: "Aushang für die Halle",
-    noticeLead: "Sag dem Gegner und der Halle, dass gefilmt wird. Druck diesen Aushang aus und häng ihn an die Tür.",
+    noticeLead: "Sag dem Gegner und der Halle, dass gefilmt wird. Druck den Aushang aus und häng ihn an die Tür.",
     notice: "Dieses Spiel\nwird gefilmt.",
     noticeSub: "Die Aufnahme ist nur\nfür die Spielanalyse im Team.",
     noticeAsk: "Fragen an:",
@@ -307,8 +284,6 @@ const de = {
     pauseShortMulti: "In der Pause weiterfilmen; gestoppt? Beide Dateien zum Spiel hochladen.",
     upload: "Am besten das ganze Spiel in einer Datei (MP4, MOV oder MKV). Eine zweite Datei, etwa die zweite Halbzeit, wird gespeichert und abgespielt, ausgewertet wird aber nur die erste.",
     uploadMulti: "Am besten das ganze Spiel in einer Datei (MP4, MOV oder MKV). Hast du mehrere Dateien, etwa eine pro Halbzeit, wählst du alle zusammen aus oder reichst die zweite später nach; ausgewertet werden alle. Nach einer Pause nimmt die App einen Seitenwechsel an; schliessen die Aufnahmen direkt aneinander an, nicht. Umstellen kannst du es in der Liste der Teile. Was du schon bestätigt hast, bleibt.",
-    guideLink: "Standort, Höhe und Einstellungen ausführlich",
-    moreTitle: "Mehr dazu",
   },
   demo: {
     title: "Demo-Spiel",
@@ -393,7 +368,7 @@ const de = {
   faq: {
     title: "Fragen",
     head: "Fragen und Antworten.",
-    lead: "Handy oder Kamera reicht. Die Analyse schlägt die Tor-Momente vor, du bestätigst sie mit einem Tipp. Das Video sieht nur dein Trainerteam. Zu jeder Antwort steht, was dir Handball Intelligence abnimmt; darunter die Anleitungen zur App.",
+    lead: "Kurze Antworten, und dazu, was dir Handball Intelligence abnimmt. Darunter die Anleitungen zur App.",
     hiLabel: "So hilft Handball Intelligence:",
     items: [
       { q: "Kann ich es heute schon nutzen?", a: "{state} Das Demo-Spiel auf dieser Seite kannst du schon jetzt ansehen, ohne Konto.", hi: "" },
@@ -469,6 +444,7 @@ const de = {
         text: "Du kannst jederzeit fragen, was über dich gespeichert ist, und verlangen, dass es gelöscht wird. Schreib dem Verein oder uns an {email}.",
       },
     ],
+    shareCaption: "Spieler und Eltern öffnen den Link im Browser, ohne Konto. Er zeigt Rückennummern statt Namen.",
     boardTitle: "Für den Vorstand",
     board: "Für die Videos, die er hochlädt, ist der Verein verantwortlich; wir bearbeiten sie in seinem Auftrag. Der Vertrag dazu (Auftragsbearbeitung) folgt vor dem Start, ebenso die geprüfte Datenschutzerklärung.",
     privacyLink: "Datenschutzerklärung (Entwurf)",
@@ -504,7 +480,7 @@ const de = {
   },
   seo: {
     how: { title: "So funktioniert die Videoanalyse", description: "Filmen, hochladen, prüfen: Die Analyse schlägt die Tor-Momente vor, du bestätigst sie, Tor für Tor. Danach Szenen, Spielverlauf und Positionen von oben." },
-    filming: { title: "Spiel filmen: Checkliste und Aushang", description: "Checkliste für den Spieltag: Handy oder Kamera hoch an der Mittellinie, ganzes Feld, in der Pause weiterfilmen. Mit Hallenplan und Aushang zum Drucken." },
+    filming: { title: "Spiel filmen: Checkliste und Aushang", description: "Fünf Regeln und die Checkliste für den Spieltag: Handy oder Kamera hoch an der Mittellinie, beide Tore im Bild. Mit Hallenplan und Aushang zum Drucken." },
     demo: { title: "Demo-Spiel: so sieht eine Auswertung aus", description: "Ein erfundenes Spiel zum Anfassen, ohne Konto: drei Dinge, Szenen, Taktikkamera, Zahlen mit Quelle und Gegentore nach Position." },
     pricing: { title: "Preise für Teams und Vereine", description: "Gratis ohne automatische Analyse, Team und Verein mit Analyse. Preise in Franken, Jahresrechnung per QR-Rechnung. Die Preise sind noch nicht endgültig." },
     faq: { title: "Fragen und Antworten", description: "Handy oder Kamera? Erkennt die Analyse die Tore selbst? Wie teile ich Szenen? Die häufigsten Fragen von Trainerinnen und Trainern, kurz beantwortet." },
@@ -576,50 +552,45 @@ const de = {
     metaTitle: "Über uns: Videoanalyse für Vereinshandball",
     description: "Wir bauen Handball Intelligence, damit Trainerinnen und Trainer im Vereinshandball nach dem Spiel wissen, was passiert ist: mit Handy oder Kamera und Stativ.",
     head: "Videoanalyse für den Vereinshandball.",
-    lead: "Wir bauen Handball Intelligence, damit jede Trainerin und jeder Trainer im Vereinshandball am Abend nach dem Spiel weiss, was wirklich passiert ist. Mit Handy oder Kamera, einem Stativ und etwas Zeit, nicht mit einem Kamerasystem und einem Analysten.",
+    lead: "Damit jede Trainerin und jeder Trainer im Vereinshandball am Abend nach dem Spiel weiss, was wirklich passiert ist. Mit Handy oder Kamera, nicht mit Kamerasystem und Analyst.",
     sections: [
       {
         title: "Warum es uns gibt",
         text: [
-          "Videoanalyse war bisher etwas für Profis. Wer sie wollte, brauchte ein Kamerasystem in der Halle und jemanden, der Stunden vor dem Bildschirm sitzt und Szenen schneidet.",
-          "Im Vereinshandball steht am Samstagabend eine Trainerin an der Seitenlinie, die am Montag wieder im Büro ist. Sie hat das Spiel gesehen, aber nur halb: Sie hat gecoacht, gewechselt, mit dem Schiedsrichter geredet. Was auf der anderen Seite passiert ist, weiss sie nicht genau. Genau für diesen Abend bauen wir.",
+          "Videoanalyse war etwas für Profis: ein Kamerasystem in der Halle und jemand, der stundenlang Szenen schneidet. Im Vereinshandball coacht die Trainerin, wechselt, redet mit dem Schiedsrichter und ist am Montag wieder im Büro. Was auf der anderen Seite passiert ist, weiss sie nicht genau. Für diesen Abend bauen wir.",
         ],
       },
       {
         title: "Für wen wir es bauen",
         text: [
-          "Für Trainerinnen und Trainer im Amateurhandball, Junioren und Aktive, von der 1. Liga abwärts, die das im Ehrenamt machen, neben Beruf und Familie. Viele haben keine Zeit für ein neues Programm und keine Lust auf hundert Zahlen.",
-          "Darum gibt es wenige Schritte, grosse Knöpfe und am Ende, bei genug Toren, drei Dinge zum Mitnehmen statt einer Tabelle. Die Spielerinnen und Spieler brauchen kein Konto: Was du teilst, öffnet sich mit einem Link.",
+          "Für Trainerinnen und Trainer im Amateurhandball, Junioren und Aktive, von der 1. Liga abwärts, im Ehrenamt neben Beruf und Familie. Darum wenige Schritte, grosse Knöpfe und drei Dinge zum Mitnehmen statt hundert Zahlen.",
         ],
       },
       {
         title: "Ehrlich über Grenzen",
         text: [
-          "Eine Analyse aus einer einzigen Kamera macht Fehler. Wir verstecken sie nicht. Die Analyse schlägt vor, der Mensch bestätigt: Sie zeigt dir die Momente, in denen ein Tor gefallen sein könnte, und du sagst in ein paar Minuten, was stimmt.",
-          "Was geschätzt ist, heisst «geschätzt». Den Ball verfolgt die Analyse heute nicht, darum zeigen wir keine Pässe. Was sie kann und was nicht, steht offen auf der Website, nicht im Kleingedruckten.",
+          "Eine Analyse aus einer Kamera macht Fehler. Darum schlägt sie vor, und du bestätigst in ein paar Minuten, was stimmt. Was geschätzt ist, heisst «geschätzt». Den Ball verfolgt sie heute nicht, darum zeigen wir keine Pässe.",
         ],
       },
       {
         title: "Das Video gehört dem Verein",
         text: [
-          "Das Video gehört dem Verein, der es hochlädt. Spielerinnen und Spieler willigen per Link ein, für Kinder die Eltern. Wir verkaufen keine Daten, zeigen keine Werbung, und diese Website setzt keine Tracker.",
-          "Die Kommunikation im Team bleibt, wo sie ist, meist im Gruppenchat. Wir bauen keinen Chat und keine Terminverwaltung. Wir machen die Analyse und liefern etwas, das sich im Chat teilen lässt.",
+          "Spielerinnen und Spieler willigen per Link ein, für Kinder die Eltern. Keine Werbung, kein Datenverkauf, keine Tracker auf dieser Website. Einen Chat bauen wir nicht: Was du teilst, ist ein Link für den Gruppenchat, den ihr schon habt.",
         ],
       },
       {
-        title: "Aus der Schweiz, zuerst für den Schweizer Vereinshandball",
+        title: "Aus der Schweiz",
         text: [
-          "Wir kommen aus der Schweiz und bauen zuerst für den Schweizer Vereinshandball: auf Deutsch, Französisch und Englisch, mit den Daten von handball.ch. Dein Team findest du über den Namen, Spielplan und Resultate sind schon da.",
+          "Zuerst für den Schweizer Vereinshandball, auf Deutsch, Französisch und Englisch, mit den Daten von handball.ch: Dein Team findest du über den Namen, Spielplan und Resultate sind schon da.",
         ],
       },
       {
         title: "Wohin es gehen soll",
         text: [
-          "Wir wollen, dass die Analyse mehr selbst erkennt und dich weniger fragen muss, zuerst bei den Toren. Bis sie das zuverlässig kann, fragt sie. Jede neue Erkennung prüfen wir an echten Spielen, bevor sie etwas automatisch einträgt.",
+          "Die Analyse soll mehr selbst erkennen und dich weniger fragen, zuerst bei den Toren. Jede neue Erkennung prüfen wir an echten Spielen, bevor sie etwas automatisch einträgt.",
         ],
       },
     ],
-    pictureCaption: "So filmst du: Handy oder Kamera hoch an der Mittellinie, mit Weitwinkel beide Tore im Bild.",
     shotAlt: "Startseite der App mit Beispieldaten: oben das letzte Spiel in der Vereinsfarbe mit Resultat und Verlauf.",
     shotCaption: "Bild aus der App, mit Beispieldaten.",
     contactTitle: "Schreib uns",

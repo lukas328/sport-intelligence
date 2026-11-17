@@ -46,7 +46,7 @@ export default async function How({ params }: Props) {
           howTo(locale, "so-funktioniert-es", {
             name: t.head,
             description: t.lead,
-            tools: [m.filming.sections[0]!.items[0]!],
+            tools: [...m.filming.tools],
             steps: t.steps.map((s) => ({ name: s.title, text: s.text })),
           }),
         )}
@@ -105,8 +105,11 @@ export default async function How({ params }: Props) {
         <section aria-labelledby="kann" className="mt-20">
           <SectionHead id="kann" title={m.honest.title} />
           <div className="mt-8">
-            <Honest t={m.honest} />
+            <Honest t={m.honest} short />
           </div>
+          <Link href={`/${locale}/fakten/#kann`} className="link mt-2">
+            {t.honestAll}
+          </Link>
         </section>
 
         <div className="mt-16 flex flex-col gap-3 border-t-2 border-ink pt-10 sm:flex-row sm:flex-wrap">
