@@ -7,6 +7,7 @@ import {
   ArrowRight,
   BookOpen,
   Clapperboard,
+  Dumbbell,
   MessageCircleQuestion,
   Plus,
   ScanSearch,
@@ -96,6 +97,8 @@ export function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenCh
                 })}
                 {teamBase && staff && row("collections", t("shell.collections"), <BookOpen />, `${teamBase}/collections`, ["playlists", "präsentationen", "presentations", "sammlung"])}
                 {teamBase && staff && row("plays", t("shell.plays"), <BookOpen />, `${teamBase}/plays`, ["spielzüge", "taktik", "tactics"])}
+                {teamBase && coachRights(org.my_role, team?.my_role) &&
+                  row("tips", t("seasonPage.tipsAction"), <Dumbbell />, `${teamBase}/season/tips`, ["training", "übungen", "drills", "entraînement"])}
                 {row("me", t("shell.me"), <UserRound />, `${base}/me`, ["profil", "profile", "passwort", "password"])}
                 {(org.my_role === "org_admin" || teams.some((x) => coachRights(org.my_role, x.my_role))) &&
                   row("club", t("shell.club"), <Settings />, `${base}/club`, ["einstellungen", "settings", "teamfunktionen", "teamleben"])}

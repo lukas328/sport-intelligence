@@ -2555,7 +2555,9 @@
     "planDone": "Eingeplant. Die Einheit steht bei den nächsten Einheiten.",
     "planOpenScenes": "Szenen-Sammlung öffnen",
     "planOwn": "Einheit selbst planen",
-    "noUpcoming": "Noch keine Einheit geplant. Aus einem Trainingstipp wird mit einem Klick eine Einheit."
+    "noUpcoming": "Noch keine Einheit geplant. Aus einem Trainingstipp wird mit einem Klick eine Einheit.",
+    "planOpen": "Zum Trainingsplan",
+    "tipPlannedElsewhere": "Schon als Schwerpunkt eingeplant."
   },
   "schedule": {
     "nav": "Meine Termine",
@@ -3883,7 +3885,8 @@
     "noAnalysisYet": "noch keine Analyse",
     "noVideoShort": "kein Video",
     "dataReport": "aus dem Spielbericht",
-    "trainingTips": "Trainingstipps dazu"
+    "trainingTips": "Trainingstipps dazu",
+    "tipsAction": "Trainingstipps"
   },
   "numbersTab": {
     "intro": "Tore, 7 m und 2 Minuten aus Spielbericht und Video, Würfe und Paraden aus den markierten Ereignissen.",
@@ -4164,7 +4167,8 @@
     "hint_overview_title": "Übersicht",
     "hint_overview_staff": "Das Nächste auf einen Blick.",
     "hint_overview_player": "Das Nächste auf einen Blick: Termine, Aufgaben, neue Szenen.",
-    "hint_overview_family": "Das Nächste für dein Kind auf einen Blick: Termine und neue Szenen."
+    "hint_overview_family": "Das Nächste für dein Kind auf einen Blick: Termine und neue Szenen.",
+    "hint_overview_family_off": "Das Nächste für dein Kind auf einen Blick: neue Szenen aus den Spielen."
   },
   "nextSteps": {
     "title": "So geht es weiter",

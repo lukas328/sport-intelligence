@@ -2555,7 +2555,9 @@
     "planDone": "Planned. The session is with the next sessions.",
     "planOpenScenes": "Open the scene collection",
     "planOwn": "Plan a session yourself",
-    "noUpcoming": "No session planned yet. One click turns a training tip into a session."
+    "noUpcoming": "No session planned yet. One click turns a training tip into a session.",
+    "planOpen": "Open the training plan",
+    "tipPlannedElsewhere": "Already planned as a focus."
   },
   "schedule": {
     "nav": "My dates",
@@ -3883,7 +3885,8 @@
     "noAnalysisYet": "no analysis yet",
     "noVideoShort": "no video",
     "dataReport": "from the match report",
-    "trainingTips": "Training tips for this"
+    "trainingTips": "Training tips for this",
+    "tipsAction": "Training tips"
   },
   "numbersTab": {
     "intro": "Goals, 7 m and 2 minutes from the match report and the video, shots and saves from the tagged events.",
@@ -4164,7 +4167,8 @@
     "hint_overview_title": "Overview",
     "hint_overview_staff": "What comes next at a glance.",
     "hint_overview_player": "What comes next at a glance: dates, tasks, new scenes.",
-    "hint_overview_family": "What comes next for your child at a glance: dates and new scenes."
+    "hint_overview_family": "What comes next for your child at a glance: dates and new scenes.",
+    "hint_overview_family_off": "What comes next for your child at a glance: new scenes from the matches."
   },
   "nextSteps": {
     "title": "What comes next",

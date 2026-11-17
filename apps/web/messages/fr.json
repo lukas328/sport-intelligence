@@ -2555,7 +2555,9 @@
     "planDone": "C'est planifié. La séance figure dans les prochaines séances.",
     "planOpenScenes": "Ouvrir la playlist des scènes",
     "planOwn": "Planifier une séance soi-même",
-    "noUpcoming": "Aucune séance planifiée. Un conseil devient une séance en un clic."
+    "noUpcoming": "Aucune séance planifiée. Un conseil devient une séance en un clic.",
+    "planOpen": "Ouvrir le plan d'entraînement",
+    "tipPlannedElsewhere": "Déjà planifié comme priorité."
   },
   "schedule": {
     "nav": "Mes rendez-vous",
@@ -3883,7 +3885,8 @@
     "noAnalysisYet": "pas encore d'analyse",
     "noVideoShort": "pas de vidéo",
     "dataReport": "de la feuille de match",
-    "trainingTips": "Conseils d'entraînement à ce sujet"
+    "trainingTips": "Conseils d'entraînement à ce sujet",
+    "tipsAction": "Conseils d'entraînement"
   },
   "numbersTab": {
     "intro": "Buts, 7 m et 2 minutes de la feuille de match et de la vidéo, tirs et arrêts des événements saisis.",
@@ -4164,7 +4167,8 @@
     "hint_overview_title": "Aperçu",
     "hint_overview_staff": "La suite d'un coup d'œil.",
     "hint_overview_player": "La suite d'un coup d'œil : rendez-vous, tâches, nouvelles scènes.",
-    "hint_overview_family": "La suite pour ton enfant d'un coup d'œil : rendez-vous et nouvelles scènes."
+    "hint_overview_family": "La suite pour ton enfant d'un coup d'œil : rendez-vous et nouvelles scènes.",
+    "hint_overview_family_off": "La suite pour ton enfant d'un coup d'œil : nouvelles scènes des matchs."
   },
   "nextSteps": {
     "title": "La suite",

@@ -28,7 +28,24 @@ const clock = (s: number | null | undefined) => (s == null ? null : `${Math.floo
  * click to make it a session (with the scenes as a collection and, if wanted, a task for the
  * players). Honest when there is nothing to say yet.
  */
-export function TrainingTips({ orgId, teamId, onPlanned }: { orgId: string; teamId: string; onPlanned: () => void }) {
+export function TrainingTips({
+  orgId,
+  teamId,
+  onPlanned,
+  heading = true,
+  planHref,
+  tasks = true,
+}: {
+  orgId: string;
+  teamId: string;
+  onPlanned: () => void;
+  /** false where the page title already names the tips (Saison › Trainingstipps) */
+  heading?: boolean;
+  /** outside the training plan: where the planned unit is found */
+  planHref?: string;
+  /** «Als Aufgabe an die Spieler»: only while Teamleben (where tasks live) is on */
+  tasks?: boolean;
+}) {
   const t = useTranslations("training");
   const path = { org_id: orgId, team_id: teamId };
   const q = useQuery({
@@ -43,11 +60,13 @@ export function TrainingTips({ orgId, teamId, onPlanned }: { orgId: string; team
   const base = `/app/${orgId}/teams/${teamId}`;
 
   return (
-    <section className="space-y-4" aria-labelledby="tips-title" data-testid="training-tips">
+    <section className="space-y-4" aria-labelledby={heading ? "tips-title" : undefined} aria-label={heading ? undefined : t("tipsTitle")} data-testid="training-tips">
       <div className="space-y-1">
-        <h2 id="tips-title" className="text-2xl">
-          {t("tipsTitle")}
-        </h2>
+        {heading && (
+          <h2 id="tips-title" className="text-2xl">
+            {t("tipsTitle")}
+          </h2>
+        )}
         {data && data.matches_analysed > 0 && <p className="text-[15px] text-muted">{t("tipsFrom", { n: data.matches_analysed })}</p>}
       </div>
       {q.isPending ? (
@@ -88,6 +107,8 @@ export function TrainingTips({ orgId, teamId, onPlanned }: { orgId: string; team
               teamId={teamId}
               planned={(focus.data ?? []).some((p) => p.insight_key === tip.key && p.match_id === tip.match_id && !p.closed_at)}
               onPlanned={onPlanned}
+              planHref={planHref}
+              tasks={tasks}
             />
           ))}
         </ol>
@@ -96,7 +117,27 @@ export function TrainingTips({ orgId, teamId, onPlanned }: { orgId: string; team
   );
 }
 
-function TipItem({ n, tip, data, orgId, teamId, planned, onPlanned }: { n: number; tip: Tip; data: Tips; orgId: string; teamId: string; planned: boolean; onPlanned: () => void }) {
+function TipItem({
+  n,
+  tip,
+  data,
+  orgId,
+  teamId,
+  planned,
+  onPlanned,
+  planHref,
+  tasks,
+}: {
+  n: number;
+  tip: Tip;
+  data: Tips;
+  orgId: string;
+  teamId: string;
+  planned: boolean;
+  onPlanned: () => void;
+  planHref?: string;
+  tasks: boolean;
+}) {
   const t = useTranslations("training");
   const td = useTranslations("drills");
   const format = useFormatter();
@@ -179,9 +220,18 @@ function TipItem({ n, tip, data, orgId, teamId, planned, onPlanned }: { n: numbe
 
       <div className="mt-3">
         {planned && !plan ? (
-          <p className="text-[15px] text-muted">{t("tipPlanned")}</p>
+          planHref ? (
+            <p className="text-[15px] text-muted">
+              {t("tipPlannedElsewhere")}{" "}
+              <Link href={planHref} className="font-semibold text-foreground underline underline-offset-4">
+                {t("planOpen")}
+              </Link>
+            </p>
+          ) : (
+            <p className="text-[15px] text-muted">{t("tipPlanned")}</p>
+          )
         ) : plan ? (
-          <PlanForm tip={tip} drills={drills} title={t("sessionTitle", { focus: td(`focus_${topic}`) })} orgId={orgId} teamId={teamId} onClose={() => setPlan(false)} onPlanned={onPlanned} />
+          <PlanForm tip={tip} drills={drills} title={t("sessionTitle", { focus: td(`focus_${topic}`) })} orgId={orgId} teamId={teamId} onClose={() => setPlan(false)} onPlanned={onPlanned} planHref={planHref} tasks={tasks} />
         ) : (
           <Button onClick={() => setPlan(true)}>{t("tipPlan")}</Button>
         )}
@@ -190,7 +240,27 @@ function TipItem({ n, tip, data, orgId, teamId, planned, onPlanned }: { n: numbe
   );
 }
 
-function PlanForm({ tip, drills, title, orgId, teamId, onClose, onPlanned }: { tip: Tip; drills: Drill[]; title: string; orgId: string; teamId: string; onClose: () => void; onPlanned: () => void }) {
+function PlanForm({
+  tip,
+  drills,
+  title,
+  orgId,
+  teamId,
+  onClose,
+  onPlanned,
+  planHref,
+  tasks,
+}: {
+  tip: Tip;
+  drills: Drill[];
+  title: string;
+  orgId: string;
+  teamId: string;
+  onClose: () => void;
+  onPlanned: () => void;
+  planHref?: string;
+  tasks: boolean;
+}) {
   const t = useTranslations("training");
   const tr = useTranslations();
   const locale = useLocale();
@@ -211,7 +281,7 @@ function PlanForm({ tip, drills, title, orgId, teamId, onClose, onPlanned }: { t
           title,
           session: { on_date: day, drills: drills.filter((d) => chosen.includes(d.id)).map((d) => toDrillItem(d, locale)) },
           playlist,
-          assignment: playlist && assignment,
+          assignment: tasks && playlist && assignment,
         },
       });
       if (r.error) throw r.error;
@@ -229,6 +299,13 @@ function PlanForm({ tip, drills, title, orgId, teamId, onClose, onPlanned }: { t
     return (
       <Alert kind="success" className="py-2">
         {t("planDone")}{" "}
+        {planHref && (
+          <>
+            <Link className="font-semibold underline underline-offset-4" href={planHref}>
+              {t("planOpen")}
+            </Link>{" "}
+          </>
+        )}
         {create.data.playlist_id && (
           <Link className="font-semibold underline underline-offset-4" href={`/app/${orgId}/playlists/${create.data.playlist_id}`}>
             {t("planOpenScenes")}
@@ -263,10 +340,12 @@ function PlanForm({ tip, drills, title, orgId, teamId, onClose, onPlanned }: { t
         <input type="checkbox" className="size-5" checked={playlist} disabled={tip.scenes.length === 0} onChange={(e) => setPlaylist(e.target.checked)} />
         {t("planPlaylist")}
       </label>
-      <label className={box}>
-        <input type="checkbox" className="size-5" checked={assignment} disabled={!playlist} onChange={(e) => setAssignment(e.target.checked)} />
-        {t("planAssignment")}
-      </label>
+      {tasks && (
+        <label className={box}>
+          <input type="checkbox" className="size-5" checked={assignment} disabled={!playlist} onChange={(e) => setAssignment(e.target.checked)} />
+          {t("planAssignment")}
+        </label>
+      )}
       <p className="text-sm text-muted">{t("planWhy")}</p>
       {error && <Alert>{tr(`errors.${error}`)}</Alert>}
       <div className="flex flex-wrap gap-2">
