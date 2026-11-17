@@ -494,3 +494,39 @@ def test_observe_ball_net_candidates_are_stored(tmp_path: Path) -> None:
     # without a ball net nothing is stored and an old file loads without candidates
     plain = observe.observe(video, _Oracle(boxes), detect_every=observe_step)
     assert plain.ball_cands == {}
+
+
+def _court_info(**kw: float) -> dict[str, float]:
+    # the right court of the calibration test set (c067): goal frames, lines and floor all fit
+    info = {
+        "goal_score": 0.488,
+        "line_score": 1.407,
+        "floor_fit": 0.668,
+        "people_on_court": 1.0,
+        "camera_height_m": 5.67,
+        "camera_x_m": 21.8,
+        "camera_y_m": -1.5,
+    }
+    return {**info, **kw}
+
+
+def test_court_doubt_accepts_a_court_where_goals_lines_and_floor_agree() -> None:
+    assert observe.court_doubt(_court_info()) is None
+
+
+@pytest.mark.parametrize(
+    ("change", "why"),
+    [
+        # wrongly accepted courts of the calibration test set before the stricter check
+        ({"goal_score": 0.318, "line_score": 0.339, "floor_fit": 0.456}, "goal frames"),  # 28 m off
+        ({"goal_score": 0.278, "line_score": 1.041, "floor_fit": 0.445}, "goal frames"),  # 3 m off
+        ({"goal_score": 0.556, "line_score": 0.58, "floor_fit": 0.36}, "court lines"),  # 9 m off
+        ({"goal_score": 0.568, "line_score": 1.087, "floor_fit": 0.351}, "floor"),  # 3.4 m off
+        ({"camera_height_m": 0.8}, "camera position"),
+        ({"camera_y_m": 5.0, "camera_x_m": 20.0}, "camera position"),
+        ({"people_on_court": 0.3}, "players"),
+    ],
+)
+def test_court_doubt_rejects_courts_that_miss_a_check(change: dict[str, float], why: str) -> None:
+    doubt = observe.court_doubt(_court_info(**change))
+    assert doubt is not None and why in doubt

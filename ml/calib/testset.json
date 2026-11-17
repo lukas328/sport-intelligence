@@ -1,0 +1,1055 @@
+{
+ "note": "calibration test set, frozen 2026-11-16 (ml/calib/testset.py); split by hall, 'test' is the end test: no tuning on it",
+ "pieces": [
+  {
+   "id": "c000",
+   "game": "AT_Challenge_Lauterach_HandballTirol_2021",
+   "dataset": "handball-segs-l10",
+   "file": "AT_Challenge_Lauterach_HandballTirol_2021_s0.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "AT_Challenge_Lauterach_HandballTirol_2021",
+   "split": "dev",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 30.0
+  },
+  {
+   "id": "c001",
+   "game": "AT_Cup_Feldkirch_Bregenz_2021",
+   "dataset": "handball-segs-l10",
+   "file": "AT_Cup_Feldkirch_Bregenz_2021_s1.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "Feldkirch",
+   "split": "dev",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 60.0
+  },
+  {
+   "id": "c002",
+   "game": "AT_HLA_Bregenz_Schwaz_ca2015",
+   "dataset": "handball-segs-l10",
+   "file": "AT_HLA_Bregenz_Schwaz_ca2015_s4.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "HLA",
+   "split": "test",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 30.0
+  },
+  {
+   "id": "c003",
+   "game": "CH_2Liga_TVZofingen_ca2019",
+   "dataset": "handball-segs-l01",
+   "file": "CH_2Liga_TVZofingen_ca2019_s1.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "TVZofingen",
+   "split": "test",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 29.97
+  },
+  {
+   "id": "c004",
+   "game": "CH_Cup_RTVBasel_Kadetten_2024-04-27",
+   "dataset": "handball-segs-l01",
+   "file": "CH_Cup_RTVBasel_Kadetten_2024-04-27_s4.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "RTVBasel",
+   "split": "test",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 50.0
+  },
+  {
+   "id": "c005",
+   "game": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02",
+   "dataset": "handball-segs-l02",
+   "file": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02_s0.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "ATVKVBasel",
+   "split": "test",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 30.0
+  },
+  {
+   "id": "c006",
+   "game": "CH_Frauen_Cupfinal_LKZug_SpOno_2021-05-08",
+   "dataset": "handball-segs-l02",
+   "file": "CH_Frauen_Cupfinal_LKZug_SpOno_2021-05-08_s4.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "LKZug",
+   "split": "test",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 50.0
+  },
+  {
+   "id": "c007",
+   "game": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-03-23",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-03-23_s0.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "SpOno2",
+   "split": "test",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 30.0
+  },
+  {
+   "id": "c008",
+   "game": "CH_Frauen_SPL2_USYverdon_HSGLeimental_2024-05-11",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_USYverdon_HSGLeimental_2024-05-11_s1.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "USYverdon",
+   "split": "dev",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 30.0
+  },
+  {
+   "id": "c009",
+   "game": "CH_Frauen_SPL2_Uster_HSGLeimental_2024-10-05",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_Uster_HSGLeimental_2024-10-05_s3.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "Uster",
+   "split": "dev",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 30.0
+  },
+  {
+   "id": "c010",
+   "game": "CH_Frauen_Supercup_Bruehl_SpOno_2020",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_Supercup_Bruehl_SpOno_2020_s3.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "Bruehl",
+   "split": "dev",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 50.0
+  },
+  {
+   "id": "c011",
+   "game": "CH_Frauen_Supercup_SpOno_LKZug_2022-08-21",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_Supercup_SpOno_LKZug_2022-08-21_s4.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "SpOno",
+   "split": "test",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 50.0
+  },
+  {
+   "id": "c012",
+   "game": "CH_NLA_BSVBern_WackerThun_2013-09-14",
+   "dataset": "handball-segs-l05",
+   "file": "CH_NLA_BSVBern_WackerThun_2013-09-14_s1.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "CH_NLA_BSVBern_WackerThun_2013-09-14",
+   "split": "dev",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 30.0
+  },
+  {
+   "id": "c013",
+   "game": "CH_NLA_FortitudoGossau_RTVBasel_2018-12-16",
+   "dataset": "handball-segs-l05",
+   "file": "CH_NLA_FortitudoGossau_RTVBasel_2018-12-16_s4.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "CH_NLA_FortitudoGossau_RTVBasel_2018-12-16",
+   "split": "dev",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 25.0
+  },
+  {
+   "id": "c014",
+   "game": "CH_NLA_GCAmicitia_KriensLuzern_ca2018",
+   "dataset": "handball-segs-l05",
+   "file": "CH_NLA_GCAmicitia_KriensLuzern_ca2018_s4.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "CH_NLA_GCAmicitia_KriensLuzern_ca2018",
+   "split": "dev",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 25.0
+  },
+  {
+   "id": "c015",
+   "game": "CH_NLA_KriensLuzern_RTVBasel_ca2018",
+   "dataset": "handball-segs-l05",
+   "file": "CH_NLA_KriensLuzern_RTVBasel_ca2018_s0.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "KriensLuzern",
+   "split": "test",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 25.0
+  },
+  {
+   "id": "c016",
+   "game": "CH_NLA_KriensLuzern_SuhrAarau_ca2018",
+   "dataset": "handball-segs-l06",
+   "file": "CH_NLA_KriensLuzern_SuhrAarau_ca2018_s4.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "CH_NLA_KriensLuzern_SuhrAarau_ca2018",
+   "split": "test",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 25.0
+  },
+  {
+   "id": "c017",
+   "game": "CH_NLA_PlayoffF1_WackerThun_Kadetten_2013-05-11",
+   "dataset": "handball-segs-l06",
+   "file": "CH_NLA_PlayoffF1_WackerThun_Kadetten_2013-05-11_s0.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "CH_NLA_PlayoffF1_WackerThun_Kadetten_2013-05-11",
+   "split": "dev",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 25.0
+  },
+  {
+   "id": "c018",
+   "game": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07",
+   "dataset": "handball-segs-l06",
+   "file": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07_s3.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07",
+   "split": "dev",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 25.0
+  },
+  {
+   "id": "c019",
+   "game": "CH_NLA_SuhrAarau_KriensLuzern_ca2018",
+   "dataset": "handball-segs-l06",
+   "file": "CH_NLA_SuhrAarau_KriensLuzern_ca2018_s4.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "CH_NLA_SuhrAarau_KriensLuzern_ca2018",
+   "split": "test",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 25.0
+  },
+  {
+   "id": "c020",
+   "game": "CH_NLB_SGHorgen_GSKadettenEspoirs_2016-10-22",
+   "dataset": "handball-segs-l06",
+   "file": "CH_NLB_SGHorgen_GSKadettenEspoirs_2016-10-22_s4.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "SGHorgen",
+   "split": "test",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 29.97
+  },
+  {
+   "id": "c021",
+   "game": "CH_NLB_SGWaedenswilHorgen_GCAmicitiaKuesnacht_2024-09-01",
+   "dataset": "handball-segs-l07",
+   "file": "CH_NLB_SGWaedenswilHorgen_GCAmicitiaKuesnacht_2024-09-01_s1.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "SGWaedenswilHorgen",
+   "split": "test",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 60.0
+  },
+  {
+   "id": "c022",
+   "game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+   "dataset": "handball-segs-b03",
+   "file": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19_s4.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "SGWaedenswilHorgen",
+   "split": "test",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 60.0
+  },
+  {
+   "id": "c023",
+   "game": "CH_NLB_SGWaedenswilHorgen_STVBaden_2023-04-05",
+   "dataset": "handball-segs-b02",
+   "file": "CH_NLB_SGWaedenswilHorgen_STVBaden_2023-04-05_s1.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "SGWaedenswilHorgen",
+   "split": "test",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 60.0
+  },
+  {
+   "id": "c024",
+   "game": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14",
+   "dataset": "handball-segs-b04",
+   "file": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14_s0.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "SGWaedenswilHorgen",
+   "split": "test",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 60.0
+  },
+  {
+   "id": "c025",
+   "game": "CH_NLB_TVBirsfelden_GSKadetten_ca2025",
+   "dataset": "handball-segs-l07",
+   "file": "CH_NLB_TVBirsfelden_GSKadetten_ca2025_s0.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "CH_NLB_TVBirsfelden_GSKadetten_ca2025",
+   "split": "dev",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 50.0
+  },
+  {
+   "id": "c026",
+   "game": "CH_Nati_Schweiz_Argentinien_2024-01-06",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Nati_Schweiz_Argentinien_2024-01-06_s0.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "Schweiz",
+   "split": "test",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 50.0
+  },
+  {
+   "id": "c027",
+   "game": "CH_Nati_Schweiz_Rumaenien_2024-01-04",
+   "dataset": "handball-segs-l05",
+   "file": "CH_Nati_Schweiz_Rumaenien_2024-01-04_s4.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "CH_Nati_Schweiz_Rumaenien_2024-01-04",
+   "split": "test",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 50.0
+  },
+  {
+   "id": "c028",
+   "game": "CH_Nati_Schweiz_Ukraine_2020-01-03",
+   "dataset": "handball-segs-l05",
+   "file": "CH_Nati_Schweiz_Ukraine_2020-01-03_s1.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "CH_Nati_Schweiz_Ukraine_2020-01-03",
+   "split": "test",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 50.0
+  },
+  {
+   "id": "c029",
+   "game": "CH_RAM_Nordwestschweiz_AGplus_2025-01-11",
+   "dataset": "handball-segs-l08",
+   "file": "CH_RAM_Nordwestschweiz_AGplus_2025-01-11_s0.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "Nordwestschweiz",
+   "split": "test",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 30.0
+  },
+  {
+   "id": "c030",
+   "game": "CH_RAM_Zuerich_Ost_2025-01-11",
+   "dataset": "handball-segs-l08",
+   "file": "CH_RAM_Zuerich_Ost_2025-01-11_s1.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "CH_RAM_Zuerich_Ost_2025-01-11",
+   "split": "test",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 30.0
+  },
+  {
+   "id": "c031",
+   "game": "CH_RegioCup_Final_Herren_2017-03",
+   "dataset": "handball-segs-l08",
+   "file": "CH_RegioCup_Final_Herren_2017-03_s0.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "CH_RegioCup_Final_Herren_2017-03",
+   "split": "test",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 30.0
+  },
+  {
+   "id": "c032",
+   "game": "CH_RegioCup_HalbF_Frauen1_2017-03",
+   "dataset": "handball-segs-l08",
+   "file": "CH_RegioCup_HalbF_Frauen1_2017-03_s1.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "CH_RegioCup_HalbF_Frauen1_2017-03",
+   "split": "test",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 30.0
+  },
+  {
+   "id": "c033",
+   "game": "CH_RegioCup_HalbF_Frauen2_2017-03",
+   "dataset": "handball-segs-l08",
+   "file": "CH_RegioCup_HalbF_Frauen2_2017-03_s3.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "CH_RegioCup_HalbF_Frauen2_2017-03",
+   "split": "dev",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 30.0
+  },
+  {
+   "id": "c034",
+   "game": "CH_SGPilatus_Staefa_ca2024",
+   "dataset": "handball-segs-l08",
+   "file": "CH_SGPilatus_Staefa_ca2024_s3.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "CH_SGPilatus_Staefa_ca2024",
+   "split": "dev",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 30.0
+  },
+  {
+   "id": "c035",
+   "game": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20",
+   "dataset": "handball-segs-l08",
+   "file": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20_s1.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20",
+   "split": "dev",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 50.0
+  },
+  {
+   "id": "c036",
+   "game": "CH_Supercup_Kadetten_SuhrAarau_2020",
+   "dataset": "handball-segs-l08",
+   "file": "CH_Supercup_Kadetten_SuhrAarau_2020_s3.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "Kadetten",
+   "split": "test",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 50.0
+  },
+  {
+   "id": "c037",
+   "game": "CH_Test_Frauen_Chenois_Cassano_ca2023",
+   "dataset": "handball-segs-l08",
+   "file": "CH_Test_Frauen_Chenois_Cassano_ca2023_s0.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "Chenois",
+   "split": "dev",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 60.0
+  },
+  {
+   "id": "c038",
+   "game": "CH_U17E_Final_HSGNordwest_SuhrAarau_ca2017",
+   "dataset": "handball-segs-l08",
+   "file": "CH_U17E_Final_HSGNordwest_SuhrAarau_ca2017_s4.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "CH_U17E_Final_HSGNordwest_SuhrAarau_ca2017",
+   "split": "dev",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 25.0
+  },
+  {
+   "id": "c039",
+   "game": "CH_U17E_Final_Pfadi_HSGNordwest_ca2019",
+   "dataset": "handball-segs-l08",
+   "file": "CH_U17E_Final_Pfadi_HSGNordwest_ca2019_s3.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "CH_U17E_Final_Pfadi_HSGNordwest_ca2019",
+   "split": "dev",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 25.0
+  },
+  {
+   "id": "c040",
+   "game": "DE_Oberliga_AhrensburgerTSV_Quickborn_2026-04-26",
+   "dataset": "handball-segs-l09",
+   "file": "DE_Oberliga_AhrensburgerTSV_Quickborn_2026-04-26_s4.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "Oberliga",
+   "split": "dev",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 60.0
+  },
+  {
+   "id": "c041",
+   "game": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10",
+   "dataset": "handball-segs-l09",
+   "file": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10_s4.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10",
+   "split": "test",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 59.94
+  },
+  {
+   "id": "c042",
+   "game": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20",
+   "dataset": "handball-segs-l09",
+   "file": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20_s0.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20",
+   "split": "dev",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 30.0
+  },
+  {
+   "id": "c043",
+   "game": "ES_1Nacional_AnaitasunaB_Trapagaran_2026",
+   "dataset": "handball-segs-l12",
+   "file": "ES_1Nacional_AnaitasunaB_Trapagaran_2026_s0.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "ES_1Nacional_AnaitasunaB_Trapagaran_2026",
+   "split": "dev",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 30.0
+  },
+  {
+   "id": "c044",
+   "game": "ES_1Nacional_Huarte_Erreka_2026",
+   "dataset": "handball-segs-l10",
+   "file": "ES_1Nacional_Huarte_Erreka_2026_s3.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "ES_1Nacional_Huarte_Erreka_2026",
+   "split": "test",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 30.0
+  },
+  {
+   "id": "c045",
+   "game": "ES_1Nacional_PalmaDelRio_2026",
+   "dataset": "handball-segs-l10",
+   "file": "ES_1Nacional_PalmaDelRio_2026_s0.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "ES_1Nacional_PalmaDelRio_2026",
+   "split": "dev",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 30.0
+  },
+  {
+   "id": "c046",
+   "game": "ES_2Nacional_MarniB_Almoradi_2026",
+   "dataset": "handball-segs-l10",
+   "file": "ES_2Nacional_MarniB_Almoradi_2026_s0.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "ES_2Nacional_MarniB_Almoradi_2026",
+   "split": "test",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 60.0
+  },
+  {
+   "id": "c047",
+   "game": "ES_HonorPlata_Bordils_Zamora_2018",
+   "dataset": "handball-segs-l12",
+   "file": "ES_HonorPlata_Bordils_Zamora_2018_s0.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "ES_HonorPlata_Bordils_Zamora_2018",
+   "split": "test",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 30.0
+  },
+  {
+   "id": "c048",
+   "game": "FI_Karsinta_Dynamo_GrIFK_2015",
+   "dataset": "handball-segs-l12",
+   "file": "FI_Karsinta_Dynamo_GrIFK_2015_s0.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "FI_Karsinta_Dynamo_GrIFK_2015",
+   "split": "dev",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 23.976
+  },
+  {
+   "id": "c049",
+   "game": "FR_N1_SudMayenne_GrandLibournais_2025",
+   "dataset": "handball-segs-l12",
+   "file": "FR_N1_SudMayenne_GrandLibournais_2025_s4.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "FR_N1_SudMayenne_GrandLibournais_2025",
+   "split": "dev",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 60.0
+  },
+  {
+   "id": "c050",
+   "game": "FR_N3_CPBRennes_SaintMalo_2026",
+   "dataset": "handball-segs-l10",
+   "file": "FR_N3_CPBRennes_SaintMalo_2026_s0.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "FR_N3_CPBRennes_SaintMalo_2026",
+   "split": "test",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 60.0
+  },
+  {
+   "id": "c051",
+   "game": "IT_SerieA2_Flavioni_Salerno_2026",
+   "dataset": "handball-segs-l10",
+   "file": "IT_SerieA2_Flavioni_Salerno_2026_s4.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "IT_SerieA2_Flavioni_Salerno_2026",
+   "split": "dev",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 30.0
+  },
+  {
+   "id": "c052",
+   "game": "IT_SerieA2_Leno_MedalpTirol_2020",
+   "dataset": "handball-segs-l10",
+   "file": "IT_SerieA2_Leno_MedalpTirol_2020_s0.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "IT_SerieA2_Leno_MedalpTirol_2020",
+   "split": "dev",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 30.0
+  },
+  {
+   "id": "c053",
+   "game": "IT_SerieA2_Malo_Crenna_2018",
+   "dataset": "handball-segs-l10",
+   "file": "IT_SerieA2_Malo_Crenna_2018_s0.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "IT_SerieA2_Malo_Crenna_2018",
+   "split": "test",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 25.0
+  },
+  {
+   "id": "c054",
+   "game": "Int_Olympia_Finale_Frankreich_Daenemark_2021",
+   "dataset": "handball-segs-l12",
+   "file": "Int_Olympia_Finale_Frankreich_Daenemark_2021_s4.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "Int_Olympia_Finale_Frankreich_Daenemark_2021",
+   "split": "dev",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 25.0
+  },
+  {
+   "id": "c055",
+   "game": "NL_1Divisie_BFC2_PSV_2021",
+   "dataset": "handball-segs-l11",
+   "file": "NL_1Divisie_BFC2_PSV_2021_s4.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "NL_1Divisie_BFC2_PSV_2021",
+   "split": "dev",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 30.0
+  },
+  {
+   "id": "c056",
+   "game": "NL_1Divisie_JongSEW_Wijhe_2024",
+   "dataset": "handball-segs-l11",
+   "file": "NL_1Divisie_JongSEW_Wijhe_2024_s1.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "NL_1Divisie_JongSEW_Wijhe_2024",
+   "split": "test",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 60.0
+  },
+  {
+   "id": "c057",
+   "game": "NL_2Divisie_SEW2_Tukkers_2019",
+   "dataset": "handball-segs-l11",
+   "file": "NL_2Divisie_SEW2_Tukkers_2019_s3.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "NL_2Divisie_SEW2_Tukkers_2019",
+   "split": "test",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 25.0
+  },
+  {
+   "id": "c058",
+   "game": "NL_2Divisie_VZV2_SEW2_2019",
+   "dataset": "handball-segs-l12",
+   "file": "NL_2Divisie_VZV2_SEW2_2019_s0.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "NL_2Divisie_VZV2_SEW2_2019",
+   "split": "dev",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 50.0
+  },
+  {
+   "id": "c059",
+   "game": "NL_Frauen_Final_VOC_SEW_2026",
+   "dataset": "handball-segs-l11",
+   "file": "NL_Frauen_Final_VOC_SEW_2026_s3.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "NL_Frauen_Final_VOC_SEW_2026",
+   "split": "test",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 25.0
+  },
+  {
+   "id": "c060",
+   "game": "NO_Frauen_1Div_Randesund_Gjerpen_2021",
+   "dataset": "handball-segs-l12",
+   "file": "NO_Frauen_1Div_Randesund_Gjerpen_2021_s0.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "1Div",
+   "split": "test",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 30.0
+  },
+  {
+   "id": "c061",
+   "game": "NO_Frauen_3Div_Sogndal_Askoey_2019",
+   "dataset": "handball-segs-l12",
+   "file": "NO_Frauen_3Div_Sogndal_Askoey_2019_s3.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "NO_Frauen_3Div_Sogndal_Askoey_2019",
+   "split": "dev",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 30.0
+  },
+  {
+   "id": "c062",
+   "game": "PT_Frauen_Madeira_Gaia_2022",
+   "dataset": "handball-segs-l12",
+   "file": "PT_Frauen_Madeira_Gaia_2022_s3.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "PT_Frauen_Madeira_Gaia_2022",
+   "split": "test",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 30.0
+  },
+  {
+   "id": "c063",
+   "game": "Pro_EuropeanCup_Karvina_HandballTirol_2025",
+   "dataset": "handball-segs-l11",
+   "file": "Pro_EuropeanCup_Karvina_HandballTirol_2025_s0.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "EuropeanCup",
+   "split": "test",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 50.0
+  },
+  {
+   "id": "c064",
+   "game": "SE_Allsvenskan_Torslanda_Amo_2018",
+   "dataset": "handball-segs-l12",
+   "file": "SE_Allsvenskan_Torslanda_Amo_2018_s1.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "SE_Allsvenskan_Torslanda_Amo_2018",
+   "split": "dev",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 25.0
+  },
+  {
+   "id": "c065",
+   "game": "SE_Amateur_Sala_Vaesteras_2022",
+   "dataset": "handball-segs-l12",
+   "file": "SE_Amateur_Sala_Vaesteras_2022_s0.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "SE_Amateur_Sala_Vaesteras_2022",
+   "split": "dev",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 30.0
+  },
+  {
+   "id": "c066",
+   "game": "SE_Test_Hammarby_Skanela_2026",
+   "dataset": "handball-segs-l12",
+   "file": "SE_Test_Hammarby_Skanela_2026_s4.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "SE_Test_Hammarby_Skanela_2026",
+   "split": "test",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 30.0
+  },
+  {
+   "id": "c067",
+   "game": "UK_Frauen_Islington_Liverpool_2026",
+   "dataset": "handball-segs-l12",
+   "file": "UK_Frauen_Islington_Liverpool_2026_s1.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "Islington",
+   "split": "dev",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 25.0
+  },
+  {
+   "id": "c068",
+   "game": "UK_PremierLeague_Olympia_LondonGD_2023",
+   "dataset": "handball-segs-l13",
+   "file": "UK_PremierLeague_Olympia_LondonGD_2023_s3.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "PremierLeague",
+   "split": "dev",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 30.0
+  },
+  {
+   "id": "c069",
+   "game": "US_NYCity_NYAC_2019",
+   "dataset": "handball-segs-l13",
+   "file": "US_NYCity_NYAC_2019_s1.mp4",
+   "start_s": 20.0,
+   "dur_s": 90.0,
+   "hall": "US_NYCity_NYAC_2019",
+   "split": "test",
+   "source_px": [
+    1280,
+    720
+   ],
+   "fps": 59.94
+  }
+ ]
+}

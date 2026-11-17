@@ -698,12 +698,40 @@ def _court_in_view(
         "camera_y_m": round(float(centre[1]), 2),
         **{k2: v for k2, v in base.items() if k2 != "floor_fit"},
     }
-    # a real camera stands above the floor beside or behind the court, and play is on the court
-    # (a camera right above the near sideline is common, so the near side starts at y < 1)
-    plausible = 1.5 <= centre[2] <= 25 and (centre[1] < 1 or centre[0] < -1 or centre[0] > 41)
-    if not plausible or inside < 0.5 or goal < 0.2:
-        raise CalibrationError(f"automatic court not trustworthy ({info})")
+    doubt = court_doubt(info)
+    if doubt is not None:
+        raise CalibrationError(f"automatic court not trustworthy: {doubt} ({info})")
     return calib, info
+
+
+# A court is only accepted when the goal frames, the lines and the floor all agree (calibration
+# test set, docs/plans/kalibrierung.md 4.7): of 30 development pieces with clicked truth the
+# product accepted 6 courts, 5 of them 3 to 28 m off; every wrong one missed at least one of these
+# three, the right one (0.8 m) met all. The rule was set before the truth of half the pieces was
+# in (4.6). A wrong court is worse than none: the user then clicks the court points.
+MIN_GOAL_FIT = 0.45  # share of the goal-frame stripes on red and white paint (was 0.2)
+MIN_LINE_SCORE = 1.0  # template search: court lines and players agree
+MIN_FLOOR_FIT_ACCEPT = 0.45  # marking length along the two floor directions
+
+
+def court_doubt(info: dict[str, Any]) -> str | None:
+    """Why an automatic court must not be trusted, or None when it may be accepted.
+
+    A real camera stands above the floor beside or behind the court (a camera right above the
+    near sideline is common, so the near side starts at y < 1), play is on the court, and the
+    goal frames, the court lines and the floor markings all fit."""
+    height, x, y = info["camera_height_m"], info["camera_x_m"], info["camera_y_m"]
+    if not (1.5 <= height <= 25 and (y < 1 or x < -1 or x > 41)):
+        return "camera position implausible"
+    if info["people_on_court"] < 0.5:
+        return "most players off the court"
+    if info["goal_score"] < MIN_GOAL_FIT:
+        return "goal frames do not fit"
+    if info["line_score"] < MIN_LINE_SCORE:
+        return "court lines do not fit"
+    if info["floor_fit"] < MIN_FLOOR_FIT_ACCEPT:
+        return "floor markings unclear"
+    return None
 
 
 def _torso_colour(
