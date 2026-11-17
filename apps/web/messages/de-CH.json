@@ -1850,7 +1850,10 @@
     "countOf": "{n} von {total}",
     "state_granted": "erteilt",
     "state_refused": "abgelehnt",
-    "state_missing": "fehlt"
+    "state_missing": "fehlt",
+    "purpose_analysis_help_guardian": "Das Team darf Spielvideos analysieren und dein Kind darin erkennen.",
+    "purpose_highlights_internal_help_guardian": "Szenen mit deinem Kind dürfen in Highlights erscheinen, die nur der Verein sieht.",
+    "purpose_highlights_public_help_guardian": "Szenen mit deinem Kind dürfen öffentlich gezeigt werden, zum Beispiel auf der Vereinsseite."
   },
   "members": {
     "makeAdmin": "Zum Vereinsadmin machen",
@@ -2772,7 +2775,8 @@
     "assessLead": "Deine Einschätzung fehlt noch",
     "assessTask": "Spiel gegen {opponent} einschätzen",
     "replyTask": "{n, plural, one {# Termin beantworten} other {# Termine beantworten}}",
-    "replyHint": "Dabei oder nicht: der Trainer plant damit."
+    "replyHint": "Dabei oder nicht: der Trainer plant damit.",
+    "newScenesFamily": "Neue Szenen deines Kindes"
   },
   "shell": {
     "search": "Suchen",

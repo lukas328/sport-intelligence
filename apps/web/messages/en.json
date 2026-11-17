@@ -1850,7 +1850,10 @@
     "countOf": "{n} of {total}",
     "state_granted": "given",
     "state_refused": "refused",
-    "state_missing": "missing"
+    "state_missing": "missing",
+    "purpose_analysis_help_guardian": "The team may analyse match videos and recognise your child in them.",
+    "purpose_highlights_internal_help_guardian": "Scenes with your child may appear in highlights only the club sees.",
+    "purpose_highlights_public_help_guardian": "Scenes with your child may be shown publicly, for example on the club website."
   },
   "members": {
     "makeAdmin": "Make club admin",
@@ -2772,7 +2775,8 @@
     "assessLead": "Your self-assessment is still missing",
     "assessTask": "Rate your game against {opponent}",
     "replyTask": "{n, plural, one {Reply to # date} other {Reply to # dates}}",
-    "replyHint": "In or out: the coach plans with it."
+    "replyHint": "In or out: the coach plans with it.",
+    "newScenesFamily": "New scenes of your child"
   },
   "shell": {
     "search": "Search",

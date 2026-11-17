@@ -60,7 +60,9 @@ const KeepersView = dynamic(() => import("./m5-views").then((m) => m.KeepersView
 const PhysicalView = dynamic(() => import("./m5-views").then((m) => m.PhysicalView));
 // the Zahlen tab, the highlights, the match-day marks and the exchange: not on the first screen
 const NumbersView = dynamic(() => import("./numbers-view").then((m) => m.NumbersView));
-const HighlightsView = dynamic(() => import("./highlight-views").then((m) => m.HighlightsView));
+// client only: it sits in the closed «Mehr zum Spiel», and rendered on the server its form fields
+// got other useId values than in the browser (hydration warning on every match page)
+const HighlightsView = dynamic(() => import("./highlight-views").then((m) => m.HighlightsView), { ssr: false });
 const MarksPanel = dynamic(() => import("./marks-panel").then((m) => m.MarksPanel));
 const ExchangePanel = dynamic(() => import("./exchange-panel").then((m) => m.ExchangePanel));
 

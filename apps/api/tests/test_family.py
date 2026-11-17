@@ -65,7 +65,10 @@ async def test_parent_decides_for_own_child_only(
         ("Noah", "guardian", True)
     ]
     assert subjects[0]["teams"][0]["is_youth"] is True
-    # parents see their child, not the team
+    # parents see their child, not the team; the list names the team with their role, so the
+    # app opens Teamleben for them instead of «no team yet»
+    listed = (await parent.get(f"/v1/orgs/{ids['org']}/teams")).json()
+    assert [(t["id"], t["my_role"]) for t in listed] == [(ids["team"], "parent")]
     assert (await parent.get(f"/v1/orgs/{ids['org']}/teams/{ids['team']}")).status_code in (
         403,
         404,

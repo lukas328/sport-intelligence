@@ -212,7 +212,10 @@ async def list_teams(ctx: Ctx) -> list[Team]:
     query = select(Team).order_by(Team.name)
     visible = visible_team_ids(actor)
     if visible is not None:
-        query = query.where(Team.id.in_(visible))
+        # a parent's team is in the list (name, settings and their role "parent"), so the app
+        # knows them as parents and opens Teamleben; reading the team itself stays closed
+        own = {t for t, r in actor.team_roles.items() if r == TeamRole.PARENT}
+        query = query.where(Team.id.in_(visible | own))
     return list((await ctx.db.scalars(query)).all())
 
 

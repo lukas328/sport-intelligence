@@ -1850,7 +1850,10 @@
     "countOf": "{n} sur {total}",
     "state_granted": "donné",
     "state_refused": "refusé",
-    "state_missing": "manquant"
+    "state_missing": "manquant",
+    "purpose_analysis_help_guardian": "L'équipe peut analyser les vidéos de match et y reconnaître ton enfant.",
+    "purpose_highlights_internal_help_guardian": "Des scènes avec ton enfant peuvent apparaître dans des highlights visibles seulement par le club.",
+    "purpose_highlights_public_help_guardian": "Des scènes avec ton enfant peuvent être montrées publiquement, par exemple sur le site du club."
   },
   "members": {
     "makeAdmin": "Nommer admin du club",
@@ -2772,7 +2775,8 @@
     "assessLead": "Ton auto-évaluation manque encore",
     "assessTask": "Évaluer le match contre {opponent}",
     "replyTask": "{n, plural, one {Répondre à # rendez-vous} other {Répondre à # rendez-vous}}",
-    "replyHint": "Présent ou non : l'entraîneur planifie avec."
+    "replyHint": "Présent ou non : l'entraîneur planifie avec.",
+    "newScenesFamily": "Nouvelles scènes de ton enfant"
   },
   "shell": {
     "search": "Chercher",

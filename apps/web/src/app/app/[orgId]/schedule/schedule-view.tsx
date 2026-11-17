@@ -61,7 +61,9 @@ export function ScheduleRow({ item: i, onReply }: { item: Item; onReply: (item: 
         <span className="block text-lg font-bold font-wide tabular-nums">{format.dateTime(when, { day: "numeric" })}</span>
         <span className="mt-1 block text-[0.875rem] font-medium text-muted">{format.dateTime(when, { month: "short" })}</span>
       </span>
-      <div className="min-w-0 flex-1">
+      {/* the text keeps a width of its own: on a phone the replies move under it instead of
+          squeezing it to one word per line */}
+      <div className="min-w-0 flex-1 basis-48">
         <p className="font-semibold">
           {i.kind === "match" ? t("match", { opponent: i.title ?? "" }) : i.title || t("training")}
           {!self && <span className="font-normal text-muted"> {t("for", { name: i.player_name })}</span>}
@@ -70,7 +72,7 @@ export function ScheduleRow({ item: i, onReply }: { item: Item; onReply: (item: 
           {[i.team, format.dateTime(when, i.starts_at ? { weekday: "long", hour: "2-digit", minute: "2-digit" } : { weekday: "long" })].join(" · ")}
         </p>
       </div>
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2 max-sm:pl-[60px]">
         {choice("yes")}
         {choice("no")}
       </div>

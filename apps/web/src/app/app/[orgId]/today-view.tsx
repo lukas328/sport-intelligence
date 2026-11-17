@@ -536,7 +536,7 @@ function FamilyToday({ orgId }: { orgId: string }) {
           </ul>
         )}
       </Block>
-      <Block title={t("today.newScenes")} href={`/app/${orgId}/feed`} linkLabel={t("today.allScenes")}>
+      <Block title={t("today.newScenesFamily")} href={`/app/${orgId}/feed`} linkLabel={t("today.allScenes")}>
         <Scenes orgId={orgId} feeds={feeds.data ?? []} loading={feeds.isLoading} />
       </Block>
     </div>
@@ -561,7 +561,8 @@ function Scenes({ orgId, feeds, loading }: { orgId: string; feeds: Schemas["Feed
                 {f.relation === "guardian" && ` · ${f.player_first_name}`}
               </span>
             </span>
-            {!f.assessed && <Badge tone="accent">{t("feed.assessNow")}</Badge>}
+            {/* the self-assessment is the player's: a parent is not asked for it */}
+            {!f.assessed && f.relation !== "guardian" && <Badge tone="accent">{t("feed.assessNow")}</Badge>}
           </Link>
         </li>
       ))}
