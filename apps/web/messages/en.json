@@ -224,14 +224,14 @@
     "org_admin": "Club admin",
     "member": "Member",
     "coach": "Coach",
-    "analyst": "Analyst",
+    "analyst": "Assistant coach",
     "player": "Player",
-    "goalkeeper": "Goalkeeper",
-    "guest": "Guest",
-    "goalkeeper_coach": "Goalkeeper coach",
-    "athletic_coach": "Athletic coach",
-    "team_manager": "Team manager",
-    "parent": "Parent"
+    "goalkeeper": "Player",
+    "guest": "Shared links only",
+    "goalkeeper_coach": "Assistant coach",
+    "athletic_coach": "Assistant coach",
+    "team_manager": "Assistant coach",
+    "parent": "Parents"
   },
   "positions": {
     "LA": "Left wing",
