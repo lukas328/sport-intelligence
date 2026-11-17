@@ -212,3 +212,51 @@ def test_after_the_analysis_the_mail_promises_only_what_is_there() -> None:
         "analysis_no_goals", "de-CH", to="a@b.ch", name="Hans", team="Z", opponent="T", link="x"
     )
     assert named.text.startswith("Hallo Hans\n") and "keine Tore" in named.text
+
+
+async def test_demo_match_stays_out_of_the_team(make_api: Callable[[], Api]) -> None:
+    """«Demo-Spiel ansehen» (app review R1, R20): the example match is no match of the team, it
+    shows three things and is marked as an example."""
+    api = make_api()
+    ids = await setup_club(api)
+    org, team = ids["org"], ids["team"]
+    roster = f"/v1/orgs/{org}/teams/{team}/seasons/{ids['season']}/roster"
+    for n, pos in ((1, "TW"), (7, "RL"), (9, "KM"), (11, "RA")):
+        body = {"first_name": f"P{n}", "last_name": "T", "jersey_number": n, "main_position": pos}
+        assert (await api.post(roster, json=body)).status_code == 201
+    real = await new_match(api, ids, kickoff_at="2026-10-03T18:00:00+02:00")
+    result = {"score_own": 25, "score_opponent": 22}
+    assert (await api.patch(f"/v1/orgs/{org}/matches/{real['id']}", json=result)).status_code == 200
+    await api.post(
+        f"/v1/orgs/{org}/matches/{real['id']}/events",
+        json={"type": "shot", "side": "own", "outcome": "goal", "clock_s": 60},
+    )
+    demo = (await api.post(f"/v1/orgs/{org}/teams/{team}/demo-match")).json()
+    assert demo["is_demo"] is True and demo["source"] == "demo"
+    assert (demo["score_own"], demo["score_opponent"]) == (27, 24)
+
+    # its own page works, nothing of the team lists or counts it
+    assert (await api.get(f"/v1/orgs/{org}/matches/{demo['id']}")).status_code == 200
+    listed = [m["id"] for m in (await api.get(f"/v1/orgs/{org}/teams/{team}/matches")).json()]
+    assert listed == [real["id"]]
+    season = (await api.get(f"/v1/orgs/{org}/teams/{team}/seasons/{ids['season']}/stats")).json()
+    assert [m["match_id"] for m in season["matches"]] == [real["id"]]
+    assert season["totals"]["goals"] == 1
+    tips = (await api.get(f"/v1/orgs/{org}/teams/{team}/training-tips")).json()
+    assert tips["matches_analysed"] == 1
+    opponents = [o["name"] for o in (await api.get(f"/v1/orgs/{org}/opponents")).json()]
+    assert support.DEMO_OPPONENT not in opponents and "TV Gegner" in opponents
+
+    # three things: 9 of 24 goals against over the right wing, 4 fast breaks, 9 of 27 from the
+    # circle (the zones of lib/three-things.ts)
+    g = (await api.get(f"/v1/orgs/{org}/matches/{demo['id']}/graphics")).json()
+    zones: dict[tuple[str, str], int] = {}
+    for x in g["goals"]:
+        zones[(x["team"], x["zone"])] = zones.get((x["team"], x["zone"]), 0) + 1
+    assert zones[("opp", "ra")] == 9 and zones[("opp", "gs")] == 4 and zones[("own", "kr")] == 9
+    stats = (await api.get(f"/v1/orgs/{org}/matches/{demo['id']}/stats")).json()
+    keepers = [k for k in stats["goalkeepers"].values() if k["side"] == "own"]
+    assert sum(k["saves"] for k in keepers) == stats["own"]["saves"] == 14
+    # a second click opens the same example
+    again = (await api.post(f"/v1/orgs/{org}/teams/{team}/demo-match")).json()
+    assert again["id"] == demo["id"]

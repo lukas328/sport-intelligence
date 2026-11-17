@@ -25,6 +25,7 @@ from handball_api.services import billing, report_pdf, roster
 from handball_api.services import events as events_service
 from handball_api.services.context import Ctx
 from handball_api.services.matches import (
+    counted,
     get_match,
     opponent_of,
     timeline_video,
@@ -49,6 +50,7 @@ async def _matches_with_events(ctx: Ctx, team_id: uuid.UUID, season_id: uuid.UUI
                     Match.team_id == team_id,
                     Match.season_id == season_id,
                     Match.kind == "match",  # trainings stay out of match statistics (4.8)
+                    counted(),  # the example match is no match of the season (R1)
                     Match.id.in_(has_events),
                 )
                 .order_by(Match.kickoff_at)
@@ -68,6 +70,7 @@ async def _played_matches(ctx: Ctx, team_id: uuid.UUID, season_id: uuid.UUID) ->
                     Match.team_id == team_id,
                     Match.season_id == season_id,
                     Match.kind == "match",
+                    counted(),
                     Match.score_own.is_not(None) | Match.id.in_(has_events),
                 )
                 .order_by(Match.kickoff_at)
@@ -384,7 +387,7 @@ async def opponent_profile(ctx: Ctx, opponent_id: uuid.UUID) -> dict[str, Any]:
     visible = visible_team_ids(ctx.require_actor())
     q = (
         select(Match)
-        .where(Match.opponent_id == opponent.id, Match.kind.in_(("match", "scouting")))
+        .where(Match.opponent_id == opponent.id, Match.kind.in_(("match", "scouting")), counted())
         .order_by(Match.kickoff_at)
     )
     if visible is not None:

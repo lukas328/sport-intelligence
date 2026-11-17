@@ -319,7 +319,7 @@ function EntryHead(props: ComponentProps<typeof WurfHead>) {
 
 /** Table excerpt, scorers and next game of a team from the federation's data (also on Spiele
  * before the first video, UX test H02). */
-export function TeamFacts({ p, hideNext = false }: { p: Preview; hideNext?: boolean }) {
+export function TeamFacts({ p, hideNext = false, hideScorers = false }: { p: Preview; hideNext?: boolean; hideScorers?: boolean }) {
   const t = useTranslations("entry");
   const format = useFormatter();
   // the table: an excerpt around the own team, the whole one a tap away (livegang K1)
@@ -333,7 +333,7 @@ export function TeamFacts({ p, hideNext = false }: { p: Preview; hideNext?: bool
         </section>
       )}
       <div className="space-y-10">
-        {p.scorers.length > 0 && (
+        {p.scorers.length > 0 && !hideScorers && (
           <section>
             <SectionHead title={t("scorers")} note={t("scorersBasis", { n: p.scorer_games })} />
             <ol className="m-0 list-none p-0" data-testid="entry-scorers">

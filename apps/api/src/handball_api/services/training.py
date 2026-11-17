@@ -6,7 +6,7 @@ import uuid
 from datetime import UTC, datetime
 from typing import Any
 
-from sqlalchemy import func, select, update
+from sqlalchemy import ColumnElement, delete, func, select, update
 
 from handball_api.core.email import try_send
 from handball_api.core.errors import ProblemError
@@ -51,7 +51,19 @@ async def notify(
     params: dict[str, Any],
     link: str | None,
 ) -> None:
-    for uid in dict.fromkeys(user_ids):
+    users = list(dict.fromkeys(user_ids))
+    mid = params.get("match_id")
+    if users and isinstance(mid, str):
+        # one note per thing (app review R5): a newer note about the same match replaces the
+        # older one («Der offizielle Spielbericht ist da» twice, the failed analysis that ran again)
+        await ctx.db.execute(
+            delete(Notification).where(
+                Notification.user_id.in_(users),
+                Notification.params["match_id"].astext == mid,
+                _same_thing(kind),
+            )
+        )
+    for uid in users:
         ctx.db.add(
             Notification(organization_id=org_id, user_id=uid, kind=kind, params=params, link=link)
         )
@@ -59,6 +71,58 @@ async def notify(
     from handball_api.services import push
 
     await push.enqueue(ctx, list(dict.fromkeys(user_ids)), kind, link)
+
+
+def _group(kind: str) -> str:
+    """Notes of one group say the same thing about a match: the analysis of a match (ready,
+    questions, every question answered, failed) is one note, its latest state."""
+    return "analysis_" if kind.startswith("analysis_") else kind
+
+
+def _same_thing(kind: str) -> ColumnElement[bool]:
+    group = _group(kind)
+    return (
+        Notification.kind.like(f"{group}%") if group == "analysis_" else Notification.kind == kind
+    )
+
+
+async def _tidy(ctx: Ctx, items: list[Notification]) -> list[Notification]:
+    """Notes about a match that no longer exists go (the link would lead to a page that is not
+    there), and of several notes about the same match and thing only the newest stays (app
+    review R5; notes from before `notify` replaced older ones). `items` newest first."""
+    ids: set[uuid.UUID] = set()
+    for n in items:
+        try:
+            ids.add(uuid.UUID(str((n.params or {})["match_id"])))
+        except (KeyError, ValueError):
+            continue
+    # notes are the organisation's (row security): a match of it that is not found was deleted
+    there = (
+        set((await ctx.db.scalars(select(Match.id).where(Match.id.in_(ids)))).all())
+        if ids
+        else set()
+    )
+    keep: list[Notification] = []
+    seen: set[tuple[str, str]] = set()
+    gone: list[uuid.UUID] = []
+    for n in items:
+        mid = (n.params or {}).get("match_id")
+        if not isinstance(mid, str):
+            keep.append(n)
+            continue
+        try:
+            exists = uuid.UUID(mid) in there
+        except ValueError:
+            exists = False
+        key = (_group(n.kind), mid)
+        if not exists or key in seen:
+            gone.append(n.id)
+            continue
+        seen.add(key)
+        keep.append(n)
+    if gone:
+        await ctx.db.execute(delete(Notification).where(Notification.id.in_(gone)))
+    return keep
 
 
 async def staff_of(ctx: Ctx, team_id: uuid.UUID) -> list[uuid.UUID]:
@@ -408,7 +472,8 @@ async def notifications(ctx: Ctx) -> NotificationList:
             select(Notification).where(base).order_by(Notification.created_at.desc()).limit(50)
         )
     ).all()
-    await _questions_now(ctx, list(items))
+    items = await _tidy(ctx, list(items))
+    await _questions_now(ctx, items)
     unread = await ctx.db.scalar(
         select(func.count(Notification.id)).where(base, Notification.read_at.is_(None))
     )

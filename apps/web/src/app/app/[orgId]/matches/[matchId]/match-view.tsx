@@ -14,6 +14,7 @@ import { markOpened } from "@/lib/fresh-match";
 import { checkCount, goalRuns, useMatchGraphics } from "@/lib/graphics";
 import { ownName } from "@/lib/own-name";
 import { ThreeThingsView } from "@/components/anlauf/three-things-view";
+import { ExampleBanner } from "@/components/anlauf/example-banner";
 import { MatchHead } from "./match-head";
 import { AskColour } from "./ask-colour";
 import { MatchZones } from "./match-graphics";
@@ -245,8 +246,10 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
   // «Spieltag starten» up front only on match day (from three hours before the kick-off); days
   // before it is a quiet action in the menu and below the opponent
   const matchDay = isMatchDay(match.kickoff_at);
-  const liveFirst = staff && match.score_own == null && !main && matchDay && match.source !== "paper_report";
-  const uploadFirst = staff && !main && !liveFirst && match.source !== "paper_report";
+  // the example match of «Demo-Spiel ansehen» is looked at, not worked on (R1)
+  const example = match.source === "demo";
+  const liveFirst = staff && match.score_own == null && !main && matchDay && match.source !== "paper_report" && !example;
+  const uploadFirst = staff && !main && !liveFirst && match.source !== "paper_report" && !example;
   // the progress of the uploads and the processing (K13, B4): the API's view, with the uploads of
   // this tab laid over; shown while it runs, and when something failed
   const local = useLocalUploads();
@@ -346,7 +349,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
   return (
     <div className="space-y-8" style={matchStyle(club, oppKit) as CSSProperties}>
       <MatchHead match={match} ownName={own} oppName={oppName(match)} view={view} graphics={graphics.data}>
-        {staff && match.opponent && !match.opponent_colors?.color && <AskColour orgId={orgId} matchId={match.id} opponent={oppName(match)} />}
+        {staff && !example && match.opponent && !match.opponent_colors?.color && <AskColour orgId={orgId} matchId={match.id} opponent={oppName(match)} />}
         {/* a known colour can be changed right in the head, five shirts (UX test B31) */}
         {staff && match.opponent && match.opponent_colors?.color && (
           <details className="mt-2.5 text-sm font-bold" data-testid="change-colour">
@@ -361,6 +364,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
           </details>
         )}
       </MatchHead>
+      {example && <ExampleBanner orgId={orgId} teamId={match.team_id} />}
       {/* one state at a time (L4): the progress block below says what runs; here only «fertig»
           and a failed match without progress to tell it */}
       {(justDone || (match.status === "failed" && !progressShown)) && (
@@ -637,7 +641,8 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
             </section>
           )}
           {/* a match without video: the report's facts below, the way to the video on top */}
-          {!main && staff && Date.parse(match.kickoff_at) <= Date.now() && (
+          {/* the example match is looked at, nothing to upload or file there (R1) */}
+          {!main && staff && !example && Date.parse(match.kickoff_at) <= Date.now() && (
             <section className="space-y-3 border-2 border-dashed border-ink/40 p-4 md:p-6" data-testid="no-video">
               <h2 className="text-[26px]">{ta("noVideoTitle")}</h2>
               <p className="m-0 max-w-[60ch] text-[17px]">{ta("noVideoBlock")}</p>
@@ -695,11 +700,12 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
                 match={{ own, opp: oppName(match), score: match.score_own != null && match.score_opponent != null ? [match.score_own, match.score_opponent] : null, half: match.halftime_own != null && match.halftime_opponent != null ? [match.halftime_own, match.halftime_opponent] : null, venue: match.venue ?? null, periodS: match.period_s, periods: match.periods }}
                 stats={stats.data ?? null}
                 names={names}
+                roster={roster.data ?? []}
               />
             </div>
             <div className="space-y-10">
               {graphics.data && goalRuns(graphics.data).length > 0 && <MatchZones graphics={graphics.data} />}
-              {stats.data && <ThreeFigures stats={stats.data} names={names} />}
+              {stats.data && <ThreeFigures stats={stats.data} names={names} roster={roster.data ?? []} />}
             </div>
           </div>
           {/* everything else of the match, as before, one step away (UX test B08); not before the
@@ -724,7 +730,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
             </div>
           </details>
           )}
-          <AttachmentsPanel orgId={orgId} matchId={match.id} staff={staff} hasReport={graphics.data?.has_report ?? false} linked={Boolean(official.data?.official_team_id)} />
+          {!example && <AttachmentsPanel orgId={orgId} matchId={match.id} staff={staff} hasReport={graphics.data?.has_report ?? false} linked={Boolean(official.data?.official_team_id)} />}
         </div>
       )}
 

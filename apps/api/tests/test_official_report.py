@@ -105,6 +105,33 @@ def test_parse_handball_ch_resolves_sides_and_keepers() -> None:
     assert (err.value.status, err.value.code) == (404, "report-not-found")
 
 
+def test_parse_handball_ch_finds_the_keeper_by_the_field_players_role() -> None:
+    """A save whose keeper role is not «bParade» (a 7 m) and whose keeper is missing from the
+    game's player list: the other side's field role names the shooter (app review R4)."""
+    data = ch_data()
+    data["gamePlayerStats"] = []
+    data["gameLog"] = [
+        {
+            "actionText": "7m Parade",
+            "homeTeamActionLCID": "b7mFeldParade",
+            "awayTeamActionLCID": "b7mParade",
+            "homeTeamPlayerStaffName": "EXEMPEL Aida",
+            "homeTeamPlayerStaffNrDesc": "9",
+            "awayTeamPlayerStaffName": "MODELL Jenny",
+            "awayTeamPlayerStaffNrDesc": "12",
+            "result": "0:0",
+            "timeInt": 42,
+        }
+    ]
+    save = service.parse_handball_ch(484345, data).entries[0]
+    assert (save.kind, save.team, save.number, save.goalkeeper_number) == (
+        "penalty_saved",
+        "home",
+        9,
+        12,
+    )
+
+
 def test_parse_dhb_press_report() -> None:
     r = service.parse_dhb(76839, dhb_text())
     assert (r.home, r.away, r.final, r.half_time) == (
