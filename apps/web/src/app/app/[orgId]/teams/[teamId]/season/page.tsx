@@ -14,7 +14,6 @@ import { PageHeader } from "@/components/ui/page-header";
 import { AreaSubNav } from "@/components/shell/section-nav";
 import { SeasonThemes } from "@/components/season/season-themes";
 import { LeagueTable } from "@/components/season/league-table";
-import { OfficialScorers } from "./official-scorers";
 import { focusMetric, matchStatement, seasonStatement } from "@/lib/voice";
 import { cn } from "@/lib/utils";
 
@@ -326,12 +325,10 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
             </p>
           </section>
 
-          <OfficialScorers
-            club={official.data?.linked ? (official.data.official_club_id ?? null) : null}
-            team={official.data?.linked ? (official.data.official_team_id ?? null) : null}
-            fallback={
-              top.length > 0 && (
-            <section>
+          {/* «Wer trifft»: the goals of every played match, the official reports included, the
+              same count as the roster, the player pages and «Mehr zur Saison» (app review R3) */}
+          {top.length > 0 && (
+            <section data-testid="season-scorers">
               <SectionHead title={ts("scorers")} note={ts("scorersNote", { n })} />
               <table className="w-full border-collapse text-[17px]" data-testid="season-players">
                 <thead>
@@ -372,9 +369,7 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
                 </Link>
               </p>
             </section>
-          )
-            }
-          />
+          )}
         </div>
 
         <aside className="min-w-0 space-y-14">

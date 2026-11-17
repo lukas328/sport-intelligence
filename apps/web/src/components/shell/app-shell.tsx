@@ -62,9 +62,12 @@ export function AppShell({
     if (urlTeam && urlTeam !== chosen) setTeam(urlTeam);
   }, [urlTeam]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // the 404 of a tool route keeps the app frame: it says so for the address it stands on
+  const [framed, setFramed] = useState<string | null>(null);
+  const showFrame = useCallback((on: boolean) => setFramed(on ? window.location.pathname : null), []);
   const value = useMemo<ShellValue>(
-    () => ({ org, orgs, teams, team, mode, me, setTeam }),
-    [org, orgs, teams, team, mode, me, setTeam],
+    () => ({ org, orgs, teams, team, mode, me, setTeam, showFrame }),
+    [org, orgs, teams, team, mode, me, setTeam, showFrame],
   );
   const navOpts = { teamFunctions: team?.team_features ?? false };
   const items = navFor(mode, org.id, team?.id ?? null, navOpts);
@@ -99,7 +102,7 @@ export function AppShell({
   }, []);
 
   // courtside and presentation tools use the whole screen, with one way back
-  const tool = /\/(present|remote|live|marks|matchday|check)$/.test(path);
+  const tool = framed !== path && /\/(present|remote|live|marks|matchday|check)$/.test(path);
   // Prüfen and the Spieltag keys bring their own top line («Später weiter», «Beenden»)
   const ownTop = path.endsWith("/check") || (path.endsWith("/matchday") && search.get("mode") !== "detail");
   if (tool) {

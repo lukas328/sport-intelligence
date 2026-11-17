@@ -6,7 +6,7 @@ import uuid
 from dataclasses import dataclass
 from typing import Any
 
-from sqlalchemy import delete, func, select
+from sqlalchemy import ColumnElement, delete, func, select
 
 from handball_api.core.colors import kit_warnings
 from handball_api.core.errors import ProblemError
@@ -49,6 +49,19 @@ log = get_logger("handball_api.matches")
 
 # where events come from when a match report brought them (handball.ch, a paper report)
 REPORT_SOURCES = ("official_feed", "paper_report", "official_report")
+
+
+# the example match of «Demo-Spiel ansehen» (services/support.demo_match): it shows what the
+# analysis does, but it is no match of the team. It stays out of every list, pick list, figure
+# and statistic of the team (app review R1); only its own page and the demo button lead to it.
+# Seeded matches with a synthetic video are `is_demo` too, but they are the demo club's matches
+# and count like any other: `source` tells the example apart.
+DEMO_SOURCE = "demo"
+
+
+def counted() -> ColumnElement[bool]:
+    """Matches that belong to the team's season: every match but the example match."""
+    return Match.source != DEMO_SOURCE
 
 
 DUPLICATE = "same-file:"  # error of a file that is already in the match: "same-file:<video id>"
@@ -105,7 +118,16 @@ def _require_staff(ctx: Ctx) -> None:
 async def list_opponents(ctx: Ctx) -> list[Opponent]:
     if visible_team_ids(ctx.require_actor()) == set():
         raise ProblemError(403, "forbidden", "No team access")
-    return list((await ctx.db.scalars(select(Opponent).order_by(Opponent.name))).all())
+    # the example match's opponent («Demo HC Beispiel») is no opponent of the club (R1)
+    example_only = (
+        select(Match.id)
+        .where(Match.opponent_id == Opponent.id, Match.source == DEMO_SOURCE)
+        .exists()
+        & ~select(Match.id).where(Match.opponent_id == Opponent.id, counted()).exists()
+    )
+    return list(
+        (await ctx.db.scalars(select(Opponent).where(~example_only).order_by(Opponent.name))).all()
+    )
 
 
 async def _opponent(ctx: Ctx, opponent_id: uuid.UUID) -> Opponent:
@@ -256,7 +278,7 @@ async def list_matches(
         select(Match, Opponent.name, Opponent.primary_color, func.count(VideoAsset.id), report)
         .outerjoin(Opponent, Opponent.id == Match.opponent_id)
         .outerjoin(VideoAsset, VideoAsset.match_id == Match.id)
-        .where(Match.team_id == team_id)
+        .where(Match.team_id == team_id, counted())
         .group_by(Match.id, Opponent.name, Opponent.primary_color)
         .order_by(Match.kickoff_at.desc())
     )

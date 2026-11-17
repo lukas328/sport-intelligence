@@ -3662,6 +3662,12 @@
     "allGoals": "{n, plural, one {Das Tor} other {Alle # Tore}}",
     "scoutingRow": "{opponent} gegen {other}",
     "scoutingTag": "Beobachtet",
+    "exampleTitle": "Das ist ein Beispiel",
+    "exampleBody": "Ein Demo-Spiel mit erfundenen Toren: so sieht ein Spiel aus, wenn die Analyse dein Video ausgewertet hat. Es gehört nicht zu deinem Team und zählt in keiner Statistik.",
+    "exampleBack": "Zurück zu deinen Spielen",
+    "thingsExplain": "Die drei Dinge: die wichtigsten Muster aus den Toren dieses Spiels, etwa über welche Seite die meisten Gegentore fielen. Gezeigt wird nur, was mindestens dreimal vorkommt.",
+    "tgKeepers": "Im Tor: {list}.",
+    "tgKeeperItem": "{name} ({saves, plural, one {1 Parade} other {# Paraden}})",
     "noticeLead": "Die Analyse ist fertig, aber sie hat zu wenig gesehen, um dich etwas zu fragen.",
     "rowParts": "{done} von {total} Teilen analysiert",
     "rowPartsFailed": "{n, plural, one {1 Teil gescheitert} other {# Teile gescheitert}}",
@@ -3975,7 +3981,14 @@
     "allNumbersNote": "Spielbericht, Würfe, Torhüter im Detail, Laufwerte",
     "unknown": "ohne Namen",
     "confirmed": "Bestätigt",
-    "confirmedYes": "alle Tore bestätigt"
+    "confirmedYes": "alle Tore bestätigt",
+    "notInRoster": "nicht im Kader",
+    "noNumber": "ohne Nummer im Spielbericht",
+    "introReport": "Alle Zahlen aus dem Spielbericht. Würfe, Paraden und Ballverluste stehen nur da, wo der Spielbericht sie aufführt.",
+    "shotsPlain": "Würfe",
+    "savesPlain": "Paraden",
+    "againstNone": "{n, plural, one {Das Gegentor ist} other {Die # Gegentore sind}} keinem Torhüter zugeordnet.",
+    "savesNone": "{n, plural, one {Eine Parade ist} other {# Paraden sind}} keinem Torhüter aus dem Kader zugeordnet."
   },
   "entry": {
     "ask": "Wie heisst dein Team?",

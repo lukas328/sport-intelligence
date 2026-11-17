@@ -6,11 +6,13 @@ import uuid
 from datetime import UTC, date, datetime
 from zoneinfo import ZoneInfo
 
-from sqlalchemy import or_, select
+from sqlalchemy import or_, select, update
 
 from handball_api.core.errors import ProblemError
 from handball_api.models import (
     Consent,
+    Event,
+    Match,
     Membership,
     Player,
     PlayerStatus,
@@ -62,6 +64,78 @@ async def numbers(ctx: Ctx, season_id: uuid.UUID, team_id: uuid.UUID) -> dict[in
         )
     )
     return {n: pid for n, pid in rows.all() if n is not None}
+
+
+async def link_numbers(ctx: Ctx, season_id: uuid.UUID, team_id: uuid.UUID) -> int:
+    """Links the events of the season's matches that name an own shirt number but no player (an
+    official or paper report read before the number was in the roster) to the player who wears
+    it now, and an own goalkeeper's saves given by number to that goalkeeper. Called whenever a
+    number comes into the roster, so the goals of every report count for the person in the season
+    figures, the roster and the player page (app review R3). Returns the events linked."""
+    nums = await numbers(ctx, season_id, team_id)
+    if not nums:
+        return 0
+    matches = select(Match.id).where(Match.season_id == season_id, Match.team_id == team_id)
+    linked = 0
+    for number, pid in nums.items():
+        r = await ctx.db.execute(
+            update(Event)
+            .where(
+                Event.match_id.in_(matches),
+                Event.side == "own",
+                Event.player_id.is_(None),
+                Event.number == number,
+            )
+            .values(player_id=pid)
+            .execution_options(synchronize_session=False)
+        )
+        linked += int(getattr(r, "rowcount", 0) or 0)
+    # afterwards only to a marked goalkeeper: an unmarked roster cannot say whether the number
+    # of a save is the goalkeeper's or a field player's
+    keepers = await goalkeeper_numbers(ctx, season_id, team_id, strict=True)
+    saves = (
+        await ctx.db.scalars(
+            select(Event).where(
+                Event.match_id.in_(matches),
+                Event.side == "opponent",
+                Event.type == "shot",
+                Event.outcome == "save",
+                Event.attributes.has_key("goalkeeper_number"),
+            )
+        )
+    ).all()
+    for e in saves:
+        attrs = dict(e.attributes or {})
+        gk = keepers.get(attrs.get("goalkeeper_number"))  # type: ignore[arg-type]
+        if gk is not None and not attrs.get("goalkeeper_id"):
+            attrs.pop("goalkeeper_number", None)
+            e.attributes = {**attrs, "goalkeeper_id": str(gk)}
+            linked += 1
+    await ctx.db.flush()
+    return linked
+
+
+async def goalkeeper_numbers(
+    ctx: Ctx, season_id: uuid.UUID, team_id: uuid.UUID, strict: bool = False
+) -> dict[int, uuid.UUID]:
+    """Shirt number -> goalkeeper of the active roster (app review R4): the players marked as
+    goalkeepers (position TW). While the roster marks none, every number unless `strict` (the
+    report that names a save's goalkeeper says who kept goal)."""
+    rows = (
+        await ctx.db.execute(
+            select(RosterEntry.jersey_number, RosterEntry.player_id, Player.main_position)
+            .join(Player, Player.id == RosterEntry.player_id)
+            .where(
+                RosterEntry.season_id == season_id,
+                RosterEntry.team_id == team_id,
+                RosterEntry.active.is_(True),
+            )
+        )
+    ).all()
+    marked = {n: pid for n, pid, pos in rows if n is not None and pos == Position.TW}
+    if strict or any(pos == Position.TW for _, _, pos in rows):
+        return marked
+    return {n: pid for n, pid, _ in rows if n is not None}
 
 
 async def _consented_players(ctx: Ctx, player_ids: list[uuid.UUID]) -> set[uuid.UUID]:
@@ -308,6 +382,8 @@ async def _add(ctx: Ctx, season: Season, data: RosterEntryCreate) -> tuple[Roste
     )
     ctx.db.add(entry)
     await ctx.db.flush()
+    if data.jersey_number is not None:
+        await link_numbers(ctx, season.id, season.team_id)
     return entry, player
 
 
@@ -354,6 +430,8 @@ async def update_entry(
         else:
             setattr(entry, k, v)
     await ctx.db.flush()
+    if {"jersey_number", "active", "main_position"} & values.keys():
+        await link_numbers(ctx, entry.season_id, entry.team_id)
     consented = await _consented_players(ctx, [player.id])
     return _out(entry, player, player.id in consented)
 

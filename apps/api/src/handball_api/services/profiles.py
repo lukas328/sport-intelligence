@@ -34,6 +34,7 @@ from handball_api.models.enums import ConsentKind, ReelStatus
 from handball_api.schemas.profiles import ProfileIn
 from handball_api.services import audit, org_verification
 from handball_api.services.context import Ctx
+from handball_api.services.matches import counted
 from handball_api.services.orgs import current_seasons
 from handball_api.services.roster import consented
 
@@ -199,7 +200,11 @@ async def _season_stats(ctx: Ctx, player: Player, team: Team) -> dict[str, float
     season = (await current_seasons(ctx, [team.id])).get(team.id)
     if season is None:
         return {}
-    base = select(Event).join(Match, Match.id == Event.match_id).where(Match.season_id == season.id)
+    base = (
+        select(Event)
+        .join(Match, Match.id == Event.match_id)
+        .where(Match.season_id == season.id, counted())
+    )
     own = base.where(Event.player_id == player.id)
 
     async def count(stmt: Any) -> int:
@@ -212,7 +217,7 @@ async def _season_stats(ctx: Ctx, player: Player, team: Team) -> dict[str, float
             await ctx.db.scalar(
                 select(func.count(func.distinct(Event.match_id)))
                 .join(Match, Match.id == Event.match_id)
-                .where(Match.season_id == season.id, Event.player_id == player.id)
+                .where(Match.season_id == season.id, counted(), Event.player_id == player.id)
             )
             or 0
         ),

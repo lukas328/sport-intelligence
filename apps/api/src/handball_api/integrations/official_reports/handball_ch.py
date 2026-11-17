@@ -80,9 +80,20 @@ def parse_handball_ch(game_id: int, data: dict[str, Any]) -> OfficialReport:
         team: str | None = acting[0] if len(acting) == 1 else None
         keeper: int | None = None
         if len(acting) == 2:  # a save names the shooter and the goalkeeper
-            gk = [s for s in acting if roles[s] in _GK_ROLES] or [
-                s for s in acting if (s, people[s][0]) in keepers
-            ]
+            # the keeper by the role, else as the other one of a field player's role
+            # («bFeldParade»: the shooter), else by the game's keepers (app review R4: a save
+            # given to the wrong team puts the other team's keeper into the own keeper table)
+            gk = (
+                [s for s in acting if roles[s] in _GK_ROLES]
+                or [
+                    s
+                    for s in acting
+                    if roles[s]
+                    and "feld" not in roles[s].lower()
+                    and any("feld" in roles[o].lower() for o in acting if o != s)
+                ]
+                or [s for s in acting if (s, people[s][0]) in keepers]
+            )
             if len(gk) == 1:
                 team = "away" if gk[0] == "home" else "home"
                 keeper = people[gk[0]][0]
