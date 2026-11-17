@@ -13,7 +13,7 @@
   const s = S.phone("pruefen-phone", { left: 214, y: pts[1] - 24, at: 0 });
   S.ring(s, yes, 4);
   // the left point of the four: the lowest left corner of their box
-  S.callout("propose", [30, 300], S.at(s, pts, 0.02, 0.86), "bl", -0.3);
-  S.callout("confirm", [30, 590], S.at(s, yes, 0.02, 0.5), "tl", -0.25);
+  S.callout("propose", [195, 150], S.at(s, pts, 0.02, 0.86), "br", 0.2, 31);
+  S.callout("confirm", [195, 600], S.at(s, yes, 0.02, 0.5), "tr", -0.2, 31);
   S.done();
 </script>

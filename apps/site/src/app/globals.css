@@ -272,7 +272,7 @@
   /*
    * product pictures (components/product-shot.tsx): ink arrows over the picture, labels as text
    * in yellow («schau hier», always with a word). The label grows with the picture but never
-   * under 14 px. Under 30rem the labels shrink to numbers and the words stand below the picture.
+   * under 14 px. Under 28rem the labels shrink to numbers and the words stand below the picture.
    */
   .shot {
     container-type: inline-size;
@@ -340,7 +340,7 @@
     line-height: 1;
     box-shadow: 2px 2px 0 var(--ink);
   }
-  @container (max-width: 29.99rem) {
+  @container (max-width: 27.99rem) {
     .shot-label,
     .shot-label[data-place] {
       display: grid;

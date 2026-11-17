@@ -18,6 +18,8 @@ export type Callout = {
   to: [number, number];
   place: Place;
   bend: number;
+  /** the widest the label may be, in per cent of the picture (default: under half) */
+  max?: number;
 };
 
 export type Shot = {

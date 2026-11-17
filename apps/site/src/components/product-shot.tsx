@@ -7,7 +7,7 @@ import { cn } from "@/lib/cn";
  * over the picture and the labels as real text in the visitor's language, so they stay sharp,
  * translatable and readable for screen readers. The picture keeps its size (width and height),
  * so nothing moves while it loads; the arrows draw themselves when the block glides in. On a
- * small picture (under 30rem wide) the labels would cover the app, so they shrink to numbers and
+ * small picture (under 28rem wide) the labels would cover the app, so they shrink to numbers and
  * the words stand in a short list below (that list is only for the eye: screen readers read the
  * labels themselves).
  */
@@ -76,7 +76,7 @@ export function ProductShot({
                 style={{
                   left: `${c.from[0]}%`,
                   top: `${c.from[1]}%`,
-                  maxWidth: `${room(c.place, c.from[0])}%`,
+                  maxWidth: `${Math.min(room(c.place, c.from[0]), c.max ?? 46)}%`,
                 }}
               >
                 <span aria-hidden className="shot-num">

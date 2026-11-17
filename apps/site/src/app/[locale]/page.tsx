@@ -117,7 +117,7 @@ export default async function Home({ params }: Props) {
             {t.steps.map((s, i) => (
               <li key={s.title} data-reveal style={{ "--d": i } as CSSProperties} className="flex flex-col md:row-span-3 md:grid md:grid-rows-subgrid">
                 {i === 0 ? (
-                  <div className="relative grid aspect-[640/620] place-items-center self-start border-2 border-ink bg-paper p-3">
+                  <div className="relative grid aspect-[640/620] place-items-center border-2 md:self-start border-ink bg-paper p-3">
                     <div className="w-full max-w-[16.5rem]">
                       <HallPlan label={m.filming.planLabel} camera={m.filming.planCamera} field={m.filming.planField} corner={m.filming.planCorner} />
                     </div>
@@ -128,7 +128,7 @@ export default async function Home({ params }: Props) {
                     alt={("alt" in s && s.alt) || ""}
                     labels={i === 1 ? m.product["step-upload"] : m.product["step-check"]}
                     sizes={STEP_SIZES}
-                    className="self-start"
+                    className="md:self-start"
                   />
                 )}
                 <div className="mt-5 flex items-baseline gap-4">

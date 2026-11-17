@@ -148,6 +148,7 @@ async function main() {
           to: pct(c.to),
           place: c.place,
           bend: c.bend,
+          ...(c.max ? { max: c.max } : {}),
         })),
       };
       const kb = (b) => ((b.length * 3) / 4 / 1024).toFixed(0);

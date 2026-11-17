@@ -68,5 +68,5 @@ Add `templates/<name>.html` (copy one that is close), a screen to `SHOTS` in `ca
 needs one, the callout texts under `product.<name>` in all three message files, and use
 `<ProductShot name="<name>" …>` on the page. Keep the style: the same phone size (`PHONE_SCREEN`
 in `stage.js`), the Keil, yellow rings with an ink edge, at most two callouts, and each label
-short (it wraps at under half the picture's width). On a picture shown under 30rem wide the labels
+short (it wraps at under half the picture's width). On a picture shown under 28rem wide the labels
 turn into numbers with the words below it.

@@ -162,9 +162,10 @@
    * both [x, y] on the stage. `place` says where the label goes from `from`: "r" right of it,
    * "l" left, "t" above and "b" below (centred), "tl"/"bl" above/below running to the right,
    * "tr"/"br" above/below running to the left. `bend` curves the arrow (+ one way, − the other).
+   * `max` caps the label's width (per cent of the picture), e.g. to keep it beside a phone.
    */
-  function callout(id, from, to, place = "r", bend = 0.25) {
-    shot.callouts.push({ id, from, to, place, bend });
+  function callout(id, from, to, place = "r", bend = 0.25, max) {
+    shot.callouts.push({ id, from, to, place, bend, ...(max ? { max } : {}) });
   }
 
   /** waits for the pictures, then tells compose.mjs the stage is ready */
