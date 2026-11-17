@@ -70,8 +70,8 @@ const fr: Messages = {
     when: "Match inventé · samedi, à domicile",
     lost: "Perdu. Et trois points à retenir.",
     resultLabel: "{own} {a} à {b} {opp}",
-    flightHalf: "Mi-temps {v}",
-    flightEnd: "Fin {v}",
+    flightHalf: "Mi-temps {score}",
+    flightEnd: "Fin {score}",
   },
   things: {
     title: "Trois points à retenir",

@@ -70,8 +70,8 @@ const en: Messages = {
     when: "Invented match · Saturday, home",
     lost: "Lost. And three things to take home.",
     resultLabel: "{own} {a} to {b} {opp}",
-    flightHalf: "Half time {v}",
-    flightEnd: "Full time {v}",
+    flightHalf: "Half time {score}",
+    flightEnd: "Full time {score}",
   },
   things: {
     title: "Three things to take home",

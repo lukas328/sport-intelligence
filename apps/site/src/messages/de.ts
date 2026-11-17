@@ -68,8 +68,8 @@ const de = {
     when: "Erfundenes Spiel · Samstag, Heimspiel",
     lost: "Verloren. Und drei Dinge zum Mitnehmen.",
     resultLabel: "{own} {a} zu {b} {opp}",
-    flightHalf: "Halbzeit {v}",
-    flightEnd: "Schluss {v}",
+    flightHalf: "Halbzeit {score}",
+    flightEnd: "Schluss {score}",
   },
   things: {
     title: "Drei Dinge zum Mitnehmen",
