@@ -953,6 +953,7 @@
     "courtFromHall": "Terrain repris d'une vidéo précédente de la même salle ({hall}). Vérifie rapidement qu'il correspond.",
     "courtFromHallCheck": "Terrain repris d'une vidéo précédente de la même salle ({hall}). Les lignes orange sont-elles sur les lignes de la salle ?",
     "courtFromHallOk": "Terrain repris d'une vidéo précédente de la même salle ({hall}) et confirmé.",
+    "courtFromHallSure": "Terrain repris d’une vidéo précédente de la même salle. Les images de la salle correspondent exactement, tu n’as rien à vérifier.",
     "courtFits": "C'est bon",
     "courtRemark": "Marquer à nouveau",
     "courtPreviewAlt": "Image de la salle avec le terrain repris, en orange",

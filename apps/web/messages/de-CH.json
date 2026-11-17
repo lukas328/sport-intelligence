@@ -953,6 +953,7 @@
     "courtFromHall": "Spielfeld aus einem früheren Video derselben Halle übernommen ({hall}). Kurz prüfen, ob es passt.",
     "courtFromHallCheck": "Spielfeld aus einem früheren Video derselben Halle übernommen ({hall}). Liegen die orangen Linien auf den Linien der Halle?",
     "courtFromHallOk": "Spielfeld aus einem früheren Video derselben Halle übernommen ({hall}) und bestätigt.",
+    "courtFromHallSure": "Spielfeld aus einem früheren Video derselben Halle übernommen. Die Hallenbilder passen genau, du musst nichts prüfen.",
     "courtFits": "Passt",
     "courtRemark": "Neu markieren",
     "courtPreviewAlt": "Hallenbild mit dem übernommenen Spielfeld in Orange",

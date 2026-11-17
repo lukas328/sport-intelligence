@@ -1181,6 +1181,14 @@ async def _part_of(ctx: Ctx, asset: VideoAsset) -> Part | None:
     return next((p for p in await parts_of(ctx, asset.match_id) if p.video_id == asset.id), None)
 
 
+def _with_sure(asset: VideoAsset, info: Any) -> Any:
+    """A court carried over from the hall says whether the hall images matched well enough not
+    to ask about it (services/checks.hall_court_sure)."""
+    if not isinstance(info, dict) or info.get("method") != "hall":
+        return info
+    return {**info, "sure": checks.hall_court_sure(asset)}
+
+
 async def analysis(ctx: Ctx, asset_id: uuid.UUID) -> dict[str, object]:
     asset = await get_asset(ctx, asset_id)
     cal = await ctx.db.scalar(
@@ -1226,7 +1234,7 @@ async def analysis(ctx: Ctx, asset_id: uuid.UUID) -> dict[str, object]:
         "panorama": meta.get("panorama"),
         "needs_calibration": bool(meta.get("needs_calibration")),
         "calibration_error": meta.get("calibration_error"),
-        "calibration_info": meta.get("calibration_info"),
+        "calibration_info": _with_sure(asset, meta.get("calibration_info")),
         "hall": await halls.summary(ctx, asset, match) if match is not None else None,
         "error_code": failure_code(job.error)
         if job is not None and job.status == "failed"

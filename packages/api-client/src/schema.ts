@@ -5351,7 +5351,7 @@ export interface components {
             calibration_error?: string | null;
             /**
              * Calibration Info
-             * @description automatic calibration: goal fit, players on the court, camera position; method 'hall' when the court was carried over from an earlier video of the hall (reference_video_id); hall_tried lists earlier videos that did not fit
+             * @description automatic calibration: goal fit, players on the court, camera position; method 'hall' when the court was carried over from an earlier video of the hall (reference_video_id; sure when the hall images matched well enough not to ask); hall_tried lists earlier videos that did not fit
              */
             calibration_info?: {
                 [key: string]: unknown;

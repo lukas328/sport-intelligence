@@ -953,6 +953,7 @@
     "courtFromHall": "Court taken over from an earlier video of the same hall ({hall}). Check briefly that it fits.",
     "courtFromHallCheck": "Court taken over from an earlier video of the same hall ({hall}). Do the orange lines lie on the hall's lines?",
     "courtFromHallOk": "Court taken over from an earlier video of the same hall ({hall}) and confirmed.",
+    "courtFromHallSure": "Court carried over from an earlier video of the same hall. The hall images match closely, nothing for you to check.",
     "courtFits": "Fits",
     "courtRemark": "Mark again",
     "courtPreviewAlt": "Hall image with the court taken over, in orange",

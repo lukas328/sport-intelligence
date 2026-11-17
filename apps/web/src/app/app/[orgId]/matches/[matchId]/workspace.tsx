@@ -27,7 +27,7 @@ import type { Shape, Tool } from "@/components/video/shapes";
 import { api } from "@/lib/client";
 import { errorKey, type ErrorKey } from "@/lib/errors";
 import { formatClock } from "@/lib/format";
-import { courtFromHall, courtUnconfirmed, coverage, firstOpen, steps } from "@/lib/match-workflow";
+import { courtFromHall, courtFromHallSure, courtUnconfirmed, coverage, firstOpen, steps } from "@/lib/match-workflow";
 import { goalRows } from "@/lib/official-goals";
 import { cn } from "@/lib/utils";
 import { GoalCandidatesPanel, useGoalCandidates } from "./goal-candidates";
@@ -900,6 +900,7 @@ function AnalysisPanel({
   const fromHall = courtFromHall(analysis);
   const hallCheck = canMark && fromHall && unconfirmed;
   const hallConfirmed = fromHall && analysis.calibration?.source === "user_correction";
+  const hallSure = !hallConfirmed && courtFromHallSure(analysis);
   return (
     // while the court waits for its check the answer bar is fixed on phones: room for it at the end
     <section className={cn("space-y-3", hallCheck && "max-lg:pb-24")} data-testid="analysis-panel">
@@ -923,7 +924,9 @@ function AnalysisPanel({
       {analysis.status === "ready" && !analysis.needs_calibration && (
         <p className="text-[0.9375rem]">
           {fromHall
-            ? t(hallConfirmed ? "courtFromHallOk" : hallCheck ? "courtFromHallCheck" : "courtFromHall", { hall: hallName ?? "" })
+            ? hallSure
+              ? t("courtFromHallSure")
+              : t(hallConfirmed ? "courtFromHallOk" : hallCheck ? "courtFromHallCheck" : "courtFromHall", { hall: hallName ?? "" })
             : unconfirmed
               ? t("checkCourt")
               : t("courtOk")}
