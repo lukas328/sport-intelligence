@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { ZONE_AT } from "@/components/anlauf/geometry";
 import { goalRuns, type MatchGraphics } from "./graphics";
-import { checkMinutes, COURT_ZONES, fromPicture, goalsWithoutSpot, halfToCourt, nineAt, spotCounts, toPicture, ZONE_AREA, ZONE_LABEL_AT, ZONE_LABEL_SIDE, zoneAtHalf, zoneAtPicture } from "./shot-spot";
+import { afterSpot, checkMinutes, COURT_ZONES, fromPicture, goalsWithoutSpot, halfToCourt, nineAt, spotCounts, toPicture, ZONE_AREA, ZONE_LABEL_AT, ZONE_LABEL_SIDE, zoneAtHalf, zoneAtPicture } from "./shot-spot";
 import { threeThings } from "./three-things";
 
 /** point in polygon (even-odd) */
@@ -50,6 +50,26 @@ describe("Von wo? on the half court", () => {
     expect(checkMinutes(12, 10)).toBe(8);
     expect(checkMinutes(0, 0, 9)).toBe(1);
     expect(checkMinutes(0, 0, 0)).toBe(1);
+  });
+});
+
+describe("«Von wo?» is offered, not asked (W33)", () => {
+  it("a place given or skipped leads on the same way: never in the way of the next question", () => {
+    expect(afterSpot({}, false)).toBe("next");
+    expect(afterSpot({ fromList: false }, false)).toBe("next");
+    // an answer being changed: back to where the round stands
+    expect(afterSpot({}, true)).toBe("back");
+    // «Wurfort ändern» from the list of answers only closes the court
+    expect(afterSpot({ fromList: true }, false)).toBe("close");
+    expect(afterSpot({ fromList: true }, true)).toBe("close");
+  });
+
+  it("skipped places stay honest: missing, offered later, and the goals with a place still make their thing", () => {
+    const g = graphics([goal("a", "opp", "rl"), goal("b", "opp", "rl"), goal("c", "opp", "rl"), goal("d", "opp", null), goal("e", "opp", null)]);
+    expect(spotCounts(g)).toEqual({ placed: 3, missing: 2, total: 5 });
+    expect(goalsWithoutSpot(g).map((x) => x.event_id)).toEqual(["d", "e"]);
+    // the base is what is known: 3 of the 3 goals with a place, never a guess for the other two
+    expect(threeThings(goalRuns(g)).map((x) => [x.key, x.zone, x.value, x.of])).toEqual([["conceded_zone", "rl", 3, 3]]);
   });
 });
 

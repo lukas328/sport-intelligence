@@ -3753,7 +3753,7 @@
     "more": "Si tu veux: {n, plural, one {1 question de plus} other {# questions de plus}}",
     "reloading": "Le terrain est repris et la vidéo réanalysée avec lui. Cela prend quelques minutes. Tu peux fermer la page ; les nouvelles questions seront ici ensuite.",
     "mainDone": "Les moments les plus importants sont vérifiés.",
-    "mainDoneText": "{n, plural, one {1 autre moment pourrait être un but.} other {# autres moments pourraient être des buts.}} {batch, plural, one {Il prend} other {Les # prochains prennent}} environ {minutes, plural, one {1 minute} other {# minutes}} avec « D'où? ».",
+    "mainDoneText": "{n, plural, one {1 autre moment pourrait être un but.} other {# autres moments pourraient être des buts.}} {batch, plural, one {Il prend} other {Les # prochains prennent}} environ {minutes, plural, one {1 minute} other {# minutes}}.",
     "goOn": "Vérifier plus",
     "roundDone": "Vérifié pour aujourd'hui.",
     "leftOpen": "{n, plural, one {1 moment reste ouvert.} other {# moments restent ouverts.}} Tant qu'ils ne sont pas répondus, le score est provisoire.",
@@ -4128,6 +4128,8 @@
   "spot": {
     "question": "D'où?",
     "why": "Touche l'endroit du tir.",
+    "whyOptional": "Si tu veux : touche l'endroit du tir. C'est de là que viennent les trois points.",
+    "skip": "Passer",
     "courtLabel": "Demi-terrain attaqué, but en haut. Gauche et droite vues par l'attaque.",
     "zone": {
       "la": "Aile gauche",

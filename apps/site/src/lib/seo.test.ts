@@ -37,7 +37,11 @@ describe("search engines", () => {
     const txt = llmsTxt();
     expect(txt.startsWith("# Handball Intelligence\n")).toBe(true);
     expect(txt).toContain("## Das machst du");
-    expect(txt).toContain("Die vorgeschlagenen Tore prüfen und bestätigen");
+    // the effort as it is (W33): a few questions, the court once per hall, the throw spot if you like
+    expect(txt).toContain("Ein paar Fragen beantworten, wo die Analyse unsicher ist: höchstens zehn pro Spiel");
+    expect(txt).toContain("pro Halle und Kameraplatz nur einmal");
+    expect(txt).toContain("Wenn du magst, nach einem Tor antippen, von wo geworfen wurde.");
+    expect(txt).not.toMatch(/Tor für Tor|bei jedem Tor|freiwilligen Fragen/);
     expect(txt).toMatch(/Team: CHF \d+ im Monat/);
     expect(txt).not.toMatch(/noch nicht|vorgesehen|geschätzt|vor dem öffentlichen Start/i);
     expect(llmsFullTxt().length).toBeGreaterThan(txt.length);
