@@ -12,7 +12,9 @@
     "assignments": "Aufgaben",
     "drills": "Übungen",
     "consents": "Einwilligungen",
-    "feed": "Meine Szenen"
+    "feed": "Meine Szenen",
+    "toWebsite": "Zur Website",
+    "toWebsiteLabel": "Handball Intelligence, zur Website"
   },
   "home": {
     "cta": "Jetzt starten",
