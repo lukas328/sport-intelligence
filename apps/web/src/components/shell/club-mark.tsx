@@ -10,7 +10,7 @@ export function initialsOf(name: string): string {
     .join("");
 }
 
-/** Short name on the crest: "HC Zürichsee" becomes HCZ, "Handball Lärchenwil" HL. */
+/** Short name on the crest: "HC Tannengrün" becomes HCT, "Handball Lärchenwil" HL. */
 export function crestText(name: string): string {
   const m = /^(HC|TV|TSV|SG|HSG|HV|SC|BSV|TSG|KTV|STV|LC)\s+(.*)$/i.exec(name.trim());
   if (m) return (m[1]!.toUpperCase() + initialsOf(m[2]!).slice(0, 1)).slice(0, 4);

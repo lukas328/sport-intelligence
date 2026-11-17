@@ -12,7 +12,9 @@
     "assignments": "Aufgaben",
     "drills": "Übungen",
     "consents": "Einwilligungen",
-    "feed": "Meine Szenen"
+    "feed": "Meine Szenen",
+    "toWebsite": "Zur Website",
+    "toWebsiteLabel": "Handball Intelligence, zur Website"
   },
   "home": {
     "cta": "Jetzt starten",
@@ -3137,7 +3139,7 @@
     "title": "Team suchen",
     "intro": "Such dein Team in den offiziellen Daten von handball.ch. Spiele, Resultate und Spieler kommen gleich mit.",
     "label": "Team oder Verein",
-    "placeholder": "z. B. Bergtal",
+    "placeholder": "z. B. Talvenau",
     "hint": "Mindestens drei Buchstaben.",
     "results": "Gefundene Teams",
     "noHits": "Kein Team gefunden für «{q}».",
@@ -4050,7 +4052,7 @@
   "entry": {
     "ask": "Wie heisst dein Team?",
     "label": "Team oder Ort",
-    "placeholder": "z. B. Seewald",
+    "placeholder": "z. B. Brimmwil",
     "search": "Suchen",
     "short": "Mindestens drei Buchstaben.",
     "none": "Kein Team gefunden für «{q}».",

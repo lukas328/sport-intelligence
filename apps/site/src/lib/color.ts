@@ -67,7 +67,7 @@ export const OPPONENT_UNKNOWN = "#646b73";
 export const OPPONENT_UNKNOWN_ON_BLACK = "#8b9198";
 export const DEFAULT_CLUB = "#1f4fd6";
 /**
- * The invented demo club (HC Zürichsee, scripts/seed.py) and so the website's own colour: a deep
+ * The invented demo club (HC Tannengrün, scripts/seed.py) and so the website's own colour: a deep
  * pine green with white. White on it 6.8:1, as text on the cloth 5.6:1, on the dark court 2.9:1,
  * so the app shows it unchanged everywhere (BEFUNDE-2 S11).
  */
@@ -100,7 +100,7 @@ export const SHIRTS = [
   ["purple", "#5b2d8e"],
 ] as const;
 
-/** The opponent the check colours are shown against (the demo season's TSV Seewald): black and white. */
+/** The opponent the check colours are shown against (the demo season's TSV Nachtwind): black and white. */
 export const CHECK_OPPONENT = ["#17191c", "#ffffff"] as const;
 
 /** Shifts `c` towards `to` until it reaches `need` contrast on `ground`. */

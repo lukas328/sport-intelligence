@@ -40,14 +40,14 @@ test("no horizontal scrolling on phones", async ({ page }, info) => {
 test("large text at 300 px: the team name in the top bar stays readable (UX test A01)", async ({ page }, info) => {
   test.skip(info.project.name !== "chromium", "runs once");
   await register(page, uniqueEmail("a01"), "Coach Gross");
-  await clubByHand(page, "HC Lindmatt");
-  await page.getByLabel("Teamname").fill("SG Lindmatt/Uferweg");
+  await clubByHand(page, "HC Sorwil");
+  await page.getByLabel("Teamname").fill("SG Sorwil/Murnwil");
   await page.getByRole("button", { name: "Zum Team" }).click();
   await page.waitForURL(/\/teams\/[^/]+/);
   await page.setViewportSize({ width: 300, height: 700 });
   await page.reload();
   const bar = page.locator("[data-frame=top] .lg\\:hidden");
-  const name = bar.getByText(/SG Lindmatt/);
+  const name = bar.getByText(/SG Sorwil/);
   await expect(name).toBeVisible();
   // the name has room: at least two words in a line, at most two lines
   const box = (await name.boundingBox())!;

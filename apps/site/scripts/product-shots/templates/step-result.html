@@ -1,17 +1,19 @@
 <!doctype html>
-<!-- Step «Anschauen und teilen»: the first of the three things cut flat out of the phone (S11: the
-     steps in one look, no device, no Keil), «9 von 18 Gegentore über aussen rechts» with the shots
-     on the half court, ringed. -->
+<!-- Step «Anschauen und teilen» (L9, L11): the phone in front of the hall with the first of the
+     three things of the website's match, «11 von 29 Gegentore über aussen rechts», the runs on the
+     half court and the shots ringed. -->
 <meta charset="utf-8" />
 <link rel="stylesheet" href="../stage.css" />
-<div id="stage"></div>
+<div id="stage"><div class="keil" style="--from: 88%; --to: 70%"></div></div>
 <script src="../stage.js"></script>
 <script>
-  S.stage(640, 620, { paper: true });
+  S.stage(640, 760);
+  document.getElementById("stage").classList.add("hall");
   const thing = S.rect("dinge-phone", "thing", [16, 290, 358, 110]);
   const dots = S.rect("dinge-phone", "dots", [325, 482, 42, 46]);
-  // from just above «1 von 3» down through the half court
-  const s = S.piece("dinge-phone", [6, thing[1] - 14, 378, 366], { left: 0, top: 0, width: 640 });
-  S.ring(s, dots, 9, true);
+  // the screen from just above «1 von 3»
+  const c = S.cap("dinge-phone");
+  const s = S.phone("dinge-phone", { left: 117, width: 380, crop: [0, thing[1] - 22, c.w, c.h - thing[1] + 22], top: 40 });
+  S.ring(s, dots, 8, true);
   S.done();
 </script>

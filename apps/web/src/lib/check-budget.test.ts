@@ -49,19 +49,19 @@ describe("the count of Prüfen is the budget only (second round A6)", () => {
 
 describe("a second file of another game (second round A5)", () => {
   it("reads team words from file names", () => {
-    expect(nameWords("DE_3Liga_HSGMoorfeld_vs_TSVHeidweiler.mp4")).toEqual(["hsg", "moorfeld", "tsv", "heidweiler"]);
+    expect(nameWords("DE_3Liga_HSGMoorfeld_vs_TSVTessbach.mp4")).toEqual(["hsg", "moorfeld", "tsv", "tessbach"]);
     expect(nameWords("GX010123.MP4")).toEqual([]);
-    expect(nameDate("Felsegg_2026-11-15_HZ1.mp4")).toBe("20261115");
+    expect(nameDate("Kalvenegg_2026-11-15_HZ1.mp4")).toBe("20261115");
     expect(nameDate("Spiel 15.11.2026.mov")).toBe("20261115");
     expect(nameDate("GX010123.MP4")).toBeNull();
   });
 
   it("warns when the names name other teams or another day, never for camera names or halves", () => {
-    expect(otherGame("DE_3Liga_HSGMoorfeld_TSVHeidweiler.mp4", ["CH_NLB_SGFelsegg_Kornau.mp4"])).toBe("CH_NLB_SGFelsegg_Kornau.mp4");
-    expect(otherGame("Felsegg Kornau 2. Halbzeit.mp4", ["Felsegg Kornau 1. Halbzeit.mp4"])).toBeNull();
+    expect(otherGame("DE_3Liga_HSGMoorfeld_TSVTessbach.mp4", ["CH_NLB_SGKalvenegg_Zwirnau.mp4"])).toBe("CH_NLB_SGKalvenegg_Zwirnau.mp4");
+    expect(otherGame("Kalvenegg Zwirnau 2. Halbzeit.mp4", ["Kalvenegg Zwirnau 1. Halbzeit.mp4"])).toBeNull();
     expect(otherGame("GX020123.MP4", ["GX010123.MP4"])).toBeNull();
-    expect(otherGame("Felsegg_2026-11-15.mp4", ["Felsegg_2026-11-08.mp4"])).toBe("Felsegg_2026-11-08.mp4");
+    expect(otherGame("Kalvenegg_2026-11-15.mp4", ["Kalvenegg_2026-11-08.mp4"])).toBe("Kalvenegg_2026-11-08.mp4");
     expect(otherGame("spiel.mp4", [])).toBeNull();
-    expect(otherGame("Moorfeld Heidweiler.mp4", ["IMG_4411.MOV"])).toBeNull();
+    expect(otherGame("Moorfeld Tessbach.mp4", ["IMG_4411.MOV"])).toBeNull();
   });
 });

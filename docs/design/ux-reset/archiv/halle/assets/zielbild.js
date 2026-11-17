@@ -29,12 +29,12 @@
     var role = app.dataset.role, on = app.dataset.on, bare = app.dataset.bare;
     if (!role || bare) return;
     var items = NAV[role], who = WHO[role];
-    var rail = '<nav class="rail"><div class="club"><span class="crest">HCZ</span><div><b>HC Zürichsee</b><small>' + (app.dataset.team || "Herren 1 · 3. Liga") + "</small></div></div>";
+    var rail = '<nav class="rail"><div class="club"><span class="crest">HCT</span><div><b>HC Tannengrün</b><small>' + (app.dataset.team || "Herren 1 · 3. Liga") + "</small></div></div>";
     rail += '<span class="btn up">' + icon("plus") + "Video hochladen</span>";
     items.forEach(function (i) { rail += '<span class="item' + (i[0] === on ? " on" : "") + '">' + icon(i[0]) + i[1] + "</span>"; });
     rail += '<div class="foot"><span class="item">' + icon("suche") + "Suchen</span>";
     rail += '<div class="me"><span class="crest" style="clip-path:none;border-radius:50%;width:30px;height:30px;padding:0;background:var(--ink);color:var(--paper)">' + who[0] + "</span>" + who[1] + "</div></div></nav>";
-    var top = '<header class="topbar"><span class="crest">HCZ</span><span class="team">' + (app.dataset.teamShort || "Herren 1") + "<small>HC Zürichsee</small></span>";
+    var top = '<header class="topbar"><span class="crest">HCT</span><span class="team">' + (app.dataset.teamShort || "Herren 1") + "<small>HC Tannengrün</small></span>";
     top += '<span class="sq line" title="Suchen">' + icon("suche") + '</span><span class="sq" title="Video hochladen">' + icon("plus") + "</span>";
     top += "</header>";
     var bar = '<nav class="tabbar">';

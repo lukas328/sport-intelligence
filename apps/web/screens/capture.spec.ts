@@ -51,7 +51,7 @@ test("screens", async ({ page, browser }, info) => {
   await page.route("**/v1/official/teams?*", (r) => r.fulfill(json(fx.searchHits)));
   await register(page, uniqueEmail("atlas"), "Sandra Trainerin");
   await snap(page, E, "onboarding-mannschaft-suchen");
-  await page.getByLabel("Team oder Verein").fill("Seeblick");
+  await page.getByLabel("Team oder Verein").fill("Brimmwil");
   await expect(page.getByTestId("official-team").first()).toBeVisible();
   await snap(page, E, "onboarding-suchergebnis");
   // step 2 «Das seid ihr, oder?» after taking a team over (answers recorded, invented names)
@@ -66,15 +66,15 @@ test("screens", async ({ page, browser }, info) => {
       r.fulfill(json([{ id: "00000000-0000-4000-8000-00000000a001", team_id: fx.CLAIMED_TEAM, kind: "match", kickoff_at: "2026-11-07T17:00:00Z", opponent_name: "TSV Farnwil", is_home: true, score_own: 26, score_opponent: 18, status: "finished", has_video: false, is_demo: false, competition: null }])),
     );
     await go(p2, "/onboarding");
-    await p2.getByLabel("Team oder Verein").fill("Seeblick");
-    await p2.getByTestId("official-team").filter({ hasText: "HC Seeblick Herren 1" }).getByTestId("claim").click();
+    await p2.getByLabel("Team oder Verein").fill("Brimmwil");
+    await p2.getByTestId("official-team").filter({ hasText: "HC Brimmwil Herren 1" }).getByTestId("claim").click();
     await expect(p2.getByTestId("claim-done")).toContainText("Timo Brunner");
     await snap(p2, E, "onboarding-das-seid-ihr");
     await p2.close();
   }
   await page.getByTestId("manual-club").click();
   await snap(page, E, "onboarding-verein-von-hand");
-  await page.getByLabel("Vereinsname").fill("HC Seeblick");
+  await page.getByLabel("Vereinsname").fill("HC Brimmwil");
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await expect(page.getByLabel("Teamname")).toBeVisible();
   await snap(page, E, "onboarding-team");

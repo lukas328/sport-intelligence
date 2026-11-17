@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Any
 
 from handball_court.geometry import COURT, distance_to_attacked_goal
+from handball_court.zones import spec as zone_spec
 from handball_metrics.model import Event, EventType, Side
 from handball_metrics.stats import compute_match_stats
 from handball_metrics.xg import expected_goal
@@ -60,22 +61,42 @@ def outside_goal_area(x: float, y: float) -> tuple[float, float]:
     return nx, ny
 
 
-# The story of the start page (docs/ux-test/livegang/BEFUNDE-2.md, W22, W29): a Saturday home game,
-# lost 16:18, and the opponent scored 9 of its 18 goals over the right wing. The plan fixes what the
-# story needs (score, half-time, goals by position); the seeded generator places the shots, the
-# times, the misses and the numbers. With the app's rule for the three things
-# (apps/web/src/lib/three-things.ts) the match gives all three kinds: 9 of 18 conceded over the
-# right wing, 4 conceded after fast breaks, 6 of 16 own goals from the pivot.
+# The story of the start page (docs/ux-test/livegang/BEFUNDE-2.md, W22, W29, L7): a Saturday home
+# game, lost 27:29 (13:15 at half-time), and the opponent scored 11 of its 29 goals over the right
+# wing. The plan fixes what the story needs (score, half-time, goals by position); the seeded
+# generator places the shots, the times, the misses and the numbers. With the app's rule for the
+# three things (apps/web/src/lib/three-things.ts) the match gives all three kinds: 11 of 29 conceded
+# over the right wing, 5 conceded after fast breaks, 9 of 27 own goals from the pivot.
 SEED = 2100
+# the invented demo club and its opponent, as in scripts/seed.py (no real place in a name)
+OWN = "HC Tannengrün"
+OPPONENT = "TSV Nachtwind"
 # goals per half by kind: (own, opponent); the opponent's wing goals all come from its right wing
 PLAN: dict[int, dict[str, tuple[int, int]]] = {
-    1: {"wing": (2, 4), "back": (2, 1), "pivot": (3, 1), "fast_break": (1, 2), "penalty": (1, 0)},
-    2: {"wing": (1, 5), "back": (2, 1), "pivot": (3, 1), "fast_break": (0, 2), "penalty": (1, 1)},
+    1: {"wing": (3, 5), "back": (4, 4), "pivot": (4, 1), "fast_break": (1, 3), "penalty": (1, 2)},
+    2: {"wing": (2, 6), "back": (4, 3), "pivot": (5, 2), "fast_break": (2, 2), "penalty": (1, 1)},
 }
 # shots that did not go in, per half: (own, opponent)
-MISSES = {1: (8, 7), 2: (10, 8)}
-# the opponent's right wing: mostly number 7, three times the substitute 22
-RIGHT_WING = [7, 7, 22, 7, 7, 7, 22, 7, 22]
+MISSES = {1: (12, 10), 2: (13, 11)}
+# the opponent's right wing: mostly number 7, four times the substitute 22
+RIGHT_WING = [7, 7, 22, 7, 7, 7, 22, 7, 22, 7, 22]
+
+
+# a pivot shot is taken from the circle band just outside the goal area (packages/court zones:
+# at most circle_max_m from the goal), so the app counts it «vom Kreis» from its spot alone
+CIRCLE_SHOT_DISTANCE = (MIN_SHOT_DISTANCE + zone_spec()["circle_max_m"]) / 2
+
+
+def in_circle_band(x: float, y: float) -> tuple[float, float]:
+    """Pull a spot straight towards the goal until it is CIRCLE_SHOT_DISTANCE away (if farther)."""
+    d = distance_to_attacked_goal(x, y)
+    if d <= CIRCLE_SHOT_DISTANCE:
+        return x, y
+    half = COURT.goal_width / 2
+    cy = COURT.width / 2
+    gx, gy = COURT.length, min(max(y, cy - half), cy + half)
+    k = CIRCLE_SHOT_DISTANCE / d
+    return round(gx + (x - gx) * k, 1), round(gy + (y - gy) * k, 1)
 
 
 def spot(rnd: random.Random, kind: str, side: Side) -> tuple[float, float]:
@@ -86,13 +107,49 @@ def spot(rnd: random.Random, kind: str, side: Side) -> tuple[float, float]:
     bx, by = rnd.choice(choices)
     x = round(bx + rnd.uniform(-1, 1), 1)
     y = round(min(19.5, max(0.5, by + rnd.uniform(-1.2, 1.2))), 1)
-    return outside_goal_area(x, y)
+    x, y = outside_goal_area(x, y)
+    return in_circle_band(x, y) if kind == "pivot" else (x, y)
+
+
+# Our shooters are the seeded squad of Herren 1 (scripts/seed.py SQUAD), by position and only
+# players with a consent for video analysis, so the app's demo club shows the same numbers.
+OWN_NUMBERS = {
+    "pivot": [11, 22, 11],
+    "wing_left": [3, 21],
+    "wing_right": [5],
+    "back_left": [7, 17],
+    "back_centre": [9],
+    "back_right": [10, 25],
+    "fast_break": [5, 3, 21],
+    "penalty": [10, 7],
+}
+
+
+def own_number(kind: str, y: float, used: dict[str, int]) -> int:
+    """The next shooter of our team for a kind of shot at width y (left is y > 10)."""
+    if kind == "wing":
+        kind = "wing_left" if y > COURT.width / 2 else "wing_right"
+    elif kind == "back":
+        kind = "back_left" if y > 13 else "back_right" if y < 7 else "back_centre"
+    numbers = OWN_NUMBERS[kind]
+    n = used.get(kind, 0)
+    used[kind] = n + 1
+    return numbers[n % len(numbers)]
+
+
+def even_out(raw: list[float], start: float) -> list[float]:
+    """Shot times of a half, drawn at random but closer to an even pace: pure chance put seven goals
+    into the first four minutes, which no coach believes. The order (and so every count) stays."""
+    n = len(raw)
+    even = [start + 90 + (k + 0.5) * 1690 / n for k in range(n)]
+    return [0.3 * r + 0.7 * e for r, e in zip(raw, even, strict=True)]
 
 
 def build(seed: int = SEED) -> dict[str, Any]:
     rnd = random.Random(seed)  # noqa: S311 (seeded demo data, not security)
     events: list[Event] = []
     wing_numbers = iter(RIGHT_WING)
+    shooters: dict[str, int] = {}
     for period in (1, 2):
         shots: list[tuple[Side, str, bool]] = []
         for kind, (own, opp) in PLAN[period].items():
@@ -102,12 +159,14 @@ def build(seed: int = SEED) -> dict[str, Any]:
             shots += [(side, kind, False) for kind in kinds]
         rnd.shuffle(shots)
         start = (period - 1) * 1800.0
-        clocks = sorted(rnd.uniform(start + 20, start + 1790) for _ in shots)
+        clocks = even_out(sorted(rnd.uniform(start + 20, start + 1790) for _ in shots), start)
         for clock, (side, kind, goal) in zip(clocks, shots, strict=True):
             x, y = spot(rnd, kind, side)
             number = rnd.choice([3, 5, 9, 11, 14, 18])
             if goal and side == Side.OPPONENT and kind == "wing":
                 number = next(wing_numbers)
+            if side == Side.OWN:
+                number = own_number(kind, y, shooters)
             outcome = "goal" if goal else rnd.choice(["save", "save", "miss", "blocked", "post"])
             events.append(
                 Event(
@@ -145,8 +204,8 @@ def build(seed: int = SEED) -> dict[str, Any]:
     ]
     return {
         "fictional": True,
-        "own": "HC Beispiel",
-        "opponent": "TV Muster",
+        "own": OWN,
+        "opponent": OPPONENT,
         "events": out_events,
         "stats": {k: stats[k] for k in ("own", "opponent", "timeline", "versions")},
     }

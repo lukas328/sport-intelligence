@@ -93,7 +93,7 @@ export const DEMO_GOALS = {
 };
 
 /**
- * The demo match of SPEC.md section 10: HC Zürichsee against TSV Seewald 26:18 (13:9), with the
+ * The demo match of SPEC.md section 10: HC Tannengrün against TSV Nachtwind 26:18 (13:9), with the
  * goal sequence of the report (Torfolge 2:1, 5:4, 9:6, 13:9; 15:12, 17:15, 21:16, 26:18).
  */
 export const DEMO_RESULT = { own: 26, opp: 18, halftime: [13, 9] } as const;
@@ -167,7 +167,7 @@ export const DEMO_SCENE_RA: CameraScene = {
   shot: [3.9, 2.9],
   aim: [0.15, 8.9],
   confirmed: true,
-  label: "Tor Seewald 39:55",
+  label: "Tor Nachtwind 39:55",
 };
 
 /** Our goal from the circle, 18:02: here the ball was not found in the picture. */
@@ -200,17 +200,17 @@ export const DEMO_SCENE_KR: CameraScene = {
   shot: [5.9, 9.9],
   aim: [0.15, 9.4],
   confirmed: false,
-  label: "Tor Zürichsee 18:02",
+  label: "Tor Tannengrün 18:02",
 };
 
 export const DEMO_SEASON = {
   diff: [
-    { label: "Rebhalden", diff: 5 },
-    { label: "Lindmatt", diff: -3 },
-    { label: "Uferweg", diff: 10 },
-    { label: "Rebberg", diff: 1 },
-    { label: "Bergtal", diff: -7 },
-    { label: "Seewald", diff: 8 },
+    { label: "Rotdorn", diff: 5 },
+    { label: "Silberpfeil", diff: -3 },
+    { label: "Blitzfang", diff: 10 },
+    { label: "Glutwind", diff: 1 },
+    { label: "Wirbelstern", diff: -7 },
+    { label: "Nachtwind", diff: 8 },
   ],
   themes: [
     { title: "Gegentore über rechts aussen", series: [5, 5, 9], team: "opp" as const },

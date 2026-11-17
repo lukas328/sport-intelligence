@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { CSSProperties } from "react";
-import { HallPlan } from "@/components/hall-plan";
+import { AppTour } from "@/components/app-tour";
 import { ProductShot } from "@/components/product-shot";
 import { Reveal } from "@/components/reveal";
 import { Honest } from "@/components/honest";
@@ -10,7 +10,6 @@ import { JsonLd } from "@/components/json-ld";
 import { PageHead, SectionHead, Updated } from "@/components/wurf-head";
 import { graph, howTo } from "@/lib/schema";
 import { APP_LOCALE, messages, type Locale } from "@/lib/i18n";
-import type { Messages } from "@/messages/de";
 import { pageMeta } from "@/lib/seo";
 
 type Props = { params: Promise<{ locale: Locale }> };
@@ -19,15 +18,13 @@ type Props = { params: Promise<{ locale: Locale }> };
  * Product pictures (public/product, scripts/product-shots): one per step after filming, and under
  * «So sieht es in der App aus» the same pictures as on the start page plus sharing.
  */
-const STEPS = ["step-upload", "step-check", "step-result"] as const;
+const STEPS = ["step-film", "step-upload", "step-check", "step-result"] as const;
 const SHOTS = ["get-video", "get-search", "get-season", "share"] as const;
 
-/** K9: each step with a picture from the app (the first with the hall plan: filming happens outside it). */
-function StepPicture({ i, alt, m }: { i: number; alt: string; m: Messages }) {
-  if (i === 0) return <HallPlan label={m.filming.planLabel} camera={m.filming.planCamera} field={m.filming.planField} corner={m.filming.planCorner} />;
-  const name = STEPS[i - 1]!;
-  // flat cut-outs of the app, in one look with the start page's steps (S11); the text says the rest
-  return <ProductShot name={name} alt={alt} labels={{}} sizes="(min-width: 768px) 26rem, calc(100vw - 2rem)" />;
+/** K9, L9, L11: each step with its picture, one style with the start page: the hall, the phone
+ * filming it, then the app in front of the same hall; the text says the rest. */
+function StepPicture({ i, alt }: { i: number; alt: string }) {
+  return <ProductShot name={STEPS[i]!} alt={alt} labels={{}} sizes="(min-width: 768px) 26rem, calc(100vw - 2rem)" />;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -77,7 +74,7 @@ export default async function How({ params }: Props) {
                 )}
               </div>
               <div data-reveal style={{ "--d": 1 } as CSSProperties} className="col-span-2 mt-6 md:col-span-1 md:mt-0">
-                <StepPicture i={i} alt={s.alt} m={m} />
+                <StepPicture i={i} alt={s.alt} />
               </div>
             </li>
           ))}
@@ -85,22 +82,18 @@ export default async function How({ params }: Props) {
 
         <section aria-labelledby="shots" className="mt-16">
           <SectionHead id="shots" title={t.shotsTitle} note={t.shotsNote} />
-          <ul className="mt-8 grid grid-cols-1 gap-10 md:grid-cols-2">
-            {t.shots.map((s, i) => {
-              const name = SHOTS[i]!;
-              return (
-                <li key={name} data-reveal style={{ "--d": i % 2 } as CSSProperties}>
-                  <ProductShot
-                    name={name}
-                    alt={s.alt}
-                    labels={m.product[name]}
-                    caption={s.caption}
-                    sizes="(min-width: 1216px) 540px, (min-width: 768px) 45vw, calc(100vw - 2rem)"
-                  />
-                </li>
-              );
-            })}
-          </ul>
+          {/* one story with the four pictures (L13): the picture stays, the steps pass by */}
+          <AppTour
+            label={t.tourLabel}
+            items={t.shots.map((s, i) => ({
+              name: SHOTS[i]!,
+              alt: s.alt,
+              caption: s.caption,
+              text: s.text,
+              labels: m.product[SHOTS[i]!],
+              lettering: SHOTS[i] === "get-video" ? m.home.film.video : undefined,
+            }))}
+          />
         </section>
 
         <section aria-labelledby="kann" className="mt-20">

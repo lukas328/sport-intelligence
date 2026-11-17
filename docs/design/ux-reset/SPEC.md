@@ -189,7 +189,7 @@ screen carries is fixed in `ANLAUF.md` section 3.
 
 - **Seitenkopf** ("152 Szenen aus drei Spielen."), then the search field as the page: filters
   and questions; recognised filters as chips, offered ones dashed; the answer as a numeral with
-  its base ("19 von 66 Gegentoren über rechts aussen", "29 Prozent. Gegen Thalwil waren es 9 von
+  its base ("19 von 66 Gegentoren über rechts aussen", "29 Prozent. Gegen Nachtwind waren es 9 von
   18."); "Alle 19 abspielen", "In eine Sammlung", "Als Tabelle".
 - Scene tiles: the run of that goal on a Minifeld, time, match, what was read ("Nummer 5
   gelesen", "Wurfposition geschätzt"), length.
@@ -308,7 +308,9 @@ Apply in `apps/web/messages/*.json`, the mobile app and e-mails.
 `scripts/seed.py` must produce a club that shows the product: three matches with video and three
 things each, two more with a match report only, 30 or more scenes per analysed match, shot map
 and zones, a confirmed squad with numbers, two season themes, one collection. Plausible, uneven
-numbers and regional names. No figure that is a dash, and no zero presented as a best value.
+numbers and invented names (no real place in a club, hall or person name). No figure that is a
+dash, and no zero presented as a best value. The last analysed match is the website's demo match
+(`apps/site/public/demo/match.json`), so the app and the website tell one story.
 
 ## 11. Accessibility and performance
 

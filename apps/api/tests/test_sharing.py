@@ -268,7 +268,7 @@ async def test_preview_tells_the_chat_what_it_is(make_api: Callable[[], Api]) ->
     org, team = ids["org"], ids["team"]
     o = f"/v1/orgs/{org}"
     base = f"{o}/teams/{team}/share-links"
-    m = await new_match(api, ids, opponent_name="SG Felsegg")
+    m = await new_match(api, ids, opponent_name="SG Kalvenegg")
     patched = await api.patch(
         f"{o}/matches/{m['id']}", json={"score_own": 28, "score_opponent": 24}
     )
@@ -287,7 +287,7 @@ async def test_preview_tells_the_chat_what_it_is(make_api: Callable[[], Api]) ->
     match_link = (await api.post(base, json={"kind": "match", "target_id": m["id"]})).json()
     anon = make_api()
     pv = (await anon.get(f"/v1/share/{match_link['token']}/preview")).json()
-    assert (pv["opponent"], pv["score"], pv["is_home"]) == ("SG Felsegg", [28, 24], True)
+    assert (pv["opponent"], pv["score"], pv["is_home"]) == ("SG Kalvenegg", [28, 24], True)
     assert pv["goals"] == [{"team": "own", "zone": "gs", "minute": 23.0}]
     assert "number" not in str(pv) and "player" not in str(pv)
 
@@ -311,7 +311,7 @@ async def test_preview_tells_the_chat_what_it_is(make_api: Callable[[], Api]) ->
     scene_link = (await api.post(base, json={"kind": "scene", "target_id": clip["id"]})).json()
     sp = (await anon.get(f"/v1/share/{scene_link['token']}/preview")).json()
     # a scene from one match carries that match; without a goal behind it, no minute
-    assert (sp["opponent"], sp["score"], sp["goal"]) == ("SG Felsegg", [28, 24], None)
+    assert (sp["opponent"], sp["score"], sp["goal"]) == ("SG Kalvenegg", [28, 24], None)
     # the preview does not count as an opening
     listing = {x["kind"]: x["views"] for x in (await api.get(base)).json()}
     assert listing == {"match": 0, "play": 0, "scene": 0}

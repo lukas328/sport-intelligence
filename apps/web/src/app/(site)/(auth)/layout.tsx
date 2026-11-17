@@ -1,6 +1,6 @@
 import { getLocale, getTranslations } from "next-intl/server";
 import { serverApi } from "@/lib/api";
-import { sitePage } from "@/lib/site";
+import { DEFAULT_SITE_URL, sitePage } from "@/lib/site";
 import type { ReactNode } from "react";
 import { LanguageSwitch } from "@/components/language-switch";
 
@@ -10,7 +10,8 @@ export default async function AuthLayout({ children }: { children: ReactNode }) 
   const ta = await getTranslations("auth");
   const locale = await getLocale();
   // the website's address from the configuration, with its language path (UX test N06)
-  const site = (await (await serverApi()).GET("/v1/public/config")).data?.site_url ?? null;
+  // (and the default when the API does not answer: the way back is always there, L5)
+  const site = (await (await serverApi()).GET("/v1/public/config")).data?.site_url || DEFAULT_SITE_URL;
   return (
     <div className="mx-auto grid w-full max-w-5xl gap-6 lg:grid-cols-[1.05fr_1fr] lg:gap-10">
       <section className="px-1 pt-2 pb-4 lg:self-center lg:pt-10">
@@ -20,11 +21,9 @@ export default async function AuthLayout({ children }: { children: ReactNode }) 
           <span className="sr-only">{t("name")}: </span>
           {ta("claim")}
         </p>
-        {site && (
-          <a href={sitePage(site, locale)} className="mt-4 inline-flex min-h-11 items-center text-[17px] font-bold text-ink underline decoration-[1.5px] underline-offset-4">
-            {ta("toSite", { site: site.replace(/^https?:\/\//, "") })}
-          </a>
-        )}
+        <a href={sitePage(site, locale)} className="mt-4 inline-flex min-h-11 items-center text-[17px] font-bold text-ink underline decoration-[1.5px] underline-offset-4">
+          {ta("toSite", { site: site.replace(/^https?:\/\//, "") })}
+        </a>
         {/* the Keil right under the claim and its link, never loose at the foot (UX test B46) */}
         <span aria-hidden data-keil="" className="mt-6 block h-3.5 bg-club shadow-[inset_0_0_0_1.5px_var(--club-edge)] [clip-path:polygon(0_0,100%_78%,100%_100%,0_100%)] md:h-[22px]" />
       </section>

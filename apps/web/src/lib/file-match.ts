@@ -1,6 +1,6 @@
 /**
  * Does a second file belong to the same match (second round A5)? Two different games ended up in
- * one match (Felsegg and Moorfeld). Several files per match are wanted (halves, a split
+ * one match (Kalvenegg and Moorfeld). Several files per match are wanted (halves, a split
  * recording), so this only warns: when the file names name different teams, or different dates.
  */
 

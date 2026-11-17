@@ -14,11 +14,11 @@ const NAV = ["Spiele", "Szenen", "Saison", "Team"];
 
 /* ---------- frame ---------- */
 function topD(on) {
-  return `<header class="top"><span class="club d"><span class="crest">HCZ</span>HC Zürichsee</span>
+  return `<header class="top"><span class="club d"><span class="crest">HCT</span>HC Tannengrün</span>
     <nav class="nav" aria-label="Hauptnavigation">${NAV.map(n => `<a href="#"${n === on ? ' aria-current="page"' : ""}>${n}</a>`).join("")}</nav>
     <div class="right"><a class="lnk" href="#">Suchen</a><a class="btn" href="#">Video hochladen</a></div></header>`;
 }
-function topP() { return `<header class="ptop"><span class="club d"><span class="crest">HCZ</span>HC Zürichsee</span><button class="ibtn" aria-label="Suchen">${I.search}</button><button class="ibtn plus" aria-label="Video hochladen">${I.plus}</button></header>`; }
+function topP() { return `<header class="ptop"><span class="club d"><span class="crest">HCT</span>HC Tannengrün</span><button class="ibtn" aria-label="Suchen">${I.search}</button><button class="ibtn plus" aria-label="Video hochladen">${I.plus}</button></header>`; }
 function barP(on) { return `<nav class="tabbar" aria-label="Hauptnavigation">${NAV.map(n => `<a href="#"${n === on ? ' aria-current="page"' : ""}>${n}</a>`).join("")}</nav>`; }
 /* full screen without navigation: Prüfen, Spieltag, the shared page, Einstieg */
 function bareTop(left, right) { return `<header class="ptop" style="padding:0 ${right && right.desk ? 32 : 16}px"><span class="back">${left}</span>${right ? right.html : ""}</header>`; }
@@ -28,19 +28,19 @@ function scoreHTML(a, b) { return `<span class="e e2" aria-hidden="true">${a}:${
 const TITLE = "Gewonnen. Und drei Dinge zum Mitnehmen.";
 function headStart(ph, W, o = {}) {
   const unknown = o.unknown, title = o.title || TITLE;
-  return `<section class="wurf big"${ph && unknown ? ' style="height:460px"' : ""}><div><p class="kick">${o.kick || (ph ? "Sa gegen TSV Thalwil · fertig seit So, 9:40" : "Samstag gegen TSV Thalwil · Analyse fertig seit Sonntag, 9:40")}</p><h1 class="d">${title}</h1></div>
-    <div><div class="score n" role="img" aria-label="26 zu 18">${scoreHTML(26, 18)}</div><p class="names"><span class="d">HC Zürichsee</span><span class="d"><i class="oc"></i>TSV Thalwil${unknown ? ", Farbe offen" : ph ? "" : ", Rang 5"}</span></p>
-    ${unknown ? `<div class="ask">Welche Farbe trägt Thalwil? ${["#17191c", "#ffffff", "#0b7a8a", "#d3202e", "#12804a"].map(c => `<button aria-label="Farbe wählen"><i style="background:${c}"></i></button>`).join("")}</div>` : ""}</div>
+  return `<section class="wurf big"${ph && unknown ? ' style="height:460px"' : ""}><div><p class="kick">${o.kick || (ph ? "Sa gegen TSV Nachtwind · fertig seit So, 9:40" : "Samstag gegen TSV Nachtwind · Analyse fertig seit Sonntag, 9:40")}</p><h1 class="d">${title}</h1></div>
+    <div><div class="score n" role="img" aria-label="26 zu 18">${scoreHTML(26, 18)}</div><p class="names"><span class="d">HC Tannengrün</span><span class="d"><i class="oc"></i>TSV Nachtwind${unknown ? ", Farbe offen" : ph ? "" : ", Rang 5"}</span></p>
+    ${unknown ? `<div class="ask">Welche Farbe trägt Nachtwind? ${["#17191c", "#ffffff", "#0b7a8a", "#d3202e", "#12804a"].map(c => `<button aria-label="Farbe wählen"><i style="background:${c}"></i></button>`).join("")}</div>` : ""}</div>
     <svg class="fl" data-fl data-w="${W}" data-h="${ph ? 84 : 160}" role="img" aria-label="Verlauf der Tordifferenz aus dem Spielbericht: Halbzeit plus 4, Schluss plus 8, von der 38. bis zur 44. Minute minus 5"></svg></section>`;
 }
 function headMatch(ph, W) {
-  return `<section class="wurf big" style="height:${ph ? 360 : 380}px"><div><p class="kick">Samstag, 7. November · Halle Seefeld</p><h1 class="d" style="font-size:${ph ? 28 : 44}px">HC Zürichsee gegen TSV Thalwil</h1><p class="meta">Halbzeit 13:9 · Time-outs 2 und 3 · Rang 5</p></div>
+  return `<section class="wurf big" style="height:${ph ? 360 : 380}px"><div><p class="kick">Samstag, 7. November · Halle Seefeld</p><h1 class="d" style="font-size:${ph ? 28 : 44}px">HC Tannengrün gegen TSV Nachtwind</h1><p class="meta">Halbzeit 13:9 · Time-outs 2 und 3 · Rang 5</p></div>
     <div><div class="score n" role="img" aria-label="26 zu 18"${ph ? ' style="font-size:88px;margin-top:10px"' : ""}>${scoreHTML(26, 18)}</div></div>
     <svg class="fl" data-fl data-w="${W}" data-h="${ph ? 72 : 150}" role="img" aria-label="Verlauf der Tordifferenz aus dem Spielbericht"></svg></section>`;
 }
 function strip(ph, o = {}) {
-  const a = o.a || 26, b = o.b || 18, opp = o.opp || "TSV Thalwil";
-  return `<section class="strip"><p class="nm d">HC Zürichsee<small>${o.sub || (ph ? "gegen " + opp : "gegen " + opp + " · Sa., 7. Nov. · Halle Seefeld")}</small></p><div class="score n" role="img" aria-label="${a} zu ${b}"><span class="e" aria-hidden="true">${a}:${b}</span><span>${a}:<u>${b}</u></span></div></section>`;
+  const a = o.a || 26, b = o.b || 18, opp = o.opp || "TSV Nachtwind";
+  return `<section class="strip"><p class="nm d">HC Tannengrün<small>${o.sub || (ph ? "gegen " + opp : "gegen " + opp + " · Sa., 7. Nov. · Halle Seefeld")}</small></p><div class="score n" role="img" aria-label="${a} zu ${b}"><span class="e" aria-hidden="true">${a}:${b}</span><span>${a}:<u>${b}</u></span></div></section>`;
 }
 /* the page head without a match: kick line, slanted title, the club wedge underneath */
 function kopf(o) { return `<section class="kopf"><p class="kick">${o.kick}</p><h1 class="d">${o.title}</h1>${o.n ? `<p class="side-n"><b class="n">${o.n}</b><span>${o.nl}</span></p>` : ""}${o.acts ? `<div class="acts">${o.acts}</div>` : ""}</section>`; }
@@ -55,7 +55,7 @@ const THINGS = [
   { v: "7", unit: "von 26", p: "Tore vom Kreis", s: "bester Wert der Saison", up: 1, b: "kr", sc: "7 Szenen", t: "2:10" }
 ];
 function stage(o) {
-  return `<div class="stage"${o.style ? ` style="${o.style}"` : ""}><svg data-cam="${o.cam || "ra"}" data-view="${o.view}" data-w="${o.w}" data-r="${o.r}"${o.labels ? " data-labels" : ""} role="img" aria-label="${o.aria || "Taktikkamera 39:49 bis 39:55: Thalwil trifft über rechts aussen"}"></svg>${o.cap || ""}<div class="bar"><button class="pause" aria-pressed="false">Pause</button>${o.mode ? '<div class="mode" role="group" aria-label="Ansicht"><button aria-pressed="false">Video</button><button aria-pressed="true">Taktik</button></div>' : ""}${o.bar ? `<span>${o.bar}</span>` : ""}<span class="clk">${o.clk || "39:55"}</span></div>${o.capBelow || ""}</div>`;
+  return `<div class="stage"${o.style ? ` style="${o.style}"` : ""}><svg data-cam="${o.cam || "ra"}" data-view="${o.view}" data-w="${o.w}" data-r="${o.r}"${o.labels ? " data-labels" : ""} role="img" aria-label="${o.aria || "Taktikkamera 39:49 bis 39:55: Nachtwind trifft über rechts aussen"}"></svg>${o.cap || ""}<div class="bar"><button class="pause" aria-pressed="false">Pause</button>${o.mode ? '<div class="mode" role="group" aria-label="Ansicht"><button aria-pressed="false">Video</button><button aria-pressed="true">Taktik</button></div>' : ""}${o.bar ? `<span>${o.bar}</span>` : ""}<span class="clk">${o.clk || "39:55"}</span></div>${o.capBelow || ""}</div>`;
 }
 function things(ph, o = {}) {
   const W = ph ? 132 : 380;
@@ -69,7 +69,7 @@ function things(ph, o = {}) {
   }).join("")}</ol>`;
 }
 function keyLine() { return '<p class="key"><span><i></i>Anlauf bis zur Wurfposition, von dir bestätigt</span><span><i class="est"></i>geschätzt</span><span>dünner Strich: zum Tor</span></p>'; }
-function camKey(ball = true) { return `<p class="camkey"><span><i class="us"></i>Zürichsee</span><span><i class="them"></i>Thalwil</span><span><i class="ref"></i>Schiri</span>${ball ? '<span><i class="ball"></i>Ball, nur wo erkannt</span>' : ""}<span>Nummer nur, wo sie gelesen wurde</span></p>`; }
+function camKey(ball = true) { return `<p class="camkey"><span><i class="us"></i>Tannengrün</span><span><i class="them"></i>Nachtwind</span><span><i class="ref"></i>Schiri</span>${ball ? '<span><i class="ball"></i>Ball, nur wo erkannt</span>' : ""}<span>Nummer nur, wo sie gelesen wurde</span></p>`; }
 function balls(cam = "ra", ph) {
   const S = CAM[cam], t0 = S.from[0] + ":" + S.from[1], t1 = clock(S, 1);
   return `<div class="balls" data-balls data-cam="${cam}" role="img" aria-label="${S.ball.length ? "Ball erkannt: 39:49 bei der 14, 39:50 bei der 9, ab 39:53 bei der 5; dazwischen nicht erkannt" : "Ball in dieser Szene nicht erkannt"}"></div><p class="ballkey"><span>${t0}</span><span>${ph ? "Ball bei" : "Wer den Ball hat, wo er im Bild erkannt wurde"}</span><span>${t1}</span></p>`;
@@ -77,10 +77,10 @@ function balls(cam = "ra", ph) {
 
 /* ---------- lists ---------- */
 const GAMES = [
-  { d: "31.10.", w: "auswärts", o: "BSV Stäfa", st: "done", r: [19, 26], sub: "2 Dinge · 33 Szenen", b: "staefa", first: "Gegenstösse" },
-  { d: "24.10.", w: "Heim", o: "HC Meilen", st: "run", r: [23, 22], sub: "Analyse läuft, noch etwa 25 Minuten" },
-  { d: "17.10.", w: "auswärts", o: "SG Horgen", st: "none", r: [29, 19] },
-  { d: "10.10.", w: "Heim", o: "TV Wädenswil", st: "none", r: [24, 27] }
+  { d: "31.10.", w: "auswärts", o: "BSV Wirbelstern", st: "done", r: [19, 26], sub: "2 Dinge · 33 Szenen", b: "staefa", first: "Gegenstösse" },
+  { d: "24.10.", w: "Heim", o: "HSG Sturmfalke", st: "run", r: [23, 22], sub: "Analyse läuft, noch etwa 25 Minuten" },
+  { d: "17.10.", w: "auswärts", o: "SG Blitzfang", st: "none", r: [29, 19] },
+  { d: "10.10.", w: "Heim", o: "TV Rotdorn", st: "none", r: [24, 27] }
 ];
 function mini(g, w) {
   if (g.st === "done") return `<span class="mfz"><svg data-b="${g.b}" data-w="${w}" role="img" aria-label="Punkt 1 dieses Spiels: ${g.first}"></svg></span>`;
@@ -95,11 +95,11 @@ function gameList(ph) {
   }).join("");
 }
 function table(rows = 3) {
-  const T = [["1 TV Talwiese", 6, "+21", 10], ["2 HC Zürichsee", 6, "+14", 8, 1], ["3 HSG Rheinau", 6, "+9", 8], ["4 SG Horgen", 6, "+2", 6], ["5 TSV Thalwil", 6, "-4", 5]];
+  const T = [["1 TV Talwiese", 6, "+21", 10], ["2 HC Tannengrün", 6, "+14", 8, 1], ["3 HSG Glutwind", 6, "+9", 8], ["4 SG Blitzfang", 6, "+2", 6], ["5 TSV Nachtwind", 6, "-4", 5]];
   return `<table class="st"><thead><tr><th>Rang</th><th>Sp.</th><th>Diff.</th><th>Pkt.</th></tr></thead><tbody>${T.slice(0, rows).map(r => `<tr${r[4] ? ' class="me"' : ""}><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join("")}</tbody></table>`;
 }
 function sideStart() {
-  return `<aside class="side"><section class="next"><p class="k">Nächster Gegner · So, 17:30</p><h3 class="d">bei HSG Rheinau</h3><div class="mfz" style="width:100%"><svg data-b="rheinau" data-w="340" role="img" aria-label="Hinspiel: 5 Tore aus dem Rückraum links"></svg></div><ul class="facts"><li>Hinspiel 24:27, 5 Tore aus dem Rückraum links</li><li><span>Rang 3, zuletzt drei Siege</span><a class="lnk" href="#">12 Szenen</a></li></ul></section>
+  return `<aside class="side"><section class="next"><p class="k">Nächster Gegner · So, 17:30</p><h3 class="d">bei HSG Glutwind</h3><div class="mfz" style="width:100%"><svg data-b="glutwind" data-w="340" role="img" aria-label="Hinspiel: 5 Tore aus dem Rückraum links"></svg></div><ul class="facts"><li>Hinspiel 24:27, 5 Tore aus dem Rückraum links</li><li><span>Rang 3, zuletzt drei Siege</span><a class="lnk" href="#">12 Szenen</a></li></ul></section>
     <section><div class="hh"><b class="d">Tabelle</b><span>3. Liga, Gruppe 2</span></div>${table(3)}</section></aside>`;
 }
 
@@ -124,8 +124,8 @@ function spielDesk() {
     + '<p class="src"><span>Quellen: Video (60 von 60 Minuten) · Spielbericht von handball.ch · 21 von 24 Toren von dir bestätigt</span><a class="lnk" href="#">Wie gerechnet?</a></p>'
     + things(false, { drill: true }) + keyLine()
     + '<div class="actrow"><a class="btn" href="#">Fürs Team zusammenstellen</a><a class="lnk" href="#">Highlights teilen</a><a class="lnk" href="#">Als Bild für den Chat</a></div>'
-    + `<div class="sp"><div class="col"><section><div class="hh"><b class="d">Punkt 1, geöffnet</b><span>Szene 3 von 9 auf der Taktikkamera</span></div>${stage({ view: "camL", w: 852, r: 11, labels: 1, bar: "Thalwil trifft über rechts aussen" })}${balls("ra")}${camKey()}</section>
-      <section><div class="hh"><b class="d">Telegramm</b><a class="lnk" href="#">Kopieren</a></div><p class="telegramm"><b>HC Zürichsee gegen TSV Thalwil 26:18 (13:9).</b> Halle Seefeld. Torfolge: 2:1, 5:4, 9:6, 13:9; 15:12, 17:15, 21:16, 26:18. Strafen: 3-mal 2 Minuten gegen Zürichsee, 4-mal 2 Minuten gegen Thalwil. Beste Werfer: Brunner 7, Graf 5/2, Schmid 4. Im Tor: Meier, 11 Paraden.</p></section></div>
+    + `<div class="sp"><div class="col"><section><div class="hh"><b class="d">Punkt 1, geöffnet</b><span>Szene 3 von 9 auf der Taktikkamera</span></div>${stage({ view: "camL", w: 852, r: 11, labels: 1, bar: "Nachtwind trifft über rechts aussen" })}${balls("ra")}${camKey()}</section>
+      <section><div class="hh"><b class="d">Telegramm</b><a class="lnk" href="#">Kopieren</a></div><p class="telegramm"><b>HC Tannengrün gegen TSV Nachtwind 26:18 (13:9).</b> Halle Seefeld. Torfolge: 2:1, 5:4, 9:6, 13:9; 15:12, 17:15, 21:16, 26:18. Strafen: 3-mal 2 Minuten gegen Tannengrün, 4-mal 2 Minuten gegen Nachtwind. Beste Werfer: Brunner 7, Graf 5/2, Schmid 4. Im Tor: Meier, 11 Paraden.</p></section></div>
       <aside class="side"><section class="zf"><div class="hh"><b class="d">Gegentore</b><span>nach Position</span></div><svg data-zones data-who="them" data-w="340" role="img" aria-label="Gegentore nach Position: rechts aussen 9, Rückraum links 3, Rückraum Mitte 2, links aussen 2, Rückraum rechts 1, Kreis 1"></svg><p class="foot">Punkt: geschätzte Wurfposition, leer: noch nicht bestätigt.</p></section>
       <section class="zf"><div class="hh"><b class="d">Eigene Tore</b><span>nach Position</span></div><svg data-zones data-who="us" data-w="340" role="img" aria-label="Eigene Tore nach Position: Kreis 7, je 3 von den Flügeln und aus dem Rückraum, 2 Siebenmeter, 2 Gegenstösse"></svg></section>
       <div class="kpis"><div class="kpi"><b class="n">11</b><span>Paraden Meier, von dir markiert</span></div><div class="kpi"><b class="n">11</b><span>Ballverluste, aus dem Spielbericht</span></div><div class="kpi"><b class="n">58<small>%</small></b><span>Wurfquote, 26 von 45, Würfe von dir markiert</span></div></div></aside></div>`;
@@ -139,14 +139,14 @@ function spielPhone() {
 }
 
 /* ===================== 7.3 Video ===================== */
-const SCN = [["38:40", "Ballverlust, Fehlpass", "danach Gegenstoss, Tor Thalwil"], ["39:55", "Tor Thalwil über rechts aussen", "läuft gerade"], ["41:05", "Ballverlust, Schrittfehler", ""], ["42:30", "Parade Meier", "von dir markiert"], ["43:48", "Ballverlust, Stürmerfoul", "danach Gegenstoss, Tor Thalwil"]];
-const SCN_KR = [["11:20", "Tor Zürichsee vom Kreis", "Nummer 8 gelesen"], ["18:02", "Tor Zürichsee vom Kreis", "läuft gerade"], ["24:47", "Tor Zürichsee vom Kreis", "Wurfposition von dir bestätigt"]];
+const SCN = [["38:40", "Ballverlust, Fehlpass", "danach Gegenstoss, Tor Nachtwind"], ["39:55", "Tor Nachtwind über rechts aussen", "läuft gerade"], ["41:05", "Ballverlust, Schrittfehler", ""], ["42:30", "Parade Meier", "von dir markiert"], ["43:48", "Ballverlust, Stürmerfoul", "danach Gegenstoss, Tor Nachtwind"]];
+const SCN_KR = [["11:20", "Tor Tannengrün vom Kreis", "Nummer 8 gelesen"], ["18:02", "Tor Tannengrün vom Kreis", "läuft gerade"], ["24:47", "Tor Tannengrün vom Kreis", "Wurfposition von dir bestätigt"]];
 function sceneList(on = 1, list = SCN) { return `<ul class="scn">${list.map((s, i) => `<li${i === on ? ' class="on" aria-current="true"' : ""}><b class="n">${s[0]}</b><span>${s[1]}${s[2] ? `<small>${s[2]}</small>` : ""}</span></li>`).join("")}</ul>`; }
 function videoDesk() {
   return topD("Spiele") + strip(false) + tabs("Video")
-    + `<div class="sp" style="grid-template-columns:minmax(0,1fr) 320px"><div style="min-width:0">${stage({ view: "camL", w: 848, r: 12, labels: 1, mode: 1, bar: "Positionen aus dem Video, 10 pro Sekunde", cap: '<p class="cap">Thalwil trifft über rechts aussen<small>Punkt 1 · Szene 3 von 9</small></p>' })}
+    + `<div class="sp" style="grid-template-columns:minmax(0,1fr) 320px"><div style="min-width:0">${stage({ view: "camL", w: 848, r: 12, labels: 1, mode: 1, bar: "Positionen aus dem Video, 10 pro Sekunde", cap: '<p class="cap">Nachtwind trifft über rechts aussen<small>Punkt 1 · Szene 3 von 9</small></p>' })}
       ${balls("ra")}${camKey()}
-      <div class="rail" style="margin-top:20px"><svg data-rail role="img" aria-label="Zeitleiste: Tore aus dem Spielbericht, Zürichsee oben, Thalwil unten, markierte Phase 38. bis 44. Minute"></svg><div class="ax"><span>Anwurf</span><span>Halbzeit</span><span>Schluss</span></div></div>
+      <div class="rail" style="margin-top:20px"><svg data-rail role="img" aria-label="Zeitleiste: Tore aus dem Spielbericht, Tannengrün oben, Nachtwind unten, markierte Phase 38. bis 44. Minute"></svg><div class="ax"><span>Anwurf</span><span>Halbzeit</span><span>Schluss</span></div></div>
       <div class="tools" style="margin-top:18px"><a class="btn" href="#">Szene merken</a><a class="btn line" href="#">Zeichnen</a><a class="btn line" href="#">Spielerin hervorheben</a><a class="btn line" href="#">Teilen</a></div></div>
       <aside class="side"><section><div class="hh"><b class="d">38. bis 44.</b><span>5 Szenen</span></div>${sceneList()}</section>
       <section><div class="hh"><b class="d">Notizen</b></div><p class="note">39:55 Unsere 7 tritt heraus, die Lücke geht auf.</p><p class="k" style="margin-top:8px">Nur für dich, bis du die Szene teilst</p></section></aside></div>`;
@@ -155,9 +155,9 @@ function videoPhone(o = {}) {
   const cam = o.cam || "ra", kr = cam === "kr";
   return topP() + strip(true) + tabs("Video")
     + stage({ cam, view: "halfDeep", w: 390, r: 10, labels: 1, mode: 1, clk: kr ? "18:02" : "39:55", style: "margin-top:12px", aria: kr ? "Taktikkamera 17:56 bis 18:02: Tor vom Kreis, Ball nicht erkannt" : undefined,
-      capBelow: `<p class="cap">${kr ? "Tor Zürichsee vom Kreis<small>Punkt 3 · Szene 2 von 7</small>" : "Thalwil trifft über rechts aussen<small>Punkt 1 · Szene 3 von 9</small>"}</p>` })
+      capBelow: `<p class="cap">${kr ? "Tor Tannengrün vom Kreis<small>Punkt 3 · Szene 2 von 7</small>" : "Nachtwind trifft über rechts aussen<small>Punkt 1 · Szene 3 von 9</small>"}</p>` })
     + `<div style="padding:0 16px">${balls(cam, true)}</div>`
-    + `<div style="padding:0 16px">${kr ? '<p class="camkey"><span><i class="us"></i>Zürichsee</span><span><i class="them"></i>Thalwil</span><span>Anlauf gestrichelt: Wurfposition geschätzt</span></p>' : '<p class="camkey"><span><i class="us"></i>Zürichsee</span><span><i class="them"></i>Thalwil</span><span><i class="ref"></i>Schiri</span><span><i class="ball"></i>Ball, wo erkannt</span></p>'}</div>`
+    + `<div style="padding:0 16px">${kr ? '<p class="camkey"><span><i class="us"></i>Tannengrün</span><span><i class="them"></i>Nachtwind</span><span>Anlauf gestrichelt: Wurfposition geschätzt</span></p>' : '<p class="camkey"><span><i class="us"></i>Tannengrün</span><span><i class="them"></i>Nachtwind</span><span><i class="ref"></i>Schiri</span><span><i class="ball"></i>Ball, wo erkannt</span></p>'}</div>`
     + (kr ? "" : '<div class="rail" style="padding:16px 16px 0"><svg data-rail role="img" aria-label="Zeitleiste"></svg><div class="ax"><span>Anwurf</span><span>Halbzeit</span><span>Schluss</span></div></div>')
     + `<section style="padding:24px 16px 28px"><div class="hh"><b class="d">${kr ? "Tore vom Kreis" : "38. bis 44."}</b><span>${kr ? "Punkt 3 · 7 Szenen" : "5 Szenen"}</span></div>${kr ? sceneList(1, SCN_KR) : sceneList()}<a class="btn" href="#" style="width:100%;margin-top:16px">Szene merken</a></section>` + barP("Spiele");
 }
@@ -197,25 +197,25 @@ function checkBody(ph) {
       <div class="progress" role="img" aria-label="4 von 36 beantwortet">${Array.from({ length: 36 }, (_, i) => `<i${i < 4 ? ' class="done"' : ""}></i>`).join("")}</div>
       <p class="foot">Fünf Antworten reichen für die Zahlen der Stammsieben.</p></div></div>`;
 }
-function pruefenDesk() { return bareTop("Prüfen · HC Zürichsee gegen TSV Thalwil", { desk: 1, html: '<a class="btn line" href="#">Später weiter</a>' }) + strip(false, { sub: "gegen TSV Thalwil · 3 Fragen zu Toren, 33 zu Personen" }) + checkBody(false); }
-function pruefenPhone() { return bareTop("Prüfen", { html: '<a class="btn line s" href="#">Später weiter</a>' }) + strip(true, { sub: "gegen TSV Thalwil · Frage 5 von 36" }) + checkBody(true); }
+function pruefenDesk() { return bareTop("Prüfen · HC Tannengrün gegen TSV Nachtwind", { desk: 1, html: '<a class="btn line" href="#">Später weiter</a>' }) + strip(false, { sub: "gegen TSV Nachtwind · 3 Fragen zu Toren, 33 zu Personen" }) + checkBody(false); }
+function pruefenPhone() { return bareTop("Prüfen", { html: '<a class="btn line s" href="#">Später weiter</a>' }) + strip(true, { sub: "gegen TSV Nachtwind · Frage 5 von 36" }) + checkBody(true); }
 
 /* ===================== 7.6 Szenen ===================== */
-const TILES = [["7.11. Thalwil", "39:55", "Tor, Nummer 5 gelesen", "0:18"], ["7.11. Thalwil", "27:10", "Tor, Nummer nicht gelesen", "0:14"], ["7.11. Thalwil", "12:45", "Tor, Nummer 5 gelesen", "0:21"], ["7.11. Thalwil", "8:02", "Tor, Wurfposition geschätzt", "0:16"], ["31.10. Stäfa", "51:02", "Tor in Unterzahl", "0:16"], ["31.10. Stäfa", "33:40", "Tor, Nummer 11 gelesen", "0:19"], ["31.10. Stäfa", "20:15", "Tor, Nummer nicht gelesen", "0:15"], ["3.10. Rüti", "44:31", "Tor, Nummer 7 gelesen", "0:17"]];
+const TILES = [["7.11. Nachtwind", "39:55", "Tor, Nummer 5 gelesen", "0:18"], ["7.11. Nachtwind", "27:10", "Tor, Nummer nicht gelesen", "0:14"], ["7.11. Nachtwind", "12:45", "Tor, Nummer 5 gelesen", "0:21"], ["7.11. Nachtwind", "8:02", "Tor, Wurfposition geschätzt", "0:16"], ["31.10. Wirbelstern", "51:02", "Tor in Unterzahl", "0:16"], ["31.10. Wirbelstern", "33:40", "Tor, Nummer 11 gelesen", "0:19"], ["31.10. Wirbelstern", "20:15", "Tor, Nummer nicht gelesen", "0:15"], ["3.10. Rüti", "44:31", "Tor, Nummer 7 gelesen", "0:17"]];
 function tiles(n, w) { return `<div class="tiles">${TILES.slice(0, n).map((t, i) => `<a class="tile" href="#"><span class="mfz"><svg data-b="saison" data-i="${i}" data-w="${w}" role="img" aria-label="Anlauf vor dem Tor ${t[1]}"></svg></span><b class="n">${t[1]}</b><span>${t[0]} · ${t[2]}</span><span class="dur">${t[3]}</span></a>`).join("")}</div>`; }
-const COLLS = [["Rückzug nach Ballverlust", "5 Szenen, 1 Spielzug · geteilt am Sonntag · 17-mal geöffnet"], ["Gegner Rheinau", "6 Szenen, 1 Spielzug · noch nicht geteilt"], ["Abwehr 5:1, so wollen wir es", "11 Szenen, 6:30 · gezeigt am 3.11."]];
+const COLLS = [["Rückzug nach Ballverlust", "5 Szenen, 1 Spielzug · geteilt am Sonntag · 17-mal geöffnet"], ["Gegner Glutwind", "6 Szenen, 1 Spielzug · noch nicht geteilt"], ["Abwehr 5:1, so wollen wir es", "11 Szenen, 6:30 · gezeigt am 3.11."]];
 function collList() { return `<ul class="coll">${COLLS.map(c => `<li><h4 class="d">${c[0]}</h4><p>${c[1]}</p><a class="lnk" href="#">Öffnen</a></li>`).join("")}</ul>`; }
 function searchBlock(ph) {
   return `<div class="search" role="search">${I.search}<span>Gegentore rechts aussen, letzte 3 Spiele</span></div>
     <div class="chips"><span class="on">Gegentor</span><span class="on">rechts aussen</span><span class="on">letzte 3 Spiele</span>${ph ? "" : '<button>Halbzeit</button><button>Spielerin</button><button>Abwehrsystem</button>'}</div>
-    <div class="answer"><b class="n">19</b><p>von 66 Gegentoren über rechts aussen<span>29 Prozent. Gegen Thalwil waren es 9 von 18.</span></p></div>
+    <div class="answer"><b class="n">19</b><p>von 66 Gegentoren über rechts aussen<span>29 Prozent. Gegen Nachtwind waren es 9 von 18.</span></p></div>
     <div class="actrow" style="padding:18px 0 28px"><a class="btn" href="#">Alle 19 abspielen</a><a class="btn line" href="#">In eine Sammlung</a>${ph ? "" : '<a class="lnk" href="#">Als Tabelle</a>'}</div>`;
 }
 function szenenDesk() {
   return topD("Szenen") + kopf({ kick: "Szenen · 3 Spiele mit Video", title: "152 Szenen aus drei Spielen." })
     + `<div class="sp"><div style="min-width:0">${searchBlock(false)}<div class="hh"><b class="d">19 Szenen</b><span>neueste zuerst</span></div>${tiles(8, 200)}<p class="foot" style="margin-top:18px"><a class="lnk" href="#">11 weitere zeigen</a></p></div>
       <aside class="side"><section><div class="hh"><b class="d">Sammlungen</b><a class="lnk" href="#">Neue Sammlung</a></div>${collList()}</section>
-      <section><div class="hh"><b class="d">Highlights</b><span>nach jedem Spiel</span></div><ul class="coll"><li><h4 class="d">Die Tore gegen Thalwil</h4><p>1:20 · quer und hochkant · ohne Personen ohne Einwilligung</p><a class="lnk" href="#">Teilen</a></li></ul></section></aside></div>`;
+      <section><div class="hh"><b class="d">Highlights</b><span>nach jedem Spiel</span></div><ul class="coll"><li><h4 class="d">Die Tore gegen Nachtwind</h4><p>1:20 · quer und hochkant · ohne Personen ohne Einwilligung</p><a class="lnk" href="#">Teilen</a></li></ul></section></aside></div>`;
 }
 function szenenPhone() {
   return topP() + kopf({ kick: "Szenen · 3 Spiele mit Video", title: "152 Szenen aus drei Spielen." })
@@ -232,7 +232,7 @@ function flowList(ph) {
     <li class="txt"><b class="n ix">5</b><p class="note">So geht es: alle sechs zurück, 52:10, Ballgewinn und eigener Gegenstoss.</p></li></ol>`;
 }
 function chatPreview() {
-  return `<div class="chat"><div class="bubble"><div class="og"><b class="d">Rückzug nach Ballverlust</b></div><div class="meta"><b>Rückzug nach Ballverlust</b>HC Zürichsee Herren 1 · 5 Szenen, 2:35</div><p class="msg">Schaut euch das bis Dienstag an.</p><p class="tm">21:14</p></div></div>`;
+  return `<div class="chat"><div class="bubble"><div class="og"><b class="d">Rückzug nach Ballverlust</b></div><div class="meta"><b>Rückzug nach Ballverlust</b>HC Tannengrün Herren 1 · 5 Szenen, 2:35</div><p class="msg">Schaut euch das bis Dienstag an.</p><p class="tm">21:14</p></div></div>`;
 }
 function sammlungDesk() {
   return topD("Szenen") + kopf({ kick: "Sammlung · aus Punkt 2 vom Samstag", title: "Rückzug nach Ballverlust", acts: '<a class="btn" href="#">Link teilen</a><a class="btn line" href="#">Am Bildschirm zeigen</a>' })
@@ -249,7 +249,7 @@ function sammlungPhone() {
 
 /* ===================== 7.8 the shared page ===================== */
 function sharedList() { return `<ol class="flow">${FLOWS.map((f, i) => `<li${i === 1 ? ' style="background:var(--attn);margin:0 -12px;padding:14px 12px"' : ""}><b class="n ix">${i + 1}</b><span class="mfz"><svg data-b="gs" data-i="${f[4]}" data-w="112" aria-hidden="true"></svg></span><div><h4>${f[0]} ${f[1]}</h4><p${i === 1 ? ' style="color:#15171a"' : ""}>${i === 0 ? "gesehen" : i === 1 ? "läuft" : "&nbsp;"}</p></div><span class="dur"${i === 1 ? ' style="color:#15171a"' : ""}>${f[3]}</span></li>`).join("")}</ol>`; }
-function sharedHead(ph) { return `<header class="ptop" style="padding:0 ${ph ? 16 : 32}px"><span class="club d"><span class="crest">HCZ</span>HC Zürichsee Herren 1</span><span class="k">${ph ? "von Sandra Frei" : "geteilt von Sandra Frei"}</span></header>`; }
+function sharedHead(ph) { return `<header class="ptop" style="padding:0 ${ph ? 16 : 32}px"><span class="club d"><span class="crest">HCT</span>HC Tannengrün Herren 1</span><span class="k">${ph ? "von Sandra Frei" : "geteilt von Sandra Frei"}</span></header>`; }
 function geteiltDesk() {
   return sharedHead(false) + kopf({ kick: "Sammlung · 5 Szenen, 2:35", title: "Rückzug nach Ballverlust" })
     + `<div class="sp"><div style="min-width:0"><div class="stage"><svg data-hall="ra" data-mode="video" role="img" aria-label="Video der Szene 41:05"></svg><p class="cap">41:05 · Szene 2 von 5<small>Ballverlust, Gegenstoss, Tor</small></p><div class="bar"><button class="pause" aria-pressed="false">Pause</button><div class="mode" role="group" aria-label="Ansicht"><button aria-pressed="true">Video</button><button aria-pressed="false">Taktik</button></div><span>Personen ohne Einwilligung unkenntlich</span><span class="clk">41:05</span></div></div>
@@ -265,7 +265,7 @@ function geteiltPhone() {
 
 /* ===================== 7.9 Saison ===================== */
 function themeList() {
-  return `<ol class="themes">${SEASON.themes.map((t, i) => `<li><h3 class="d">${t.t}</h3><p>${t.s}${t.of ? ` ${t.series.reduce((a, b) => a + b, 0)} von ${t.of.reduce((a, b) => a + b, 0)}.` : ""}</p><a class="lnk" href="#">${t.n}</a><svg data-series data-theme="${i}" role="img" aria-label="${t.t} pro Spiel: Rüti ${t.series[0]}, Stäfa ${t.series[1]}, Thalwil ${t.series[2]}"></svg><span class="lab" aria-hidden="true"><span>Rüti</span><span>Stäfa</span><span>Thalwil</span></span></li>`).join("")}</ol>`;
+  return `<ol class="themes">${SEASON.themes.map((t, i) => `<li><h3 class="d">${t.t}</h3><p>${t.s}${t.of ? ` ${t.series.reduce((a, b) => a + b, 0)} von ${t.of.reduce((a, b) => a + b, 0)}.` : ""}</p><a class="lnk" href="#">${t.n}</a><svg data-series data-theme="${i}" role="img" aria-label="${t.t} pro Spiel: Rüti ${t.series[0]}, Wirbelstern ${t.series[1]}, Nachtwind ${t.series[2]}"></svg><span class="lab" aria-hidden="true"><span>Rüti</span><span>Wirbelstern</span><span>Nachtwind</span></span></li>`).join("")}</ol>`;
 }
 const SCORERS = [[4, "Levin Brunner", 6, 37, "6,2", ""], [10, "Elias Graf", 6, 29, "4,8", "11/13"], [11, "Jonas Schmid", 5, 21, "4,2", ""], [8, "Nico Meier", 6, 17, "2,8", ""], [7, "Luca Roth", 6, 15, "2,5", ""]];
 function scorers(ph) {
@@ -275,11 +275,11 @@ const SEASON_TITLE = { kick: "Saison 2026/27 · 3. Liga, Gruppe 2 · nach sechs 
 function saisonDesk() {
   return topD("Saison") + kopf(SEASON_TITLE)
     + `<div class="sp"><div class="col"><section><div class="hh"><b class="d">Was sich wiederholt</b><span>aus 3 Spielen mit Video</span></div>${themeList()}</section>
-      <section class="diff"><div class="hh"><b class="d">Verlauf</b><span>Tordifferenz pro Spiel</span></div><svg data-diff data-w="852" role="img" aria-label="Tordifferenz pro Spiel: Rüti plus 5, Wädenswil minus 3, Horgen plus 10, Meilen plus 1, Stäfa minus 7, Thalwil plus 8"></svg><p class="foot">4 Siege, 2 Niederlagen · 148:134 Tore. Zwei Spiele ohne Video: <a class="lnk" href="#">hochladen</a></p></section>
+      <section class="diff"><div class="hh"><b class="d">Verlauf</b><span>Tordifferenz pro Spiel</span></div><svg data-diff data-w="852" role="img" aria-label="Tordifferenz pro Spiel: Rüti plus 5, Rotdorn minus 3, Blitzfang plus 10, Sturmfalke plus 1, Wirbelstern minus 7, Nachtwind plus 8"></svg><p class="foot">4 Siege, 2 Niederlagen · 148:134 Tore. Zwei Spiele ohne Video: <a class="lnk" href="#">hochladen</a></p></section>
       <section><div class="hh"><b class="d">Wer trifft</b><span>aus den Spielberichten</span></div>${scorers(false)}<p class="foot"><a class="lnk" href="#">Ganzer Kader</a></p></section></div>
       <aside class="side"><section><div class="hh"><b class="d">Rechts aussen</b><span>19 Anläufe, 3 Spiele</span></div><div class="mfz play" style="width:100%"><svg data-b="saison" data-w="340" role="img" aria-label="Alle 19 Gegentore über rechts aussen als Anläufe"></svg></div></section>
       <section><div class="hh"><b class="d">Tabelle</b><span>handball.ch, gestern</span></div>${table(5)}</section>
-      <section><div class="hh"><b class="d">Gegner</b></div><ul class="facts"><li><span>HSG Rheinau, Sonntag</span><a class="lnk" href="#">12 Szenen</a></li><li><span>TV Talwiese, 22.11.</span><span class="k">noch kein Spiel</span></li><li><span>BSV Stäfa, 29.11.</span><a class="lnk" href="#">33 Szenen</a></li></ul></section></aside></div>`;
+      <section><div class="hh"><b class="d">Gegner</b></div><ul class="facts"><li><span>HSG Glutwind, Sonntag</span><a class="lnk" href="#">12 Szenen</a></li><li><span>TV Talwiese, 22.11.</span><span class="k">noch kein Spiel</span></li><li><span>BSV Wirbelstern, 29.11.</span><a class="lnk" href="#">33 Szenen</a></li></ul></section></aside></div>`;
 }
 function saisonPhone() {
   return topP() + kopf(SEASON_TITLE)
@@ -307,13 +307,13 @@ function teamPhone() { return topP() + kopf(TEAM_TITLE) + `<div style="padding:0
 
 /* ===================== 7.11 Spieltag ===================== */
 function mkeys() {
-  return `<div class="mkeys"><button class="us"><b class="d">Tor wir</b><span>14 bisher</span></button><button class="them"><b class="d">Tor Thalwil</b><span>11 bisher</span></button>
+  return `<div class="mkeys"><button class="us"><b class="d">Tor wir</b><span>14 bisher</span></button><button class="them"><b class="d">Tor Nachtwind</b><span>11 bisher</span></button>
     <button><b class="d">Gute Aktion</b><span>merken</span></button><button><b class="d">Fehler</b><span>merken</span></button>
     <button><b class="d">Abwehr anschauen</b><span>später im Video</span></button><button><b class="d">Später anschauen</b><span>später im Video</span></button></div>
     <div class="mrow"><div class="mkeys" style="display:contents"><button class="small">2 Minuten</button><button class="small">Time-out</button><button class="small">Halbzeit</button></div></div>`;
 }
-const LOG = [["23:12", "Tor wir", "us"], ["22:40", "Tor Thalwil", "them"], ["21:05", "Abwehr anschauen", ""], ["19:48", "Tor wir", "us"], ["18:30", "2 Minuten gegen Thalwil", ""]];
-function liveStrip(ph) { return `<section class="strip live"><div class="nm d">HC Zürichsee<small>gegen TSV Thalwil · Halle Seefeld</small><span class="clock"><b>23:41</b>1. Halbzeit, Uhr läuft</span></div><div class="score n" role="img" aria-label="14 zu 11"><span class="e" aria-hidden="true">14:11</span><span>14:<u>11</u></span></div></section>`; }
+const LOG = [["23:12", "Tor wir", "us"], ["22:40", "Tor Nachtwind", "them"], ["21:05", "Abwehr anschauen", ""], ["19:48", "Tor wir", "us"], ["18:30", "2 Minuten gegen Nachtwind", ""]];
+function liveStrip(ph) { return `<section class="strip live"><div class="nm d">HC Tannengrün<small>gegen TSV Nachtwind · Halle Seefeld</small><span class="clock"><b>23:41</b>1. Halbzeit, Uhr läuft</span></div><div class="score n" role="img" aria-label="14 zu 11"><span class="e" aria-hidden="true">14:11</span><span>14:<u>11</u></span></div></section>`; }
 function spieltagPhone() {
   return bareTop("Spieltag", { html: '<a class="btn line s" href="#">Beenden</a>' }) + liveStrip(true)
     + `<section style="padding:16px 16px 0">${mkeys()}<div class="last"><b class="n">23:12</b><span>Tor wir</span><a class="lnk" href="#">zurücknehmen</a><a class="lnk" href="#" style="margin-left:auto">Pro Spielerin erfassen</a></div></section>`
@@ -329,11 +329,11 @@ function spieltagDesk() {
 /* ===================== 7.12 Einstieg ===================== */
 const SWATCH = [["blau", "#1f4fd6"], ["rot", "#d3202e"], ["gelb", "#f6c500"], ["schwarz", "#17191c"], ["weiss", "#ffffff"], ["gruen", "#12804a"], ["orange", "#e2731c"], ["violett", "#5b2d8e"]];
 function found() {
-  return `<div class="found"><p class="k">Von handball.ch</p><h3 class="d">HC Zürichsee Herren 1</h3><p class="sub">3. Liga, Gruppe 2 · Halle Seefeld</p><ul>${["14 Spielerinnen und Spieler, mit Nummern", "22 Spiele im Spielplan, 6 gespielt", "Tabelle: Rang 2"].map(t => `<li>${I.ok}${t}</li>`).join("")}</ul></div>`;
+  return `<div class="found"><p class="k">Von handball.ch</p><h3 class="d">HC Tannengrün Herren 1</h3><p class="sub">3. Liga, Gruppe 2 · Halle Seefeld</p><ul>${["14 Spielerinnen und Spieler, mit Nummern", "22 Spiele im Spielplan, 6 gespielt", "Tabelle: Rang 2"].map(t => `<li>${I.ok}${t}</li>`).join("")}</ul></div>`;
 }
 function swatches() { return `<div class="hh" style="margin-top:32px"><b class="d">Welche Farbe hat euer Trikot?</b></div><div class="swatches" role="group" aria-label="Trikotfarbe">${SWATCH.map(s => `<button data-club-pick="${s[0]}" aria-label="${s[0]}" aria-pressed="false"><i style="background:${s[1]}"></i></button>`).join("")}</div><p class="foot">Das Wappen könnt ihr später hochladen.</p>`; }
 function einstiegPreview(ph) {
-  return `<div class="preview"><p class="k" style="margin-bottom:8px">So sieht euer letztes Spiel aus</p><section class="wurf big"><div><p class="kick">Samstag gegen TSV Thalwil</p><h1 class="d">Gewonnen.</h1></div><div><div class="score n" aria-hidden="true">${scoreHTML(26, 18)}</div></div></section>
+  return `<div class="preview"><p class="k" style="margin-bottom:8px">So sieht euer letztes Spiel aus</p><section class="wurf big"><div><p class="kick">Samstag gegen TSV Nachtwind</p><h1 class="d">Gewonnen.</h1></div><div><div class="score n" aria-hidden="true">${scoreHTML(26, 18)}</div></div></section>
     <div style="margin-top:12px">${[[4, "Levin Brunner", "RL", "6 Spiele"], [10, "Elias Graf", "RL", "6 Spiele"]].map(p => `<div class="pl"><b class="n">${p[0]}</b><h4 class="d">${p[1]}</h4><p>${p[3]}</p><span class="pos">${p[2]}</span></div>`).join("")}</div></div>`;
 }
 const EIN = { kick: "Schritt 2 von 2", title: "Das seid ihr, oder?" };
@@ -350,13 +350,13 @@ function einstiegPhone() {
 
 /* ===================== 7.13 states ===================== */
 function stateNoVideo() {
-  return topP() + `<section class="wurf big" style="height:340px"><div><p class="kick">Samstag, 17. Oktober · auswärts</p><h1 class="d" style="font-size:28px">HC Zürichsee bei SG Horgen</h1></div><div><div class="score n" style="font-size:88px;margin-top:4px" role="img" aria-label="29 zu 19">${scoreHTML(29, 19)}</div></div><svg class="fl" data-fl data-flow="horgen" data-w="390" data-h="56" style="bottom:26px" role="img" aria-label="Verlauf aus dem Spielbericht: von Anfang an vorn, am Schluss plus 10"></svg></section>`
+  return topP() + `<section class="wurf big" style="height:340px"><div><p class="kick">Samstag, 17. Oktober · auswärts</p><h1 class="d" style="font-size:28px">HC Tannengrün bei SG Blitzfang</h1></div><div><div class="score n" style="font-size:88px;margin-top:4px" role="img" aria-label="29 zu 19">${scoreHTML(29, 19)}</div></div><svg class="fl" data-fl data-flow="blitzfang" data-w="390" data-h="56" style="bottom:26px" role="img" aria-label="Verlauf aus dem Spielbericht: von Anfang an vorn, am Schluss plus 10"></svg></section>`
     + tabs("Spiel", true) + '<p class="src">Quelle: Spielbericht von handball.ch. Der Verlauf kommt aus der Torfolge.</p>'
     + '<div class="state"><div style="display:grid;grid-template-columns:120px minmax(0,1fr);gap:14px;align-items:center"><span class="mfz" style="width:120px"><svg data-empty data-w="120" aria-hidden="true"></svg><em>kein Video</em></span><p>Lad das Video hoch. Nach etwa 40 Minuten bekommst du die drei Dinge und alle Szenen.</p></div><div class="btns"><a class="btn" href="#">Video wählen</a><a class="btn line" href="#">Link einfügen</a></div></div>'
-    + '<section style="padding:28px 16px"><div class="hh"><b class="d">Telegramm</b><a class="lnk" href="#">Kopieren</a></div><p class="telegramm" style="font-size:15px"><b>SG Horgen gegen HC Zürichsee 19:29 (8:14).</b> Torfolge: 1:2, 4:5, 6:9, 8:14; 11:18, 14:22, 16:26, 19:29. Beste Werfer: Brunner 8, Graf 6/3. Im Tor: Meier.</p></section>' + barP("Spiele");
+    + '<section style="padding:28px 16px"><div class="hh"><b class="d">Telegramm</b><a class="lnk" href="#">Kopieren</a></div><p class="telegramm" style="font-size:15px"><b>SG Blitzfang gegen HC Tannengrün 19:29 (8:14).</b> Torfolge: 1:2, 4:5, 6:9, 8:14; 11:18, 14:22, 16:26, 19:29. Beste Werfer: Brunner 8, Graf 6/3. Im Tor: Meier.</p></section>' + barP("Spiele");
 }
 function stateRunning() {
-  return topP() + headStart(true, 390, { kick: "Sa gegen TSV Thalwil · Spielbericht ist da", title: "Die Analyse läuft." })
+  return topP() + headStart(true, 390, { kick: "Sa gegen TSV Nachtwind · Spielbericht ist da", title: "Die Analyse läuft." })
     + '<section style="padding:24px 16px 0"><div class="hh"><b class="d">Noch etwa 25 Minuten</b></div><div class="pbar" style="max-width:none;height:8px;margin:0 0 12px"><i style="width:55%"></i></div>'
     + '<ol class="steps"><li class="done"><span>fertig</span>Video geladen, 58 Minuten</li><li class="done"><span>fertig</span>Spielfeld erkannt</li><li class="now"><span>läuft</span>Spielerinnen und Spieler verfolgen</li><li class="next"><span>danach</span>Szenen schneiden</li><li class="next"><span>danach</span>Drei Dinge schreiben</li></ol>'
     + '<p style="margin-top:14px;font-size:16px">Du bekommst eine Mitteilung. In der Zwischenzeit: <a class="lnk" href="#">Kader bestätigen</a>, das macht die Zahlen genauer.</p></section>'
@@ -373,7 +373,7 @@ function stateEmpty() {
     + '<div class="msg"><h3 class="d">Hier landen eure Szenen.</h3><p>Sobald das erste Spiel analysiert ist, kannst du sie suchen, sammeln und dem Team zeigen.</p><div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap"><a class="btn" href="#">Video hochladen</a><a class="btn line" href="#">Demo-Spiel ansehen</a></div></div></section>' + barP("Szenen");
 }
 function stateError() {
-  return topP() + headStart(true, 390, { kick: "Sa gegen TSV Thalwil · Spielbericht ist da", title: "Gestern war Spiel." })
+  return topP() + headStart(true, 390, { kick: "Sa gegen TSV Nachtwind · Spielbericht ist da", title: "Gestern war Spiel." })
     + '<section style="padding:24px 16px 0"><div class="err">' + I.err + '<div><h3 class="d">Der Upload ist abgebrochen.</h3><p>Bei 64 Prozent ist die Verbindung abgerissen. Was schon oben ist, bleibt: du machst dort weiter, wo es aufgehört hat.</p></div></div>'
     + '<div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap"><a class="btn" href="#">Weiter hochladen</a><a class="btn line" href="#">Andere Datei wählen</a></div><p class="k" style="margin-top:12px">Am besten im WLAN. Der Upload läuft weiter, wenn du die App schliesst.</p></section>'
     + `<section style="padding:32px 16px 28px"><div class="hh"><b class="d">Alle Spiele</b></div>${gameList(true)}</section>` + barP("Spiele");

@@ -5,8 +5,8 @@
  * screens can be tested without reaching handball.ch.
  */
 
-export const CLUB = { id: 9001, name: "HC Seeblick", city: "Seedorf" };
-const OTHER_CLUB = { id: 9002, name: "SG Bergtal", city: "Bergtal" };
+export const CLUB = { id: 9001, name: "HC Brimmwil", city: "Brimmwil" };
+const OTHER_CLUB = { id: 9002, name: "SG Talvenau", city: "Talvenau" };
 // a club and team of the app that already took its official team over
 export const CLAIMED_ORG = "00000000-0000-4000-8000-000000000a01";
 export const CLAIMED_TEAM = "00000000-0000-4000-8000-000000000b01";
@@ -27,9 +27,9 @@ const team = (official_id: number, name: string, league: string, club = CLUB) =>
 });
 
 export const searchHits = [
-  team(71001, "HC Seeblick Herren 1", "Herren 3. Liga"),
-  team(71002, "HC Seeblick Juniorinnen U18", "U18 Elite"),
-  { ...team(72001, "SG Bergtal Herren", "Herren 2. Liga", OTHER_CLUB), status: "claimed" as const, team_id: CLAIMED_TEAM, organization_id: CLAIMED_ORG },
+  team(71001, "HC Brimmwil Herren 1", "Herren 3. Liga"),
+  team(71002, "HC Brimmwil Juniorinnen U18", "U18 Elite"),
+  { ...team(72001, "SG Talvenau Herren", "Herren 2. Liga", OTHER_CLUB), status: "claimed" as const, team_id: CLAIMED_TEAM, organization_id: CLAIMED_ORG },
 ];
 
 export const claimed = (organization_id: string, team_id: string) => ({
@@ -55,7 +55,7 @@ export const accessRequested = {
 export const joinRequested = {
   id: "00000000-0000-4000-8000-000000000d01",
   team_id: CLAIMED_TEAM,
-  team_name: "SG Bergtal Herren",
+  team_name: "SG Talvenau Herren",
   organization_id: CLAIMED_ORG,
   organization_name: OTHER_CLUB.name,
   status: "pending",
@@ -73,7 +73,7 @@ export const link = {
   group_name: "Gruppe 2",
   synced_at: new Date(Date.now() - 20 * 60_000).toISOString(),
   standing: [
-    { teamId: 71001, rank: 2, name: "HC Seeblick Herren 1", games: 6, goalDifference: 14, points: 9 },
+    { teamId: 71001, rank: 2, name: "HC Brimmwil Herren 1", games: 6, goalDifference: 14, points: 9 },
     { teamId: 73001, rank: 1, name: "TV Talwiese", games: 6, goalDifference: 21, points: 10 },
   ],
   open_suggestions: 5,

@@ -325,10 +325,11 @@ def fold(s: str | None) -> str:
 
 
 def opponent_key(name: str | None) -> str:
-    """One opponent under several spellings (review R7): «SG Felsegg/Lärchenwil 1» in the league,
-    «SG Felsegg/Lärchenwil (M2)» in the cup, «sg felsegg-lärchenwil» typed by a coach. Drops case,
-    accents, punctuation, a bracketed addition and the «1» of a club's first team; a second team
-    («… 2») stays its own. Same rule as `opponentKey` in the web (lib/opponent-name.ts)."""
+    """One opponent under several spellings (review R7): «SG Kalvenegg/Lärchenwil 1» in the
+    league, «SG Kalvenegg/Lärchenwil (M2)» in the cup, «sg kalvenegg-lärchenwil» typed by a coach.
+    Drops case, accents, punctuation, a bracketed addition and the «1» of a club's first team; a
+    second team («… 2») stays its own. Same rule as `opponentKey` in the web
+    (lib/opponent-name.ts)."""
     s = re.sub(r"\([^)]*\)", " ", fold(name))
     s = re.sub(r"[^a-z0-9]+", " ", s).strip()
     return re.sub(r"\s+1$", "", s).replace(" ", "")

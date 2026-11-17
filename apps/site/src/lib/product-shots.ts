@@ -29,10 +29,12 @@ export type Shot = {
   src: string;
   srcSet: string;
   callouts: Callout[];
+  /** where the website writes a word over the picture (the video: «Dein Spiel»), [x, y, w, h] in per cent */
+  lettering?: [number, number, number, number];
 };
 
 export function productShot(name: ShotName): Shot {
-  const m = manifest[name] as { width: number; height: number; callouts: Callout[] };
+  const m = manifest[name] as { width: number; height: number; callouts: Callout[]; lettering?: [number, number, number, number] };
   return {
     name,
     width: m.width,
@@ -40,6 +42,7 @@ export function productShot(name: ShotName): Shot {
     src: `/product/${name}.webp`,
     srcSet: `/product/${name}.webp ${m.width}w, /product/${name}-2x.webp ${m.width * 2}w`,
     callouts: m.callouts,
+    lettering: m.lettering,
   };
 }
 

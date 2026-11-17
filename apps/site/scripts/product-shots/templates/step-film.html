@@ -1,0 +1,139 @@
+<!doctype html>
+<!-- Step «Filmen» (BEFUNDE-2 L9): the hall, and in front of it the phone on its tripod, filming
+     it across, wide. The hall is a real recording blurred past recognition (assets/halle.webp, no
+     person, number, text or logo); the phone is drawn (no maker), its screen shows what it films,
+     with a neutral camera interface: recording, the time, the wide angle (.5) chosen. No words,
+     so the picture works in every language; the website says the rest under it. -->
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../stage.css" />
+<style>
+  .cam {
+    position: absolute;
+    left: 88px;
+    top: 150px;
+    width: 464px;
+    height: 238px;
+    padding: 12px;
+    border-radius: 40px;
+    background: #121315;
+    box-shadow:
+      0 0 0 1px #2b2d31 inset,
+      0 40px 70px -24px rgb(10 13 17 / 0.75),
+      0 14px 26px -12px rgb(10 13 17 / 0.5);
+  }
+  .cam .scr {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: 29px;
+    overflow: hidden;
+    background: url("../assets/halle.webp") 46% 40% / 128% auto no-repeat;
+  }
+  /* a camera interface of no particular maker */
+  .rec {
+    position: absolute;
+    left: 50%;
+    top: 12px;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 4px 10px 4px 8px;
+    border-radius: 7px;
+    background: rgb(214 52 44 / 0.95);
+    color: #fff;
+    font: 600 14px/1 "Plex Mono", ui-monospace, monospace;
+    letter-spacing: 0.04em;
+  }
+  .rec i {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #fff;
+  }
+  .zoom {
+    position: absolute;
+    left: 50%;
+    bottom: 12px;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 6px;
+    padding: 4px;
+    border-radius: 999px;
+    background: rgb(10 13 17 / 0.45);
+    font: 600 13px/1 "Plex Mono", ui-monospace, monospace;
+  }
+  .zoom b {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    color: #fff;
+    background: rgb(10 13 17 / 0.4);
+  }
+  .zoom b.on {
+    color: var(--attn);
+    font-size: 14px;
+  }
+  .shutter {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    width: 44px;
+    height: 44px;
+    margin-top: -22px;
+    border-radius: 50%;
+    border: 3px solid #fff;
+    display: grid;
+    place-items: center;
+  }
+  .shutter i {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    background: #e0453b;
+  }
+  /* thirds, faint, as camera apps draw them */
+  .grid {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(90deg, transparent calc(33.3% - 0.5px), rgb(255 255 255 / 0.28) 0 calc(33.3% + 0.5px), transparent 0 calc(66.6% - 0.5px), rgb(255 255 255 / 0.28) 0 calc(66.6% + 0.5px), transparent 0),
+      linear-gradient(180deg, transparent calc(33.3% - 0.5px), rgb(255 255 255 / 0.28) 0 calc(33.3% + 0.5px), transparent 0 calc(66.6% - 0.5px), rgb(255 255 255 / 0.28) 0 calc(66.6% + 0.5px), transparent 0);
+  }
+  .tripod {
+    position: absolute;
+    inset: 0;
+  }
+</style>
+<div id="stage">
+  <div class="keil" style="--from: 88%; --to: 70%"></div>
+  <svg class="tripod" viewBox="0 0 640 760" aria-hidden="true">
+    <!-- three legs from the head, out of the picture at the bottom -->
+    <g stroke="#121315" stroke-linecap="round">
+      <path d="M320 422 L150 780" stroke-width="13" />
+      <path d="M320 422 L490 780" stroke-width="13" />
+      <path d="M320 422 L322 780" stroke-width="11" stroke="#25272b" />
+      <path d="M214 600 L426 600" stroke-width="5" stroke="#25272b" />
+    </g>
+    <!-- the column and the head -->
+    <rect x="309" y="378" width="22" height="58" rx="5" fill="#25272b" />
+    <circle cx="320" cy="392" r="17" fill="#121315" />
+    <rect x="292" y="380" width="56" height="12" rx="4" fill="#121315" />
+  </svg>
+  <div class="cam">
+    <div class="scr">
+      <div class="grid"></div>
+      <div class="rec"><i></i>00:47:12</div>
+      <div class="shutter"><i></i></div>
+      <div class="zoom"><b class="on">.5</b><b>1×</b><b>2</b></div>
+    </div>
+  </div>
+</div>
+<script src="../stage.js"></script>
+<script>
+  S.stage(640, 760);
+  document.getElementById("stage").classList.add("hall");
+  S.done();
+</script>

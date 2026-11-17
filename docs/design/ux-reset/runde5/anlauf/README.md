@@ -62,12 +62,12 @@ Fehlwürfe vom Kreis gäbe es nur von Hand.
 
 ## Zustände
 
-- **Kein Video** (SG Horgen): Wurf-Kopf mit Resultat und Verlauf aus der Torfolge, Tab «Video»
+- **Kein Video** (SG Blitzfang): Wurf-Kopf mit Resultat und Verlauf aus der Torfolge, Tab «Video»
   ausgegraut, ein leeres Feld «kein Video» mit «Video wählen» und «Link einfügen», das Telegramm.
 - **Feld nicht bestätigt:** Das Video zeigt das erkannte Feld gelb gestrichelt mit vier Ecken.
   «Stimmt das Feld?» mit «Ja, stimmt» und «Ecken verschieben». Bis dahin keine Wege, keine Punkte.
-- **Gegnerfarbe unbekannt:** Thalwil steht grau mit «Farbe offen», im Kopf fragt eine Reihe von
-  Trikotfarben «Welche Farbe trägt Thalwil?». Auf der Taktikkamera sind die Gegnerinnen graue
+- **Gegnerfarbe unbekannt:** Nachtwind steht grau mit «Farbe offen», im Kopf fragt eine Reihe von
+  Trikotfarben «Welche Farbe trägt Nachtwind?». Auf der Taktikkamera sind die Gegnerinnen graue
   Ringe. Nie geraten.
 - **Gleiche Farbe:** Sind die beiden Teams auf dem dunklen Feld zu ähnlich (schwarz gegen schwarz,
   weiss gegen schwarz im Zweittrikot), werden die Gegnerinnen zu grauen Ringen.

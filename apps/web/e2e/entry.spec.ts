@@ -12,7 +12,7 @@ const json = (route: Route, body: unknown, status = 200) => route.fulfill({ stat
 async function federation(page: Page, opts: { delayMs?: number } = {}) {
   await page.route("**/v1/public/teams?*", (route) => {
     const q = new URL(route.request().url()).searchParams.get("q") ?? "";
-    return json(route, /rebhalde/i.test(q) ? [fx.TAKEN, ...fx.HITS] : /seeufer|uferweg/i.test(q) ? fx.HITS : []);
+    return json(route, /kiesenau/i.test(q) ? [fx.TAKEN, ...fx.HITS] : /ulmgarten|murnwil/i.test(q) ? fx.HITS : []);
   });
   await page.route(/\/v1\/public\/clubs\/\d+\/teams\/\d+/, async (route) => {
     const url = new URL(route.request().url());
@@ -28,9 +28,9 @@ test("entry: from the website's question to Spiele, without a password", async (
   test.skip(info.project.name !== "mobile", "the entry is for the phone");
   test.setTimeout(240_000);
   await federation(page);
-  await page.goto("/?q=Seeufer&farbe=gelb");
+  await page.goto("/?q=Ulmgarten&farbe=gelb");
   await page.waitForURL(/\/einstieg\?/);
-  await expect(page.getByLabel("Wie heisst dein Team?")).toHaveValue("Seeufer");
+  await expect(page.getByLabel("Wie heisst dein Team?")).toHaveValue("Ulmgarten");
   const hits = page.getByTestId("entry-hits");
   await expect(hits.getByRole("button").first()).toBeVisible({ timeout: 60_000 });
   await expectAccessible(page);
@@ -69,7 +69,7 @@ test("entry: the wait for the team says what happens, slow federation offers sav
   test.setTimeout(180_000);
   // the federation is slow today: the team's answer comes after 12 s
   await federation(page, { delayMs: 12_000 });
-  await page.goto("/einstieg?q=Seeufer&farbe=rot");
+  await page.goto("/einstieg?q=Ulmgarten&farbe=rot");
   const hits = page.getByTestId("entry-hits");
   await expect(hits.getByRole("button").first()).toBeVisible({ timeout: 60_000 });
   const name = (await hits.getByRole("button").first().locator("span span").first().textContent())!.trim();
@@ -96,7 +96,7 @@ test("entry: a team already in the app, request and a way on", async ({ browser 
     claims.push(route.request().url().split("/").at(-2)!);
     return json(route, fx.accessRequested, 202);
   });
-  await hans.goto("/einstieg?q=Rebhalde&farbe=gelb");
+  await hans.goto("/einstieg?q=Kiesenau&farbe=gelb");
   await hans.getByTestId("entry-hits").getByRole("button").first().click({ timeout: 60_000 });
   await expect(hans.getByTestId("entry-in-app")).toContainText("Dieses Team ist schon in der App", { timeout: 60_000 });
   await hans.getByTestId("entry-save").click();
