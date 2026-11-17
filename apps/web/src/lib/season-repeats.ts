@@ -79,11 +79,11 @@ export function seasonRepeats<T extends GoalRun>(matches: SeasonMatch<T>[]): Rep
   return { conceded, scored, turnovers, matches: matches.length };
 }
 
-// words of a club name that are no place: «Handball Pfannenstiel» is «Pfannenstiel» (review R11)
+// words of a club name that are no place: «Handball Kammhöhe» is «Kammhöhe» (review R11)
 const GENERIC = /^(TV|TSV|BSV|SG|HC|HSG|SC|HV|TSG|KTV|SV|STV|GC|RTV|LK|FC|HB|HG|SPV|Handball|Handballclub|Handballverein|Club|Verein|Team|Sport|Sportverein|Turnverein|Damen|Herren|Junioren|Juniorinnen|Frauen|Männer)$/i;
 
-/** A short name for a bar: the first place name of the opponent (no club prefix, no "Au", no
- * «(M2)», no team number; of «Horgen/Wädenswil» the first place). */
+/** A short name for a bar: the first place name of the opponent (no club prefix, no "Ey", no
+ * «(M2)», no team number; of «Felsegg/Lärchenwil» the first place). */
 export function shortName(opponent: string): string {
   const words = opponent
     .replace(/\([^)]*\)/g, " ")

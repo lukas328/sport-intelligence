@@ -67,7 +67,7 @@ async def test_order_to_payment(
     ops = make_api()
     await ops.register("ops@handball-ops.ch")
     r = await ops.post(
-        "/v1/ops/vouchers", json={"code": "verband-be", "percent_off": 20, "note": "HV Bern"}
+        "/v1/ops/vouchers", json={"code": "verband-be", "percent_off": 20, "note": "HV Kornfeld"}
     )
     assert r.status_code == 201
 

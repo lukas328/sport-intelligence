@@ -63,7 +63,7 @@ test("screens", async ({ page, browser }, info) => {
     await p2.route(`${claimed}/official`, (r) => r.fulfill(json(fx.link)));
     await p2.route(`${claimed}/official/suggestions*`, (r) => r.fulfill(json(fx.suggestions)));
     await p2.route(`${claimed}/matches`, (r) =>
-      r.fulfill(json([{ id: "00000000-0000-4000-8000-00000000a001", team_id: fx.CLAIMED_TEAM, kind: "match", kickoff_at: "2026-11-07T17:00:00Z", opponent_name: "TSV Thalwil", is_home: true, score_own: 26, score_opponent: 18, status: "finished", has_video: false, is_demo: false, competition: null }])),
+      r.fulfill(json([{ id: "00000000-0000-4000-8000-00000000a001", team_id: fx.CLAIMED_TEAM, kind: "match", kickoff_at: "2026-11-07T17:00:00Z", opponent_name: "TSV Farnwil", is_home: true, score_own: 26, score_opponent: 18, status: "finished", has_video: false, is_demo: false, competition: null }])),
     );
     await go(p2, "/onboarding");
     await p2.getByLabel("Team oder Verein").fill("Seeblick");
@@ -114,8 +114,8 @@ test("screens", async ({ page, browser }, info) => {
   await page.request.put(`/v1/orgs/${org}/teams/${team.id}/players/${roster[3]!.player_id}/status`, { headers: h, data: { kind: "absent" } });
   const slots = await (await page.request.get(`/v1/orgs/${org}/teams/${team.id}/seasons/${season.id}/training-slots`)).json();
   if (!slots.length) {
-    await page.request.post(`/v1/orgs/${org}/teams/${team.id}/seasons/${season.id}/training-slots`, { headers: h, data: { weekday: 2, start_time: "19:00", duration_min: 90, location: "Halle Seefeld" } });
-    await page.request.post(`/v1/orgs/${org}/teams/${team.id}/seasons/${season.id}/training-slots`, { headers: h, data: { weekday: 4, start_time: "18:30", duration_min: 90, location: "Halle Seefeld", title: "Abschluss" } });
+    await page.request.post(`/v1/orgs/${org}/teams/${team.id}/seasons/${season.id}/training-slots`, { headers: h, data: { weekday: 2, start_time: "19:00", duration_min: 90, location: "Halle Schilfmatt" } });
+    await page.request.post(`/v1/orgs/${org}/teams/${team.id}/seasons/${season.id}/training-slots`, { headers: h, data: { weekday: 4, start_time: "18:30", duration_min: 90, location: "Halle Schilfmatt", title: "Abschluss" } });
     await page.request.post(`/v1/orgs/${org}/teams/${team.id}/seasons/${season.id}/training-slots/generate`, { headers: h, data: { skip_dates: [] } });
   }
   const drills = (await (await page.request.get(`/v1/orgs/${org}/teams/${team.id}/drills?lang=de-CH`)).json()) as { source: string }[];

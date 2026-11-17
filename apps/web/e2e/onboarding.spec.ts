@@ -26,7 +26,7 @@ test("new club: club, colour and team in three steps, roster from the team page,
 
   // step 1: the club's name; country and crest behind «Mehr» (UX test B27)
   await page.getByTestId("manual-club").click();
-  await page.getByLabel("Vereinsname").fill("HC E2E Zürich");
+  await page.getByLabel("Vereinsname").fill("HC E2E Grossried");
   await page.getByText("Mehr: Land, Wappen").click();
   await page.getByLabel("Wappen (optional)").setInputFiles(path.join(fixtures, "logo.png"));
   await expect(page.getByText("Schritt 1 von 3").first()).toBeVisible();
@@ -107,7 +107,7 @@ test("new club: club, colour and team in three steps, roster from the team page,
   const ctx = await browser.newContext();
   const player = await ctx.newPage();
   await player.goto(link);
-  await expect(player.getByText("Du bist eingeladen zu HC E2E Zürich.")).toBeVisible();
+  await expect(player.getByText("Du bist eingeladen zu HC E2E Grossried.")).toBeVisible();
   await expectAccessible(player);
   await player.getByRole("link", { name: "Konto erstellen und annehmen" }).click();
   await expect(player.getByLabel("E-Mail")).toHaveValue(playerEmail);
@@ -129,7 +129,7 @@ test("new club: club, colour and team in three steps, roster from the team page,
   // settings: pending invitations are empty now, members list shows the player
   await page.getByTestId("account-menu").filter({ visible: true }).click();
   // the account menu (K4): the club by its name under «Verein»
-  await page.getByRole("menuitem", { name: "HC E2E Zürich", exact: true }).click();
+  await page.getByRole("menuitem", { name: "HC E2E Grossried", exact: true }).click();
   await page.getByRole("link", { name: "Teams und Rollen", exact: true }).click();
   // the reload must hit the page of teams and roles, not the club page the click is leaving
   // (it raced the navigation and reloaded the club page, where the member is not listed)

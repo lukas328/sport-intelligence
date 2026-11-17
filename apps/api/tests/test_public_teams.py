@@ -24,10 +24,10 @@ async def test_public_search_needs_no_account_and_shows_no_app_data(
 ) -> None:
     anon = make_api()
     anon.app.state.rate_limiter = MemoryRateLimiter()
-    r = await anon.get("/v1/public/teams", params={"q": "thalwil"})
+    r = await anon.get("/v1/public/teams", params={"q": "farnwil"})
     assert r.status_code == 200, r.text
     first = next(h for h in r.json() if h["official_id"] == TEAM)
-    assert first["club"] == {"id": CLUB, "name": "TV Thalwil", "city": "Thalwil"}
+    assert first["club"] == {"id": CLUB, "name": "TV Farnwil", "city": "Farnwil"}
     # only the federation's data and whether the team is in the app: no ids of the app
     assert set(first) == {"official_id", "name", "league", "group_name", "club", "in_app", "fuzzy"}
     assert first["in_app"] is False
@@ -42,7 +42,7 @@ async def test_public_search_says_when_a_team_is_in_the_app(make_api: Callable[[
     anon.app.state.rate_limiter = MemoryRateLimiter()
     hit = next(
         h
-        for h in (await anon.get("/v1/public/teams", params={"q": "thalwil"})).json()
+        for h in (await anon.get("/v1/public/teams", params={"q": "farnwil"})).json()
         if h["official_id"] == TEAM
     )
     assert hit["in_app"] is True and "team_id" not in hit and "organization_id" not in hit
@@ -54,7 +54,7 @@ async def test_public_preview_from_the_federations_data(make_api: Callable[[], A
     r = await anon.get(f"/v1/public/clubs/{CLUB}/teams/{TEAM}")
     assert r.status_code == 200, r.text
     p = r.json()
-    assert p["name"] == "TV Thalwil" and p["club"]["name"] == "TV Thalwil"
+    assert p["name"] == "TV Farnwil" and p["club"]["name"] == "TV Farnwil"
     assert p["played"] > 0 and p["last"] is not None
     assert p["rank"] is not None and any(row["own"] for row in p["table"])
     assert all(set(s) == {"name", "goals"} for s in p["scorers"])
@@ -125,17 +125,17 @@ async def test_public_config_gives_the_website_and_support_addresses(
 
 
 def test_a_typo_is_a_letter_away() -> None:
-    """UX test N10: «Wädenswill» and «Thalwill» find their clubs."""
+    """UX test N10: «Lärchenwill» and «Farnwill» find their clubs."""
     from handball_api.services.public_teams import _near
 
-    assert _near("wadenswill", "wadenswil") and _near("thalwill", "thalwil")
-    assert _near("staefa", "stafa") is False or _near("stafa", "stafa")
-    assert not _near("uster", "zuerich")
+    assert _near("larchenwill", "larchenwil") and _near("farnwill", "farnwil")
+    assert _near("saelmatt", "salmatt") is False or _near("salmatt", "salmatt")
+    assert not _near("brunnmatt", "grossried")
 
 
 def test_team_words_do_not_hide_the_club() -> None:
-    """UX test N27: «Wädenswil Herren 1» searches the club by «Wädenswil»."""
+    """UX test N27: «Lärchenwil Herren 1» searches the club by «Lärchenwil»."""
     from handball_api.services.public_teams import TEAM_WORD
 
     assert all(TEAM_WORD.fullmatch(w) for w in ("herren", "1", "u15", "damen"))
-    assert not TEAM_WORD.fullmatch("wadenswil")
+    assert not TEAM_WORD.fullmatch("larchenwil")

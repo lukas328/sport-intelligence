@@ -99,5 +99,5 @@ export const suggestions = [
   // no official game yet: unticked
   suggestion("3", "roster_add", { first_name: "Nico", last_name: "Zemp", jersey_number: 23, appearances: 0, stats: null }),
   suggestion("4", "report", { opponent: "TV Talwiese", is_home: true, kickoff_at: "2026-11-01T17:00:00Z", score_own: 27, score_opponent: 25 }),
-  suggestion("5", "match_new", { opponent: "HSG Rheinau", is_home: false, kickoff_at: "2026-11-22T18:30:00Z" }),
+  suggestion("5", "match_new", { opponent: "HSG Auenfeld", is_home: false, kickoff_at: "2026-11-22T18:30:00Z" }),
 ];

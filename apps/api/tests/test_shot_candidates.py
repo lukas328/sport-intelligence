@@ -80,7 +80,7 @@ async def test_shot_candidates_with_the_official_report(
     api = make_api()
     ids = await setup_club(api)
     org = ids["org"]
-    m = await new_match(api, ids, opponent_name="HC Arbon")  # home: we are HSG Leimental
+    m = await new_match(api, ids, opponent_name="HC Kalmoos")  # home: we are HSG Haselgrund
     base = f"/v1/orgs/{org}/matches/{m['id']}"
     url = f"{base}/goal-candidates"
     shot_url = f"{base}/shot-candidates"
@@ -258,7 +258,7 @@ async def test_shots_confirmed_before_the_report_are_taken_over(
     the report entry takes the video time and the candidate's own event goes (one save)."""
     api = make_api()
     ids = await setup_club(api)
-    m = await new_match(api, ids, opponent_name="HC Arbon")
+    m = await new_match(api, ids, opponent_name="HC Kalmoos")
     base = f"/v1/orgs/{ids['org']}/matches/{m['id']}"
     await upload(api, ids, m["id"], b"v" * 100)
     jobs: MemoryJobQueue = api.app.state.jobs

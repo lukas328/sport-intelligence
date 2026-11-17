@@ -8,7 +8,7 @@ import { ASK_SHIRTS } from "@/lib/color";
 
 
 /**
- * «Welche Farbe trägt Thalwil?» in the Wurf head (SPEC 7.13, Gegnerfarbe unbekannt): five shirts,
+ * «Welche Farbe trägt Farnwil?» in the Wurf head (SPEC 7.13, Gegnerfarbe unbekannt): five shirts,
  * one tap saves the colour for this match and the next one against the opponent. Never guessed.
  */
 export function AskColour({ orgId, matchId, opponent }: { orgId: string; matchId: string; opponent: string }) {

@@ -1,8 +1,9 @@
 """Clubs and teams from the official league data (docs/plans/federation-onboarding.md).
 
 The network is never used: handball.ch answers come from tests/fixtures/handball_ch, recorded
-from the real match centre (TV Thalwil, men's 2nd league, season 2026/27) with pseudonymised
-player names. Tests change copies of them to simulate moved games, new players or a new season.
+from the real match centre (a men's 2nd league team, season 2026/27) with invented names for every
+club, place, hall and person (TV Farnwil and its opponents do not exist). Tests change copies of
+them to simulate moved games, new players or a new season.
 """
 
 from __future__ import annotations
@@ -91,10 +92,10 @@ def hch() -> Iterator[Recorded]:
     handball_ch.set_transport(None)
 
 
-async def coach(make_api: Callable[[], Api], email: str = "coach@tvt-handball.ch") -> Api:
+async def coach(make_api: Callable[[], Api], email: str = "coach@tv-farnwil.example.org") -> Api:
     api = make_api()
     api.app.state.rate_limiter = MemoryRateLimiter()
-    assert (await api.register(email, name="Coach Carter")).status_code == 201
+    assert (await api.register(email, name="Coach Imhof")).status_code == 201
     return api
 
 
@@ -142,21 +143,21 @@ async def test_client_parses_caches_and_rests_after_errors(hch: Recorded) -> Non
     assert (season.id, season.label, season.current) == (2026, "2026/27", True)
     detail = await handball_ch.club(None, CLUB, 2026)
     assert detail is not None
-    assert detail.website == "https://www.tvt-handball.ch/"
-    assert handball_ch.mail_domains(detail) == ["tvt-handball.ch"]
+    assert detail.website == "https://www.tv-farnwil.example.org/"
+    assert handball_ch.mail_domains(detail) == ["tv-farnwil.example.org"]
     first = next(t for t in detail.teams if t.id == TEAM)
-    assert (first.name, first.league, first.group_id) == ("TV Thalwil", "Männer 2. Liga", GROUP)
+    assert (first.name, first.league, first.group_id) == ("TV Farnwil", "Männer 2. Liga", GROUP)
     games = await handball_ch.team_games(None, TEAM)
     assert len(games) == GAMES and sum(g.played for g in games) == PLAYED
     g = next(g for g in games if g.id == 509192)
     assert (g.home_name, g.away_name, g.home_score, g.away_score) == (
-        "TV Thalwil",
-        "Grün-Weiss Effretikon 1",
+        "TV Farnwil",
+        "Grün-Weiss Erlikofen 1",
         26,
         19,
     )
     assert g.kickoff_at.isoformat() == "2026-09-27T17:00:00+02:00"  # Swiss local time
-    assert g.venue == "Thalwil Sonnenberg"
+    assert g.venue == "Farnwil Birkenhalde"
     # team officials (placeholder ids shared across teams) are not players
     appearances = await handball_ch.game_players(None, 509192)
     assert appearances and all(a.player_id < 10_000_000 for a in appearances)
@@ -221,30 +222,30 @@ async def test_client_spaces_requests_without_waiting_for_slow_answers(hch: Reco
 
 async def test_search_lists_registered_teams(make_api: Callable[[], Api], hch: Recorded) -> None:
     api = await coach(make_api)
-    r = await api.get("/v1/official/teams", params={"q": "thalwil"})
+    r = await api.get("/v1/official/teams", params={"q": "farnwil"})
     assert r.status_code == 200, r.text
     hits = r.json()
     first = next(h for h in hits if h["official_id"] == TEAM)
-    assert first["name"] == "TV Thalwil"
+    assert first["name"] == "TV Farnwil"
     assert first["league"] == "Männer 2. Liga"
-    assert first["club"] == {"id": CLUB, "name": "TV Thalwil", "city": "Thalwil"}
+    assert first["club"] == {"id": CLUB, "name": "TV Farnwil", "city": "Farnwil"}
     assert first["status"] == "available" and first["team_id"] is None
     assert len(hits) >= 5  # men, women, youth teams of the club
     # the answers are cached: a second search does not ask handball.ch again
     calls = len(hch.calls)
-    assert (await api.get("/v1/official/teams", params={"q": "Thalwil"})).status_code == 200
+    assert (await api.get("/v1/official/teams", params={"q": "Farnwil"})).status_code == 200
     assert len(hch.calls) == calls
     assert (await api.get("/v1/official/teams", params={"q": "zzzzqqq"})).json() == []
     r = await api.get("/v1/official/teams", params={"q": "th"})
     assert r.status_code == 422 and r.json()["type"].endswith("query-too-short")
     anon = make_api()
-    assert (await anon.get("/v1/official/teams", params={"q": "thalwil"})).status_code == 401
+    assert (await anon.get("/v1/official/teams", params={"q": "farnwil"})).status_code == 401
 
 
 async def test_search_when_handball_ch_is_down(make_api: Callable[[], Api], hch: Recorded) -> None:
     api = await coach(make_api)
     hch.down = True
-    r = await api.get("/v1/official/teams", params={"q": "thalwil"})
+    r = await api.get("/v1/official/teams", params={"q": "farnwil"})
     assert r.status_code == 503 and r.json()["type"].endswith("official-unavailable")
 
 
@@ -267,7 +268,7 @@ async def test_claim_creates_club_and_team_and_prefills(
 
     org = (await api.get(f"/v1/orgs/{c['organization_id']}")).json()
     assert (org["name"], org["official_club_id"], org["verification"]) == (
-        "TV Thalwil",
+        "TV Farnwil",
         CLUB,
         "unverified",
     )
@@ -279,16 +280,16 @@ async def test_claim_creates_club_and_team_and_prefills(
     matches = (await api.get(base(c) + "/matches")).json()
     assert len(matches) == GAMES
     m = next(x for x in matches if x["kickoff_at"].startswith("2026-09-27"))
-    assert m["opponent_name"] == "Grün-Weiss Effretikon 1"
+    assert m["opponent_name"] == "Grün-Weiss Erlikofen 1"
     assert m["is_home"] is True and (m["score_own"], m["score_opponent"]) == (26, 19)
     assert m["kickoff_at"].startswith("2026-09-27T15:00:00")
-    away = [x for x in matches if x["opponent_name"] == "SG Horgen/Wädenswil 1"]
+    away = [x for x in matches if x["opponent_name"] == "SG Felsegg/Lärchenwil 1"]
     assert {x["is_home"] for x in away} == {True, False}
     row = await owner_conn.fetchrow(
         "SELECT venue, official_game_id, source FROM matches WHERE id = $1::uuid", m["id"]
     )
     assert dict(row) == {
-        "venue": "Thalwil Sonnenberg",
+        "venue": "Farnwil Birkenhalde",
         "official_game_id": 509192,
         "source": "official",
     }
@@ -368,7 +369,7 @@ async def test_duplicate_claim_becomes_access_request(
     second = await coach(make_api, "other@example.org")
     hit = next(
         h
-        for h in (await second.get("/v1/official/teams", params={"q": "thalwil"})).json()
+        for h in (await second.get("/v1/official/teams", params={"q": "farnwil"})).json()
         if h["official_id"] == TEAM
     )
     assert hit["status"] == "claimed" and hit["team_id"] == c["team_id"]
@@ -380,7 +381,7 @@ async def test_duplicate_claim_becomes_access_request(
     assert other["status"] == "access_requested"
     assert other["access_request_id"] == req["access_request_id"]
     mine = (await second.get("/v1/me/access-requests")).json()
-    assert [(m["organization_name"], m["status"]) for m in mine] == [("TV Thalwil", "pending")]
+    assert [(m["organization_name"], m["status"]) for m in mine] == [("TV Farnwil", "pending")]
     # still only one organisation for the club, and the second person is not in it yet
     assert (await second.get("/v1/me")).json()["organizations"] == []
 
@@ -417,7 +418,7 @@ async def test_access_request_for_a_new_team_creates_it(
     assert (team["official_team_id"], team["my_role"], team["name"]) == (
         41042,
         "coach",
-        "TV Thalwil 2",
+        "TV Farnwil 2",
     )
     # a declined request
     third = await coach(make_api, "three@example.org")
@@ -698,7 +699,7 @@ async def test_join_request_matches_roster_and_coach_approves(
     joiner = await coach(make_api, "luca@example.org")
     hit = next(
         h
-        for h in (await joiner.get("/v1/official/teams", params={"q": "thalwil"})).json()
+        for h in (await joiner.get("/v1/official/teams", params={"q": "farnwil"})).json()
         if h["official_id"] == TEAM
     )
     r = await joiner.post(
@@ -708,8 +709,8 @@ async def test_join_request_matches_roster_and_coach_approves(
     assert r.status_code == 201, r.text
     req = r.json()
     assert (req["team_name"], req["organization_name"], req["status"]) == (
-        "TV Thalwil",
-        "TV Thalwil",
+        "TV Farnwil",
+        "TV Farnwil",
         "pending",
     )
     r = await joiner.post(
@@ -884,7 +885,7 @@ async def test_permissions_other_club_player_and_unverified_club(
     # the claimant cannot confirm their own club
     r = await api.post(f"/v1/orgs/{c['organization_id']}/verification/confirm")
     assert r.status_code == 403 and r.json()["type"].endswith("second-person-required")
-    # mail domain of the club: the admin's confirmed address at tvt-handball.ch
+    # mail domain of the club: the admin's confirmed address at tv-farnwil.example.org
     await owner_conn.execute("UPDATE users SET email_verified_at = now()")
     r = await api.get(f"/v1/orgs/{c['organization_id']}/verification")
     assert r.json()["verification"] == "verified" and r.json()["verified_via"] == "mail_domain"
@@ -899,7 +900,7 @@ async def test_verification_by_second_official_and_operator(
     org = c["organization_id"]
     r = await api.get(f"/v1/orgs/{org}/verification")
     assert r.json()["verification"] == "unverified"
-    assert r.json()["club_domains"] == ["tvt-handball.ch"]
+    assert r.json()["club_domains"] == ["tv-farnwil.example.org"]
     # who took the club over needs a second person; that person sees the button (review R21)
     assert r.json()["my_part"] == "claimed"
     second = await invite(api, make_api, outbox, c, "coach")  # the invitation confirms the mail
@@ -1318,8 +1319,8 @@ def test_public_mail_providers_prove_no_club_role() -> None:
     from handball_api.services.org_verification import club_domains
 
     # a club listed with a free-mail address: anyone could sign up there
-    assert club_domains(["bluemail.ch", "GMX.at", "hotmail.de", "tvt-handball.ch"]) == [
-        "tvt-handball.ch"
+    assert club_domains(["bluemail.ch", "GMX.at", "hotmail.de", "tv-farnwil.example.org"]) == [
+        "tv-farnwil.example.org"
     ]
 
 

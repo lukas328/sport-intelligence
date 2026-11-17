@@ -1,6 +1,6 @@
 /**
  * The name of our side in heads, telegram and camera (UX test H11): the team's own name when it
- * is one («SG Wädenswil/Horgen», a joint team), else the club's («HC Zürichsee» for «Herren 1»).
+ * is one («SG Lärchenwil/Felsegg», a joint team), else the club's («HC Zürichsee» for «Herren 1»).
  */
 const GENERIC = /^(herren|damen|männer|frauen|junior(en|innen)?|mixed|u\s?\d+|[a-e]-junior|hommes|femmes|men|women)\b/i;
 
@@ -27,8 +27,8 @@ const fold = (s: string) =>
     .trim();
 
 /**
- * The club's name in the frame only when it says more than the team's (finding K7): \u00abTV Thalwil\u00bb
- * and the team \u00abTV Thalwil\u00bb show the name once; a team \u00abTV Thalwil 2\u00bb already carries the club.
+ * The club's name in the frame only when it says more than the team's (finding K7): \u00abTV Farnwil\u00bb
+ * and the team \u00abTV Farnwil\u00bb show the name once; a team \u00abTV Farnwil 2\u00bb already carries the club.
  * Null: leave the club's name out (the crest and the team stay).
  */
 export function clubNameShown(club: string, team: string | null | undefined): string | null {

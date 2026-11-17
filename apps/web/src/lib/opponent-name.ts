@@ -1,7 +1,7 @@
 /**
  * One opponent, several spellings (review R7): handball.ch writes the same team as
- * «SG Horgen/Wädenswil 1» in the league and «SG Horgen/Wädenswil (M2)» in the cup, and a coach
- * may type «sg horgen-wädenswil». The key drops case, accents, punctuation, a bracketed
+ * «SG Felsegg/Lärchenwil 1» in the league and «SG Felsegg/Lärchenwil (M2)» in the cup, and a coach
+ * may type «sg felsegg-lärchenwil». The key drops case, accents, punctuation, a bracketed
  * addition and the «1» of a club's first team; a second team («… 2») stays a team of its own.
  * Same rule as `opponent_key` in the API (integrations/handball_ch.py).
  */
@@ -26,8 +26,8 @@ export function sameOpponent(a: string | null | undefined, b: string | null | un
 
 /**
  * The row of a team in a league table: the same key first; otherwise one row whose name contains
- * the other (tables sometimes shorten names). Two such rows are no answer: «HC Thalwil» must not
- * pick «HC Thalwil 2» over «HC Thalwil».
+ * the other (tables sometimes shorten names). Two such rows are no answer: «HC Farnwil» must not
+ * pick «HC Farnwil 2» over «HC Farnwil».
  */
 export function findTeamRow<R extends { name?: string | null }>(
   rows: R[],

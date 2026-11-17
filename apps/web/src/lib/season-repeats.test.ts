@@ -36,14 +36,14 @@ describe("seasonRepeats", () => {
     expect(seasonRepeats([m("a", [], 10), missing, m("c", [], 11)]).turnovers).toBeNull();
   });
   it("shortens opponent names", () => {
-    expect(shortName("BSV Stäfa-Uerikon")).toBe("Stäfa");
-    expect(shortName("TSV Thalwil-Gattikon")).toBe("Thalwil");
-    expect(shortName("TV Rüti")).toBe("Rüti");
-    expect(shortName("TV Au-Wädenswil")).toBe("Wädenswil");
-    // review R11: no «Handball», no «Horgen/.»
-    expect(shortName("Handball Pfannenstiel")).toBe("Pfannenstiel");
-    expect(shortName("SG Horgen/Wädenswil (M2)")).toBe("Horgen");
-    expect(shortName("HC Goldach-Rorschach 2")).toBe("Goldach");
+    expect(shortName("BSV Sälmatt-Uferholz")).toBe("Sälmatt");
+    expect(shortName("TSV Farnwil-Rietli")).toBe("Farnwil");
+    expect(shortName("TV Mürli")).toBe("Mürli");
+    expect(shortName("TV Ey-Lärchenwil")).toBe("Lärchenwil");
+    // review R11: no «Handball», no «Felsegg/.»
+    expect(shortName("Handball Kammhöhe")).toBe("Kammhöhe");
+    expect(shortName("SG Felsegg/Lärchenwil (M2)")).toBe("Felsegg");
+    expect(shortName("HC Gerstach-Seefurt 2")).toBe("Gerstach");
     expect(shortName("SG")).toBe("SG");
   });
 });

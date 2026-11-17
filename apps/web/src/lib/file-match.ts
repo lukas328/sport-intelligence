@@ -1,6 +1,6 @@
 /**
  * Does a second file belong to the same match (second round A5)? Two different games ended up in
- * one match (Horgen and Konstanz). Several files per match are wanted (halves, a split
+ * one match (Felsegg and Moorfeld). Several files per match are wanted (halves, a split
  * recording), so this only warns: when the file names name different teams, or different dates.
  */
 
@@ -15,7 +15,7 @@ const NOISE = new Set([
 ]);
 
 /** The words of a file name that may name a team or a place: letters only, CamelCase split
- * (HSGKonstanz: HSG, Konstanz), at least three letters, without the usual noise. */
+ * (HSGMoorfeld: HSG, Moorfeld), at least three letters, without the usual noise. */
 export function nameWords(filename: string): string[] {
   const base = filename.replace(/\.[a-z0-9]{2,5}$/i, "");
   const words = base

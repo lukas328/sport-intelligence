@@ -18,16 +18,16 @@ PNG = b"\x89PNG\r\n\x1a\n" + b"\x00" * 64
 async def test_create_org_makes_creator_admin(make_api: Callable[[], Api]) -> None:
     api = make_api()
     await api.register("admin@hc-test.ch")
-    r = await api.post("/v1/orgs", json={"name": "  HC Wädenswil ", "primary_color": "#AABBCC"})
+    r = await api.post("/v1/orgs", json={"name": "  HC Lärchenwil ", "primary_color": "#AABBCC"})
     assert r.status_code == 201
     org = r.json()
-    assert org["name"] == "HC Wädenswil"
+    assert org["name"] == "HC Lärchenwil"
     assert org["primary_color"] == "#aabbcc"
     assert org["my_role"] == "org_admin"
     assert org["plan"] == "free"
     assert org["data_region"] == "ch"
     me = (await api.get("/v1/me")).json()
-    assert me["organizations"] == [{"id": org["id"], "name": "HC Wädenswil", "role": "org_admin"}]
+    assert me["organizations"] == [{"id": org["id"], "name": "HC Lärchenwil", "role": "org_admin"}]
 
 
 async def test_org_validation(make_api: Callable[[], Api]) -> None:

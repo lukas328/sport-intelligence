@@ -57,7 +57,7 @@ async def test_attach_list_open_note_and_delete(make_api: Callable[[], Api]) -> 
     status, body = await _attach(api, org, m["id"], PDF, "application/pdf")
     assert status == 200, body
     assert body["status"] == "ready" and body["note"] == "Papier" and body["is_image"] is False
-    assert body["created_by"] == "Coach Carter"
+    assert body["created_by"] == "Coach Imhof"
     status, photo = await _attach(api, org, m["id"], JPEG, "image/jpeg", name="foto.jpg")
     assert status == 200 and photo["is_image"]
     listed = (await api.get(f"/v1/orgs/{org}/matches/{m['id']}/attachments")).json()
