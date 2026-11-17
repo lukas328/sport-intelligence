@@ -102,6 +102,13 @@ def test_little_found_names_the_reason() -> None:
     assert checks.little_found(asset(odd), False) == "court"
     few = {"signals": {"detector_few_people": True}}
     assert checks.little_found(asset(few), True) == "few_people"
+    # the fallback still found moments: the analysis saw the play, the moments are asked
+    seen = {**few, "goal_candidates": {"goal_candidates": 12, "shot_candidates": 3}}
+    assert checks.little_found(asset(seen), True) is None
+    # the fallback detector still followed the players
+    followed = {**few, "stats": {"tracks": 35}}
+    assert checks.little_found(asset(followed), True) is None
+    assert checks.little_found(asset({**few, "stats": {"tracks": 2}}), True) == "few_people"
     idle = {"signals": {"play_s": 40.0, "duration_s": 1200.0}}
     assert checks.little_found(asset(idle), True) == "no_play"
     played = {"signals": {"play_s": 900.0, "duration_s": 1200.0}}
@@ -263,7 +270,7 @@ async def test_a_goal_already_known_is_not_asked(make_api: Callable[[], Api]) ->
             {"needs_calibration": True, "calibration_info": {"reason": "camera_motion"}},
             "camera_motion",
         ),
-        ({"detector_few_people": True}, "few_people"),
+        ({"detector_few_people": True, "goal_candidates": None}, "few_people"),
         ({"goal_candidates": {**MANY, "play_s": 12.0}}, "no_play"),
     ],
 )
@@ -291,8 +298,10 @@ async def test_found_little_asks_nothing_and_says_why(
         "duration_s": None,
         "limit_s": None,
     }
-    # the moments stay reachable behind «Mehr prüfen», never counted
-    assert len([c for c in g["more_checks"] if c["kind"] == "goal"]) == 30
+    # the moments stay reachable behind «Mehr prüfen», never counted (none were found when the
+    # detector saw almost nobody)
+    moments = 0 if reason == "few_people" else 30
+    assert len([c for c in g["more_checks"] if c["kind"] == "goal"]) == moments
     note = await _note(api, org)
     assert note["params"].get("questions", 0) == len(g["checks"])
 

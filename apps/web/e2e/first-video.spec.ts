@@ -48,7 +48,7 @@ test("start after a first video without goals: one sentence, one step", async ({
   await expect(page.getByTestId("match-list")).toContainText(/Analyse fertig, (1 Frage|\d+ Fragen) offen/);
   await expect(page.getByTestId("match-list")).not.toContainText("Kein Ding");
   // the start and Prüfen count the same questions
-  const n = Number((await step.locator("p").textContent())!.match(/(\d+) Frage/)![1]);
+  const n = Number((await step.locator("p").textContent())!.match(/(\d+) gezielte Frage/)![1]);
   const g = await (await page.request.get(`/v1/orgs/${org}/matches/${match.id}/graphics`)).json();
   expect(g.checks.length).toBe(n);
   await expectAccessible(page);

@@ -44,6 +44,8 @@ PER_MISSING_GOAL = 1.5  # goal questions per goal of the result without a place 
 SKIPPED = "checks_skipped"  # report_extra: keys of the court and throw-off questions left
 OPEN = ("open", "skipped")  # a skipped candidate is still unanswered
 # almost no play: less than this many seconds, or this share of the video
+# a handball match has at least a dozen people on court: fewer tracks than this is «almost nobody»
+LITTLE_MIN_TRACKS = 6
 LITTLE_PLAY_S = 30.0
 LITTLE_PLAY_SHARE = 0.1
 LITTLE_MIN_VIDEO_S = 60.0  # a shorter clip is not judged by its play time
@@ -114,7 +116,8 @@ def signals(r: dict[str, Any]) -> dict[str, Any]:
 def little_found(asset: VideoAsset | None, court_ok: bool | None) -> str | None:
     """Why the analysis of this file found too little to ask about, or None: the court not
     recognised (and not set by a person: then camera_motion, no_floor, flat_view, few_people or
-    court), the detector saw almost nobody (few_people), almost no play (no_play)."""
+    court), the detector saw almost nobody and nothing was found (few_people), almost no play
+    (no_play)."""
     if asset is None:
         return None
     a = asset.analysis or {}
@@ -125,7 +128,19 @@ def little_found(asset: VideoAsset | None, court_ok: bool | None) -> str | None:
     sig = a.get("signals")
     if not isinstance(sig, dict):
         return None
-    if sig.get("detector_few_people"):
+    # the learned detector can miss people while the fallback still follows the players and finds
+    # moments (synthetic or unusual footage): «saw almost nobody» only counts when the analysis
+    # also followed almost nobody and found no goal moment
+    found = a.get("goal_candidates")
+    moments = found.get("goal_candidates") if isinstance(found, dict) else None
+    stats = a.get("stats")
+    tracks = stats.get("tracks") if isinstance(stats, dict) else None
+    followed = isinstance(tracks, int) and tracks >= LITTLE_MIN_TRACKS
+    if (
+        sig.get("detector_few_people")
+        and not followed
+        and not (isinstance(moments, int) and moments > 0)
+    ):
         return "few_people"
     play, length = sig.get("play_s"), sig.get("duration_s")
     if (
