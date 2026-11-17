@@ -20,6 +20,7 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
+from handball_api.core.colors import FALLBACK_CLUB_COLOUR
 from handball_api.core.db import Base, EntityMixin, TenantMixin
 from handball_api.models._types import str_enum
 from handball_api.models.enums import ClipSource, JobStatus, MatchStatus, VideoRole, VideoStatus
@@ -71,7 +72,8 @@ class Match(Base, EntityMixin, TenantMixin):
     competition: Mapped[str | None] = mapped_column(String(120))
     venue: Mapped[str | None] = mapped_column(String(160))
     # Kit colours help team assignment in the pipeline (BRIEF 7.2 stage 5)
-    kit_own: Mapped[str] = mapped_column(String(7), nullable=False, default="#0b6bcb")
+    # the club's colour when the match is made (services/matches.py); the fallback without one
+    kit_own: Mapped[str] = mapped_column(String(7), nullable=False, default=FALLBACK_CLUB_COLOUR)
     kit_own_gk: Mapped[str] = mapped_column(String(7), nullable=False, default="#f59e0b")
     kit_opponent: Mapped[str] = mapped_column(String(7), nullable=False, default="#dc2626")
     kit_opponent_gk: Mapped[str] = mapped_column(String(7), nullable=False, default="#16a34a")

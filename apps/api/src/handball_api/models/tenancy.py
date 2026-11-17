@@ -17,6 +17,7 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import ARRAY, CITEXT, JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
+from handball_api.core.colors import club_colour, club_colour_chosen
 from handball_api.core.db import Base, EntityMixin, TenantMixin
 from handball_api.models._types import str_enum
 from handball_api.models.enums import DataRegion, OrgRole, Plan, TeamGender, TeamRole
@@ -33,7 +34,8 @@ class Organization(Base, EntityMixin):
     name: Mapped[str] = mapped_column(String(120), nullable=False)
     country: Mapped[str] = mapped_column(String(2), nullable=False, default="CH")
     logo_key: Mapped[str | None] = mapped_column(String(300))
-    primary_color: Mapped[str] = mapped_column(String(7), nullable=False, default="#0b6bcb")
+    # None: the club has not chosen its colour yet (E8); `club_colour` is what it is shown in
+    primary_color: Mapped[str | None] = mapped_column(String(7))
     secondary_color: Mapped[str] = mapped_column(String(7), nullable=False, default="#ffffff")
     plan: Mapped[Plan] = mapped_column(str_enum(Plan), nullable=False, default=Plan.FREE)
     data_region: Mapped[DataRegion] = mapped_column(
@@ -67,6 +69,15 @@ class Organization(Base, EntityMixin):
     claimed_by_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("users.id", ondelete="SET NULL"), index=True
     )
+
+    @property
+    def club_colour(self) -> str:
+        """The club's own colour, or the neutral fallback while it has not chosen one."""
+        return club_colour(self.primary_color)
+
+    @property
+    def colour_chosen(self) -> bool:
+        return club_colour_chosen(self.primary_color)
 
 
 class StripeEvent(Base):

@@ -504,7 +504,7 @@ async def _new_match(
     # our shirts: the club's colour, as for a match made by hand (review R16: synced matches
     # showed the default blue at the upload of a club in green)
     org = await ctx.db.get(Organization, team.organization_id)
-    kit = {"kit_own": org.primary_color} if org is not None and org.primary_color else {}
+    kit = {"kit_own": org.club_colour} if org is not None else {}
     m = Match(
         organization_id=team.organization_id,
         team_id=team.id,

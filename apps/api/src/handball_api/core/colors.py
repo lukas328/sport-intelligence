@@ -8,6 +8,24 @@ from __future__ import annotations
 
 SIMILAR_DELTA_E = 25.0
 
+# The club colour (decision E8, 17.11.2026). A club that has not chosen one shows a neutral slate:
+# no club picks it, it is not the demo club's green, and white text on it reaches 7.6:1 (the app
+# head). Until then every new club was stored with blue #0b6bcb, nobody's choice: such rows count
+# as «not chosen» (no rewrite of existing rows). apps/web/src/lib/color.ts holds the same values.
+FALLBACK_CLUB_COLOUR = "#475569"
+LEGACY_DEFAULT_CLUB_COLOUR = "#0b6bcb"
+
+
+def club_colour_chosen(stored: str | None) -> bool:
+    """Whether the club picked its colour: stored, and not the blue every club got before."""
+    return bool(stored) and str(stored).lower() != LEGACY_DEFAULT_CLUB_COLOUR
+
+
+def club_colour(stored: str | None) -> str:
+    """The colour the club is shown in: its own, or the neutral fallback."""
+    return str(stored).lower() if stored and club_colour_chosen(stored) else FALLBACK_CLUB_COLOUR
+
+
 KIT_PAIRS = (
     ("own", "opponent"),
     ("own", "opponent_gk"),
