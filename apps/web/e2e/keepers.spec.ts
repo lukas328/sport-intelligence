@@ -1,14 +1,12 @@
 import { expect, test } from "@playwright/test";
-import { register, uniqueEmail } from "./helpers";
+import { clubByHand, register, uniqueEmail } from "./helpers";
 
 /** A team has more than one goalkeeper: the block «Wer steht im Tor?» stays open for every keeper
  * and folds into one line after «Fertig» (Lukas, 17.11.: it closed after the first keeper). */
 test("squad: mark two goalkeepers, take one out again", async ({ page, context }, info) => {
   test.skip(info.project.name !== "chromium", "runs once");
   await register(page, uniqueEmail("keepers"), "Coach Tor");
-  await page.getByTestId("manual-club").click();
-  await page.getByLabel("Vereinsname").fill("HC Torlinie");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+  await clubByHand(page, "HC Torlinie");
   await page.getByLabel("Teamname").fill("Herren 2");
   await page.getByRole("button", { name: "Zum Team" }).click();
   await page.waitForURL(/\/teams\/[^/]+/);
