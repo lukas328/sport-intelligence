@@ -33,12 +33,14 @@ test("collection: note, order, remove, rename, share with a lasting link, revoke
   await items.nth(2).getByRole("button", { name: "Nach oben" }).click();
   await expect(items.nth(1)).toContainText("Nur zwei laufen zurück!");
   // removing can be taken back for a few seconds (UX test N30)
-  await items.nth(0).getByTestId("item-remove").click();
+  await items.nth(0).getByTestId("item-more").click();
+  await page.getByTestId("item-remove").click();
   await expect(items).toHaveCount(2);
   await page.getByTestId("undo-remove").getByRole("button", { name: "Rückgängig" }).click();
   await expect(items).toHaveCount(3);
   await expect(items.nth(0)).toContainText("Erst schauen");
-  await items.nth(0).getByTestId("item-remove").click();
+  await items.nth(0).getByTestId("item-more").click();
+  await page.getByTestId("item-remove").click();
   await expect(items).toHaveCount(2);
   await expect(page.getByTestId("collection-editor")).toHaveAttribute("aria-busy", "false");
   await page.reload();
@@ -46,7 +48,8 @@ test("collection: note, order, remove, rename, share with a lasting link, revoke
   await expect(items.nth(0)).toContainText("Nur zwei laufen zurück!");
 
   // a note right where it belongs, after the first entry (UX test N29)
-  await items.nth(0).getByTestId("item-note-after").click();
+  await items.nth(0).getByTestId("item-more").click();
+  await page.getByTestId("item-note-after").click();
   await page.getByLabel("Notiz").fill("Dazwischen");
   await page.getByRole("button", { name: "Notiz speichern" }).click();
   await expect(items).toHaveCount(3);

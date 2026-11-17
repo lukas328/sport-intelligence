@@ -147,7 +147,8 @@ async def create_assignment(ctx: Ctx, team_id: uuid.UUID, data: AssignmentCreate
         {"title": a.title, "team": team.name, "due_at": a.due_at.isoformat() if a.due_at else None},
         link,
     )
-    if data.notify_email:
+    # «Zusätzlich per E-Mail» only while mails reach people (L2); the bell always rings
+    if data.notify_email and ctx.settings.mail_delivers:
         coach = await ctx.db.get(User, ctx.user_id) if ctx.user_id else None
         users = (await ctx.db.scalars(select(User).where(User.id.in_(recipients)))).all()
         for u in users:

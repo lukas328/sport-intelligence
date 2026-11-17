@@ -145,9 +145,9 @@ test("suggestion inbox: squad with a doubled number, a report to import, the tab
   await expectAccessible(page);
 
   await squad.getByLabel("Rückennummer von Jonas Amrein").fill("17");
-  await expect(page.getByTestId("take-squad")).toHaveText("2 Spieler/innen übernehmen");
+  await expect(page.getByTestId("take-squad")).toHaveText("2 Spieler übernehmen");
   await page.getByTestId("take-squad").click();
-  await expect(page.getByText("2 Spieler/innen im Team.")).toBeVisible();
+  await expect(page.getByText("2 Spieler im Team.")).toBeVisible();
   expect(accepted.map((a) => a.body)).toEqual([{ jersey_number: 7 }, { jersey_number: 17 }]);
   await expect(squad.getByTestId("roster-suggestion")).toHaveCount(1);
 

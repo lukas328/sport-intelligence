@@ -224,14 +224,14 @@
     "org_admin": "Club admin",
     "member": "Member",
     "coach": "Coach",
-    "analyst": "Analyst",
+    "analyst": "Assistant coach",
     "player": "Player",
-    "goalkeeper": "Goalkeeper",
-    "guest": "Guest",
-    "goalkeeper_coach": "Goalkeeper coach",
-    "athletic_coach": "Athletic coach",
-    "team_manager": "Team manager",
-    "parent": "Parent"
+    "goalkeeper": "Player",
+    "guest": "Shared links only",
+    "goalkeeper_coach": "Assistant coach",
+    "athletic_coach": "Assistant coach",
+    "team_manager": "Assistant coach",
+    "parent": "Parents"
   },
   "positions": {
     "LA": "Left wing",
@@ -2251,7 +2251,8 @@
     "chat": "Open chat",
     "thanks": "Thank you! We will reply by e-mail.",
     "failed": "Sending failed. Write to support@handball-intelligence.com.",
-    "close": "Close"
+    "close": "Close",
+    "thanksNoMail": "Thank you! Your message has reached us, we read every one."
   },
   "checklist": {
     "title": "First steps",
@@ -2555,7 +2556,9 @@
     "planDone": "Planned. The session is with the next sessions.",
     "planOpenScenes": "Open the scene collection",
     "planOwn": "Plan a session yourself",
-    "noUpcoming": "No session planned yet. One click turns a training tip into a session."
+    "noUpcoming": "No session planned yet. One click turns a training tip into a session.",
+    "planOpen": "Open the training plan",
+    "tipPlannedElsewhere": "Already planned as a focus."
   },
   "schedule": {
     "nav": "My dates",
@@ -2688,7 +2691,11 @@
     "joined": "Accepted: {name}.",
     "toClub": "Go to club",
     "noAdmin": "Only club admins can accept the invitation.",
-    "accept": "Accept"
+    "accept": "Accept",
+    "linkOnly": "We are not sending e-mails at the moment. Send this link to the club administration ({email}) yourself. It is valid for 30 days.",
+    "linkLabel": "Invitation link",
+    "copy": "Copy link",
+    "copied": "Link copied"
   },
   "calibrate": {
     "title": "Mark the court",
@@ -3350,7 +3357,11 @@
     "emptyTitle": "No collection yet.",
     "emptyText": "Put scenes together for your team and share the link in the team chat. Players do not need an account.",
     "emptyNoVideo": "A collection is made of scenes. Upload a video first.",
-    "emptyToScenes": "Choose scenes"
+    "emptyToScenes": "Choose scenes",
+    "moveUpItem": "Move item {n} up",
+    "moveDownItem": "Move item {n} down",
+    "moreItem": "More for item {n}",
+    "more": "More"
   },
   "consentLink": {
     "invalid": "This link is no longer valid. Ask the team for the new one.",
@@ -3883,7 +3894,8 @@
     "noAnalysisYet": "no analysis yet",
     "noVideoShort": "no video",
     "dataReport": "from the match report",
-    "trainingTips": "Training tips for this"
+    "trainingTips": "Training tips for this",
+    "tipsAction": "Training tips"
   },
   "numbersTab": {
     "intro": "Goals, 7 m and 2 minutes from the match report and the video, shots and saves from the tagged events.",
@@ -4164,7 +4176,8 @@
     "hint_overview_title": "Overview",
     "hint_overview_staff": "What comes next at a glance.",
     "hint_overview_player": "What comes next at a glance: dates, tasks, new scenes.",
-    "hint_overview_family": "What comes next for your child at a glance: dates and new scenes."
+    "hint_overview_family": "What comes next for your child at a glance: dates and new scenes.",
+    "hint_overview_family_off": "What comes next for your child at a glance: new scenes from the matches."
   },
   "nextSteps": {
     "title": "What comes next",

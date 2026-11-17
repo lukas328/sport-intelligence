@@ -52,10 +52,10 @@ async def test_federation_licences(
     ids = await setup_club(club)
     org = ids["org"]
     url = f"/v1/federations/{fed['id']}"
-    assert (
-        await fed_admin.post(f"{url}/invites", json={"email": "coach@hc-test.ch"})
-    ).status_code == 201
+    first = await fed_admin.post(f"{url}/invites", json={"email": "coach@hc-test.ch"})
+    assert first.status_code == 201 and first.json()["mailed"] is True
     token = token_of(outbox)
+    assert first.json()["link"].endswith(f"/federation/join?token={token}")
     joined = await club.post(f"/v1/orgs/{org}/federation/join", json={"token": token})
     assert joined.status_code == 200, joined.text
     billing = (await club.get(f"/v1/orgs/{org}/billing")).json()
@@ -66,8 +66,17 @@ async def test_federation_licences(
     again = await club.post(f"/v1/orgs/{org}/federation/join", json={"token": token})
     assert again.status_code == 404
 
-    # quota: one more invitation, then full
-    assert (await fed_admin.post(f"{url}/invites", json={"email": "b@club.ch"})).status_code == 201
+    # quota: one more invitation, then full; without mail delivery (L2) the federation gets the
+    # link to pass on itself and no mail is promised
+    sent = len(outbox.outbox)
+    fed_admin.app.state.settings.mail_enabled = False
+    try:
+        second = await fed_admin.post(f"{url}/invites", json={"email": "b@club.ch"})
+    finally:
+        fed_admin.app.state.settings.mail_enabled = None
+    assert second.status_code == 201 and second.json()["mailed"] is False
+    assert "/federation/join?token=" in second.json()["link"]
+    assert len(outbox.outbox) == sent
     full = await fed_admin.post(f"{url}/invites", json={"email": "c@club.ch"})
     assert full.status_code == 409 and full.json()["type"].endswith("quota-reached")
 

@@ -14,7 +14,7 @@ import { api } from "@/lib/client";
 import { errorKey, fieldErrors, type ErrorKey } from "@/lib/errors";
 import type { Kits } from "@/lib/kit";
 import { DateTimeField } from "@/components/domain/date-time-field";
-import { combine, formatDate, formatTime } from "@/lib/date-input";
+import { combine, defaultKickoff } from "@/lib/date-input";
 
 const FORMATS = ["adult_2x30", "youth_2x25", "youth_2x20", "mini", "tournament"] as const;
 const KIT_DEFAULTS: Kits = {
@@ -43,8 +43,9 @@ export function NewMatchForm({ orgId, teamId }: { orgId: string; teamId: string 
   const [away, setAway] = useState(false);
   const [format, setFormat] = useState<string | null>(null);
   // the kick-off written the Swiss way, whatever the browser's language (L16)
-  const [day, setDay] = useState(() => formatDate(new Date()));
-  const [clock, setClock] = useState(() => formatTime(new Date()));
+  // a round kick-off in the past, not the minute of the click (at night that was «00:57»)
+  const [day, setDay] = useState(() => defaultKickoff().day);
+  const [clock, setClock] = useState(() => defaultKickoff().clock);
   const team = useQuery({
     queryKey: ["team", orgId, teamId],
     queryFn: async () =>

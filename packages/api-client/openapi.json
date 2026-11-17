@@ -6727,11 +6727,21 @@
             "format": "date-time",
             "title": "Expires At",
             "type": "string"
+          },
+          "link": {
+            "title": "Link",
+            "type": "string"
+          },
+          "mailed": {
+            "title": "Mailed",
+            "type": "boolean"
           }
         },
         "required": [
           "email",
-          "expires_at"
+          "expires_at",
+          "link",
+          "mailed"
         ],
         "title": "InviteOut",
         "type": "object"

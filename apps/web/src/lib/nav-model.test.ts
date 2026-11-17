@@ -62,6 +62,9 @@ describe("navigation model", () => {
     expect(destOf("/app/o/plays/x", "staff")).toBe("scenes");
     expect(destOf(`${TEAM}/season`, "staff")).toBe("season");
     expect(destOf(`${TEAM}/season`, "player")).toBe("season");
+    // the training tips come from the analysis and sit under Saison, Teamleben on or off (K21)
+    expect(destOf(`${TEAM}/season/tips`, "staff")).toBe("season");
+    expect(sectionOf(`${TEAM}/season/tips`)).toBe("season");
     expect(destOf("/app/o/opponents/x", "staff")).toBe("season");
     expect(destOf("/app/o/drills", "staff")).toBe("team");
     expect(destOf("/app/o/settings", "staff")).toBeNull();

@@ -16,5 +16,5 @@ export default async function TrainingPage({ params }: { params: Promise<{ orgId
   ]);
   const role = team?.my_role ?? "";
   const canPlan = org?.my_role === "org_admin" || ["coach", "analyst", "goalkeeper_coach", "athletic_coach", "team_manager"].includes(role);
-  return <TrainingView orgId={orgId} teamId={teamId} canPlan={canPlan} />;
+  return <TrainingView orgId={orgId} teamId={teamId} canPlan={canPlan} tasks={Boolean(team?.settings.team_features)} />;
 }
