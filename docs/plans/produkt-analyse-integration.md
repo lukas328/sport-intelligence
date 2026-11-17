@@ -121,7 +121,24 @@ gerechnet: bei 2.7 % Detektor-Treffern kann daraus kein brauchbarer Pfad werden.
 **Laufzeit pro Stufe** (`ml/integration/profile_analysis.py`: `run_analysis` lokal, S3 und Reporter
 durch lokale Attrappen ersetzt, Einstellungen des CPU-Images; 4 CPU-Kerne; Video: 15 min aus
 AT_Cup_Feldkirch_Bregenz_2021, 5 Segmente zu 3 min, mit der Produkt-Umwandlung auf 1280 px / 25 fps):
-(läuft noch, Zahlen folgen in diesem PR)
+| Stufe | Sekunden | Anteil | x Videolänge |
+|---|---|---|---|
+| Proxy-Umwandlung (Ingest, CPU-Worker) | 111 | eigener Job | 0.12 |
+| Beobachtung gesamt (`observe`) | 3 928 | 100 % | 4.36 |
+| davon Rückennummern (PP-OCR, alle 6 Bilder) | 2 560 | 65 % | 2.84 |
+| davon YOLOX (alle 3 Bilder) | 850 | 22 % | 0.94 |
+| davon Kamerabewegung (jedes Bild) | 256 | 7 % | 0.28 |
+| davon Hallentafel lesen | 155 | 4 % | 0.17 |
+| davon Linien, Trikotfarben | 35 | 1 % | 0.04 |
+| Kalibrierung | 11 | | 0.01 |
+
+Lesart: Die CPU-Kette braucht etwa **4.4 x Videolänge**, ein 60-Minuten-Spiel also rund 4.4 h auf 4
+Kernen (das Runbook nennt 2 x; seither kamen Rückennummern und Hallentafel dazu). Zwei Drittel davon
+sind die Rückennummern. Die Kalibrierung brach mit `flat_view` ab (Kamera zu flach, Klickpunkte
+nötig); Tracking, Ball und Ereignisse liefen deshalb nicht und fehlen hier. Sie sind nach dem
+Kalibrierungsteil billig (Sekunden bis Minuten), müssen aber auf einem Spiel mit Kalibrierung
+nachgemessen werden. Während der Messung liefen zeitweise kurze Tests mit 1 bis 2 Threads mit; die
+Zahlen sind eher etwas zu hoch. Der Hebel Rückennummern gehört zu Schritt 4.
 
 ### Schritt 2: Ball v2 hinter dem Schalter (Code fertig, gleicher PR)
 
