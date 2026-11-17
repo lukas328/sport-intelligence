@@ -21,7 +21,11 @@ from handball_api.services import orgs as org_service
 from handball_api.services.context import Ctx
 
 SettingsDep = Annotated[Settings, Depends(get_settings)]
-DbDep = Annotated[AsyncSession, Depends(get_session)]
+# scope="function": the transaction commits once the endpoint and the serialisation of its
+# response are done, before the response is sent. With the default request scope of a yield
+# dependency it committed only after sending, so a client reading right after a write could
+# still see the old state.
+DbDep = Annotated[AsyncSession, Depends(get_session, scope="function")]
 UNSAFE = {"POST", "PUT", "PATCH", "DELETE"}
 OAUTH_CALLBACK = re.compile(r"^/v1/auth/oauth/[a-z]+/callback$")
 
