@@ -134,15 +134,25 @@ def resolve_ball_models(settings: JobSettings, s3: Any = None) -> tuple[list[Pat
     return resolve_models(settings.ball_model, settings.ball_model_sha256, settings, s3)
 
 
+def _has_cuda() -> bool:
+    import onnxruntime as ort
+
+    return "CUDAExecutionProvider" in ort.get_available_providers()
+
+
 def load_ball_net(settings: JobSettings, s3: Any = None) -> tuple[BallNet | None, str]:
     """The 3-frame ball net(s) of `HB_BALL_MODEL` and the status of `resolve_ball_models`; None
-    (the YOLOX ball path stays) unless all files are there with the right checksum. Test phase:
+    (the YOLOX ball path stays) unless all files are there with the right checksum and, with
+    `ball_require_gpu` (default), ONNX Runtime can use CUDA ("no_gpu" otherwise). Test phase:
     the nets contain DeepSport data, see ballnet.py."""
     paths, status = resolve_ball_models(settings, s3)
     if status != "ok":
         if status != "off":
             log.warning("ball_model_unavailable", status=status, model=settings.ball_model)
         return None, status
+    if settings.ball_require_gpu and not _has_cuda():
+        log.warning("ball_model_needs_gpu", model=settings.ball_model)
+        return None, "no_gpu"
     return BallNet(paths, threads=settings.detector_threads or None), status
 
 
@@ -181,6 +191,9 @@ def load_embedder(settings: JobSettings, s3: Any = None) -> tuple[Embedder | Non
     paths, status = resolve_models(settings.reid_model, settings.reid_model_sha256, settings, s3)
     if status != "ok":
         return None, status
+    if settings.reid_require_gpu and not _has_cuda():
+        log.warning("reid_model_needs_gpu", model=settings.reid_model)
+        return None, "no_gpu"
     return Embedder(paths[0], threads=settings.detector_threads or None), status
 
 

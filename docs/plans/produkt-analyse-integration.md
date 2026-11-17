@@ -330,3 +330,20 @@ Lesart:
   und eine Wurfform prüfen: Flug in Richtung Tor, endet am Tor oder beim Torhüter, dazu die
   Wurf-Kandidaten aus `goalcandidates` (Kamera und Spieler).
 - **Bis dahin:** keine Produktänderung, weil Raten ohne Wahrheit nichts bringt.
+
+### Freigaben vom 2026-11-17: Modelle im Staging-Bucket, Schutz ohne GPU
+
+- Hochgeladen in den R2-Bucket `handball-testdata` (Staging), per Rückdownload mit SHA geprüft:
+  - `models/ball/ball_hr1_fp16-a99d126f7fc6.onnx`;
+  - `models/ball/ball_hrp1_fp16-37153d8dfc83.onnx`;
+  - `models/reid/reid-6f3e1b1d0534.onnx`.
+
+  Testphase: Die Ballnetze enthalten DeepSport, ReID ist auf MSMT17 trainiert.
+- Die Staging-Einstellungen (`HB_BALL_MODEL`, `HB_BALL_MODEL_SHA256`, `HB_REID_MODEL`,
+  `HB_REID_MODEL_SHA256`) setzt die UX-Sitzung in Terraform. Eine Änderung gibt eine neue
+  Revision, darum erst nach Lukas' laufendem Spiel.
+- **Schutz:** Ballnetz und ReID laufen nur, wenn ONNX Runtime CUDA nutzen kann
+  (`HB_BALL_REQUIRE_GPU`, `HB_REID_REQUIRE_GPU`, Standard an). Sonst bleiben sie aus, mit Status
+  `no_gpu`. Ohne GPU bräuchte ein ganzes Spiel mit Ballnetz Tage. Für den Probelauf auf Staging
+  (ohne GPU, nur ein kurzer Clip) `HB_BALL_REQUIRE_GPU=false` dazusetzen und danach wieder
+  entfernen.
