@@ -23,25 +23,28 @@ export function HeroThings({ things, label, note }: { things: ThingView[]; label
   const [round, setRound] = useState(0);
   const [held, setHeld] = useState(false);
   const [stopped, setStopped] = useState(false);
-  const [still, setStill] = useState(true);
+  // the drawing is CSS (no motion under reduced motion anyway); the turning waits for the check
+  const [still, setStill] = useState(false);
+  const [ready, setReady] = useState(false);
   const box = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
     const set = () => setStill(mq.matches);
     set();
+    setReady(true);
     mq.addEventListener("change", set);
     return () => mq.removeEventListener("change", set);
   }, []);
 
   useEffect(() => {
-    if (still || held || stopped || things.length < 2) return;
+    if (!ready || still || held || stopped || things.length < 2) return;
     const id = window.setTimeout(() => {
       setAt((a) => (a + 1) % things.length);
       setRound((r) => r + 1);
     }, TURN_MS);
     return () => window.clearTimeout(id);
-  }, [at, still, held, stopped, things.length]);
+  }, [at, ready, still, held, stopped, things.length]);
 
   const pick = (i: number) => {
     setStopped(true);
@@ -86,7 +89,7 @@ export function HeroThings({ things, label, note }: { things: ThingView[]; label
                 <p className="mt-2 text-[1.3125rem] leading-tight font-bold md:text-[1.5rem]">{t.text}</p>
                 <p className="mt-1 text-base text-ink-2 md:text-[1.0625rem]">{t.sub}</p>
                 <div className="mt-4 [mask-image:linear-gradient(to_bottom,#000_72%,transparent)]">
-                  <Bundle key={`${i}-${on ? round : "off"}`} goals={t.goals} width={440} play={on && !still} clean box={HERO_BOX} label={t.label} />
+                  <Bundle key={`${i}-${on ? round : "off"}`} goals={t.goals} width={440} play={on} clean box={HERO_BOX} label={t.label} />
                 </div>
               </div>
             );

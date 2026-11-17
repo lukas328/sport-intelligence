@@ -329,9 +329,10 @@ export default async function Home({ params }: Props) {
           <h2 id="final" className="text-[2.5rem] md:text-[3.75rem]">
             {t.finalTitle}
           </h2>
-          <div className="mt-8 grid grid-cols-1 items-end gap-8 md:grid-cols-[minmax(0,34rem)_auto]">
+          {/* as in the head: the team search, the demo as a text link under it */}
+          <div className="mt-8">
             <TeamField id="team-end" label={t.teamLabel} button={t.teamButton} example={t.teamExample} after={t.teamAfter} appLocale={app} />
-            <DemoLink href={`/${locale}/demo/`} className="link md:mb-[4.25rem] md:justify-self-start">
+            <DemoLink href={`/${locale}/demo/`} className="link mt-4">
               {m.cta.demo}
             </DemoLink>
           </div>
