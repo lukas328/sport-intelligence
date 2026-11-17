@@ -26,6 +26,13 @@ Einschätzung; Prio P1 (vor dem nächsten Test), P2 (bald), P3 (später).
 | U11 | Die Taktiktafel von oben blinkt auf dem Handy sehr zufällig | Startseite und Demo, Taktikkamera | P1 | stimmt, wahrscheinliche Ursache: die Animation startet jedes Mal von vorne, wenn die Tafel den sichtbaren Bereich betritt oder verlässt (`IntersectionObserver` setzt den Start zurück, `tactics-camera.tsx`); am Handy passiert das beim Scrollen oft, weil die Adressleiste ein- und ausfährt, und die Punkte springen. Massnahme: Laufzeit beim Pausieren merken statt zurücksetzen, nur pausieren, wenn die Tafel wirklich weg ist; auf einem echten Handy-Profil (iPhone, Android) nachprüfen und weitere Ursachen ausschliessen (Punkte, die zwischen Bildern fehlen) | offen |
 | U12 | Beim Hochscrollen muss man ganz nach oben, bis das Menü wieder erscheint | Kopf, Handy | P1 | stimmt: der Kopf scrollt mit der Seite weg (nicht angeheftet). Massnahme: angehefteter, schmaler Kopf, der beim Runterscrollen ausblendet und beim ersten Hochscrollen sofort wieder erscheint; ohne Layout-Sprung, bei reduzierter Bewegung ohne Animation | offen |
 
+## App
+
+| # | Befund | Wo | Prio | Einschätzung und Massnahme | Stand |
+|---|---|---|---|---|---|
+| A1 | Die Menüs (z. B. «Mehr» auf der Spielseite) passen nicht zur App | alle Aufklappmenüs (`components/ui/menu.tsx`) | P1 | stimmt: die App arbeitet mit 2-px-Rahmen in Tinte, fetter Schrift und harten Kanten (Knöpfe «Teilen», «Mehr»), das Menü ist ein weiches Standardmenü (1-px-Ring in Grau, graue Linien-Symbole, normale Schrift). Dazu ein Fehler: in der Klasse der Einträge fehlt ein Leerzeichen (`"outline-none" + "data-[highlighted]:…"`), darum wird der gewählte Eintrag mit Maus oder Tastatur nicht hervorgehoben, in allen Menüs. Massnahme: Fehler beheben; Menü im Stil der App: 2-px-Rahmen in Tinte, harter Versatz-Schatten wie bei den Karten, Einträge halbfett, Symbole in Tinte, gewählter Eintrag invertiert (Tinte, helle Schrift), Trennlinie kräftiger, «Spiel löschen» rot mit Abstand. Gleich für alle Menüs und den Teamwechsler | offen |
+| A2 | Im Menü steht «Gegner-Profil: Demo HC Beispiel» | Spielseite des Beispielspiels | P3 | Name des Beispiel-Gegners in Produktion (`services/support.py`); er wird gebraucht, um bestehende Beispielspiele zu erkennen, darum nicht einfach umbenennen. Später mit einer Migration auf einen Namen aus der Demo-Geschichte umstellen | offen |
+
 ## Externe Website-Review (17.11., 12 Seiten bei 1117 und 524 px)
 
 Übernommen, was jetzt wichtig ist; Belege von aussen stehen unten unter «Später». Einige Punkte decken sich mit U1 bis U12 und sind dort vermerkt.
