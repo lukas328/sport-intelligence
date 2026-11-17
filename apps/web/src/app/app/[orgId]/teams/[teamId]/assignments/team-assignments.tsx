@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Alert, EmptyState } from "@/components/ui/card";
 import { Input } from "@/components/ui/field";
 import { api } from "@/lib/client";
+import { useMailEnabled } from "@/lib/site-config";
 import { useConfirm } from "@/components/ui/confirm";
 import { problemCode } from "@handball/api-client";
 import { targetLink } from "../../../assignments/my-assignments";
@@ -18,6 +19,7 @@ type Kind = (typeof KINDS)[number];
 
 export function TeamAssignments({ orgId, teamId }: { orgId: string; teamId: string }) {
   const t = useTranslations("assignments");
+  const mail = useMailEnabled();
   const format = useFormatter();
   const lang = useLocale() as Lang;
   const qc = useQueryClient();
@@ -146,10 +148,13 @@ export function TeamAssignments({ orgId, teamId }: { orgId: string; teamId: stri
           <Input label={t("titleLabel")} name="title" maxLength={200} />
           <Input label={t("note")} name="note" maxLength={2000} />
           <Input label={t("due")} name="due" type="date" />
-          <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" name="email" defaultChecked />
-            {t("email")}
-          </label>
+          {/* no promise of a mail while none goes out (L2); the bell rings either way */}
+          {mail && (
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" name="email" defaultChecked />
+              {t("email")}
+            </label>
+          )}
           <p className="text-xs text-muted">
             {t("recipients")}: {t("allPlayers")}
           </p>

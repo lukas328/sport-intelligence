@@ -2251,7 +2251,8 @@
     "chat": "Chat öffnen",
     "thanks": "Danke! Wir melden uns per E-Mail.",
     "failed": "Senden hat nicht geklappt. Schreib an support@handball-intelligence.com.",
-    "close": "Schliessen"
+    "close": "Schliessen",
+    "thanksNoMail": "Danke! Deine Nachricht ist bei uns angekommen, wir lesen jede."
   },
   "checklist": {
     "title": "Erste Schritte",
@@ -2690,7 +2691,11 @@
     "joined": "Angenommen: {name}.",
     "toClub": "Zum Verein",
     "noAdmin": "Nur Vereinsadmins können die Einladung annehmen.",
-    "accept": "Annehmen"
+    "accept": "Annehmen",
+    "linkOnly": "Wir verschicken gerade keine Mails. Schick der Vereinsadministration ({email}) diesen Link selbst. Er gilt 30 Tage.",
+    "linkLabel": "Link zur Einladung",
+    "copy": "Link kopieren",
+    "copied": "Link kopiert"
   },
   "calibrate": {
     "title": "Spielfeld markieren",

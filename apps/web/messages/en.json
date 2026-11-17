@@ -2251,7 +2251,8 @@
     "chat": "Open chat",
     "thanks": "Thank you! We will reply by e-mail.",
     "failed": "Sending failed. Write to support@handball-intelligence.com.",
-    "close": "Close"
+    "close": "Close",
+    "thanksNoMail": "Thank you! Your message has reached us, we read every one."
   },
   "checklist": {
     "title": "First steps",
@@ -2690,7 +2691,11 @@
     "joined": "Accepted: {name}.",
     "toClub": "Go to club",
     "noAdmin": "Only club admins can accept the invitation.",
-    "accept": "Accept"
+    "accept": "Accept",
+    "linkOnly": "We are not sending e-mails at the moment. Send this link to the club administration ({email}) yourself. It is valid for 30 days.",
+    "linkLabel": "Invitation link",
+    "copy": "Copy link",
+    "copied": "Link copied"
   },
   "calibrate": {
     "title": "Mark the court",
