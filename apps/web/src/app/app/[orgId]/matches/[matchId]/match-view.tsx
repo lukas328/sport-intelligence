@@ -204,6 +204,8 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
   const plainPlayer = useRef<PlayerHandle>(null);
   // a video of the opponent against another team (K3): that team takes the own side
   const scouting = match.kind === "scouting";
+  // the demo match shows the product: no upload, no colour question, no files (review R22)
+  const demo = match.is_demo;
   const own = scouting ? (match.scouting_other ?? t("progress.otherTeam")) : ownName(teamName, shell?.org.name ?? teamName);
   const more = useRef<HTMLDetailsElement>(null);
   const roster = useRosterNames(orgId, match.team_id, match.season_id);
@@ -246,7 +248,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
   // before it is a quiet action in the menu and below the opponent
   const matchDay = isMatchDay(match.kickoff_at);
   const liveFirst = staff && match.score_own == null && !main && matchDay && match.source !== "paper_report";
-  const uploadFirst = staff && !main && !liveFirst && match.source !== "paper_report";
+  const uploadFirst = staff && !demo && !main && !liveFirst && match.source !== "paper_report";
   // the progress of the uploads and the processing (K13, B4): the API's view, with the uploads of
   // this tab laid over; shown while it runs, and when something failed
   const local = useLocalUploads();
@@ -346,9 +348,9 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
   return (
     <div className="space-y-8" style={matchStyle(club, oppKit) as CSSProperties}>
       <MatchHead match={match} ownName={own} oppName={oppName(match)} view={view} graphics={graphics.data}>
-        {staff && match.opponent && !match.opponent_colors?.color && <AskColour orgId={orgId} matchId={match.id} opponent={oppName(match)} />}
+        {staff && !demo && match.opponent && !match.opponent_colors?.color && <AskColour orgId={orgId} matchId={match.id} opponent={oppName(match)} />}
         {/* a known colour can be changed right in the head, five shirts (UX test B31) */}
-        {staff && match.opponent && match.opponent_colors?.color && (
+        {staff && !demo && match.opponent && match.opponent_colors?.color && (
           <details className="mt-2.5 text-sm font-bold" data-testid="change-colour">
             <summary className="inline-flex min-h-11 cursor-pointer list-none items-center gap-2 underline decoration-[1.5px] underline-offset-4 [&::-webkit-details-marker]:hidden">
               <i aria-hidden className="block size-5 border-[1.5px] border-club-ink" style={{ background: match.opponent_colors.color ?? undefined }} />
@@ -586,7 +588,12 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
         ) : !staff ? (
           <EmptyState icon={<Clapperboard />} title={match.source === "paper_report" ? t("stats.noVideo") : t("player.notReady")} />
         ) : null}
-        {staff && !main && (
+        {demo && !main && (
+          <p className="m-0 max-w-[60ch] text-[17px]" data-testid="demo-no-video">
+            {ta("demoNoVideo")}
+          </p>
+        )}
+        {staff && !demo && !main && (
           <section id="upload" className="scroll-mt-24 space-y-4" aria-label={t("upload.title")}>
             <p className="m-0 max-w-[60ch] text-[17px] font-bold">{ta("noVideoBlock")}</p>
             {/* the analysis separates the teams by their shirts: without the opponent's colour it
@@ -637,7 +644,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
             </section>
           )}
           {/* a match without video: the report's facts below, the way to the video on top */}
-          {!main && staff && Date.parse(match.kickoff_at) <= Date.now() && (
+          {!main && staff && !demo && Date.parse(match.kickoff_at) <= Date.now() && (
             <section className="space-y-3 border-2 border-dashed border-ink/40 p-4 md:p-6" data-testid="no-video">
               <h2 className="text-[26px]">{ta("noVideoTitle")}</h2>
               <p className="m-0 max-w-[60ch] text-[17px]">{ta("noVideoBlock")}</p>
@@ -724,7 +731,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
             </div>
           </details>
           )}
-          <AttachmentsPanel orgId={orgId} matchId={match.id} staff={staff} hasReport={graphics.data?.has_report ?? false} linked={Boolean(official.data?.official_team_id)} />
+          {!demo && <AttachmentsPanel orgId={orgId} matchId={match.id} staff={staff} hasReport={graphics.data?.has_report ?? false} linked={Boolean(official.data?.official_team_id)} />}
         </div>
       )}
 

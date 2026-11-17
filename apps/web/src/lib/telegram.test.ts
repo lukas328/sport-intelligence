@@ -34,6 +34,10 @@ describe("telegram", () => {
     expect(topScorers(players, { a: "Lea Brunner", b: "Mia Graf" }, 3, (k) => ` (${k} vom 7-m)`)).toEqual(["Brunner 7", "Graf 5 (2 vom 7-m)"]);
     expect(mainKeeper([{ side: "own", player_id: "k", number: 1, saves: 11 }], { k: "Nora Meier" })).toEqual({ name: "Meier", saves: 11 });
     expect(mainKeeper([{ side: "own", player_id: "k", number: 1, saves: 0 }], {})).toBeNull();
+    // nobody known: no «Im Tor: ?», no «? 4» (review R22)
+    expect(mainKeeper([{ side: "own", player_id: null, number: null, saves: 9 }], {})).toBeNull();
+    expect(mainKeeper([{ side: "own", player_id: null, number: 12, saves: 9 }], {})).toEqual({ name: "#12", saves: 9 });
+    expect(topScorers([{ side: "own", player_id: null, number: null, goals: 4, seven_m_goals: 0 }], {})).toEqual([]);
   });
 
   it("says where the figures come from", () => {

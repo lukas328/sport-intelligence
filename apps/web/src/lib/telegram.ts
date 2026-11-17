@@ -53,7 +53,8 @@ interface ScorerRow {
  * as a fraction (UX test N25). */
 export function topScorers(players: ScorerRow[], names: Record<string, string>, n = 3, seven: (k: number) => string = (k) => `/${k}`): string[] {
   return players
-    .filter((p) => p.side === "own" && p.goals > 0)
+    // a scorer without name and number would read «? 5» (review R22): left out
+    .filter((p) => p.side === "own" && p.goals > 0 && (Boolean(p.player_id && names[p.player_id]?.trim()) || p.number != null))
     .sort((a, b) => b.goals - a.goals || (a.number ?? 99) - (b.number ?? 99))
     .slice(0, n)
     .map((p) => `${shortName(p.player_id ? names[p.player_id] : undefined, p.number)} ${p.goals}${p.seven_m_goals ? seven(p.seven_m_goals) : ""}`);
@@ -69,6 +70,8 @@ interface KeeperRow {
 /** Our keeper with the most saves, or null when no save was recorded. */
 export function mainKeeper(keepers: KeeperRow[], names: Record<string, string>): { name: string; saves: number } | null {
   const k = keepers.filter((x) => x.side === "own" && x.saves > 0).sort((a, b) => b.saves - a.saves)[0];
+  // a keeper nobody knows (no name, no number) is no «Im Tor: ?» (review R22)
+  if (k && !(k.player_id && names[k.player_id]?.trim()) && k.number == null) return null;
   return k ? { name: shortName(k.player_id ? names[k.player_id] : undefined, k.number), saves: k.saves } : null;
 }
 

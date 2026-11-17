@@ -42,7 +42,7 @@ export function MatchHead({ match, ownName, oppName, view, graphics, children }:
   // with goal moments still open the score is an interim one (third real-video test G1)
   const moments = graphics ? openMoments(graphics) : 0;
   const note = fromVideo ? (moments > 0 ? t("scoreSoFar", { n: moments }) : t("scoreFromVideo")) : undefined;
-  const colourOpen = !match.opponent_colors?.color && match.opponent ? <AttnTag className="ml-2">{t("colourOpen")}</AttnTag> : null;
+  const colourOpen = !match.opponent_colors?.color && match.opponent && !match.is_demo ? <AttnTag className="ml-2">{t("colourOpen")}</AttnTag> : null;
   return (
     <div className="bleed-x -mt-6 lg:-mt-8">
       {scoreText && (

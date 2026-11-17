@@ -3530,7 +3530,7 @@
     "stepNext": "ensuite",
     "minutesLeft": "{minutes, plural, one {encore environ 1 minute} other {encore environ # minutes}}",
     "meanwhile": "En attendant : les buts de la feuille de match sont déjà dans le déroulement.",
-    "noThings": "Pour trois points, il faut plus de buts avec vidéo. Les scènes sont sous Vidéo.",
+    "noThings": "Pour trois choses, il faut plus de buts avec leur lieu de tir. Les scènes arrivent dès que des buts sont confirmés dans la vidéo.",
     "telegram": "Résumé",
     "copy": "Copier",
     "copied": "Copié",
@@ -3681,7 +3681,8 @@
     "rowPartsUploading": "{n, plural, one {1 partie pas encore entièrement envoyée} other {# parties pas encore entièrement envoyées}}",
     "rowFailedWhy": "L'analyse n'a pas fonctionné : {reason}",
     "zonesLine": "{m7, plural, one {1 but} other {# buts}} à 7 m{rest, plural, =0 {.} one {, 1 autre sans lieu de tir.} other {, # autres sans lieu de tir.}}",
-    "flightCut": "Suite des buts jusqu’à la {m}e minute seulement"
+    "flightCut": "Suite des buts jusqu’à la {m}e minute seulement",
+    "demoNoVideo": "Le match de démo montre ce que l’analyse tire d’un match : les buts avec leurs trajets et leurs positions. Il n’a pas de vidéo ; la tienne, tu la télécharges dans un de tes matchs."
   },
   "check": {
     "top": "Vérifier · {opponent}",

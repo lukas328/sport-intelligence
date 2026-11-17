@@ -3530,7 +3530,7 @@
     "stepNext": "next",
     "minutesLeft": "{minutes, plural, one {about 1 minute left} other {about # minutes left}}",
     "meanwhile": "Meanwhile: the goals from the match report are already in the flow.",
-    "noThings": "Three things need more goals with video. The scenes are under Video.",
+    "noThings": "Three things need more goals with a shot spot. Scenes come once goals are confirmed in the video.",
     "telegram": "Summary",
     "copy": "Copy",
     "copied": "Copied",
@@ -3681,7 +3681,8 @@
     "rowPartsUploading": "{n, plural, one {1 part} other {# parts}} not fully uploaded yet",
     "rowFailedWhy": "Analysis did not work: {reason}",
     "zonesLine": "{m7, plural, one {1 goal} other {# goals}} from 7 m{rest, plural, =0 {.} one {, 1 more without a shot spot.} other {, # more without a shot spot.}}",
-    "flightCut": "Goal sequence only up to minute {m}"
+    "flightCut": "Goal sequence only up to minute {m}",
+    "demoNoVideo": "The demo match shows what the analysis makes of a match: the goals with their runs and positions. It has no video; you upload your own in one of your matches."
   },
   "check": {
     "top": "Check · {opponent}",

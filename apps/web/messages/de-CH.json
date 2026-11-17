@@ -3530,7 +3530,7 @@
     "stepNext": "danach",
     "minutesLeft": "{minutes, plural, one {noch etwa 1 Minute} other {noch etwa # Minuten}}",
     "meanwhile": "In der Zwischenzeit: die Tore aus dem Spielbericht stehen schon im Verlauf.",
-    "noThings": "Für drei Dinge braucht es mehr Tore mit Video. Die Szenen findest du unter Video.",
+    "noThings": "Für drei Dinge braucht es mehr Tore mit Wurfort. Szenen gibt es, sobald Tore im Video bestätigt sind.",
     "telegram": "Kurzbericht",
     "copy": "Kopieren",
     "copied": "Kopiert",
@@ -3681,7 +3681,8 @@
     "rowPartsUploading": "{n, plural, one {1 Teil} other {# Teile}} noch nicht ganz hochgeladen",
     "rowFailedWhy": "Analyse nicht geklappt: {reason}",
     "zonesLine": "{m7, plural, one {1 Tor} other {# Tore}} von 7 m{rest, plural, =0 {.} one {, 1 weiteres ohne Wurfort.} other {, # weitere ohne Wurfort.}}",
-    "flightCut": "Torfolge nur bis {m}. Minute"
+    "flightCut": "Torfolge nur bis {m}. Minute",
+    "demoNoVideo": "Das Demo-Spiel zeigt, was die Analyse aus einem Spiel macht: die Tore mit ihren Wegen und Positionen. Ein Video gehört nicht dazu; dein eigenes lädst du in einem deiner Spiele hoch."
   },
   "check": {
     "top": "Prüfen · {opponent}",
