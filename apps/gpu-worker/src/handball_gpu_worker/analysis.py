@@ -367,7 +367,11 @@ def run_analysis(
         )
         if learned_result is not None:
             return learned_result
-        # the detector saw (almost) nobody, e.g. unusual footage: the classical path decides
+        # the detector saw (almost) nobody, e.g. unusual footage: the classical path decides;
+        # the API is told, so Prüfen asks nothing and says why (services/checks)
+        few_people = True
+    else:
+        few_people = False
     Path(settings.work_dir).mkdir(parents=True, exist_ok=True)
     work = Path(tempfile.mkdtemp(prefix=f"analysis-{asset_id}-", dir=settings.work_dir))
     started = time.perf_counter()
@@ -423,6 +427,10 @@ def run_analysis(
                 **view,
                 "needs_calibration": True,
                 "calibration_error": str(exc),
+                "calibration_info": {
+                    "reason": "few_people" if few_people else getattr(exc, "reason", "court")
+                },
+                "detector_few_people": few_people,
                 "calibration": None,
                 "tracks": [],
                 "fps": fps,
@@ -465,6 +473,7 @@ def run_analysis(
             "formations": detect_formations(result),
             "events": events_payload(result, side_hint),
             "scoreboard": None,
+            "detector_few_people": few_people,
         }
         rep.succeed(payload)
         log.info(

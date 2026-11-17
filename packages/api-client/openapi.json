@@ -275,7 +275,7 @@
                 "type": "null"
               }
             ],
-            "description": "calibration, unreadable, too_short, timeout or generic",
+            "description": "calibration, unreadable, too_short, timeout, stalled or generic",
             "title": "Error Code"
           },
           "formations": {
@@ -1733,6 +1733,57 @@
         "title": "Chart",
         "type": "object"
       },
+      "CheckNoticeOut": {
+        "description": "Why Pr\u00fcfen asks little or nothing (second round A6, A7): the analysis found too little,\nor it failed. The web says it in the coach's words with what helps.",
+        "properties": {
+          "duration_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "length of that video",
+            "title": "Duration S"
+          },
+          "failed": {
+            "default": false,
+            "description": "the analysis failed",
+            "title": "Failed",
+            "type": "boolean"
+          },
+          "limit_s": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "timeout: how long the analysis of this video may compute",
+            "title": "Limit S"
+          },
+          "reason": {
+            "description": "found little: camera_motion, no_floor, flat_view, few_people, court (court not recognised), no_play; failed: calibration, unreadable, too_short, timeout, stalled, generic",
+            "title": "Reason",
+            "type": "string"
+          },
+          "video_id": {
+            "format": "uuid",
+            "title": "Video Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason",
+          "video_id"
+        ],
+        "title": "CheckNoticeOut",
+        "type": "object"
+      },
       "CheckOut": {
         "properties": {
           "box": {
@@ -1817,6 +1868,70 @@
           "candidates"
         ],
         "title": "CheckOut",
+        "type": "object"
+      },
+      "CheckSkipAllOut": {
+        "properties": {
+          "moments": {
+            "description": "goal moments of every rank left with them",
+            "title": "Moments",
+            "type": "integer"
+          },
+          "skipped": {
+            "description": "questions of the main round left",
+            "title": "Skipped",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "skipped",
+          "moments"
+        ],
+        "title": "CheckSkipAllOut",
+        "type": "object"
+      },
+      "CheckSkipIn": {
+        "description": "\u00abWeiss nicht\u00bb in Pr\u00fcfen: a goal moment (its candidate id), the court of a file (its video\nid) or the throw-off of a half.",
+        "properties": {
+          "id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "kind": {
+            "enum": [
+              "goal",
+              "field",
+              "kickoff"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "period": {
+            "anyOf": [
+              {
+                "maximum": 2.0,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Period"
+          }
+        },
+        "required": [
+          "kind"
+        ],
+        "title": "CheckSkipIn",
         "type": "object"
       },
       "ChecklistItem": {
@@ -4622,6 +4737,18 @@
             "description": "the last sign of life: a part uploaded, a worker report",
             "title": "Last Activity At"
           },
+          "limit_s": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "failed with timeout: how long the step may compute",
+            "title": "Limit S"
+          },
           "overall": {
             "description": "the whole way of this file, all stages",
             "maximum": 1.0,
@@ -4658,6 +4785,12 @@
             "default": false,
             "description": "this step was restarted once already after it went silent",
             "title": "Restarted",
+            "type": "boolean"
+          },
+          "retry": {
+            "default": true,
+            "description": "failed: whether starting the step again can help (not after a timeout on the same file, an unreadable or too short file, an abandoned upload)",
+            "title": "Retry",
             "type": "boolean"
           },
           "role": {
@@ -5594,6 +5727,11 @@
             ],
             "title": "Side"
           },
+          "skipped": {
+            "default": false,
+            "title": "Skipped",
+            "type": "boolean"
+          },
           "start_ms": {
             "title": "Start Ms",
             "type": "integer"
@@ -6096,6 +6234,36 @@
           "goal_in_video"
         ],
         "title": "GoalViewOut",
+        "type": "object"
+      },
+      "GraphicsFileOut": {
+        "properties": {
+          "filename": {
+            "title": "Filename",
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "none",
+              "running",
+              "ready",
+              "failed"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "video_id": {
+            "format": "uuid",
+            "title": "Video Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "video_id",
+          "filename",
+          "state"
+        ],
+        "title": "GraphicsFileOut",
         "type": "object"
       },
       "GraphicsPartOut": {
@@ -8439,12 +8607,32 @@
             "description": "null without a video",
             "title": "Field Confirmed"
           },
+          "files": {
+            "description": "every file of the match that is a part of it",
+            "items": {
+              "$ref": "#/components/schemas/GraphicsFileOut"
+            },
+            "title": "Files",
+            "type": "array"
+          },
           "goals": {
             "items": {
               "$ref": "#/components/schemas/GoalRunOut"
             },
             "title": "Goals",
             "type": "array"
+          },
+          "goals_missing": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "goals of the final score without a place in the video yet; null without a final score",
+            "title": "Goals Missing"
           },
           "has_report": {
             "default": false,
@@ -8457,12 +8645,23 @@
             "type": "boolean"
           },
           "more_checks": {
-            "description": "lower-ranked goal candidates, offered, not counted",
+            "description": "beyond the budget of the main round: further goal moments, questions left with \u00abWeiss nicht\u00bb, what a file that found little proposed; offered, never counted",
             "items": {
               "$ref": "#/components/schemas/CheckOut"
             },
             "title": "More Checks",
             "type": "array"
+          },
+          "notice": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CheckNoticeOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "why there is little or nothing to ask"
           },
           "parts": {
             "description": "the files of the match on its timeline (two halves, a split recording)",
@@ -8485,6 +8684,12 @@
             },
             "title": "Report Goals",
             "type": "array"
+          },
+          "skipped": {
+            "default": 0,
+            "description": "questions left with \u00abWeiss nicht\u00bb this round",
+            "title": "Skipped",
+            "type": "integer"
           },
           "source": {
             "enum": [
@@ -25162,6 +25367,117 @@
         "summary": "Boundaries",
         "tags": [
           "matches"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/matches/{match_id}/checks/skip": {
+      "post": {
+        "description": "\u00abWeiss nicht\u00bb in Pr\u00fcfen, kept: the question is not asked again in this round and waits\nbehind \u00abMehr pr\u00fcfen\u00bb; it no longer counts in the bell.",
+        "operationId": "skip_check_v1_orgs__org_id__matches__match_id__checks_skip_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "match_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Match Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckSkipIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Skip Check",
+        "tags": [
+          "events"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/matches/{match_id}/checks/skip-all": {
+      "post": {
+        "description": "\u00abF\u00fcr dieses Spiel fertig\u00bb: every open question of the match is left at once; the bell\nclears, the questions stay behind \u00abMehr pr\u00fcfen\u00bb.",
+        "operationId": "skip_all_checks_v1_orgs__org_id__matches__match_id__checks_skip_all_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "match_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Match Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckSkipAllOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Skip All Checks",
+        "tags": [
+          "events"
         ]
       }
     },

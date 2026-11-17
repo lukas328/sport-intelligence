@@ -12,7 +12,12 @@ is known, how long it probably still takes and whether it still moves:
   once after RESTART_AFTER_S, or ends it as failed the second time (the coach can try again);
 - an upload goes from the browser straight to storage: its parts tell how far it is and when the
   last one arrived; no new part for UPLOAD_IDLE_S and it is «interrupted» (closed tab, lost
-  connection), the same file chosen again continues it.
+  connection), the same file chosen again continues it. No new part for ABANDON_UPLOAD_S and it
+  is abandoned: shown as failed, and the watchdog ends it (`abandon_uploads`), so the yellow line
+  goes by itself and the file can be removed (second round A4, A9);
+- a failed step says whether starting it again can help (`retry`): not after a timeout on the
+  same file (it would run out of time again), nor for a file that cannot be read or is too short
+  (second round A3).
 
 Two files of one match run one after the other: the second half's analysis waits for the first
 (services/videos.WAITING), so its finish counts from the first one's.
@@ -46,6 +51,9 @@ WEIGHTS: dict[str, float] = {"upload": 0.1, "ingest": 0.3, "analysis": 0.6}
 WEIGHTS_NO_ANALYSIS: dict[str, float] = {"upload": 0.25, "ingest": 0.75}
 
 UPLOAD_IDLE_S = 5 * 60  # no new part for this long: the upload stopped
+ABANDON_UPLOAD_S = 6 * 3600  # no new part for this long: the upload is given up
+ABANDONED_ERROR = "upload abandoned"
+NO_RETRY = ("timeout", "unreadable", "too_short")  # starting the same file again fails again
 STALL_S = 10 * 60  # a running job silent this long (it reports at least once a minute)
 STALL_S_OLD = 45 * 60  # a job of a worker without heartbeat (before the heartbeat existed)
 RESTART_AFTER_S = 30 * 60  # the watchdog restarts a job silent this long, once
@@ -241,6 +249,21 @@ def file_progress(
             if took >= 10:
                 eta = int((asset.size_bytes - uploaded) / (uploaded / took))
         interrupted = idle >= UPLOAD_IDLE_S
+        if idle >= ABANDON_UPLOAD_S:
+            # given up (the watchdog ends it): nothing goes on by itself, the file can go
+            return FileProgressOut(
+                **base,
+                stage="upload",
+                state="failed",
+                fraction=frac,
+                overall=overall("upload", frac or 0.0),
+                stage_started_at=asset.created_at,
+                last_activity_at=parts.last_part_at if parts else None,
+                uploaded_bytes=uploaded,
+                idle_s=int(idle),
+                error="abandoned",
+                retry=False,
+            )
         return FileProgressOut(
             **base,
             stage="upload",
@@ -261,12 +284,18 @@ def file_progress(
         asset.status == VideoStatus.FAILED and ingest_open
     ):
         if asset.status == VideoStatus.FAILED:
+            code = (
+                ("abandoned" if (asset.error or "") == ABANDONED_ERROR else "upload")
+                if ingest is None
+                else failure_code(asset.error)
+            )
             return FileProgressOut(
                 **base,
                 stage="upload" if ingest is None else "ingest",
                 state="failed",
                 overall=overall("ingest", 0.0),
-                error="upload" if ingest is None else failure_code(asset.error),
+                error=code,
+                retry=ingest is not None and code not in NO_RETRY,
             )
         return _job_file(
             base, "ingest", ingest, jobs, now, hist_ingest, overall, after=hist_analysis
@@ -310,6 +339,9 @@ def _job_file(
     stage: ProgressStage = "ingest" if kind == "ingest" else "analysis"
     restarted = _restarted(jobs, kind)
     if job is not None and job.status == JobStatus.FAILED:
+        from handball_api.services.videos import job_budget_s  # imports this module
+
+        code = failure_code(job.error)
         return FileProgressOut(
             **base,
             stage=stage,
@@ -319,7 +351,13 @@ def _job_file(
             stage_started_at=job.started_at,
             last_activity_at=job.finished_at,
             restarted=restarted,
-            error=failure_code(job.error),
+            error=code,
+            retry=code not in NO_RETRY,
+            limit_s=(
+                job_budget_s(kind, base.get("duration_s"), base.get("size_bytes"))
+                if code == "timeout"
+                else None
+            ),
         )
     eta, basis = _remaining(kind, job, now, history_total)
     # the analysis after the ingest: only once the video's length is known (never before)
@@ -381,9 +419,12 @@ def match_summary(
     files: list[FileProgressOut],
     jobs: list[ProcessingJob],
     now: datetime,
+    keep_failed: bool = False,
 ) -> MatchProgressOut | None:
     """The files together: the step of the file furthest behind, the worst state, and the time
-    until everything is done (a waiting second half counts from the first one's finish)."""
+    until everything is done (a waiting second half counts from the first one's finish).
+    `keep_failed` (the match's own page): a failed file stays shown however long ago it failed,
+    so it can be removed or started again there (second round A1)."""
     if not files:
         return None
     active = [f for f in files if f.state in ACTIVE]
@@ -391,7 +432,8 @@ def match_summary(
     ended = [j.finished_at for j in jobs if j.finished_at is not None]
     finished_at = max(ended) if ended else None
     # nothing runs: shown a while after the end («fertig», or what failed)
-    if not active and (finished_at is None or (now - finished_at).total_seconds() > RECENT_S):
+    old = finished_at is None or (now - finished_at).total_seconds() > RECENT_S
+    if not active and old and not (keep_failed and failed):
         return None
     # the finish of each file: a part that waits starts after the parts before it
     finish: list[int | None] = []
@@ -453,7 +495,11 @@ async def _upload_parts(ctx: Ctx, asset: VideoAsset, now: datetime) -> UploadPar
 
 
 async def for_match(
-    ctx: Ctx, match: Match, now: datetime | None = None, pace: Throughput | None = None
+    ctx: Ctx,
+    match: Match,
+    now: datetime | None = None,
+    pace: Throughput | None = None,
+    keep_failed: bool = False,
 ) -> MatchProgressOut | None:
     now = now or datetime.now(UTC)
     if match.is_demo:
@@ -495,7 +541,7 @@ async def for_match(
     # the files in the order of the match: parts first, then the others as uploaded
     files.sort(key=lambda f: (f.part is None, f.part or 0))
     opp = await ctx.db.get(Opponent, match.opponent_id) if match.opponent_id else None
-    return match_summary(match, opp.name if opp else "", files, jobs, now)
+    return match_summary(match, opp.name if opp else "", files, jobs, now, keep_failed)
 
 
 async def for_org(ctx: Ctx, now: datetime | None = None) -> list[MatchProgressOut]:
@@ -605,7 +651,58 @@ async def watchdog(ctx: Ctx, now: datetime | None = None) -> dict[str, int]:
             log.warning("job_failed_silent", job=str(job.id), kind=job.kind)
             failed += 1
     await ctx.db.flush()
-    return {"restarted": restarted, "failed": failed}
+    abandoned = await abandon_uploads(ctx, now)
+    return {"restarted": restarted, "failed": failed, "abandoned": abandoned}
+
+
+async def abandon_uploads(ctx: Ctx, now: datetime | None = None) -> int:
+    """Uploads without a new part for ABANDON_UPLOAD_S are given up: the parts in storage go,
+    the file is marked failed («Der Upload wurde nicht fertig»), the yellow line of the
+    interrupted upload ends by itself and the file can be removed (second round A4, A9). Each
+    upload is handled within its own club (RLS)."""
+    from handball_api.services import videos  # imports this module
+
+    now = now or datetime.now(UTC)
+    await enable_system_access(ctx.db, reason="watchdog: uploads nobody continues")
+    found = (
+        await ctx.db.execute(
+            select(VideoAsset.id, VideoAsset.organization_id).where(
+                VideoAsset.status == VideoStatus.UPLOADING,
+                VideoAsset.source_url.is_(None),
+                VideoAsset.created_at <= now - timedelta(seconds=ABANDON_UPLOAD_S),
+            )
+        )
+    ).all()
+    await disable_system_access(ctx.db)
+    gone = 0
+    for asset_id, org_id in found:
+        await disable_system_access(ctx.db)
+        await set_tenant(ctx.db, org_id)
+        asset = await ctx.db.get(VideoAsset, asset_id)
+        if asset is None or asset.status != VideoStatus.UPLOADING:
+            continue
+        parts = await _upload_parts(ctx, asset, now) if asset.upload_id else None
+        last = (parts.last_part_at if parts else None) or asset.created_at
+        if (now - last).total_seconds() < ABANDON_UPLOAD_S:
+            continue
+        if asset.upload_id:
+            try:
+                await ctx.storage.abort_multipart(
+                    ctx.settings.s3_bucket_videos, asset.storage_key, asset.upload_id
+                )
+            except Exception as exc:  # already gone
+                log.info("abort_multipart_failed", video=str(asset.id), error=str(exc))
+        asset.status = VideoStatus.FAILED
+        asset.error = ABANDONED_ERROR
+        asset.upload_id = None
+        match = await ctx.db.get(Match, asset.match_id)
+        if match is not None:
+            await ctx.db.flush()
+            await videos.settle_status(ctx, match)
+        log.warning("upload_abandoned", video=str(asset.id), last_part=str(last))
+        gone += 1
+    await ctx.db.flush()
+    return gone
 
 
 def _old_limit(job: ProcessingJob) -> float:

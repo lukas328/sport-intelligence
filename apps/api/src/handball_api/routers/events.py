@@ -7,6 +7,8 @@ from fastapi import APIRouter, File, Query, Response, UploadFile
 
 from handball_api.routers.deps import OrgDep, per_user
 from handball_api.schemas.events import (
+    CheckSkipAllOut,
+    CheckSkipIn,
     EventIn,
     EventOut,
     EventPatch,
@@ -24,8 +26,8 @@ from handball_api.schemas.events import (
     ShotSpotOut,
 )
 from handball_api.schemas.season_line import SeasonLine
+from handball_api.services import checks, goal_candidates, official_report, paper_reports
 from handball_api.services import events as service
-from handball_api.services import goal_candidates, official_report, paper_reports
 from handball_api.services import insights as insights_service
 from handball_api.services import season_line as season_line_service
 
@@ -185,6 +187,20 @@ async def review_goal_candidate(
         data.x,
         data.y,
     )
+
+
+@router.post("/matches/{match_id}/checks/skip", status_code=204)
+async def skip_check(match_id: uuid.UUID, data: CheckSkipIn, scope: OrgDep) -> None:
+    """«Weiss nicht» in Prüfen, kept: the question is not asked again in this round and waits
+    behind «Mehr prüfen»; it no longer counts in the bell."""
+    await checks.skip(scope.ctx, match_id, data.kind, data.id, data.period)
+
+
+@router.post("/matches/{match_id}/checks/skip-all", response_model=CheckSkipAllOut)
+async def skip_all_checks(match_id: uuid.UUID, scope: OrgDep) -> dict[str, int]:
+    """«Für dieses Spiel fertig»: every open question of the match is left at once; the bell
+    clears, the questions stay behind «Mehr prüfen»."""
+    return await checks.skip_all(scope.ctx, match_id)
 
 
 @router.get("/matches/{match_id}/goals/{event_id}/view", response_model=GoalViewOut)
