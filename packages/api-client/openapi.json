@@ -6245,6 +6245,7 @@
           "state": {
             "enum": [
               "none",
+              "uploading",
               "running",
               "ready",
               "failed"

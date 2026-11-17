@@ -550,7 +550,8 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
               <p className="m-0 max-w-[60ch] text-[17px]">{graphics.data?.analysis === "running" ? ta("plainRunning") : graphics.data?.analysis !== "ready" ? ta("plainVideoOnly") : staff && checks > 0 ? ta("plainChecks", { n: checks }) : ta("plainNoGoals")}</p>
             )}
             <div className="flex flex-wrap gap-3">
-              {staff && checks > 0 && (
+              {/* with a notice its «Ecken setzen» is the way into Prüfen: not a second button */}
+              {staff && checks > 0 && !(graphics.data?.analysis === "ready" && graphics.data.notice && !graphics.data.notice.failed) && (
                 <Link href={`${base}/check`} className={buttonClass("primary")}>
                   {ta("plainToCheck")}
                 </Link>

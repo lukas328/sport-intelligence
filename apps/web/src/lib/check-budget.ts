@@ -25,15 +25,16 @@ export function personGroups<T extends PersonTrack>(tracks: T[], minMs: number, 
     .sort((a, b) => a[0]!.first_ms - b[0]!.first_ms);
 }
 
-export type FileState = { state: "none" | "running" | "ready" | "failed" };
+export type FileState = { state: "none" | "uploading" | "running" | "ready" | "failed" };
 
 /** What the files of a match did together (second round A8): null for a match of one file. */
-export function filesSummary(files: FileState[]): { total: number; ready: number; failed: number; running: number } | null {
+export function filesSummary(files: FileState[]): { total: number; ready: number; failed: number; running: number; uploading: number } | null {
   if (files.length < 2) return null;
   return {
     total: files.length,
     ready: files.filter((f) => f.state === "ready").length,
     failed: files.filter((f) => f.state === "failed").length,
     running: files.filter((f) => f.state === "running").length,
+    uploading: files.filter((f) => f.state === "uploading").length,
   };
 }

@@ -3665,7 +3665,9 @@
     "noticeLead": "L'analyse est terminée, mais elle a vu trop peu pour te poser des questions.",
     "rowParts": "{done} parties sur {total} analysées",
     "rowPartsFailed": "{n, plural, one {1 partie a échoué} other {# parties ont échoué}}",
-    "rowNotice": "Analyse terminée, aucune question : {reason}"
+    "rowNotice": "Analyse terminée, aucune question : {reason}",
+    "rowPartsUploading": "{n, plural, one {1 partie pas encore entièrement envoyée} other {# parties pas encore entièrement envoyées}}",
+    "rowFailedWhy": "L'analyse n'a pas fonctionné : {reason}"
   },
   "check": {
     "top": "Vérifier · {opponent}",
@@ -3712,7 +3714,7 @@
     "more": "Si tu veux: {n, plural, one {1 question de plus} other {# questions de plus}}",
     "reloading": "Le terrain est repris et la vidéo réanalysée avec lui. Cela prend quelques minutes. Tu peux fermer la page ; les nouvelles questions seront ici ensuite.",
     "mainDone": "Les moments les plus importants sont vérifiés.",
-    "mainDoneText": "{n, plural, one {1 autre moment pourrait être un but.} other {# autres pourraient être des buts.}} Avec «D'où?», cela prend environ {minutes, plural, one {1 minute} other {# minutes}}.",
+    "mainDoneText": "{n, plural, one {1 autre moment pourrait être un but.} other {# autres moments pourraient être des buts.}} {batch, plural, one {Il prend} other {Les # prochains prennent}} environ {minutes, plural, one {1 minute} other {# minutes}} avec « D'où? ».",
     "goOn": "Vérifier plus",
     "roundDone": "Vérifié pour aujourd'hui.",
     "leftOpen": "{n, plural, one {1 moment reste ouvert.} other {# moments restent ouverts.}} Tant qu'ils ne sont pas répondus, le score est provisoire.",
@@ -3741,7 +3743,8 @@
     "finishedText": "{n, plural, one {1 question attend} other {# questions attendent}} sous « Vérifier plus », quand tu veux. La cloche est calme.",
     "finishedTextNone": "Les autres questions sont mises de côté. La cloche est calme.",
     "skippedLeft": "{n, plural, one {Tu as passé 1 question. Elle attend} other {Tu as passé # questions. Elles attendent}} sous « Vérifier plus », quand tu veux.",
-    "skipAll": "Terminé pour ce match : passer toutes les autres"
+    "skipAll": "Terminé pour ce match : passer toutes les autres",
+    "noneOpen": "aucune question ouverte"
   },
   "scenesPage": {
     "searchLabel": "Chercher des scènes",

@@ -48,12 +48,15 @@ export function AnalysisNotice({
   cornersHref,
   lead,
   className,
+  plain = false,
   testId = "analysis-notice",
 }: {
   notice: Notice;
   cornersHref?: string | null;
   lead?: string;
   className?: string;
+  /** inside a block that already has its edge (the failed file in the progress) */
+  plain?: boolean;
   testId?: string;
 }) {
   const t = useTranslations("analysisNotice");
@@ -62,7 +65,7 @@ export function AnalysisNotice({
   const locale = useLocale();
   const corners = cornersHref && cornersHelp(notice);
   return (
-    <section className={cn("max-w-[62ch] space-y-3 border-l-4 border-attn pl-4", className)} data-testid={testId} data-reason={notice.reason}>
+    <section className={cn("max-w-[62ch] space-y-3", !plain && "border-l-4 border-attn pl-4", className)} data-testid={testId} data-reason={notice.reason}>
       {lead && <p className="m-0 text-[15px] font-semibold text-ink-2">{lead}</p>}
       <p className="m-0 text-[19px] font-bold">{words.title}</p>
       <p className="m-0 text-[17px]">{words.help}</p>

@@ -46,6 +46,8 @@ type Question =
 // person (the tracks with the same shirt number), at most three (second round A6)
 const PERSON_MIN_MS = 5000;
 const PERSON_MAX = 3;
+// «Mehr prüfen» takes the further questions ten at a time, then offers the next ten
+const MORE_BATCH = 10;
 /** `summary`: how the answer reads in «Beantwortet» when the button's words say too little
  * («Jetzt ist Anwurf» becomes «Video 0:42»), taken at the moment of the tap */
 type Answer = { key: string; label: string; first?: boolean; numeral?: string; summary?: () => string; run: () => Promise<void> };
@@ -134,6 +136,8 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
           const left = (list: Schemas["CheckOut"][]) => list.filter((c) => !skipped.current.has(keyOf(c)) && !seen.current.has(keyOf(c)));
           setAsked({ first: left(g.checks), more: left(g.more_checks ?? []) });
           setDone([]);
+          // a batch of «Mehr prüfen» is done: the next one only when asked for
+          setWantMore(false);
           setVerified(left(g.checks).length === 0);
         } else setVerified(true);
         return g;
@@ -176,7 +180,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
   const questions = useMemo<Question[]>(() => {
     if (!asked) return [];
     // the further goal moments with «Weiter prüfen», the people in the picture on their own
-    return [...toQuestions(asked.first), ...(wantMore ? toQuestions(asked.more) : []), ...(peopleAsked ?? []).filter((q) => !retired.has(id(q)))];
+    return [...toQuestions(asked.first), ...(wantMore ? toQuestions(asked.more).slice(0, MORE_BATCH) : []), ...(peopleAsked ?? []).filter((q) => !retired.has(id(q)))];
   }, [asked, wantMore, peopleAsked, retired, toQuestions]);
   const moreCount = people.length;
   // goal moments beyond the most important ones: while any is open nothing looks final, «Alles
@@ -576,7 +580,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
       <div className={cn("bleed-x", spotStep && "max-md:hidden")}>
         <Strip
           name={own}
-          sub={`${ta("vsShort")} ${oppName} · ${left > 0 ? t("openCount", { n: left, minutes: leftMinutes }) : t("count", { n: total > 0 || wantMore ? total : moreGoals || otherOpen })}`}
+          sub={`${ta("vsShort")} ${oppName} · ${left > 0 ? t("openCount", { n: left, minutes: leftMinutes }) : total > 0 ? t("count", { n: total }) : otherOpen > 0 ? t("count", { n: otherOpen }) : t("noneOpen")}`}
           own={match.score_own}
           opp={match.score_opponent}
         />
@@ -603,8 +607,8 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
             </div>
           ) : !wantMore && moreGoals > 0 ? (
             <div className="space-y-4" data-testid="check-main-done">
-              <h1 className="text-[40px] md:text-[58px]">{t("mainDone")}</h1>
-              <p className="text-[17px] text-ink-2">{t("mainDoneText", { n: moreGoals, minutes: checkMinutes(moreGoals, 0) })}</p>
+              <h1 className="text-[40px] md:text-[58px]">{leftOver > 0 ? t("finishedTitle") : t("mainDone")}</h1>
+              <p className="text-[17px] text-ink-2">{t("mainDoneText", { n: moreGoals, batch: Math.min(moreGoals, MORE_BATCH), minutes: checkMinutes(Math.min(moreGoals, MORE_BATCH), 0) })}</p>
               <div className="flex flex-wrap items-center gap-4">
                 <button
                   type="button"

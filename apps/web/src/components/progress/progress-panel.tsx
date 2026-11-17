@@ -186,7 +186,7 @@ function FileNote({
     return (
       <div className="mt-2 space-y-2" role="alert" data-testid="progress-failed" data-error={f.error ?? undefined}>
         {reason ? (
-          <AnalysisNotice notice={{ reason, failed: true, duration_s: f.duration_s, limit_s: f.limit_s }} className="mt-3" testId="progress-failed-reason" />
+          <AnalysisNotice notice={{ reason, failed: true, duration_s: f.duration_s, limit_s: f.limit_s }} className="mt-3" plain testId="progress-failed-reason" />
         ) : (
           <p className={cn(base, "mt-0 text-[17px]")}>{t(f.stage === "upload" ? (f.error === "abandoned" ? "failedAbandoned" : "failedUpload") : "failedIngest")}</p>
         )}

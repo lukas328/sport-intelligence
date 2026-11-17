@@ -259,7 +259,8 @@ function useHeadProps(m: Match | null, next: Match | null, g: MatchGraphics | nu
   const t = useTranslations("anlauf");
   const format = useFormatter();
   if (!m) {
-    return { title: next ? t("titleNext", { opponent: next.opponent_name }) : t("titleWelcome"), own: null, opp: null, ownName: teamName, oppName: next?.opponent_name ?? "", waiting: true };
+    // nothing played yet: no empty place for a score (second round A10)
+    return { title: next ? t("titleNext", { opponent: next.opponent_name }) : t("titleWelcome"), own: null, opp: null, ownName: teamName, oppName: next?.opponent_name ?? "", waiting: true, scoreless: true };
   }
   const state = matchState(m);
   const running = ["matches.status_processing", "matches.status_uploading"].includes(state.label) || g?.analysis === "running";
@@ -284,6 +285,9 @@ function useHeadProps(m: Match | null, next: Match | null, g: MatchGraphics | nu
     ownName: teamName,
     oppName: m.opponent_name,
     goals: g ? reportGoals(g) : null,
+    // without a result (and once the data is there) no large empty place for one: the head stays
+    // short and what matters comes up (second round A10)
+    scoreless: g != null || !m.has_video,
     flightLabels: { half: t("halftime", { v: "{v}" }), end: t("end", { v: "{v}" }), halfLevel: t("halftimeLevel"), endLevel: t("endLevel") },
   };
 }
@@ -323,11 +327,11 @@ function RowSummary({ orgId, m }: { orgId: string; m: Match }) {
   // several files: what all of them did, never the first file's state alone (second round A8)
   const files = filesSummary(g.data.files ?? []);
   if (files && files.ready < files.total) {
-    return <>{[files.running > 0 ? t("rowRunning") : null, t("rowParts", { done: files.ready, total: files.total }), files.failed > 0 ? t("rowPartsFailed", { n: files.failed }) : null].filter(Boolean).join(", ")}</>;
+    return <>{[files.running > 0 ? t("rowRunning") : null, t("rowParts", { done: files.ready, total: files.total }), files.uploading > 0 ? t("rowPartsUploading", { n: files.uploading }) : null, files.failed > 0 ? t("rowPartsFailed", { n: files.failed }) : null].filter(Boolean).join(", ")}</>;
   }
   // «Analyse fertig» only when it is (E06)
   if (g.data.analysis === "running") return <>{t("rowRunning")}</>;
-  if (g.data.analysis === "failed") return <>{t("rowFailed")}</>;
+  if (g.data.analysis === "failed") return <>{g.data.notice?.failed ? t("rowFailedWhy", { reason: tn(`short_${noticeKey(g.data.notice.reason)}` as "short_court") }) : t("rowFailed")}</>;
   const things = threeThings(goalRuns(g.data));
   const scenes = g.data.goals.filter((x) => x.has_video || x.source === "demo").length;
   // no things yet: the state in words, not «Kein Ding · 0 Szenen» (UX test A02)

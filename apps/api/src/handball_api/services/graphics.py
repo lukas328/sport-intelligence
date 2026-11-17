@@ -462,6 +462,8 @@ async def _files_state(ctx: Ctx, match: Match) -> list[dict[str, Any]]:
             continue
         if a.status == VideoStatus.FAILED:
             state = "failed"
+        elif a.status == VideoStatus.UPLOADING:
+            state = "uploading"  # not all of it arrived (it may be stuck)
         elif a.status != VideoStatus.READY:
             state = "running"
         else:

@@ -3665,7 +3665,9 @@
     "noticeLead": "The analysis is done, but it saw too little to ask you anything.",
     "rowParts": "{done} of {total} parts analysed",
     "rowPartsFailed": "{n, plural, one {1 part failed} other {# parts failed}}",
-    "rowNotice": "Analysis done, no questions: {reason}"
+    "rowNotice": "Analysis done, no questions: {reason}",
+    "rowPartsUploading": "{n, plural, one {1 part} other {# parts}} not fully uploaded yet",
+    "rowFailedWhy": "Analysis did not work: {reason}"
   },
   "check": {
     "top": "Check · {opponent}",
@@ -3712,7 +3714,7 @@
     "more": "If you like: {n, plural, one {1 more question} other {# more questions}}",
     "reloading": "The court is being taken over and the video analysed again with it. This takes a few minutes. You can close the page; the new questions will be here afterwards.",
     "mainDone": "The most important moments are checked.",
-    "mainDoneText": "{n, plural, one {1 more moment could be a goal.} other {# more could be goals.}} With «From where?» that takes about {minutes, plural, one {1 minute} other {# minutes}}.",
+    "mainDoneText": "{n, plural, one {1 more moment could be a goal.} other {# more moments could be goals.}} {batch, plural, one {It takes} other {The next # take}} about {minutes, plural, one {1 minute} other {# minutes}} with “From where?”.",
     "goOn": "Check more",
     "roundDone": "Checked for today.",
     "leftOpen": "{n, plural, one {1 moment stays open.} other {# moments stay open.}} Until they are answered, the score is an interim one.",
@@ -3741,7 +3743,8 @@
     "finishedText": "{n, plural, one {1 question waits} other {# questions wait}} under “Check more”, whenever you like. The bell is quiet.",
     "finishedTextNone": "The other questions are put aside. The bell is quiet.",
     "skippedLeft": "{n, plural, one {You skipped 1 question. It waits} other {You skipped # questions. They wait}} under “Check more”, whenever you like.",
-    "skipAll": "Done for this match: skip all the others"
+    "skipAll": "Done for this match: skip all the others",
+    "noneOpen": "no question open"
   },
   "scenesPage": {
     "searchLabel": "Search scenes",

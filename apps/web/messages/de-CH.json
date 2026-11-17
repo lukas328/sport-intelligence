@@ -3665,7 +3665,9 @@
     "noticeLead": "Die Analyse ist fertig, aber sie hat zu wenig gesehen, um dich etwas zu fragen.",
     "rowParts": "{done} von {total} Teilen analysiert",
     "rowPartsFailed": "{n, plural, one {1 Teil gescheitert} other {# Teile gescheitert}}",
-    "rowNotice": "Analyse fertig, keine Fragen: {reason}"
+    "rowNotice": "Analyse fertig, keine Fragen: {reason}",
+    "rowPartsUploading": "{n, plural, one {1 Teil} other {# Teile}} noch nicht ganz hochgeladen",
+    "rowFailedWhy": "Analyse nicht geklappt: {reason}"
   },
   "check": {
     "top": "Prüfen · {opponent}",
@@ -3712,7 +3714,7 @@
     "more": "Wenn du magst: {n, plural, one {1 weitere Frage} other {# weitere Fragen}}",
     "reloading": "Das Feld wird übernommen und das Video damit neu ausgewertet. Das dauert einige Minuten. Du kannst die Seite schliessen; die neuen Fragen stehen danach hier.",
     "mainDone": "Die wichtigsten Momente sind geprüft.",
-    "mainDoneText": "{n, plural, one {1 weiterer Moment könnte ein Tor sein.} other {# weitere könnten Tore sein.}} Mit «Von wo?» dauert das etwa {minutes, plural, one {1 Minute} other {# Minuten}}.",
+    "mainDoneText": "{n, plural, one {1 weiterer Moment könnte ein Tor sein.} other {# weitere Momente könnten Tore sein.}} {batch, plural, one {Er dauert} other {Die nächsten # dauern}} mit «Von wo?» etwa {minutes, plural, one {1 Minute} other {# Minuten}}.",
     "goOn": "Mehr prüfen",
     "roundDone": "Für heute geprüft.",
     "leftOpen": "{n, plural, one {1 Moment bleibt offen.} other {# Momente bleiben offen.}} Bis sie beantwortet sind, ist das Resultat ein Zwischenstand.",
@@ -3741,7 +3743,8 @@
     "finishedText": "{n, plural, one {1 Frage wartet} other {# Fragen warten}} unter «Mehr prüfen», wann immer du magst. Die Glocke ist ruhig.",
     "finishedTextNone": "Die übrigen Fragen sind weggelegt. Die Glocke ist ruhig.",
     "skippedLeft": "{n, plural, one {1 Frage hast du übersprungen. Sie wartet} other {# Fragen hast du übersprungen. Sie warten}} unter «Mehr prüfen», wann immer du magst.",
-    "skipAll": "Für dieses Spiel fertig: alle übrigen überspringen"
+    "skipAll": "Für dieses Spiel fertig: alle übrigen überspringen",
+    "noneOpen": "keine Frage offen"
   },
   "scenesPage": {
     "searchLabel": "Szenen suchen",

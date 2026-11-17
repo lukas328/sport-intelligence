@@ -29,8 +29,8 @@ describe("the people in the picture, bundled (second round A6)", () => {
 describe("the files of a match together (second round A8)", () => {
   it("sums up several files, says nothing for one", () => {
     expect(filesSummary([{ state: "ready" }])).toBeNull();
-    expect(filesSummary([{ state: "ready" }, { state: "failed" }])).toEqual({ total: 2, ready: 1, failed: 1, running: 0 });
-    expect(filesSummary([{ state: "ready" }, { state: "running" }, { state: "ready" }])).toEqual({ total: 3, ready: 2, failed: 0, running: 1 });
+    expect(filesSummary([{ state: "ready" }, { state: "failed" }])).toEqual({ total: 2, ready: 1, failed: 1, running: 0, uploading: 0 });
+    expect(filesSummary([{ state: "ready" }, { state: "running" }, { state: "uploading" }])).toEqual({ total: 3, ready: 1, failed: 0, running: 1, uploading: 1 });
   });
 });
 

@@ -767,7 +767,7 @@ class CheckNoticeOut(ApiModel):
 class GraphicsFileOut(ApiModel):
     video_id: uuid.UUID
     filename: str
-    state: Literal["none", "running", "ready", "failed"]
+    state: Literal["none", "uploading", "running", "ready", "failed"]
 
 
 class MatchGraphicsOut(ApiModel):

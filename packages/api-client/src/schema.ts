@@ -7453,7 +7453,7 @@ export interface components {
              * State
              * @enum {string}
              */
-            state: "none" | "running" | "ready" | "failed";
+            state: "none" | "uploading" | "running" | "ready" | "failed";
             /**
              * Video Id
              * Format: uuid
