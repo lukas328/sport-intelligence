@@ -3726,7 +3726,8 @@
     "todayTitle": "Das kannst du heute schon",
     "todayNote": "aus dem Spielbericht",
     "todayText": "Die Spielkarte als Bild für den Teamchat und den Kurzbericht zum Kopieren, noch ohne Video.",
-    "todayCard": "Spielkarte für den Teamchat"
+    "todayCard": "Spielkarte für den Teamchat",
+    "exampleBand": "Beispiel · erfundene Zahlen"
   },
   "check": {
     "top": "Prüfen · {opponent}",

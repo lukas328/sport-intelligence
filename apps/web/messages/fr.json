@@ -3726,7 +3726,8 @@
     "todayTitle": "Ce que tu peux faire dès aujourd’hui",
     "todayNote": "d’après la feuille de match",
     "todayText": "La carte du match en image pour le chat de l’équipe et le résumé à copier, déjà sans vidéo.",
-    "todayCard": "Carte du match pour le chat"
+    "todayCard": "Carte du match pour le chat",
+    "exampleBand": "Exemple · chiffres inventés"
   },
   "check": {
     "top": "Vérifier · {opponent}",

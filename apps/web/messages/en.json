@@ -3726,7 +3726,8 @@
     "todayTitle": "What you can do today",
     "todayNote": "from the match report",
     "todayText": "The match card as a picture for the team chat and the short report to copy, even without a video.",
-    "todayCard": "Match card for the team chat"
+    "todayCard": "Match card for the team chat",
+    "exampleBand": "Example · invented figures"
   },
   "check": {
     "top": "Check · {opponent}",

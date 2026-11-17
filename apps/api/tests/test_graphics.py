@@ -109,9 +109,16 @@ async def test_demo_match_draws_demo_positions(make_api: Callable[[], Api]) -> N
     teams = [t["team"] for t in s["tracks"]]
     # six attackers, six defenders and the keeper, one referee
     assert teams.count("ref") == 1 and len(teams) == 14
-    # the scorer's way ends where the shot was taken; the ball is not detected, so not drawn
+    # the scorer's way ends where the shot was taken
     assert s["shot"] == s["tracks"][0]["xy"][-1]
-    assert s["ball"] == []
+    # the ball as the ball net finds it (A4): the centre back until the pass, then the scorer
+    # until the shot, both of them on the court with their number
+    scorer = s["scorer"]["number"]
+    assert [b["number"] for b in s["ball"]] == [10 if scorer != 10 else 6, scorer]
+    assert s["ball"][0]["from_s"] == 0 and s["ball"][-1]["to_s"] == s["duration_s"]
+    assert all(b["team"] == s["scorer"]["team"] for b in s["ball"])
+    numbers = {(t["team"], t["number"]) for t in s["tracks"] if t["number"] is not None}
+    assert {(b["team"], b["number"]) for b in s["ball"]} <= numbers
 
 
 async def test_scene_of_another_match_is_not_found(make_api: Callable[[], Api]) -> None:

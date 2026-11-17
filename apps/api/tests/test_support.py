@@ -260,3 +260,60 @@ async def test_demo_match_stays_out_of_the_team(make_api: Callable[[], Api]) -> 
     # a second click opens the same example
     again = (await api.post(f"/v1/orgs/{org}/teams/{team}/demo-match")).json()
     assert again["id"] == demo["id"]
+
+
+async def test_example_match_names_nobody_of_the_team(make_api: Callable[[], Api]) -> None:
+    """A4, A2: the example takes nothing of the team: invented shirt numbers instead of the
+    roster's players (also after a number comes into the roster), the first day of the season
+    as its date, an invented opponent of the demo story with an entry of its own."""
+    api = make_api()
+    ids = await setup_club(api)
+    org, team = ids["org"], ids["team"]
+    roster = f"/v1/orgs/{org}/teams/{team}/seasons/{ids['season']}/roster"
+    for n, pos in ((12, "TW"), (2, "RL"), (4, "KM"), (13, "RA")):
+        body = {"first_name": f"P{n}", "last_name": "E", "jersey_number": n, "main_position": pos}
+        assert (await api.post(roster, json=body)).status_code == 201
+    # a real opponent of the club that happens to carry the example's name stays the club's own
+    real = await new_match(api, ids, opponent_name=support.DEMO_OPPONENT)
+    demo = (await api.post(f"/v1/orgs/{org}/teams/{team}/demo-match")).json()
+    assert demo["opponent"]["name"] == support.DEMO_OPPONENT == "TSV Nachtwind"
+    assert demo["opponent"]["id"] != real["opponent"]["id"]
+    season = next(
+        s
+        for s in (await api.get(f"/v1/orgs/{org}/teams/{team}/seasons")).json()
+        if s["id"] == ids["season"]
+    )
+    assert demo["kickoff_at"].startswith(season["starts_on"])
+
+    events = (await api.get(f"/v1/orgs/{org}/matches/{demo['id']}/events")).json()
+    own = [e for e in events if e["side"] == "own"]
+    assert own and all(e["player_id"] is None for e in events)
+    assert {e["number"] for e in own if e["number"] is not None} <= set(support.DEMO_NUMBERS)
+    saves = [e for e in events if e["side"] == "opponent" and e["outcome"] in ("save", "goal")]
+    assert saves and all(
+        e["attributes"] == {"goalkeeper_number": support.DEMO_KEEPER} for e in saves
+    )
+    # a number coming into the roster links the season's reports, never the example (R3)
+    body = {"first_name": "Neu", "last_name": "Echt", "jersey_number": 5}
+    assert (await api.post(roster, json=body)).status_code == 201
+    events = (await api.get(f"/v1/orgs/{org}/matches/{demo['id']}/events")).json()
+    assert all(e["player_id"] is None for e in events)
+    stats = (await api.get(f"/v1/orgs/{org}/matches/{demo['id']}/stats")).json()
+    keepers = [k for k in stats["goalkeepers"].values() if k["side"] == "own"]
+    assert [k["number"] for k in keepers] == [support.DEMO_KEEPER]
+    # a second team's example plays the same invented opponent entry
+    other = await api.post(
+        f"/v1/orgs/{org}/teams", json={"name": "Herren 2", "gender": "men", "is_youth": False}
+    )
+    assert other.status_code == 201, other.text
+    second = (await api.post(f"/v1/orgs/{org}/teams/{other.json()['id']}/demo-match")).json()
+    assert second["opponent"]["id"] == demo["opponent"]["id"]
+
+
+def test_example_kickoff_is_the_first_day_of_the_season() -> None:
+    from datetime import date
+
+    start = date(2026, 7, 1)
+    assert support.demo_kickoff(start, date(2026, 11, 18)).date() == start
+    # a season not started yet: the same day a year earlier, never a date in the future
+    assert support.demo_kickoff(start, date(2026, 6, 20)).date() == date(2025, 7, 1)
