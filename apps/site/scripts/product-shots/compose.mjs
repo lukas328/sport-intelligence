@@ -2,7 +2,7 @@
 /**
  * Step 2 of the product pictures: places the app captures (captures/, made by capture.mjs) into
  * the designed pictures (templates/*.html with stage.css and stage.js) and writes them as WebP
- * to public/product/: <name>.webp (1x) and <name>@2x.webp, each as small as the budget allows.
+ * to public/product/: <name>.webp (1x) and <name>-2x.webp, each as small as the budget allows.
  * The manifest src/lib/product-shots.json holds the sizes and the callouts (arrow and label
  * positions in per cent); the website draws the arrows and writes the labels as real text in the
  * visitor's language (src/components/product-shot.tsx, texts in src/messages/*.ts, `product`).
@@ -134,7 +134,7 @@ async function main() {
       const one = await encode(encoder, png, shot.width, BUDGET["1x"]);
       const two = await encode(encoder, png, shot.width * 2, shot.budget2x ?? BUDGET["2x"]);
       writeFileSync(join(OUT, `${name}.webp`), Buffer.from(one.b64, "base64"));
-      writeFileSync(join(OUT, `${name}@2x.webp`), Buffer.from(two.b64, "base64"));
+      writeFileSync(join(OUT, `${name}-2x.webp`), Buffer.from(two.b64, "base64"));
       const pct = ([x, y]) => [
         +((x / shot.width) * 100).toFixed(2),
         +((y / shot.height) * 100).toFixed(2),

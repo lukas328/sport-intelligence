@@ -25,7 +25,7 @@ That runs both steps:
    hidden in the picture.
 2. `compose.mjs` places the captures into `templates/*.html` (one per picture, with `stage.css`
    and `stage.js`), photographs them with Chromium and writes `public/product/<name>.webp` and
-   `<name>@2x.webp`, each at the best quality under its budget (100 KB for 1x, 150 KB for 2x).
+   `<name>-2x.webp`, each at the best quality under its budget (100 KB for 1x, 150 KB for 2x).
    The sizes and the callouts (label point, spot, side, bend; in per cent) go to
    `src/lib/product-shots.json`. Rings and arrows follow the boxes from step 1, so a changed
    layout in the app moves them along.

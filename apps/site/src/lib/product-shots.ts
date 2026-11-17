@@ -38,7 +38,7 @@ export function productShot(name: ShotName): Shot {
     width: m.width,
     height: m.height,
     src: `/product/${name}.webp`,
-    srcSet: `/product/${name}.webp ${m.width}w, /product/${name}@2x.webp ${m.width * 2}w`,
+    srcSet: `/product/${name}.webp ${m.width}w, /product/${name}-2x.webp ${m.width * 2}w`,
     callouts: m.callouts,
   };
 }
