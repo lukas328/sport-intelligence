@@ -10,22 +10,22 @@ set -euo pipefail
 mkdir -p "$OUT/artefacts"
 
 ws=$(az monitor log-analytics workspace list -g "$rg" --query "[0].customerId" -o tsv)
-echo "== gpu-worker log, last 24 hours"
+echo "== worker logs (worker and gpu-worker), last 24 hours"
 az monitor log-analytics query -w "$ws" -o json --analytics-query "ContainerAppConsoleLogs_CL
-  | where TimeGenerated > ago(24h) | where ContainerAppName_s contains 'gpu'
-  | project TimeGenerated, Log_s | order by TimeGenerated asc" >"$OUT/gpu-worker-24h.json"
-jq -r '.[] | "\(.TimeGenerated) \(.Log_s)"' "$OUT/gpu-worker-24h.json" >"$OUT/gpu-worker-24h.log"
-echo "lines: $(wc -l <"$OUT/gpu-worker-24h.log")"
+  | where TimeGenerated > ago(24h) | where ContainerAppName_s contains 'worker'
+  | project TimeGenerated, ContainerAppName_s, Log_s | order by TimeGenerated asc" >"$OUT/workers-24h.json"
+jq -r '.[] | "\(.TimeGenerated) \(.ContainerAppName_s) \(.Log_s)"' "$OUT/workers-24h.json" >"$OUT/workers-24h.log"
+echo "lines: $(wc -l <"$OUT/workers-24h.log")"
 echo "== analysis_done"
-grep 'analysis_done' "$OUT/gpu-worker-24h.log" || echo "(none in 24 hours)"
+grep 'analysis_done' "$OUT/workers-24h.log" || echo "(none in 24 hours)"
 echo "== warnings and errors"
-grep -Ei '"level": ?"(warning|error|critical)"|Traceback|Killed|OOM' "$OUT/gpu-worker-24h.log" | cut -c1-600 || echo "(none)"
+grep -Ei '\[(warning|error|critical) *\]|"level": ?"(warning|error|critical)"|Traceback|Killed|OOM' "$OUT/workers-24h.log" | cut -c1-600 || echo "(none)"
 
 kv=$(terraform output -raw key_vault)
 dsn=$(az keyvault secret show --vault-name "$kv" -n hb-admin-dsn --query value -o tsv)
 echo "::add-mask::$dsn"
 ip=$(curl -fsS https://api.ipify.org)
-az postgres flexible-server firewall-rule create -g "$rg" -n "$(terraform output -raw postgres_server)" \
+az postgres flexible-server firewall-rule create -g "$rg" --server-name "$(terraform output -raw postgres_server)" \
   --rule-name "$FW_RULE" --start-ip-address "$ip" --end-ip-address "$ip" -o none
 
 q() { PGCONNECT_TIMEOUT=20 psql "$dsn" -v ON_ERROR_STOP=1 -At -c "SET app.bypass_rls = 'on'; $1"; }
