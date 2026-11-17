@@ -13,7 +13,7 @@
  *   node apps/site/scripts/product-shots/capture.mjs video      # only the named ones
  *
  * Environment: HB_APP_URL (default http://localhost:3000), HB_DEMO_EMAIL, HB_DEMO_PASSWORD,
- * HB_API_ORIGIN (only for a second dev server, see below),
+ * HB_API_ORIGIN (only for a second dev server, see below), HB_DEMO_HLS_DIR (see localMedia),
  * PLAYWRIGHT_CHROMIUM_PATH (optional, a Chromium binary under /opt/pw-browsers).
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -123,6 +123,8 @@ function pageHelpers() {
 }
 
 const PHONE = { width: 390, height: 844, scale: 2 };
+/** phone screens cut out flat and shown large on the site (the steps): sharper sources */
+const PHONE_SHARP = { ...PHONE, scale: 4 };
 const DESKTOP = { width: 1280, height: 860, scale: 2 };
 
 /**
@@ -162,7 +164,7 @@ const SHOTS = [
   {
     // the first of the three things on the phone: the number, the words, the shots on the court
     name: "dinge-phone",
-    size: PHONE,
+    size: PHONE_SHARP,
     async open(p) {
       await p.evaluate(() => {
         const t = window.__hb.text("1 von 3") ?? window.__hb.text(/^1\s*von\s*3$/);
@@ -183,7 +185,7 @@ const SHOTS = [
   },
   {
     name: "hochladen-phone",
-    size: PHONE,
+    size: PHONE_SHARP,
     async open(p) {
       // the header's «Video hochladen» opens the same sheet with ?upload=1
       await p.goto(`${p.__team}?upload=1`, { waitUntil: "networkidle" });
@@ -209,7 +211,7 @@ const SHOTS = [
   },
   {
     name: "pruefen-phone",
-    size: PHONE,
+    size: PHONE_SHARP,
     async open(p) {
       await openMatch(p);
       const check = await p.getByTestId("check-link").first().getAttribute("href");
@@ -446,6 +448,25 @@ async function sameOrigin(ctx) {
   });
 }
 
+/**
+ * Optional: the video's player media from a folder instead of the running app (HB_DEMO_HLS_DIR,
+ * laid out like the video's media folder: hls/master.m3u8, hls/720p/index.m3u8, init.mp4,
+ * seg_*.m4s). For a stack seeded before the demo footage changed: render the match with the
+ * current `handball_vision.synthetic --demo` (same seed and length as scripts/seed.py) and package
+ * it, so the pictures show the footage a fresh seed gives. Files not in the folder come from the app.
+ */
+async function localMedia(ctx) {
+  const dir = process.env.HB_DEMO_HLS_DIR;
+  if (!dir) return;
+  await ctx.route(/\/media\/[^?]+\.(m3u8|m4s|mp4)(\?|$)/, async (route) => {
+    const path = new URL(route.request().url()).pathname.split("/media/")[1] ?? "";
+    const file = join(dir, path);
+    if (path.includes("..") || !existsSync(file)) return route.continue();
+    const type = path.endsWith(".m3u8") ? "application/vnd.apple.mpegurl" : "video/mp4";
+    await route.fulfill({ status: 200, contentType: type, body: readFileSync(file) });
+  });
+}
+
 async function settle(p) {
   await p.waitForLoadState("networkidle").catch(() => {});
   await p.waitForTimeout(900);
@@ -553,6 +574,7 @@ async function main() {
     }, QUIET_CSS);
     await ctx.addInitScript(pageHelpers);
     await sameOrigin(ctx);
+    await localMedia(ctx);
     const p = await ctx.newPage();
     p.__team = team;
     try {

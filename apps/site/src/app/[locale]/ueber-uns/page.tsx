@@ -60,7 +60,7 @@ export default async function AboutUs({ params }: Props) {
           <div className="min-w-0">
             <div className="lg:sticky lg:top-6">
               <figure className="m-0 max-w-[26rem]">
-                <ProductShot name="step-result" alt={t.shotAlt} labels={m.product["step-result"]} sizes="(min-width: 1024px) 26rem, calc(100vw - 2rem)" />
+                <ProductShot name="step-result" alt={t.shotAlt} labels={{}} sizes="(min-width: 1024px) 26rem, calc(100vw - 2rem)" />
                 <figcaption className="mt-3 text-[1.0625rem] text-ink-2">{t.shotCaption}</figcaption>
               </figure>
               <ProductShot name="share" alt={m.home.shareAlt} labels={m.product.share} sizes="(min-width: 1024px) 26rem, calc(100vw - 2rem)" className="mt-10 max-w-[26rem]" />

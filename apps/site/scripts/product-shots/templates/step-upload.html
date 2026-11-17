@@ -1,15 +1,16 @@
 <!doctype html>
-<!-- Step «Hochladen»: the phone with the upload sheet, the first match ringed. -->
+<!-- Step «Hochladen»: the upload sheet cut flat out of the phone (S11: the three steps in one look,
+     no device, no Keil), «Zu welchem Spiel gehört das Video?» with the first match ringed. -->
 <meta charset="utf-8" />
 <link rel="stylesheet" href="../stage.css" />
-<div id="stage"><div class="keil" style="--from: 76%; --to: 52%"></div></div>
+<div id="stage"></div>
 <script src="../stage.js"></script>
 <script>
-  S.stage(640, 620);
-  // the phone stands on the bottom edge: its lower part with the sheet is what shows
-  const s = S.phone("hochladen-phone", { left: 214, bottom: 26 });
+  S.stage(640, 620, { paper: true });
+  const sheet = S.rect("hochladen-phone", "dialog", [0, 480, 390, 364]);
   const row = S.rect("hochladen-phone", "first", [24, 583, 342, 56]);
-  S.ring(s, row, 4);
-  S.callout("pick", [195, 300], S.at(s, row, 0.02, 0.4), "tr", 0.2, 31);
+  // from the sheet's title down to the screen's bottom edge, a little narrower than the phone
+  const s = S.piece("hochladen-phone", [10, sheet[1] + 6, 370, 358], { left: 0, top: 0, width: 640 });
+  S.ring(s, row, 5);
   S.done();
 </script>
