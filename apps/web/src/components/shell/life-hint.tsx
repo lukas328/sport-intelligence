@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import { lifeHintKey } from "@/lib/life-hint-key";
 import { sectionOf, type Section } from "@/lib/nav-model";
 import { useShell } from "./context";
 
@@ -16,7 +17,7 @@ const KEY = (area: string) => `hb_life_hint_${area}`;
 export function LifeHint() {
   const t = useTranslations("teamLife");
   const path = usePathname();
-  const { mode } = useShell();
+  const { mode, teams } = useShell();
   const area = sectionOf(path);
   const known = area && AREAS.includes(area) ? area : null;
   const [seen, setSeen] = useState(true);
@@ -29,11 +30,10 @@ export function LifeHint() {
     }
   }, [known]);
   if (!known || seen) return null;
-  const who = mode === "staff" ? "staff" : mode === "family" ? "family" : "player";
   return (
     <aside className="mb-6 max-w-[70ch] border-l-4 border-attn bg-surface px-4 py-3" aria-label={t("hintLabel")} data-testid="life-hint">
       <p className="m-0 text-[15px] font-bold">{t(`hint_${known}_title`)}</p>
-      <p className="mt-1 mb-2 text-[15px]">{t(`hint_${known}_${who}`)}</p>
+      <p className="mt-1 mb-2 text-[15px]">{t(lifeHintKey(known, mode, teams.some((x) => x.team_features)) as "hint_overview_family")}</p>
       <button
         type="button"
         className="min-h-11 cursor-pointer text-[15px] font-bold underline decoration-[1.5px] underline-offset-4"
