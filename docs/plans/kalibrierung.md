@@ -79,6 +79,11 @@ der Wahrheit (Runde 1: Entwicklung, 63 Bilder).
   zwischen den Bildern um etwa ein Grad oder mehr daneben, wie im Nachtrag von ADR 025 für die
   SGWH-Streams beschrieben, aber hier in fast allen Hallen.
 
+Vorläufige Sichtprüfung der 6 heute akzeptierten Entwicklungs-Felder (keine Wahrheit, nur zum
+Entwickeln): c008 und c061 falsch, c040 und c067 plausibel, c025 und c039 in der Schwenkmitte nah,
+an den Schwenkenden daneben. Die heutigen Prüfungen (Kamerahöhe, Leute auf dem Feld, Torpfosten)
+lassen also falsche Felder durch.
+
 ## 5. Was nicht geholfen hat
 
 | Was | Wo | Zahlen | Warum verworfen |
@@ -86,4 +91,5 @@ der Wahrheit (Runde 1: Entwicklung, 63 Bilder).
 | Schwelle `MIN_VIEW_DEG` von 10 auf 3 Grad | 6 `flat_view`-Stücke der Entwicklung | 3 Felder neu akzeptiert, alle 3 auf Sicht falsch (Linien neben den Feldlinien) | Die Draufsicht ist bei tiefer Kamera unzuverlässig; die Schwelle schützt zu Recht. Tiefe Kameras brauchen eine Anpassung im Bild. |
 | Brennweite bewegter Kameras skalieren (0.5 bis 1.2) | c001, c014, c038 | Blickwinkel bleibt bei 7 bis 9 Grad; c038 bei 1.2 akzeptiert, ohne Prüfung | Nicht die Ursache von `flat_view`. |
 | Radiale Verzeichnung k1 (-0.3 bis +0.06) auf den Liniensegmenten | 9 `no_floor`-Stücke und c000 | Bodenanteil ändert sich um höchstens 0.03, keines erreicht 0.35 | Nicht die Ursache von `no_floor`; die Kamerabewegung ist es. |
-| Drehung jedes Linienbildes nachkorrigieren (höchstens 3 Grad pro Achse, `ml/calib/motion_refine.py`) | 9 `no_floor`-Stücke | Bodenanteil steigt (z. B. 0.18 auf 0.34, 0.24 auf 0.42), aber 0 neue Felder: die Stücke scheitern dann an `flat_view` (2) oder `court` (3); Korrekturen im Median 2 bis 3 Grad | Vorläufig: verdächtig grosse Korrekturen (Überanpassung pro Bild möglich) und das Hallenbild wurde nicht neu gerechnet (Beispielbilder nicht gespeichert; ab jetzt in `run.py`). Mit der Wahrheit nochmals prüfen. |
+| Drehung jedes Linienbildes nachkorrigieren (höchstens 3 Grad pro Achse, `ml/calib/motion_refine.py`, `run.py calibrate --refine`) | 33 Entwicklungs-Stücke, Hallenbild neu gerechnet | Bodenanteil steigt (z. B. 0.18 auf 0.34); Felder 6 auf 8: neu c009, c013, c038, verloren c025; auf Sicht c009 und c038 falsch, c013 unklar; Korrekturen im Median 2 bis 3 Grad | Mehr falsch akzeptierte Felder; die Korrektur passt jedes Bild an die Linien an, auch an die falschen (Überanpassung). Verworfen. |
+| Prüfwert "Feldlinien auf erkannten Segmenten" (Anteil der projizierten Feldlinien innerhalb 4 px der gespeicherten Liniensegmente, Median über die Linienbilder) | 6 akzeptierte Entwicklungs-Stücke und die 3 neuen | alle 0.07 bis 0.17; die auf Sicht falschen (c008 0.08, c009 0.12, c038 0.17) nicht tiefer als die plausiblen (c040 0.08, c067 0.14) | Die gespeicherten Segmente sind zu dünn; ein Prüfwert braucht die Linien der Bilder selbst. Neu mit der Wahrheit. |

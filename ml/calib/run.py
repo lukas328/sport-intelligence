@@ -179,14 +179,19 @@ def load(cache: Path, pid: str) -> tuple[Any, Any]:
     return obs, hall
 
 
-def calibrate_one(cache: Path, pid: str) -> dict[str, Any]:
+def calibrate_one(cache: Path, pid: str, refine: bool = False) -> dict[str, Any]:
     from handball_vision import observe as ob
     from handball_vision.calibration import CalibrationError
 
     obs, hall = load(cache, pid)
+    extra: dict[str, Any] = {}
+    if refine:  # experiment: rotations of the marking frames corrected (motion_refine.py)
+        from motion_refine import refine_rotations
+
+        extra["refine"] = refine_rotations(obs)
     hall = obs.motion.background()  # the worker calibrates on the rendered hall image
     t0 = time.perf_counter()
-    out: dict[str, Any] = {"id": pid, "moving": bool(obs.motion.moving)}
+    out: dict[str, Any] = {"id": pid, "moving": bool(obs.motion.moving), **extra}
     try:
         calib, info = ob.auto_calibrate(obs, hall)
         out.update(
@@ -214,7 +219,7 @@ def calibrate_one(cache: Path, pid: str) -> dict[str, Any]:
 def calibrate(a: argparse.Namespace) -> None:
     ids = [p["id"] for p in pieces(a.ids) if (a.cache / f"{p['id']}.obs.npz").exists()]
     with ProcessPoolExecutor(a.jobs) as ex:
-        res = list(ex.map(calibrate_one, [a.cache] * len(ids), ids))
+        res = list(ex.map(calibrate_one, [a.cache] * len(ids), ids, [a.refine] * len(ids)))
     for r in res:
         print(r["id"], "ok" if r["ok"] else r["reason"], r["seconds"], "s")
     a.out.write_text(json.dumps({"results": res}, indent=1) + "\n")
@@ -235,6 +240,7 @@ def main() -> None:
     p.add_argument("out", type=Path)
     p.add_argument("--ids", nargs="*")
     p.add_argument("--jobs", type=int, default=4)
+    p.add_argument("--refine", action="store_true", help="experiment: motion_refine first")
     p.set_defaults(fn=calibrate)
     a = ap.parse_args()
     a.fn(a)
