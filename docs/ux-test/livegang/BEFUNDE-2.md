@@ -60,6 +60,55 @@ App, Analyse und Prüfen (Lukas' echter Lauf, 17.11.):
 | A9 | Gelber Hinweis «Upload unterbrochen: HC Goldach-Rorschach 2 · weiter mit derselben Datei» bleibt auf jeder Seite stehen, auch nach Stunden, lässt sich nicht wegklicken: «Verwerfen» und nach einer Frist von selbst weg (vgl. A4) | Fortschrittsleiste | offen 🟡 |
 | A10 | Grosse leere grüne Fläche oben auf der Startseite: Platz ohne Inhalt, das Wichtige rutscht nach unten | Start | offen 🟡 |
 
+## App-Review (externe Sitzung, Desktop 900 px, 17.11.)
+
+Von Lukas weitergegeben. Nicht alles ist korrekt: Spalte «Einschätzung» sagt, ob der Punkt stimmt und was wir tun.
+Priorität: P1 vor dem nächsten Test, P2 bald, P3 wenn Zeit, ✗ nicht übernehmen.
+
+| # | Befund | Prio | Einschätzung |
+|---|---|---|---|
+| R1 | «Demo-Spiel ansehen» legt ein Spiel an, das in Spielliste, «Das letzte Spiel», Saison («nach zehn Spielen»), «Was sich wiederholt», Trainingstipps und als Vorauswahl im Upload-Dialog auftaucht | P1 | stimmt vermutlich: `is_demo` wird nur in der Abrechnung ausgeschlossen. Demo aus allen Auswertungen, Listen und Auswahlen nehmen, im Demo sichtbar «Das ist ein Beispiel» und ein Weg zurück |
+| R2 | Spiel ohne Video, «Aus: Spielbericht», zeigt trotzdem Würfe pro Spieler, Wurfquote 49 % und Ballverluste 16; Kurzbericht «16 Paraden», Kennzahl «20 Paraden»; Trainingstipps «3 von 7 Siebenmetern», Tabelle 3 von 6 | P1 | stimmt: Quellenlogik prüfen (der offizielle Bericht hat keine Würfe), eine Zahl pro Sache, gleiche Quelle überall |
+| R3 | Torschützen: Übersicht «Liam Krause 58 aus 10 Spielberichten», «Mehr zur Saison» 6, Kader 6, Sean Krause im Kader ohne Tore | P1 | stimmt vermutlich: Spielerwerte ziehen nur einen Bericht; Torschützen aus allen offiziellen Berichten, überall gleich |
+| R4 | Torhüter-Tabelle mischt beide Teams (#16 ohne Namen, Gegner-TW, ein Feldspieler), eigener TW #12 fehlt | P1 | stimmt: nur eigenes Team, Torhüter aus Kader-Position |
+| R5 | Mitteilungen: Link auf gelöschtes Spiel ergibt 404 («159 Fragen»), «Video gegen HC Goldach-Rorschach 2 liess sich nicht auswerten» für ein Spiel, das es nicht gibt, «Spielbericht ist da» doppelt, Öffnen markiert alles gelesen, 404-Seite ohne Kopf und Navigation | P1 | stimmt: Mitteilungen beim Löschen mitlöschen, Dubletten zusammenfassen, gelesen erst beim Anklicken, 404 innerhalb der App mit Kopf |
+| R6 | «Suchen» im Kopf führt ohne Videos auf eine leere Szenen-Seite ohne Suchfeld | P2 | stimmt: Suchfeld immer zeigen, ohne Daten mit Satz «Suche findet Szenen ab dem ersten Video» |
+| R7 | Gegner-Zuordnung bricht bei Namensvarianten («SG Horgen/Wädenswil 1» vs «… (M2)»): falsches letztes Resultat | P2 | stimmt: Gegner über handball.ch-ID bzw. normalisierten Namen ohne Klammerzusatz zuordnen |
+| R8 | Screenreader-Text «28 zu 28, Zeichnen» | P3 | prüfen: der Katalog sagt «Unentschieden», vermutlich falscher Schlüssel; schnell |
+| R9 | Hero auf Spiele und Spiel: lange Headline wird von der Schräge abgeschnitten, Tordifferenz-Linie läuft durch den Text, «Wädens-/wil» | P2 | stimmt, am Handy schlimmer: Schrift skalieren, Linie unter den Text |
+| R10 | Formular-Validierung auf Browser-Englisch («Please fill out this field») im Spielzug-Editor | P3 | stimmt: eigene deutsche Meldungen |
+| R11 | Verlauf-Chart kürzt Gegner zu «Handball», «Horgen/.», «+11» oben abgeschnitten | P3 | stimmt: Kurznamen aus dem Vereinsnamen, Label nicht abschneiden |
+| R12 | Wurfort-Halbfelder riesig bei Daten nur aus dem Spielbericht (nur «3 / 7 m»); Vorlagen-Bilder mit Leerraum | P3 | stimmt: ohne Positionsdaten eine Zeile statt Halbfeld |
+| R13 | Spielverlauf endet bei etwa 41 Min., Achse bis 60 | P2 | prüfen: fehlende Torfolge oder Achse; Achse ans Datenende oder Lücke kennzeichnen |
+| R14 | Spielzug-Editor: Werkzeugleiste nicht sticky, Seite heisst «Spielzüge» statt «Neuer Spielzug», Tab-Titel nur «Handball Intelligence», «starte mit einer Vorlage» ohne Vorlagen-Knopf im Editor | P2 | stimmt: alles umsetzen |
+| R15 | Farblogik «Wir»: in Vorlagen wechselt, welche Farbe angreift; eigene Trikotfarbe für «Wir» und Legende | P2 | teilweise: «Wir» bleibt eine Farbe; Vorlagen prüfen, dass «Wir» immer die eigene Rolle ist (Angriff oder Abwehr); eigene Trikotfarbe nur, wenn der Kontrast reicht (K23) |
+| R16 | Video-Tab: Gegner-Farbfelder brechen um, Icons «Eigene Feldspieler/Torhüter» blau/orange trotz grünem Heimtrikot, unklar ob klickbar | P3 | stimmt: eigene Farben zeigen, Umbruch richten |
+| R17 | Spiel-Kopf beim Tab «Spiel» gross, bei «Video»/«Zahlen» kompakt | ✗ | gewollt (Arbeitsfläche im Video); nicht ändern |
+| R18 | Verein-Seiten: im Tab nichts aktiv, kein Zurück | P2 | stimmt: aktiver Zustand und Zurück |
+| R19 | «Hilfe und Anleitungen» verlässt die App im selben Tab | P3 | stimmt: neuer Tab |
+| R20 | «Die drei Dinge» nirgends erklärt; im Demo «1 von 2 / 2 von 2» | P1 | stimmt: ein Satz an erster Stelle, was die drei Dinge sind (wie W7 auf der Website), Demo zeigt drei |
+| R21 | Verein bestätigen widersprüchlich («eine zweite Person» und Knopf «Ich bestätige»); Teilen blockiert ohne Link zur Bestätigung; «So geht es weiter» verspricht Teilen | P2 | stimmt: Bestätigung als Schritt mit Link in «So geht es weiter», Knopf nur für die zweite Person |
+| R22 | Demo zeigt «Kein Video, lad das Video hoch» neben «Positionen aus dem Video»; «Im Tor: ?» | P2 | stimmt: Demo ohne Upload-Box, Platzhalter weg |
+| R23 | «Telegramm» wird als Messenger gelesen | P3 | stimmt: «Kurzbericht» |
+| R24 | «… von handball.ch oder so, wie du sie eingetragen hast» liest sich umgangssprachlich | P3 | stimmt: umformulieren |
+| R25 | Saison › Gegner: «HC Stammheim 1, Samstag» ohne Datum, Vergangenheit oder Zukunft unklar | P3 | stimmt: «Nächste Gegner» mit Datum |
+| R26 | Tordifferenz-Leiste dreimal mit gleichen Daten | P3 | stimmt: einmal, mit Datum und Gegner |
+| R27 | Karte «Tore pro Spiel 27.7, Gegentore 25.8» mischt Label und Nebeninfo | P3 | stimmt: zwei Zeilen |
+| R28 | Verband: «Gegner stehen nur mit Nummer» ohne Begründung | P3 | stimmt: ein Satz warum (Datenschutz, unbestätigter Verein) |
+| R29 | Abo: «Limiten sind in dieser Installation nicht aktiv» ist ein Entwickler-Satz | P2 | stimmt: entfernen oder Kundensprache |
+| R30 | Hilfe «Erste Schritte»: «noch nicht gemessen» | P3 | Website; mit W32 vermutlich schon entfernt, prüfen |
+| R31 | Trainingstipps: Zusammenhang Befund und Übung unklar, «aus euren letzten 2 Spielen» obwohl nur das Demo analysiert ist | P2 | stimmt: Zeile «Warum diese Übung»; Demo raus (R1) |
+| R32 | Haupt-Aktion überall gleich stark (Video hochladen, Demo, Spiel öffnen, + Video, pro Zeile, So geht es weiter) | P2 | stimmt: eine primäre Aktion im Hero, Rest sekundär |
+| R33 | Vor dem Upload fehlen Antworten: Formate, Grösse, Dauer, Analyseminuten, was passiert beim Zuklappen | P2 | stimmt: kurzer Info-Block im Upload-Dialog (Dauer erst nennen, wenn gemessen) |
+| R34 | Knöpfe im leeren Zustand aktiv, die nichts tun («Szenen neu erstellen», «Neue Highlights», «Tore als Szenen ansehen», «Zu den Szenen») | P2 | stimmt: ausblenden oder mit Hinweis deaktivieren |
+| R35 | Spiel ohne Video: «Die Szenen findest du unter Video», dort ist nur der Upload | P3 | stimmt: Text je nach Zustand |
+| R36 | «So geht es weiter» lässt sich ausblenden, aber nicht zurückholen; kein Fortschritt | P2 | teilweise: Haken gibt es schon (D); Zurückholen im Kontomenü oder Hilfe ergänzen |
+| R37 | Kader: warum er wichtig ist und Torhüter markieren fehlt | P3 | stimmt |
+| R38 | Fortschrittsbalken nicht gesehen | ✗ | gibt es (K6), erscheint nur bei laufendem Upload oder Analyse |
+| R39 | Spielkarte und Kurzbericht prominenter als «das kannst du heute schon» | P3 | sinnvoll |
+| R40 | Seitenwechsel 2 bis 4 s ohne Ladeanzeige | P2 | stimmt: Skelette bzw. loading.tsx je Bereich |
+| R41 | Handy-Ansicht nicht getestet | P1 | nächste Runde auf 390 px |
+
 ## Noch offen aus der ersten Runde
 
 | # | Punkt | Wo | Stand |
