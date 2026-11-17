@@ -6,34 +6,6 @@ Dauer, Kosten, Auffälligkeiten). Vor dem Commit `git pull --rebase`, danach pus
 
 ## Offen
 
-### 15. Ballnetz im eigenen Thread mit uint8 im ganzen Job (T4), 2026-11-17 (Integrations-Sitzung), freigegeben von Lukas (17.11.)
-- Wozu: Auftrag 14 hat das Ballnetz allein mit uint8-Eingabe bei 62 ms pro Bild gemessen (1280 px;
-  960 px: 42 ms). Im Job kostete es 122 ms pro Bild, weil es nacheinander mit Kamera, YOLOX und
-  Nummern lief. Seit PR #67 läuft das Netz in einem eigenen Thread. Im besten Fall dauert der Job
-  dann max(Netz, Rest) statt der Summe: bei 1280 px auf jedem Bild etwa 1.55 x Videolänge und
-  1.02 USD pro Spiel. Das ist zu messen (Plan, Abschnitt GPU-Profil).
-- Was läuft: `ml/integration/profile_variants.py` (der echte `run_analysis`) auf 2 Minuten des
-  Spiels aus den Aufträgen 13 und 14, YOLOX jedes 3. Bild, Nummern-Budget 0.3, in dieser
-  Reihenfolge:
-  - `lean_u8_1280_e1`, `lean_u8_960_e1`, `lean_u8_1280_e2`, `lean_u8_960_e2`: hrp1 uint8 bei
-    1280 und 960 px, jedes bzw. jedes 2. Bild;
-  - `cuda_lean`: ohne Netz, also der Rest;
-  - `lean_ens_u8_1280_e1`: hr1 + hrp1, nur wenn die Zeit reicht.
-
-  Testphase: hr1/hrp1 enthalten DeepSport, hier wird nur gemessen.
-- Befehl (wie Auftrag 14): `modal deploy ml/gpu/profile_lean_gpu.py`, dann
-  `modal.Function.from_name("handball-profile-lean", "run_t4").spawn(2, "handball-gpu-lean-u8", 25, "lean_u8_1280_e1,lean_u8_960_e1,lean_u8_1280_e2,lean_u8_960_e2,cuda_lean,lean_ens_u8_1280_e1")`.
-- Fortsetzbar: Fertige Varianten liegen auf dem Volume `handball-gpu-out`
-  (`handball-gpu-lean-u8/`), derselbe Aufruf setzt fort. Den Proxy schneidet der Job aus dem von
-  Auftrag 14 auf dem Volume. Nach 25 Minuten startet keine neue Variante mehr. Eine laufende
-  Variante wird 2.5 Minuten vor dem harten Modal-Ende (30 min) gestoppt, damit der Upload sicher
-  kommt.
-- Erwartet: etwa 22 Minuten auf einer T4, rund 0.25 USD (höchstens 30 Minuten, 0.33 USD).
-- Ergebnis: Kaggle-Dataset `handball-gpu-lean-u8` (summary.json, je Variante ein JSON mit
-  `observe_counters.ball_net_busy_ms`). Die Integrations-Sitzung holt es ab.
-- Wichtig: In der ersten Logzeile muss `session ['CUDAExecutionProvider', ...]` stehen, sonst bricht
-  das Skript ab. Bei "budget"/"spend limit" abbrechen und melden.
-
 Gemeinsam für 3 bis 10: OWLv2 wie Auftrag 2, Rechnung mit den gemessenen ~210 s pro Segment auf
 einer T4 (inkl. Download) und 0.66 USD/h (7.23 USD für 11.0 h). `--budget-h 10` lässt Luft bis 11 h
 für den Upload. Jeder Auftrag ist für sich, sie dürfen parallel laufen (Modal-Ausgabenlimit für
@@ -110,6 +82,37 @@ Summe 3 bis 10: 841 Segmente, etwa 49 GPU-Stunden, etwa 32 USD. Falls ein Auftra
 Auftrag 3 (mit `--resume-from <Dataset des Teillaufs>`).
 
 ## Erledigt
+
+### 15. Ballnetz im eigenen Thread mit uint8 im ganzen Job (T4), erledigt 2026-11-17
+- Ergebnis: `lukasde1000/handball-gpu-lean-u8` (Status ready): `summary.json` und je Variante ein
+  JSON (alle 6), mit `observe_counters.ball_net_busy_ms`.
+- Lauf: 16:35 bis 16:57, etwa 22 min auf der T4, alle 6 Varianten fertig, kein Budget-Stopp und
+  keine fehlgeschlagene Variante. Erste Logzeile: `session ['CUDAExecutionProvider', ...]`
+  (ORT 1.22.0). Deployt vom Stand des PR #68 (vor dem Merge), mit Commit `74f87a3d`.
+- Kosten laut `modal billing report`: 0.28 USD (Grenze 0.33).
+- Zahlen (2 min Video, 3000 Bilder, YOLOX jedes 3. Bild, Nummern-Budget 0.3):
+
+  | Variante | Zeit für 2 min | Netz beschäftigt | min pro Spiel | USD/Spiel Modal | USD/Spiel Azure |
+  |---|---|---|---|---|---|
+  | cuda_lean (ohne Netz) | 127 s | - | 64 | 0.70 | 0.95 |
+  | lean_u8_960_e2 | 137 s | 66 s | 68 | 0.75 | 1.02 |
+  | lean_u8_1280_e2 | 153 s | 102 s | 76 | 0.84 | 1.14 |
+  | lean_u8_960_e1 | 158 s | 127 s | 79 | 0.87 | 1.18 |
+  | lean_u8_1280_e1 | 225 s | 197 s | 112 | 1.24 | 1.69 |
+  | lean_ens_u8_1280_e1 (hr1 + hrp1) | 315 s | 287 s | 158 | 1.73 | 2.36 |
+
+  ("Netz beschäftigt" = `ball_net_busy_ms`; `timings_s.ball_net` ist nur noch die Wartezeit des
+  Hauptstrangs auf das Netz.)
+- Der Thread wirkt: Solange das Netz weniger braucht als der Rest (127 s), kostet es kaum
+  zusätzlich (960 px jedes 2. Bild: +10 s; 960 px jedes Bild: +31 s). Bei 1280 px auf jedem Bild
+  ist das Netz der Engpass (197 s Netz, 225 s gesamt), wie erwartet max(Netz, Rest) plus etwas.
+  Netz pro Bild im Job: 1280 px 66 ms, 960 px 42 ms, wie in der Kurzmessung von Auftrag 14.
+- Auffällig, wie in 13 und 14: `tracks` 0 und `ball` None in allen Varianten, obwohl
+  `ball_model_status` ok ist. Bitte prüfen, ob der Ausschnitt oder die Kalibrierung
+  (`needs_calibration`) das verhindert.
+- Änderung der lokalen Sitzung vor dem Start: Eine fehlgeschlagene Variante wird als
+  `<name>.failed.txt` festgehalten und der Lauf geht weiter, damit die fertigen Varianten trotzdem
+  auf Kaggle kommen (wurde hier nicht gebraucht).
 
 ### 14. Ballnetz billiger auf der T4 (Kurzmessung), erledigt 2026-11-17
 - Ergebnis: `lukasde1000/handball-gpu-bench-ballnet` (Status ready): `bench.json`,
