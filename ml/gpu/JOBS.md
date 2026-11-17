@@ -6,6 +6,32 @@ Dauer, Kosten, Auffälligkeiten). Vor dem Commit `git pull --rebase`, danach pus
 
 ## Offen
 
+### 14. Ballnetz billiger auf der T4 (Kurzmessung), 2026-11-17 (Integrations-Sitzung), freigegeben von Lukas (17.11.)
+- Wozu: Auftrag 13 hat das Ballnetz hrp1 auf der T4 mit 80 bis 120 ms pro Bild gemessen, dazu 21 ms
+  CPU-Vorbereitung; Stapeln brachte nichts. Mit hrp1 auf jedem Bild kostet ein 60-Minuten-Spiel
+  etwa 3 USD. Gesucht ist der billigere Weg (Plan `docs/plans/produkt-analyse-integration.md`,
+  Abschnitt GPU-Profil T4).
+- Was läuft: (1) `ml/integration/bench_ballnet.py`: hrp1 allein auf 120 echten Dreiergruppen, bei
+  1280 und 960 px: wie im Produkt, uint8-Eingabe mit Vorbereitung im Graphen
+  (`ml/ball/onnx_u8.py`), dasselbe mit IO-Binding, TensorRT fp16 (uint8- und float-Eingabe).
+  (2) `ml/integration/profile_variants.py`: der ganze Produkt-Job auf 3 Minuten des Spiels aus
+  Auftrag 13 mit YOLOX auf jedem 3. Bild und Nummern-Budget 0.3, ohne Ballnetz (`cuda_lean`) und
+  mit hrp1 auf jedem Bild (`cuda_lean_hrp1`). Testphase: hrp1 enthält DeepSport, hier wird nur
+  gemessen.
+- Befehl (wie Auftrag 12 auf diesem PC): `modal deploy ml/gpu/bench_ballnet_gpu.py`, dann
+  `modal.Function.from_name("handball-bench-ballnet", "run_t4").spawn(3, "handball-gpu-bench-ballnet", 25, "cuda_lean,cuda_lean_hrp1")`.
+  Alternativ `modal run --detach ml/gpu/bench_ballnet_gpu.py`.
+- Fortsetzbar: jede fertige Variante liegt auf dem Volume `handball-gpu-out`
+  (`handball-gpu-bench-ballnet/`, auch der TensorRT-Cache); derselbe Aufruf setzt fort. Stopp:
+  nach 25 Minuten startet keine neue Variante mehr, nach 30 Minuten beendet Modal die Funktion
+  sicher.
+- Erwartet: etwa 25 Minuten auf einer T4, rund 0.30 USD (höchstens 30 Minuten, 0.35 USD).
+- Ergebnis: Kaggle-Dataset `handball-gpu-bench-ballnet` (bench.json, bench_summary.json,
+  cuda_lean.json, cuda_lean_hrp1.json, summary.json). Die Integrations-Sitzung holt es ab.
+- Wichtig: In der ersten Logzeile muss `session ['CUDAExecutionProvider', ...]` stehen, sonst bricht
+  das Skript selbst ab. Fehlt `TensorrtExecutionProvider` unter "available", laufen die übrigen
+  Varianten trotzdem; bitte melden. Bei "budget"/"spend limit" abbrechen und melden.
+
 Gemeinsam für 3 bis 10: OWLv2 wie Auftrag 2, Rechnung mit den gemessenen ~210 s pro Segment auf
 einer T4 (inkl. Download) und 0.66 USD/h (7.23 USD für 11.0 h). `--budget-h 10` lässt Luft bis 11 h
 für den Upload. Jeder Auftrag ist für sich, sie dürfen parallel laufen (Modal-Ausgabenlimit für
