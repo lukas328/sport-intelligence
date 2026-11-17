@@ -96,7 +96,8 @@ test("onboarding: find the team, take one over, ask a claimed club for access, a
   await expectAccessible(page);
   await done.getByRole("button", { name: "Stimmt, weiter" }).filter({ visible: true }).click();
   await page.waitForURL(new RegExp(`/app/${fx.CLAIMED_ORG}/teams/${fx.CLAIMED_TEAM}/matches$`));
-  expect(patched).toEqual({ primary_color: "#d3202e" });
+  // «Rot» of the club palette (white text on it at least 4.5:1, E8)
+  expect(patched).toEqual({ primary_color: "#c8102e" });
   // the players who played come into the squad; Nico Zemp (no game yet) waits in the inbox
   expect(accepted).toHaveLength(2);
 });
