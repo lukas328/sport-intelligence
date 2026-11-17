@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Phone } from "@/components/device";
 import { productShot } from "@/lib/product-shots";
-import { HallCamera } from "@/components/figures";
+import { ProductShot } from "@/components/product-shot";
 import { JsonLd } from "@/components/json-ld";
 import { KitScope, StartLink } from "@/components/kit";
 import { MailLine } from "@/components/mail-line";
@@ -15,7 +15,7 @@ import { LAUNCHED } from "@/lib/site";
 
 type Props = { params: Promise<{ locale: Locale }> };
 
-/** the team's start page on the phone (public/product, scripts/product-shots) */
+/** the team's start page on the phone and, further down, a collection as it arrives in the chat (public/product, scripts/product-shots) */
 const phone = productShot("hero-phone");
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -53,7 +53,7 @@ export default async function AboutUs({ params }: Props) {
                   </p>
                 ))}
                 {i === 2 && (
-                  <Link href={`/${locale}/so-funktioniert-es/#kann`} className="link mt-3">
+                  <Link href={`/${locale}/fakten/#kann`} className="link mt-3">
                     {m.cta.honest}
                   </Link>
                 )}
@@ -67,11 +67,11 @@ export default async function AboutUs({ params }: Props) {
           </div>
           <div className="min-w-0">
             <div className="lg:sticky lg:top-6">
-              <HallCamera label={m.filming.planLabel} camera={m.filming.planCamera} field={m.filming.planField} corner={m.filming.planCorner} caption={t.pictureCaption} />
-              <figure className="m-0 mt-8 max-w-[18rem]">
+              <figure className="m-0 max-w-[18rem]">
                 <Phone src={phone.src} srcSet={phone.srcSet} sizes="18rem" width={phone.width} height={phone.height} alt={t.shotAlt} />
                 <figcaption className="mt-3 text-[1.0625rem] text-ink-2">{t.shotCaption}</figcaption>
               </figure>
+              <ProductShot name="share" alt={m.home.shareAlt} labels={m.product.share} sizes="(min-width: 1024px) 26rem, calc(100vw - 2rem)" className="mt-10 max-w-[26rem]" />
             </div>
           </div>
         </div>
