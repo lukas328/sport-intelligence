@@ -9,6 +9,7 @@ import { useEarlyFiles } from "@/lib/early-files";
 import { sitePage, useSiteConfig } from "@/lib/site-config";
 import { useEffect, useRef, useState, type DragEvent, type FormEvent } from "react";
 import { KitFields } from "@/components/domain/kit-fields";
+import { UploadFacts } from "@/components/upload/upload-facts";
 import { useOptionalShell } from "@/components/shell/context";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/card";
@@ -412,6 +413,8 @@ export function UploadPanel({
         <li>{t("upload.tip2")}</li>
         <li>{t("upload.tip3")}</li>
       </ul>
+      {/* files, size, the phone going to sleep, the analysis: answered before the file (R33) */}
+      <UploadFacts />
       {/* the guide on the website, its address from the configuration */}
       {site && <a href={sitePage(site.site_url, locale, "aufnahme/")} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center text-[17px] font-bold text-ink underline decoration-[1.5px] underline-offset-4">
         {t("upload.guide")}

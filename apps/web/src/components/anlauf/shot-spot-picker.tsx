@@ -26,6 +26,9 @@ const NS = { vectorEffect: "non-scaling-stroke" } as const;
  * «Von wo?» (fourth real-video test H7): the attacked half, six places to tap, Siebenmeter and
  * Gegenstoss as keys and a quiet «Weiss nicht». One tap answers; there is no «Weiter».
  *
+ * With `onSkip` (Prüfen, after a confirmed goal) the place is offered, not asked (W33): instead of
+ * «Weiss nicht» an «Überspringen» key as large as the others, which saves nothing and goes on.
+ *
  * The court lies as the camera sees it when the goal's side in the video is known (real-clip test:
  * with the goal always at the top, the coach had to turn it in his head for every attack on the
  * left goal): the attacked goal on the left or right as in the video, the far sideline at the top,
@@ -37,6 +40,7 @@ export function ShotSpotPicker({
   current,
   orientation = "top",
   onPick,
+  onSkip,
   disabled,
 }: {
   /** the place the coach gave before («Bisher») */
@@ -44,6 +48,8 @@ export function ShotSpotPicker({
   orientation?: SpotOrientation;
   /** the answer and, for a tap on the court, the point in court metres (attacked goal at x = 40) */
   onPick: (answer: SpotAnswer, point?: Pt) => void;
+  /** the place is optional: «Überspringen» in the row of keys, equal to them, instead of «Weiss nicht» */
+  onSkip?: () => void;
   disabled?: boolean;
 }) {
   const t = useTranslations("spot");
@@ -82,9 +88,15 @@ export function ShotSpotPicker({
           </button>
         );
       })}
-      <button type="button" disabled={disabled} onClick={() => onPick("unknown")} className="min-h-12 cursor-pointer border-0 bg-transparent px-1 text-left text-[15px] font-bold whitespace-nowrap text-ink underline underline-offset-4 sm:text-[17px]" data-testid="spot-unknown">
-        {t("unknown")}
-      </button>
+      {onSkip ? (
+        <button type="button" onClick={onSkip} className="flex min-h-12 cursor-pointer items-center border-2 border-ink bg-transparent px-2.5 text-left text-[15px] font-semibold whitespace-nowrap text-ink sm:px-4 sm:text-[17px] md:min-h-14" data-testid="spot-skip">
+          {t("skip")}
+        </button>
+      ) : (
+        <button type="button" disabled={disabled} onClick={() => onPick("unknown")} className="min-h-12 cursor-pointer border-0 bg-transparent px-1 text-left text-[15px] font-bold whitespace-nowrap text-ink underline underline-offset-4 sm:text-[17px]" data-testid="spot-unknown">
+          {t("unknown")}
+        </button>
+      )}
     </>
   );
 

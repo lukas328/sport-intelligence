@@ -6,18 +6,12 @@ import Link from "next/link";
 import { useFormatter, useTranslations } from "next-intl";
 import { SectionHead, linkClass } from "@/components/anlauf/blocks";
 import { api } from "@/lib/client";
+import { findTeamRow, sameOpponent } from "@/lib/opponent-name";
 import { topScorers } from "@/lib/telegram";
 import type { Stats } from "./analysis-views";
 
 type Match = Schemas["MatchOut"];
 type Row = { teamId?: number; name?: string; rank?: number; points?: number; games?: number };
-
-const fold = (v: string) => v.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]/g, "");
-const sameTeam = (a: string, b: string) => {
-  const x = fold(a);
-  const y = fold(b);
-  return Boolean(x && y) && (x === y || x.includes(y) || y.includes(x));
-};
 
 /**
  * What is known already while the video is processed (K22): the official report, the scorers,
@@ -65,12 +59,12 @@ export function KnownFacts({
   const linked = Boolean(link.data?.official_team_id);
   const table = (link.data?.standing ?? []) as Row[];
   const ownRow = scouting ? undefined : table.find((r) => r.teamId != null && r.teamId === link.data?.official_team_id);
-  const oppRow = table.find((r) => r.name && sameTeam(r.name, oppName));
-  const otherRow = scouting && match.scouting_other ? table.find((r) => r.name && sameTeam(r.name, match.scouting_other!)) : undefined;
+  const oppRow = findTeamRow(table, oppName);
+  const otherRow = scouting && match.scouting_other ? findTeamRow(table, match.scouting_other) : undefined;
   const meetings = scouting
     ? []
     : (earlier.data ?? [])
-        .filter((m) => m.id !== match.id && m.opponent_name === match.opponent?.name && m.score_own != null && m.score_opponent != null)
+        .filter((m) => m.id !== match.id && sameOpponent(m.opponent_name, match.opponent?.name) && m.score_own != null && m.score_opponent != null)
         .slice(0, 3);
   const scorers = stats ? topScorers(Object.values(stats.players), names, 3) : [];
   const played = Date.parse(match.kickoff_at) < Date.now();

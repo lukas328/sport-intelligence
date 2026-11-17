@@ -1,11 +1,12 @@
 "use client";
 
 import type { Schemas } from "@handball/api-client";
-import { TEMPLATES, searchTemplates, templateDoc, type PlayDoc } from "@handball/tactics";
+import { TEMPLATES, searchTemplates, type PlayDoc } from "@handball/tactics";
 import Link from "next/link";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
-import { Board } from "@/components/tactics/board";
+import { PlayPreview, TemplateGrid, TemplateLegend } from "@/components/tactics/play-preview";
+import { commonFrom } from "@/lib/play-preview";
 import { EmptyState } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { buttonClass } from "@/components/ui/button";
@@ -14,7 +15,6 @@ const CATEGORIES = ["attack", "defence", "fast_break", "set_piece", "seven_m", "
 
 export function PlayLibrary({ orgId, teamId, plays, staff }: { orgId: string; teamId: string; plays: Schemas["PlayOut"][]; staff: boolean }) {
   const t = useTranslations("tactics");
-  const locale = useLocale();
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<string>("");
   const needle = q.trim().toLowerCase();
@@ -27,6 +27,7 @@ export function PlayLibrary({ orgId, teamId, plays, staff }: { orgId: string; te
       ),
     [plays, cat, needle],
   );
+  const from = commonFrom(list.map((p) => p.doc as unknown as PlayDoc));
   const templates = staff ? searchTemplates(q, (cat || undefined) as (typeof TEMPLATES)[number]["category"] | undefined) : [];
   return (
     <div className="space-y-6">
@@ -72,7 +73,7 @@ export function PlayLibrary({ orgId, teamId, plays, staff }: { orgId: string; te
           {list.map((p) => (
             <li key={p.id}>
               <Link href={`/app/${orgId}/plays/${p.id}`} className="block space-y-2 border-t-2 border-foreground pt-2 hover:text-accent">
-                <Preview doc={p.doc as unknown as PlayDoc} label={p.name} />
+                <PlayPreview doc={p.doc as unknown as PlayDoc} label={p.name} from={(p.doc as unknown as PlayDoc).court === "half" ? from : undefined} />
                 <p className="font-medium">{p.name}</p>
                 <p className="text-sm text-muted">
                   {t(`cat_${p.category as "other"}`)}
@@ -88,33 +89,10 @@ export function PlayLibrary({ orgId, teamId, plays, staff }: { orgId: string; te
       {templates.length > 0 && (
         <section className="space-y-3" aria-label={t("templates")}>
           <h2 className="text-lg font-semibold">{t("templates")}</h2>
-          <ul className="grid gap-x-6 gap-y-6 sm:grid-cols-2 lg:grid-cols-4">
-            {templates.map((tpl) => (
-              <li key={tpl.id}>
-                <Link
-                  href={`/app/${orgId}/teams/${teamId}/plays/new?template=${tpl.id}`}
-                  className="block space-y-2 border-t border-foreground/30 pt-2 hover:text-accent"
-                  aria-label={`${t("fromTemplate")}: ${t(`tpl_${tpl.id}`)}`}
-                >
-                  <Preview doc={templateDoc(tpl, locale)} label={t(`tpl_${tpl.id}`)} />
-                  <p className="text-sm font-medium">{t(`tpl_${tpl.id}`)}</p>
-                </Link>
-              </li>
-            ))}
-          </ul>
+          <TemplateLegend />
+          <TemplateGrid orgId={orgId} teamId={teamId} templates={templates} />
         </section>
       )}
-    </div>
-  );
-}
-
-function Preview({ doc, label }: { doc: PlayDoc; label: string }) {
-  const f = doc.frames[0];
-  if (!f) return null;
-  // full-court plays stay across in the small card (upright they would be twice as tall as the others)
-  return (
-    <div aria-hidden className="pointer-events-none">
-      <Board frame={f} court={doc.court} label={label} orientation={doc.court === "full" ? "landscape" : "portrait"} />
     </div>
   );
 }

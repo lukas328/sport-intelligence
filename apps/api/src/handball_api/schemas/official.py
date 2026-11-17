@@ -210,6 +210,11 @@ class AccessApproveIn(ApiModel):
 
 class VerificationOut(ApiModel):
     verification: Literal["none", "unverified", "verified"]
+    my_part: Literal["claimed", "can_confirm", "none"] = Field(
+        default="none",
+        description="the asking person: took the club over (needs a second person), can confirm "
+        "it (club admin or coach), or has no part",
+    )
     verified_via: str | None
     verified_at: datetime | None
     official_provider: str | None

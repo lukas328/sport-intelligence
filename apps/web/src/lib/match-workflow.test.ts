@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { clockAt, courtFromHall, courtUnconfirmed, coverage, covered, firstOpen, inside, kickoffMissing, parseClock, steps, type StepInput } from "./match-workflow";
+import { clockAt, courtFromHall, courtFromHallSure, courtUnconfirmed, coverage, covered, firstOpen, inside, kickoffMissing, parseClock, steps, type StepInput } from "./match-workflow";
 
 const HALF = 1800;
 
@@ -125,6 +125,14 @@ describe("courtUnconfirmed", () => {
     expect(courtFromHall({ calibration_info: hall })).toBe(true);
     expect(courtUnconfirmed({ camera: "fixed", calibration: auto, calibration_info: hall })).toBe(true);
     expect(courtUnconfirmed({ camera: "fixed", calibration: { source: "user_correction" }, calibration_info: hall })).toBe(false);
+  });
+
+  it("does not ask again for a court of the same hall whose hall images matched well", () => {
+    const sure = { method: "hall", sure: true };
+    expect(courtFromHallSure({ calibration_info: sure })).toBe(true);
+    expect(courtUnconfirmed({ camera: "fixed", calibration: auto, calibration_info: sure })).toBe(false);
+    expect(courtUnconfirmed({ camera: "moving", calibration: auto, calibration_info: sure })).toBe(false);
+    expect(courtUnconfirmed({ camera: "fixed", calibration: auto, calibration_info: { method: "hall", sure: false } })).toBe(true);
   });
 
   it("needs nothing without a court", () => {

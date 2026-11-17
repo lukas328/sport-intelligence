@@ -29,7 +29,7 @@ import { useRouter } from "next/navigation";
 import { partName, partsOf, partStarts, timelineVideo } from "@/lib/video-parts";
 import { ShotSpotPicker } from "@/components/anlauf/shot-spot-picker";
 import { useGoalView, useSaveSpot } from "@/components/anlauf/spot-parts";
-import { checkMinutes, type SpotAnswer, type SpotZone } from "@/lib/shot-spot";
+import { afterSpot, checkMinutes, type SpotAnswer, type SpotZone } from "@/lib/shot-spot";
 import type { Pt as HalfPt } from "@/components/anlauf/geometry";
 
 type Match = Schemas["MatchOut"];
@@ -415,7 +415,8 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
     }
     // the bell counts the questions afresh (livegang L13)
     void qc.invalidateQueries({ queryKey: ["notifications", orgId] });
-    // a confirmed goal: saved; then «Von wo?» in the same question, the video stays (H7)
+    // a confirmed goal: saved; then «Von wo?» offered in the same question, the video stays (H7);
+    // «Überspringen» goes on as quickly as a place does (W33)
     const row = lastReview.current as Candidate | null;
     const goal = current.kind === "goal" && row?.status === "confirmed" && row.outcome === "goal" && row.event_id ? row.event_id : null;
     const index = revisit ?? answered.length;
@@ -443,13 +444,15 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
       return;
     }
     setAnswered((list) => list.map((x, i) => (i === step.index ? { ...x, spot } : x)));
+    leaveSpot(step);
+  }
+  /** On without a place (W33): nothing is saved, the goal keeps «Wurfort fehlt» and can be filled in later. */
+  function leaveSpot(step: SpotStep) {
+    setFailed(null);
     setSpotStep(null);
-    if (step.fromList) return;
-    if (revisit != null) {
-      setRevisit(null);
-      return;
-    }
-    next(step.q);
+    const to = afterSpot(step, revisit != null);
+    if (to === "back") setRevisit(null);
+    else if (to === "next") next(step.q);
   }
   // keyboard and screen reader: the question «Von wo?» takes the focus when it appears
   useEffect(() => {
@@ -482,7 +485,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
   // «Weiss nicht» is kept (second round A6): not asked again in this round, waits behind «Mehr
   // prüfen» and leaves the bell; a person in the picture is only skipped on this screen
   const skip = (q: Question) => {
-    if (spotStep) return void pickSpot(spotStep, "unknown");
+    if (spotStep) return leaveSpot(spotStep);
     if (revisit != null) return setRevisit(null);
     skipped.current.add(id(q));
     next(q);
@@ -674,7 +677,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
                           className="min-h-11 cursor-pointer border-0 bg-transparent p-0 font-bold underline underline-offset-4"
                           data-testid="check-spot-change"
                         >
-                          {ts("change")}
+                          {x.spot && x.spot !== "unknown" ? ts("change") : ts("set")}
                         </button>
                       )}
                       <button type="button" onClick={() => setRevisit(i)} className="min-h-11 cursor-pointer border-0 bg-transparent p-0 font-bold underline underline-offset-4">
@@ -792,7 +795,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
                   </button>
                 </div>
                 <p className="mt-1 mb-0 max-w-[54ch] text-[15px] text-ink-2 md:mt-3 md:text-[17px]">
-                  {ts("why")}
+                  {spotStep.fromList ? ts("why") : ts("whyOptional")}
                 </p>
                 {failed && (
                   <p role="alert" className="mt-4 max-w-[54ch] border-l-4 border-loss pl-3 text-[17px] font-semibold" data-testid="check-failed">
@@ -800,7 +803,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
                   </p>
                 )}
                 <div className="mt-2 md:mt-4">
-                  <ShotSpotPicker key={`${spotStep.eventId}-${spotStep.index}`} current={spotStep.suggestion?.zone ?? null} orientation={spotView.orientation} disabled={!spotView.ready} onPick={(spot, point) => void pickSpot(spotStep, spot, point)} />
+                  <ShotSpotPicker key={`${spotStep.eventId}-${spotStep.index}`} current={spotStep.suggestion?.zone ?? null} orientation={spotView.orientation} disabled={!spotView.ready} onPick={(spot, point) => void pickSpot(spotStep, spot, point)} onSkip={spotStep.fromList ? undefined : () => leaveSpot(spotStep)} />
                 </div>
               </section>
             ) : (

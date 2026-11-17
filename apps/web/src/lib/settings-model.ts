@@ -34,7 +34,8 @@ export function clubTabs(orgId: string, a: ClubAccess): Tab<ClubTab>[] {
     a.isAdmin ? { key: "club", href: base } : null,
     a.isAdmin || a.coachOf > 0 ? { key: "teams", href: `${base}/teams` } : null,
     a.isAdmin ? { key: "billing", href: `${base}/billing` } : null,
-    a.isAdmin && a.official ? { key: "federation", href: `${base}/federation` } : null,
+    // the coaches too: the second person who confirms the club is often a coach (review R21)
+    (a.isAdmin || a.coachOf > 0) && a.official ? { key: "federation", href: `${base}/federation` } : null,
   ];
   return tabs.filter((x): x is Tab<ClubTab> => x !== null);
 }

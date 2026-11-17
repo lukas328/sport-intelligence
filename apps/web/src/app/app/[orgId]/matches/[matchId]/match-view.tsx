@@ -30,6 +30,7 @@ import { Segmented } from "@/components/ui/tabs";
 import { VideoPlayer, type PlayerHandle } from "@/components/video/player";
 import { FromMatchButton } from "@/components/collections/from-match";
 import { GameActions, PointOpen, Telegram, ThreeFigures } from "./game-tab";
+import { TodayBlock } from "./today-block";
 import { OverviewView, ReportView, ShotsView, useStats } from "./analysis-views";
 import dynamic from "next/dynamic";
 import { Button, buttonClass } from "@/components/ui/button";
@@ -40,7 +41,7 @@ import { cn } from "@/lib/utils";
 import { useOpponentName } from "@/lib/opponent";
 import { formatClock } from "@/lib/format";
 import { coverage } from "@/lib/match-workflow";
-import { MyScenesLine, TeamFeedView } from "./feed-views";
+import { MyScenesLine } from "./feed-views";
 import { officialGoalsKey } from "./official-goals";
 import { PartsLine, PartsPanel, usePartMarkers } from "./parts-panel";
 import { AnalysisNotice } from "@/components/analysis/analysis-notice";
@@ -205,6 +206,9 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
   const plainPlayer = useRef<PlayerHandle>(null);
   // a video of the opponent against another team (K3): that team takes the own side
   const scouting = match.kind === "scouting";
+  // the example match of «Demo-Spiel ansehen» is looked at, not worked on (R1, R22): no upload,
+  // no colour question, no files, no placeholders; seeded demo matches with a video stay matches
+  const example = match.source === "demo";
   const own = scouting ? (match.scouting_other ?? t("progress.otherTeam")) : ownName(teamName, shell?.org.name ?? teamName);
   const more = useRef<HTMLDetailsElement>(null);
   const roster = useRosterNames(orgId, match.team_id, match.season_id);
@@ -221,8 +225,25 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
   // without counted events the record, shots and goalkeepers have nothing to show: no dead tabs
   // (the overview says how they come: the match report or marking courtside)
   const counted = (stats.data?.quality.events ?? 0) > 0;
+  // scenes are goals with a place in the video: collections and highlights need them (review R34)
+  const hasScenes = Boolean(graphics.data?.goals.some((g) => g.has_video || g.source === "demo"));
   // a match still to come without a score: nothing to share or look back on yet
   const upcoming = !main && match.score_own == null && Date.parse(match.kickoff_at) > Date.now();
+  // the Spielkarte, rendered on the server: into the chat by the share sheet, else saved (K20)
+  const cardPicture =
+    match.score_own != null && match.score_opponent != null
+      ? () => void shareMatchCard(orgId, match.id, `${t("share.card.file")}-${oppName(match)}-${match.score_own}-${match.score_opponent}.png`.replace(/\s+/g, "-"))
+      : undefined;
+  const telegram = (
+    <Telegram
+      match={{ own, opp: oppName(match), score: match.score_own != null && match.score_opponent != null ? [match.score_own, match.score_opponent] : null, half: match.halftime_own != null && match.halftime_opponent != null ? [match.halftime_own, match.halftime_opponent] : null, venue: match.venue ?? null, periodS: match.period_s, periods: match.periods }}
+      stats={stats.data ?? null}
+      names={names}
+      roster={roster.data ?? []}
+    />
+  );
+  // a played match without video (not the example): what works today stands first (review R39)
+  const today = !main && !example && !upcoming && (cardPicture != null || match.score_own != null);
   // Zahlen: the figure sheets stacked, one level; running distance only with a video
   // running figures only from the tracking of a video, and called estimated (UX test Z5)
   const numberParts = (counted || stats.isLoading ? SUBS : SUBS.filter((v) => v === "physical")).filter((v) => v !== "physical" || main);
@@ -246,8 +267,6 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
   // «Spieltag starten» up front only on match day (from three hours before the kick-off); days
   // before it is a quiet action in the menu and below the opponent
   const matchDay = isMatchDay(match.kickoff_at);
-  // the example match of «Demo-Spiel ansehen» is looked at, not worked on (R1)
-  const example = match.source === "demo";
   const liveFirst = staff && match.score_own == null && !main && matchDay && match.source !== "paper_report" && !example;
   const uploadFirst = staff && !main && !liveFirst && match.source !== "paper_report" && !example;
   // the progress of the uploads and the processing (K13, B4): the API's view, with the uploads of
@@ -351,7 +370,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
       <MatchHead match={match} ownName={own} oppName={oppName(match)} view={view} graphics={graphics.data}>
         {staff && !example && match.opponent && !match.opponent_colors?.color && <AskColour orgId={orgId} matchId={match.id} opponent={oppName(match)} />}
         {/* a known colour can be changed right in the head, five shirts (UX test B31) */}
-        {staff && match.opponent && match.opponent_colors?.color && (
+        {staff && !example && match.opponent && match.opponent_colors?.color && (
           <details className="mt-2.5 text-sm font-bold" data-testid="change-colour">
             <summary className="inline-flex min-h-11 cursor-pointer list-none items-center gap-2 underline decoration-[1.5px] underline-offset-4 [&::-webkit-details-marker]:hidden">
               <i aria-hidden className="block size-5 border-[1.5px] border-club-ink" style={{ background: match.opponent_colors.color ?? undefined }} />
@@ -590,7 +609,12 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
         ) : !staff ? (
           <EmptyState icon={<Clapperboard />} title={match.source === "paper_report" ? t("stats.noVideo") : t("player.notReady")} />
         ) : null}
-        {staff && !main && (
+        {example && !main && (
+          <p className="m-0 max-w-[60ch] text-[17px]" data-testid="demo-no-video">
+            {ta("demoNoVideo")}
+          </p>
+        )}
+        {staff && !example && !main && (
           <section id="upload" className="scroll-mt-24 space-y-4" aria-label={t("upload.title")}>
             <p className="m-0 max-w-[60ch] text-[17px] font-bold">{ta("noVideoBlock")}</p>
             {/* the analysis separates the teams by their shirts: without the opponent's colour it
@@ -640,6 +664,8 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
               <NextOpponent orgId={orgId} teamId={match.team_id} next={{ id: match.id, kickoff_at: match.kickoff_at, opponent_name: oppName(match), is_home: match.is_home } as Schemas["MatchSummary"]} played={(teamMatches.data ?? []).filter((m) => m.score_own != null)} />
             </section>
           )}
+          {/* without video: first what works today, the Spielkarte and the Kurzbericht (R39) */}
+          {today && <TodayBlock onPicture={cardPicture} report={telegram} />}
           {/* a match without video: the report's facts below, the way to the video on top */}
           {/* the example match is looked at, nothing to upload or file there (R1) */}
           {!main && staff && !example && Date.parse(match.kickoff_at) <= Date.now() && (
@@ -679,30 +705,25 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
             <ThreeThingsView orgId={orgId} matchId={match.id} graphics={graphics.data} oppName={oppName(match)} onScenes={main ? (_, n) => setView("video", n) : undefined} onScene={main ? (id) => setView("video", null, id) : undefined} />
           )}
           <GameActions
-            collect={staff && counted && match.opponent ? <FromMatchButton orgId={orgId} teamId={match.team_id} matchId={match.id} opponent={oppName(match)} /> : null}
+            collect={staff && counted && hasScenes && match.opponent ? <FromMatchButton orgId={orgId} teamId={match.team_id} matchId={match.id} opponent={oppName(match)} /> : null}
             // before the match there is nothing to share yet (UX test A05), nor before a goal is
             // known (open questions alone make no reel, L6)
-            onHighlights={upcoming || noGoals || (graphics.data != null && graphics.data.goals.length === 0) ? undefined : () => {
+            // highlights are made of scenes: without a goal in the video there is none (R34)
+            onHighlights={upcoming || noGoals || !hasScenes ? undefined : () => {
               if (more.current) more.current.open = true;
               requestAnimationFrame(() => document.getElementById("highlights")?.scrollIntoView({ behavior: "smooth", block: "start" }));
             }}
             // the Spielkarte, rendered on the server: into the chat by the share sheet, else saved (K20)
-            onPicture={
-              match.score_own != null && match.score_opponent != null
-                ? () => void shareMatchCard(orgId, match.id, `${t("share.card.file")}-${oppName(match)}-${match.score_own}-${match.score_opponent}.png`.replace(/\s+/g, "-"))
-                : undefined
-            }
+            onPicture={today ? undefined : cardPicture}
           />
-          <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_340px]">
-            <div className="min-w-0 space-y-10">
-              {graphics.data && <PointOpen orgId={orgId} matchId={match.id} graphics={graphics.data} oppName={oppName(match)} />}
-              <Telegram
-                match={{ own, opp: oppName(match), score: match.score_own != null && match.score_opponent != null ? [match.score_own, match.score_opponent] : null, half: match.halftime_own != null && match.halftime_opponent != null ? [match.halftime_own, match.halftime_opponent] : null, venue: match.venue ?? null, periodS: match.period_s, periods: match.periods }}
-                stats={stats.data ?? null}
-                names={names}
-                roster={roster.data ?? []}
-              />
-            </div>
+          {/* without video the left column (Punkt 1, Kurzbericht) moved up: one column here */}
+          <div className={cn("grid gap-12", !today && "lg:grid-cols-[minmax(0,1fr)_340px]")}>
+            {!today && (
+              <div className="min-w-0 space-y-10">
+                {graphics.data && <PointOpen orgId={orgId} matchId={match.id} graphics={graphics.data} oppName={oppName(match)} />}
+                {telegram}
+              </div>
+            )}
             <div className="space-y-10">
               {graphics.data && goalRuns(graphics.data).length > 0 && <MatchZones graphics={graphics.data} />}
               {stats.data && <ThreeFigures stats={stats.data} names={names} roster={roster.data ?? []} />}
@@ -722,9 +743,9 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
               estimated from the video are not shown */}
           {stats.data && stats.data.quality.events > 0 && <OverviewView orgId={orgId} match={match} teamName={teamName} stats={stats.data} names={names} staff={staff} onPlay={main ? onPlay : undefined} parts={["timeline"]} span={graphics.data && !graphics.data.has_report ? (graphics.data.span ?? null) : null} />}
           <div className="space-y-8">
-            <div id="highlights" className="scroll-mt-24"><HighlightsView orgId={orgId} matchId={match.id} teamId={match.team_id} staff={staff} names={names} /></div>
+            <div id="highlights" className="scroll-mt-24"><HighlightsView orgId={orgId} matchId={match.id} teamId={match.team_id} staff={staff} names={names} scenes={Boolean(main && graphics.data?.goals.some((g) => g.has_video))} /></div>
             {/* the players' personal scenes are the staff's overview (K18) */}
-            {canDelete && !main && <TeamFeedView orgId={orgId} matchId={match.id} kickoff={match.kickoff_ms} periodS={match.period_s} />}
+            {/* the players' scenes need a video: without one «Szenen neu erstellen» made nothing (review R34) */}
             {staff && <MarksPanel orgId={orgId} matchId={match.id} onPlay={main ? onPlay : undefined} />}
           </div>
             </div>

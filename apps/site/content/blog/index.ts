@@ -32,14 +32,14 @@ export const BLOG: BlogPost[] = [
     date: "2026-11-03",
     updated: "2026-11-17",
     title: {
-      de: "Warum du jedes Tor selbst bestätigst",
-      fr: "Pourquoi tu confirmes toi-même chaque but",
-      en: "Why you confirm every goal yourself",
+      de: "Warum die Analyse dich fragt, wo sie unsicher ist",
+      fr: "Pourquoi l'analyse te demande là où elle hésite",
+      en: "Why the analysis asks you where it is unsure",
     },
     summary: {
-      de: "Die Analyse schlägt vor, du bestätigst. So stimmt jedes Tor, und jede Zahl steht mit ihrer Basis da. Ein Blick hinter die Kulissen.",
-      fr: "L'analyse propose, tu confirmes. Ainsi chaque but est juste, et chaque chiffre est donné avec sa base. Un regard en coulisses.",
-      en: "The analysis suggests, you confirm. So every goal is right, and every number comes with its base. A look behind the scenes.",
+      de: "Die Analyse schlägt vor und fragt nur, wo sie unsicher ist: ein paar Fragen statt Tor für Tor, jede Zahl mit ihrer Basis. Ein Blick hinter die Kulissen.",
+      fr: "L'analyse propose et te demande là où elle hésite : quelques questions plutôt que but après but. Chaque chiffre est donné avec sa base. Un regard en coulisses.",
+      en: "The analysis suggests and asks you where it is unsure: a few questions instead of goal by goal. Every number comes with its base. A look behind the scenes.",
     },
   },
 ];

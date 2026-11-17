@@ -14,6 +14,7 @@ from handball_api.core.security import (
     verify_password,
     verify_totp,
 )
+from handball_api.integrations.handball_ch import opponent_key
 from handball_api.models.enums import OrgRole, TeamRole
 from handball_api.services.csv_import import decode, parse_roster_csv
 from handball_api.services.mail_templates import render
@@ -344,3 +345,19 @@ async def test_ctx_enqueue_runs_off_the_event_loop() -> None:
     assert seen == [("gpu", "a.b", "j1", {"x": 1}, 60, True)]
     with pytest.raises(RuntimeError):
         await Ctx(db=none, settings=none, email=none, storage=none).enqueue("gpu", "a.b", "j2", {})
+
+
+@pytest.mark.parametrize(
+    ("a", "b", "same"),
+    [
+        ("SG Horgen/Wädenswil 1", "SG Horgen/Wädenswil (M2)", True),
+        ("sg horgen-wädenswil", "SG Horgen/Wädenswil", True),
+        ("TV Rüti", "TV Ruti", True),
+        ("SG Horgen/Wädenswil 1", "SG Horgen/Wädenswil 2", False),
+        ("HC 11 Freunde", "HC Freunde", False),
+    ],
+)
+def test_opponent_key_joins_spellings_of_one_team(a: str, b: str, same: bool) -> None:
+    """Review R7: one opponent under the league's and the cup's name; same rule as the web."""
+    assert (opponent_key(a) == opponent_key(b)) is same
+    assert opponent_key("SG Horgen/Wädenswil (M2)") == "sghorgenwadenswil"

@@ -7,7 +7,7 @@ describe("Ich and Verein", () => {
     expect(clubTabs("o", { isAdmin: true, coachOf: 0, official: true }).map((t) => t.key)).toEqual(["club", "teams", "billing", "federation"]);
     expect(clubTabs("o", { isAdmin: true, coachOf: 0, official: false }).map((t) => t.key)).toEqual(["club", "teams", "billing"]);
     // a coach sees teams and roles only; a player no club page at all
-    expect(clubTabs("o", { isAdmin: false, coachOf: 1, official: true }).map((t) => t.key)).toEqual(["teams"]);
+    expect(clubTabs("o", { isAdmin: false, coachOf: 1, official: true }).map((t) => t.key)).toEqual(["teams", "federation"]);
     expect(hasClub({ isAdmin: false, coachOf: 0, official: false })).toBe(false);
     expect(clubTabs("o", { isAdmin: false, coachOf: 0, official: false })).toEqual([]);
   });

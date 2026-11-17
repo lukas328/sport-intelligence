@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
-import { PageTabs } from "@/components/shell/page-tabs";
+import { BackToTeam, PageTabs } from "@/components/shell/page-tabs";
 import { PageHeader } from "@/components/ui/page-header";
 import { clubTabs, hasClub } from "@/lib/settings-model";
 import { loadSettings } from "../settings/load";
@@ -15,6 +15,7 @@ export default async function ClubLayout({ children, params }: { children: React
   return (
     <div className="space-y-8">
       <div className="space-y-5">
+        <BackToTeam />
         <PageHeader title={t("club")} />
         <PageTabs label={t("club")} items={clubTabs(orgId, access).map((x) => ({ ...x, label: t(`tab_${x.key}`) }))} />
       </div>

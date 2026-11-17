@@ -16,6 +16,7 @@ import { NewMatchForm } from "./new-match-form";
 import { ScoutingForm } from "./scouting-form";
 import { NextSteps } from "@/components/people/next-steps";
 import { StartView } from "./start-view";
+import { UploadFacts } from "@/components/upload/upload-facts";
 
 type Match = Schemas["MatchSummary"];
 
@@ -157,6 +158,8 @@ function UploadPicker({ open, onOpenChange, orgId, teamId, matches }: { open: bo
             </button>
           )}
         </div>
+        {/* the questions before an upload, answered in the dialog already (review R33) */}
+        <UploadFacts />
       </div>
     </Dialog>
   );

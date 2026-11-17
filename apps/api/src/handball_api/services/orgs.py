@@ -6,12 +6,21 @@ import uuid
 from dataclasses import replace
 from datetime import UTC, date, datetime, timedelta
 
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 
 from handball_api.core.db import disable_system_access, enable_system_access, set_tenant
 from handball_api.core.errors import ProblemError
 from handball_api.core.storage import ObjectNotFoundError
-from handball_api.models import Membership, Organization, OrgMembership, Season, Team, User
+from handball_api.models import (
+    Match,
+    Membership,
+    Organization,
+    OrgMembership,
+    Season,
+    Team,
+    User,
+    VideoAsset,
+)
 from handball_api.models.enums import OrgRole, PersonRole, Plan, TeamRole
 from handball_api.schemas.orgs import (
     OrgCreate,
@@ -117,10 +126,39 @@ async def build_actor(ctx: Ctx, user: User, org_id: uuid.UUID) -> tuple[Actor, O
     return actor, org
 
 
+# the kit a match gets when nobody chose one (models/matches.py)
+DEFAULT_KIT_OWN = "#0b6bcb"
+
+
+async def _matches_follow_club_colour(ctx: Ctx, org: Organization, old: str | None) -> None:
+    """A new club colour reaches the matches that still wear the old one (or the default) and
+    have no video yet: the schedule's matches made before the colour was set showed blue shirts
+    at the upload of a club in green (review R16). A match with a video keeps what its analysis
+    used; a scouting match's own side is another team."""
+    if not org.primary_color:
+        return
+    worn = {DEFAULT_KIT_OWN, *([old.lower()] if old else [])}
+    has_video = select(VideoAsset.id).where(VideoAsset.match_id == Match.id).exists()
+    await ctx.db.execute(
+        update(Match)
+        .where(
+            Match.organization_id == org.id,
+            func.lower(Match.kit_own).in_(worn),
+            Match.kind != "scouting",
+            ~has_video,
+        )
+        .values(kit_own=org.primary_color)
+        .execution_options(synchronize_session=False)
+    )
+
+
 async def update_org(ctx: Ctx, org: Organization, data: OrgUpdate) -> Organization:
     authorize(ctx.require_actor(), Action.ORG_UPDATE, two_factor=ctx.two_factor)
+    old_colour = org.primary_color
     for field, value in data.model_dump(exclude_unset=True).items():
         setattr(org, field, value)
+    if "primary_color" in data.model_fields_set and org.primary_color != old_colour:
+        await _matches_follow_club_colour(ctx, org, old_colour)
     await audit.record(
         ctx,
         "org.updated",

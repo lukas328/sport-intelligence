@@ -17,6 +17,7 @@ import { TeamLifeCard } from "@/components/settings/team-life";
 import { coachRights } from "@/lib/roles";
 import { ConsentCopy } from "./consent-copy";
 import { TwoFactorTask } from "./two-factor-task";
+import { MarkKeepers } from "@/components/roster/mark-keepers";
 
 type Entry = Schemas["RosterEntryOut"];
 
@@ -155,6 +156,16 @@ export default async function TeamPage({ params, searchParams }: { params: Promi
                 </Link>
               )}
             </section>
+          )}
+          {/* what the squad is for, said once (review R37) */}
+          {canEdit && entries.length > 0 && (
+            <p className="m-0 max-w-[70ch] text-[15px] text-ink-2 md:col-span-3" data-testid="roster-why">
+              {t("why")}
+            </p>
+          )}
+          {/* nobody is goalkeeper yet: one tap per keeper (review R37) */}
+          {canEdit && entries.length > 0 && !entries.some((p) => p.main_position === "TW") && (
+            <MarkKeepers orgId={orgId} teamId={teamId} players={[...entries].sort((a, b) => (a.jersey_number ?? 100) - (b.jersey_number ?? 100))} />
           )}
           {groups.map((g) => (
             <section key={g.key} aria-labelledby={`group-${g.key}`} className={cn(g.key === "other" && "md:col-span-3")}>

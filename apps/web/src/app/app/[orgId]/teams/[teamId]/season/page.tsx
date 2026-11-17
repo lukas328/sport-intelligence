@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getFormatter, getTranslations } from "next-intl/server";
+import { sameOpponent } from "@/lib/opponent-name";
 import { PlanHint } from "@/components/billing/plan-hint";
 import { serverApi } from "@/lib/api";
 import { linkClass, SectionHead } from "@/components/anlauf/blocks";
@@ -150,7 +151,9 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
   const basis = (k: number) => (k === 0 ? ts("basisNone") : ts("basis", { k, n }));
   // one row per figure: value, a bar on a fixed scale and a tick for the reference (or goals against)
   const cells: { key: string; label: string; value: string; href: string; share: number | null; tick: number; refText: string; basis: string; focus?: boolean }[] = [
-    { key: "goals", label: `${t("goals")} ${t("perMatch")}`, value: goalsFor.toFixed(1), href: `${base}/scenes?type=shot&outcome=goal&side=own`, share: goalsFor / 40, tick: goalsAgainst / 40, refText: tv("againstRef", { value: goalsAgainst.toFixed(1) }), basis: ts("basisAll", { n }) },
+    // goals and goals against one row each, not one as the side note of the other (review R27)
+    { key: "goals", label: `${t("goals")} ${t("perMatch")}`, value: goalsFor.toFixed(1), href: `${base}/scenes?type=shot&outcome=goal&side=own`, share: goalsFor / 40, tick: goalsAgainst / 40, refText: ts("tickAgainst"), basis: ts("basisAll", { n }) },
+    { key: "against", label: `${t("goalsAgainst")} ${t("perMatch")}`, value: goalsAgainst.toFixed(1), href: `${base}/scenes?type=shot&outcome=goal&side=opponent`, share: goalsAgainst / 40, tick: goalsFor / 40, refText: `${ts("tickFor")}, ${tv("lowerBetter")}`, basis: ts("basisAll", { n }) },
     { key: "shooting", label: t("shootingPct"), value: pct(totals.shooting_pct), href: `${base}/scenes?type=shot&side=own`, share: totals.shooting_pct, tick: 0.55, refText: tv("reference", { value: "55 %" }), basis: basis(totals.shooting_matches ?? 0), focus: focus === "shooting_pct" },
     { key: "save", label: t("savePct"), value: pct(totals.save_pct), href: `${base}/scenes?type=shot&outcome=save&side=opponent`, share: totals.save_pct, tick: 0.3, refText: tv("reference", { value: "30 %" }), basis: basis(totals.save_matches ?? 0), focus: focus === "save_pct" },
     { key: "turnovers", label: `${t("turnovers")} ${t("perMatch")}`, value: turnovers == null ? "-" : turnovers.toFixed(1), href: `${base}/scenes?type=turnover&side=own`, share: turnovers == null ? null : turnovers / 24, tick: 0.5, refText: `${tv("reference", { value: "12" })}, ${tv("lowerBetter")}`, basis: basis(totals.turnovers_matches ?? 0), focus: focus === "turnovers" },
@@ -216,6 +219,8 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
     .filter((m) => m.opponent_name && new Date(m.kickoff_at) > new Date())
     .sort((x, y) => x.kickoff_at.localeCompare(y.kickoff_at))
     .slice(0, 3);
+  // a bar of the course: who, when, by how much (one course on the page, review R26)
+  const bar = (m: Row) => ({ label: shortName(m.opponent), sub: format.dateTime(new Date(m.kickoff_at), { day: "numeric", month: "numeric" }), diff: m.score_own - m.score_opponent });
   const top = [...data.players].filter((p) => p.goals > 0).sort((a, b) => b.goals - a.goals).slice(0, 5);
   const scenesHref = (chips: string[]) => `${base}/scenes?chips=${chips.join(",")}`;
   const ZONE_CHIP: Record<string, string> = { ra: "wing_right", la: "wing_left", rl: "back_left", rm: "back_centre", rr: "back_right", kr: "circle" };
@@ -306,10 +311,10 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
             <SectionHead title={ts("trend")} note={chrono.length > 6 ? ts("trendNoteLast", { shown: Math.min(10, chrono.length), phone: 6, n: chrono.length }) : ts("trendNote")} />
             {/* phones: the last six matches at a readable size */}
             <div className="sm:hidden">
-              <DiffBars matches={chrono.slice(-6).map((m) => ({ label: shortName(m.opponent), diff: m.score_own - m.score_opponent }))} width={400} label={t("chartLabel")} />
+              <DiffBars matches={chrono.slice(-6).map(bar)} width={400} label={t("chartLabel")} />
             </div>
             <div className="max-sm:hidden">
-              <DiffBars matches={chrono.slice(-10).map((m) => ({ label: shortName(m.opponent), diff: m.score_own - m.score_opponent }))} label={t("chartLabel")} />
+              <DiffBars matches={chrono.slice(-10).map(bar)} label={t("chartLabel")} />
             </div>
             <p className="mt-3 text-[15px] text-ink-2" data-testid="season-summary">
               {draws > 0 ? ts("recordDraws", { w: wins, d: draws, l: losses }) : ts("record", { w: wins, l: losses })} · {ts("goalsFor", { gf: goalsForTotal, ga: goalsAgainstTotal })}
@@ -376,7 +381,10 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
           {main && (
             <section>
               <SectionHead title={ts(`zoneTitle.${main.zone}` as "zoneTitle.ra")} note={ts("runs", { n: main.value, k: withVideo.length })} />
+              {/* the aside is full width below lg: the half court keeps its size there */}
+              <div className="max-w-[420px]">
               <Bundle goals={main.goals} rest={[]} width={340} label={ts("bundleLabel", { n: main.value, what: ta(`zoneFrom.${main.zone}` as "zoneFrom.ra") })} />
+              </div>
             </section>
           )}
           {standing.length > 0 && (
@@ -396,11 +404,12 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
             ) : (
               <ul className="m-0 list-none p-0" data-testid="season-opponents">
                 {fixtures.map((f) => {
-                  const before = [...data.matches].filter((m) => m.opponent === f.opponent_name).sort((x, y) => y.kickoff_at.localeCompare(x.kickoff_at))[0];
+                  const before = [...data.matches].filter((m) => sameOpponent(m.opponent, f.opponent_name)).sort((x, y) => y.kickoff_at.localeCompare(x.kickoff_at))[0];
                   return (
                     <li key={f.id} className="flex min-h-11 items-center justify-between gap-3 border-t border-rule py-2.5 text-[15px] first:border-t-0">
                       <Link href={`/app/${orgId}/matches/${f.id}`} className="inline-flex min-h-11 items-center hover:underline hover:underline-offset-4">
-                        {f.opponent_name}, {format.dateTime(new Date(f.kickoff_at), { weekday: "long" })}
+                        {/* the date says it lies ahead (review R25) */}
+                        {f.opponent_name}, {format.dateTime(new Date(f.kickoff_at), { weekday: "short", day: "numeric", month: "numeric" })}
                       </Link>
                       {before ? (
                         <Link href={`/app/${orgId}/matches/${before.match_id}`} className={cn(linkClass, "text-[15px]")}>
@@ -429,9 +438,12 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
             <Link href={`/app/${orgId}/matches/${last.match_id}`} className={linkClass}>
               {tv("lastResult")}: {last.score_own}:{last.score_opponent} {last.opponent}
             </Link>
-            <Link href={`${base}/scenes?type=shot&outcome=goal&side=own`} className={buttonClass("secondary")}>
-              {tv("goalsAsClips")}
-            </Link>
+            {/* scenes need a match with video (review R34) */}
+            {withVideo.length > 0 && (
+              <Link href={`${base}/scenes?type=shot&outcome=goal&side=own`} className={buttonClass("secondary")}>
+                {tv("goalsAsClips")}
+              </Link>
+            )}
             {tools}
           </p>
           <SeasonThemes orgId={orgId} teamId={teamId} seasonId={seasonId} names={names} />
@@ -463,16 +475,6 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
             </section>
 
             <div className="space-y-12">
-              <section className="space-y-4">
-                <SectionHead title={t("form")} note={t("formLast", { n: Math.min(10, n) })} />
-                <DiffBars
-                  matches={[...data.matches]
-                    .sort((x, y) => x.kickoff_at.localeCompare(y.kickoff_at))
-                    .slice(-10)
-                    .map((m) => ({ label: m.opponent.split(/[\s-]/).filter((w) => w.length > 3)[0] ?? m.opponent, diff: m.score_own - m.score_opponent }))}
-                  label={t("chartLabel")}
-                />
-              </section>
 
               {n > 1 && (
                 <section className="space-y-4">
@@ -497,33 +499,6 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
             </div>
           </div>
 
-
-      {n >= 3 ? (
-            <section className="space-y-3">
-              <h2 className="text-2xl">
-                {t("trend")} <span className="font-sans text-base font-medium text-muted">{t("chartLabel")}</span>
-              </h2>
-              {(() => {
-                const rows = [...data.matches].sort((x, y) => x.kickoff_at.localeCompare(y.kickoff_at));
-                const day = (iso: string) => format.dateTime(new Date(iso), { day: "numeric", month: "numeric" });
-                return (
-                  <>
-                    {/* phones: the last six matches at a readable size */}
-                    <div className="sm:hidden">
-                      <TrendChart rows={rows.slice(-6)} label={t("chartLabel")} day={day} width={420} />
-                    </div>
-                    <div className="hidden sm:block">
-                      <TrendChart rows={rows} label={t("chartLabel")} day={day} />
-                    </div>
-                  </>
-                );
-              })()}
-            </section>
-          ) : (
-            <p className="text-[0.9375rem] text-muted" data-testid="season-trend">
-              {tv("chartLater")}
-            </p>
-          )}
           {scorers.length > 0 && <Scorers scorers={scorers} names={names} shirts={shirts} topGoals={topGoals} t={t} />}
       <section className="space-y-3">
             <SectionHead title={t("allMatches")} note={ts("dataCount", { k: totals.analysed_matches ?? 0, n })} />
@@ -644,41 +619,5 @@ function StatBar({ share, tick, focus }: { share: number | null; tick: number; f
       {share != null && <span className={cn("absolute inset-y-0 left-0", focus ? "bg-ink" : "bg-ink/45")} style={{ width: clamp(share) }} />}
       <span className="absolute -top-1.5 -bottom-1.5 w-0.5 -translate-x-1/2 bg-foreground" style={{ left: clamp(tick) }} />
     </span>
-  );
-}
-
-/** Goal difference per match as bars above (won) and below (lost) the line; values on hover. */
-function TrendChart({ rows, label, day, width = 1100 }: { rows: Row[]; label: string; day: (iso: string) => string; width?: number }) {
-  const w = width;
-  const h = 240;
-  const pad = { l: 8, r: 8, t: 22, b: 40 };
-  const max = Math.max(5, ...rows.map((r) => Math.abs(r.score_own - r.score_opponent)));
-  const mid = pad.t + (h - pad.t - pad.b) / 2;
-  const half = (h - pad.t - pad.b) / 2;
-  const slot = (w - pad.l - pad.r) / rows.length;
-  const bw = Math.min(44, slot * 0.6);
-  return (
-    <svg viewBox={`0 0 ${w} ${h}`} role="img" aria-label={label} className="h-auto w-full" data-testid="season-trend">
-      {rows.map((r, i) => {
-        const d = r.score_own - r.score_opponent;
-        const bh = Math.max(3, (Math.abs(d) / max) * half);
-        const x = pad.l + slot * i + (slot - bw) / 2;
-        const y = d >= 0 ? mid - bh : mid;
-        const fill = d > 0 ? "var(--ok)" : d < 0 ? "var(--error)" : "var(--muted)";
-        return (
-          <g key={r.match_id}>
-            <title>{`${r.opponent} ${r.score_own}:${r.score_opponent}`}</title>
-            <rect x={x} y={y} width={bw} height={bh} rx={2} fill={fill} />
-            <text x={x + bw / 2} y={d >= 0 ? y - 6 : y + bh + 14} fontSize="14" fontWeight={700} textAnchor="middle" fill="var(--foreground)">
-              {d > 0 ? `+${d}` : d}
-            </text>
-            <text x={x + bw / 2} y={h - 8} fontSize="14" textAnchor="middle" fill="var(--muted)">
-              {day(r.kickoff_at)}
-            </text>
-          </g>
-        );
-      })}
-      <line x1={pad.l} x2={w - pad.r} y1={mid} y2={mid} stroke="var(--foreground)" strokeWidth={1.5} />
-    </svg>
   );
 }
