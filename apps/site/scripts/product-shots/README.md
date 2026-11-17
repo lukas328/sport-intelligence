@@ -90,6 +90,27 @@ warns. After either step, look at the pictures on the site at 390 and 1280 px.
 | `get-season` | browser, «Saison», cut below the title: what repeats, one bar per match, the shots on the court | «So sieht es aus» |
 | `share` | phone, a collection: «So kommt es im Chat an» and «Link teilen» | «So sieht es aus», «Über uns», «Daten» |
 
+## The link preview in the team chat
+
+Tuesday's chat on the start page (`src/components/phone-chat.tsx`) shows the preview a shared
+collection gets in WhatsApp and co.: `public/media/teilen-vorschau-{de,fr,en}.webp`. It is not
+drawn by hand: the app's own share picture renderer (`apps/web/src/lib/share/og-image.tsx`, the
+same code that answers `/s/<token>/og`) renders it for the demo collection «Aussen rechts
+zumachen» of HC Tannengrün Herren 1 (4 scenes, 1 minute), with the app's translations and the
+title and team in each language («Fermer l'aile droite», «Hommes 1»; «Close the right wing», «Men
+1»):
+
+```bash
+node apps/site/scripts/product-shots/share-preview.mjs
+```
+
+No app, database or network: the script loads the renderer with vite (from the app's vitest) and
+writes the three WebP files at 640 px. Make them again whenever the renderer's design, the demo
+club or the collection changes, and keep `home.chat.previewTitle` and `previewText` in
+`src/messages` saying the same. `src/lib/names.test.ts` fails when a name of the earlier demo
+(Zürichsee, Thalwil …) shows up in `public/` (text or file name), the messages or the content; it
+cannot read pictures, which is why every picture with words is made by a script.
+
 ## A new picture
 
 Add `templates/<name>.html` (copy one that is close), a screen to `SHOTS` in `capture.mjs` if it
