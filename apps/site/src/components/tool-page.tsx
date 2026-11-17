@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Crumbs } from "@/components/crumbs";
 import { JsonLd } from "@/components/json-ld";
 import { KitScope } from "@/components/kit";
-import { PageHead, Updated } from "@/components/wurf-head";
+import { PageHead } from "@/components/wurf-head";
 import { messages, type Locale } from "@/lib/i18n";
 import { breadcrumbs, graph, webPage } from "@/lib/schema";
 import { SITE_UPDATED, pageUrl } from "@/lib/site";
@@ -46,9 +46,7 @@ export function ToolPage({
           breadcrumbs([...trail.map(([n, h]) => [n, pageUrl(locale, h.replace(`/${locale}/`, ""))] as [string, string]), [title, pageUrl(locale, path)]]),
         )}
       />
-      <PageHead kick={<Crumbs label={m.nav.crumbs} items={trail} />} title={title} lead={lead}>
-        <Updated locale={locale} />
-      </PageHead>
+      <PageHead kick={<Crumbs label={m.nav.crumbs} items={trail} />} title={title} lead={lead} />
       <div className="wrap">
         {children}
         {more && (

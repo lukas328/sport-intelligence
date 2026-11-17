@@ -3,6 +3,7 @@ import plans from "@handball/plans";
 import { Faq } from "@/components/faq";
 import { KitScope, StartLink } from "@/components/kit";
 import { JsonLd } from "@/components/json-ld";
+import { TrialArt } from "@/components/head-art";
 import { PageHead, SectionHead } from "@/components/wurf-head";
 import { faqPage, graph } from "@/lib/schema";
 import { APP_LOCALE, fmt, messages, type Locale } from "@/lib/i18n";
@@ -48,8 +49,7 @@ export default async function Pricing({ params }: Props) {
         kick={t.title}
         title={t.head}
         lead={fmt(t.lead, nums)}
-        figure={team.trial_days}
-        figureLabel={t.figureLabel}
+        aside={<TrialArt days={team.trial_days} label={t.figureLabel} />}
       >
         <StartLink appLocale={APP_LOCALE[locale]} className="btn btn-ink mt-8">
           {t.choose}

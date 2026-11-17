@@ -45,6 +45,12 @@
   --opp-cam-edge: #e9eef2;
   --opp-cam-trail: #ffffff;
   color-scheme: light;
+  --wrap: 76rem;
+}
+@media (min-width: 100rem) {
+  :root {
+    --wrap: 90rem;
+  }
 }
 
 @theme inline {
@@ -375,9 +381,11 @@
       line-height: 1.3;
     }
   }
+  /* the stage: 76rem, from 1600 px a wider 90rem for pictures and sections (BEFUNDE-3 U4); text
+     columns keep their own measure (40rem and the like) inside it */
   .wrap {
     width: 100%;
-    max-width: 76rem;
+    max-width: var(--wrap);
     margin-inline: auto;
     padding-inline: 1rem;
   }

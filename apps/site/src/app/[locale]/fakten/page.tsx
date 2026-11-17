@@ -3,12 +3,12 @@ import Link from "next/link";
 import { Honest } from "@/components/honest";
 import { JsonLd } from "@/components/json-ld";
 import { KitScope } from "@/components/kit";
-import { PageHead, SectionHead } from "@/components/wurf-head";
+import { PageHead, SectionHead, Updated } from "@/components/wurf-head";
 import { factRows } from "@/lib/facts";
-import { HTML_LANG, fmt, messages, type Locale } from "@/lib/i18n";
+import { messages, type Locale } from "@/lib/i18n";
 import { APP_ID, graph, organization, softwareApplication, webPage, website } from "@/lib/schema";
 import { pageMeta } from "@/lib/seo";
-import { SITE_UPDATED, pageUrl } from "@/lib/site";
+import { PAGE_UPDATED, SITE_UPDATED, pageUrl } from "@/lib/site";
 
 type Props = { params: Promise<{ locale: Locale }> };
 
@@ -27,7 +27,6 @@ export default async function Facts({ params }: Props) {
   const m = messages(locale);
   const t = m.facts;
   const rows = factRows(locale);
-  const date = new Intl.DateTimeFormat(HTML_LANG[locale], { dateStyle: "long", timeZone: "Europe/Zurich" }).format(new Date(SITE_UPDATED));
   const links: [string, string][] = [
     ["so-funktioniert-es", m.nav.how],
     ["aufnahme", m.nav.filming],
@@ -47,11 +46,7 @@ export default async function Facts({ params }: Props) {
           { ...webPage(locale, "fakten", t.metaTitle, t.description, SITE_UPDATED, "AboutPage"), about: { "@id": APP_ID } },
         )}
       />
-      <PageHead kick={t.title} title={t.head} lead={t.lead}>
-        <p className="mt-5 text-[1.0625rem] text-ink-2">
-          <time dateTime={SITE_UPDATED}>{fmt(m.guides.updated, { date })}</time>
-        </p>
-      </PageHead>
+      <PageHead kick={t.title} title={t.head} lead={t.lead} />
       <div className="wrap">
         <section aria-labelledby="fakten" className="mt-12">
           <SectionHead id="fakten" title={t.tableTitle} />
@@ -101,6 +96,7 @@ export default async function Facts({ params }: Props) {
             ))}
           </ul>
         </section>
+        <Updated locale={locale} date={PAGE_UPDATED.fakten} />
       </div>
     </KitScope>
   );

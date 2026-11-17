@@ -15,15 +15,16 @@ import { GUIDES } from "../../content/ratgeber";
  */
 export function Header({ locale }: { locale: Locale }) {
   const t = messages(locale).nav;
-  // the way home first (L2), then four steps of a visitor's question and the guides (W17);
+  // the way home first (L2), then four steps of a visitor's question, the guides before the
+  // questions (W17, BEFUNDE-3 U8);
   // «Filmen» lives in the footer and under «So funktioniert es»
   const links: [string, string][] = [
     ["", t.homeLink],
     ["so-funktioniert-es", t.how],
     ["demo", t.demo],
     ["preise", t.pricing],
-    ["hilfe", t.faq],
     ["ratgeber", t.guides],
+    ["hilfe", t.faq],
   ];
   const app = APP_LOCALE[locale];
   const names = Object.fromEntries(LOCALES.map((l) => [l, LOCALE_NAMES[l]]));
