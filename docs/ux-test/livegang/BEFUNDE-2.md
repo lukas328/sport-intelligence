@@ -160,6 +160,7 @@ Umsetzung im Strang W2 (eigener PR). Grenzen wie beim Website-Review: keine erfu
 | L10 | Preise: Oben muss «gratis starten» stehen, nicht CHF 39 | P1 | stimmt: oben der Gratis-Einstieg (30 Tage alles, dann Gratis-Plan oder CHF 39), CHF 39 als zweiter Schritt | offen |
 | L11 | Alle Beispielbilder, auch «So funktioniert es», wirken nach Demo; sie müssen richtig gut aussehen | P1 | stimmt: hochwertige Produktbilder in einem Stil, mit Halle und echtem Kontext | offen |
 | L12 | Teamchat-Abschnitt: statt der gezeichneten Karte ein Handy mit echt wirkendem Teamchat, wie in Produktion | P1 | stimmt: Handy-Mockup mit der echten Link-Vorschau unseres Teilen-Links, andere Nachrichten leicht verwischt; allgemeiner Messenger im WhatsApp-Stil, ohne WhatsApp-Namen, -Logo oder exakte Kopie (fremde Marke) | offen |
+| L13 | «So sieht es in der App aus»: vier Bilder im Raster mit Beschriftungen wirken gequetscht | P1 | stimmt: grössere Bilder, Beschriftungen halb über den Bildrand gezogen, die vier Bilder als eine Geschichte beim Scrollen (fixierter Bildbereich, Text wechselt); ohne Bewegung und auf dem Handy ruhig gestapelt | offen |
 
 ## Noch offen aus der ersten Runde
 
