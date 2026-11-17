@@ -136,7 +136,11 @@ Langfristig robuster wäre ein gelerntes Modell für Feldlinien oder Feld-Keypoi
 Hallenbilder plus etwa 300 gelabelte Bilder, einige GPU-Stunden): 1 bis 2 Wochen, GPU nur nach
 Rücksprache.
 
-### 4.4 Fall: Fernsehbild mit Zoom und Schnitten (`camera_motion`), Schätzung
+### 4.4 Fall: Fernsehbild mit Zoom und Schnitten (`camera_motion`): geparkt
+
+**Entscheid 2026-11-17 (Hauptsitzung): geparkt, 4 bis 5 Tage, 70 bis 85 % Abdeckung.** Nur 4 von 70
+Stücken, das Produkt zielt auf Vereinskameras; Vorrang hat die strengere Feldprüfung, danach tiefe
+Kameras. Die App zeigt für diesen Fall eine klare Meldung (UX-Sitzung).
 
 Anlass: der erste echte Staging-Lauf (NLB 2017, 99 min) scheitert mit `camera_motion`: Brennweite
 1.4 Bildbreiten, Zoom bis x6.5, 165 Schnitte, Schwenk 107 Grad. Im Testsatz 4 von 70 Stücken (c012
