@@ -482,3 +482,32 @@ Kosten pro 60-min-Spiel: Modal T4 0.66 USD/h, Azure T4 mit 4 vCPU und 16 GiB 0.9
   Das ist ein eigener kleiner Schritt in `scoreboard.play_intervals`; dort arbeitet heute niemand
   sonst. Messbar auf den Testclips und auf den Dev-Segmenten mit Protokollzeiten (Pausen kennt das
   Protokoll als Timeouts und Halbzeit).
+
+### Weniger Tor-Kandidaten (Punkt 8, 2026-11-17)
+
+Zwei Regeln in `goalcandidates.from_observations` (Standardliste = Rate 1 und 2, die heute als
+Fragen erscheinen):
+- **Einspielen:** Liest die Analyse die Matchuhr (Hallentafel oder Einblendung), gilt die Zeit vor
+  dem ersten Uhrlauf von mindestens 30 s als kein Spiel (20 s Spielraum davor; nur wenn dieser
+  Lauf mindestens 2 min nach Videobeginn liegt). Das gilt auch für die Wurf-Kandidaten. Spätere
+  Lücken der Uhr werden nicht genutzt, weil die Tafel oft minutenlang nicht im Bild ist
+  (Abschnitt Pausenerkennung).
+- **Mindestwert:** Ein Kandidat mit Wert unter 1.2 (robuster z-Wert) fällt aus der Standardliste und
+  behält nur Rate 4. Er erscheint also weiter, wenn der Trainer mehr Kandidaten verlangt.
+
+Gemessen mit `ml/goals`-Logik: Treffer, wenn ein Kandidat 3 s vor bis 8 s nach der Protokollzeit
+liegt. Grundlage sind 25 Dev-Segmente mit Würfen, 75 min, 42 protokollierte Tore. Alle Segmente
+liegen im Spiel und haben keine Uhr, darum greift dort nur der Mindestwert.
+
+| | Kandidaten/min (Dev) | Tore gefunden, Rate ≤ 2 | Tore gefunden, Rate ≤ 4 | Lukas' 99 min, Rate ≤ 2 |
+|---|---|---|---|---|
+| vorher | 1.96 | 40/42 | 42/42 | 159 |
+| Mindestwert | 1.88 | 40/42 | 42/42 | 142 |
+| + Einspielen (mit `play.json` des Laufs) | 1.88 | 40/42 | 42/42 | 122 |
+
+- In Lukas' Video beginnt der erste Uhrlauf bei 12:48. Davor lagen 20 Fragen; mit dem Mindestwert
+  sind es insgesamt 37 Fragen weniger (−23 %).
+- Nicht übernommen: Ohne Feld nur Rate 1. Das wären 81 statt 159 Fragen, aber auf den
+  Dev-Segmenten nur noch 28 von 42 Toren. Ein höherer Mindestwert von 1.5 kostet schon ein Tor
+  (39/42). Weniger Fragen ohne Torverlust gibt es nur über die Zeit ausserhalb des Spiels, also
+  über Einspielen, Pausen und Nachspiel. Dafür braucht es eine bessere Pausenerkennung.

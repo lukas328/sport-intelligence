@@ -255,7 +255,10 @@ def test_goal_candidates_from_observations() -> None:
     assert out["duration_s"] == pytest.approx(360.0)
     assert out["play_s"] == pytest.approx(360.0) and out["no_play_ms"] == []  # fixed camera
     cands = out["candidates"]
-    assert len([c for c in cands if c["rate"] <= 2]) == 12
+    assert out["warm_up_ms"] == []  # no clock readings: no warm-up known
+    assert len(cands) == 24  # 4 per minute of play; at most 2 of them in the default list
+    assert len([c for c in cands if c["rate"] <= 2]) <= 12
+    assert all(c["score"] >= gc.MIN_DEFAULT_SCORE for c in cands if c["rate"] <= 2)
     for c in cands:
         assert c["start_ms"] == max(0, c["t_ms"] - 10_000)
         assert c["end_ms"] == min(360_000, c["t_ms"] + 4000)
@@ -274,6 +277,35 @@ def test_goal_candidates_from_observations() -> None:
         assert c["start_ms"] == max(0, c["t_ms"] - 8000)
     for g in goals:  # goals are shots
         assert [c for c in sc if c["rate"] <= 4 and abs(c["t_ms"] - g * 1000) <= 8000], g
+
+
+def test_warm_up_before_the_first_run_of_the_clock() -> None:
+    t = np.arange(0, 600, gc.DT)
+    # a short run (a countdown tapped during the warm-up) does not count; the throw-off at 200 s
+    warm = gc.warm_up(t, [(60_000, 70_000), (200_000, 260_000), (300_000, 400_000)])
+    assert warm[t < 179.9].all() and not warm[t > 180.1].any()
+    assert not gc.warm_up(t, None).any()
+    assert not gc.warm_up(t, [(90_000, 400_000)]).any()  # throw-off right at the start
+
+
+def test_weak_candidates_leave_the_default_list() -> None:
+    found = [
+        gc.Candidate(10.0, 2.0, 1, 0),
+        gc.Candidate(30.0, 0.5, 1, 1),
+        gc.Candidate(50.0, 1.0, 2, 2),
+        gc.Candidate(70.0, 0.1, 4, 3),
+    ]
+    assert [c.rate for c in gc.demote_weak(found)] == [1, 4, 4, 4]
+
+
+def test_no_goal_candidates_in_the_warm_up() -> None:
+    obs = _synthetic_game([100.0, 251.0])
+    out = gc.from_observations(obs, play=[(150_000, 360_000)])
+    assert out is not None
+    assert out["warm_up_ms"] == [[0, 130_000]]
+    assert out["play_s"] == pytest.approx(230.0, abs=0.2)
+    assert all(c["t_ms"] >= 130_000 for c in out["candidates"])
+    assert all(c["t_ms"] >= 130_000 for c in out["shots"]["candidates"])
 
 
 def test_too_little_to_go_on() -> None:

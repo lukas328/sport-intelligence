@@ -597,11 +597,14 @@ def _cached_observations(
         return None
 
 
-def goal_candidates(obs: learned.Observations) -> dict[str, Any] | None:
+def goal_candidates(
+    obs: learned.Observations, play: dict[str, Any] | None = None
+) -> dict[str, Any] | None:
     """Moments that are probably goals, from the camera motion and the people of the observation
-    pass (no court needed): the coach confirms or rejects each. Never fails the analysis."""
+    pass (no court needed; the match clock, if read, marks the warm-up): the coach confirms or
+    rejects each. Never fails the analysis."""
     try:
-        return goalcandidates.from_observations(obs)
+        return goalcandidates.from_observations(obs, play=play_intervals(play))
     except Exception as exc:  # pragma: no cover - defensive
         log.warning("goal_candidates_failed", error=str(exc))
         return None
@@ -853,7 +856,7 @@ def _run_learned(
                 },
                 "formations": [],
                 "scoreboard": overlay,
-                "goal_candidates": goal_candidates(obs),
+                "goal_candidates": goal_candidates(obs, play),
             }
             rep.succeed(pending)
             log.info("analysis_needs_calibration", job_id=job_id, reason=str(exc))
