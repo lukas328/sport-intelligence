@@ -203,7 +203,7 @@ def observe(
             progress("observe", min(1.0, n / total))
     if balls_net is not None:
         t0 = time.perf_counter()
-        balls_net.flush()
+        balls_net.finish()  # waits for the worker thread
         timings["ball_net"] += time.perf_counter() - t0
     t0 = time.perf_counter()
     motion = est.finish()
@@ -219,6 +219,9 @@ def observe(
     )
     if gate is not None:
         counters |= {"number_boxes_offered": gate.offered, "number_boxes_read": gate.read}
+    if balls_net is not None:
+        # timings["ball_net"] is what the main thread waited for the net; this is the net's own
+        counters["ball_net_busy_ms"] = round(balls_net.busy_s * 1000)
     return Observations(
         motion,
         frames,
