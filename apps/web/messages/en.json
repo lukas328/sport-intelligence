@@ -1695,7 +1695,8 @@
       "consent-missing": "Public highlights need the consent «Public highlights» of everyone shown, for minors from their parents. Collect it with the team's consent link.",
       "forbidden": "Your role in the team does not allow public links. Ask your coach.",
       "plan": "Share links are not part of your plan.",
-      "unverified": "The club is not confirmed yet: sharing works only afterwards. How to confirm it is in the settings."
+      "unverified": "The club is not confirmed yet: sharing by link works only afterwards.",
+      "unverifiedLink": "How to confirm the club"
     },
     "card": {
       "title": "Match card",
@@ -2881,7 +2882,8 @@
     "emailFailed": "That did not work. Try again later.",
     "later": "Later",
     "newTab": "opens in a new tab",
-    "backToTeam": "Back to {team}"
+    "backToTeam": "Back to {team}",
+    "nextSteps": "What comes next"
   },
   "palette": {
     "newMatch": "Add a match",
@@ -3135,7 +3137,7 @@
     "claimedFound": "We found {matches, plural, one {# match} other {# matches}}, {players, plural, one {# player} other {# players}} and {reports, plural, one {# match report} other {# match reports}}.",
     "heldBack": "{n, plural, one {# more match was} other {# more matches were}} not taken over on the free plan.",
     "upgrade": "See plans",
-    "unverifiedHint": "The club is not confirmed yet: sharing and public profiles work after that. The settings explain how.",
+    "unverifiedHint": "The club is not confirmed yet: sharing and public profiles work only afterwards. How to confirm it is under Club › Federation and in «What comes next».",
     "confirmSquad": "Confirm the team",
     "notFound": "Team not found or outside Switzerland?",
     "manual": "Create a club by hand",
@@ -3223,10 +3225,10 @@
   "verification": {
     "section": "Official data",
     "title": "Club not confirmed yet",
-    "why": "Until the club is confirmed, sharing and public profiles stay off and opponents appear in match reports with numbers only. Ways to confirm:",
+    "why": "Until the club is confirmed, sharing by link and public profiles stay off, and opponents appear in match reports with numbers only.",
     "way_mail_domain": "Sign in with an e-mail address of the club.",
     "way_mail_domain_known": "Sign in with an e-mail address of the club ({domains}).",
-    "way_second_official": "A second person (admin or coach, not you) confirms here.",
+    "way_second_official": "A second person of the club (admin or coach, not the one who took it over) confirms it here.",
     "way_federation": "With a federation licence.",
     "way_operator": "Through support.",
     "confirm": "I confirm the club",
@@ -3238,7 +3240,12 @@
     "line": "The club is not confirmed yet: sharing and public profiles are off until then.",
     "lineLink": "How to confirm",
     "federationTitle": "Federation",
-    "notOfficial": "Your club is not linked to handball.ch. The link is made when you look up your team on handball.ch during setup and take it over."
+    "notOfficial": "Your club is not linked to handball.ch. The link is made when you look up your team on handball.ch during setup and take it over.",
+    "whyNumbers": "Why: the names of other teams' players are personal data. We show them, and open links to the outside, only once it is clear that you really work for this club.",
+    "ways": "How the club is confirmed:",
+    "way_second_official_invite": "A second person of the club (admin or coach) signs in and confirms it here.",
+    "inviteSecond": "Invite someone",
+    "youConfirm": "You are an admin or coach of the club and did not take it over: you can confirm it."
   },
   "playerStatus": {
     "injured": "Injured",
@@ -4247,7 +4254,13 @@
     "shareText": "Put together a collection and send the link to the team chat. Players do not need an account.",
     "shareAction": "Go to scenes",
     "done": "done",
-    "hide": "Hide"
+    "hide": "Hide",
+    "verifyTitle": "Have the club confirmed",
+    "verifyText": "Sharing by link works only afterwards. A second person of the club confirms it, or you sign in with an e-mail address of the club.",
+    "verifyTextYou": "Sharing by link works only afterwards. You can confirm it.",
+    "verifyAction": "How it works",
+    "progress": "{done} of {total} done",
+    "hideNote": "You can bring them back any time from the account menu at the top right."
   },
   "onboardingAccount": {
     "account": "Account",

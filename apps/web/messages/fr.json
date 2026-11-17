@@ -1695,7 +1695,8 @@
       "consent-missing": "Des temps forts publics demandent le consentement « Temps forts publics » de toutes les personnes montrées, pour les mineurs celui des parents. Demande-le avec le lien de consentement de l'équipe.",
       "forbidden": "Avec ton rôle dans l'équipe, tu ne peux pas créer de liens publics. Demande à ton entraîneur.",
       "plan": "Les liens de partage ne font pas partie de ton abonnement.",
-      "unverified": "Le club n'est pas encore confirmé : le partage n'est possible qu'ensuite. La marche à suivre se trouve dans les réglages."
+      "unverified": "Le club n'est pas encore confirmé : le partage par lien n'est possible qu'ensuite.",
+      "unverifiedLink": "Comment confirmer le club"
     },
     "card": {
       "title": "Carte de match",
@@ -2881,7 +2882,8 @@
     "emailFailed": "Cela n'a pas marché. Réessaie plus tard.",
     "later": "Plus tard",
     "newTab": "s’ouvre dans un nouvel onglet",
-    "backToTeam": "Retour à {team}"
+    "backToTeam": "Retour à {team}",
+    "nextSteps": "La suite"
   },
   "palette": {
     "newMatch": "Ajouter un match",
@@ -3135,7 +3137,7 @@
     "claimedFound": "Nous avons trouvé {matches, plural, one {# match} other {# matchs}}, {players, plural, one {# joueur} other {# joueurs}} et {reports, plural, one {# feuille de match} other {# feuilles de match}}.",
     "heldBack": "{n, plural, one {# autre match n'a pas été repris} other {# autres matchs n'ont pas été repris}} avec le plan gratuit.",
     "upgrade": "Voir les plans",
-    "unverifiedHint": "Le club n'est pas encore confirmé : le partage et les profils publics fonctionnent ensuite. Les réglages expliquent comment.",
+    "unverifiedHint": "Le club n’est pas encore confirmé : le partage et les profils publics ne sont possibles qu’ensuite. La marche à suivre se trouve sous Club › Fédération et dans «La suite».",
     "confirmSquad": "Confirmer l'équipe",
     "notFound": "Équipe introuvable ou hors de Suisse ?",
     "manual": "Créer un club à la main",
@@ -3223,10 +3225,10 @@
   "verification": {
     "section": "Données officielles",
     "title": "Club pas encore confirmé",
-    "why": "Tant que le club n'est pas confirmé, le partage et les profils publics restent désactivés et les adversaires n'apparaissent qu'avec leur numéro dans les feuilles de match. Pour confirmer :",
+    "why": "Tant que le club n'est pas confirmé, le partage par lien et les profils publics restent désactivés et les adversaires n'apparaissent qu'avec leur numéro dans les feuilles de match.",
     "way_mail_domain": "Se connecter avec une adresse e-mail du club.",
     "way_mail_domain_known": "Se connecter avec une adresse e-mail du club ({domains}).",
-    "way_second_official": "Une deuxième personne (admin ou entraîneur/e, pas toi) confirme ici.",
+    "way_second_official": "Une deuxième personne du club (admin ou entraîneur·e, pas celle qui l'a repris) le confirme ici.",
     "way_federation": "Avec une licence de la fédération.",
     "way_operator": "Via le support.",
     "confirm": "Je confirme le club",
@@ -3238,7 +3240,12 @@
     "line": "Le club n'est pas encore confirmé : le partage et les profils publics sont désactivés d'ici là.",
     "lineLink": "Comment faire",
     "federationTitle": "Fédération",
-    "notOfficial": "Ton club n'est pas relié à handball.ch. Le lien se fait quand tu cherches ton équipe sur handball.ch lors de l'inscription et que tu la reprends."
+    "notOfficial": "Ton club n'est pas relié à handball.ch. Le lien se fait quand tu cherches ton équipe sur handball.ch lors de l'inscription et que tu la reprends.",
+    "whyNumbers": "Pourquoi : les noms des joueuses et joueurs d'autres équipes sont des données personnelles. Nous les montrons, et ouvrons les liens vers l'extérieur, seulement quand il est établi que tu travailles vraiment pour ce club.",
+    "ways": "Pour confirmer le club :",
+    "way_second_official_invite": "Une deuxième personne du club (admin ou entraîneur·e) se connecte et le confirme ici.",
+    "inviteSecond": "Inviter une personne",
+    "youConfirm": "Tu es admin ou entraîneur·e du club et tu ne l'as pas repris : tu peux le confirmer."
   },
   "playerStatus": {
     "injured": "Blessé·e",
@@ -4247,7 +4254,13 @@
     "shareText": "Crée une sélection et envoie le lien dans le chat de l'équipe. Les joueurs n'ont pas besoin de compte.",
     "shareAction": "Aller aux scènes",
     "done": "fait",
-    "hide": "Masquer"
+    "hide": "Masquer",
+    "verifyTitle": "Fais confirmer le club",
+    "verifyText": "Le partage par lien n'est possible qu'ensuite. Une deuxième personne du club le confirme, ou tu te connectes avec une adresse e-mail du club.",
+    "verifyTextYou": "Le partage par lien n'est possible qu'ensuite. Tu peux le confirmer.",
+    "verifyAction": "Comment faire",
+    "progress": "{done} sur {total} faits",
+    "hideNote": "Tu peux les retrouver à tout moment dans le menu du compte en haut à droite."
   },
   "onboardingAccount": {
     "account": "Compte",

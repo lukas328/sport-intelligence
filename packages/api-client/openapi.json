@@ -18989,6 +18989,17 @@
             "title": "Methods",
             "type": "array"
           },
+          "my_part": {
+            "default": "none",
+            "description": "the asking person: took the club over (needs a second person), can confirm it (club admin or coach), or has no part",
+            "enum": [
+              "claimed",
+              "can_confirm",
+              "none"
+            ],
+            "title": "My Part",
+            "type": "string"
+          },
           "official_club_id": {
             "anyOf": [
               {

@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Check } from "lucide-react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { linkClass, SectionHead } from "@/components/anlauf/blocks";
 import { useShell } from "@/components/shell/context";
 import { api } from "@/lib/client";
@@ -13,25 +13,50 @@ import { cn } from "@/lib/utils";
 import { InviteDialog } from "./invite-dialog";
 
 const KEY = (team: string) => `hb_next_steps_hidden:${team}`;
+/** «So geht es weiter» asked back from the account menu (review R36): shown even when done */
+export const SHOW_NEXT_STEPS = "hb:next-steps-show";
+const ASKED = "hb_next_steps_asked";
+
+/** Puts «So geht es weiter» back for a team: the account menu calls it before it opens Spiele. */
+export function showNextSteps(team: string) {
+  try {
+    window.localStorage.removeItem(KEY(team));
+    window.sessionStorage.setItem(ASKED, "1");
+  } catch {
+    /* storage unavailable: the event below still shows it on this page */
+  }
+  window.dispatchEvent(new Event(SHOW_NEXT_STEPS));
+}
 
 /**
  * After registering and taking over a team (finding K17): three clear next steps for the coach,
  * each with its way: the first video, the Co-Trainer, a link for the team chat without an account.
- * Each ticks off from the real data; the block goes away when all are done or when put away.
+ * Each ticks off from the real data; the block goes away when all are done or when put away, and
+ * comes back from the account menu (review R36). A club taken over from handball.ch has a fourth
+ * step: have it confirmed, before sharing works (review R21).
  */
 export function NextSteps({ hasVideo }: { hasVideo: boolean }) {
   const t = useTranslations("nextSteps");
   const { org, team } = useShell();
   const coach = team ? coachRights(org.my_role, team.my_role) : false;
   const [hidden, setHidden] = useState(true);
+  // asked back from the menu: shown even when every step is done, with all ticks
+  const [asked, setAsked] = useState(false);
   const [invite, setInvite] = useState(false);
   useEffect(() => {
     if (!team) return;
-    try {
-      setHidden(window.localStorage.getItem(KEY(team.id)) === "1");
-    } catch {
-      setHidden(false);
-    }
+    const read = () => {
+      try {
+        setHidden(window.localStorage.getItem(KEY(team.id)) === "1");
+        setAsked(window.sessionStorage.getItem(ASKED) === "1");
+      } catch {
+        setHidden(false);
+      }
+    };
+    read();
+    const show = () => (setHidden(false), setAsked(true));
+    window.addEventListener(SHOW_NEXT_STEPS, show);
+    return () => window.removeEventListener(SHOW_NEXT_STEPS, show);
   }, [team]);
   const path = { org_id: org.id, team_id: team?.id ?? "" };
   const people = useQuery({
@@ -52,7 +77,13 @@ export function NextSteps({ hasVideo }: { hasVideo: boolean }) {
     enabled: coach && !hidden && Boolean(team),
     queryFn: async () => ((await api.GET("/v1/orgs/{org_id}/teams/{team_id}/share-links", { params: { path } })).data ?? []).length > 0,
   });
-  if (!team || !coach || hidden || people.isPending || shared.isPending) return null;
+  const verification = useQuery({
+    queryKey: ["verification", org.id],
+    enabled: coach && !hidden,
+    queryFn: async () => (await api.GET("/v1/orgs/{org_id}/verification", { params: { path: { org_id: org.id } } })).data ?? null,
+  });
+  if (!team || !coach || hidden || people.isPending || shared.isPending || verification.isPending) return null;
+  const v = verification.data;
   const base = `/app/${org.id}/teams/${team.id}`;
   const act = cn(linkClass, "inline-flex min-h-11 items-center");
   const steps = [
@@ -66,12 +97,17 @@ export function NextSteps({ hasVideo }: { hasVideo: boolean }) {
         </button>
       ),
     },
+    // a club from handball.ch: confirmed before sharing works, a step of its own with its way
+    ...(v && v.verification !== "none"
+      ? [{ key: "verify" as const, done: v.verification === "verified", text: v.my_part === "can_confirm" ? ("verifyTextYou" as const) : undefined, action: <Link href={`/app/${org.id}/club/federation`} className={act} data-testid="next-verify">{t("verifyAction")}</Link> }]
+      : []),
     { key: "share", done: Boolean(shared.data), action: <Link href={hasVideo ? `${base}/scenes` : `${base}/collections`} className={act}>{t("shareAction")}</Link> },
-  ] as const;
-  if (steps.every((s) => s.done)) return null;
+  ] as { key: "video" | "coach" | "verify" | "share"; done: boolean; text?: "verifyTextYou"; action: ReactNode }[];
+  const doneCount = steps.filter((s) => s.done).length;
+  if (doneCount === steps.length && !asked) return null;
   return (
     <section aria-labelledby="next-steps" data-testid="next-steps">
-      <SectionHead title={<span id="next-steps">{t("title")}</span>} />
+      <SectionHead title={<span id="next-steps">{t("title")}</span>} note={t("progress", { done: doneCount, total: steps.length })} />
       <ol className="m-0 list-none p-0">
         {steps.map((s, i) => (
           <li key={s.key} className="grid grid-cols-[28px_minmax(0,1fr)] gap-x-3 border-t border-rule py-3">
@@ -85,7 +121,7 @@ export function NextSteps({ hasVideo }: { hasVideo: boolean }) {
               </span>
               {!s.done && (
                 <>
-                  <span className="block text-[15px] text-ink-2">{t(`${s.key}Text`)}</span>
+                  <span className="block text-[15px] text-ink-2">{t(s.text ?? `${s.key}Text`)}</span>
                   <span className="mt-1 block">{s.action}</span>
                 </>
               )}
@@ -99,6 +135,7 @@ export function NextSteps({ hasVideo }: { hasVideo: boolean }) {
         onClick={() => {
           try {
             window.localStorage.setItem(KEY(team.id), "1");
+            window.sessionStorage.removeItem(ASKED);
           } catch {
             /* storage unavailable: hidden until the page reloads */
           }
@@ -107,6 +144,7 @@ export function NextSteps({ hasVideo }: { hasVideo: boolean }) {
       >
         {t("hide")}
       </button>
+      <p className="m-0 text-[14px] text-ink-2">{t("hideNote")}</p>
       <InviteDialog orgId={org.id} team={{ id: team.id, name: team.name, team_features: team.team_features }} isAdmin={org.my_role === "org_admin"} open={invite} onOpenChange={setInvite} />
     </section>
   );

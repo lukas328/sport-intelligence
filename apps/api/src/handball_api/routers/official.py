@@ -303,7 +303,7 @@ async def verification(scope: OrgDep) -> dict[str, Any]:
     """State of the club's verification; the automatic ways (mail domain, federation licence)
     are checked on every call."""
     await org_verification.evaluate(scope.ctx, scope.org)
-    return org_verification.status(scope.org)
+    return org_verification.status(scope.org, scope.ctx, scope.user)
 
 
 @router.post(
@@ -312,7 +312,7 @@ async def verification(scope: OrgDep) -> dict[str, Any]:
 async def confirm_verification(scope: OrgDep) -> dict[str, Any]:
     """A second person with a club role (club admin or coach) confirms the club."""
     await org_verification.confirm(scope.ctx, scope.org, scope.user)
-    return org_verification.status(scope.org)
+    return org_verification.status(scope.org, scope.ctx, scope.user)
 
 
 @router.post(

@@ -11925,6 +11925,13 @@ export interface components {
             club_domains: string[];
             /** Methods */
             methods: string[];
+            /**
+             * My Part
+             * @description the asking person: took the club over (needs a second person), can confirm it (club admin or coach), or has no part
+             * @default none
+             * @enum {string}
+             */
+            my_part?: "claimed" | "can_confirm" | "none";
             /** Official Club Id */
             official_club_id: number | null;
             /** Official Provider */

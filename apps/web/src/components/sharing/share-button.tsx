@@ -172,6 +172,12 @@ function SharePanel({ orgId, teamId, kind, targetId, matchId, info }: { orgId: s
         <Alert kind="info" data-testid="share-blocked">
           {t(`reason.${reason}`)}
           {reason === "youth-protection" && matchId && <span className="mt-1 block">{t("reason.youthCard")}</span>}
+          {/* the way to the confirmation, not only that it is missing (review R21) */}
+          {reason === "unverified" && (
+            <a href={`/app/${orgId}/club/federation`} className="mt-1 block font-bold text-ink underline underline-offset-4" data-testid="share-verify">
+              {t("reason.unverifiedLink")}
+            </a>
+          )}
         </Alert>
       )}
       {state === "choose" && (

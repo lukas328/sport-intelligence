@@ -900,7 +900,10 @@ async def test_verification_by_second_official_and_operator(
     r = await api.get(f"/v1/orgs/{org}/verification")
     assert r.json()["verification"] == "unverified"
     assert r.json()["club_domains"] == ["tvt-handball.ch"]
+    # who took the club over needs a second person; that person sees the button (review R21)
+    assert r.json()["my_part"] == "claimed"
     second = await invite(api, make_api, outbox, c, "coach")  # the invitation confirms the mail
+    assert (await second.get(f"/v1/orgs/{org}/verification")).json()["my_part"] == "can_confirm"
     r = await second.post(f"/v1/orgs/{org}/verification/confirm")
     assert r.status_code == 200, r.text
     assert (r.json()["verification"], r.json()["verified_via"]) == ("verified", "second_official")

@@ -1695,7 +1695,8 @@
       "consent-missing": "Öffentliche Highlights brauchen die Einwilligung «Highlights öffentlich» von allen, die darin vorkommen, bei Minderjährigen von den Eltern. Hol sie mit dem Einwilligungslink im Team.",
       "forbidden": "Mit deiner Rolle im Team kannst du keine öffentlichen Links erstellen. Frag deinen Trainer.",
       "plan": "Links zum Teilen gehören nicht zu deinem Abo.",
-      "unverified": "Der Verein ist noch nicht bestätigt: Teilen geht erst danach. Wie das geht, steht in den Einstellungen."
+      "unverified": "Der Verein ist noch nicht bestätigt: Teilen per Link geht erst danach.",
+      "unverifiedLink": "So bestätigst du den Verein"
     },
     "card": {
       "title": "Spielkarte",
@@ -2881,7 +2882,8 @@
     "emailFailed": "Das ging gerade nicht. Versuch es später nochmals.",
     "later": "Später",
     "newTab": "öffnet in einem neuen Tab",
-    "backToTeam": "Zurück zu {team}"
+    "backToTeam": "Zurück zu {team}",
+    "nextSteps": "So geht es weiter"
   },
   "palette": {
     "newMatch": "Neues Spiel anlegen",
@@ -3135,7 +3137,7 @@
     "claimedFound": "Wir haben {matches, plural, one {# Spiel} other {# Spiele}}, {players} Spieler und {reports, plural, one {# Spielbericht} other {# Spielberichte}} gefunden.",
     "heldBack": "{n, plural, one {# weiteres Spiel ist} other {# weitere Spiele sind}} im Gratis-Plan nicht übernommen.",
     "upgrade": "Plan ansehen",
-    "unverifiedHint": "Der Verein ist noch nicht bestätigt: Teilen und öffentliche Profile gehen erst danach. Wie das geht, steht in den Einstellungen.",
+    "unverifiedHint": "Der Verein ist noch nicht bestätigt: Teilen und öffentliche Profile gehen erst danach. Wie das geht, steht unter Verein › Verband und in «So geht es weiter».",
     "confirmSquad": "Team bestätigen",
     "notFound": "Team nicht gefunden oder ausserhalb der Schweiz?",
     "manual": "Verein von Hand anlegen",
@@ -3223,10 +3225,10 @@
   "verification": {
     "section": "Offizielle Daten",
     "title": "Verein noch nicht bestätigt",
-    "why": "Bis der Verein bestätigt ist, bleiben Teilen und öffentliche Profile aus, und Gegner stehen in den Spielberichten nur mit Nummer. So geht es:",
+    "why": "Bis der Verein bestätigt ist, bleiben Teilen per Link und öffentliche Profile aus, und Gegner stehen in den Spielberichten nur mit Nummer.",
     "way_mail_domain": "Mit einer E-Mail-Adresse des Vereins anmelden.",
     "way_mail_domain_known": "Mit einer E-Mail-Adresse des Vereins anmelden ({domains}).",
-    "way_second_official": "Eine zweite Person (Admin oder Trainer, nicht du) bestätigt hier.",
+    "way_second_official": "Eine zweite Person aus dem Verein (Admin oder Trainer, nicht wer ihn übernommen hat) bestätigt ihn hier.",
     "way_federation": "Mit einer Lizenz des Verbands.",
     "way_operator": "Über den Support.",
     "confirm": "Ich bestätige den Verein",
@@ -3238,7 +3240,12 @@
     "line": "Der Verein ist noch nicht bestätigt: Teilen und öffentliche Profile sind bis dahin aus.",
     "lineLink": "So geht es",
     "federationTitle": "Verband",
-    "notOfficial": "Dein Verein ist nicht mit handball.ch verbunden. Die Verbindung entsteht, wenn du dein Team beim Einstieg über handball.ch suchst und übernimmst."
+    "notOfficial": "Dein Verein ist nicht mit handball.ch verbunden. Die Verbindung entsteht, wenn du dein Team beim Einstieg über handball.ch suchst und übernimmst.",
+    "whyNumbers": "Warum: Die Namen von Spielerinnen und Spielern anderer Teams sind Personendaten. Wir zeigen sie und öffnen Links nach aussen erst, wenn feststeht, dass du wirklich für diesen Verein arbeitest.",
+    "ways": "So wird der Verein bestätigt:",
+    "way_second_official_invite": "Eine zweite Person aus dem Verein (Admin oder Trainer) meldet sich an und bestätigt ihn hier.",
+    "inviteSecond": "Person einladen",
+    "youConfirm": "Du bist Admin oder Trainer im Verein und hast ihn nicht übernommen: Du kannst ihn bestätigen."
   },
   "playerStatus": {
     "injured": "Verletzt",
@@ -4247,7 +4254,13 @@
     "shareText": "Stell eine Sammlung zusammen und schick den Link in den Teamchat. Spieler brauchen dafür kein Konto.",
     "shareAction": "Zu den Szenen",
     "done": "erledigt",
-    "hide": "Ausblenden"
+    "hide": "Ausblenden",
+    "verifyTitle": "Lass den Verein bestätigen",
+    "verifyText": "Teilen per Link geht erst danach. Eine zweite Person aus dem Verein bestätigt ihn, oder du meldest dich mit einer E-Mail-Adresse des Vereins an.",
+    "verifyTextYou": "Teilen per Link geht erst danach. Du kannst ihn bestätigen.",
+    "verifyAction": "So geht es",
+    "progress": "{done} von {total} erledigt",
+    "hideNote": "Zurückholen kannst du sie jederzeit im Konto-Menü oben rechts."
   },
   "onboardingAccount": {
     "account": "Konto",

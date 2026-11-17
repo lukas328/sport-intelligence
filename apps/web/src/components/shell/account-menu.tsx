@@ -2,13 +2,14 @@
 
 import * as M from "@radix-ui/react-dropdown-menu";
 import { useQuery } from "@tanstack/react-query";
-import { Building2, HelpCircle, LogOut, MessageSquare, ShieldAlert, UserRound } from "lucide-react";
+import { Building2, HelpCircle, ListChecks, LogOut, MessageSquare, ShieldAlert, UserRound } from "lucide-react";
 import Link from "next/link";
 import { LANGUAGE_NAMES, setLanguage } from "@/components/language-switch";
 import { locales } from "@/i18n/config";
 import { usePathname, useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
+import { showNextSteps } from "@/components/people/next-steps";
 import { FeedbackDialog } from "@/components/support/support-bar";
 import { helpUrl } from "@/components/support/help-map";
 import { MenuContent, MenuItem, MenuLabel, MenuRoot, MenuSeparator, MenuTrigger } from "@/components/ui/menu";
@@ -35,7 +36,7 @@ export function initials(name: string): string {
 export function AccountMenu({ compact }: { compact?: boolean }) {
   const t = useTranslations("shell");
   const tc = useTranslations("common");
-  const { org, me, teams } = useShell();
+  const { org, me, teams, team } = useShell();
   // «Verein» for the club's admins and the coaches of a team (lib/settings-model.ts)
   const club = org.my_role === "org_admin" || teams.some((x) => coachRights(org.my_role, x.my_role));
   const router = useRouter();
@@ -144,6 +145,19 @@ export function AccountMenu({ compact }: { compact?: boolean }) {
           <MenuItem href={helpUrl(cfg.data?.help_url ?? "https://handball-intelligence.com/hilfe", locale, path)} newTab={t("newTab")} icon={<HelpCircle />} testId="help-link">
             {t("helpItem")}
           </MenuItem>
+          {/* «So geht es weiter» put away on Spiele comes back from here (review R36) */}
+          {team && coachRights(org.my_role, team.my_role) && (
+            <MenuItem
+              icon={<ListChecks />}
+              testId="menu-next-steps"
+              onSelect={() => {
+                showNextSteps(team.id);
+                router.push(`${base}/teams/${team.id}/matches#next-steps`);
+              }}
+            >
+              {t("nextSteps")}
+            </MenuItem>
+          )}
           <MenuItem onSelect={() => setFeedback(true)} icon={<MessageSquare />}>
             {t("feedback")}
           </MenuItem>
