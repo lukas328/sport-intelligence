@@ -45,6 +45,7 @@ from __future__ import annotations
 import itertools
 import math
 import re
+import time
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 from typing import Any, Literal
@@ -562,6 +563,8 @@ class _Stats:
     boxes: int = 0
     probes: int = 0
     found: int = 0
+    skipped: int = 0  # reads left out by the time budget
+    seconds: float = 0.0  # time spent in `add`
 
 
 def board_rect(
@@ -666,7 +669,12 @@ class HallBoardReader:
     `full_every_s`: text detection on the whole frame at most this often while the board is not
     in view; `probe_every_s`: template probes for a locked board that is out of view (0: only at
     the regular reads). Frames may come at any spacing: a frame is read once its index reaches
-    the next one due."""
+    the next one due.
+
+    Cost caps (an own recording without a board in view must not cost hours, staging timeout
+    2026-11-16): while whole-frame searches find nothing, their spacing doubles up to
+    `full_max_s` (a find resets it); and the reader spends at most `budget_share` of the video
+    time so far (CPU seconds per video second), reads beyond it are left out (`stats.skipped`)."""
 
     def __init__(
         self,
@@ -675,12 +683,17 @@ class HallBoardReader:
         every_s: float = 1.0,
         full_every_s: float = 4.0,
         probe_every_s: float = 0.25,
+        full_max_s: float = 60.0,
+        budget_share: float = 0.1,
     ) -> None:
         self.ocr = ocr  # handball_vision.numbers.NumberReader (detect + recognise)
         self.fps = fps
         self.step = max(1, round(every_s * fps))
         self.probe_step = max(1, round(probe_every_s * fps)) if probe_every_s > 0 else self.step
         self.full_ms = round(full_every_s * 1000)
+        self.full_base_ms = self.full_ms
+        self.full_max_ms = max(self.full_ms, round(full_max_s * 1000))
+        self.budget_share = budget_share
         self.samples: list[tuple[int, list[Token]]] = []
         self.calls = 0
         self.stats = _Stats()
@@ -838,6 +851,17 @@ class HallBoardReader:
     def add(self, index: int, frame: NDArray[Any]) -> None:
         if index < self._due:
             return
+        if self.budget_share > 0 and self.stats.seconds > self.budget_share * index / self.fps:
+            self.stats.skipped += 1
+            self._due = index + self.step
+            return
+        t0 = time.perf_counter()
+        try:
+            self._add(index, frame)
+        finally:
+            self.stats.seconds += time.perf_counter() - t0
+
+    def _add(self, index: int, frame: NDArray[Any]) -> None:
         t_ms = round(index * 1000 / self.fps)
         seen = False
         if self._lock is not None:
@@ -880,6 +904,9 @@ class HallBoardReader:
                 self._store(t_ms, tokens)
                 self._make_lock(frame, tokens, r)
                 self._note(r)
+                self.full_ms = self.full_base_ms
+            else:  # nothing on the whole frame: search less often
+                self.full_ms = min(self.full_max_ms, 2 * self.full_ms)
         if seen or self._lock is None:
             self._due = index + self.step
         else:  # locked board out of view: probe again soon
@@ -925,6 +952,8 @@ class HallBoardReader:
                 "boxes": self.stats.boxes,
                 "probes": self.stats.probes,
                 "found": self.stats.found,
+                "skipped": self.stats.skipped,
+                "seconds": round(self.stats.seconds, 1),
             },
             "stacked": self.stacked,
             "goals": goals_from_board(readings, sequence),

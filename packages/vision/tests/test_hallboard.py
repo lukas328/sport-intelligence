@@ -186,10 +186,11 @@ def test_reader_locks_the_board_and_reads_it_cheaply() -> None:
     for k in range(6, 9):  # the camera pans: the board is found elsewhere
         reader.add(k * 10, _scene(500 - 60 * (k - 5), 200 + 10 * (k - 5)))
     assert reader.stats.found == 8
-    blank = _scene(None, 0)  # out of view: probes every 0.5 s, the whole frame every 4 s
+    # out of view: probes every 0.5 s; the whole frame after 4 s, then (nothing found) after 8 s
+    blank = _scene(None, 0)
     for i in range(90, 150):
         reader.add(i, blank)
-    assert reader.stats.full == 1 + 2 and reader.stats.probes == 8 + 12
+    assert reader.stats.full == 1 + 1 and reader.stats.probes == 8 + 12
     reads = reader.readings
     assert len(reads) == 9 and {(r.home, r.away) for r in reads} == {(16, 11), (17, 11)}
     s = reader.summary()
@@ -231,3 +232,33 @@ def test_layout_known_a_misread_clock_does_not_make_the_score_the_clock() -> Non
     # a dashed clock under a bare score casts no vote for "below"
     votes = [(k * 2000, dashed) for k in range(4)]
     assert hb.stacked_vote(votes) is None
+
+
+def test_whole_frame_search_backs_off_without_a_board() -> None:
+    ocr = _FakeOcr()
+    ocr.text = "WERBUNG"  # text, but never a board
+    reader = hb.HallBoardReader(ocr, fps=10, every_s=1.0, full_every_s=4.0, full_max_s=60.0)
+    blank = _scene(None, 0)
+    for i in range(0, 10 * 600, 10):  # ten minutes, one frame a second
+        reader.add(i, blank)
+    # 4 s doubling up to 60 s: 0, 4, 12, 28, 60, 124, then every 60 s: about 13 searches, not 150
+    assert 10 <= reader.stats.full <= 16
+
+
+def test_time_budget_leaves_reads_out() -> None:
+    import time as _time
+
+    class _Slow(_FakeOcr):
+        def detect(self, img: NDArray[Any]) -> list[NDArray[np.float32]]:
+            _time.sleep(0.05)
+            return super().detect(img)
+
+    ocr = _Slow()
+    ocr.text = "WERBUNG"
+    # budget 1 % of the video time: 50 ms per search allows one search per 5 s of video
+    reader = hb.HallBoardReader(ocr, fps=10, full_every_s=1.0, full_max_s=1.0, budget_share=0.01)
+    blank = _scene(None, 0)
+    for i in range(0, 10 * 60, 10):  # one minute
+        reader.add(i, blank)
+    assert reader.stats.skipped > 0
+    assert reader.stats.seconds <= 0.01 * 60 + 0.1
