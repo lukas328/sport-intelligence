@@ -12,6 +12,7 @@ import { useConfirm } from "@/components/ui/confirm";
 import { control } from "@/components/ui/field";
 import { api } from "@/lib/client";
 import { errorKey, type ErrorKey } from "@/lib/errors";
+import { useEarlyFiles } from "@/lib/early-files";
 import { formatBytes } from "@/lib/format";
 import { xhrPutPart } from "@/lib/upload";
 import { cn } from "@/lib/utils";
@@ -50,6 +51,8 @@ export function AttachmentsPanel({ orgId, matchId, staff, hasReport, linked }: {
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState<number | null>(null);
   const [error, setError] = useState<ErrorKey | "type" | "size" | "upload" | "many" | null>(null);
+  // a file chosen while the page was still loading: the input holds it, show it
+  useEarlyFiles(fileRef, (files) => setFile(files[0] ?? null));
   // the API's refusals in the words of this panel
   const said = (problem: unknown) => {
     const code = problemCode(problem);

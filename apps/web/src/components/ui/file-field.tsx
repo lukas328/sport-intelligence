@@ -1,6 +1,7 @@
 "use client";
 
-import { useId, useState, type InputHTMLAttributes } from "react";
+import { useId, useRef, useState, type InputHTMLAttributes } from "react";
+import { useEarlyFiles } from "@/lib/early-files";
 import { cn } from "@/lib/utils";
 
 /** A file field in the app's own words (the browser's "Choose File / No file chosen" stays in the
@@ -17,11 +18,15 @@ export function FileField({
 }: Omit<InputHTMLAttributes<HTMLInputElement>, "type"> & { label?: string; hint?: string; button: string; empty: string }) {
   const id = useId();
   const [file, setFile] = useState<string | null>(null);
+  const ref = useRef<HTMLInputElement>(null);
+  // chosen while the page was still loading: the form sends it anyway, so name it
+  useEarlyFiles(ref, (files) => setFile(files[0]?.name ?? null));
   return (
     <div className={cn("space-y-1", className)}>
       {label && <p className="text-sm font-semibold">{label}</p>}
       <div className="flex flex-wrap items-center gap-3">
         <input
+          ref={ref}
           id={id}
           type="file"
           className="peer sr-only"

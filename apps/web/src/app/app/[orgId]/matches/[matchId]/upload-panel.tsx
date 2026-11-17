@@ -5,6 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { track } from "@/lib/analytics";
 import { useLocale, useTranslations } from "next-intl";
 import { looksLikeVideo } from "@/lib/video-file";
+import { useEarlyFiles } from "@/lib/early-files";
 import { sitePage, useSiteConfig } from "@/lib/site-config";
 import { useEffect, useRef, useState, type DragEvent, type FormEvent } from "react";
 import { KitFields } from "@/components/domain/kit-fields";
@@ -136,6 +137,12 @@ export function UploadPanel({
     window.addEventListener("online", go, { once: true });
     return () => window.removeEventListener("online", go);
   }, [state]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // a video chosen while the page was still loading (slow phone): the input holds it, start now
+  useEarlyFiles(input, (files) => {
+    choose(files);
+    if (input.current) input.current.value = "";
+  });
 
   const [queue, setQueue] = useState<Item[]>([]);
   const mark = (file: File, patch: Partial<Item>) => setQueue((q) => q.map((it) => (it.file === file ? { ...it, ...patch } : it)));
