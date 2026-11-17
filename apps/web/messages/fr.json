@@ -2197,7 +2197,8 @@
     "status_rendering": "Rendu en cours…",
     "status_failed": "La création a échoué.",
     "status_blocked_consent": "Impossible faute de consentements.",
-    "newReel": "Créer de nouveaux temps forts"
+    "newReel": "Créer de nouveaux temps forts",
+    "needScenes": "Les temps forts se font à partir de scènes : dès que des buts sont confirmés dans la vidéo de ce match, tu les assembles ici."
   },
   "parts": {
     "sideChange": "Changement de côté avant cette partie :",
@@ -3695,7 +3696,11 @@
     "rowFailedWhy": "L'analyse n'a pas fonctionné : {reason}",
     "zonesLine": "{m7, plural, one {1 but} other {# buts}} à 7 m{rest, plural, =0 {.} one {, 1 autre sans lieu de tir.} other {, # autres sans lieu de tir.}}",
     "flightCut": "Suite des buts jusqu’à la {m}e minute seulement",
-    "demoNoVideo": "Le match de démo montre ce que l’analyse tire d’un match : les buts avec leurs trajets et leurs positions. Il n’a pas de vidéo ; la tienne, tu la télécharges dans un de tes matchs."
+    "demoNoVideo": "Le match de démo montre ce que l’analyse tire d’un match : les buts avec leurs trajets et leurs positions. Il n’a pas de vidéo ; la tienne, tu la télécharges dans un de tes matchs.",
+    "todayTitle": "Ce que tu peux faire dès aujourd’hui",
+    "todayNote": "d’après la feuille de match",
+    "todayText": "La carte du match en image pour le chat de l’équipe et le résumé à copier, déjà sans vidéo.",
+    "todayCard": "Carte du match pour le chat"
   },
   "check": {
     "top": "Vérifier · {opponent}",
@@ -4274,7 +4279,8 @@
     "verifyTextYou": "Le partage par lien n'est possible qu'ensuite. Tu peux le confirmer.",
     "verifyAction": "Comment faire",
     "progress": "{done} sur {total} faits",
-    "hideNote": "Tu peux les retrouver à tout moment dans le menu du compte en haut à droite."
+    "hideNote": "Tu peux les retrouver à tout moment dans le menu du compte en haut à droite.",
+    "shareLater": "Possible après la première vidéo."
   },
   "onboardingAccount": {
     "account": "Compte",

@@ -2197,7 +2197,8 @@
     "status_rendering": "Wird gerendert…",
     "status_failed": "Erstellen fehlgeschlagen.",
     "status_blocked_consent": "Wegen fehlender Einwilligungen nicht möglich.",
-    "newReel": "Neue Highlights erstellen"
+    "newReel": "Neue Highlights erstellen",
+    "needScenes": "Highlights entstehen aus Szenen: Sobald im Video dieses Spiels Tore bestätigt sind, stellst du sie hier zusammen."
   },
   "parts": {
     "sideChange": "Seitenwechsel vor diesem Teil:",
@@ -3695,7 +3696,11 @@
     "rowFailedWhy": "Analyse nicht geklappt: {reason}",
     "zonesLine": "{m7, plural, one {1 Tor} other {# Tore}} von 7 m{rest, plural, =0 {.} one {, 1 weiteres ohne Wurfort.} other {, # weitere ohne Wurfort.}}",
     "flightCut": "Torfolge nur bis {m}. Minute",
-    "demoNoVideo": "Das Demo-Spiel zeigt, was die Analyse aus einem Spiel macht: die Tore mit ihren Wegen und Positionen. Ein Video gehört nicht dazu; dein eigenes lädst du in einem deiner Spiele hoch."
+    "demoNoVideo": "Das Demo-Spiel zeigt, was die Analyse aus einem Spiel macht: die Tore mit ihren Wegen und Positionen. Ein Video gehört nicht dazu; dein eigenes lädst du in einem deiner Spiele hoch.",
+    "todayTitle": "Das kannst du heute schon",
+    "todayNote": "aus dem Spielbericht",
+    "todayText": "Die Spielkarte als Bild für den Teamchat und den Kurzbericht zum Kopieren, noch ohne Video.",
+    "todayCard": "Spielkarte für den Teamchat"
   },
   "check": {
     "top": "Prüfen · {opponent}",
@@ -4274,7 +4279,8 @@
     "verifyTextYou": "Teilen per Link geht erst danach. Du kannst ihn bestätigen.",
     "verifyAction": "So geht es",
     "progress": "{done} von {total} erledigt",
-    "hideNote": "Zurückholen kannst du sie jederzeit im Konto-Menü oben rechts."
+    "hideNote": "Zurückholen kannst du sie jederzeit im Konto-Menü oben rechts.",
+    "shareLater": "Geht nach dem ersten Video."
   },
   "onboardingAccount": {
     "account": "Konto",

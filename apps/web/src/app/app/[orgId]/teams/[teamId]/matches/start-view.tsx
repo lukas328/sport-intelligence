@@ -75,7 +75,7 @@ export function StartView({
           <ul className="m-0 list-none p-0" data-testid="match-list">
             {played.map((m) => (
               <li key={m.id}>
-                <GameRow orgId={orgId} m={m} canWrite={canWrite} />
+                <GameRow orgId={orgId} m={m} canWrite={canWrite} inHero={m.id === last?.id} />
               </li>
             ))}
           </ul>
@@ -351,7 +351,7 @@ function RowSummary({ orgId, m }: { orgId: string; m: Match }) {
   return <>{t("rowSummary", { things: things.length, scenes, first: things[0] ? text(things[0]) : "none" })}</>;
 }
 
-function GameRow({ orgId, m, canWrite }: { orgId: string; m: Match; canWrite: boolean }) {
+function GameRow({ orgId, m, canWrite, inHero = false }: { orgId: string; m: Match; canWrite: boolean; inHero?: boolean }) {
   const t = useTranslations("anlauf");
   const tm = useTranslations("matches");
   const format = useFormatter();
@@ -391,7 +391,8 @@ function GameRow({ orgId, m, canWrite }: { orgId: string; m: Match; canWrite: bo
           ) : !m.has_video ? (
             <>
               {t("reportOnly")}
-              {canWrite && m.score_own != null && (
+              {/* the match of the head has its upload there as the one main action (review R32) */}
+              {canWrite && m.score_own != null && !inHero && (
                 <>
                   {" · "}
                   <Link href={`${base}?tab=video`} className={cn(linkClass, "inline-flex min-h-11 items-center")}>

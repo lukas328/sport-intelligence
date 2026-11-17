@@ -101,7 +101,9 @@ export function NextSteps({ hasVideo }: { hasVideo: boolean }) {
     ...(v && v.verification !== "none"
       ? [{ key: "verify" as const, done: v.verification === "verified", text: v.my_part === "can_confirm" ? ("verifyTextYou" as const) : undefined, action: <Link href={`/app/${org.id}/club/federation`} className={act} data-testid="next-verify">{t("verifyAction")}</Link> }]
       : []),
-    { key: "share", done: Boolean(shared.data), action: <Link href={hasVideo ? `${base}/scenes` : `${base}/collections`} className={act}>{t("shareAction")}</Link> },
+    // sharing needs scenes: before the first video the step says so instead of a link that leads
+    // to an empty page (review R34)
+    { key: "share", done: Boolean(shared.data), action: hasVideo ? <Link href={`${base}/scenes`} className={act}>{t("shareAction")}</Link> : <span className="text-[15px] text-ink-2">{t("shareLater")}</span> },
   ] as { key: "video" | "coach" | "verify" | "share"; done: boolean; text?: "verifyTextYou"; action: ReactNode }[];
   const doneCount = steps.filter((s) => s.done).length;
   if (doneCount === steps.length && !asked) return null;

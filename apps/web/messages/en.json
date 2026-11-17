@@ -2197,7 +2197,8 @@
     "status_rendering": "Rendering…",
     "status_failed": "Creation failed.",
     "status_blocked_consent": "Not possible because consents are missing.",
-    "newReel": "Create new highlights"
+    "newReel": "Create new highlights",
+    "needScenes": "Highlights are made from scenes: once goals are confirmed in this match’s video, you put them together here."
   },
   "parts": {
     "sideChange": "Teams changed ends before this part:",
@@ -3695,7 +3696,11 @@
     "rowFailedWhy": "Analysis did not work: {reason}",
     "zonesLine": "{m7, plural, one {1 goal} other {# goals}} from 7 m{rest, plural, =0 {.} one {, 1 more without a shot spot.} other {, # more without a shot spot.}}",
     "flightCut": "Goal sequence only up to minute {m}",
-    "demoNoVideo": "The demo match shows what the analysis makes of a match: the goals with their runs and positions. It has no video; you upload your own in one of your matches."
+    "demoNoVideo": "The demo match shows what the analysis makes of a match: the goals with their runs and positions. It has no video; you upload your own in one of your matches.",
+    "todayTitle": "What you can do today",
+    "todayNote": "from the match report",
+    "todayText": "The match card as a picture for the team chat and the short report to copy, even without a video.",
+    "todayCard": "Match card for the team chat"
   },
   "check": {
     "top": "Check · {opponent}",
@@ -4274,7 +4279,8 @@
     "verifyTextYou": "Sharing by link works only afterwards. You can confirm it.",
     "verifyAction": "How it works",
     "progress": "{done} of {total} done",
-    "hideNote": "You can bring them back any time from the account menu at the top right."
+    "hideNote": "You can bring them back any time from the account menu at the top right.",
+    "shareLater": "Possible after the first video."
   },
   "onboardingAccount": {
     "account": "Account",

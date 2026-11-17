@@ -443,9 +443,12 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
             <Link href={`/app/${orgId}/matches/${last.match_id}`} className={linkClass}>
               {tv("lastResult")}: {last.score_own}:{last.score_opponent} {last.opponent}
             </Link>
-            <Link href={`${base}/scenes?type=shot&outcome=goal&side=own`} className={buttonClass("secondary")}>
-              {tv("goalsAsClips")}
-            </Link>
+            {/* scenes need a match with video (review R34) */}
+            {withVideo.length > 0 && (
+              <Link href={`${base}/scenes?type=shot&outcome=goal&side=own`} className={buttonClass("secondary")}>
+                {tv("goalsAsClips")}
+              </Link>
+            )}
             {tools}
           </p>
           <SeasonThemes orgId={orgId} teamId={teamId} seasonId={seasonId} names={names} />
