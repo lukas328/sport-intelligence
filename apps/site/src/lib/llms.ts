@@ -44,6 +44,8 @@ export function llmsTxt(): string {
     "",
     `Stand: ${SITE_UPDATED}. Sprachen: Deutsch (de-CH), Französisch (fr-CH), Englisch. Für wen: ${get("Für wen")}`,
     "",
+    `Team und Spielplan: ${get("Team und Spielplan")}`,
+    "",
     `Wer dahinter steht: ${de.us.homeText}`,
     "",
     `## ${de.honest.canTitle}`,

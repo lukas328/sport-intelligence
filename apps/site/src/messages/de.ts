@@ -36,6 +36,7 @@ const de = {
     imprint: "Impressum",
     status: "Systemstatus",
     note: "Diese Website setzt keine Cookies und lädt nichts von anderen Anbietern.",
+    made: "Entwickelt in der Schweiz",
   },
   cta: {
     start: "Kostenlos starten",
@@ -185,9 +186,8 @@ const de = {
     trust: [
       { title: "Es gehört deinem Verein", text: "Sehen kann es nur das Trainerteam, ausser du teilst einen Link." },
       { title: "Einwilligung per Link", text: "Jede Spielerin und jeder Spieler sagt selbst ja oder nein. Bis 16 entscheiden die Eltern." },
-      { title: "Schweizer Datenschutz", text: "Keine Werbung, kein Datenverkauf. App und Datenbank in der Schweiz, Videos in der EU." },
+      { title: "DSGVO und Schweizer DSG", text: "Keine Werbung, kein Datenverkauf. App und Datenbank laufen in der Schweiz, die Videos liegen in der EU." },
     ],
-    trustSwiss: "Aus der Schweiz, mit den Daten von handball.ch: Dein Team, Spielplan und Resultate sind schon da.",
     trustLink: "Über uns",
     priceTitle: "Gratis starten, dann ab CHF {price} pro Team.",
     priceUnit: "Tage gratis, alles drin",
@@ -195,7 +195,8 @@ const de = {
     teamLabel: "Wie heisst dein Team?",
     teamButton: "Zeigen",
     teamExample: "Der Vereinsname oder der Ort reicht.",
-    teamAfter: "Nach «Zeigen» siehst du dein Team mit Spielplan und Resultaten aus den Verbandsdaten, ohne Konto.",
+    teamAfter: "Für Teams aus der Schweiz übernehmen wir Spielplan und Resultate automatisch. Alle anderen legen ihr Team in einer Minute von Hand an.",
+    teamManual: "Team von Hand anlegen",
     finalTitle: "Probier es mit deinem nächsten Spiel.",
     film: { label: "Kurzer Film zum Beispielspiel: Ein Spielvideo läuft, die Analyse setzt die {of} Gegentore aufs halbe Feld, {n} davon kamen über aussen rechts. Daraus werden drei Dinge fürs nächste Training.", video: "Dein Spiel", status: ["Video", "Analyse", "Drei Dinge"], replay: "Nochmals abspielen", count: "{n} von {of} über aussen rechts", wait: ["Video wird angeschaut", "Analyse läuft"] },
   },
@@ -371,7 +372,7 @@ const de = {
     },
     trial: "{days} Tage gratis",
     choose: "Kostenlos starten",
-    annual: "Jahresrechnung per QR-Rechnung: {months} Monatsbeiträge, zahlbar innert 30 Tagen.",
+    annual: "Jahresrechnung per QR-Rechnung: {months} Monatsbeiträge, zahlbar innerhalb von 30 Tagen.",
     currency: "Alle Preise in Schweizer Franken.",
     faqTitle: "Fragen zu Preis und Abo",
     faq: [
@@ -395,7 +396,7 @@ const de = {
       { q: "Wo stelle ich die Kamera hin?", a: "Auf Höhe der Mittellinie, so hoch wie möglich, ab etwa 3 Metern: Tribüne, Galerie oder ein hohes Stativ. Mit dem Weitwinkel (0,5×) sind beide Tore und Torräume im Bild. Fest ist am besten; schwenken geht auch, dann findet die Analyse das Feld schwerer.", hi: "Die Analyse findet das Feld selbst und folgt der Kamera. Ob es passt, bestätigst du beim Prüfen mit einmal Tippen." },
       { q: "Welche Datei kann ich hochladen?", a: "Die Videodatei, so wie Handy oder Kamera sie speichern. {upload} Ein direkter Link auf eine Videodatei geht auch, zum Beispiel der Download-Link von Veo oder Spiideo.", hi: "Bricht die Verbindung ab, geht der Upload beim nächsten Mal dort weiter." },
       { q: "Wie lange dauert die Analyse?", a: "Sie läuft im Hintergrund, du musst nicht dabeibleiben.", hi: "Oben in der App siehst du, wie weit sie ist und wie lange es etwa noch dauert, die Glocke meldet, wenn sie fertig ist. Danach beantwortest du die paar Fragen, wo sie unsicher ist." },
-      { q: "Muss ich etwas von Hand eintragen?", a: "Eintippen nicht. Wo die Analyse unsicher ist, fragt sie dich: höchstens zehn Fragen pro Spiel, meist in ein paar Minuten beantwortet.", hi: "Jede Frage beantwortest du mit einmal Tippen, und du kannst sie auch alle überspringen. Gibt es einen Spielbericht von handball.ch, übernimmt die App Tore und Torschützen daraus. Den Wurfort tippst du an, wenn du magst; Paraden und Fehlwürfe markierst du nur, wenn du sie willst." },
+      { q: "Muss ich etwas von Hand eintragen?", a: "Eintippen nicht. Wo die Analyse unsicher ist, fragt sie dich: höchstens zehn Fragen pro Spiel, meist in ein paar Minuten beantwortet.", hi: "Jede Frage beantwortest du mit einmal Tippen, und du kannst sie auch alle überspringen. Gibt es einen offiziellen Spielbericht, übernimmt die App Tore und Torschützen daraus: bei Teams aus der Schweiz von selbst, sonst über den Link zum Spielbericht. Den Wurfort tippst du an, wenn du magst; Paraden und Fehlwürfe markierst du nur, wenn du sie willst." },
       { q: "Wie teile ich Szenen mit dem Team?", a: "Stell eine Sammlung zusammen und teil sie per Link im Teamchat, ohne Konto für die Spieler.", hi: "Jede Szene kommt mit einmal Tippen in eine Sammlung, auf Wunsch mit einer Notiz. Im Chat erscheint eine Vorschau mit Titel; der Link zeigt Rückennummern statt Namen, läuft ab und lässt sich jederzeit sperren." },
       { q: "Wie sehe ich, woher die Gegentore kommen?", a: "Zähl sie nach Wurfposition: Aussen, Rückraum, Kreis, Siebenmeter, Gegenstoss. Eine Häufung zeigt dir, wo du zuerst hinschaust; was dahinter steckt, zeigt erst die Szene.", hi: "Die App zählt für dich, aus dem Wurfort, den du nach einem Tor antippst, wenn du magst. Bei genug Toren siehst du drei Dinge zum Mitnehmen mit den Szenen dazu, und die Saison zeigt, was sich wiederholt." },
       { q: "Wie zeige ich Szenen im Training?", a: "Kurz: zehn Minuten, ein Thema, drei bis fünf Szenen, zuerst ein gutes Beispiel.", hi: "Eine Sammlung spielst du am Bildschirm oder Beamer ab, Szene für Szene, mit deinen Notizen dazwischen." },
@@ -448,7 +449,7 @@ const de = {
       },
       {
         title: "Wo die Daten liegen",
-        text: "Die App und ihre Datenbank laufen auf Servern in der Schweiz, die Videos liegen in einem Speicher in der EU. Es gilt das Schweizer Datenschutzgesetz und, wo nötig, die DSGVO.",
+        text: "Die App und ihre Datenbank laufen auf Servern in der Schweiz, die Videos liegen in einem Speicher in der EU. Wir halten uns an die DSGVO und das Schweizer Datenschutzgesetz (DSG). Für die EU gilt die Schweiz als Land mit angemessenem Datenschutz.",
       },
       {
         title: "Wie lange",
@@ -473,7 +474,7 @@ const de = {
     head: "Frag uns. Wir schreiben zurück.",
     contactTitle: "Kontakt",
     email: "E-Mail",
-    reply: "Wir antworten in der Regel innert eines Arbeitstags.",
+    reply: "Wir antworten in der Regel innerhalb eines Arbeitstags.",
     inApp: "Wenn du angemeldet bist, geht es am schnellsten über «Hilfe» in der App.",
     status: "Zustand der Dienste",
     principlesTitle: "Woran wir uns halten",
@@ -504,7 +505,7 @@ const de = {
     pricing: { title: "Preise: gratis starten, dann ab CHF 39", description: "30 Tage gratis mit allem, auch der Analyse. Danach Team für CHF 39 im Monat oder der Gratis-Plan; Verein für mehrere Teams. Jahresrechnung per QR-Rechnung." },
     faq: { title: "Fragen und Antworten", description: "Handy oder Kamera? Erkennt die Analyse die Tore selbst? Wie teile ich Szenen? Die häufigsten Fragen von Trainerinnen und Trainern, kurz beantwortet." },
     data: { title: "Video im Verein: Daten und Einwilligung", description: "Für Eltern und Spieler: wer das Video sieht, wie die Einwilligung per Link geht, was für Kinder gilt, wo die Daten liegen und wann sie gelöscht werden." },
-    about: { title: "Kontakt", description: "Schreib uns an die Support-Adresse, wir antworten in der Regel innert eines Arbeitstags." },
+    about: { title: "Kontakt", description: "Schreib uns an die Support-Adresse, wir antworten in der Regel innerhalb eines Arbeitstags." },
     blog: { title: "Blog: aus der Werkstatt", description: "Beiträge zum Filmen mit Handy oder Kamera und dazu, warum die Analyse dich fragt, wo sie unsicher ist." },
     terms: { title: "AGB (Entwurf)", description: "Allgemeine Geschäftsbedingungen von Handball Intelligence. Entwurf, noch nicht rechtlich geprüft." },
     privacy: { title: "Datenschutzerklärung (Entwurf)", description: "Wie Handball Intelligence Personendaten bearbeitet. Entwurf, noch nicht rechtlich geprüft." },
@@ -545,16 +546,17 @@ const de = {
     tableCaption: "Handball Intelligence: die wichtigsten Angaben",
     rows: [
       { k: "Was es ist", v: "Eine Web-App zur Videoanalyse von Handballspielen. Sie läuft im Browser, am Handy und am Computer." },
-      { k: "Für wen", v: "Trainerinnen und Trainer im Amateurhandball, Junioren und Aktive; zuerst in der Schweiz, dort von der 1. Liga abwärts. Spielerinnen, Spieler und Eltern brauchen kein Konto." },
+      { k: "Für wen", v: "Trainerinnen und Trainer im Amateur- und Nachwuchshandball, für Vereine in ganz Europa. Spielerinnen, Spieler und Eltern brauchen kein Konto." },
+      { k: "Team und Spielplan", v: "Für Teams aus der Schweiz übernimmt die App Spielplan, Resultate, Kader und Tabelle automatisch von handball.ch. Alle anderen legen ihr Team in einer Minute von Hand an; Video, Analyse und Szenen funktionieren für alle gleich." },
       { k: "Was du brauchst", v: "Ein Handy oder eine Kamera, die in Full HD (1080p) filmt, einen erhöhten Platz an der Mittellinie und {fileNeed}." },
       { k: "Wie es abläuft", v: "Filmen, hochladen, warten, bis die App «fertig» meldet, dann prüfen: Wo die Analyse unsicher ist, fragt sie dich, etwa ob das Spielfeld passt oder ob in einem Moment ein Tor gefallen ist. Höchstens zehn Fragen pro Spiel, meist in ein paar Minuten beantwortet; du kannst sie auch alle überspringen. Steht die Kamera in derselben Halle wieder gleich, übernimmt die Analyse das Spielfeld fürs nächste Video. Den Wurfort eines Tors tippst du an, wenn du magst." },
-      { k: "Mit Spielbericht", v: "Gibt es einen Spielbericht, zum Beispiel von handball.ch, kommen Tore und Torschützen daraus; die App rechnet ihre Zeit im Video über den Anwurf, den du beim Prüfen bestätigst, und fragt solche Tore nicht noch einmal." },
+      { k: "Mit Spielbericht", v: "Gibt es einen offiziellen Spielbericht, kommen Tore und Torschützen daraus: für Teams aus der Schweiz von selbst, sonst über den Link zum Spielbericht (handball.ch, DHB, nuLiga oder HLA). Die App rechnet ihre Zeit im Video über den Anwurf, den du beim Prüfen bestätigst, und fragt solche Tore nicht noch einmal." },
       { k: "Dauer der Analyse", v: "Die Analyse läuft im Hintergrund. Die App zeigt dir, wie weit sie ist und wie lange es etwa noch dauert, und meldet sich, wenn sie fertig ist." },
       { k: "Was du bekommst", v: "Resultat und Spielverlauf, jedes bestätigte Tor als Szene im Video, die Positionen von oben, bei genug Toren mit Wurfort drei Dinge zum Mitnehmen und einen Link fürs Team." },
       { k: "Was du machst", v: "Ein paar Fragen beantworten, wo die Analyse unsicher ist, das Spielfeld mit einem Tippen bestätigen, den Wurfort antippen, wenn du magst, Paraden und Fehlwürfe markieren, wenn du sie willst, und entscheiden, welche Szenen das Team sieht." },
       { k: "Andere Wege", v: "Kameras wie Veo oder Pixellot filmen mit eigener Kamera und meist mit Abo. Handball Intelligence braucht keine eigene Kamera: Ein Handy oder eine vorhandene Kamera reicht, und es wertet Videos aus, auch über einen Download-Link von Veo. Ob Veo bei Handball Ereignisse automatisch erkennt, gibt Veo nicht an (Stand 13. November 2026). Mehr im Ratgeber «Welche Wege zur Videoanalyse gibt es für ein Handballteam?»." },
       { k: "Preise", v: "Gratis ohne automatische Analyse. Team: CHF {team} im Monat. Verein: CHF {club} im Monat für bis zu {clubTeams} Teams. 30 Tage gratis." },
-      { k: "Datenstandort", v: "App und Datenbank in der Schweiz, Videos in einem Speicher in der EU." },
+      { k: "Datenstandort", v: "App und Datenbank in der Schweiz, Videos in einem Speicher in der EU. Datenschutz nach DSGVO und Schweizer DSG." },
       { k: "Einwilligung", v: "Per Link im Teamchat, ohne Konto, für jeden Zweck einzeln, jederzeit änderbar. Das Gesetz kennt keine feste Grenze, es kommt auf die Urteilsfähigkeit an. In der App entscheiden bis 16 die Eltern, weil das einfach und vorsichtig ist." },
       { k: "Sprachen", v: "Deutsch, Französisch und Englisch." },
       { k: "Kontakt", v: "{email}" },
@@ -580,7 +582,7 @@ const de = {
       {
         title: "Für wen wir es bauen",
         text: [
-          "Für Trainerinnen und Trainer im Amateurhandball, Junioren und Aktive, von der 1. Liga abwärts, im Ehrenamt neben Beruf und Familie. Darum wenige Schritte, grosse Knöpfe und drei Dinge zum Mitnehmen statt hundert Zahlen.",
+          "Für Trainerinnen und Trainer im Amateur- und Nachwuchshandball, in Vereinen in ganz Europa, im Ehrenamt neben Beruf und Familie. Darum wenige Schritte, grosse Knöpfe und drei Dinge zum Mitnehmen statt hundert Zahlen.",
         ],
       },
       {
@@ -596,9 +598,10 @@ const de = {
         ],
       },
       {
-        title: "Aus der Schweiz",
+        title: "Entwickelt in der Schweiz",
         text: [
-          "Zuerst für den Schweizer Vereinshandball, auf Deutsch, Französisch und Englisch, mit den Daten von handball.ch: Dein Team findest du über den Namen, Spielplan und Resultate sind schon da.",
+          "Wir entwickeln Handball Intelligence in der Schweiz, für Vereine in ganz Europa. Die Daten liegen in der Schweiz und der EU, der Datenschutz richtet sich nach der DSGVO und dem Schweizer DSG. Die App gibt es auf Deutsch, Französisch und Englisch.",
+          "Für Teams aus der Schweiz übernimmt die App Spielplan und Resultate automatisch von handball.ch. Alle anderen legen ihr Team in einer Minute von Hand an; Video, Analyse und Szenen funktionieren für alle gleich.",
         ],
       },
       {
@@ -613,7 +616,7 @@ const de = {
     contactTitle: "Schreib uns",
     contact: "Fragen, Kritik oder ein Spiel, bei dem die Analyse nicht weiterkommt: Schreib uns an {email}.",
     homeTitle: "Wer dahinter steht",
-    homeText: "Wir kommen aus der Schweiz und bauen Videoanalyse für Trainerinnen und Trainer, die das im Ehrenamt machen. Die Analyse schlägt vor und fragt nur, wo sie unsicher ist, und das Video gehört deinem Verein.",
+    homeText: "Wir bauen Videoanalyse für Trainerinnen und Trainer im Vereinshandball, die das im Ehrenamt machen. Die Analyse schlägt vor und fragt nur, wo sie unsicher ist, und das Video gehört deinem Verein.",
     homeLink: "Über uns",
   },
   tools: {
@@ -653,7 +656,7 @@ const de = {
       contact: "Widerruf und Fragen an: [Name, Telefon oder E-Mail des Trainerteams]",
       team: "Team / Verein",
       withdraw: "Widerrufen: Eine kurze Nachricht an das Trainerteam genügt, mündlich oder schriftlich. Ab dann zeigt es keine neuen Szenen mit dir, und Szenen mit dir werden nicht mehr geteilt.",
-      more: "Was in der Schweiz beim Filmen im Verein gilt",
+      more: "Was beim Filmen im Verein gilt, in der Schweiz und in Deutschland",
     },
     tally: {
       title: "Strichliste für die Spielauswertung",
@@ -681,7 +684,7 @@ const de = {
         { title: "Einpacken", items: ["Handy mit Weitwinkel oder Kamera, geladen", "Stativ oder Klemme", "Powerbank und langes Kabel", "Mindestens 10 GB frei", "Aushang für die Hallentür"] },
         { title: "In der Halle", items: ["20 Minuten vor dem Anpfiff da sein", "Hallenwart oder Heimteam fragen, wo du filmen darfst", "Gegner und Schiedsrichter informieren, Aushang aufhängen", "Platz an der Mittellinie, so hoch wie möglich, nicht im Fluchtweg"] },
         { title: "Einstellen", items: ["Weitwinkel (0,5× oder «Ultraweit»)", "1080p, wenn möglich 50 Bilder pro Sekunde", "Flugmodus an, Bildschirmsperre aus", "Quer, beide Tore und Torräume ganz im Bild", "Am besten fest, nicht zoomen"] },
-        { title: "Während dem Spiel", items: ["Aufnahme starten, wenn die Teams einlaufen", "Handy oder Kamera möglichst nicht mehr anfassen", "{pauseShort}"] },
+        { title: "Während des Spiels", items: ["Aufnahme starten, wenn die Teams einlaufen", "Handy oder Kamera möglichst nicht mehr anfassen", "{pauseShort}"] },
         { title: "Danach", items: ["Aufnahme stoppen, Datei prüfen", "Zu Hause im WLAN hochladen", "Aushang abnehmen"] },
       ],
       more: "Ratgeber: Handballspiel filmen mit Handy oder Kamera",

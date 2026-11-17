@@ -62,6 +62,30 @@ test("entry: from the website's question to Spiele, without a password", async (
   await expect(page.getByRole("main")).toBeVisible();
 });
 
+// Europe (L14): the federation data covers teams in Switzerland only. The search says so before
+// any search, and the way by hand is there at once; the website's «Team von Hand anlegen» opens it.
+test("entry: says what the search covers, the way by hand without a search first", async ({ page }, info) => {
+  test.skip(info.project.name !== "mobile", "the entry is for the phone");
+  await federation(page);
+  await page.goto("/einstieg");
+  await expect(page.getByTestId("entry-by-hand")).toContainText("Für Teams aus der Schweiz übernehmen wir Spielplan und Resultate automatisch.");
+  await page.getByTestId("entry-by-name").click();
+  await expect(page.getByLabel("Teamname")).toBeFocused();
+
+  // a team from elsewhere: nothing found, the same sentence and the same way
+  await page.goto("/einstieg?q=TSV%20Nordhafen");
+  await expect(page.getByText("Kein Team gefunden für «TSV Nordhafen».")).toBeVisible();
+  await expect(page.getByTestId("entry-by-name")).toHaveText("Team von Hand anlegen");
+
+  // from the website: straight to the team name
+  await page.goto("/einstieg?step=name&farbe=rot");
+  await expect(page.getByLabel("Teamname")).toBeVisible();
+  await page.getByLabel("Teamname").fill("TSV Nordhafen");
+  await page.getByRole("button", { name: "Weiter" }).click();
+  await expect(page.getByTestId("entry-mail")).toBeVisible();
+  await expectAccessible(page);
+});
+
 // UX test round 2, N03: after tapping the team there is a sentence and the head at once; a slow
 // federation gets an honest state with «Trotzdem speichern».
 test("entry: the wait for the team says what happens, slow federation offers saving anyway", async ({ page }, info) => {
