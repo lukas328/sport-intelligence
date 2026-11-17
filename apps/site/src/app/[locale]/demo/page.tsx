@@ -98,7 +98,7 @@ export default async function Demo({ params }: Props) {
           <div className="mt-6">
             <DemoCamera
               scene={v.scene}
-              text={{ label: m.camera.label, pause: m.camera.pause, play: m.camera.play, notFound: m.camera.notFound, noBall: m.camera.noBall, caption: v.scene.label }}
+              text={{ label: m.camera.label, pause: m.camera.pause, play: m.camera.play, notFound: m.camera.notFound, noBall: m.camera.noBall, caption: v.scene.label, ballLine: m.camera.ballLine }}
               legend={{ own: v.own, opp: v.opp, ref: m.camera.legendRef, number: m.camera.legendNumber, ball: m.camera.legendBall }}
             />
           </div>

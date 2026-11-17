@@ -1,5 +1,6 @@
 "use client";
 
+import { checkMinutes } from "@/lib/shot-spot";
 import { ShareButton, shareMatchCard } from "@/components/sharing/share-button";
 import type { Schemas } from "@handball/api-client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -679,7 +680,14 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
               not an empty tab (real-video test, second round) */}
           {staff && graphics.data?.analysis === "ready" && !graphics.data.goals.some((x) => x.has_video) && graphics.data.checks.length > 0 && (
             <section className="max-w-[60ch] space-y-3 border-l-4 border-attn pl-4" data-testid="game-next-step">
-              <p className="m-0 text-[19px] font-bold">{ta("nextStepChecks", { n: graphics.data.checks.length })}</p>
+              <p className="m-0 text-[19px] font-bold">{ta("nextStepChecks", {
+                  n: graphics.data.checks.length,
+                  // the sentence needs both numbers: without minutes it showed its key (staging, 17.11.)
+                  minutes: checkMinutes(
+                    graphics.data.checks.filter((c) => c.kind === "goal").length,
+                    graphics.data.checks.filter((c) => c.kind !== "goal").length,
+                  ),
+                })}</p>
               <Link href={`${base}/check`} className={buttonClass("primary")} data-testid="game-step">
                 {ta("answerChecks", { n: graphics.data.checks.length })}
               </Link>

@@ -6,8 +6,9 @@ import { loginUrl } from "@/lib/site";
 
 /**
  * The top bar: the two-coloured word mark (outside the app, never on a club colour), five
- * destinations, «Anmelden» and «Kostenlos starten». On the phone the destinations sit behind
- * «Menü» (a word, not a symbol alone); a <details> element needs no script.
+ * destinations, «Anmelden» and «Kostenlos starten», all in the bar from a laptop (1024 px) on. On
+ * the phone and the tablet the destinations sit behind «Menü» (a word, not a symbol alone); a
+ * <details> element needs no script.
  */
 export function Header({ locale }: { locale: Locale }) {
   const t = messages(locale).nav;
@@ -26,26 +27,28 @@ export function Header({ locale }: { locale: Locale }) {
       <a href="#main" className="sr-only bg-ink px-4 py-3 font-bold text-ground focus:not-sr-only focus:absolute focus:top-2 focus:left-2">
         {t.skip}
       </a>
-      <div className="wrap flex min-h-[4.5rem] flex-wrap items-center gap-x-4 gap-y-2 py-2">
+      <div className="wrap flex min-h-[5rem] flex-wrap items-center gap-x-4 gap-y-2 py-2 lg:flex-nowrap lg:gap-x-2 xl:gap-x-5">
         <Link href={`/${locale}/`} className="inline-flex shrink-0 items-center py-1" aria-label={t.home}>
-          {/* docs/design/brand2/taktik/final/wortmarke-zweizeilig.svg: the sign about 45 px high, the words readable */}
-          <img src="/brand/wortmarke-zweizeilig.svg" alt="" width={1456} height={512} className="h-14 w-auto md:h-16" />
+          {/* docs/design/brand2/taktik/final/wortmarke-zweizeilig.svg, a vector at its own size: at
+              least 140 px wide (brand rule), here 160 to 205 px */}
+          <img src="/brand/wortmarke-zweizeilig.svg" alt="" width={1456} height={512} className="h-16 w-auto lg:h-14 xl:h-[4.5rem]" />
         </Link>
-        <nav aria-label={t.main} className="hidden flex-1 min-[1280px]:block">
+        {/* from a laptop on, the five destinations and «Anmelden» stand in the bar (S1) */}
+        <nav aria-label={t.main} className="hidden min-w-0 flex-1 lg:block">
           <NavLinks locale={locale} links={links} />
         </nav>
-        <div className="ml-auto hidden items-center gap-5 min-[1280px]:flex">
-          <a href={loginUrl(app)} className="link">
+        <div className="ml-auto hidden shrink-0 items-center gap-3 lg:flex xl:gap-5">
+          <a href={loginUrl(app)} className="link whitespace-nowrap px-1">
             {t.login}
           </a>
-          <StartLink appLocale={app} className="btn btn-ink">
+          <StartLink appLocale={app} className="btn btn-ink whitespace-nowrap max-xl:px-4">
             {t.start}
           </StartLink>
         </div>
-        <StartLink appLocale={app} className="btn btn-ink ml-auto hidden md:max-[1279px]:inline-flex">
+        <StartLink appLocale={app} className="btn btn-ink ml-auto hidden md:max-lg:inline-flex">
           {t.start}
         </StartLink>
-        <details className="group ml-auto md:ml-0 min-[1280px]:hidden">
+        <details className="group ml-auto md:ml-0 lg:hidden">
           <summary className="btn btn-line list-none px-5">{t.menu}</summary>
           <div className="absolute inset-x-0 top-full border-b-2 border-ink bg-ground">
             <nav aria-label={t.main} className="wrap py-4">

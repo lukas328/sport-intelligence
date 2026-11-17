@@ -8,6 +8,10 @@ import { inView, pathOf, type Pt, sampleAt, trailOf, VIEWS, type ViewName } from
 
 const NS = { vectorEffect: "non-scaling-stroke" } as const;
 const INK_DARK = "#0a0d11";
+/** the referee: a neutral grey diamond */
+export const REF = "#9a9890";
+/** a thin cream edge, so own dots in a dark club colour stand out on the ink court */
+const OWN_EDGE = "rgb(236 234 229 / .8)";
 const PLAY_MS = 6000;
 const CYCLE_MS = 7600;
 
@@ -55,7 +59,7 @@ export function CameraFrame({ scene, view, width, dot = 12, t, labels = false }:
   return (
     <>
       <g transform={tf}>
-        <CourtLines floor="var(--court)" area="rgb(255 255 255 / .06)" line="rgb(226 236 244 / .5)" width={1.3} />
+        <CourtLines floor="var(--court)" area="rgb(236 234 229 / .06)" line="rgb(236 234 229 / .5)" width={1.3} />
       </g>
       {players.filter((x) => x.team === "opp").flatMap((x, i) => trail(x, "var(--opp-cam-trail)", `o${i}`))}
       {players.filter((x) => x.team === "own").flatMap((x, i) => trail(x, "var(--club-cam)", `u${i}`))}
@@ -69,7 +73,7 @@ export function CameraFrame({ scene, view, width, dot = 12, t, labels = false }:
         .filter((x) => x.team === "ref")
         .map((x, i) => {
           const p = f(sampleAt(x.xy, t));
-          return <rect key={`ref${i}`} x={p[0] - r * 0.5} y={p[1] - r * 0.5} width={r} height={r} fill="#8d97a1" transform={`rotate(45 ${p[0]} ${p[1]})`} />;
+          return <rect key={`ref${i}`} x={p[0] - r * 0.5} y={p[1] - r * 0.5} width={r} height={r} fill={REF} transform={`rotate(45 ${p[0]} ${p[1]})`} />;
         })}
       {[...players.filter((x) => x.team === "opp"), ...players.filter((x) => x.team === "own")].map((x, i) => {
         const us = x.team === "own";
@@ -77,7 +81,7 @@ export function CameraFrame({ scene, view, width, dot = 12, t, labels = false }:
         return (
           <g key={`p${i}`}>
             {us ? (
-              <circle cx={e[0]} cy={e[1]} r={r} fill="var(--club-cam)" stroke={INK_DARK} strokeWidth={1.4} {...NS} />
+              <circle cx={e[0]} cy={e[1]} r={r} fill="var(--club-cam)" stroke={OWN_EDGE} strokeWidth={1.4} {...NS} />
             ) : (
               <circle cx={e[0]} cy={e[1]} r={r * 0.92} fill="var(--opp-cam)" stroke="var(--opp-cam-edge)" strokeWidth={2.2} {...NS} />
             )}
@@ -135,6 +139,8 @@ export interface CameraText {
   noBall: string;
   caption?: string | null;
   captionSmall?: string | null;
+  /** a heading over the ball line, saying what its numbers are */
+  ballLine?: string;
 }
 
 /**
@@ -211,15 +217,15 @@ export function TacticsCamera({
           <CameraFrame scene={scene} view={view} width={width} dot={dot} t={t} labels={showLabels} />
         </svg>
         {text.caption && (
-          <figcaption className="max-sm:static max-sm:max-w-none max-sm:border-t max-sm:border-[#2a3440] absolute top-4 right-4 max-w-[70%] bg-[rgb(10_13_17/0.9)] px-3 py-2 text-base font-bold text-[#eef2f5]">
+          <figcaption className="max-sm:static max-sm:max-w-none max-sm:border-t max-sm:border-[#33353a] absolute top-4 right-4 max-w-[70%] bg-[rgb(14_15_17/0.92)] px-3 py-2 text-base font-bold text-[#f2f0eb]">
             {text.caption}
-            {text.captionSmall && <small className="mt-0.5 block font-mono text-sm font-medium text-[#c7ced5]">{text.captionSmall}</small>}
+            {text.captionSmall && <small className="mt-0.5 block font-mono text-sm font-medium text-court-text">{text.captionSmall}</small>}
           </figcaption>
         )}
         <div className="flex flex-wrap items-center gap-2.5 bg-court-bar px-3 py-2 font-mono text-base font-semibold text-court-text">
           <button
             type="button"
-            className="min-h-12 min-w-12 cursor-pointer border-2 border-[#c7ced5] bg-court-bar px-4 font-sans text-base font-bold text-white"
+            className="min-h-12 min-w-12 cursor-pointer border-2 border-court-text bg-court-bar px-4 font-sans text-base font-bold text-white"
             aria-pressed={paused}
             onClick={() => setPaused((p) => !p)}
           >
@@ -231,7 +237,12 @@ export function TacticsCamera({
           </span>
         </div>
       </div>
-      {ballLine && <BallLine scene={scene} t={t} notFound={text.notFound} noBall={text.noBall} />}
+      {ballLine && (
+        <>
+          {text.ballLine && <p className="mt-3 text-base font-semibold text-ink-2">{text.ballLine}</p>}
+          <BallLine scene={scene} t={t} notFound={text.notFound} noBall={text.noBall} />
+        </>
+      )}
     </figure>
   );
 }

@@ -1,0 +1,18 @@
+<!doctype html>
+<!-- The real app on a computer (S13), start page under the three things: a match with its video,
+     the scenes of the phase (the one playing in yellow), the three things and all goals on the
+     timeline. The whole browser window, no Keil, no callouts: the page says what it is. -->
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../stage.css" />
+<div id="stage"></div>
+<script src="../stage.js"></script>
+<script>
+  const c = S.cap("video");
+  const W = 1200;
+  const k = (W - 4) / c.w;
+  // a wide screen full of small text: more weight than the default, still loaded only when seen
+  S.stage(W, Math.round(30 + c.h * k + 4), { budget1x: 170 * 1024, budget2x: 340 * 1024 });
+  S.browser("video", [0, 0, c.w, c.h], { left: 0, top: 0, width: W });
+  document.querySelector(".browser").style.boxShadow = "none";
+  S.done();
+</script>

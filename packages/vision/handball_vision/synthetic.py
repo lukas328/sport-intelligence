@@ -116,6 +116,10 @@ class _Agent:
 # sprinting across the court) gives about 190 m per minute and a fast break in every attack.
 DEMO: dict[str, Any] = {"restarts": True, "phase_s": 25.0, "jog_speed": 4.0, "tempo": 0.4}
 
+# The demo club's shirts (scripts/seed.py: primary colour and kit_own #10684a, goalkeeper #f28c00),
+# so the video shows the colours the app draws. The opponent's goalkeeper steps off green to purple.
+DEMO_KITS = Kits(home=(74, 104, 16), home_gk=(0, 140, 242), away_gk=(140, 45, 120))
+
 
 class SyntheticMatch:
     def __init__(self, cfg: SyntheticConfig | None = None) -> None:
@@ -564,7 +568,7 @@ def main() -> None:
     ap.add_argument("--truth", type=Path, help="write ground truth JSON here")
     ap.add_argument("--demo", action="store_true", help="match-like flow for demo data (DEMO)")
     args = ap.parse_args()
-    extra = DEMO if args.demo else {}
+    extra = {**DEMO, "kits": DEMO_KITS} if args.demo else {}
     match = SyntheticMatch(SyntheticConfig(seconds=args.seconds, seed=args.seed, **extra))
     truth = match.write(args.out)
     if args.truth:
