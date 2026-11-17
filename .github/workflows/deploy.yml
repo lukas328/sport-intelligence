@@ -23,6 +23,14 @@ on:
         type: choice
         options: [keep, resume, pause]
         default: keep
+      diag:
+        description: "with status: read the newest finished analysis (log, result, artefacts) into a run artefact"
+        type: boolean
+        default: false
+      diag_asset:
+        description: "with diag: this video asset id instead of the newest"
+        type: string
+        default: ""
   push:
     branches: [claude/compassionate-pascal-n3gl03]
 
@@ -132,6 +140,29 @@ jobs:
           fi
           echo "== migration job runs"
           az containerapp job execution list -g "$rg" -n "$(terraform output -raw migrate_job)" --query "[0:3].{name:name, status:properties.status, start:properties.startTime}" -o table || true
+
+      - name: Analysis diagnosis (read only)
+        if: steps.mode.outputs.mode == 'status' && inputs.diag
+        env:
+          OUT: ${{ runner.temp }}/diag
+          DIAG_ASSET: ${{ inputs.diag_asset }}
+          FW_RULE: gh-diag-${{ github.run_id }}
+        run: bash ../../azure/staging-diag.sh
+
+      - name: Remove the diagnosis firewall rule
+        if: always() && steps.mode.outputs.mode == 'status' && inputs.diag
+        run: |
+          az postgres flexible-server firewall-rule delete -g "$rg" -n "$(terraform output -raw postgres_server)" \
+            --rule-name "gh-diag-${{ github.run_id }}" --yes -o none 2>/dev/null || true
+
+      - name: Diagnosis artefact
+        if: always() && steps.mode.outputs.mode == 'status' && inputs.diag
+        uses: actions/upload-artifact@v4
+        with:
+          name: analysis-diag-${{ github.run_id }}
+          path: ${{ runner.temp }}/diag
+          retention-days: 5
+          if-no-files-found: warn
 
       - name: Paused or running
         if: steps.mode.outputs.mode != 'status'
