@@ -22,7 +22,9 @@ export function MatchHead({ match, ownName, oppName, view, graphics, children }:
   const title = match.opponent ? `${match.is_home ? ownName : oppName} ${tm("vs")} ${match.is_home ? oppName : ownName}` : `${tm("training")}: ${ownName}`;
   const when = format.dateTime(kickoff, { weekday: "long", day: "numeric", month: "long" });
   const half = match.halftime_own != null && match.halftime_opponent != null ? `${tm("halftime")} ${match.halftime_own}:${match.halftime_opponent}` : null;
-  const kick = [when, match.competition, match.venue].filter(Boolean).join(" · ");
+  // a video of the opponent against another team says so first (K3)
+  const watched = match.kind === "scouting" ? t("scoutingTag") : null;
+  const kick = [watched, when, match.competition, match.venue].filter(Boolean).join(" · ");
   const scoreText = match.score_own != null && match.score_opponent != null ? t("scoreLabel", { own: match.score_own, opp: match.score_opponent }) : null;
   // before the game the head shows when it starts instead of an empty result (UX test B42)
   const upcoming = match.score_own == null && kickoff.getTime() > Date.now();
@@ -59,6 +61,7 @@ export function MatchHead({ match, ownName, oppName, view, graphics, children }:
           scoreNote={note}
           ownName={ownName}
           oppName={oppName}
+          ownColor={match.kit_own}
           goals={graphics ? reportGoals(graphics) : null}
           flightLabels={{ half: t("halftime", { v: "{v}" }), end: t("end", { v: "{v}" }), halfLevel: t("halftimeLevel"), endLevel: t("endLevel") }}
           meta={
@@ -78,7 +81,7 @@ export function MatchHead({ match, ownName, oppName, view, graphics, children }:
               {match.opponent && <span className="sr-only">{` ${ta("vsShort")} ${oppName}`}</span>}
             </h1>
           }
-          sub={[match.opponent ? `${ta("vsShort")} ${oppName}` : null, when, match.venue, note].filter(Boolean).join(" · ")}
+          sub={[watched, match.opponent ? `${ta("vsShort")} ${oppName}` : null, when, match.venue, note].filter(Boolean).join(" · ")}
           own={own}
           opp={opp}
           pending={pending}

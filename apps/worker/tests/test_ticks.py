@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import httpx
 
-from handball_worker.ticks import scouting_tick
+from handball_worker.ticks import scouting_tick, watchdog_tick
 
 
 def test_scouting_tick_posts_and_survives_errors() -> None:
@@ -49,6 +49,7 @@ def test_tick_is_scheduled_once_and_comes_back_after_a_lost_schedule() -> None:
     q = Queue("default", connection=conn)
     ensure_scheduled(conn)
     assert TICK_JOB_ID in q.scheduled_job_registry
+    assert "tick-watchdog" in q.scheduled_job_registry
     first = q.scheduled_job_registry.get_scheduled_time(TICK_JOB_ID)
     ensure_scheduled(conn)  # pending: untouched
     assert q.scheduled_job_registry.get_scheduled_time(TICK_JOB_ID) == first
@@ -67,3 +68,20 @@ def test_tick_is_scheduled_once_and_comes_back_after_a_lost_schedule() -> None:
     schedule(conn)
     job = q.fetch_job(TICK_JOB_ID)
     assert job is not None and job.result_ttl is not None and job.result_ttl > 3600
+
+
+def test_watchdog_tick_posts_and_survives_errors() -> None:
+    seen: list[str] = []
+
+    def ok(request: httpx.Request) -> httpx.Response:
+        seen.append(request.url.path)
+        return httpx.Response(200, json={"restarted": 1, "failed": 0})
+
+    client = httpx.Client(transport=httpx.MockTransport(ok))
+    assert watchdog_tick(client, reschedule=False) == {"restarted": 1, "failed": 0}
+    assert seen == ["/internal/watchdog"]
+
+    def down(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(503)
+
+    assert watchdog_tick(httpx.Client(transport=httpx.MockTransport(down)), reschedule=False) == {}

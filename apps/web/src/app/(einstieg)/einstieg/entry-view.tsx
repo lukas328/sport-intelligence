@@ -269,7 +269,23 @@ function TeamStep({ club, team, known, colour, onColour, onSave, onBack }: { clu
         {t("save")}
       </button>
       <TeamFacts p={full.data ? { ...p, scorers: full.data.scorers, scorer_games: full.data.scorer_games } : p} />
-      {full.isLoading && <p className="m-0 text-[15px] text-ink-2" aria-live="polite">{t("scorersLoading")}</p>}
+      {/* the scorers take a moment the first time: their place is kept, no jumping text (L15) */}
+      {full.isLoading && (
+        <section aria-busy data-testid="scorers-loading">
+          <SectionHead title={t("scorers")} />
+          <span className="sr-only" aria-live="polite">
+            {t("scorersLoading")}
+          </span>
+          <ol className="m-0 list-none p-0" aria-hidden>
+            {[78, 64, 56, 48, 40].map((w) => (
+              <li key={w} className="flex justify-between border-b border-rule py-2.5">
+                <span className="block h-5 animate-pulse bg-rule" style={{ width: `${w}%` }} />
+                <span className="block h-5 w-6 animate-pulse bg-rule" />
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
       <p className="text-[15px] text-ink-2">{t("source")}</p>
       <Example />
       <div className="space-y-2 border-t-2 border-ink pt-5">

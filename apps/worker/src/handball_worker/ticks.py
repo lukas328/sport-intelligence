@@ -24,6 +24,10 @@ EVERY = timedelta(hours=1)
 # saves it as finished and lets the job hash expire after `result_ttl` (default 500 s). That hash
 # is the one the scheduler needs an hour later, so it has to outlive the gap between two ticks.
 TICK_RESULT_TTL_S = int(3 * EVERY.total_seconds())
+# the job watchdog: a job whose worker went silent is restarted (services/progress in the API)
+WATCHDOG_JOB_ID = "tick-watchdog"
+WATCHDOG_EVERY = timedelta(minutes=10)
+WATCHDOG_RESULT_TTL_S = int(3 * WATCHDOG_EVERY.total_seconds())
 
 
 def scouting_tick(client: httpx.Client | None = None, reschedule: bool = True) -> int:
@@ -59,6 +63,35 @@ def scouting_tick(client: httpx.Client | None = None, reschedule: bool = True) -
     return created
 
 
+def watchdog_tick(client: httpx.Client | None = None, reschedule: bool = True) -> dict[str, int]:
+    """Every ten minutes: the API restarts processing jobs that stopped reporting."""
+    settings = WorkerSettings()
+    result: dict[str, int] = {}
+    try:
+        http = client or httpx.Client(timeout=60)
+        base = settings.api_internal_url.rstrip("/")
+        r = http.post(
+            f"{base}/internal/watchdog", headers={"x-internal-token": settings.internal_token}
+        )
+        r.raise_for_status()
+        result = r.json()
+        if result.get("restarted") or result.get("failed"):
+            log.warning("watchdog_tick", **result)
+    except httpx.HTTPError as exc:
+        log.warning("watchdog_tick_failed", error=str(exc))
+    finally:
+        if reschedule:
+            schedule_watchdog(sync_redis(settings.redis_url))
+    return result
+
+
+def schedule_watchdog(conn: Redis, delay: timedelta = WATCHDOG_EVERY) -> None:
+    """Idempotent like the tick: fixed job id, and its hash outlives the gap to the next run."""
+    Queue("default", connection=conn).enqueue_in(
+        delay, watchdog_tick, job_id=WATCHDOG_JOB_ID, result_ttl=WATCHDOG_RESULT_TTL_S
+    )
+
+
 def schedule(conn: Redis, delay: timedelta = EVERY) -> None:
     """Idempotent: one pending tick at a time (fixed job id)."""
     q = Queue("default", connection=conn)
@@ -71,6 +104,8 @@ def ensure_scheduled(conn: Redis) -> None:
     could not re-schedule itself, the chain starts again within minutes. A leftover job hash
     (finished or failed) does not count as scheduled."""
     q = Queue("default", connection=conn)
-    if TICK_JOB_ID in q.scheduled_job_registry or TICK_JOB_ID in q.get_job_ids():
-        return
-    schedule(conn, timedelta(minutes=1))
+    waiting = set(q.get_job_ids())
+    if TICK_JOB_ID not in q.scheduled_job_registry and TICK_JOB_ID not in waiting:
+        schedule(conn, timedelta(minutes=1))
+    if WATCHDOG_JOB_ID not in q.scheduled_job_registry and WATCHDOG_JOB_ID not in waiting:
+        schedule_watchdog(conn, timedelta(minutes=2))

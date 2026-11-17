@@ -29,6 +29,7 @@ from handball_api.core.storage import ObjectStorage, S3Storage
 from handball_api.core.telemetry import instrument_engine, setup_tracing
 from handball_api.core.text import ClaudeTextGenerator, TextGenerator
 from handball_api.routers import assistant as assistant_router
+from handball_api.routers import attachments as attachments_router
 from handball_api.routers import auth, health, internal, matches, orgs, teams
 from handball_api.routers import billing as billing_router
 from handball_api.routers import collections as collections_router
@@ -228,6 +229,7 @@ def create_app(
     app.include_router(teams.router)
     app.include_router(matches.router)
     app.include_router(matches.public_media)
+    app.include_router(attachments_router.router)
     app.include_router(events_router.router)
     app.include_router(tactics_router.router)
     app.include_router(training_router.router)

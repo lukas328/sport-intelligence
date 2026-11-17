@@ -4,7 +4,7 @@ import { ShareButton, shareMatchCard } from "@/components/sharing/share-button";
 import type { Schemas } from "@handball/api-client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useLocale, useNow, useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent } from "react";
 import Link from "next/link";
 import { ArrowLeftRight, Check, ChevronDown, ChartNoAxesColumn, Clapperboard, FileDown, Hand, MoreHorizontal, Pencil, Plus, Radio, Shield, Trash2, Upload } from "lucide-react";
@@ -16,7 +16,6 @@ import { markOpened } from "@/lib/fresh-match";
 import { checkCount, goalRuns, useMatchGraphics } from "@/lib/graphics";
 import { ownName } from "@/lib/own-name";
 import { ThreeThingsView } from "@/components/anlauf/three-things-view";
-import { EmptyField } from "@/components/anlauf/bundle";
 import { MatchHead } from "./match-head";
 import { NextOpponent } from "@/app/app/[orgId]/teams/[teamId]/matches/start-view";
 import { AskColour } from "./ask-colour";
@@ -47,7 +46,13 @@ import { coverage } from "@/lib/match-workflow";
 import { MyScenesLine, TeamFeedView } from "./feed-views";
 import { officialGoalsKey } from "./official-goals";
 import { PartsLine, PartsPanel, usePartMarkers } from "./parts-panel";
-import { latestJobs, partName, partsOf, partState, timelineVideo } from "@/lib/video-parts";
+import { latestJobs, partsOf, timelineVideo } from "@/lib/video-parts";
+import { ProgressPanel } from "@/components/progress/progress-panel";
+import { isActive, progressKey, useProgress, withLocal } from "@/lib/progress";
+import { useLocalUploads } from "@/lib/upload-store";
+import { storedUploadIds } from "@/lib/upload";
+import { KnownFacts } from "./known-facts";
+import { AttachmentsPanel } from "./attachments-panel";
 
 // Loaded when shown, so the match page stays within the bundle budget (scripts/check-bundle.mjs).
 // Keepers and running distances sit deep in the Zahlen tab.
@@ -110,6 +115,8 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
     es.addEventListener("job", (e) => {
       const ev = JSON.parse((e as MessageEvent).data) as Job & { job_id: string };
       setLive((l) => ({ ...l, [ev.job_id]: ev }));
+      // the progress block reads the API's progress (steps, time left): fresh on every report
+      void qc.invalidateQueries({ queryKey: progressKey(orgId) });
       if (ev.status === "succeeded" || ev.status === "failed") void qc.invalidateQueries({ queryKey: key });
       // a new analysis reads the goals again: the comparison with the official report changes
       if (ev.status === "succeeded") {
@@ -189,7 +196,9 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
   const ta = useTranslations("anlauf");
   const tParts = useTranslations("parts");
   const plainPlayer = useRef<PlayerHandle>(null);
-  const own = ownName(teamName, shell?.org.name ?? teamName);
+  // a video of the opponent against another team (K3): that team takes the own side
+  const scouting = match.kind === "scouting";
+  const own = scouting ? (match.scouting_other ?? t("progress.otherTeam")) : ownName(teamName, shell?.org.name ?? teamName);
   const more = useRef<HTMLDetailsElement>(null);
   const roster = useRosterNames(orgId, match.team_id, match.season_id);
   const names = useMemo(
@@ -231,17 +240,29 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
   const soon = kickoff.getTime() > Date.now() - 3 * 3600_000;
   const liveFirst = staff && match.score_own == null && !main && soon && match.source !== "paper_report";
   const uploadFirst = staff && !main && !liveFirst && match.source !== "paper_report";
-  // a further part whose analysis failed is said in the list of parts, with «Erneut versuchen»;
-  // the match itself stays usable (the big failure box is for a match without a usable video)
-  const partFailed = (j: Job) => parts.length > 1 && j.kind === "analysis" && j.status === "failed" && parts.some((p) => p.id === j.video_asset_id);
-  const shownJobs = jobs.filter((j) => !partFailed(j));
-  const running = shownJobs.filter((j) => j.status !== "succeeded");
-  // a further file on its way or being analysed: the progress shows its own steps (not the done
-  // steps of the first half), under its name once it is a part
-  const newcomer = parts.length >= 1 ? match.videos.find((v) => v.role === "main" && v.part == null && v.status === "processing") : undefined;
-  const runningPart = parts.length > 1 ? (parts.find((p) => ["processing", "analysing"].includes(partState(p, jobs).kind)) ?? newcomer) : newcomer;
-  const runningName = runningPart?.part != null ? partName(runningPart.part, parts) : null;
-  const runningPartName = runningName ? tParts(runningName.key, { n: runningName.n }) : runningPart ? runningPart.filename : undefined;
+  // the progress of the uploads and the processing (K13, B4): the API's view, with the uploads of
+  // this tab laid over; shown while it runs, and when something failed
+  const local = useLocalUploads();
+  // read after mount (the server knows no browser storage)
+  const [stored, setStored] = useState<Set<string>>(() => new Set());
+  useEffect(() => setStored(storedUploadIds()), [local]);
+  const allProgress = useProgress(orgId);
+  const listed = allProgress.data?.find((p) => p.match_id === match.id);
+  const progress = withLocal(listed ? [listed] : match.progress ? [match.progress] : [], local, Date.now(), stored)[0] ?? null;
+  const progressShown = progress != null && (isActive(progress) || progress.state === "failed");
+  // the analysis is done, nothing open in Prüfen, no goal found and no result known (L6)
+  const noGoals = Boolean(
+    main && graphics.data?.analysis === "ready" && !graphics.data.goals.length && !graphics.data.checks.length && match.score_own == null && !progressShown,
+  );
+  // uploads the API holds as unfinished (not a link import): the upload panel offers the way on
+  const stuckUploads = match.videos.filter((v) => v.status === "uploading" && progress?.files.find((f) => f.video_id === v.id)?.step !== "link");
+  const ownKits = { own: match.kit_own, own_gk: match.kit_own_gk, opponent: match.kit_opponent, opponent_gk: match.kit_opponent_gk, referee: match.kit_referee ?? null };
+  const official = useQuery({
+    queryKey: ["official", match.team_id],
+    enabled: staff,
+    staleTime: 600_000,
+    queryFn: async () => (await api.GET("/v1/orgs/{org_id}/teams/{team_id}/official", { params: { path: { org_id: orgId, team_id: match.team_id } } })).data ?? null,
+  });
   // the «Weitere Datei» box stays open after the upload (with «Fertig hochgeladen») until closed
   const [addOpen, setAddOpen] = useState(false);
   const adding = pendingVideos.some((v) => v.status === "processing" || v.status === "uploading");
@@ -260,6 +281,18 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
     if (box.top >= 0 && box.bottom <= window.innerHeight) return;
     const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     v.scrollIntoView({ block: "nearest", behavior: still ? "auto" : "smooth" });
+  }
+
+  // to the files of the match at the end of the tab Spiel
+  function toAttachments() {
+    setView("game");
+    requestAnimationFrame(() => requestAnimationFrame(() => document.getElementById("attachments")?.scrollIntoView({ behavior: "smooth" })));
+  }
+
+  // to the upload of the tab Video (another file, or the same file again to go on)
+  function toUpload() {
+    setView("video");
+    requestAnimationFrame(() => document.getElementById("upload")?.scrollIntoView({ behavior: "smooth" }));
   }
 
   function onPlay(ms: number) {
@@ -321,7 +354,9 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
           </details>
         )}
       </MatchHead>
-      {(justDone || ["uploading", "processing", "failed"].includes(match.status)) && (
+      {/* one state at a time (L4): the progress block below says what runs; here only «fertig»
+          and a failed match without progress to tell it */}
+      {(justDone || (match.status === "failed" && !progressShown)) && (
         <p role="status" className="-mt-4 flex flex-wrap items-center gap-3 text-[15px] font-bold">
           {justDone && (
             <span className="inline-flex items-center gap-1.5">
@@ -329,7 +364,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
               {t("processing.done")}
             </span>
           )}
-          {["uploading", "processing", "failed"].includes(match.status) && <span className={match.status === "failed" ? "text-loss" : undefined}>{t(`matches.status_${match.status}`)}</span>}
+          {match.status === "failed" && !progressShown && !justDone && <span className="text-loss">{t("matches.status_failed")}</span>}
         </p>
       )}
       <div className="space-y-6">
@@ -445,7 +480,21 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
           </div>
         </details>
       )}
-      {running.length > 0 && <Processing jobs={runningPart ? shownJobs.filter((j) => j.video_asset_id === runningPart.id) : shownJobs} part={runningPartName} orgId={orgId} staff={staff} hasReport={graphics.data?.has_report ?? false} onOtherFile={() => (setView("video"), requestAnimationFrame(() => document.getElementById("upload")?.scrollIntoView({ behavior: "smooth" })))} />}
+      {progressShown && progress && (
+        <ProgressPanel
+          orgId={orgId}
+          progress={progress}
+          staff={staff}
+          onOtherFile={toUpload}
+          onResumeUpload={toUpload}
+          aside={
+            // what is known and what comes, once the video is in (during the upload the way on counts)
+            isActive(progress) && progress.stage !== "upload" ? (
+              <KnownFacts orgId={orgId} match={match} ownName={own} oppName={oppName(match)} stats={stats.data ?? null} names={names} hasReport={graphics.data?.has_report ?? false} checks={checks} staff={staff} onAttach={toAttachments} />
+            ) : undefined
+          }
+        />
+      )}
 
       <div hidden={view !== "video"} className="space-y-6">
         {/* a player's own scenes of this match, one step away */}
@@ -523,7 +572,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
                 <AskColour orgId={orgId} matchId={match.id} opponent={oppName(match)} />
               </div>
             )}
-            <UploadPanel orgId={orgId} matchId={match.id} onUploaded={() => void qc.invalidateQueries({ queryKey: key })} />
+            <UploadPanel orgId={orgId} matchId={match.id} kits={scouting ? null : ownKits} stuck={stuckUploads} progressFiles={progress?.files ?? []} onUploaded={() => void qc.invalidateQueries({ queryKey: key })} />
           </section>
         )}
         <PartsPanel orgId={orgId} match={match} jobs={jobs} staff={staff} onChanged={() => void qc.invalidateQueries({ queryKey: key })} />
@@ -536,7 +585,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
               {t("upload.addCamera")}
             </summary>
             <div className="pt-3">
-              <UploadPanel orgId={orgId} matchId={match.id} hasMain onUploaded={() => void qc.invalidateQueries({ queryKey: key })} />
+              <UploadPanel orgId={orgId} matchId={match.id} hasMain stuck={stuckUploads} progressFiles={progress?.files ?? []} onUploaded={() => void qc.invalidateQueries({ queryKey: key })} />
             </div>
           </details>
         )}
@@ -580,13 +629,29 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
               </Link>
             </section>
           )}
+          {/* analysed, every question answered, no goal found and no result: the reason and the
+              next step right here, not only in the tab Video (L6) */}
+          {noGoals && (
+            <section className="max-w-[62ch] space-y-3 border-l-4 border-attn pl-4" data-testid="game-no-goals">
+              <h2 className="text-[26px]">{t("progress.noGoalsTitle")}</h2>
+              <p className="m-0 text-[17px]">{t("progress.noGoalsWhy")}</p>
+              {staff && (
+                <div className="flex flex-wrap gap-3">
+                  <Button onClick={() => setDialog("edit")}>{t("progress.noGoalsScore")}</Button>
+                  <Button variant="secondary" onClick={() => (setView("video"), setBench(true))}>
+                    {t("progress.noGoalsMark")}
+                  </Button>
+                </div>
+              )}
+            </section>
+          )}
           {graphics.data && (goalRuns(graphics.data).length > 0 || graphics.data.goals.some((x) => x.has_video)) && (
             <ThreeThingsView orgId={orgId} matchId={match.id} graphics={graphics.data} oppName={oppName(match)} onScenes={main ? (_, n) => setView("video", n) : undefined} onScene={main ? (id) => setView("video", null, id) : undefined} />
           )}
           <GameActions
             collect={staff && counted && match.opponent ? <FromMatchButton orgId={orgId} teamId={match.team_id} matchId={match.id} opponent={oppName(match)} /> : null}
             // before the match there is nothing to share yet (UX test A05)
-            onHighlights={upcoming ? undefined : () => {
+            onHighlights={upcoming || noGoals ? undefined : () => {
               if (more.current) more.current.open = true;
               requestAnimationFrame(() => document.getElementById("highlights")?.scrollIntoView({ behavior: "smooth", block: "start" }));
             }}
@@ -632,6 +697,7 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
             </div>
           </details>
           )}
+          <AttachmentsPanel orgId={orgId} matchId={match.id} staff={staff} hasReport={graphics.data?.has_report ?? false} linked={Boolean(official.data?.official_team_id)} />
         </div>
       )}
 
@@ -645,8 +711,24 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
             </section>
           )}
           {numberParts.length === 0 && (
-            <EmptyState icon={<ChartNoAxesColumn />} title={t("stats.noData")}>
-              {staff && match.source !== "paper_report" ? t("stats.noDataHint") : null}
+            // why there are no figures and the way to them (L6)
+            <EmptyState icon={<ChartNoAxesColumn />} title={noGoals ? t("progress.noGoalsTitle") : progressShown ? t("progress.numbersRunning") : t("stats.noData")}>
+              <span className="block" data-testid="numbers-empty">
+                {noGoals ? t("progress.noGoalsWhy") : progressShown ? t("progress.numbersRunningText") : staff && match.source !== "paper_report" ? t(main ? "progress.numbersNoEvents" : "stats.noDataHint") : null}
+              </span>
+              {staff && noGoals && (
+                <span className="mt-3 flex flex-wrap justify-center gap-3">
+                  <Button size="sm" onClick={() => setDialog("edit")}>{t("progress.noGoalsScore")}</Button>
+                  <Button size="sm" variant="secondary" onClick={() => (setView("video"), setBench(true))}>
+                    {t("progress.noGoalsMark")}
+                  </Button>
+                </span>
+              )}
+              {staff && !main && !progressShown && match.source !== "paper_report" && (
+                <span className="mt-3 flex justify-center">
+                  <Button size="sm" onClick={toUpload}>{t("upload.title")}</Button>
+                </span>
+              )}
             </EmptyState>
           )}
           {numberParts.map((part) => (
@@ -687,98 +769,6 @@ export function MatchView({ orgId, initial, teamName, staff }: { orgId: string; 
         <ExchangePanel orgId={orgId} matchId={match.id} canImport={staff} />
       </Dialog>
     </div>
-  );
-}
-
-function Processing({ jobs, orgId, staff, onOtherFile, hasReport = false, part }: { jobs: Job[]; orgId: string; staff: boolean; onOtherFile?: () => void; hasReport?: boolean; part?: string | undefined }) {
-  const t = useTranslations("processing");
-  const ta = useTranslations("anlauf");
-  const now = useNow({ updateInterval: 5000 });
-  const running = jobs.filter((j) => j.status !== "succeeded");
-  const failed = running.find((j) => j.status === "failed");
-  const ingest = jobs.find((j) => j.kind === "ingest");
-  const analysis = jobs.find((j) => j.kind === "analysis");
-  // three steps in the coach's words (UX test B11): the video read, the players followed, the
-  // three things searched; the technical stages stay one step away
-  const state = (done: boolean, active: boolean) => (done ? "done" : active ? "running" : "pending");
-  const ingestDone = ingest?.status === "succeeded" || Boolean(analysis);
-  const followDone = analysis?.status === "succeeded" || (analysis?.progress ?? 0) >= 0.7;
-  const steps = [
-    { key: "read", st: state(ingestDone, Boolean(ingest) && !ingestDone) },
-    { key: "follow", st: state(followDone, Boolean(analysis) && !followDone) },
-    { key: "things", st: state(analysis?.status === "succeeded", followDone && analysis?.status !== "succeeded") },
-  ] as const;
-  const current = analysis && analysis.status !== "succeeded" ? analysis : (ingest ?? running[0]);
-  // the bar only moves forward (UX test H05: it jumped 10, 15, 70, 5 between the stages): the
-  // whole run counts, ingest the first fifth, the analysis the rest
-  const overall = analysis ? 0.2 + 0.8 * (analysis.status === "succeeded" ? 1 : analysis.progress) : 0.2 * (ingest?.progress ?? 0);
-  const shown = useRef(0);
-  shown.current = Math.max(shown.current, overall);
-  const started = current?.started_at ? new Date(current.started_at).getTime() : null;
-  const elapsed = started ? (now.getTime() - started) / 1000 : 0;
-  // the early estimate was far too low (real-video test, second round): only after the first
-  // quarter of the stage, and as a span upward
-  const etaRaw = current && current.status === "running" && current.progress >= 0.25 && elapsed > 20 ? ((elapsed / current.progress) * (1 - current.progress)) / 60 : null;
-  const etaMin = etaRaw != null ? Math.max(1, Math.round(etaRaw)) : null;
-  const etaMax = etaMin != null && etaRaw != null ? Math.max(etaMin + 1, Math.ceil(etaRaw * 1.5)) : null;
-  if (failed) {
-    // what failed, what stays, what to do (UX test B29)
-    return (
-      <section className="space-y-3 border-2 border-loss p-4 md:p-6" role="alert" data-testid="job-failed" data-orgid={orgId}>
-        <h2 className="text-[26px]">{t("failedTitle")}</h2>
-        <p className="m-0 max-w-[60ch] text-[17px]">{t("failedText")}</p>
-        {staff && onOtherFile && (
-          <button type="button" className={buttonClass("primary")} onClick={onOtherFile}>
-            {t("otherFile")}
-          </button>
-        )}
-      </section>
-    );
-  }
-  return (
-    // Analyse läuft (SPEC 7.13): the steps with fertig / läuft / danach, a bar, the minutes left,
-    // something useful meanwhile and the three fields that will fill
-    <section className="grid gap-8 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]" aria-live="polite" data-testid="job" data-orgid={orgId} data-staff={staff || undefined}>
-      <div>
-        {/* a match in several files: which part is on its way (the others are done) */}
-        <h2 className="text-[26px]">{part ? t("titlePart", { name: part }) : ta("titleRunning")}</h2>
-        {/* stays for the whole analysis, not four seconds (UX test N24, H05) */}
-        <p className="m-0 mt-1 max-w-[60ch] text-[17px]" data-testid="may-close">{t("analysisHint")}</p>
-        <div className="mt-3 h-1.5 bg-rule" aria-hidden>
-          <div className="h-full bg-ink transition-all duration-500" style={{ width: `${shown.current * 100}%` }} />
-        </div>
-        <p className="mt-2 text-[15px] font-bold">{etaMin != null && etaMax != null ? ta("minutesSpan", { low: etaMin, high: etaMax }) : t("etaSoon")}</p>
-        <ol className="mt-4 m-0 list-none p-0">
-          {steps.map(({ key, st }) => (
-            <li key={key} className={cn("grid min-h-11 grid-cols-[72px_minmax(0,1fr)] items-baseline gap-3 border-t border-rule py-2.5 text-base", st === "pending" && "text-ink-2")}>
-              <span className={cn("justify-self-start text-[15px] font-bold", st === "done" ? "text-win" : st === "running" ? "bg-attn px-1.5 py-0.5 text-attn-ink" : "text-ink-2")}>
-                {st === "done" ? ta("stepDone") : st === "running" ? ta("stepRunning") : ta("stepNext")}
-              </span>
-              {t(`coach_${key}`)}
-            </li>
-          ))}
-        </ol>
-        {/* only with a match report there are its goals to look at meanwhile (E08) */}
-        {hasReport && <p className="mt-4 text-[15px] text-ink-2">{ta("meanwhile")}</p>}
-        <details className="mt-3 text-[15px] text-ink-2">
-          <summary className="min-h-11 cursor-pointer content-center font-semibold">{t("technical")}</summary>
-          {running.map((j) => (
-            <ul key={j.id} className="m-0 list-none p-0">
-              {Object.entries((j.stages ?? {}) as Record<string, { status?: string }>).map(([k, v]) => (
-                <li key={k}>
-                  {t.has(`stage_${j.kind}_${k}`) ? t(`stage_${j.kind}_${k}` as "stage_download") : t.has(`stage_${k}`) ? t(`stage_${k}` as "stage_download") : k}: {v?.status ?? "pending"}
-                </li>
-              ))}
-            </ul>
-          ))}
-        </details>
-      </div>
-      <div className="grid grid-cols-3 gap-3 self-start" aria-hidden>
-        {[0, 1, 2].map((i) => (
-          <EmptyField key={i} />
-        ))}
-      </div>
-    </section>
   );
 }
 

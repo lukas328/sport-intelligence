@@ -6,7 +6,6 @@ import { Command } from "cmdk";
 import {
   ArrowRight,
   BookOpen,
-  Camera,
   Clapperboard,
   MessageCircleQuestion,
   Plus,
@@ -105,7 +104,6 @@ export function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenCh
                   {row("upload", t("shell.upload"), <Upload />, `${teamBase}/matches?upload=1`, ["video"])}
                   {row("new-match", t("palette.newMatch"), <Plus />, `${teamBase}/matches?new=1`)}
                   {row("search", t("palette.searchScenes"), <ScanSearch />, `${teamBase}/scenes`)}
-                  {row("paper", t("palette.paper"), <Camera />, `${teamBase}/matches?report=1`)}
                 </Command.Group>
               )}
               {(matches.data ?? []).length > 0 && (

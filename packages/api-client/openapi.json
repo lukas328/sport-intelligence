@@ -902,6 +902,179 @@
         "title": "AssignmentStatusIn",
         "type": "object"
       },
+      "AttachmentComplete": {
+        "properties": {
+          "etag": {
+            "description": "ETag storage answered the PUT",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Etag",
+            "type": "string"
+          }
+        },
+        "required": [
+          "etag"
+        ],
+        "title": "AttachmentComplete",
+        "type": "object"
+      },
+      "AttachmentCreate": {
+        "properties": {
+          "content_type": {
+            "description": "image/jpeg, image/png, image/webp, image/heic or PDF",
+            "maxLength": 100,
+            "title": "Content Type",
+            "type": "string"
+          },
+          "filename": {
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Filename",
+            "type": "string"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "size_bytes": {
+            "description": "at most 25 MB",
+            "exclusiveMinimum": 0.0,
+            "title": "Size Bytes",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "filename",
+          "content_type",
+          "size_bytes"
+        ],
+        "title": "AttachmentCreate",
+        "type": "object"
+      },
+      "AttachmentOut": {
+        "properties": {
+          "content_type": {
+            "title": "Content Type",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "created_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "the name of who added it",
+            "title": "Created By"
+          },
+          "filename": {
+            "title": "Filename",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "is_image": {
+            "title": "Is Image",
+            "type": "boolean"
+          },
+          "match_id": {
+            "format": "uuid",
+            "title": "Match Id",
+            "type": "string"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "size_bytes": {
+            "title": "Size Bytes",
+            "type": "integer"
+          },
+          "status": {
+            "enum": [
+              "uploading",
+              "ready"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "match_id",
+          "filename",
+          "content_type",
+          "size_bytes",
+          "note",
+          "status",
+          "is_image",
+          "created_at"
+        ],
+        "title": "AttachmentOut",
+        "type": "object"
+      },
+      "AttachmentUpdate": {
+        "properties": {
+          "note": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "null or empty clears it",
+            "title": "Note"
+          }
+        },
+        "title": "AttachmentUpdate",
+        "type": "object"
+      },
+      "AttachmentUploadOut": {
+        "properties": {
+          "attachment": {
+            "$ref": "#/components/schemas/AttachmentOut"
+          },
+          "upload_url": {
+            "description": "PUT the file here (presigned, one part), then complete",
+            "title": "Upload Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "attachment",
+          "upload_url"
+        ],
+        "title": "AttachmentUploadOut",
+        "type": "object"
+      },
       "AttendanceIn": {
         "properties": {
           "records": {
@@ -4328,6 +4501,256 @@
         "title": "FeedbackIn",
         "type": "object"
       },
+      "FileProgressOut": {
+        "description": "Where one file of a match is (services/progress): its step in the coach's words, how far\nthe step is, how long it probably takes, and whether it moves.",
+        "properties": {
+          "duration_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration S"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "failed: a stable failure code",
+            "title": "Error"
+          },
+          "eta_basis": {
+            "anyOf": [
+              {
+                "enum": [
+                  "measured",
+                  "history"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "measured: from the pace of this run; history: from video length and the pace of the latest runs",
+            "title": "Eta Basis"
+          },
+          "eta_s": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "seconds left in the current stage; null: cannot be estimated",
+            "title": "Eta S"
+          },
+          "filename": {
+            "title": "Filename",
+            "type": "string"
+          },
+          "finish_s": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "seconds until the file is done with all its stages; null while unknown",
+            "title": "Finish S"
+          },
+          "fraction": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "how far the current stage is; null while unknown",
+            "title": "Fraction"
+          },
+          "half": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "1 or 2 when the parts are two halves",
+            "title": "Half"
+          },
+          "idle_s": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "seconds without a sign of life (stalled, interrupted, queued)",
+            "title": "Idle S"
+          },
+          "last_activity_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "the last sign of life: a part uploaded, a worker report",
+            "title": "Last Activity At"
+          },
+          "overall": {
+            "description": "the whole way of this file, all stages",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Overall",
+            "type": "number"
+          },
+          "part": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "its number on the match timeline, from 1",
+            "title": "Part"
+          },
+          "restart_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "stalled: when the watchdog restarts the step at the latest",
+            "title": "Restart At"
+          },
+          "restarted": {
+            "default": false,
+            "description": "this step was restarted once already after it went silent",
+            "title": "Restarted",
+            "type": "boolean"
+          },
+          "role": {
+            "$ref": "#/components/schemas/VideoRole"
+          },
+          "size_bytes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Size Bytes"
+          },
+          "stage": {
+            "description": "upload: hochladen; ingest: einlesen (converting for playback and analysis); analysis: analysieren; done: fertig",
+            "enum": [
+              "upload",
+              "ingest",
+              "analysis",
+              "done"
+            ],
+            "title": "Stage",
+            "type": "string"
+          },
+          "stage_started_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stage Started At"
+          },
+          "state": {
+            "description": "running; queued: waits for a free worker; waiting: waits for the analysis of an earlier part; stalled: no report from the worker for a while; interrupted: the upload stopped (closed tab, lost connection); done; failed",
+            "enum": [
+              "running",
+              "queued",
+              "waiting",
+              "stalled",
+              "interrupted",
+              "done",
+              "failed"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "step": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "the technical sub-step (download, transcode, observe, ...)",
+            "title": "Step"
+          },
+          "uploaded_bytes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Uploaded Bytes"
+          },
+          "video_id": {
+            "format": "uuid",
+            "title": "Video Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "video_id",
+          "filename",
+          "role",
+          "stage",
+          "state",
+          "overall"
+        ],
+        "title": "FileProgressOut",
+        "type": "object"
+      },
       "FocusIn": {
         "properties": {
           "assignment": {
@@ -7694,10 +8117,11 @@
           },
           "kind": {
             "default": "match",
-            "description": "training: training video without opponent (4.8)",
+            "description": "training: training video without opponent (4.8); scouting: a video of the opponent playing another team (the own team does not play, K3)",
             "enum": [
               "match",
-              "training"
+              "training",
+              "scouting"
             ],
             "title": "Kind",
             "type": "string"
@@ -7796,6 +8220,20 @@
               }
             ],
             "title": "Periods"
+          },
+          "scouting_other": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "scouting: the team the opponent plays against; it takes the own side in the analysis (kit_own is its shirt colour)",
+            "title": "Scouting Other"
           },
           "season_id": {
             "anyOf": [
@@ -8151,6 +8589,17 @@
             "title": "Periods",
             "type": "integer"
           },
+          "progress": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MatchProgressOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "uploads and processing while they run and a while after (services/progress); only in the single match read"
+          },
           "report_extra": {
             "anyOf": [
               {
@@ -8184,6 +8633,18 @@
               }
             ],
             "title": "Score Own"
+          },
+          "scouting_other": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "scouting: the team the opponent plays against",
+            "title": "Scouting Other"
           },
           "season_id": {
             "format": "uuid",
@@ -8252,6 +8713,125 @@
           "jobs"
         ],
         "title": "MatchOut",
+        "type": "object"
+      },
+      "MatchProgressOut": {
+        "description": "Uploads and processing of one match, for the progress in the head, on Spiele and in the\nmatch (K6, K13, B4). Present while something runs and a while after it ended.",
+        "properties": {
+          "eta_s": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "seconds until everything is done; null: cannot be estimated",
+            "title": "Eta S"
+          },
+          "files": {
+            "items": {
+              "$ref": "#/components/schemas/FileProgressOut"
+            },
+            "title": "Files",
+            "type": "array"
+          },
+          "finished_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "done or failed: when the last step ended",
+            "title": "Finished At"
+          },
+          "is_home": {
+            "title": "Is Home",
+            "type": "boolean"
+          },
+          "kickoff_at": {
+            "format": "date-time",
+            "title": "Kickoff At",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "match_id": {
+            "format": "uuid",
+            "title": "Match Id",
+            "type": "string"
+          },
+          "opponent_name": {
+            "title": "Opponent Name",
+            "type": "string"
+          },
+          "overall": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Overall",
+            "type": "number"
+          },
+          "scouting_other": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scouting Other"
+          },
+          "stage": {
+            "description": "the step of the file furthest behind",
+            "enum": [
+              "upload",
+              "ingest",
+              "analysis",
+              "done"
+            ],
+            "title": "Stage",
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "running",
+              "queued",
+              "waiting",
+              "stalled",
+              "interrupted",
+              "done",
+              "failed"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "team_id": {
+            "format": "uuid",
+            "title": "Team Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "match_id",
+          "team_id",
+          "kind",
+          "opponent_name",
+          "kickoff_at",
+          "is_home",
+          "stage",
+          "state",
+          "overall",
+          "files"
+        ],
+        "title": "MatchProgressOut",
         "type": "object"
       },
       "MatchStatus": {
@@ -8348,6 +8928,18 @@
               }
             ],
             "title": "Score Own"
+          },
+          "scouting_other": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "scouting: the team the opponent plays against",
+            "title": "Scouting Other"
           },
           "status": {
             "$ref": "#/components/schemas/MatchStatus"
@@ -8606,6 +9198,20 @@
               }
             ],
             "title": "Score Own"
+          },
+          "scouting_other": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "scouting matches only: the other team's name",
+            "title": "Scouting Other"
           },
           "venue": {
             "anyOf": [
@@ -17911,6 +18517,12 @@
             "title": "Part Size",
             "type": "integer"
           },
+          "resumed": {
+            "default": false,
+            "description": "the unfinished upload of the same file: list its parts and send the rest",
+            "title": "Resumed",
+            "type": "boolean"
+          },
           "video": {
             "$ref": "#/components/schemas/VideoOut"
           }
@@ -21775,6 +22387,238 @@
         ]
       }
     },
+    "/v1/orgs/{org_id}/attachments/{attachment_id}": {
+      "delete": {
+        "operationId": "delete_attachment_v1_orgs__org_id__attachments__attachment_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "attachment_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Attachment Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Attachment",
+        "tags": [
+          "attachments"
+        ]
+      },
+      "patch": {
+        "operationId": "update_attachment_v1_orgs__org_id__attachments__attachment_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "attachment_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Attachment Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttachmentUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttachmentOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Attachment",
+        "tags": [
+          "attachments"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/attachments/{attachment_id}/complete": {
+      "post": {
+        "operationId": "complete_attachment_v1_orgs__org_id__attachments__attachment_id__complete_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "attachment_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Attachment Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttachmentComplete"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttachmentOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Complete Attachment",
+        "tags": [
+          "attachments"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/attachments/{attachment_id}/file": {
+      "get": {
+        "operationId": "attachment_file_v1_orgs__org_id__attachments__attachment_id__file_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "attachment_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Attachment Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "as a download, also for photos",
+            "in": "query",
+            "name": "download",
+            "required": false,
+            "schema": {
+              "default": false,
+              "description": "as a download, also for photos",
+              "title": "Download",
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/pdf": {},
+              "image/*": {}
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Attachment File",
+        "tags": [
+          "attachments"
+        ]
+      }
+    },
     "/v1/orgs/{org_id}/attendance/{kind}/{target_id}": {
       "get": {
         "operationId": "attendance_v1_orgs__org_id__attendance__kind___target_id__get",
@@ -23984,6 +24828,125 @@
         "tags": [
           "matches",
           "annotations"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/matches/{match_id}/attachments": {
+      "get": {
+        "operationId": "list_attachments_v1_orgs__org_id__matches__match_id__attachments_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "match_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Match Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AttachmentOut"
+                  },
+                  "title": "Response List Attachments V1 Orgs  Org Id  Matches  Match Id  Attachments Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Attachments",
+        "tags": [
+          "attachments"
+        ]
+      },
+      "post": {
+        "description": "Starts the upload: PUT the file to `upload_url`, then complete with the ETag.",
+        "operationId": "create_attachment_v1_orgs__org_id__matches__match_id__attachments_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "match_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Match Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttachmentCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttachmentUploadOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Attachment",
+        "tags": [
+          "attachments"
         ]
       }
     },
@@ -29509,6 +30472,55 @@
         ]
       }
     },
+    "/v1/orgs/{org_id}/progress": {
+      "get": {
+        "description": "Uploads and processing of the matches the person sees, while they run and a while after\n(the progress in the head of every page, on Spiele and in the match: K6, K13).",
+        "operationId": "org_progress_v1_orgs__org_id__progress_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MatchProgressOut"
+                  },
+                  "title": "Response Org Progress V1 Orgs  Org Id  Progress Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Org Progress",
+        "tags": [
+          "matches",
+          "matches"
+        ]
+      }
+    },
     "/v1/orgs/{org_id}/saved-filters/{filter_id}": {
       "delete": {
         "operationId": "delete_filter_v1_orgs__org_id__saved_filters__filter_id__delete",
@@ -32146,6 +33158,18 @@
                 }
               ],
               "title": "Season Id"
+            }
+          },
+          {
+            "description": "also the videos of an opponent against another team (K3); they are no matches of the team (season figures, table) and are left out by default",
+            "in": "query",
+            "name": "scouting",
+            "required": false,
+            "schema": {
+              "default": false,
+              "description": "also the videos of an opponent against another team (K3); they are no matches of the team (season figures, table) and are left out by default",
+              "title": "Scouting",
+              "type": "boolean"
             }
           }
         ],
