@@ -63,6 +63,8 @@ class Observations:
     static: U8 | None = None
     # ball net candidates (HB_BALL_MODEL): frame index -> [(x, y, score)] in frame pixels
     ball_cands: dict[int, list[tuple[float, float, float]]] = field(default_factory=dict)
+    # cost counters of the observation pass (number crops read, boxes offered / read by the gate)
+    counters: dict[str, int] = field(default_factory=dict)
 
 
 def static_edges(frames: list[U8], min_share: float = 0.6) -> U8 | None:
@@ -121,10 +123,12 @@ def observe(
     ball_net: Any = None,  # handball_vision.ballnet.BallNet
     ball_every: int = 1,
     ball_batch: int = 8,
+    number_gate: bool = True,
 ) -> Observations:
     """`on_frame(index, frame)` sees every decoded frame (e.g. the score overlay reader), so the
     video is decoded only once. With `ball_net` the 3-frame ball net runs on every `ball_every`-th
-    frame (`Observations.ball_cands`)."""
+    frame (`Observations.ball_cands`). `number_gate`: read shirt numbers only where it is worth it
+    (`numbers.NumberGate`); off: every eligible torso on every number frame."""
     from handball_vision.pipeline import _open, iter_frames
 
     _, _, fps, total = _open(path)
@@ -134,6 +138,11 @@ def observe(
     frames: list[FrameObservation] = []
     segments: dict[int, F64] = {}
     timings: dict[str, float] = defaultdict(float)
+    gate = None
+    if numbers is not None and number_gate:
+        from handball_vision.numbers import NumberGate
+
+        gate = NumberGate(fps or 25.0, number_every)
     balls_net = None
     if ball_net is not None:
         from handball_vision.ballnet import BallCandidates
@@ -165,7 +174,7 @@ def observe(
             timings["appearance"] += time.perf_counter() - t0
             if numbers is not None and n % number_every == 0:
                 t0 = time.perf_counter()
-                fo.numbers = read_numbers(numbers, frame, people)
+                fo.numbers = read_numbers(numbers, frame, people, gate, n)
                 timings["numbers"] += time.perf_counter() - t0
             if embedder is not None and n % embed_every == 0:
                 t0 = time.perf_counter()
@@ -196,6 +205,9 @@ def observe(
         step = len(motion.samples) / 30
         motion.samples = [motion.samples[int(k * step)] for k in range(30)]
     static = static_edges([f for _, f in motion.samples]) if motion.moving else None
+    counters = {"number_crops": getattr(numbers, "calls", 0)} if numbers is not None else {}
+    if gate is not None:
+        counters |= {"number_boxes_offered": gate.offered, "number_boxes_read": gate.read}
     return Observations(
         motion,
         frames,
@@ -206,22 +218,41 @@ def observe(
         detector.source,
         static=static,
         ball_cands=balls_net.result if balls_net is not None else {},
+        counters=counters,
     )
 
 
-def read_numbers(reader: Any, frame: U8, people: list[Detection]) -> dict[int, tuple[int, float]]:
-    """Shirt numbers of the players large, sharp and fully inside the frame."""
+def read_numbers(
+    reader: Any,
+    frame: U8,
+    people: list[Detection],
+    gate: Any = None,  # handball_vision.numbers.NumberGate
+    index: int = 0,
+) -> dict[int, tuple[int, float]]:
+    """Shirt numbers of the players large, sharp and fully inside the frame; with `gate` only of
+    the boxes the gate picks (and the gate learns the outcome)."""
     from handball_vision.numbers import MIN_BOX_HEIGHT, sharp_enough
 
     h, w = frame.shape[:2]
-    out: dict[int, tuple[int, float]] = {}
+    eligible: list[int] = []
     for k, d in enumerate(people):
         box = (d.x1, d.y1, d.x2, d.y2)
         if d.y2 - d.y1 < MIN_BOX_HEIGHT or d.x1 < 2 or d.y1 < 2 or d.x2 > w - 2 or d.y2 > h - 2:
             continue
         if not sharp_enough(frame, box):
             continue
-        r = reader.read_player(frame, box)
+        eligible.append(k)
+    if gate is not None:
+        boxes = [(people[k].x1, people[k].y1, people[k].x2, people[k].y2) for k in eligible]
+        chosen = [(j, eligible[j]) for j in gate.pick(index, boxes)]
+    else:
+        chosen = list(enumerate(eligible))
+    out: dict[int, tuple[int, float]] = {}
+    for j, k in chosen:
+        d = people[k]
+        r = reader.read_player(frame, (d.x1, d.y1, d.x2, d.y2))
+        if gate is not None:
+            gate.note(index, j, r)
         if r is not None:
             out[k] = (r.number, round(r.confidence, 3))
     return out

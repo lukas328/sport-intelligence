@@ -205,9 +205,36 @@ def run_once(video: Path, models: Path, work: Path, overrides: dict | None = Non
         "tracks": len(result.get("tracks") or []),
         "versions": result.get("versions"),
         "ball_model_status": stats.get("ball_model_status"),
+        "observe_counters": stats.get("observe_counters"),
+        "numbers": _number_quality(result.get("tracks") or []),
+        "scoreboard": _board_quality(result.get("scoreboard")),
         "ball": stats.get("ball"),
         "error": rep.error or result.get("error"),
     }
+
+
+def _number_quality(tracks: list[dict]) -> dict:
+    """Share of tracks with a voted shirt number: all tracks and the longer ones (at least 10 s,
+    the players that matter for the stats)."""
+
+    def share(ts: list[dict]) -> float | None:
+        return round(sum(t.get("number") is not None for t in ts) / len(ts), 3) if ts else None
+
+    long = [t for t in tracks if (t.get("last_ms", 0) - t.get("first_ms", 0)) >= 10_000]
+    return {
+        "tracks": len(tracks),
+        "with_number": share(tracks),
+        "tracks_10s": len(long),
+        "with_number_10s": share(long),
+        "numbers_10s": sorted({t["number"] for t in long if t.get("number") is not None}),
+    }
+
+
+def _board_quality(board: dict | None) -> dict | None:
+    if not isinstance(board, dict):
+        return None
+    keep = ("source", "readings", "calls", "ocr", "goals", "board_clock")
+    return {k: (len(v) if isinstance(v, list) else v) for k, v in board.items() if k in keep}
 
 
 def main() -> None:
