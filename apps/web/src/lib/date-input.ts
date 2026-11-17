@@ -61,3 +61,15 @@ export function isoDay(text: string): string {
   const d = parseDate(text);
   return d ? `${d[0]}-${pad(d[1])}-${pad(d[2])}` : "";
 }
+
+/**
+ * What the kick-off field of a new match proposes. Not the minute of the click (at night that was
+ * «00:57»). A coach creates a match by hand mostly to upload the video of one just played (future
+ * matches come from the schedule of handball.ch), so the proposal lies in the past, where the
+ * match page opens on the upload: during the day the last full hour, at night and early in the
+ * morning (before nine) last evening at 18:00. The fields stay editable and required.
+ */
+export function defaultKickoff(now = new Date()): { day: string; clock: string } {
+  if (now.getHours() < 9) return { day: formatDate(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1)), clock: "18:00" };
+  return { day: formatDate(now), clock: `${pad(now.getHours())}:00` };
+}
