@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, MutableMapping
 from typing import Any
 
 import pytest
@@ -88,7 +88,7 @@ async def test_request_transaction_commits_before_the_response_is_sent() -> None
     async def receive() -> dict[str, Any]:
         return {"type": "http.request", "body": b"", "more_body": False}
 
-    async def send(message: dict[str, Any]) -> None:
+    async def send(message: MutableMapping[str, Any]) -> None:
         if message["type"] == "http.response.start":
             order.append("response")
 
