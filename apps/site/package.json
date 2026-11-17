@@ -8,7 +8,9 @@
     "build": "next build && node scripts/redirects.mjs && node scripts/check-out.mjs",
     "lint": "eslint . --max-warnings 0",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "shots": "node scripts/product-shots/capture.mjs && node scripts/product-shots/compose.mjs",
+    "shots:compose": "node scripts/product-shots/compose.mjs"
   },
   "dependencies": {
     "@handball/court": "workspace:*",

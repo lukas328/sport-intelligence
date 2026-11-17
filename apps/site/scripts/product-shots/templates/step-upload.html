@@ -1,0 +1,15 @@
+<!doctype html>
+<!-- Step «Hochladen»: the phone with the upload sheet, the first match ringed. -->
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../stage.css" />
+<div id="stage"><div class="keil" style="--from: 76%; --to: 52%"></div></div>
+<script src="../stage.js"></script>
+<script>
+  S.stage(640, 620);
+  // the phone stands on the bottom edge: its lower part with the sheet is what shows
+  const s = S.phone("hochladen-phone", { left: 214, bottom: 26 });
+  const row = S.rect("hochladen-phone", "first", [24, 583, 342, 56]);
+  S.ring(s, row, 4);
+  S.callout("pick", [30, 300], S.at(s, row, 0.03, 0.15), "tl", 0.3);
+  S.done();
+</script>

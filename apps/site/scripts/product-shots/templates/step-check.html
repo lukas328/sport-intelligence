@@ -1,0 +1,19 @@
+<!doctype html>
+<!-- Step «Prüfen»: the question «Passt das Spielfeld?» with the four yellow points the analysis
+     proposes, and the answer «Passt». -->
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../stage.css" />
+<div id="stage"><div class="keil" style="--from: 76%; --to: 52%"></div></div>
+<script src="../stage.js"></script>
+<script>
+  S.stage(640, 620);
+  const pts = S.rect("pruefen-phone", "points", [32, 103, 325, 62]);
+  const yes = S.rect("pruefen-phone", "yes", [16, 614, 358, 56]);
+  // from just above the points down to the answers
+  const s = S.phone("pruefen-phone", { left: 214, y: pts[1] - 24, at: 0 });
+  S.ring(s, yes, 4);
+  // the left point of the four: the lowest left corner of their box
+  S.callout("propose", [30, 300], S.at(s, pts, 0.02, 0.86), "bl", -0.3);
+  S.callout("confirm", [30, 590], S.at(s, yes, 0.02, 0.5), "tl", -0.25);
+  S.done();
+</script>

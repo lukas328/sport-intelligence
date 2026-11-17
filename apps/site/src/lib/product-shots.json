@@ -1,0 +1,237 @@
+{
+  "get-search": {
+    "width": 720,
+    "height": 520,
+    "callouts": [
+      {
+        "id": "answer",
+        "from": [
+          72.52,
+          58.95
+        ],
+        "to": [
+          66.49,
+          58.95
+        ],
+        "place": "r",
+        "bend": 0
+      },
+      {
+        "id": "play",
+        "from": [
+          16.32,
+          88.16
+        ],
+        "to": [
+          16.32,
+          80.85
+        ],
+        "place": "bl",
+        "bend": 0
+      }
+    ]
+  },
+  "get-season": {
+    "width": 720,
+    "height": 520,
+    "callouts": [
+      {
+        "id": "bars",
+        "from": [
+          52.1,
+          51.61
+        ],
+        "to": [
+          55.88,
+          51.61
+        ],
+        "place": "l",
+        "bend": 0
+      },
+      {
+        "id": "dots",
+        "from": [
+          85.17,
+          60.04
+        ],
+        "to": [
+          91.66,
+          49.31
+        ],
+        "place": "br",
+        "bend": -0.25
+      }
+    ]
+  },
+  "get-video": {
+    "width": 720,
+    "height": 520,
+    "callouts": [
+      {
+        "id": "tap",
+        "from": [
+          36.34,
+          22.09
+        ],
+        "to": [
+          69.19,
+          35.75
+        ],
+        "place": "t",
+        "bend": 0.22
+      },
+      {
+        "id": "timeline",
+        "from": [
+          43.78,
+          69.38
+        ],
+        "to": [
+          31.38,
+          76.82
+        ],
+        "place": "tl",
+        "bend": -0.2
+      }
+    ]
+  },
+  "hero-laptop": {
+    "width": 760,
+    "height": 500,
+    "callouts": [
+      {
+        "id": "where",
+        "from": [
+          10.26,
+          40.37
+        ],
+        "to": [
+          31.26,
+          80.23
+        ],
+        "place": "tl",
+        "bend": 0.28
+      }
+    ]
+  },
+  "hero-phone": {
+    "width": 300,
+    "height": 1446,
+    "callouts": []
+  },
+  "share": {
+    "width": 640,
+    "height": 620,
+    "callouts": [
+      {
+        "id": "chat",
+        "from": [
+          4.69,
+          19.35
+        ],
+        "to": [
+          38.99,
+          21.66
+        ],
+        "place": "bl",
+        "bend": 0.3
+      },
+      {
+        "id": "nologin",
+        "from": [
+          4.69,
+          90.32
+        ],
+        "to": [
+          38.27,
+          81.04
+        ],
+        "place": "tl",
+        "bend": -0.25
+      }
+    ]
+  },
+  "step-check": {
+    "width": 640,
+    "height": 620,
+    "callouts": [
+      {
+        "id": "propose",
+        "from": [
+          4.69,
+          48.39
+        ],
+        "to": [
+          41.41,
+          12.22
+        ],
+        "place": "bl",
+        "bend": -0.3
+      },
+      {
+        "id": "confirm",
+        "from": [
+          4.69,
+          95.16
+        ],
+        "to": [
+          38.99,
+          88.48
+        ],
+        "place": "tl",
+        "bend": -0.25
+      }
+    ]
+  },
+  "step-result": {
+    "width": 640,
+    "height": 620,
+    "callouts": [
+      {
+        "id": "things",
+        "from": [
+          4.69,
+          24.19
+        ],
+        "to": [
+          39.54,
+          11.87
+        ],
+        "place": "bl",
+        "bend": -0.3
+      },
+      {
+        "id": "dots",
+        "from": [
+          4.69,
+          72.58
+        ],
+        "to": [
+          84.95,
+          41.29
+        ],
+        "place": "bl",
+        "bend": 0.25
+      }
+    ]
+  },
+  "step-upload": {
+    "width": 640,
+    "height": 620,
+    "callouts": [
+      {
+        "id": "pick",
+        "from": [
+          4.69,
+          48.39
+        ],
+        "to": [
+          40.68,
+          54.07
+        ],
+        "place": "tl",
+        "bend": 0.3
+      }
+    ]
+  }
+}
