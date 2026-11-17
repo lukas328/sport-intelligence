@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Phone } from "@/components/device";
-import { productShot } from "@/lib/product-shots";
 import { ProductShot } from "@/components/product-shot";
 import { JsonLd } from "@/components/json-ld";
 import { KitScope, StartLink } from "@/components/kit";
@@ -10,13 +8,8 @@ import { PageHead, SectionHead, Updated } from "@/components/wurf-head";
 import { APP_LOCALE, messages, type Locale } from "@/lib/i18n";
 import { ORG_ID, graph, organization, webPage } from "@/lib/schema";
 import { pageMeta } from "@/lib/seo";
-import { launchState } from "@/lib/files";
-import { LAUNCHED } from "@/lib/site";
 
 type Props = { params: Promise<{ locale: Locale }> };
-
-/** the team's start page on the phone and, further down, a collection as it arrives in the chat (public/product, scripts/product-shots) */
-const phone = productShot("hero-phone");
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
@@ -37,7 +30,6 @@ export default async function AboutUs({ params }: Props) {
       <JsonLd data={graph(organization(), { ...webPage(locale, "ueber-uns", t.metaTitle, t.description, undefined, "AboutPage"), about: { "@id": ORG_ID } })} />
       <PageHead kick={t.title} title={t.head} lead={t.lead}>
         <Updated locale={locale} />
-        {!LAUNCHED && <p className="mt-4 max-w-[40rem] border-l-4 border-attn bg-paper px-4 py-2 text-[1.0625rem]">{launchState(m)}</p>}
       </PageHead>
       <div className="wrap">
         <div className="mt-12 grid grid-cols-1 gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)]">
@@ -67,8 +59,8 @@ export default async function AboutUs({ params }: Props) {
           </div>
           <div className="min-w-0">
             <div className="lg:sticky lg:top-6">
-              <figure className="m-0 max-w-[18rem]">
-                <Phone src={phone.src} srcSet={phone.srcSet} sizes="18rem" width={phone.width} height={phone.height} alt={t.shotAlt} />
+              <figure className="m-0 max-w-[26rem]">
+                <ProductShot name="step-result" alt={t.shotAlt} labels={m.product["step-result"]} sizes="(min-width: 1024px) 26rem, calc(100vw - 2rem)" />
                 <figcaption className="mt-3 text-[1.0625rem] text-ink-2">{t.shotCaption}</figcaption>
               </figure>
               <ProductShot name="share" alt={m.home.shareAlt} labels={m.product.share} sizes="(min-width: 1024px) 26rem, calc(100vw - 2rem)" className="mt-10 max-w-[26rem]" />
@@ -81,7 +73,7 @@ export default async function AboutUs({ params }: Props) {
           <ul className="mt-2 grid grid-cols-1 md:grid-cols-3">
             {m.about.principles.map((p) => (
               <li key={p.title} className="border-b border-rule py-6 md:border-b-0 md:px-6 md:first:pl-0 md:[&+li]:border-l md:[&+li]:border-l-rule">
-                <h3 className="font-slant text-[1.5rem]">{p.title}</h3>
+                <h3 className="text-[1.375rem]">{p.title}</h3>
                 <p className="mt-1">{p.text}</p>
               </li>
             ))}

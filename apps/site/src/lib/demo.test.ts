@@ -53,6 +53,19 @@ describe("demo match", () => {
     expect(match.events.some((e) => e.type === "turnover")).toBe(false);
   });
 
+  it("tells the start page's story: lost 16:18, 9 of 18 conceded over the right wing", () => {
+    expect(match.stats.timeline.final).toEqual({ own: 16, opp: 18 });
+    const t = threeThings(demoGoals(match));
+    expect(t.map((x) => [x.key, x.value, x.of, x.zone])).toEqual([
+      ["conceded_zone", 9, 18, "ra"],
+      ["conceded_fast_breaks", 4, 18, "gs"],
+      ["scored_zone", 6, 16, "kr"],
+    ]);
+    // the scene on the tactics camera is one of the nine
+    expect(demoView(de).sceneGoal.zone).toBe("ra");
+    expect(demoGoals(match).every((g) => g.confirmed)).toBe(true);
+  });
+
   it("shows the ball in every frame of the scene: the demo is invented, so we know where it is", () => {
     const v = demoView(de);
     expect(v.scene.ball.length).toBeGreaterThanOrEqual(2);

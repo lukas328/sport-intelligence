@@ -11,7 +11,6 @@
   const answer = S.rect("szenen", "answer", [32, 466, 828, 107]);
   const play = S.rect("szenen", "play", [32, 584, 168, 48]);
   const s = S.browser("szenen", [16, search[1] - 26, 864, 560], { left: 28, top: 30, width: 760 });
-  S.spot(s, [search, [answer[0], answer[1], answer[2] * 0.62, answer[3]], play], 8, 0.22);
   S.ring(s, [answer[0], answer[1], answer[2] * 0.6, answer[3]], 6);
   S.ring(s, play, 5);
   S.callout("answer", S.at(s, answer, 0.66, 0.5), S.at(s, answer, 0.6, 0.5), "r", 0);

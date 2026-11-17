@@ -7,9 +7,8 @@ import { cn } from "@/lib/cn";
  * over the picture and the labels as real text in the visitor's language, so they stay sharp,
  * translatable and readable for screen readers. The picture keeps its size (width and height),
  * so nothing moves while it loads; the arrows draw themselves when the block glides in. On a
- * small picture (under 28rem wide) the labels would cover the app, so they shrink to numbers and
- * the words stand in a short list below (that list is only for the eye: screen readers read the
- * labels themselves).
+ * small picture (under 28rem wide) the labels would cover the app, so arrows and labels go and
+ * the words stand in a short list below. Screen readers always read that list, never the labels.
  */
 export function ProductShot({
   name,
@@ -68,9 +67,10 @@ export function ProductShot({
                 );
               })}
             </svg>
-            {callouts.map((c, i) => (
+            {callouts.map((c) => (
               <span
                 key={c.id}
+                aria-hidden
                 className="shot-label"
                 data-place={c.place}
                 style={{
@@ -79,25 +79,20 @@ export function ProductShot({
                   maxWidth: `${Math.min(room(c.place, c.from[0]), c.max ?? 46)}%`,
                 }}
               >
-                <span aria-hidden className="shot-num">
-                  {i + 1}
-                </span>
-                <span className="shot-text">{labels[c.id]}</span>
+                {labels[c.id]}
               </span>
             ))}
           </>
         )}
       </div>
       {callouts.length > 0 && (
-        // on a small picture the labels shrink to their numbers and the words stand below
-        <ol aria-hidden className="shot-legend">
-          {callouts.map((c, i) => (
-            <li key={c.id}>
-              <span className="shot-num">{i + 1}</span>
-              {labels[c.id]}
-            </li>
+        // the words once more as a list: read by screen readers, and shown under a small picture,
+        // where labels would cover the app (W16: the words below or the labels on it, never both)
+        <ul className="shot-legend">
+          {callouts.map((c) => (
+            <li key={c.id}>{labels[c.id]}</li>
           ))}
-        </ol>
+        </ul>
       )}
       {caption && <figcaption className="mt-3 text-[1.0625rem]">{caption}</figcaption>}
     </figure>

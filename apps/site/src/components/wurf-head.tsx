@@ -128,7 +128,7 @@ export function SectionHead({ id, title, note, as = "h2" }: { id?: string; title
   const T = as;
   return (
     <div className="section-head flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
-      <T id={id} className={as === "h2" ? "text-[1.875rem] md:text-[2.375rem]" : "font-slant text-[1.5rem] md:text-[1.75rem]"}>
+      <T id={id} className={as === "h2" ? "text-[1.875rem] md:text-[2.375rem]" : "text-[1.375rem] md:text-[1.5rem]"}>
         {title}
       </T>
       {note && <span className="text-[1.0625rem] text-ink-2">{note}</span>}

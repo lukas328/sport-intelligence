@@ -21,19 +21,19 @@
   },
   "get-season": {
     "width": 720,
-    "height": 520,
+    "height": 430,
     "callouts": [
       {
         "id": "bars",
-        "from": [52.1, 51.61],
-        "to": [55.88, 51.61],
+        "from": [52.1, 40.03],
+        "to": [55.88, 40.03],
         "place": "l",
         "bend": 0
       },
       {
         "id": "dots",
-        "from": [85.17, 60.04],
-        "to": [91.66, 49.31],
+        "from": [85.17, 50.22],
+        "to": [91.66, 37.25],
         "place": "br",
         "bend": -0.25
       }
@@ -59,23 +59,19 @@
       }
     ]
   },
-  "hero-laptop": {
-    "width": 760,
-    "height": 500,
+  "hero-thing": {
+    "width": 480,
+    "height": 480,
     "callouts": [
       {
-        "id": "where",
-        "from": [10.26, 40.37],
-        "to": [31.26, 80.23],
-        "place": "tl",
-        "bend": 0.28
+        "id": "dots",
+        "from": [76.53, 82.48],
+        "to": [81.11, 65.4],
+        "place": "l",
+        "bend": 0.25,
+        "max": 60
       }
     ]
-  },
-  "hero-phone": {
-    "width": 300,
-    "height": 1446,
-    "callouts": []
   },
   "share": {
     "width": 640,

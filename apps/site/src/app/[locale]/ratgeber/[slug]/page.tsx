@@ -143,7 +143,7 @@ export default async function GuidePage({ params }: Props) {
                     const l = own ? locale : "de";
                     return (
                       <li key={r.slug} className="border-b border-rule py-4">
-                        <Link href={`/${l}/ratgeber/${r.slug}/`} hrefLang={own ? undefined : "de-CH"} lang={own ? undefined : "de-CH"} className="font-slant text-[1.375rem] hover:underline">
+                        <Link href={`/${l}/ratgeber/${r.slug}/`} hrefLang={own ? undefined : "de-CH"} lang={own ? undefined : "de-CH"} className="font-bold text-[1.375rem] hover:underline">
                           {r.title[l]}
                         </Link>
                         <p className="mt-1 text-ink-2" lang={own ? undefined : "de-CH"}>
@@ -179,7 +179,7 @@ export default async function GuidePage({ params }: Props) {
                 </nav>
               )}
               <div className="mt-8 border-2 border-ink bg-paper p-5">
-                <p className="font-slant text-[1.375rem] leading-tight">{m.home.finalTitle}</p>
+                <p className="font-bold text-[1.375rem] leading-tight">{m.home.finalTitle}</p>
                 <p className="mt-2 text-[1.0625rem]">{t.try}</p>
                 <StartLink appLocale={APP_LOCALE[locale]} className="btn btn-ink mt-4 w-full">
                   {m.cta.start}

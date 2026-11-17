@@ -1,17 +1,20 @@
 <!doctype html>
-<!-- «Die Saison im Blick»: what repeats, one bar per match, and where on the court it happens. -->
+<!-- «Die Saison im Blick»: what repeats, one bar per match, and where on the court it happens.
+     Cut below the page's title: the season's sentence belongs to the seeded club, not to the story
+     on the website. -->
 <meta charset="utf-8" />
 <link rel="stylesheet" href="../stage.css" />
-<div id="stage"><div class="keil" style="--from: 70%; --to: 40%"></div></div>
+<div id="stage"><div class="keil" style="--from: 72%; --to: 44%"></div></div>
 <script src="../stage.js"></script>
 <script>
-  S.stage(720, 520);
+  S.stage(720, 430);
   const bars = S.rect("saison", "bars", [728, 445, 132, 85]);
   const dots = S.rect("saison", "dots", [1201, 420, 41, 48]);
   const court = S.rect("saison", "court", [908, 399, 340, 276]);
-  // from under the app's header (the season's sentence) to the bottom of the capture
+  // from «Was sich wiederholt» (just above the rows with the bars) to the bottom of the capture
   const c = S.cap("saison");
-  const s = S.browser("saison", [16, 66, 1248, c.h - 66], { left: 28, top: 30, width: 664 });
+  const from = court[1] - 120;
+  const s = S.browser("saison", [16, from, 1248, c.h - from], { left: 28, top: 30, width: 664 });
   S.ring(s, bars, 6);
   S.ring(s, dots, 8, true);
   S.callout("bars", S.at(s, bars, -0.45, 0.5), S.at(s, bars, -0.06, 0.5), "l", 0);

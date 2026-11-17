@@ -34,7 +34,7 @@ export default async function MatchdayTemplate({ params }: Props) {
         <div className="mt-4 grid grid-cols-1 gap-x-10 md:grid-cols-2 print:grid-cols-2">
           {t.groups.map((g) => (
             <section key={g.title} className="mt-4 break-inside-avoid print:mt-[6mm]">
-              <h3 className="font-slant border-b-2 border-ink pb-1 text-[1.375rem]">{g.title}</h3>
+              <h3 className="border-b-2 border-ink pb-1 text-[1.375rem]">{g.title}</h3>
               <ul className="mt-1">
                 {g.items.map((x) => (
                   <li key={x} className="flex gap-3 border-b border-rule py-2 leading-[1.45] print:py-[2.7mm] print:text-[13pt]">

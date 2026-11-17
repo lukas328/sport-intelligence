@@ -14,11 +14,11 @@ export const SITE_NAME = "Handball Intelligence";
 export const SITE_UPDATED = "2026-11-16";
 
 /**
- * The plan table in packages/plans is a placeholder (OPEN_QUESTIONS Q-PROD-4, Q-SITE-1). While this
- * is false, the pages say «noch nicht endgültig» and no price goes into structured data or llms.txt
- * as a fixed offer.
+ * The prices of packages/plans go into structured data as offers. The website describes the
+ * product as it will be at release, without «noch nicht endgültig» (Lukas, 17.11., BEFUNDE-2 W32);
+ * set to false to keep prices out of structured data again.
  */
-export const PRICES_FINAL = false;
+export const PRICES_FINAL = true;
 
 /**
  * Whether the analysis uses every file of a match (OPEN_QUESTIONS Q-VIDEO-PARTS). True since the
@@ -26,13 +26,6 @@ export const PRICES_FINAL = false;
  * guide and the help articles follow this switch.
  */
 export const MULTI_FILE = true;
-
-/**
- * Public launch. While false, Fakten, Über uns, llms.txt and the question «Kann ich es heute schon
- * nutzen?» say that the site is before the launch and that operator details, terms and privacy
- * policy follow (m.facts.launchPre, dated with SITE_UPDATED). Set to true on launch day.
- */
-export const LAUNCHED = false;
 
 /** Operating company for the imprint; left empty until it is known (OPEN_QUESTIONS Q-ADD-3). */
 export const COMPANY = {

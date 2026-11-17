@@ -42,17 +42,16 @@ export function Things({
   pickHint,
   scenesOf,
   timesOf,
-  estimated,
   noVideo,
   scenesHref,
 }: {
   things: ThingView[];
-  legend: { solid: string; dashed: string; thin: string };
+  /** the line legend (the demo page); the start page leaves it out */
+  legend?: { solid: string; thin: string };
   selectable?: boolean;
   pickHint?: string;
   scenesOf?: string;
   timesOf?: string;
-  estimated?: string;
   noVideo?: string;
   /** on the start page the scene count leads to the demo, where the scenes are listed */
   scenesHref?: string;
@@ -113,26 +112,23 @@ export function Things({
           );
         })}
       </ol>
-      <p className="mt-2 flex flex-wrap gap-x-6 gap-y-2 text-base text-ink-2">
-        <span className="inline-flex items-center gap-2">
-          <i aria-hidden className="inline-block h-[3px] w-7 bg-ink" />
-          {legend.solid}
-        </span>
-        <span className="inline-flex items-center gap-2">
-          <i aria-hidden className="inline-block h-[3px] w-7 bg-[repeating-linear-gradient(90deg,var(--ink)_0_6px,transparent_6px_10px)]" />
-          {legend.dashed}
-        </span>
-        <span>{legend.thin}</span>
-      </p>
+      {legend && (
+        <p className="mt-2 flex flex-wrap gap-x-6 gap-y-2 text-base text-ink-2">
+          <span className="inline-flex items-center gap-2">
+            <i aria-hidden className="inline-block h-[3px] w-7 bg-ink" />
+            {legend.solid}
+          </span>
+          <span>{legend.thin}</span>
+        </p>
+      )}
       {selectable && scenesOf && (
         <section aria-live="polite" className="mt-10">
-          <h3 className="font-slant section-head text-[1.5rem] md:text-[1.75rem]">{(chosen.kind === "times" && timesOf ? timesOf : scenesOf).replace("{i}", String(open + 1))}</h3>
+          <h3 className="section-head text-[1.375rem] md:text-[1.5rem]">{(chosen.kind === "times" && timesOf ? timesOf : scenesOf).replace("{i}", String(open + 1))}</h3>
           <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {chosen.scenes.map((s, i) => (
               <li key={i} className="flex min-h-14 items-center gap-3 border-b border-rule py-2 text-[1.0625rem]">
                 <span className="font-num w-16 text-[1.375rem]">{s.clock}</span>
                 <span className="min-w-0">{s.text.replace(`${s.clock} · `, "")}</span>
-                {s.estimated && estimated && <span className="ml-auto border-b-2 border-dashed border-ink-2 text-base text-ink-2">{estimated}</span>}
               </li>
             ))}
           </ul>

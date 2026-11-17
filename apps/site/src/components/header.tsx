@@ -5,19 +5,20 @@ import { APP_LOCALE, messages, type Locale } from "@/lib/i18n";
 import { loginUrl } from "@/lib/site";
 
 /**
- * The top bar: the two-coloured word mark (outside the app, never on a club colour), six
+ * The top bar: the two-coloured word mark (outside the app, never on a club colour), five
  * destinations, «Anmelden» and «Kostenlos starten». On the phone the destinations sit behind
  * «Menü» (a word, not a symbol alone); a <details> element needs no script.
  */
 export function Header({ locale }: { locale: Locale }) {
   const t = messages(locale).nav;
+  // four steps of a visitor's question, then the guides (W17); «Filmen» lives in the footer and
+  // under «So funktioniert es»
   const links: [string, string][] = [
     ["so-funktioniert-es", t.how],
-    ["aufnahme", t.filming],
     ["demo", t.demo],
     ["preise", t.pricing],
-    ["ratgeber", t.guides],
     ["hilfe", t.faq],
+    ["ratgeber", t.guides],
   ];
   const app = APP_LOCALE[locale];
   return (

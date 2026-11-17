@@ -9,6 +9,7 @@ export function DemoCamera({
   legend,
   view = "camL",
   desktopWidth = 1000,
+  shotLabel = true,
 }: {
   scene: CameraScene;
   text: CameraText;
@@ -16,11 +17,13 @@ export function DemoCamera({
   view?: "camL" | "halfB";
   /** the width the desktop picture is drawn for (dots keep their size in pixels) */
   desktopWidth?: number;
+  /** the label next to the shot spot; off where the caption already names the goal and the spot is at the edge */
+  shotLabel?: boolean;
 }) {
   return (
     <div className="on-court">
       <div className="hidden md:block">
-        <TacticsCamera scene={scene} view={view} width={desktopWidth} dot={13} text={text} />
+        <TacticsCamera scene={scene} view={view} width={desktopWidth} dot={13} text={text} showLabels={shotLabel} />
       </div>
       <div className="md:hidden">
         <TacticsCamera scene={scene} view="halfB" width={358} dot={10} text={text} showLabels={false} />

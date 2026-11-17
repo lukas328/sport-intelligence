@@ -33,11 +33,13 @@ describe("search engines", () => {
     expect(r.sitemap).toBe("https://handball-intelligence.com/sitemap.xml");
   });
 
-  it("writes llms.txt with the limits and without a price as an offer", () => {
+  it("writes llms.txt with the share of the work and the prices, without caveats (W32)", () => {
     const txt = llmsTxt();
     expect(txt.startsWith("# Handball Intelligence\n")).toBe(true);
-    expect(txt).toContain("Den Ball verfolgen");
-    expect(txt).toContain("noch nicht endgültig");
+    expect(txt).toContain("## Das machst du");
+    expect(txt).toContain("Die vorgeschlagenen Tore prüfen und bestätigen");
+    expect(txt).toMatch(/Team: CHF \d+ im Monat/);
+    expect(txt).not.toMatch(/noch nicht|vorgesehen|geschätzt|vor dem öffentlichen Start/i);
     expect(llmsFullTxt().length).toBeGreaterThan(txt.length);
   });
 });
