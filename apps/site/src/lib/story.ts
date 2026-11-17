@@ -1,8 +1,8 @@
 /**
  * The start page tells one invented week (docs/ux-test/livegang/BEFUNDE-2.md, W22 to W28):
- * Saturday the demo match (public/demo/match.json) is lost 16:18, 9 of the 18 goals conceded come
+ * Saturday the demo match (public/demo/match.json) is lost 27:29, 11 of the 29 goals conceded come
  * over the right wing; Tuesday four scenes go to the team chat; three matches later the right
- * wing is closed: 3 of 22. Saturday comes from the demo match itself, so the numbers on the page
+ * wing is closed: 3 of 26. Saturday comes from the demo match itself, so the numbers on the page
  * are the demo's; «three matches later» is drawn here, invented and marked so on the page.
  */
 import type { Pt } from "@/components/anlauf/geometry";
@@ -22,7 +22,7 @@ export interface StoryCourt {
   dots: StoryDot[];
 }
 
-/** Saturday: the demo match's goals conceded and its first thing (9 of 18 over the right wing). */
+/** Saturday: the demo match's goals conceded and its first thing (11 of 29 over the right wing). */
 export function saturday(): StoryCourt & { score: string; zone: string } {
   const goals = demoGoals(MATCH);
   const first = threeThings(goals)[0]!;
@@ -41,14 +41,14 @@ export function saturday(): StoryCourt & { score: string; zone: string } {
 const LATER: [Zone, Pt, number][] = [
   ["ra", [18.6, 2.6], 3],
   ["la", [1.4, 2.6], 4],
-  ["rl", [4.8, 9.4], 3],
-  ["rm", [10, 10.4], 3],
+  ["rl", [4.8, 9.4], 4],
+  ["rm", [10, 10.4], 4],
   ["rr", [15.2, 9.4], 4],
-  ["kr", [10, 6.9], 3],
-  ["rm", [10, 7.3], 2],
+  ["kr", [10, 6.9], 4],
+  ["rm", [10, 7.3], 3],
 ];
 
-/** Three matches later: 3 of 22 over the right wing (invented, seeded, the same on every build). */
+/** Three matches later: 3 of 26 over the right wing (invented, seeded, the same on every build). */
 export function threeMatchesLater(): StoryCourt {
   let s = 20261117;
   const r = () => {

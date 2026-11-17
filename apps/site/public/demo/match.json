@@ -1,243 +1,191 @@
 {
  "events": [
   {
-   "clock_s": 56,
+   "clock_s": 25,
    "id": "e0",
    "number": 11,
    "outcome": "goal",
    "period": 1,
-   "shot_type": "fast_break",
-   "side": "opponent",
+   "shot_type": "jump_shot",
+   "side": "own",
    "type": "shot",
-   "x": 33.6,
-   "xg": 0.9,
-   "y": 9.0
+   "x": 29.7,
+   "xg": 0.38,
+   "y": 4.9
   },
   {
-   "clock_s": 240,
+   "clock_s": 31,
    "id": "e1",
-   "number": 11,
-   "outcome": "goal",
-   "period": 1,
-   "shot_type": "wing",
-   "side": "own",
-   "type": "shot",
-   "x": 38.6,
-   "xg": 0.4,
-   "y": 1.6
-  },
-  {
-   "clock_s": 265,
-   "id": "e2",
-   "number": 9,
-   "outcome": "miss",
-   "period": 1,
-   "shot_type": "pivot",
-   "side": "opponent",
-   "type": "shot",
-   "x": 33.7,
-   "xg": 0.69,
-   "y": 12.1
-  },
-  {
-   "clock_s": 337,
-   "id": "e3",
-   "number": 7,
-   "outcome": "goal",
-   "period": 1,
-   "shot_type": "wing",
-   "side": "opponent",
-   "type": "shot",
-   "x": 37.7,
-   "xg": 0.41,
-   "y": 1.5
-  },
-  {
-   "clock_s": 346,
-   "id": "e4",
-   "number": 7,
-   "outcome": "goal",
-   "period": 1,
-   "shot_type": "wing",
-   "side": "opponent",
-   "type": "shot",
-   "x": 38.1,
-   "xg": 0.36,
-   "y": 0.7
-  },
-  {
-   "clock_s": 347,
-   "id": "e5",
-   "number": 5,
-   "outcome": "save",
-   "period": 1,
-   "shot_type": "wing",
-   "side": "own",
-   "type": "shot",
-   "x": 38.6,
-   "xg": 0.36,
-   "y": 19.1
-  },
-  {
-   "clock_s": 371,
-   "id": "e6",
-   "number": 14,
-   "outcome": "goal",
-   "period": 1,
-   "shot_type": "jump_shot",
-   "side": "own",
-   "type": "shot",
-   "x": 29.2,
-   "xg": 0.4,
-   "y": 10.1
-  },
-  {
-   "clock_s": 372,
-   "id": "e7",
-   "number": 9,
-   "outcome": "save",
-   "period": 1,
-   "shot_type": "jump_shot",
-   "side": "own",
-   "type": "shot",
-   "x": 30.0,
-   "xg": 0.41,
-   "y": 5.5
-  },
-  {
-   "clock_s": 404,
-   "id": "e8",
-   "number": 9,
-   "outcome": "post",
-   "period": 1,
-   "shot_type": "jump_shot",
-   "side": "own",
-   "type": "shot",
-   "x": 30.4,
-   "xg": 0.47,
-   "y": 10.9
-  },
-  {
-   "clock_s": 577,
-   "id": "e9",
-   "number": 5,
+   "number": 3,
    "outcome": "goal",
    "period": 1,
    "shot_type": "penalty",
-   "side": "own",
+   "side": "opponent",
    "type": "shot",
    "x": 33.0,
    "xg": 0.75,
    "y": 10.0
   },
   {
-   "clock_s": 685,
-   "id": "e10",
-   "number": 3,
-   "outcome": "post",
-   "period": 1,
-   "shot_type": "jump_shot",
-   "side": "own",
-   "type": "shot",
-   "x": 30.0,
-   "xg": 0.41,
-   "y": 5.5
-  },
-  {
-   "clock_s": 691,
-   "id": "e11",
-   "number": 9,
-   "outcome": "post",
-   "period": 1,
-   "shot_type": "jump_shot",
-   "side": "opponent",
-   "type": "shot",
-   "x": 31.0,
-   "xg": 0.44,
-   "y": 15.1
-  },
-  {
-   "clock_s": 726,
-   "id": "e12",
-   "number": 22,
+   "clock_s": 47,
+   "id": "e2",
+   "number": 7,
    "outcome": "goal",
    "period": 1,
    "shot_type": "wing",
    "side": "opponent",
+   "type": "shot",
+   "x": 39.0,
+   "xg": 0.42,
+   "y": 2.1
+  },
+  {
+   "clock_s": 70,
+   "id": "e3",
+   "number": 9,
+   "outcome": "goal",
+   "period": 1,
+   "shot_type": "wing",
+   "side": "own",
    "type": "shot",
    "x": 37.8,
    "xg": 0.48,
    "y": 2.5
   },
   {
-   "clock_s": 785,
-   "id": "e13",
+   "clock_s": 83,
+   "id": "e4",
    "number": 18,
-   "outcome": "goal",
+   "outcome": "save",
    "period": 1,
    "shot_type": "jump_shot",
-   "side": "own",
+   "side": "opponent",
    "type": "shot",
    "x": 29.8,
    "xg": 0.4,
    "y": 5.9
   },
   {
-   "clock_s": 899,
-   "id": "e14",
-   "number": 11,
-   "outcome": "miss",
-   "period": 1,
-   "shot_type": "pivot",
-   "side": "opponent",
-   "type": "shot",
-   "x": 33.0,
-   "xg": 0.66,
-   "y": 11.6
-  },
-  {
-   "clock_s": 971,
-   "id": "e15",
-   "number": 5,
+   "clock_s": 104,
+   "id": "e5",
+   "number": 9,
    "outcome": "save",
-   "period": 1,
-   "shot_type": "jump_shot",
-   "side": "opponent",
-   "type": "shot",
-   "x": 30.2,
-   "xg": 0.39,
-   "y": 4.6
-  },
-  {
-   "clock_s": 990,
-   "id": "e16",
-   "number": 3,
-   "outcome": "save",
-   "period": 1,
-   "shot_type": "jump_shot",
-   "side": "opponent",
-   "type": "shot",
-   "x": 30.3,
-   "xg": 0.47,
-   "y": 9.8
-  },
-  {
-   "clock_s": 1050,
-   "id": "e17",
-   "number": 11,
-   "outcome": "post",
    "period": 1,
    "shot_type": "jump_shot",
    "side": "own",
    "type": "shot",
-   "x": 31.0,
-   "xg": 0.47,
-   "y": 6.2
+   "x": 30.0,
+   "xg": 0.41,
+   "y": 5.5
   },
   {
-   "clock_s": 1126,
-   "id": "e18",
+   "clock_s": 163,
+   "id": "e6",
+   "number": 18,
+   "outcome": "goal",
+   "period": 1,
+   "shot_type": "jump_shot",
+   "side": "own",
+   "type": "shot",
+   "x": 30.1,
+   "xg": 0.45,
+   "y": 8.9
+  },
+  {
+   "clock_s": 201,
+   "id": "e7",
+   "number": 7,
+   "outcome": "goal",
+   "period": 1,
+   "shot_type": "wing",
+   "side": "opponent",
+   "type": "shot",
+   "x": 39.2,
+   "xg": 0.4,
+   "y": 1.8
+  },
+  {
+   "clock_s": 217,
+   "id": "e8",
+   "number": 3,
+   "outcome": "goal",
+   "period": 1,
+   "shot_type": "jump_shot",
+   "side": "opponent",
+   "type": "shot",
+   "x": 31.0,
+   "xg": 0.46,
+   "y": 5.7
+  },
+  {
+   "clock_s": 314,
+   "id": "e9",
+   "number": 9,
+   "outcome": "goal",
+   "period": 1,
+   "shot_type": "wing",
+   "side": "own",
+   "type": "shot",
+   "x": 38.7,
+   "xg": 0.4,
+   "y": 18.4
+  },
+  {
+   "clock_s": 334,
+   "id": "e10",
+   "number": 18,
+   "outcome": "blocked",
+   "period": 1,
+   "shot_type": "pivot",
+   "side": "own",
+   "type": "shot",
+   "x": 33.5,
+   "xg": 0.69,
+   "y": 11.1
+  },
+  {
+   "clock_s": 343,
+   "id": "e11",
+   "number": 9,
+   "outcome": "goal",
+   "period": 1,
+   "shot_type": "pivot",
+   "side": "opponent",
+   "type": "shot",
+   "x": 33.3,
+   "xg": 0.68,
+   "y": 9.9
+  },
+  {
+   "clock_s": 486,
+   "id": "e12",
    "number": 11,
+   "outcome": "goal",
+   "period": 1,
+   "shot_type": "wing",
+   "side": "own",
+   "type": "shot",
+   "x": 38.0,
+   "xg": 0.45,
+   "y": 2.1
+  },
+  {
+   "clock_s": 556,
+   "id": "e13",
+   "number": 18,
+   "outcome": "goal",
+   "period": 1,
+   "shot_type": "fast_break",
+   "side": "own",
+   "type": "shot",
+   "x": 33.7,
+   "xg": 0.91,
+   "y": 10.9
+  },
+  {
+   "clock_s": 561,
+   "id": "e14",
+   "number": 5,
    "outcome": "goal",
    "period": 1,
    "shot_type": "pivot",
@@ -245,300 +193,14 @@
    "type": "shot",
    "x": 33.7,
    "xg": 0.69,
-   "y": 12.0
-  },
-  {
-   "clock_s": 1268,
-   "id": "e19",
-   "number": 3,
-   "outcome": "goal",
-   "period": 1,
-   "shot_type": "jump_shot",
-   "side": "opponent",
-   "type": "shot",
-   "x": 29.0,
-   "xg": 0.39,
-   "y": 9.8
-  },
-  {
-   "clock_s": 1338,
-   "id": "e20",
-   "number": 18,
-   "outcome": "goal",
-   "period": 1,
-   "shot_type": "fast_break",
-   "side": "opponent",
-   "type": "shot",
-   "x": 33.7,
-   "xg": 0.91,
-   "y": 9.2
-  },
-  {
-   "clock_s": 1368,
-   "id": "e21",
-   "number": 11,
-   "outcome": "miss",
-   "period": 1,
-   "shot_type": "pivot",
-   "side": "own",
-   "type": "shot",
-   "x": 32.7,
-   "xg": 0.64,
    "y": 7.9
   },
   {
-   "clock_s": 1371,
-   "id": "e22",
-   "number": 7,
-   "outcome": "goal",
-   "period": 1,
-   "shot_type": "wing",
-   "side": "opponent",
-   "type": "shot",
-   "x": 38.6,
-   "xg": 0.45,
-   "y": 2.3
-  },
-  {
-   "clock_s": 1417,
-   "id": "e23",
-   "number": 5,
-   "outcome": "goal",
-   "period": 1,
-   "shot_type": "pivot",
-   "side": "own",
-   "type": "shot",
-   "x": 33.7,
-   "xg": 0.7,
-   "y": 8.6
-  },
-  {
-   "clock_s": 1430,
-   "id": "e24",
-   "number": 14,
-   "outcome": "goal",
-   "period": 1,
-   "shot_type": "pivot",
-   "side": "own",
-   "type": "shot",
-   "x": 32.8,
-   "xg": 0.66,
-   "y": 9.9
-  },
-  {
-   "clock_s": 1445,
-   "id": "e25",
-   "number": 18,
-   "outcome": "blocked",
-   "period": 1,
-   "shot_type": "wing",
-   "side": "own",
-   "type": "shot",
-   "x": 38.6,
-   "xg": 0.38,
-   "y": 1.2
-  },
-  {
-   "clock_s": 1462,
-   "id": "e26",
-   "number": 5,
-   "outcome": "goal",
-   "period": 1,
-   "shot_type": "fast_break",
-   "side": "own",
-   "type": "shot",
-   "x": 33.7,
-   "xg": 0.91,
-   "y": 8.9
-  },
-  {
-   "clock_s": 1554,
-   "id": "e27",
-   "number": 14,
-   "outcome": "goal",
-   "period": 1,
-   "shot_type": "pivot",
-   "side": "opponent",
-   "type": "shot",
-   "x": 32.8,
-   "xg": 0.66,
-   "y": 9.5
-  },
-  {
-   "clock_s": 1556,
-   "id": "e28",
-   "number": 11,
-   "outcome": "goal",
-   "period": 1,
-   "shot_type": "wing",
-   "side": "own",
-   "type": "shot",
-   "x": 38.3,
-   "xg": 0.36,
-   "y": 0.7
-  },
-  {
-   "clock_s": 1658,
-   "id": "e29",
-   "number": 5,
-   "outcome": "post",
-   "period": 1,
-   "shot_type": "wing",
-   "side": "opponent",
-   "type": "shot",
-   "x": 38.8,
-   "xg": 0.39,
-   "y": 1.4
-  },
-  {
-   "clock_s": 1723,
-   "id": "e30",
-   "number": 18,
-   "outcome": "save",
-   "period": 1,
-   "shot_type": "wing",
-   "side": "opponent",
-   "type": "shot",
-   "x": 37.7,
-   "xg": 0.46,
-   "y": 2.2
-  },
-  {
-   "clock_s": 1727,
-   "id": "e31",
-   "number": 5,
-   "outcome": "miss",
-   "period": 1,
-   "shot_type": "jump_shot",
-   "side": "own",
-   "type": "shot",
-   "x": 30.5,
-   "xg": 0.41,
-   "y": 15.3
-  },
-  {
-   "clock_s": 1952,
-   "id": "e32",
-   "number": 9,
-   "outcome": "miss",
-   "period": 2,
-   "shot_type": "jump_shot",
-   "side": "own",
-   "type": "shot",
-   "x": 29.6,
-   "xg": 0.43,
-   "y": 9.8
-  },
-  {
-   "clock_s": 1953,
-   "id": "e33",
-   "number": 5,
-   "outcome": "miss",
-   "period": 2,
-   "shot_type": "jump_shot",
-   "side": "opponent",
-   "type": "shot",
-   "x": 30.5,
-   "xg": 0.42,
-   "y": 15.0
-  },
-  {
-   "clock_s": 1961,
-   "id": "e34",
-   "number": 14,
-   "outcome": "blocked",
-   "period": 2,
-   "shot_type": "jump_shot",
-   "side": "opponent",
-   "type": "shot",
-   "x": 30.6,
-   "xg": 0.44,
-   "y": 14.4
-  },
-  {
-   "clock_s": 2048,
-   "id": "e35",
-   "number": 3,
-   "outcome": "goal",
-   "period": 2,
-   "shot_type": "jump_shot",
-   "side": "own",
-   "type": "shot",
-   "x": 30.4,
-   "xg": 0.44,
-   "y": 14.0
-  },
-  {
-   "clock_s": 2091,
-   "id": "e36",
-   "number": 11,
-   "outcome": "save",
-   "period": 2,
-   "shot_type": "jump_shot",
-   "side": "own",
-   "type": "shot",
-   "x": 29.8,
-   "xg": 0.44,
-   "y": 10.5
-  },
-  {
-   "clock_s": 2203,
-   "id": "e37",
-   "number": 11,
-   "outcome": "goal",
-   "period": 2,
-   "shot_type": "jump_shot",
-   "side": "opponent",
-   "type": "shot",
-   "x": 30.9,
-   "xg": 0.45,
-   "y": 14.6
-  },
-  {
-   "clock_s": 2291,
-   "id": "e38",
+   "clock_s": 573,
+   "id": "e15",
    "number": 9,
    "outcome": "save",
-   "period": 2,
-   "shot_type": "jump_shot",
-   "side": "opponent",
-   "type": "shot",
-   "x": 30.2,
-   "xg": 0.46,
-   "y": 8.9
-  },
-  {
-   "clock_s": 2299,
-   "id": "e39",
-   "number": 5,
-   "outcome": "goal",
-   "period": 2,
-   "shot_type": "pivot",
-   "side": "own",
-   "type": "shot",
-   "x": 32.9,
-   "xg": 0.66,
-   "y": 11.8
-  },
-  {
-   "clock_s": 2301,
-   "id": "e40",
-   "number": 18,
-   "outcome": "goal",
-   "period": 2,
-   "shot_type": "penalty",
-   "side": "own",
-   "type": "shot",
-   "x": 33.0,
-   "xg": 0.75,
-   "y": 10.0
-  },
-  {
-   "clock_s": 2305,
-   "id": "e41",
-   "number": 5,
-   "outcome": "post",
-   "period": 2,
+   "period": 1,
    "shot_type": "jump_shot",
    "side": "opponent",
    "type": "shot",
@@ -547,9 +209,698 @@
    "y": 11.1
   },
   {
-   "clock_s": 2384,
-   "id": "e42",
+   "clock_s": 577,
+   "id": "e16",
    "number": 9,
+   "outcome": "post",
+   "period": 1,
+   "shot_type": "jump_shot",
+   "side": "own",
+   "type": "shot",
+   "x": 29.9,
+   "xg": 0.44,
+   "y": 10.7
+  },
+  {
+   "clock_s": 667,
+   "id": "e17",
+   "number": 18,
+   "outcome": "goal",
+   "period": 1,
+   "shot_type": "fast_break",
+   "side": "opponent",
+   "type": "shot",
+   "x": 33.7,
+   "xg": 0.91,
+   "y": 9.7
+  },
+  {
+   "clock_s": 713,
+   "id": "e18",
+   "number": 9,
+   "outcome": "goal",
+   "period": 1,
+   "shot_type": "fast_break",
+   "side": "opponent",
+   "type": "shot",
+   "x": 33.3,
+   "xg": 0.9,
+   "y": 10.0
+  },
+  {
+   "clock_s": 726,
+   "id": "e19",
+   "number": 14,
+   "outcome": "post",
+   "period": 1,
+   "shot_type": "jump_shot",
+   "side": "opponent",
+   "type": "shot",
+   "x": 30.9,
+   "xg": 0.5,
+   "y": 8.8
+  },
+  {
+   "clock_s": 735,
+   "id": "e20",
+   "number": 11,
+   "outcome": "save",
+   "period": 1,
+   "shot_type": "jump_shot",
+   "side": "own",
+   "type": "shot",
+   "x": 30.3,
+   "xg": 0.4,
+   "y": 4.7
+  },
+  {
+   "clock_s": 743,
+   "id": "e21",
+   "number": 5,
+   "outcome": "post",
+   "period": 1,
+   "shot_type": "jump_shot",
+   "side": "opponent",
+   "type": "shot",
+   "x": 30.4,
+   "xg": 0.45,
+   "y": 13.6
+  },
+  {
+   "clock_s": 809,
+   "id": "e22",
+   "number": 3,
+   "outcome": "goal",
+   "period": 1,
+   "shot_type": "penalty",
+   "side": "own",
+   "type": "shot",
+   "x": 33.0,
+   "xg": 0.75,
+   "y": 10.0
+  },
+  {
+   "clock_s": 809,
+   "id": "e23",
+   "number": 11,
+   "outcome": "goal",
+   "period": 1,
+   "shot_type": "jump_shot",
+   "side": "opponent",
+   "type": "shot",
+   "x": 30.9,
+   "xg": 0.47,
+   "y": 13.5
+  },
+  {
+   "clock_s": 810,
+   "id": "e24",
+   "number": 11,
+   "outcome": "goal",
+   "period": 1,
+   "shot_type": "jump_shot",
+   "side": "opponent",
+   "type": "shot",
+   "x": 29.3,
+   "xg": 0.41,
+   "y": 9.5
+  },
+  {
+   "clock_s": 873,
+   "id": "e25",
+   "number": 11,
+   "outcome": "goal",
+   "period": 1,
+   "shot_type": "jump_shot",
+   "side": "own",
+   "type": "shot",
+   "x": 30.7,
+   "xg": 0.49,
+   "y": 10.9
+  },
+  {
+   "clock_s": 914,
+   "id": "e26",
+   "number": 5,
+   "outcome": "goal",
+   "period": 1,
+   "shot_type": "jump_shot",
+   "side": "opponent",
+   "type": "shot",
+   "x": 30.9,
+   "xg": 0.47,
+   "y": 13.8
+  },
+  {
+   "clock_s": 934,
+   "id": "e27",
+   "number": 18,
+   "outcome": "post",
+   "period": 1,
+   "shot_type": "wing",
+   "side": "own",
+   "type": "shot",
+   "x": 38.0,
+   "xg": 0.43,
+   "y": 18.1
+  },
+  {
+   "clock_s": 965,
+   "id": "e28",
+   "number": 22,
+   "outcome": "goal",
+   "period": 1,
+   "shot_type": "wing",
+   "side": "opponent",
+   "type": "shot",
+   "x": 38.2,
+   "xg": 0.46,
+   "y": 2.3
+  },
+  {
+   "clock_s": 1022,
+   "id": "e29",
+   "number": 14,
+   "outcome": "miss",
+   "period": 1,
+   "shot_type": "jump_shot",
+   "side": "own",
+   "type": "shot",
+   "x": 30.9,
+   "xg": 0.45,
+   "y": 5.6
+  },
+  {
+   "clock_s": 1028,
+   "id": "e30",
+   "number": 7,
+   "outcome": "goal",
+   "period": 1,
+   "shot_type": "wing",
+   "side": "opponent",
+   "type": "shot",
+   "x": 37.6,
+   "xg": 0.37,
+   "y": 0.8
+  },
+  {
+   "clock_s": 1030,
+   "id": "e31",
+   "number": 9,
+   "outcome": "blocked",
+   "period": 1,
+   "shot_type": "wing",
+   "side": "own",
+   "type": "shot",
+   "x": 38.2,
+   "xg": 0.44,
+   "y": 2.0
+  },
+  {
+   "clock_s": 1050,
+   "id": "e32",
+   "number": 7,
+   "outcome": "goal",
+   "period": 1,
+   "shot_type": "wing",
+   "side": "opponent",
+   "type": "shot",
+   "x": 38.4,
+   "xg": 0.45,
+   "y": 2.3
+  },
+  {
+   "clock_s": 1126,
+   "id": "e33",
+   "number": 11,
+   "outcome": "save",
+   "period": 1,
+   "shot_type": "jump_shot",
+   "side": "opponent",
+   "type": "shot",
+   "x": 30.3,
+   "xg": 0.41,
+   "y": 14.8
+  },
+  {
+   "clock_s": 1195,
+   "id": "e34",
+   "number": 14,
+   "outcome": "goal",
+   "period": 1,
+   "shot_type": "pivot",
+   "side": "own",
+   "type": "shot",
+   "x": 32.9,
+   "xg": 0.66,
+   "y": 10.2
+  },
+  {
+   "clock_s": 1255,
+   "id": "e35",
+   "number": 3,
+   "outcome": "goal",
+   "period": 1,
+   "shot_type": "fast_break",
+   "side": "opponent",
+   "type": "shot",
+   "x": 33.7,
+   "xg": 0.91,
+   "y": 10.4
+  },
+  {
+   "clock_s": 1288,
+   "id": "e36",
+   "number": 3,
+   "outcome": "miss",
+   "period": 1,
+   "shot_type": "wing",
+   "side": "opponent",
+   "type": "shot",
+   "x": 39.2,
+   "xg": 0.38,
+   "y": 1.5
+  },
+  {
+   "clock_s": 1305,
+   "id": "e37",
+   "number": 11,
+   "outcome": "goal",
+   "period": 1,
+   "shot_type": "jump_shot",
+   "side": "own",
+   "type": "shot",
+   "x": 31.0,
+   "xg": 0.51,
+   "y": 10.6
+  },
+  {
+   "clock_s": 1317,
+   "id": "e38",
+   "number": 9,
+   "outcome": "blocked",
+   "period": 1,
+   "shot_type": "jump_shot",
+   "side": "own",
+   "type": "shot",
+   "x": 31.2,
+   "xg": 0.48,
+   "y": 6.2
+  },
+  {
+   "clock_s": 1430,
+   "id": "e39",
+   "number": 18,
+   "outcome": "blocked",
+   "period": 1,
+   "shot_type": "jump_shot",
+   "side": "own",
+   "type": "shot",
+   "x": 30.4,
+   "xg": 0.43,
+   "y": 14.2
+  },
+  {
+   "clock_s": 1430,
+   "id": "e40",
+   "number": 5,
+   "outcome": "miss",
+   "period": 1,
+   "shot_type": "jump_shot",
+   "side": "opponent",
+   "type": "shot",
+   "x": 30.0,
+   "xg": 0.41,
+   "y": 5.5
+  },
+  {
+   "clock_s": 1462,
+   "id": "e41",
+   "number": 11,
+   "outcome": "miss",
+   "period": 1,
+   "shot_type": "jump_shot",
+   "side": "opponent",
+   "type": "shot",
+   "x": 29.6,
+   "xg": 0.38,
+   "y": 14.9
+  },
+  {
+   "clock_s": 1467,
+   "id": "e42",
+   "number": 14,
+   "outcome": "post",
+   "period": 1,
+   "shot_type": "wing",
+   "side": "own",
+   "type": "shot",
+   "x": 37.9,
+   "xg": 0.35,
+   "y": 19.5
+  },
+  {
+   "clock_s": 1549,
+   "id": "e43",
+   "number": 18,
+   "outcome": "save",
+   "period": 1,
+   "shot_type": "jump_shot",
+   "side": "opponent",
+   "type": "shot",
+   "x": 30.6,
+   "xg": 0.43,
+   "y": 14.7
+  },
+  {
+   "clock_s": 1575,
+   "id": "e44",
+   "number": 9,
+   "outcome": "goal",
+   "period": 1,
+   "shot_type": "penalty",
+   "side": "opponent",
+   "type": "shot",
+   "x": 33.0,
+   "xg": 0.75,
+   "y": 10.0
+  },
+  {
+   "clock_s": 1634,
+   "id": "e45",
+   "number": 18,
+   "outcome": "save",
+   "period": 1,
+   "shot_type": "pivot",
+   "side": "own",
+   "type": "shot",
+   "x": 32.8,
+   "xg": 0.66,
+   "y": 10.7
+  },
+  {
+   "clock_s": 1683,
+   "id": "e46",
+   "number": 9,
+   "outcome": "goal",
+   "period": 1,
+   "shot_type": "pivot",
+   "side": "own",
+   "type": "shot",
+   "x": 33.2,
+   "xg": 0.68,
+   "y": 9.2
+  },
+  {
+   "clock_s": 1685,
+   "id": "e47",
+   "number": 11,
+   "outcome": "goal",
+   "period": 1,
+   "shot_type": "pivot",
+   "side": "own",
+   "type": "shot",
+   "x": 33.2,
+   "xg": 0.67,
+   "y": 8.0
+  },
+  {
+   "clock_s": 1709,
+   "id": "e48",
+   "number": 18,
+   "outcome": "save",
+   "period": 1,
+   "shot_type": "wing",
+   "side": "own",
+   "type": "shot",
+   "x": 38.5,
+   "xg": 0.38,
+   "y": 1.2
+  },
+  {
+   "clock_s": 1752,
+   "id": "e49",
+   "number": 14,
+   "outcome": "save",
+   "period": 1,
+   "shot_type": "pivot",
+   "side": "opponent",
+   "type": "shot",
+   "x": 33.7,
+   "xg": 0.7,
+   "y": 8.1
+  },
+  {
+   "clock_s": 1827,
+   "id": "e50",
+   "number": 11,
+   "outcome": "post",
+   "period": 2,
+   "shot_type": "jump_shot",
+   "side": "own",
+   "type": "shot",
+   "x": 31.0,
+   "xg": 0.48,
+   "y": 6.5
+  },
+  {
+   "clock_s": 1862,
+   "id": "e51",
+   "number": 5,
+   "outcome": "goal",
+   "period": 2,
+   "shot_type": "fast_break",
+   "side": "opponent",
+   "type": "shot",
+   "x": 33.7,
+   "xg": 0.91,
+   "y": 9.0
+  },
+  {
+   "clock_s": 1947,
+   "id": "e52",
+   "number": 14,
+   "outcome": "save",
+   "period": 2,
+   "shot_type": "wing",
+   "side": "own",
+   "type": "shot",
+   "x": 38.7,
+   "xg": 0.43,
+   "y": 2.1
+  },
+  {
+   "clock_s": 1979,
+   "id": "e53",
+   "number": 5,
+   "outcome": "miss",
+   "period": 2,
+   "shot_type": "pivot",
+   "side": "own",
+   "type": "shot",
+   "x": 33.7,
+   "xg": 0.69,
+   "y": 7.7
+  },
+  {
+   "clock_s": 1991,
+   "id": "e54",
+   "number": 5,
+   "outcome": "blocked",
+   "period": 2,
+   "shot_type": "jump_shot",
+   "side": "opponent",
+   "type": "shot",
+   "x": 31.2,
+   "xg": 0.47,
+   "y": 14.4
+  },
+  {
+   "clock_s": 2063,
+   "id": "e55",
+   "number": 3,
+   "outcome": "save",
+   "period": 2,
+   "shot_type": "jump_shot",
+   "side": "opponent",
+   "type": "shot",
+   "x": 29.7,
+   "xg": 0.43,
+   "y": 10.7
+  },
+  {
+   "clock_s": 2115,
+   "id": "e56",
+   "number": 3,
+   "outcome": "save",
+   "period": 2,
+   "shot_type": "jump_shot",
+   "side": "opponent",
+   "type": "shot",
+   "x": 31.4,
+   "xg": 0.5,
+   "y": 6.5
+  },
+  {
+   "clock_s": 2116,
+   "id": "e57",
+   "number": 11,
+   "outcome": "goal",
+   "period": 2,
+   "shot_type": "pivot",
+   "side": "own",
+   "type": "shot",
+   "x": 33.6,
+   "xg": 0.7,
+   "y": 10.2
+  },
+  {
+   "clock_s": 2121,
+   "id": "e58",
+   "number": 18,
+   "outcome": "goal",
+   "period": 2,
+   "shot_type": "wing",
+   "side": "own",
+   "type": "shot",
+   "x": 38.9,
+   "xg": 0.4,
+   "y": 1.6
+  },
+  {
+   "clock_s": 2220,
+   "id": "e59",
+   "number": 18,
+   "outcome": "post",
+   "period": 2,
+   "shot_type": "wing",
+   "side": "opponent",
+   "type": "shot",
+   "x": 37.5,
+   "xg": 0.39,
+   "y": 1.0
+  },
+  {
+   "clock_s": 2220,
+   "id": "e60",
+   "number": 14,
+   "outcome": "goal",
+   "period": 2,
+   "shot_type": "jump_shot",
+   "side": "opponent",
+   "type": "shot",
+   "x": 29.8,
+   "xg": 0.42,
+   "y": 13.4
+  },
+  {
+   "clock_s": 2336,
+   "id": "e61",
+   "number": 9,
+   "outcome": "post",
+   "period": 2,
+   "shot_type": "jump_shot",
+   "side": "own",
+   "type": "shot",
+   "x": 29.8,
+   "xg": 0.44,
+   "y": 9.9
+  },
+  {
+   "clock_s": 2388,
+   "id": "e62",
+   "number": 7,
+   "outcome": "goal",
+   "period": 2,
+   "shot_type": "wing",
+   "side": "opponent",
+   "type": "shot",
+   "x": 37.9,
+   "xg": 0.47,
+   "y": 2.5
+  },
+  {
+   "clock_s": 2451,
+   "id": "e63",
+   "number": 3,
+   "outcome": "goal",
+   "period": 2,
+   "shot_type": "penalty",
+   "side": "own",
+   "type": "shot",
+   "x": 33.0,
+   "xg": 0.75,
+   "y": 10.0
+  },
+  {
+   "clock_s": 2472,
+   "id": "e64",
+   "number": 14,
+   "outcome": "blocked",
+   "period": 2,
+   "shot_type": "jump_shot",
+   "side": "own",
+   "type": "shot",
+   "x": 30.7,
+   "xg": 0.45,
+   "y": 5.7
+  },
+  {
+   "clock_s": 2475,
+   "id": "e65",
+   "number": 3,
+   "outcome": "goal",
+   "period": 2,
+   "shot_type": "fast_break",
+   "side": "opponent",
+   "type": "shot",
+   "x": 33.7,
+   "xg": 0.91,
+   "y": 8.9
+  },
+  {
+   "clock_s": 2488,
+   "id": "e66",
+   "number": 11,
+   "outcome": "goal",
+   "period": 2,
+   "shot_type": "jump_shot",
+   "side": "opponent",
+   "type": "shot",
+   "x": 30.4,
+   "xg": 0.47,
+   "y": 9.9
+  },
+  {
+   "clock_s": 2495,
+   "id": "e67",
+   "number": 3,
+   "outcome": "miss",
+   "period": 2,
+   "shot_type": "pivot",
+   "side": "own",
+   "type": "shot",
+   "x": 33.7,
+   "xg": 0.7,
+   "y": 8.6
+  },
+  {
+   "clock_s": 2513,
+   "id": "e68",
+   "number": 11,
+   "outcome": "blocked",
+   "period": 2,
+   "shot_type": "wing",
+   "side": "opponent",
+   "type": "shot",
+   "x": 38.2,
+   "xg": 0.41,
+   "y": 1.6
+  },
+  {
+   "clock_s": 2525,
+   "id": "e69",
+   "number": 5,
    "outcome": "goal",
    "period": 2,
    "shot_type": "penalty",
@@ -560,47 +911,346 @@
    "y": 10.0
   },
   {
-   "clock_s": 2499,
-   "id": "e43",
+   "clock_s": 2579,
+   "id": "e70",
+   "number": 14,
+   "outcome": "goal",
+   "period": 2,
+   "shot_type": "wing",
+   "side": "own",
+   "type": "shot",
+   "x": 37.6,
+   "xg": 0.38,
+   "y": 1.0
+  },
+  {
+   "clock_s": 2588,
+   "id": "e71",
+   "number": 5,
+   "outcome": "goal",
+   "period": 2,
+   "shot_type": "jump_shot",
+   "side": "own",
+   "type": "shot",
+   "x": 29.8,
+   "xg": 0.44,
+   "y": 11.0
+  },
+  {
+   "clock_s": 2622,
+   "id": "e72",
+   "number": 5,
+   "outcome": "goal",
+   "period": 2,
+   "shot_type": "jump_shot",
+   "side": "opponent",
+   "type": "shot",
+   "x": 29.6,
+   "xg": 0.38,
+   "y": 5.1
+  },
+  {
+   "clock_s": 2681,
+   "id": "e73",
+   "number": 9,
+   "outcome": "goal",
+   "period": 2,
+   "shot_type": "pivot",
+   "side": "own",
+   "type": "shot",
+   "x": 33.2,
+   "xg": 0.67,
+   "y": 8.3
+  },
+  {
+   "clock_s": 2722,
+   "id": "e74",
+   "number": 14,
+   "outcome": "post",
+   "period": 2,
+   "shot_type": "pivot",
+   "side": "own",
+   "type": "shot",
+   "x": 33.7,
+   "xg": 0.69,
+   "y": 12.0
+  },
+  {
+   "clock_s": 2731,
+   "id": "e75",
+   "number": 22,
+   "outcome": "goal",
+   "period": 2,
+   "shot_type": "wing",
+   "side": "opponent",
+   "type": "shot",
+   "x": 38.6,
+   "xg": 0.34,
+   "y": 0.5
+  },
+  {
+   "clock_s": 2772,
+   "id": "e76",
+   "number": 18,
+   "outcome": "goal",
+   "period": 2,
+   "shot_type": "fast_break",
+   "side": "own",
+   "type": "shot",
+   "x": 33.7,
+   "xg": 0.91,
+   "y": 9.7
+  },
+  {
+   "clock_s": 2799,
+   "id": "e77",
+   "number": 18,
+   "outcome": "goal",
+   "period": 2,
+   "shot_type": "jump_shot",
+   "side": "own",
+   "type": "shot",
+   "x": 30.5,
+   "xg": 0.43,
+   "y": 14.5
+  },
+  {
+   "clock_s": 2806,
+   "id": "e78",
+   "number": 3,
+   "outcome": "blocked",
+   "period": 2,
+   "shot_type": "jump_shot",
+   "side": "own",
+   "type": "shot",
+   "x": 31.5,
+   "xg": 0.46,
+   "y": 15.3
+  },
+  {
+   "clock_s": 2808,
+   "id": "e79",
+   "number": 11,
+   "outcome": "goal",
+   "period": 2,
+   "shot_type": "pivot",
+   "side": "opponent",
+   "type": "shot",
+   "x": 33.5,
+   "xg": 0.69,
+   "y": 11.6
+  },
+  {
+   "clock_s": 2818,
+   "id": "e80",
+   "number": 9,
+   "outcome": "goal",
+   "period": 2,
+   "shot_type": "jump_shot",
+   "side": "own",
+   "type": "shot",
+   "x": 30.8,
+   "xg": 0.46,
+   "y": 6.1
+  },
+  {
+   "clock_s": 2881,
+   "id": "e81",
+   "number": 18,
+   "outcome": "post",
+   "period": 2,
+   "shot_type": "pivot",
+   "side": "opponent",
+   "type": "shot",
+   "x": 32.7,
+   "xg": 0.65,
+   "y": 10.7
+  },
+  {
+   "clock_s": 2958,
+   "id": "e82",
    "number": 7,
    "outcome": "goal",
    "period": 2,
    "shot_type": "wing",
    "side": "opponent",
    "type": "shot",
-   "x": 37.9,
-   "xg": 0.47,
-   "y": 2.4
+   "x": 38.6,
+   "xg": 0.36,
+   "y": 0.8
   },
   {
-   "clock_s": 2499,
-   "id": "e44",
-   "number": 11,
+   "clock_s": 2990,
+   "id": "e83",
+   "number": 18,
+   "outcome": "blocked",
+   "period": 2,
+   "shot_type": "wing",
+   "side": "opponent",
+   "type": "shot",
+   "x": 38.8,
+   "xg": 0.43,
+   "y": 2.2
+  },
+  {
+   "clock_s": 3047,
+   "id": "e84",
+   "number": 22,
+   "outcome": "goal",
+   "period": 2,
+   "shot_type": "wing",
+   "side": "opponent",
+   "type": "shot",
+   "x": 38.2,
+   "xg": 0.45,
+   "y": 2.2
+  },
+  {
+   "clock_s": 3057,
+   "id": "e85",
+   "number": 5,
+   "outcome": "goal",
+   "period": 2,
+   "shot_type": "pivot",
+   "side": "own",
+   "type": "shot",
+   "x": 33.7,
+   "xg": 0.7,
+   "y": 8.2
+  },
+  {
+   "clock_s": 3069,
+   "id": "e86",
+   "number": 5,
    "outcome": "save",
    "period": 2,
    "shot_type": "jump_shot",
    "side": "own",
    "type": "shot",
-   "x": 30.7,
-   "xg": 0.41,
-   "y": 15.6
+   "x": 30.3,
+   "xg": 0.47,
+   "y": 9.4
   },
   {
-   "clock_s": 2514,
-   "id": "e45",
-   "number": 5,
+   "clock_s": 3088,
+   "id": "e87",
+   "number": 18,
+   "outcome": "save",
+   "period": 2,
+   "shot_type": "jump_shot",
+   "side": "opponent",
+   "type": "shot",
+   "x": 31.2,
+   "xg": 0.47,
+   "y": 14.4
+  },
+  {
+   "clock_s": 3109,
+   "id": "e88",
+   "number": 11,
+   "outcome": "goal",
+   "period": 2,
+   "shot_type": "pivot",
+   "side": "own",
+   "type": "shot",
+   "x": 32.8,
+   "xg": 0.66,
+   "y": 11.0
+  },
+  {
+   "clock_s": 3273,
+   "id": "e89",
+   "number": 18,
+   "outcome": "save",
+   "period": 2,
+   "shot_type": "jump_shot",
+   "side": "own",
+   "type": "shot",
+   "x": 31.0,
+   "xg": 0.51,
+   "y": 10.0
+  },
+  {
+   "clock_s": 3291,
+   "id": "e90",
+   "number": 3,
    "outcome": "goal",
    "period": 2,
    "shot_type": "pivot",
    "side": "opponent",
    "type": "shot",
-   "x": 33.6,
-   "xg": 0.69,
-   "y": 11.5
+   "x": 33.7,
+   "xg": 0.7,
+   "y": 10.9
   },
   {
-   "clock_s": 2581,
-   "id": "e46",
+   "clock_s": 3310,
+   "id": "e91",
+   "number": 3,
+   "outcome": "save",
+   "period": 2,
+   "shot_type": "jump_shot",
+   "side": "opponent",
+   "type": "shot",
+   "x": 29.9,
+   "xg": 0.44,
+   "y": 9.5
+  },
+  {
+   "clock_s": 3341,
+   "id": "e92",
+   "number": 11,
+   "outcome": "miss",
+   "period": 2,
+   "shot_type": "wing",
+   "side": "own",
+   "type": "shot",
+   "x": 37.6,
+   "xg": 0.4,
+   "y": 1.3
+  },
+  {
+   "clock_s": 3341,
+   "id": "e93",
+   "number": 3,
+   "outcome": "goal",
+   "period": 2,
+   "shot_type": "pivot",
+   "side": "own",
+   "type": "shot",
+   "x": 33.7,
+   "xg": 0.7,
+   "y": 10.7
+  },
+  {
+   "clock_s": 3360,
+   "id": "e94",
+   "number": 18,
+   "outcome": "save",
+   "period": 2,
+   "shot_type": "jump_shot",
+   "side": "own",
+   "type": "shot",
+   "x": 30.4,
+   "xg": 0.41,
+   "y": 5.1
+  },
+  {
+   "clock_s": 3377,
+   "id": "e95",
+   "number": 5,
+   "outcome": "blocked",
+   "period": 2,
+   "shot_type": "pivot",
+   "side": "opponent",
+   "type": "shot",
+   "x": 33.7,
+   "xg": 0.69,
+   "y": 12.2
+  },
+  {
+   "clock_s": 3456,
+   "id": "e96",
    "number": 7,
    "outcome": "goal",
    "period": 2,
@@ -608,330 +1258,135 @@
    "side": "opponent",
    "type": "shot",
    "x": 38.8,
-   "xg": 0.4,
-   "y": 1.7
-  },
-  {
-   "clock_s": 2676,
-   "id": "e47",
-   "number": 11,
-   "outcome": "goal",
-   "period": 2,
-   "shot_type": "jump_shot",
-   "side": "own",
-   "type": "shot",
-   "x": 29.9,
-   "xg": 0.39,
-   "y": 4.9
-  },
-  {
-   "clock_s": 2741,
-   "id": "e48",
-   "number": 3,
-   "outcome": "goal",
-   "period": 2,
-   "shot_type": "wing",
-   "side": "own",
-   "type": "shot",
-   "x": 38.9,
-   "xg": 0.39,
-   "y": 18.5
-  },
-  {
-   "clock_s": 2780,
-   "id": "e49",
-   "number": 11,
-   "outcome": "miss",
-   "period": 2,
-   "shot_type": "jump_shot",
-   "side": "own",
-   "type": "shot",
-   "x": 30.0,
-   "xg": 0.45,
-   "y": 10.4
-  },
-  {
-   "clock_s": 2882,
-   "id": "e50",
-   "number": 3,
-   "outcome": "goal",
-   "period": 2,
-   "shot_type": "fast_break",
-   "side": "opponent",
-   "type": "shot",
-   "x": 33.2,
-   "xg": 0.89,
-   "y": 8.9
-  },
-  {
-   "clock_s": 2937,
-   "id": "e51",
-   "number": 22,
-   "outcome": "goal",
-   "period": 2,
-   "shot_type": "wing",
-   "side": "opponent",
-   "type": "shot",
-   "x": 38.1,
-   "xg": 0.45,
-   "y": 2.1
-  },
-  {
-   "clock_s": 2956,
-   "id": "e52",
-   "number": 5,
-   "outcome": "goal",
-   "period": 2,
-   "shot_type": "pivot",
-   "side": "own",
-   "type": "shot",
-   "x": 33.2,
-   "xg": 0.68,
-   "y": 10.5
-  },
-  {
-   "clock_s": 2960,
-   "id": "e53",
-   "number": 9,
-   "outcome": "miss",
-   "period": 2,
-   "shot_type": "pivot",
-   "side": "own",
-   "type": "shot",
-   "x": 33.7,
-   "xg": 0.7,
-   "y": 10.5
-  },
-  {
-   "clock_s": 3030,
-   "id": "e54",
-   "number": 9,
-   "outcome": "save",
-   "period": 2,
-   "shot_type": "pivot",
-   "side": "opponent",
-   "type": "shot",
-   "x": 33.6,
-   "xg": 0.7,
-   "y": 10.4
-  },
-  {
-   "clock_s": 3145,
-   "id": "e55",
-   "number": 3,
-   "outcome": "blocked",
-   "period": 2,
-   "shot_type": "jump_shot",
-   "side": "own",
-   "type": "shot",
-   "x": 30.8,
-   "xg": 0.47,
-   "y": 13.5
-  },
-  {
-   "clock_s": 3163,
-   "id": "e56",
-   "number": 7,
-   "outcome": "goal",
-   "period": 2,
-   "shot_type": "wing",
-   "side": "opponent",
-   "type": "shot",
-   "x": 38.9,
    "xg": 0.34,
    "y": 0.7
   },
   {
-   "clock_s": 3222,
-   "id": "e57",
-   "number": 14,
+   "clock_s": 3468,
+   "id": "e97",
+   "number": 11,
+   "outcome": "save",
+   "period": 2,
+   "shot_type": "jump_shot",
+   "side": "own",
+   "type": "shot",
+   "x": 29.6,
+   "xg": 0.36,
+   "y": 15.4
+  },
+  {
+   "clock_s": 3496,
+   "id": "e98",
+   "number": 11,
    "outcome": "goal",
    "period": 2,
-   "shot_type": "pivot",
+   "shot_type": "jump_shot",
    "side": "own",
+   "type": "shot",
+   "x": 29.7,
+   "xg": 0.4,
+   "y": 13.9
+  },
+  {
+   "clock_s": 3499,
+   "id": "e99",
+   "number": 5,
+   "outcome": "blocked",
+   "period": 2,
+   "shot_type": "pivot",
+   "side": "opponent",
    "type": "shot",
    "x": 33.7,
    "xg": 0.7,
-   "y": 11.9
+   "y": 8.1
   },
   {
-   "clock_s": 3241,
-   "id": "e58",
-   "number": 14,
-   "outcome": "post",
+   "clock_s": 3509,
+   "id": "e100",
+   "number": 3,
+   "outcome": "goal",
    "period": 2,
-   "shot_type": "jump_shot",
+   "shot_type": "fast_break",
    "side": "own",
    "type": "shot",
-   "x": 31.4,
-   "xg": 0.47,
-   "y": 14.7
+   "x": 33.7,
+   "xg": 0.91,
+   "y": 10.8
   },
   {
-   "clock_s": 3251,
-   "id": "e59",
-   "number": 14,
-   "outcome": "miss",
-   "period": 2,
-   "shot_type": "jump_shot",
-   "side": "opponent",
-   "type": "shot",
-   "x": 30.4,
-   "xg": 0.43,
-   "y": 14.5
-  },
-  {
-   "clock_s": 3307,
-   "id": "e60",
+   "clock_s": 3543,
+   "id": "e101",
    "number": 22,
    "outcome": "goal",
    "period": 2,
    "shot_type": "wing",
    "side": "opponent",
    "type": "shot",
-   "x": 37.9,
-   "xg": 0.35,
+   "x": 38.7,
+   "xg": 0.34,
    "y": 0.5
-  },
-  {
-   "clock_s": 3330,
-   "id": "e61",
-   "number": 11,
-   "outcome": "save",
-   "period": 2,
-   "shot_type": "jump_shot",
-   "side": "own",
-   "type": "shot",
-   "x": 29.8,
-   "xg": 0.44,
-   "y": 9.5
-  },
-  {
-   "clock_s": 3340,
-   "id": "e62",
-   "number": 11,
-   "outcome": "goal",
-   "period": 2,
-   "shot_type": "fast_break",
-   "side": "opponent",
-   "type": "shot",
-   "x": 33.1,
-   "xg": 0.89,
-   "y": 10.9
-  },
-  {
-   "clock_s": 3381,
-   "id": "e63",
-   "number": 5,
-   "outcome": "save",
-   "period": 2,
-   "shot_type": "jump_shot",
-   "side": "own",
-   "type": "shot",
-   "x": 30.1,
-   "xg": 0.45,
-   "y": 11.2
-  },
-  {
-   "clock_s": 3388,
-   "id": "e64",
-   "number": 3,
-   "outcome": "save",
-   "period": 2,
-   "shot_type": "jump_shot",
-   "side": "opponent",
-   "type": "shot",
-   "x": 29.9,
-   "xg": 0.41,
-   "y": 14.1
-  },
-  {
-   "clock_s": 3447,
-   "id": "e65",
-   "number": 14,
-   "outcome": "miss",
-   "period": 2,
-   "shot_type": "pivot",
-   "side": "opponent",
-   "type": "shot",
-   "x": 33.1,
-   "xg": 0.67,
-   "y": 10.0
-  },
-  {
-   "clock_s": 3572,
-   "id": "e66",
-   "number": 3,
-   "outcome": "miss",
-   "period": 2,
-   "shot_type": "jump_shot",
-   "side": "own",
-   "type": "shot",
-   "x": 30.7,
-   "xg": 0.44,
-   "y": 14.5
   }
  ],
  "fictional": true,
- "opponent": "TV Muster",
- "own": "HC Beispiel",
+ "opponent": "TSV Seewald",
+ "own": "HC Zürichsee",
  "stats": {
   "opponent": {
    "attack_efficiency": null,
    "by_situation": {
     "equal": {
-     "goals": 18,
-     "pct": 0.5455,
-     "shots": 33
+     "goals": 29,
+     "pct": 0.58,
+     "shots": 50
     }
    },
-   "fast_break_goals": 4,
+   "fast_break_goals": 5,
    "goal_zones": {
     "BC": {
+     "goals": 7,
+     "shots": 8
+    },
+    "BL": {
+     "goals": 1,
+     "shots": 1
+    },
+    "BR": {
      "goals": 4,
      "shots": 5
     },
-    "BL": {
-     "goals": 3,
-     "shots": 4
-    },
-    "BR": {
-     "goals": 2,
-     "shots": 2
-    },
     "MC": {
-     "goals": 3,
-     "shots": 3
+     "goals": 4,
+     "shots": 7
     },
     "ML": {
-     "goals": 1,
-     "shots": 2
+     "goals": 6,
+     "shots": 7
     },
     "MR": {
-     "goals": 5,
-     "shots": 6
+     "goals": 3,
+     "shots": 5
     },
     "TL": {
-     "goals": 0,
+     "goals": 1,
      "shots": 1
     },
     "TR": {
-     "goals": 0,
-     "shots": 1
+     "goals": 3,
+     "shots": 4
     }
    },
-   "goals": 18,
-   "goals_against": 16,
+   "goals": 29,
+   "goals_against": 27,
    "known": {
     "saving": true,
     "shooting": true,
     "turnovers": false
    },
-   "misses": 5,
+   "misses": 3,
    "positions": {
     "KM": {
      "goals": 1,
-     "shots": 3,
+     "shots": 4,
      "zones": [
       "circle_centre"
      ]
@@ -942,169 +1397,15 @@
      "zones": []
     },
     "RA": {
-     "goals": 9,
-     "shots": 11,
+     "goals": 11,
+     "shots": 15,
      "zones": [
       "wing_right"
      ]
     },
     "RL": {
-     "goals": 1,
-     "shots": 6,
-     "zones": [
-      "back_left"
-     ]
-    },
-    "RM": {
-     "goals": 2,
-     "shots": 7,
-     "zones": [
-      "back_centre",
-      "half_centre"
-     ]
-    },
-    "RR": {
-     "goals": 0,
-     "shots": 1,
-     "zones": [
-      "back_right"
-     ]
-    }
-   },
-   "possessions": null,
-   "posts": 3,
-   "red_cards": 0,
-   "save_pct": 0.2727,
-   "saves": 6,
-   "seven_m_awarded": 0,
-   "seven_m_goals": 1,
-   "seven_m_shots": 1,
-   "shooting_pct": 0.5625,
-   "shots": 32,
-   "shots_blocked": 1,
-   "steals": 0,
-   "suspensions": 0,
-   "timeouts": 0,
-   "turnover_rate": null,
-   "turnovers": 0,
-   "turnovers_by_type": {},
-   "xg": 17.33,
-   "xg_coverage": 1.0,
-   "xg_goals": 18,
-   "xg_shots": 32,
-   "yellow_cards": 0,
-   "zones": {
-    "back_centre": {
-     "goals": 1,
-     "shots": 3
-    },
-    "back_left": {
-     "goals": 1,
-     "shots": 6
-    },
-    "back_right": {
-     "goals": 0,
-     "shots": 1
-    },
-    "circle_centre": {
-     "goals": 1,
-     "shots": 3
-    },
-    "fast_break": {
-     "goals": 4,
-     "shots": 4
-    },
-    "half_centre": {
-     "goals": 1,
-     "shots": 4
-    },
-    "penalty": {
-     "goals": 1,
-     "shots": 1
-    },
-    "wing_right": {
-     "goals": 9,
-     "shots": 11
-    }
-   }
-  },
-  "own": {
-   "attack_efficiency": null,
-   "by_situation": {
-    "equal": {
-     "goals": 16,
-     "pct": 0.4706,
-     "shots": 34
-    }
-   },
-   "fast_break_goals": 1,
-   "goal_zones": {
-    "BC": {
-     "goals": 1,
-     "shots": 1
-    },
-    "BL": {
      "goals": 3,
-     "shots": 4
-    },
-    "BR": {
-     "goals": 2,
-     "shots": 2
-    },
-    "MC": {
-     "goals": 2,
-     "shots": 3
-    },
-    "ML": {
-     "goals": 2,
-     "shots": 3
-    },
-    "MR": {
-     "goals": 3,
-     "shots": 4
-    },
-    "TL": {
-     "goals": 0,
-     "shots": 1
-    },
-    "TR": {
-     "goals": 3,
-     "shots": 4
-    }
-   },
-   "goals": 16,
-   "goals_against": 18,
-   "known": {
-    "saving": true,
-    "shooting": true,
-    "turnovers": false
-   },
-   "misses": 6,
-   "positions": {
-    "KM": {
-     "goals": 3,
-     "shots": 4,
-     "zones": [
-      "circle_centre"
-     ]
-    },
-    "LA": {
-     "goals": 1,
-     "shots": 2,
-     "zones": [
-      "wing_left"
-     ]
-    },
-    "RA": {
-     "goals": 2,
-     "shots": 3,
-     "zones": [
-      "wing_right"
-     ]
-    },
-    "RL": {
-     "goals": 1,
-     "shots": 6,
+     "shots": 9,
      "zones": [
       "back_left",
       "half_left"
@@ -1112,7 +1413,7 @@
     },
     "RM": {
      "goals": 4,
-     "shots": 11,
+     "shots": 9,
      "zones": [
       "back_centre",
       "half_centre"
@@ -1131,56 +1432,220 @@
    "posts": 4,
    "red_cards": 0,
    "save_pct": 0.25,
-   "saves": 6,
+   "saves": 9,
    "seven_m_awarded": 0,
-   "seven_m_goals": 2,
-   "seven_m_shots": 2,
-   "shooting_pct": 0.5,
-   "shots": 32,
-   "shots_blocked": 2,
+   "seven_m_goals": 3,
+   "seven_m_shots": 3,
+   "shooting_pct": 0.6444,
+   "shots": 45,
+   "shots_blocked": 5,
    "steals": 0,
    "suspensions": 0,
    "timeouts": 0,
    "turnover_rate": null,
    "turnovers": 0,
    "turnovers_by_type": {},
-   "xg": 16.67,
+   "xg": 23.76,
    "xg_coverage": 1.0,
-   "xg_goals": 16,
-   "xg_shots": 32,
+   "xg_goals": 29,
+   "xg_shots": 45,
    "yellow_cards": 0,
    "zones": {
     "back_centre": {
-     "goals": 1,
-     "shots": 7
+     "goals": 2,
+     "shots": 4
     },
     "back_left": {
      "goals": 1,
+     "shots": 5
+    },
+    "back_right": {
+     "goals": 1,
+     "shots": 3
+    },
+    "circle_centre": {
+     "goals": 1,
+     "shots": 4
+    },
+    "fast_break": {
+     "goals": 5,
+     "shots": 5
+    },
+    "half_centre": {
+     "goals": 2,
+     "shots": 5
+    },
+    "half_left": {
+     "goals": 2,
+     "shots": 4
+    },
+    "half_right": {
+     "goals": 1,
+     "shots": 2
+    },
+    "penalty": {
+     "goals": 3,
+     "shots": 3
+    },
+    "wing_right": {
+     "goals": 11,
+     "shots": 15
+    }
+   }
+  },
+  "own": {
+   "attack_efficiency": null,
+   "by_situation": {
+    "equal": {
+     "goals": 27,
+     "pct": 0.5192,
+     "shots": 52
+    }
+   },
+   "fast_break_goals": 3,
+   "goal_zones": {
+    "BC": {
+     "goals": 6,
+     "shots": 6
+    },
+    "BL": {
+     "goals": 1,
+     "shots": 1
+    },
+    "BR": {
+     "goals": 2,
+     "shots": 4
+    },
+    "MC": {
+     "goals": 5,
+     "shots": 5
+    },
+    "ML": {
+     "goals": 3,
+     "shots": 5
+    },
+    "MR": {
+     "goals": 2,
+     "shots": 4
+    },
+    "TL": {
+     "goals": 1,
+     "shots": 2
+    },
+    "TR": {
+     "goals": 7,
+     "shots": 9
+    }
+   },
+   "goals": 27,
+   "goals_against": 29,
+   "known": {
+    "saving": true,
+    "shooting": true,
+    "turnovers": false
+   },
+   "misses": 4,
+   "positions": {
+    "KM": {
+     "goals": 4,
+     "shots": 8,
+     "zones": [
+      "circle_centre"
+     ]
+    },
+    "LA": {
+     "goals": 1,
+     "shots": 3,
+     "zones": [
+      "wing_left"
+     ]
+    },
+    "RA": {
+     "goals": 4,
+     "shots": 8,
+     "zones": [
+      "wing_right"
+     ]
+    },
+    "RL": {
+     "goals": 2,
+     "shots": 5,
+     "zones": [
+      "back_left",
+      "half_left"
+     ]
+    },
+    "RM": {
+     "goals": 9,
+     "shots": 14,
+     "zones": [
+      "back_centre",
+      "half_centre"
+     ]
+    },
+    "RR": {
+     "goals": 2,
+     "shots": 9,
+     "zones": [
+      "back_right",
+      "half_right"
+     ]
+    }
+   },
+   "possessions": null,
+   "posts": 6,
+   "red_cards": 0,
+   "save_pct": 0.2368,
+   "saves": 9,
+   "seven_m_awarded": 0,
+   "seven_m_goals": 2,
+   "seven_m_shots": 2,
+   "shooting_pct": 0.587,
+   "shots": 46,
+   "shots_blocked": 6,
+   "steals": 0,
+   "suspensions": 0,
+   "timeouts": 0,
+   "turnover_rate": null,
+   "turnovers": 0,
+   "turnovers_by_type": {},
+   "xg": 25.13,
+   "xg_coverage": 1.0,
+   "xg_goals": 27,
+   "xg_shots": 46,
+   "yellow_cards": 0,
+   "zones": {
+    "back_centre": {
+     "goals": 2,
+     "shots": 5
+    },
+    "back_left": {
+     "goals": 2,
      "shots": 4
     },
     "back_right": {
      "goals": 2,
-     "shots": 4
+     "shots": 7
     },
     "circle_centre": {
-     "goals": 3,
-     "shots": 4
+     "goals": 4,
+     "shots": 8
     },
     "fast_break": {
-     "goals": 1,
-     "shots": 1
+     "goals": 3,
+     "shots": 3
     },
     "half_centre": {
-     "goals": 3,
-     "shots": 4
+     "goals": 7,
+     "shots": 9
     },
     "half_left": {
      "goals": 0,
-     "shots": 2
+     "shots": 1
     },
     "half_right": {
      "goals": 0,
-     "shots": 1
+     "shots": 2
     },
     "penalty": {
      "goals": 2,
@@ -1188,33 +1653,33 @@
     },
     "wing_left": {
      "goals": 1,
-     "shots": 2
+     "shots": 3
     },
     "wing_right": {
-     "goals": 2,
-     "shots": 3
+     "goals": 4,
+     "shots": 8
     }
    }
   },
   "timeline": {
    "best_run": {
     "opponent": {
-     "from_s": 2384,
+     "from_s": 914,
      "goals": 4
     },
     "own": {
-     "from_s": 1417,
+     "from_s": 486,
      "goals": 3
     }
    },
    "final": {
-    "opp": 18,
-    "own": 16
+    "opp": 29,
+    "own": 27
    },
    "longest_own_drought_s": {
-    "from_s": 1556,
-    "seconds": 492,
-    "to_s": 2048
+    "from_s": 1685,
+    "seconds": 431,
+    "to_s": 2116
    },
    "score": [
     {
@@ -1223,208 +1688,340 @@
      "own": 0
     },
     {
-     "clock_s": 56,
+     "clock_s": 25,
      "event_id": "e0",
-     "opp": 1,
-     "own": 0
+     "opp": 0,
+     "own": 1
     },
     {
-     "clock_s": 240,
+     "clock_s": 31,
      "event_id": "e1",
      "opp": 1,
      "own": 1
     },
     {
-     "clock_s": 337,
-     "event_id": "e3",
+     "clock_s": 47,
+     "event_id": "e2",
      "opp": 2,
      "own": 1
     },
     {
-     "clock_s": 346,
-     "event_id": "e4",
-     "opp": 3,
-     "own": 1
-    },
-    {
-     "clock_s": 371,
-     "event_id": "e6",
-     "opp": 3,
+     "clock_s": 70,
+     "event_id": "e3",
+     "opp": 2,
      "own": 2
     },
     {
-     "clock_s": 577,
-     "event_id": "e9",
+     "clock_s": 163,
+     "event_id": "e6",
+     "opp": 2,
+     "own": 3
+    },
+    {
+     "clock_s": 201,
+     "event_id": "e7",
      "opp": 3,
      "own": 3
     },
     {
-     "clock_s": 726,
-     "event_id": "e12",
+     "clock_s": 217,
+     "event_id": "e8",
      "opp": 4,
      "own": 3
     },
     {
-     "clock_s": 785,
-     "event_id": "e13",
+     "clock_s": 314,
+     "event_id": "e9",
      "opp": 4,
      "own": 4
     },
     {
-     "clock_s": 1126,
-     "event_id": "e18",
-     "opp": 4,
-     "own": 5
+     "clock_s": 343,
+     "event_id": "e11",
+     "opp": 5,
+     "own": 4
     },
     {
-     "clock_s": 1268,
-     "event_id": "e19",
+     "clock_s": 486,
+     "event_id": "e12",
      "opp": 5,
      "own": 5
     },
     {
-     "clock_s": 1338,
-     "event_id": "e20",
-     "opp": 6,
-     "own": 5
-    },
-    {
-     "clock_s": 1371,
-     "event_id": "e22",
-     "opp": 7,
-     "own": 5
-    },
-    {
-     "clock_s": 1417,
-     "event_id": "e23",
-     "opp": 7,
+     "clock_s": 556,
+     "event_id": "e13",
+     "opp": 5,
      "own": 6
     },
     {
-     "clock_s": 1430,
-     "event_id": "e24",
+     "clock_s": 561,
+     "event_id": "e14",
+     "opp": 5,
+     "own": 7
+    },
+    {
+     "clock_s": 667,
+     "event_id": "e17",
+     "opp": 6,
+     "own": 7
+    },
+    {
+     "clock_s": 713,
+     "event_id": "e18",
      "opp": 7,
      "own": 7
     },
     {
-     "clock_s": 1462,
-     "event_id": "e26",
+     "clock_s": 809,
+     "event_id": "e22",
      "opp": 7,
      "own": 8
     },
     {
-     "clock_s": 1554,
-     "event_id": "e27",
+     "clock_s": 809,
+     "event_id": "e23",
      "opp": 8,
      "own": 8
     },
     {
-     "clock_s": 1556,
-     "event_id": "e28",
-     "opp": 8,
+     "clock_s": 810,
+     "event_id": "e24",
+     "opp": 9,
+     "own": 8
+    },
+    {
+     "clock_s": 873,
+     "event_id": "e25",
+     "opp": 9,
      "own": 9
     },
     {
-     "clock_s": 2048,
+     "clock_s": 914,
+     "event_id": "e26",
+     "opp": 10,
+     "own": 9
+    },
+    {
+     "clock_s": 965,
+     "event_id": "e28",
+     "opp": 11,
+     "own": 9
+    },
+    {
+     "clock_s": 1028,
+     "event_id": "e30",
+     "opp": 12,
+     "own": 9
+    },
+    {
+     "clock_s": 1050,
+     "event_id": "e32",
+     "opp": 13,
+     "own": 9
+    },
+    {
+     "clock_s": 1195,
+     "event_id": "e34",
+     "opp": 13,
+     "own": 10
+    },
+    {
+     "clock_s": 1255,
      "event_id": "e35",
-     "opp": 8,
+     "opp": 14,
      "own": 10
     },
     {
-     "clock_s": 2203,
+     "clock_s": 1305,
      "event_id": "e37",
-     "opp": 9,
-     "own": 10
-    },
-    {
-     "clock_s": 2299,
-     "event_id": "e39",
-     "opp": 9,
+     "opp": 14,
      "own": 11
     },
     {
-     "clock_s": 2301,
-     "event_id": "e40",
-     "opp": 9,
-     "own": 12
+     "clock_s": 1575,
+     "event_id": "e44",
+     "opp": 15,
+     "own": 11
     },
     {
-     "clock_s": 2384,
-     "event_id": "e42",
-     "opp": 10,
-     "own": 12
-    },
-    {
-     "clock_s": 2499,
-     "event_id": "e43",
-     "opp": 11,
-     "own": 12
-    },
-    {
-     "clock_s": 2514,
-     "event_id": "e45",
-     "opp": 12,
-     "own": 12
-    },
-    {
-     "clock_s": 2581,
+     "clock_s": 1683,
      "event_id": "e46",
-     "opp": 13,
+     "opp": 15,
      "own": 12
     },
     {
-     "clock_s": 2676,
+     "clock_s": 1685,
      "event_id": "e47",
-     "opp": 13,
+     "opp": 15,
      "own": 13
     },
     {
-     "clock_s": 2741,
-     "event_id": "e48",
-     "opp": 13,
-     "own": 14
-    },
-    {
-     "clock_s": 2882,
-     "event_id": "e50",
-     "opp": 14,
-     "own": 14
-    },
-    {
-     "clock_s": 2937,
+     "clock_s": 1862,
      "event_id": "e51",
-     "opp": 15,
-     "own": 14
-    },
-    {
-     "clock_s": 2956,
-     "event_id": "e52",
-     "opp": 15,
-     "own": 15
-    },
-    {
-     "clock_s": 3163,
-     "event_id": "e56",
      "opp": 16,
-     "own": 15
+     "own": 13
     },
     {
-     "clock_s": 3222,
+     "clock_s": 2116,
      "event_id": "e57",
      "opp": 16,
-     "own": 16
+     "own": 14
     },
     {
-     "clock_s": 3307,
+     "clock_s": 2121,
+     "event_id": "e58",
+     "opp": 16,
+     "own": 15
+    },
+    {
+     "clock_s": 2220,
      "event_id": "e60",
      "opp": 17,
+     "own": 15
+    },
+    {
+     "clock_s": 2388,
+     "event_id": "e62",
+     "opp": 18,
+     "own": 15
+    },
+    {
+     "clock_s": 2451,
+     "event_id": "e63",
+     "opp": 18,
      "own": 16
     },
     {
-     "clock_s": 3340,
-     "event_id": "e62",
-     "opp": 18,
+     "clock_s": 2475,
+     "event_id": "e65",
+     "opp": 19,
      "own": 16
+    },
+    {
+     "clock_s": 2488,
+     "event_id": "e66",
+     "opp": 20,
+     "own": 16
+    },
+    {
+     "clock_s": 2525,
+     "event_id": "e69",
+     "opp": 21,
+     "own": 16
+    },
+    {
+     "clock_s": 2579,
+     "event_id": "e70",
+     "opp": 21,
+     "own": 17
+    },
+    {
+     "clock_s": 2588,
+     "event_id": "e71",
+     "opp": 21,
+     "own": 18
+    },
+    {
+     "clock_s": 2622,
+     "event_id": "e72",
+     "opp": 22,
+     "own": 18
+    },
+    {
+     "clock_s": 2681,
+     "event_id": "e73",
+     "opp": 22,
+     "own": 19
+    },
+    {
+     "clock_s": 2731,
+     "event_id": "e75",
+     "opp": 23,
+     "own": 19
+    },
+    {
+     "clock_s": 2772,
+     "event_id": "e76",
+     "opp": 23,
+     "own": 20
+    },
+    {
+     "clock_s": 2799,
+     "event_id": "e77",
+     "opp": 23,
+     "own": 21
+    },
+    {
+     "clock_s": 2808,
+     "event_id": "e79",
+     "opp": 24,
+     "own": 21
+    },
+    {
+     "clock_s": 2818,
+     "event_id": "e80",
+     "opp": 24,
+     "own": 22
+    },
+    {
+     "clock_s": 2958,
+     "event_id": "e82",
+     "opp": 25,
+     "own": 22
+    },
+    {
+     "clock_s": 3047,
+     "event_id": "e84",
+     "opp": 26,
+     "own": 22
+    },
+    {
+     "clock_s": 3057,
+     "event_id": "e85",
+     "opp": 26,
+     "own": 23
+    },
+    {
+     "clock_s": 3109,
+     "event_id": "e88",
+     "opp": 26,
+     "own": 24
+    },
+    {
+     "clock_s": 3291,
+     "event_id": "e90",
+     "opp": 27,
+     "own": 24
+    },
+    {
+     "clock_s": 3341,
+     "event_id": "e93",
+     "opp": 27,
+     "own": 25
+    },
+    {
+     "clock_s": 3456,
+     "event_id": "e96",
+     "opp": 28,
+     "own": 25
+    },
+    {
+     "clock_s": 3496,
+     "event_id": "e98",
+     "opp": 28,
+     "own": 26
+    },
+    {
+     "clock_s": 3509,
+     "event_id": "e100",
+     "opp": 28,
+     "own": 27
+    },
+    {
+     "clock_s": 3543,
+     "event_id": "e101",
+     "opp": 29,
+     "own": 27
     }
    ],
    "timed": true

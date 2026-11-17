@@ -53,13 +53,13 @@ describe("demo match", () => {
     expect(match.events.some((e) => e.type === "turnover")).toBe(false);
   });
 
-  it("tells the start page's story: lost 16:18, 9 of 18 conceded over the right wing", () => {
-    expect(match.stats.timeline.final).toEqual({ own: 16, opp: 18 });
+  it("tells the start page's story: lost 27:29, 11 of 29 conceded over the right wing", () => {
+    expect(match.stats.timeline.final).toEqual({ own: 27, opp: 29 });
     const t = threeThings(demoGoals(match));
     expect(t.map((x) => [x.key, x.value, x.of, x.zone])).toEqual([
-      ["conceded_zone", 9, 18, "ra"],
-      ["conceded_fast_breaks", 4, 18, "gs"],
-      ["scored_zone", 6, 16, "kr"],
+      ["conceded_zone", 11, 29, "ra"],
+      ["conceded_fast_breaks", 5, 29, "gs"],
+      ["scored_zone", 9, 27, "kr"],
     ]);
     // the scene on the tactics camera is one of the nine
     expect(demoView(de).sceneGoal.zone).toBe("ra");

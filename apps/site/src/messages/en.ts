@@ -211,7 +211,7 @@ const en: Messages = {
       "Decide which scenes the team sees, and share the link.",
     ],
     notFiles: "Analyse a match made of two files. Only the first one is analysed.",
-    note: "Every number comes with its base, for example 9 of 18, and every number has its scenes.",
+    note: "Every number comes with its base, for example 11 of 29, and every number has its scenes.",
   },
   how: {
     title: "How it works",
@@ -236,7 +236,7 @@ const en: Messages = {
       {
         title: "Watch and share",
         text: "Score, run of the match, every goal as a scene and the positions from above; with enough goals and their shot spots, three things to take away. The scenes that matter go to the team chat as a collection, by link.",
-        alt: "The first of the three things on a phone: 9 of 18 goals conceded on the right wing, below it the half court with the shots, all from the right wing.",
+        alt: "The first of the three things on a phone: 11 of 29 goals conceded on the right wing, below it the half court with the shots, all from the right wing.",
       },
     ],
     honestAll: "The full list, point by point",
@@ -472,7 +472,7 @@ const en: Messages = {
     principles: [
       { title: "Result before machine", text: "You see what came out. Where the analysis is unsure, it asks you instead of hiding it." },
       { title: "Little manual work", text: "A few questions instead of hours of cutting. No typing." },
-      { title: "Every number with its base", text: "9 of 18, not 50 per cent. And with every number the scenes, so you see for yourself what is behind it." },
+      { title: "Every number with its base", text: "11 of 29, not 38 per cent. And with every number the scenes, so you see for yourself what is behind it." },
     ],
     whoTitle: "Who we are",
     who: "What we stand for and where we are heading is on the page \"About us\".",
@@ -600,7 +600,7 @@ const en: Messages = {
         ],
       },
     ],
-    shotAlt: "The app on a phone after the match: the first of the three things, 9 of 18 goals conceded on the right wing, below it the half court with the shots, all on the right wing.",
+    shotAlt: "The app on a phone after the match: the first of the three things, 11 of 29 goals conceded on the right wing, below it the half court with the shots, all on the right wing.",
     shotCaption: "Picture from the app, with example data (in German).",
     contactTitle: "Write to us",
     contact: "Questions, criticism or a match where the analysis gets stuck: write to us at {email}.",

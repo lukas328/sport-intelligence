@@ -211,7 +211,7 @@ const fr: Messages = {
       "Décider quelles scènes l'équipe voit, et partager le lien.",
     ],
     notFiles: "Analyser un match composé de deux fichiers. Seul le premier est analysé.",
-    note: "Chaque chiffre est donné avec sa base, par exemple 9 sur 18, et chacun a ses scènes.",
+    note: "Chaque chiffre est donné avec sa base, par exemple 11 sur 29, et chacun a ses scènes.",
   },
   how: {
     title: "Comment ça marche",
@@ -236,7 +236,7 @@ const fr: Messages = {
       {
         title: "Regarder et partager",
         text: "Résultat, déroulement, chaque but comme scène et les positions vues d'en haut ; avec assez de buts et leur lieu de tir, trois choses à retenir. Les scènes importantes, tu les envoies en sélection par lien dans le chat de l'équipe.",
-        alt: "La première des trois choses sur le téléphone : 9 buts encaissés sur 18 par l'aile droite, en dessous le demi-terrain avec les tirs, tous à l'aile droite.",
+        alt: "La première des trois choses sur le téléphone : 11 buts encaissés sur 29 par l'aile droite, en dessous le demi-terrain avec les tirs, tous à l'aile droite.",
       },
     ],
     honestAll: "La liste complète, point par point",
@@ -472,7 +472,7 @@ const fr: Messages = {
     principles: [
       { title: "Le résultat avant la technique", text: "Tu vois ce qui en ressort. Là où l'analyse hésite, elle te le demande au lieu de le cacher." },
       { title: "Peu de travail manuel", text: "Quelques questions au lieu d'heures de découpage. Rien à taper." },
-      { title: "Chaque chiffre avec sa base", text: "9 sur 18, pas 50 pour cent. Et pour chaque chiffre les scènes, pour que tu voies toi-même ce qu'il y a derrière." },
+      { title: "Chaque chiffre avec sa base", text: "11 sur 29, pas 38 pour cent. Et pour chaque chiffre les scènes, pour que tu voies toi-même ce qu'il y a derrière." },
     ],
     whoTitle: "Qui nous sommes",
     who: "Ce que nous défendons et où nous allons figure sur la page « Qui sommes-nous ».",
@@ -600,7 +600,7 @@ const fr: Messages = {
         ],
       },
     ],
-    shotAlt: "L'app sur le téléphone après le match : le premier des trois points, 9 buts encaissés sur 18 par l'aile droite, en dessous le demi-terrain avec les tirs, tous à l'aile droite.",
+    shotAlt: "L'app sur le téléphone après le match : le premier des trois points, 11 buts encaissés sur 29 par l'aile droite, en dessous le demi-terrain avec les tirs, tous à l'aile droite.",
     shotCaption: "Image de l'app, avec des données d'exemple (en allemand).",
     contactTitle: "Écris-nous",
     contact: "Une question, une critique ou un match où l'analyse bloque : écris-nous à {email}.",

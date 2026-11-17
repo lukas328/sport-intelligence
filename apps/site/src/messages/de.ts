@@ -209,7 +209,7 @@ const de = {
       "Entscheiden, welche Szenen das Team sieht, und den Link teilen.",
     ],
     notFiles: "Ein Spiel aus zwei Dateien auswerten. Ausgewertet wird nur die erste.",
-    note: "Jede Zahl steht mit ihrer Basis da, zum Beispiel 9 von 18, und zu jeder gehören die Szenen.",
+    note: "Jede Zahl steht mit ihrer Basis da, zum Beispiel 11 von 29, und zu jeder gehören die Szenen.",
   },
   how: {
     title: "So funktioniert es",
@@ -234,7 +234,7 @@ const de = {
       {
         title: "Anschauen und teilen",
         text: "Resultat, Spielverlauf, jedes Tor als Szene und die Positionen von oben; bei genug Toren mit Wurfort drei Dinge zum Mitnehmen. Die wichtigsten Szenen schickst du als Sammlung per Link in den Teamchat.",
-        alt: "Das erste der drei Dinge am Handy: 9 von 18 Gegentoren über aussen rechts, darunter das halbe Feld mit den Würfen, alle aussen rechts.",
+        alt: "Das erste der drei Dinge am Handy: 11 von 29 Gegentoren über aussen rechts, darunter das halbe Feld mit den Würfen, alle aussen rechts.",
       },
     ],
     honestAll: "Die ganze Liste, Punkt für Punkt",
@@ -470,7 +470,7 @@ const de = {
     principles: [
       { title: "Ergebnis vor Technik", text: "Du siehst, was herauskommt. Wo die Analyse unsicher ist, fragt sie dich, statt es zu verstecken." },
       { title: "Wenig Handarbeit", text: "Ein paar Fragen statt Stunden schneiden. Eintippen musst du nichts." },
-      { title: "Jede Zahl mit ihrer Basis", text: "9 von 18, nicht 50 Prozent. Und zu jeder Zahl die Szenen, damit du selbst siehst, was dahinter steckt." },
+      { title: "Jede Zahl mit ihrer Basis", text: "11 von 29, nicht 38 Prozent. Und zu jeder Zahl die Szenen, damit du selbst siehst, was dahinter steckt." },
     ],
     whoTitle: "Wer wir sind",
     who: "Wofür wir stehen und wohin es gehen soll, steht auf der Seite «Über uns».",
@@ -598,7 +598,7 @@ const de = {
         ],
       },
     ],
-    shotAlt: "Die App am Handy nach dem Spiel: das erste der drei Dinge, 9 von 18 Gegentoren über aussen rechts, darunter das halbe Feld mit den Würfen, alle rechts aussen.",
+    shotAlt: "Die App am Handy nach dem Spiel: das erste der drei Dinge, 11 von 29 Gegentoren über aussen rechts, darunter das halbe Feld mit den Würfen, alle rechts aussen.",
     shotCaption: "Bild aus der App, mit Beispieldaten.",
     contactTitle: "Schreib uns",
     contact: "Fragen, Kritik oder ein Spiel, bei dem die Analyse nicht weiterkommt: Schreib uns an {email}.",
