@@ -19,11 +19,11 @@ Website-Feedback (aus einer anderen Sitzung, von Lukas weitergegeben, 17.11.):
 | W5 | Neue Abfolge: Hero, Problem, Was du bekommst, Demo, Filmen/Hochladen/Prüfen, Link in den Teamchat, Datenschutz, Preis, Abschluss | Website, Start | offen, empfohlen |
 | W6 | «Profis haben Analysten. Du hast den Samstagabend.» direkt unter den Hero, mit zwei Sätzen zum Problem (Lukas: sehr gut, nach oben) | Website, Start | offen, empfohlen |
 | W7 | Eigener kurzer Block, der die drei Dinge zeigt (Kernversprechen) | Website, Start | offen, empfohlen |
-| W8 | Vision «Heute, als Nächstes, später»: die ehrlichen Grenzen an einer Stelle gebündelt und als Richtung erzählt | Website, Start | offen, empfohlen |
+| W8 | Vision «Heute, als Nächstes, später» | Website, Start | ersetzt durch W32: keine Einschränkungen auf der Website |
 | W9 | Aufwand ehrlich: «Mehr musst du nicht tun» → «Die Analyse schlägt vor, du bestätigst Tor für Tor» | Website | offen, empfohlen |
 | W10 | «ein Tipp» wird als Hinweis gelesen: überall «einmal tippen» oder «antippen» | Website, App | offen, empfohlen |
 | W11 | Preisüberschrift «Ein Preis pro Team» passt nicht zu drei Plänen, z. B. «Ab CHF 39 pro Team» | Website | offen, empfohlen |
-| W12 | Demo: Ball nur mit grossem Hinweis «in echten Videos noch nicht erkannt» direkt am Bild, oder Szene ohne Ball | Website, Demo | offen, empfohlen (Hinweis am Bild) |
+| W12 | Demo: Ball zeigen, ohne Hinweis «noch nicht erkannt» (W32) | Website, Demo | offen |
 | W13 | Farbwahl über die Demo setzen oder weglassen | Website, Start | offen, eher weglassen |
 | W14 | Ratgeber-Block von der Startseite nehmen (Menü und Footer reichen) | Website, Start | offen, empfohlen |
 | W15 | Zahlenreihe «1 / 0 / 3» streichen | Website, Start | offen, empfohlen |
@@ -41,7 +41,8 @@ Website-Feedback (aus einer anderen Sitzung, von Lukas weitergegeben, 17.11.):
 | W27 | Gutes Ende: Vorher und Nachher («Erst 9 von 18, drei Spiele später 3 von 22») statt «aussen rechts bleibt offen»; Demo-Daten dafür anpassen | Website, Demo, Produktbilder | offen, empfohlen (klar als Beispiel) |
 | W28 | Teamchat als Wirkung: die Spieler sehen es selbst, statt es vom Trainer zu hören | Website | offen, empfohlen |
 | W29 | Demo-Spiel als Niederlage statt «Gewonnen. Und drei Dinge zum Mitnehmen.» | Website, Demo, Produktbilder | offen, empfohlen |
-| W30 | Vorsicht bündeln: «noch nicht», «vorgesehen», «geschätzt» an einer Stelle, sonst selbstbewusst | Website | offen, empfohlen (zusammen mit W8) |
+| W30 | «noch nicht», «vorgesehen», «geschätzt» von der Website entfernen (W32) | Website | offen |
+| W32 | **Entscheid Lukas (17.11.):** Die Website beschreibt das Produkt so, wie es beim Release sein wird: keine Hinweise wie «kommt bald», «noch nicht verfügbar», «noch nicht erkannt», «Preise noch nicht endgültig». Begründung: Testphase, Release erst, wenn alles passt. Bis zum Release gilt: Website nicht bewerben; Claude schlägt vor, Suchmaschinen bis dahin auszusperren (noindex) oder den Einstieg als Testphase zu kennzeichnen, damit niemand Funktionen erwartet, die noch nicht laufen | Website | offen, Schutz bis Release mit Lukas klären |
 | W31 | Zeit als Anker «Samstag filmen, Sonntag wissen», nur wenn die Analysedauer es hergibt | Website | zurückgestellt, bis die Dauer gemessen ist |
 
 ## Noch offen aus der ersten Runde
