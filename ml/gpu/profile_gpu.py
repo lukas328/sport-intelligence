@@ -51,7 +51,7 @@ image = (
         # ONNX Runtime with CUDA 12 as in Dockerfile.cuda (with the CUDA and cuDNN wheels)
         "onnxruntime-gpu[cuda,cudnn]>=1.20,<1.24",
         # export of the ball nets inside the container, on the CPU
-        "torch==2.5.1", "timm==1.0.11", "onnx==1.17.0", "onnxconverter-common==1.14.0",
+        "torch==2.5.1", "timm==1.0.11", "onnx==1.17.0", "onnxconverter-common==1.16.0",
         "kaggle==2.2.5", "kagglesdk==0.1.38", "six",
     )
     .run_commands(

@@ -32,22 +32,6 @@ für den Upload. Jeder Auftrag ist für sich, sie dürfen parallel laufen (Modal
 alle zusammen: etwa 33 USD). Vorher `git pull` (Auftrag 3 braucht `--resume-from`). Bei
 "budget"/"spend limit" abbrechen und melden.
 
-### 12. Vorlabels für den Wurf-Goldstandard (61 Wurf-Clips), 2026-11-16, Vorrang
-- Wozu: Würfe aufs Tor sind das neue Hauptmass für den Balltracker. Die 61 Clips
-  (`ml/gold/shot_clips.json`, Würfe aus den offiziellen Spielprotokollen, `ml/gold/pick_shots.py`)
-  brauchen die Kandidaten der vier neuen Ballnetze und OWLv2. Kaggle-GPU ist bis Samstag
-  aufgebraucht, Lukas gibt dafür Modal-Guthaben frei (23 CHF übrig).
-- **Neu ab 2026-11-16 abends (nach drei Abbrüchen durch Modal-Preemption ohne Ergebnis):** Das Skript
-  schreibt jetzt nach jedem Paket von 5 Clips auf das Volume `handball-gpu-out` und macht nach einer
-  Unterbrechung dort weiter. Derselbe Befehl nochmals setzt ebenfalls fort. Nur noch hr1 und hrp1,
-  OWLv2 auf jedem 4. Bild. Erwartet etwa 3.5 h auf einer T4, rund 2.5 USD.
-- Befehl: `modal run --detach ml/gpu/prelabel_clips.py --clips ml/gold/shot_clips.json --tag shots`
-  (Ergebnis-Dataset `handball-gpu-prelabel-shots`, ohne Datum). Unterbricht Modal den Lauf und startet
-  ihn nicht selbst neu: denselben Befehl nochmals ausführen.
-- Eingaben: `handball-segs-l01`, `-l02`, `-b01`, `-b03`, `-b04`, `handball-ball-hrmodels` (die
-  Netze hr1, hrp1, hr2, hrp2). Ergebnis: Dataset `handball-gpu-prelabel-shots-<datum>`.
-- Bei "budget"/"spend limit" abbrechen und melden. Die Cloud-Sitzung holt das Ergebnis selbst ab.
-
 ### 3. OWLv2 Rest von l01 bis l03 (111 Segmente: 11 aus l02, 100 aus l03)
 - Befehl: `modal run --detach ml/gpu/owl_pseudo.py --datasets handball-segs-l02,handball-segs-l03 --resume-from handball-gpu-owl-20261105-1449 --gpu T4 --budget-h 8`
 - `--resume-from` übernimmt die 189 fertigen Segmente (zuerst vom Modal-Volume, sonst aus dem
@@ -118,6 +102,27 @@ Summe 3 bis 10: 841 Segmente, etwa 49 GPU-Stunden, etwa 32 USD. Falls ein Auftra
 Auftrag 3 (mit `--resume-from <Dataset des Teillaufs>`).
 
 ## Erledigt
+
+### 12. Vorlabels für den Wurf-Goldstandard (61 Wurf-Clips), erledigt 2026-11-17
+- Ergebnis: `lukasde1000/handball-gpu-prelabel-shots` (Status ready, hochgeladen 2026-11-17 02:16
+  UTC): `clips/w00.mp4` bis `w60.mp4`, `hrp1/pre.json` und `hr1/pre.json` (je 61 Clips, dazu die
+  13 `part_NN.json`). OWLv2 auf jedem 4. Bild steckt in `hrp1/pre.json` (`owl_every` 4), `hr1`
+  hat kein OWL. Auch auf dem Modal-Volume `handball-gpu-out` unter `handball-gpu-prelabel-shots/`.
+- Kosten laut `modal billing report`: 8.76 USD gesamt. Davon 4.27 USD für den ersten Lauf (alte
+  Fassung, zweimal preempted, jedes Mal von vorne, gestoppt ohne Ergebnis), 1.14 USD für vier
+  kurze Läufe der neuen Fassung (siehe unten), 3.35 USD für den Lauf, der fertig wurde (2026-11-16
+  22:24 bis 2026-11-17 02:17, etwa 3.9 h auf einer T4, Pakete 2 bis 12 von hrp1 und alle von hr1).
+- Auffälligkeiten:
+  - Erster Lauf: etwa 0.79 s pro Bild mit OWL auf jedem 2. Bild, statt der geplanten etwa 0.28 s.
+  - **`modal run --detach` reicht auf diesem PC nicht.** Der Firmen-Proxy kappt die Verbindung zu
+    Modal etwa alle 20 bis 25 Minuten (WinError 10013/10054). Stürzt der lokale Client dabei ab,
+    bricht Modal den laufenden Aufruf ab ("Received a cancellation signal"), trotz `--detach`.
+    Bei Paketen von etwa 20 Minuten kam der Lauf so in vier Anläufen nur durch 2 Pakete.
+  - Lösung, die funktioniert hat: `modal deploy ml/gpu/prelabel_clips.py`, dann
+    `modal.Function.from_name("handball-prelabel", "run_t4").spawn(<clips_json>, "hrp1:ballhrp,hr1:ballhr", "handball-gpu-prelabel-shots", 4, 5)`.
+    Der Aufruf läuft dann ohne lokale Verbindung weiter. Danach `modal app stop handball-prelabel`.
+    Für lange Jobs von diesem PC aus künftig so starten.
+- Die Labels selbst sind nicht geprüft, nur Vollständigkeit und Upload. Auswertung: Cloud-Sitzung.
 
 ### 2. OWLv2-Pseudo-Labels für l01 bis l03 — Teilergebnis, gestoppt durch 11-h-Grenze, 2026-11-06
 - Ergebnis: `lukasde1000/handball-gpu-owl-20261105-1449` (Status ready, 189 `segs/*.json` plus
