@@ -252,3 +252,29 @@ Lesart:
   - YOLOX und Kamera auf 4 Kernen etwa 0.8 bis 0.9 x, auf 2 vCPU etwa 1.7 x;
   - ein 60-min-Spiel damit etwa 2.5 bis 3 h, unter dem Timeout von 6 h.
   - Ungemessen auf Staging selbst.
+
+### Schritt 3 vorbereitet: CUDA-Image mit Ballnetz (2026-11-17, ohne Deploy)
+
+- `apps/gpu-worker/Dockerfile.cuda` hat jetzt die GPU-Einstellungen:
+  - YOLOX auf jedem Bild;
+  - Rückennummern wieder dicht: `HB_NUMBER_EVERY=3`, kein Gate, kein Budget (Entscheid
+    Hauptsitzung; gegen die gemessenen Kosten pro Spiel aus Modal-Auftrag 13 zu prüfen);
+  - Ballnetz auf jedem Bild, Cache unter `/tmp/handball-models`.
+
+  Die Netze kommen zur Laufzeit aus dem Artifacts-Bucket (`HB_BALL_MODEL`,
+  `HB_BALL_MODEL_SHA256`), nicht aus dem Image.
+- Lokal gebaut (Image 7.7 GB) und im Container auf der CPU geprüft: 6 s Video, beide Netze
+  (fp16) aus einem Dateipfad. Ergebnis:
+  - `ball_model_status: ok`, `versions.ball: ball_hr1_fp16+ball_hrp1_fp16`;
+  - Ballkandidaten auf 148 von 150 Bildern in `observations.npz`.
+
+  Ohne GPU brauchen die Netze dort etwa 1 s pro Bild (beide zusammen). Die GPU-Laufzeit misst
+  Modal-Auftrag 13.
+- Hinweise zum lokalen Build:
+  - Docker Hub antwortete mit 429; die Basis-Images kamen von `nvcr.io` und
+    `mirror.gcr.io`, das Dockerfile bleibt bei den Original-Namen.
+  - Der Build in dieser Umgebung braucht `--network host`, weil der Proxy auf 127.0.0.1
+    lauscht.
+- Offen, mit der UX-Sitzung abzustimmen:
+  - das CUDA-Image in der CI bauen (Grösse 7.7 GB, Laufzeit);
+  - den Ausführungsort bestimmen (Azure Serverless T4, `docs/plans/gpu-analyse.md`).
