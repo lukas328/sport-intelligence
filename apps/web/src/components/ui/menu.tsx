@@ -1,6 +1,7 @@
 "use client";
 
 import * as M from "@radix-ui/react-dropdown-menu";
+import { ExternalLink } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
@@ -39,6 +40,7 @@ export function MenuItem({
   danger,
   disabled,
   external,
+  newTab,
   testId,
 }: {
   children: ReactNode;
@@ -49,6 +51,9 @@ export function MenuItem({
   disabled?: boolean;
   /** plain <a> (downloads, API routes) instead of client navigation */
   external?: boolean;
+  /** opens in a new tab and says so (help pages outside the app, review R19); the words for
+   * screen readers come with it */
+  newTab?: string;
   testId?: string;
 }) {
   const cls = cn(item, danger && "text-error [&_svg]:text-error");
@@ -58,6 +63,20 @@ export function MenuItem({
       <span className="flex-1">{children}</span>
     </>
   );
+  if (href && newTab) {
+    return (
+      <M.Item asChild disabled={disabled}>
+        <a href={href} target="_blank" rel="noopener noreferrer" className={cls} data-testid={testId}>
+          {icon}
+          <span className="flex-1">
+            {children}
+            <span className="sr-only"> ({newTab})</span>
+          </span>
+          <ExternalLink aria-hidden className="size-3.5 text-ink-2" />
+        </a>
+      </M.Item>
+    );
+  }
   if (href) {
     return (
       <M.Item asChild disabled={disabled}>

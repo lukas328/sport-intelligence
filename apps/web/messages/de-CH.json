@@ -2879,7 +2879,9 @@
     "emailResend": "Mail nochmals schicken",
     "emailSent": "Gesendet. Schau in dein Postfach und tippe auf den Link.",
     "emailFailed": "Das ging gerade nicht. Versuch es später nochmals.",
-    "later": "Später"
+    "later": "Später",
+    "newTab": "öffnet in einem neuen Tab",
+    "backToTeam": "Zurück zu {team}"
   },
   "palette": {
     "newMatch": "Neues Spiel anlegen",

@@ -44,6 +44,7 @@ export function AccountMenu({ compact }: { compact?: boolean }) {
   const [feedback, setFeedback] = useState(false);
   const cfg = useQuery({ queryKey: ["support-config"], queryFn: async () => (await api.GET("/v1/support/config")).data ?? null, staleTime: 3_600_000 });
   const base = `/app/${org.id}`;
+  const here = path.startsWith(`${base}/me`) || path.startsWith(`${base}/club`);
   const reminder = useTwoFactorReminder();
   return (
     <>
@@ -56,7 +57,8 @@ export function AccountMenu({ compact }: { compact?: boolean }) {
             !compact && "flex-1 px-2 py-1.5",
           )}
         >
-          <span aria-hidden className="font-slant relative grid size-9 shrink-0 place-items-center bg-ink text-[15px] text-ground">
+          {/* on Ich and Verein the initials carry the active mark: those pages come from here (R18) */}
+          <span aria-hidden className={cn("font-slant relative grid size-9 shrink-0 place-items-center bg-ink text-[15px] text-ground", here && "ring-2 ring-club ring-offset-2 ring-offset-ground")} data-active={here || undefined}>
             {initials(me.name) || "?"}
             {reminder.overdue && <span className="absolute -top-1 -right-1 size-3 border-2 border-ground bg-error" data-testid="account-dot" />}
           </span>
@@ -139,7 +141,7 @@ export function AccountMenu({ compact }: { compact?: boolean }) {
           )}
           <MenuSeparator />
           <MenuLabel>{t("help")}</MenuLabel>
-          <MenuItem href={helpUrl(cfg.data?.help_url ?? "https://handball-intelligence.com/hilfe", locale, path)} external icon={<HelpCircle />} testId="help-link">
+          <MenuItem href={helpUrl(cfg.data?.help_url ?? "https://handball-intelligence.com/hilfe", locale, path)} newTab={t("newTab")} icon={<HelpCircle />} testId="help-link">
             {t("helpItem")}
           </MenuItem>
           <MenuItem onSelect={() => setFeedback(true)} icon={<MessageSquare />}>

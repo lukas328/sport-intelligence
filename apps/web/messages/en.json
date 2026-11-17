@@ -2879,7 +2879,9 @@
     "emailResend": "Send the e-mail again",
     "emailSent": "Sent. Check your inbox and tap the link.",
     "emailFailed": "That did not work. Try again later.",
-    "later": "Later"
+    "later": "Later",
+    "newTab": "opens in a new tab",
+    "backToTeam": "Back to {team}"
   },
   "palette": {
     "newMatch": "Add a match",
