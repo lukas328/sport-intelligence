@@ -101,6 +101,8 @@ test("a club without video: Szenen says one sentence and the way to the video (U
   const empty = page.getByTestId("scenes-empty");
   await expect(empty).toContainText("Lade ein Video hoch, dann siehst du hier deine Szenen.");
   await expect(empty.getByRole("link", { name: "Video hochladen" })).toBeVisible();
-  await expect(page.getByTestId("scene-search")).toHaveCount(0);
+  // «Suchen» leads here: the field is there, closed, and says from when it finds (review R6)
+  await expect(page.getByTestId("scene-search")).toBeDisabled();
+  await expect(empty).toContainText("Die Suche findet Szenen ab dem ersten Video.");
   await expect(page.getByText(/0 Szenen aus 0 Spielen/)).toHaveCount(0);
 });
