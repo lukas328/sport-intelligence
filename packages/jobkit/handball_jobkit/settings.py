@@ -32,9 +32,12 @@ class JobSettings(BaseSettings):
     # per frame (a whole game: days), ReID about 2.5 CPU s per video second. ball_allow_cpu=1 lets
     # them run on a CPU for videos of at most ball_max_minutes (short trial runs).
     ball_allow_cpu: bool = False
-    ball_max_minutes: float = 3.0
+    ball_max_minutes: float = 12.0  # the 10-minute test clips run 10:02 and 10:09
     ball_cache_dir: str = "/tmp/handball-models"  # noqa: S108
     ball_every: int = 1  # every 2nd frame costs about 6 points on gold v1 (11 on fast balls)
+    # input width of the ball nets (frames are scaled to it): 960 halves the CPU time; on gold v1
+    # hrp1 at 960 on every 3rd frame 63.5 % against 65.3 % at 1280
+    ball_width: int = 1280
     ball_batch: int = 8
     detector_threads: int = 0
     # shirt numbers (PP-OCRv4 text models) and re-identification (person appearance network);
