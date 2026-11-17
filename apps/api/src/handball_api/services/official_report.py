@@ -88,6 +88,7 @@ from handball_api.services.official_comparison import (
     review,
 )
 from handball_api.services.policies import Action
+from handball_api.services.roster import goalkeeper_numbers
 from handball_api.services.roster import numbers as roster_numbers
 
 __all__ = [
@@ -368,6 +369,7 @@ def _add_entries(
     known: _Known,
     clock_map: match_clock.ClockMap,
     roster: dict[int, uuid.UUID],
+    keepers: dict[int, uuid.UUID] | None = None,
 ) -> _Added:
     """Adds each entry of the report as an event, matched with the goals and shots from video."""
     own_team = "home" if match.is_home else "away"
@@ -417,7 +419,11 @@ def _add_entries(
             if (side, clock) in known.reviewed:
                 attrs["review"] = known.reviewed[(side, clock)]
         if spec.get("outcome") == "save" and e.goalkeeper_number is not None:
-            gk = roster.get(e.goalkeeper_number) if side == "opponent" else None
+            # our goalkeeper by the roster's goalkeepers: a number the roster gives to a field
+            # player stays a number (a report naming the wrong team must not turn a field
+            # player into a goalkeeper, app review R4)
+            gk = (keepers if keepers is not None else roster).get(e.goalkeeper_number)
+            gk = gk if side == "opponent" else None
             attrs.update(
                 {"goalkeeper_id": str(gk)} if gk else {"goalkeeper_number": e.goalkeeper_number}
             )
@@ -556,7 +562,8 @@ async def apply(ctx: Ctx, match: Match, report: OfficialReport) -> dict[str, Any
     known = await _known(ctx, match)
     clock_map = match_clock.build(match, await _analysis(ctx, match), [])
     roster = await roster_numbers(ctx, match.season_id, match.team_id)
-    added = _add_entries(ctx, match, report, known, clock_map, roster)
+    keepers = await goalkeeper_numbers(ctx, match.season_id, match.team_id)
+    added = _add_entries(ctx, match, report, known, clock_map, roster, keepers)
     unmatched_video = await _settle_video_goals(ctx, match, known, added)
     return await _write_result(ctx, match, report, known, added, unmatched_video)
 

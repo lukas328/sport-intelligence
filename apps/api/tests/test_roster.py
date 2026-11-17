@@ -241,3 +241,66 @@ async def test_player_status(
     assert (await other.get(f"{team}/player-statuses")).status_code == 404
     r = await other.put(f"{team}/players/{nora['player_id']}/status", json={"kind": "absent"})
     assert r.status_code == 404
+
+
+async def test_a_number_new_in_the_roster_takes_over_the_reports_goals(
+    make_api: Callable[[], Api],
+) -> None:
+    """App review R3, R4: goals of a report read before the scorer's number was in the roster
+    count for the player once the number is there (season, roster, player page); a save given by
+    number goes to that goalkeeper, never to a field player wearing the number."""
+    from .test_matches import new_match
+
+    api = make_api()
+    ids = await setup_club(api)
+    org, team, season = ids["org"], ids["team"], ids["season"]
+    m = await new_match(api, ids)
+    events = f"/v1/orgs/{org}/matches/{m['id']}/events"
+    for clock in (60, 120, 180):
+        body = {"type": "shot", "side": "own", "outcome": "goal", "clock_s": clock, "number": 7}
+        assert (await api.post(events, json=body)).status_code == 201
+    for clock, keeper in ((200, 12), (260, 7)):
+        body = {
+            "type": "shot",
+            "side": "opponent",
+            "outcome": "save",
+            "clock_s": clock,
+            "attributes": {"goalkeeper_number": keeper},
+        }
+        assert (await api.post(events, json=body)).status_code == 201
+    roster = f"/v1/orgs/{org}/teams/{team}/seasons/{season}/roster"
+    stats = f"/v1/orgs/{org}/teams/{team}/seasons/{season}/stats"
+    assert (await api.get(stats)).json()["players"] == []
+
+    sean = (
+        await api.post(
+            roster,
+            json={
+                "first_name": "Sean",
+                "last_name": "K",
+                "jersey_number": 7,
+                "main_position": "RL",
+            },
+        )
+    ).json()
+    keeper = (
+        await api.post(
+            roster,
+            json={
+                "first_name": "Tim",
+                "last_name": "W",
+                "jersey_number": 12,
+                "main_position": "TW",
+            },
+        )
+    ).json()
+    players = {p["player_id"]: p for p in (await api.get(stats)).json()["players"]}
+    assert players[sean["player_id"]]["goals"] == 3
+    assert players[keeper["player_id"]]["saves"] == 1  # #7 is a field player: no save for him
+    assert players[sean["player_id"]]["saves"] == 0
+    line = (
+        await api.get(
+            f"/v1/orgs/{org}/teams/{team}/seasons/{season}/players/{sean['player_id']}/line"
+        )
+    ).json()
+    assert line["totals"]["goals"] == 3

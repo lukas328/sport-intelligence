@@ -233,3 +233,77 @@ async def test_the_bell_counts_the_questions_as_they_are_now(
     assert note["params"]["opponent"] == "TV Gegner"
     assert note["link"] == f"/app/{org}/matches/{m['id']}" and note["read_at"] is not None
     assert notes["unread"] == 0
+
+
+async def test_the_bell_has_one_note_per_thing_and_none_for_deleted_matches(
+    make_api: Callable[[], Api], owner_conn: asyncpg.Connection
+) -> None:
+    """App review R5: «Der offizielle Spielbericht ist da» twice, a failed analysis of a match
+    that no longer exists, a link to a deleted match. Reading the list marks nothing as read."""
+    from handball_api.core.db import open_session, set_tenant
+    from handball_api.services import training
+    from handball_api.services.context import Ctx
+
+    from .test_matches import new_match
+
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    kept = await new_match(api, ids)
+    gone = await new_match(api, ids, opponent_name="HC Weg")
+    user = await owner_conn.fetchval("SELECT id FROM users WHERE email = 'coach@hc-test.ch'")
+
+    async def note(kind: str, match_id: str, minutes_ago: int) -> None:
+        await owner_conn.execute(
+            "INSERT INTO notifications (id, organization_id, user_id, kind, params, link, "
+            "created_at) VALUES (gen_random_uuid(), $1, $2, $3, $4::jsonb, $5, "
+            "now() - make_interval(mins => $6))",
+            uuid.UUID(org),
+            user,
+            kind,
+            json.dumps({"match_id": match_id, "opponent": "TV Gegner"}),
+            f"/app/{org}/matches/{match_id}",
+            minutes_ago,
+        )
+
+    await note("official_report", kept["id"], 30)
+    await note("official_report", kept["id"], 20)  # the same report again
+    await note("analysis_failed", kept["id"], 15)  # then analysed again: ready
+    await note("analysis_ready", kept["id"], 10)
+    await note("analysis_failed", gone["id"], 5)
+    await owner_conn.execute(
+        "INSERT INTO notifications (id, organization_id, user_id, kind, params) "
+        "VALUES (gen_random_uuid(), $1, $2, 'official_suggestions', '{\"count\": 2}'::jsonb)",
+        uuid.UUID(org),
+        user,
+    )
+    assert (await api.delete(f"/v1/orgs/{org}/matches/{gone['id']}")).status_code == 204
+
+    notes = (await api.get(f"/v1/orgs/{org}/me/notifications")).json()
+    kinds = sorted((n["kind"], (n["params"] or {}).get("match_id")) for n in notes["items"])
+    assert kinds == [
+        ("analysis_ready", kept["id"]),
+        ("official_report", kept["id"]),
+        ("official_suggestions", None),
+    ]
+    # the list itself marks nothing as read: a note is read on its click or with «Alle gelesen»
+    assert notes["unread"] == 3 and all(n["read_at"] is None for n in notes["items"])
+    assert await owner_conn.fetchval("SELECT count(*) FROM notifications") == 3
+
+    # a new note about the same match and thing replaces the older one
+    async with open_session() as db:
+        await set_tenant(db, uuid.UUID(org))
+        ctx = Ctx(
+            db=db,
+            settings=api.app.state.settings,
+            email=api.app.state.email,
+            storage=api.app.state.storage,
+        )
+        await training.notify(
+            ctx, uuid.UUID(org), [user], "official_report", {"match_id": kept["id"]}, None
+        )
+        await db.commit()
+    reports = await owner_conn.fetch(
+        "SELECT params FROM notifications WHERE kind = 'official_report'"
+    )
+    assert len(reports) == 1 and json.loads(reports[0]["params"]) == {"match_id": kept["id"]}
