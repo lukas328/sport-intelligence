@@ -682,3 +682,38 @@ pro 60-min-Spiel: Modal T4 0.66 USD/h, Azure T4 mit 4 vCPU und 16 GiB 0.90 USD/h
   - Testphase: hrp1 enthält DeepSport und ist vor Go-live zu ersetzen.
 - Damit ist das adaptive Rechnen mit Wurf-Fenstern (Abschnitt oben) nicht mehr nötig: Es wäre
   teurer (1.03 bis 1.09 USD) und schlechter.
+
+### Rückennummern und Spuren: GPU-Einstellung (Entscheid Lukas 2026-11-17)
+
+Frage: Was kostet das volle Nummern-Lesen auf der GPU, und was bringt es? Gemessen auf der CPU mit
+`ml/integration/profile_analysis.py` auf Lukas' 10-min-Clip A (kalibriert). Das Budget der T4 ist
+auf der CPU nachgebildet: Ein Torso kostet auf 2 Kernen 35.5 ms, auf der T4 21.4 ms (Auftrag 15).
+Budget 0.3 auf der T4 entspricht also 0.5 auf der CPU, 1.0 entspricht 1.7.
+
+| | GPU-Image bisher | schlank | Mittelweg (Entscheid) |
+|---|---|---|---|
+| YOLOX | jedes Bild | jedes 3. Bild | jedes 3. Bild |
+| Rückennummern | jedes 3. Bild, ohne Gate und Budget | Gate, Budget 0.3 (T4) | Gate, Budget 1.0 (T4) |
+| gelesene Torsos pro Videosekunde (Clip A) | 161 | 14 | Messung läuft |
+| Spuren gesamt / ab 10 s (Clip A) | 407 / 242 | 319 / 209 | Messung läuft |
+| Spuren ab 10 s mit Nummer (Clip A) | 7.9 % (19) | 3.3 % (7) | Messung läuft |
+| verschiedene Nummern ab 10 s (Clip A) | 16 | 7 | Messung läuft |
+| USD pro Spiel Modal / Azure, mit Ballnetz 960 | etwa 2.9 / 3.9 | 0.87 / 1.18 | etwa 1.27 / 1.74 |
+
+- Kosten:
+  - GPU-Image bisher: Auftrag 13 ohne Nummern ergibt 0.93 x Videolänge. Dazu kommen die Nummern
+    mit 161 Torsos/s x 21.4 ms = 3.45 x. Zusammen etwa 4.4 x. Das Ballnetz ist im Thread ganz
+    verdeckt.
+  - schlank: gemessen in Auftrag 15.
+  - Mittelweg: geschätzt aus `cuda_lean` (1.06 x) plus 0.7 x mehr Nummern-Budget, also etwa
+    1.9 x. Das Ballnetz (1.06 x) bleibt verdeckt.
+- Auf diesem Video lesen beide Varianten wenige Nummern (Halle, Abstand). Das volle Lesen findet
+  aber mehr als doppelt so viele. Fast alle Mehrkosten gehen ins Nummern-Lesen, nicht in YOLOX.
+- **Entscheid Lukas (2026-11-17), GPU-Standard für die Testphase:**
+  - YOLOX jedes 3. Bild;
+  - Nummern-Gate an, Nummern-Budget 1.0;
+  - Ballnetz hrp1 uint8, 960 px, jedes Bild;
+  - geschätzt 1.27 USD pro Spiel auf Modal.
+
+  Umgesetzt in `apps/gpu-worker/Dockerfile.cuda`. Staging (CPU) bleibt unverändert.
+- Nachtrag folgt: Mittelweg auf Clip A, alle drei Varianten auf Clip B.
