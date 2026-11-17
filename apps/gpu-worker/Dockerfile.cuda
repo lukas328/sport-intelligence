@@ -63,9 +63,11 @@ COPY --from=models /models /models
 # dense again (no gate, no CPU time budget: on the GPU the run time is not the bottleneck,
 # decision 2026-11-17; to be checked against the measured cost per game, Modal job 13). The ball
 # nets (HB_BALL_MODEL, HB_BALL_MODEL_SHA256) come from the artifacts bucket at run time, not from
-# this image; without them the YOLOX ball path stays.
+# this image; without them the YOLOX ball path stays. Ball net at 960 px on every frame (hrp1 with
+# uint8 input on its worker thread, Modal job 15: gold 73.0 %, 0.87 USD per game with detection on
+# every 3rd frame and number budget 0.3).
 ENV PATH="/app/.venv/bin:$PATH" HB_DETECT_EVERY=1 HB_NUMBER_EVERY=3 HB_NUMBER_GATE=false \
-    HB_NUMBER_BUDGET=0 HB_BALL_EVERY=1 HB_BALL_CACHE_DIR=/tmp/handball-models
+    HB_NUMBER_BUDGET=0 HB_BALL_EVERY=1 HB_BALL_WIDTH=960 HB_BALL_CACHE_DIR=/tmp/handball-models
 USER app
 HEALTHCHECK --interval=15s --timeout=5s --retries=5 CMD ["handball-gpu-worker", "healthcheck"]
 CMD ["handball-gpu-worker"]
