@@ -92,6 +92,10 @@ Deploy vorher über die Hauptsitzung abstimmen.
    - YOLOX mit `HB_DETECT_EVERY` so selten wie vertretbar;
    - Kamerabewegung (dominiert auf der GPU laut Runbook);
    - nur ein Netz statt Ensemble, wenn der Verlust klein ist.
+   - Rückennummern billiger (vorgezogen 2026-11-17, Staging-Timeout): Gate pro Spielerbox und
+     Zeitbudget `HB_NUMBER_BUDGET`, siehe Abschnitt 4. Kostet etwa ein Viertel der sicher
+     gelesenen Nummern. Auf der GPU `NUMBER_EVERY` wieder dichter stellen, dort ist die
+     Laufzeit nicht der Engpass (Entscheid Hauptsitzung).
    - Jede Änderung mit Laufzeit, Kosten und Gold-Wert dokumentieren.
 5. **Danach die übrigen Stufen**, priorisiert nach Nutzen fürs Produkt:
    - Kalibrierung (grösster Blocker für Taktiktafel und Wurfzonen);
@@ -185,3 +189,65 @@ Zahlen sind eher etwas zu hoch. Der Hebel Rückennummern gehört zu Schritt 4.
   Boden-Homografie) folgen mit den Ereignissen in Schritt 5.
 - **Offen in Schritt 2:** Netze in den Staging-Bucket laden (Skript, nur mit Freigabe von Lukas);
   GPU-Laufzeit messen (Schritt 3); ein echtes Spiel mit Kalibrierung und Ballnetz durchrechnen.
+
+### Rückennummern und Hallentafel billiger (vorgezogen 2026-11-17)
+
+Anlass: Auf Staging (2 vCPU) brach die Analyse von Lukas' ganzem Spiel nach dem RQ-Timeout von
+6 h ab, im Stack die Texterkennung (`hallboard.py`, `numbers.py`). Im CPU-Profil (Abschnitt
+oben) sind die Rückennummern zwei Drittel der Beobachtung.
+
+**Was geändert ist:**
+- `numbers.NumberGate` (Schalter `HB_NUMBER_GATE`, Standard an): Spielerboxen werden von
+  Nummernbild zu Nummernbild verknüpft. Gelesen wird eine Box nur in diesen Fällen:
+  - sie ist neu;
+  - die Nummer ist noch nicht gesetzt (6 sichere Lesungen);
+  - nach einem Fehlversuch nach höchstens 0.5 s wieder;
+  - eine gesetzte Nummer wird alle 5 s nachgeprüft;
+  - höchstens 6 Boxen pro Nummernbild.
+- `HB_NUMBER_BUDGET` (Standard 0.75): höchstens so viele CPU-Sekunden Rückennummern pro
+  Videosekunde; darüber werden Nummernbilder ausgelassen (Zähler `number_frames_skipped`).
+- Hallentafel: Die Ganzbildsuche ohne Fund wartet zunehmend länger (4 s bis 60 s, ein Fund setzt
+  zurück), dazu ein Budget von 10 % der Videozeit (`stats.skipped`, `stats.seconds` in der
+  Zusammenfassung).
+- Zähler pro Lauf in `stats.observe_counters` (gelesene Crops, angebotene und gelesene Boxen,
+  ausgelassene Nummernbilder).
+
+**Messung** (4 CPU-Kerne, `ml/integration/profile_analysis.py`). Qualität auf Ebene der Lesungen
+aus `observations.npz`:
+- sichere Lesungen (Konfidenz ab 0.8);
+- Nummern mit mindestens 3 sicheren Lesungen, denn die Abstimmung pro Spur braucht 3.
+
+Spuren mit Nummer liessen sich nicht vergleichen: Auf beiden Spielen scheitert die Kalibrierung
+über die ganze Länge, ohne Feld gibt es kein Tracking. Die Kalibrierung aus einem einzelnen
+40-s-Fenster von Bregenz-Schwaz ist laut Kalibrierungs-Sitzung vermutlich ein Glückstreffer und
+wird für keine Messung verwendet.
+
+| Lauf | x Videolänge | Rückennummern s | Crops | sichere Lesungen | Nummern mit ≥ 3 |
+|---|---|---|---|---|---|
+| Bregenz-Schwaz 15 min, ohne Gate | 2.33 | 1 294 | (alle) | 123 | 13 |
+| mit Gate (erste Fassung, verworfen) | 1.33 | 412 | | 40 | 6 |
+| **mit Gate** | **1.68** | **687** | 30 867 | 71 | **10** |
+| mit Gate und Budget 0.75 | 1.61 | 626 | 28 284 | 65 | 9 |
+| Feldkirch-Bregenz 3 min, ohne Gate | 2.47 | 252 | 11 110 | 701 | 21 |
+| **mit Gate** | **1.88** | **142** | 6 002 | 321 | **16** |
+
+Lesart:
+- **Laufzeit:** Die Rückennummern kosten etwa die Hälfte (minus 44 bis 47 %), die ganze
+  Analyse ein Viertel bis ein Drittel weniger.
+- **Nummernverlust:** Er ist echt und wird bewusst in Kauf genommen. Die Nummern mit mindestens
+  3 sicheren Lesungen fallen auf etwa drei Viertel (Bregenz 13 auf 10, Feldkirch 21 auf 16).
+- **Warum kein Gate verlustfrei ist:** Die Nachspielung des Gates auf den Lesungen ohne Gate
+  (Rasterversuch über Rückzug, Nachprüfung, Obergrenze) zeigt es. Die lesbaren Momente (Rücken zur
+  Kamera, scharf) sind kurz und nicht vorhersagbar. Bei gleichen Kosten ist das Gate etwas besser
+  als einfach seltener lesen (`NUMBER_EVERY` 12: 14 statt 16 auf Feldkirch, 9 statt 10 auf
+  Bregenz).
+- **Hallentafel:** Auf Feldkirch (kein TV-Overlay, Hallentafel-Pfad) gibt es gleich viele
+  Uhr-Lesungen (148 ohne, 145 mit den neuen Grenzen). Die Kosten dort sind klein (16 s auf 3 min);
+  die Grenzen schützen Aufnahmen, auf denen die Tafel nie gefunden wird.
+- **Entscheid Hauptsitzung 2026-11-17:** Ein abgebrochenes Spiel liefert gar keine Nummern, das
+  wiegt schwerer. Darum Gate und Budget als Standard.
+- **Grobe Hochrechnung für Staging (2 vCPU, etwa doppelt so langsam):**
+  - Rückennummern höchstens 0.75 x Videolänge, durch das Budget gedeckelt;
+  - YOLOX und Kamera auf 4 Kernen etwa 0.8 bis 0.9 x, auf 2 vCPU etwa 1.7 x;
+  - ein 60-min-Spiel damit etwa 2.5 bis 3 h, unter dem Timeout von 6 h.
+  - Ungemessen auf Staging selbst.

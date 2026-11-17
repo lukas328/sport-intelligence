@@ -37,6 +37,13 @@ class JobSettings(BaseSettings):
     number_det_model: str = "/models/ch_PP-OCRv4_det_infer.onnx"
     number_rec_model: str = "/models/ch_PP-OCRv4_rec_infer.onnx"
     number_every: int = 6  # frames; 3 on the GPU image (every detection frame)
+    # read a torso only when it is worth it (numbers.NumberGate): new boxes, unsettled numbers,
+    # back-off after failed reads; off = every eligible torso on every number frame (as before)
+    number_gate: bool = True
+    # at most this many CPU seconds of shirt numbers per video second (0: no limit): keeps a whole
+    # game under the job timeout on a CPU worker; on the 4-core profile reading every torso cost
+    # 1.4 to 2.8 s per video second, the gate about 0.5
+    number_budget: float = 0.75
     reid_model: str = "/models/reid.onnx"
     reid_every: int = 30  # frames: about once per second per player
     role_model: str = "/models/roles.onnx"  # player / goalkeeper / referee (ml/roles)

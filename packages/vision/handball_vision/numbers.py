@@ -343,3 +343,142 @@ def split_points(readings: list[Reading], min_side: int = 2, gain: int = 2) -> l
         here,
         *split_points(good[i:], min_side, gain),
     ]
+
+
+Box = tuple[float, float, float, float]
+
+
+@dataclass
+class _Look:
+    """One player as the number gate follows it from number frame to number frame."""
+
+    box: Box
+    seen: int  # last frame index with a matched box
+    due: int  # next frame index at which the box may be read
+    wait: int = 0  # current back-off in frames after reads without a confident number
+    counts: dict[int, int] | None = None  # confident readings per number
+    sure: int | None = None  # the number once it is settled
+    last: int = -1  # last frame index the box was read
+
+
+def _iou(a: Box, b: Box) -> float:
+    ix = max(0.0, min(a[2], b[2]) - max(a[0], b[0]))
+    iy = max(0.0, min(a[3], b[3]) - max(a[1], b[1]))
+    inter = ix * iy
+    union = (a[2] - a[0]) * (a[3] - a[1]) + (b[2] - b[0]) * (b[3] - b[1]) - inter
+    return inter / union if union > 0 else 0.0
+
+
+class NumberGate:
+    """Which player boxes are worth reading on a number frame (cost of the shirt numbers).
+
+    Reading every eligible torso costs most of the CPU time of the analysis (two thirds on a
+    15-minute game, docs/plans/produkt-analyse-integration.md), and nine crops in ten show no
+    readable number. The gate follows the boxes from one number frame to the next (overlap or
+    a near centre, no identities: that is the tracker's job later) and reads a box only when
+    it is worth it:
+    - a new box: at once;
+    - after a confident reading: again at the next number frame, until the number is settled
+      (`sure_reads` confident readings of one number, at least 70 % of them; the vote per track
+      needs at least 3, and a track can lose its readings to an identity split);
+    - a settled box: again only after `recheck_s` (identity switches still show up in the
+      readings of `split_points`);
+    - after a read without a confident number: back off, doubling from one number step up to
+      `max_wait_s` (readable moments are short: a longer back-off loses them);
+    - at most `max_per_frame` boxes per number frame: unsettled first, then the box read longest
+      ago, then the tallest.
+    The readings themselves and the vote per track are unchanged.
+
+    Measured by replaying the gate on runs that read every torso (3 minutes Feldkirch-Bregenz,
+    15 minutes Bregenz-Schwaz, docs/plans/produkt-analyse-integration.md): no gate setting reads
+    fewer crops without losing numbers (readable moments are short and not predictable); these
+    defaults keep the most numbers per crop, about half the crops for three quarters of the
+    numbers with three or more sure readings. Plain sparser reading (NUMBER_EVERY doubled) keeps
+    fewer at the same cost."""
+
+    def __init__(
+        self,
+        fps: float,
+        step: int,
+        recheck_s: float = 5.0,
+        max_wait_s: float = 0.5,
+        sure_reads: int = 6,
+        max_per_frame: int = 6,
+        lost_s: float = 1.0,
+    ) -> None:
+        self.step = max(1, step)
+        self.recheck = max(self.step, round(recheck_s * fps))
+        self.max_wait = max(self.step, round(max_wait_s * fps))
+        self.sure_reads = sure_reads
+        self.max_per_frame = max_per_frame
+        self.lost = max(self.step, round(lost_s * fps))
+        self.looks: list[_Look] = []
+        self._picked: dict[int, _Look] = {}
+        self.offered = 0
+        self.read = 0
+
+    def _match(self, index: int, boxes: list[Box]) -> list[_Look]:
+        self.looks = [lk for lk in self.looks if index - lk.seen <= self.lost]
+        pairs = []
+        for k, b in enumerate(boxes):
+            w = b[2] - b[0]
+            cx, cy = (b[0] + b[2]) / 2, (b[1] + b[3]) / 2
+            for j, lk in enumerate(self.looks):
+                ov = _iou(b, lk.box)
+                d = math.hypot(cx - (lk.box[0] + lk.box[2]) / 2, cy - (lk.box[1] + lk.box[3]) / 2)
+                if ov >= 0.2 or d <= 0.6 * w:
+                    pairs.append((ov - d / max(w, 1.0), k, j))
+        pairs.sort(reverse=True)
+        out: list[_Look | None] = [None] * len(boxes)
+        used: set[int] = set()
+        for _, k, j in pairs:
+            if out[k] is None and j not in used:
+                out[k] = self.looks[j]
+                used.add(j)
+        result: list[_Look] = []
+        for k, b in enumerate(boxes):
+            found = out[k]
+            if found is None:
+                found = _Look(b, index, index)
+                self.looks.append(found)
+            found.box, found.seen = b, index
+            result.append(found)
+        return result
+
+    def pick(self, index: int, boxes: list[Box]) -> list[int]:
+        """Indices into `boxes` to read on this frame, best first."""
+        looks = self._match(index, boxes)
+        self.offered += len(boxes)
+        due = [k for k, lk in enumerate(looks) if lk.due <= index]
+        # unsettled first, then the box read longest ago (no box starves), then the tallest
+        due.sort(
+            key=lambda k: (looks[k].sure is not None, looks[k].last, -(boxes[k][3] - boxes[k][1]))
+        )
+        chosen = due[: self.max_per_frame]
+        for k in chosen:  # `note` sets the real next time; without it: the next number frame
+            looks[k].last = index
+            looks[k].due = index + self.step
+        self._picked = {k: looks[k] for k in chosen}
+        self.read += len(chosen)
+        return chosen
+
+    def note(self, index: int, k: int, reading: Reading | None) -> None:
+        """The outcome of reading box `k` of the last `pick`."""
+        lk = self._picked.get(k)
+        if lk is None:
+            return
+        if reading is None or reading.confidence < MIN_CONFIDENCE:
+            lk.wait = min(self.max_wait, max(self.step, 2 * lk.wait))
+            lk.due = index + lk.wait
+            return
+        lk.wait = 0
+        counts = lk.counts if lk.counts is not None else {}
+        counts[reading.number] = counts.get(reading.number, 0) + 1
+        lk.counts = counts
+        best = max(counts, key=lambda n: counts[n])
+        if counts[best] >= self.sure_reads and counts[best] >= 0.7 * sum(counts.values()):
+            lk.sure = best
+            lk.due = index + self.recheck
+        else:
+            lk.sure = None
+            lk.due = index + self.step
