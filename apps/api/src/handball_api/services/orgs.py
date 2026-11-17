@@ -8,7 +8,7 @@ from datetime import UTC, date, datetime, timedelta
 
 from sqlalchemy import func, select, update
 
-from handball_api.core.colors import FALLBACK_CLUB_COLOUR, LEGACY_DEFAULT_CLUB_COLOUR
+from handball_api.core.colors import FALLBACK_CLUB_COLOUR, LEGACY_UNCHOSEN_CLUB_COLOURS
 from handball_api.core.db import disable_system_access, enable_system_access, set_tenant
 from handball_api.core.errors import ProblemError
 from handball_api.core.storage import ObjectNotFoundError
@@ -132,7 +132,7 @@ async def _matches_follow_club_colour(ctx: Ctx, org: Organization, old: str | No
     blue, the neutral fallback) and have no video yet: the schedule's matches made before the
     colour was set showed blue shirts at the upload of a club in green (review R16). A match with
     a video keeps what its analysis used; a scouting match's own side is another team."""
-    worn = {LEGACY_DEFAULT_CLUB_COLOUR, FALLBACK_CLUB_COLOUR, *([old.lower()] if old else [])}
+    worn = {*LEGACY_UNCHOSEN_CLUB_COLOURS, FALLBACK_CLUB_COLOUR, *([old.lower()] if old else [])}
     has_video = select(VideoAsset.id).where(VideoAsset.match_id == Match.id).exists()
     await ctx.db.execute(
         update(Match)

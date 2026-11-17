@@ -43,7 +43,7 @@ export interface CameraScene {
   aim?: Pt | null;
   /** the scorer's way: solid when confirmed, dashed when estimated */
   confirmed: boolean;
-  /** label at the shot spot, e.g. "Tor Thalwil 39:55" */
+  /** label at the shot spot, e.g. "Tor Farnwil 39:55" */
   label?: string | null;
   /** the attack goes to the goal at x = 40: drawn on that half, as in the video (G3) */
   right?: boolean;

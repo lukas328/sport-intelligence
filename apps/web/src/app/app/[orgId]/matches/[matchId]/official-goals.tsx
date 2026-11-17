@@ -123,7 +123,7 @@ export function OfficialGoalsPanel({
   const team = (side: string) => (side === "own" ? ownName : oppName);
   const score = (s: number[] | null) =>
     s && s.length === 2 ? (isHome ? `${s[0]}:${s[1]}` : `${s[1]}:${s[0]}`) : null;
-  // the roster name, else the report's name in the same form ("#7 Lisa Zimmerli")
+  // the roster name, else the report's name in the same form ("#7 Lisa Zufall")
   const who = (r: GoalRow) =>
     (r.playerId && names[r.playerId]) || playerLabel(r.number, reportName(r.name));
 

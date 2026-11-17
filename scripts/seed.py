@@ -11,8 +11,9 @@ A club from the Zürichsee region that shows the product the way a coach would u
 - two themes that repeat over the matches with video (the right wing stays open, 7 m are missed),
 - one collection made from the last match, and the opponents' colours.
 
-Numbers are uneven and plausible; names are invented, places are real. Everything is marked as
-demo. The videos are rendered by packages/vision (synthetic, not real footage).
+Numbers are uneven and plausible; the club, its opponents, the hall and the people are invented.
+Everything is marked as demo. The videos are rendered by packages/vision (synthetic, not real
+footage).
 
     uv run python scripts/seed.py [--web http://localhost:3000]
 """

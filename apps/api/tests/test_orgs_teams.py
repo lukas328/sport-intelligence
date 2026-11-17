@@ -18,16 +18,16 @@ PNG = b"\x89PNG\r\n\x1a\n" + b"\x00" * 64
 async def test_create_org_makes_creator_admin(make_api: Callable[[], Api]) -> None:
     api = make_api()
     await api.register("admin@hc-test.ch")
-    r = await api.post("/v1/orgs", json={"name": "  HC Wädenswil ", "primary_color": "#AABBCC"})
+    r = await api.post("/v1/orgs", json={"name": "  HC Lärchenwil ", "primary_color": "#AABBCC"})
     assert r.status_code == 201
     org = r.json()
-    assert org["name"] == "HC Wädenswil"
+    assert org["name"] == "HC Lärchenwil"
     assert org["primary_color"] == "#aabbcc"
     assert org["my_role"] == "org_admin"
     assert org["plan"] == "free"
     assert org["data_region"] == "ch"
     me = (await api.get("/v1/me")).json()
-    assert me["organizations"] == [{"id": org["id"], "name": "HC Wädenswil", "role": "org_admin"}]
+    assert me["organizations"] == [{"id": org["id"], "name": "HC Lärchenwil", "role": "org_admin"}]
 
 
 async def test_org_validation(make_api: Callable[[], Api]) -> None:
@@ -67,13 +67,20 @@ async def test_a_club_without_a_chosen_colour_shows_the_fallback(
     picked = (await api.patch(path, json={"primary_color": "#C8102E"})).json()
     assert (picked["primary_color"], picked["color_chosen"]) == ("#c8102e", True)
 
-    # a club made before the decision: stored with the blue every club got
-    await owner_conn.execute(
-        "UPDATE organizations SET primary_color = '#0b6bcb' WHERE id = $1",
-        uuid.UUID(org["id"]),
-    )
-    legacy = (await api.get(path)).json()
-    assert (legacy["primary_color"], legacy["color_chosen"]) == (FALLBACK_CLUB_COLOUR, False)
+    # a club made before the decision: stored with the blue of the API or the shirt the old
+    # onboarding had picked in advance (staging 17.11.)
+    for stored in ("#0b6bcb", "#1f4fd6", "#1F4FD6"):
+        await owner_conn.execute(
+            "UPDATE organizations SET primary_color = $2 WHERE id = $1",
+            uuid.UUID(org["id"]),
+            stored,
+        )
+        legacy = (await api.get(path)).json()
+        assert (legacy["primary_color"], legacy["color_chosen"]) == (FALLBACK_CLUB_COLOUR, False)
+
+    # the palette's blue is told apart from the old one
+    blue = (await api.patch(path, json={"primary_color": "#1d4ed8"})).json()
+    assert (blue["primary_color"], blue["color_chosen"]) == ("#1d4ed8", True)
 
     back = (await api.patch(path, json={"primary_color": None})).json()
     assert (back["primary_color"], back["color_chosen"]) == (FALLBACK_CLUB_COLOUR, False)

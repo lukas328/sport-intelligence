@@ -3137,7 +3137,7 @@
     "title": "Team suchen",
     "intro": "Such dein Team in den offiziellen Daten von handball.ch. Spiele, Resultate und Spieler kommen gleich mit.",
     "label": "Team oder Verein",
-    "placeholder": "z. B. Thalwil",
+    "placeholder": "z. B. Bergtal",
     "hint": "Mindestens drei Buchstaben.",
     "results": "Gefundene Teams",
     "noHits": "Kein Team gefunden für «{q}».",
@@ -4050,7 +4050,7 @@
   "entry": {
     "ask": "Wie heisst dein Team?",
     "label": "Team oder Ort",
-    "placeholder": "z. B. Wädenswil",
+    "placeholder": "z. B. Seewald",
     "search": "Suchen",
     "short": "Mindestens drei Buchstaben.",
     "none": "Kein Team gefunden für «{q}».",

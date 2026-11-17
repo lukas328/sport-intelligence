@@ -26,7 +26,7 @@ export function similarTeams<T extends { name: string }>(name: string, teams: T[
     const other = have.join(" ");
     if (other === key) return true;
     // one name is the other with more words («Herren» and «Herren 2» are not the same team, but
-    // «TV Thalwil Herren» and «Herren» likely are)
+    // «TV Farnwil Herren» and «Herren» likely are)
     const [short, long] = want.length <= have.length ? [want, have] : [have, want];
     const extra = long.filter((w) => !short.includes(w));
     return short.every((w) => long.includes(w)) && extra.every((w) => !/^\d+$/.test(w)) && short.length > 0 && extra.length <= 2;

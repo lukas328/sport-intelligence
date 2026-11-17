@@ -30,7 +30,7 @@ test("coach plans a session, opens the matrix and the assistant", async ({ page,
   await slots.getByRole("button", { name: "Trainingszeit hinzufügen" }).click();
   const slotForm = slots.getByRole("form", { name: "Trainingszeit hinzufügen" });
   await slotForm.getByLabel("Wochentag").selectOption("1");
-  await slotForm.getByLabel("Ort (optional)").fill("Halle Seefeld");
+  await slotForm.getByLabel("Ort (optional)").fill("Halle Schilfmatt");
   await slotForm.getByRole("button", { name: "Speichern" }).click();
   await expect(slots.getByTestId("training-slot")).toContainText("19:00 bis 20:30");
   // only holidays on a training day are offered (Monday: Ostermontag, Pfingstmontag)

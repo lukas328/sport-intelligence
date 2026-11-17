@@ -23,7 +23,7 @@ ICS = (
     "BEGIN:VCALENDAR\r\nVERSION:2.0\r\n"
     "BEGIN:VEVENT\r\nUID:t-2\r\nDTSTART;TZID=Europe/Zurich:20261112T193000\r\n"
     "DTEND;TZID=Europe/Zurich:20261112T211500\r\nSUMMARY:Training\\, Halle B\r\n"
-    "LOCATION:Sporthalle Wankdorf\r\nDESCRIPTION:Schwerpunkt: Rückzug\\nBälle mitbringen\r\n"
+    "LOCATION:Sporthalle Weidenhof\r\nDESCRIPTION:Schwerpunkt: Rückzug\\nBälle mitbringen\r\n"
     "END:VEVENT\r\n"
     "BEGIN:VEVENT\r\nUID:m-1\r\nDTSTART:20261107T170000Z\r\nSUMMARY:Spiel gegen\r\n"
     "  TV Gegner\r\nEND:VEVENT\r\n"

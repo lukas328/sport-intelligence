@@ -7,12 +7,12 @@ Spielbericht (genehmigt)
 Spielinformation
 Spielnummer                         20                                                               Gruppe                        MEHRLEBEN HLA MEISTERLIGA
                                                                                                                                    Hauptrunde powered by Finanzfuchsgruppe
-Datum                               26.09.2026, Spielbeginn 19:00h                                   Heimmannschaft                HC LINZ AG
-Spielort                            SMS Kleinmünchen, Linz                                           Gastmannschaft                HSG Holding Graz
+Datum                               26.09.2026, Spielbeginn 19:00h                                   Heimmannschaft                HC TRAUNECK AG
+Spielort                            SMS Flussau, Trauneck                                            Gastmannschaft                HSG Holding Weinleiten
 
 
 Ergebnis
-Sieger                                                                        HC LINZ AG
+Sieger                                                                        HC TRAUNECK AG
 Ergebnis                                                                     36:29 (17:16)
 
 
@@ -26,7 +26,7 @@ Sec. C.       SATONERU, Risidap                            -         -          
 
 
 Heimmannschaft
-HC LINZ AG
+HC TRAUNECK AG
                                                                                                                                    2-Minuten                    Disqualifikation
 Trikot    Name, Vorname                            Geburtsdatum          Pass-Nr                 Tore         7M       g. Karte 1.         2.        3.         o.B.       m.B.
 7         BANAPADUKAPUZ, Vunom                     -                     -
@@ -66,7 +66,7 @@ Spielbericht (genehmigt)
 
 
 Gastmannschaft
-HSG Holding Graz
+HSG Holding Weinleiten
                                                                                                             2-Minuten         Disqualifikation
 Trikot    Name, Vorname                            Geburtsdatum   Pass-Nr       Tore   7M       g. Karte 1.         2.   3.   o.B.      m.B.
 1         MUKULUREZ, Gegu                          -              -

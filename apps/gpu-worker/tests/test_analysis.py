@@ -558,7 +558,7 @@ def test_hall_reference_with_most_floor_matches_wins(
             "video_id": "b",
             "panorama_key": "b/analysis/panorama.jpg",
             "homography": (np.eye(3) * 2).tolist(),
-            "hall": "Halle Untermosen",
+            "hall": "Halle Moosgarten",
         },
     ]
     tried: list[dict[str, Any]] = []
@@ -569,7 +569,7 @@ def test_hall_reference_with_most_floor_matches_wins(
     calib, info = found
     assert calib.homography[0, 0] == 2
     assert info["method"] == "hall" and info["reference_video_id"] == "b"
-    assert info["hall"] == "Halle Untermosen" and info["floor_inliers"] == 40
+    assert info["hall"] == "Halle Moosgarten" and info["floor_inliers"] == 40
     assert [t["video_id"] for t in tried] == ["a", "c", "b"]
     assert tried[0]["error"] == "the earlier hall image is missing"
     assert "not the same hall" in tried[1]["error"]

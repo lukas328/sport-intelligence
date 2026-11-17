@@ -10,15 +10,18 @@ SIMILAR_DELTA_E = 25.0
 
 # The club colour (decision E8, 17.11.2026). A club that has not chosen one shows a neutral slate:
 # no club picks it, it is not the demo club's green, and white text on it reaches 7.6:1 (the app
-# head). Until then every new club was stored with blue #0b6bcb, nobody's choice: such rows count
-# as «not chosen» (no rewrite of existing rows). apps/web/src/lib/color.ts holds the same values.
+# head). Until then every new club was stored with a blue nobody chose: #0b6bcb from the API and
+# #1f4fd6, the shirt the old onboarding had picked in advance (staging 17.11.: a club made through
+# it reads #1f4fd6). Such rows count as «not chosen» (no rewrite of existing rows); the palette's
+# blue is #1d4ed8 so that a new choice is told apart. apps/web/src/lib/color.ts holds the values.
 FALLBACK_CLUB_COLOUR = "#475569"
 LEGACY_DEFAULT_CLUB_COLOUR = "#0b6bcb"
+LEGACY_UNCHOSEN_CLUB_COLOURS = frozenset({LEGACY_DEFAULT_CLUB_COLOUR, "#1f4fd6"})
 
 
 def club_colour_chosen(stored: str | None) -> bool:
-    """Whether the club picked its colour: stored, and not the blue every club got before."""
-    return bool(stored) and str(stored).lower() != LEGACY_DEFAULT_CLUB_COLOUR
+    """Whether the club picked its colour: stored, and not a blue every club got before."""
+    return bool(stored) and str(stored).lower() not in LEGACY_UNCHOSEN_CLUB_COLOURS
 
 
 def club_colour(stored: str | None) -> str:

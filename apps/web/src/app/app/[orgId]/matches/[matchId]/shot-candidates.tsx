@@ -164,7 +164,7 @@ export function ShotCandidatesPanel({
     c.clock_s != null ? tr("events.at", { period: c.period ?? 1, clock: formatClock(c.clock_s * 1000) }) : formatClock(c.goal_ms);
   const pickedSide = (c: ShotCandidate) => (side?.id === c.id ? side.side : defaultSide(c));
   const outcomeLabel = (o: string | null | undefined) => (o ? te(o as ShotOutcome) : "");
-  // the report's entry as a sentence: "Parade, Wurf von #7 Muster (HC Demo-Meilen)"
+  // the report's entry as a sentence: "Parade, Wurf von #7 Muster (HC Demo-Weidried)"
   const reportLine = (c: ShotCandidate) => {
     const s = c.suggestion;
     if (!s) return null;

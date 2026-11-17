@@ -50,7 +50,7 @@ export function chipsFromText(text: string): string[] {
 const fold = (v: string) => v.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
 /**
- * What the chips cannot say (UX test B19): the opponent («Paraden gegen Stäfa») among the team's
+ * What the chips cannot say (UX test B19): the opponent («Paraden gegen Sälmatt») among the team's
  * opponents and a shirt number («Tore von Nummer 11», «#11»).
  */
 export function extrasFromText(text: string, opponents: readonly string[]): { opponent?: string; number?: number } {
@@ -59,7 +59,7 @@ export function extrasFromText(text: string, opponents: readonly string[]): { op
   const n = s.match(/(?:nummer|nr\.?|numero|number|no\.?|#)\s*(\d{1,2})\b/);
   if (n) out.number = Number(n[1]);
   for (const name of opponents) {
-    // a word of the name of four letters or more, e.g. «stafa» in «Handball Stäfa»
+    // a word of the name of four letters or more, e.g. «salmatt» in «Handball Sälmatt»
     const words = fold(name).split(/[\s/-]+/).filter((w) => w.length >= 4 && !["handball", "verein", "club"].includes(w));
     if (words.some((w) => s.includes(` ${w} `) || s.includes(` ${w}`))) {
       out.opponent = name;

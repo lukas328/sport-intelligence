@@ -1,6 +1,6 @@
-/** Player names as the match page shows them: "#7 Lisa Zimmerli", first name first, normal case. */
+/** Player names as the match page shows them: "#7 Lisa Zufall", first name first, normal case. */
 
-/** "#7 Lisa Zimmerli"; either part may be missing. */
+/** "#7 Lisa Zufall"; either part may be missing. */
 export function playerLabel(
   number: number | null | undefined,
   name: string | null | undefined,
@@ -23,8 +23,8 @@ const capitalise = (w: string) =>
 
 /**
  * A name from an official report or a score overlay in display form. Reports write the surname
- * in capitals, before or after the first name ("ZIMMERLI Lisa", "Amy HOCHREUTENER"): the first
- * name comes first and the surname loses its capitals ("Lisa Zimmerli"). Names without a word in
+ * in capitals, before or after the first name ("ZUFALL Lisa", "Amy MUSTERMANN"): the first
+ * name comes first and the surname loses its capitals ("Lisa Zufall"). Names without a word in
  * capitals stay as they are. For display only; the stored name is not changed.
  */
 export function reportName(name: string | null | undefined): string {
