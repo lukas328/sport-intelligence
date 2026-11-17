@@ -311,6 +311,35 @@ stimmige Bewegung nötig; die Bilder werden über die Bewegung nur verbunden, wo
   Ende.
 - Fernsehbild mit Zoom und Schnitten bleibt geparkt (4.4).
 
+### 4.9 Machbarkeitsprobe "Feld pro Bild aus den Bildlinien" (2026-11-18, Nacht, nur CPU)
+
+Frage: Lohnen sich die 4 bis 6 Tage aus 4.8? Probe auf den 46 Wahrheitsbildern der 30
+Entwicklungs-Stücke, ohne Produktänderung (`ml/calib/experiments/frame_fit.py`,
+`line_pixels.py`; Zahlen in `ml/calib/data/probe_frame_fit.json`).
+
+1. **Anpassung pro Bild** (Kameraort, Blickziel, Brennweite, Rollwinkel; Bewertung: Handball-Linien
+   auf Linienpixeln, Spieler 1.75 m gross und auf dem Feld; etwa 1 600 Starts, die besten 25
+   verfeinert; Annahme-Regel vorher festgelegt): **0 von 46 Bildern unter 2 m** (Median 13.7 m,
+   bestes 6.2 m); angenommen hätte sie 11 Bilder, alle falsch; pro Stück 0 richtig, 10 falsch,
+   20 abgelehnt.
+2. **Ursache:** Das wahre Feld bekommt eine *schlechtere* Bewertung als das gefundene falsche (auf
+   6 geprüften Bildern alle 6). Gegen leicht verschobene, gedrehte oder gespiegelte Felder (1 bis 4 m)
+   gewinnt das wahre Feld nur in **8 von 46 Bildern (17 %)** mit der klassischen Linienmaske. Auf
+   Mehrsport-Böden trifft ein falsch gelegtes Feld ebenso viele Linien, und die Maske findet nur
+   einen Teil der Handball-Linien (Spieler verdecken sie, dünne Linien in 720p).
+3. **Gelernte Linienpixel** (Gradient Boosting auf 16 lokalen Merkmalen, gelernt auf den
+   Wahrheitsbildern der anderen Stücke, 5 Gruppen): findet nur 3 % der Handball-Linienpixel bei 5 %
+   Präzision; das wahre Feld gewinnt damit in **10 von 46 (22 %)**. Ein einfacher Pixel-Klassifikator
+   reicht nicht.
+
+**Folgerung:** Der klassische Weg "Feld im Bild anpassen" ist auf diesem Material nicht machbar;
+die 4 bis 6 Tage aus 4.8 lohnen sich nicht. Was die Linien nicht leisten, kann nur ein gelerntes
+Modell mit Kontext (ganzes Bild, Handball-Linien als eigene Klasse) leisten, mit GPU und deutlich
+mehr Wahrheit (grob 300 Bilder) und ohne Erfolgsgarantie. Der verlässliche Weg fürs Produkt ist
+die Hand-Kalibrierung, schnell gemacht: der Linien-Modus der Klickseite (unter 1 Minute pro Bild,
+gemessen in Runde 1b) in den Kalibrier-Dialog übernehmen, und das Feld pro Halle wiederverwenden
+(`hallmatch`, ADR 025 Nachtrag 2), damit ein Verein pro Halle einmal klickt.
+
 ## 5. Was nicht geholfen hat
 
 | Was | Wo | Zahlen | Warum verworfen |
