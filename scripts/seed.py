@@ -600,7 +600,7 @@ def main() -> None:
     c.post(
         base,
         json={
-            "opponent_name": "HSG Rheinau",
+            "opponent_name": "HSG Moosbach",
             "kickoff_at": (now + timedelta(days=4)).isoformat(),
             "is_home": False,
             "competition": "2. Liga Herren",
