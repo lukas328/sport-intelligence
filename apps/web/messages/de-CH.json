@@ -3139,7 +3139,7 @@
     "title": "Team suchen",
     "intro": "Für Teams aus der Schweiz übernehmen wir Spielplan, Resultate und Kader automatisch von handball.ch. Sonst legst du deinen Verein in einer Minute von Hand an.",
     "label": "Team oder Verein",
-    "placeholder": "z. B. HC Tannengrün",
+    "placeholder": "Vereinsname oder Ort",
     "hint": "Mindestens drei Buchstaben.",
     "results": "Gefundene Teams",
     "noHits": "Kein Team gefunden für «{q}».",
@@ -4052,7 +4052,7 @@
   "entry": {
     "ask": "Wie heisst dein Team?",
     "label": "Team oder Ort",
-    "placeholder": "z. B. HC Tannengrün",
+    "placeholder": "Vereinsname oder Ort",
     "search": "Suchen",
     "short": "Mindestens drei Buchstaben.",
     "none": "Kein Team gefunden für «{q}».",

@@ -162,12 +162,14 @@ function SearchStep({ initial, byHand = false, onPick, onName }: { initial: stri
             </button>
           </form>
         ) : (
-          <p className="m-0 max-w-[60ch] text-[17px]">
-            {hits.data && hits.data.length > 0 ? t("noneWay") : t("scope")}{" "}
+          // the way by hand under the sentence: as a tall touch target inside the sentence it tore
+          // the line apart («an.» alone before it)
+          <div className="max-w-[60ch] text-[17px]">
+            <p className="m-0">{hits.data && hits.data.length > 0 ? t("noneWay") : t("scope")}</p>
             <button type="button" onClick={() => setByName(true)} className="min-h-11 cursor-pointer border-0 bg-transparent p-0 font-bold underline decoration-2 underline-offset-4" data-testid="entry-by-name">
               {t("byName")}
             </button>
-          </p>
+          </div>
         )}
       </div>
       {/* both ways in, also with a password from the start (L12) */}

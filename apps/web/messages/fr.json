@@ -3139,7 +3139,7 @@
     "title": "Chercher l'équipe",
     "intro": "Pour les équipes de Suisse, nous reprenons automatiquement le calendrier, les résultats et l'effectif depuis handball.ch. Sinon, tu crées ton club à la main en une minute.",
     "label": "Équipe ou club",
-    "placeholder": "p. ex. HC Tannengrün",
+    "placeholder": "Nom du club ou localité",
     "hint": "Au moins trois lettres.",
     "results": "Équipes trouvées",
     "noHits": "Aucune équipe trouvée pour « {q} ».",
@@ -4052,7 +4052,7 @@
   "entry": {
     "ask": "Comment s'appelle ton équipe ?",
     "label": "Équipe ou lieu",
-    "placeholder": "p. ex. HC Tannengrün",
+    "placeholder": "Nom du club ou localité",
     "search": "Chercher",
     "short": "Au moins trois lettres.",
     "none": "Aucune équipe trouvée pour «{q}».",
