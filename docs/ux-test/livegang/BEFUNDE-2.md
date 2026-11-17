@@ -55,6 +55,10 @@ App, Analyse und Prüfen (Lukas' echter Lauf, 17.11.):
 | A4 | Hängender Upload (1070 Min. ohne neuen Teil) gilt nicht von selbst als abgebrochen: nach einer Frist als abgebrochen markieren und entfernen lassen | Upload, Watchdog | offen 🟡 |
 | A5 | Zwei verschiedene Spiele (Horgen und Konstanz) hängen am selben Spiel: gewollt (mehrere Dateien pro Spiel) oder Bedienfehler? Beim Hochladen auf ein Spiel mit anderer Datei warnen, wenn Dateiname oder Länge nicht passen | Upload | offen, prüfen |
 | A6 | 150 offene Fragen, obwohl die Analyse «nichts gefunden» hat; kein «alle überspringen». Konzept: höchstens etwa 10 Fragen pro Spiel, nach Nutzen sortiert, gebündelt (eine Frage pro Spieler statt pro Szene), «alle überspringen», keine Fragen wenn kaum etwas gefunden wurde, dafür klare Meldung, was fehlt (z. B. Spielfeld nicht erkannt) | Prüfen, Glocke | offen 🔴, Konzept folgt |
+| A7 | Start: «Die Analyse hat noch keine Tore gefunden. 159 Fragen helfen ihr weiter.» schiebt die Arbeit auf den Trainer. Stattdessen ehrliche Meldung mit Grund (Feld nicht erkannt, Video zu lang) und höchstens wenige gezielte Fragen (siehe A6) | Start | offen 🔴 |
+| A8 | Widerspruch: Spielliste «Analyse fertig, 159 Fragen offen», im Spiel «Die Analyse hat nicht geklappt» (zwei Dateien, eine fertig, eine gescheitert). Status pro Spiel fasst beides zusammen, z. B. «1 von 2 Teilen analysiert» | Spiele, Spiel | offen 🟡 |
+| A9 | Gelber Hinweis «Upload unterbrochen: HC Goldach-Rorschach 2 · weiter mit derselben Datei» bleibt auf jeder Seite stehen, auch nach Stunden, lässt sich nicht wegklicken: «Verwerfen» und nach einer Frist von selbst weg (vgl. A4) | Fortschrittsleiste | offen 🟡 |
+| A10 | Grosse leere grüne Fläche oben auf der Startseite: Platz ohne Inhalt, das Wichtige rutscht nach unten | Start | offen 🟡 |
 
 ## Noch offen aus der ersten Runde
 
