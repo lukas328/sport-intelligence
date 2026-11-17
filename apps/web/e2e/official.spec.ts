@@ -40,14 +40,14 @@ test("onboarding: find the team, take one over, ask a claimed club for access, a
 
   // a coach of the claimed club asks its admins for access, with a message
   const bergtal = page.getByTestId("official-team").filter({ hasText: "SG Bergtal Herren" });
-  await bergtal.getByRole("button", { name: "Zugang anfragen" }).click();
+  await bergtal.getByRole("button", { name: "Diesem Team beitreten" }).click();
   await bergtal.getByLabel(/Nachricht/).fill("Ich trainiere die Herren seit diesem Sommer.");
   await bergtal.getByRole("button", { name: "Anfrage senden" }).click();
-  await expect(page.getByText("Anfrage gesendet. Die Admins von SG Bergtal melden sich in der App.")).toBeVisible();
+  await expect(page.getByText(/^Anfrage gesendet. Die Trainer von SG Bergtal sehen sie in der App./)).toBeVisible();
   expect(claims.at(-1)).toEqual({ id: "72001", body: { club_id: 9002, message: "Ich trainiere die Herren seit diesem Sommer." } });
 
   // a player asks to join that team
-  await bergtal.getByRole("button", { name: "Als Spieler/in beitreten" }).click();
+  await bergtal.getByRole("button", { name: "Als Spieler beitreten" }).click();
   await bergtal.getByLabel("Vorname").fill("Lara");
   await bergtal.getByLabel("Nachname").fill("Muster");
   await bergtal.getByLabel(/Rückennummer/).fill("11");

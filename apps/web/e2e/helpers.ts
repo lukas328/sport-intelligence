@@ -28,9 +28,13 @@ export async function linkFromMail(page: Page, to: string, path: string): Promis
 export async function expectAccessible(page: Page) {
   // metadata (the <title>) is streamed after client-side navigations
   await expect.poll(() => page.title()).not.toBe("");
+  // judged from the top: mid-scroll, the sticky top bar covers the lines under it and axe counts
+  // them as too small targets
+  await page.evaluate(() => window.scrollTo(0, 0));
   const result = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
   expect(
-    result.violations.flatMap((v) => v.nodes.map((n) => `${v.id}: ${n.target.join(" ")} ${n.failureSummary ?? ""}`)),
+    // the element itself in the message: a selector alone rarely says which one it was
+    result.violations.flatMap((v) => v.nodes.map((n) => `${v.id}: ${n.target.join(" ")} ${n.html.slice(0, 200)} ${n.failureSummary ?? ""}`)),
   ).toEqual([]);
 }
 

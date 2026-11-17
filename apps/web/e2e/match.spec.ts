@@ -1,7 +1,7 @@
 import { statSync } from "node:fs";
 import { expect, test } from "@playwright/test";
 import { MATCH_VIDEO } from "./global-setup";
-import { expectAccessible, follow, openAnalysis, openLibrary, register, uniqueEmail } from "./helpers";
+import { expectAccessible, follow, openAnalysis, register, uniqueEmail } from "./helpers";
 
 test.describe.configure({ mode: "serial" });
 
@@ -181,7 +181,9 @@ test("playlist: create and share with players", async ({ page }, info) => {
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByLabel("Teamname").fill("U19");
   await page.getByRole("button", { name: "Zum Team" }).click();
-  await openLibrary(page, "Sammlungen");
+  // an empty Sammlungen page shows only the way to the scenes (K8): the playlists by address
+  await page.waitForURL(/\/teams\/[^/]+/);
+  await page.goto(page.url().replace(/(\/teams\/[^/?#]+).*/, "$1/playlists"));
   await page.getByLabel("Name", { exact: true }).fill("Abwehr Training");
   await page.getByRole("button", { name: "Neue Sammlung" }).click();
   await expect(page.getByRole("heading", { name: "Abwehr Training" })).toBeVisible();
