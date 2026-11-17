@@ -122,7 +122,7 @@ const en: Messages = {
     stepsLead: "That is all you do. The analysis does the rest.",
     steps: [
       { title: "Film", text: "Phone or camera high up at the halfway line, both goals in the picture. Fixed is best, panning works too." },
-      { title: "Upload", text: "Pick the video, done. The analysis runs, you get an email.", alt: "The app asks when uploading: which match is this video from? Two matches to choose from." },
+      { title: "Upload", text: "Pick the video, done. The app shows how far the analysis is and tells you when it is done.", alt: "The app asks when uploading: which match is this video from? Two matches to choose from." },
       { title: "Check", text: "The analysis suggests goals and the court. You confirm with one tap.", alt: "A question while checking: is the court right? With the buttons Fits and Not sure." },
     ],
     getTitle: "What you get from every match",
@@ -213,7 +213,7 @@ const en: Messages = {
       },
       {
         title: "Upload",
-        text: "In the app you pick the match and the video file (MP4, MOV or MKV), ideally on Wi-Fi. If the connection drops, it continues where it stopped. Then the analysis runs: it finds the court, tracks the players, reads shirt numbers where it can and looks for the goal moments. You do not have to stay: you get an email.",
+        text: "In the app you pick the match and the video file (MP4, MOV or MKV), ideally on Wi-Fi. If the connection drops, it continues where it stopped. Then the analysis runs: it finds the court, tracks the players, reads shirt numbers where it can and looks for the goal moments. You do not have to stay: at the top of the app you see how far it is and roughly how long it still takes, and the bell tells you when it is done.",
         alt: "Uploading a video in the app: which match is this video from? Two matches to choose from and \"Or create a new match\".",
       },
       {
@@ -402,7 +402,7 @@ const en: Messages = {
       { q: "Is my phone good enough, or do I need a camera?", a: "Both work. Any phone or camera that films in Full HD (1080p) is enough. Where it stands matters more than the device.", hi: "The app takes the file as the phone or camera saves it, also a download link from Veo or Spiideo." },
       { q: "Where do I put the camera?", a: "Level with the halfway line, as high as possible, from about 3 metres: stands, gallery or a tall tripod. With the wide angle (0.5×), both goals and goal areas are in the picture. Fixed is best; panning works too, the analysis then finds the court harder.", hi: "The analysis finds the court by itself and follows the camera. Whether it is right, you confirm with one tap while checking." },
       { q: "Which file can I upload?", a: "The video file as the phone or camera saves it. {upload} A direct link to a video file works too, for example the download link from Veo or Spiideo.", hi: "If the connection drops, the upload continues where it stopped." },
-      { q: "How long does the analysis take?", a: "We will give the time once we have measured it in operation.", hi: "You need not stay: you get an e-mail when it is done. Then you confirm the goal moments." },
+      { q: "How long does the analysis take?", a: "We will give the time once we have measured it in operation.", hi: "You need not stay: at the top of the app you see how far it is and roughly how long it still takes, the bell tells you when it is done. Then you confirm the goal moments." },
       { q: "Do I have to enter anything by hand?", a: "No typing, but a short check. In the test with a five-minute match clip: 22 questions with shot spot in six to nine minutes for nine goals. For a whole match we have not measured it yet.", hi: "The analysis suggests the moments when a goal may have been scored; you confirm with a tap. If there is a match report from handball.ch, the app takes goals and scorers from it. You mark saves and missed shots only if you want them." },
       { q: "How do I share scenes with the team?", a: "Put together a collection and share it by link in the team chat, with no account for the players.", hi: "Every scene goes into a collection with one tap, with a note if you like. The chat shows a preview with a title; the link shows shirt numbers instead of names, expires and can be blocked at any time." },
       { q: "How do I see where the goals conceded come from?", a: "Count them by shot position: wings, backcourt, pivot, 7 metres, fast break. A cluster shows you where to look first; what is behind it, only the scene shows.", hi: "The app counts for you, from the shot spot you tap for each goal while checking. With enough goals you see three things to take away with their scenes, and the season shows what repeats." },
@@ -556,9 +556,9 @@ const en: Messages = {
       { k: "What it is", v: "A web app for video analysis of handball matches. It runs in the browser, on phones and computers." },
       { k: "Who it is for", v: "Coaches in amateur handball, youth and senior teams; starting in Switzerland, from the 1st league down. Players and parents need no account." },
       { k: "What you need", v: "A phone or camera that films in Full HD (1080p), a raised spot at the halfway line and {fileNeed}." },
-      { k: "How it works", v: "Film, upload, wait for the e-mail, then check: the analysis suggests moments when a goal may have been scored, and you confirm them. After each confirmed goal you tap where the shot came from. Answer the optional questions at the end too, or a goal may be missing. In the test with a five-minute match clip: 22 questions with shot spot in six to nine minutes for nine goals. For a whole match we have not measured it yet." },
+      { k: "How it works", v: "Film, upload, wait until the app says it is done, then check: the analysis suggests moments when a goal may have been scored, and you confirm them. After each confirmed goal you tap where the shot came from. Answer the optional questions at the end too, or a goal may be missing. In the test with a five-minute match clip: 22 questions with shot spot in six to nine minutes for nine goals. For a whole match we have not measured it yet." },
       { k: "With a match report", v: "If there is a match report, for example from handball.ch, goals and scorers come from it; the app works out their time in the video from the throw-off you confirm and does not ask about those goals again. We have not yet tested this path on real video." },
-      { k: "Analysis time", v: "We will give the time once we have measured it in operation. You get an e-mail when it is done." },
+      { k: "Analysis time", v: "We will give the time once we have measured it in operation. The app shows how far it is and roughly how long it still takes, and tells you when it is done." },
       { k: "What you get", v: "Result and run of play, every confirmed goal as a scene in the video, positions from above (estimated), three things to take home when there are enough goals with a shot spot, and a link for the team." },
       { k: "What it cannot do", v: "Track the ball (so no passes and no shot paths), reliably detect goals by itself, detect saves and missed shots{fileNot}." },
       { k: "Other ways", v: "Cameras such as Veo or Pixellot film with their own camera and usually a subscription. Handball Intelligence needs no camera of its own: a phone or an existing camera is enough, and it analyses videos, also from a Veo download link. Whether Veo detects handball events automatically, Veo does not say (as of 13 November 2026). More in the German and French guide on ways to video analysis." },
