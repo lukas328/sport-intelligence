@@ -786,6 +786,12 @@ def test_side_hint_reaches_the_event_baseline() -> None:
     assert seen == ["right", None]
 
 
+@pytest.fixture(autouse=True)
+def _cuda_for_model_loaders(monkeypatch: pytest.MonkeyPatch) -> None:
+    """The model loader tests run as if CUDA were there; the GPU rule has its own test."""
+    monkeypatch.setattr(analysis, "_has_cuda", lambda: True)
+
+
 def _tiny_ball_net(path: Path) -> Path:
     import onnx
     from onnx import TensorProto, helper
@@ -857,11 +863,16 @@ def test_ball_net_from_bucket_with_checksum(tmp_path: Path) -> None:
     assert analysis.load_ball_net(ok, s3)[1] == "ok"
     assert s3.downloads == 1
     # wrong checksum: nothing kept, old path
-    wrong = JobSettings(ball_model=key, ball_model_sha256="f" * 64, ball_cache_dir=str(cache))
+    wrong = JobSettings(
+        ball_model=key,
+        ball_model_sha256="f" * 64,
+        ball_cache_dir=str(cache),
+    )
     assert analysis.load_ball_net(wrong, s3) == (None, "sha_mismatch")
     assert not list(cache.glob("ffffffffffff-*"))
     # a bucket key needs its checksum; an unknown key falls back
-    assert analysis.load_ball_net(JobSettings(ball_model=key), s3) == (None, "sha_missing")
+    nosha = JobSettings(ball_model=key)
+    assert analysis.load_ball_net(nosha, s3) == (None, "sha_missing")
     nokey = JobSettings(ball_model="models/ball/x.onnx", ball_model_sha256=sha)
     assert analysis.load_ball_net(nokey, s3) == (None, "missing")
 
@@ -896,3 +907,26 @@ def test_reid_and_role_models_from_bucket_or_file(tmp_path: Path) -> None:
     assert s3.downloads == 1  # the same file from the cache
     bad = JobSettings(reid_model=key, reid_model_sha256="0" * 64, ball_cache_dir=cache)
     assert analysis.load_embedder(bad, s3) == (None, "sha_mismatch")
+
+
+def test_ball_net_and_reid_need_a_gpu_by_default(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Without CUDA the ball nets and ReID stay off; HB_BALL_ALLOW_CPU=1 lets them run on a CPU
+    for videos of at most HB_BALL_MAX_MINUTES (a whole game on a CPU worker would take days)."""
+    net = _tiny_ball_net(tmp_path / "hr1.onnx")
+    monkeypatch.setattr(analysis, "_has_cuda", lambda: False)
+    assert analysis.load_ball_net(JobSettings(ball_model=str(net)), None, 60) == (None, "no_gpu")
+    assert analysis.load_embedder(JobSettings(reid_model=str(net)), None, 60) == (None, "no_gpu")
+    cpu = JobSettings(ball_model=str(net), reid_model=str(net), ball_allow_cpu=True)
+    assert analysis.load_ball_net(cpu, None, 120)[1] == "ok"
+    assert analysis.load_embedder(cpu, None, 120)[1] == "ok"
+    assert analysis.load_ball_net(cpu, None, 181) == (None, "too_long_for_cpu")
+    assert analysis.load_embedder(cpu, None, 3600) == (None, "too_long_for_cpu")
+    assert analysis.load_ball_net(cpu, None, None) == (None, "too_long_for_cpu")
+    longer = JobSettings(ball_model=str(net), ball_allow_cpu=True, ball_max_minutes=10)
+    assert analysis.load_ball_net(longer, None, 500)[1] == "ok"
+    assert analysis.load_ball_net(JobSettings(ball_model=""))[1] == "off"
+    monkeypatch.setattr(analysis, "_has_cuda", lambda: True)
+    assert analysis.load_ball_net(JobSettings(ball_model=str(net)), None, 3600)[1] == "ok"
+    assert analysis.load_embedder(JobSettings(reid_model=str(net)))[1] == "ok"

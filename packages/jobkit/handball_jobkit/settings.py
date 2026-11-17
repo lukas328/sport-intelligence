@@ -28,6 +28,11 @@ class JobSettings(BaseSettings):
     # nets hr1/hrp1 contain DeepSport data (non-commercial) and must be replaced before go-live.
     ball_model: str = ""
     ball_model_sha256: str = ""
+    # the ball nets and ReID only with a GPU (CUDA): on a CPU worker the nets take about 1 to 2 s
+    # per frame (a whole game: days), ReID about 2.5 CPU s per video second. ball_allow_cpu=1 lets
+    # them run on a CPU for videos of at most ball_max_minutes (short trial runs).
+    ball_allow_cpu: bool = False
+    ball_max_minutes: float = 3.0
     ball_cache_dir: str = "/tmp/handball-models"  # noqa: S108
     ball_every: int = 1  # every 2nd frame costs about 6 points on gold v1 (11 on fast balls)
     ball_batch: int = 8
