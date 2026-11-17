@@ -921,11 +921,14 @@ def test_ball_net_and_reid_need_a_gpu_by_default(
     cpu = JobSettings(ball_model=str(net), reid_model=str(net), ball_allow_cpu=True)
     assert analysis.load_ball_net(cpu, None, 120)[1] == "ok"
     assert analysis.load_embedder(cpu, None, 120)[1] == "ok"
-    assert analysis.load_ball_net(cpu, None, 181) == (None, "too_long_for_cpu")
+    assert analysis.load_ball_net(cpu, None, 721) == (None, "too_long_for_cpu")
     assert analysis.load_embedder(cpu, None, 3600) == (None, "too_long_for_cpu")
     assert analysis.load_ball_net(cpu, None, None) == (None, "too_long_for_cpu")
-    longer = JobSettings(ball_model=str(net), ball_allow_cpu=True, ball_max_minutes=10)
-    assert analysis.load_ball_net(longer, None, 500)[1] == "ok"
+    longer = JobSettings(ball_model=str(net), ball_allow_cpu=True, ball_max_minutes=20)
+    assert analysis.load_ball_net(longer, None, 1100)[1] == "ok"
+    narrow = JobSettings(ball_model=str(net), ball_allow_cpu=True, ball_width=960)
+    loaded = analysis.load_ball_net(narrow, None, 60)[0]
+    assert loaded is not None and loaded.width == 960
     assert analysis.load_ball_net(JobSettings(ball_model=""))[1] == "off"
     monkeypatch.setattr(analysis, "_has_cuda", lambda: True)
     assert analysis.load_ball_net(JobSettings(ball_model=str(net)), None, 3600)[1] == "ok"
