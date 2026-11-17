@@ -2,13 +2,16 @@
 
 from __future__ import annotations
 
+import asyncio
 import uuid
 from dataclasses import dataclass
 from typing import Any
 
 from sqlalchemy import ColumnElement, delete, func, select
+from sqlalchemy.exc import DBAPIError
 
 from handball_api.core.colors import kit_warnings
+from handball_api.core.db import transaction_conflict
 from handball_api.core.errors import ProblemError
 from handball_api.core.logging import get_logger
 from handball_api.core.storage import ObjectStorage
@@ -799,6 +802,9 @@ class MatchFiles:
         return removed
 
 
+DELETE_ATTEMPTS = 3  # a deadlock with a view writing at the same moment: tried again
+
+
 async def delete_match(ctx: Ctx, match_id: uuid.UUID) -> MatchFiles:
     """Deletes the match with all videos, derived data (BRIEF 12, deletion) in one short
     transaction; the files go afterwards with the returned `MatchFiles.remove`. The rows go
@@ -828,9 +834,21 @@ async def delete_match(ctx: Ctx, match_id: uuid.UUID) -> MatchFiles:
         prefix=f"{match.organization_id}/{match.id}/",
         uploads=uploads,
     )
-    # the cached statistics of the match (scope_id is no foreign key, so no cascade)
-    await ctx.db.execute(delete(StatsCache).where(StatsCache.scope_id == match.id))
-    await ctx.db.delete(match)
+    # the cached statistics of the match (scope_id is no foreign key, so no cascade), then the
+    # match with everything below it. Views of the match may write while this runs: a deadlock
+    # with one of them (40P01) rolls back only the savepoint, and the delete runs again.
+    for attempt in range(DELETE_ATTEMPTS):
+        try:
+            async with ctx.db.begin_nested():
+                await ctx.db.execute(delete(StatsCache).where(StatsCache.scope_id == match.id))
+                await ctx.db.delete(match)
+                await ctx.db.flush()
+            break
+        except DBAPIError as exc:
+            if attempt == DELETE_ATTEMPTS - 1 or not transaction_conflict(exc):
+                raise
+            log.info("match_delete_retry", match_id=str(match_id), attempt=attempt + 1)
+            await asyncio.sleep(0.05 * (attempt + 1))
     await audit.record(
         ctx,
         "match.deleted",

@@ -9,12 +9,14 @@ import json
 import uuid
 from typing import Any
 
-from sqlalchemy import func, select
+from sqlalchemy import func, select, text
 from sqlalchemy.dialects.postgresql import insert as pg_insert
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import DBAPIError, IntegrityError
 
 from handball_api.core.clock import parse_clock
+from handball_api.core.db import lock_contended
 from handball_api.core.errors import ProblemError
+from handball_api.core.logging import get_logger
 from handball_api.models import (
     Correction,
     Event,
@@ -359,6 +361,10 @@ async def stats_for(ctx: Ctx, match: Match) -> dict[str, Any]:
     return data
 
 
+CACHE_LOCK_WAIT = "250ms"  # the cache row locked longer: answer without storing it
+log = get_logger("handball_api.events")
+
+
 async def cache_get(
     ctx: Ctx, scope: str, scope_id: uuid.UUID, version: str
 ) -> dict[str, Any] | None:
@@ -380,7 +386,12 @@ async def cache_put(
     version: str,
     data: dict[str, Any],
 ) -> None:
-    """Atomic upsert: concurrent first views must not collide on the unique key."""
+    """Atomic upsert: concurrent first views must not collide on the unique key.
+
+    Only a cache: when the row is locked (the match being deleted, another view writing it), the
+    view answers without storing it. The upsert runs in a savepoint and waits at most
+    CACHE_LOCK_WAIT, well below Postgres' deadlock_timeout (1 s): a view never takes part in a
+    deadlock with the delete, whose first statement removes these rows (CI, 17.11.)."""
     stmt = pg_insert(StatsCache).values(
         id=uuid.uuid4(),
         organization_id=org_id,
@@ -389,12 +400,25 @@ async def cache_put(
         version=version,
         data=data,
     )
-    await ctx.db.execute(
-        stmt.on_conflict_do_update(
-            constraint="uq_stats_cache_scope",
-            set_={"version": stmt.excluded.version, "data": stmt.excluded.data},
-        )
-    )
+    try:
+        async with ctx.db.begin_nested():
+            before = await ctx.db.scalar(text("SELECT current_setting('lock_timeout')"))
+            await ctx.db.execute(
+                text("SELECT set_config('lock_timeout', :v, true)"), {"v": CACHE_LOCK_WAIT}
+            )
+            await ctx.db.execute(
+                stmt.on_conflict_do_update(
+                    constraint="uq_stats_cache_scope",
+                    set_={"version": stmt.excluded.version, "data": stmt.excluded.data},
+                )
+            )
+            await ctx.db.execute(
+                text("SELECT set_config('lock_timeout', :v, true)"), {"v": before or "0"}
+            )
+    except DBAPIError as exc:  # the savepoint is rolled back, with the setting
+        if not lock_contended(exc):
+            raise
+        log.info("stats_cache_skipped", scope=scope, scope_id=str(scope_id))
 
 
 KICKOFF_ABSENT = "kickoff_absent"  # report_extra: halves whose throw-off is not in the video

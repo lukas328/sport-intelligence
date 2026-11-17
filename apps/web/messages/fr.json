@@ -3904,8 +3904,12 @@
     "emptyAction": "Saisir l'effectif",
     "why": "Pourquoi l’effectif compte : avec les numéros, l’analyse attribue buts, tirs et scènes aux bons joueurs, et qui est inscrit comme gardien (TW) reçoit ses arrêts.",
     "keepersTitle": "Qui est dans les buts ?",
-    "keepersText": "Personne n’est encore inscrit comme gardien. Touche tes gardiens : l’effectif et les chiffres des gardiens montrent alors leurs arrêts.",
-    "keepersMark": "Inscrire {name} comme gardien",
+    "keepersText": "Personne n’est encore inscrit comme gardien. Touche tous tes gardiens : l’effectif et les chiffres des gardiens montrent alors leurs arrêts.",
+    "keepersMark": "{name} dans les buts",
+    "keepersMore": "Touche tous ceux qui jouent dans les buts. Toucher encore une fois retire quelqu’un.",
+    "keepersSome": "{n, plural, one {1 gardien inscrit.} other {# gardiens inscrits.}}",
+    "keepersChange": "Modifier les gardiens",
+    "keepersDone": "Terminé",
     "keepersFailed": "Cela n’a pas marché. Réessaie ou saisis la position sous «Modifier l'effectif»."
   },
   "seasonPage": {
