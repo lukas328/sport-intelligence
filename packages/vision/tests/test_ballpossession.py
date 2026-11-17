@@ -190,3 +190,17 @@ def test_ball_net_on_every_third_frame_fills_the_frames_between() -> None:
     assert q is not None and abs(q[0] - (100 + 2 * 100)) < 12  # player 1's ball at frame 100
     out = bp.from_observations(obs, result)
     assert out is not None and {p["track_id"] for p in out["possessions"]} == {1, 3}
+
+
+def test_clock_read_too_rarely_does_not_drop_the_balls() -> None:
+    """A hall board read a handful of times gives a few seconds of "play" in a long video: the
+    gate would drop nearly every ball, so it is ignored and said so."""
+    obs, result = _observed()
+    obs.total = 300  # 12 s at 25 fps
+    out = bp.from_observations(obs, result, play=[(0, 1000)])  # 1 s of 12 s: too sparse
+    assert out is not None and out["ball_gated_by_clock"] is False
+    assert out["clock_too_sparse"] is True
+    assert {p["track_id"] for p in out["possessions"]} == {1, 3}
+    # enough play: the gate holds
+    out = bp.from_observations(obs, result, play=[(0, 6000)])
+    assert out is not None and out["ball_gated_by_clock"] is True and "clock_too_sparse" not in out

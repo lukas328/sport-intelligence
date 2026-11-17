@@ -352,3 +352,74 @@ Lesart:
 - Das Log `analysis_done` meldet jetzt `ball_model_status`, `reid_model_status` und die Zähler der
   Beobachtung (`number_crops`, `number_frames_skipped`, angebotene und gelesene Boxen). Die
   UX-Sitzung liest nur Logs.
+
+### CPU-Testeinstellung für den Ball auf Staging (2026-11-17)
+
+Linie von Lukas: Bis das Produkt fertig ist, wird auf Staging nur mit Ausschnitten von 5 bis 10 min
+ohne GPU getestet. Die Einstellung unten ist eine **Test-Einstellung** und trifft 63.5 % statt
+80 %. Der Produktwert gilt erst mit GPU: Ensemble hr1 + hrp1 auf jedem Bild.
+
+- **Gold v1 pro Einstellung** (Zeile «Product port and cost variants» in `ml/ball/LINEAGE.md`):
+  - hrp1 bei 960 px auf jedem 3. Bild: 63.5 % [57.3, 69.4], schnelle 64.8 %.
+  - Ensemble auf jedem Bild: 80.0 %.
+  - hrp1 bei 1280 px auf jedem 3. Bild: 65.3 %.
+  - hr1 bei 960 px auf jedem 3. Bild: 53.9 %.
+- **Kosten pro Netzlauf auf 2 Kernen:** hrp1 1.0 s (1280) bzw. 0.53 s (960), hr1 0.81 bzw.
+  0.47 s. fp16 ist auf der CPU nicht schneller.
+- **Neu im Code:**
+  - `HB_BALL_WIDTH`: Eingabebreite des Netzes.
+  - `HB_BALL_EVERY > 1`: Der Tracker läuft auf der ausgedünnten Folge mit fps / k und füllt
+    dazwischen auf. Vorher hätte er leere Bilder gesehen.
+  - `HB_BALL_MAX_MINUTES` Standard 12, weil die Testclips 10:02 und 10:09 lang sind.
+  - Spielphasen, die weniger als 20 % des Videos abdecken, sperren den Ball nicht mehr
+    (`clock_too_sparse`).
+  - Der Zeitbudget-Test der Hallentafel läuft mit einer Fake-Uhr.
+
+**Ganze Kette auf den Testclips** (`testclips/sghorgen-h1-30m00-10min.mp4` und
+`-h2-65m00-10min.mp4`). Lokal je auf 2 Kernen gerechnet, zwei Läufe gleichzeitig auf einer
+4-Kern-Maschine:
+
+| Lauf | x Videolänge | Beobachtung s | Ballnetz s | YOLOX s | Rückennummern s | Spuren |
+|---|---|---|---|---|---|---|
+| H1 ohne Ballnetz | 2.38 | 1 403 | | 625 | 457 | 310 |
+| H2 ohne Ballnetz | 2.37 | 1 374 | | 617 | 452 | 283 |
+| H1 mit Ballnetz (hrp1, 960, jedes 3.) | **7.97** | 4 791 | 3 307 | 679 | 457 | 308 |
+| H2 mit Ballnetz | **8.01** | 4 761 | 3 298 | 677 | 452 | 287 |
+
+Lesart:
+- **Laufzeit:** Mit Ballnetz braucht ein 10-min-Clip etwa 80 min, nicht 66. Das Netz kostete hier
+  0.65 s pro Lauf statt 0.53 s, vermutlich weil zwei Läufe sich den Speicher teilten. Für
+  Ball-Tests auf Staging sind 5-min-Ausschnitte (etwa 40 min) die bessere Wahl.
+- **Ballnetz-Status:** ok, `versions.ball: ball_hrp1_fp16`.
+- **Ballpfad mit der Uhr-Sperre** (vor der neuen Regel):
+  - H1: Punkte auf 53 % der Bilder (31 % mit Sicherheit ab 0.3).
+  - H2: nur 1 %, weil die Hallentafel in H2 nur 39-mal gelesen wurde (6 s «Spiel»).
+- **Ballpfad ohne Sperre:** 98 % der Bilder in beiden Clips (59 % bzw. 49 % mit Sicherheit ab
+  0.3). Mit der neuen 20-%-Regel gilt das für H2. H1 bleibt gesperrt (54 % Abdeckung), obwohl der
+  ganze Clip im Spiel liegt: Die Pausenerkennung aus der Hallentafel ist lückenhaft, das ist offen.
+- **Ballbesitz H1** (mit Sperre): 176 Besitzphasen, 57 bzw. 32 Pässe. Ungeprüft.
+- **Rückennummern:** Das Budget liess etwa die Hälfte der Nummernbilder aus. Spuren über 10 s
+  mit Nummer: 3 bis 6 %.
+- **Kalibrierung:** Auf beiden Clips greift die Auto-Kalibrierung, auf dem ganzen 99-min-Video
+  nicht (`camera_motion`). Ob das Feld stimmt, prüft die Kalibrierungs-Sitzung.
+
+**Werte für Terraform (gpu-worker, nur für Ball-Tests auf Staging):**
+- `HB_BALL_MODEL=models/ball/ball_hrp1_fp16-37153d8dfc83.onnx`
+- `HB_BALL_MODEL_SHA256=37153d8dfc832e683283b43229d35ea5fd1a257757c689d1b05ffb81fd9779f5`
+- `HB_BALL_ALLOW_CPU=1`, `HB_BALL_WIDTH=960`, `HB_BALL_EVERY=3` (`HB_BALL_MAX_MINUTES` bleibt
+  beim Standard 12).
+- `HB_REID_MODEL` auf Staging nicht setzen: `HB_BALL_ALLOW_CPU=1` gilt auch für ReID und kostet
+  auf der CPU etwa 2.5 CPU-Sekunden pro Videosekunde.
+
+### Lukas' erster ganzer Lauf auf Staging (Asset c498a0c4, 99 min, 2026-11-17)
+
+- **Laufzeit:** Start 05:00:37 durch den Watchdog, Dateien um 08:33. Etwa 3 h 33 min für 99 min
+  Video, also 2.2 x Videolänge auf 2 vCPU, mit #50.
+- **Kalibrierung:** gescheitert mit `camera_motion` (Zoom bis 6.5 x, 165 Schnitte). Darum keine
+  Spuren und keine Tore aus dem Tracking.
+- **Rückennummern:** 7 500 Lesungen, davon 3 504 sicher; 34 Nummern mit mindestens 3 sicheren
+  Lesungen. Mangels Spuren keiner Spur zugeordnet.
+- **159 offene Fragen:** genau die Tor-Kandidaten mit Rate 1 oder 2 (81 + 78, also 16 pro
+  10 min). Dazu 165 mit Rate 4 und 466 Wurf-Kandidaten.
+- **Uhr und Spielstand:** 924 Uhr-Lesungen, aber Spielphasen nur von 12:50 bis 40:50 und von
+  87:30 bis 92:10. Ohne Spielstand-Verlauf gibt es auch keine Tore aus der Tafel.

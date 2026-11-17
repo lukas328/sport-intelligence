@@ -27,6 +27,9 @@ from typing import Any
 import numpy as np
 
 Box = tuple[int, float, float, float, float]  # track id, x1, y1, x2, y2 (frame pixels)
+# play intervals covering less than this share of the video are not trusted for gating the ball
+# (a hall board read 39 times in 10 minutes gave 6 s of play: every ball would be dropped)
+MIN_PLAY_SHARE = 0.2
 
 
 @dataclass(frozen=True)
@@ -173,7 +176,8 @@ def from_observations(
     `play`: the stretches (start_ms, end_ms) in which the match clock runs
     (`scoreboard.play_intervals`). Balls outside them are ignored: in breaks, timeouts and before
     and after the game warm-up balls, ball racks and loose balls are not the game ball. None or
-    empty (no clock read): every ball counts. `ball_gated_by_clock` says which it was.
+    empty (no clock read): every ball counts. `ball_gated_by_clock` says which it was. Intervals
+    covering less than `MIN_PLAY_SHARE` of the video are ignored too (`clock_too_sparse`).
 
     With ball net candidates in the observations (`obs.ball_cands`, `HB_BALL_MODEL`) the path comes
     from tracker v2 (`balltrack2`, frame pixels, points below `min_conf` left out); otherwise from
@@ -181,9 +185,16 @@ def from_observations(
     ball net the result also carries `path_rows` (`path_rows()`, a numpy array: the caller stores
     it and removes it before the result goes into JSON)."""
     gate = sorted(play) if play else None
+    sparse = False
+    span_ms = 1000 * obs.total / obs.fps if getattr(obs, "total", 0) and obs.fps else 0.0
+    if gate and span_ms and sum(b - a for a, b in gate) < MIN_PLAY_SHARE * span_ms:
+        # the clock was read too rarely to tell play from breaks (a hall board mostly out of
+        # view): every ball counts, as without a clock
+        gate, sparse = None, True
     gated = {
         "ball_gated_by_clock": gate is not None,
         "in_play_s": round(sum(b - a for a, b in gate) / 1000, 1) if gate else None,
+        **({"clock_too_sparse": True} if sparse else {}),
     }
     cands: Mapping[int, Sequence[tuple[float, float, float]]] = (
         getattr(obs, "ball_cands", None) or {}
