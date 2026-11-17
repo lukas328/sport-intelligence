@@ -46,7 +46,7 @@ import itertools
 import math
 import re
 import time
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from typing import Any, Literal
 
@@ -685,6 +685,7 @@ class HallBoardReader:
         probe_every_s: float = 0.25,
         full_max_s: float = 60.0,
         budget_share: float = 0.1,
+        clock: Callable[[], float] = time.perf_counter,
     ) -> None:
         self.ocr = ocr  # handball_vision.numbers.NumberReader (detect + recognise)
         self.fps = fps
@@ -694,6 +695,7 @@ class HallBoardReader:
         self.full_base_ms = self.full_ms
         self.full_max_ms = max(self.full_ms, round(full_max_s * 1000))
         self.budget_share = budget_share
+        self.clock = clock  # seconds; injectable so the budget can be tested without real time
         self.samples: list[tuple[int, list[Token]]] = []
         self.calls = 0
         self.stats = _Stats()
@@ -855,11 +857,11 @@ class HallBoardReader:
             self.stats.skipped += 1
             self._due = index + self.step
             return
-        t0 = time.perf_counter()
+        t0 = self.clock()
         try:
             self._add(index, frame)
         finally:
-            self.stats.seconds += time.perf_counter() - t0
+            self.stats.seconds += self.clock() - t0
 
     def _add(self, index: int, frame: NDArray[Any]) -> None:
         t_ms = round(index * 1000 / self.fps)

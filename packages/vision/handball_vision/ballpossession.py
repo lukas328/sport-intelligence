@@ -27,6 +27,9 @@ from typing import Any
 import numpy as np
 
 Box = tuple[int, float, float, float, float]  # track id, x1, y1, x2, y2 (frame pixels)
+# play intervals covering less than this share of the video are not trusted for gating the ball
+# (a hall board read 39 times in 10 minutes gave 6 s of play: every ball would be dropped)
+MIN_PLAY_SHARE = 0.2
 
 
 @dataclass(frozen=True)
@@ -173,7 +176,8 @@ def from_observations(
     `play`: the stretches (start_ms, end_ms) in which the match clock runs
     (`scoreboard.play_intervals`). Balls outside them are ignored: in breaks, timeouts and before
     and after the game warm-up balls, ball racks and loose balls are not the game ball. None or
-    empty (no clock read): every ball counts. `ball_gated_by_clock` says which it was.
+    empty (no clock read): every ball counts. `ball_gated_by_clock` says which it was. Intervals
+    covering less than `MIN_PLAY_SHARE` of the video are ignored too (`clock_too_sparse`).
 
     With ball net candidates in the observations (`obs.ball_cands`, `HB_BALL_MODEL`) the path comes
     from tracker v2 (`balltrack2`, frame pixels, points below `min_conf` left out); otherwise from
@@ -181,9 +185,16 @@ def from_observations(
     ball net the result also carries `path_rows` (`path_rows()`, a numpy array: the caller stores
     it and removes it before the result goes into JSON)."""
     gate = sorted(play) if play else None
+    sparse = False
+    span_ms = 1000 * obs.total / obs.fps if getattr(obs, "total", 0) and obs.fps else 0.0
+    if gate and span_ms and sum(b - a for a, b in gate) < MIN_PLAY_SHARE * span_ms:
+        # the clock was read too rarely to tell play from breaks (a hall board mostly out of
+        # view): every ball counts, as without a clock
+        gate, sparse = None, True
     gated = {
         "ball_gated_by_clock": gate is not None,
         "in_play_s": round(sum(b - a for a, b in gate) / 1000, 1) if gate else None,
+        **({"clock_too_sparse": True} if sparse else {}),
     }
     cands: Mapping[int, Sequence[tuple[float, float, float]]] = (
         getattr(obs, "ball_cands", None) or {}
@@ -302,18 +313,52 @@ def ball_path_v2(
     gate: list[tuple[int, int]] | None = None,
 ) -> tuple[int, list[tuple[float, float] | None], list[float]]:
     """Tracker v2 over the ball net candidates: (first frame, point per frame from there, confidence
-    per frame), frame pixels. Frames without a net run or outside play have no candidates."""
+    per frame), frame pixels. Frames outside play have no candidates.
+
+    The net may have run on every `step`-th frame only (`HB_BALL_EVERY`): the tracker then runs on
+    that thinned sequence at fps / step, and the frames in between are filled linearly between
+    neighbouring points of a segment (gold v1: hrp1 on every 3rd frame 65.3 % instead of 76.1 %,
+    ml/integration; the frames between without a point stay None)."""
     from handball_vision import balltrack2
 
-    first, last = min(cands), max(cands)
+    frames = sorted(cands)
+    first, last = frames[0], frames[-1]
+    step = _net_step(frames)
     starts = [a for a, _ in gate or []]
     ms = 1000 / obs.fps
     peaks = [
         list(cands.get(f, ())) if _in_play(gate, starts, f * ms) else []
-        for f in range(first, last + 1)
+        for f in range(first, last + 1, step)
     ]
-    out, conf = balltrack2.track_windows(peaks, obs.fps, float(obs.motion.frame_size[0]))
+    thin, thin_conf = balltrack2.track_windows(
+        peaks, obs.fps / step, float(obs.motion.frame_size[0])
+    )
+    if step == 1:
+        return first, thin, thin_conf
+    n = last - first + 1
+    out: list[tuple[float, float] | None] = [None] * n
+    conf = [0.0] * n
+    for i, (q, c) in enumerate(zip(thin, thin_conf, strict=True)):
+        out[i * step], conf[i * step] = q, c
+    for i in range(len(thin) - 1):
+        a, b = thin[i], thin[i + 1]
+        if a is None or b is None:
+            continue
+        low = min(thin_conf[i], thin_conf[i + 1])
+        for j in range(1, step):
+            u = j / step
+            out[i * step + j] = (a[0] + u * (b[0] - a[0]), a[1] + u * (b[1] - a[1]))
+            conf[i * step + j] = low
     return first, out, conf
+
+
+def _net_step(frames: Sequence[int]) -> int:
+    """The spacing of the frames the net ran on (the most common gap; 1 for every frame)."""
+    gaps: dict[int, int] = defaultdict(int)
+    for a, b in itertools.pairwise(frames):
+        if b > a:
+            gaps[b - a] += 1
+    return max(gaps, key=lambda g: gaps[g]) if gaps else 1
 
 
 def _path_v2(
