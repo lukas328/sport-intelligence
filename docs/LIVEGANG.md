@@ -4,6 +4,13 @@ Stand 2026-11-04. Checkliste für den Owner: was entschieden, gekauft, geprüft 
 die Plattform als stabile Web-App für echte Vereine läuft. Technische Details stehen in `GO_LIVE.md`
 und `docs/OPEN_QUESTIONS.md`; diese Datei verweist dorthin.
 
+**Stand 17.11.2026:** App live unter https://app.handball-intelligence.com (Azure «hb-stg», Switzerland
+North, Deploy per GitHub-Workflow `.github/workflows/deploy.yml`, Modi plan, deploy, status; Pausieren und
+Fortsetzen über `state`), Website live unter https://handball-intelligence.com (Cloudflare Workers, baut
+bei jeder Änderung an `apps/site` auf `main`). Befunde aus dem ersten Test und ihr Stand:
+`docs/ux-test/livegang/BEFUNDE.md`. Noch ohne Mail-Versand (`HB_EMAIL_BACKEND=console`, die App sagt das
+ehrlich) und ohne Grafikkarte (Plan: `docs/plans/gpu-analyse.md`).
+
 **Für andere Sessions:** Wer einen Punkt erledigt, hakt ihn hier ab (☐ → ✅) und ergänzt `GO_LIVE.md`.
 
 Legende: 🔴 blockiert den Livegang · 🟡 vor dem Pilot nötig · ⚪ kann warten · **Empfehlung** = mein Vorschlag
@@ -18,7 +25,7 @@ Legende: 🔴 blockiert den Livegang · 🟡 vor dem Pilot nötig · ⚪ kann wa
 | ☐ 🔴 | **Firma** (GmbH, Einzelfirma?), MWST, Währungen CHF/EUR (Q-PROD-3, Q-ADD-3) | Firma vor dem ersten zahlenden Verein; Treuhand für MWST fragen | Impressum, Verträge, Stripe, QR-Rechnung (IBAN), Apple-Konto brauchen eine Firma |
 | ✅ | Hosting | Azure West Europe für App, Datenbank, Secrets, Monitoring; Cloudflare R2 (EU) für Videos (ADR 002) | |
 | ☐ 🟡 | **E-Mail-Anbieter** (Q-INFRA-3) | **Azure Communication Services** (alles in Azure, Daten in Europa, Kosten fast null) statt Postmark | Login-Links und Einladungen |
-| ☐ 🟡 | **GPU** | **Zuerst ohne GPU**: Analyse auf CPU, etwa 2 × Videolänge (60-min-Spiel ≈ 2 h, grob 1 € pro Spiel). GPU später | GPU kostet mehr und ist schwerer zu beschaffen; für den Pilot reicht CPU |
+| ☑ 🟡 | **GPU** | Entschieden 16.11.: GPU kommt (Azure Serverless GPU T4, Switzerland North, skaliert auf null, geschätzt CHF 0.50 bis 1.50 pro Spiel), siehe `docs/plans/gpu-analyse.md`. Der Test zeigte: auf CPU dauert ein ganzes Spiel viele Stunden | Ohne GPU ist ein ganzes Spiel für Trainer nicht tragbar |
 | ☐ 🟡 | **Umgebungen** | Staging + Produktion; Staging skaliert nachts auf null | Neue Versionen erst auf Staging testen |
 | ☐ 🟡 | **Preise** (Q-PROD-4) | Platzhalter in `packages/plans/plans.json` prüfen | Website und Abo-Seite zeigen sie |
 | ☐ 🟡 | **Automatische Ereignisse zu schwach?** (Q-ADD-1) | Start mit "assistiert": Tore aus Live-Erfassung, Spielbericht oder Score-Einblendung; Automatik als Bonus | Bälle und Würfe erkennt die Analyse noch nicht |
@@ -31,9 +38,9 @@ Legende: 🔴 blockiert den Livegang · 🟡 vor dem Pilot nötig · ⚪ kann wa
 
 | | Was | Wo | Kosten (grob) | Wann |
 |---|---|---|---|---|
-| ☐ 🔴 | **Domain** | **Cloudflare Registrar** (Einkaufspreis, DNS gratis). Bietet Cloudflare die Endung nicht an (bei `.ch` prüfen): bei Infomaniak oder Hostpoint kaufen und die Nameserver auf Cloudflare stellen | 10 bis 40 € pro Jahr | Nach dem Namen |
-| ☐ 🔴 | **Azure** | Subscription; ein Setup-Skript für die Cloud Shell (baue ich) richtet den Zugang für GitHub ein | siehe Abschnitt 5 | Vor dem ersten Deploy |
-| ☐ 🔴 | **Cloudflare** | Konto, R2 aktivieren (Kreditkarte nötig, 10 GB gratis), API-Token erstellen | 0,015 $ pro GB und Monat, Auslieferung gratis | Vor dem ersten Deploy |
+| ✅ | **Domain** (handball-intelligence.com, DNS bei Cloudflare) | **Cloudflare Registrar** (Einkaufspreis, DNS gratis). Bietet Cloudflare die Endung nicht an (bei `.ch` prüfen): bei Infomaniak oder Hostpoint kaufen und die Nameserver auf Cloudflare stellen | 10 bis 40 € pro Jahr | Nach dem Namen |
+| ✅ | **Azure** | Subscription; ein Setup-Skript für die Cloud Shell (baue ich) richtet den Zugang für GitHub ein | siehe Abschnitt 5 | Vor dem ersten Deploy |
+| ✅ | **Cloudflare** | Konto, R2 aktivieren (Kreditkarte nötig, 10 GB gratis), API-Token erstellen | 0,015 $ pro GB und Monat, Auslieferung gratis | Vor dem ersten Deploy |
 | ☐ 🟡 | **GitHub Secrets** | Repository → Settings → Secrets and variables → Actions: R2-Token. Azure braucht nur 3 nicht-geheime IDs (Anleitung folgt) | 0 | Vor dem ersten Deploy |
 | ☐ 🟡 | **Firmen-Bankkonto** (IBAN für QR-Rechnung) | Bank | | Vor der ersten Rechnung |
 | ☐ ⚪ | **Stripe** (Kartenzahlung, Q-BILL-1) | stripe.com, zuerst Testmodus | Gebühr pro Zahlung | Bevor du Geld verlangst |
