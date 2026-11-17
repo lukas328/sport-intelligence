@@ -14,6 +14,7 @@ import { markOpened } from "@/lib/fresh-match";
 import { checkCount, goalRuns, useMatchGraphics } from "@/lib/graphics";
 import { ownName } from "@/lib/own-name";
 import { ThreeThingsView } from "@/components/anlauf/three-things-view";
+import { ExampleBanner } from "@/components/anlauf/example-banner";
 import { MatchHead } from "./match-head";
 import { AskColour } from "./ask-colour";
 import { MatchZones } from "./match-graphics";
@@ -244,8 +245,10 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
   // «Spieltag starten» up front only on match day (from three hours before the kick-off); days
   // before it is a quiet action in the menu and below the opponent
   const matchDay = isMatchDay(match.kickoff_at);
-  const liveFirst = staff && match.score_own == null && !main && matchDay && match.source !== "paper_report";
-  const uploadFirst = staff && !main && !liveFirst && match.source !== "paper_report";
+  // the example match of «Demo-Spiel ansehen» is looked at, not worked on (R1)
+  const example = match.source === "demo";
+  const liveFirst = staff && match.score_own == null && !main && matchDay && match.source !== "paper_report" && !example;
+  const uploadFirst = staff && !main && !liveFirst && match.source !== "paper_report" && !example;
   // the progress of the uploads and the processing (K13, B4): the API's view, with the uploads of
   // this tab laid over; shown while it runs, and when something failed
   const local = useLocalUploads();
@@ -360,6 +363,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
           </details>
         )}
       </MatchHead>
+      {example && <ExampleBanner orgId={orgId} teamId={match.team_id} />}
       {/* one state at a time (L4): the progress block below says what runs; here only «fertig»
           and a failed match without progress to tell it */}
       {(justDone || (match.status === "failed" && !progressShown)) && (

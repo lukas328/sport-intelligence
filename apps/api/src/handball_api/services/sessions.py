@@ -40,6 +40,7 @@ from handball_api.schemas.sessions import (
 )
 from handball_api.services import audit, roster
 from handball_api.services.context import Ctx
+from handball_api.services.matches import counted
 from handball_api.services.orgs import get_season, get_team
 from handball_api.services.policies import Action
 from handball_api.services.report_pdf import TEXTS, _esc, _styles
@@ -489,6 +490,7 @@ async def my_schedule(ctx: Ctx, days: int = 30) -> list[dict[str, Any]]:
         await ctx.db.scalars(
             select(Match).where(
                 Match.team_id.in_(teams),
+                counted(),
                 Match.kickoff_at >= datetime.combine(today, datetime.min.time(), UTC),
                 Match.kickoff_at
                 <= datetime.combine(today + timedelta(days=days), datetime.min.time(), UTC),
@@ -634,7 +636,7 @@ async def calendar_ics(ctx: Ctx, token: str) -> str:
     since = _now() - timedelta(days=60)
     matches = (
         await ctx.db.scalars(
-            select(Match).where(Match.team_id == team.id, Match.kickoff_at >= since)
+            select(Match).where(Match.team_id == team.id, counted(), Match.kickoff_at >= since)
         )
     ).all()
     opponents = {

@@ -3628,7 +3628,11 @@
     "howCountedVideo": "Les buts viennent de la vidéo, tels que tu les as confirmés dans Vérifier. Les courses sont les trajets du tireur ou de la tireuse dans les trois secondes avant le but, mesurés dans la vidéo. Les positions de tir estimées sont en pointillé jusqu'à ce que tu les confirmes.",
     "allGoals": "{n, plural, one {Le but} other {Les # buts}}",
     "scoutingRow": "{opponent} contre {other}",
-    "scoutingTag": "Observé"
+    "scoutingTag": "Observé",
+    "exampleTitle": "Ceci est un exemple",
+    "exampleBody": "Un match de démonstration avec des buts inventés : voilà à quoi ressemble un match une fois ta vidéo analysée. Il n'appartient pas à ton équipe et ne compte dans aucune statistique.",
+    "exampleBack": "Retour à tes matchs",
+    "thingsExplain": "Les trois points : les tendances les plus nettes parmi les buts de ce match, par exemple le côté par lequel la plupart des buts encaissés sont tombés. Seul ce qui revient au moins trois fois est montré."
   },
   "check": {
     "top": "Vérifier · {opponent}",

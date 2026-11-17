@@ -24,6 +24,7 @@ from handball_api.models import (
 from handball_api.services.context import Ctx
 from handball_api.services.events import _to_metric
 from handball_api.services.matches import (
+    counted,
     duration_ms,
     in_video,
     timeline_videos,
@@ -120,6 +121,7 @@ async def load(
                 ).where(
                     Match.team_id == team.id,
                     Match.kind == "match",
+                    counted(),  # the example match is not the team's (R1)
                     Match.season_id.in_(scope),
                 )
             )

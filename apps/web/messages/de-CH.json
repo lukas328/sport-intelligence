@@ -3628,7 +3628,11 @@
     "howCountedVideo": "Die Tore kommen aus dem Video, so wie du sie in Prüfen bestätigt hast. Die Anläufe sind die Wege der Werferin oder des Werfers in den drei Sekunden vor dem Tor, aus dem Video gemessen. Geschätzte Wurfpositionen sind gestrichelt, bis du sie bestätigst.",
     "allGoals": "{n, plural, one {Das Tor} other {Alle # Tore}}",
     "scoutingRow": "{opponent} gegen {other}",
-    "scoutingTag": "Beobachtet"
+    "scoutingTag": "Beobachtet",
+    "exampleTitle": "Das ist ein Beispiel",
+    "exampleBody": "Ein Demo-Spiel mit erfundenen Toren: so sieht ein Spiel aus, wenn die Analyse dein Video ausgewertet hat. Es gehört nicht zu deinem Team und zählt in keiner Statistik.",
+    "exampleBack": "Zurück zu deinen Spielen",
+    "thingsExplain": "Die drei Dinge: die wichtigsten Muster aus den Toren dieses Spiels, etwa über welche Seite die meisten Gegentore fielen. Gezeigt wird nur, was mindestens dreimal vorkommt."
   },
   "check": {
     "top": "Prüfen · {opponent}",
