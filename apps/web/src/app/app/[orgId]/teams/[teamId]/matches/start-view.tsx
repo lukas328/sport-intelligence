@@ -9,6 +9,7 @@ import { useEffect, useState, type ComponentProps, type CSSProperties, type Reac
 import { AttnTag, linkClass, SectionHead } from "@/components/anlauf/blocks";
 import { Bundle, EmptyField } from "@/components/anlauf/bundle";
 import { WurfHead } from "@/components/anlauf/heads";
+import { LeagueTable } from "@/components/season/league-table";
 import { ThreeThingsView, useThingText } from "@/components/anlauf/three-things-view";
 import { FromMatchButton } from "@/components/collections/from-match";
 import { useShell } from "@/components/shell/context";
@@ -17,12 +18,17 @@ import { api } from "@/lib/client";
 import { ownName } from "@/lib/own-name";
 import { TeamFacts, useStanding } from "@/app/(einstieg)/einstieg/entry-view";
 import { matchStyle } from "@/lib/color";
-import { checkCount, goalRuns, openMoments, reportGoals, useMatchGraphics, videoScore, type MatchGraphics } from "@/lib/graphics";
+import { checkCount, goalRuns, openMoments, reportCut, reportGoals, useMatchGraphics, videoScore, type MatchGraphics } from "@/lib/graphics";
 import { freshMatch, openedMatches } from "@/lib/fresh-match";
 import { matchState } from "@/lib/match-state";
+import { findTeamRow, sameOpponent } from "@/lib/opponent-name";
 import { threeThings } from "@/lib/three-things";
 import { checkMinutes } from "@/lib/shot-spot";
 import { cn } from "@/lib/utils";
+import { ProgressLine } from "@/components/progress/progress-line";
+import { NextSteps } from "@/components/people/next-steps";
+import { AnalysisNotice, noticeKey } from "@/components/analysis/analysis-notice";
+import { filesSummary } from "@/lib/check-budget";
 
 type Match = Schemas["MatchSummary"];
 
@@ -50,9 +56,11 @@ export function StartView({
   // match has no result of its own, its goals are in the video: Echtlauf 6, after Prüfen the head
   // jumped back to an older match without video)
   const fresh = useFreshMatch(orgId, played);
-  const last = played.find((m) => m.id === fresh) ?? played.find((m) => m.kind !== "training" && (m.score_own != null || m.has_video)) ?? played[0] ?? null;
-  const next = upcoming.find((m) => m.kind !== "training") ?? null;
-  const withoutVideo = played.filter((m) => !m.has_video).length;
+  // a video of the opponent against others (K3) is listed, but never our last match or the next
+  const ours = played.filter((m) => m.kind !== "scouting");
+  const last = ours.find((m) => m.id === fresh) ?? ours.find((m) => m.kind !== "training" && (m.score_own != null || m.has_video)) ?? ours[0] ?? null;
+  const next = upcoming.find((m) => m.kind === "match") ?? null;
+  const withoutVideo = ours.filter((m) => !m.has_video).length;
   return (
     <div className="space-y-8">
       <LastMatch orgId={orgId} m={last} next={next} teamName={ownName(team?.name, org.name)} canWrite={canWrite} club={[org.primary_color, org.secondary_color ?? null]} />
@@ -60,19 +68,23 @@ export function StartView({
         <section aria-labelledby="all-matches">
           <SectionHead
             title={<span id="all-matches">{t("allMatches")}</span>}
-            note={withoutVideo > 0 ? t("withoutVideo", { count: withoutVideo, total: played.length }) : undefined}
+            note={withoutVideo > 0 ? t("withoutVideo", { count: withoutVideo, total: ours.length }) : undefined}
           />
           {/* a new match and a report are not actions on the last match: they belong to the list */}
           {actions && <div className="-mt-1 mb-2 flex flex-wrap items-center gap-3">{actions}</div>}
           <ul className="m-0 list-none p-0" data-testid="match-list">
             {played.map((m) => (
               <li key={m.id}>
-                <GameRow orgId={orgId} m={m} canWrite={canWrite} />
+                <GameRow orgId={orgId} m={m} canWrite={canWrite} inHero={m.id === last?.id} />
               </li>
             ))}
           </ul>
         </section>
-        <aside className="flex min-w-0 flex-col gap-8">{next && <NextOpponent orgId={orgId} teamId={team?.id} next={next} played={played} />}</aside>
+        <aside className="flex min-w-0 flex-col gap-8">
+          {/* after taking over the team: the coach's next steps (K17) */}
+          <NextSteps hasVideo={ours.some((m) => m.has_video)} />
+          {next && <NextOpponent orgId={orgId} teamId={team?.id} next={next} played={ours} />}
+        </aside>
       </div>
     </div>
   );
@@ -104,6 +116,9 @@ function LastMatch({ orgId, m, next, teamName, canWrite, club }: { orgId: string
   const g = useMatchGraphics(orgId, m?.id ?? "");
   const head = useHeadProps(m, next, g.data ?? null, teamName);
   const checks = g.data ? checkCount(g.data) : 0;
+  const goalChecks = g.data ? g.data.checks.filter((c) => c.kind === "goal").length : 0;
+  const minutes = checkMinutes(goalChecks, checks - goalChecks);
+  const notice = g.data?.notice ?? null;
   const base = m ? `/app/${orgId}/matches/${m.id}` : null;
   // the analysis runs after the video is ready: «running» until it is done too (E06)
   const running = m ? ["matches.status_processing", "matches.status_uploading"].includes(matchState(m).label) || g.data?.analysis === "running" : false;
@@ -118,6 +133,7 @@ function LastMatch({ orgId, m, next, teamName, canWrite, club }: { orgId: string
       <div className="bleed-x -mt-6 lg:-mt-8">
         <WurfHead {...head} />
       </div>
+      {m && running && <ProgressLine orgId={orgId} matchId={m.id} className="max-w-xl text-[17px] font-bold" />}
       <div className="flex flex-wrap items-center gap-3">
         {/* the last match without video: the task is the video, the demo shows what comes (UX test B26) */}
         {m && base && canWrite && !m.has_video ? (
@@ -146,7 +162,7 @@ function LastMatch({ orgId, m, next, teamName, canWrite, club }: { orgId: string
             <AttnTag>{t("check")}</AttnTag>
             <Link href={`${base}/check`} className={linkClass}>
               {/* after the court come the people in the picture: say so instead of «1 Minute» (UX test N13) */}
-              {t("checksOpen", { count: checks, minutes: g.data ? checkMinutes(g.data.checks.filter((c) => c.kind === "goal").length, checks - g.data.checks.filter((c) => c.kind === "goal").length) : 1 })}
+              {t("checksOpen", { count: checks, minutes })}
             </Link>
           </span>
         )}
@@ -154,17 +170,28 @@ function LastMatch({ orgId, m, next, teamName, canWrite, club }: { orgId: string
       {/* before the first video: what the federation's data already says (UX test H02) */}
       {!m?.has_video && m && <FromReport orgId={orgId} teamId={m.team_id} hideNext={next != null} />}
       {/* the analysis is done without three things: say so and name the next step (UX test N05) */}
-      {quiet && m && g.data && base && (
+      {/* the analysis found too little or failed: the reason and what helps, never a pile of
+          questions (second round A7); the court question stays one tap away */}
+      {quiet && m && g.data && base && notice && (
+        <div className="space-y-3" data-testid="start-next-step">
+          <AnalysisNotice
+            notice={notice}
+            lead={t("noticeLead")}
+            cornersHref={canWrite && g.data.checks.some((c) => c.kind === "field") ? `${base}/check` : null}
+            testId="start-notice"
+          />
+          <Link href={base} className={linkClass} data-testid="open-match">
+            {t("openMatch")}
+          </Link>
+        </div>
+      )}
+      {quiet && m && g.data && base && !notice && (
         <section className="max-w-[60ch] space-y-3 border-l-4 border-attn pl-4" data-testid="start-next-step">
-          <p className="m-0 text-[19px] font-bold">{checks > 0 ? t("nextStepChecks", { n: checks }) : !g.data.has_report ? t("nextStepReport") : t("nextStepNoGoals")}</p>
+          <p className="m-0 text-[19px] font-bold">{checks > 0 ? t("nextStepChecks", { n: checks, minutes }) : !g.data.has_report ? t("nextStepReport") : t("nextStepNoGoals")}</p>
           <div className="flex flex-wrap items-center gap-4">
             {canWrite && checks > 0 ? (
               <Link href={`${base}/check`} className={buttonClass("primary")} data-testid="start-step">
                 {t("plainToCheck")}
-              </Link>
-            ) : canWrite && !g.data.has_report ? (
-              <Link href={`/app/${orgId}/teams/${m.team_id}/matches?report=1`} className={buttonClass("primary")} data-testid="start-step">
-                {t("nextStepAddReport")}
               </Link>
             ) : (
               <Link href={base} className={buttonClass("primary")} data-testid="start-step">
@@ -172,7 +199,7 @@ function LastMatch({ orgId, m, next, teamName, canWrite, club }: { orgId: string
               </Link>
             )}
             {/* the match stays one tap away, as a plain link beside the step */}
-            {(checks > 0 || !g.data.has_report) && canWrite && (
+            {checks > 0 && canWrite && (
               <Link href={base} className={linkClass} data-testid="open-match">
                 {t("openMatch")}
               </Link>
@@ -195,19 +222,20 @@ function FromReport({ orgId, teamId, hideNext }: { orgId: string; teamId: string
   const club = link.data?.official_club_id;
   const team = link.data?.official_team_id;
   const preview = useQuery({
-    queryKey: ["public-team", club, team],
+    queryKey: ["public-team", club, team, "facts"],
     enabled: Boolean(club && team),
     retry: false,
     staleTime: 3_600_000,
-    queryFn: async () => (await api.GET("/v1/public/clubs/{club_id}/teams/{official_id}", { params: { path: { club_id: club!, official_id: team! } } })).data ?? null,
+    queryFn: async () => (await api.GET("/v1/public/clubs/{club_id}/teams/{official_id}", { params: { path: { club_id: club!, official_id: team! }, query: { scorers: false } } })).data ?? null,
   });
   const standing = useStanding(preview.data);
   if (!preview.data) return null;
   return (
     <section className="space-y-6" data-testid="start-from-report">
       {standing && <p className="font-slant m-0 text-[28px] leading-tight md:text-[34px]">{standing}</p>}
-      {/* the next opponent stands once, at the side (UX test B40) */}
-      <TeamFacts p={preview.data} hideNext={hideNext} />
+      {/* the next opponent stands once, at the side (UX test B40); the scorers stand in the
+          season, counted from the match reports in the app like the roster (app review R3) */}
+      <TeamFacts p={preview.data} hideNext={hideNext} hideScorers />
       <p className="m-0 text-[15px] text-ink-2">{t("source")}</p>
     </section>
   );
@@ -233,7 +261,8 @@ function useHeadProps(m: Match | null, next: Match | null, g: MatchGraphics | nu
   const t = useTranslations("anlauf");
   const format = useFormatter();
   if (!m) {
-    return { title: next ? t("titleNext", { opponent: next.opponent_name }) : t("titleWelcome"), own: null, opp: null, ownName: teamName, oppName: next?.opponent_name ?? "", waiting: true };
+    // nothing played yet: no empty place for a score (second round A10)
+    return { title: next ? t("titleNext", { opponent: next.opponent_name }) : t("titleWelcome"), own: null, opp: null, ownName: teamName, oppName: next?.opponent_name ?? "", waiting: true, scoreless: true };
   }
   const state = matchState(m);
   const running = ["matches.status_processing", "matches.status_uploading"].includes(state.label) || g?.analysis === "running";
@@ -258,7 +287,11 @@ function useHeadProps(m: Match | null, next: Match | null, g: MatchGraphics | nu
     ownName: teamName,
     oppName: m.opponent_name,
     goals: g ? reportGoals(g) : null,
-    flightLabels: { half: t("halftime", { v: "{v}" }), end: t("end", { v: "{v}" }), halfLevel: t("halftimeLevel"), endLevel: t("endLevel") },
+    goalsUntil: g ? reportCut(g, m.score_own, m.score_opponent) : null,
+    // without a result (and once the data is there) no large empty place for one: the head stays
+    // short and what matters comes up (second round A10)
+    scoreless: g != null || !m.has_video,
+    flightLabels: { half: t("halftime", { v: "{v}" }), end: t("end", { v: "{v}" }), halfLevel: t("halftimeLevel"), endLevel: t("endLevel"), cut: t("flightCut", { m: "{m}" }) },
   };
 }
 
@@ -277,7 +310,8 @@ function MiniField({ orgId, m, width = 128 }: { orgId: string; m: Match; width?:
       </span>
     );
   }
-  const word = running ? t("miniRunning") : !m.has_video ? t("miniNoVideo") : null;
+  // an upload on its way is not «Analyse läuft» yet (its row says how far the upload is)
+  const word = state.label === "matches.status_processing" ? t("miniRunning") : !m.has_video && !running ? t("miniNoVideo") : null;
   return (
     <span className="relative block w-full" style={{ maxWidth: width }}>
       <EmptyField />
@@ -289,16 +323,25 @@ function MiniField({ orgId, m, width = 128 }: { orgId: string; m: Match; width?:
 /** The second line of a match with video: its things, its scenes and Punkt 1. */
 function RowSummary({ orgId, m }: { orgId: string; m: Match }) {
   const t = useTranslations("anlauf");
+  const tn = useTranslations("analysisNotice");
   const text = useThingText();
   const g = useMatchGraphics(orgId, m.id);
   if (!g.data) return <>{m.competition}</>;
+  // several files: what all of them did, never the first file's state alone (second round A8)
+  const files = filesSummary(g.data.files ?? []);
+  if (files && files.ready < files.total) {
+    return <>{[files.running > 0 ? t("rowRunning") : null, t("rowParts", { done: files.ready, total: files.total }), files.uploading > 0 ? t("rowPartsUploading", { n: files.uploading }) : null, files.failed > 0 ? t("rowPartsFailed", { n: files.failed }) : null].filter(Boolean).join(", ")}</>;
+  }
   // «Analyse fertig» only when it is (E06)
   if (g.data.analysis === "running") return <>{t("rowRunning")}</>;
-  if (g.data.analysis === "failed") return <>{t("rowFailed")}</>;
+  if (g.data.analysis === "failed") return <>{g.data.notice?.failed ? t("rowFailedWhy", { reason: tn(`short_${noticeKey(g.data.notice.reason)}` as "short_court") }) : t("rowFailed")}</>;
   const things = threeThings(goalRuns(g.data));
   const scenes = g.data.goals.filter((x) => x.has_video || x.source === "demo").length;
   // no things yet: the state in words, not «Kein Ding · 0 Szenen» (UX test A02)
   if (things.length === 0 && g.data.analysis !== "ready") return <>{t("rowVideoOnly")}</>;
+  // found too little to ask: the reason in a few words, not «0 Fragen» (second round A6)
+  if (things.length === 0 && !g.data.goals.some((x) => x.has_video) && g.data.notice && !g.data.notice.failed && checkCount(g.data) === 0)
+    return <>{t("rowNotice", { reason: tn(`short_${noticeKey(g.data.notice.reason)}` as "short_court") })}</>;
   if (things.length === 0 && !g.data.goals.some((x) => x.has_video)) return <>{checkCount(g.data) > 0 ? t("rowChecks", { n: checkCount(g.data) }) : t("rowNoGoals")}</>;
   // while goal moments are open the count is an interim one, also in the list (fourth real-video test)
   if (things.length === 0) {
@@ -309,12 +352,13 @@ function RowSummary({ orgId, m }: { orgId: string; m: Match }) {
   return <>{t("rowSummary", { things: things.length, scenes, first: things[0] ? text(things[0]) : "none" })}</>;
 }
 
-function GameRow({ orgId, m, canWrite }: { orgId: string; m: Match; canWrite: boolean }) {
+function GameRow({ orgId, m, canWrite, inHero = false }: { orgId: string; m: Match; canWrite: boolean; inHero?: boolean }) {
   const t = useTranslations("anlauf");
   const tm = useTranslations("matches");
   const format = useFormatter();
   const date = new Date(m.kickoff_at);
-  const result = resultOf(m);
+  // a scouting video: no win or loss of ours (K3)
+  const result = m.kind === "scouting" ? null : resultOf(m);
   const state = matchState(m);
   const base = `/app/${orgId}/matches/${m.id}`;
   return (
@@ -330,17 +374,26 @@ function GameRow({ orgId, m, canWrite }: { orgId: string; m: Match; canWrite: bo
       <div className="min-w-0">
         <h3 className="m-0">
           <Link href={base} className="font-slant text-[17px] leading-tight text-ink no-underline hover:underline md:text-[22px]">
-            {m.kind === "training" ? tm("training") : m.opponent_name}
+            {m.kind === "training" ? tm("training") : m.kind === "scouting" ? t("scoutingRow", { opponent: m.opponent_name, other: m.scouting_other ?? "" }) : m.opponent_name}
           </Link>
+          {m.kind === "scouting" && <span className="ml-2 align-middle text-sm font-bold text-ink-2">{t("scoutingTag")}</span>}
         </h3>
         <p className="m-0 text-[15px] text-ink-2 md:text-[15px]">
           <span className="md:hidden">{format.dateTime(date, { day: "2-digit", month: "2-digit" })} · </span>
           {["matches.status_processing", "matches.status_uploading", "matches.status_failed"].includes(state.label) ? (
-            tm(state.label.replace("matches.", "") as "status_processing")
+            <ProgressLine orgId={orgId} matchId={m.id} className="max-md:inline" fallback={tm(state.label.replace("matches.", "") as "status_processing")} />
+          ) : !m.has_video && m.kind === "scouting" ? (
+            // a scouting match is nothing without its video
+            canWrite ? (
+              <Link href={`${base}?tab=video`} className={cn(linkClass, "inline-flex min-h-11 items-center")}>
+                {t("uploadVideo")}
+              </Link>
+            ) : null
           ) : !m.has_video ? (
             <>
               {t("reportOnly")}
-              {canWrite && m.score_own != null && (
+              {/* the match of the head has its upload there as the one main action (review R32) */}
+              {canWrite && m.score_own != null && !inHero && (
                 <>
                   {" · "}
                   <Link href={`${base}?tab=video`} className={cn(linkClass, "inline-flex min-h-11 items-center")}>
@@ -356,12 +409,12 @@ function GameRow({ orgId, m, canWrite }: { orgId: string; m: Match; canWrite: bo
       </div>
       {result ? (
         <p className="m-0 text-right">
-          <span className="sr-only">{`${t("scoreLabel", { own: m.score_own ?? 0, opp: m.score_opponent ?? 0 })}, ${t(result)}`}</span>
+          {/* «draw» is also the drawing tool: the result has its own word (UX test B50, review R8) */}
+          <span className="sr-only">{`${t("scoreLabel", { own: m.score_own ?? 0, opp: m.score_opponent ?? 0 })}, ${t(result === "draw" ? "drawResult" : result)}`}</span>
           <b className="font-num block text-[28px] leading-[.85] md:text-[44px]" aria-hidden>
             {m.score_own}:{m.score_opponent}
           </b>
           <small aria-hidden className={cn("mt-1 block text-[15px] font-bold md:mt-1.5 md:text-sm", result === "win" ? "text-win" : result === "loss" ? "text-loss" : "text-ink-2")}>
-            {/* «draw» is also the drawing tool: the result has its own word (UX test B50) */}
             {t(result === "draw" ? "drawResult" : result)}
           </small>
         </p>
@@ -373,7 +426,6 @@ function GameRow({ orgId, m, canWrite }: { orgId: string; m: Match; canWrite: bo
 }
 
 type Row = { teamId?: number; name?: string; rank?: number; games?: number; won?: number; drawn?: number; lost?: number; goalsFor?: number; goalsAgainst?: number; goalDifference?: number; points?: number };
-const fold = (v: string) => v.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
 
 /**
  * Nächster Gegner (SPEC 7.1, UX test B40): three facts from the federation's table and our own
@@ -385,8 +437,9 @@ export function NextOpponent({ orgId, teamId, next, played }: { orgId: string; t
   const format = useFormatter();
   const date = new Date(next.kickoff_at);
   // the last duel with video: its Minifeld and a line
-  const met = played.find((m) => m.opponent_name === next.opponent_name && m.score_own != null && m.has_video);
-  const duel = played.find((m) => m.opponent_name === next.opponent_name && m.score_own != null);
+  // «SG Horgen/Wädenswil 1» and «SG Horgen/Wädenswil (M2)» are one opponent (review R7)
+  const met = played.find((m) => sameOpponent(m.opponent_name, next.opponent_name) && m.score_own != null && m.has_video);
+  const duel = played.find((m) => sameOpponent(m.opponent_name, next.opponent_name) && m.score_own != null);
   const g = useMatchGraphics(orgId, met?.id ?? "");
   const text = useThingText();
   const first = g.data ? threeThings(goalRuns(g.data))[0] : undefined;
@@ -397,16 +450,14 @@ export function NextOpponent({ orgId, teamId, next, played }: { orgId: string; t
   });
   const table = (link.data?.standing ?? []) as Row[];
   const ownId = link.data?.official_team_id;
-  const opp = next.opponent_name ? fold(next.opponent_name) : "";
-  const row = opp ? table.find((r) => r.name && (fold(r.name) === opp || fold(r.name).includes(opp) || opp.includes(fold(r.name)))) : undefined;
+  const row = findTeamRow(table, next.opponent_name);
   const facts: string[] = [];
   if (row?.rank != null && row.points != null && row.games != null) facts.push(t("oppRank", { rank: row.rank, points: row.points, games: row.games }));
   if (row?.won != null && row.drawn != null && row.lost != null) facts.push(t("oppRecord", { won: row.won, drawn: row.drawn, lost: row.lost }));
   if (row?.goalsFor != null && row.goalsAgainst != null && row.games) facts.push(t("oppGoals", { scored: Math.round(row.goalsFor / row.games), conceded: Math.round(row.goalsAgainst / row.games) }));
   if (duel) facts.push(t("lastMeeting", { score: `${duel.score_own}:${duel.score_opponent}` }) + (met && first ? `, ${text(first)}` : ""));
-  // the table around both teams: at most six rows, own and opponent marked
-  const marked = (r: Row) => (ownId != null && r.teamId === ownId) || r === row;
-  const around = table.length <= 6 ? table : table.filter((r, i) => table.slice(Math.max(0, i - 1), i + 2).some(marked)).slice(0, 6);
+  // the table around both teams, own and opponent marked; the whole table a tap away (K1)
+  const rows = table.map((r) => ({ key: `${r.rank}-${r.name}`, rank: r.rank ?? null, name: r.name ?? "", games: r.games ?? null, diff: r.goalDifference ?? null, points: r.points ?? null, own: ownId != null && r.teamId === ownId, marked: r === row }));
   return (
     <section data-testid="next-opponent">
       <p className="m-0 text-[15px] font-semibold text-ink-2">
@@ -433,28 +484,10 @@ export function NextOpponent({ orgId, teamId, next, played }: { orgId: string; t
       ) : (
         <p className="m-0 border-t border-rule py-2.5 text-base text-ink-2">{t("noVideoAgainst", { opponent: next.opponent_name })}</p>
       )}
-      {around.length > 0 && (
-        <table className="mt-4 w-full border-collapse text-[15px]" data-testid="next-table">
-          <caption className="mb-1 text-left text-[15px] font-semibold text-ink-2">{link.data?.league || link.data?.group_name || t("table")}</caption>
-          <thead className="sr-only">
-            <tr>
-              <th scope="col">{t("tableRank")}</th>
-              <th scope="col">{t("tableTeam")}</th>
-              <th scope="col">{t("tableGames")}</th>
-              <th scope="col">{t("tablePoints")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {around.map((r) => (
-              <tr key={`${r.rank}-${r.name}`} className={cn("border-t border-rule", marked(r) && "font-bold")}>
-                <td className="w-8 py-2 tabular-nums">{r.rank}</td>
-                <td className="py-2">{r.name}</td>
-                <td className="py-2 text-right text-ink-2 tabular-nums">{r.games}</td>
-                <td className="w-10 py-2 text-right tabular-nums">{r.points}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {rows.length > 0 && (
+        <div className="mt-4">
+          <LeagueTable rows={rows} caption={link.data?.league || link.data?.group_name || t("table")} excerpt={6} size="sm" testid="next-table" />
+        </div>
       )}
     </section>
   );

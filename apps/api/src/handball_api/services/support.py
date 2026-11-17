@@ -26,6 +26,7 @@ from handball_api.models import (
     Match,
     Organization,
     OrgMembership,
+    Player,
     Presentation,
     RosterEntry,
     Team,
@@ -37,7 +38,7 @@ from handball_api.schemas.matches import MatchCreate
 from handball_api.services import audit
 from handball_api.services.context import Ctx
 from handball_api.services.mail_templates import render
-from handball_api.services.matches import create_match
+from handball_api.services.matches import DEMO_SOURCE, create_match
 
 SERIES_DAYS = (0, 1, 3, 7, 14)
 SERIES_LINKS = {0: "/app", 1: "/hilfe/aufnahme", 3: "/hilfe/videositzung", 7: "/app", 14: "/app"}
@@ -49,6 +50,10 @@ SERIES_LINKS = {0: "/app", 1: "/hilfe/aufnahme", 3: "/hilfe/videositzung", 7: "/
 def failure_code(error: str | None) -> str:
     """Stable code for an analysis error; the UI explains it and suggests the next step."""
     e = (error or "").lower()
+    # the watchdog ended a job whose worker went silent twice (services/progress.STALLED_ERROR):
+    # a lost worker, not a video too long; starting again can help
+    if e.startswith("stalled"):
+        return "stalled"
     if "calibration" in e:
         return "calibration"
     if "no video stream" in e or "unknown duration" in e or "probe" in e or "decode" in e:
@@ -95,7 +100,10 @@ async def feedback(
         raise ProblemError(
             503, "email-unavailable", "The e-mail could not be sent; please try again later"
         )
-    await audit.record(ctx, "support.feedback", data={"page": context.get("page")})
+    # without mail delivery (console backend) the mail went nowhere: keep the message in the audit
+    # log so the support can read it there (L2); with mail it is in the support's inbox
+    kept = {} if ctx.settings.mail_delivers else {"message": message[:2000]}
+    await audit.record(ctx, "support.feedback", data={"page": context.get("page"), **kept})
 
 
 def chat_config(ctx: Ctx, user: User | None, locale: str) -> dict[str, Any] | None:
@@ -134,7 +142,7 @@ async def checklist(ctx: Ctx, org: Organization) -> list[dict[str, Any]]:
         )
     )
     presentations = await count(select(func.count(Presentation.id)))
-    demo = await count(select(func.count(Match.id)).where(Match.is_demo))
+    demo = await count(select(func.count(Match.id)).where(Match.source == DEMO_SOURCE))
     team_id = await ctx.db.scalar(select(Team.id).order_by(Team.created_at).limit(1))
     return [
         {"key": "team", "done": teams > 0, "link": f"/app/{org.id}"},
@@ -159,72 +167,175 @@ async def checklist(ctx: Ctx, org: Organization) -> list[dict[str, Any]]:
     ]
 
 
+# The example match: a plausible 27:24 with three clear patterns, so the three things show what
+# they are (app review R20): 9 of 24 goals against over the right wing, 4 fast breaks against,
+# 9 of 27 own goals from the circle. Zone -> a shot spot of that zone (attacked goal at x = 40).
+DEMO_SPOT = {
+    "wing_left": (38.6, 18.4),
+    "wing_right": (38.6, 1.6),
+    "circle_left": (34.2, 13.0),
+    "circle_centre": (33.6, 10.2),
+    "circle_right": (34.2, 7.0),
+    "back_left": (30.0, 15.5),
+    "back_centre": (29.5, 10.0),
+    "back_right": (30.0, 4.5),
+    "fast_break": (34.0, 10.0),
+    "penalty": (33.0, 10.0),
+}
+# goals per zone and side, then the shots that did not go in (saved, missed, blocked)
+DEMO_GOALS = {
+    "own": {
+        "circle_centre": 4,
+        "circle_left": 3,
+        "circle_right": 2,
+        "back_left": 4,
+        "back_centre": 3,
+        "back_right": 3,
+        "wing_left": 2,
+        "wing_right": 2,
+        "penalty": 3,
+        "fast_break": 1,
+    },
+    "opponent": {
+        "wing_right": 9,
+        "fast_break": 4,
+        "back_left": 3,
+        "back_centre": 3,
+        "circle_centre": 2,
+        "wing_left": 1,
+        "penalty": 2,
+    },
+}
+DEMO_OTHER = {
+    "own": {"save": 12, "miss": 5, "blocked": 2, "penalty_save": 1},
+    "opponent": {"save": 13, "miss": 4, "blocked": 1, "penalty_save": 1},
+}
+DEMO_TURNOVERS = {"own": 9, "opponent": 11}
+DEMO_SUSPENSIONS = {"own": 2, "opponent": 3}
+DEMO_OPPONENT = "Demo HC Beispiel"
+
+
+def demo_events(
+    period_s: int, field: list[tuple[uuid.UUID, int | None]], keeper: uuid.UUID | None
+) -> list[dict[str, Any]]:
+    """The example match's events in match order (fixed seed): own field players from `field`
+    (player, number), the own goalkeeper's saves credited to `keeper`."""
+    rng = random.Random(7)  # noqa: S311 (example data, not security relevant)
+    shots: list[dict[str, Any]] = []
+    for side in ("own", "opponent"):
+        for zone, n in DEMO_GOALS[side].items():
+            shots += [{"side": side, "outcome": "goal", "zone": zone} for _ in range(n)]
+        for outcome, n in DEMO_OTHER[side].items():
+            for _ in range(n):
+                if outcome == "penalty_save":
+                    shots.append({"side": side, "outcome": "save", "zone": "penalty"})
+                else:
+                    zone = rng.choice(["back_left", "back_centre", "back_right", "wing_left"])
+                    shots.append({"side": side, "outcome": outcome, "zone": zone})
+    rest: list[dict[str, Any]] = [
+        {"side": side, "type": "turnover"} for side, n in DEMO_TURNOVERS.items() for _ in range(n)
+    ] + [
+        {"side": side, "type": "suspension_2min"}
+        for side, n in DEMO_SUSPENSIONS.items()
+        for _ in range(n)
+    ]
+    items = shots + rest
+    rng.shuffle(items)
+    length = 2 * period_s
+    out: list[dict[str, Any]] = []
+    opp_numbers = [3, 5, 7, 9, 11, 14, 18, 21, 23, 27]
+    for k, item in enumerate(items):
+        clock = round((k + 0.5) * length / len(items) + rng.uniform(-8, 8), 1)
+        e: dict[str, Any] = {
+            "side": item["side"],
+            "period": 1 if clock < period_s else 2,
+            "clock_s": clock,
+        }
+        own = item["side"] == "own"
+        shooter = rng.choice(field) if own and field else None
+        if "type" in item:
+            e["type"] = item["type"]
+            if item["type"] == "turnover":
+                e["turnover_type"] = rng.choice(["bad_pass", "steps", "offensive_foul"])
+        else:
+            zone = item["zone"]
+            x, y = DEMO_SPOT[zone]
+            e.update(
+                type="shot",
+                outcome=item["outcome"],
+                x=round(x + rng.uniform(-0.4, 0.4), 1),
+                y=round(y + rng.uniform(-0.4, 0.4), 1),
+                shot_zone=zone,
+                shot_type="penalty"
+                if zone == "penalty"
+                else "fast_break"
+                if zone == "fast_break"
+                else None,
+                goal_zone=rng.choice(["TL", "TC", "TR", "ML", "MC", "MR", "BL", "BC", "BR"])
+                if item["outcome"] in ("goal", "save")
+                else None,
+            )
+            if item["outcome"] == "save":
+                # our saves to our goalkeeper, theirs to a numbered keeper of the opponent
+                e["attributes"] = (
+                    {"goalkeeper_number": 1}
+                    if own
+                    else ({"goalkeeper_id": str(keeper)} if keeper else {})
+                )
+        if own:
+            e["player_id"] = shooter[0] if shooter else None
+            e["number"] = shooter[1] if shooter else None
+        else:
+            e["number"] = rng.choice(opp_numbers)
+        out.append(e)
+    return out
+
+
 async def demo_match(ctx: Ctx, team_id: uuid.UUID) -> Match:
-    """A demo match with realistic events to try the analysis views (marked as demo)."""
-    existing = await ctx.db.scalar(select(Match).where(Match.team_id == team_id, Match.is_demo))
+    """The example match of «Demo-Spiel ansehen»: one per team, with realistic events, marked as
+    an example (`source` demo). It is no match of the team: lists, figures, statistics and pick
+    lists leave it out (services/matches.counted, app review R1)."""
+    existing = await ctx.db.scalar(
+        select(Match).where(Match.team_id == team_id, Match.source == DEMO_SOURCE)
+    )
     if existing:
         return existing
     m = await create_match(
         ctx,
         team_id,
         MatchCreate(
-            opponent_name="Demo HC Beispiel",
+            opponent_name=DEMO_OPPONENT,
             kickoff_at=datetime.now(UTC) - timedelta(days=2),
             is_demo=True,
         ),
     )
-    rng = random.Random(7)  # noqa: S311 (demo data, not security relevant)
-    numbers = await ctx.db.execute(
-        select(RosterEntry.player_id, RosterEntry.jersey_number).where(
-            RosterEntry.season_id == m.season_id
+    m.source = DEMO_SOURCE
+    m.halftime_own = m.halftime_opponent = 0
+    roster = (
+        await ctx.db.execute(
+            select(RosterEntry.player_id, RosterEntry.jersey_number, Player.main_position)
+            .join(Player, Player.id == RosterEntry.player_id)
+            .where(RosterEntry.season_id == m.season_id, RosterEntry.team_id == team_id)
+            .order_by(RosterEntry.jersey_number.nulls_last())
         )
-    )
-    own_players = [pid for pid, _ in numbers.all()]
+    ).all()
+    keeper = next((pid for pid, _, pos in roster if pos == "TW"), None)
+    field = [(pid, n) for pid, n, pos in roster if pos != "TW"]
     own = opp = 0
-    for k in range(64):
-        period = 1 if k < 32 else 2
-        clock = (k % 32) * 55.0 + rng.uniform(0, 40) + (period - 1) * m.period_s
-        side = "own" if k % 2 == 0 else "opponent"
-        # positions are normalised to the attacked goal at x = 40 for both teams
-        x = rng.uniform(26, 38)
-        y = rng.uniform(1, 19)
-        outcome = rng.choices(["goal", "save", "miss", "blocked"], weights=[55, 25, 15, 5])[0]
-        if outcome == "goal":
-            own, opp = (own + 1, opp) if side == "own" else (own, opp + 1)
+    for e in demo_events(m.period_s, field, keeper):
+        if e.get("outcome") == "goal":
+            own, opp = (own + 1, opp) if e["side"] == "own" else (own, opp + 1)
+            if e["period"] == 1:
+                m.halftime_own, m.halftime_opponent = own, opp
         ctx.db.add(
             Event(
                 organization_id=m.organization_id,
                 match_id=m.id,
-                type="shot",
-                side=side,
-                period=period,
-                clock_s=round(clock, 1),
-                x=round(x, 1),
-                y=round(y, 1),
-                outcome=outcome,
-                number=rng.randint(2, 30) if side == "opponent" else None,
-                player_id=rng.choice(own_players) if side == "own" and own_players else None,
-                goal_zone=rng.choice(["TL", "TC", "TR", "ML", "MC", "MR", "BL", "BC", "BR"])
-                if outcome in ("goal", "save")
-                else None,
                 source="demo",
                 confidence=1.0,
+                **e,
             )
         )
-        if k % 9 == 4:
-            ctx.db.add(
-                Event(
-                    organization_id=m.organization_id,
-                    match_id=m.id,
-                    type="turnover",
-                    side=side,
-                    period=period,
-                    clock_s=round(clock + 5, 1),
-                    turnover_type=rng.choice(["bad_pass", "steps", "offensive_foul"]),
-                    source="demo",
-                    confidence=1.0,
-                )
-            )
     m.score_own, m.score_opponent = own, opp
     await ctx.db.flush()
     await audit.record(ctx, "match.demo_created", target_type="match", target_id=m.id)

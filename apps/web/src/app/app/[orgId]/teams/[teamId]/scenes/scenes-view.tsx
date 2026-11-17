@@ -17,6 +17,7 @@ import { chipsFromText, extrasFromText } from "@/lib/scene-words";
 import { matchStyle } from "@/lib/color";
 import { goalRuns, useMatchGraphics } from "@/lib/graphics";
 import { formatClock } from "@/lib/format";
+import { sameOpponent } from "@/lib/opponent-name";
 import { cn } from "@/lib/utils";
 import { PresentView } from "../../../collections/[collectionId]/present/present-view";
 import { threeThings } from "@/lib/three-things";
@@ -108,7 +109,7 @@ export function ScenesView({ orgId, teamId, matches, side }: { orgId: string; te
   useEffect(() => {
     if (sentence && opponents.length) setExtra(extrasFromText(sentence, opponents));
   }, [sentence, opponents]);
-  const againstIds = extra.opponent ? withVideo.filter((m) => m.opponent_name === extra.opponent).map((m) => m.id) : [];
+  const againstIds = extra.opponent ? withVideo.filter((m) => sameOpponent(m.opponent_name, extra.opponent)).map((m) => m.id) : [];
   const withExtra = (f: ReturnType<typeof combine>) => ({
     ...f,
     ...(extra.opponent ? { match_ids: againstIds } : {}),

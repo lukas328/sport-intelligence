@@ -231,3 +231,102 @@ async def test_shared_goal_scene_carries_its_tactics_camera(
     # the title parts as in the app (UX test B15): minute, side, position of the goal
     assert first["goal"] == {"minute": goal["minute"], "team": goal["team"], "zone": goal["zone"]}
     assert second["goal"] is None
+
+
+async def test_share_options_explain_the_youth_rule(make_api: Callable[[], Api]) -> None:
+    """K20: the share dialog asks first and explains, instead of a failed attempt."""
+    api = make_api()
+    ids = await setup_club(api)
+    r = await api.get(f"/v1/orgs/{ids['org']}/teams/{ids['team']}/share-options")
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert body["youth"] is False and body["default_days"] == 30
+    assert set(body["kinds"]) == {"play", "match", "playlist", "highlight", "scene", "collection"}
+    assert all(v is None for v in body["kinds"].values())
+
+
+async def test_share_options_youth(make_api: Callable[[], Api]) -> None:
+    api = make_api()
+    ids = await setup_club(api, youth=True)
+    r = await api.get(f"/v1/orgs/{ids['org']}/teams/{ids['team']}/share-options")
+    kinds = r.json()["kinds"]
+    assert r.json()["youth"] is True and kinds["play"] is None
+    assert {k for k, v in kinds.items() if v == "youth-protection"} == {
+        "match",
+        "playlist",
+        "highlight",
+        "scene",
+        "collection",
+    }
+
+
+async def test_preview_tells_the_chat_what_it_is(make_api: Callable[[], Api]) -> None:
+    """K20: opponent, result and goals by zone for a match; the minute of a goal scene; the
+    drawing of a play. No names and no numbers of players in any preview."""
+    api = make_api()
+    ids = await setup_club(api)
+    org, team = ids["org"], ids["team"]
+    o = f"/v1/orgs/{org}"
+    base = f"{o}/teams/{team}/share-links"
+    m = await new_match(api, ids, opponent_name="SG Horgen")
+    patched = await api.patch(
+        f"{o}/matches/{m['id']}", json={"score_own": 28, "score_opponent": 24}
+    )
+    assert patched.status_code == 200, patched.text
+    await api.post(
+        f"{o}/matches/{m['id']}/events",
+        json={
+            "type": "shot",
+            "side": "own",
+            "outcome": "goal",
+            "clock_s": 1380,
+            "number": 7,
+            "shot_type": "fast_break",
+        },
+    )
+    match_link = (await api.post(base, json={"kind": "match", "target_id": m["id"]})).json()
+    anon = make_api()
+    pv = (await anon.get(f"/v1/share/{match_link['token']}/preview")).json()
+    assert (pv["opponent"], pv["score"], pv["is_home"]) == ("SG Horgen", [28, 24], True)
+    assert pv["goals"] == [{"team": "own", "zone": "gs", "minute": 23.0}]
+    assert "number" not in str(pv) and "player" not in str(pv)
+
+    play = (
+        await api.post(
+            f"{o}/teams/{team}/plays",
+            json={"name": "Kreuzen", "category": "attack", "doc": doc()},
+        )
+    ).json()
+    play_link = (await api.post(base, json={"kind": "play", "target_id": play["id"]})).json()
+    pp = (await anon.get(f"/v1/share/{play_link['token']}/preview")).json()
+    assert pp["play"]["category"] == "attack" and pp["play"]["doc"]["frames"]
+    assert pp["score"] is None and pp["goal"] is None
+
+    clip = (
+        await api.post(
+            f"{o}/clips",
+            json={"match_id": m["id"], "start_ms": 1000, "end_ms": 9000, "title": "Gegenstoss"},
+        )
+    ).json()
+    scene_link = (await api.post(base, json={"kind": "scene", "target_id": clip["id"]})).json()
+    sp = (await anon.get(f"/v1/share/{scene_link['token']}/preview")).json()
+    # a scene from one match carries that match; without a goal behind it, no minute
+    assert (sp["opponent"], sp["score"], sp["goal"]) == ("SG Horgen", [28, 24], None)
+    # the preview does not count as an opening
+    listing = {x["kind"]: x["views"] for x in (await api.get(base)).json()}
+    assert listing == {"match": 0, "play": 0, "scene": 0}
+
+
+def test_byte_ranges() -> None:
+    """The reel answers ranges (Safari and the iMessage preview play MP4 only that way)."""
+    from handball_api.routers.sharing import byte_range
+
+    assert byte_range(None, 100) is None
+    assert byte_range("bytes=0-", 100) == (0, 99)
+    assert byte_range("bytes=0-1", 100) == (0, 1)
+    assert byte_range("bytes=90-200", 100) == (90, 99)
+    assert byte_range("bytes=-10", 100) == (90, 99)
+    assert byte_range("bytes=100-", 100) == "invalid"
+    assert byte_range("bytes=5-2", 100) == "invalid"
+    assert byte_range("bytes=0-1,4-5", 100) is None
+    assert byte_range("items=0-1", 100) is None

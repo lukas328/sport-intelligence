@@ -39,7 +39,8 @@ class Match(Base, EntityMixin, TenantMixin):
     __table_args__ = (
         CheckConstraint("score_own IS NULL OR score_own >= 0", name="score_own_positive"),
         CheckConstraint("score_opponent IS NULL OR score_opponent >= 0", name="score_opp_positive"),
-        CheckConstraint("kind IN ('match', 'training')", name="kind_values"),
+        # scouting: a video of the opponent playing somebody else (the own team does not play)
+        CheckConstraint("kind IN ('match', 'training', 'scouting')", name="kind_values"),
         CheckConstraint(
             "kind = 'training' OR opponent_id IS NOT NULL", name="opponent_for_matches"
         ),
@@ -60,6 +61,9 @@ class Match(Base, EntityMixin, TenantMixin):
         ForeignKey("opponents.id", ondelete="RESTRICT"), index=True
     )
     kind: Mapped[str] = mapped_column(String(10), nullable=False, default="match")
+    # kind scouting: the team the observed opponent plays against (the opponent is opponent_id);
+    # in the analysis and the events it takes the place of the own team ("own" side, kit_own)
+    scouting_other: Mapped[str | None] = mapped_column(String(120))
     kickoff_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, index=True
     )
@@ -169,8 +173,35 @@ class ProcessingJob(Base, EntityMixin, TenantMixin):
     error: Mapped[str | None] = mapped_column(Text)
     started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # the last report of the worker (progress or its heartbeat once a minute): a running job that
+    # stays silent much longer has lost its worker (services/progress, the watchdog)
+    heartbeat_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     gpu_seconds: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
     cost_chf: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
+
+
+class MatchAttachment(Base, EntityMixin, TenantMixin):
+    """A file kept with a match: a photo or PDF of the paper match report, notes (K19). Uploaded
+    straight to storage like a video (one presigned part), listed and downloaded on the match."""
+
+    __tablename__ = "match_attachments"
+    __table_args__ = (CheckConstraint("status IN ('uploading', 'ready')", name="status_values"),)
+
+    match_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("matches.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    filename: Mapped[str] = mapped_column(String(255), nullable=False)
+    content_type: Mapped[str] = mapped_column(String(100), nullable=False)
+    size_bytes: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    storage_key: Mapped[str] = mapped_column(String(400), nullable=False)
+    upload_id: Mapped[str | None] = mapped_column(String(400))
+    status: Mapped[str] = mapped_column(
+        String(12), nullable=False, default="uploading", server_default="uploading"
+    )
+    note: Mapped[str | None] = mapped_column(Text)
+    created_by_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), index=True
+    )
 
 
 class Clip(Base, EntityMixin, TenantMixin):
@@ -232,7 +263,9 @@ class Comment(Base, EntityMixin, TenantMixin):
     author_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
     t_ms: Mapped[int] = mapped_column(Integer, nullable=False)
     body: Mapped[str] = mapped_column(Text, nullable=False)
-    clip_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("clips.id", ondelete="CASCADE"))
+    clip_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("clips.id", ondelete="CASCADE"), index=True
+    )
 
 
 class Annotation(Base, EntityMixin, TenantMixin):

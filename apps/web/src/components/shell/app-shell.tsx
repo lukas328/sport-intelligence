@@ -6,10 +6,12 @@ import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { ChevronLeft, Plus, Search } from "lucide-react";
 import { NotificationBell } from "@/components/training/bell";
-import { destOf, modeFor, navFor, startHref, teamInPath, uploadHref } from "@/lib/nav-model";
+import { analyses, destOf, modeFor, navFor, startHref, teamInPath, uploadHref } from "@/lib/nav-model";
+import { clubNameShown } from "@/lib/own-name";
 import { buttonClass } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { AppMark } from "@/components/brand";
+import { ProgressStrip } from "@/components/progress/progress-strip";
 import { AccountMenu } from "./account-menu";
 import { ClubMark } from "./club-mark";
 import { CommandPalette } from "./command-palette";
@@ -17,6 +19,7 @@ import {
   ShellContext,
   setCookie,
   TEAM_COOKIE,
+  type ShellMe,
   type ShellOrg,
   type ShellTeam,
   type ShellValue,
@@ -37,7 +40,7 @@ export function AppShell({
   org: ShellOrg;
   orgs: { id: string; name: string }[];
   teams: ShellTeam[];
-  me: { name: string; email: string; /** the club asks for two-factor and it is not set up */ two_factor_due?: boolean };
+  me: ShellMe;
   savedTeam: string | null;
   banner?: ReactNode;
   children: ReactNode;
@@ -59,18 +62,23 @@ export function AppShell({
     if (urlTeam && urlTeam !== chosen) setTeam(urlTeam);
   }, [urlTeam]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // the 404 of a tool route keeps the app frame: it says so for the address it stands on
+  const [framed, setFramed] = useState<string | null>(null);
+  const showFrame = useCallback((on: boolean) => setFramed(on ? window.location.pathname : null), []);
   const value = useMemo<ShellValue>(
-    () => ({ org, orgs, teams, team, mode, me, setTeam }),
-    [org, orgs, teams, team, mode, me, setTeam],
+    () => ({ org, orgs, teams, team, mode, me, setTeam, showFrame }),
+    [org, orgs, teams, team, mode, me, setTeam, showFrame],
   );
   const navOpts = { teamFunctions: team?.team_features ?? false };
   const items = navFor(mode, org.id, team?.id ?? null, navOpts);
   const active = destOf(path, mode);
   const home = startHref(mode, org.id, team?.id ?? null);
-  // one action reachable from everywhere for staff (SPEC section 6)
-  const upload = mode === "staff" ? uploadHref(org.id, team?.id ?? null) : null;
+  // one action reachable from everywhere for the staff and the players (SPEC section 6, K18)
+  const upload = analyses(mode) ? uploadHref(org.id, team?.id ?? null) : null;
   const [palette, setPalette] = useState(false);
-  const searchHref = mode === "staff" && team ? `/app/${org.id}/teams/${team.id}/scenes?focus=1` : null;
+  const searchHref = analyses(mode) && team ? `/app/${org.id}/teams/${team.id}/scenes?focus=1` : null;
+  // the club's name only when it says more than the team's (K7: «TV Thalwil» once, not twice)
+  const clubName = clubNameShown(org.name, team?.name ?? null);
 
   // menus and dialogs render at the end of <body>: give the document the club's colours too
   useEffect(() => {
@@ -94,7 +102,7 @@ export function AppShell({
   }, []);
 
   // courtside and presentation tools use the whole screen, with one way back
-  const tool = /\/(present|remote|live|marks|matchday|check)$/.test(path);
+  const tool = framed !== path && /\/(present|remote|live|marks|matchday|check)$/.test(path);
   // Prüfen and the Spieltag keys bring their own top line («Später weiter», «Beenden»)
   const ownTop = path.endsWith("/check") || (path.endsWith("/matchday") && search.get("mode") !== "detail");
   if (tool) {
@@ -148,7 +156,7 @@ export function AppShell({
                 {/* the product in ink, then the club: the colours belong to the club */}
                 <AppMark size={32} />
                 <ClubMark org={org} />
-                {org.name}
+                {clubName ?? <span className="sr-only">{org.name}</span>}
               </Link>
               <div className="max-w-40 min-w-0 shrink">
                 <TeamSwitcher compact />
@@ -191,10 +199,12 @@ export function AppShell({
                     {t("search")}
                   </button>
                 )}
+                {/* the frame's action in outline: the one filled button is the page's own
+                    (review R32: «Video hochladen» stood as strong as the page's main action) */}
                 {upload && (
                   <Link
                     href={upload}
-                    className={buttonClass("primary", "md")}
+                    className={buttonClass("secondary", "md")}
                     data-testid="upload-video"
                   >
                     {t("upload")}
@@ -229,7 +239,7 @@ export function AppShell({
               {upload && (
                 <Link
                   href={upload}
-                  className="flex h-11 shrink-0 items-center justify-center gap-1 border-2 border-ink bg-ink px-2.5 text-[15px] font-bold text-ground no-underline max-[439px]:w-11 max-[439px]:px-0"
+                  className="flex h-11 shrink-0 items-center justify-center gap-1 border-2 border-ink bg-transparent px-2.5 text-[15px] font-bold text-ink no-underline max-[439px]:w-11 max-[439px]:px-0"
                   aria-label={t("upload")}
                   data-testid="upload-video-compact"
                 >
@@ -242,6 +252,7 @@ export function AppShell({
               )}
               <AccountMenu compact />
             </div>
+            <ProgressStrip orgId={org.id} />
           </header>
 
           {banner}
@@ -275,7 +286,8 @@ export function AppShell({
                     // Szenen on the phone opens with the cursor in the search (UX test B18/N08)
                     href={it.key === "scenes" && searchHref ? searchHref : it.href}
                     aria-current={on ? "page" : undefined}
-                    className={cn(navLink(on), "min-h-14 justify-center text-base")}
+                    // five destinations with Teamleben (K16): a size smaller, a long word may break into two lines
+                    className={cn(navLink(on), "min-h-14 justify-center px-0.5 text-center leading-tight", items.length > 4 ? "text-[14px] tracking-tight" : "text-base")}
                   >
                     {on && (
                       <span

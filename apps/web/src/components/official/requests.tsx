@@ -90,8 +90,10 @@ export function JoinRequests({ orgId, teamId }: { orgId: string; teamId: string 
   );
 }
 
-/** A second person of a club already in the app asks for access (club admins decide). */
-export function AccessRequests({ orgId, teams }: { orgId: string; teams: { id: string; name: string }[] }) {
+/** A second person of a club already in the app asks for access (club admins decide, K17): as
+ * Co-Trainer (coach rights in the team) or as Trainer (also club admin). `teamId`: only the
+ * requests for that team, and nothing at all while there are none (the Team page). */
+export function AccessRequests({ orgId, teams, teamId }: { orgId: string; teams: { id: string; name: string }[]; teamId?: string }) {
   const t = useTranslations("requests");
   const tr = useTranslations();
   const format = useFormatter();
@@ -122,11 +124,13 @@ export function AccessRequests({ orgId, teams }: { orgId: string; teams: { id: s
     },
     onError: (e) => setError(errorKey(e)),
   });
-  const rows = (q.data ?? []).filter((r) => r.status === "pending");
+  const rows = (q.data ?? []).filter((r) => r.status === "pending" && (!teamId || r.team_id === teamId));
   const teamName = (id: string | null) => teams.find((x) => x.id === id)?.name;
+  if (teamId && rows.length === 0 && !said) return null;
   return (
     <div className="space-y-3" id="access-requests" data-testid="access-requests">
       <h3 className="font-semibold">{t("accessTitle")}</h3>
+      {rows.length > 0 && <p className="m-0 text-[15px] text-ink-2">{t("accessExplain")}</p>}
       <div aria-live="polite" className="space-y-2">
         {said && <p className="text-sm text-ok">{said}</p>}
         {error && <Alert>{tr(`errors.${error}`)}</Alert>}
@@ -193,18 +197,43 @@ export function Verification({ orgId }: { orgId: string }) {
       </p>
     );
   const ways = METHODS.filter((m) => v.methods.length === 0 || v.methods.includes(m));
+  // who took the club over asks a second person; that person confirms with the button. Never the
+  // button next to «a second person, not you» for the one who cannot use it (review R21)
+  const part = v.my_part ?? "none";
   return (
     <div className="space-y-3" data-testid="verification">
       <h3 className="font-semibold">{t("title")}</h3>
       <p className="text-sm">{t("why")}</p>
-      <ul className="list-disc space-y-1 pl-5 text-sm">
-        {ways.map((m) => (
-          <li key={m}>{m === "mail_domain" && v.club_domains.length > 0 ? t("way_mail_domain_known", { domains: v.club_domains.join(", ") }) : t(`way_${m}`)}</li>
-        ))}
-      </ul>
-      <Button size="sm" variant="secondary" loading={confirm.isPending} onClick={() => confirm.mutate()}>
-        {t("confirm")}
-      </Button>
+      <p className="text-sm text-ink-2" data-testid="verification-why-numbers">
+        {t("whyNumbers")}
+      </p>
+      {part === "can_confirm" ? (
+        <>
+          <p className="text-sm">{t("youConfirm")}</p>
+          <Button size="sm" variant="primary" loading={confirm.isPending} onClick={() => confirm.mutate()} data-testid="verification-confirm">
+            {t("confirm")}
+          </Button>
+        </>
+      ) : (
+        <>
+          <p className="text-sm">{t("ways")}</p>
+          <ul className="list-disc space-y-1 pl-5 text-sm">
+            {ways.map((m) => (
+              <li key={m}>
+                {m === "mail_domain" && v.club_domains.length > 0 ? t("way_mail_domain_known", { domains: v.club_domains.join(", ") }) : t(m === "second_official" && part === "claimed" ? "way_second_official_invite" : `way_${m}`)}
+                {m === "second_official" && part === "claimed" && (
+                  <>
+                    {" "}
+                    <a href={`/app/${orgId}/club/teams`} className="font-bold underline underline-offset-4" data-testid="verification-invite">
+                      {t("inviteSecond")}
+                    </a>
+                  </>
+                )}
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
       <div aria-live="polite">{error && <Alert>{tr(`errors.${error}`)}</Alert>}</div>
     </div>
   );

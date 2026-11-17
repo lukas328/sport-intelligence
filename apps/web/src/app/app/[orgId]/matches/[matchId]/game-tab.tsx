@@ -9,7 +9,8 @@ import { buttonClass } from "@/components/ui/button";
 import { goalRuns, type MatchGraphics } from "@/lib/graphics";
 import { threeThings, type Thing } from "@/lib/three-things";
 import { usePhone } from "@/lib/use-phone";
-import { halfScore, mainKeeper, mainSource, scoreSequence, topScorers } from "@/lib/telegram";
+import { ownKeepers, withRosterIds, type RosterLike } from "@/lib/keepers";
+import { halfScore, keeperSaves, mainSource, scoreSequence, topScorers } from "@/lib/telegram";
 import type { Stats } from "./analysis-views";
 
 /**
@@ -21,6 +22,8 @@ import type { Stats } from "./analysis-views";
 /** The actions under the three things: the team collection, the highlights, a picture. */
 export function GameActions({ collect, onHighlights, onPicture }: { collect: ReactNode; onHighlights?: () => void; onPicture?: () => void }) {
   const t = useTranslations("anlauf");
+  // nothing to do: no empty row that leaves a gap
+  if (!collect && !onHighlights && !onPicture) return null;
   return (
     <div className="flex flex-wrap items-center gap-x-5 gap-y-3" data-testid="game-actions">
       {collect}
@@ -79,10 +82,10 @@ export interface TelegramMatch {
 }
 
 /** The telegram: one paragraph of facts as a report would print it, with «Kopieren». */
-export function Telegram({ match, stats, names }: { match: TelegramMatch; stats: Stats | null; names: Record<string, string> }) {
+export function Telegram({ match, stats, names, roster = [] }: { match: TelegramMatch; stats: Stats | null; names: Record<string, string>; roster?: RosterLike[] }) {
   const t = useTranslations("anlauf");
   const [copied, setCopied] = useState(false);
-  const text = telegramText(t, match, stats, names);
+  const text = telegramText(t, match, stats, names, roster);
   if (!text) return null;
   return (
     <section data-testid="telegram">
@@ -108,7 +111,7 @@ export function Telegram({ match, stats, names }: { match: TelegramMatch; stats:
 
 type T = ReturnType<typeof useTranslations<"anlauf">>;
 
-export function telegramText(t: T, m: TelegramMatch, stats: Stats | null, names: Record<string, string>): string | null {
+export function telegramText(t: T, m: TelegramMatch, stats: Stats | null, names: Record<string, string>, roster: RosterLike[] = []): string | null {
   if (!m.score) return null;
   const timed = stats?.timeline.timed !== false;
   const points = stats?.timeline.score ?? [];
@@ -125,20 +128,25 @@ export function telegramText(t: T, m: TelegramMatch, stats: Stats | null, names:
       stats.opponent.suspensions ? t("tgPenalty", { n: stats.opponent.suspensions, team: m.opp }) : null,
     ].filter(Boolean);
     if (pens.length) parts.push(t("tgPenalties", { list: pens.join(", ") }));
-    const scorers = topScorers(Object.values(stats.players), names, 3, (k) => ` ${t("tgSeven", { n: k })}`);
+    const scorers = topScorers(withRosterIds(Object.values(stats.players), roster), names, 3, (k) => ` ${t("tgSeven", { n: k })}`);
     if (scorers.length) parts.push(t("tgScorers", { list: scorers.join(", ") }));
-    const keeper = mainKeeper(Object.values(stats.goalkeepers ?? {}), names);
-    if (keeper) parts.push(t("tgKeeper", { name: keeper.name, saves: keeper.saves }));
+    // every own keeper with saves: the figure beside counts them all (R2)
+    const keepers = keeperSaves(withRosterIds(ownKeepers(Object.values(stats.goalkeepers ?? {}), roster), roster), names);
+    if (keepers.length === 1) parts.push(t("tgKeeper", { name: keepers[0]!.name, saves: keepers[0]!.saves }));
+    else if (keepers.length > 1) parts.push(t("tgKeepers", { list: keepers.map((k) => t("tgKeeperItem", { name: k.name, saves: k.saves })).join(", ") }));
   }
   return parts.join(" ");
 }
 
 /** Three figures with their source; a figure the sources never recorded is left out. */
-export function ThreeFigures({ stats, names }: { stats: Stats; names: Record<string, string> }) {
+export function ThreeFigures({ stats, names, roster = [] }: { stats: Stats; names: Record<string, string>; roster?: RosterLike[] }) {
   const t = useTranslations("anlauf");
   const src = mainSource(stats.quality.sources);
   const from = t(src === "report" ? "fromReport" : src === "marked" ? "markedByYou" : "fromVideo");
-  const keeper = mainKeeper(Object.values(stats.goalkeepers ?? {}), names);
+  // the saves of the team; named after the keeper only when that keeper made all of them, so the
+  // figure and the telegram never give two numbers for one thing (R2: «16 Paraden» and «20 Paraden»)
+  const keepers = keeperSaves(withRosterIds(ownKeepers(Object.values(stats.goalkeepers ?? {}), roster), roster), names);
+  const keeper = keepers.length === 1 && keepers[0]!.saves === stats.own.saves ? keepers[0]! : null;
   const figs: { value: string; label: string; testid: string }[] = [];
   if (stats.own.known?.saving !== false && stats.own.saves > 0) {
     figs.push({ value: String(stats.own.saves), label: `${keeper ? t("figSavesOf", { name: keeper.name }) : t("figSaves")}, ${from}`, testid: "fig-saves" });
@@ -170,54 +178,4 @@ export function ThreeFigures({ stats, names }: { stats: Stats; names: Record<str
       ))}
     </dl>
   );
-}
-
-/** «Als Bild für den Chat»: the score and the three things as a square picture to save. */
-export function chatPicture(opts: { title: string; sub: string; score: string; things: { value: number; text: string }[]; heading: string; file: string }) {
-  const c = document.createElement("canvas");
-  c.width = 1080;
-  c.height = 1080;
-  const g = c.getContext("2d");
-  if (!g) return;
-  const css = getComputedStyle(document.documentElement);
-  const v = (name: string, fallback: string) => css.getPropertyValue(name).trim() || fallback;
-  const club = v("--club", "black");
-  const onClub = v("--club-ink", "white");
-  const ground = v("--ground", "white");
-  const ink = v("--ink", "black");
-  g.fillStyle = ground;
-  g.fillRect(0, 0, 1080, 1080);
-  g.fillStyle = club;
-  g.beginPath();
-  g.moveTo(0, 0);
-  g.lineTo(1080, 0);
-  g.lineTo(1080, 420);
-  g.lineTo(0, 480);
-  g.closePath();
-  g.fill();
-  g.fillStyle = onClub;
-  g.font = "bold 40px sans-serif";
-  g.fillText(opts.sub, 64, 100);
-  g.font = "italic 900 64px sans-serif";
-  g.fillText(opts.title, 64, 180, 952);
-  g.font = "italic 900 200px sans-serif";
-  g.fillText(opts.score, 64, 390, 952);
-  g.fillStyle = ink;
-  g.font = "italic 900 48px sans-serif";
-  g.fillText(opts.heading, 64, 580);
-  opts.things.forEach((x, i) => {
-    const y = 680 + i * 120;
-    g.font = "italic 900 88px sans-serif";
-    g.fillText(String(x.value), 64, y + 20);
-    g.font = "bold 40px sans-serif";
-    g.fillText(x.text, 220, y, 796);
-  });
-  c.toBlob((blob) => {
-    if (!blob) return;
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = opts.file;
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
-  }, "image/png");
 }

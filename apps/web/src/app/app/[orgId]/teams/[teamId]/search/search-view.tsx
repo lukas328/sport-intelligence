@@ -96,7 +96,12 @@ export function SearchView({ orgId, teamId, teamName, seasonId }: { orgId: strin
   const tags = (sets.data ?? []).flatMap((s: TagSet) => s.tags);
   const result = useQuery({
     queryKey: ["search", teamId, filter],
-    queryFn: async () => (await api.POST("/v1/orgs/{org_id}/teams/{team_id}/search", { params: { path: team }, body: filter })).data,
+    queryFn: async () => {
+      // a refused search is an error, not «no data» (React Query rejects undefined)
+      const r = await api.POST("/v1/orgs/{org_id}/teams/{team_id}/search", { params: { path: team }, body: filter });
+      if (r.error || !r.data) throw r.error ?? new Error("search");
+      return r.data;
+    },
   });
   const saved = useQuery({
     queryKey: ["saved-filters", teamId],

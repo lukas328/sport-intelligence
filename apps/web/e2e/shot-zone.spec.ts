@@ -2,7 +2,7 @@ import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { expect, test } from "@playwright/test";
 import { MATCH_VIDEO } from "./global-setup";
-import { expectAccessible, register, uniqueEmail } from "./helpers";
+import { chooseVideo, expectAccessible, register, uniqueEmail } from "./helpers";
 
 const DB = process.env.E2E_DATABASE_URL ?? "postgresql://handball:handball@localhost:5432/handball";
 
@@ -31,7 +31,7 @@ test("a confirmed goal asks «Von wo?»; three from one place make a thing; the 
     })
   ).json();
   await page.goto(`/app/${org}/matches/${match.id}?tab=video`);
-  await page.getByTestId("video-file").setInputFiles(MATCH_VIDEO);
+  await chooseVideo(page, MATCH_VIDEO);
   await expect
     .poll(async () => (await (await page.request.get(`/v1/orgs/${org}/matches/${match.id}/graphics`)).json()).analysis, { timeout: 240_000, intervals: [2000] })
     .toBe("ready");
@@ -48,10 +48,11 @@ test("a confirmed goal asks «Von wo?»; three from one place make a thing; the 
   await page.getByRole("button", { name: "Jetzt ist Anwurf" }).click();
   for (let n = 0; n < 3; n++) {
     await page.getByRole("button", { name: "Tor HC Wurfort" }).click();
-    // the goal is saved, the same question asks where from, the video stays above
+    // the goal is saved, the same question offers where from (W33: «wenn du magst»), the video stays above
     const step = page.getByTestId("spot-step");
     await expect(step).toContainText("Tor HC Wurfort ist gespeichert.");
     await expect(step.getByRole("heading", { name: "Von wo?" })).toBeVisible();
+    await expect(step).toContainText("Wenn du magst");
     // the clip runs on in a loop while the coach taps, with «Anhalten» beside «Von wo?» (V7)
     await expect(page.getByTestId("spot-pause")).toHaveText("Anhalten");
     const at = () => page.getByTestId("video").evaluate((v: HTMLVideoElement) => v.currentTime);
@@ -60,16 +61,18 @@ test("a confirmed goal asks «Von wo?»; three from one place make a thing; the 
     // no estimate is offered as a suggestion (V2)
     await expect(page.getByTestId("spot-picker")).not.toContainText("Vorschlag");
     if (n === 0) {
-      // one screen on a phone: the bottom of the video and «Weiss nicht» are in view together, no scrolling
+      // one screen on a phone: the bottom of the video and «Überspringen» are in view together, no scrolling
       for (const size of [{ width: 390, height: 844 }, { width: 360, height: 740 }]) {
         await page.setViewportSize(size);
-        await expect(page.getByTestId("spot-unknown")).toBeVisible();
+        await expect(page.getByTestId("spot-skip")).toBeVisible();
         await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
         const video = (await page.getByTestId("video").boundingBox())!;
-        const unknown = (await page.getByTestId("spot-unknown").boundingBox())!;
+        const skip = (await page.getByTestId("spot-skip").boundingBox())!;
         expect(video.y).toBeGreaterThanOrEqual(0);
         expect(video.y + video.height).toBeLessThanOrEqual(size.height);
-        expect(unknown.y + unknown.height).toBeLessThanOrEqual(size.height);
+        expect(skip.y + skip.height).toBeLessThanOrEqual(size.height);
+        // «Überspringen» is an equal choice: as tall as the keys beside it (W33)
+        expect(skip.height).toBeGreaterThanOrEqual((await page.getByTestId("spot-m7").boundingBox())!.height - 1);
       }
       await expectAccessible(page);
       // every place is a target of at least 44 px for a thumb

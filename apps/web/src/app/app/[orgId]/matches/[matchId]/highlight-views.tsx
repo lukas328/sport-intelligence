@@ -18,12 +18,15 @@ export function HighlightsView({
   teamId,
   staff,
   names,
+  scenes = true,
 }: {
   orgId: string;
   matchId: string;
   teamId: string;
   staff: boolean;
   names: Record<string, string>;
+  /** the match has scenes (goals with video): without them a new reel would be empty */
+  scenes?: boolean;
 }) {
   const t = useTranslations("highlights");
   const tr = useTranslations();
@@ -57,7 +60,13 @@ export function HighlightsView({
         <p className="max-w-prose text-sm text-muted">{t("intro")}</p>
       </div>
       {error && <Alert>{tr(`errors.${error}`)}</Alert>}
-      {staff && (
+      {/* without scenes no reel: said instead of a form that makes nothing (review R34) */}
+      {staff && !scenes && (
+        <p className="m-0 text-[15px] text-ink-2" data-testid="highlights-need-scenes">
+          {t("needScenes")}
+        </p>
+      )}
+      {staff && scenes && (
         // a new reel is an occasional job: folded, not a form on top of the reels
         <details className="text-sm">
         <summary className="cursor-pointer font-medium">{t("newReel")}</summary>
@@ -80,7 +89,7 @@ export function HighlightsView({
         </div>
         </details>
       )}
-      {q.data && q.data.length === 0 && <EmptyState title={t("none")}>{t("noneHint")}</EmptyState>}
+      {q.data && q.data.length === 0 && scenes && <EmptyState title={t("none")}>{t("noneHint")}</EmptyState>}
       <div className="grid gap-x-12 gap-y-6 md:grid-cols-2">
         {(q.data ?? []).map((r) => (
           <div key={r.id} className="space-y-2 border-t-2 border-foreground pt-3" data-testid="reel">

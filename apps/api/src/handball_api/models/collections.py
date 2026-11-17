@@ -48,7 +48,9 @@ class CollectionItem(Base, EntityMixin, TenantMixin):
     )
     position: Mapped[int] = mapped_column(Integer, nullable=False)
     kind: Mapped[str] = mapped_column(String(10), nullable=False)
-    clip_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("clips.id", ondelete="CASCADE"))
+    clip_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("clips.id", ondelete="CASCADE"), index=True
+    )
     play_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("plays.id", ondelete="CASCADE"))
     # the note itself, or the coach's note at a scene or play
     text: Mapped[str | None] = mapped_column(Text)

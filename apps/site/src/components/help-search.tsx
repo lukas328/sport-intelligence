@@ -48,7 +48,7 @@ export function HelpSearch({ entries, locale, t }: { entries: HelpEntry[]; local
             if (!list.length) return null;
             return (
               <section key={g} className="mt-10">
-                <h3 className="font-slant text-[1.5rem]">{t.groups[g]}</h3>
+                <h3 className="text-[1.375rem]">{t.groups[g]}</h3>
                 <ul className="mt-2 border-t-2 border-ink">{list.map(row)}</ul>
               </section>
             );

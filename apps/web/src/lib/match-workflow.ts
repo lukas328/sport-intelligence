@@ -66,7 +66,7 @@ export function kickoffMissing(
 export interface CourtSource {
   camera?: string | null;
   calibration?: { source: string } | null;
-  calibration_info?: { method?: unknown } | null;
+  calibration_info?: { method?: unknown; sure?: unknown } | null;
 }
 
 /** The court was carried over from an earlier video of the same hall (hallmatch). */
@@ -75,11 +75,24 @@ export function courtFromHall(a: CourtSource): boolean {
 }
 
 /**
+ * The court was carried over from a confirmed court of the same hall and the hall images matched
+ * well (the API decides): it is not asked again.
+ */
+export function courtFromHallSure(a: CourtSource): boolean {
+  return courtFromHall(a) && a.calibration_info?.sure === true;
+}
+
+/**
  * The court was found automatically and a person should look at it once: a moving camera, or a
- * court carried over from another video of the hall. "Passt" stores it as checked.
+ * court carried over from another video of the hall whose match is not sure. "Passt" stores it
+ * as checked.
  */
 export function courtUnconfirmed(a: CourtSource): boolean {
-  return a.calibration?.source === "heuristic" && (a.camera === "moving" || courtFromHall(a));
+  return (
+    a.calibration?.source === "heuristic" &&
+    !courtFromHallSure(a) &&
+    (a.camera === "moving" || courtFromHall(a))
+  );
 }
 
 export interface StepInput {

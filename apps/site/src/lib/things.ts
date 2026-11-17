@@ -13,7 +13,6 @@ export const MATCH = data as unknown as DemoMatch;
 export interface SceneRow {
   clock: string;
   text: string;
-  estimated: boolean;
 }
 
 export interface ThingView {
@@ -53,9 +52,8 @@ export function demoView(m: Messages): DemoView {
   const row = (g: DemoGoal): SceneRow => ({
     clock: g.clock,
     text: g.number != null ? fmt(m.demo.sceneRow, { clock: g.clock, number: g.number }) : fmt(m.demo.sceneRowNoNumber, { clock: g.clock }),
-    estimated: !g.confirmed,
   });
-  const bundleLabel = (gs: DemoGoal[]) => fmt(tx.bundleLabel, { n: gs.length, est: gs.filter((g) => !g.confirmed).length });
+  const bundleLabel = (gs: DemoGoal[]) => fmt(tx.bundleLabel, { n: gs.length });
   // the app's rule (lib/three-things.ts): as many things as the goals allow, at most three
   const things: ThingView[] = threeThings(goals).map((t, i) => {
     const gs = t.goals as DemoGoal[];

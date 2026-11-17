@@ -43,15 +43,15 @@ test("large text at 300 px: the team name in the top bar stays readable (UX test
   test.skip(info.project.name !== "chromium", "runs once");
   await register(page, uniqueEmail("a01"), "Coach Gross");
   await page.getByTestId("manual-club").click();
-  await page.getByLabel("Vereinsname").fill("HC Wädenswil");
+  await page.getByLabel("Vereinsname").fill("HC Lindmatt");
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
-  await page.getByLabel("Teamname").fill("SG Wädenswil/Horgen");
+  await page.getByLabel("Teamname").fill("SG Lindmatt/Uferweg");
   await page.getByRole("button", { name: "Zum Team" }).click();
   await page.waitForURL(/\/teams\/[^/]+/);
   await page.setViewportSize({ width: 300, height: 700 });
   await page.reload();
   const bar = page.locator("[data-frame=top] .lg\\:hidden");
-  const name = bar.getByText(/SG Wädenswil/);
+  const name = bar.getByText(/SG Lindmatt/);
   await expect(name).toBeVisible();
   // the name has room: at least two words in a line, at most two lines
   const box = (await name.boundingBox())!;
@@ -99,8 +99,10 @@ test("a club without video: Szenen says one sentence and the way to the video (U
   await page.waitForURL(/\/teams\/[^/]+/);
   await page.goto(page.url().replace(/(\/teams\/[^/?#]+).*/, "$1/scenes"));
   const empty = page.getByTestId("scenes-empty");
-  await expect(empty).toContainText("Szenen gibt es nach dem ersten Video.");
+  await expect(empty).toContainText("Lade ein Video hoch, dann siehst du hier deine Szenen.");
   await expect(empty.getByRole("link", { name: "Video hochladen" })).toBeVisible();
-  await expect(page.getByTestId("scene-search")).toHaveCount(0);
+  // «Suchen» leads here: the field is there, closed, and says from when it finds (review R6)
+  await expect(page.getByTestId("scene-search")).toBeDisabled();
+  await expect(empty).toContainText("Die Suche findet Szenen ab dem ersten Video.");
   await expect(page.getByText(/0 Szenen aus 0 Spielen/)).toHaveCount(0);
 });

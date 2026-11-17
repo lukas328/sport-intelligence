@@ -14,6 +14,7 @@ from handball_api.core.security import (
     verify_password,
     verify_totp,
 )
+from handball_api.integrations.handball_ch import opponent_key
 from handball_api.models.enums import OrgRole, TeamRole
 from handball_api.services.csv_import import decode, parse_roster_csv
 from handball_api.services.mail_templates import render
@@ -40,9 +41,17 @@ def test_can_team_actions() -> None:
     assert can(actor(OrgRole.ORG_ADMIN), Action.ROSTER_WRITE, OTHER)
     assert can(actor(team_role=TeamRole.COACH), Action.ROSTER_WRITE, TEAM)
     assert not can(actor(team_role=TeamRole.COACH), Action.ROSTER_WRITE, OTHER)
-    assert not can(actor(team_role=TeamRole.ANALYST), Action.ROSTER_WRITE, TEAM)
+    # the older specialist roles are Co-Trainers: coach rights in the team (K18)
+    assert can(actor(team_role=TeamRole.ANALYST), Action.ROSTER_WRITE, TEAM)
     assert can(actor(team_role=TeamRole.ANALYST), Action.SEASON_WRITE, TEAM)
     assert can(actor(team_role=TeamRole.PLAYER), Action.ROSTER_READ, TEAM)
+    # players work with the video, but do not delete, invite or change the squad
+    assert can(actor(team_role=TeamRole.PLAYER), Action.VIDEO_UPLOAD, TEAM)
+    assert can(actor(team_role=TeamRole.GOALKEEPER), Action.PLAYLIST_WRITE, TEAM)
+    assert not can(actor(team_role=TeamRole.PLAYER), Action.MATCH_DELETE, TEAM)
+    assert not can(actor(team_role=TeamRole.PLAYER), Action.INVITE_TEAM, TEAM)
+    assert not can(actor(team_role=TeamRole.PLAYER), Action.ROSTER_WRITE, TEAM)
+    assert not can(actor(team_role=TeamRole.PARENT), Action.TEAM_READ, TEAM)
     assert not can(actor(team_role=TeamRole.GUEST), Action.TEAM_READ, TEAM)
     with pytest.raises(ValueError, match="needs a team"):
         can(actor(), Action.TEAM_READ)
@@ -336,3 +345,19 @@ async def test_ctx_enqueue_runs_off_the_event_loop() -> None:
     assert seen == [("gpu", "a.b", "j1", {"x": 1}, 60, True)]
     with pytest.raises(RuntimeError):
         await Ctx(db=none, settings=none, email=none, storage=none).enqueue("gpu", "a.b", "j2", {})
+
+
+@pytest.mark.parametrize(
+    ("a", "b", "same"),
+    [
+        ("SG Horgen/Wädenswil 1", "SG Horgen/Wädenswil (M2)", True),
+        ("sg horgen-wädenswil", "SG Horgen/Wädenswil", True),
+        ("TV Rüti", "TV Ruti", True),
+        ("SG Horgen/Wädenswil 1", "SG Horgen/Wädenswil 2", False),
+        ("HC 11 Freunde", "HC Freunde", False),
+    ],
+)
+def test_opponent_key_joins_spellings_of_one_team(a: str, b: str, same: bool) -> None:
+    """Review R7: one opponent under the league's and the cup's name; same rule as the web."""
+    assert (opponent_key(a) == opponent_key(b)) is same
+    assert opponent_key("SG Horgen/Wädenswil (M2)") == "sghorgenwadenswil"

@@ -40,14 +40,14 @@ test("onboarding: find the team, take one over, ask a claimed club for access, a
 
   // a coach of the claimed club asks its admins for access, with a message
   const bergtal = page.getByTestId("official-team").filter({ hasText: "SG Bergtal Herren" });
-  await bergtal.getByRole("button", { name: "Zugang anfragen" }).click();
+  await bergtal.getByRole("button", { name: "Diesem Team beitreten" }).click();
   await bergtal.getByLabel(/Nachricht/).fill("Ich trainiere die Herren seit diesem Sommer.");
   await bergtal.getByRole("button", { name: "Anfrage senden" }).click();
-  await expect(page.getByText("Anfrage gesendet. Die Admins von SG Bergtal melden sich in der App.")).toBeVisible();
+  await expect(page.getByText(/^Anfrage gesendet. Die Trainer von SG Bergtal sehen sie in der App./)).toBeVisible();
   expect(claims.at(-1)).toEqual({ id: "72001", body: { club_id: 9002, message: "Ich trainiere die Herren seit diesem Sommer." } });
 
   // a player asks to join that team
-  await bergtal.getByRole("button", { name: "Als Spieler/in beitreten" }).click();
+  await bergtal.getByRole("button", { name: "Als Spieler beitreten" }).click();
   await bergtal.getByLabel("Vorname").fill("Lara");
   await bergtal.getByLabel("Nachname").fill("Muster");
   await bergtal.getByLabel(/Rückennummer/).fill("11");
@@ -69,7 +69,7 @@ test("onboarding: find the team, take one over, ask a claimed club for access, a
   });
   await page.route(`${claimedBase}/matches`, (route) =>
     json(route, [
-      { id: "00000000-0000-4000-8000-00000000a001", team_id: fx.CLAIMED_TEAM, kind: "match", kickoff_at: "2026-11-07T17:00:00Z", opponent_name: "TSV Thalwil", is_home: true, score_own: 26, score_opponent: 18, status: "finished", has_video: false, is_demo: false, competition: null },
+      { id: "00000000-0000-4000-8000-00000000a001", team_id: fx.CLAIMED_TEAM, kind: "match", kickoff_at: "2026-11-07T17:00:00Z", opponent_name: "TSV Seewald", is_home: true, score_own: 26, score_opponent: 18, status: "finished", has_video: false, is_demo: false, competition: null },
       { id: "00000000-0000-4000-8000-00000000a002", team_id: fx.CLAIMED_TEAM, kind: "match", kickoff_at: "2026-11-22T18:30:00Z", opponent_name: "HSG Rheinau", is_home: false, score_own: null, score_opponent: null, status: "scheduled", has_video: false, is_demo: false, competition: null },
     ]),
   );
@@ -145,9 +145,9 @@ test("suggestion inbox: squad with a doubled number, a report to import, the tab
   await expectAccessible(page);
 
   await squad.getByLabel("Rückennummer von Jonas Amrein").fill("17");
-  await expect(page.getByTestId("take-squad")).toHaveText("2 Spieler/innen übernehmen");
+  await expect(page.getByTestId("take-squad")).toHaveText("2 Spieler übernehmen");
   await page.getByTestId("take-squad").click();
-  await expect(page.getByText("2 Spieler/innen im Team.")).toBeVisible();
+  await expect(page.getByText("2 Spieler im Team.")).toBeVisible();
   expect(accepted.map((a) => a.body)).toEqual([{ jersey_number: 7 }, { jersey_number: 17 }]);
   await expect(squad.getByTestId("roster-suggestion")).toHaveCount(1);
 

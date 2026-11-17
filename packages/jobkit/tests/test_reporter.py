@@ -75,3 +75,31 @@ def test_persistent_server_errors_raise_for_terminal_updates(sleeps: list[float]
     with pytest.raises(ReportError, match="HTTP 503"):
         rep.fail("boom")
     assert len(posts) == 3
+
+
+def test_heartbeat_while_a_stage_runs_and_none_after_the_end() -> None:
+    posts: list[Any] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        posts.append(json.loads(request.content))
+        return httpx.Response(200)
+
+    client = httpx.Client(transport=httpx.MockTransport(handler))
+    rep = Reporter("http://api", "secret", "job-1", {"a": 1}, client=client, heartbeat_s=0.05)
+    rep.stage("a")  # a long step without fractions (a download)
+    deadline = time.monotonic() + 3
+    while len(posts) < 3 and time.monotonic() < deadline:
+        time.sleep(0.01)
+    assert len(posts) >= 3, "the reporter says it is still there"
+    assert all(p["status"] == "running" and p["stage"] == "a" for p in posts)
+    rep.succeed({})
+    count = len(posts)
+    time.sleep(0.2)
+    assert len(posts) == count and posts[-1]["status"] == "succeeded"
+
+
+def test_no_heartbeat_thread_without_interval() -> None:
+    rep, _ = make(lambda r: httpx.Response(200))
+    quiet = Reporter("http://api", "s", "j", {"a": 1}, client=rep.client, heartbeat_s=None)
+    quiet.stage("a")
+    assert quiet._beat is None

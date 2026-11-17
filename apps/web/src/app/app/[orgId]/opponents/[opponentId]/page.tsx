@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { PageHeader } from "@/components/ui/page-header";
-import { OlderArea } from "@/components/shell/section-nav";
 import { BackToFixtures } from "./back-to-fixtures";
 import Link from "next/link";
 import { OpponentPlayers } from "./opponent-players";
@@ -13,7 +12,7 @@ import { serverApi } from "@/lib/api";
 interface Profile {
   opponent: { id: string; name: string };
   record: { won: number; drawn: number; lost: number };
-  matches: { match_id: string; kickoff_at: string; is_home: boolean; score_own: number | null; score_opponent: number | null; events: number }[];
+  matches: { match_id: string; kickoff_at: string; is_home: boolean; score_own: number | null; score_opponent: number | null; events: number; kind?: string; scouting_other?: string | null }[];
   tagged_matches: number;
   totals: { goals: number; shots: number; shooting_pct: number | null; seven_m_goals: number; seven_m_shots: number; fast_break_goals: number; turnovers: number; xg: number; xg_shots: number; xg_coverage: number | null };
   zones: Record<string, { shots: number; goals: number }>;
@@ -54,7 +53,6 @@ export default async function OpponentPage({ params }: { params: Promise<{ orgId
       <div>
         <BackToFixtures orgId={orgId} />
         <PageHeader eyebrow={`${t("title")} · ${t("record", p.record)}`} title={p.opponent.name} />
-        <OlderArea />
       </div>
       {p.tagged_matches === 0 ? (
         <EmptyState title={t("none")} />
@@ -156,10 +154,11 @@ export default async function OpponentPage({ params }: { params: Promise<{ orgId
               <Link href={`/app/${orgId}/matches/${m.match_id}`} className="group flex min-h-11 items-center justify-between gap-3 py-2">
                 <span>
                   <span className="group-hover:underline group-hover:underline-offset-4">{format.dateTime(new Date(m.kickoff_at), { dateStyle: "medium" })}</span>
-                  <span className="text-sm text-muted"> · {t(m.is_home ? "homeGame" : "awayGame")}</span>
+                  {/* a video of them against another team (K3): what they do counts here, not as our result */}
+                  <span className="text-sm text-muted"> · {m.kind === "scouting" ? t("watchedAgainst", { other: m.scouting_other ?? "" }) : t(m.is_home ? "homeGame" : "awayGame")}</span>
                 </span>
                 <span className="flex items-baseline gap-3">
-                  {m.score_own != null && m.score_opponent != null && (
+                  {m.kind !== "scouting" && m.score_own != null && m.score_opponent != null && (
                     <span className="text-sm text-muted">{t(m.score_own > m.score_opponent ? "won" : m.score_own < m.score_opponent ? "lost" : "drawn")}</span>
                   )}
                   <span className="font-score text-lg tabular-nums">{m.score_own != null && m.score_opponent != null ? `${m.score_own}:${m.score_opponent}` : ""}</span>

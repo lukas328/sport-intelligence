@@ -9,9 +9,10 @@ import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { useConfirm } from "@/components/ui/confirm";
-import { Alert, EmptyState, Sheet } from "@/components/ui/card";
+import { Alert, Sheet } from "@/components/ui/card";
 import { AttendancePanel } from "@/components/team/attendance-panel";
 import { TrainingSlots } from "@/components/training/training-slots";
+import { TrainingTips } from "@/components/training/training-tips";
 import { api } from "@/lib/client";
 import { move, toDrillItem, totalMinutes, type DrillItem } from "@/lib/drill-snapshot";
 import { drillItemOf, useTeamDrills } from "@/lib/team-drills";
@@ -177,7 +178,7 @@ function FocusList({ focus }: { focus: Focus[] }) {
   );
 }
 
-export function TrainingView({ orgId, teamId, canPlan }: { orgId: string; teamId: string; canPlan: boolean }) {
+export function TrainingView({ orgId, teamId, canPlan, tasks = true }: { orgId: string; teamId: string; canPlan: boolean; tasks?: boolean }) {
   const t = useTranslations("training");
   const tr = useTranslations();
   const locale = useLocale();
@@ -291,11 +292,11 @@ export function TrainingView({ orgId, teamId, canPlan }: { orgId: string; teamId
           </p>
         )}
         <div className="flex flex-wrap gap-3 text-sm">
-          <a className="font-medium text-accent hover:underline" href={`/v1/orgs/${orgId}/sessions/${s.id}/pdf?lang=${locale}`}>{t("pdf")}</a>
+          <a className="font-medium text-accent underline decoration-[1.5px] underline-offset-4" href={`/v1/orgs/${orgId}/sessions/${s.id}/pdf?lang=${locale}`}>{t("pdf")}</a>
           {canPlan && (
             <>
-              <button type="button" className="font-medium text-accent hover:underline" onClick={() => setEditing(s.id)}>{t("edit")}</button>
-              <button type="button" className="font-medium text-accent hover:underline" onClick={() => setOpen(open === s.id ? null : s.id)}>{t("attendance")}</button>
+              <button type="button" className="font-medium text-accent underline decoration-[1.5px] underline-offset-4" onClick={() => setEditing(s.id)}>{t("edit")}</button>
+              <button type="button" className="font-medium text-accent underline decoration-[1.5px] underline-offset-4" onClick={() => setOpen(open === s.id ? null : s.id)}>{t("attendance")}</button>
               {/* apart from the everyday actions, and asked once: a thumb slip must not delete a unit */}
               <button
                 type="button"
@@ -316,36 +317,35 @@ export function TrainingView({ orgId, teamId, canPlan }: { orgId: string; teamId
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="sr-only">{t("title")}</h2>
-        <p className="max-w-xl text-sm text-muted">{t("hint")}</p>
+        <p className="max-w-xl text-[15px] text-muted">{canPlan ? t("hintTips") : t("hint")}</p>
         {/* the drill library left the navigation with the training plan; this is its way in */}
-        <Link href={`/app/${orgId}/drills`} className="text-sm font-medium underline underline-offset-4 hover:text-foreground">
-          {tr("shell.drills")}
+        <Link href={`/app/${orgId}/drills`} className="inline-flex min-h-11 items-center text-[15px] font-semibold underline underline-offset-4 hover:text-foreground">
+          {t("library")}
         </Link>
-        {canPlan && (
-          <Button onClick={() => setEditing(editing === "new" ? null : "new")}>
-            <Plus aria-hidden />
-            {t("new")}
-          </Button>
-        )}
       </div>
-      {editing === "new" && (
-        <section className="border-t-2 border-foreground pt-4">
-          <SessionForm orgId={orgId} teamId={teamId} onDone={done} />
-        </section>
-      )}
+      {/* first what to train, from the matches (K21); planning by hand comes after */}
+      {canPlan && <TrainingTips orgId={orgId} teamId={teamId} tasks={tasks} onPlanned={() => void qc.invalidateQueries({ queryKey: ["sessions", teamId] })} />}
       {error && <Alert>{tr(`errors.${error}`)}</Alert>}
       {canPlan && season && (
         <TrainingSlots orgId={orgId} teamId={teamId} season={season} onGenerated={() => void qc.invalidateQueries({ queryKey: ["sessions", teamId] })} />
       )}
       <section className="space-y-2" aria-labelledby="upcoming">
-        <h3 id="upcoming" className="text-lg font-semibold">{t("upcoming")}</h3>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h3 id="upcoming" className="text-lg font-semibold">{t("upcoming")}</h3>
+          {canPlan && editing !== "new" && (
+            <Button variant="secondary" size="sm" onClick={() => setEditing("new")}>
+              <Plus aria-hidden />
+              {t("planOwn")}
+            </Button>
+          )}
+        </div>
+        {editing === "new" && (
+          <div className="border-t-2 border-foreground pt-4">
+            <SessionForm orgId={orgId} teamId={teamId} onDone={done} />
+          </div>
+        )}
         {upcoming.length === 0 ? (
-          <EmptyState
-            title={t("none")}
-            action={canPlan && editing !== "new" ? <Button variant="secondary" size="sm" onClick={() => setEditing("new")}>{t("planFirst")}</Button> : undefined}
-          >
-            {canPlan ? t("noneHint") : null}
-          </EmptyState>
+          <p className="text-[15px] text-muted">{canPlan ? t("noUpcoming") : t("none")}</p>
         ) : (
           <>
             {/* units made for a whole season would fill the page: the next four weeks, the rest folded */}

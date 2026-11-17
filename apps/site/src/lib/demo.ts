@@ -1,15 +1,17 @@
 /**
  * The fictional demo match (public/demo/match.json, scripts/make_demo.py) in the shape the app
- * draws: goals with zone, estimated shot spot and the scorer's run; the three things; one scene
+ * draws: goals with zone, shot spot and the scorer's run; the three things; one scene
  * for the tactics camera. Everything here is invented and marked so on the page. Shot positions,
  * goals, turnovers and the figures come from match.json (computed with the app's metrics code);
- * the runs and the scene are drawn from them by a seeded generator. The ball is never placed: the
- * analysis does not find it yet (OPEN_QUESTIONS Q-UX-15).
+ * the runs and the scene are drawn from them by a seeded generator. Runs and positions are
+ * handball-typical: no field player ever stands in a goal area (tested). The scene shows the ball
+ * in every frame.
  */
 import type { GoalRun } from "@/components/anlauf/bundle";
 import type { ReportGoal } from "@/components/anlauf/flight-layout";
 import type { Pt } from "@/components/anlauf/geometry";
-import type { CameraScene, SceneTrack } from "@/components/anlauf/tactics-camera";
+import type { BallStretch, CameraScene, SceneTrack } from "@/components/anlauf/tactics-camera";
+import { COURT } from "@handball/court";
 
 export interface DemoEvent {
   id: string;
@@ -96,6 +98,29 @@ export function zoneOf(shotType: string | null, spot: Pt): Zone {
 
 const clamp = (p: Pt): Pt => [Math.max(0.3, Math.min(19.7, p[0])), Math.max(0.3, Math.min(19.8, p[1]))];
 
+/* The goal area (6 m around the goal, packages/court) belongs to the goalkeeper. Field players
+ * jump into it at most when they shoot; their take-off spot and every run stay outside. */
+const POST_L = COURT.width / 2 - COURT.goal.width / 2;
+const POST_R = COURT.width / 2 + COURT.goal.width / 2;
+/** Shot spots, runs and positions keep at least this far from the goal (metres). */
+export const SHOT_MIN = COURT.goalAreaRadius + 0.3;
+const FIELD_MIN = COURT.goalAreaRadius + 0.4;
+const DEFENCE_MIN = COURT.goalAreaRadius + 0.5;
+
+/** Distance of a half-court spot (u across, v from the goal line) to the goal. */
+export function goalDistance(p: Pt): number {
+  return Math.hypot(p[0] - Math.min(POST_R, Math.max(POST_L, p[0])), p[1]);
+}
+
+/** Push a spot straight away from the goal until it is at least `min` metres away. */
+export function outsideArea(p: Pt, min: number = FIELD_MIN): Pt {
+  const d = goalDistance(p);
+  if (d >= min) return p;
+  const g: Pt = [Math.min(POST_R, Math.max(POST_L, p[0])), 0];
+  if (d < 1e-6) return [p[0], min];
+  return [g[0] + ((p[0] - g[0]) * min) / d, g[1] + ((p[1] - g[1]) * min) / d];
+}
+
 /** The scorer's last metres before the shot, invented to fit the zone (as in the Zielbild demo). */
 function runTo(zone: Zone, shot: Pt, R: () => number): Pt[] {
   const [u, v] = shot;
@@ -115,16 +140,18 @@ function runTo(zone: Zone, shot: Pt, R: () => number): Pt[] {
     const dx = (R() - 0.5) * 7;
     pts = [[u + dx, v + 4.5 + R() * 3], [u + dx * 0.55, v + 2.6 + R()], [u + dx * 0.15, v + 0.9], [u, v]];
   }
-  return pts.map(clamp);
+  // the scorer takes off before the 6 m line: no point of a run lies in the goal area
+  return pts.map((p, i) => (i === pts.length - 1 ? p : clamp(outsideArea(clamp(p)))));
 }
 
-/** Every goal of the match with its zone and run; about one in five is estimated (dashed). */
+/** Every goal of the match with its zone and run, all confirmed: the demo shows a match after «Prüfen». */
 export function demoGoals(match: DemoMatch): DemoGoal[] {
   return match.events
     .filter((e) => e.type === "shot" && e.outcome === "goal" && e.x !== null && e.y !== null)
-    .map((e, i) => {
+    .map((e) => {
       const R = rng(seedOf(e.id));
-      const shot = clamp(halfSpot(e.x!, e.y!));
+      const spot = clamp(halfSpot(e.x!, e.y!));
+      const shot = e.shot_type === "penalty" ? spot : outsideArea(spot, SHOT_MIN);
       const zone = zoneOf(e.shot_type, shot);
       return {
         id: e.id,
@@ -137,7 +164,7 @@ export function demoGoals(match: DemoMatch): DemoGoal[] {
         run: runTo(zone, shot, R),
         shot,
         aim: [8.8 + R() * 2.4, 0] as Pt,
-        confirmed: i % 5 !== 3,
+        confirmed: true,
       };
     });
 }
@@ -148,67 +175,174 @@ export function reportGoals(goals: readonly DemoGoal[]): ReportGoal[] {
 }
 
 /* ---------------------------------------------------------------------------------------------
- * The scene of thing 1 on the tactics camera: the opponent attacks our goal (x = 0). The scorer
- * follows the run of the goal; the others hold a 6:0 defence and a set attack and shift a little
- * towards the ball side. Numbers only on some players: the analysis reads about one in four.
+ * The scene of thing 1 on the tactics camera: the opponent attacks our goal (x = 0) in a set
+ * attack and scores. Everything is invented, but it moves like handball:
+ * - attack around 9 m: backs (RL, RM, RR) at 9 to 11 m, wings near the sidelines, the pivot just
+ *   outside the 6 m line between two defenders;
+ * - defence 6:0 just in front of the 6 m line, shifting towards the ball, the defender at the
+ *   ball steps out;
+ * - only the goalkeeper stands in the goal area;
+ * - the ball is always shown: in an invented match we know where it is. Two or three passes
+ *   lead to the scorer, who takes off at his shot spot when the scene ends.
+ * Numbers only on some players: the analysis reads about one in four (the ball carriers here).
  * ------------------------------------------------------------------------------------------- */
 
 /** Half court (u across, v from the goal line) to court metres with the goal at x = 0. */
 const toCourt = (p: Pt): Pt => [p[1], p[0]];
 
-function drift(start: Pt, toward: Pt, amount: number, R: () => number): Pt[] {
-  const out: Pt[] = [];
-  for (let i = 0; i < 5; i++) {
-    const f = (i / 4) * amount;
-    out.push([start[0] + (toward[0] - start[0]) * f + (R() - 0.5) * 0.25, start[1] + (toward[1] - start[1]) * f + (R() - 0.5) * 0.25]);
-  }
-  return out;
-}
+const SCENE_SECONDS = 6;
+const SAMPLES = 25; // one point every quarter second
+const PASS_SECONDS = 0.4;
+
+type Slot = "la" | "rl" | "rm" | "rr" | "ra" | "kr";
+/** Where the attack stands, in half-court metres. */
+const SLOTS: Record<Slot, Pt> = {
+  la: [1.0, 3.0],
+  rl: [4.6, 9.6],
+  rm: [10.0, 10.8],
+  rr: [15.4, 9.6],
+  ra: [19.0, 3.0],
+  kr: [10.0, 7.4],
+};
+/** A 6:0 defence, each at about 7 m (outside the area), left to right as the attacker sees it. */
+const DEFENCE: Pt[] = [
+  [2.6, 3.8],
+  [5.0, 6.2],
+  [8.4, 7.0],
+  [11.6, 7.0],
+  [15.0, 6.2],
+  [17.4, 3.8],
+];
+/** Who passes to whom before the goal, by the scorer's position. */
+const PLAYS: Record<Slot, Slot[]> = {
+  la: ["rm", "rl", "la"],
+  rl: ["rr", "rm", "rl"],
+  rm: ["la", "rl", "rm"],
+  rr: ["rl", "rm", "rr"],
+  ra: ["rm", "rr", "ra"],
+  kr: ["rl", "rm", "kr"],
+};
+
+const lerp = (a: Pt, b: Pt, f: number): Pt => [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f];
+const ease = (f: number) => (f <= 0 ? 0 : f >= 1 ? 1 : f * f * (3 - 2 * f));
 
 export function demoScene(goal: DemoGoal, label: string): CameraScene {
   const R = rng(seedOf(`${goal.id}-scene`));
-  const ball = toCourt(goal.shot);
-  const ballSide = goal.shot[0];
-  const tracks: SceneTrack[] = [];
-  // attackers: LA, RL, RM, RR, RA, KR in half coordinates; the scorer replaces the one of his zone
-  const attack: [Zone, Pt][] = [
-    ["la", [1.2, 2.2]],
-    ["rl", [4.8, 10.6]],
-    ["rm", [10, 11.8]],
-    ["rr", [15.2, 10.6]],
-    ["ra", [18.8, 2.2]],
-    ["kr", [9.2, 6.6]],
-  ];
-  const oppNumbers = [3, 9, 14, 22, 11, 18];
-  const replaced = attack.findIndex(([z]) => z === goal.zone);
+  const scorerSlot: Slot = goal.zone in SLOTS ? (goal.zone as Slot) : "rm";
+  const play = PLAYS[scorerSlot];
   const scorerNumber = goal.number ?? 5;
-  attack.forEach(([, at], i) => {
-    if (i === replaced) return;
-    const toward: Pt = [at[0] + (ballSide - at[0]) * 0.15, at[1] - 0.8];
-    tracks.push({ team: "opp", number: i % 2 === 0 ? oppNumbers[i] : null, xy: drift(toCourt(at), toCourt(toward), 1, R) });
+  // numbers for the ball carriers, never the scorer's number twice
+  const pool = [9, 14, 22, 3, 11, 18, 7, 20].filter((n) => n !== scorerNumber);
+  const numberOf = new Map<Slot, number | null>();
+  for (const s of Object.keys(SLOTS) as Slot[]) numberOf.set(s, null);
+  numberOf.set(scorerSlot, scorerNumber);
+  play.slice(0, -1).forEach((s, i) => numberOf.set(s, pool[i]!));
+  const extra = (["kr", "la", "ra"] as Slot[]).find((s) => !play.includes(s));
+  if (extra) numberOf.set(extra, pool[3]!);
+
+  // ball schedule: the holders one after the other, a short flight in between
+  const hold = (SCENE_SECONDS - PASS_SECONDS * (play.length - 1)) / play.length;
+  const ball: BallStretch[] = play.map((s, i) => {
+    const from = i * (hold + PASS_SECONDS);
+    return { from: round2(from), to: round2(i === play.length - 1 ? SCENE_SECONDS : from + hold), team: "opp", number: numberOf.get(s)! };
   });
-  const run = goal.run.length > 4 ? goal.run : [...goal.run];
-  tracks.push({ team: "opp", number: scorerNumber, xy: run.map(toCourt) });
-  // defenders on the 6 m line, shifting towards the ball side; the goalkeeper in the goal
-  const defence: Pt[] = [[2.2, 4.6], [5.2, 6.6], [8.4, 7.2], [11.6, 7.2], [14.8, 6.6], [17.8, 4.6]];
+  const holderAt = (sec: number): Slot | null => {
+    const i = ball.findIndex((b) => sec >= b.from && sec <= b.to);
+    return i < 0 ? null : play[i]!;
+  };
+  const times = Array.from({ length: SAMPLES }, (_, i) => (i / (SAMPLES - 1)) * SCENE_SECONDS);
+  const receivedAt = ball[ball.length - 1]!.from;
+  /** Across position of the ball from the schedule alone (holder's slot, or between two on a pass). */
+  const ballSide = (sec: number): number => {
+    const h = holderAt(sec);
+    if (h) return SLOTS[h][0];
+    const i = ball.findIndex((b) => b.from > sec);
+    const f = (sec - ball[i - 1]!.to) / (ball[i]!.from - ball[i - 1]!.to);
+    return SLOTS[play[i - 1]!][0] + (SLOTS[play[i]!][0] - SLOTS[play[i - 1]!][0]) * f;
+  };
+
+  // attackers: the one with the ball goes at the defence (a step towards the goal), the others
+  // wait in their slot and move a little; the scorer runs from his slot to his shot spot
+  const shot = outsideArea(goal.shot, SHOT_MIN);
+  const wobble = () => (R() - 0.5) * 0.3;
+  const attack = new Map<Slot, Pt[]>();
+  for (const s of Object.keys(SLOTS) as Slot[]) {
+    const at = SLOTS[s];
+    const pts = times.map((sec) => {
+      if (s === scorerSlot && sec >= receivedAt - 0.6) {
+        const f = ease((sec - (receivedAt - 0.6)) / (SCENE_SECONDS - receivedAt + 0.6));
+        return lerp(at, shot, f);
+      }
+      const h = holderAt(sec) === s;
+      // the pivot stays between the two middle defenders, who shift with the ball
+      if (s === "kr" && !h) return [at[0] + (ballSide(sec) - at[0]) * 0.2 + wobble() * 0.5, at[1] + wobble() * 0.5] as Pt;
+      const toward: Pt = s === "la" || s === "ra" ? [at[0] + (s === "la" ? 0.5 : -0.5), at[1] + 0.6] : [at[0] + (10 - at[0]) * 0.08, at[1] - 1.3];
+      const p = h ? toward : at;
+      return [p[0] + wobble(), p[1] + wobble()] as Pt;
+    });
+    const path = smoothSteps(pts).map((p) => outsideArea(p, FIELD_MIN));
+    // the scorer ends exactly at his shot spot
+    if (s === scorerSlot) path[path.length - 1] = shot;
+    attack.set(s, path);
+  }
+
+  // the ball's spot at a time: at its holder, or in flight between two holders
+  const attackAt = (s: Slot, sec: number): Pt => attack.get(s)![Math.round((sec / SCENE_SECONDS) * (SAMPLES - 1))]!;
+  const ballSpot = (sec: number): Pt => {
+    const h = holderAt(sec);
+    if (h) return attackAt(h, sec);
+    const i = ball.findIndex((b) => b.from > sec);
+    const a = ball[i - 1]!;
+    const b = ball[i]!;
+    return lerp(attackAt(play[i - 1]!, a.to), attackAt(play[i]!, b.from), (sec - a.to) / (b.from - a.to));
+  };
+
+  // defence: the line shifts towards the ball, the defender facing the ball steps out to it
+  const defence = DEFENCE.map((at) =>
+    times.map((sec) => {
+      const b = ballSpot(sec);
+      let p: Pt = [at[0] + (b[0] - at[0]) * 0.2, at[1]];
+      const nearest = DEFENCE.reduce((best, d) => (Math.abs(d[0] - b[0]) < Math.abs(best[0] - b[0]) ? d : best));
+      if (nearest === at) p = lerp(p, b, 0.32);
+      return outsideArea([p[0] + wobble() * 0.5, p[1] + wobble() * 0.5], DEFENCE_MIN);
+    }),
+  );
   const ownNumbers = [7, null, 13, 4, null, 10];
-  defence.forEach((at, i) => {
-    const toward: Pt = [at[0] + (ballSide - at[0]) * 0.22, at[1] - 0.6];
-    tracks.push({ team: "own", number: ownNumbers[i], xy: drift(toCourt(at), toCourt(toward), 1, R) });
+
+  const tracks: SceneTrack[] = [];
+  for (const s of Object.keys(SLOTS) as Slot[]) tracks.push({ team: "opp", number: numberOf.get(s) ?? null, xy: attack.get(s)!.map(toCourt) });
+  defence.forEach((pts, i) => tracks.push({ team: "own", number: ownNumbers[i], xy: smoothSteps(pts).map(toCourt) }));
+  // the goalkeeper, the only one in the goal area: moves with the ball between the posts
+  tracks.push({
+    team: "own",
+    number: 1,
+    keeper: true,
+    xy: times.map((sec) => toCourt([Math.max(8.9, Math.min(11.1, 10 + (ballSpot(sec)[0] - 10) * 0.18)), 0.9])),
   });
-  tracks.push({ team: "own", number: 1, xy: drift(toCourt([10, 0.9]), toCourt([Math.max(8.6, Math.min(11.4, ballSide)), 0.9]), 1, R) });
-  tracks.push({ team: "ref", xy: drift([12.5, 1.6], [11, 1.4], 1, R) });
+  tracks.push({ team: "ref", xy: times.map((sec) => [13.5 - sec * 0.25, 0.9] as Pt) });
+
   return {
-    clock: Math.max(0, Math.round(goal.minute * 60) - 6),
-    duration: 6,
+    clock: Math.max(0, Math.round(goal.minute * 60) - SCENE_SECONDS),
+    duration: SCENE_SECONDS,
     tracks,
-    ball: [],
+    ball,
     scorer: { team: "opp", number: scorerNumber },
-    shot: ball,
+    shot: toCourt(shot),
     aim: toCourt(goal.aim ?? [10, 0]),
     confirmed: goal.confirmed,
     label,
   };
+}
+
+const round2 = (v: number) => Math.round(v * 100) / 100;
+
+/** A light moving average so that a path has no corners (the camera smooths it again). */
+function smoothSteps(pts: Pt[]): Pt[] {
+  return pts.map((p, i) => {
+    const a = pts[Math.max(0, i - 1)]!;
+    const b = pts[Math.min(pts.length - 1, i + 1)]!;
+    return [(a[0] + 2 * p[0] + b[0]) / 4, (a[1] + 2 * p[1] + b[1]) / 4] as Pt;
+  });
 }
 
 /** Figures for the table «Zahlen», each with its source (report, marked by hand). */

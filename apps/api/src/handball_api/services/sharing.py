@@ -5,6 +5,9 @@ Tokens are random, only their hash is stored; links expire (1 to 90 days), can b
 views.
 Shared content never contains player names, only jersey numbers. Youth teams may only share plays
 (addendum 01, youth protection).
+
+The preview (Open Graph, K20) carries what a chat shows before anyone opens the link: teams,
+result, the minute of a scene, the goals by zone, the play's drawing. Never names, never frames.
 """
 
 from __future__ import annotations
@@ -18,6 +21,7 @@ from sqlalchemy import select
 from handball_api.core.db import disable_system_access, enable_system_access, set_tenant
 from handball_api.core.errors import ProblemError
 from handball_api.core.security import SecretBox, hash_token, new_token
+from handball_api.core.storage import ObjectNotFoundError
 from handball_api.models import (
     Clip,
     Event,
@@ -42,13 +46,46 @@ from handball_api.services.context import Ctx
 from handball_api.services.highlights import rank
 from handball_api.services.matches import opponent_of, timeline_video
 from handball_api.services.orgs import get_team
-from handball_api.services.policies import Action
+from handball_api.services.policies import Action, can, is_coach
 from handball_api.services.roster import consented
 from handball_api.services.videos import read_media_object
+
+KINDS = ("play", "match", "playlist", "highlight", "scene", "collection")
 
 
 def _now() -> datetime:
     return datetime.now(UTC)
+
+
+def youth_blocked(team: Team, kind: str) -> bool:
+    """Youth protection (addendum 01): a youth team shares plays only, no video or player data
+    of children."""
+    return bool(team.is_youth) and kind != "play"
+
+
+async def options(ctx: Ctx, team_id: uuid.UUID) -> dict[str, Any]:
+    """What this person may share publicly for the team, per kind, and why not (K20): the share
+    dialog explains instead of failing. Reasons: forbidden (role), plan, unverified (a club
+    claimed from the official data), youth-protection. Consents are per target (highlights) and
+    come with the attempt."""
+    team = await get_team(ctx, team_id)
+    reason: str | None = None
+    actor = ctx.require_actor()
+    if not can(actor, Action.PLAYLIST_WRITE, team.id):
+        reason = "forbidden"
+    else:
+        org = await ctx.db.get(Organization, team.organization_id)
+        if org is None or not billing.has_feature(ctx.settings, org, "share_links"):
+            reason = "plan"
+        elif await org_verification.is_unverified(ctx, team.organization_id):
+            reason = "unverified"
+    return {
+        "youth": bool(team.is_youth),
+        "default_days": 30,
+        "kinds": {
+            k: reason or ("youth-protection" if youth_blocked(team, k) else None) for k in KINDS
+        },
+    }
 
 
 async def _target(ctx: Ctx, team: Team, kind: str, target_id: uuid.UUID) -> str:
@@ -117,7 +154,7 @@ async def create(
     await billing.require_feature(ctx, "share_links", team.organization_id)
     # a club claimed from the official data shares nothing publicly until it is verified
     await org_verification.require_verified(ctx, team.organization_id)
-    if team.is_youth and kind != "play":
+    if youth_blocked(team, kind):
         # youth protection (addendum 01): no public video or player data of children
         raise ProblemError(
             403, "youth-protection", "Youth teams can only share plays, no matches or videos"
@@ -168,6 +205,9 @@ async def revoke(ctx: Ctx, link_id: uuid.UUID) -> None:
     if link is None:
         raise ProblemError(404, "not-found", "Link not found")
     await get_team(ctx, link.team_id, Action.PLAYLIST_WRITE)
+    # players share by link and take back their own links; the staff take back any (K18)
+    if not is_coach(ctx.require_actor(), link.team_id) and link.created_by_id != ctx.user_id:
+        raise ProblemError(403, "forbidden", "Only the staff revoke links made by others")
     link.revoked_at = link.revoked_at or _now()
     await audit.record(ctx, "share_link.revoked", target_type="share_link", target_id=link.id)
 
@@ -272,7 +312,18 @@ async def public(ctx: Ctx, token: str) -> dict[str, Any]:
         reel = await ctx.db.get(HighlightReel, link.target_id)
         if reel is None or reel.status != ReelStatus.READY:
             raise ProblemError(404, "not-found", "Not found")
-        return {**base, "highlight": {"format": reel.format, "scenes": len(reel.clip_ids)}}
+        match = await ctx.db.get(Match, reel.match_id) if reel.match_id else None
+        ctx_match = await _match_context(ctx, match)
+        return {
+            **base,
+            "highlight": {
+                "format": reel.format,
+                "scenes": len(reel.clip_ids),
+                "opponent": ctx_match.get("opponent"),
+                "score": ctx_match.get("score"),
+                "kickoff_at": match.kickoff_at.isoformat() if match else None,
+            },
+        }
     if link.kind in ("scene", "collection"):
         scenes = await _scenes_of(ctx, link)
         out = []
@@ -296,7 +347,7 @@ async def public(ctx: Ctx, token: str) -> dict[str, Any]:
                         # Taktik and the Minifeld per scene); none without a confirmed court
                         "camera": camera,
                         # minute, side and position of the goal: the same title as in the
-                        # app («35:51 Gegentor über rechts aussen», UX test B15)
+                        # app («35:51 Gegentor über aussen rechts», UX test B15)
                         "goal": goal,
                     }
                     if sc
@@ -381,12 +432,47 @@ async def _scenes_of(ctx: Ctx, link: ShareLink) -> dict[str, Any]:
     return {"items": await collections_service.items_of(ctx, source, row)}
 
 
+async def _match_context(ctx: Ctx, match: Match | None) -> dict[str, Any]:
+    """Opponent, result and date of a match for the chat preview: what a newspaper prints."""
+    if match is None:
+        return {}
+    opp = await opponent_of(ctx, match)
+    both = match.score_own is not None and match.score_opponent is not None
+    half = match.halftime_own is not None and match.halftime_opponent is not None
+    return {
+        "opponent": opp.name if opp else None,
+        "opp_kit": opp.primary_color if opp else None,
+        "score": [match.score_own, match.score_opponent] if both else None,
+        "halftime": [match.halftime_own, match.halftime_opponent] if half else None,
+        "kickoff_at": match.kickoff_at,
+        "is_home": match.is_home,
+    }
+
+
+async def _goal_list(ctx: Ctx, match: Match | None) -> list[dict[str, Any]]:
+    """The goals of a match by side, zone and minute (the three things of the match card); no
+    scorer, no number."""
+    if match is None:
+        return []
+    return [
+        {
+            "team": "own" if e.side == "own" else "opp",
+            "zone": graphics_service.zone_of(e),
+            "minute": graphics_service.minute_of(e),
+        }
+        for e in await graphics_service._goals(ctx, match)
+    ]
+
+
 async def preview(ctx: Ctx, token: str) -> dict[str, Any]:
-    """Open Graph data of a link: title, club, team, kit, number and length of the scenes."""
+    """Open Graph data of a link (K20): title, club, team, kit, number and length of the scenes,
+    and per kind what makes the preview concrete: opponent and result, the minute of a scene,
+    the goals by zone, the drawing of a play. Does not count as an opening."""
     link = await _resolve(ctx, token)
     team = await ctx.db.get(Team, link.team_id)
     org = await ctx.db.get(Organization, link.organization_id)
     scenes, duration = 0, None
+    extra: dict[str, Any] = {}
     if link.kind in ("scene", "collection", "playlist"):
         if link.kind == "playlist":
             items = await collections_service.items_of(
@@ -397,12 +483,32 @@ async def preview(ctx: Ctx, token: str) -> dict[str, Any]:
         windows = [i["scene"] for i in items if i.get("scene")]
         scenes = len(windows)
         duration = round(sum(w["end_ms"] - w["start_ms"] for w in windows) / 1000) or None
+        # all scenes from one match: that match's opponent and result
+        matches = {w["match_id"] for w in windows}
+        if len(matches) == 1:
+            extra |= await _match_context(ctx, await ctx.db.get(Match, uuid.UUID(matches.pop())))
+        if link.kind == "scene" and windows:
+            extra["goal"] = await _goal(ctx, windows[0])
     elif link.kind == "highlight":
         reel = await ctx.db.get(HighlightReel, link.target_id)
         scenes = len(reel.clip_ids) if reel else 0
+        if reel is not None:
+            match = await ctx.db.get(Match, reel.match_id) if reel.match_id else None
+            extra |= await _match_context(ctx, match)
+            extra["reel"] = {"format": str(reel.format)}
     elif link.kind == "match":
         match = await ctx.db.get(Match, link.target_id)
         duration = match.period_s * match.periods if match else None
+        extra |= await _match_context(ctx, match)
+        extra["goals"] = await _goal_list(ctx, match)
+    elif link.kind == "play":
+        play = await ctx.db.get(Play, link.target_id)
+        if play is not None:
+            extra["play"] = {
+                "category": play.category,
+                "formation": play.formation,
+                "doc": play.doc,
+            }
     return {
         "kind": link.kind,
         "title": link.title,
@@ -415,6 +521,7 @@ async def preview(ctx: Ctx, token: str) -> dict[str, Any]:
             "b": org.secondary_color if org else "#ffffff",
         },
         "expires_at": link.expires_at,
+        **extra,
     }
 
 
@@ -453,5 +560,8 @@ async def public_reel(ctx: Ctx, token: str) -> bytes:
     reel = await ctx.db.get(HighlightReel, link.target_id)
     if reel is None or reel.status != ReelStatus.READY or not reel.output_key:
         raise ProblemError(404, "not-found", "Not found")
-    data, _ = await ctx.storage.get(ctx.settings.s3_bucket_artifacts, reel.output_key)
+    try:
+        data, _ = await ctx.storage.get(ctx.settings.s3_bucket_artifacts, reel.output_key)
+    except ObjectNotFoundError:
+        raise ProblemError(404, "not-found", "Not found") from None
     return data

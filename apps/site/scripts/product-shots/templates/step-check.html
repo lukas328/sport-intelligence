@@ -1,0 +1,23 @@
+<!doctype html>
+<!-- Step «Prüfen»: flat pieces of the phone (S11: the three steps in one look, no device, no Keil):
+     the picture with the four yellow points the analysis proposes, the question «Passt das
+     Spielfeld?» and the answer «Passt», ringed. The lines between them are left out. -->
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../stage.css" />
+<div id="stage"></div>
+<script src="../stage.js"></script>
+<script>
+  S.stage(640, 620, { cloth: true });
+  const q = S.rect("pruefen-phone", "question", [16, 449, 358, 76]);
+  const yes = S.rect("pruefen-phone", "yes", [16, 614, 358, 56]);
+  const W = 560;
+  const k = W / 358;
+  // the video picture with the points (the dark frame of the app around it)
+  S.piece("pruefen-phone", [16, 22, 358, 218], { left: 40, top: 22, width: W });
+  const top2 = 22 + 218 * k + 16;
+  S.piece("pruefen-phone", [16, q[1], 358, q[3]], { left: 40, top: top2, width: W });
+  const top3 = top2 + q[3] * k + 6;
+  const c = S.piece("pruefen-phone", [14, yes[1] - 8, 362, yes[3] + 16], { left: 40 - 2 * k, top: top3, width: W + 4 * k });
+  S.ring(c, yes, 4);
+  S.done();
+</script>

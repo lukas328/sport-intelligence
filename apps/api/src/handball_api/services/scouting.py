@@ -21,6 +21,7 @@ from handball_api.models.enums import TeamRole
 from handball_api.services import audit, scouting_pdf, training
 from handball_api.services.context import Ctx
 from handball_api.services.matches import (
+    counted,
     duration_ms,
     get_match,
     in_video,
@@ -263,7 +264,10 @@ async def _data(
                 .where(
                     Match.team_id == team.id,
                     Match.opponent_id == opponent.id,
-                    Match.kind == "match",
+                    # our matches against them and the videos of them against others (K3): the
+                    # own side of a scouting match is their opponent of that day
+                    Match.kind.in_(("match", "scouting")),
+                    counted(),  # the example match is not the team's (R1)
                     Match.kickoff_at < before,
                 )
                 .order_by(Match.kickoff_at)
@@ -368,6 +372,7 @@ async def run_due(ctx: Ctx, now: datetime | None = None) -> int:
                 Match.team_id == m.team_id,
                 Match.opponent_id == m.opponent_id,
                 Match.kickoff_at < m.kickoff_at,
+                counted(),
                 Match.id.in_(select(Event.match_id)),
             )
             .limit(1)

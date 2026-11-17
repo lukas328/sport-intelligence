@@ -16,12 +16,16 @@ test("paper report: import, overview, match report, shots", async ({ page }, inf
   await page.getByRole("button", { name: "Zum Team" }).click();
   await follow(page, page.getByRole("link", { name: "Spiele", exact: true }).first(), /\/matches$/);
 
-  // "Spielbericht hinzufügen" holds the photo and the file import
-  await page.getByTestId("add-report").first().click();
-  await page.getByTestId("report-dialog").getByTestId("paper-file").setInputFiles(REPORT);
-  // goalkeeper zones carry one unknown shooter: the import reports it and stays on the list
-  await expect(page.getByText("Hinweise")).toBeVisible();
-  await page.getByRole("link", { name: /TV Papierdorf/ }).click();
+  // the paper import is no longer offered in the app (K19), its API stays: the data comes that way
+  const [, orgId, teamId] = page.url().match(/\/app\/([^/]+)\/teams\/([^/?#]+)/)!;
+  const csrf = (await page.context().cookies()).find((c) => c.name === "hb_csrf")!.value;
+  const imported = await page.request.post(`/v1/orgs/${orgId}/teams/${teamId}/paper-reports`, {
+    headers: { "x-csrf-token": csrf },
+    multipart: { file: { name: "paper-report.json", mimeType: "application/json", buffer: readFileSync(REPORT) } },
+  });
+  expect(imported.ok()).toBeTruthy();
+  await page.reload();
+  await page.getByRole("link", { name: /TV Papierdorf/ }).first().click();
   await expect(page.getByRole("heading", { level: 1 })).toContainText("TV Papierdorf");
   await expect(page.getByTestId("score")).toHaveText("5:4");
   await matchMenu(page);
@@ -41,7 +45,8 @@ test("paper report: import, overview, match report, shots", async ({ page }, inf
   await page.getByRole("tab", { name: "Spiel", exact: true }).click();
   await expect(page.getByTestId("telegram")).toContainText("5:4");
   await expect(page.getByTestId("no-video")).toContainText("Kein Video");
-  await expect(page.getByTestId("game-actions")).toContainText("Als Bild für den Chat");
+  // without video what works today stands first: the Spielkarte for the chat (review R39)
+  await expect(page.getByTestId("today-block")).toContainText("Spielkarte für den Teamchat");
   await openAnalysis(page, "Übersicht");
   const table = page.getByTestId("comparison");
   await expect(table.getByRole("row", { name: /^Tore(?! pro)/ })).toContainText("5");
@@ -86,7 +91,7 @@ test("paper report: import, overview, match report, shots", async ({ page }, inf
   await page.getByTestId("season-more").locator("summary").click();
   await expect(page.getByTestId("season-tiles")).toContainText("Tore pro Spiel");
   await expect(page.getByTestId("season-matches")).toContainText("TV Papierdorf");
-  // one match: the trend chart waits for three matches and says so
-  await expect(page.getByTestId("season-trend")).toContainText("ab drei Spielen");
+  // the course of the goal difference is drawn once, at the top (review R26), not again in here
+  await expect(page.getByTestId("season-more").getByRole("img", { name: "Tordifferenz pro Spiel" })).toHaveCount(0);
   await expectAccessible(page);
 });

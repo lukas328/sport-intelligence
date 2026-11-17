@@ -6,7 +6,7 @@ import uuid
 from datetime import UTC, datetime
 from typing import Any
 
-from sqlalchemy import func, select, update
+from sqlalchemy import ColumnElement, delete, func, select, update
 
 from handball_api.core.email import try_send
 from handball_api.core.errors import ProblemError
@@ -51,7 +51,19 @@ async def notify(
     params: dict[str, Any],
     link: str | None,
 ) -> None:
-    for uid in dict.fromkeys(user_ids):
+    users = list(dict.fromkeys(user_ids))
+    mid = params.get("match_id")
+    if users and isinstance(mid, str):
+        # one note per thing (app review R5): a newer note about the same match replaces the
+        # older one («Der offizielle Spielbericht ist da» twice, the failed analysis that ran again)
+        await ctx.db.execute(
+            delete(Notification).where(
+                Notification.user_id.in_(users),
+                Notification.params["match_id"].astext == mid,
+                _same_thing(kind),
+            )
+        )
+    for uid in users:
         ctx.db.add(
             Notification(organization_id=org_id, user_id=uid, kind=kind, params=params, link=link)
         )
@@ -59,6 +71,58 @@ async def notify(
     from handball_api.services import push
 
     await push.enqueue(ctx, list(dict.fromkeys(user_ids)), kind, link)
+
+
+def _group(kind: str) -> str:
+    """Notes of one group say the same thing about a match: the analysis of a match (ready,
+    questions, every question answered, failed) is one note, its latest state."""
+    return "analysis_" if kind.startswith("analysis_") else kind
+
+
+def _same_thing(kind: str) -> ColumnElement[bool]:
+    group = _group(kind)
+    return (
+        Notification.kind.like(f"{group}%") if group == "analysis_" else Notification.kind == kind
+    )
+
+
+async def _tidy(ctx: Ctx, items: list[Notification]) -> list[Notification]:
+    """Notes about a match that no longer exists go (the link would lead to a page that is not
+    there), and of several notes about the same match and thing only the newest stays (app
+    review R5; notes from before `notify` replaced older ones). `items` newest first."""
+    ids: set[uuid.UUID] = set()
+    for n in items:
+        try:
+            ids.add(uuid.UUID(str((n.params or {})["match_id"])))
+        except (KeyError, ValueError):
+            continue
+    # notes are the organisation's (row security): a match of it that is not found was deleted
+    there = (
+        set((await ctx.db.scalars(select(Match.id).where(Match.id.in_(ids)))).all())
+        if ids
+        else set()
+    )
+    keep: list[Notification] = []
+    seen: set[tuple[str, str]] = set()
+    gone: list[uuid.UUID] = []
+    for n in items:
+        mid = (n.params or {}).get("match_id")
+        if not isinstance(mid, str):
+            keep.append(n)
+            continue
+        try:
+            exists = uuid.UUID(mid) in there
+        except ValueError:
+            exists = False
+        key = (_group(n.kind), mid)
+        if not exists or key in seen:
+            gone.append(n.id)
+            continue
+        seen.add(key)
+        keep.append(n)
+    if gone:
+        await ctx.db.execute(delete(Notification).where(Notification.id.in_(gone)))
+    return keep
 
 
 async def staff_of(ctx: Ctx, team_id: uuid.UUID) -> list[uuid.UUID]:
@@ -147,7 +211,8 @@ async def create_assignment(ctx: Ctx, team_id: uuid.UUID, data: AssignmentCreate
         {"title": a.title, "team": team.name, "due_at": a.due_at.isoformat() if a.due_at else None},
         link,
     )
-    if data.notify_email:
+    # «Zusätzlich per E-Mail» only while mails reach people (L2); the bell always rings
+    if data.notify_email and ctx.settings.mail_delivers:
         coach = await ctx.db.get(User, ctx.user_id) if ctx.user_id else None
         users = (await ctx.db.scalars(select(User).where(User.id.in_(recipients)))).all()
         for u in users:
@@ -354,6 +419,52 @@ async def delete_assignment(ctx: Ctx, assignment_id: uuid.UUID) -> None:
     await ctx.db.delete(a)
 
 
+QUESTIONS = "analysis_questions"
+CHECKED = "analysis_checked"  # every question of the note answered
+LIVE_MATCHES = 10  # matches whose questions are counted afresh per call (the newest notes)
+
+
+async def _questions_now(ctx: Ctx, items: list[Notification]) -> None:
+    """«n Fragen an dich» counts the questions as they are now, from the one source Prüfen, the
+    start and the mail use (graphics.open_checks), not as they were when the analysis ended
+    (livegang L13). Once none is left the note says so, counts as read and leads to the match."""
+    from handball_api.services.graphics import open_checks
+
+    live: dict[str, tuple[int, int] | None] = {}
+    for n in items:
+        mid = (n.params or {}).get("match_id")
+        if n.kind != QUESTIONS or not isinstance(mid, str):
+            continue
+        if mid not in live:
+            if len(live) >= LIVE_MATCHES:
+                continue
+            try:
+                match = await ctx.db.get(Match, uuid.UUID(mid))
+            except ValueError:
+                match = None
+            if match is None:  # another club's match (row security) or deleted
+                live[mid] = None
+                continue
+            # only the budget of the main round counts (second round A6): what waits behind
+            # «Mehr prüfen» is offered in Prüfen, never rung in the bell
+            questions = len(await open_checks(ctx, match))
+            more = 0
+            live[mid] = (questions, more)
+        now = live[mid]
+        if now is None:
+            continue
+        questions, more = now
+        if questions == 0:
+            n.kind = CHECKED
+            n.params = {k: v for k, v in n.params.items() if k not in ("questions", "more_moments")}
+            n.link = f"/app/{n.organization_id}/matches/{mid}"
+            if n.read_at is None:
+                n.read_at = _now()
+        elif (n.params.get("questions"), n.params.get("more_moments")) != (questions, more):
+            n.params = {**n.params, "questions": questions, "more_moments": more}
+    await ctx.db.flush()
+
+
 async def notifications(ctx: Ctx) -> NotificationList:
     base = Notification.user_id == ctx.user_id
     items = (
@@ -361,6 +472,8 @@ async def notifications(ctx: Ctx) -> NotificationList:
             select(Notification).where(base).order_by(Notification.created_at.desc()).limit(50)
         )
     ).all()
+    items = await _tidy(ctx, list(items))
+    await _questions_now(ctx, items)
     unread = await ctx.db.scalar(
         select(func.count(Notification.id)).where(base, Notification.read_at.is_(None))
     )

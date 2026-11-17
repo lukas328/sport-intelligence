@@ -13,6 +13,8 @@ type Purpose = Schemas["ConsentKind"];
 export const PURPOSES: Purpose[] = ["analysis", "highlights_internal", "highlights_public", "public_profile", "training_data"];
 /** Youth protection (addendum 01, 4.9): nothing public for youth players. */
 const PUBLIC: Purpose[] = ["highlights_public", "public_profile"];
+// the help texts that speak to the person themselves («dich», «mit dir») have a parent's version
+const GUARDIAN_HELP: Purpose[] = ["analysis", "highlights_internal", "highlights_public"];
 
 export function MyConsents({ orgId }: { orgId: string }) {
   const t = useTranslations();
@@ -62,9 +64,13 @@ export function MyConsents({ orgId }: { orgId: string }) {
                 const locked = childLocked || (youth && PUBLIC.includes(p) && !active);
                 return (
                   <li key={p} className="flex flex-wrap items-center gap-3 py-3">
-                    <div className="min-w-0 flex-1">
+                    {/* a width of its own: on a phone the state and the button move under it */}
+                    <div className="min-w-0 flex-1 basis-56">
                       <p className="font-medium">{t(`consents.purpose_${p}`)}</p>
-                      <p className="text-sm text-muted">{t(`consents.purpose_${p}_help`)}</p>
+                      <p className="text-sm text-muted">
+                        {/* a parent decides about the child, not about themselves */}
+                        {s.relation === "guardian" && GUARDIAN_HELP.includes(p) ? t(`consents.purpose_${p}_help_guardian` as "consents.purpose_analysis_help_guardian") : t(`consents.purpose_${p}_help`)}
+                      </p>
                     </div>
                     <span className={active ? "text-sm font-medium text-ok" : "text-sm text-muted"}>
                       {active ? t("consents.given") : youth && PUBLIC.includes(p) ? t("consents.youthLocked") : t("consents.notGiven")}

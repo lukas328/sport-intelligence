@@ -10,6 +10,7 @@ import asyncio
 import hashlib
 import uuid
 from dataclasses import dataclass, field
+from datetime import UTC, datetime
 from typing import Any, Protocol
 
 import boto3
@@ -33,6 +34,8 @@ class UploadedPart:
     number: int
     etag: str
     size: int
+    # when the part arrived: an upload whose last part is long ago has stopped (services/progress)
+    last_modified: datetime | None = None
 
 
 class ObjectStorage(Protocol):
@@ -63,6 +66,7 @@ class ObjectStorage(Protocol):
 class MemoryStorage:
     objects: dict[tuple[str, str], tuple[bytes, str]] = field(default_factory=dict)
     uploads: dict[str, dict[int, bytes]] = field(default_factory=dict)
+    part_times: dict[tuple[str, int], datetime] = field(default_factory=dict)
 
     async def put(self, bucket: str, key: str, data: bytes, content_type: str) -> None:
         self.objects[(bucket, key)] = (data, content_type)
@@ -93,13 +97,19 @@ class MemoryStorage:
     def upload_part(self, upload_id: str, number: int, data: bytes) -> str:
         """Test helper: what the browser does with the presigned URL."""
         self.uploads[upload_id][number] = data
+        self.part_times[(upload_id, number)] = datetime.now(UTC)
         return hashlib.md5(data, usedforsecurity=False).hexdigest()
 
     async def list_parts(self, bucket: str, key: str, upload_id: str) -> list[UploadedPart]:
         if upload_id not in self.uploads:
             raise ObjectNotFoundError(upload_id)
         return [
-            UploadedPart(n, hashlib.md5(d, usedforsecurity=False).hexdigest(), len(d))
+            UploadedPart(
+                n,
+                hashlib.md5(d, usedforsecurity=False).hexdigest(),
+                len(d),
+                self.part_times.get((upload_id, n)),
+            )
             for n, d in sorted(self.uploads[upload_id].items())
         ]
 
@@ -199,7 +209,9 @@ class S3Storage:
                 except ClientError as exc:
                     raise ObjectNotFoundError(upload_id) from exc
                 parts += [
-                    UploadedPart(p["PartNumber"], p["ETag"].strip('"'), p["Size"])
+                    UploadedPart(
+                        p["PartNumber"], p["ETag"].strip('"'), p["Size"], p.get("LastModified")
+                    )
                     for p in r.get("Parts", [])
                 ]
                 if not r.get("IsTruncated"):

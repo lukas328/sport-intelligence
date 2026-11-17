@@ -33,6 +33,9 @@ export interface FlightLabels {
   /** said instead when the difference is zero ("Halbzeit, Gleichstand") */
   halfLevel?: string;
   endLevel?: string;
+  /** the goal sequence stops early (`until`): said at its end instead of the end label, "{m}" is
+   * the minute ("Torfolge bis 41'") */
+  cut?: string;
 }
 
 export interface FlightLabel {
@@ -66,7 +69,10 @@ export function floorAt(x: number, width: number, height: number, slant: number)
  * (`slant`: how far the edge rises over the width, in the drawing's units); every label keeps
  * LABEL_GAP from the line and from the edge: above the line where it fits, else below.
  */
-export function flightLayout(goals: readonly ReportGoal[], width: number, height: number, length = 60, labels?: FlightLabels, slant = 0, from = 0): FlightLayout {
+export function flightLayout(goals: readonly ReportGoal[], width: number, height: number, length = 60, labels?: FlightLabels, slant = 0, from = 0, until?: number | null): FlightLayout {
+  // a sequence that stops early (goals missing after `until`) ends there: no flat line to the
+  // end of the axis that says «no more goals» (review R13)
+  const stop = until != null && until > from && until < length ? until : length;
   // `from` to `length`: the minutes drawn, the whole match or only what a video covers (E10)
   const flow = flowOf(goals, from);
   const pad = width < 500 ? 16 : 32;
@@ -79,8 +85,8 @@ export function flightLayout(goals: readonly ReportGoal[], width: number, height
     if (i) steps.push([x(p[0]), flow[i - 1]![1]]);
     steps.push([x(p[0]), p[1]]);
   });
-  const endV = diffAt(flow, length);
-  steps.push([x(length), endV]);
+  const endV = diffAt(flow, stop);
+  steps.push([x(stop), endV]);
   // the scale: the whole range between the top and the slanted floor
   let U = (height - top - 6 - slant) / Math.max(10, hi - lo);
   let base = Math.min(...steps.map(([px, v]) => floorAt(px, width, height, slant) - 6 + v * U), floorAt(pad, width, height, slant) - 6);
@@ -90,7 +96,7 @@ export function flightLayout(goals: readonly ReportGoal[], width: number, height
   }
   const y = (v: number) => base - v * U;
   const pts: Pt[] = steps.map(([px, v]) => [px, y(v)]);
-  const end: Pt = [x(length), y(endV)];
+  const end: Pt = [x(stop), y(endV)];
   const out: FlightLabel[] = [];
   if (labels) {
     const half = diffAt(flow, (from + length) / 2);
@@ -107,10 +113,14 @@ export function flightLayout(goals: readonly ReportGoal[], width: number, height
       const box: FlightLabel["box"] = [x0, baseline - LABEL_SIZE + 3, x1, baseline + 3];
       out.push({ text, x: cx, y: baseline, anchor, box });
     };
-    place(say(labels.half, labels.halfLevel, half), x((from + length) / 2), "middle");
-    // the end label to the left of the end dot, clear of it
-    place(say(labels.end, labels.endLevel, endV), end[0] - 12, "end");
+    if (stop === length || stop > (from + length) / 2 + 2) place(say(labels.half, labels.halfLevel, half), x((from + length) / 2), "middle");
+    if (stop < length) {
+      // where the sequence stops: said right of the dot, the empty axis after it is the gap
+      place((labels.cut ?? "{m}'").replace("{m}", String(Math.floor(stop))), end[0] + 12, "start");
+    } else {
+      // the end label to the left of the end dot, clear of it
+      place(say(labels.end, labels.endLevel, endV), end[0] - 12, "end");
+    }
   }
   return { pts, base, end, labels: out };
 }
-

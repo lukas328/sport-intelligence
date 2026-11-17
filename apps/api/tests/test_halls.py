@@ -206,3 +206,52 @@ async def test_references_read_one_court_per_video_in_sql(
     assert refs, query_counter
     assert all("DISTINCT ON (calibrations.video_asset_id)" in q for q in refs)
     assert not any("video_assets.analysis AS" in q for q in refs)
+
+
+async def _hall_video(api: Api, ids: dict[str, Any], kickoff: str) -> tuple[str, str, str]:
+    """A home game in the confirmed hall: (match id, video id, analysis job id)."""
+    m = await new_match(api, ids, venue="Sporthalle Untermosen", kickoff_at=kickoff)
+    vid = (await upload(api, ids, m["id"], b"v" * 100))["id"]
+    jobs: MemoryJobQueue = api.app.state.jobs
+    await _ingest(api, jobs.jobs[-1][2], jobs.jobs[-1][3]["prefix"], audio=False)
+    return m["id"], vid, jobs.jobs[-1][2]
+
+
+@pytest.mark.parametrize(
+    ("floor", "error", "asked"),
+    [(140, 0.8, False), (40, 0.8, True), (140, 6.0, True), (140, None, True)],
+)
+async def test_a_sure_court_of_the_same_hall_is_not_asked_again(
+    make_api: Callable[[], Api], floor: int, error: float | None, asked: bool
+) -> None:
+    """«Passt das Spielfeld?» is not asked for a court carried over from a confirmed court of
+    the same hall when the hall images matched well; a weak match is still asked (round 2, A11)."""
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    _, first, job = await _hall_video(api, ids, "2026-11-07T18:00:00+01:00")
+    await _finish(
+        api,
+        job,
+        {"calibration": _court("user_correction"), "tracks": _tracks(), "panorama": PANORAMA},
+    )
+    match_id, second, job2 = await _hall_video(api, ids, "2026-11-14T18:00:00+01:00")
+    info: dict[str, Any] = {"method": "hall", "reference_video_id": first, "floor_inliers": floor}
+    if error is not None:
+        info["error_px"] = error
+    await _finish(
+        api,
+        job2,
+        {
+            "calibration": _court("heuristic"),
+            "calibration_info": info,
+            "tracks": _tracks(),
+            "panorama": PANORAMA,
+            "chunks": 1,
+            "chunk_ms": 30_000,
+        },
+    )
+    a = (await api.get(f"/v1/orgs/{org}/videos/{second}/analysis")).json()
+    assert a["calibration_info"]["sure"] is (not asked)
+    checks = (await api.get(f"/v1/orgs/{org}/matches/{match_id}/graphics")).json()["checks"]
+    assert [c["id"] for c in checks if c["kind"] == "field"] == ([second] if asked else [])

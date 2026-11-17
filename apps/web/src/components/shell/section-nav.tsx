@@ -9,6 +9,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { destOf, sectionOf, sectionsFor, type Dest, type Section } from "@/lib/nav-model";
 import { LinkTabs } from "@/components/anlauf/blocks";
 import { useShell } from "./context";
+import { LifeHint } from "./life-hint";
 
 /** Second (and last) level of navigation: slanted tabs below the page title, all widths. */
 export function SubNav({ label, items, active }: { label: string; items: { key: string; href: string; label: ReactNode }[]; active: string | null }) {
@@ -26,10 +27,11 @@ function useArea() {
   return { dest, items, active: sectionOf(path), page, org, team, mode };
 }
 
-const SUBNAV_LABEL: Partial<Record<Dest, "matchSections" | "scenesSections" | "teamSections">> = {
+const SUBNAV_LABEL: Partial<Record<Dest, "matchSections" | "scenesSections" | "teamSections" | "lifeSections">> = {
   matches: "matchSections",
   scenes: "scenesSections",
   team: "teamSections",
+  life: "lifeSections",
 };
 
 /** Second level of the current destination (the top bar holds only the four destinations). */
@@ -42,10 +44,14 @@ export function AreaSubNav() {
 
 /** Leaf pages one level below a section item, with a way back to it. */
 // older: an area from the earlier product, kept and reachable, said so in one line (UX test A07)
-const LEAF: Record<string, { parent: Section; title: string; href?: string; older?: boolean }> = {
+// back: the word of the way back when it leads to a page that is no section item
+const LEAF: Record<string, { parent: Section; title: string; href?: string; older?: boolean; back?: string }> = {
   playlists: { parent: "collections", title: "library.playlists", href: "collections", older: true },
   presentations: { parent: "collections", title: "library.presentations", href: "collections", older: true },
-  plays: { parent: "scenes", title: "library.plays", href: "scenes", older: true },
+  // the tactics board is current (K23): no «earlier version» line
+  plays: { parent: "scenes", title: "library.plays", href: "scenes" },
+  // the editor of a new play says what it is and leads back to the plays (review R14)
+  "plays/new": { parent: "scenes", title: "tactics.new", href: "plays", back: "library.plays" },
   assistant: { parent: "scenes", title: "palette.ask" },
   paper: { parent: "fixtures", title: "paper.photoTitle", href: "matches" },
 };
@@ -55,8 +61,9 @@ export function AreaHeader({ actions, title: fallbackTitle }: { actions?: ReactN
   const t = useTranslations("shell");
   const tr = useTranslations();
   const { dest, items, active, page, org, team } = useArea();
+  const path = usePathname();
   const teamBase = team ? `/app/${org.id}/teams/${team.id}` : null;
-  const leaf = LEAF[page];
+  const leaf = (page === "plays" && /\/plays\/new$/.test(path) ? LEAF["plays/new"] : undefined) ?? LEAF[page];
   // the title names the page; the destination and the team go into the eyebrow
   const destTitle = dest ? t(dest) : undefined;
   const pageTitle =
@@ -66,18 +73,20 @@ export function AreaHeader({ actions, title: fallbackTitle }: { actions?: ReactN
     : { eyebrow: undefined, title: fallbackTitle ?? "" };
   return (
     <div className="space-y-5">
-      {leaf && teamBase && <BackLink href={`${teamBase}/${leaf.href ?? leaf.parent}`} parent={leaf.parent} />}
+      {leaf && teamBase && <BackLink href={`${teamBase}/${leaf.href ?? leaf.parent}`} parent={leaf.parent} label={leaf.back ? tr(leaf.back as "library.plays") : undefined} />}
       <PageHeader eyebrow={heading.eyebrow} title={heading.title} actions={actions} />
       {leaf?.older && <OlderArea />}
       {dest && items.length > 0 && !leaf && <SubNav label={t(SUBNAV_LABEL[dest] ?? "teamSections")} items={items} active={active} />}
+      {/* the first visit of an area of Teamleben says what it is for (K16) */}
+      {dest === "life" && <LifeHint />}
     </div>
   );
 }
 
 /** The way back from a page one level below a section item: a text link above the title. */
-function BackLink({ href, parent }: { href: string; parent: Section }) {
+function BackLink({ href, parent, label }: { href: string; parent: Section; label?: string }) {
   const t = useTranslations();
-  const parentLabel = t(`shell.${parent}` as "shell.season");
+  const parentLabel = label ?? t(`shell.${parent}` as "shell.season");
   return (
     <Link href={href} className="-mb-3 inline-flex min-h-11 items-center gap-1 text-[15px] font-bold text-ink">
       <ChevronLeft aria-hidden className="size-4" />
@@ -94,8 +103,9 @@ export function TeamChrome() {
   // the official data and the join requests sit under the squad but bring their own heading
   if (page === "official" || page === "join-requests" || page === "players") return null;
   // the season page opens with its own stage (one stage per screen, at the top); Szenen has its
-  // own Seitenkopf with the count and no tabs (SPEC 7.6)
-  if (/\/(season|scenes)$/.test(path)) return null;
+  // own Seitenkopf with the count and no tabs (SPEC 7.6); the training tips under Saison bring
+  // their own head with the way back
+  if (/\/(season|season\/tips|scenes)$/.test(path)) return null;
   // the squad has its own Seitenkopf with the state of the squad as title (SPEC 7.10)
   if (/\/teams\/[^/]+$/.test(path)) return null;
   // the fixture list has its own title and actions
@@ -105,8 +115,9 @@ export function TeamChrome() {
 
 /** Header for org-level pages that sit in a destination for staff and stand alone for others. */
 export function AreaOrPageHeader({ title }: { title: string }) {
-  const { mode, dest, team } = useArea();
-  if (mode === "staff" && dest === "team" && team) return <AreaHeader title={title} />;
+  const { mode, dest, team, items } = useArea();
+  // Teamleben for everyone with its tabs (K16); Team for the staff with the team in the eyebrow
+  if ((dest === "life" && items.length > 0) || (mode === "staff" && dest === "team" && team)) return <AreaHeader title={title} />;
   return <PageHeader title={title} />;
 }
 

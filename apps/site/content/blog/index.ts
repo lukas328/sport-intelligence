@@ -30,16 +30,16 @@ export const BLOG: BlogPost[] = [
   {
     slug: "warum-wir-unsicherheit-zeigen",
     date: "2026-11-03",
-    updated: "2026-11-13",
+    updated: "2026-11-17",
     title: {
-      de: "Warum wir zeigen, wo die Analyse unsicher ist",
-      fr: "Pourquoi nous montrons où l'analyse est incertaine",
-      en: "Why we show where the analysis is uncertain",
+      de: "Warum die Analyse dich fragt, wo sie unsicher ist",
+      fr: "Pourquoi l'analyse te demande là où elle hésite",
+      en: "Why the analysis asks you where it is unsure",
     },
     summary: {
-      de: "Automatische Erkennung macht Fehler. Wir markieren sie, statt sie zu verstecken. Ein Blick hinter die Kulissen.",
-      fr: "La détection automatique fait des erreurs. Nous les signalons au lieu de les cacher. Un regard en coulisses.",
-      en: "Automatic detection makes mistakes. We flag them instead of hiding them. A look behind the scenes.",
+      de: "Die Analyse schlägt vor und fragt nur, wo sie unsicher ist: ein paar Fragen statt Tor für Tor, jede Zahl mit ihrer Basis. Ein Blick hinter die Kulissen.",
+      fr: "L'analyse propose et te demande là où elle hésite : quelques questions plutôt que but après but. Chaque chiffre est donné avec sa base. Un regard en coulisses.",
+      en: "The analysis suggests and asks you where it is unsure: a few questions instead of goal by goal. Every number comes with its base. A look behind the scenes.",
     },
   },
 ];

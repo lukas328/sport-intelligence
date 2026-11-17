@@ -24,6 +24,7 @@ from handball_api.models import (
 from handball_api.services.context import Ctx
 from handball_api.services.events import _to_metric
 from handball_api.services.matches import (
+    counted,
     duration_ms,
     in_video,
     timeline_videos,
@@ -31,6 +32,7 @@ from handball_api.services.matches import (
 )
 from handball_metrics.model import Event as MEvent
 from handball_metrics.query import MatchInfo, Row
+from handball_metrics.stats import OFFICIAL_SOURCES
 
 # what _to_metric and load read of an event (not its free text columns, timestamps, ...)
 EVENT_COLUMNS = (
@@ -51,6 +53,7 @@ class TeamData:
         rows: list[Row],
         video: dict[str, int | None],
         plays: dict[str, str],
+        analysed: set[str] | None = None,
     ) -> None:
         self.team = team
         self.matches = {m.id: m for m in matches}
@@ -58,6 +61,9 @@ class TeamData:
         self.event_ms = video  # event id -> video time (None without video)
         self.by_id = {r.event.id: r for r in rows}
         self.plays = plays  # play id -> name
+        # matches with data beyond the official report (video, tagging, a filled-in report):
+        # only these feed averages and trends, the official goals alone are no analysis (K15)
+        self.analysed = analysed if analysed is not None else {m.id for m in matches}
 
 
 async def season_scope(
@@ -115,6 +121,7 @@ async def load(
                 ).where(
                     Match.team_id == team.id,
                     Match.kind == "match",
+                    counted(),  # the example match is not the team's (R1)
                     Match.season_id.in_(scope),
                 )
             )
@@ -198,6 +205,7 @@ async def load(
     season = {m.id: m.season_id for m in matches}
     rows: list[Row] = []
     video: dict[str, int | None] = {}
+    analysed: set[str] = set()
     events = (
         (
             await ctx.db.scalars(
@@ -208,6 +216,8 @@ async def load(
         else []
     )
     for e in events:
+        if e.source not in OFFICIAL_SOURCES:
+            analysed.add(str(e.match_id))
         me = _to_metric(e)
         if e.side == "own" and e.player_id is not None:
             # own players are identified by their jersey number of that season; the position is
@@ -224,7 +234,7 @@ async def load(
         # mid-half lie before or after it)
         length = duration_ms(timeline.get(e.match_id))
         video[str(e.id)] = e.t_ms if in_video(e.t_ms, length) else None
-    return TeamData(team, list(infos.values()), rows, video, plays)
+    return TeamData(team, list(infos.values()), rows, video, plays, analysed)
 
 
 def _anonymous(e: MEvent, number: int | None, attributes: dict[str, object]) -> MEvent:

@@ -11,7 +11,8 @@ export interface SeasonMatch<T extends GoalRun = GoalRun> {
   /** short opponent name under the bar */
   label: string;
   goals: T[];
-  turnovers: number;
+  /** null: not recorded in this match (the analysis of the video does not count them) */
+  turnovers: number | null;
 }
 
 export interface ZoneRepeat<T extends GoalRun = GoalRun> {
@@ -64,8 +65,10 @@ export function seasonRepeats<T extends GoalRun>(matches: SeasonMatch<T>[]): Rep
   const conceded = zoneRepeat(matches, "opp", ["m7", "gs"]);
   const scored = zoneRepeat(matches, "own", ["m7"]);
   let turnovers: Repeats<T>["turnovers"] = null;
-  if (matches.length >= 2) {
-    const series = matches.map((m) => m.turnovers);
+  // only when every match has them recorded: a missing count is no 0 (livegang K14)
+  const recorded = matches.map((m) => m.turnovers).filter((v): v is number => v != null);
+  if (matches.length >= 2 && recorded.length === matches.length) {
+    const series = recorded;
     const sorted = [...series].sort((a, b) => a - b);
     const median = sorted[Math.floor((sorted.length - 1) / 2)]!;
     const max = Math.max(...series);
@@ -76,8 +79,15 @@ export function seasonRepeats<T extends GoalRun>(matches: SeasonMatch<T>[]): Rep
   return { conceded, scored, turnovers, matches: matches.length };
 }
 
-/** A short name for a bar: the first place name of the opponent (no club prefix, no "Au"). */
+// words of a club name that are no place: «Handball Pfannenstiel» is «Pfannenstiel» (review R11)
+const GENERIC = /^(TV|TSV|BSV|SG|HC|HSG|SC|HV|TSG|KTV|SV|STV|GC|RTV|LK|FC|HB|HG|SPV|Handball|Handballclub|Handballverein|Club|Verein|Team|Sport|Sportverein|Turnverein|Damen|Herren|Junioren|Juniorinnen|Frauen|Männer)$/i;
+
+/** A short name for a bar: the first place name of the opponent (no club prefix, no "Au", no
+ * «(M2)», no team number; of «Horgen/Wädenswil» the first place). */
 export function shortName(opponent: string): string {
-  const words = opponent.split(/[\s-]+/).filter((w) => w.length > 2 && !/^(TV|TSV|BSV|SG|HC|HSG|SC|HV|TSG|KTV|SV|STV|GC|RTV|LK|FC)$/i.test(w));
-  return words[0] ?? opponent;
+  const words = opponent
+    .replace(/\([^)]*\)/g, " ")
+    .split(/[\s/-]+/)
+    .filter((w) => w.length > 2 && !/^\d+$/.test(w) && !GENERIC.test(w));
+  return words[0] ?? opponent.trim();
 }

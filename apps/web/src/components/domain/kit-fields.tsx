@@ -36,10 +36,26 @@ function Shirt({ colour, empty = false }: { colour?: string; empty?: boolean }) 
 const PICKER = "absolute inset-0 size-full cursor-pointer opacity-0";
 
 /** The kit colours of a match as colour swatches: four team kits and the optional referee kit,
- * with the warning when two of them are hard to tell apart. Used by the new and the edit form. */
-export function KitFields({ kits, onChange, unknown = [] }: { kits: Kits; onChange: (kits: Kits) => void; unknown?: readonly TeamKitKey[] }) {
+ * with the warning when two of them are hard to tell apart. Used by the new and the edit form and
+ * at the upload (K2). `presets`: the club's home and away shirt as one tap for our shirt; `only`:
+ * just these swatches (the upload asks for our kits only). */
+export function KitFields({
+  kits,
+  onChange,
+  unknown = [],
+  presets,
+  only,
+}: {
+  kits: Kits;
+  onChange: (kits: Kits) => void;
+  unknown?: readonly TeamKitKey[];
+  presets?: { home: string; away: string | null } | null;
+  only?: readonly TeamKitKey[];
+}) {
   const t = useTranslations();
   const hintId = useId();
+  const shown = only ? TEAM_KITS.filter(([k]) => only.includes(k)) : TEAM_KITS;
+  const same = (a: string | null | undefined, b: string | null | undefined) => Boolean(a && b && a.toLowerCase() === b.toLowerCase());
   // a kit nobody chose stays empty and is not compared (third real-video test G7: the form
   // filled the opponent in red and warned of «Ähnliche Farben» for a red club)
   const isOpen = (k: TeamKitKey) => unknown.includes(k);
@@ -47,8 +63,35 @@ export function KitFields({ kits, onChange, unknown = [] }: { kits: Kits; onChan
   const referee = `${t("matches.kitReferee")} (${t("common.optional")})`;
   return (
     <>
+      {presets && (
+        <div className="mb-3 flex flex-wrap items-center gap-2" role="group" aria-label={t("matches.kitPresets")} data-testid="kit-presets">
+          {(
+            [
+              ["home", presets.home],
+              ["away", presets.away],
+            ] as const
+          ).map(([which, colour]) =>
+            colour ? (
+              <button
+                key={which}
+                type="button"
+                aria-pressed={same(kits.own, colour)}
+                onClick={() => onChange({ ...kits, own: colour })}
+                className={cn(
+                  "inline-flex min-h-11 cursor-pointer items-center gap-2 border-2 px-3 text-[15px] font-bold",
+                  same(kits.own, colour) ? "border-ink bg-ink text-ground" : "border-ink bg-transparent text-ink",
+                )}
+                data-testid={`kit-preset-${which}`}
+              >
+                <i aria-hidden className="block size-5 shadow-[0_0_0_1.5px_currentColor]" style={{ background: colour }} />
+                {t(which === "home" ? "matches.kitHome" : "matches.kitAway")}
+              </button>
+            ) : null,
+          )}
+        </div>
+      )}
       <div className="flex flex-wrap gap-x-5 gap-y-3">
-        {TEAM_KITS.map(([k, label]) => (
+        {shown.map(([k, label]) => (
           <label key={k} className="flex cursor-pointer items-center gap-2 text-sm">
             <span className={cn(SWATCH, isOpen(k) && "text-muted")} data-testid={`kit-${k}`} data-open={isOpen(k) || undefined}>
               <Shirt colour={isOpen(k) ? undefined : kits[k]} empty={isOpen(k)} />
@@ -65,6 +108,7 @@ export function KitFields({ kits, onChange, unknown = [] }: { kits: Kits; onChan
             {t(label)}
           </label>
         ))}
+        {!only && (
         <div className="flex items-center gap-2">
           <label className="flex cursor-pointer items-center gap-2 text-sm">
             <span className={cn(SWATCH, !kits.referee && "text-muted")} data-testid="kit-referee">
@@ -96,11 +140,14 @@ export function KitFields({ kits, onChange, unknown = [] }: { kits: Kits; onChan
             </Button>
           )}
         </div>
+        )}
       </div>
       <p className="mt-2 text-xs text-muted">{t("matches.kitsHint")}</p>
-      <p id={hintId} className="mt-1 text-xs text-muted">
-        {t("matches.kitRefereeHint")}
-      </p>
+      {!only && (
+        <p id={hintId} className="mt-1 text-xs text-muted">
+          {t("matches.kitRefereeHint")}
+        </p>
+      )}
       {similar.length > 0 && (
         <Alert kind="info" className="mt-3">
           <span data-testid="kit-warning">

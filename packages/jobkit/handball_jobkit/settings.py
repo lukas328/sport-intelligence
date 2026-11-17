@@ -19,15 +19,46 @@ class JobSettings(BaseSettings):
     # the file the classical background detector runs (ADR 012)
     detector_model: str = "/models/yolox_s.onnx"
     detect_every: int = 3
+    # 3-frame ball net(s) (docs/plans/produkt-analyse-integration.md step 2): comma-separated,
+    # each a local ONNX file (ml/ball/export_onnx.py) or a key in the artifacts bucket (e.g.
+    # models/ball/ball_hrp1-<sha12>.onnx), fetched once into ball_cache_dir. Two entries =
+    # ensemble (hr1 + hrp1, the default for quality), one = single net (cost comparison).
+    # ball_model_sha256: the files' SHA-256 in the same order (required for bucket keys).
+    # Empty, missing or a wrong checksum: the YOLOX "sports ball" path stays. TEST PHASE: the
+    # nets hr1/hrp1 contain DeepSport data (non-commercial) and must be replaced before go-live.
+    ball_model: str = ""
+    ball_model_sha256: str = ""
+    # the ball nets and ReID only with a GPU (CUDA): on a CPU worker the nets take about 1 to 2 s
+    # per frame (a whole game: days), ReID about 2.5 CPU s per video second. ball_allow_cpu=1 lets
+    # them run on a CPU for videos of at most ball_max_minutes (short trial runs).
+    ball_allow_cpu: bool = False
+    ball_max_minutes: float = 12.0  # the 10-minute test clips run 10:02 and 10:09
+    ball_cache_dir: str = "/tmp/handball-models"  # noqa: S108
+    ball_every: int = 1  # every 2nd frame costs about 6 points on gold v1 (11 on fast balls)
+    # input width of the ball nets (frames are scaled to it): 960 halves the CPU time; on gold v1
+    # hrp1 at 960 on every 3rd frame 63.5 % against 65.3 % at 1280
+    ball_width: int = 1280
+    ball_batch: int = 8
     detector_threads: int = 0
     # shirt numbers (PP-OCRv4 text models) and re-identification (person appearance network);
     # each step runs only when its model files are installed
     number_det_model: str = "/models/ch_PP-OCRv4_det_infer.onnx"
     number_rec_model: str = "/models/ch_PP-OCRv4_rec_infer.onnx"
     number_every: int = 6  # frames; 3 on the GPU image (every detection frame)
+    # read a torso only when it is worth it (numbers.NumberGate): new boxes, unsettled numbers,
+    # back-off after failed reads; off = every eligible torso on every number frame (as before)
+    number_gate: bool = True
+    # at most this many CPU seconds of shirt numbers per video second (0: no limit): keeps a whole
+    # game under the job timeout on a CPU worker; on the 4-core profile reading every torso cost
+    # 1.4 to 2.8 s per video second, the gate about 0.5
+    number_budget: float = 0.75
+    # local file or artifacts-bucket key (fetched like the ball nets, with its checksum); test
+    # phase: the FastReID weights are trained on MSMT17 (non-commercial), see ml/models
     reid_model: str = "/models/reid.onnx"
+    reid_model_sha256: str = ""
     reid_every: int = 30  # frames: about once per second per player
     role_model: str = "/models/roles.onnx"  # player / goalkeeper / referee (ml/roles)
+    role_model_sha256: str = ""
     role_every: int = 30
     hallboard_every_s: float = 1.0  # hall scoreboard reading when the video has no overlay
     hallboard_full_every_s: float = 4.0  # whole-frame search for the board while it is not in view

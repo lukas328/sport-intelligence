@@ -10,6 +10,8 @@ import { api } from "@/lib/client";
 import { cn } from "@/lib/utils";
 import { Drill, N, useDrill, type KeeperRow, type ViewProps } from "./analysis-views";
 import { useOpponentName } from "@/lib/opponent";
+import { ownKeepers } from "@/lib/keepers";
+import { useRosterNames } from "@/components/analysis/tagger";
 
 const pct = (v: number | null | undefined) => (v == null ? "-" : `${Math.round(v * 100)} %`);
 
@@ -22,7 +24,10 @@ export function KeepersView({ orgId, match, teamName, stats, names, onPlay }: Vi
   const tz = useTranslations("zones");
   const oppName = useOpponentName();
   const sheet = ((match.report_extra as { names?: Record<string, string> } | null)?.names ?? {}) as Record<string, string>;
-  const rows = Object.values(stats.goalkeepers ?? {}).sort((a, b) => (a.side === b.side ? b.faced - a.faced : a.side === "own" ? -1 : 1));
+  // only the own goalkeepers, by the roster's goalkeepers (app review R4: the table mixed both
+  // teams, a field player and a number without a name); hooks before any early return
+  const roster = useRosterNames(orgId, match.team_id, match.season_id);
+  const rows = ownKeepers(Object.values(stats.goalkeepers ?? {}), roster.data ?? []);
   if (rows.length === 0) return <EmptyState title={t("none")}>{t("assignHint")}</EmptyState>;
   const nameOf = (k: KeeperRow) =>
     (k.player_id && names[k.player_id]) ||
@@ -250,7 +255,7 @@ export function PhysicalView({
             </table>
           </div>
           {short > 0 && (
-            <button type="button" className="text-sm font-medium text-accent hover:underline" onClick={() => setShowShort((v) => !v)}>
+            <button type="button" className="text-sm font-medium text-accent underline decoration-[1.5px] underline-offset-4" onClick={() => setShowShort((v) => !v)}>
               {showShort ? t("hideShort") : t("showShort", { n: short })}
             </button>
           )}

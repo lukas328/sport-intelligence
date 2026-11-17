@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+import json
 import re
+import uuid
 from collections.abc import Callable
 from typing import Any
 
+import asyncpg
 import pytest
 
 from handball_api.core.email import MemoryEmailSender
@@ -104,6 +107,23 @@ async def test_assignment_flow(make_api: Callable[[], Api], outbox: MemoryEmailS
         },
     )
     assert drill.status_code == 201 and drill.json()["recipients"] == 1
+    # without mail delivery (L2) «Zusätzlich per E-Mail» sends nothing; the bell still rings
+    sent = len(outbox.outbox)
+    coach.app.state.settings.mail_enabled = False
+    try:
+        quiet = await coach.post(
+            base,
+            json={
+                "kind": "drill",
+                "target_id": "finishing_wings",
+                "title": "Ohne Mail",
+                "user_ids": [tim.user["id"]],
+                "notify_email": True,
+            },
+        )
+    finally:
+        coach.app.state.settings.mail_enabled = None
+    assert quiet.status_code == 201 and len(outbox.outbox) == sent
     assert (
         await tim.put(f"/v1/orgs/{org}/assignments/{a['id']}/status", json={"done": False})
     ).json()["done_at"] is None
@@ -168,10 +188,122 @@ async def test_assignment_progress_for_staff(
     listing = (await coach.get(f"/v1/orgs/{org}/teams/{team}/assignments")).json()
     assert listing[0]["done"] == 1 and len(listing[0]["still_open"]) == 2
 
-    # players never see other players' progress; outside the video staff no detail
-    for api in (alia, bea, manager):
+    # players never see other players' progress; every Co-Trainer does (K18)
+    for api in (alia, bea):
         assert (await api.get(detail_url)).status_code == 403
+    assert (await manager.get(detail_url)).status_code == 200
     assert (await coach.get(f"/v1/orgs/{org}/assignments/{ids['team']}")).status_code == 404
     other = make_api()
     await setup_club(other, "other@hc-test.ch")
     assert (await other.get(f"/v1/orgs/{org}/assignments/{a['id']}")).status_code == 404
+
+
+async def test_the_bell_counts_the_questions_as_they_are_now(
+    make_api: Callable[[], Api], owner_conn: asyncpg.Connection
+) -> None:
+    """Livegang L13: «2 Fragen an dich» stayed after every question was answered. The note
+    counts the open questions afresh; with none left it says so and counts as read."""
+    from .test_matches import new_match
+    from .test_themes import ready_video
+
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    m = await new_match(api, ids)
+    await ready_video(api, ids, m["id"])  # one question open: the throw-off
+    user = await owner_conn.fetchval("SELECT id FROM users WHERE email = 'coach@hc-test.ch'")
+    params = {"match_id": m["id"], "opponent": "TV Gegner", "questions": 2, "more_moments": 0}
+    await owner_conn.execute(
+        "INSERT INTO notifications (id, organization_id, user_id, kind, params, link) "
+        "VALUES (gen_random_uuid(), $1, $2, 'analysis_questions', $3::jsonb, $4)",
+        uuid.UUID(org),
+        user,
+        json.dumps(params),
+        f"/app/{org}/matches/{m['id']}/check",
+    )
+    notes = (await api.get(f"/v1/orgs/{org}/me/notifications")).json()
+    note = notes["items"][0]
+    assert note["kind"] == "analysis_questions" and note["params"]["questions"] == 1
+    assert notes["unread"] == 1
+    r = await api.put(f"/v1/orgs/{org}/matches/{m['id']}/kickoff", json={"period": 1, "t_ms": 0})
+    assert r.status_code < 300, r.text
+    notes = (await api.get(f"/v1/orgs/{org}/me/notifications")).json()
+    note = notes["items"][0]
+    assert note["kind"] == "analysis_checked" and "questions" not in note["params"]
+    assert note["params"]["opponent"] == "TV Gegner"
+    assert note["link"] == f"/app/{org}/matches/{m['id']}" and note["read_at"] is not None
+    assert notes["unread"] == 0
+
+
+async def test_the_bell_has_one_note_per_thing_and_none_for_deleted_matches(
+    make_api: Callable[[], Api], owner_conn: asyncpg.Connection
+) -> None:
+    """App review R5: «Der offizielle Spielbericht ist da» twice, a failed analysis of a match
+    that no longer exists, a link to a deleted match. Reading the list marks nothing as read."""
+    from handball_api.core.db import open_session, set_tenant
+    from handball_api.services import training
+    from handball_api.services.context import Ctx
+
+    from .test_matches import new_match
+
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    kept = await new_match(api, ids)
+    gone = await new_match(api, ids, opponent_name="HC Weg")
+    user = await owner_conn.fetchval("SELECT id FROM users WHERE email = 'coach@hc-test.ch'")
+
+    async def note(kind: str, match_id: str, minutes_ago: int) -> None:
+        await owner_conn.execute(
+            "INSERT INTO notifications (id, organization_id, user_id, kind, params, link, "
+            "created_at) VALUES (gen_random_uuid(), $1, $2, $3, $4::jsonb, $5, "
+            "now() - make_interval(mins => $6))",
+            uuid.UUID(org),
+            user,
+            kind,
+            json.dumps({"match_id": match_id, "opponent": "TV Gegner"}),
+            f"/app/{org}/matches/{match_id}",
+            minutes_ago,
+        )
+
+    await note("official_report", kept["id"], 30)
+    await note("official_report", kept["id"], 20)  # the same report again
+    await note("analysis_failed", kept["id"], 15)  # then analysed again: ready
+    await note("analysis_ready", kept["id"], 10)
+    await note("analysis_failed", gone["id"], 5)
+    await owner_conn.execute(
+        "INSERT INTO notifications (id, organization_id, user_id, kind, params) "
+        "VALUES (gen_random_uuid(), $1, $2, 'official_suggestions', '{\"count\": 2}'::jsonb)",
+        uuid.UUID(org),
+        user,
+    )
+    assert (await api.delete(f"/v1/orgs/{org}/matches/{gone['id']}")).status_code == 204
+
+    notes = (await api.get(f"/v1/orgs/{org}/me/notifications")).json()
+    kinds = sorted((n["kind"], (n["params"] or {}).get("match_id")) for n in notes["items"])
+    assert kinds == [
+        ("analysis_ready", kept["id"]),
+        ("official_report", kept["id"]),
+        ("official_suggestions", None),
+    ]
+    # the list itself marks nothing as read: a note is read on its click or with «Alle gelesen»
+    assert notes["unread"] == 3 and all(n["read_at"] is None for n in notes["items"])
+    assert await owner_conn.fetchval("SELECT count(*) FROM notifications") == 3
+
+    # a new note about the same match and thing replaces the older one
+    async with open_session() as db:
+        await set_tenant(db, uuid.UUID(org))
+        ctx = Ctx(
+            db=db,
+            settings=api.app.state.settings,
+            email=api.app.state.email,
+            storage=api.app.state.storage,
+        )
+        await training.notify(
+            ctx, uuid.UUID(org), [user], "official_report", {"match_id": kept["id"]}, None
+        )
+        await db.commit()
+    reports = await owner_conn.fetch(
+        "SELECT params FROM notifications WHERE kind = 'official_report'"
+    )
+    assert len(reports) == 1 and json.loads(reports[0]["params"]) == {"match_id": kept["id"]}

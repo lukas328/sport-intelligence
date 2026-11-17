@@ -98,7 +98,7 @@ export function Presenter({ orgId, presId }: { orgId: string; presId: string }) 
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-2">
-        <Link href={`/app/${orgId}/presentations/${presId}`} className="text-sm font-medium text-accent hover:underline">
+        <Link href={`/app/${orgId}/presentations/${presId}`} className="text-sm font-medium text-accent underline decoration-[1.5px] underline-offset-4">
           {t("back")}
         </Link>
         <span className="flex-1 font-semibold">{q.data.title}</span>
@@ -139,7 +139,7 @@ export function Presenter({ orgId, presId }: { orgId: string; presId: string }) 
                 <img src={qr} alt={t("qrAlt")} width={160} height={160} />
                 <p className="text-xs text-muted">{t("qrHint")}</p>
                 {remoteUrl && (
-                  <a href={remoteUrl} target="_blank" rel="noreferrer" className="text-xs font-medium text-accent hover:underline" data-testid="remote-link">
+                  <a href={remoteUrl} target="_blank" rel="noreferrer" className="text-xs font-medium text-accent underline decoration-[1.5px] underline-offset-4" data-testid="remote-link">
                     {t("remoteLink")}
                   </a>
                 )}

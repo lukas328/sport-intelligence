@@ -112,3 +112,95 @@ def test_balls_while_the_clock_stands_are_ignored() -> None:
     # the clock never ran while a ball was seen: no ball time at all, but said so
     out = bp.from_observations(obs, result, play=[(20_000, 30_000)])
     assert out is not None and out["ball_gated_by_clock"] is True and out["possessions"] == []
+
+
+def _with_ball_net(obs: Any) -> Any:
+    """The same scene with ball net candidates on every frame (`HB_BALL_MODEL`) instead of YOLOX
+    boxes: the true ball plus a weaker lamp."""
+    cands = {}
+    for fo in obs.frames:
+        row = [((b.x1 + b.x2) / 2, (b.y1 + b.y2) / 2, 0.7) for b in fo.balls]
+        row.append((1200.0, 60.0, 0.2))
+        cands[fo.index] = row
+        fo.balls = []
+    obs.ball_cands = cands
+    return obs
+
+
+@pytest.mark.parametrize("play", [None, []])
+def test_ball_net_path_without_clock(play: list[tuple[int, int]] | None) -> None:
+    obs, result = _observed()
+    out = bp.from_observations(_with_ball_net(obs), result, play=play)
+    assert out is not None and out["ball_model"] == "ballnet"
+    assert {p["track_id"] for p in out["possessions"]} == {1, 3}
+
+
+def test_ball_net_path_gated_by_clock() -> None:
+    obs, result = _observed()
+    obs = _with_ball_net(obs)
+    out = bp.from_observations(obs, result, play=[(0, 6000)])
+    assert out is not None and out["ball_model"] == "ballnet"
+    assert {p["track_id"] for p in out["possessions"]} == {1}
+    out = bp.from_observations(obs, result, play=[(20_000, 30_000)])
+    assert out is not None and out["possessions"] == []
+
+
+def test_ball_net_path_confidence_threshold() -> None:
+    obs, result = _observed()
+    obs = _with_ball_net(obs)
+    first, path, conf = bp.ball_path_v2(obs, obs.ball_cands)
+    assert first == 0 and len(path) == len(conf) == 300
+    out = bp.from_observations(obs, result, min_conf=1.01)  # nothing is that sure
+    assert out is not None and out["possessions"] == []
+
+
+def test_yolox_path_says_its_model() -> None:
+    obs, result = _observed()
+    out = bp.from_observations(obs, result)
+    assert out is not None and out["ball_model"] == "yolox"
+
+
+def test_ball_net_path_rows_for_storage() -> None:
+    obs, result = _observed()
+    out = bp.from_observations(_with_ball_net(obs), result, play=[(0, 6000)])
+    assert out is not None
+    rows = out["path_rows"]
+    assert rows.dtype == np.float32 and rows.shape[1] == 4
+    assert len(rows) > 100
+    # times in ms at 25 fps, inside play, frame pixels near the true ball, confidence 0..1
+    assert rows[:, 0].max() <= 6000 + 40
+    assert np.all((rows[:, 3] >= 0) & (rows[:, 3] <= 1))
+    first = rows[rows[:, 0] == 0]
+    assert len(first) == 0 or abs(first[0, 1] - 100) < 12
+    # the YOLOX path keeps no rows
+    plain, result2 = _observed()
+    assert "path_rows" not in (bp.from_observations(plain, result2) or {})
+
+
+def test_ball_net_on_every_third_frame_fills_the_frames_between() -> None:
+    obs, result = _observed()
+    obs = _with_ball_net(obs)
+    obs.ball_cands = {f: c for f, c in obs.ball_cands.items() if f % 3 == 0}
+    first, path, conf = bp.ball_path_v2(obs, obs.ball_cands)
+    assert first == 0 and len(path) == len(conf) == 298  # frames 0 to 297
+    # the frames between the net's frames get points while the ball is seen
+    between = [path[f] for f in range(1, 140) if f % 3]
+    assert sum(q is not None for q in between) > 0.9 * len(between)
+    q = path[100]
+    assert q is not None and abs(q[0] - (100 + 2 * 100)) < 12  # player 1's ball at frame 100
+    out = bp.from_observations(obs, result)
+    assert out is not None and {p["track_id"] for p in out["possessions"]} == {1, 3}
+
+
+def test_clock_read_too_rarely_does_not_drop_the_balls() -> None:
+    """A hall board read a handful of times gives a few seconds of "play" in a long video: the
+    gate would drop nearly every ball, so it is ignored and said so."""
+    obs, result = _observed()
+    obs.total = 300  # 12 s at 25 fps
+    out = bp.from_observations(obs, result, play=[(0, 1000)])  # 1 s of 12 s: too sparse
+    assert out is not None and out["ball_gated_by_clock"] is False
+    assert out["clock_too_sparse"] is True
+    assert {p["track_id"] for p in out["possessions"]} == {1, 3}
+    # enough play: the gate holds
+    out = bp.from_observations(obs, result, play=[(0, 6000)])
+    assert out is not None and out["ball_gated_by_clock"] is True and "clock_too_sparse" not in out

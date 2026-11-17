@@ -2,7 +2,7 @@ import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { expect, test } from "@playwright/test";
 import { MATCH_VIDEO } from "./global-setup";
-import { register, uniqueEmail } from "./helpers";
+import { chooseVideo, register, uniqueEmail } from "./helpers";
 
 // the local stack's and CI's database (docker compose): the goal candidates the recognition would
 // find in a real hall video, which the 30 s synthetic clip does not give
@@ -37,7 +37,7 @@ test("no goal found by the analysis: after Prüfen the result, course, goals and
     data: { opponent_name: "TV Neuer", kickoff_at: new Date(Date.now() - 7_200_000).toISOString() },
   });
   await page.goto(`/app/${org}/matches/${match.id}?tab=video`);
-  await page.getByTestId("video-file").setInputFiles(MATCH_VIDEO);
+  await chooseVideo(page, MATCH_VIDEO);
   await expect(page.getByTestId("plain-stage")).toBeVisible({ timeout: 240_000 });
   // away from the match while the analysis runs: it is not opened after it
   await page.goto(`/app/${org}/teams/${team}/matches`);
@@ -58,7 +58,7 @@ test("no goal found by the analysis: after Prüfen the result, course, goals and
   // the start counts the court, the throw-off and the three goals: one count
   await page.goto(`/app/${org}/teams/${team}/matches`);
   // the fresh analysis stands in the head, ahead of the newer match
-  await expect(page.getByTestId("start-next-step")).toContainText("5 Fragen helfen");
+  await expect(page.getByTestId("start-next-step")).toContainText("5 gezielte Fragen");
   await expect(page.locator("[data-zone=wurf]")).toContainText("TV Kandidat");
 
   // the Spiel tab right after the analysis: the sentence and the step, not an empty tab (in a
@@ -80,29 +80,16 @@ test("no goal found by the analysis: after Prüfen the result, course, goals and
     if (n < 2) await expect(page.getByText(`Frage ${n + 3} von 5`)).toBeVisible();
     else await expect(page.getByText("Frage 5 von 5")).toBeVisible();
     await page.getByRole("button", { name: who }).click();
-    // then «Von wo?» in the same question (H7): not seen here
-    await page.getByTestId("spot-unknown").click();
+    // then «Von wo?» offered in the same question (H7), skipped as an equal choice (W33)
+    await page.getByTestId("spot-skip").click();
   }
-  // one moment is still open: nothing looks final (third real-video test G1)
-  await expect(page.getByTestId("check-main-done")).toContainText("Die wichtigsten Momente sind geprüft.");
-  await expect(page.getByTestId("check-main-done")).toContainText("1 weiterer Moment könnte ein Tor sein.");
-  await expect(page.getByRole("heading", { name: "Alles geprüft." })).toHaveCount(0);
-  await expect(page.getByTestId("check-failed")).toHaveCount(0);
-  // the head says interim, the count stays (in a second browser: this one has not opened the
-  // match, so the start keeps it in its head below)
-  const third = await page.context().browser()!.newContext({ baseURL: info.project.use.baseURL, storageState: await page.context().storageState() });
-  const look = await third.newPage();
-  await look.goto(`/app/${org}/matches/${match.id}`);
-  await expect(look.getByTestId("score-note")).toHaveText("bisher bestätigt · 1 Moment offen");
-  await expect(look.getByTestId("check-link")).toContainText("1");
-  await third.close();
-  await page.reload();
-  await expect(page.getByTestId("check-main-done")).toBeVisible({ timeout: 30_000 });
-  await page.getByTestId("check-more").click();
-  // its clip holds the goal at 0:24 already confirmed: the question says so (real-video test G2)
-  await expect(page.getByText("In diesem Ausschnitt liegt das Tor von 0:24, das du schon bestätigt hast.")).toBeVisible();
-  await page.getByRole("button", { name: "Nein, dasselbe Tor" }).click();
+  // the weaker moment lies 5.6 s after the confirmed goal at 0:24: a goal already known is never
+  // asked again (A6), so the round is done; it is not counted anywhere
   await expect(page.getByRole("heading", { name: "Alles geprüft." })).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByTestId("check-failed")).toHaveCount(0);
+  const g = await (await page.request.get(`/v1/orgs/${org}/matches/${match.id}/graphics`)).json();
+  expect(g.checks).toHaveLength(0);
+  expect(g.more_checks.filter((c: { kind: string }) => c.kind === "goal")).toHaveLength(0);
 
   // the start: the result of the video in the head, the course, the goals and their scene
   await page.goto(`/app/${org}/teams/${team}/matches`);
@@ -176,7 +163,7 @@ test("a moved corner: Prüfen waits for the new analysis and asks what is open",
     })
   ).json();
   await page.goto(`/app/${org}/matches/${match.id}?tab=video`);
-  await page.getByTestId("video-file").setInputFiles(MATCH_VIDEO);
+  await chooseVideo(page, MATCH_VIDEO);
   const analysis = async () => (await (await page.request.get(`/v1/orgs/${org}/matches/${match.id}/graphics`)).json()).analysis;
   await expect.poll(analysis, { timeout: 240_000, intervals: [2000] }).toBe("ready");
 
@@ -242,7 +229,7 @@ test("the court question on a phone: the corners can be dragged with a finger", 
     })
   ).json();
   await page.goto(`/app/${org}/matches/${match.id}?tab=video`);
-  await page.getByTestId("video-file").setInputFiles(MATCH_VIDEO);
+  await chooseVideo(page, MATCH_VIDEO);
   await expect
     .poll(async () => (await (await page.request.get(`/v1/orgs/${org}/matches/${match.id}/graphics`)).json()).analysis, { timeout: 240_000, intervals: [2000] })
     .toBe("ready");

@@ -1,12 +1,20 @@
-"""E-mail port: SMTP (mailpit locally, provider in production), memory, console."""
+"""E-mail port: SMTP (mailpit locally), Azure Communication Services (production), memory,
+console."""
 
 from __future__ import annotations
 
+import base64
+import hashlib
+import hmac
+import json
 from dataclasses import dataclass, field
 from email.message import EmailMessage
-from typing import Protocol
+from email.utils import formatdate, parseaddr
+from typing import Any, Protocol
+from urllib.parse import urlsplit
 
 import aiosmtplib
+import httpx
 
 from handball_api.core.logging import get_logger
 
@@ -18,6 +26,8 @@ class Email:
     text: str
     html: str | None = None
     attachments: tuple[tuple[str, str, bytes], ...] = ()  # (filename, mime type, content)
+    # the template the mail was rendered from (logged without the text by the console backend)
+    template: str | None = None
 
 
 class EmailSender(Protocol):
@@ -49,8 +59,26 @@ class MemoryEmailSender:
 
 
 class ConsoleEmailSender:
+    """Writes mails to the log instead of sending them.
+
+    Mails carry sign-in, reset and invitation links: only in local development (`full`) does the
+    log get the whole text; anywhere else it gets the recipient's domain, the subject and the
+    template, never the address or a link (L10).
+    """
+
+    def __init__(self, full: bool = False) -> None:
+        self.full = full
+
     async def send(self, email: Email) -> None:
-        get_logger("email").info("email", to=email.to, subject=email.subject, text=email.text)
+        if self.full:
+            get_logger("email").info("email", to=email.to, subject=email.subject, text=email.text)
+            return
+        get_logger("email").info(
+            "email_not_sent",
+            to_domain=email.to.rsplit("@", 1)[-1].lower(),
+            subject=email.subject,
+            template=email.template,
+        )
 
 
 class SmtpEmailSender:
@@ -86,3 +114,78 @@ class SmtpEmailSender:
             start_tls=self.starttls,
             timeout=10,
         )
+
+
+class AcsEmailSender:
+    """Azure Communication Services Email over its REST API, signed with the resource's access
+    key (HMAC-SHA256): no SMTP user and no app registration needed. The display name of the
+    sender is set on its sender username in Azure; here only the address is sent."""
+
+    API_VERSION = "2023-03-31"
+
+    def __init__(
+        self,
+        connection_string: str,
+        sender: str,
+        transport: httpx.AsyncBaseTransport | None = None,
+    ) -> None:
+        parts = dict(
+            item.split("=", 1) for item in connection_string.strip().strip(";").split(";") if item
+        )
+        fields = {k.lower(): v for k, v in parts.items()}
+        endpoint, key = fields.get("endpoint"), fields.get("accesskey")
+        if not endpoint or not key:
+            raise ValueError("the connection string needs endpoint and accesskey")
+        self.endpoint = endpoint.rstrip("/")
+        self.key = base64.b64decode(key)
+        self.sender = parseaddr(sender)[1] or sender
+        self.transport = transport
+
+    def _body(self, email: Email) -> dict[str, Any]:
+        content: dict[str, str] = {"subject": email.subject, "plainText": email.text}
+        if email.html:
+            content["html"] = email.html
+        body: dict[str, Any] = {
+            "senderAddress": self.sender,
+            "content": content,
+            "recipients": {"to": [{"address": email.to}]},
+            "userEngagementTrackingDisabled": True,
+        }
+        if email.attachments:
+            body["attachments"] = [
+                {
+                    "name": name,
+                    "contentType": mime,
+                    "contentInBase64": base64.b64encode(data).decode(),
+                }
+                for name, mime, data in email.attachments
+            ]
+        return body
+
+    def signed_headers(self, path_and_query: str, content: bytes) -> dict[str, str]:
+        host = urlsplit(self.endpoint).netloc
+        date = formatdate(usegmt=True)
+        digest = base64.b64encode(hashlib.sha256(content).digest()).decode()
+        to_sign = f"POST\n{path_and_query}\n{date};{host};{digest}"
+        signature = base64.b64encode(
+            hmac.new(self.key, to_sign.encode(), hashlib.sha256).digest()
+        ).decode()
+        return {
+            "x-ms-date": date,
+            "x-ms-content-sha256": digest,
+            "Authorization": "HMAC-SHA256 SignedHeaders=x-ms-date;host;x-ms-content-sha256"
+            f"&Signature={signature}",
+            "Content-Type": "application/json",
+        }
+
+    async def send(self, email: Email) -> None:
+        path = f"/emails:send?api-version={self.API_VERSION}"
+        content = json.dumps(self._body(email)).encode()
+        async with httpx.AsyncClient(transport=self.transport, timeout=10) as client:
+            res = await client.post(
+                self.endpoint + path, content=content, headers=self.signed_headers(path, content)
+            )
+        if res.status_code >= 300:
+            # the provider message can echo the address: only the status goes up (try_send logs
+            # the exception type)
+            raise RuntimeError(f"Azure Communication Services answered {res.status_code}")

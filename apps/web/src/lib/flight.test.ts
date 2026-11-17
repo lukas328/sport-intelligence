@@ -54,4 +54,14 @@ describe("flight labels", () => {
     expect(L.labels[0]!.text).toBe("Halbzeit, Gleichstand");
     expect(flightLayout(seq([1, 1, -1]), 1000, 120, 60, LABELS).labels[0]!.text).not.toContain("0");
   });
+
+  it("ends the line where an incomplete sequence stops and says so (review R13)", () => {
+    const goals: ReportGoal[] = [{ minute: 10, team: "own" }, { minute: 25, team: "opp" }, { minute: 41, team: "own" }];
+    const L = flightLayout(goals, 1000, 120, 60, { ...LABELS, cut: "Torfolge bis {m}" }, 48, 0, 41);
+    const full = flightLayout(goals, 1000, 120, 60, LABELS, 48);
+    expect(L.end[0]).toBeLessThan(full.end[0] - 200);
+    expect(Math.max(...L.pts.map((p) => p[0]))).toBe(L.end[0]);
+    expect(L.labels.map((l) => l.text)).toContain("Torfolge bis 41");
+    expect(L.labels.some((l) => l.text.startsWith("Schluss"))).toBe(false);
+  });
 });

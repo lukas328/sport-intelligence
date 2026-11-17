@@ -21,7 +21,7 @@ type Job = Schemas["JobOut"];
  * the few things a coach may want: swap the order, analyse a half again, remove a file. Shown once
  * the match has more than one main file; with one file there is nothing to say.
  */
-export function PartsPanel({ orgId, match, jobs, staff, onChanged }: { orgId: string; match: Match; jobs: Job[]; staff: boolean; onChanged: () => void }) {
+export function PartsPanel({ orgId, match, jobs, staff, canDelete = staff, onChanged }: { orgId: string; match: Match; jobs: Job[]; staff: boolean; /** players upload but do not delete (K18) */ canDelete?: boolean; onChanged: () => void }) {
   const t = useTranslations("parts");
   const qc = useQueryClient();
   const confirm = useConfirm();
@@ -80,9 +80,21 @@ export function PartsPanel({ orgId, match, jobs, staff, onChanged }: { orgId: st
 
   const source = segments.data?.every((s) => s.confirmed) ? "confirmed" : segments.data?.some((s) => s.source === "metadata") ? "orderMetadata" : "orderUpload";
   const gapOf = (id: string) => segments.data?.find((s) => s.video_id === id)?.gap_before_ms ?? null;
-  if (files.length < 2 && (bounds.data ?? []).length === 0) return null;
+  // one file: its name and «Datei entfernen» for the staff, also after the analysis (second
+  // round A1); nothing else to say about one file
+  const single = files.length === 1 && canDelete ? files[0]! : null;
+  if (files.length < 2 && (bounds.data ?? []).length === 0 && !single) return null;
   return (
     <section className="space-y-3" data-testid="parts" aria-label={t("title", { n: files.length })}>
+      {single && (
+        <p className="m-0 flex flex-wrap items-center gap-x-3 gap-y-1 text-[15px] text-ink-2" data-testid="single-file">
+          <span className="min-w-0 truncate">{single.filename}</span>
+          {single.duration_s != null && <span className="tabular-nums">{t("length", { time: formatClock(single.duration_s * 1000) })}</span>}
+          <button type="button" onClick={() => void remove(single)} className={cn(linkClass, "min-h-11 cursor-pointer border-0 bg-transparent p-0 text-[15px]")} data-testid="single-remove" aria-label={`${t("removeFile")}: ${single.filename}`}>
+            {t("removeFile")}
+          </button>
+        </p>
+      )}
       {files.length > 1 && (
         <>
           <SectionHead
@@ -175,9 +187,11 @@ export function PartsPanel({ orgId, match, jobs, staff, onChanged }: { orgId: st
                           {t("up")}
                         </Button>
                       )}
-                      <Button size="sm" variant={short || st.kind === "duplicate" ? "primary" : "secondary"} onClick={() => void remove(v)} data-testid="part-remove" aria-label={`${t("remove")}: ${label(v)}`}>
-                        {t("remove")}
-                      </Button>
+                      {canDelete && (
+                        <Button size="sm" variant={short || st.kind === "duplicate" ? "primary" : "secondary"} onClick={() => void remove(v)} data-testid="part-remove" aria-label={`${t("remove")}: ${label(v)}`}>
+                          {t("remove")}
+                        </Button>
+                      )}
                     </div>
                   )}
                 </li>

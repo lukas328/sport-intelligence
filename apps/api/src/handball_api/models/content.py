@@ -60,7 +60,9 @@ class PresentationSlide(Base, EntityMixin, TenantMixin):
     )
     position: Mapped[int] = mapped_column(SmallInteger, nullable=False)
     type: Mapped[SlideType] = mapped_column(str_enum(SlideType), nullable=False)
-    clip_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("clips.id", ondelete="SET NULL"))
+    clip_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("clips.id", ondelete="SET NULL"), index=True
+    )
     play_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("plays.id", ondelete="SET NULL"))
     # {"in_ms", "out_ms", "holds": [ms], "slow": [[a, b]], "drawings": [...], "spotlight": [ids]}
     content: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False, default=dict)
@@ -187,7 +189,7 @@ class PlayerFeedItem(Base, EntityMixin, TenantMixin):
         ForeignKey("matches.id", ondelete="CASCADE"), index=True, nullable=False
     )
     clip_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("clips.id", ondelete="CASCADE"), nullable=False
+        ForeignKey("clips.id", ondelete="CASCADE"), index=True, nullable=False
     )
     rank: Mapped[int] = mapped_column(SmallInteger, nullable=False)
     reason: Mapped[str] = mapped_column(String(40), nullable=False)

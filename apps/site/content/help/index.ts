@@ -28,9 +28,9 @@ export const HELP: HelpEntry[] = [
     group: "start",
     title: { de: "Spiel richtig filmen", fr: "Bien filmer un match", en: "Filming a match" },
     summary: {
-      de: "Wo das Handy steht, wie hoch, welche Einstellungen.",
-      fr: "Où placer le téléphone, à quelle hauteur, quels réglages.",
-      en: "Where the phone goes, how high, which settings.",
+      de: "Wo Handy oder Kamera steht, wie hoch, welche Einstellungen.",
+      fr: "Où placer le téléphone ou la caméra, à quelle hauteur, quels réglages.",
+      en: "Where the phone or camera goes, how high, which settings.",
     },
     keywords: { de: "kamera handy stativ aufnahme filmen mittellinie", fr: "caméra téléphone trépied enregistrement filmer ligne médiane", en: "camera phone tripod recording filming halfway line" },
   },
@@ -104,13 +104,13 @@ export const HELP: HelpEntry[] = [
   {
     slug: "tags-und-filter",
     group: "work",
-    title: { de: "Szenen suchen", fr: "Chercher des séquences", en: "Searching scenes" },
+    title: { de: "Szenen suchen", fr: "Chercher des scènes", en: "Searching scenes" },
     summary: {
       de: "Suchen über alle Spiele, die Antwort mit Basis, Sammlungen.",
       fr: "Chercher dans tous les matchs, la réponse avec sa base, sélections.",
       en: "Search across all matches, the answer with its base, collections.",
     },
-    keywords: { de: "szenen suchen filter sammlung", fr: "séquences chercher filtre sélection", en: "scenes search filter collection" },
+    keywords: { de: "szenen suchen filter sammlung", fr: "scènes chercher filtre sélection", en: "scenes search filter collection" },
   },
   {
     slug: "praesentation",
@@ -128,7 +128,7 @@ export const HELP: HelpEntry[] = [
     slug: "deine-szenen",
     group: "work",
     listed: false,
-    title: { de: "Meine Szenen", fr: "Mes séquences", en: "My scenes" },
+    title: { de: "Meine Szenen", fr: "Mes scènes", en: "My scenes" },
     summary: {
       de: "Was Spielerinnen und Spieler sehen und wie sie kommentieren.",
       fr: "Ce que voient les joueurs et comment ils commentent.",

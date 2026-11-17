@@ -1,0 +1,20 @@
+<!doctype html>
+<!-- «Antworten statt Spulen»: «Szenen» with a search, its answer with the base (24 of 66) and the
+     button that plays them all, zoomed onto the left column. -->
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../stage.css" />
+<div id="stage"><div class="keil" style="--from: 70%; --to: 40%"></div></div>
+<script src="../stage.js"></script>
+<script>
+  S.stage(720, 520);
+  const search = S.rect("szenen", "search", [16, 257, 724, 64]);
+  const answer = S.rect("szenen", "answer", [32, 466, 828, 107]);
+  const play = S.rect("szenen", "play", [32, 584, 168, 48]);
+  const s = S.browser("szenen", [16, search[1] - 26, 864, 560], { left: 28, top: 30, width: 760 });
+  S.ring(s, [answer[0], answer[1], answer[2] * 0.6, answer[3]], 6);
+  S.ring(s, play, 5);
+  S.callout("answer", S.at(s, answer, 0.66, 0.5), S.at(s, answer, 0.6, 0.5), "r", 0);
+  const below = S.at(s, play, 0.5, 1);
+  S.callout("play", [below[0], below[1] + 46], [below[0], below[1] + 8], "bl", 0);
+  S.done();
+</script>

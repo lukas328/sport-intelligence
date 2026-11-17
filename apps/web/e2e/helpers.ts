@@ -28,9 +28,13 @@ export async function linkFromMail(page: Page, to: string, path: string): Promis
 export async function expectAccessible(page: Page) {
   // metadata (the <title>) is streamed after client-side navigations
   await expect.poll(() => page.title()).not.toBe("");
+  // judged from the top: mid-scroll, the sticky top bar covers the lines under it and axe counts
+  // them as too small targets
+  await page.evaluate(() => window.scrollTo(0, 0));
   const result = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
   expect(
-    result.violations.flatMap((v) => v.nodes.map((n) => `${v.id}: ${n.target.join(" ")} ${n.failureSummary ?? ""}`)),
+    // the element itself in the message: a selector alone rarely says which one it was
+    result.violations.flatMap((v) => v.nodes.map((n) => `${v.id}: ${n.target.join(" ")} ${n.html.slice(0, 200)} ${n.failureSummary ?? ""}`)),
   ).toEqual([]);
 }
 
@@ -45,11 +49,14 @@ export async function register(page: Page, email: string, name = "Test Trainerin
   await page.waitForURL((url) => !url.pathname.startsWith("/register"), { timeout: 30_000 });
 }
 
-/** Team area: "Team" in the main navigation, then a tab (Termine needs Teamfunktionen). */
+/** Team area: "Team" in the main navigation; Termine are in «Teamleben» (K16, needs the team
+ * setting). */
 export async function openTeam(page: Page, section?: "Team" | "Termine") {
+  if (section === "Termine") {
+    await follow(page, page.getByRole("link", { name: "Teamleben", exact: true }).first(), /\/schedule$/);
+    return;
+  }
   await follow(page, page.getByRole("link", { name: "Team", exact: true }), /\/teams\/[^/]+$/);
-  if (!section || section === "Team") return;
-  await follow(page, page.getByRole("link", { name: section, exact: true }), /\/schedule$/);
 }
 
 /** Spiele in the main navigation (the start for staff). Saison is a destination of its own;
@@ -130,4 +137,21 @@ export async function follow(page: Page, link: Locator, url: RegExp) {
     await link.click();
     await page.waitForURL(url);
   }
+}
+
+/**
+ * Chooses the video file(s) in the upload panel once React listens to the input: a file chosen
+ * before hydration is taken by the browser but never reaches the upload (slow dev server).
+ */
+export async function chooseVideo(page: Page, files: string | string[]) {
+  await chooseFile(page, "video-file", files);
+}
+
+/** Any file input of the app by its test id, once React listens to it (see chooseVideo). */
+export async function chooseFile(page: Page, testId: string, files: Parameters<Locator["setInputFiles"]>[0]) {
+  const input = page.getByTestId(testId);
+  await expect
+    .poll(() => input.evaluate((el) => Object.keys(el).some((k) => k.startsWith("__reactProps"))), { timeout: 30_000 })
+    .toBe(true);
+  await input.setInputFiles(files);
 }

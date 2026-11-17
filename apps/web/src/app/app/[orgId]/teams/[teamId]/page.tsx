@@ -7,11 +7,17 @@ import { AttnTag, linkClass, SectionHead } from "@/components/anlauf/blocks";
 import { PageHead } from "@/components/anlauf/heads";
 import { RosterEditor } from "@/components/roster/roster-editor";
 import { AreaSubNav } from "@/components/shell/section-nav";
+import { buttonClass } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
 import { serverApi } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { AccessRequests } from "@/components/official/requests";
+import { InviteDialog } from "@/components/people/invite-dialog";
+import { TeamLifeCard } from "@/components/settings/team-life";
+import { coachRights } from "@/lib/roles";
 import { ConsentCopy } from "./consent-copy";
 import { TwoFactorTask } from "./two-factor-task";
+import { MarkKeepers } from "@/components/roster/mark-keepers";
 
 type Entry = Schemas["RosterEntryOut"];
 
@@ -22,8 +28,6 @@ const GROUPS = [
   ["wingPivot", ["LA", "RA", "KM"]],
 ] as const;
 const ORDER = ["TW", "RL", "RM", "RR", "LA", "RA", "KM"];
-// who sits on the bench: everyone in the team who is not a player or a guest
-const BENCH = ["coach", "analyst", "goalkeeper_coach", "athletic_coach", "team_manager"];
 
 /**
  * Team (SPEC 7.10): the title says the state of the squad, three groups by position with the
@@ -42,19 +46,20 @@ export default async function TeamPage({ params, searchParams }: { params: Promi
   const { edit } = await searchParams;
   const client = await serverApi();
   const path = { params: { path: { org_id: orgId, team_id: teamId } } };
-  const [team, org, official, members] = await Promise.all([
+  const [team, org, official] = await Promise.all([
     client.GET("/v1/orgs/{org_id}/teams/{team_id}", path),
     client.GET("/v1/orgs/{org_id}", { params: { path: { org_id: orgId } } }),
     client.GET("/v1/orgs/{org_id}/teams/{team_id}/official", path),
-    client.GET("/v1/orgs/{org_id}/teams/{team_id}/members", path),
   ]);
   if (!team.data || !org.data) notFound();
   const t = await getTranslations("teamPage");
   const tr = await getTranslations();
   const format = await getFormatter();
   const season = team.data.current_season;
-  const canEdit = org.data.my_role === "org_admin" || team.data.my_role === "coach";
-  const staff = canEdit || ["analyst", "team_manager", "goalkeeper_coach", "athletic_coach"].includes(team.data.my_role ?? "");
+  // Trainer and Co-Trainer edit the squad and see the side (K18)
+  const canEdit = coachRights(org.data.my_role, team.data.my_role);
+  const staff = canEdit;
+  const isAdmin = org.data.my_role === "org_admin";
   const base = `/app/${orgId}/teams/${teamId}`;
   if (!season) return null;
 
@@ -84,10 +89,13 @@ export default async function TeamPage({ params, searchParams }: { params: Promi
   }
 
   const seasonPath = { params: { path: { org_id: orgId, team_id: teamId, season_id: season.id } } };
-  const [roster, stats, matchList] = await Promise.all([
+  const [roster, stats, matchList, members] = await Promise.all([
     client.GET("/v1/orgs/{org_id}/teams/{team_id}/seasons/{season_id}/roster", seasonPath),
     client.GET("/v1/orgs/{org_id}/teams/{team_id}/seasons/{season_id}/stats", seasonPath),
     client.GET("/v1/orgs/{org_id}/teams/{team_id}/matches", path),
+    // the staff list feeds only the side, which players do not get; they may not read it, so it
+    // is not asked for (a 403 on every visit otherwise)
+    staff ? client.GET("/v1/orgs/{org_id}/teams/{team_id}/members", path) : Promise.resolve({ data: [] as Schemas["TeamMemberOut"][] }),
   ]);
   // before the first video nothing is missing yet (UX test H04): consents matter once scenes
   // are shared, numbers once scenes are named
@@ -119,7 +127,8 @@ export default async function TeamPage({ params, searchParams }: { params: Promi
   ].filter((g) => g.rows.length > 0);
   // without positions there are no position groups: one list, «Ohne Position» is no shortcoming
   const onlyOther = groups.length === 1 && groups[0]!.key === "other";
-  const bench = (members.data ?? []).filter((m) => BENCH.includes(m.role));
+  const bench = (members.data ?? []).filter((m) => m.person_role === "trainer" || m.person_role === "co_trainer");
+  const shellTeam = { id: teamId, name: team.data.name, team_features: team.data.settings.team_features ?? false };
 
   return (
     <div>
@@ -137,6 +146,27 @@ export default async function TeamPage({ params, searchParams }: { params: Promi
       />
       <div className={cn("grid gap-x-8 gap-y-12", staff ? "lg:grid-cols-[minmax(0,1fr)_300px] xl:grid-cols-[minmax(0,1fr)_340px]" : "")}>
         <div className="grid gap-x-8 gap-y-8 md:grid-cols-3">
+          {/* an empty squad: what it is for and the one way to fill it (K8) */}
+          {entries.length === 0 && (
+            <section className="max-w-[60ch] space-y-4 md:col-span-3" data-testid="roster-empty">
+              <p className="m-0 text-[17px]">{canEdit ? t("emptyText") : t("emptyTextPlayer")}</p>
+              {canEdit && (
+                <Link href={`${base}?edit=1`} className={buttonClass("primary")}>
+                  {t("emptyAction")}
+                </Link>
+              )}
+            </section>
+          )}
+          {/* what the squad is for, said once (review R37) */}
+          {canEdit && entries.length > 0 && (
+            <p className="m-0 max-w-[70ch] text-[15px] text-ink-2 md:col-span-3" data-testid="roster-why">
+              {t("why")}
+            </p>
+          )}
+          {/* the keepers, one tap each; open while nobody is keeper, else one line (review R37) */}
+          {canEdit && entries.length > 0 && (
+            <MarkKeepers orgId={orgId} teamId={teamId} players={[...entries].sort((a, b) => (a.jersey_number ?? 100) - (b.jersey_number ?? 100))} />
+          )}
           {groups.map((g) => (
             <section key={g.key} aria-labelledby={`group-${g.key}`} className={cn(g.key === "other" && "md:col-span-3")}>
               <h2 id={`group-${g.key}`} className="font-slant mb-3 flex items-baseline gap-2.5 border-b border-rule pb-3 text-xl">
@@ -183,6 +213,8 @@ export default async function TeamPage({ params, searchParams }: { params: Promi
         {staff && (
           <aside className="space-y-12">
             <TwoFactorTask orgId={orgId} />
+            {/* a second coach who chose this team on handball.ch waits here for the admins (K17) */}
+            {isAdmin && <AccessRequests orgId={orgId} teams={[{ id: teamId, name: team.data.name }]} teamId={teamId} />}
             <section aria-labelledby="consents">
               <SectionHead as="h2" title={<span id="consents">{t("consents")}</span>} />
               {firstVideo ? (
@@ -209,19 +241,21 @@ export default async function TeamPage({ params, searchParams }: { params: Promi
                   {bench.map((m) => (
                     <li key={m.user_id} className="flex min-h-12 items-center justify-between gap-3 border-b border-rule text-[17px] font-medium">
                       {m.name}
-                      <span className="text-[15px] font-normal text-ink-2">{tr(`roles.${m.role}`)}</span>
+                      <span className="text-[15px] font-normal text-ink-2">{tr(`personRoles.${m.person_role ?? "co_trainer"}`)}</span>
                     </li>
                   ))}
                 </ul>
               )}
-              {org.data.my_role === "org_admin" && (
-                <p className="mt-3">
-                  <Link href={`/app/${orgId}/settings#people`} className={linkClass}>
-                    {t("invite")}
-                  </Link>
-                </p>
-              )}
+              {/* inviting right here (K17): the roles say what each person sees */}
+              <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2">
+                <InviteDialog orgId={orgId} team={shellTeam} isAdmin={isAdmin} label={t("invite")} />
+                <Link href={`/app/${orgId}/club/teams#people`} className={linkClass}>
+                  {t("allPeople")}
+                </Link>
+              </div>
             </section>
+            {/* Teamleben where the coach looks for it (K16) */}
+            <TeamLifeCard orgId={orgId} teamId={teamId} teamName={team.data.name} initial={shellTeam.team_features} />
           </aside>
         )}
       </div>

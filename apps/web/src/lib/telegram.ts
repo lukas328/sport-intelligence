@@ -35,6 +35,11 @@ export function scoreSequence(points: ScorePoint[], periodS: number, periods = 2
   return out;
 }
 
+/** A player the short report can name: a name in the roster or a number. */
+function known(p: { player_id: string | null; number: number | null }, names: Record<string, string>): boolean {
+  return Boolean(p.player_id && names[p.player_id]?.trim()) || p.number != null;
+}
+
 /** The surname of a full name, or the number. */
 export function shortName(name: string | undefined, number: number | null): string {
   if (name?.trim()) return name.trim().split(/\s+/).at(-1)!;
@@ -53,7 +58,8 @@ interface ScorerRow {
  * as a fraction (UX test N25). */
 export function topScorers(players: ScorerRow[], names: Record<string, string>, n = 3, seven: (k: number) => string = (k) => `/${k}`): string[] {
   return players
-    .filter((p) => p.side === "own" && p.goals > 0)
+    // a scorer without name and number would read «? 5» (review R22): left out
+    .filter((p) => p.side === "own" && p.goals > 0 && known(p, names))
     .sort((a, b) => b.goals - a.goals || (a.number ?? 99) - (b.number ?? 99))
     .slice(0, n)
     .map((p) => `${shortName(p.player_id ? names[p.player_id] : undefined, p.number)} ${p.goals}${p.seven_m_goals ? seven(p.seven_m_goals) : ""}`);
@@ -66,10 +72,20 @@ interface KeeperRow {
   saves: number;
 }
 
+/** Our goalkeepers with saves, the most first: a keeper by roster name or by number, never the
+ * saves without a named keeper (app review R2: the telegram said «16 Paraden» of one keeper where
+ * the figure counted the team's 20) and never a keeper nobody knows, no «Im Tor: ?» (review R22).
+ * Pass the own keepers (lib/keepers). */
+export function keeperSaves(keepers: KeeperRow[], names: Record<string, string>): { name: string; saves: number }[] {
+  return keepers
+    .filter((x) => x.side === "own" && x.saves > 0 && known(x, names))
+    .sort((a, b) => b.saves - a.saves)
+    .map((k) => ({ name: shortName(k.player_id ? names[k.player_id] : undefined, k.number), saves: k.saves }));
+}
+
 /** Our keeper with the most saves, or null when no save was recorded. */
 export function mainKeeper(keepers: KeeperRow[], names: Record<string, string>): { name: string; saves: number } | null {
-  const k = keepers.filter((x) => x.side === "own" && x.saves > 0).sort((a, b) => b.saves - a.saves)[0];
-  return k ? { name: shortName(k.player_id ? names[k.player_id] : undefined, k.number), saves: k.saves } : null;
+  return keeperSaves(keepers, names)[0] ?? null;
 }
 
 /** Where most events of the match come from: the report, the coach's marks, or the video. */

@@ -29,18 +29,34 @@ centre lives at `{site}/{de|fr|en}/hilfe/{slug}/`; the app links there with `HB_
   `src/components/figures.tsx` (labels come from the MDX file).
 - Search engines and AI assistants: `docs/site/SEO.md`. Titles and descriptions per page in
   `messages.seo`, structured data in `src/lib/schema.ts`, `/llms.txt` and `/llms-full.txt` from
-  `src/lib/llms.ts`, the facts page from `messages.facts`. `PRICES_FINAL` in `src/lib/site.ts` keeps
-  prices out of structured data until the plan table is final.
+  `src/lib/llms.ts`, the facts page from `messages.facts`. `PRICES_FINAL` in `src/lib/site.ts` puts
+  the prices into structured data. The site describes the product as it will be at release, with
+  no «noch nicht», «vorgesehen» or «geschätzt» (BEFUNDE-2 W32); only the legal drafts say they
+  are drafts.
 - Help articles: `content/help/{locale}/{slug}.mdx`, index with titles, summaries and search keywords in
   `content/help/index.ts`. Every article exists in all three languages (tested).
 - Blog: `content/blog`, legal drafts: `content/legal` (marked as not yet legally reviewed, Q-ADD-5).
 - Texts of the pages: `src/messages/{de,fr,en}.ts` (same keys and placeholders, tested).
 - Prices: `@handball/plans` (`packages/plans/plans.json`), generated from the API plan table with
   `make plans`; CI fails when it is out of date.
-- Demo match: `public/demo/match.json`, a fictional match from `scripts/make_demo.py` (seeded random
-  events, statistics from `handball_metrics`); regenerate with `make plans`. `src/lib/demo.ts` turns it
-  into what the pages draw (zones, invented runs, the three things, one scene without a ball); the
-  page says «Erfundenes Spiel» at the top. The visitor's colour comes in with `?kit=red` (no storage).
+- Demo match: `public/demo/match.json`, a fictional match from `scripts/make_demo.py` (a fixed plan,
+  lost 16:18 with 9 of 18 goals conceded over the right wing, and seeded random shots, times and
+  numbers; statistics from `handball_metrics`); regenerate with `make plans`. `src/lib/demo.ts` turns it
+  into what the pages draw (zones, invented runs, the three things, one scene on the tactics camera);
+  the page says «Erfundenes Spiel» at the top. Everything invented is handball-typical: shot spots
+  and runs stay outside the goal area, the scene has a 6:0 defence in front of 6 m, the attack
+  around 9 m, only the goalkeeper in the goal area, and the ball in every frame (tested in
+  `src/lib/demo.test.ts`). The visitor's colour comes in with `?kit=red` (no storage).
+- Product pictures: `public/product/*.webp` (1x and @2x), made by `scripts/product-shots` from the
+  local app with the seeded demo club: `pnpm --filter @handball/site shots` (how:
+  `scripts/product-shots/README.md`); sizes and callouts in `src/lib/product-shots.json`, the
+  callout texts in `src/messages/*.ts` (`product`).
+- Start page: one invented week with the demo match (BEFUNDE-2 W5, W22): hero with the team field
+  and the answer from the app, Saturday 7 pm (lost, only a feeling), Saturday 10 pm (the three
+  things), one goal on the tactics camera, film/upload/check, Tuesday (four scenes in the team
+  chat), three matches later (3 of 22, `src/lib/story.ts`), the video in the club, price, start.
+  The pieces are in `src/components/story.tsx`. Blocks marked `data-reveal` glide in once
+  (`src/components/reveal.tsx`); with `prefers-reduced-motion` nothing moves.
 - Help guides outside the core have `listed: false` in `content/help/index.ts`: reachable for the app's
   links, not listed, not in the sitemap, `noindex`.
 

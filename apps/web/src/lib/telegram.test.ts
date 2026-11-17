@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { halfScore, mainKeeper, mainSource, scoreSequence, shortName, topScorers } from "./telegram";
+import { halfScore, keeperSaves, mainKeeper, mainSource, scoreSequence, shortName, topScorers } from "./telegram";
 
 const pts = [
   { clock_s: 0, own: 0, opp: 0 },
@@ -34,6 +34,26 @@ describe("telegram", () => {
     expect(topScorers(players, { a: "Lea Brunner", b: "Mia Graf" }, 3, (k) => ` (${k} vom 7-m)`)).toEqual(["Brunner 7", "Graf 5 (2 vom 7-m)"]);
     expect(mainKeeper([{ side: "own", player_id: "k", number: 1, saves: 11 }], { k: "Nora Meier" })).toEqual({ name: "Meier", saves: 11 });
     expect(mainKeeper([{ side: "own", player_id: "k", number: 1, saves: 0 }], {})).toBeNull();
+    // every keeper with saves, never the saves without a named keeper (R2), never a keeper
+    // nobody knows: a person without a roster name and without a number (R22)
+    const rows = [
+      { side: "own" as const, player_id: "k", number: 1, saves: 16 },
+      { side: "own" as const, player_id: null, number: 16, saves: 3 },
+      { side: "own" as const, player_id: null, number: null, saves: 1 },
+      { side: "own" as const, player_id: "gone", number: null, saves: 2 },
+      { side: "opponent" as const, player_id: null, number: 12, saves: 9 },
+    ];
+    expect(keeperSaves(rows, { k: "Nora Meier" })).toEqual([
+      { name: "Meier", saves: 16 },
+      { name: "#16", saves: 3 },
+    ]);
+    // nobody known: no «Im Tor: ?», no «? 4» (review R22)
+    expect(mainKeeper([{ side: "own", player_id: null, number: null, saves: 9 }], {})).toBeNull();
+    expect(mainKeeper([{ side: "own", player_id: null, number: 12, saves: 9 }], {})).toEqual({ name: "#12", saves: 9 });
+    // the keeper with the most saves unknown: the next known keeper is named
+    expect(mainKeeper([{ side: "own", player_id: "x", number: null, saves: 9 }, { side: "own", player_id: null, number: 12, saves: 4 }], {})).toEqual({ name: "#12", saves: 4 });
+    expect(topScorers([{ side: "own", player_id: null, number: null, goals: 4, seven_m_goals: 0 }], {})).toEqual([]);
+    expect(topScorers([{ side: "own", player_id: "p", number: null, goals: 4, seven_m_goals: 0 }], { p: "Lea Brunner" })).toEqual(["Brunner 4"]);
   });
 
   it("says where the figures come from", () => {

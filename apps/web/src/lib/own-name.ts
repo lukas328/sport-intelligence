@@ -17,3 +17,23 @@ export function headName(name: string): string {
     .trim()
     .replace(/([/-])(?=\S)/g, "$1\u200b");
 }
+
+const fold = (s: string) =>
+  s
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+
+/**
+ * The club's name in the frame only when it says more than the team's (finding K7): \u00abTV Thalwil\u00bb
+ * and the team \u00abTV Thalwil\u00bb show the name once; a team \u00abTV Thalwil 2\u00bb already carries the club.
+ * Null: leave the club's name out (the crest and the team stay).
+ */
+export function clubNameShown(club: string, team: string | null | undefined): string | null {
+  const c = fold(club);
+  const t = fold(team ?? "");
+  if (!t || !c) return club;
+  return ` ${t} `.includes(` ${c} `) ? null : club;
+}

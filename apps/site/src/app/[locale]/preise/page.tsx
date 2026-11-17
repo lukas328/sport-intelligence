@@ -38,7 +38,6 @@ export default async function Pricing({ params }: Props) {
         )}
       />
       <PageHead kick={t.title} title={t.head} lead={fmt(t.lead, { month: team.price_chf_month, year: team.price_chf_year })} figure={team.price_chf_month} figureLabel={t.figureLabel}>
-        <p className="mt-6 inline-block bg-attn px-3 py-1.5 text-[1.0625rem] font-semibold text-ink">{t.draft}</p>
       </PageHead>
       <div className="wrap">
         <div className="mt-12 border-t-2 border-ink">

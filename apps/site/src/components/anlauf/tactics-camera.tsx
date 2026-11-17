@@ -2,55 +2,24 @@
 
 import { type CSSProperties, type ReactNode, useEffect, useRef, useState } from "react";
 import { CourtLines } from "./court";
+import { ballAt, PASS_MAX_S } from "./ball";
+import type { CameraScene, SceneTrack } from "./camera-types";
 import { inView, pathOf, type Pt, sampleAt, trailOf, VIEWS, type ViewName } from "./geometry";
 
 const NS = { vectorEffect: "non-scaling-stroke" } as const;
 const INK_DARK = "#0a0d11";
+/** the referee: a neutral grey diamond */
+export const REF = "#9a9890";
+/** a thin cream edge, so own dots in a dark club colour stand out on the ink court */
+const OWN_EDGE = "rgb(236 234 229 / .8)";
 const PLAY_MS = 6000;
 const CYCLE_MS = 7600;
 
-/** One tracked person of a scene, in court metres (40 x 20). */
-export interface SceneTrack {
-  team: "own" | "opp" | "ref";
-  /** shirt number, only where it was read */
-  number?: number | null;
-  xy: readonly Pt[];
-}
-
-/** A stretch where the ball was found in the picture and the analysis knows who holds it. */
-export interface BallStretch {
-  /** seconds from the scene start */
-  from: number;
-  to: number;
-  team: "own" | "opp";
-  number: number;
-}
-
-export interface CameraScene {
-  /** match clock at the scene start, seconds */
-  clock: number;
-  /** length in seconds */
-  duration: number;
-  tracks: readonly SceneTrack[];
-  /** empty: the ball was not found in this scene; nothing is drawn for it */
-  ball: readonly BallStretch[];
-  scorer?: { team: "own" | "opp"; number: number } | null;
-  shot?: Pt | null;
-  aim?: Pt | null;
-  /** the scorer's way: solid when confirmed, dashed when estimated */
-  confirmed: boolean;
-  /** label at the shot spot, e.g. "Tor Thalwil 39:55" */
-  label?: string | null;
-}
+export type { BallStretch, CameraScene, SceneTrack } from "./camera-types";
 
 export function clockAt(scene: Pick<CameraScene, "clock" | "duration">, t: number): string {
   const s = scene.clock + Math.min(scene.duration, Math.floor(t * scene.duration));
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
-}
-
-function holderAt(scene: CameraScene, t: number): BallStretch | null {
-  const sec = t * scene.duration;
-  return scene.ball.find((b) => sec >= b.from && sec <= b.to) ?? null;
 }
 
 /** One frame of the tactics camera at t (0 to 1). */
@@ -82,16 +51,15 @@ export function CameraFrame({ scene, view, width, dot = 12, t, labels = false }:
     });
   };
   const players = scene.tracks.filter((x) => x.team !== "ref");
-  const hold = holderAt(scene, t);
-  // the ball only at the player who holds it, and only while it was found in the picture
-  const holder = hold ? players.find((x) => x.team === hold.team && x.number === hold.number) : undefined;
-  const ballAt: Pt | null = holder ? f(sampleAt(holder.xy, t)) : null;
+  // the ball at the player who holds it (or on a pass), and only while it was found in the picture
+  const ballRaw = ballAt(scene, t);
+  const ballPt: Pt | null = ballRaw ? f(ballRaw) : null;
   const done = t >= 1;
   const tf = V.turn ? "matrix(0 1 1 0 0 0)" : undefined;
   return (
     <>
       <g transform={tf}>
-        <CourtLines floor="var(--court)" area="rgb(255 255 255 / .06)" line="rgb(226 236 244 / .5)" width={1.3} />
+        <CourtLines floor="var(--court)" area="rgb(236 234 229 / .06)" line="rgb(236 234 229 / .5)" width={1.3} />
       </g>
       {players.filter((x) => x.team === "opp").flatMap((x, i) => trail(x, "var(--opp-cam-trail)", `o${i}`))}
       {players.filter((x) => x.team === "own").flatMap((x, i) => trail(x, "var(--club-cam)", `u${i}`))}
@@ -105,7 +73,7 @@ export function CameraFrame({ scene, view, width, dot = 12, t, labels = false }:
         .filter((x) => x.team === "ref")
         .map((x, i) => {
           const p = f(sampleAt(x.xy, t));
-          return <rect key={`ref${i}`} x={p[0] - r * 0.5} y={p[1] - r * 0.5} width={r} height={r} fill="#8d97a1" transform={`rotate(45 ${p[0]} ${p[1]})`} />;
+          return <rect key={`ref${i}`} x={p[0] - r * 0.5} y={p[1] - r * 0.5} width={r} height={r} fill={REF} transform={`rotate(45 ${p[0]} ${p[1]})`} />;
         })}
       {[...players.filter((x) => x.team === "opp"), ...players.filter((x) => x.team === "own")].map((x, i) => {
         const us = x.team === "own";
@@ -113,7 +81,7 @@ export function CameraFrame({ scene, view, width, dot = 12, t, labels = false }:
         return (
           <g key={`p${i}`}>
             {us ? (
-              <circle cx={e[0]} cy={e[1]} r={r} fill="var(--club-cam)" stroke={INK_DARK} strokeWidth={1.4} {...NS} />
+              <circle cx={e[0]} cy={e[1]} r={r} fill="var(--club-cam)" stroke={OWN_EDGE} strokeWidth={1.4} {...NS} />
             ) : (
               <circle cx={e[0]} cy={e[1]} r={r * 0.92} fill="var(--opp-cam)" stroke="var(--opp-cam-edge)" strokeWidth={2.2} {...NS} />
             )}
@@ -131,7 +99,7 @@ export function CameraFrame({ scene, view, width, dot = 12, t, labels = false }:
           </g>
         );
       })}
-      {ballAt && <Ball at={ballAt} r={r} />}
+      {ballPt && <Ball at={ballPt} r={r} />}
       {done && labels && scene.shot && scene.label && (
         <g>
           <rect x={f(scene.shot)[0] + r * 2.4} y={f(scene.shot)[1] - 11 / kk} width={(scene.label.length * 7.4 + 16) / kk} height={22 / kk} fill={INK_DARK} />
@@ -144,7 +112,7 @@ export function CameraFrame({ scene, view, width, dot = 12, t, labels = false }:
   );
 }
 
-/** The ball at the player who holds it: white with a seam, upper right of the dot. Never a flight. */
+/** The ball at the player who holds it: white with a seam, upper right of the dot. */
 function Ball({ at, r }: { at: Pt; r: number }) {
   const bx = at[0] + r * 0.95;
   const by = at[1] - r * 0.95;
@@ -171,6 +139,8 @@ export interface CameraText {
   noBall: string;
   caption?: string | null;
   captionSmall?: string | null;
+  /** a heading over the ball line, saying what its numbers are */
+  ballLine?: string;
 }
 
 /**
@@ -247,15 +217,15 @@ export function TacticsCamera({
           <CameraFrame scene={scene} view={view} width={width} dot={dot} t={t} labels={showLabels} />
         </svg>
         {text.caption && (
-          <figcaption className="max-sm:static max-sm:max-w-none max-sm:border-t max-sm:border-[#2a3440] absolute top-4 right-4 max-w-[70%] bg-[rgb(10_13_17/0.9)] px-3 py-2 text-base font-bold text-[#eef2f5]">
+          <figcaption className="max-sm:static max-sm:max-w-none max-sm:border-t max-sm:border-[#33353a] absolute top-4 right-4 max-w-[70%] bg-[rgb(14_15_17/0.92)] px-3 py-2 text-base font-bold text-[#f2f0eb]">
             {text.caption}
-            {text.captionSmall && <small className="mt-0.5 block font-mono text-sm font-medium text-[#c7ced5]">{text.captionSmall}</small>}
+            {text.captionSmall && <small className="mt-0.5 block font-mono text-sm font-medium text-court-text">{text.captionSmall}</small>}
           </figcaption>
         )}
         <div className="flex flex-wrap items-center gap-2.5 bg-court-bar px-3 py-2 font-mono text-base font-semibold text-court-text">
           <button
             type="button"
-            className="min-h-12 min-w-12 cursor-pointer border-2 border-[#c7ced5] bg-court-bar px-4 font-sans text-base font-bold text-white"
+            className="min-h-12 min-w-12 cursor-pointer border-2 border-court-text bg-court-bar px-4 font-sans text-base font-bold text-white"
             aria-pressed={paused}
             onClick={() => setPaused((p) => !p)}
           >
@@ -267,15 +237,20 @@ export function TacticsCamera({
           </span>
         </div>
       </div>
-      {ballLine && <BallLine scene={scene} t={t} notFound={text.notFound} noBall={text.noBall} />}
+      {ballLine && (
+        <>
+          {text.ballLine && <p className="mt-3 text-base font-semibold text-ink-2">{text.ballLine}</p>}
+          <BallLine scene={scene} t={t} notFound={text.notFound} noBall={text.noBall} />
+        </>
+      )}
     </figure>
   );
 }
 
 /** Who held the ball, only where it was found; the gaps say so. */
 export function BallLine({ scene, t = 1, notFound, noBall }: { scene: Pick<CameraScene, "ball" | "duration">; t?: number; notFound: string; noBall: string }) {
-  const gap = (flex: number, key: string, word: boolean) => (
-    <span
+  const gap = (flex: number, key: string, word: boolean, pass = false) => (
+    pass ? <span key={key} style={{ flex }} /> : <span
       key={key}
       className="grid place-items-center text-base font-semibold text-ink-2"
       style={{ flex, background: "repeating-linear-gradient(-60deg, transparent 0 5px, color-mix(in srgb, var(--ink) 14%, transparent) 5px 6px)" }}
@@ -294,7 +269,8 @@ export function BallLine({ scene, t = 1, notFound, noBall }: { scene: Pick<Camer
   const parts = [];
   let at = 0;
   for (const [i, b] of scene.ball.entries()) {
-    if (b.from > at) parts.push(gap(b.from - at, `g${i}`, b.from - at >= 1.5));
+    // a short gap between two holders is a pass, not a stretch where the ball was lost
+    if (b.from > at) parts.push(gap(b.from - at, `g${i}`, b.from - at >= 1.5, i > 0 && b.from - at <= PASS_MAX_S));
     parts.push(
       <span
         key={`s${i}`}

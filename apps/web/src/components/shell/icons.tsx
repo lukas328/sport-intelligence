@@ -88,10 +88,9 @@ export const IconAsk = (p: P) => (
 );
 
 export const DEST_ICON: Record<Dest, (p: P) => React.JSX.Element> = {
-  today: IconOverview,
+  life: IconDates,
   matches: IconMatches,
   team: IconTeam,
   season: IconSeason,
   scenes: IconScenes,
-  dates: IconDates,
 };

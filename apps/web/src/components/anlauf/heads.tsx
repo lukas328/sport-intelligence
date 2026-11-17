@@ -83,6 +83,11 @@ export function OppChip({ className }: { className?: string }) {
   return <i aria-hidden className={cn("inline-block size-3 bg-opp align-[-1px] shadow-[0_0_0_1.5px_var(--club-ink)]", className)} />;
 }
 
+/** The same square in our shirt colour of the match (K22: both teams have one). */
+export function OwnChip({ color, className }: { color: string; className?: string }) {
+  return <i aria-hidden className={cn("inline-block size-3 align-[-1px] shadow-[0_0_0_1.5px_var(--club-ink)]", className)} style={{ background: color }} />;
+}
+
 /**
  * Wurf: the result head of the start and of the tab Spiel. Club colour, lower edge slanted,
  * slanted title, the result large, the run of the match as a line underneath.
@@ -102,9 +107,17 @@ export function WurfHead({
   pending,
   span,
   scoreNote,
+  ownColor,
+  scoreless = false,
+  titleText,
+  goalsUntil,
 }: {
   kick?: ReactNode;
   title: ReactNode;
+  /** the headline as plain text when `title` is markup: its length sets the size */
+  titleText?: string;
+  /** the goal sequence stops early at this minute (goals missing after it) */
+  goalsUntil?: number | null;
   own: number | null;
   opp: number | null;
   ownName: string;
@@ -121,16 +134,28 @@ export function WurfHead({
   span?: readonly [number, number] | null;
   /** a word under the result when it is not the match's own («Tore im Video») */
   scoreNote?: ReactNode;
+  /** our shirt colour in this match: a square before our name like the opponent's */
+  ownColor?: string | null;
+  /** the data is loaded: without a result no empty place is kept for one (it only avoids a jump
+   * while loading) */
+  scoreless?: boolean;
 }) {
   const from = span ? span[0] : 0;
   const length = span ? span[1] : 60;
+  const line = Boolean(goals && goals.length > 0);
+  // a long headline («Als Nächstes: SG Horgen/Wädenswil 1.») a size smaller, so it keeps whole
+  // words and two or three lines (review R9)
+  const long = (typeof title === "string" ? title : titleText ?? "").length > 32;
   return (
     <header
       data-zone="wurf"
       className={cn(
-        "relative grid grid-cols-1 px-4 pt-5 [clip-path:polygon(0_0,100%_0,100%_88%,0_100%)] md:grid-cols-[minmax(0,1fr)_minmax(0,560px)] md:gap-6 md:px-8 md:pt-9 md:[clip-path:polygon(0_0,100%_0,100%_80%,0_100%)]",
-        // without a goal sequence there is no line: the slant follows right under title and score
-        goals && goals.length > 0 ? "min-h-[400px] md:h-[410px]" : "pb-14 md:pb-20",
+        // the slanted edge rises by a fixed height, not a share: a taller head (long headline)
+        // keeps the line of the match clear of it
+        "relative grid grid-cols-1 px-4 pt-5 [clip-path:polygon(0_0,100%_0,100%_calc(100%-48px),0_100%)] md:grid-cols-[minmax(0,1fr)_minmax(0,40%)] md:gap-x-6 md:px-8 md:pt-9 md:[clip-path:polygon(0_0,100%_0,100%_calc(100%-82px),0_100%)] lg:grid-cols-[minmax(0,1fr)_minmax(0,560px)]",
+        // without a goal sequence there is no line: the slant follows right under title and score.
+        // With it the line takes the last row: under a long headline, never through it (review R9)
+        line ? "min-h-[400px] md:min-h-[410px] md:grid-rows-[auto_1fr]" : "pb-14 md:pb-20",
         waiting ? "bg-transparent text-ink shadow-[inset_0_0_0_2px_var(--ink)]" : "bg-club text-club-ink shadow-[inset_0_0_0_2px_var(--club-edge)]",
       )}
     >
@@ -138,12 +163,12 @@ export function WurfHead({
       <div className="relative z-10 min-w-0">
         {kick && <p className="mb-2 text-[15px] font-semibold md:mb-3.5 md:text-[15px]">{kick}</p>}
         {/* long club names («SG Wädenswil/Horgen») wrap instead of running out (UX test N11) */}
-        <h1 className="text-[32px] leading-[.96] [overflow-wrap:break-word] md:text-[58px]">{title}</h1>
+        <h1 className={cn("leading-[.96] [overflow-wrap:break-word]", long ? "text-[28px] md:text-[40px] lg:text-[52px]" : "text-[32px] md:text-[48px] lg:text-[58px]")}>{title}</h1>
         {meta && <div className="mt-[18px] text-sm font-semibold">{meta}</div>}
         {children}
       </div>
       <div className="flex min-w-0 flex-col">
-        <Score own={own} opp={opp} pending={pending} phoneLeft className="mt-[18px] text-[100px] md:mt-1 md:text-right md:text-[196px]" />
+        {!(scoreless && (own == null || opp == null) && !pending) && <Score own={own} opp={opp} pending={pending} phoneLeft className="mt-[18px] text-[100px] md:mt-1 md:text-right md:text-[128px] lg:text-[196px]" />}
         {scoreNote && (
           // on a wide screen above the score: under it the drawn course covered it (real-video
           // test, second round, 1280 px)
@@ -152,19 +177,19 @@ export function WurfHead({
           </p>
         )}
         <p className="font-slant mt-2 flex flex-wrap gap-[18px] text-[15px] md:order-first md:mt-0 md:mb-3.5 md:justify-end md:gap-7 md:text-[15px]">
-          <span>{ownName}</span>
+          <span>
+            {ownColor && <OwnChip color={ownColor} className="mr-2" />}
+            {ownName}
+          </span>
           <span>
             <OppChip className="mr-2" />
             {oppName}
           </span>
         </p>
-        {goals && goals.length > 0 && <Flight goals={goals} width={390} height={90} from={from} length={length} className="-mx-4 mt-3 mb-14 w-[calc(100%+2rem)] md:hidden" />}
+        {goals && goals.length > 0 && <Flight goals={goals} width={390} height={90} from={from} length={length} until={goalsUntil} className="-mx-4 mt-3 mb-14 w-[calc(100%+2rem)] md:hidden" />}
       </div>
       {goals && goals.length > 0 && (
-        <>
-          <Flight goals={goals} width={1000} height={120} labels={span ? undefined : flightLabels} from={from} length={length} slant={48} className="pointer-events-none absolute right-0 bottom-[30px] left-0 hidden w-full md:block" />
-
-        </>
+        <Flight goals={goals} width={1000} height={120} labels={span ? undefined : flightLabels} from={from} length={length} until={goalsUntil} slant={48} className="pointer-events-none -mx-8 mb-[30px] hidden w-[calc(100%+4rem)] self-end md:col-span-2 md:block" />
       )}
     </header>
   );

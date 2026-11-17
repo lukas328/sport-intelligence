@@ -16,7 +16,8 @@ export function FederationView({ id, initial }: { id: string; initial: Schemas["
   const format = useFormatter();
   const qc = useQueryClient();
   const [email, setEmail] = useState("");
-  const [sent, setSent] = useState<string | null>(null);
+  const [sent, setSent] = useState<{ email: string; link: string | null } | null>(null);
+  const [copied, setCopied] = useState(false);
   const [error, setError] = useState<ErrorKey | null>(null);
   const path = { federation_id: id };
   const data = useQuery({
@@ -28,9 +29,12 @@ export function FederationView({ id, initial }: { id: string; initial: Schemas["
     mutationFn: async () => {
       const r = await api.POST("/v1/federations/{federation_id}/invites", { params: { path }, body: { email } });
       if (r.error) throw r.error;
+      return r.data;
     },
-    onSuccess: () => {
-      setSent(email);
+    onSuccess: (r) => {
+      // no mail went out (L2): the federation passes the link on itself
+      setSent({ email: r.email, link: r.mailed ? null : r.link });
+      setCopied(false);
       setEmail("");
       setError(null);
       void qc.invalidateQueries({ queryKey: ["federation", id] });
@@ -67,7 +71,22 @@ export function FederationView({ id, initial }: { id: string; initial: Schemas["
           </label>
           <Button type="submit" disabled={invite.isPending}>{t("send")}</Button>
         </form>
-        {sent && <p className="text-sm text-ok">{t("sent", { email: sent })}</p>}
+        {sent && !sent.link && <p className="text-sm text-ok">{t("sent", { email: sent.email })}</p>}
+        {sent?.link && (
+          <div className="space-y-2" data-testid="federation-invite-link">
+            <p className="text-sm">{t("linkOnly", { email: sent.email })}</p>
+            <div className="flex flex-wrap gap-2">
+              <input readOnly value={sent.link} onFocus={(e) => e.currentTarget.select()} aria-label={t("linkLabel")} className="min-h-10 min-w-0 flex-1 bg-raised px-3 font-mono text-xs ring-1 ring-inset ring-border" />
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => void navigator.clipboard?.writeText(sent.link!).then(() => setCopied(true), () => setCopied(false))}
+              >
+                {copied ? t("copied") : t("copy")}
+              </Button>
+            </div>
+          </div>
+        )}
         {error && <Alert>{tr(`errors.${error}`)}</Alert>}
       </Card>
       <section aria-labelledby="members">

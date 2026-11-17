@@ -5,7 +5,7 @@ import { useFormatter, useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { AttnTag } from "@/components/anlauf/blocks";
 import { Breakable, Strip, WurfHead } from "@/components/anlauf/heads";
-import { openMoments, reportGoals, videoScore, type MatchGraphics } from "@/lib/graphics";
+import { openMoments, reportCut, reportGoals, videoScore, type MatchGraphics } from "@/lib/graphics";
 
 type Match = Schemas["MatchOut"];
 
@@ -22,7 +22,9 @@ export function MatchHead({ match, ownName, oppName, view, graphics, children }:
   const title = match.opponent ? `${match.is_home ? ownName : oppName} ${tm("vs")} ${match.is_home ? oppName : ownName}` : `${tm("training")}: ${ownName}`;
   const when = format.dateTime(kickoff, { weekday: "long", day: "numeric", month: "long" });
   const half = match.halftime_own != null && match.halftime_opponent != null ? `${tm("halftime")} ${match.halftime_own}:${match.halftime_opponent}` : null;
-  const kick = [when, match.competition, match.venue].filter(Boolean).join(" · ");
+  // a video of the opponent against another team says so first (K3)
+  const watched = match.kind === "scouting" ? t("scoutingTag") : null;
+  const kick = [watched, when, match.competition, match.venue].filter(Boolean).join(" · ");
   const scoreText = match.score_own != null && match.score_opponent != null ? t("scoreLabel", { own: match.score_own, opp: match.score_opponent }) : null;
   // before the game the head shows when it starts instead of an empty result (UX test B42)
   const upcoming = match.score_own == null && kickoff.getTime() > Date.now();
@@ -40,7 +42,7 @@ export function MatchHead({ match, ownName, oppName, view, graphics, children }:
   // with goal moments still open the score is an interim one (third real-video test G1)
   const moments = graphics ? openMoments(graphics) : 0;
   const note = fromVideo ? (moments > 0 ? t("scoreSoFar", { n: moments }) : t("scoreFromVideo")) : undefined;
-  const colourOpen = !match.opponent_colors?.color && match.opponent ? <AttnTag className="ml-2">{t("colourOpen")}</AttnTag> : null;
+  const colourOpen = !match.opponent_colors?.color && match.opponent && match.source !== "demo" ? <AttnTag className="ml-2">{t("colourOpen")}</AttnTag> : null;
   return (
     <div className="bleed-x -mt-6 lg:-mt-8">
       {scoreText && (
@@ -52,6 +54,7 @@ export function MatchHead({ match, ownName, oppName, view, graphics, children }:
         <WurfHead
           kick={kick}
           title={<Breakable text={title} />}
+          titleText={title}
           own={own}
           opp={opp}
           pending={pending}
@@ -59,8 +62,11 @@ export function MatchHead({ match, ownName, oppName, view, graphics, children }:
           scoreNote={note}
           ownName={ownName}
           oppName={oppName}
+          ownColor={match.kit_own}
+          scoreless={graphics != null}
           goals={graphics ? reportGoals(graphics) : null}
-          flightLabels={{ half: t("halftime", { v: "{v}" }), end: t("end", { v: "{v}" }), halfLevel: t("halftimeLevel"), endLevel: t("endLevel") }}
+          goalsUntil={graphics ? reportCut(graphics, match.score_own, match.score_opponent, (match.period_s * match.periods) / 60) : null}
+          flightLabels={{ half: t("halftime", { v: "{v}" }), end: t("end", { v: "{v}" }), halfLevel: t("halftimeLevel"), endLevel: t("endLevel"), cut: t("flightCut", { m: "{m}" }) }}
           meta={
             <>
               {half}
@@ -78,7 +84,7 @@ export function MatchHead({ match, ownName, oppName, view, graphics, children }:
               {match.opponent && <span className="sr-only">{` ${ta("vsShort")} ${oppName}`}</span>}
             </h1>
           }
-          sub={[match.opponent ? `${ta("vsShort")} ${oppName}` : null, when, match.venue, note].filter(Boolean).join(" · ")}
+          sub={[watched, match.opponent ? `${ta("vsShort")} ${oppName}` : null, when, match.venue, note].filter(Boolean).join(" · ")}
           own={own}
           opp={opp}
           pending={pending}

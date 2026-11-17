@@ -2,23 +2,31 @@
 
 from __future__ import annotations
 
+import asyncio
 import uuid
 from dataclasses import dataclass
 from typing import Any
 
-from sqlalchemy import delete, func, select
+from sqlalchemy import ColumnElement, delete, func, select
+from sqlalchemy.exc import DBAPIError
 
 from handball_api.core.colors import kit_warnings
+from handball_api.core.db import transaction_conflict
 from handball_api.core.errors import ProblemError
+from handball_api.core.logging import get_logger
+from handball_api.core.storage import ObjectStorage
+from handball_api.integrations.handball_ch import opponent_key
 from handball_api.models import (
     Event,
     Match,
+    MatchAttachment,
     MatchSegment,
     Opponent,
     OpponentPlayer,
     Organization,
     ProcessingJob,
     Season,
+    StatsCache,
     VideoAsset,
 )
 from handball_api.models.enums import MatchFormatKey, VideoRole, VideoStatus
@@ -41,8 +49,23 @@ from handball_api.services.context import Ctx
 from handball_api.services.orgs import current_seasons, get_team
 from handball_api.services.policies import Action, authorize, is_staff_somewhere, visible_team_ids
 
+log = get_logger("handball_api.matches")
+
 # where events come from when a match report brought them (handball.ch, a paper report)
 REPORT_SOURCES = ("official_feed", "paper_report", "official_report")
+
+
+# the example match of «Demo-Spiel ansehen» (services/support.demo_match): it shows what the
+# analysis does, but it is no match of the team. It stays out of every list, pick list, figure
+# and statistic of the team (app review R1); only its own page and the demo button lead to it.
+# Seeded matches with a synthetic video are `is_demo` too, but they are the demo club's matches
+# and count like any other: `source` tells the example apart.
+DEMO_SOURCE = "demo"
+
+
+def counted() -> ColumnElement[bool]:
+    """Matches that belong to the team's season: every match but the example match."""
+    return Match.source != DEMO_SOURCE
 
 
 DUPLICATE = "same-file:"  # error of a file that is already in the match: "same-file:<video id>"
@@ -93,15 +116,22 @@ def video_out(v: VideoAsset, part: Part | None = None, half: int | None = None) 
 
 def _require_staff(ctx: Ctx) -> None:
     if not is_staff_somewhere(ctx.require_actor()):
-        raise ProblemError(
-            403, "forbidden", "Only coaches, analysts, team managers and admins manage opponents"
-        )
+        raise ProblemError(403, "forbidden", "Only members of a team manage opponents")
 
 
 async def list_opponents(ctx: Ctx) -> list[Opponent]:
     if visible_team_ids(ctx.require_actor()) == set():
         raise ProblemError(403, "forbidden", "No team access")
-    return list((await ctx.db.scalars(select(Opponent).order_by(Opponent.name))).all())
+    # the example match's opponent («Demo HC Beispiel») is no opponent of the club (R1)
+    example_only = (
+        select(Match.id)
+        .where(Match.opponent_id == Opponent.id, Match.source == DEMO_SOURCE)
+        .exists()
+        & ~select(Match.id).where(Match.opponent_id == Opponent.id, counted()).exists()
+    )
+    return list(
+        (await ctx.db.scalars(select(Opponent).where(~example_only).order_by(Opponent.name))).all()
+    )
 
 
 async def _opponent(ctx: Ctx, opponent_id: uuid.UUID) -> Opponent:
@@ -155,8 +185,16 @@ async def put_opponent_players(
 
 async def create_opponent(ctx: Ctx, data: OpponentCreate) -> Opponent:
     _require_staff(ctx)
-    existing = await ctx.db.scalar(
-        select(Opponent).where(func.lower(Opponent.name) == data.name.lower())
+    # the same opponent under another spelling is the same opponent (review R7)
+    key = opponent_key(data.name)
+    known = (await ctx.db.scalars(select(Opponent).order_by(Opponent.created_at))).all()
+    existing = next(
+        (
+            o
+            for o in known
+            if (opponent_key(o.name) == key if key else o.name.lower() == data.name.lower())
+        ),
+        None,
     )
     if existing:
         return existing
@@ -205,8 +243,9 @@ async def create_match(ctx: Ctx, team_id: uuid.UUID, data: MatchCreate) -> Match
         data.kit_opponent if "kit_opponent" in data.model_fields_set else None
     )
     values["opponent_kit"] = said if opp else None
-    # our own shirts: the club's colour unless the form said another (real-video test E09)
-    if "kit_own" not in data.model_fields_set:
+    # our own shirts: the club's colour unless the form said another (real-video test E09); in a
+    # scouting match the own side is the other team, whose colour nobody knows by default
+    if "kit_own" not in data.model_fields_set and data.kind != "scouting":
         org = await ctx.db.get(Organization, team.organization_id)
         if org is not None and org.primary_color:
             values["kit_own"] = org.primary_color
@@ -237,7 +276,7 @@ async def create_match(ctx: Ctx, team_id: uuid.UUID, data: MatchCreate) -> Match
 
 
 async def list_matches(
-    ctx: Ctx, team_id: uuid.UUID, season_id: uuid.UUID | None = None
+    ctx: Ctx, team_id: uuid.UUID, season_id: uuid.UUID | None = None, scouting: bool = False
 ) -> list[MatchSummary]:
     await get_team(ctx, team_id, Action.MATCH_READ)
     # a report is there once its events are (UX test A02: «Spielbericht hinzufügen» only without)
@@ -251,12 +290,14 @@ async def list_matches(
         select(Match, Opponent.name, Opponent.primary_color, func.count(VideoAsset.id), report)
         .outerjoin(Opponent, Opponent.id == Match.opponent_id)
         .outerjoin(VideoAsset, VideoAsset.match_id == Match.id)
-        .where(Match.team_id == team_id)
+        .where(Match.team_id == team_id, counted())
         .group_by(Match.id, Opponent.name, Opponent.primary_color)
         .order_by(Match.kickoff_at.desc())
     )
     if season_id:
         q = q.where(Match.season_id == season_id)
+    if not scouting:
+        q = q.where(Match.kind != "scouting")
     rows = (await ctx.db.execute(q)).all()
     return [
         MatchSummary(
@@ -274,6 +315,7 @@ async def list_matches(
             has_video=count > 0,
             opponent_color=m.opponent_kit or remembered,
             has_report=bool(has_report),
+            scouting_other=m.scouting_other,
         )
         for m, name, remembered, count, has_report in rows
     ]
@@ -677,6 +719,7 @@ async def match_out(ctx: Ctx, match: Match) -> MatchOut:
         report_extra=match.report_extra,
         videos=[video_out(v, parts.get(v.id), half.get(v.id)) for v in videos],
         jobs=[JobOut.model_validate(j) for j in jobs],
+        scouting_other=match.scouting_other,
     )
 
 
@@ -701,6 +744,8 @@ def _format(key: MatchFormatKey, period_s: int | None, periods: int | None) -> t
 async def update_match(ctx: Ctx, match_id: uuid.UUID, data: MatchUpdate) -> Match:
     match = await get_match(ctx, match_id, Action.MATCH_WRITE)
     changes = data.model_dump(exclude_unset=True)
+    if "scouting_other" in changes and (match.kind != "scouting" or not changes["scouting_other"]):
+        raise ProblemError(422, "validation", "Only a scouting match names the other team")
     fmt_keys = {"format", "period_s", "periods"}
     if fmt_keys & changes.keys():
         key = changes.get("format") or MatchFormatKey.CUSTOM
@@ -730,24 +775,85 @@ async def update_match(ctx: Ctx, match_id: uuid.UUID, data: MatchUpdate) -> Matc
     return match
 
 
-async def delete_match(ctx: Ctx, match_id: uuid.UUID) -> None:
-    """Deletes the match with all videos, derived files and data (BRIEF 12, deletion)."""
-    match = await get_match(ctx, match_id, Action.MATCH_WRITE)
+@dataclass
+class MatchFiles:
+    """The stored files of a deleted match, removed after its rows are gone (`remove`)."""
+
+    storage: ObjectStorage
+    buckets: tuple[str, ...]
+    prefix: str
+    uploads: list[tuple[str, str, str]]  # bucket, key, upload id of uploads still open
+
+    async def remove(self) -> int:
+        """Aborts open uploads and removes every object below the match's prefix. Runs after
+        the response: a big match has thousands of video segments, which took long enough to
+        hold a request (and its database transaction) open for a long time. A failure is logged
+        with the prefix to remove by hand; the rows are gone either way."""
+        removed = 0
+        try:
+            for bucket, key, upload_id in self.uploads:
+                await self.storage.abort_multipart(bucket, key, upload_id)
+            for bucket in self.buckets:
+                removed += await self.storage.delete_prefix(bucket, self.prefix)
+        except Exception:
+            log.exception("match_files_left", prefix=self.prefix, removed=removed)
+            return removed
+        log.info("match_files_removed", prefix=self.prefix, removed=removed)
+        return removed
+
+
+DELETE_ATTEMPTS = 3  # a deadlock with a view writing at the same moment: tried again
+
+
+async def delete_match(ctx: Ctx, match_id: uuid.UUID) -> MatchFiles:
+    """Deletes the match with all videos, derived data (BRIEF 12, deletion) in one short
+    transaction; the files go afterwards with the returned `MatchFiles.remove`. The rows go
+    by the database's ON DELETE CASCADE in one statement."""
+    match = await get_match(ctx, match_id, Action.MATCH_DELETE)
     videos = (await ctx.db.scalars(select(VideoAsset).where(VideoAsset.match_id == match.id))).all()
-    for v in videos:
-        if v.upload_id and v.status == "uploading":
-            await ctx.storage.abort_multipart(
-                ctx.settings.s3_bucket_videos, v.storage_key, v.upload_id
+    bucket = ctx.settings.s3_bucket_videos
+    uploads = [
+        (bucket, v.storage_key, v.upload_id)
+        for v in videos
+        if v.upload_id and v.status == "uploading"
+    ]
+    # an attachment still uploading has parts only (stored files go with the prefix)
+    uploads += [
+        (bucket, a.storage_key, str(a.upload_id))
+        for a in (
+            await ctx.db.scalars(
+                select(MatchAttachment).where(
+                    MatchAttachment.match_id == match.id, MatchAttachment.upload_id.is_not(None)
+                )
             )
-    prefix = f"{match.organization_id}/{match.id}/"
-    removed = 0
-    for bucket in (ctx.settings.s3_bucket_videos, ctx.settings.s3_bucket_artifacts):
-        removed += await ctx.storage.delete_prefix(bucket, prefix)
-    await ctx.db.delete(match)
+        ).all()
+    ]
+    files = MatchFiles(
+        storage=ctx.storage,
+        buckets=(ctx.settings.s3_bucket_videos, ctx.settings.s3_bucket_artifacts),
+        prefix=f"{match.organization_id}/{match.id}/",
+        uploads=uploads,
+    )
+    # the cached statistics of the match (scope_id is no foreign key, so no cascade), then the
+    # match with everything below it. Views of the match may write while this runs: a deadlock
+    # with one of them (40P01) rolls back only the savepoint, and the delete runs again.
+    for attempt in range(DELETE_ATTEMPTS):
+        try:
+            async with ctx.db.begin_nested():
+                await ctx.db.execute(delete(StatsCache).where(StatsCache.scope_id == match.id))
+                await ctx.db.delete(match)
+                await ctx.db.flush()
+            break
+        except DBAPIError as exc:
+            if attempt == DELETE_ATTEMPTS - 1 or not transaction_conflict(exc):
+                raise
+            log.info("match_delete_retry", match_id=str(match_id), attempt=attempt + 1)
+            await asyncio.sleep(0.05 * (attempt + 1))
     await audit.record(
         ctx,
         "match.deleted",
         target_type="match",
         target_id=match_id,
-        data={"objects_removed": removed, "videos": len(videos)},
+        data={"videos": len(videos), "files_prefix": files.prefix},
     )
+    return files

@@ -47,7 +47,14 @@ from handball_api.models import (
     Team,
     User,
 )
-from handball_api.models.enums import MatchFormatKey, MatchStatus, OrgRole, TeamGender, TeamRole
+from handball_api.models.enums import (
+    MatchFormatKey,
+    MatchStatus,
+    OrgRole,
+    Position,
+    TeamGender,
+    TeamRole,
+)
 from handball_api.schemas.official import AccessApproveIn, ClaimIn, SuggestionAcceptIn
 from handball_api.schemas.orgs import OrgCreate
 from handball_api.services import (
@@ -59,6 +66,7 @@ from handball_api.services import (
     training,
 )
 from handball_api.services import orgs as org_service
+from handball_api.services import roster as roster_service
 from handball_api.services.context import Ctx
 from handball_api.services.policies import Action, Actor, authorize, can
 
@@ -72,6 +80,10 @@ SYNC_EVERY = timedelta(hours=20)
 SYNC_BATCH = 20
 REPORT_AFTER = timedelta(minutes=90)  # a game is over and the log complete
 REPORT_WINDOW = timedelta(days=7)
+# the reports of the season's earlier games (a team taken over in mid-season, a game whose report
+# was only offered): imported by the tick too, so the scorers of every report count everywhere
+# (app review R3); a game without a log by then is asked this often and then left alone
+REPORT_BACKFILL_TRIES = 3
 REPORT_BATCH = 20
 # a game without a game log yet: asked again after an hour, then after ever longer waits
 REPORT_RETRY = timedelta(hours=1)
@@ -218,8 +230,13 @@ async def _request_access(
             org_id,
             list(admins),
             "access_request",
-            {"request_id": str(req.id)},
-            f"/app/{org_id}/settings/access-requests",
+            # who asks for which team: the admins decide on the Team page (K17)
+            {
+                "request_id": str(req.id),
+                "name": user.name,
+                "team": (await ctx.db.get(Team, team_id)).name if team_id else "",  # type: ignore[union-attr]
+            },
+            f"/app/{org_id}/teams/{team_id}" if team_id else f"/app/{org_id}/club/federation",
         )
         await audit.record(
             ctx,
@@ -455,8 +472,19 @@ def _scores(m: Match, g: ch.OfficialGame, home: bool) -> bool:
     return True
 
 
+async def _opponents(ctx: Ctx, org_id: uuid.UUID) -> dict[str, Opponent]:
+    """The club's opponents by name key: «X 1» and «X (M2)» are one opponent (review R7). Of two
+    rows with the same key (made before the key existed) the oldest stays the one used."""
+    rows = await ctx.db.scalars(
+        select(Opponent)
+        .where(Opponent.organization_id == org_id)
+        .order_by(Opponent.created_at.desc())
+    )
+    return {ch.opponent_key(o.name): o for o in rows.all()}
+
+
 async def _opponent(ctx: Ctx, org_id: uuid.UUID, name: str, cache: dict[str, Opponent]) -> Opponent:
-    key = ch.fold(name)
+    key = ch.opponent_key(name)
     if key not in cache:
         opp = Opponent(organization_id=org_id, name=name[:120] or "?")
         ctx.db.add(opp)
@@ -473,6 +501,10 @@ async def _new_match(
         key, period_s, periods = match_formats.resolve(MatchFormatKey(team.default_format or ""))
     except ValueError:  # no or a custom default: the template of the age group
         key, period_s, periods = match_formats.resolve(match_formats.default_for(team.is_youth))
+    # our shirts: the club's colour, as for a match made by hand (review R16: synced matches
+    # showed the default blue at the upload of a club in green)
+    org = await ctx.db.get(Organization, team.organization_id)
+    kit = {"kit_own": org.primary_color} if org is not None and org.primary_color else {}
     m = Match(
         organization_id=team.organization_id,
         team_id=team.id,
@@ -489,6 +521,7 @@ async def _new_match(
         periods=periods,
         official_provider=PROVIDER,
         official_game_id=int(payload["game_id"]),
+        **kit,
     )
     ctx.db.add(m)
     await ctx.db.flush()
@@ -688,14 +721,7 @@ async def sync_team(ctx: Ctx, team: Team, *, initial: bool = False) -> dict[str,
                 )
             ).all()
         }
-        opponents = {
-            ch.fold(o.name): o
-            for o in (
-                await ctx.db.scalars(
-                    select(Opponent).where(Opponent.organization_id == team.organization_id)
-                )
-            ).all()
-        }
+        opponents = await _opponents(ctx, team.organization_id)
         now = _now()
         held = await _held_back(ctx, team, season, games, existing, now) if initial else set()
         held_new = 0
@@ -922,10 +948,14 @@ async def add_from_suggestion(
 ) -> Player:
     p = s.payload
     season = await _team_season(ctx, team)
+    raw = p.get("stats")
+    stats: dict[str, Any] = raw if isinstance(raw, dict) else {}
     player = Player(
         organization_id=team.organization_id,
         first_name=str(p.get("first_name") or "?")[:80],
         last_name=str(p.get("last_name") or "?")[:80],
+        # a goalkeeper in the federation's statistics is the roster's goalkeeper (R4)
+        main_position=Position.TW if stats.get("goalkeeper") else None,
     )
     ctx.db.add(player)
     await ctx.db.flush()
@@ -942,6 +972,8 @@ async def add_from_suggestion(
         )
     )
     await ctx.db.flush()
+    # the reports read before the player was in the roster count for the player now (R3)
+    await roster_service.link_numbers(ctx, season.id, team.id)
     return player
 
 
@@ -1007,13 +1039,15 @@ async def accept(
             if number is None:
                 raise ProblemError(409, "jersey-number-taken", "The number is taken")
             entry.jersey_number = number
+        await ctx.db.flush()
+        await roster_service.link_numbers(ctx, entry.season_id, entry.team_id)
         out["player_id"] = entry.player_id
     elif s.kind in ("match_new", "match_moved", "report"):
         if s.kind == "match_new":
             season = await _team_season(ctx, team)
             # official games count toward the plan's matches per season (402 plan-limit-matches)
             await billing.check_new_match(ctx, team.organization_id, team.id, season.id)
-            m = await _new_match(ctx, team, season, p, {})
+            m = await _new_match(ctx, team, season, p, await _opponents(ctx, team.organization_id))
             await _played_match(ctx, team, m, p)
         else:
             found = await ctx.db.get(Match, uuid.UUID(str(p["match_id"])))
@@ -1236,8 +1270,10 @@ async def _sync_due_team(ctx: Ctx, team: Team) -> int:
     return new
 
 
-async def _import_due_report(ctx: Ctx, m: Match) -> None:
+async def _import_due_report(ctx: Ctx, m: Match, now: datetime) -> None:
     await import_report(ctx, m)
+    if m.kickoff_at < now - REPORT_WINDOW:
+        return  # an earlier game filled in: no note for each of them in the bell (R5)
     await training.notify(
         ctx,
         m.organization_id,
@@ -1288,7 +1324,8 @@ async def run_due(ctx: Ctx, now: datetime | None = None) -> dict[str, int]:
                     Match.official_game_id.is_not(None),
                     Match.official_report_at.is_(None),
                     Match.kickoff_at < now - REPORT_AFTER,
-                    Match.kickoff_at > now - REPORT_WINDOW,
+                    (Match.kickoff_at > now - REPORT_WINDOW)
+                    | (Match.official_report_tries < REPORT_BACKFILL_TRIES),
                     Match.official_report_retry_at.is_(None)
                     | (Match.official_report_retry_at <= now),
                 )
@@ -1328,7 +1365,7 @@ async def run_due(ctx: Ctx, now: datetime | None = None) -> dict[str, int]:
                     m = await ctx.db.get(Match, match_id)
                     if m is None:
                         continue
-                    await _import_due_report(ctx, m)
+                    await _import_due_report(ctx, m, now)
                 out["reports"] += 1
             except ProblemError as exc:
                 if _upstream_down(exc):

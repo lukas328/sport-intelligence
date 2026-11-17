@@ -14,6 +14,7 @@ can mark the court instead of seeing an error.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import shutil
 import tempfile
@@ -29,6 +30,7 @@ from handball_jobkit import TRANSFER, JobSettings, Reporter, s3_client, upload_d
 from handball_vision import __version__ as vision_version
 from handball_vision import formation, goalcandidates, hallmatch, scoreboard
 from handball_vision import observe as learned
+from handball_vision.ballnet import BallNet
 from handball_vision.calibration import (
     Calibration,
     CalibrationError,
@@ -72,6 +74,116 @@ def load_detector(settings: JobSettings) -> YoloxDetector | None:
     return YoloxDetector(path, threads=settings.detector_threads or None)
 
 
+def _entries(value: str) -> list[str]:
+    return [v.strip() for v in value.split(",") if v.strip()]
+
+
+def _sha256(path: Path) -> str:
+    h = hashlib.sha256()
+    with path.open("rb") as f:
+        for block in iter(lambda: f.read(1 << 20), b""):
+            h.update(block)
+    return h.hexdigest()
+
+
+def resolve_models(
+    value: str, sha256: str, settings: JobSettings, s3: Any = None
+) -> tuple[list[Path], str]:
+    """Local files for a model setting (comma-separated local paths or artifacts-bucket keys,
+    their SHA-256 in the same order) and a status: "off" (not set), "ok", "missing" (no such
+    file or bucket key), "sha_mismatch", "sha_missing" (a bucket key without its checksum).
+    Bucket keys are fetched once into `ball_cache_dir` (the model cache; a cached file is reused
+    after its checksum matched); local paths are checked against their checksum when one is
+    given."""
+    names = _entries(value)
+    if not names:
+        return [], "off"
+    shas = _entries(sha256)
+    cache = Path(settings.ball_cache_dir)
+    paths: list[Path] = []
+    for k, name in enumerate(names):
+        sha = shas[k].lower() if k < len(shas) else ""
+        local = Path(name)
+        if not local.is_file():
+            if s3 is None:
+                return [], "missing"
+            if not sha:
+                return [], "sha_missing"
+            local = cache / f"{sha[:12]}-{Path(name).name}"
+            if not local.is_file():
+                cache.mkdir(parents=True, exist_ok=True)
+                part = local.with_suffix(".part")
+                try:
+                    s3.download_file(settings.s3_bucket_artifacts, name, str(part), Config=TRANSFER)
+                except Exception as exc:  # no such key or storage error: the old path runs
+                    log.warning("model_download_failed", key=name, error=str(exc))
+                    part.unlink(missing_ok=True)
+                    return [], "missing"
+                if _sha256(part) != sha:
+                    part.unlink(missing_ok=True)
+                    return [], "sha_mismatch"
+                part.rename(local)
+        if sha and _sha256(local) != sha:
+            return [], "sha_mismatch"
+        paths.append(local)
+    return paths, "ok"
+
+
+def resolve_ball_models(settings: JobSettings, s3: Any = None) -> tuple[list[Path], str]:
+    """`resolve_models` for `HB_BALL_MODEL` / `HB_BALL_MODEL_SHA256`."""
+    return resolve_models(settings.ball_model, settings.ball_model_sha256, settings, s3)
+
+
+def _has_cuda() -> bool:
+    import onnxruntime as ort
+
+    return "CUDAExecutionProvider" in ort.get_available_providers()
+
+
+def _cpu_gate(settings: JobSettings, video_s: float | None) -> str | None:
+    """Why a GPU-only model may not run here, or None: "no_gpu" without CUDA unless
+    `ball_allow_cpu`; "too_long_for_cpu" on a CPU for a video longer than `ball_max_minutes`
+    (or of unknown length)."""
+    if _has_cuda():
+        return None
+    if not settings.ball_allow_cpu:
+        return "no_gpu"
+    if video_s is None or video_s > 60 * settings.ball_max_minutes:
+        return "too_long_for_cpu"
+    return None
+
+
+def load_ball_net(
+    settings: JobSettings, s3: Any = None, video_s: float | None = None
+) -> tuple[BallNet | None, str]:
+    """The 3-frame ball net(s) of `HB_BALL_MODEL` and the status of `resolve_ball_models`; None
+    (the YOLOX ball path stays) unless all files are there with the right checksum and ONNX
+    Runtime can use CUDA (`_cpu_gate`: on a CPU only with `ball_allow_cpu` and a short video).
+    Test phase:
+    the nets contain DeepSport data, see ballnet.py."""
+    paths, status = resolve_ball_models(settings, s3)
+    if status != "ok":
+        if status != "off":
+            log.warning("ball_model_unavailable", status=status, model=settings.ball_model)
+        return None, status
+    gate = _cpu_gate(settings, video_s)
+    if gate is not None:
+        log.warning("ball_model_needs_gpu", model=settings.ball_model, status=gate)
+        return None, gate
+    return (
+        BallNet(paths, threads=settings.detector_threads or None, width=settings.ball_width),
+        status,
+    )
+
+
+def _ball_version(obs: learned.Observations, settings: JobSettings) -> str:
+    """Which ball path the result used: the ball net files' names, or the YOLOX boxes."""
+    if not getattr(obs, "ball_cands", None):
+        return "yolox"
+    names = [Path(p).stem for p in _entries(settings.ball_model)]
+    return "+".join(names) or "ballnet"
+
+
 def load_number_reader(settings: JobSettings) -> NumberReader | None:
     det, rec = Path(settings.number_det_model), Path(settings.number_rec_model)
     if not (det.is_file() and rec.is_file()):
@@ -79,20 +191,64 @@ def load_number_reader(settings: JobSettings) -> NumberReader | None:
     return NumberReader(det, rec, threads=settings.detector_threads or None)
 
 
-def load_role_classifier(settings: JobSettings) -> RoleClassifier | None:
-    """Player / goalkeeper / referee from appearance, when the model is installed (ml/roles)."""
-    path = Path(settings.role_model)
-    return (
-        RoleClassifier(path, threads=settings.detector_threads or None) if path.is_file() else None
-    )
+def load_role_classifier(
+    settings: JobSettings, s3: Any = None
+) -> tuple[RoleClassifier | None, str]:
+    """Player / goalkeeper / referee from appearance (ml/roles), when `HB_ROLE_MODEL` is a local
+    file or a bucket key with its checksum (`HB_ROLE_MODEL_SHA256`); and the status of
+    `resolve_models` ("missing" for the image default without the file is the normal case)."""
+    paths, status = resolve_models(settings.role_model, settings.role_model_sha256, settings, s3)
+    if status != "ok":
+        return None, status
+    return RoleClassifier(paths[0], threads=settings.detector_threads or None), status
 
 
-def load_embedder(settings: JobSettings) -> Embedder | None:
-    path = Path(settings.reid_model)
-    return Embedder(path, threads=settings.detector_threads or None) if path.is_file() else None
+def load_embedder(
+    settings: JobSettings, s3: Any = None, video_s: float | None = None
+) -> tuple[Embedder | None, str]:
+    """Person re-identification (`HB_REID_MODEL`, local file or bucket key with
+    `HB_REID_MODEL_SHA256`) and the status of `resolve_models`. TEST PHASE: the FastReID weights
+    were trained on MSMT17 (non-commercial research only, ml/models/reid-fastreid.md, Q-ML-5);
+    not for a real go-live."""
+    paths, status = resolve_models(settings.reid_model, settings.reid_model_sha256, settings, s3)
+    if status != "ok":
+        return None, status
+    gate = _cpu_gate(settings, video_s)
+    if gate is not None:
+        log.warning("reid_model_needs_gpu", model=settings.reid_model, status=gate)
+        return None, gate
+    return Embedder(paths[0], threads=settings.detector_threads or None), status
 
 
 CHUNK_MS = 30_000
+
+
+def write_ball_path(result: AnalysisResult, out: Path) -> int:
+    """The ball net's path as `ball.bin` (little-endian float32 rows t_ms, x, y in proxy frame
+    pixels, confidence); the number of rows (0: no ball net path, no file)."""
+    rows = result.ball_rows
+    if rows is None or not len(rows):
+        return 0
+    (out / "ball.bin").write_bytes(np.asarray(rows, "<f4").tobytes())
+    return len(rows)
+
+
+def ball_summary(
+    ball_status: str, ball_rows: int, frames: int, play: dict[str, Any] | None
+) -> dict[str, Any]:
+    """Short ball figures for the job log and the stats, to judge a test run without reading
+    `ball.bin`: the model status, the share of frames with a ball point and how much of the video
+    the match clock counted as play (None without clock readings)."""
+    in_play = None
+    if play and play.get("intervals_ms"):
+        in_play = sum(b - a for a, b in play["intervals_ms"]) / 1000
+    return {
+        "ball_model_status": ball_status,
+        "ball_path_points": ball_rows,
+        "ball_path_coverage": round(ball_rows / frames, 3) if frames else None,
+        "clock_play_s": round(in_play, 1) if in_play is not None else None,
+        "clock_readings": (play or {}).get("clock_readings"),
+    }
 
 
 def write_chunks(result: AnalysisResult, out: Path) -> int:
@@ -232,7 +388,11 @@ def run_analysis(
         )
         if learned_result is not None:
             return learned_result
-        # the detector saw (almost) nobody, e.g. unusual footage: the classical path decides
+        # the detector saw (almost) nobody, e.g. unusual footage: the classical path decides;
+        # the API is told, so Prüfen asks nothing and says why (services/checks)
+        few_people = True
+    else:
+        few_people = False
     Path(settings.work_dir).mkdir(parents=True, exist_ok=True)
     work = Path(tempfile.mkdtemp(prefix=f"analysis-{asset_id}-", dir=settings.work_dir))
     started = time.perf_counter()
@@ -288,6 +448,10 @@ def run_analysis(
                 **view,
                 "needs_calibration": True,
                 "calibration_error": str(exc),
+                "calibration_info": {
+                    "reason": "few_people" if few_people else getattr(exc, "reason", "court")
+                },
+                "detector_few_people": few_people,
                 "calibration": None,
                 "tracks": [],
                 "fps": fps,
@@ -330,6 +494,7 @@ def run_analysis(
             "formations": detect_formations(result),
             "events": events_payload(result, side_hint),
             "scoreboard": None,
+            "detector_few_people": few_people,
         }
         rep.succeed(payload)
         log.info(
@@ -450,11 +615,14 @@ def _cached_observations(
         return None
 
 
-def goal_candidates(obs: learned.Observations) -> dict[str, Any] | None:
+def goal_candidates(
+    obs: learned.Observations, play: dict[str, Any] | None = None
+) -> dict[str, Any] | None:
     """Moments that are probably goals, from the camera motion and the people of the observation
-    pass (no court needed): the coach confirms or rejects each. Never fails the analysis."""
+    pass (no court needed; the match clock, if read, marks the warm-up): the coach confirms or
+    rejects each. Never fails the analysis."""
     try:
-        return goalcandidates.from_observations(obs)
+        return goalcandidates.from_observations(obs, play=play_intervals(play))
     except Exception as exc:  # pragma: no cover - defensive
         log.warning("goal_candidates_failed", error=str(exc))
         return None
@@ -570,6 +738,8 @@ def _run_learned(
             else None
         )
         rep.stage("observe")
+        # "cached": a re-run on stored observations (their ball candidates, if any, are reused)
+        ball_status = reid_status = role_status = "cached"
         if obs is None:
             video = work / "proxy.mp4"
             s3.download_file(bucket, proxy_key, str(video), Config=TRANSFER)
@@ -584,6 +754,10 @@ def _run_learned(
             reader = _overlay_reader(spread, fps, total / fps if fps else 0.0)
             del spread
             numbers = load_number_reader(settings)
+            video_s = total / fps if fps and total else None
+            ball_net, ball_status = load_ball_net(settings, s3, video_s)
+            embedder, reid_status = load_embedder(settings, s3, video_s)
+            roles, role_status = load_role_classifier(settings, s3)
             # no overlay: the hall's own scoreboard, when the camera shows it (raw recordings)
             board = (
                 HallBoardReader(
@@ -604,10 +778,15 @@ def _run_learned(
                 on_frame=reader.add if reader else (board.add if board else None),
                 numbers=numbers,
                 number_every=max(1, settings.number_every),
-                embedder=load_embedder(settings),
+                number_gate=settings.number_gate,
+                number_budget=settings.number_budget,
+                embedder=embedder,
                 embed_every=max(1, settings.reid_every),
-                roles=load_role_classifier(settings),
+                roles=roles,
                 role_every=max(1, settings.role_every),
+                ball_net=ball_net,
+                ball_every=max(1, settings.ball_every),
+                ball_batch=max(1, settings.ball_batch),
             )
             overlay = _overlay_summary(reader)
             play = clock_play(reader, board)
@@ -678,16 +857,33 @@ def _run_learned(
                 "chunks": 0,
                 "chunk_ms": CHUNK_MS,
                 "detector": "model",
-                "versions": {"vision": vision_version, "detector": detector.model},
+                "versions": {
+                    "vision": vision_version,
+                    "detector": detector.model,
+                    "ball": _ball_version(obs, settings),
+                },
                 "timings_s": {k: round(v, 2) for k, v in obs.timings_s.items()},
                 "elapsed_s": round(time.perf_counter() - started, 1),
-                "stats": {"camera": view["camera"], "motion": obs.motion.stats},
+                "stats": {
+                    "camera": view["camera"],
+                    "motion": obs.motion.stats,
+                    "ball_model_status": ball_status,
+                    "reid_model_status": reid_status,
+                    "role_model_status": role_status,
+                    "observe_counters": getattr(obs, "counters", {}),
+                },
                 "formations": [],
                 "scoreboard": overlay,
-                "goal_candidates": goal_candidates(obs),
+                "goal_candidates": goal_candidates(obs, play),
             }
             rep.succeed(pending)
-            log.info("analysis_needs_calibration", job_id=job_id, reason=str(exc))
+            log.info(
+                "analysis_needs_calibration",
+                job_id=job_id,
+                reason=str(exc),
+                # no ball path without the court: only the model status and the clock
+                **ball_summary(ball_status, 0, 0, play),
+            )
             return pending
         # the motion is saved after calibration (a fixed camera's focal length is set there)
         _store_view(s3, settings.s3_bucket_artifacts, prefix, work, obs.motion)
@@ -718,6 +914,8 @@ def _run_learned(
         out.mkdir()
         result.write_parquet(out / "tracks.parquet")
         chunks = write_chunks(result, out)
+        ball_rows = write_ball_path(result, out)
+        ball_info = ball_summary(ball_status, ball_rows, result.frames, play)
         upload_dir(s3, settings.s3_bucket_artifacts, out, prefix + "analysis/")
         payload: dict[str, Any] = {
             **view,
@@ -730,14 +928,26 @@ def _run_learned(
             "chunks": chunks,
             "chunk_ms": CHUNK_MS,
             "detector": result.detector_source,
-            "versions": {"vision": vision_version, "detector": detector.model},
+            "versions": {
+                "vision": vision_version,
+                "detector": detector.model,
+                "ball": _ball_version(obs, settings),
+            },
             "timings_s": {k: round(v, 2) for k, v in result.timings_s.items()},
             "elapsed_s": round(time.perf_counter() - started, 1),
-            "stats": result.extra,
+            "stats": {
+                **result.extra,
+                "ball_model_status": ball_status,
+                "reid_model_status": reid_status,
+                "role_model_status": role_status,
+                "observe_counters": getattr(obs, "counters", {}),
+                "ball_summary": ball_info,
+            },
             "formations": detect_formations(result),
             "events": events_payload(result, side_hint),
             "scoreboard": overlay,
             "goal_candidates": goals,
+            "ball_path": {"file": "ball.bin", "rows": ball_rows} if ball_rows else None,
         }
         rep.succeed(payload)
         log.info(
@@ -745,6 +955,9 @@ def _run_learned(
             job_id=job_id,
             tracks=len(payload["tracks"]),
             elapsed_s=payload["elapsed_s"],
+            reid_model_status=reid_status,
+            **ball_info,
+            **getattr(obs, "counters", {}),
         )
         return payload
     except CalibrationError as exc:

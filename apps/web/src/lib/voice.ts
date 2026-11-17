@@ -18,8 +18,9 @@ export interface Statement {
 export interface SeasonRow {
   score_own: number;
   score_opponent: number;
-  xg: number;
-  xg_against: number;
+  /** null: a match without analysis (the official result only); it stays out of the xG sums */
+  xg: number | null;
+  xg_against: number | null;
   /** share of the opponent's shots on target with a position (absent from older answers) */
   xg_against_coverage?: number | null;
   kickoff_at: string;
@@ -57,10 +58,12 @@ export function seasonStatement(rows: SeasonRow[], xgCoverage?: number | null, u
   if (run >= 3 && results.at(-1) !== "d") {
     return { headline: { key: results.at(-1) === "w" ? "voice.runWins" : "voice.runLosses", params: { n: run } }, evidence: record };
   }
-  const goals = sorted.reduce((s, r) => s + r.score_own, 0);
-  const xg = sorted.reduce((s, r) => s + r.xg, 0);
-  const against = sorted.reduce((s, r) => s + r.score_opponent, 0);
-  const xga = sorted.reduce((s, r) => s + r.xg_against, 0);
+  // goals against xG of the same matches: those with an analysis (livegang K15)
+  const measured = sorted.filter((r) => r.xg != null);
+  const goals = measured.reduce((s, r) => s + r.score_own, 0);
+  const xg = measured.reduce((s, r) => s + (r.xg ?? 0), 0);
+  const against = measured.reduce((s, r) => s + r.score_opponent, 0);
+  const xga = measured.reduce((s, r) => s + (r.xg_against ?? 0), 0);
   const attack = !useXg ? null : xgCoverage === undefined || (xgCoverage != null && xgCoverage >= XG_MIN_COVERAGE) ? xgGap(goals, xg) : null;
   if (attack) {
     return {
@@ -69,7 +72,7 @@ export function seasonStatement(rows: SeasonRow[], xgCoverage?: number | null, u
     };
   }
   // the same rule as for the attack: no statement from xG against that rests on few positions
-  const defenceCovered = sorted.every((r) => r.xg_against_coverage === undefined || (r.xg_against_coverage != null && r.xg_against_coverage >= XG_MIN_COVERAGE));
+  const defenceCovered = measured.length > 0 && measured.every((r) => r.xg_against_coverage === undefined || (r.xg_against_coverage != null && r.xg_against_coverage >= XG_MIN_COVERAGE));
   const defence = useXg && defenceCovered ? xgGap(against, xga) : null;
   if (defence === "under") {
     return { headline: { key: "voice.defenceHeld", params: {} }, evidence: { key: "voice.xgaEvidence", params: { against, xga: round1(xga) } } };

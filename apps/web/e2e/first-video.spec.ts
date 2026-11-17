@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { MATCH_VIDEO } from "./global-setup";
-import { expectAccessible, register, uniqueEmail } from "./helpers";
+import { chooseVideo, expectAccessible, register, uniqueEmail } from "./helpers";
 
 /**
  * UX test A02: after a first video in which the analysis finds no goals, the start says one
@@ -26,7 +26,7 @@ test("start after a first video without goals: one sentence, one step", async ({
   const match = (await res.json()) as { id: string };
 
   await page.goto(`/app/${org}/matches/${match.id}?tab=video`);
-  await page.getByTestId("video-file").setInputFiles(MATCH_VIDEO);
+  await chooseVideo(page, MATCH_VIDEO);
   await expect(page.getByTestId("plain-stage")).toBeVisible({ timeout: 240_000 });
   // the video plays before the analysis is done; the start speaks once it is (E06)
   await expect
@@ -38,7 +38,7 @@ test("start after a first video without goals: one sentence, one step", async ({
   await expect(step).toBeVisible();
   // one sentence with the count of the questions, one button
   await expect(step.locator("p")).toHaveCount(1);
-  await expect(step.locator("p")).toHaveText(/^Die Analyse hat noch keine Tore gefunden\. (1 Frage hilft|\d+ Fragen helfen) ihr weiter\.$/);
+  await expect(step.locator("p")).toHaveText(/^Noch keine Tore bestätigt\. (1 gezielte Frage|\d+ gezielte Fragen), etwa (1 Minute|\d+ Minuten), dann zeigt die Analyse mehr\.$/);
   await expect(step.getByTestId("start-step")).toHaveText("Fragen beantworten");
   // nothing that says the same again, no collection without scenes
   await expect(page.getByTestId("collection-from-match")).toHaveCount(0);
@@ -48,7 +48,7 @@ test("start after a first video without goals: one sentence, one step", async ({
   await expect(page.getByTestId("match-list")).toContainText(/Analyse fertig, (1 Frage|\d+ Fragen) offen/);
   await expect(page.getByTestId("match-list")).not.toContainText("Kein Ding");
   // the start and Prüfen count the same questions
-  const n = Number((await step.locator("p").textContent())!.match(/(\d+) Frage/)![1]);
+  const n = Number((await step.locator("p").textContent())!.match(/(\d+) gezielte Frage/)![1]);
   const g = await (await page.request.get(`/v1/orgs/${org}/matches/${match.id}/graphics`)).json();
   expect(g.checks.length).toBe(n);
   await expectAccessible(page);

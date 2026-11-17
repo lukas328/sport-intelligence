@@ -14,9 +14,9 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: plan or deploy
+        description: "plan, deploy, or status (read only: apps, jobs, recent logs)"
         type: choice
-        options: [plan, deploy]
+        options: [plan, deploy, status]
         default: plan
       state:
         description: keep the environment as it is, resume a paused one, or pause it
@@ -102,7 +102,39 @@ jobs:
           echo "rg=$(terraform output -raw resource_group)" >>"$GITHUB_ENV"
           echo "registry=$(terraform output -raw registry_name)" >>"$GITHUB_ENV"
 
+      - name: Status (read only)
+        if: steps.mode.outputs.mode == 'status'
+        run: |
+          echo "== apps"
+          az containerapp list -g "$rg" --query "[].{name:name, running:properties.runningStatus, revision:properties.latestRevisionName, image:properties.template.containers[0].image, min:properties.template.scale.minReplicas, max:properties.template.scale.maxReplicas, cpu:properties.template.containers[0].resources.cpu, mem:properties.template.containers[0].resources.memory}" -o table
+          for app in $(az containerapp list -g "$rg" --query "[].name" -o tsv); do
+            echo "== replicas $app"
+            az containerapp replica list -g "$rg" -n "$app" --query "[].{name:name, created:properties.createdTime, state:properties.runningState, restarts:properties.containers[0].restartCount}" -o table || true
+          done
+          for app in $(az containerapp list -g "$rg" --query "[?contains(name,'worker') || contains(name,'api')].name" -o tsv); do
+            echo "== last 150 log lines $app"
+            az containerapp logs show -g "$rg" -n "$app" --type console --tail 150 --format text 2>&1 | cut -c1-400 || true
+            echo "== system events $app"
+            az containerapp logs show -g "$rg" -n "$app" --type system --tail 40 --format text 2>&1 | cut -c1-300 || true
+          done
+          ws=$(az monitor log-analytics workspace list -g "$rg" --query "[0].customerId" -o tsv)
+          if [ -n "$ws" ]; then
+            echo "== errors in the last 8 hours (Log Analytics)"
+            az monitor log-analytics query -w "$ws" -o table --analytics-query "ContainerAppConsoleLogs_CL | where TimeGenerated > ago(8h) | where Log_s has_any ('error','Error','ERROR','Traceback','exception','Killed','OOM','failed') | project TimeGenerated, ContainerAppName_s, Log=substring(Log_s, 0, 300) | order by TimeGenerated desc | take 80" 2>&1 | cut -c1-420 || true
+            # The API logs every unexpected 500 as one JSON line (event unhandled_exception) whose
+            # exception field holds the whole traceback. Print it in full: the queries above cut
+            # lines, which loses the frame that raised.
+            echo "== last 20 unhandled exceptions of the API, full traceback (Log Analytics, 48 hours)"
+            az monitor log-analytics query -w "$ws" -o json --analytics-query "ContainerAppConsoleLogs_CL | where TimeGenerated > ago(48h) | where ContainerAppName_s contains 'api' | where Log_s has 'unhandled_exception' | extend j = parse_json(Log_s) | project TimeGenerated, method=tostring(j.method), path=tostring(j.path), request_id=tostring(j.request_id), exception=iff(isempty(tostring(j.exception)), Log_s, tostring(j.exception)) | order by TimeGenerated desc | take 20" >"$RUNNER_TEMP/unhandled.json" 2>&1 || true
+            jq -r '.[] | "--- \(.TimeGenerated) \(.method) \(.path) request_id=\(.request_id)\n\(.exception)\n"' "$RUNNER_TEMP/unhandled.json" 2>/dev/null || cat "$RUNNER_TEMP/unhandled.json"
+            echo "== restarts and OOM (system log)"
+            az monitor log-analytics query -w "$ws" -o table --analytics-query "ContainerAppSystemLogs_CL | where TimeGenerated > ago(8h) | where Reason_s has_any ('OOM','Kill','BackOff','Failed','Crash','Terminated') or Log_s has_any ('OOM','killed','Killed','exit code') | project TimeGenerated, ContainerAppName_s, Reason_s, Log=substring(Log_s, 0, 250) | order by TimeGenerated desc | take 40" 2>&1 | cut -c1-400 || true
+          fi
+          echo "== migration job runs"
+          az containerapp job execution list -g "$rg" -n "$(terraform output -raw migrate_job)" --query "[0:3].{name:name, status:properties.status, start:properties.startTime}" -o table || true
+
       - name: Paused or running
+        if: steps.mode.outputs.mode != 'status'
         id: state
         run: |
           pg=$(terraform output -raw postgres_server)
@@ -147,6 +179,7 @@ jobs:
           echo "PG=$pg" >>"$GITHUB_ENV"
 
       - name: DNS records for the app domain
+        if: steps.mode.outputs.mode != 'status'
         id: dns
         run: |
           fqdn=$(terraform output -raw web_default_fqdn)
@@ -159,14 +192,49 @@ jobs:
           echo "ready=$ok" >>"$GITHUB_OUTPUT"
           echo "DNS ready: $ok"
 
+      - name: Mail domain (Azure Communication Services)
+        if: steps.mode.outputs.mode != 'status'
+        run: |
+          # the sending domain exists after the first apply with the mail service; its DNS records
+          # are set by hand (terraform output mail_verification_records). Here Azure is asked to
+          # verify what is not verified yet; once all four are, mail_live links the domain and
+          # switches the apps to it.
+          live=false
+          id=$(terraform output -raw mail_domain_id 2>/dev/null || true)
+          case "$id" in /subscriptions/*) ;; *) id="" ;; esac
+          if [ -z "$id" ]; then
+            echo "no sending domain yet (created by this apply)"
+          else
+            url="https://management.azure.com${id}?api-version=2023-03-31"
+            states() { az rest --method get --url "$url" --query "properties.verificationStates" -o json; }
+            az rest --method get --url "$url" --query "properties.verificationRecords" -o json || true
+            for t in Domain SPF DKIM DKIM2; do
+              s=$(states | python3 -c "import json,sys;print((json.load(sys.stdin) or {}).get('$t',{}).get('status',''))")
+              echo "$t: $s"
+              if [ "$s" != Verified ] && [ "$s" != VerificationRequested ] && [ "$s" != VerificationInProgress ]; then
+                az rest --method post --url "https://management.azure.com${id}/initiateVerification?api-version=2023-03-31" \
+                  --body "{\"verificationType\": \"$t\"}" -o none || echo "$t: verification not started (DNS record missing?)"
+              fi
+            done
+            for i in $(seq 1 20); do
+              n=$(states | python3 -c "import json,sys;d=json.load(sys.stdin) or {};print(sum(d.get(t,{}).get('status')=='Verified' for t in ('Domain','SPF','DKIM','DKIM2')))")
+              echo "$(date -u +%T) verified $n of 4"
+              [ "$n" = 4 ] && live=true && break
+              sleep 30
+            done
+          fi
+          echo "MAIL_LIVE=$live" >>"$GITHUB_ENV"
+          echo "mail live: $live"
+
       - name: Plan
+        if: steps.mode.outputs.mode != 'status'
         run: |
           tag=$([ "${{ steps.mode.outputs.mode }}" = deploy ] && echo "${{ steps.mode.outputs.tag }}" || sed -n 's/^image_tag *= *"\(.*\)"/\1/p' staging.tfvars)
           echo "TAG=$tag" >>"$GITHUB_ENV"
           echo "BIND=${{ steps.dns.outputs.ready }}" >>"$GITHUB_ENV"
           terraform plan -input=false -no-color -var-file=staging.tfvars \
             -var "image_tag=$tag" -var "app_domain=$APP_DOMAIN" \
-            -var "bind_custom_domain=${{ steps.dns.outputs.ready }}" -var "paused=$PAUSED" \
+            -var "bind_custom_domain=${{ steps.dns.outputs.ready }}" -var "paused=$PAUSED" -var "mail_live=$MAIL_LIVE" \
             -refresh=$REFRESH -out=tfplan | tee plan.txt
           {
             echo '### Terraform plan (staging)'
@@ -195,7 +263,7 @@ jobs:
         run: |
           terraform apply -input=false -auto-approve -no-color -var-file=staging.tfvars \
             -var "image_tag=$TAG" -var "app_domain=$APP_DOMAIN" -var "bind_custom_domain=$BIND" \
-            -var "paused=$PAUSED" -target=azurerm_container_app_job.migrate
+            -var "paused=$PAUSED" -var "mail_live=$MAIL_LIVE" -target=azurerm_container_app_job.migrate
           job=$(terraform output -raw migrate_job)
           run=$(az containerapp job start -n "$job" -g "$rg" --query name -o tsv)
           echo "migration run $run"
@@ -212,7 +280,7 @@ jobs:
         run: |
           terraform apply -input=false -auto-approve -no-color -var-file=staging.tfvars \
             -var "image_tag=$TAG" -var "app_domain=$APP_DOMAIN" -var "bind_custom_domain=$BIND" \
-            -var "paused=$PAUSED"
+            -var "paused=$PAUSED" -var "mail_live=$MAIL_LIVE"
 
       - name: Managed certificate for the app domain
         if: steps.mode.outputs.mode == 'deploy' && env.BIND == 'true'

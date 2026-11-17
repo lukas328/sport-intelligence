@@ -22,40 +22,77 @@ function Figure({ caption, children }: { caption?: ReactNode; children: ReactNod
 /**
  * The hall from above: the camera raised about nine metres behind the near sideline (a stand) at the middle line,
  * with a wide-angle lens (0.5x, about 120 degrees). Drawn to scale: both goals and goal areas are in
- * the picture, the two near corners are not. Labels sit outside the court.
+ * the picture, the two near corners are not. Labels sit outside the court. `bare` leaves the
+ * words out (the page lists them under the drawing) and fits the drawing to `aspect` (width by
+ * height), so it matches the product pictures next to it (start page, BEFUNDE-2 S11).
  */
-export function HallCamera({ label, camera, field, corner, caption }: { label: string; camera: string; field: string; corner?: string; caption?: ReactNode }) {
+export function HallCamera({
+  label,
+  camera,
+  field,
+  corner,
+  caption,
+  framed = true,
+  bare = false,
+  aspect,
+}: {
+  label: string;
+  camera: string;
+  field: string;
+  corner?: string;
+  caption?: ReactNode;
+  framed?: boolean;
+  bare?: boolean;
+  aspect?: number;
+}) {
   // camera at (20, 29.5) in court metres: the near goal areas just fit; rays at 60 degrees either side of straight ahead
   const cx = 20;
   const cy = 29.5;
   const k = Math.tan((60 * Math.PI) / 180); // dx per dy
   const yAt = (x: number) => cy - Math.abs(x - cx) / k;
+  // «Ecke nicht im Bild» under each near corner, outside the camera's view, in two short lines
+  const words = (corner ?? "").split(" ");
+  const cut = Math.ceil(words.length / 2);
+  const lines = words.length > 2 ? [words.slice(0, cut).join(" "), words.slice(cut).join(" ")] : [corner ?? ""];
+  const cornerText = (x: number, anchor: "start" | "end") => (
+    <text x={x} y={23.4} textAnchor={anchor} fill="var(--ink)" style={SMALL}>
+      {lines.map((l, i) => (
+        <tspan key={i} x={x} dy={i ? 1.9 : 0}>
+          {l}
+        </tspan>
+      ))}
+    </text>
+  );
+  // without its words (bare) the drawing comes closer: 43 x 35 instead of 52 x 43 field metres
+  const [X, W, Y0, H0] = bare ? [-1.5, 43, -2, 35] : [-6, 52, -6, 43];
+  const H = aspect ? W / aspect : H0;
+  const top = Y0 - (H - H0) / 2;
   return (
     <Figure caption={caption}>
-      <svg viewBox="-6 -6 52 43" role="img" aria-label={label} className="block w-full border-2 border-ink">
-        <rect x={-6} y={-6} width={52} height={43} fill="var(--paper)" />
-        <path d={`M${cx} ${cy} L-6 ${yAt(-6).toFixed(2)} L-6 -6 L46 -6 L46 ${yAt(46).toFixed(2)} Z`} fill="var(--club)" fillOpacity={0.13} />
+      <svg viewBox={`${X} ${top.toFixed(2)} ${W} ${H.toFixed(2)}`} role="img" aria-label={label} className={framed ? "block w-full border-2 border-ink" : "block w-full"}>
+        <rect x={-6} y={top} width={52} height={H} fill="var(--paper)" />
+        <path d={`M${cx} ${cy} L-6 ${yAt(-6).toFixed(2)} L-6 ${top.toFixed(2)} L46 ${top.toFixed(2)} L46 ${yAt(46).toFixed(2)} Z`} fill="var(--club)" fillOpacity={0.13} />
         <path d={`M-6 ${yAt(-6).toFixed(2)} L${cx} ${cy} L46 ${yAt(46).toFixed(2)}`} fill="none" stroke="var(--club-line)" strokeWidth={0.2} strokeDasharray="0.8 0.6" />
         <CourtLines line="var(--ink)" width={1.6} />
-        {corner && (
+        {corner && !bare && (
           <g>
             <path d="M0 20l2.6 -2.6M0 17.4l2.6 2.6M40 20l-2.6 -2.6M40 17.4l-2.6 2.6" stroke="var(--loss)" strokeWidth={0.35} />
-            <text x={1.3} y={23.2} textAnchor="middle" fill="var(--ink)" style={SMALL}>
-              {corner}
-            </text>
-            <text x={38.7} y={23.2} textAnchor="middle" fill="var(--ink)" style={SMALL}>
-              {corner}
-            </text>
+            {cornerText(-5.2, "start")}
+            {cornerText(45.2, "end")}
           </g>
         )}
         <rect x={18} y={cy} width={4} height={2.2} fill="var(--ink)" />
         <circle cx={20} cy={cy} r={0.7} fill="var(--paper)" />
-        <text x={20} y={34.9} textAnchor="middle" fill="var(--ink)" style={LABEL}>
-          {camera}
-        </text>
-        <text x={20} y={-2.6} textAnchor="middle" fill="var(--ink)" style={LABEL}>
-          {field}
-        </text>
+        {!bare && (
+          <>
+            <text x={20} y={34.9} textAnchor="middle" fill="var(--ink)" style={LABEL}>
+              {camera}
+            </text>
+            <text x={20} y={-2.6} textAnchor="middle" fill="var(--ink)" style={LABEL}>
+              {field}
+            </text>
+          </>
+        )}
       </svg>
     </Figure>
   );
@@ -266,7 +303,7 @@ export function Steps({ items }: { items: { name: string; text: string }[] }) {
             {i + 1}
           </span>
           <div>
-            <h3 className="font-slant text-[1.375rem] md:text-[1.5rem]">{s.name}</h3>
+            <h3 className="text-[1.25rem] md:text-[1.375rem]">{s.name}</h3>
             <p className="mt-1 leading-[1.6]">{s.text}</p>
           </div>
         </li>

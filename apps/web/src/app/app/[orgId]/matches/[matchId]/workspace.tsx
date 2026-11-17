@@ -3,7 +3,7 @@
 import { track } from "@/lib/analytics";
 import type { Schemas } from "@handball/api-client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Crosshair, Keyboard, Maximize2, Play, X } from "lucide-react";
+import { Crosshair, Keyboard, Maximize2, Play, Share2, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, type FormEvent, type Ref } from "react";
 import { useRouter } from "next/navigation";
@@ -11,6 +11,7 @@ import { CourtCalibration, CourtPreview } from "@/components/analysis/court-cali
 import { Tagger, useRosterNames } from "@/components/analysis/tagger";
 import { FROM_VIDEO_KEY, playFromVideo } from "@/lib/play-from-video";
 import { Button } from "@/components/ui/button";
+import { ShareButton } from "@/components/sharing/share-button";
 import { Alert } from "@/components/ui/card";
 import { Segmented } from "@/components/ui/tabs";
 import { control, Input, Select } from "@/components/ui/field";
@@ -26,7 +27,7 @@ import type { Shape, Tool } from "@/components/video/shapes";
 import { api } from "@/lib/client";
 import { errorKey, type ErrorKey } from "@/lib/errors";
 import { formatClock } from "@/lib/format";
-import { courtFromHall, courtUnconfirmed, coverage, firstOpen, steps } from "@/lib/match-workflow";
+import { courtFromHall, courtFromHallSure, courtUnconfirmed, coverage, firstOpen, steps } from "@/lib/match-workflow";
 import { goalRows } from "@/lib/official-goals";
 import { cn } from "@/lib/utils";
 import { GoalCandidatesPanel, useGoalCandidates } from "./goal-candidates";
@@ -765,14 +766,16 @@ export function Workspace({
             <ul className="min-h-0 flex-1 space-y-1 overflow-auto text-sm" data-testid="clips">
               {(clips.data ?? []).length === 0 && <li className="text-muted">{t("clips.empty")}</li>}
               {(clips.data ?? []).map((c) => (
-                <li key={c.id}>
-                  <button className="w-full px-2 py-1 text-left hover:bg-surface" onClick={() => {
+                <li key={c.id} className="flex items-center gap-1">
+                  <button className="min-w-0 flex-1 px-2 py-1 text-left hover:bg-surface" onClick={() => {
                     player.current.seek(c.start_ms);
                     player.current.play();
                   }}>
                     <span className="font-score text-xs">{t("clips.range", { start: gameAt(c.start_ms), end: gameAt(c.end_ms) })}</span>{" "}
                     {c.title}
                   </button>
+                  {/* one scene as a link for the team chat (K20) */}
+                  {staff && <ShareButton orgId={orgId} teamId={match.team_id} kind="scene" targetId={c.id} info={{ title: c.title ?? "" }} trigger={<Button size="icon-sm" variant="ghost" aria-label={t("share.dialogTitle", { kind: "scene" })} data-testid="clip-share"><Share2 aria-hidden /></Button>} />}
                 </li>
               ))}
             </ul>
@@ -897,6 +900,7 @@ function AnalysisPanel({
   const fromHall = courtFromHall(analysis);
   const hallCheck = canMark && fromHall && unconfirmed;
   const hallConfirmed = fromHall && analysis.calibration?.source === "user_correction";
+  const hallSure = !hallConfirmed && courtFromHallSure(analysis);
   return (
     // while the court waits for its check the answer bar is fixed on phones: room for it at the end
     <section className={cn("space-y-3", hallCheck && "max-lg:pb-24")} data-testid="analysis-panel">
@@ -920,7 +924,9 @@ function AnalysisPanel({
       {analysis.status === "ready" && !analysis.needs_calibration && (
         <p className="text-[0.9375rem]">
           {fromHall
-            ? t(hallConfirmed ? "courtFromHallOk" : hallCheck ? "courtFromHallCheck" : "courtFromHall", { hall: hallName ?? "" })
+            ? hallSure
+              ? t("courtFromHallSure")
+              : t(hallConfirmed ? "courtFromHallOk" : hallCheck ? "courtFromHallCheck" : "courtFromHall", { hall: hallName ?? "" })
             : unconfirmed
               ? t("checkCourt")
               : t("courtOk")}

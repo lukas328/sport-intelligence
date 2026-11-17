@@ -671,6 +671,10 @@ async def test_official_games_count_toward_the_plan_limit(
         await api.get(f"/v1/orgs/{c['organization_id']}/matches/{r.json()['match_id']}")
     ).json()
     assert (match["score_own"], match["score_opponent"]) == (26, 19)
+    # taking over a game reuses the club's opponent instead of adding a second one (review R7)
+    names = [r["name"] for r in await owner_conn.fetch("SELECT name FROM opponents")]
+    keys = [handball_ch.opponent_key(n) for n in names]
+    assert len(keys) == len(set(keys)), names
     report = next(
         s for s in await suggestions(api, c, "report") if s["payload"]["game_id"] == 509192
     )
@@ -896,7 +900,10 @@ async def test_verification_by_second_official_and_operator(
     r = await api.get(f"/v1/orgs/{org}/verification")
     assert r.json()["verification"] == "unverified"
     assert r.json()["club_domains"] == ["tvt-handball.ch"]
+    # who took the club over needs a second person; that person sees the button (review R21)
+    assert r.json()["my_part"] == "claimed"
     second = await invite(api, make_api, outbox, c, "coach")  # the invitation confirms the mail
+    assert (await second.get(f"/v1/orgs/{org}/verification")).json()["my_part"] == "can_confirm"
     r = await second.post(f"/v1/orgs/{org}/verification/confirm")
     assert r.status_code == 200, r.text
     assert (r.json()["verification"], r.json()["verified_via"]) == ("verified", "second_official")
@@ -1113,11 +1120,18 @@ async def _tick(api: Api) -> dict[str, int]:
 
 
 async def _ended(owner_conn: asyncpg.Connection, ago: dict[int, timedelta]) -> None:
-    """Only these games ended lately (the others a month ago, outside the report window)."""
-    await owner_conn.execute("UPDATE matches SET kickoff_at = now() - interval '30 days'")
+    """Only these games ended lately (the others a month ago, outside the report window, and
+    already asked as often as an earlier game is)."""
+    from handball_api.services.official import REPORT_BACKFILL_TRIES
+
+    await owner_conn.execute(
+        "UPDATE matches SET kickoff_at = now() - interval '30 days', official_report_tries = $1",
+        REPORT_BACKFILL_TRIES,
+    )
     for game, interval in ago.items():
         await owner_conn.execute(
-            "UPDATE matches SET kickoff_at = now() - $2::interval WHERE official_game_id = $1",
+            "UPDATE matches SET kickoff_at = now() - $2::interval, official_report_tries = 0 "
+            "WHERE official_game_id = $1",
             game,
             interval,
         )
@@ -1168,6 +1182,44 @@ async def test_tick_asks_the_latest_game_first_and_backs_off_without_a_log(
     assert row["tries"] == 2 and timedelta(minutes=115) < row["wait"] <= timedelta(hours=2)
     assert official._retry_after(3) == timedelta(hours=4)
     assert official._retry_after(9) == official._retry_after(30) == timedelta(days=1)
+
+
+async def test_tick_fills_in_the_reports_of_earlier_games(
+    make_api: Callable[[], Api], hch: Recorded, owner_conn: asyncpg.Connection
+) -> None:
+    """App review R3: the scorers of the season counted only the one report that came after
+    the take-over (6 goals against 58 on handball.ch). The tick imports the earlier games'
+    reports too, quietly (no note per game), and gives up on a game without a log after
+    REPORT_BACKFILL_TRIES."""
+    from handball_api.services.official import REPORT_BACKFILL_TRIES
+
+    api = await coach(make_api)
+    await claim(api)
+    # 509192 (with log) and 509181 (without) were played a month ago, the rest is out of reach
+    await _ended(owner_conn, {})
+    await owner_conn.execute(
+        "UPDATE matches SET official_report_tries = 0 WHERE official_game_id IN (509192, 509181)"
+    )
+    assert (await _tick(api))["reports"] == 1
+    assert await owner_conn.fetchval(
+        "SELECT count(*) FROM events e JOIN matches m ON m.id = e.match_id "
+        "WHERE m.official_game_id = 509192 AND e.source = 'official_report'"
+    )
+    # no note in the bell for a report of an earlier game
+    assert not await owner_conn.fetchval(
+        "SELECT count(*) FROM notifications WHERE kind = 'official_report'"
+    )
+    # the game without a log is asked again later, and left alone after the last try
+    for _ in range(REPORT_BACKFILL_TRIES + 1):
+        await owner_conn.execute("UPDATE matches SET official_report_retry_at = NULL")
+        await _tick(api)
+    tries = await owner_conn.fetchval(
+        "SELECT official_report_tries FROM matches WHERE official_game_id = 509181"
+    )
+    assert tries == REPORT_BACKFILL_TRIES
+    hch.calls.clear()
+    await owner_conn.execute("UPDATE matches SET official_report_retry_at = NULL")
+    assert (await _tick(api))["reports"] == 0 and _report_calls(hch) == []
 
 
 async def test_tick_keeps_going_after_an_unexpected_error(

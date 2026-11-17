@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import threading
 import time
 from typing import Any
 
@@ -10,6 +11,10 @@ import structlog
 
 log = structlog.get_logger("worker.reporter")
 ATTEMPTS = 3
+# While a stage runs the reporter says it is still there this often, also when the stage itself
+# reports no fraction (a download, the court, the upload): a job silent for many minutes has lost
+# its worker, and the API's watchdog can restart it instead of the coach waiting for hours.
+HEARTBEAT_S = 60.0
 
 
 class ReportError(RuntimeError):
@@ -24,6 +29,7 @@ class Reporter:
         job_id: str,
         stages: dict[str, float],
         client: httpx.Client | None = None,
+        heartbeat_s: float | None = HEARTBEAT_S,
     ) -> None:
         self.url = f"{api_url.rstrip('/')}/internal/jobs/{job_id}"
         self.headers = {"x-internal-token": token}
@@ -33,6 +39,10 @@ class Reporter:
         self._last = 0.0
         self._current: str | None = None
         self._fraction = 0.0
+        self._lock = threading.Lock()
+        self._heartbeat_s = heartbeat_s
+        self._stop = threading.Event()
+        self._beat: threading.Thread | None = None
 
     def progress(self) -> float:
         done = sum(w for s, w in self.weights.items() if self.stages[s]["status"] == "done")
@@ -43,10 +53,11 @@ class Reporter:
         """POST the update, three attempts on network errors and 5xx answers. Progress updates
         give up quietly (the next one follows); a terminal update (succeeded / failed) raises
         ReportError, so RQ marks the job failed instead of the API waiting for it forever."""
-        now = time.monotonic()
-        if not (force or terminal) and now - self._last < 2:
-            return
-        self._last = now
+        with self._lock:
+            now = time.monotonic()
+            if not (force or terminal) and now - self._last < 2:
+                return
+            self._last = now
         error = ""
         for attempt in range(ATTEMPTS):
             try:
@@ -62,6 +73,26 @@ class Reporter:
         if terminal:
             raise ReportError(f"could not report {body.get('status')} to the API: {error}")
 
+    def _start_heartbeat(self) -> None:
+        if not self._heartbeat_s or self._beat is not None or self._stop.is_set():
+            return
+        self._beat = threading.Thread(target=self._heartbeat, name="job-heartbeat", daemon=True)
+        self._beat.start()
+
+    def _heartbeat(self) -> None:
+        interval = float(self._heartbeat_s or HEARTBEAT_S)
+        while not self._stop.wait(interval):
+            if time.monotonic() - self._last < interval / 2:
+                continue  # a progress update went out a moment ago
+            self._send(
+                {"status": "running", "progress": self.progress(), "stage": self._current},
+                force=True,
+            )
+
+    def stop(self) -> None:
+        """No more heartbeats: the job ended (succeed and fail call it)."""
+        self._stop.set()
+
     def stage(self, name: str) -> None:
         if self._current:
             self.stages[self._current] = {
@@ -71,6 +102,7 @@ class Reporter:
             }
         self._current, self._fraction = name, 0.0
         self.stages[name] = {"status": "running", "started": time.time()}
+        self._start_heartbeat()
         self._send(
             {
                 "status": "running",
@@ -86,6 +118,7 @@ class Reporter:
         self._send({"status": "running", "progress": self.progress(), "stage": self._current})
 
     def succeed(self, result: dict[str, Any]) -> None:
+        self.stop()
         if self._current:
             self.stages[self._current] = {
                 **self.stages[self._current],
@@ -98,6 +131,7 @@ class Reporter:
         )
 
     def fail(self, error: str) -> None:
+        self.stop()
         if self._current:
             self.stages[self._current] = {**self.stages[self._current], "status": "failed"}
         self._send(

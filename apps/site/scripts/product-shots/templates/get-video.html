@@ -1,0 +1,27 @@
+<!doctype html>
+<!-- «Jedes Tor als Szene»: a match on the computer, the video, the scene that plays (yellow in the
+     list) and all goals on the timeline. -->
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../stage.css" />
+<div id="stage"><div class="keil" style="--from: 70%; --to: 40%"></div></div>
+<script src="../stage.js"></script>
+<script>
+  S.stage(720, 520);
+  const video = S.rect("video", "video", [32, 212, 844, 475]);
+  const active = S.rect("video", "active", [908, 391, 340, 62]);
+  const timeline = S.rect("video", "timeline", [32, 802, 844, 118]);
+  const s = S.browser(
+    "video",
+    [16, video[1] - 24, 1248, timeline[1] + timeline[3] - video[1] + 40],
+    {
+      left: 28,
+      top: 30,
+      width: 664,
+    },
+  );
+  S.ring(s, active, 3);
+  // the label sits on the dark hall wall of the video, the arrow goes to the scene in the list
+  S.callout("tap", S.at(s, video, 0.5, 0.16), S.at(s, active, -0.02, 0.5), "t", 0.22);
+  S.callout("timeline", S.at(s, timeline, 0.62, -0.42), S.at(s, timeline, 0.42, 0.2), "tl", -0.2);
+  S.done();
+</script>

@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { HALF_1, HALF_2 } from "./global-setup";
-import { expectAccessible, register, uniqueEmail } from "./helpers";
+import { chooseVideo, expectAccessible, register, uniqueEmail } from "./helpers";
 
 /**
  * Q-VIDEO-PARTS: a coach stopped the recording at half-time and has two files. Both are chosen at
@@ -33,7 +33,7 @@ test("two halves in two files: one match, both analysed, one video", async ({ pa
   const { org, match } = await newMatch(page, "parts");
   await page.goto(`/app/${org}/matches/${match}?tab=video`);
   // both files at once; they go up one after the other
-  await page.getByTestId("video-file").setInputFiles([HALF_2, HALF_1]);
+  await chooseVideo(page, [HALF_2, HALF_1]);
   await expect(page.getByTestId("upload-queue-item")).toHaveCount(2);
   await expect(page.getByTestId("upload-queue-item").nth(1)).toHaveAttribute("data-status", "done", { timeout: 120_000 });
   await expect(page.getByTestId("upload-queue-item").nth(0)).toHaveAttribute("data-status", "done");
@@ -86,7 +86,8 @@ test("two halves in two files: one match, both analysed, one video", async ({ pa
   await list.getByTestId("part-remove").first().click();
   await page.getByRole("button", { name: "Entfernen" }).last().click();
   await expect.poll(async () => (await graphics()).parts.length).toBe(0);
-  await expect(page.getByTestId("parts")).toHaveCount(0);
+  // no list of parts any more; the remaining single file keeps only its «Datei entfernen» (A1)
+  await expect(page.getByTestId("parts")).not.toContainText("Das Spiel in");
 });
 
 test("the list of halves on a phone", async ({ page }, info) => {
@@ -94,7 +95,7 @@ test("the list of halves on a phone", async ({ page }, info) => {
   test.setTimeout(300_000);
   const { org, match } = await newMatch(page, "parts-phone");
   await page.goto(`/app/${org}/matches/${match}?tab=video`);
-  await page.getByTestId("video-file").setInputFiles([HALF_1, HALF_2]);
+  await chooseVideo(page, [HALF_1, HALF_2]);
   await expect(page.getByTestId("upload-queue-item").nth(1)).toHaveAttribute("data-status", "done", { timeout: 120_000 });
   await page.screenshot({ path: test.info().outputPath("upload-phone.png"), fullPage: true });
   await page.reload();

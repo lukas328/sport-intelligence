@@ -28,7 +28,7 @@ export function JoinView({ token, orgs }: { token: string; orgs: { id: string; n
         {done ? (
           <p>
             {t("joined", { name: done })}{" "}
-            <Link className="font-medium text-accent hover:underline" href={`/app/${org}`}>{t("toClub")}</Link>
+            <Link className="font-medium text-accent underline decoration-[1.5px] underline-offset-4" href={`/app/${org}`}>{t("toClub")}</Link>
           </p>
         ) : orgs.length === 0 ? (
           <Alert>{t("noAdmin")}</Alert>

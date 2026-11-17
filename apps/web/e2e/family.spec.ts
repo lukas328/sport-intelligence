@@ -25,10 +25,11 @@ test("parent consents for own child; coach sees kit warning", async ({ page, con
   const parentEmail = uniqueEmail("parent");
   const invite = page.getByRole("form", { name: "Person einladen" });
   await invite.getByLabel("E-Mail").fill(parentEmail);
-  await invite.getByLabel("Rolle").selectOption("parent");
-  await expect(invite.getByLabel("Kind")).toContainText("Noah Kind");
+  // the four roles (K18): parents are invited for their child
+  await invite.getByRole("radio", { name: /^Eltern/ }).check();
+  await expect(invite.getByLabel("Kind", { exact: true })).toContainText("Noah Kind");
   await invite.getByRole("button", { name: "Einladung senden" }).click();
-  await expect(page.getByText(`Eingeladen: ${parentEmail}`)).toBeVisible();
+  await expect(page.getByText(`Einladung an ${parentEmail} geschickt.`)).toBeVisible();
 
   // the parent accepts and consents to video analysis for the child only
   const link = await linkFromMail(page, parentEmail, "/invite/");

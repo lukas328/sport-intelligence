@@ -22,6 +22,13 @@ class Settings(BaseSettings):
 
     # Runtime connection uses the non-superuser role so that RLS applies (ADR 005).
     database_url: str = "postgresql+asyncpg://handball_app:handball_app@localhost:5432/handball"
+    # Connections per API process: the pool keeps db_pool_size open and opens up to
+    # db_max_overflow more under load. All processes of all replicas together must stay below
+    # the server's connection limit (processes x replicas x (size + overflow)); a request that
+    # finds the pool full waits up to db_pool_timeout_s, then gets a 503.
+    db_pool_size: int = 5
+    db_max_overflow: int = 5
+    db_pool_timeout_s: float = 10.0
     # Owner connection for migrations only.
     migration_database_url: str | None = None
     redis_url: str = "redis://localhost:6379/0"
@@ -112,13 +119,28 @@ class Settings(BaseSettings):
     rate_limit_auth: str = "10/60"
 
     # E-mail (ADR 009)
-    email_backend: Literal["smtp", "memory", "console"] = "smtp"
+    email_backend: Literal["smtp", "acs", "memory", "console"] = "smtp"
+    # Azure Communication Services: "endpoint=https://…;accesskey=…" (backend acs)
+    acs_connection_string: SecretStr | None = None
     email_from: str = "Handball Intelligence <noreply@localhost>"
     smtp_host: str = "localhost"
     smtp_port: int = 1025
     smtp_username: str | None = None
     smtp_password: SecretStr | None = None
     smtp_starttls: bool = False
+    # Whether mails reach people (L2). Unset: SMTP and the test outbox do; the console backend
+    # only in local development, where the mail is read in the log. Set it to false while a
+    # provider is configured but not live yet. The app then promises no mail: no sign-in links,
+    # saving asks for a password, a forgotten password goes through the support.
+    mail_enabled: bool | None = None
+
+    @property
+    def mail_delivers(self) -> bool:
+        if self.mail_enabled is not None:
+            return self.mail_enabled
+        if self.email_backend == "console":
+            return self.env == "local"
+        return True
 
     max_logo_bytes: int = 1_000_000
     password_reset_ttl_minutes: int = 60

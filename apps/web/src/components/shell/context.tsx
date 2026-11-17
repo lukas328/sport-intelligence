@@ -24,14 +24,26 @@ export interface ShellOrg {
   my_role: string;
 }
 
+export interface ShellMe {
+  name: string;
+  email: string;
+  /** the club asks for two-factor and it is not set up */
+  two_factor_due?: boolean;
+  /** past the grace period: club settings are blocked until two-factor is set up */
+  two_factor_overdue?: boolean;
+}
+
 export interface ShellValue {
   org: ShellOrg;
   orgs: { id: string; name: string }[];
   teams: ShellTeam[];
   team: ShellTeam | null;
   mode: Mode;
-  me: { name: string; email: string; /** the club asks for two-factor and it is not set up */ two_factor_due?: boolean };
+  me: ShellMe;
   setTeam: (id: string) => void;
+  /** a page that is not there (the 404) asks for the whole app frame, also on a full-screen tool
+   * route such as Prüfen (app review R5: a deleted match's «Fragen» link ended without a header) */
+  showFrame?: (on: boolean) => void;
 }
 
 export const ShellContext = createContext<ShellValue | null>(null);

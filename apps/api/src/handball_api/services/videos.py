@@ -35,7 +35,16 @@ from handball_api.models import (
 )
 from handball_api.models.enums import JobStatus, MatchStatus, VideoRole, VideoStatus
 from handball_api.schemas.matches import JobUpdate, LinkImport, UploadComplete, UploadCreate
-from handball_api.services import audit, auto_events, billing, feed, halls, timeline, training
+from handball_api.services import (
+    audit,
+    auto_events,
+    billing,
+    checks,
+    feed,
+    halls,
+    timeline,
+    training,
+)
 from handball_api.services.context import Ctx
 from handball_api.services.mail_templates import render
 from handball_api.services.matches import DUPLICATE, Part, get_match, parts_of
@@ -81,12 +90,43 @@ def media_prefix_of(org_id: uuid.UUID, match_id: uuid.UUID, video_id: uuid.UUID)
 
 async def create_upload(
     ctx: Ctx, match_id: uuid.UUID, data: UploadCreate
-) -> tuple[VideoAsset, int, int]:
+) -> tuple[VideoAsset, int, int, bool]:
+    """A new upload, or the unfinished upload of the same file (name, size, camera) to go on with
+    (`resumed`): after a reload, on another device or with the browser's memory cleared, choosing
+    the file again continues where it stopped instead of answering «already in the match» (L4)."""
     match = await get_match(ctx, match_id, Action.VIDEO_UPLOAD)
     if data.size_bytes > ctx.settings.max_video_bytes:
         raise ProblemError(413, "video-too-large", "The video is too large")
     if not VIDEO_EXT.search(data.filename):
         raise ProblemError(415, "unsupported-video", "Use MP4, MOV, MKV, AVI, MTS or WebM")
+    open_upload = await ctx.db.scalar(
+        select(VideoAsset).where(
+            VideoAsset.match_id == match.id,
+            VideoAsset.role == data.role,
+            VideoAsset.filename == data.filename,
+            VideoAsset.size_bytes == data.size_bytes,
+            VideoAsset.status == VideoStatus.UPLOADING,
+            VideoAsset.upload_id.is_not(None),
+            VideoAsset.source_url.is_(None),
+        )
+    )
+    if open_upload is not None:
+        try:
+            await ctx.storage.list_parts(
+                ctx.settings.s3_bucket_videos, open_upload.storage_key, str(open_upload.upload_id)
+            )
+        except ObjectNotFoundError:
+            # the storage forgot the parts: that upload is over, a new one starts below
+            open_upload.status = VideoStatus.FAILED
+            open_upload.error = "upload expired"
+            open_upload.upload_id = None
+            await ctx.db.flush()
+        else:
+            await audit.record(
+                ctx, "video.upload_resumed", target_type="video", target_id=open_upload.id
+            )
+            count = math.ceil(open_upload.size_bytes / open_upload.part_size)
+            return open_upload, open_upload.part_size, count, True
     same = await ctx.db.scalar(
         select(VideoAsset.id).where(
             VideoAsset.match_id == match.id,
@@ -131,7 +171,7 @@ async def create_upload(
         target_id=asset.id,
         data={"size": data.size_bytes, "role": data.role},
     )
-    return asset, part_size, math.ceil(data.size_bytes / part_size)
+    return asset, part_size, math.ceil(data.size_bytes / part_size), False
 
 
 async def get_asset(
@@ -201,14 +241,11 @@ async def _ready_note(ctx: Ctx, match: Match) -> tuple[str, dict[str, Any]]:
     if (goals or 0) >= THREE_THINGS_MIN_GOALS:
         return "analysis_ready", {}
     # the same questions the start and Prüfen show (UX test A02: one count, not two)
-    from handball_api.services.graphics import more_checks, open_checks
+    from handball_api.services.graphics import open_checks
 
+    # the budget of the main round only (second round A6): «Mehr prüfen» is never promised
     questions = len(await open_checks(ctx, match))
-    # further moments after the most important ones (third real-video test G1); with none of
-    # the most important left, the other moments are the questions
-    more = len(await more_checks(ctx, match))
-    if questions == 0:
-        questions, more = more, 0
+    more = 0
     return ("analysis_questions" if questions else "analysis_no_goals"), {
         "questions": questions,
         "more_moments": more,
@@ -282,6 +319,10 @@ async def abort_upload(ctx: Ctx, asset_id: uuid.UUID) -> None:
     """Deletes a file of the match (an upload not finished, or a part): the parts after it move
     up, and what the analysis found in it goes with it."""
     asset = await get_asset(ctx, asset_id, Action.VIDEO_UPLOAD)
+    # cancelling an upload that is still running is part of uploading; a file that arrived is
+    # deleted by the staff only (players upload, they do not delete: K18)
+    if asset.status != VideoStatus.UPLOADING:
+        await get_asset(ctx, asset_id, Action.MATCH_DELETE)
     match = await ctx.db.get(Match, asset.match_id)
     before = await parts_of(ctx, asset.match_id)
     placed = any(p.video_id == asset.id for p in before)
@@ -297,7 +338,44 @@ async def abort_upload(ctx: Ctx, asset_id: uuid.UUID) -> None:
         await timeline.settle(ctx, match, before)
         await _whole_match(ctx, match)
         await start_waiting(ctx, match)
+    if match is not None:
+        # the last file gone, or only a failed one left: the match no longer says «wird
+        # hochgeladen» or «Analyse läuft» (second round A1)
+        await settle_status(ctx, match)
     await audit.record(ctx, "video.deleted", target_type="video", target_id=asset_id)
+
+
+async def settle_status(ctx: Ctx, match: Match) -> None:
+    """The match's status from its files, after one was removed or given up: playable when one
+    plays, being processed or uploaded while one is, failed when all failed; with no file left
+    it waits for a video again."""
+    if match.status not in (
+        MatchStatus.UPLOADING,
+        MatchStatus.PROCESSING,
+        MatchStatus.READY,
+        MatchStatus.FAILED,
+    ):
+        return
+    rows = (
+        await ctx.db.scalars(
+            select(VideoAsset.status).where(
+                VideoAsset.match_id == match.id, VideoAsset.role == VideoRole.MAIN
+            )
+        )
+    ).all()
+    states = set(rows)
+    if VideoStatus.READY in states:
+        match.status = MatchStatus.READY
+    elif states & {VideoStatus.UPLOADED, VideoStatus.PROCESSING}:
+        match.status = MatchStatus.PROCESSING
+    elif VideoStatus.UPLOADING in states:
+        match.status = MatchStatus.UPLOADING
+    elif states:
+        match.status = MatchStatus.FAILED
+    elif match.status != MatchStatus.READY:
+        # no video left: a match with a report stays as it is, one without waits for a video
+        match.status = MatchStatus.SCHEDULED
+    await ctx.db.flush()
 
 
 async def _whole_match(ctx: Ctx, match: Match) -> None:
@@ -603,6 +681,8 @@ async def apply_job_update(ctx: Ctx, job_id: uuid.UUID, data: JobUpdate) -> Proc
         return job  # late or duplicate callbacks are ignored (idempotent)
     if job.started_at is None and data.status != JobStatus.QUEUED:
         job.started_at = now
+    # every report (progress, heartbeat, the end) says the worker is still on it
+    job.heartbeat_at = now
     job.status = data.status
     job.progress = (
         max(job.progress, data.progress) if data.status == JobStatus.RUNNING else data.progress
@@ -893,7 +973,12 @@ async def _rosters(ctx: Ctx, match: Match) -> dict[str, list[int]]:
     kits in the job payload, so "home" is always the own kit (match.is_home only moves the
     overlay); the opponent side only when its players were entered. Empty sides are left out."""
     out: dict[str, list[int]] = {}
-    own = sorted(await roster_numbers(ctx, match.season_id, match.team_id))
+    # a scouting match: the own side is the opponent's opponent, not our roster (K3)
+    own = (
+        sorted(await roster_numbers(ctx, match.season_id, match.team_id))
+        if match.kind != "scouting"
+        else []
+    )
     if own:
         out["home"] = own
     if match.opponent_id is not None:
@@ -964,7 +1049,8 @@ async def _apply_analysis_result(
     roster: dict[int, uuid.UUID] = {}
     if isinstance(tracks, list) and any(t.get("number") is not None for t in tracks):
         owner = await ctx.db.get(Match, asset.match_id)
-        if owner is not None and owner.season_id is not None:
+        # a scouting match: the "home" kit is another team, never our players (K3)
+        if owner is not None and owner.season_id is not None and owner.kind != "scouting":
             roster = await roster_numbers(ctx, owner.season_id, owner.team_id)
     if isinstance(tracks, list):
         for t in tracks:
@@ -1015,8 +1101,12 @@ async def _apply_analysis_result(
             "calibration_error",
             "calibration_info",
             "scoreboard",
+            "ball_path",
         )
     }
+    # how much the analysis found (play time, people seen): Prüfen asks nothing when it is too
+    # little and says why instead (services/checks)
+    asset.analysis["signals"] = checks.signals(r)
     if clicked is not None:
         asset.analysis[CLICKED] = clicked
     if pending is not None:  # a newer run with clicked points is still running
@@ -1091,6 +1181,14 @@ async def _part_of(ctx: Ctx, asset: VideoAsset) -> Part | None:
     return next((p for p in await parts_of(ctx, asset.match_id) if p.video_id == asset.id), None)
 
 
+def _with_sure(asset: VideoAsset, info: Any) -> Any:
+    """A court carried over from the hall says whether the hall images matched well enough not
+    to ask about it (services/checks.hall_court_sure)."""
+    if not isinstance(info, dict) or info.get("method") != "hall":
+        return info
+    return {**info, "sure": checks.hall_court_sure(asset)}
+
+
 async def analysis(ctx: Ctx, asset_id: uuid.UUID) -> dict[str, object]:
     asset = await get_asset(ctx, asset_id)
     cal = await ctx.db.scalar(
@@ -1136,7 +1234,7 @@ async def analysis(ctx: Ctx, asset_id: uuid.UUID) -> dict[str, object]:
         "panorama": meta.get("panorama"),
         "needs_calibration": bool(meta.get("needs_calibration")),
         "calibration_error": meta.get("calibration_error"),
-        "calibration_info": meta.get("calibration_info"),
+        "calibration_info": _with_sure(asset, meta.get("calibration_info")),
         "hall": await halls.summary(ctx, asset, match) if match is not None else None,
         "error_code": failure_code(job.error)
         if job is not None and job.status == "failed"

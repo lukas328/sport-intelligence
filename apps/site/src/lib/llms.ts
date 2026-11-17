@@ -1,14 +1,14 @@
 /**
  * /llms.txt and /llms-full.txt (proposal at llmstxt.org): what the product is, for whom, what it
- * can and cannot do, and the important pages, in Markdown. Built from the same texts as the pages
+ * does and what the coach does, and the important pages, in Markdown. Built from the same texts as the pages
  * (messages, facts, guides), so they never say more than the site. Google says it ignores these
  * files; other assistants may read them. See docs/site/SEO.md.
  */
 import plans from "@handball/plans";
 import { factRows } from "@/lib/facts";
-import { fileVars, launchState, notList } from "@/lib/files";
+import { fileVars, notList } from "@/lib/files";
 import { fmt, messages, type Locale } from "@/lib/i18n";
-import { LAUNCHED, SITE_NAME, SITE_UPDATED, pageUrl } from "@/lib/site";
+import { SITE_NAME, SITE_UPDATED, pageUrl } from "@/lib/site";
 import { BLOG } from "../../content/blog";
 import { GUIDES } from "../../content/ratgeber";
 import { HELP } from "../../content/help";
@@ -42,16 +42,15 @@ export function llmsTxt(): string {
     "",
     `> ${de.facts.lead}`,
     "",
-    ...(LAUNCHED ? [] : [launchState(de), ""]),
     `Stand: ${SITE_UPDATED}. Sprachen: Deutsch (de-CH), Französisch (fr-CH), Englisch. Für wen: ${get("Für wen")}`,
     "",
     `Wer dahinter steht: ${de.us.homeText}`,
     "",
-    "## Kann",
+    `## ${de.honest.canTitle}`,
     "",
     ...de.honest.can.map((x) => `- ${x}`),
     "",
-    "## Kann noch nicht",
+    `## ${de.honest.notTitle}`,
     "",
     ...notList(de).map((x) => `- ${x}`),
     "",
@@ -63,7 +62,7 @@ export function llmsTxt(): string {
     "",
     `Andere Wege: ${get("Andere Wege")}`,
     "",
-    `Preisstand: ${get("Preisstand")}`,
+    `Preise: ${get("Preise")}`,
     "",
     "## Wichtige Seiten",
     "",
@@ -106,9 +105,13 @@ function section(locale: Locale): string[] {
     "",
     m.honest.note,
     "",
+    `### ${m.filming.head}`,
+    "",
+    ...m.filming.rules.map((r) => `- **${r.title}:** ${r.text}`),
+    "",
     `### ${m.faq.head}`,
     "",
-    ...m.faq.items.flatMap((f) => [`**${f.q}** ${fmt(f.a, { month: team.price_chf_month, year: team.price_chf_year, ...fileVars(m) })}`, ""]),
+    ...m.faq.items.flatMap((f) => [`**${f.q}** ${fmt(f.a, { month: team.price_chf_month, year: team.price_chf_year, ...fileVars(m) })}${f.hi ? ` ${f.hi}` : ""}`, ""]),
     `### ${m.guides.title}`,
     "",
     ...guides(locale),

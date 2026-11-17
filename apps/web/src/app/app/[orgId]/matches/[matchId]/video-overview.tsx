@@ -22,7 +22,6 @@ type Possessions = { phases: Phase[]; summary: Record<"own" | "opponent", { coun
 export function VideoOverview({
   orgId,
   matchId,
-  teamId,
   ownName,
   oppName,
   durationMs,
@@ -155,7 +154,7 @@ export function VideoOverview({
                     </ul>
                     {rows.length === 0 && <p className="text-sm text-muted">{t("noneFiltered")}</p>}
                     {rows.length > 8 && (
-                      <button type="button" className="text-sm font-medium text-accent hover:underline" onClick={() => setShowAll((v) => !v)}>
+                      <button type="button" className="text-sm font-medium text-accent underline decoration-[1.5px] underline-offset-4" onClick={() => setShowAll((v) => !v)}>
                         {showAll ? t("showLess") : t("showAll", { n: rows.length })}
                       </button>
                     )}
@@ -165,7 +164,7 @@ export function VideoOverview({
             </div>
           </>
         )}
-        <button type="button" onClick={onPhysical} className="text-sm font-semibold text-accent hover:underline">
+        <button type="button" onClick={onPhysical} className="text-sm font-semibold text-accent underline decoration-[1.5px] underline-offset-4">
           {t("physical")}
         </button>
       </Sheet>
@@ -174,10 +173,6 @@ export function VideoOverview({
           <h2 className="text-xl">{t("moreTitle")}</h2>
           <p className="max-w-2xl text-sm text-muted">{t("moreText")}</p>
           <div className="flex flex-wrap gap-2">
-            {/* after the match the sheet is the way to shots and saves; marking is for the next one */}
-            <Link href={`/app/${orgId}/teams/${teamId}/matches?report=1`} className={buttonClass("primary", "sm")}>
-              {t("paper")}
-            </Link>
             <Link href={`/app/${orgId}/matches/${matchId}/marks`} className={buttonClass("secondary", "sm")}>
               {t("marks")}
             </Link>

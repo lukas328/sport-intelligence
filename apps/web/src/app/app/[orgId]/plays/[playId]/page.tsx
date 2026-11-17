@@ -1,9 +1,16 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ShareButton } from "@/components/sharing/share-button";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { PlayEditor } from "@/components/tactics/play-editor";
 import { serverApi } from "@/lib/api";
+
+export async function generateMetadata({ params }: { params: Promise<{ orgId: string; playId: string }> }): Promise<Metadata> {
+  const { orgId, playId } = await params;
+  const { data } = await (await serverApi()).GET("/v1/orgs/{org_id}/plays/{play_id}", { params: { path: { org_id: orgId, play_id: playId } } });
+  return { title: data?.name ?? (await getTranslations("tactics"))("title") };
+}
 
 export default async function PlayPage({ params }: { params: Promise<{ orgId: string; playId: string }> }) {
   const { orgId, playId } = await params;
@@ -26,7 +33,7 @@ export default async function PlayPage({ params }: { params: Promise<{ orgId: st
       </p>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-2xl font-bold sm:text-[1.75rem]">{play.data.name}</h1>
-        {staff && <ShareButton orgId={orgId} teamId={play.data.team_id} kind="play" targetId={play.data.id} />}
+        {staff && <ShareButton orgId={orgId} teamId={play.data.team_id} kind="play" targetId={play.data.id} info={{ title: play.data.name }} />}
       </div>
       <PlayEditor orgId={orgId} teamId={play.data.team_id} play={play.data} editable={staff} source={source} />
     </div>

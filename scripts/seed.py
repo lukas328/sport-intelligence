@@ -58,8 +58,8 @@ NO_CONSENT = {14, 19}
 
 
 ZONE_FROM = {
-    "la": "über links aussen",
-    "ra": "über rechts aussen",
+    "la": "über aussen links",
+    "ra": "über aussen rechts",
     "rl": "aus dem Rückraum links",
     "rm": "aus dem Rückraum Mitte",
     "rr": "aus dem Rückraum rechts",
@@ -416,7 +416,7 @@ def main() -> None:
         "/v1/orgs",
         json={
             "name": CLUB,
-            "primary_color": "#1f4fd6",
+            "primary_color": "#10684a",
             "secondary_color": "#ffffff",
         },
     ).json()["id"]
@@ -484,8 +484,8 @@ def main() -> None:
 
     # two older matches with a match report only
     for days, opponent, home, own, opp in (
-        (33, "TV Au-Wädenswil", False, 24, 27),
-        (19, "SG Horgen-Oberrieden", True, 29, 19),
+        (33, "TV Lindmatt", False, 24, 27),
+        (19, "SG Uferweg-Riet", True, 29, 19),
     ):
         report = paper_report(rng, now - timedelta(days=days), opponent, home, own, opp)
         c.post(
@@ -495,11 +495,11 @@ def main() -> None:
 
     # three matches with video and events; the right wing stays open, 7 m are missed
     # SPEC.md section 10: the last match is the one of the Zielbild, 26:18 (13:9) against TSV
-    # Thalwil in black; nine of their 18 goals over our right wing, our circle the strength
+    # Seewald in black; nine of their 18 goals over our right wing, our circle the strength
     analysed = [
         dict(
             days=26,
-            opponent="TV Rüti",
+            opponent="TV Rebhalden",
             home=True,
             kit="#c8102e",
             own=27,
@@ -514,7 +514,7 @@ def main() -> None:
         ),
         dict(
             days=12,
-            opponent="BSV Stäfa-Uerikon",
+            opponent="BSV Bergtal",
             home=False,
             kit="#5b2d8e",
             own=19,
@@ -529,7 +529,7 @@ def main() -> None:
         ),
         dict(
             days=5,
-            opponent="TSV Thalwil-Gattikon",
+            opponent="TSV Seewald",
             home=True,
             kit="#17191c",
             own=26,
@@ -552,8 +552,8 @@ def main() -> None:
                 "kickoff_at": (now - timedelta(days=spec["days"])).isoformat(),
                 "is_home": spec["home"],
                 "competition": "2. Liga Herren",
-                "venue": "Sporthalle Rotweg, Horgen" if spec["home"] else None,
-                "kit_own": "#1f4fd6",
+                "venue": "Sporthalle Seeblick" if spec["home"] else None,
+                "kit_own": "#10684a",
                 "kit_own_gk": "#f28c00",
                 "opponent_kit": spec["kit"],
                 "kit_opponent": spec["kit"],
@@ -600,7 +600,7 @@ def main() -> None:
     c.post(
         base,
         json={
-            "opponent_name": "HSG Rheinau",
+            "opponent_name": "HSG Moosbach",
             "kickoff_at": (now + timedelta(days=4)).isoformat(),
             "is_home": False,
             "competition": "2. Liga Herren",

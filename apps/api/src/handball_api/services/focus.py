@@ -260,9 +260,10 @@ async def plans(ctx: Ctx, team_id: uuid.UUID) -> list[dict[str, Any]]:
         return []
     # the seasons since the oldest plan, and the one before (its "before" matches)
     data = await load(ctx, team, since=min(p.created_at for p in items).date())
-    with_events = {r.match.id for r in data.rows}
+    # before and after only over matches with an analysis: a match with the official report
+    # alone has goals, but no turnovers or saves, and would pull every average down (K15)
     ordered = sorted(
-        (m for m in data.matches.values() if m.id in with_events), key=lambda m: m.date
+        (m for m in data.matches.values() if m.id in data.analysed), key=lambda m: m.date
     )
     out = []
     for p in items:

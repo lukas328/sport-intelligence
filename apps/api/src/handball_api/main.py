@@ -4,6 +4,7 @@ import uuid
 from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
 
+import sentry_sdk
 import structlog
 from fastapi import Depends, FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
@@ -11,14 +12,24 @@ from fastapi.middleware.cors import CORSMiddleware
 from handball_api import __version__
 from handball_api.core.assistant_llm import AssistantModel, ClaudeAssistantModel
 from handball_api.core.config import Settings, get_settings
-from handball_api.core.db import dispose_engine, init_engine
+from handball_api.core.db import (
+    database_unavailable,
+    dispose_engine,
+    init_engine,
+    transaction_conflict,
+)
 from handball_api.core.email import (
+    AcsEmailSender,
     ConsoleEmailSender,
     EmailSender,
     MemoryEmailSender,
     SmtpEmailSender,
 )
-from handball_api.core.errors import install_error_handlers
+from handball_api.core.errors import (
+    install_error_handlers,
+    internal_error_response,
+    unavailable_response,
+)
 from handball_api.core.jobs import EventBus, JobQueue, RedisEventBus, RqJobQueue
 from handball_api.core.logging import configure_logging, get_logger
 from handball_api.core.oidc import OidcClient
@@ -28,6 +39,7 @@ from handball_api.core.storage import ObjectStorage, S3Storage
 from handball_api.core.telemetry import instrument_engine, setup_tracing
 from handball_api.core.text import ClaudeTextGenerator, TextGenerator
 from handball_api.routers import assistant as assistant_router
+from handball_api.routers import attachments as attachments_router
 from handball_api.routers import auth, health, internal, matches, orgs, teams
 from handball_api.routers import billing as billing_router
 from handball_api.routers import collections as collections_router
@@ -79,7 +91,13 @@ def _email_sender(settings: Settings) -> EmailSender:
     if settings.email_backend == "memory":
         return MemoryEmailSender()
     if settings.email_backend == "console":
-        return ConsoleEmailSender()
+        return ConsoleEmailSender(full=settings.env == "local")
+    if settings.email_backend == "acs":
+        if settings.acs_connection_string is None:
+            raise RuntimeError("HB_EMAIL_BACKEND=acs needs HB_ACS_CONNECTION_STRING")
+        return AcsEmailSender(
+            settings.acs_connection_string.get_secret_value(), settings.email_from
+        )
     return SmtpEmailSender(
         settings.smtp_host,
         settings.smtp_port,
@@ -138,7 +156,12 @@ def create_app(
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-        engine = init_engine(settings.database_url)
+        engine = init_engine(
+            settings.database_url,
+            pool_size=settings.db_pool_size,
+            max_overflow=settings.db_max_overflow,
+            pool_timeout_s=settings.db_pool_timeout_s,
+        )
         instrument_engine(app, engine)
         log.info("startup", env=settings.env, version=__version__)
         yield
@@ -195,9 +218,32 @@ def create_app(
         request: Request, call_next: Callable[[Request], Awaitable[Response]]
     ) -> Response:
         request_id = request.headers.get("x-request-id") or uuid.uuid4().hex
+        request.state.request_id = request_id
         structlog.contextvars.bind_contextvars(request_id=request_id)
         try:
             response = await call_next(request)
+        except Exception as exc:
+            # An unexpected error becomes a problem+json 500 here, logged as one structured line
+            # with the request id. Left alone it would reach Starlette's server error middleware,
+            # which answers without the id and re-raises, so the server prints a bare traceback.
+            # The database out of reach (no free connection, the server refusing one) is no fault
+            # of the request: 503 with Retry-After. Logged the same way, so it is not missed.
+            # A deadlock that still reaches here (the delete tried three times) is no fault of
+            # the request either: 503, try again.
+            unavailable = database_unavailable(exc) or transaction_conflict(exc)
+            log.exception(
+                "unhandled_exception",
+                method=request.method,
+                path=request.url.path,
+                status=503 if unavailable else 500,
+                kind="database-unavailable" if unavailable else "error",
+            )
+            sentry_sdk.capture_exception(exc)  # no-op without Sentry; deduplicated with it
+            response = (
+                unavailable_response(request, request_id)
+                if unavailable
+                else internal_error_response(request, request_id)
+            )
         finally:
             structlog.contextvars.clear_contextvars()
         response.headers["x-request-id"] = request_id
@@ -219,6 +265,7 @@ def create_app(
     app.include_router(teams.router)
     app.include_router(matches.router)
     app.include_router(matches.public_media)
+    app.include_router(attachments_router.router)
     app.include_router(events_router.router)
     app.include_router(tactics_router.router)
     app.include_router(training_router.router)

@@ -39,7 +39,8 @@ export function Footer({ locale }: { locale: Locale }) {
     <footer className="mt-24 border-t-2 border-ink">
       <div className="wrap grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-4">
         <div>
-          <img src="/brand/wortmarke-quer-einfarbig.svg" alt="Handball Intelligence" width={2150} height={512} className="h-12 w-auto" />
+          {/* the vector word mark above its smallest size (brand: across from 220 px), so it stays sharp */}
+          <img src="/brand/wortmarke-quer-einfarbig.svg" alt="Handball Intelligence" width={2150} height={512} className="h-14 w-auto" />
           <p className="mt-4 max-w-[18rem] text-base text-ink-2">{m.footer.note}</p>
         </div>
         {col(m.footer.product, [

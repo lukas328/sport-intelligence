@@ -56,12 +56,22 @@ export const INK_DARK = "#0a0d11";
 export const GROUND = "#eceae5";
 export const PAPER = "#f7f6f2";
 export const ATTN = "#ffd23c";
-export const COURT = "#0f2333";
+/**
+ * The tactics camera's court on the website: ink, with cream lines. The app draws it navy; the
+ * website keeps to its own colours (cream, green, ink; BEFUNDE-2 S10).
+ */
+export const COURT = "#1c1d20";
 /** the opponent while nobody has said its colour: grey, never a guess */
 export const OPPONENT_UNKNOWN = "#646b73";
 /** the unknown opponent next to a black club, which would swallow the grey */
 export const OPPONENT_UNKNOWN_ON_BLACK = "#8b9198";
 export const DEFAULT_CLUB = "#1f4fd6";
+/**
+ * The invented demo club (HC Zürichsee, scripts/seed.py) and so the website's own colour: a deep
+ * pine green with white. White on it 6.8:1, as text on the cloth 5.6:1, on the dark court 2.9:1,
+ * so the app shows it unchanged everywhere (BEFUNDE-2 S11).
+ */
+export const DEMO_CLUB = "#10684a";
 /** below this contrast two colours of the same family read as the same team on the court */
 export const CAM_SAME_LIGHTNESS = 2.5;
 
@@ -85,12 +95,12 @@ export const SHIRTS = [
   ["yellow", "#f6c500"],
   ["black", "#17191c"],
   ["white", "#ffffff"],
-  ["green", "#138a4b"],
+  ["green", "#12804a"],
   ["orange", "#e8731a"],
   ["purple", "#5b2d8e"],
 ] as const;
 
-/** The opponent the check colours are shown against (the demo season's TV Thalwil): black and white. */
+/** The opponent the check colours are shown against (the demo season's TSV Seewald): black and white. */
 export const CHECK_OPPONENT = ["#17191c", "#ffffff"] as const;
 
 /** Shifts `c` towards `to` until it reaches `need` contrast on `ground`. */

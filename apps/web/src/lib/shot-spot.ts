@@ -93,6 +93,16 @@ export function spotCounts(g: MatchGraphics): { placed: number; missing: number;
   return { placed: goals.filter((x) => x.spot_by_coach === true).length, missing: goalsWithoutSpot(g).length, total: goals.length };
 }
 
+/**
+ * Where Prüfen goes once the place of a confirmed goal is given or skipped (W33): the place is
+ * offered, never in the way, so both lead on the same way. From the list of answers the court
+ * closes, while an answer is being changed it goes back to the round, else to the next question.
+ */
+export function afterSpot(step: { fromList?: boolean }, changing: boolean): "close" | "back" | "next" {
+  if (step.fromList) return "close";
+  return changing ? "back" : "next";
+}
+
 /** Minutes for Prüfen: goal moments with «Von wo?» about 23 s, other questions about 18 s, a place alone about 7 s (measured without the place: 22 questions in 6 to 7 minutes). */
 export function checkMinutes(goalQuestions: number, otherQuestions: number, placesOnly = 0): number {
   const s = goalQuestions * 23 + otherQuestions * 18 + placesOnly * 7;

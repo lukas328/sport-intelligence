@@ -7,6 +7,7 @@ import { Bell } from "lucide-react";
 import Link from "next/link";
 import { useFormatter, useNow, useTranslations } from "next-intl";
 import { api } from "@/lib/client";
+import { checkMinutes } from "@/lib/shot-spot";
 import { cn } from "@/lib/utils";
 
 type Note = Schemas["NotificationOut"];
@@ -36,7 +37,13 @@ export function NotificationBell({ orgId }: { orgId: string }) {
   // with the match's name where the note carries it (UX test H06, B29)
   const text = (n: Note) => {
     const named = `${n.kind}_match`;
-    if ((n.params as { opponent?: string } | null)?.opponent && t.has(named as "assignment")) return t(named as "assignment", n.params as never);
+    // the questions with about how long they take: «3 Fragen, etwa 1 Minute» (second round A6)
+    const questions = Number((n.params as { questions?: number } | null)?.questions ?? 0);
+    const params = { ...(n.params as object), minutes: checkMinutes(questions, 0) };
+    if ((n.params as { opponent?: string } | null)?.opponent && t.has(named as "assignment")) return t(named as "assignment", params as never);
+    // who asks for which team (K17); older notes without a name keep the plain text
+    const person = `${n.kind}_${(n.params as { team?: string } | null)?.team ? "team" : "named"}`;
+    if ((n.params as { name?: string } | null)?.name && t.has(person as "assignment")) return t(person as "assignment", n.params as never);
     return t.has(n.kind as "assignment") ? t(n.kind as "assignment", n.params as never) : t("other");
   };
   return (
@@ -68,13 +75,19 @@ export function NotificationBell({ orgId }: { orgId: string }) {
           <div className="flex items-center justify-between border-b border-border/70 px-4 py-3">
             <p className="font-semibold">{t("title")}</p>
             {unread > 0 && (
-              <button className="text-xs font-medium text-accent hover:underline" onClick={() => read.mutate([])}>
+              <button className="text-xs font-medium text-accent underline decoration-[1.5px] underline-offset-4" onClick={() => read.mutate([])}>
                 {t("markAll")}
               </button>
             )}
           </div>
           <div className="max-h-[26rem] overflow-auto p-1.5">
-            {items.length === 0 && <p className="px-3 py-6 text-center text-muted">{t("none")}</p>}
+            {/* empty: say what will come here (K8) */}
+            {items.length === 0 && (
+              <div className="px-3 py-5" data-testid="bell-empty">
+                <p className="m-0 font-semibold">{t("none")}</p>
+                <p className="mt-1 mb-0 text-[15px] text-ink-2">{t("noneHint")}</p>
+              </div>
+            )}
             {items.map((n) => (
               <M.Item key={n.id} asChild>
                 <Link

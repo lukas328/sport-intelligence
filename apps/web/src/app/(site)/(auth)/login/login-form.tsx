@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/field";
 import { api } from "@/lib/client";
 import { errorKey, type ErrorKey } from "@/lib/errors";
 import { enterApp, safeNext } from "@/lib/nav";
+import { useMailEnabled } from "@/lib/site-config";
 
 type Mode = "password" | "magic" | "totp" | "magic-sent";
 
@@ -20,6 +21,8 @@ export function LoginForm({ oauth }: { oauth?: ReactNode }) {
   const [mode, setMode] = useState<Mode>(params.get("totp") ? "totp" : "password");
   const [error, setError] = useState<ErrorKey | null>(params.get("error") ? errorKey({ type: `x:${params.get("error")}` }) : null);
   const [busy, setBusy] = useState(false);
+  // a sign-in link needs mail delivery (L2): without it the way is the password only
+  const mail = useMailEnabled();
 
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -83,7 +86,7 @@ export function LoginForm({ oauth }: { oauth?: ReactNode }) {
               {mode === "password" && (
                 <>
                   <Input label={t("auth.password")} name="password" type="password" autoComplete="current-password" required />
-                  <Link href="/auth/forgot" className="block text-sm font-medium text-accent hover:underline">
+                  <Link href="/auth/forgot" className="block text-sm font-medium text-accent underline decoration-[1.5px] underline-offset-4">
                     {t("auth.forgot")}
                   </Link>
                 </>
@@ -97,19 +100,21 @@ export function LoginForm({ oauth }: { oauth?: ReactNode }) {
       )}
       {mode !== "totp" && (
         <div className="flex flex-col gap-2 text-sm">
-          <button
-            type="button"
-            className="text-left font-medium text-accent hover:underline"
-            onClick={() => {
-              setError(null);
-              setMode(mode === "password" ? "magic" : "password");
-            }}
-          >
-            {mode === "password" ? t("auth.useMagic") : t("auth.usePassword")}
-          </button>
+          {(mail || mode !== "password") && (
+            <button
+              type="button"
+              className="text-left font-medium text-accent underline decoration-[1.5px] underline-offset-4"
+              onClick={() => {
+                setError(null);
+                setMode(mode === "password" ? "magic" : "password");
+              }}
+            >
+              {mode === "password" ? t("auth.useMagic") : t("auth.usePassword")}
+            </button>
+          )}
           <p>
             {t("auth.noAccount")}{" "}
-            <Link href="/register" className="font-medium text-accent hover:underline">
+            <Link href="/register" className="font-medium text-accent underline decoration-[1.5px] underline-offset-4">
               {t("auth.toRegister")}
             </Link>
           </p>

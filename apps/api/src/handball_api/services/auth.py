@@ -12,7 +12,8 @@ from datetime import UTC, datetime, timedelta
 from urllib.parse import quote
 
 import httpx
-from sqlalchemy import delete, select
+from sqlalchemy import delete, select, update
+from sqlalchemy.orm.attributes import set_committed_value
 
 from handball_api.core.email import try_send
 from handball_api.core.errors import ProblemError
@@ -275,8 +276,26 @@ async def resolve_session(ctx: Ctx, token: str) -> tuple[AuthSession, User] | No
     if session.expires_at <= now:
         return None
     if session.last_seen_at is None or now - session.last_seen_at > LAST_SEEN_RESOLUTION:
-        session.last_seen_at = now
+        await _touch(ctx, session, now)
     return session, user
+
+
+async def _touch(ctx: Ctx, session: AuthSession, now: datetime) -> None:
+    """Records the last-seen time without ever waiting for the row. The request holds the row
+    lock until it commits; a long one (deleting a big match removes thousands of files) made
+    every other request of the person wait on the row (the time was old for all of them), the
+    pools filled up and requests failed. Another request holding the row records the time."""
+    free = (
+        select(AuthSession.id).where(AuthSession.id == session.id).with_for_update(skip_locked=True)
+    )
+    done = await ctx.db.execute(
+        update(AuthSession)
+        .where(AuthSession.id.in_(free.scalar_subquery()))
+        .values(last_seen_at=now)
+        .execution_options(synchronize_session=False)
+    )
+    if done.rowcount:  # type: ignore[attr-defined]
+        set_committed_value(session, "last_seen_at", now)
 
 
 async def logout(ctx: Ctx, session: AuthSession) -> None:
@@ -286,7 +305,12 @@ async def logout(ctx: Ctx, session: AuthSession) -> None:
 async def start(ctx: Ctx, email: str, locale: str, next_path: str | None) -> None:
     """The passwordless start of the public entry: a new address gets an account without a
     password (saving accepts the terms), every address gets a sign-in link that leads to
-    `next_path`. Same answer either way (no account enumeration)."""
+    `next_path`. Same answer either way (no account enumeration).
+
+    Without mail delivery an account without a password would have no way in (L2): refused, the
+    entry asks for a password then (`/auth/register`)."""
+    if not ctx.settings.mail_delivers:
+        raise ProblemError(409, "mail-unavailable", "No mail delivery: register with a password")
     user = await ctx.db.scalar(select(User).where(User.email == email))
     if user is None:
         user = User(

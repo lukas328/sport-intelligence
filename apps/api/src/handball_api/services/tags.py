@@ -41,6 +41,7 @@ from handball_api.schemas.tags import (
 from handball_api.services import audit
 from handball_api.services.context import Ctx
 from handball_api.services.matches import (
+    counted,
     duration_ms,
     get_match,
     in_video,
@@ -245,6 +246,8 @@ def _link_col(col: Any) -> Any:
 async def search(ctx: Ctx, team_id: uuid.UUID, f: SearchFilter) -> SearchResult:
     team = await get_team(ctx, team_id, Action.PLAYLIST_READ_ALL)
     mq = select(Match.id).where(Match.team_id == team.id)
+    if not f.match_ids:  # the example match only when asked for by its id (R1)
+        mq = mq.where(counted())
     if f.season_id:
         mq = mq.where(Match.season_id == f.season_id)
     if f.match_ids:
