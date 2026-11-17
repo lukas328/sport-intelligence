@@ -3352,7 +3352,11 @@
     "emptyTitle": "Pas encore de sélection.",
     "emptyText": "Réunis des scènes pour ton équipe et partage le lien dans le chat de l'équipe. Les joueurs n'ont pas besoin de compte.",
     "emptyNoVideo": "Une sélection se compose de scènes. Télécharge d'abord une vidéo.",
-    "emptyToScenes": "Choisir des scènes"
+    "emptyToScenes": "Choisir des scènes",
+    "moveUpItem": "Monter l'élément {n}",
+    "moveDownItem": "Descendre l'élément {n}",
+    "moreItem": "Plus pour l'élément {n}",
+    "more": "Plus"
   },
   "consentLink": {
     "invalid": "Ce lien n’est plus valable. Demande le nouveau dans l’équipe.",

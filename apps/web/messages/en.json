@@ -3352,7 +3352,11 @@
     "emptyTitle": "No collection yet.",
     "emptyText": "Put scenes together for your team and share the link in the team chat. Players do not need an account.",
     "emptyNoVideo": "A collection is made of scenes. Upload a video first.",
-    "emptyToScenes": "Choose scenes"
+    "emptyToScenes": "Choose scenes",
+    "moveUpItem": "Move item {n} up",
+    "moveDownItem": "Move item {n} down",
+    "moreItem": "More for item {n}",
+    "more": "More"
   },
   "consentLink": {
     "invalid": "This link is no longer valid. Ask the team for the new one.",

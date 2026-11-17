@@ -3352,7 +3352,11 @@
     "emptyTitle": "Noch keine Sammlung.",
     "emptyText": "Stell Szenen für dein Team zusammen und teil den Link im Teamchat. Spieler brauchen dafür kein Konto.",
     "emptyNoVideo": "Eine Sammlung besteht aus Szenen. Lade zuerst ein Video hoch.",
-    "emptyToScenes": "Szenen auswählen"
+    "emptyToScenes": "Szenen auswählen",
+    "moveUpItem": "Eintrag {n} nach oben",
+    "moveDownItem": "Eintrag {n} nach unten",
+    "moreItem": "Mehr zu Eintrag {n}",
+    "more": "Mehr"
   },
   "consentLink": {
     "invalid": "Dieser Link gilt nicht mehr. Frag im Team nach dem neuen.",
