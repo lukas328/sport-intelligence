@@ -6,1340 +6,1340 @@
    "club": [
     {
      "clubId": 140269,
-     "name": "TV Aarburg",
-     "city": "Aarburg",
+     "name": "TV Hasenmatt",
+     "city": "Hasenmatt",
      "canton": "AG"
     },
     {
      "clubId": 140270,
-     "name": "HSV Säuliamt",
-     "city": "Affoltern am Albis",
+     "name": "HSV Krebsbühl",
+     "city": "Lehmweid",
      "canton": "ZH"
     },
     {
      "clubId": 140273,
-     "name": "HB Blau Boys Binningen",
-     "city": "Binningen",
+     "name": "HB Schilfikon",
+     "city": "Kieselwies",
      "canton": "BL"
     },
     {
      "clubId": 140275,
-     "name": "HSG Pfäffikon-Fehraltorf",
-     "city": "Fehraltorf",
+     "name": "HSG Haselhalden",
+     "city": "Ulmenweid",
      "canton": "ZH"
     },
     {
      "clubId": 140276,
-     "name": "TV Aesch",
-     "city": "Aesch BL",
+     "name": "TV Heidefeld",
+     "city": "Heidefeld",
      "canton": "BL"
     },
     {
      "clubId": 140277,
-     "name": "TV Appenzell",
-     "city": "Appenzell",
+     "name": "TV Tannenmatt",
+     "city": "Tannenmatt",
      "canton": "AI"
     },
     {
      "clubId": 140280,
-     "name": "STV Baden",
-     "city": "Baden",
+     "name": "STV Krähenmoos",
+     "city": "Krähenmoos",
      "canton": "AG"
     },
     {
      "clubId": 140281,
-     "name": "TV Balsthal",
-     "city": "Balsthal",
+     "name": "TV Sonnikon",
+     "city": "Sonnikon",
      "canton": "SO"
     },
     {
      "clubId": 140284,
-     "name": "TV Kleinbasel",
-     "city": "Basel",
+     "name": "TV Egliboden",
+     "city": "Spechtwil",
      "canton": "BS"
     },
     {
      "clubId": 140285,
-     "name": "TSV Wahlen",
-     "city": "Wahlen b. Laufen",
+     "name": "TSV Biberegg",
+     "city": "Biberegg",
      "canton": "BL"
     },
     {
      "clubId": 140288,
-     "name": "TV Länggasse Bern",
-     "city": "Bern",
+     "name": "TV Brombeerikon",
+     "city": "Kornfeld",
      "canton": "BE"
     },
     {
      "clubId": 140290,
-     "name": "Biberist aktiv",
-     "city": "Biberist",
+     "name": "Handball Ulmenrüti",
+     "city": "Ulmenrüti",
      "canton": "SO"
     },
     {
      "clubId": 140291,
-     "name": "TV Birsfelden",
-     "city": "Birsfelden",
+     "name": "TV Linsenrüti",
+     "city": "Linsenrüti",
      "canton": "BL"
     },
     {
      "clubId": 140294,
-     "name": "TV Brittnau",
-     "city": "Brittnau",
+     "name": "TV Fuchsacker",
+     "city": "Fuchsacker",
      "canton": "AG"
     },
     {
      "clubId": 140296,
-     "name": "TV Jegenstorf",
-     "city": "Jegenstorf",
+     "name": "TV Gerstenried",
+     "city": "Gerstenried",
      "canton": "BE"
     },
     {
      "clubId": 140298,
-     "name": "TV Dagmersellen",
-     "city": "Dagmersellen",
+     "name": "TV Linsenweid",
+     "city": "Linsenweid",
      "canton": "LU"
     },
     {
      "clubId": 140300,
-     "name": "TV Eiken",
-     "city": "Eiken",
+     "name": "TV Flachsbühl",
+     "city": "Flachsbühl",
      "canton": "AG"
     },
     {
      "clubId": 140303,
-     "name": "TSV Frick",
-     "city": "Frick",
+     "name": "TSV Wolfsrain",
+     "city": "Wolfsrain",
      "canton": "AG"
     },
     {
      "clubId": 140305,
-     "name": "TV Endingen",
-     "city": "Endingen",
+     "name": "TV Kornau",
+     "city": "Kornau",
      "canton": "AG"
     },
     {
      "clubId": 140307,
-     "name": "HSC Kreuzlingen",
-     "city": "Kreuzlingen",
+     "name": "HSC Weidenbühl",
+     "city": "Weidenbühl",
      "canton": "TG"
     },
     {
      "clubId": 140309,
-     "name": "FSG Genève-Paquis",
-     "city": "Les Acacias",
+     "name": "FSG Côtechamp",
+     "city": "Hautvigne",
      "canton": "GE"
     },
     {
      "clubId": 140312,
-     "name": "Gränichen STV",
-     "city": "Gränichen",
+     "name": "Handball Espenegg",
+     "city": "Ulmenwies",
      "canton": "AG"
     },
     {
      "clubId": 140314,
-     "name": "HR Hochdorf",
-     "city": "Hochdorf",
+     "name": "HR Moosrain",
+     "city": "Moosrain",
      "canton": "LU"
     },
     {
      "clubId": 140317,
-     "name": "TV Horw",
-     "city": "Horw",
+     "name": "TV Roggenried",
+     "city": "Roggenried",
      "canton": "LU"
     },
     {
      "clubId": 140319,
-     "name": "HC Kaltenbach",
-     "city": "Stein am Rhein",
+     "name": "HC Kühlbrunn",
+     "city": "Heidegrund",
      "canton": "SH"
     },
     {
      "clubId": 140320,
-     "name": "Handball Zurzibiet",
-     "city": "Bad Zurzach",
+     "name": "Handball Brombeeregg",
+     "city": "Hasenhag",
      "canton": "AG"
     },
     {
      "clubId": 140322,
-     "name": "Club 72 Köniz",
-     "city": "Köniz",
+     "name": "Handball Flachshof",
+     "city": "Eglihof",
      "canton": "BE"
     },
     {
      "clubId": 140325,
-     "name": "Lausanne-Ville/Cugy Handball",
-     "city": "Lausanne",
+     "name": "Pierre-sur-Saule Handball",
+     "city": "Prévigne",
      "canton": "VD"
     },
     {
      "clubId": 140330,
-     "name": "TV Reinach",
-     "city": "Reinach BL",
+     "name": "TV Schwalbenikon",
+     "city": "Schwalbenikon",
      "canton": "BL"
     },
     {
      "clubId": 140333,
-     "name": "BSG Vorderland",
-     "city": "Heiden",
+     "name": "BSG Tannenegg",
+     "city": "Erlenwil",
      "canton": "AR"
     },
     {
      "clubId": 140334,
-     "name": "TV Magden",
-     "city": "Magden",
+     "name": "TV Falkenwies",
+     "city": "Falkenwies",
      "canton": "AG"
     },
     {
      "clubId": 140336,
-     "name": "HBC Münsingen",
-     "city": "Münsingen",
+     "name": "HBC Haferboden",
+     "city": "Haferboden",
      "canton": "BE"
     },
     {
      "clubId": 140338,
-     "name": "TV Muttenz",
-     "city": "Muttenz",
+     "name": "TV Schilfhof",
+     "city": "Schilfhof",
      "canton": "BL"
     },
     {
      "clubId": 140339,
-     "name": "TV Möhlin",
-     "city": "Möhlin",
+     "name": "TV Finkenweid",
+     "city": "Finkenweid",
      "canton": "AG"
     },
     {
      "clubId": 140340,
-     "name": "TV Muri",
-     "city": "Muri AG",
+     "name": "TV Mardergrund",
+     "city": "Mardergrund",
      "canton": "AG"
     },
     {
      "clubId": 140349,
-     "name": "TV Pratteln NS",
-     "city": "Pratteln",
+     "name": "TV Iltisfeld",
+     "city": "Iltisfeld",
      "canton": "BL"
     },
     {
      "clubId": 140351,
-     "name": "TSV Rheinfelden",
-     "city": "Rheinfelden",
+     "name": "TSV Kleeacker",
+     "city": "Kleeacker",
      "canton": "AG"
     },
     {
      "clubId": 140352,
-     "name": "TV Teufen",
-     "city": "Teufen AR",
+     "name": "TV Biberboden",
+     "city": "Biberboden",
      "canton": "AR"
     },
     {
      "clubId": 140353,
-     "name": "TV Räterschen Handball",
-     "city": "Räterschen",
+     "name": "TV Krebsried Handball",
+     "city": "Krebsried",
      "canton": "ZH"
     },
     {
      "clubId": 140354,
-     "name": "HV Rothrist",
-     "city": "Rothrist",
+     "name": "HV Linsenbühl",
+     "city": "Linsenbühl",
      "canton": "AG"
     },
     {
      "clubId": 140355,
-     "name": "TV Sarnen",
-     "city": "Sarnen",
+     "name": "TV Muschelhag",
+     "city": "Muschelhag",
      "canton": "OW"
     },
     {
      "clubId": 140357,
-     "name": "GS Schaffhausen",
-     "city": "Schaffhausen",
+     "name": "GS Bibermoos",
+     "city": "Bibermoos",
      "canton": "SH"
     },
     {
      "clubId": 140358,
-     "name": "HBS-TV Schlieren",
-     "city": "Schlieren",
+     "name": "HBS-TV Weidenwies",
+     "city": "Weidenwies",
      "canton": "ZH"
     },
     {
      "clubId": 140359,
-     "name": "TV Schupfart",
-     "city": "Schupfart",
+     "name": "TV Eichenweid",
+     "city": "Eichenweid",
      "canton": "AG"
     },
     {
      "clubId": 140360,
-     "name": "HC STV Schwyz",
-     "city": "Schwyz",
+     "name": "HC STV Brombeerwil",
+     "city": "Brombeerwil",
      "canton": "SZ"
     },
     {
      "clubId": 140362,
-     "name": "TV Solothurn",
-     "city": "Solothurn",
+     "name": "TV Muschelhalden",
+     "city": "Muschelhalden",
      "canton": "SO"
     },
     {
      "clubId": 140364,
-     "name": "HSC Suhr Aarau",
-     "city": "Aarau",
+     "name": "HSC Hirschengrund",
+     "city": "Kranichgrund",
      "canton": "AG"
     },
     {
      "clubId": 140365,
-     "name": "TV Sissach",
-     "city": "Sissach",
+     "name": "TV Rehweid",
+     "city": "Rehweid",
      "canton": "BL"
     },
     {
      "clubId": 140366,
-     "name": "TV Stein",
-     "city": "Stein AG",
+     "name": "TV Felchenwil",
+     "city": "Felchenwil",
      "canton": "AG"
     },
     {
      "clubId": 140367,
-     "name": "SEEN TIGERS",
-     "city": "Winterthur",
+     "name": "Handball Ahornrain",
+     "city": "Talstadt",
      "canton": "ZH"
     },
     {
      "clubId": 140368,
-     "name": "TV Steffisburg",
-     "city": "Steffisburg",
+     "name": "TV Weidenwil",
+     "city": "Weidenwil",
      "canton": "BE"
     },
     {
      "clubId": 140371,
-     "name": "TV Thalwil",
-     "city": "Thalwil",
+     "name": "TV Farnwil",
+     "city": "Farnwil",
      "canton": "ZH"
     },
     {
      "clubId": 140373,
-     "name": "TV Uster",
-     "city": "Uster",
+     "name": "TV Brunnmatt",
+     "city": "Brunnmatt",
      "canton": "ZH"
     },
     {
      "clubId": 140374,
-     "name": "TV Uznach",
-     "city": "Uznach",
+     "name": "TV Gerstenweid",
+     "city": "Gerstenweid",
      "canton": "SG"
     },
     {
      "clubId": 140377,
-     "name": "TV Obermumpf",
-     "city": "Obermumpf",
+     "name": "TV Hasenacker",
+     "city": "Hasenacker",
      "canton": "AG"
     },
     {
      "clubId": 140378,
-     "name": "TV Wabern",
-     "city": "Köniz",
+     "name": "TV Eulenbühl",
+     "city": "Eglihof",
      "canton": "BE"
     },
     {
      "clubId": 140381,
-     "name": "STV Willisau",
-     "city": "Willisau",
+     "name": "STV Holunderfeld",
+     "city": "Holunderfeld",
      "canton": "LU"
     },
     {
      "clubId": 140384,
-     "name": "Handball Wohlen",
-     "city": "Wohlen AG",
+     "name": "Handball Luchsfeld",
+     "city": "Luchsfeld",
      "canton": "AG"
     },
     {
      "clubId": 140385,
-     "name": "Handball Würenlingen",
-     "city": "Würenlingen",
+     "name": "Handball Hanfhag",
+     "city": "Hanfhag",
      "canton": "AG"
     },
     {
      "clubId": 140387,
-     "name": "TV Witikon",
-     "city": "Zürich",
+     "name": "TV Distelau",
+     "city": "Grossried",
      "canton": "ZH"
     },
     {
      "clubId": 140388,
-     "name": "HC Andelfingen",
-     "city": "Andelfingen",
+     "name": "HC Holderacker",
+     "city": "Holderacker",
      "canton": "ZH"
     },
     {
      "clubId": 140390,
-     "name": "Schwamendingen HandBall",
-     "city": "Zürich",
+     "name": "Brachfeld HandBall",
+     "city": "Grossried",
      "canton": "ZH"
     },
     {
      "clubId": 140428,
-     "name": "TV Zofingen Handball",
-     "city": "Zofingen",
+     "name": "TV Holunderhof Handball",
+     "city": "Holunderhof",
      "canton": "AG"
     },
     {
      "clubId": 140435,
-     "name": "TV Unterstrass Zürich",
-     "city": "Zürich",
+     "name": "TV Föhrengrund",
+     "city": "Grossried",
      "canton": "ZH"
     },
     {
      "clubId": 140473,
-     "name": "HC Amriswil",
-     "city": "Amriswil",
+     "name": "HC Storchenbühl",
+     "city": "Storchenbühl",
      "canton": "TG"
     },
     {
      "clubId": 140477,
-     "name": "HG Rütihof",
-     "city": "Rütihof",
+     "name": "HG Ahornegg",
+     "city": "Ahornegg",
      "canton": "AG"
     },
     {
      "clubId": 140478,
-     "name": "HC Flawil",
-     "city": "Flawil",
+     "name": "HC Erlenfeld",
+     "city": "Erlenfeld",
      "canton": "SG"
     },
     {
      "clubId": 140479,
-     "name": "HV Langenthal",
-     "city": "Langenthal",
+     "name": "HV Distelmatt",
+     "city": "Distelmatt",
      "canton": "BE"
     },
     {
      "clubId": 140480,
-     "name": "Bernex Handball Club",
-     "city": "Les Acacias",
+     "name": "Combevigne Handball Club",
+     "city": "Hautvigne",
      "canton": "GE"
     },
     {
      "clubId": 140483,
-     "name": "HV Suhrental",
-     "city": "Schöftland",
+     "name": "HV Reihergrund",
+     "city": "Kranichhof",
      "canton": "AG"
     },
     {
      "clubId": 140487,
-     "name": "SC Siggenthal",
-     "city": "Nussbaumen",
+     "name": "SC Holderboden",
+     "city": "Eulenfeld",
      "canton": "AG"
     },
     {
      "clubId": 140488,
-     "name": "HC Ehrendingen",
-     "city": "Ehrendingen",
+     "name": "HC Eulenwil",
+     "city": "Eulenwil",
      "canton": "AG"
     },
     {
      "clubId": 140489,
-     "name": "BSV Aarberg",
-     "city": "Aarberg",
+     "name": "BSV Iltishalden",
+     "city": "Iltishalden",
      "canton": "BE"
     },
     {
      "clubId": 140492,
-     "name": "RTV 1879 Basel",
-     "city": "Basel",
+     "name": "RTV 1879 Spechtwil",
+     "city": "Spechtwil",
      "canton": "BS"
     },
     {
      "clubId": 140493,
-     "name": "GTV Basel",
-     "city": "Basel",
+     "name": "GTV Spechtwil",
+     "city": "Spechtwil",
      "canton": "BS"
     },
     {
      "clubId": 140500,
-     "name": "HC Pfadi Dietlikon",
-     "city": "Dietlikon",
+     "name": "HC Pfadi Storchenrüti",
+     "city": "Storchenrüti",
      "canton": "ZH"
     },
     {
      "clubId": 140503,
-     "name": "PSG Lyss",
-     "city": "Lyss",
+     "name": "PSG Rietrain",
+     "city": "Rietrain",
      "canton": "BE"
     },
     {
      "clubId": 140504,
-     "name": "HS Biel Bienne",
-     "city": "Biel/Bienne",
+     "name": "HS Kranichried",
+     "city": "Nusshalden",
      "canton": "BE"
     },
     {
      "clubId": 140505,
-     "name": "HC Crissier",
-     "city": "Crissier",
+     "name": "HC Fleursaule",
+     "city": "Fleursaule",
      "canton": "VD"
     },
     {
      "clubId": 140508,
-     "name": "HC Bruggen",
-     "city": "St. Gallen",
+     "name": "HC Holderweid",
+     "city": "Weiherried",
      "canton": "SG"
     },
     {
      "clubId": 140510,
-     "name": "HC Dübendorf",
-     "city": "Dübendorf",
+     "name": "HC Krebsweid",
+     "city": "Krebsweid",
      "canton": "ZH"
     },
     {
      "clubId": 140511,
-     "name": "SC Frauenfeld",
-     "city": "Frauenfeld",
+     "name": "SC Ginstermatt",
+     "city": "Ginstermatt",
      "canton": "TG"
     },
     {
      "clubId": 140513,
-     "name": "CH Fribourg",
-     "city": "Fribourg",
+     "name": "CH Mont-en-Val",
+     "city": "Mont-en-Val",
      "canton": "FR"
     },
     {
      "clubId": 140514,
-     "name": "Handball Emmen",
-     "city": "Emmen",
+     "name": "Handball Kranichbühl",
+     "city": "Kranichbühl",
      "canton": "LU"
     },
     {
      "clubId": 140515,
-     "name": "HC Arbon",
-     "city": "Arbon",
+     "name": "HC Kalmoos",
+     "city": "Kalmoos",
      "canton": "TG"
     },
     {
      "clubId": 140516,
-     "name": "CS Chênois Genève Handball",
-     "city": "Thônex",
+     "name": "CS Croix-sur-Champ Handball",
+     "city": "Côte-en-Vigne",
      "canton": "GE"
     },
     {
      "clubId": 140520,
-     "name": "LC Brühl Handball",
-     "city": "St. Gallen",
+     "name": "LC Luchsikon Handball",
+     "city": "Weiherried",
      "canton": "SG"
     },
     {
      "clubId": 140521,
-     "name": "SV Fides St. Gallen",
-     "city": "St. Gallen",
+     "name": "SV Marderikon",
+     "city": "Weiherried",
      "canton": "SG"
     },
     {
      "clubId": 140522,
-     "name": "TV Herisau",
-     "city": "Herisau",
+     "name": "TV Riedboden",
+     "city": "Riedboden",
      "canton": "AR"
     },
     {
      "clubId": 140524,
-     "name": "HC Servette",
-     "city": "Les Acacias",
+     "name": "HC Rive-sur-Saule",
+     "city": "Hautvigne",
      "canton": "GE"
     },
     {
      "clubId": 140525,
-     "name": "Lancy Plan-les-Ouates Handball",
-     "city": "Petit-Lancy",
+     "name": "Saulechamp Handball",
+     "city": "Clair-en-Bruyère",
      "canton": "GE"
     },
     {
      "clubId": 140526,
-     "name": "HC Glarus",
-     "city": "Glarus",
+     "name": "HC Ulmenikon",
+     "city": "Ulmenikon",
      "canton": "GL"
     },
     {
      "clubId": 140527,
-     "name": "HBC Ins",
-     "city": "Ins",
+     "name": "HBC Holunderhag",
+     "city": "Holunderhag",
      "canton": "BE"
     },
     {
      "clubId": 140531,
-     "name": "Handball Emme",
-     "city": "Kirchberg BE",
+     "name": "Handball Hanfmoos",
+     "city": "Eichengrund",
      "canton": "BE"
     },
     {
      "clubId": 140535,
-     "name": "BSV RW Sursee",
-     "city": "Sursee",
+     "name": "BSV Ginsterboden",
+     "city": "Sonnried",
      "canton": "LU"
     },
     {
      "clubId": 140537,
-     "name": "HC Rheintal",
-     "city": "Heerbrugg",
+     "name": "HC Amselrüti",
+     "city": "Gratikon",
      "canton": "SG"
     },
     {
      "clubId": 140538,
-     "name": "HSG Lenzburg",
-     "city": "Lenzburg",
+     "name": "HSG Holunderweid",
+     "city": "Holunderweid",
      "canton": "AG"
     },
     {
      "clubId": 140544,
-     "name": "HC TSV Meilen",
-     "city": "Meilen",
+     "name": "HC TSV Weidried",
+     "city": "Weidried",
      "canton": "ZH"
     },
     {
      "clubId": 140549,
-     "name": "HV Olten",
-     "city": "Olten",
+     "name": "HV Muschelboden",
+     "city": "Muschelboden",
      "canton": "SO"
     },
     {
      "clubId": 140550,
-     "name": "HC Neftenbach",
-     "city": "Neftenbach",
+     "name": "HC Tobelacker",
+     "city": "Tobelacker",
      "canton": "ZH"
     },
     {
      "clubId": 140551,
-     "name": "HC Romanshorn",
-     "city": "Romanshorn",
+     "name": "HC Dinkelikon",
+     "city": "Dinkelikon",
      "canton": "TG"
     },
     {
      "clubId": 140552,
-     "name": "HC Rümlang-Oberglatt",
-     "city": "Rümlang",
+     "name": "HC Hirschenbühl",
+     "city": "Kieselrain",
      "canton": "ZH"
     },
     {
      "clubId": 140554,
-     "name": "HC Rothenburg",
-     "city": "Rothenburg",
+     "name": "HC Tannenhalden",
+     "city": "Tannenhalden",
      "canton": "LU"
     },
     {
      "clubId": 140555,
-     "name": "HC Rüti Rapperswil-Jona",
-     "city": "Jona",
+     "name": "HC Mürli-Seehafen",
+     "city": "Fuchsboden",
      "canton": "SG"
     },
     {
      "clubId": 140558,
-     "name": "Handball Stäfa",
-     "city": "Stäfa",
+     "name": "Handball Sälmatt",
+     "city": "Sälmatt",
      "canton": "ZH"
     },
     {
      "clubId": 140559,
-     "name": "HBC Vallée de Joux",
-     "city": "Le Sentier",
+     "name": "HBC Rive-sur-Mont",
+     "city": "Préchamp",
      "canton": "VD"
     },
     {
      "clubId": 140560,
-     "name": "BSV Stans",
-     "city": "Stans",
+     "name": "BSV Wachtelacker",
+     "city": "Wachtelacker",
      "canton": "NW"
     },
     {
      "clubId": 140561,
-     "name": "Kadetten Schaffhausen",
-     "city": "Schaffhausen",
+     "name": "Handball Bohnenboden",
+     "city": "Bibermoos",
      "canton": "SH"
     },
     {
      "clubId": 140562,
-     "name": "HV Thayngen",
-     "city": "Thayngen",
+     "name": "HV Reiherwil",
+     "city": "Reiherwil",
      "canton": "SH"
     },
     {
      "clubId": 140564,
-     "name": "Pfader Neuhausen",
-     "city": "Neuhausen am Rheinfall",
+     "name": "Handball Haferhof",
+     "city": "Gratmoos",
      "canton": "SH"
     },
     {
      "clubId": 140565,
-     "name": "KJS Schaffhausen",
-     "city": "Schaffhausen",
+     "name": "KJS Bibermoos",
+     "city": "Bibermoos",
      "canton": "SH"
     },
     {
      "clubId": 140566,
-     "name": "HC Kriens",
-     "city": "Kriens",
+     "name": "HC Ulmengrund",
+     "city": "Ulmengrund",
      "canton": "LU"
     },
     {
      "clubId": 140568,
-     "name": "HC Stammheim",
-     "city": "Unterstammheim",
+     "name": "HC Hagmatt",
+     "city": "Unterhagmatt",
      "canton": "ZH"
     },
     {
      "clubId": 140569,
-     "name": "HC Goldau",
-     "city": "Goldau",
+     "name": "HC Rübenwies",
+     "city": "Rübenwies",
      "canton": "SZ"
     },
     {
      "clubId": 140570,
-     "name": "Wacker Thun",
-     "city": "Thun",
+     "name": "Handball Hasenweid",
+     "city": "Flachsfeld",
      "canton": "BE"
     },
     {
      "clubId": 140571,
-     "name": "HC Turbenthal",
-     "city": "Turbenthal",
+     "name": "HC Erlenacker",
+     "city": "Erlenacker",
      "canton": "ZH"
     },
     {
      "clubId": 140574,
-     "name": "HG Bödeli",
-     "city": "Unterseen",
+     "name": "HG Reiherau",
+     "city": "Mühlmoos",
      "canton": "BE"
     },
     {
      "clubId": 140576,
-     "name": "Pfadi Winterthur",
-     "city": "Winterthur",
+     "name": "Handball Talstadt",
+     "city": "Talstadt",
      "canton": "ZH"
     },
     {
      "clubId": 140577,
-     "name": "HC Wädenswil",
-     "city": "Wädenswil",
+     "name": "HC Lärchenwil",
+     "city": "Lärchenwil",
      "canton": "ZH"
     },
     {
      "clubId": 140579,
-     "name": "HC Rover Wittenbach",
-     "city": "Wittenbach",
+     "name": "HC Ahornacker",
+     "city": "Hirschenwies",
      "canton": "SG"
     },
     {
      "clubId": 140580,
-     "name": "HC Uzwil",
-     "city": "Niederuzwil",
+     "name": "HC Lehmmatt",
+     "city": "Birkenhof",
      "canton": "SG"
     },
     {
      "clubId": 140581,
-     "name": "Yellow Winterthur",
-     "city": "Winterthur",
+     "name": "Handball Honighalden",
+     "city": "Talstadt",
      "canton": "ZH"
     },
     {
      "clubId": 140582,
-     "name": "Grün-Weiss Effretikon",
-     "city": "Illnau-Effretikon",
+     "name": "Grün-Weiss Erlikofen",
+     "city": "Erlikofen",
      "canton": "ZH"
     },
     {
      "clubId": 140585,
-     "name": "HC Vevey",
-     "city": "Vevey",
+     "name": "HC Rive-sur-Font",
+     "city": "Rive-sur-Font",
      "canton": "VD"
     },
     {
      "clubId": 140586,
-     "name": "US Yverdon",
-     "city": "Yverdon-les-Bains",
+     "name": "US Mont-sur-Bruyère",
+     "city": "Montvigne",
      "canton": "VD"
     },
     {
      "clubId": 140604,
-     "name": "DHB Rotweiss Thun",
-     "city": "Thun",
+     "name": "DHB Krähenboden",
+     "city": "Flachsfeld",
      "canton": "BE"
     },
     {
      "clubId": 140621,
-     "name": "LK Zug",
-     "city": "Zug",
+     "name": "LK Otterhag",
+     "city": "Otterhag",
      "canton": "ZG"
     },
     {
      "clubId": 140629,
-     "name": "BSV Borba Luzern",
-     "city": "Luzern",
+     "name": "BSV Roggenfeld",
+     "city": "Bohnenwies",
      "canton": "LU"
     },
     {
      "clubId": 140631,
-     "name": "HC Dietikon-Urdorf",
-     "city": "Dietikon",
+     "name": "HC Spechtwies",
+     "city": "Schilfau",
      "canton": "ZH"
     },
     {
      "clubId": 140633,
-     "name": "HC KZO Wetzikon",
-     "city": "Wetzikon ZH",
+     "name": "HC KSW Weiherfeld",
+     "city": "Weiherfeld",
      "canton": "ZH"
     },
     {
      "clubId": 140635,
-     "name": "HC Limmat-OTVG",
-     "city": "Unterengstringen",
+     "name": "HC Wieselhag",
+     "city": "Egliweid",
      "canton": "ZH"
     },
     {
      "clubId": 140640,
-     "name": "HC Therwil",
-     "city": "Therwil",
+     "name": "HC Rosenrain",
+     "city": "Rosenrain",
      "canton": "BL"
     },
     {
      "clubId": 140641,
-     "name": "SC Volketswil",
-     "city": "Volketswil",
+     "name": "SC Grubenau",
+     "city": "Grubenau",
      "canton": "ZH"
     },
     {
      "clubId": 140675,
-     "name": "HC KTV Altdorf",
-     "city": "Altdorf UR",
+     "name": "HC KTV Lehmau",
+     "city": "Lehmau",
      "canton": "UR"
     },
     {
      "clubId": 140676,
-     "name": "Vom Stein Baden",
-     "city": "Baden",
+     "name": "Handball Gerstenau",
+     "city": "Krähenmoos",
      "canton": "AG"
     },
     {
      "clubId": 140680,
-     "name": "HC Mutschellen",
-     "city": "Berikon",
+     "name": "HC Luchshag",
+     "city": "Roggenwil",
      "canton": "AG"
     },
     {
      "clubId": 140681,
-     "name": "BSV Bischofszell",
-     "city": "Bischofszell",
+     "name": "BSV Fuchsikon",
+     "city": "Fuchsikon",
      "canton": "TG"
     },
     {
      "clubId": 140682,
-     "name": "Handball Brunnen",
-     "city": "Brunnen",
+     "name": "Handball Kirschmatt",
+     "city": "Kirschmatt",
      "canton": "SZ"
     },
     {
      "clubId": 140684,
-     "name": "TSV St. Otmar St. Gallen",
-     "city": "St. Gallen",
+     "name": "TSV Linsenboden",
+     "city": "Weiherried",
      "canton": "SG"
     },
     {
      "clubId": 140685,
-     "name": "HC Goldach-Rorschach",
-     "city": "Rorschach",
+     "name": "HC Gerstach-Seefurt",
+     "city": "Seefurt",
      "canton": "SG"
     },
     {
      "clubId": 140686,
-     "name": "TSV Fortitudo Gossau",
-     "city": "Gossau SG",
+     "name": "TSV Wolfsbühl",
+     "city": "Krebshof",
      "canton": "SG"
     },
     {
      "clubId": 140687,
-     "name": "KTV Hasle",
-     "city": "Hasle LU",
+     "name": "KTV Riedgrund",
+     "city": "Riedgrund",
      "canton": "LU"
     },
     {
      "clubId": 140690,
-     "name": "HC Malters",
-     "city": "Malters",
+     "name": "HC Flachswies",
+     "city": "Flachswies",
      "canton": "LU"
     },
     {
      "clubId": 140691,
-     "name": "KTV Muotathal",
-     "city": "Muotathal",
+     "name": "KTV Hanfwil",
+     "city": "Hanfwil",
      "canton": "SZ"
     },
     {
      "clubId": 140692,
-     "name": "BSV Münchenstein",
-     "city": "Münchenstein",
+     "name": "BSV Quellhag",
+     "city": "Quellhag",
      "canton": "BL"
     },
     {
      "clubId": 140695,
-     "name": "SPONO EAGLES",
-     "city": "Nottwil",
+     "name": "Handball Bohnenegg",
+     "city": "Binsenbühl",
      "canton": "LU"
     },
     {
      "clubId": 140696,
-     "name": "HC Oberwil",
-     "city": "Oberwil BL",
+     "name": "HC Kleehag",
+     "city": "Kleehag",
      "canton": "BL"
     },
     {
      "clubId": 140698,
-     "name": "Handball Riehen",
-     "city": "Riehen",
+     "name": "Handball Weiheregg",
+     "city": "Weiheregg",
      "canton": "BS"
     },
     {
      "clubId": 140699,
-     "name": "HC Fides Ruswil",
-     "city": "Ruswil",
+     "name": "HC Ulmenacker",
+     "city": "Falkenried",
      "canton": "LU"
     },
     {
      "clubId": 140701,
-     "name": "KTV Visp Handball",
-     "city": "Visp",
+     "name": "KTV Ahornhag Handball",
+     "city": "Ahornhag",
      "canton": "VS"
     },
     {
      "clubId": 140702,
-     "name": "HC Visperterminen",
-     "city": "Visp",
+     "name": "HC Flachshag",
+     "city": "Ahornhag",
      "canton": "VS"
     },
     {
      "clubId": 140703,
-     "name": "SV Lägern Wettingen",
-     "city": "Wettingen",
+     "name": "SV Weidenrain",
+     "city": "Eichenrüti",
      "canton": "AG"
     },
     {
      "clubId": 140704,
-     "name": "KTV Wil",
-     "city": "Wil SG",
+     "name": "KTV Fuchsweid",
+     "city": "Fuchsweid",
      "canton": "SG"
     },
     {
      "clubId": 140728,
-     "name": "HC Einsiedeln",
-     "city": "Einsiedeln",
+     "name": "HC Binsenfeld",
+     "city": "Binsenfeld",
      "canton": "SZ"
     },
     {
      "clubId": 140737,
-     "name": "Satus TV Birsfelden",
-     "city": "Birsfelden",
+     "name": "Satus TV Linsenrüti",
+     "city": "Linsenrüti",
      "canton": "BL"
     },
     {
      "clubId": 140752,
-     "name": "züri west handball",
-     "city": "Zürich",
+     "name": "Handball Dohlenmoos",
+     "city": "Grossried",
      "canton": "ZH"
     },
     {
      "clubId": 140753,
-     "name": "HSG Baar/Zug",
-     "city": "Baar",
+     "name": "HSG Gratrüti",
+     "city": "Storchenmoos",
      "canton": "ZG"
     },
     {
      "clubId": 140756,
-     "name": "HV Rotweiss Buchs",
-     "city": "Buchs AG",
+     "name": "HV Otteracker",
+     "city": "Rübenfeld",
      "canton": "AG"
     },
     {
      "clubId": 140758,
-     "name": "HC Vikings Liestal",
-     "city": "Liestal",
+     "name": "HC Weiherhalden",
+     "city": "Eglibühl",
      "canton": "BL"
     },
     {
      "clubId": 140764,
-     "name": "HC Buchs-Vaduz",
-     "city": "Buchs SG",
+     "name": "HC Fuchswies",
+     "city": "Amselhag",
      "canton": "SG"
     },
     {
      "clubId": 140765,
-     "name": "HBC La Chaux-de-Fonds",
-     "city": "La Chaux-de-Fonds",
+     "name": "HBC Bois-en-Saule",
+     "city": "Bois-en-Saule",
      "canton": "NE"
     },
     {
      "clubId": 140768,
-     "name": "SC Pfadi Frauenfeld",
-     "city": "Frauenfeld",
+     "name": "SC Pfadi Ginstermatt",
+     "city": "Ginstermatt",
      "canton": "TG"
     },
     {
      "clubId": 140769,
-     "name": "HC Gym Laufen",
-     "city": "Laufen",
+     "name": "HC Mostacker",
+     "city": "Kleeried",
      "canton": "BL"
     },
     {
      "clubId": 140770,
-     "name": "HV Herzogenbuchsee",
-     "city": "Herzogenbuchsee",
+     "name": "HV Hirschenikon",
+     "city": "Hirschenikon",
      "canton": "BE"
     },
     {
      "clubId": 140771,
-     "name": "HC Horgen",
-     "city": "Horgen",
+     "name": "HC Felsegg",
+     "city": "Felsegg",
      "canton": "ZH"
     },
     {
      "clubId": 140772,
-     "name": "HBC Büren",
-     "city": "Büren an der Aare",
+     "name": "HBC Ginsterau",
+     "city": "Ginsterau",
      "canton": "BE"
     },
     {
      "clubId": 140774,
-     "name": "HBC Nyon",
-     "city": "Nyon",
+     "name": "HBC Valfont",
+     "city": "Valfont",
      "canton": "VD"
     },
     {
      "clubId": 140776,
-     "name": "HBC Neuchâtel",
-     "city": "Neuchâtel",
+     "name": "HBC Saule-en-Val",
+     "city": "Saule-en-Val",
      "canton": "NE"
     },
     {
      "clubId": 140777,
-     "name": "HG Ostermundigen",
-     "city": "Ittigen",
+     "name": "HG Marderfeld",
+     "city": "Nussweid",
      "canton": "BE"
     },
     {
      "clubId": 140782,
-     "name": "STV Wegenstetten",
-     "city": "Wegenstetten",
+     "name": "STV Weiherboden",
+     "city": "Weiherboden",
      "canton": "AG"
     },
     {
      "clubId": 140799,
-     "name": "BSV Weinfelden Handball",
-     "city": "Weinfelden",
+     "name": "BSV Falkenacker Handball",
+     "city": "Falkenacker",
      "canton": "TG"
     },
     {
      "clubId": 140808,
-     "name": "Uni Bern-Handball",
-     "city": "Bern",
+     "name": "Handball Birkenweid",
+     "city": "Kornfeld",
      "canton": "BE"
     },
     {
      "clubId": 140823,
-     "name": "HC Pfadi Regensdorf",
-     "city": "Regensdorf",
+     "name": "HC Pfadi Igelhof",
+     "city": "Igelhof",
      "canton": "ZH"
     },
     {
      "clubId": 164406,
-     "name": "BSV Bern",
-     "city": "Gümligen",
+     "name": "BSV Kornfeld",
+     "city": "Felchenboden",
      "canton": "BE"
     },
     {
      "clubId": 164472,
-     "name": "HBC Etoy",
-     "city": "Morges",
+     "name": "HBC Mont-en-Lieu",
+     "city": "Fontbruyère",
      "canton": "VD"
     },
     {
      "clubId": 244373,
-     "name": "Handball Grauholz",
-     "city": "Zollikofen",
+     "name": "Handball Riedau",
+     "city": "Gratrain",
      "canton": "BE"
     },
     {
      "clubId": 250361,
-     "name": "HBC Moudon",
-     "city": "Moudon",
+     "name": "HBC Pierre-en-Lieu",
+     "city": "Pierre-en-Lieu",
      "canton": "VD"
     },
     {
      "clubId": 251232,
-     "name": "HBC Trélex/Chéserex/Genolier/Gland",
-     "city": "Gland",
+     "name": "HBC Vignelieu",
+     "city": "Saulelieu",
      "canton": "VD"
     },
     {
      "clubId": 255416,
-     "name": "HC Höfe",
-     "city": "Pfäffikon SZ",
+     "name": "HC Rosenwil",
+     "city": "Schilfweid",
      "canton": "SZ"
     },
     {
      "clubId": 255434,
-     "name": "Handball Langnau",
-     "city": "Langnau im Emmental",
+     "name": "Handball Iltishof",
+     "city": "Iltishof",
      "canton": "BE"
     },
     {
      "clubId": 255435,
-     "name": "TV Grenchen",
-     "city": "Grenchen",
+     "name": "TV Felchenau",
+     "city": "Felchenau",
      "canton": "SO"
     },
     {
      "clubId": 257094,
-     "name": "TV Zofingen Handball Frauen",
-     "city": "Zofingen",
+     "name": "TV Holunderhof Handball Frauen",
+     "city": "Holunderhof",
      "canton": "AG"
     },
     {
      "clubId": 260948,
-     "name": "Handball Brugg",
-     "city": "Windisch",
+     "name": "Handball Birkenacker",
+     "city": "Eichenfeld",
      "canton": "AG"
     },
     {
      "clubId": 265709,
-     "name": "BSC Grosshöchstetten",
-     "city": "Biglen",
+     "name": "BSC Krähengrund",
+     "city": "Igelhalden",
      "canton": "BE"
     },
     {
      "clubId": 266403,
-     "name": "West HBC",
-     "city": "Crissier",
+     "name": "Belle-en-Clair HBC",
+     "city": "Fleursaule",
      "canton": "VD"
     },
     {
      "clubId": 274385,
-     "name": "ATV/KV Basel",
-     "city": "Basel",
+     "name": "ATV/KV Spechtwil",
+     "city": "Spechtwil",
      "canton": "BS"
     },
     {
      "clubId": 288821,
-     "name": "GC Amicitia Zürich",
-     "city": "Zürich",
+     "name": "GC Schwalbenrüti",
+     "city": "Grossried",
      "canton": "ZH"
     },
     {
      "clubId": 290005,
-     "name": "Albis Foxes Handball",
-     "city": "Kilchberg ZH",
+     "name": "Ginsterrüti Handball",
+     "city": "Marderwil",
      "canton": "ZH"
     },
     {
      "clubId": 290244,
-     "name": "Troinex Handball Club",
-     "city": "Les Acacias",
+     "name": "Grandsaule Handball Club",
+     "city": "Hautvigne",
      "canton": "GE"
     },
     {
      "clubId": 296614,
-     "name": "HC Büelen Nesslau",
-     "city": "Nesslau",
+     "name": "HC Krähenacker",
+     "city": "Kirschried",
      "canton": "SG"
     },
     {
      "clubId": 298714,
-     "name": "SG Pilatus Handball",
-     "city": "Luzern",
+     "name": "SG Rübenikon Handball",
+     "city": "Bohnenwies",
      "canton": "LU"
     },
     {
      "clubId": 300401,
-     "name": "Genève Eaux-Vives HBC",
-     "city": "Les Acacias",
+     "name": "Rivebruyère HBC",
+     "city": "Hautvigne",
      "canton": "GE"
     },
     {
      "clubId": 305701,
-     "name": "HC Küsnacht",
-     "city": "Küsnacht ZH",
+     "name": "HC Distelikon",
+     "city": "Distelikon",
      "canton": "ZH"
     },
     {
      "clubId": 305844,
-     "name": "Corsier HB",
-     "city": "Les Acacias",
+     "name": "Bois-sur-Saule HB",
+     "city": "Hautvigne",
      "canton": "GE"
     },
     {
      "clubId": 307678,
-     "name": "FSS Oberdiessbach",
-     "city": "Oberdiessbach",
+     "name": "FSS Wachtelhof",
+     "city": "Wachtelhof",
      "canton": "BE"
     },
     {
      "clubId": 307679,
-     "name": "FSS Aeschi Handball",
-     "city": "Aeschi b. Spiez",
+     "name": "FSS Kirschikon Handball",
+     "city": "Kirschikon",
      "canton": "BE"
     },
     {
      "clubId": 309309,
-     "name": "HV Oensingen",
-     "city": "Oensingen",
+     "name": "HV Föhrenhalden",
+     "city": "Föhrenhalden",
      "canton": "SO"
     },
     {
      "clubId": 310888,
-     "name": "Annemasse HandBall",
-     "city": "Vétraz Monthoux",
+     "name": "Croix-en-Clair HandBall",
+     "city": "Croix-en-Val",
      "canton": "-"
     },
     {
      "clubId": 315381,
-     "name": "RSB Handball",
-     "city": "Renens VD",
+     "name": "Clairbruyère Handball",
+     "city": "Boisclair",
      "canton": "VD"
     },
     {
      "clubId": 315699,
-     "name": "FSS Langendorf",
-     "city": "Langendorf",
+     "name": "FSS Muschelrain",
+     "city": "Muschelrain",
      "canton": "SO"
     },
     {
      "clubId": 320556,
-     "name": "Associazione Pallamano Ticino",
-     "city": "Bellinzona",
+     "name": "Pallamano Sassobruno",
+     "city": "Sassobruno",
      "canton": "TI"
     },
     {
      "clubId": 323521,
-     "name": "USTS Handball",
-     "city": "Commugny",
+     "name": "Côte-en-Bruyère Handball",
+     "city": "Pierresable",
      "canton": "VD"
     },
     {
      "clubId": 324980,
-     "name": "Handball Jura Club",
-     "city": "Delémont",
+     "name": "Handball Saule-en-Fleuri",
+     "city": "Préfleuri",
      "canton": "JU"
     },
     {
      "clubId": 325899,
-     "name": "HC Winterthur",
-     "city": "Winterthur",
+     "name": "HC Talstadt",
+     "city": "Talstadt",
      "canton": "ZH"
     },
     {
      "clubId": 330442,
-     "name": "Nyon Handball - La Côte",
-     "city": "Nyon",
+     "name": "Grandfleuri Handball",
+     "city": "Valfont",
      "canton": "VD"
     },
     {
      "clubId": 335814,
-     "name": "HSG Aargau Ost",
-     "city": "Siggenthal Station",
+     "name": "HSG Roggenacker",
+     "city": "Luchswil",
      "canton": "AG"
     },
     {
      "clubId": 337367,
-     "name": "HR Wehntal",
-     "city": "Schöfflisdorf",
+     "name": "HR Eulenhalden",
+     "city": "Fuchshalden",
      "canton": "ZH"
     },
     {
      "clubId": 338923,
-     "name": "BHV Wasserschloss",
-     "city": "Untersiggenthal",
+     "name": "BHV Rietikon",
+     "city": "Weiherrüti",
      "canton": "AG"
     },
     {
      "clubId": 339634,
-     "name": "Copaca Bâle",
-     "city": "Muttenz",
+     "name": "Handball Igelmoos",
+     "city": "Schilfhof",
      "canton": "BL"
     },
     {
      "clubId": 339716,
-     "name": "TV Felben-Wellhausen",
-     "city": "Felben-Wellhausen",
+     "name": "TV Linsenrain",
+     "city": "Linsenrain",
      "canton": "TG"
     },
     {
      "clubId": 340674,
-     "name": "HC Val-de-Travers",
-     "city": "Travers",
+     "name": "HC Pré-sur-Rive",
+     "city": "Clairpré",
      "canton": "NE"
     },
     {
      "clubId": 340675,
-     "name": "HC Kirchberg",
-     "city": "Kirchberg SG",
+     "name": "HC Wieselwies",
+     "city": "Wieselwies",
      "canton": "SG"
     },
     {
      "clubId": 340676,
-     "name": "HC Lachen",
-     "city": "Lachen SZ",
+     "name": "HC Schilfried",
+     "city": "Schilfried",
      "canton": "SZ"
     },
     {
      "clubId": 345252,
-     "name": "HSG Leimental",
-     "city": "Ettingen",
+     "name": "HSG Haselgrund",
+     "city": "Krebsgrund",
      "canton": "BL"
     },
     {
      "clubId": 346223,
-     "name": "HSG Baden-Endingen",
-     "city": "Baden",
+     "name": "HSG Heidehalden",
+     "city": "Krähenmoos",
      "canton": "AG"
     },
     {
      "clubId": 350659,
-     "name": "Havanna Beach Boys",
-     "city": "Dietikon",
+     "name": "Handball Eulenhag",
+     "city": "Schilfau",
      "canton": "ZH"
     },
     {
      "clubId": 350660,
-     "name": "Handball Züri Unterland",
-     "city": "Bülach",
+     "name": "Handball Spechtrain",
+     "city": "Hafermatt",
      "canton": "ZH"
     },
     {
      "clubId": 353541,
-     "name": "Handball Nordwest",
-     "city": "Muttenz",
+     "name": "Handball Hechtrüti",
+     "city": "Schilfhof",
      "canton": "BL"
     },
     {
      "clubId": 355343,
-     "name": "Celtics 54",
-     "city": "Ehrendingen",
+     "name": "Handball Gratbühl",
+     "city": "Eulenwil",
      "canton": "AG"
     },
     {
      "clubId": 362221,
-     "name": "BHC Rappi-Jona",
-     "city": "Jona",
+     "name": "BHC Weiherweid",
+     "city": "Fuchsboden",
      "canton": "SG"
     },
     {
      "clubId": 364405,
-     "name": "Handball Chur Grischun",
-     "city": "Chur",
+     "name": "Handball Kalkikon",
+     "city": "Sonnhalden",
      "canton": "GR"
     },
     {
      "clubId": 364406,
-     "name": "HC Brienzersee",
-     "city": "Brienz",
+     "name": "HC Sandfeld",
+     "city": "Marderrüti",
      "canton": "BE"
     },
     {
      "clubId": 364407,
-     "name": "Handball Club La Gruyère",
-     "city": "Sâles",
+     "name": "Handball Belle-sur-Val",
+     "city": "Vignefont",
      "canton": "FR"
     }
    ]
