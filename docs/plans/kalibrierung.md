@@ -136,6 +136,38 @@ Langfristig robuster wäre ein gelerntes Modell für Feldlinien oder Feld-Keypoi
 Hallenbilder plus etwa 300 gelabelte Bilder, einige GPU-Stunden): 1 bis 2 Wochen, GPU nur nach
 Rücksprache.
 
+### 4.4 Fall: Fernsehbild mit Zoom und Schnitten (`camera_motion`), Schätzung
+
+Anlass: der erste echte Staging-Lauf (NLB 2017, 99 min) scheitert mit `camera_motion`: Brennweite
+1.4 Bildbreiten, Zoom bis x6.5, 165 Schnitte, Schwenk 107 Grad. Im Testsatz 4 von 70 Stücken (c012
+und drei im Endtest), dazu Fernsehbilder, die heute mit anderem Grund scheitern (c054, Olympia).
+
+Heute rechnet die Kamerabewegung über Schnitte hinweg weiter (`cuts` zählt die Bilder ohne Anschluss)
+und baut ein Panorama, das die Halle mehrfach zeigt; die Prüfung `check_motion` lehnt dann zu Recht ab.
+
+Vorschlag "pro Einstellung":
+1. Das Video an den Schnitten in Einstellungen teilen; jede Einstellung bekommt ihre eigene
+   Kamerabewegung und ihr eigenes Hallenbild (kurze Einstellungen unter etwa 3 s fallen weg).
+2. Die Einstellungen nach Kamera gruppieren: Hallenbilder gegeneinander mit `hallmatch` (SIFT, eine
+   Homographie, gleiche Kamera am gleichen Ort; ADR 025 Nachtrag 2). Die Hauptkamera ist die Gruppe
+   mit der meisten Spielzeit.
+3. Das Feld einmal für die Hauptkamera bestimmen: automatisch auf ihrer längsten, weitesten
+   Einstellung, oder mit Klickpunkten einmal pro Spiel; dann über die Hallen-Homographien auf jede
+   Einstellung dieser Kamera übertragen. Andere Kameras (hinter dem Tor, Nahaufnahmen, Wiederholungen)
+   bekommen keine Positionen und werden als solche markiert.
+
+Abdeckung: in Fernsehbildern zeigt die Hauptkamera erfahrungsgemäß den grössten Teil der Spielzeit,
+Wiederholungen und Nahaufnahmen fallen meist in Unterbrechungen; geschätzt 70 bis 85 % der Spielzeit,
+zu messen als Anteil der Spielbilder (Pausenerkennung), die der Hauptkamera zugeordnet werden.
+Risiken: starker Zoom innerhalb einer Einstellung (die Brennweite der Bewegung ist bei reinem
+Schwenk schlecht bestimmt), Fehlschnitte bei schnellem Schwenk, und die Prüfung gegen falsche Felder
+(Abschnitt 4.2) gilt hier genauso.
+
+Aufwand grob: Teilen an Schnitten und Bewegung pro Einstellung 1 bis 2 Tage, Gruppieren mit
+`hallmatch` und Übertragen 1 bis 2 Tage, Messung (Abdeckung und Fehler auf den Testsatz-Stücken mit
+Schnitten, dazu das Staging-Video) 1 Tag: zusammen etwa 4 bis 5 Arbeitstage. Berührt den
+Beobachtungsdurchlauf (Kamerabewegung) nur über deren Ergebnis; `observe()` selbst bleibt.
+
 ## 5. Was nicht geholfen hat
 
 | Was | Wo | Zahlen | Warum verworfen |
