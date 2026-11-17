@@ -233,7 +233,8 @@ async def shown(ctx: Ctx, events: list[Event]) -> list[EventOut]:
     for e in events:
         if e.match_id not in visible:
             match = await ctx.db.get(Match, e.match_id)
-            assert match is not None
+            if match is None:  # deleted while this request read its events
+                raise ProblemError(404, "not-found", "Match not found")
             visible[e.match_id] = await roster.visible_players(ctx, match.team_id, match.season_id)
         ev = EventOut.model_validate(e)
         ev.attributes = shown_attributes(e, visible[e.match_id])
@@ -254,8 +255,9 @@ async def list_events(
     goal_zone: str | None = None,
     turnover_type: str | None = None,
 ) -> list[EventOut]:
-    await get_match(ctx, match_id)
-    q = select(Event).where(Event.match_id == match_id)
+    # kept: `shown` finds the match in the session instead of reading it again
+    match = await get_match(ctx, match_id)
+    q = select(Event).where(Event.match_id == match.id)
     for col, val in (
         (Event.side, side),
         (Event.type, type_),

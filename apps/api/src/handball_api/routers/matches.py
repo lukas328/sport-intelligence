@@ -6,7 +6,7 @@ import uuid
 from collections.abc import AsyncIterator
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Path, Query, Request, Response
+from fastapi import APIRouter, BackgroundTasks, Path, Query, Request, Response
 from fastapi.responses import StreamingResponse
 from sqlalchemy import select
 
@@ -154,8 +154,11 @@ async def update_match(match_id: uuid.UUID, data: MatchUpdate, scope: OrgDep) ->
 
 
 @router.delete("/matches/{match_id}", status_code=204)
-async def delete_match(match_id: uuid.UUID, scope: OrgDep) -> None:
-    await service.delete_match(scope.ctx, match_id)
+async def delete_match(match_id: uuid.UUID, scope: OrgDep, background: BackgroundTasks) -> None:
+    files = await service.delete_match(scope.ctx, match_id)
+    # after the response, so after the commit: the files go only once the rows are gone, and
+    # removing thousands of video segments holds neither the request nor its transaction
+    background.add_task(files.remove)
 
 
 # ---- videos --------------------------------------------------------------------------------
