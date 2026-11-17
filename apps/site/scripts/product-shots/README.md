@@ -6,21 +6,22 @@ of the phone in one shape and look (no device, no Keil; BEFUNDE-2 S11), the comp
 in a browser window, some on the club's Keil with a soft shadow; yellow rings mark what matters. The arrows and their labels
 are drawn by the website over the picture, as real text in the visitor's language
 (`src/components/product-shot.tsx`, texts in `src/messages/*.ts` under `product`). They show the
-seeded demo club (HC Zürichsee, invented players, synthetic videos), never real people, and only
+seeded demo club (HC Tannengrün, invented players, synthetic videos), never real people, and only
 what the app really shows. The demo club plays in the website's own pine green (`#10684a`, seed
 and synthetic footage), so the pictures sit in the site's colours (cream, green, ink).
 
-The website tells its own story with the demo match (HC Zürichsee against TSV Seewald, lost
-27:29, 11 of 29 conceded over the right wing; `scripts/make_demo.py`), while the seeded club in the
-app won its last match 26:18. So no picture shows a score or the match's headline, and the few
-counts on a picture that belong to that match are set to the story's numbers while capturing: each
-screen in `capture.mjs` may have a `story` (texts replaced once, exactly or by pattern),
-`storyBars` (a small bar chart redrawn with other values) and `hide` (a block kept empty, e.g. an
-empty «Noch keine Notiz»). Today: the match (56 goals, the three things 11, 5 and 9 scenes), the
-search over the last three matches (26 of 77, «Gegen Seewald waren es 11 von 29»), the season (bars
-6, 9, 11 and 4, 0, 9) and the collection of the website's Tuesday («Aussen rechts zumachen», 4
-scenes). Change them together with `make_demo.py`. The start page's head draws its film itself
-(components/hero-film.tsx).
+The website tells its story with the demo match (HC Tannengrün against TSV Nachtwind, lost
+27:29, 11 of 29 conceded over the right wing; `scripts/make_demo.py`), and the seeded app tells the
+same: `scripts/seed.py` takes that match's shots from `public/demo/match.json` as the events of its
+last analysed match, our shooters from its squad, and adds the collection of the website's Tuesday
+(«Aussen rechts zumachen», 4 scenes). So the pictures show the app as it is, with no number
+changed while capturing: the match (56 goals, the three things 11, 5 and 9 scenes), the search over
+the last three matches (26 of 77, 34 Prozent, «Gegen Nachtwind waren es 11 von 29»), the season
+(bars 6, 9, 11 and 4, 0, 9) and the collection. A screen in `capture.mjs` may only `hide` what a
+visitor would not see: an empty «Noch keine Notiz», and the clock of the synthetic clip, whose
+picture the hall recording covers. Change the story in `make_demo.py`, then seed again
+(the tests in `src/lib/story.test.ts` keep seed and website together). The start page's head draws
+its film itself (components/hero-film.tsx).
 
 The match video in every picture is a real hall recording, blurred past recognition
 (`assets/halle.webp`, made with `blur-hall.py` from one frame of a test clip; no person, face,
@@ -85,7 +86,7 @@ warns. After either step, look at the pictures on the site at 390 and 1280 px.
 | `step-check` | the hall, the phone in front: the hall recording with the proposed field in yellow, «Passt das Spielfeld?», «Passt» ringed | step 3 |
 | `step-result` | the hall, the phone in front: the first of the three things (11 von 29) with its runs, ring on the shots | «So funktioniert es», step 4; «Über uns» |
 | `get-video` | browser, a match: video, the scene that plays, all goals on the timeline | «So sieht es aus» |
-| `get-search` | browser, «Szenen»: the search, the answer with its base, «Alle 24 abspielen» | «So sieht es aus» |
+| `get-search` | browser, «Szenen»: the search, the answer with its base, «Alle 26 abspielen» | «So sieht es aus» |
 | `get-season` | browser, «Saison», cut below the title: what repeats, one bar per match, the shots on the court | «So sieht es aus» |
 | `share` | phone, a collection: «So kommt es im Chat an» and «Link teilen» | «So sieht es aus», «Über uns», «Daten» |
 

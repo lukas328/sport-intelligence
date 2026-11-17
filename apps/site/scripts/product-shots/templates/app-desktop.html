@@ -20,7 +20,8 @@
   S.stage(W, Math.round(30 + crop[3] * k + 4), { budget1x: 170 * 1024, budget2x: 340 * 1024 });
   const s = S.browser("video", crop, { left: 0, top: 0, width: W });
   document.querySelector(".browser").style.boxShadow = "none";
-  // the picture of the player (above its controls), and the player's line at minute 7:46 of 61
-  S.lettering(S.video(s, vid, { cut: 78, bar: 63, at: 0.127 }));
+  // the picture of the player (above its controls), and the player's line at the start of the
+  // scene that plays (capture.mjs)
+  S.lettering(S.video(s, vid, { cut: 78, bar: 63, at: 0 }));
   S.done();
 </script>
