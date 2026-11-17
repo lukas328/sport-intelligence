@@ -23,6 +23,11 @@ test("live tagging courtside: clock, buttons, offline queue, sync", async ({ pag
 
   await follow(page, page.getByRole("link", { name: "Spiele", exact: true }).first(), /\/matches$/);
   await page.getByLabel("Gegner", { exact: true }).fill("TV Halle");
+  // kick-off now: «Spieltag starten» stands up front only on match day
+  const now = new Date();
+  const two = (n: number) => String(n).padStart(2, "0");
+  await page.getByLabel("Datum", { exact: true }).fill(`${two(now.getDate())}.${two(now.getMonth() + 1)}.${now.getFullYear()}`);
+  await page.getByLabel("Anpfiff", { exact: true }).fill(`${two(now.getHours())}:${two(now.getMinutes())}`);
   await page.getByRole("button", { name: "Spiel anlegen" }).click();
   // Spieltag opens on the six big keys; the capture per player sits behind «Pro Spielerin erfassen»
   await page.getByTestId("live-link").click();
