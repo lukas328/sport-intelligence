@@ -8,11 +8,13 @@ Run: uv run python apps/site/scripts/make_demo.py [--check]
 from __future__ import annotations
 
 import json
+import math
 import random
 import sys
 from pathlib import Path
 from typing import Any
 
+from handball_court.geometry import COURT, distance_to_attacked_goal
 from handball_metrics.model import Event, EventType, Side
 from handball_metrics.stats import compute_match_stats
 from handball_metrics.xg import expected_goal
@@ -32,6 +34,30 @@ TYPES = {
     "fast_break": "fast_break",
     "penalty": "penalty",
 }
+
+
+# where a shot is taken: the take-off spot, outside the goal area (only the goalkeeper stands in it;
+# wings and the pivot jump into it, but they take off before the 6 m line)
+MIN_SHOT_DISTANCE = COURT.goal_area_radius + 0.3
+
+
+def outside_goal_area(x: float, y: float) -> tuple[float, float]:
+    """Push a spot straight away from the goal until it is at least MIN_SHOT_DISTANCE away."""
+    d = distance_to_attacked_goal(x, y)
+    if d >= MIN_SHOT_DISTANCE:
+        return x, y
+    half = COURT.goal_width / 2
+    cy = COURT.width / 2
+    gx, gy = COURT.length, min(max(y, cy - half), cy + half)
+    if d < 1e-6:
+        return round(gx - MIN_SHOT_DISTANCE, 1), y
+    k = MIN_SHOT_DISTANCE / d
+    # round away from the goal so that the rounded spot stays outside as well
+    nx = gx + (x - gx) * k
+    ny = gy + (y - gy) * k
+    nx = math.floor(nx * 10) / 10
+    ny = math.ceil(ny * 10) / 10 if ny > gy else math.floor(ny * 10) / 10
+    return nx, ny
 
 
 # chosen so that the app's rule for the three things (apps/web/src/lib/three-things.ts) gives all
@@ -55,6 +81,8 @@ def build(seed: int = SEED) -> dict[str, Any]:
             y = round(min(19.5, max(0.5, by + rnd.uniform(-1.2, 1.2))), 1)
             if kind == "penalty":
                 x, y = 33.0, 10.0
+            else:
+                x, y = outside_goal_area(x, y)
             xg = expected_goal(x, y, TYPES[kind])
             r = rnd.random()
             outcome = "goal" if r < xg else rnd.choice(["save", "save", "miss", "blocked", "post"])

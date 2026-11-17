@@ -112,7 +112,7 @@ export function InsightsCard({
                 {t(i.kind)}
               </span>
               <span className="min-w-0 basis-full sm:flex-1 sm:basis-auto">{text(i)}</span>
-              <button className="text-xs font-semibold text-accent hover:underline" onClick={() => onEvidence(text(i), i.evidence)}>
+              <button className="text-xs font-semibold text-accent underline decoration-[1.5px] underline-offset-4" onClick={() => onEvidence(text(i), i.evidence)}>
                 {t("evidence")}
               </button>
               {/* drills are a staff page: players would land on a 404 */}
@@ -129,7 +129,7 @@ export function InsightsCard({
         </ul>
       )}
       {ordered.length > shown.length && (
-        <button type="button" className="block text-sm font-medium text-accent hover:underline" onClick={() => setAll(true)}>
+        <button type="button" className="block text-sm font-medium text-accent underline decoration-[1.5px] underline-offset-4" onClick={() => setAll(true)}>
           {t("showAll", { n: ordered.length })}
         </button>
       )}
@@ -195,7 +195,7 @@ function TrainFromInsight({ orgId, matchId, insight, label }: { orgId: string; m
       {create.data ? (
         <p className="text-sm">
           {t("trainDone")}{" "}
-          <Link className="font-medium text-accent hover:underline" href={`/app/${orgId}/teams/${create.data.team_id}/training`}>
+          <Link className="font-medium text-accent underline decoration-[1.5px] underline-offset-4" href={`/app/${orgId}/teams/${create.data.team_id}/training`}>
             {t("trainOpen")}
           </Link>
         </p>
@@ -234,4 +234,3 @@ function TrainFromInsight({ orgId, matchId, insight, label }: { orgId: string; m
     </div>
   );
 }
-

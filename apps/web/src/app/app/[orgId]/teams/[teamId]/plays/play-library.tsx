@@ -1,9 +1,9 @@
 "use client";
 
 import type { Schemas } from "@handball/api-client";
-import { TEMPLATES, searchTemplates, type PlayDoc } from "@handball/tactics";
+import { TEMPLATES, searchTemplates, templateDoc, type PlayDoc } from "@handball/tactics";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { Board } from "@/components/tactics/board";
 import { EmptyState } from "@/components/ui/card";
@@ -14,6 +14,7 @@ const CATEGORIES = ["attack", "defence", "fast_break", "set_piece", "seven_m", "
 
 export function PlayLibrary({ orgId, teamId, plays, staff }: { orgId: string; teamId: string; plays: Schemas["PlayOut"][]; staff: boolean }) {
   const t = useTranslations("tactics");
+  const locale = useLocale();
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<string>("");
   const needle = q.trim().toLowerCase();
@@ -95,7 +96,7 @@ export function PlayLibrary({ orgId, teamId, plays, staff }: { orgId: string; te
                   className="block space-y-2 border-t border-foreground/30 pt-2 hover:text-accent"
                   aria-label={`${t("fromTemplate")}: ${t(`tpl_${tpl.id}`)}`}
                 >
-                  <Preview doc={tpl.doc} label={t(`tpl_${tpl.id}`)} />
+                  <Preview doc={templateDoc(tpl, locale)} label={t(`tpl_${tpl.id}`)} />
                   <p className="text-sm font-medium">{t(`tpl_${tpl.id}`)}</p>
                 </Link>
               </li>
@@ -110,9 +111,10 @@ export function PlayLibrary({ orgId, teamId, plays, staff }: { orgId: string; te
 function Preview({ doc, label }: { doc: PlayDoc; label: string }) {
   const f = doc.frames[0];
   if (!f) return null;
+  // full-court plays stay across in the small card (upright they would be twice as tall as the others)
   return (
     <div aria-hidden className="pointer-events-none">
-      <Board frame={f} court={doc.court} label={label} />
+      <Board frame={f} court={doc.court} label={label} orientation={doc.court === "full" ? "landscape" : "portrait"} />
     </div>
   );
 }

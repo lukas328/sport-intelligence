@@ -22,6 +22,8 @@ class Problem(BaseModel):
     detail: str | None = None
     instance: str | None = None
     errors: list[dict[str, Any]] | None = None
+    # extension member on 500s: the id in our logs, so a report can be matched to its error
+    request_id: str | None = None
 
 
 class ProblemError(Exception):
@@ -47,6 +49,23 @@ def _title(status: int) -> str:
         return HTTPStatus(status).phrase
     except ValueError:
         return "Error"
+
+
+def internal_error_response(request: Request, request_id: str | None = None) -> JSONResponse:
+    """The 500 for an unexpected exception: no details, but the request id."""
+    rid = request_id or getattr(request.state, "request_id", None)
+    response = _response(
+        Problem(
+            title="Internal Server Error",
+            status=500,
+            detail="An unexpected error occurred",
+            instance=request.url.path,
+            request_id=rid,
+        )
+    )
+    if rid:
+        response.headers["x-request-id"] = rid
+    return response
 
 
 def install_error_handlers(app: FastAPI) -> None:
@@ -92,11 +111,6 @@ def install_error_handlers(app: FastAPI) -> None:
 
     @app.exception_handler(Exception)
     async def _unhandled(request: Request, exc: Exception) -> JSONResponse:
-        return _response(
-            Problem(
-                title="Internal Server Error",
-                status=500,
-                detail="An unexpected error occurred",
-                instance=request.url.path,
-            )
-        )
+        # fallback only: the request middleware in main.py turns exceptions into this response
+        # (and logs them with the request id) before they reach the server error middleware
+        return internal_error_response(request)

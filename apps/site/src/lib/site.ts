@@ -11,7 +11,7 @@ export const SITE_NAME = "Handball Intelligence";
  * Date of the last content review of the core pages («Stand» on the page, lastmod in the sitemap,
  * dateModified in structured data). Change it when the texts are reviewed again.
  */
-export const SITE_UPDATED = "2026-11-13";
+export const SITE_UPDATED = "2026-11-16";
 
 /**
  * The plan table in packages/plans is a placeholder (OPEN_QUESTIONS Q-PROD-4, Q-SITE-1). While this

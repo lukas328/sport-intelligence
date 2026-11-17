@@ -9,6 +9,7 @@ import { api } from "@/lib/client";
 import { SHIRTS } from "@/lib/color";
 import { FARBE } from "../entry-view";
 import { ownershipMail, useSiteConfig } from "@/lib/site-config";
+import { similarTeams } from "@/lib/team-names";
 
 type Suggestion = Schemas["SuggestionOut"];
 const num = (v: unknown) => (typeof v === "number" ? v : null);
@@ -23,7 +24,10 @@ export function SaveTeam() {
   const site = useSiteConfig();
   const params = useSearchParams();
   const router = useRouter();
-  const [state, setState] = useState<"saving" | "access" | "failed">("saving");
+  const [state, setState] = useState<"saving" | "access" | "failed" | "twin">("saving");
+  // a team of the same name in the own club (K17): open it rather than make it twice
+  const [twin, setTwin] = useState<{ org: string; id: string; name: string } | null>(null);
+  const [twinOk, setTwinOk] = useState(false);
   const started = useRef(false);
   const colour = FARBE[params.get("farbe") ?? ""] ?? SHIRTS[0][1];
   const second = colour === SHIRTS[4][1] || colour === SHIRTS[2][1] ? SHIRTS[3][1] : SHIRTS[4][1];
@@ -61,13 +65,21 @@ export function SaveTeam() {
       const own = me.data.organizations.filter((o) => o.role === "org_admin");
       const orgId = own.length === 1 ? own[0]!.id : (await api.POST("/v1/orgs", { body: { name, country: "CH", primary_color: colour, secondary_color: second } })).data?.id;
       if (!orgId) return setState("failed");
+      if (own.length === 1 && !twinOk) {
+        const existing = (await api.GET("/v1/orgs/{org_id}/teams", { params: { path: { org_id: orgId } } })).data ?? [];
+        const same = similarTeams(name, existing)[0];
+        if (same) {
+          setTwin({ org: orgId, id: same.id, name: same.name });
+          return setState("twin");
+        }
+      }
       const tm = await api.POST("/v1/orgs/{org_id}/teams", { params: { path: { org_id: orgId } }, body: { name, gender: "mixed" } });
       if (tm.error || !tm.data) return setState("failed");
       router.replace(`/app/${orgId}/teams/${tm.data.id}/matches`);
       return;
     }
     router.replace("/einstieg");
-  }, [params, router, colour, second]);
+  }, [params, router, colour, second, twinOk]);
 
   useEffect(() => {
     if (started.current) return;
@@ -102,6 +114,27 @@ export function SaveTeam() {
             </p>
           )}
         </>
+      )}
+      {state === "twin" && twin && (
+        <div className="space-y-4" data-testid="entry-twin">
+          <h1 className="font-slant text-[34px] leading-tight">{t("twinTitle", { name: twin.name })}</h1>
+          <p className="text-[19px]">{t("twinText")}</p>
+          <div className="flex flex-wrap gap-3">
+            <a href={`/app/${twin.org}/teams/${twin.id}/matches`} className={buttonClass("primary")}>
+              {t("twinOpen")}
+            </a>
+            <button
+              type="button"
+              className={buttonClass("secondary")}
+              onClick={() => {
+                started.current = false;
+                setTwinOk(true);
+              }}
+            >
+              {t("twinAnyway")}
+            </button>
+          </div>
+        </div>
       )}
       {state === "failed" && (
         <>

@@ -69,7 +69,7 @@ export function UnlinkedAccounts({ orgId, teamId, entries, members, rosterKey }:
             >
               <span className="min-w-0 flex-1 basis-40">
                 <span className="block font-medium">{m.name}</span>
-                <span className="block text-xs text-muted">{t(`roles.${m.role}`)}</span>
+                <span className="block text-xs text-muted">{t(`personRoles.${m.person_role ?? "guest"}`)}</span>
               </span>
               <Select label={t("accountLink.entry")} name="entry" defaultValue={free.find((e) => `${e.first_name} ${e.last_name}` === m.name)?.player_id ?? ""}>
                 <option value="">{t("accountLink.pick")}</option>

@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { getTranslations } from "next-intl/server";
 import type { CSSProperties, ReactNode } from "react";
 import { AppShell } from "@/components/shell/app-shell";
+import { EmailBanner } from "@/components/shell/email-banner";
 import { serverApi } from "@/lib/api";
 import { CHECK_KITS, clubStyle } from "@/lib/color";
 
@@ -22,10 +23,10 @@ export default async function OrgLayout({ children, params }: { children: ReactN
   // development only: show the club in one of the six check colours (screenshots, SPEC.md 13)
   const preview = process.env.NODE_ENV !== "production" ? CHECK_KITS[jar.get("hb_dev_kit")?.value as keyof typeof CHECK_KITS] : undefined;
   const kitColours = preview ?? ([org.primary_color, org.secondary_color] as const);
-  // only while the admin has not set it up yet
-  // nothing pushes in on every page (UX test H13): two-factor is a point at the account, the
-  // club's verification is a task on the club page (Verein › Verband)
-  const banner = null;
+  // nothing pushes in on every page (UX test H13): two-factor sits in the account, the club's
+  // verification is a task on the club page (Verein › Verband). One quiet line only while the
+  // e-mail address is not confirmed and mails go out (L14); it can be put away.
+  const banner = me.email_verified ? null : <EmailBanner />;
   return (
     <div className="club min-h-dvh" style={clubStyle(kitColours[0], kitColours[1]) as CSSProperties}>
       <AppShell
@@ -41,7 +42,12 @@ export default async function OrgLayout({ children, params }: { children: ReactN
           season_id: x.current_season?.id ?? null,
           team_features: x.settings.team_features ?? false,
         }))}
-        me={{ name: me.name, email: me.email, two_factor_due: Boolean(org.two_factor_required && !me.totp_enabled && org.something_to_protect) }}
+        me={{
+          name: me.name,
+          email: me.email,
+          two_factor_due: Boolean(org.two_factor_required && !me.totp_enabled && org.something_to_protect),
+          two_factor_overdue: Boolean(org.two_factor_overdue && !me.totp_enabled),
+        }}
         savedTeam={savedTeam}
         banner={banner}
       >

@@ -21,6 +21,16 @@ class TeamRole(StrEnum):
     PARENT = "parent"  # sees only content of their own children (guardianships)
 
 
+class PersonRole(StrEnum):
+    """The four roles the product shows (K18); not stored, read from the organisation and team
+    role (`services.policies.person_role`)."""
+
+    TRAINER = "trainer"
+    CO_TRAINER = "co_trainer"
+    PLAYER = "player"
+    PARENT = "parent"
+
+
 class Position(StrEnum):
     LA = "LA"
     RL = "RL"

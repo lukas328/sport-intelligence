@@ -40,9 +40,17 @@ def test_can_team_actions() -> None:
     assert can(actor(OrgRole.ORG_ADMIN), Action.ROSTER_WRITE, OTHER)
     assert can(actor(team_role=TeamRole.COACH), Action.ROSTER_WRITE, TEAM)
     assert not can(actor(team_role=TeamRole.COACH), Action.ROSTER_WRITE, OTHER)
-    assert not can(actor(team_role=TeamRole.ANALYST), Action.ROSTER_WRITE, TEAM)
+    # the older specialist roles are Co-Trainers: coach rights in the team (K18)
+    assert can(actor(team_role=TeamRole.ANALYST), Action.ROSTER_WRITE, TEAM)
     assert can(actor(team_role=TeamRole.ANALYST), Action.SEASON_WRITE, TEAM)
     assert can(actor(team_role=TeamRole.PLAYER), Action.ROSTER_READ, TEAM)
+    # players work with the video, but do not delete, invite or change the squad
+    assert can(actor(team_role=TeamRole.PLAYER), Action.VIDEO_UPLOAD, TEAM)
+    assert can(actor(team_role=TeamRole.GOALKEEPER), Action.PLAYLIST_WRITE, TEAM)
+    assert not can(actor(team_role=TeamRole.PLAYER), Action.MATCH_DELETE, TEAM)
+    assert not can(actor(team_role=TeamRole.PLAYER), Action.INVITE_TEAM, TEAM)
+    assert not can(actor(team_role=TeamRole.PLAYER), Action.ROSTER_WRITE, TEAM)
+    assert not can(actor(team_role=TeamRole.PARENT), Action.TEAM_READ, TEAM)
     assert not can(actor(team_role=TeamRole.GUEST), Action.TEAM_READ, TEAM)
     with pytest.raises(ValueError, match="needs a team"):
         can(actor(), Action.TEAM_READ)

@@ -1,0 +1,85 @@
+{
+  "dinge-phone": {
+    "width": 780,
+    "height": 1688,
+    "scale": 2,
+    "rects": {
+      "thing": [32, 580, 716, 219],
+      "dots": [650, 965, 85, 92]
+    }
+  },
+  "ergebnis-laptop": {
+    "width": 2880,
+    "height": 1880,
+    "scale": 2,
+    "rects": {
+      "dots": [817, 1642, 104, 112],
+      "things": [64, 1184, 873, 280]
+    }
+  },
+  "ergebnis-phone-tall": {
+    "width": 780,
+    "height": 3760,
+    "scale": 2,
+    "rects": {}
+  },
+  "hochladen-phone": {
+    "width": 780,
+    "height": 1688,
+    "scale": 2,
+    "rects": {
+      "dialog": [0, 961, 780, 739],
+      "first": [48, 1166, 684, 112]
+    }
+  },
+  "pruefen-phone": {
+    "width": 780,
+    "height": 1688,
+    "scale": 2,
+    "rects": {
+      "points": [65, 207, 650, 125],
+      "question": [32, 898, 716, 152],
+      "yes": [32, 1229, 716, 112]
+    }
+  },
+  "saison": {
+    "width": 2560,
+    "height": 1640,
+    "scale": 2,
+    "rects": {
+      "bars": [1456, 828, 264, 169],
+      "dots": [2402, 777, 82, 95],
+      "court": [1816, 736, 680, 552]
+    }
+  },
+  "szenen": {
+    "width": 2560,
+    "height": 1880,
+    "scale": 2,
+    "rects": {
+      "search": [64, 515, 1656, 128],
+      "answer": [64, 915, 1656, 214],
+      "play": [64, 1168, 336, 96]
+    }
+  },
+  "teilen-phone": {
+    "width": 780,
+    "height": 1688,
+    "scale": 2,
+    "rects": {
+      "card": [32, 605, 716, 551],
+      "share": [32, 1478, 237, 96]
+    }
+  },
+  "video": {
+    "width": 2560,
+    "height": 2000,
+    "scale": 2,
+    "rects": {
+      "video": [64, 424, 1688, 950],
+      "active": [1816, 782, 680, 125],
+      "list": [1816, 533, 680, 623],
+      "timeline": [64, 1605, 1688, 236]
+    }
+  }
+}

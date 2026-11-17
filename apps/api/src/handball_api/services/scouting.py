@@ -263,7 +263,9 @@ async def _data(
                 .where(
                     Match.team_id == team.id,
                     Match.opponent_id == opponent.id,
-                    Match.kind == "match",
+                    # our matches against them and the videos of them against others (K3): the
+                    # own side of a scouting match is their opponent of that day
+                    Match.kind.in_(("match", "scouting")),
                     Match.kickoff_at < before,
                 )
                 .order_by(Match.kickoff_at)

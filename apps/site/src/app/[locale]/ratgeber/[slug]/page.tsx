@@ -118,11 +118,12 @@ export default async function GuidePage({ params }: Props) {
               </section>
             )}
 
-            <aside aria-labelledby="produkt" className="measure mt-14 border-t-2 border-ink pt-6">
+            {/* K12: after the answer, what the app takes off the coach's hands for this question */}
+            <aside aria-labelledby="produkt" className="measure mt-14 border-2 border-ink border-l-[6px] border-l-club-text bg-paper p-5 md:p-6">
               <h2 id="produkt" className="font-slant text-[1.5rem] md:text-[1.75rem]">
                 {t.productTitle}
               </h2>
-              <p className="mt-2 leading-[1.6]">{t.productText}</p>
+              <p className="mt-2 leading-[1.6]">{g.product?.[locale] ?? t.productText}</p>
               <div className="mt-2 flex flex-wrap gap-x-8">
                 <Link href={`/${locale}/so-funktioniert-es/`} className="link">
                   {t.productLink}

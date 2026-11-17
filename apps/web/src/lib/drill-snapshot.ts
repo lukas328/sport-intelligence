@@ -20,7 +20,8 @@ export function toDrillItem(d: Drill, lang: string): DrillItem {
     name: d.name[l] ?? d.name["de-CH"],
     minutes: d.minutes,
     focus: [...d.focus],
-    setup: d.setup[l] ?? d.setup["de-CH"],
+    // set-up and procedure together: the session (and its PDF) shows how the drill runs
+    setup: `${d.setup[l] ?? d.setup["de-CH"]} ${d.procedure[l] ?? d.procedure["de-CH"]}`,
     coaching: d.coaching[l] ?? d.coaching["de-CH"],
   };
 }

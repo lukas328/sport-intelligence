@@ -244,7 +244,8 @@ async def apply_scoreboard(
 
     manual = await _manual_goals(ctx, match)
     # the overlay names the scorer after a goal ("7 Lisa ZUFALL"): own players by shirt number
-    roster = await numbers(ctx, match.season_id, match.team_id)
+    # (a scouting match has no own players: the own side is the opponent's opponent)
+    roster = await numbers(ctx, match.season_id, match.team_id) if match.kind != "scouting" else {}
     created = 0
     confidence = 0.8 if overlay.get("source") == "hall_scoreboard" else 0.95
     noted: set[int] = set()  # official goals given the overlay reading in this run

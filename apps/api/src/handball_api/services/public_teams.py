@@ -172,15 +172,14 @@ async def preview(
     goals: dict[int, int] = defaultdict(int)
     names: dict[int, str] = {}
     counted = 0
-    try:
-        for g in played[-SCORER_GAMES:] if with_scorers else []:
-            for p in await ch.game_players(ctx.db, g.id):
-                if p.team_id == team.id and p.goals:
-                    goals[p.player_id] += p.goals
-                    names[p.player_id] = p.name or ""
-            counted += 1
-    except ch.UpstreamUnavailableError:
-        pass  # the preview stands without scorers
+    ids = [g.id for g in played[-SCORER_GAMES:]] if with_scorers else []
+    # the games asked at the same time; one handball.ch does not answer is left out
+    for players in (await ch.game_players_many(ctx.db, ids)).values():
+        for p in players:
+            if p.team_id == team.id and p.goals:
+                goals[p.player_id] += p.goals
+                names[p.player_id] = p.name or ""
+        counted += 1
     scorers = [
         {"name": display_name(names[pid]), "goals": n}
         for pid, n in sorted(goals.items(), key=lambda kv: -kv[1])[:5]

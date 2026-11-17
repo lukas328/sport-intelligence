@@ -58,8 +58,15 @@ class OpponentPlayerOut(ApiModel):
 
 
 class MatchCreate(ApiModel):
-    kind: Literal["match", "training"] = Field(
-        default="match", description="training: training video without opponent (4.8)"
+    kind: Literal["match", "training", "scouting"] = Field(
+        default="match",
+        description="training: training video without opponent (4.8); scouting: a video of the "
+        "opponent playing another team (the own team does not play, K3)",
+    )
+    scouting_other: Name | None = Field(
+        default=None,
+        description="scouting: the team the opponent plays against; it takes the own side in the "
+        "analysis (kit_own is its shirt colour)",
     )
     season_id: uuid.UUID | None = None
     opponent_id: uuid.UUID | None = None
@@ -93,6 +100,8 @@ class MatchCreate(ApiModel):
 
     @model_validator(mode="after")
     def _opponent(self) -> MatchCreate:
+        if (self.kind == "scouting") != bool(self.scouting_other):
+            raise ValueError("scouting_other: the other team of a scouting match, only there")
         if self.kind == "training":
             if self.opponent_id or self.opponent_name:
                 raise ValueError("a training has no opponent")
@@ -105,6 +114,9 @@ class MatchCreate(ApiModel):
 
 class MatchUpdate(ApiModel):
     kickoff_at: datetime | None = None
+    scouting_other: Name | None = Field(
+        default=None, description="scouting matches only: the other team's name"
+    )
     is_home: bool | None = None
     competition: Name | None = None
     venue: Name | None = None
@@ -176,6 +188,89 @@ class JobOut(ApiModel):
     finished_at: datetime | None
 
 
+ProgressStage = Literal["upload", "ingest", "analysis", "done"]
+ProgressState = Literal["running", "queued", "waiting", "stalled", "interrupted", "done", "failed"]
+
+
+class FileProgressOut(ApiModel):
+    """Where one file of a match is (services/progress): its step in the coach's words, how far
+    the step is, how long it probably takes, and whether it moves."""
+
+    video_id: uuid.UUID
+    filename: str
+    role: VideoRole
+    part: int | None = Field(default=None, description="its number on the match timeline, from 1")
+    half: int | None = Field(default=None, description="1 or 2 when the parts are two halves")
+    stage: ProgressStage = Field(
+        description="upload: hochladen; ingest: einlesen (converting for playback and analysis); "
+        "analysis: analysieren; done: fertig"
+    )
+    state: ProgressState = Field(
+        description="running; queued: waits for a free worker; waiting: waits for the analysis of "
+        "an earlier part; stalled: no report from the worker for a while; interrupted: the upload "
+        "stopped (closed tab, lost connection); done; failed"
+    )
+    step: str | None = Field(
+        default=None, description="the technical sub-step (download, transcode, observe, ...)"
+    )
+    fraction: float | None = Field(
+        default=None, ge=0, le=1, description="how far the current stage is; null while unknown"
+    )
+    overall: float = Field(ge=0, le=1, description="the whole way of this file, all stages")
+    stage_started_at: datetime | None = None
+    last_activity_at: datetime | None = Field(
+        default=None, description="the last sign of life: a part uploaded, a worker report"
+    )
+    eta_s: int | None = Field(
+        default=None, description="seconds left in the current stage; null: cannot be estimated"
+    )
+    finish_s: int | None = Field(
+        default=None,
+        description="seconds until the file is done with all its stages; null while unknown",
+    )
+    eta_basis: Literal["measured", "history"] | None = Field(
+        default=None,
+        description="measured: from the pace of this run; history: from video length and the "
+        "pace of the latest runs",
+    )
+    uploaded_bytes: int | None = None
+    size_bytes: int | None = None
+    duration_s: float | None = None
+    idle_s: int | None = Field(
+        default=None, description="seconds without a sign of life (stalled, interrupted, queued)"
+    )
+    restart_at: datetime | None = Field(
+        default=None, description="stalled: when the watchdog restarts the step at the latest"
+    )
+    restarted: bool = Field(
+        default=False, description="this step was restarted once already after it went silent"
+    )
+    error: str | None = Field(default=None, description="failed: a stable failure code")
+
+
+class MatchProgressOut(ApiModel):
+    """Uploads and processing of one match, for the progress in the head, on Spiele and in the
+    match (K6, K13, B4). Present while something runs and a while after it ended."""
+
+    match_id: uuid.UUID
+    team_id: uuid.UUID
+    kind: str
+    opponent_name: str
+    scouting_other: str | None = None
+    kickoff_at: datetime
+    is_home: bool
+    stage: ProgressStage = Field(description="the step of the file furthest behind")
+    state: ProgressState
+    overall: float = Field(ge=0, le=1)
+    eta_s: int | None = Field(
+        default=None, description="seconds until everything is done; null: cannot be estimated"
+    )
+    finished_at: datetime | None = Field(
+        default=None, description="done or failed: when the last step ended"
+    )
+    files: list[FileProgressOut]
+
+
 class OpponentColors(ApiModel):
     """The opponent's colours for this match (docs/design/ux-reset). The web applies the clash rule
     (lib/color.ts, opponentShown); nothing here is guessed."""
@@ -218,6 +313,14 @@ class MatchOut(ApiModel):
     report_extra: dict[str, Any] | None
     videos: list[VideoOut]
     jobs: list[JobOut]
+    scouting_other: str | None = Field(
+        default=None, description="scouting: the team the opponent plays against"
+    )
+    progress: MatchProgressOut | None = Field(
+        default=None,
+        description="uploads and processing while they run and a while after (services/progress); "
+        "only in the single match read",
+    )
 
 
 class MatchSummary(ApiModel):
@@ -239,6 +342,9 @@ class MatchSummary(ApiModel):
     has_report: bool = Field(
         default=False, description="events from a match report (handball.ch or paper) exist"
     )
+    scouting_other: str | None = Field(
+        default=None, description="scouting: the team the opponent plays against"
+    )
 
 
 class UploadCreate(ApiModel):
@@ -252,6 +358,10 @@ class UploadOut(ApiModel):
     video: VideoOut
     part_size: int
     part_count: int
+    resumed: bool = Field(
+        default=False,
+        description="the unfinished upload of the same file: list its parts and send the rest",
+    )
 
 
 class PartsRequest(ApiModel):

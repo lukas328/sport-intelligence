@@ -5,9 +5,11 @@ from typing import Annotated
 
 from fastapi import APIRouter, File, Query, UploadFile, status
 
-from handball_api.models import Consent, Season, Team
+from handball_api.models import Consent, Season, Team, User
+from handball_api.models.enums import OrgRole, TeamRole
 from handball_api.routers.deps import OrgDep
 from handball_api.schemas.orgs import (
+    PersonRoleIn,
     SeasonCreate,
     SeasonOut,
     TeamCreate,
@@ -33,6 +35,7 @@ from handball_api.schemas.roster import (
 from handball_api.services import orgs as service
 from handball_api.services import roster as roster_service
 from handball_api.services.context import Ctx
+from handball_api.services.policies import person_role
 
 router = APIRouter(prefix="/v1/orgs/{org_id}/teams", tags=["teams"])
 
@@ -109,10 +112,17 @@ async def create_season(team_id: uuid.UUID, data: SeasonCreate, scope: OrgDep) -
 
 @router.get("/{team_id}/members", response_model=list[TeamMemberOut], tags=["members"])
 async def list_team_members(team_id: uuid.UUID, scope: OrgDep) -> list[TeamMemberOut]:
-    return [
-        TeamMemberOut(user_id=u.id, name=u.name, email=u.email, role=r)
-        for u, r in await service.list_team_members(scope.ctx, team_id)
-    ]
+    return [_member_out(u, r, o) for u, r, o in await service.list_team_members(scope.ctx, team_id)]
+
+
+def _member_out(u: User, role: TeamRole, org_role: OrgRole | None) -> TeamMemberOut:
+    return TeamMemberOut(
+        user_id=u.id,
+        name=u.name,
+        email=u.email,
+        role=role,
+        person_role=person_role(org_role, role),
+    )
 
 
 @router.patch("/{team_id}/members/{user_id}", response_model=TeamMemberOut, tags=["members"])
@@ -121,8 +131,21 @@ async def update_team_member(
 ) -> TeamMemberOut:
     await service.update_team_member(scope.ctx, team_id, user_id, data)
     members = await service.list_team_members(scope.ctx, team_id)
-    u, r = next((u, r) for u, r in members if u.id == user_id)
-    return TeamMemberOut(user_id=u.id, name=u.name, email=u.email, role=r)
+    return next(_member_out(u, r, o) for u, r, o in members if u.id == user_id)
+
+
+@router.put(
+    "/{team_id}/members/{user_id}/person-role", response_model=TeamMemberOut, tags=["members"]
+)
+async def set_person_role(
+    team_id: uuid.UUID, user_id: uuid.UUID, data: PersonRoleIn, scope: OrgDep
+) -> TeamMemberOut:
+    """Trainer (coach and club admin), Co-Trainer or Spieler for a member of the team (K18).
+    Making or unmaking a Trainer is for club admins."""
+    await service.set_person_role(scope.ctx, team_id, user_id, data.role)
+    await scope.ctx.db.flush()
+    members = await service.list_team_members(scope.ctx, team_id)
+    return next(_member_out(u, r, o) for u, r, o in members if u.id == user_id)
 
 
 @router.delete(

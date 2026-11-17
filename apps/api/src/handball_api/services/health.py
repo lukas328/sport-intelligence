@@ -10,11 +10,11 @@ from typing import Literal
 
 import boto3
 from botocore.config import Config as BotoConfig
-from redis.asyncio import Redis
 from sqlalchemy import text
 
 from handball_api.core.config import Settings
 from handball_api.core.db import get_engine
+from handball_jobkit.redisconn import async_redis
 
 Status = Literal["ok", "error"]
 Check = Callable[[], Awaitable[None]]
@@ -49,7 +49,7 @@ def default_checks(settings: Settings) -> dict[str, Check]:
             await conn.execute(text("SELECT 1"))
 
     async def redis() -> None:
-        client = Redis.from_url(settings.redis_url)
+        client = async_redis(settings.redis_url)
         try:
             await client.ping()
         finally:

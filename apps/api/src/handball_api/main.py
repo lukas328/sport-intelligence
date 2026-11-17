@@ -4,6 +4,7 @@ import uuid
 from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
 
+import sentry_sdk
 import structlog
 from fastapi import Depends, FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
@@ -18,7 +19,7 @@ from handball_api.core.email import (
     MemoryEmailSender,
     SmtpEmailSender,
 )
-from handball_api.core.errors import install_error_handlers
+from handball_api.core.errors import install_error_handlers, internal_error_response
 from handball_api.core.jobs import EventBus, JobQueue, RedisEventBus, RqJobQueue
 from handball_api.core.logging import configure_logging, get_logger
 from handball_api.core.oidc import OidcClient
@@ -28,6 +29,7 @@ from handball_api.core.storage import ObjectStorage, S3Storage
 from handball_api.core.telemetry import instrument_engine, setup_tracing
 from handball_api.core.text import ClaudeTextGenerator, TextGenerator
 from handball_api.routers import assistant as assistant_router
+from handball_api.routers import attachments as attachments_router
 from handball_api.routers import auth, health, internal, matches, orgs, teams
 from handball_api.routers import billing as billing_router
 from handball_api.routers import collections as collections_router
@@ -79,7 +81,7 @@ def _email_sender(settings: Settings) -> EmailSender:
     if settings.email_backend == "memory":
         return MemoryEmailSender()
     if settings.email_backend == "console":
-        return ConsoleEmailSender()
+        return ConsoleEmailSender(full=settings.env == "local")
     return SmtpEmailSender(
         settings.smtp_host,
         settings.smtp_port,
@@ -195,9 +197,17 @@ def create_app(
         request: Request, call_next: Callable[[Request], Awaitable[Response]]
     ) -> Response:
         request_id = request.headers.get("x-request-id") or uuid.uuid4().hex
+        request.state.request_id = request_id
         structlog.contextvars.bind_contextvars(request_id=request_id)
         try:
             response = await call_next(request)
+        except Exception as exc:
+            # An unexpected error becomes a problem+json 500 here, logged as one structured line
+            # with the request id. Left alone it would reach Starlette's server error middleware,
+            # which answers without the id and re-raises, so the server prints a bare traceback.
+            log.exception("unhandled_exception", method=request.method, path=request.url.path)
+            sentry_sdk.capture_exception(exc)  # no-op without Sentry; deduplicated with it
+            response = internal_error_response(request, request_id)
         finally:
             structlog.contextvars.clear_contextvars()
         response.headers["x-request-id"] = request_id
@@ -219,6 +229,7 @@ def create_app(
     app.include_router(teams.router)
     app.include_router(matches.router)
     app.include_router(matches.public_media)
+    app.include_router(attachments_router.router)
     app.include_router(events_router.router)
     app.include_router(tactics_router.router)
     app.include_router(training_router.router)

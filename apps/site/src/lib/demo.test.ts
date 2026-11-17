@@ -1,11 +1,17 @@
 import { describe, expect, it } from "vitest";
 import data from "../../public/demo/match.json";
 import de from "@/messages/de";
-import { demoFigures, demoGoals, demoScene, halfSpot, reportGoals, zoneOf, type DemoMatch } from "./demo";
+import { COURT } from "@handball/court";
+import { sampleAt, smooth } from "@/components/anlauf/geometry";
+import { ballAt } from "@/components/anlauf/ball";
+import { demoFigures, demoGoals, demoScene, goalDistance, halfSpot, reportGoals, SHOT_MIN, zoneOf, type DemoMatch } from "./demo";
 import { threeThings } from "./three-things";
 import { demoView } from "./things";
 
 const match = data as unknown as DemoMatch;
+
+/** Distance of a court spot (metres, goal at x = 0) to that goal. */
+const courtGoalDistance = (x: number, y: number) => goalDistance([y, x]);
 
 describe("demo match", () => {
   it("is marked as fictional", () => {
@@ -47,12 +53,52 @@ describe("demo match", () => {
     expect(match.events.some((e) => e.type === "turnover")).toBe(false);
   });
 
-  it("draws no ball in the scene: the analysis does not find it yet", () => {
-    const t = threeThings(demoGoals(match));
-    const scene = demoScene(t[0]!.goals[0] as ReturnType<typeof demoGoals>[number], "x");
-    expect(scene.ball).toEqual([]);
-    expect(scene.tracks.filter((x) => x.team === "own")).toHaveLength(7);
-    expect(scene.tracks.filter((x) => x.team === "opp")).toHaveLength(6);
+  it("shows the ball in every frame of the scene: the demo is invented, so we know where it is", () => {
+    const v = demoView(de);
+    expect(v.scene.ball.length).toBeGreaterThanOrEqual(2);
+    expect(v.scene.ball.at(-1)).toMatchObject({ team: "opp", number: v.scene.scorer!.number, to: v.scene.duration });
+    for (let i = 0; i <= 300; i++) expect(ballAt(v.scene, i / 300), `t=${i / 300}`).not.toBeNull();
+  });
+
+  it("keeps every field player out of both goal areas; only the goalkeeper stands in his", () => {
+    const v = demoView(de);
+    const scenes = [v.scene, ...demoGoals(match).filter((g) => g.zone !== "gs" && g.zone !== "m7").map((g) => demoScene(g, "x"))];
+    for (const scene of scenes) {
+      for (const tr of scene.tracks) {
+        if (tr.team === "ref") continue;
+        for (let i = 0; i <= 200; i++) {
+          // court metres, our goal at x = 0, theirs at x = 40
+          const [x, y] = sampleAt(tr.xy, i / 200);
+          const d = Math.min(courtGoalDistance(x, y), courtGoalDistance(40 - x, y));
+          if (tr.keeper) expect(d, "goalkeeper in his area").toBeLessThan(COURT.goalAreaRadius);
+          else expect(d, `${tr.team} ${tr.number ?? "?"} at t=${i / 200}`).toBeGreaterThanOrEqual(COURT.goalAreaRadius);
+        }
+      }
+      expect(scene.tracks.filter((x) => x.keeper)).toHaveLength(1);
+    }
+  });
+
+  it("puts the attack around 9 m and the defence just in front of 6 m", () => {
+    const scene = demoView(de).scene;
+    const start = (team: "own" | "opp") => scene.tracks.filter((x) => x.team === team && !x.keeper).map((x) => courtGoalDistance(x.xy[0]![0], x.xy[0]![1]));
+    const defence = start("own");
+    expect(defence).toHaveLength(6);
+    for (const d of defence) {
+      expect(d).toBeGreaterThanOrEqual(6.4);
+      expect(d).toBeLessThan(8);
+    }
+    const attack = start("opp").sort((a, b) => b - a);
+    expect(attack).toHaveLength(6);
+    // three backs at 9 m or more, the wings and the pivot closer, all outside 6 m
+    expect(attack.slice(0, 3).every((d) => d >= 8.5)).toBe(true);
+    expect(attack.every((d) => d >= 6.4)).toBe(true);
+  });
+
+  it("starts no run and takes no shot inside the goal area", () => {
+    for (const g of demoGoals(match)) {
+      for (const p of [...g.run, g.shot]) expect(goalDistance(p), `${g.id} ${g.zone}`).toBeGreaterThanOrEqual(SHOT_MIN - 1e-9);
+      for (const p of smooth(g.run, 8)) expect(goalDistance(p), `${g.id} smoothed`).toBeGreaterThanOrEqual(COURT.goalAreaRadius);
+    }
   });
 
   it("gives every figure a source and the match's own numbers", () => {

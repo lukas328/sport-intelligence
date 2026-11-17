@@ -7,7 +7,8 @@ import { apiBaseUrl } from "@/lib/api-base";
  */
 export const dynamic = "force-dynamic";
 
-const FORWARD_REQUEST = ["cookie", "content-type", "x-csrf-token", "x-request-id", "origin", "user-agent", "accept"];
+// range: Safari plays an MP4 (a shared highlight reel) only from byte ranges
+const FORWARD_REQUEST = ["cookie", "content-type", "x-csrf-token", "x-request-id", "origin", "user-agent", "accept", "range"];
 const DROP_RESPONSE = new Set(["content-encoding", "content-length", "transfer-encoding", "connection"]);
 
 async function proxy(req: NextRequest, ctx: { params: Promise<{ path: string[] }> }): Promise<Response> {
@@ -40,6 +41,9 @@ async function proxy(req: NextRequest, ctx: { params: Promise<{ path: string[] }
   upstream.headers.forEach((value, key) => {
     if (!DROP_RESPONSE.has(key) && key !== "set-cookie") out.set(key, value);
   });
+  // the length stays true when fetch did not unpack the body (video parts need it, 206)
+  const length = upstream.headers.get("content-length");
+  if (length && !upstream.headers.get("content-encoding")) out.set("content-length", length);
   for (const cookie of upstream.headers.getSetCookie()) out.append("set-cookie", cookie);
   return new Response(upstream.status === 204 ? null : upstream.body, { status: upstream.status, headers: out });
 }

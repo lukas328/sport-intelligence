@@ -39,7 +39,9 @@ type Question = { kind: "field"; videoId: string; part: number | null; copyFrom:
 // a person question: own tracks without a name, long enough to recognise someone, at most six
 const PERSON_MIN_MS = 5000;
 const PERSON_MAX = 6;
-type Answer = { key: string; label: string; first?: boolean; numeral?: string; run: () => Promise<void> };
+/** `summary`: how the answer reads in «Beantwortet» when the button's words say too little
+ * («Jetzt ist Anwurf» becomes «Video 0:42»), taken at the moment of the tap */
+type Answer = { key: string; label: string; first?: boolean; numeral?: string; summary?: () => string; run: () => Promise<void> };
 /** «Von wo?» after a confirmed goal (fourth real-video test H7): the goal's event, the place to mark */
 type SpotStep = { q: Question; eventId: string; goal: string; suggestion: { zone: SpotZone; kind: "current" } | null; index: number; fromList?: boolean };
 type Answered = { q: Question; label: string; eventId?: string; spot?: SpotAnswer };
@@ -88,13 +90,21 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
     if (!asked && graphics.data) setAsked({ first: graphics.data.checks, more: graphics.data.more_checks ?? [] });
   }, [asked, graphics.data]);
   const [wantMore, setWantMore] = useState(false);
-  const [wantPeople, setWantPeople] = useState(false);
+  // the people asked in this round: taken when the coach asks for them, so a name given does
+  // not shift the count while answering
+  const [peopleAsked, setPeopleAsked] = useState<Question[] | null>(null);
+  const wantPeople = peopleAsked != null;
   // the server's questions afresh: after a moved court the analysis runs again and writes new
   // candidates (real-video test F3); «Alles geprüft» only once the server has none left
   const [reloading, setReloading] = useState(false);
   const [verified, setVerified] = useState(false);
   // questions left with «Weiss nicht»: not asked again in this round
   const skipped = useRef(new Set<string>());
+  // every question answered or skipped on this screen: when the list is taken afresh from the
+  // server (or the people in the picture are counted again) none of them comes back, so the
+  // round always ends (livegang L5: six times «Weiss nicht» started again at «Frage 1 von 6»)
+  const seen = useRef(new Set<string>());
+  const [retired, setRetired] = useState<ReadonlySet<string>>(() => new Set());
   const keyOf = (c: Schemas["CheckOut"]) => (c.kind === "field" ? `field:${c.id}` : c.kind === "kickoff" ? `kickoff:${c.frame_ref}` : c.id);
   const fetchChecks = useCallback(async () => {
     const r = await api.GET("/v1/orgs/{org_id}/matches/{match_id}/graphics", { params: { path: { org_id: orgId, match_id: match.id } } });
@@ -112,8 +122,9 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
         }
         await qc.refetchQueries({ queryKey: ["goal-candidates", match.id] });
         void qc.invalidateQueries({ queryKey: ["graphics", match.id] });
+        setRetired(new Set(seen.current));
         if (g) {
-          const left = (list: Schemas["CheckOut"][]) => list.filter((c) => !skipped.current.has(keyOf(c)));
+          const left = (list: Schemas["CheckOut"][]) => list.filter((c) => !skipped.current.has(keyOf(c)) && !seen.current.has(keyOf(c)));
           setAsked({ first: left(g.checks), more: left(g.more_checks ?? []) });
           setDone([]);
           setVerified(left(g.checks).length === 0);
@@ -131,12 +142,12 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
   const people = useMemo<Question[]>(() => {
     if (!main || cal0?.source !== "user_correction" || !analysis.data?.chunk_ms || analysis.data.camera !== "fixed") return [];
     return (analysis.data.tracks ?? [])
-      .filter((tr) => (tr.team === "home" || tr.team === "home_gk") && !tr.player_id && tr.last_ms - tr.first_ms >= PERSON_MIN_MS)
+      .filter((tr) => (tr.team === "home" || tr.team === "home_gk") && !tr.player_id && tr.last_ms - tr.first_ms >= PERSON_MIN_MS && !retired.has(`person:${tr.track_no}`))
       .sort((a, b) => b.last_ms - b.first_ms - (a.last_ms - a.first_ms))
       .slice(0, PERSON_MAX)
       .sort((a, b) => a.first_ms - b.first_ms)
       .map((tr) => ({ kind: "person" as const, tr, at: tr.first_ms + Math.min(2000, (tr.last_ms - tr.first_ms) / 2) }));
-  }, [analysis.data, cal0, main]);
+  }, [analysis.data, cal0, main, retired]);
   const toQuestions = useCallback(
     (list: Schemas["CheckOut"][]): Question[] =>
       list.flatMap((c): Question[] => {
@@ -157,13 +168,15 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
   const questions = useMemo<Question[]>(() => {
     if (!asked) return [];
     // the further goal moments with «Weiter prüfen», the people in the picture on their own
-    return [...toQuestions(asked.first), ...(wantMore ? toQuestions(asked.more) : []), ...(wantPeople ? people : [])];
-  }, [asked, wantMore, wantPeople, toQuestions, people]);
+    return [...toQuestions(asked.first), ...(wantMore ? toQuestions(asked.more) : []), ...(peopleAsked ?? []).filter((q) => !retired.has(id(q)))];
+  }, [asked, wantMore, peopleAsked, retired, toQuestions]);
   const moreCount = people.length;
   // goal moments beyond the most important ones: while any is open nothing looks final, «Alles
   // geprüft» only without (third real-video test G1)
   const moreGoals = asked ? toQuestions(asked.more).length : 0;
   const stillOpen = graphics.data ? openMoments(graphics.data) : 0;
+  // the court or a throw-off left with «Weiss nicht»: still open, so never «Alles geprüft»
+  const otherOpen = graphics.data ? graphics.data.checks.filter((c) => c.kind !== "goal").length : 0;
   const open = questions.filter((q) => !done.includes(id(q)));
   // what was answered in this round, to look at again and change (UX test H12)
   const [answered, setAnswered] = useState<Answered[]>([]);
@@ -175,24 +188,45 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
   const spotView = useGoalView(orgId, match.id, spotStep?.eventId ?? null);
   const lastReview = useRef<Candidate | null>(null);
   const current = spotStep?.q ?? (revisit != null ? (answered[revisit]?.q ?? null) : (open[0] ?? null));
-  // «Beantwortet» from the saved answers, also after a reload (V5): the goal moments already
-  // answered, with their place, ahead of what this round adds
+  // «Beantwortet» from the saved answers, also after a reload (V5): the court, the throw-offs
+  // with their time and the goal moments already answered, with their place, ahead of what this
+  // round adds (livegang L13: only the throw-off stood there, without its time)
   const restored = useRef(false);
+  // a throw-off as the summary says it: where it lies in the video, or, before the video's start,
+  // the match clock the video begins with
+  const kickoffLabel = (period: number, ms: number) =>
+    ms >= 0 ? t("videoAt", { video: clock(ms / 1000) }) : t("kickoffAbsentAt", { clock: clock((period - 1) * match.period_s - ms / 1000) });
   useEffect(() => {
-    if (restored.current || !candidates.data || !graphics.data) return;
+    if (restored.current || !candidates.data || !graphics.data || (main != null && analysis.isLoading)) return;
     restored.current = true;
-    const saved = candidates.data.candidates
+    const court: Answered[] =
+      main && analysis.data?.calibration?.source === "user_correction"
+        ? [{ q: { kind: "field", videoId: main.id, part: parts.find((p) => p.id === main.id)?.part ?? null, copyFrom: null }, label: t("fieldConfirmed") }]
+        : [];
+    const absentHalves = ((match.report_extra as { kickoff_absent?: number[] } | null)?.kickoff_absent ?? []).filter((p) => !match.kickoff_ms?.[String(p)]);
+    const throwOffs: Answered[] = [
+      ...Object.entries(match.kickoff_ms ?? {}).map(([p, ms]) => ({ period: Number(p), label: kickoffLabel(Number(p), ms) })),
+      ...absentHalves.map((p) => ({ period: p, label: t("kickoffAbsent") })),
+    ]
+      .sort((a, b) => a.period - b.period)
+      .map(({ period, label }) => ({ q: { kind: "kickoff" as const, period }, label }));
+    const goals = candidates.data.candidates
       .filter((c) => c.status !== "open")
       .map((c): Answered => {
         const goal = c.event_id ? graphics.data!.goals.find((x) => x.event_id === c.event_id) : undefined;
         const label = c.status === "rejected" ? t("noGoal") : t("goalOf", { team: c.side === "own" ? own : oppName });
         const spot: SpotAnswer | undefined = goal?.spot_by_coach && goal.zone ? (goal.zone as SpotZone) : goal?.zone_source === "unknown" ? "unknown" : undefined;
         return { q: { kind: "goal", c }, label, ...(c.status === "confirmed" && c.outcome === "goal" && c.event_id ? { eventId: c.event_id } : {}), ...(spot ? { spot } : {}) };
-      });
+      })
+      .sort((a, b) => (a.q.kind === "goal" && b.q.kind === "goal" ? a.q.c.goal_ms - b.q.c.goal_ms : 0));
+    const saved = [...court, ...throwOffs, ...goals];
     if (saved.length) setAnswered((list) => [...saved.filter((s) => !list.some((x) => id(x.q) === id(s.q))), ...list]);
-  }, [candidates.data, graphics.data, t, own, oppName]);
+  }, [candidates.data, graphics.data, analysis.isLoading, analysis.data, main, parts, match.kickoff_ms, match.report_extra, t, own, oppName]); // eslint-disable-line react-hooks/exhaustive-deps
   const total = questions.length;
-  const next = useCallback((q: Question) => setDone((d) => [...d, id(q)]), []);
+  const next = useCallback((q: Question) => {
+    seen.current.add(id(q));
+    setDone((d) => [...d, id(q)]);
+  }, []);
 
   // the court on the hall image: the stored court projected back, four handles (UX test B13, B14);
   // a further part of the match has its own hall image and court
@@ -239,6 +273,9 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
     void qc.invalidateQueries({ queryKey: ["analysis", main?.id] });
   }
 
+  // a name for the person in the box: the same answer from a button, the list or the keys
+  const personAnswer = (tr: Track, r: (typeof players)[number]): Answer => ({ key: `#${r.jersey_number ?? r.player_id}`, label: `${r.first_name} ${r.last_name}`, run: () => identify(tr, r.player_id) });
+
   // a goal already confirmed for the same side inside this question's clip: the same goal again
   // is the likely answer (third real-video test G2)
   const earlier = current?.kind === "goal" && graphics.data ? sameGoal(graphics.data.goals, current.c) : null;
@@ -248,13 +285,14 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
       ? // the number the analysis read first, then the squad by number: a tap or the shirt number
         [...(read ? [read] : []), ...players.filter((r) => r !== read && r.jersey_number != null).sort((a, b) => a.jersey_number! - b.jersey_number!)]
           .slice(0, 6)
-          .map((r, i) => ({ key: `#${r.jersey_number}`, numeral: String(r.jersey_number), first: i === 0 && r === read, label: `${r.first_name} ${r.last_name}`, run: () => identify(current.tr, r.player_id) }))
+          .map((r, i) => ({ ...personAnswer(current.tr, r), numeral: String(r.jersey_number), first: i === 0 && r === read }))
       : current.kind === "kickoff"
       ? [
           {
             key: "1",
             label: t("kickoffNow"),
             first: true,
+            summary: () => kickoffLabel(current.period, Math.round(getTime())),
             run: async () => {
               must(await api.PUT("/v1/orgs/{org_id}/matches/{match_id}/kickoff", { params: { path }, body: { period: current.period, t_ms: Math.round(getTime()) } }));
               for (const key of ["match", "events", "stats", "official-goals", "goal-candidates"]) void qc.invalidateQueries({ queryKey: [key, match.id] });
@@ -349,6 +387,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
   async function answer(a: Answer) {
     if (!current) return;
     lastReview.current = null;
+    const label = a.summary?.() ?? a.label;
     try {
       setFailed(null);
       await a.run();
@@ -356,11 +395,13 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
       setFailed(e instanceof Error ? e.message : String(e));
       return;
     }
+    // the bell counts the questions afresh (livegang L13)
+    void qc.invalidateQueries({ queryKey: ["notifications", orgId] });
     // a confirmed goal: saved; then «Von wo?» in the same question, the video stays (H7)
     const row = lastReview.current as Candidate | null;
     const goal = current.kind === "goal" && row?.status === "confirmed" && row.outcome === "goal" && row.event_id ? row.event_id : null;
     const index = revisit ?? answered.length;
-    const entry: Answered = { q: current, label: a.label, ...(goal ? { eventId: goal } : {}) };
+    const entry: Answered = { q: current, label, ...(goal ? { eventId: goal } : {}) };
     setAnswered((list) => (revisit != null ? list.map((x, i) => (i === revisit ? entry : x)) : [...list, entry]));
     if (goal && row) {
       const zone = row.shot_zone as SpotZone | null | undefined;
@@ -432,7 +473,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
   const typed = useRef<{ digits: string; timer: number | null }>({ digits: "", timer: null });
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (!current || spotStep || e.metaKey || e.ctrlKey || (e.target as HTMLElement)?.closest("input, textarea, select")) return;
+      if (!current || spotStep || waitsForVideo || e.metaKey || e.ctrlKey || (e.target as HTMLElement)?.closest("input, textarea, select")) return;
       if (current.kind === "person") {
         if (e.key === " ") return (e.preventDefault(), skip(current));
         if (!/^\d$/.test(e.key)) return;
@@ -442,7 +483,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
         buf.timer = window.setTimeout(() => {
           const r = players.find((x) => x.jersey_number === Number(buf.digits));
           buf.digits = "";
-          if (r) void identify(current.tr, r.player_id).then(() => next(current));
+          if (r) void answer(personAnswer(current.tr, r));
         }, 600);
         return;
       }
@@ -455,6 +496,13 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
   });
 
   const media = main ? `/v1/orgs/${orgId}/videos/${main.id}/media` : null;
+  // a question that needs the video while it does not play yet: look again until it does
+  const waitsForVideo = !media && current != null && current.kind !== "field";
+  useEffect(() => {
+    if (!waitsForVideo) return;
+    const timer = window.setInterval(() => router.refresh(), 10_000);
+    return () => window.clearInterval(timer);
+  }, [waitsForVideo, router]);
   // where a half's file starts in the match video: the throw-off of the second half is near there
   const kickoffFrom = (period: number) => {
     const start = period > 1 ? partStarts(match.videos).find((p) => p.part === period)?.start_ms : undefined;
@@ -484,7 +532,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
       <div className={cn("bleed-x", spotStep && "max-md:hidden")}>
         <Strip
           name={own}
-          sub={`${ta("vsShort")} ${oppName} · ${left > 0 ? t("openCount", { n: left, minutes: leftMinutes }) : t("count", { n: total > 0 || wantMore ? total : moreGoals })}`}
+          sub={`${ta("vsShort")} ${oppName} · ${left > 0 ? t("openCount", { n: left, minutes: leftMinutes }) : t("count", { n: total > 0 || wantMore ? total : moreGoals || otherOpen })}`}
           own={match.score_own}
           opp={match.score_opponent}
         />
@@ -518,11 +566,11 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
                 </Link>
               </div>
             </div>
-          ) : stillOpen > 0 ? (
+          ) : stillOpen > 0 || otherOpen > 0 ? (
             // left with «Weiss nicht»: still open, said so, never «Alles geprüft»
             <div className="space-y-4" data-testid="check-left-open">
               <h1 className="text-[40px] md:text-[58px]">{t("roundDone")}</h1>
-              <p className="text-[17px] text-ink-2">{t("leftOpen", { n: stillOpen })}</p>
+              <p className="text-[17px] text-ink-2">{stillOpen > 0 ? t("leftOpen", { n: stillOpen }) : t("questionsLeft", { n: otherOpen })}</p>
             </div>
           ) : (
             <>
@@ -531,11 +579,19 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
             </>
           )}
           {/* the people in the picture, offered, not pressed on the coach (E07) */}
-          {!wantPeople && moreGoals === 0 && stillOpen === 0 && moreCount > 0 && (
-            <button type="button" onClick={() => (setVerified(false), setWantPeople(true))} className={buttonClass("secondary")} data-testid="check-people">
+          {/* without a squad there is nobody to pick: first the squad, one tap away (livegang L5) */}
+          {!wantPeople && moreGoals === 0 && stillOpen === 0 && otherOpen === 0 && moreCount > 0 && roster.isSuccess && (players.length > 0 ? (
+            <button type="button" onClick={() => (setVerified(false), setPeopleAsked(people))} className={buttonClass("secondary")} data-testid="check-people">
               {t("more", { n: moreCount })}
             </button>
-          )}
+          ) : (
+            <div className="space-y-3 border-l-4 border-attn pl-4" data-testid="check-people-roster">
+              <p className="m-0 text-[17px]">{t("peopleNeedRoster", { n: moreCount })}</p>
+              <Link href={`/app/${orgId}/teams/${match.team_id}?edit=1`} className={buttonClass("secondary")} data-testid="check-roster-link">
+                {t("rosterAdd")}
+              </Link>
+            </div>
+          ))}
           {answered.length > 0 && (
             <section aria-labelledby="answered" data-testid="check-answered">
               <h2 id="answered" className="text-[22px]">{t("answered")}</h2>
@@ -607,6 +663,15 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
               <VideoPlayer ref={player} key={`kickoff-${current.period}`} src={`${media}/hls/master.m3u8`} window={kickoffFrom(current.period)} />
             ) : current.kind === "goal" && media ? (
               <VideoPlayer ref={player} key={current.c.id} src={`${media}/hls/master.m3u8`} window={goalWindow(current.c)} autoPlay bare={spotStep != null} loop={spotStep != null} />
+            ) : current.kind !== "field" ? (
+              // the video is not playable yet (still uploaded or converted): said, never an empty
+              // black area; the page looks again until it plays (livegang K5)
+              <div role="status" className="grid aspect-video w-full place-items-center p-6 text-center text-[#eef2f5]" data-testid="check-video-wait">
+                <p className="m-0 max-w-[36ch] text-[17px] font-semibold">
+                  {t("videoSoon")}
+                  <span className="mt-1 block text-[15px] font-normal text-[#c4ccd3]">{t("videoSoonText")}</span>
+                </p>
+              </div>
             ) : null}
             {current.kind === "person" && (
               <figcaption className="bg-[rgb(10_13_17/0.9)] px-3 py-2 font-mono text-[13px] font-semibold text-[#eef2f5]">
@@ -694,8 +759,9 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
                       key={a.key}
                       type="button"
                       onClick={() => void answer(a)}
+                      disabled={waitsForVideo}
                       className={cn(
-                        "flex min-h-14 cursor-pointer items-center gap-3.5 border-2 border-ink px-4 text-left text-[17px] font-semibold md:min-h-16",
+                        "flex min-h-14 cursor-pointer items-center gap-3.5 border-2 border-ink px-4 text-left text-[17px] font-semibold disabled:cursor-default disabled:opacity-50 md:min-h-16",
                         a.first ? "bg-ink text-ground" : "bg-transparent text-ink",
                         answers.length <= 2 && "col-span-2",
                       )}
@@ -718,7 +784,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
                         const period = current.period;
                         void answer({
                           key: "absent",
-                          label: t("kickoffAbsent"),
+                          label: minute != null && Number.isFinite(minute) ? t("kickoffAbsentAt", { clock: `${Math.floor(Number(startMinute))}:${String(Math.min(59, Number(startSecond) || 0)).padStart(2, "0")}` }) : t("kickoffAbsent"),
                           run: async () => {
                             const clock_s = minute != null && Number.isFinite(minute) ? (period - 1) * match.period_s + minute * 60 : undefined;
                             must(await api.PUT("/v1/orgs/{org_id}/matches/{match_id}/kickoff", { params: { path }, body: { period, t_ms: 0, absent: true, ...(clock_s != null ? { clock_s } : {}) } }));
@@ -777,8 +843,8 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
                       <select
                         value=""
                         onChange={(e) => {
-                          const id = e.target.value;
-                          if (id) void identify(current.tr, id).then(() => next(current));
+                          const r = players.find((x) => x.player_id === e.target.value);
+                          if (r) void answer(personAnswer(current.tr, r));
                         }}
                         className="min-h-14 w-full border-2 border-ink bg-transparent px-3 text-[17px] font-semibold"
                         data-testid="person-pick"

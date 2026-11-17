@@ -8,6 +8,8 @@ import { PageHeader } from "@/components/ui/page-header";
 import { serverApi } from "@/lib/api";
 import { CollectionEditor, CollectionTitle } from "./collection-editor";
 import { ShareBox } from "./share-box";
+import { OG_VERSION } from "@/lib/share/meta";
+import { blockedReason } from "@/lib/share/policy";
 
 type Params = { params: Promise<{ orgId: string; collectionId: string }> };
 
@@ -33,10 +35,11 @@ export default async function CollectionPage({ params }: Params) {
   if (!c) notFound();
   const t = await getTranslations("collections");
   const client = await serverApi();
-  const [{ data: links = [] }, { data: team }, { data: org }] = await Promise.all([
+  const [{ data: links = [] }, { data: team }, { data: org }, { data: options }] = await Promise.all([
     client.GET("/v1/orgs/{org_id}/teams/{team_id}/share-links", { params: { path: { org_id: orgId, team_id: c.team_id } } }),
     client.GET("/v1/orgs/{org_id}/teams/{team_id}", { params: { path: { org_id: orgId, team_id: c.team_id } } }),
     client.GET("/v1/orgs/{org_id}", { params: { path: { org_id: orgId } } }),
+    client.GET("/v1/orgs/{org_id}/teams/{team_id}/share-options", { params: { path: { org_id: orgId, team_id: c.team_id } } }),
   ]);
   const link = links.filter((l) => l.kind === "collection" && l.target_id === c.id && !l.revoked_at).sort((a, b) => b.created_at.localeCompare(a.created_at))[0];
   const base = `/app/${orgId}`;
@@ -80,19 +83,31 @@ export default async function CollectionPage({ params }: Params) {
           <div>
             <SectionHead as="h2" title={t("inChat")} />
             <div className="bg-[#e4ddd2] p-5">
-              <div className="ml-auto max-w-[300px] bg-white p-1.5 text-attn-ink">
-                <div className="relative h-[150px] overflow-hidden bg-club p-3.5 text-club-ink shadow-[inset_0_0_0_2px_var(--club-edge)] [clip-path:polygon(0_0,100%_0,100%_84%,0_100%)]">
-                  <b className="font-slant block max-w-[80%] text-[26px] leading-[.95]">{c.title}</b>
+              {link?.token ? (
+                // the real preview the chat shows (K20): the picture made for this link
+                <div className="ml-auto max-w-[300px] bg-white p-1.5 text-attn-ink" data-testid="chat-preview">
+                  {/* eslint-disable-next-line @next/next/no-img-element -- the link's own preview picture */}
+                  <img src={`/s/${link.token}/og?v=${OG_VERSION}`} alt="" width={1200} height={630} className="block h-auto w-full" />
+                  <p className="m-0 px-1.5 pt-2 text-[15px]">
+                    <b className="block text-[15px]">{c.title}</b>
+                    {[org?.name, team?.name].filter(Boolean).join(" ")} · {summary}
+                  </p>
                 </div>
-                <p className="m-0 px-1.5 pt-2 text-[15px]">
-                  <b className="block text-[15px]">{c.title}</b>
-                  {[org?.name, team?.name].filter(Boolean).join(" ")} · {summary}
-                </p>
-              </div>
+              ) : (
+                <div className="ml-auto max-w-[300px] bg-white p-1.5 text-attn-ink">
+                  <div className="relative h-[150px] overflow-hidden bg-club p-3.5 text-club-ink shadow-[inset_0_0_0_2px_var(--club-edge)] [clip-path:polygon(0_0,100%_0,100%_84%,0_100%)]">
+                    <b className="font-slant block max-w-[80%] text-[26px] leading-[.95]">{c.title}</b>
+                  </div>
+                  <p className="m-0 px-1.5 pt-2 text-[15px]">
+                    <b className="block text-[15px]">{c.title}</b>
+                    {[org?.name, team?.name].filter(Boolean).join(" ")} · {summary}
+                  </p>
+                </div>
+              )}
             </div>
             <p className="mt-2 text-[15px] text-ink-2">{t("chatHint")}</p>
           </div>
-          <ShareBox orgId={orgId} teamId={c.team_id} collectionId={c.id} link={link ?? null} />
+          <ShareBox orgId={orgId} teamId={c.team_id} collectionId={c.id} link={link ?? null} title={c.title} scenes={scenes.length} blocked={blockedReason(options, "collection")} />
         </aside>
       </div>
     </div>

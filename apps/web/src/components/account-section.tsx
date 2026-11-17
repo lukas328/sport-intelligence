@@ -9,6 +9,7 @@ import { Alert } from "@/components/ui/card";
 import { Input } from "@/components/ui/field";
 import { api } from "@/lib/client";
 import { errorKey, type ErrorKey } from "@/lib/errors";
+import { useMailEnabled } from "@/lib/site-config";
 
 type Me = Schemas["MeOut"];
 
@@ -21,6 +22,8 @@ function deviceName(ua: string | null | undefined, fallback: string): string {
 
 export function AccountSection({ me }: { me: Me }) {
   const t = useTranslations();
+  // confirming the address needs mail delivery (L2, L14)
+  const mail = useMailEnabled();
   const format = useFormatter();
   const qc = useQueryClient();
   const [pwError, setPwError] = useState<ErrorKey | null>(null);
@@ -70,7 +73,7 @@ export function AccountSection({ me }: { me: Me }) {
       <h2 id="account-title" className="text-lg font-semibold">
         {t("account.title")}
       </h2>
-      {!me.email_verified && (
+      {!me.email_verified && mail && (
         <Alert kind="info">
           {t("account.emailUnverified")}{" "}
           {resent ? (

@@ -134,9 +134,9 @@ async def test_consent_overview(
         uuid.UUID(mia["player_id"]),
     )
     assert len((await manager.get(url)).json()["players"]) == 3
-    # analysts follow the roster rule for official names: the entry without consent is hidden
+    # analysts are Co-Trainers (K18): they organise the team and see every entry
     seen = [p["player_id"] for p in (await analyst.get(url)).json()["players"]]
-    assert mia["player_id"] not in seen and len(seen) == 2
+    assert mia["player_id"] in seen and len(seen) == 3
 
     # unknown season, another club
     assert (await coach.get(f"{team}/seasons/{uuid.uuid4()}/consents")).status_code == 404

@@ -8,7 +8,8 @@ import { clubStyle, SHIRTS } from "@/lib/color";
 import { PageHeader } from "@/components/ui/page-header";
 import { useEffect, useState, type FormEvent } from "react";
 import { ShirtPicker } from "@/components/anlauf/shirt-picker";
-import { Button } from "@/components/ui/button";
+import { Button, buttonClass } from "@/components/ui/button";
+import { similarTeams } from "@/lib/team-names";
 import { Alert, Card } from "@/components/ui/card";
 import { Checkbox, Input, Select } from "@/components/ui/field";
 import { api } from "@/lib/client";
@@ -27,7 +28,7 @@ const STEPS = ["stepClub", "stepTeam"] as const;
 const OFFICIAL_STEPS = ["stepFind", "stepConfirm"] as const;
 const COUNTRIES = ["CH", "DE", "AT", "FR", "LI"] as const;
 
-export function OnboardingWizard({ existingOrg, resume = false }: { existingOrg?: Org; resume?: boolean }) {
+export function OnboardingWizard({ existingOrg, resume = false, waiting = [] }: { existingOrg?: Org; resume?: boolean; /** clubs whose admins have not answered an access request yet */ waiting?: string[] }) {
   const t = useTranslations();
   const router = useRouter();
   const [step, setStep] = useState(existingOrg ? 1 : 0);
@@ -63,6 +64,9 @@ export function OnboardingWizard({ existingOrg, resume = false }: { existingOrg?
   const shownStep = official ? (claimed ? 1 : 0) : step;
   // a player who asked to join a team has no club steps ahead
   const [joined, setJoined] = useState(false);
+  // teams of the club with a similar name, and whether the coach wants a new one anyway (K17)
+  const [twins, setTwins] = useState<{ id: string; name: string }[]>([]);
+  const [twinOk, setTwinOk] = useState(false);
 
   async function createOrg(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -105,6 +109,15 @@ export function OnboardingWizard({ existingOrg, resume = false }: { existingOrg?
     setBusy(true);
     setError(null);
     const league = String(f.get("league") ?? "").trim();
+    // a team typed by hand can exist twice: say so before making a second one (K17)
+    if (!twinOk) {
+      const existing = (await api.GET("/v1/orgs/{org_id}/teams", { params: { path: { org_id: org.id } } })).data ?? [];
+      const same = similarTeams(String(f.get("name") ?? ""), existing);
+      if (same.length > 0) {
+        setBusy(false);
+        return setTwins(same.map((x) => ({ id: x.id, name: x.name })));
+      }
+    }
     const { data, error } = await api.POST("/v1/orgs/{org_id}/teams", {
       params: { path: { org_id: org.id } },
       body: {
@@ -119,7 +132,8 @@ export function OnboardingWizard({ existingOrg, resume = false }: { existingOrg?
       setFields(fieldErrors(error));
       return setError(errorKey(error));
     }
-    router.push(`/app/${org.id}/teams/${data.id}`);
+    // on to Spiele: the next steps stand there (K17)
+    router.push(`/app/${org.id}/teams/${data.id}/matches`);
     router.refresh();
   }
 
@@ -140,6 +154,13 @@ export function OnboardingWizard({ existingOrg, resume = false }: { existingOrg?
         )}
       </div>
       {error && <Alert>{t(`errors.${error}`)}</Alert>}
+      {/* asked to join a team that is already in the app: it waits for its admins (K17) */}
+      {waiting.length > 0 && !claimed && (
+        <section className="max-w-[65ch] border-l-4 border-attn bg-surface px-4 py-3" data-testid="onboarding-waiting">
+          <p className="m-0 font-bold">{t("onboarding.waitingTitle", { club: waiting.join(", ") })}</p>
+          <p className="mt-1 mb-0 text-[15px]">{t("onboarding.waitingText")}</p>
+        </section>
+      )}
 
       {official && !claimed && <OfficialTeamSearch onManual={() => setManual(true)} onClaimed={(club, out, team) => {
             setName(club);
@@ -225,8 +246,22 @@ export function OnboardingWizard({ existingOrg, resume = false }: { existingOrg?
               <Input label={`${t("onboarding.league")} (${t("common.optional")})`} name="league" />
             </div>
             <Checkbox name="is_youth" label={t("onboarding.youth")} />
+            {twins.length > 0 && org && (
+              <div className="space-y-3 border-l-4 border-attn bg-surface px-4 py-3" role="alert" data-testid="team-twin">
+                <p className="m-0 font-bold">{t("onboarding.twinTitle", { names: twins.map((x) => x.name).join(", ") })}</p>
+                <p className="m-0 text-[15px]">{t("onboarding.twinText")}</p>
+                <div className="flex flex-wrap gap-3">
+                  <a href={`/app/${org.id}/teams/${twins[0]!.id}`} className={buttonClass("primary", "sm")}>
+                    {t("onboarding.twinOpen", { name: twins[0]!.name })}
+                  </a>
+                  <Button size="sm" variant="secondary" onClick={() => (setTwinOk(true), setTwins([]))} data-testid="team-twin-anyway">
+                    {t("onboarding.twinAnyway")}
+                  </Button>
+                </div>
+              </div>
+            )}
             <Button type="submit" loading={busy}>
-              {t("onboarding.finish")}
+              {twinOk ? t("onboarding.twinCreate") : t("onboarding.finish")}
             </Button>
           </form>
         </Card>

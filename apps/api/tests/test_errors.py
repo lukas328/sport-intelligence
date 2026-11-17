@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from fastapi import FastAPI, Query
 from httpx import ASGITransport, AsyncClient
+from structlog.testing import capture_logs
 
 from handball_api.core.errors import PROBLEM_MEDIA_TYPE, ProblemError
 
@@ -56,3 +57,22 @@ async def test_unhandled_error_hides_details(app: FastAPI) -> None:
         r = await c.get("/_test/crash")
     assert r.status_code == 500
     assert "boom" not in r.text
+
+
+async def test_unhandled_error_is_a_problem_with_the_request_id(app: FastAPI) -> None:
+    """No bare server traceback: a problem+json 500 that names the request id of the log line."""
+    _register(app)
+    async with AsyncClient(
+        transport=ASGITransport(app=app, raise_app_exceptions=False), base_url="http://test"
+    ) as c:
+        with capture_logs() as logs:
+            r = await c.get("/_test/crash")
+        given = await c.get("/_test/crash", headers={"x-request-id": "req-123"})
+    assert r.status_code == 500
+    assert r.headers["content-type"] == PROBLEM_MEDIA_TYPE
+    body = r.json()
+    assert body["request_id"] == r.headers["x-request-id"]
+    assert body["instance"] == "/_test/crash"
+    crash = [e for e in logs if e["event"] == "unhandled_exception"]
+    assert crash and crash[0]["path"] == "/_test/crash" and crash[0]["log_level"] == "error"
+    assert given.json()["request_id"] == "req-123" == given.headers["x-request-id"]

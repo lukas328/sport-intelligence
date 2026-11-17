@@ -98,7 +98,7 @@ test("entry: a team already in the app, request and a way on", async ({ browser 
   });
   await hans.goto("/einstieg?q=Rebhalde&farbe=gelb");
   await hans.getByTestId("entry-hits").getByRole("button").first().click({ timeout: 60_000 });
-  await expect(hans.getByTestId("entry-in-app")).toContainText("nutzt Handball Intelligence schon", { timeout: 60_000 });
+  await expect(hans.getByTestId("entry-in-app")).toContainText("Dieses Team ist schon in der App", { timeout: 60_000 });
   await hans.getByTestId("entry-save").click();
   const email = uniqueEmail("hans-taken");
   await hans.getByLabel("E-Mail").fill(email);

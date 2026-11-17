@@ -6,10 +6,12 @@ import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { ChevronLeft, Plus, Search } from "lucide-react";
 import { NotificationBell } from "@/components/training/bell";
-import { destOf, modeFor, navFor, startHref, teamInPath, uploadHref } from "@/lib/nav-model";
+import { analyses, destOf, modeFor, navFor, startHref, teamInPath, uploadHref } from "@/lib/nav-model";
+import { clubNameShown } from "@/lib/own-name";
 import { buttonClass } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { AppMark } from "@/components/brand";
+import { ProgressStrip } from "@/components/progress/progress-strip";
 import { AccountMenu } from "./account-menu";
 import { ClubMark } from "./club-mark";
 import { CommandPalette } from "./command-palette";
@@ -17,6 +19,7 @@ import {
   ShellContext,
   setCookie,
   TEAM_COOKIE,
+  type ShellMe,
   type ShellOrg,
   type ShellTeam,
   type ShellValue,
@@ -37,7 +40,7 @@ export function AppShell({
   org: ShellOrg;
   orgs: { id: string; name: string }[];
   teams: ShellTeam[];
-  me: { name: string; email: string; /** the club asks for two-factor and it is not set up */ two_factor_due?: boolean };
+  me: ShellMe;
   savedTeam: string | null;
   banner?: ReactNode;
   children: ReactNode;
@@ -67,10 +70,12 @@ export function AppShell({
   const items = navFor(mode, org.id, team?.id ?? null, navOpts);
   const active = destOf(path, mode);
   const home = startHref(mode, org.id, team?.id ?? null);
-  // one action reachable from everywhere for staff (SPEC section 6)
-  const upload = mode === "staff" ? uploadHref(org.id, team?.id ?? null) : null;
+  // one action reachable from everywhere for the staff and the players (SPEC section 6, K18)
+  const upload = analyses(mode) ? uploadHref(org.id, team?.id ?? null) : null;
   const [palette, setPalette] = useState(false);
-  const searchHref = mode === "staff" && team ? `/app/${org.id}/teams/${team.id}/scenes?focus=1` : null;
+  const searchHref = analyses(mode) && team ? `/app/${org.id}/teams/${team.id}/scenes?focus=1` : null;
+  // the club's name only when it says more than the team's (K7: «TV Thalwil» once, not twice)
+  const clubName = clubNameShown(org.name, team?.name ?? null);
 
   // menus and dialogs render at the end of <body>: give the document the club's colours too
   useEffect(() => {
@@ -148,7 +153,7 @@ export function AppShell({
                 {/* the product in ink, then the club: the colours belong to the club */}
                 <AppMark size={32} />
                 <ClubMark org={org} />
-                {org.name}
+                {clubName ?? <span className="sr-only">{org.name}</span>}
               </Link>
               <div className="max-w-40 min-w-0 shrink">
                 <TeamSwitcher compact />
@@ -242,6 +247,7 @@ export function AppShell({
               )}
               <AccountMenu compact />
             </div>
+            <ProgressStrip orgId={org.id} />
           </header>
 
           {banner}
@@ -275,7 +281,8 @@ export function AppShell({
                     // Szenen on the phone opens with the cursor in the search (UX test B18/N08)
                     href={it.key === "scenes" && searchHref ? searchHref : it.href}
                     aria-current={on ? "page" : undefined}
-                    className={cn(navLink(on), "min-h-14 justify-center text-base")}
+                    // five destinations with Teamleben (K16): a size smaller, a long word may break into two lines
+                    className={cn(navLink(on), "min-h-14 justify-center px-0.5 text-center leading-tight", items.length > 4 ? "text-[14px] tracking-tight" : "text-base")}
                   >
                     {on && (
                       <span

@@ -10,6 +10,8 @@ describe("drill snapshot", () => {
     expect(fr.name).toBe(d.name.fr ?? d.name["de-CH"]);
     expect(toDrillItem(d, "xx").name).toBe(d.name["de-CH"]);
     expect(fr.focus).toEqual(d.focus);
+    expect(fr.setup).toContain(d.setup.fr);
+    expect(fr.setup).toContain(d.procedure.fr);
   });
 
   it("sums minutes and reorders", () => {

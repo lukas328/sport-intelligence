@@ -1,0 +1,17 @@
+<!doctype html>
+<!-- Step «Anschauen und teilen»: the first of the three things on the phone, «9 von 18 Gegentore
+     über aussen rechts», with the shots on the half court. -->
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../stage.css" />
+<div id="stage"><div class="keil" style="--from: 76%; --to: 52%"></div></div>
+<script src="../stage.js"></script>
+<script>
+  S.stage(640, 620);
+  const s = S.phone("dinge-phone", { left: 214, bottom: 26 });
+  const thing = S.rect("dinge-phone", "thing", [16, 290, 358, 110]);
+  const dots = S.rect("dinge-phone", "dots", [320, 500, 44, 52]);
+  S.ring(s, dots, 8, true);
+  S.callout("things", [195, 130], S.at(s, thing, 0.03, 0.3), "br", 0.2, 31);
+  S.callout("dots", [195, 330], S.at(s, dots, 0, 0.6), "br", -0.15, 31);
+  S.done();
+</script>

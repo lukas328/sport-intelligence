@@ -17,6 +17,7 @@ import { VIEWS } from "@/components/anlauf/geometry";
 import { cameraScene } from "@/lib/graphics";
 import { MINI } from "@/lib/mini-field";
 import { clockOf } from "@/components/anlauf/three-things-view";
+import { OG_VERSION } from "@/lib/share/meta";
 
 export interface Shared {
   kind: "play" | "match" | "playlist" | "highlight" | "scene" | "collection";
@@ -36,7 +37,7 @@ export interface Shared {
     players: { number: number | null; goals: number; shots: number; saves: number; turnovers: number }[];
     video_id: string | null;
   };
-  highlight?: { format: string; scenes: number };
+  highlight?: { format: string; scenes: number; opponent?: string | null; score?: number[] | null; kickoff_at?: string | null };
   playlist?: { title: string; description: string | null; clips: { id: string; title: string | null; start_ms: number; end_ms: number; video_id: string | null }[] };
   scene?: SharedRun;
   collection?: SharedRun;
@@ -64,9 +65,16 @@ export function SharedView({ token, data, club = null, clubColour = null }: { to
   const run = data.scene ?? data.collection;
   const scenes = run?.items.filter((i) => i.scene) ?? [];
   const seconds = Math.round(scenes.reduce((n, i) => n + (i.scene!.end_ms - i.scene!.start_ms), 0) / 1000);
+  // what one sees, first (K20): the kind and its size, then the team
   const eyebrow = run
     ? t("runKick", { kind: data.collection ? "collection" : "scene", n: scenes.length, length: duration(seconds) })
-    : `${owner} · ${t("readOnly", { date: format.dateTime(new Date(data.expires_at), { dateStyle: "medium" }) })}`;
+    : data.highlight
+      ? [t("highlightKick", { n: data.highlight.scenes }), data.highlight.kickoff_at ? format.dateTime(new Date(data.highlight.kickoff_at), { dateStyle: "medium" }) : null].filter(Boolean).join(" · ")
+      : data.play
+        ? t("playKick", { n: data.play.doc.frames?.length ?? 1 })
+        : data.match
+          ? `${t("matchKick")} · ${owner}`
+          : `${owner} · ${t("readOnly", { date: format.dateTime(new Date(data.expires_at), { dateStyle: "medium" }) })}`;
   const days = Math.max(0, Math.ceil((Date.parse(data.expires_at) - Date.now()) / 86_400_000));
   return (
     <div data-testid="shared">
@@ -85,23 +93,36 @@ export function SharedView({ token, data, club = null, clubColour = null }: { to
           <PlayEditor orgId="" teamId="" editable={false} initialDoc={data.play.doc} play={null} />
         </>
       )}
-      {data.match && <MatchShare m={data.match} media={media} t={t} ts={ts} format={format} />}
+      {data.match && <MatchShare m={data.match} own={data.team} media={media} t={t} ts={ts} format={format} />}
       {data.playlist && <PlaylistShare p={data.playlist} media={media} />}
-      {run && <RunShare run={run} media={media} days={days} />}
+      {run && <RunShare run={run} media={media} days={days} single={Boolean(data.scene)} />}
       {data.highlight && (
-        <video
-          controls
-          preload="metadata"
-          src={`/v1/share/${token}/reel.mp4`}
-          aria-label={data.title}
-          className={data.highlight.format === "9x16" ? "mx-auto max-h-[80vh]" : "w-full"}
-        />
+        <div className="space-y-3">
+          {data.highlight.opponent && (
+            <p className="font-slant text-2xl">
+              {data.highlight.score && data.highlight.score.length === 2 ? `${data.highlight.score[0]}:${data.highlight.score[1]} ` : ""}
+              <span className="text-ink-2">{data.highlight.opponent}</span>
+            </p>
+          )}
+          {/* inline on phones, the link's picture until it plays; ranges let Safari play it */}
+          <video
+            controls
+            playsInline
+            preload="metadata"
+            poster={`/s/${token}/og?v=${OG_VERSION}`}
+            src={`/v1/share/${token}/reel.mp4`}
+            aria-label={data.title}
+            className={data.highlight.format === "9x16" ? "mx-auto block max-h-[80dvh] w-auto max-w-full bg-ink" : "block w-full bg-ink"}
+            data-testid="shared-reel"
+          />
+          <p className="text-[15px] text-ink-2">{t("onlyLink", { days })}</p>
+        </div>
       )}
     </div>
   );
 }
 
-function MatchShare({ m, media, ts, format }: { m: NonNullable<Shared["match"]>; media: (v: string) => string; t: (k: string) => string; ts: (k: string) => string; format: ReturnType<typeof useFormatter> }) {
+function MatchShare({ m, own, media, ts, format }: { m: NonNullable<Shared["match"]>; own: string; media: (v: string) => string; t: (k: string) => string; ts: (k: string) => string; format: ReturnType<typeof useFormatter> }) {
   const rows: [string, string | number, string | number][] = [
     [ts("goals"), m.own.goals ?? 0, m.opponent_stats.goals ?? 0],
     [ts("shots"), m.own.shots ?? 0, m.opponent_stats.shots ?? 0],
@@ -122,6 +143,13 @@ function MatchShare({ m, media, ts, format }: { m: NonNullable<Shared["match"]>;
       <Card>
         <table className="w-full text-sm">
           <caption className="sr-only">{ts("comparison")}</caption>
+          <thead>
+            <tr>
+              <td />
+              <th scope="col" className="pb-1.5 text-right font-semibold">{own}</th>
+              <th scope="col" className="pb-1.5 pl-3 text-right font-semibold">{m.opponent}</th>
+            </tr>
+          </thead>
           <tbody>
             {rows.map(([label, a, b]) => (
               <tr key={label} className="border-t border-border/70 first:border-0">
@@ -189,7 +217,7 @@ function PlaylistShare({ p, media }: { p: NonNullable<Shared["playlist"]>; media
  * Scenes play one after the other (SPEC 7.8): the video with the note of the running scene,
  * «Nächste Szene», and the Ablauf at the side: number, Minifeld, title, length, seen or running.
  */
-function RunShare({ run, media, days }: { run: SharedRun; media: (v: string) => string; days: number }) {
+function RunShare({ run, media, days, single = false }: { run: SharedRun; media: (v: string) => string; days: number; single?: boolean }) {
   const t = useTranslations("share");
   const ta = useTranslations("anlauf");
   const scenes = run.items.filter((i) => i.scene?.video_id);
@@ -198,6 +226,7 @@ function RunShare({ run, media, days }: { run: SharedRun; media: (v: string) => 
   const [mode, setMode] = useState<"video" | "taktik">("video");
   const cur = scenes[k];
   const next = () => setK((x) => Math.min(x + 1, scenes.length - 1));
+  const prev = () => setK((x) => Math.max(x - 1, 0));
   // the positions before a goal, where the court was confirmed (UX test B15)
   // the title as in the app: minute, goal or goal against, the position (UX test B15)
   const tc = useTranslations("collections");
@@ -225,7 +254,7 @@ function RunShare({ run, media, days }: { run: SharedRun; media: (v: string) => 
     </div>
   );
   return (
-    <div className="grid gap-x-10 gap-y-8 lg:grid-cols-[minmax(0,1fr)_300px]">
+    <div className={cn("grid gap-x-10 gap-y-8", !single && "lg:grid-cols-[minmax(0,1fr)_300px]")}>
       <div className="min-w-0">
         {toggle && <div className="mb-3">{toggle}</div>}
         {cur && shown === "video" && (
@@ -243,16 +272,29 @@ function RunShare({ run, media, days }: { run: SharedRun; media: (v: string) => 
             />
           </div>
         )}
+        {!cur && <p className="border-t-2 border-ink pt-4 text-[17px] text-ink-2">{t("noVideo")}</p>}
+        {cur && !single && (
+          <p className="mt-3 text-[15px] font-semibold" aria-live="polite" data-testid="scene-of">
+            {t("sceneOf", { k: k + 1, n: scenes.length })}: {titleOf(cur.scene!)}
+          </p>
+        )}
         {cur?.text && <p className="mt-4 border-l-4 border-club-text pl-3 text-[17px] italic">{cur.text}</p>}
-        <div className="mt-5 flex flex-wrap gap-3">
-          <button type="button" onClick={next} disabled={k >= scenes.length - 1} className="min-h-12 cursor-pointer border-2 border-ink bg-ink px-5 font-bold text-ground disabled:cursor-default disabled:opacity-50">
-            {t("nextScene")}
-          </button>
-          <a href="#ablauf" className="inline-flex min-h-12 items-center border-2 border-ink px-5 font-bold text-ink no-underline">
-            {t("allScenes", { n: scenes.length })}
-          </a>
-        </div>
+        {!single && scenes.length > 1 && (
+          <div className="mt-5 grid grid-cols-2 gap-3 sm:flex sm:flex-wrap">
+            <button type="button" onClick={prev} disabled={k === 0} className="min-h-12 cursor-pointer border-2 border-ink px-5 font-bold text-ink disabled:cursor-default disabled:opacity-50" data-testid="scene-prev">
+              {t("prevScene")}
+            </button>
+            <button type="button" onClick={next} disabled={k >= scenes.length - 1} className="min-h-12 cursor-pointer border-2 border-ink bg-ink px-5 font-bold text-ground disabled:cursor-default disabled:opacity-50" data-testid="scene-next">
+              {t("nextScene")}
+            </button>
+            <a href="#ablauf" className="col-span-2 inline-flex min-h-12 items-center justify-center border-2 border-ink px-5 font-bold text-ink no-underline sm:col-span-1">
+              {t("allScenes", { n: scenes.length })}
+            </a>
+          </div>
+        )}
+        {single && <p className="mt-4 text-[15px] text-ink-2">{t("onlyLink", { days })}</p>}
       </div>
+      {!single && (
       <aside id="ablauf" className="min-w-0">
         <SectionHead title={t("run")} />
         {intro && <p className="-mt-1 mb-3 text-[15px] text-ink-2">{intro}</p>}
@@ -292,6 +334,7 @@ function RunShare({ run, media, days }: { run: SharedRun; media: (v: string) => 
         </ol>
         <p className="mt-4 text-[15px] text-ink-2">{t("onlyLink", { days })}</p>
       </aside>
+      )}
     </div>
   );
 }

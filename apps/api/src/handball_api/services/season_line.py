@@ -46,6 +46,8 @@ FIELD_KEYS = (
     "suspensions",
 )
 PRESENT = (AttendanceStatus.PRESENT, AttendanceStatus.LATE)
+# what the official report knows of a player: the rest only a match with an analysis has
+REPORT_KEYS = ("goals", "suspensions", "yellow_cards", "red_cards")
 
 
 def _ratio(a: int, b: int) -> float | None:
@@ -159,6 +161,7 @@ async def _match_line(
     own = m.score_own if m.score_own is not None else stats["own"]["goals"]
     opp = m.score_opponent if m.score_opponent is not None else stats["opponent"]["goals"]
     tagged = bool(stats["quality"]["events"])
+    analysed = bool(stats["quality"].get("analysed"))
     att = attendance.get(m.id)
     return SeasonLineMatch(
         match_id=m.id,
@@ -170,24 +173,33 @@ async def _match_line(
         score_opponent=opp,
         result=_result(own, opp),
         tagged=tagged,
+        analysed=analysed,
         involved=any(ids[k] for k in LINE_KEYS),
         attendance=att.status if att else None,
         response=att.response if att else None,
         figures=figures,
-        shooting_pct=_ratio(figures.goals, figures.shots),
-        save_pct=_ratio(figures.saves, figures.faced),
+        # a rate only where the misses are recorded: the report's goals alone are no shots
+        shooting_pct=_ratio(figures.goals, figures.shots) if analysed else None,
+        save_pct=_ratio(figures.saves, figures.faced) if analysed else None,
         events=LineEvents(**{k: [uuid.UUID(i) for i in v] for k, v in ids.items()}),
     )
 
 
 def _totals(lines: list[SeasonLineMatch]) -> SeasonLineTotals:
-    sums = {k: sum(getattr(line.figures, k) for line in lines) for k in LINE_KEYS}
+    sums = {
+        k: sum(getattr(line.figures, k) for line in lines if line.analysed or k in REPORT_KEYS)
+        for k in LINE_KEYS
+    }
+    # the rate from the analysed matches alone: goals and shots of the same matches
+    rated = [line for line in lines if line.analysed]
+    rated_goals = sum(line.figures.goals for line in rated)
     return SeasonLineTotals(
         **sums,
         matches=len(lines),
         tagged_matches=sum(line.tagged for line in lines),
+        analysed_matches=len(rated),
         matches_involved=sum(line.involved for line in lines),
         matches_present=sum(line.attendance in PRESENT for line in lines),
-        shooting_pct=_ratio(sums["goals"], sums["shots"]),
+        shooting_pct=_ratio(rated_goals, sums["shots"]),
         save_pct=_ratio(sums["saves"], sums["faced"]),
     )

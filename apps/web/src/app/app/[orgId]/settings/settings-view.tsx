@@ -12,8 +12,10 @@ import { Strip } from "@/components/anlauf/heads";
 import { ShirtPicker } from "@/components/anlauf/shirt-picker";
 import { clubStyle } from "@/lib/color";
 import { InviteForm } from "@/components/people/invite-form";
+import { TeamPeople } from "@/components/people/team-people";
+import { personRole } from "@/lib/roles";
 import { Button } from "@/components/ui/button";
-import { Alert, EmptyState } from "@/components/ui/card";
+import { Alert } from "@/components/ui/card";
 import { Input } from "@/components/ui/field";
 import { api } from "@/lib/client";
 import { errorKey, type ErrorKey } from "@/lib/errors";
@@ -112,31 +114,29 @@ export function PeopleSection({
   allTeams: Team[];
 }) {
   const t = useTranslations();
+  const tp = useTranslations("people");
   const format = useFormatter();
   const qc = useQueryClient();
   const teamName = (id: string | null | undefined) => allTeams.find((x) => x.id === id)?.name ?? "";
+  const me = useQuery({ queryKey: ["me"], queryFn: async () => (await api.GET("/v1/me")).data });
+  // club admins without a team: Trainer of the club (K18)
   const members = useQuery({
     queryKey: ["members", orgId],
     enabled: isAdmin,
     queryFn: async () => (await api.GET("/v1/orgs/{org_id}/members", { params: { path: { org_id: orgId } } })).data ?? [],
   });
-  const me = useQuery({ queryKey: ["me"], queryFn: async () => (await api.GET("/v1/me")).data });
+  const clubOnly = (members.data ?? []).filter((m) => m.org_role === "org_admin" && Object.keys(m.team_roles).length === 0);
   const [roleError, setRoleError] = useState<ErrorKey | null>(null);
-  const setRole = useMutation({
-    mutationFn: async ({ userId, role }: { userId: string; role: "org_admin" | "member" }) => {
+  const stepDown = useMutation({
+    mutationFn: async (userId: string) => {
       const r = await api.PATCH("/v1/orgs/{org_id}/members/{user_id}", {
         params: { path: { org_id: orgId, user_id: userId } },
-        body: { org_role: role },
+        body: { org_role: "member" },
       });
       if (r.error) throw r.error;
-      return role;
     },
-    onSuccess: (role, v) => {
-      setRoleError(null);
-      // stepping down: reload, the admin areas are gone
-      if (role === "member" && v.userId === me.data?.id) return void (window.location.href = `/app/${orgId}`);
-      void qc.invalidateQueries({ queryKey: ["members", orgId] });
-    },
+    // stepping down: reload, the admin areas are gone
+    onSuccess: () => void (window.location.href = `/app/${orgId}`),
     onError: (e) => setRoleError(errorKey(e)),
   });
   const invitations = useQuery({
@@ -162,77 +162,76 @@ export function PeopleSection({
     onSuccess: () => void qc.invalidateQueries({ queryKey: ["invitations", orgId] }),
   });
   const pending = (invitations.data ?? []).filter((i) => !i.accepted_at && !i.revoked_at);
+  const meIsAdmin = me.data?.organizations.find((o) => o.id === orgId)?.role === "org_admin";
 
   return (
     <section aria-labelledby="people" className="space-y-3">
       <h2 id="people" className="text-lg font-semibold">
         {t("settings.people")}
       </h2>
-      {isAdmin && (
-        <div className="border-t border-foreground/15 pt-5 space-y-3">
-          <h3 className="font-semibold">{t("settings.membersTitle")}</h3>
-          {roleError && <Alert>{t(`errors.${roleError}`)}</Alert>}
-          {members.data && members.data.length > 0 ? (
-            <ul className="divide-y divide-border/70 text-sm">
-              {members.data.map((m) => (
-                <li key={m.user_id} className="flex flex-wrap justify-between gap-2 py-2">
-                  <span>
-                    <span className="font-medium">{m.name}</span> <span className="text-muted">{m.email}</span>
-                  </span>
-                  <span className="text-muted">
-                    {[
-                      m.org_role === "org_admin" ? t("roles.org_admin") : null,
-                      ...Object.entries(m.team_roles).map(([tid, r]) => `${teamName(tid)}: ${t(`roles.${r}`)}`),
-                    ]
-                      .filter(Boolean)
-                      .join(" · ")}
-                  </span>
-                  {m.org_role === "org_admin" && m.user_id === me.data?.id ? (
-                    <Button variant="ghost" className="min-h-8 px-2 py-1" onClick={() => setRole.mutate({ userId: m.user_id, role: "member" })}>
+      <p className="m-0 max-w-[65ch] text-[15px] text-ink-2">{tp("rolesIntro")}</p>
+      {roleError && <Alert>{t(`errors.${roleError}`)}</Alert>}
+      {teams.map((tm) => (
+        <div key={tm.id} className="space-y-3 border-t border-foreground/15 pt-5">
+          <h3 className="font-semibold">{tm.name}</h3>
+          <TeamPeople orgId={orgId} teamId={tm.id} isAdmin={isAdmin} meId={me.data?.id ?? null} />
+        </div>
+      ))}
+      {isAdmin && clubOnly.length > 0 && (
+        <div className="space-y-3 border-t border-foreground/15 pt-5">
+          <h3 className="font-semibold">{tp("clubOnly")}</h3>
+          <ul className="m-0 list-none divide-y divide-rule p-0">
+            {clubOnly.map((m) => (
+              <li key={m.user_id} className="flex min-h-14 flex-wrap items-center justify-between gap-3 py-2">
+                <span className="min-w-0">
+                  <span className="block font-bold">{m.name}</span>
+                  <span className="block truncate text-[15px] text-ink-2">{m.email}</span>
+                </span>
+                <span className="flex items-center gap-3 text-[15px] text-ink-2">
+                  {t("personRoles.trainer")}
+                  {m.user_id === me.data?.id && (
+                    <Button variant="quiet" size="sm" onClick={() => stepDown.mutate(m.user_id)}>
                       {t("members.stepDown")}
                     </Button>
-                  ) : m.org_role !== "org_admin" ? (
-                    <Button variant="ghost" className="min-h-8 px-2 py-1" onClick={() => setRole.mutate({ userId: m.user_id, role: "org_admin" })}>
-                      {t("members.makeAdmin")}
-                    </Button>
-                  ) : null}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <EmptyState title={t("settings.membersEmpty")} />
-          )}
+                  )}
+                </span>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
-      <div className="border-t border-foreground/15 pt-5 space-y-3">
+      <div id="invite" className="scroll-mt-24 space-y-3 border-t border-foreground/15 pt-5">
         <h3 className="font-semibold">{t("settings.inviteTitle")}</h3>
         <InviteForm
           orgId={orgId}
-          teams={teams}
-          isAdmin={isAdmin}
+          teams={teams.map((tm) => ({ ...tm, team_features: allTeams.find((x) => x.id === tm.id)?.settings.team_features ?? false }))}
+          isAdmin={Boolean(isAdmin && meIsAdmin !== false)}
           onInvited={() => void qc.invalidateQueries({ queryKey: ["invitations", orgId] })}
         />
       </div>
-      <div className="border-t border-foreground/15 pt-5 space-y-3">
+      <div className="space-y-3 border-t border-foreground/15 pt-5">
         <h3 className="font-semibold">{t("settings.invitationsTitle")}</h3>
         {pending.length === 0 ? (
           <p className="text-sm text-muted">{t("settings.noInvitations")}</p>
         ) : (
           <ul className="divide-y divide-border/70 text-sm" data-testid="pending-invitations">
-            {pending.map((i) => (
-              <li key={i.id} className="flex flex-wrap items-center justify-between gap-2 py-2">
-                <span>
-                  <span className="font-medium">{i.email}</span>{" "}
-                  <span className="text-muted">
-                    {i.team_role ? `${teamName(i.team_id)}: ${t(`roles.${i.team_role}`)}` : t("roles.org_admin")} ·{" "}
-                    {t("settings.expires", { date: format.dateTime(new Date(i.expires_at), { dateStyle: "medium" }) })}
+            {pending.map((i) => {
+              const role = personRole(i.org_role, i.team_role);
+              return (
+                <li key={i.id} className="flex flex-wrap items-center justify-between gap-2 py-2">
+                  <span>
+                    <span className="font-medium">{i.email}</span>{" "}
+                    <span className="text-muted">
+                      {[teamName(i.team_id), role ? t(`personRoles.${role}`) : null].filter(Boolean).join(": ")} ·{" "}
+                      {t("settings.expires", { date: format.dateTime(new Date(i.expires_at), { dateStyle: "medium" }) })}
+                    </span>
                   </span>
-                </span>
-                <Button variant="ghost" className="min-h-8 px-2 py-1" onClick={() => revoke.mutate(i.id)}>
-                  {t("settings.revoke")}
-                </Button>
-              </li>
-            ))}
+                  <Button variant="ghost" className="min-h-8 px-2 py-1" onClick={() => revoke.mutate(i.id)}>
+                    {t("settings.revoke")}
+                  </Button>
+                </li>
+              );
+            })}
           </ul>
         )}
       </div>

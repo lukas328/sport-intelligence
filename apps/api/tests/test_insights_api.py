@@ -187,3 +187,62 @@ async def test_season_counts_every_played_match_and_each_goal_once(
     prof = (await api.get(f"/v1/orgs/{org}/opponents/{opp_id}/profile")).json()
     home = {m["match_id"]: m["is_home"] for m in prof["matches"]}
     assert home[both] is False and home[played] is True
+    # the profile is made of the analysed match only
+    assert prof["tagged_matches"] == 1
+
+
+async def test_matches_without_analysis_do_not_count_in_averages(
+    make_api: Callable[[], Api], owner_conn: asyncpg.Connection
+) -> None:
+    """Livegang K14, K15: a match with only the official report has no turnovers, saves or
+    shots: they are missing (None), never 0, and only the analysed matches make an average or
+    a best value. Goals and the result of every played match still count."""
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    # analysed: two turnovers tagged
+    analysed = await tagged_match(api, ids, 3, 1, kickoff_at="2026-09-05T18:00:00+02:00")
+    for i in range(2):
+        r = await api.post(
+            f"/v1/orgs/{org}/matches/{analysed}/events",
+            json={"type": "turnover", "side": "own", "clock_s": 900 + i},
+        )
+        assert r.status_code == 201, r.text
+    # only the official report: the goals, nothing else
+    official = (await new_match(api, ids, kickoff_at="2026-09-12T18:00:00+02:00"))["id"]
+    for clock in (100, 200):
+        body = {"type": "shot", "side": "own", "outcome": "goal", "clock_s": clock}
+        r = await api.post(f"/v1/orgs/{org}/matches/{official}/events", json=body)
+        assert r.status_code == 201, r.text
+    await owner_conn.execute(
+        "UPDATE events SET source = 'official_report' WHERE match_id = $1", uuid.UUID(official)
+    )
+    # only the result
+    result = (await new_match(api, ids, kickoff_at="2026-09-19T18:00:00+02:00"))["id"]
+    r = await api.patch(
+        f"/v1/orgs/{org}/matches/{result}", json={"score_own": 20, "score_opponent": 22}
+    )
+    assert r.status_code == 200, r.text
+
+    season = (
+        await api.get(f"/v1/orgs/{org}/teams/{ids['team']}/seasons/{ids['season']}/stats")
+    ).json()
+    rows = {m["match_id"]: m for m in season["matches"]}
+    totals = season["totals"]
+    assert totals["matches"] == 3 and totals["analysed_matches"] == 1
+    assert rows[analysed]["has_analysis"] is True and rows[analysed]["turnovers"] == 2
+    assert rows[analysed]["from_report"] is False and rows[official]["from_report"] is False
+    for mid in (official, result):
+        row = rows[mid]
+        assert row["has_analysis"] is False and row["has_video"] is False
+        assert row["turnovers"] is None and row["shooting_pct"] is None
+        assert row["save_pct"] is None and row["shots"] is None and row["seven_m"] is None
+    assert rows[official]["official"] is True and rows[result]["official"] is False
+    # the official goals count for the goals, the result for the record
+    assert rows[official]["goals"] == 2 and rows[result]["goals"] == 20
+    assert totals["goals"] == 3 + 2 + 20
+    # averages only over the matches where the figure was recorded
+    assert totals["turnovers"] == 2 and totals["turnovers_matches"] == 1
+    assert totals["turnovers_per_match"] == 2.0
+    assert totals["shooting_matches"] == 1 and totals["shooting_pct"] == 0.75
+    assert totals["shots"] == 4 and totals["video_matches"] == 0

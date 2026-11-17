@@ -3,6 +3,21 @@
 One table maps each action to the roles allowed to perform it. Org-level actions are checked
 against the organisation role, team-level actions against the team role (org admins may do
 everything a coach may do in every team of their organisation).
+
+Four roles in the product (finding K18, decided 2026-11-16); the stored roles stay and map onto
+them (`person_role`):
+
+- **Trainer**: coach of a team and club admin (`coach` + `org_admin`). Everything.
+- **Co-Trainer**: coach rights in the team without the club and the subscription. Stored as
+  `coach`, `analyst`, `team_manager`, `goalkeeper_coach` or `athletic_coach` with the plain
+  organisation role `member`; all five have the same rights in the team.
+- **Spieler**: `player` and `goalkeeper` (the goalkeeper is a player with a position). They see
+  everything of the team, mark scenes, build collections and share them by link, comment, check
+  what the analysis asks and upload videos. They do not delete matches or videos, invite people,
+  manage the squad, the team or the club.
+- **Eltern**: `parent`, only their own children (guardianships).
+
+`guest` gets no team access: guests see shared links only.
 """
 
 from __future__ import annotations
@@ -13,7 +28,7 @@ from datetime import UTC, datetime, timedelta
 from enum import StrEnum
 
 from handball_api.core.errors import ProblemError
-from handball_api.models.enums import OrgRole, TeamRole
+from handball_api.models.enums import OrgRole, PersonRole, TeamRole
 
 
 class Action(StrEnum):
@@ -41,6 +56,8 @@ class Action(StrEnum):
     INVITE_TEAM = "invite.team"
     MATCH_READ = "match.read"
     MATCH_WRITE = "match.write"
+    # deleting a match or a video of it (Trainer and Co-Trainer, never players: K18)
+    MATCH_DELETE = "match.delete"
     VIDEO_UPLOAD = "video.upload"
     CLIP_WRITE = "clip.write"
     PLAYLIST_READ_ALL = "playlist.read_all"
@@ -71,57 +88,64 @@ ORG_ACTIONS: dict[Action, frozenset[OrgRole]] = {
     Action.ORG_ACCESS_MANAGE: frozenset({OrgRole.ORG_ADMIN}),
 }
 
-_STAFF = frozenset({TeamRole.COACH, TeamRole.ANALYST})
-# specialist coaches read everything and work with video, but do not manage team or data
-_ASSISTANTS = frozenset({TeamRole.GOALKEEPER_COACH, TeamRole.ATHLETIC_COACH})
-_MANAGER = frozenset({TeamRole.TEAM_MANAGER})
+# Co-Trainer roles: coach rights in the team (K18). The old specialist roles keep working and
+# read as Co-Trainer in the product.
+_COACHES = frozenset(
+    {
+        TeamRole.COACH,
+        TeamRole.ANALYST,
+        TeamRole.TEAM_MANAGER,
+        TeamRole.GOALKEEPER_COACH,
+        TeamRole.ATHLETIC_COACH,
+    }
+)
+_PLAYERS = frozenset({TeamRole.PLAYER, TeamRole.GOALKEEPER})
 # parents are deliberately not readers: they only reach their own children (guardianships)
-_READERS = frozenset({TeamRole.PLAYER, TeamRole.GOALKEEPER}) | _STAFF | _ASSISTANTS | _MANAGER
-_COACH = frozenset({TeamRole.COACH})
-_VIDEO_WORK = _STAFF | _ASSISTANTS
-_ORGANISE = _COACH | _MANAGER
+_READERS = _COACHES | _PLAYERS
+# kept for callers that ask who works with video in a team: everyone who reads the team
+_STAFF = _COACHES
 
 TEAM_ACTIONS: dict[Action, frozenset[TeamRole]] = {
+    # see everything of the team
     Action.TEAM_READ: _READERS,
     Action.ROSTER_READ: _READERS,
-    Action.TEAM_MEMBERS_READ: _STAFF | _ASSISTANTS | _MANAGER,
-    Action.SEASON_WRITE: _STAFF | _MANAGER,
-    Action.TEAM_UPDATE: _COACH,
-    Action.ROSTER_WRITE: _ORGANISE,
-    # injured or absent on the squad: the staff who plan sessions and matches read and set it;
-    # players see only their own status
-    Action.PLAYER_STATUS: _VIDEO_WORK | _MANAGER,
-    Action.CONSENT_READ: _ORGANISE,
-    Action.CONSENT_WRITE: _ORGANISE,
-    # the team's consent states per purpose before filming: whoever manages roster and consents,
-    # and the analysts, who often film (decided by the owner, 2026-11-10)
-    Action.CONSENT_OVERVIEW: _ORGANISE | frozenset({TeamRole.ANALYST}),
-    Action.TEAM_MEMBERS_MANAGE: _COACH,
-    Action.INVITE_TEAM: _ORGANISE,
     Action.MATCH_READ: _READERS,
-    Action.MATCH_WRITE: _STAFF | _MANAGER,
-    Action.VIDEO_UPLOAD: _STAFF | _MANAGER,
-    Action.CLIP_WRITE: _VIDEO_WORK,
-    Action.PLAYLIST_READ_ALL: _VIDEO_WORK,
-    Action.PLAYLIST_WRITE: _VIDEO_WORK,
+    Action.PLAYLIST_READ_ALL: _READERS,
+    Action.PLAY_READ_ALL: _READERS,
+    # a player's season line (figures per match with event links)
+    Action.PLAYER_LINE_READ_ALL: _READERS,
+    # work with the video: upload, mark scenes, draw, comment, answer the analysis' questions,
+    # build collections and share them by link (players too, K18)
+    Action.MATCH_WRITE: _READERS,
+    Action.VIDEO_UPLOAD: _READERS,
+    Action.CLIP_WRITE: _READERS,
+    Action.ANNOTATION_WRITE: _READERS,
     Action.COMMENT_WRITE: _READERS,
-    Action.COMMENT_MODERATE: _STAFF,
-    Action.ANNOTATION_WRITE: _VIDEO_WORK,
-    Action.EVENT_WRITE: _STAFF,
-    Action.PLAY_READ_ALL: _VIDEO_WORK,
-    Action.PLAY_WRITE: _STAFF,
-    Action.ASSIGNMENT_WRITE: _VIDEO_WORK,
-    # the assistant reads the whole team's data, so only the analysing staff use it (5.1)
-    Action.ASSISTANT_USE: _VIDEO_WORK,
-    # sessions, attendance and the calendar feed (5.7); athletic coaches plan sessions too
-    Action.TRAINING_WRITE: _VIDEO_WORK | _MANAGER,
-    # a player's season line (figures per match with event links): the staff for every player
-    # of the team, players only their own (with match.read)
-    Action.PLAYER_LINE_READ_ALL: _VIDEO_WORK | _MANAGER,
-    # official data: sync and suggestions (roster suggestions carry names from the official
-    # data, visible only to whoever organises the team); join requests like invitations
-    Action.OFFICIAL_MANAGE: _ORGANISE,
-    Action.JOIN_REQUESTS_MANAGE: _ORGANISE,
+    Action.EVENT_WRITE: _READERS,
+    Action.PLAYLIST_WRITE: _READERS,
+    # the team's people (with their e-mail addresses), the squad and the team itself
+    Action.TEAM_MEMBERS_READ: _COACHES,
+    Action.TEAM_MEMBERS_MANAGE: _COACHES,
+    Action.INVITE_TEAM: _COACHES,
+    Action.JOIN_REQUESTS_MANAGE: _COACHES,
+    Action.TEAM_UPDATE: _COACHES,
+    Action.SEASON_WRITE: _COACHES,
+    Action.ROSTER_WRITE: _COACHES,
+    # injured or absent on the squad: the staff set it; players see only their own status
+    Action.PLAYER_STATUS: _COACHES,
+    Action.CONSENT_READ: _COACHES,
+    Action.CONSENT_WRITE: _COACHES,
+    Action.CONSENT_OVERVIEW: _COACHES,
+    # official data: sync and suggestions carry names from the official data
+    Action.OFFICIAL_MANAGE: _COACHES,
+    # deleting is for the staff only
+    Action.MATCH_DELETE: _COACHES,
+    Action.COMMENT_MODERATE: _COACHES,
+    # plays, tasks, sessions and the assistant (which reads and costs per question)
+    Action.PLAY_WRITE: _COACHES,
+    Action.ASSIGNMENT_WRITE: _COACHES,
+    Action.ASSISTANT_USE: _COACHES,
+    Action.TRAINING_WRITE: _COACHES,
 }
 
 # Actions that change rights, billing or the organisation.
@@ -189,8 +213,37 @@ def authorize(
 
 
 def is_staff_somewhere(actor: Actor) -> bool:
-    """Org admins, or coach/analyst/team manager of a team (e.g. may manage opponents)."""
-    return actor.is_org_admin or any(r in _STAFF | _MANAGER for r in actor.team_roles.values())
+    """Org admins, or anyone who works with the matches of a team (Trainer, Co-Trainer, players:
+    K18): may add opponents and their numbers."""
+    return actor.is_org_admin or any(r in _READERS for r in actor.team_roles.values())
+
+
+def is_coach(actor: Actor, team_id: uuid.UUID) -> bool:
+    """Trainer or Co-Trainer of the team (or club admin)."""
+    return actor.is_org_admin or actor.team_role(team_id) in _COACHES
+
+
+def person_role(org_role: OrgRole | None, team_role: TeamRole | None) -> PersonRole | None:
+    """Stored roles to the product's four. None: no role in the team (a guest, or nobody)."""
+    if team_role in _COACHES:
+        return PersonRole.TRAINER if org_role == OrgRole.ORG_ADMIN else PersonRole.CO_TRAINER
+    if team_role in _PLAYERS:
+        return PersonRole.PLAYER
+    if team_role == TeamRole.PARENT:
+        return PersonRole.PARENT
+    if org_role == OrgRole.ORG_ADMIN:
+        return PersonRole.TRAINER
+    return None
+
+
+def stored_roles(role: PersonRole) -> tuple[OrgRole, TeamRole]:
+    """The product's role to what is stored for a new team member."""
+    return {
+        PersonRole.TRAINER: (OrgRole.ORG_ADMIN, TeamRole.COACH),
+        PersonRole.CO_TRAINER: (OrgRole.MEMBER, TeamRole.COACH),
+        PersonRole.PLAYER: (OrgRole.MEMBER, TeamRole.PLAYER),
+        PersonRole.PARENT: (OrgRole.MEMBER, TeamRole.PARENT),
+    }[role]
 
 
 def visible_team_ids(actor: Actor) -> set[uuid.UUID] | None:
@@ -203,14 +256,29 @@ def visible_team_ids(actor: Actor) -> set[uuid.UUID] | None:
 def matrix_markdown() -> str:
     """Human-readable permission matrix (docs/policy-matrix.md is generated from this)."""
     roles = ["org_admin", *[r.value for r in TeamRole]]
+    names = {
+        PersonRole.TRAINER: "Trainer",
+        PersonRole.CO_TRAINER: "Co-Trainer",
+        PersonRole.PLAYER: "Spieler",
+        PersonRole.PARENT: "Eltern",
+    }
+    shown = {"org_admin": "Trainer"} | {
+        r.value: names.get(person_role(OrgRole.MEMBER, r), "Gast (Links)")  # type: ignore[arg-type]
+        for r in TeamRole
+    }
     lines = [
         "# Permission matrix",
         "",
         "Generated from `handball_api/services/policies.py` (`make policy-doc`). Do not edit.",
         "Enforced server-side; verified by `apps/api/tests/test_policy_matrix.py`.",
         "",
+        "The product shows four roles (K18): **Trainer** (coach and club admin), **Co-Trainer** "
+        "(coach rights in the team, no club or subscription), **Spieler**, **Eltern**. The "
+        "stored roles stay; the second header row says which of the four each one is.",
+        "",
         "| Action | " + " | ".join(roles) + " |",
         "|---|" + "---|" * len(roles),
+        "| *shown as* | " + " | ".join(shown[r] for r in roles) + " |",
     ]
     for action, allowed_org in ORG_ACTIONS.items():
         # users with only a team role are plain organisation members
@@ -224,6 +292,14 @@ def matrix_markdown() -> str:
         "",
         "- Team actions apply to the teams where the user has that role; "
         "org admins act in every team.",
+        "- A Trainer is stored as `coach` with the organisation role `org_admin`; inviting a "
+        "Trainer needs `invite.org`. A `coach` without it is a Co-Trainer.",
+        "- `analyst`, `team_manager`, `goalkeeper_coach` and `athletic_coach` are older roles "
+        "with the same rights as `coach`; the product shows them as Co-Trainer.",
+        "- Players (`player`, `goalkeeper`) see everything of the team, mark scenes, build "
+        "collections and share them by link, comment, answer the analysis' questions and upload "
+        "videos. They do not delete matches or videos, invite people, change the squad, the team, "
+        "the club or the subscription, and revoke only share links they made.",
         "- Org admins need two-factor sign-in for org-level write actions after the grace period "
         "(`HB_ORG_ADMIN_2FA_GRACE_DAYS`, default 14).",
         "- Guests get access only through share links (M8).",
@@ -232,6 +308,7 @@ def matrix_markdown() -> str:
         "- Players decide their own consents (`/me/consents`); minors need a parent or guardian.",
         "- Youth teams (addendum 01, 4.9): share links only for plays, no consent for public "
         "purposes (public highlights, public profile), season player lists unranked.",
+        "- Public highlights need the public highlights consent of every featured player.",
         "- Opponent players: number only; a name needs a public source and is never public.",
         "- Training slots and own drills: `training.write` in the team. A drill shared in the "
         "club is read by the readers of every team and changed only by the team that made it.",

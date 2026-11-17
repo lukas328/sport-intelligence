@@ -15,7 +15,7 @@ test("coach plans a session, opens the matrix and the assistant", async ({ page,
 
   // training: a session with two library drills, then the PDF link
   await openTraining(page);
-  await page.getByRole("button", { name: "Neue Einheit" }).click();
+  await page.getByRole("button", { name: "Einheit selbst planen" }).click();
   const form = page.getByRole("form", { name: "Neue Einheit" });
   const day = new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10);
   await form.getByLabel("Datum").fill(day);
@@ -70,10 +70,9 @@ test("coach plans a session, opens the matrix and the assistant", async ({ page,
   page.on("request", (r) => r.url().endsWith("/matrix") && r.method() === "POST" && asked.push(r.postDataJSON()));
   // the matrix is the table tab of Szenen ("Als Tabelle", SPEC 7.6)
   await follow(page, page.getByRole("link", { name: "Szenen", exact: true }).first(), /\/scenes$/);
-  // «Tabelle» shows the scene answer as rows in Szenen (UX test B21, B32); the pivot stays at ?pivot=1
-  await follow(page, page.getByRole("link", { name: "Tabelle", exact: true }).first(), /\/scenes\?view=table$/);
-  await expect(page.getByText("Szenen gibt es nach dem ersten Video.")).toBeVisible();
-  await page.goto(page.url().replace(/\/scenes\?view=table$/, "/matrix?pivot=1"));
+  // before the first video Szenen says only the way to the video (K8); the pivot stays at ?pivot=1
+  await expect(page.getByTestId("scenes-empty")).toContainText("Lade ein Video hoch, dann siehst du hier deine Szenen.");
+  await page.goto(page.url().replace(/\/scenes$/, "/matrix?pivot=1"));
   await expect(page.getByRole("heading", { level: 1, name: "Tabelle" })).toBeVisible();
   await expect(page.getByText("Keine Ereignisse für diese Auswahl.")).toBeVisible();
   await page.getByTestId("matrix-seasons").selectOption(current.id);
@@ -87,7 +86,11 @@ test("coach plans a session, opens the matrix and the assistant", async ({ page,
   await expectAccessible(page);
 
   // «Suchen» is the scene search (UX test B02): the old assistant address hands the question
-  // over, its words become chips, nothing ends in «not set up»
+  // over, its words become chips, nothing ends in «not set up». Szenen searches once a video is
+  // there (K8): a match with a started upload
+  const headers = { "x-csrf-token": (await context.cookies()).find((c) => c.name === "hb_csrf")!.value };
+  const withVideo = await (await page.request.post(`/v1/orgs/${orgId}/teams/${teamId}/matches`, { headers, data: { opponent_name: "TV Video", kickoff_at: "2026-11-07T18:00:00+01:00" } })).json();
+  await page.request.post(`/v1/orgs/${orgId}/matches/${withVideo.id}/videos`, { headers, data: { filename: "daten.mp4", size_bytes: 6_000_000, content_type: "video/mp4", role: "main" } });
   await page.goto(`${page.url().replace(/\/matrix\?pivot=1$/, "")}/assistant?q=${encodeURIComponent("Wie viele Gegentore über rechts aussen in den letzten drei Spielen?")}`);
   await page.waitForURL(/\/scenes\?q=/);
   for (const chip of ["Gegentor", "aussen rechts", "letzte 3 mit Video"]) await expect(page.getByRole("button", { name: chip, pressed: true })).toBeVisible();
