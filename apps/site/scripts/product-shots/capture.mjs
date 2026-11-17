@@ -597,7 +597,12 @@ async function main() {
   }
   await browser.close();
   const sorted = Object.fromEntries(Object.entries(meta).sort(([a], [b]) => a.localeCompare(b)));
-  writeFileSync(META, `${JSON.stringify(sorted, null, 2)}\n`);
+  // boxes on one line each, as prettier writes them
+  const json = JSON.stringify(sorted, null, 2).replace(
+    /\[\s+([-\d.,\s]+?)\s+\]/g,
+    (_, inner) => `[${inner.split(/,\s*/).join(", ")}]`,
+  );
+  writeFileSync(META, `${json}\n`);
   if (failed.length) {
     console.error(`not updated: ${failed.join(", ")} (the old captures stay)`);
     process.exit(1);

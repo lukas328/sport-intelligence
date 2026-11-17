@@ -174,7 +174,12 @@ async function main() {
   const sorted = Object.fromEntries(
     Object.entries(manifest).sort(([a], [b]) => a.localeCompare(b)),
   );
-  writeFileSync(MANIFEST, `${JSON.stringify(sorted, null, 2)}\n`);
+  // short number lists on one line, as prettier writes them
+  const json = JSON.stringify(sorted, null, 2).replace(
+    /\[\s+([-\d.,\s]+?)\s+\]/g,
+    (_, inner) => `[${inner.split(/,\s*/).join(", ")}]`,
+  );
+  writeFileSync(MANIFEST, `${json}\n`);
   if (failed) process.exit(1);
 }
 
