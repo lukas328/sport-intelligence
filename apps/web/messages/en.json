@@ -587,7 +587,6 @@
     "tip3": "Best: the whole match in one file. Did you stop at half-time, or did the phone or camera split the recording? Just choose all files of the match together. They are analysed as one match.",
     "guide": "Full filming guide",
     "chooseVideo": "Choose video",
-    "more": "More: another camera, a link, technical details",
     "mayClose": "You can close the page. When the analysis is done, the bell at the top tells you.",
     "notVideo": "This file is not a video (MP4, MOV or MKV). Choose the file from the camera or the phone.",
     "secondFile": "This match already has a video. If you choose the second half or another piece here, it is added after it and analysed with it.",
@@ -618,7 +617,8 @@
     "failedAgain": "If it fails again, it is mostly the connection. Try later on Wi-Fi, or start over.",
     "ownKit": "Which shirt do you wear in this match?",
     "ownKitSaved": "Saved.",
-    "otherGame": "“{name}” is named quite differently from “{first}”, which is already in this match. Does the file really belong here? Another game gets a match of its own. The upload goes on."
+    "otherGame": "“{name}” is named quite differently from “{first}”, which is already in this match. Does the file really belong here? Another game gets a match of its own. The upload goes on.",
+    "moreAll": "More: how to film, files and size, another camera, link"
   },
   "processing": {
     "title": "Processing",

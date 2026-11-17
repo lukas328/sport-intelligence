@@ -67,8 +67,9 @@ export function AppShell({
   // the 404 of a tool route keeps the app frame: it says so for the address it stands on
   const [framed, setFramed] = useState<string | null>(null);
   const showFrame = useCallback((on: boolean) => setFramed(on ? window.location.pathname : null), []);
+  const [pageUpload, setPageUpload] = useState<string | null>(null);
   const value = useMemo<ShellValue>(
-    () => ({ org, orgs, teams, team, mode, me, setTeam, showFrame }),
+    () => ({ org, orgs, teams, team, mode, me, setTeam, showFrame, setPageUpload }),
     [org, orgs, teams, team, mode, me, setTeam, showFrame],
   );
   const navOpts = { teamFunctions: team?.team_features ?? false };
@@ -76,7 +77,7 @@ export function AppShell({
   const active = destOf(path, mode);
   const home = startHref(mode, org.id, team?.id ?? null);
   // one action reachable from everywhere for the staff and the players (SPEC section 6, K18)
-  const upload = analyses(mode) ? uploadHref(org.id, team?.id ?? null) : null;
+  const upload = analyses(mode) ? (pageUpload ?? uploadHref(org.id, team?.id ?? null)) : null;
   const [palette, setPalette] = useState(false);
   const searchHref = analyses(mode) && team ? `/app/${org.id}/teams/${team.id}/scenes?focus=1` : null;
   // «Suchen» in the head only once the team has scenes, that is a match with video (finding A6):

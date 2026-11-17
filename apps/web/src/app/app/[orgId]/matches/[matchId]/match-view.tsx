@@ -4,11 +4,11 @@ import { checkMinutes } from "@/lib/shot-spot";
 import { ShareButton, shareMatchCard } from "@/components/sharing/share-button";
 import type { Schemas } from "@handball/api-client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent } from "react";
 import Link from "next/link";
-import { ArrowLeftRight, Check, ChevronDown, ChartNoAxesColumn, Clapperboard, FileDown, Hand, MoreHorizontal, Pencil, Plus, Radio, Shield, Trash2, Upload } from "lucide-react";
+import { ArrowLeftRight, Check, ChevronDown, ChartNoAxesColumn, Clapperboard, FileDown, Hand, MoreHorizontal, Pencil, Plus, Radio, Shield, Trash2 } from "lucide-react";
 import { useRosterNames } from "@/components/analysis/tagger";
 import { DEFAULT_CLUB, matchStyle } from "@/lib/color";
 import { markOpened } from "@/lib/fresh-match";
@@ -160,6 +160,13 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
     window.addEventListener("popstate", readAddress);
     return () => window.removeEventListener("popstate", readAddress);
   }, [readAddress]);
+  // a link to this page with another address (the frame's «Video hochladen» on a match without
+  // video, A11): the tab follows it, and #upload brings the field into view
+  const address = useSearchParams().toString();
+  useEffect(() => {
+    readAddress();
+    if (window.location.hash === "#upload") requestAnimationFrame(() => requestAnimationFrame(() => document.getElementById("upload")?.scrollIntoView({ behavior: "smooth" })));
+  }, [address, readAddress]);
   const TAB_WORD: Record<View, string> = { game: "spiel", video: "video", numbers: "zahlen" };
   const setView = useCallback((v: View, n: number | null = null, sceneId: string | null = null) => {
     // a tab the coach chose is not changed by the default afterwards
@@ -270,6 +277,13 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
   const matchDay = isMatchDay(match.kickoff_at);
   const liveFirst = staff && match.score_own == null && !main && matchDay && match.source !== "paper_report" && !example;
   const uploadFirst = staff && !main && !liveFirst && match.source !== "paper_report" && !example;
+  // this match's upload field is the one way to upload from here: the frame's button leads to it
+  const setPageUpload = shell?.setPageUpload;
+  useEffect(() => {
+    if (!setPageUpload || !uploadFirst) return;
+    setPageUpload(`/app/${orgId}/matches/${match.id}?tab=video#upload`);
+    return () => setPageUpload(null);
+  }, [setPageUpload, uploadFirst, orgId, match.id]);
   // the progress of the uploads and the processing (K13, B4): the API's view, with the uploads of
   // this tab laid over; shown while it runs, and when something failed
   const local = useLocalUploads();
@@ -426,12 +440,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
                 {t("live.open")}
               </Link>
             )}
-            {uploadFirst && view !== "video" && Date.parse(match.kickoff_at) <= Date.now() && (
-              <Button onClick={() => (setView("video"), document.getElementById("upload")?.scrollIntoView({ behavior: "smooth" }))}>
-                <Upload aria-hidden />
-                {t("upload.title")}
-              </Button>
-            )}
+            {/* no own «Video hochladen» here: the frame's button leads to this match's field (A11) */}
             {/* before the match there is no report to share yet (UX test A05) */}
             {staff && !upcoming && (
               <ShareButton
@@ -619,15 +628,26 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
         {staff && !example && !main && (
           <section id="upload" className="scroll-mt-24 space-y-4" aria-label={t("upload.title")}>
             <p className="m-0 max-w-[60ch] text-[17px] font-bold">{ta("noVideoBlock")}</p>
-            {/* the analysis separates the teams by their shirts: without the opponent's colour it
-                guesses worse, so it is asked before the upload, with the reason (E09) */}
-            {match.opponent && !match.opponent_colors?.color && (
-              <div className="max-w-[60ch] border-l-4 border-attn pl-3" data-testid="upload-ask-colour">
-                <p className="m-0 text-[15px]">{ta("colourTip", { opponent: oppName(match) })}</p>
-                <AskColour orgId={orgId} matchId={match.id} opponent={oppName(match)} />
-              </div>
-            )}
-            <UploadPanel orgId={orgId} matchId={match.id} kits={scouting ? null : ownKits} stuck={stuckUploads} progressFiles={progress?.files ?? []} existing={match.videos.filter((v) => v.role === "main" && !v.duplicate_of).map((v) => v.filename)} onUploaded={() => void qc.invalidateQueries({ queryKey: key })} />
+            {/* the field first (A11); the shirts after it, before «Mehr»: they are saved at once,
+                also while the upload runs. The analysis separates the teams by their shirts:
+                without the opponent's colour it guesses worse, so it is asked with the reason (E09) */}
+            <UploadPanel
+              orgId={orgId}
+              matchId={match.id}
+              kits={scouting ? null : ownKits}
+              stuck={stuckUploads}
+              progressFiles={progress?.files ?? []}
+              existing={match.videos.filter((v) => v.role === "main" && !v.duplicate_of).map((v) => v.filename)}
+              onUploaded={() => void qc.invalidateQueries({ queryKey: key })}
+              shirts={
+                match.opponent && !match.opponent_colors?.color ? (
+                  <div className="max-w-[60ch] border-l-4 border-attn pl-3" data-testid="upload-ask-colour">
+                    <p className="m-0 text-[15px]">{ta("colourTip", { opponent: oppName(match) })}</p>
+                    <AskColour orgId={orgId} matchId={match.id} opponent={oppName(match)} />
+                  </div>
+                ) : null
+              }
+            />
           </section>
         )}
         <PartsPanel orgId={orgId} match={match} jobs={jobs} staff={staff} canDelete={canDelete} onChanged={() => void qc.invalidateQueries({ queryKey: key })} />

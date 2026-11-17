@@ -587,7 +587,6 @@
     "tip3": "Am besten das ganze Spiel in einer Datei. Hast du in der Pause gestoppt oder hat das Handy oder die Kamera die Aufnahme geteilt? Wähl einfach alle Dateien des Spiels zusammen aus. Sie werden als ein Spiel ausgewertet.",
     "guide": "Ausführliche Filmanleitung",
     "chooseVideo": "Video wählen",
-    "more": "Mehr: andere Kamera, Link, Technik",
     "mayClose": "Du kannst die Seite schliessen. Ist die Analyse fertig, meldet sich die Glocke oben.",
     "notVideo": "Diese Datei ist kein Video (MP4, MOV oder MKV). Wähl die Datei aus der Kamera oder vom Handy.",
     "secondFile": "Dieses Spiel hat schon ein Video. Wählst du hier die 2. Halbzeit oder ein weiteres Stück aus, kommt es hinten dazu und wird mit ausgewertet.",
@@ -618,7 +617,8 @@
     "failedAgain": "Klappt es wieder nicht, liegt es meist an der Verbindung. Versuch es später im WLAN, oder starte neu.",
     "ownKit": "Welches Trikot tragt ihr in diesem Spiel?",
     "ownKitSaved": "Gespeichert.",
-    "otherGame": "«{name}» heisst ganz anders als «{first}», das schon in diesem Spiel liegt. Gehört die Datei wirklich hierher? Ein anderes Spiel legst du als eigenes Spiel an. Der Upload läuft weiter."
+    "otherGame": "«{name}» heisst ganz anders als «{first}», das schon in diesem Spiel liegt. Gehört die Datei wirklich hierher? Ein anderes Spiel legst du als eigenes Spiel an. Der Upload läuft weiter.",
+    "moreAll": "Mehr: so filmst du, Dateien und Grösse, andere Kamera, Link"
   },
   "processing": {
     "title": "Verarbeitung",

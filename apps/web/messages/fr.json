@@ -587,7 +587,6 @@
     "tip3": "Idéalement tout le match dans un seul fichier. Tu as arrêté à la pause ou le téléphone ou la caméra a coupé l'enregistrement ? Choisis simplement tous les fichiers du match ensemble. Ils sont analysés comme un seul match.",
     "guide": "Guide de tournage complet",
     "chooseVideo": "Choisir la vidéo",
-    "more": "Plus : autre caméra, lien, technique",
     "mayClose": "Tu peux fermer la page. Quand l'analyse est terminée, la cloche en haut te le signale.",
     "notVideo": "Ce fichier n'est pas une vidéo (MP4, MOV ou MKV). Choisis le fichier de la caméra ou du téléphone.",
     "secondFile": "Ce match a déjà une vidéo. Si tu choisis ici la 2e mi-temps ou un autre morceau, il s'ajoute à la suite et il est analysé avec.",
@@ -618,7 +617,8 @@
     "failedAgain": "Si cela échoue encore, c'est souvent la connexion. Réessaie plus tard en Wi-Fi ou recommence.",
     "ownKit": "Quel maillot portez-vous dans ce match ?",
     "ownKitSaved": "Enregistré.",
-    "otherGame": "« {name} » porte un nom très différent de « {first} », déjà dans ce match. Le fichier appartient-il vraiment ici ? Un autre match se crée comme match à part. L'envoi continue."
+    "otherGame": "« {name} » porte un nom très différent de « {first} », déjà dans ce match. Le fichier appartient-il vraiment ici ? Un autre match se crée comme match à part. L'envoi continue.",
+    "moreAll": "Plus : comment filmer, fichiers et taille, autre caméra, lien"
   },
   "processing": {
     "title": "Traitement",
