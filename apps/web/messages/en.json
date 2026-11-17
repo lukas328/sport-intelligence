@@ -3671,7 +3671,8 @@
     "rowNotice": "Analysis done, no questions: {reason}",
     "rowPartsUploading": "{n, plural, one {1 part} other {# parts}} not fully uploaded yet",
     "rowFailedWhy": "Analysis did not work: {reason}",
-    "zonesLine": "{m7, plural, one {1 goal} other {# goals}} from 7 m{rest, plural, =0 {.} one {, 1 more without a shot spot.} other {, # more without a shot spot.}}"
+    "zonesLine": "{m7, plural, one {1 goal} other {# goals}} from 7 m{rest, plural, =0 {.} one {, 1 more without a shot spot.} other {, # more without a shot spot.}}",
+    "flightCut": "Goal sequence only up to minute {m}"
   },
   "check": {
     "top": "Check · {opponent}",

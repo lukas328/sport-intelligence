@@ -3671,7 +3671,8 @@
     "rowNotice": "Analyse fertig, keine Fragen: {reason}",
     "rowPartsUploading": "{n, plural, one {1 Teil} other {# Teile}} noch nicht ganz hochgeladen",
     "rowFailedWhy": "Analyse nicht geklappt: {reason}",
-    "zonesLine": "{m7, plural, one {1 Tor} other {# Tore}} von 7 m{rest, plural, =0 {.} one {, 1 weiteres ohne Wurfort.} other {, # weitere ohne Wurfort.}}"
+    "zonesLine": "{m7, plural, one {1 Tor} other {# Tore}} von 7 m{rest, plural, =0 {.} one {, 1 weiteres ohne Wurfort.} other {, # weitere ohne Wurfort.}}",
+    "flightCut": "Torfolge nur bis {m}. Minute"
   },
   "check": {
     "top": "Prüfen · {opponent}",

@@ -128,6 +128,19 @@ export function reportGoals(g: MatchGraphics): ReportGoal[] {
   return g.report_goals.filter((x): x is { minute: number; team: "own" | "opp" } => x.minute != null);
 }
 
+/**
+ * Where the goal sequence of the report stops when goals are missing after it (fewer goals than
+ * the result, the last one well before the end): the line of the match ends there instead of
+ * running flat to minute 60 (review R13). Null when the sequence is complete or nothing is known.
+ */
+export function reportCut(g: MatchGraphics, own: number | null | undefined, opp: number | null | undefined, length = 60): number | null {
+  const goals = reportGoals(g);
+  if (own == null || opp == null || goals.length === 0 || g.span) return null;
+  if (goals.length >= own + opp) return null;
+  const last = Math.max(...goals.map((x) => x.minute));
+  return last < length - 1 ? last : null;
+}
+
 /** The tactics camera's scene, or null when there is nothing measured to show. */
 export function cameraScene(s: SceneCamera, label?: string | null): CameraScene | null {
   // positions as soon as the court is confirmed and the scene has tracks; without the throw-off

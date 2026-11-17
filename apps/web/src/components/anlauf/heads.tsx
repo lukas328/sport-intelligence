@@ -110,11 +110,14 @@ export function WurfHead({
   ownColor,
   scoreless = false,
   titleText,
+  goalsUntil,
 }: {
   kick?: ReactNode;
   title: ReactNode;
   /** the headline as plain text when `title` is markup: its length sets the size */
   titleText?: string;
+  /** the goal sequence stops early at this minute (goals missing after it) */
+  goalsUntil?: number | null;
   own: number | null;
   opp: number | null;
   ownName: string;
@@ -183,10 +186,10 @@ export function WurfHead({
             {oppName}
           </span>
         </p>
-        {goals && goals.length > 0 && <Flight goals={goals} width={390} height={90} from={from} length={length} className="-mx-4 mt-3 mb-14 w-[calc(100%+2rem)] md:hidden" />}
+        {goals && goals.length > 0 && <Flight goals={goals} width={390} height={90} from={from} length={length} until={goalsUntil} className="-mx-4 mt-3 mb-14 w-[calc(100%+2rem)] md:hidden" />}
       </div>
       {goals && goals.length > 0 && (
-        <Flight goals={goals} width={1000} height={120} labels={span ? undefined : flightLabels} from={from} length={length} slant={48} className="pointer-events-none -mx-8 mb-[30px] hidden w-[calc(100%+4rem)] self-end md:col-span-2 md:block" />
+        <Flight goals={goals} width={1000} height={120} labels={span ? undefined : flightLabels} from={from} length={length} until={goalsUntil} slant={48} className="pointer-events-none -mx-8 mb-[30px] hidden w-[calc(100%+4rem)] self-end md:col-span-2 md:block" />
       )}
     </header>
   );

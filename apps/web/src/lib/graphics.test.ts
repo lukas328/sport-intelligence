@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cameraScene, goalRuns, reportGoals, spotless, videoScore, zoneLine, zonesWorthACourt, type MatchGraphics, type SceneCamera } from "./graphics";
+import { cameraScene, goalRuns, reportCut, reportGoals, spotless, videoScore, zoneLine, zonesWorthACourt, type MatchGraphics, type SceneCamera } from "./graphics";
 
 const G: MatchGraphics = {
   has_video: true,
@@ -49,6 +49,15 @@ describe("graphics data", () => {
     expect(zoneLine(onlyReport, "opp")).toEqual({ m7: 2, rest: 1 });
     expect(zonesWorthACourt({ ...onlyReport, goals: [...onlyReport.goals, report("w", "ra")] }, "opp")).toBe(true);
     expect(zonesWorthACourt(G, "opp")).toBe(true);
+  });
+
+  it("knows where an incomplete goal sequence stops (review R13)", () => {
+    const seq = (mins: number[]): MatchGraphics => ({ ...G, report_goals: mins.map((minute, i) => ({ minute, team: i % 2 ? "opp" : "own" })) });
+    expect(reportCut(seq([5, 20, 41]), 2, 2)).toBe(41);
+    expect(reportCut(seq([5, 20, 41]), 2, 1)).toBeNull();
+    expect(reportCut(seq([5, 20, 59.5]), 3, 3)).toBeNull();
+    expect(reportCut(seq([5, 20, 41]), null, null)).toBeNull();
+    expect(reportCut({ ...seq([5, 20, 41]), span: [0, 41] }, 2, 2)).toBeNull();
   });
 
   it("shows no camera without a confirmed court or without positions", () => {

@@ -18,7 +18,7 @@ import { api } from "@/lib/client";
 import { ownName } from "@/lib/own-name";
 import { TeamFacts, useStanding } from "@/app/(einstieg)/einstieg/entry-view";
 import { matchStyle } from "@/lib/color";
-import { checkCount, goalRuns, openMoments, reportGoals, useMatchGraphics, videoScore, type MatchGraphics } from "@/lib/graphics";
+import { checkCount, goalRuns, openMoments, reportCut, reportGoals, useMatchGraphics, videoScore, type MatchGraphics } from "@/lib/graphics";
 import { freshMatch, openedMatches } from "@/lib/fresh-match";
 import { matchState } from "@/lib/match-state";
 import { findTeamRow, sameOpponent } from "@/lib/opponent-name";
@@ -286,10 +286,11 @@ function useHeadProps(m: Match | null, next: Match | null, g: MatchGraphics | nu
     ownName: teamName,
     oppName: m.opponent_name,
     goals: g ? reportGoals(g) : null,
+    goalsUntil: g ? reportCut(g, m.score_own, m.score_opponent) : null,
     // without a result (and once the data is there) no large empty place for one: the head stays
     // short and what matters comes up (second round A10)
     scoreless: g != null || !m.has_video,
-    flightLabels: { half: t("halftime", { v: "{v}" }), end: t("end", { v: "{v}" }), halfLevel: t("halftimeLevel"), endLevel: t("endLevel") },
+    flightLabels: { half: t("halftime", { v: "{v}" }), end: t("end", { v: "{v}" }), halfLevel: t("halftimeLevel"), endLevel: t("endLevel"), cut: t("flightCut", { m: "{m}" }) },
   };
 }
 

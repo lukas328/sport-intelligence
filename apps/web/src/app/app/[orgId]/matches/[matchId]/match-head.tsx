@@ -5,7 +5,7 @@ import { useFormatter, useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { AttnTag } from "@/components/anlauf/blocks";
 import { Breakable, Strip, WurfHead } from "@/components/anlauf/heads";
-import { openMoments, reportGoals, videoScore, type MatchGraphics } from "@/lib/graphics";
+import { openMoments, reportCut, reportGoals, videoScore, type MatchGraphics } from "@/lib/graphics";
 
 type Match = Schemas["MatchOut"];
 
@@ -65,7 +65,8 @@ export function MatchHead({ match, ownName, oppName, view, graphics, children }:
           ownColor={match.kit_own}
           scoreless={graphics != null}
           goals={graphics ? reportGoals(graphics) : null}
-          flightLabels={{ half: t("halftime", { v: "{v}" }), end: t("end", { v: "{v}" }), halfLevel: t("halftimeLevel"), endLevel: t("endLevel") }}
+          goalsUntil={graphics ? reportCut(graphics, match.score_own, match.score_opponent, (match.period_s * match.periods) / 60) : null}
+          flightLabels={{ half: t("halftime", { v: "{v}" }), end: t("end", { v: "{v}" }), halfLevel: t("halftimeLevel"), endLevel: t("endLevel"), cut: t("flightCut", { m: "{m}" }) }}
           meta={
             <>
               {half}

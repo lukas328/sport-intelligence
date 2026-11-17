@@ -291,6 +291,7 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
             periodS={match.period_s}
             periods={match.periods}
             span={span}
+            final={match.score_own != null && match.score_opponent != null ? { own: match.score_own, opp: match.score_opponent } : null}
           />
           <ul className="text-sm text-muted">
             {run && run.goals > 1 && <li>{t("bestRun", { goals: run.goals })}</li>}
@@ -359,8 +360,11 @@ function ScoreChart({
   periodS,
   periods,
   span = null,
+  final = null,
 }: {
   points: { clock_s: number; own: number; opp: number }[];
+  /** the result: a sequence with fewer goals ends where it stops, not flat to the end (R13) */
+  final?: { own: number; opp: number } | null;
   own: string;
   opp: string;
   periodS: number;
@@ -368,6 +372,7 @@ function ScoreChart({
   /** the match minutes a video covers: without a report the course runs over these, not 0 to 60 (E10, G9) */
   span?: readonly [number, number] | null;
 }) {
+  const tc = useTranslations("anlauf");
   const w = 600;
   const h = 210;
   const right = 34;
@@ -381,10 +386,14 @@ function ScoreChart({
   const grid = Array.from({ length: Math.floor(maxG / gridStep) + 1 }, (_, i) => i * gridStep);
   const X = (s: number) => 28 + ((Math.min(maxT, Math.max(minT, s)) - minT) / range) * (w - 28 - right);
   const Y = (g: number) => h - 22 - (g / maxG) * (h - 34);
+  const last = points.at(-1) ?? { clock_s: 0, own: 0, opp: 0 };
+  // goals missing after the last one (fewer than the result, well before the end): the lines end
+  // there and say so, instead of running flat to the end of the axis (review R13)
+  const cut = !span && final != null && last.own + last.opp < final.own + final.opp && last.clock_s < maxT - 60 ? last.clock_s : null;
+  const endT = cut ?? maxT;
   const step = (key: "own" | "opp") =>
-    points.map((p, i) => `${i ? `H${X(p.clock_s)}` : `M${X(minT)} ${Y(0)} H${X(p.clock_s)}`} V${Y(p[key])}`).join(" ") + ` H${X(maxT)}`;
+    points.map((p, i) => `${i ? `H${X(p.clock_s)}` : `M${X(minT)} ${Y(0)} H${X(p.clock_s)}`} V${Y(p[key])}`).join(" ") + ` H${X(endT)}`;
   const timed = points.every((p) => p.clock_s > 0 || (p.own === 0 && p.opp === 0));
-  const last = points.at(-1) ?? { own: 0, opp: 0 };
   // end labels: keep them apart when the score is close
   let yo = Y(last.own);
   let yp = Y(last.opp);
@@ -429,15 +438,16 @@ function ScoreChart({
         {timed && <path d={step("own")} fill="none" stroke="var(--accent)" strokeWidth={2.5} strokeLinejoin="round" />}
         {timed && (
           <>
-            <text x={X(maxT) + 6} y={yo + 4} fontSize="14" fontWeight="700" fill="var(--accent)">
+            <text x={X(endT) + 6} y={yo + 4} fontSize="14" fontWeight="700" fill="var(--accent)">
               {last.own}
             </text>
-            <text x={X(maxT) + 6} y={yp + 4} fontSize="14" fontWeight="600" fill="var(--muted)">
+            <text x={X(endT) + 6} y={yp + 4} fontSize="14" fontWeight="600" fill="var(--muted)">
               {last.opp}
             </text>
           </>
         )}
       </svg>
+      {timed && cut != null && <p className="text-sm text-muted">{tc("flightCut", { m: Math.floor(cut / 60) })}</p>}
     </figure>
   );
 }

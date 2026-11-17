@@ -3671,7 +3671,8 @@
     "rowNotice": "Analyse terminée, aucune question : {reason}",
     "rowPartsUploading": "{n, plural, one {1 partie pas encore entièrement envoyée} other {# parties pas encore entièrement envoyées}}",
     "rowFailedWhy": "L'analyse n'a pas fonctionné : {reason}",
-    "zonesLine": "{m7, plural, one {1 but} other {# buts}} à 7 m{rest, plural, =0 {.} one {, 1 autre sans lieu de tir.} other {, # autres sans lieu de tir.}}"
+    "zonesLine": "{m7, plural, one {1 but} other {# buts}} à 7 m{rest, plural, =0 {.} one {, 1 autre sans lieu de tir.} other {, # autres sans lieu de tir.}}",
+    "flightCut": "Suite des buts jusqu’à la {m}e minute seulement"
   },
   "check": {
     "top": "Vérifier · {opponent}",

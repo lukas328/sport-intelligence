@@ -15,9 +15,12 @@ export function Flight({
   from = 0,
   labels,
   slant = 0,
+  until,
   className,
 }: {
   goals: readonly ReportGoal[];
+  /** the sequence stops early at this minute (goals missing after it): the line ends there */
+  until?: number | null;
   width: number;
   height: number;
   length?: number;
@@ -30,7 +33,7 @@ export function Flight({
 }) {
   const small = width < 500;
   const pad = small ? 16 : 32;
-  const L = flightLayout(goals, width, height, length, small ? undefined : labels, slant, from);
+  const L = flightLayout(goals, width, height, length, small ? undefined : labels, slant, from, until);
   const text = { font: "600 14px var(--font-sans)", fill: "var(--club-ink)" };
   return (
     <svg viewBox={`0 0 ${width} ${height}`} aria-hidden className={className}>
