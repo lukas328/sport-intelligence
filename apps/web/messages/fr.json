@@ -1447,7 +1447,8 @@
     "emptyText": "La saison grandit ici à chaque match : résultats, ce qui se répète et qui marque. Crée ton premier match et charge la vidéo.",
     "noFiguresTitle": "Pas encore de chiffres pour la saison.",
     "noFiguresText": "La saison compte les matchs avec des buts et des tirs saisis. Dans tes matchs avec vidéo, l'analyse n'en a pas encore trouvé : réponds aux questions ouvertes ou saisis le résultat.",
-    "toMatches": "Vers les matchs"
+    "toMatches": "Vers les matchs",
+    "goalsAgainst": "Buts encaissés"
   },
   "notifications": {
     "title": "Notifications",
@@ -3933,7 +3934,7 @@
     "basisAll": "sur {n, plural, one {le seul match} other {les # matchs}}",
     "bestBasis": "Buts sur tous les matchs, réussite au tir, arrêts et pertes de balle seulement sur les matchs analysés ({k} de {n})",
     "dataCount": "{k} de {n} analysés",
-    "legend": "Le résultat et les buts viennent de handball.ch ou de ce que tu as saisi. La réussite au tir, les tirs arrêtés et les pertes de balle viennent de tes vidéos (analyse et ce que tu marques); les matchs sans ces données n'y comptent pas.",
+    "legend": "Le résultat et les buts viennent de la feuille de match officielle de handball.ch ou de tes propres saisies. La réussite au tir, les tirs arrêtés et les pertes de balle viennent de tes vidéos (analyse et ce que tu marques); les matchs sans ces données n'y comptent pas.",
     "colData": "Données",
     "dataVideo": "vidéo analysée",
     "dataTagged": "saisi à la main",
@@ -3945,7 +3946,9 @@
     "noVideoShort": "pas de vidéo",
     "dataReport": "de la feuille de match",
     "trainingTips": "Conseils d'entraînement à ce sujet",
-    "tipsAction": "Conseils d'entraînement"
+    "tipsAction": "Conseils d'entraînement",
+    "tickAgainst": "Trait : buts encaissés",
+    "tickFor": "Trait : buts marqués"
   },
   "numbersTab": {
     "intro": "Buts, 7 m et 2 minutes de la feuille de match et de la vidéo, tirs et arrêts des événements saisis.",

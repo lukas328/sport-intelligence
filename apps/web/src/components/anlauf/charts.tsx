@@ -97,7 +97,7 @@ export function Rail({
 /** Series: one bar per match with video, the last one in the team's colour. */
 export function Series({ values, team, label }: { values: readonly number[]; team: "own" | "opp"; label: string }) {
   const W = 132;
-  const H = 64;
+  const H = 70; // 6 above the highest number (review R11)
   const n = values.length;
   const bw = n > 4 ? 18 : 30;
   const gap = n > 1 ? (W - n * bw) / (n - 1) : 0;
@@ -125,14 +125,17 @@ export function Series({ values, team, label }: { values: readonly number[]; tea
 }
 
 /** Goal difference per match: wins up in the club colour, losses down as a dashed ink outline. */
-export function DiffBars({ matches, width = 700, label }: { matches: readonly { label: string; diff: number }[]; width?: number; label: string }) {
+export function DiffBars({ matches, width = 700, label }: { matches: readonly { label: string; diff: number; sub?: string }[]; width?: number; label: string }) {
   // the scale fits the biggest difference, the height the bars and their numbers on both sides:
   // a −20 keeps its bar and its number inside the picture (UX test A10)
   const most = Math.max(0, ...matches.map((m) => m.diff));
   const least = Math.max(0, ...matches.map((m) => -m.diff));
   const U = Math.min(7, 84 / Math.max(1, most, least));
-  const mid = Math.max(30, most * U + 32);
-  const H = mid + Math.max(30, least * U + 32);
+  // room above the highest number and below the lowest: «+11» is never cut (review R11)
+  // a second line under the name (the date) needs its own room on both sides of the line
+  const two = matches.some((m) => m.sub);
+  const mid = Math.max(two ? 52 : 36, most * U + 40);
+  const H = mid + Math.max(two ? 52 : 36, least * U + 38);
   const step = width / Math.max(1, matches.length);
   const bw = Math.min(64, step - 22);
   // a name never runs into its neighbour (UX test H14): cut to the slot, with a point
@@ -163,10 +166,15 @@ export function DiffBars({ matches, width = 700, label }: { matches: readonly { 
             <text x={x + bw / 2} y={up ? mid - h - 8 : mid + h + 22} textAnchor="middle" className="font-num" fill="var(--ink)" style={{ fontSize: 20 }}>
               {signed(v)}
             </text>
-            <text x={x + bw / 2} y={up ? mid + 20 : mid - 10} textAnchor="middle" fill="var(--ink-2)" style={{ font: "600 14px var(--font-sans)" }}>
-              <title>{m.label}</title>
+            <text x={x + bw / 2} y={up ? mid + 20 : m.sub ? mid - 26 : mid - 10} textAnchor="middle" fill="var(--ink-2)" style={{ font: "600 14px var(--font-sans)" }}>
+              <title>{m.sub ? `${m.label}, ${m.sub}` : m.label}</title>
               {fit(m.label)}
             </text>
+            {m.sub && (
+              <text x={x + bw / 2} y={up ? mid + 38 : mid - 9} textAnchor="middle" fill="var(--ink-2)" style={{ font: "400 13px var(--font-sans)" }}>
+                {m.sub}
+              </text>
+            )}
           </g>
         );
       })}

@@ -1447,7 +1447,8 @@
     "emptyText": "The season grows here with every match: results, what repeats and who scores. Create your first match and upload the video.",
     "noFiguresTitle": "No figures for the season yet.",
     "noFiguresText": "The season counts matches with recorded goals and shots. In your matches with video the analysis has not found any yet: answer the open questions there or enter the result.",
-    "toMatches": "To the matches"
+    "toMatches": "To the matches",
+    "goalsAgainst": "Goals against"
   },
   "notifications": {
     "title": "Notifications",
@@ -3933,7 +3934,7 @@
     "basisAll": "from {n, plural, one {the one match} other {all # matches}}",
     "bestBasis": "Goals from all matches, shooting, saves and turnovers only from analysed matches ({k} of {n})",
     "dataCount": "{k} of {n} analysed",
-    "legend": "Results and goals come from handball.ch or as you entered them. Shooting, saves and turnovers come from your videos (the analysis and what you mark); matches without that data do not count there.",
+    "legend": "Results and goals come from the official handball.ch match report or from what you entered yourself. Shooting, saves and turnovers come from your videos (the analysis and what you mark); matches without that data do not count there.",
     "colData": "Data",
     "dataVideo": "video analysed",
     "dataTagged": "entered by hand",
@@ -3945,7 +3946,9 @@
     "noVideoShort": "no video",
     "dataReport": "from the match report",
     "trainingTips": "Training tips for this",
-    "tipsAction": "Training tips"
+    "tipsAction": "Training tips",
+    "tickAgainst": "Mark: goals against",
+    "tickFor": "Mark: goals scored"
   },
   "numbersTab": {
     "intro": "Goals, 7 m and 2 minutes from the match report and the video, shots and saves from the tagged events.",

@@ -145,10 +145,10 @@ screen carries is fixed in `ANLAUF.md` section 3.
   (goals from the circle), not "Kreisanspiel": passes are not measured.
 - Actions: "Fürs Team zusammenstellen", "Highlights teilen", "Als Bild für den Chat".
 - **Punkt 1, geöffnet**: the tactics camera of the selected scene with the Ball-Linie and the
-  legend. **Telegramm**: the newspaper form from the report, copyable.
+  legend. **Kurzbericht** (formerly «Telegramm», read as the messenger, review R23): the newspaper form from the report, copyable.
 - Side: **Gegentore** and **Eigene Tore** as zones, three figures with their source (Paraden
   marked, Ballverluste from the report, Wurfquote from marked shots).
-- Without video: Telegramm and Verlauf from the report plus the upload block (state "Kein
+- Without video: Kurzbericht and Verlauf from the report plus the upload block (state "Kein
   Video"). Before the match: the opponent facts and "Spieltag starten" if no official report is
   expected.
 
@@ -263,7 +263,7 @@ come, offer one action.
 
 - **Kein Video**: head with result and Verlauf from the report, tab Video greyed, dashed block
   "Lad das Video hoch. Nach etwa 40 Minuten bekommst du die drei Dinge und alle Szenen.", "Video
-  wählen", "Link einfügen", the Telegramm.
+  wählen", "Link einfügen", the Kurzbericht.
 - **Analyse läuft**: "Die Analyse läuft." in the head with the result from the report, steps with
   "fertig / läuft / danach", a bar, minutes left, something useful meanwhile, three empty fields.
 - **Feld nicht bestätigt**: the detected field dashed yellow with four corner handles, "Stimmt das

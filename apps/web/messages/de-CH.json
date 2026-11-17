@@ -1447,7 +1447,8 @@
     "emptyText": "Mit jedem Spiel wächst hier die Saison: Resultate, was sich wiederholt und wer trifft. Leg dein erstes Spiel an und lade das Video hoch.",
     "noFiguresTitle": "Noch keine Zahlen für die Saison.",
     "noFiguresText": "Die Saison zählt Spiele mit erfassten Toren und Würfen. In deinen Spielen mit Video hat die Analyse noch keine gefunden: Beantworte dort die offenen Fragen oder trag das Resultat ein.",
-    "toMatches": "Zu den Spielen"
+    "toMatches": "Zu den Spielen",
+    "goalsAgainst": "Gegentore"
   },
   "notifications": {
     "title": "Mitteilungen",
@@ -3521,7 +3522,7 @@
     "minutesLeft": "{minutes, plural, one {noch etwa 1 Minute} other {noch etwa # Minuten}}",
     "meanwhile": "In der Zwischenzeit: die Tore aus dem Spielbericht stehen schon im Verlauf.",
     "noThings": "Für drei Dinge braucht es mehr Tore mit Video. Die Szenen findest du unter Video.",
-    "telegram": "Telegramm",
+    "telegram": "Kurzbericht",
     "copy": "Kopieren",
     "copied": "Kopiert",
     "check": "Prüfen",
@@ -3933,7 +3934,7 @@
     "basisAll": "aus {n, plural, one {dem einen Spiel} other {allen # Spielen}}",
     "bestBasis": "Tore aus allen Spielen, Wurfquote, Paraden und Ballverluste nur aus Spielen mit Analyse ({k} von {n})",
     "dataCount": "{k} von {n} mit Analyse",
-    "legend": "Resultat und Tore kommen von handball.ch oder so, wie du sie eingetragen hast. Wurfquote, gehaltene Würfe und Ballverluste kommen aus deinen Videos (Analyse und was du markierst); Spiele ohne diese Daten zählen dort nicht mit.",
+    "legend": "Resultat und Tore kommen aus dem offiziellen Spielbericht von handball.ch oder aus deinen eigenen Angaben. Wurfquote, gehaltene Würfe und Ballverluste kommen aus deinen Videos (Analyse und was du markierst); Spiele ohne diese Daten zählen dort nicht mit.",
     "colData": "Daten",
     "dataVideo": "Video analysiert",
     "dataTagged": "von Hand erfasst",
@@ -3945,7 +3946,9 @@
     "noVideoShort": "kein Video",
     "dataReport": "aus dem Spielbericht",
     "trainingTips": "Trainingstipps dazu",
-    "tipsAction": "Trainingstipps"
+    "tipsAction": "Trainingstipps",
+    "tickAgainst": "Strich: Gegentore",
+    "tickFor": "Strich: Tore"
   },
   "numbersTab": {
     "intro": "Tore, 7 m und 2 Minuten aus Spielbericht und Video, Würfe und Paraden aus den markierten Ereignissen.",

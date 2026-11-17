@@ -90,7 +90,7 @@ test("paper report: import, overview, match report, shots", async ({ page }, inf
   await page.getByTestId("season-more").locator("summary").click();
   await expect(page.getByTestId("season-tiles")).toContainText("Tore pro Spiel");
   await expect(page.getByTestId("season-matches")).toContainText("TV Papierdorf");
-  // one match: the trend chart waits for three matches and says so
-  await expect(page.getByTestId("season-trend")).toContainText("ab drei Spielen");
+  // the course of the goal difference is drawn once, at the top (review R26), not again in here
+  await expect(page.getByTestId("season-more").getByRole("img", { name: "Tordifferenz pro Spiel" })).toHaveCount(0);
   await expectAccessible(page);
 });
