@@ -511,3 +511,60 @@ liegen im Spiel und haben keine Uhr, darum greift dort nur der Mindestwert.
   Dev-Segmenten nur noch 28 von 42 Toren. Ein höherer Mindestwert von 1.5 kostet schon ein Tor
   (39/42). Weniger Fragen ohne Torverlust gibt es nur über die Zeit ausserhalb des Spiels, also
   über Einspielen, Pausen und Nachspiel. Dafür braucht es eine bessere Pausenerkennung.
+
+### Ballnetz billiger auf der T4 (Modal-Auftrag 14, Dataset `handball-gpu-bench-ballnet`, 2026-11-17)
+
+3 min des Spiels aus Auftrag 13, T4, ONNX Runtime 1.22 mit CUDA und TensorRT 10.9. hrp1 fp16.
+
+Ballnetz allein, 120 echte Dreiergruppen, ms pro Bild (Vorbereitung auf der CPU + Netz):
+
+| | 1280 px | 960 px | stärkster Kandidat wie Produkt |
+|---|---|---|---|
+| Produkt heute (float-Eingabe) | 21 + 71 = 92 | 15 + 40 = 55 | |
+| uint8 mit Vorbereitung im Graphen (`ml/ball/onnx_u8.py`) | 17 + 46 = 62 | 14 + 28 = 42 | 100 % |
+| uint8 + IO-Binding | 17 + 46 = 62 | 16 + 29 = 45 | 100 % |
+| TensorRT fp16, float-Eingabe | 40 + 62 = 101 | 25 + 31 = 55 | 99.2 % / 100 % |
+
+- uint8 spart ein Drittel. IO-Binding bringt nichts dazu.
+- TensorRT ist nicht schneller als CUDA fp16 und braucht einmalig 379 s für den Engine-Bau. Die
+  uint8-Variante scheiterte an einem fehlenden Shape-Profil für den Teilgraphen, den ONNX Runtime
+  an TensorRT gab. Die Korrektur (Cast zuerst, #65) ist nicht nachgemessen; ein Nachlauf lohnt
+  nicht, weil auch die float-Variante keinen Gewinn zeigt. Die erwarteten 10 bis 20 ms waren zu
+  optimistisch: 46 ms ist die Rechenzeit von hrp1 bei 1280 x 704 auf einer T4.
+
+Ganzer Job, YOLOX jedes 3. Bild, Rückennummern-Budget 0.3 (Kosten pro 60-min-Spiel, Modal T4
+0.66 USD/h, Azure T4 0.90 USD/h):
+
+| Einstellung | s für 180 s | x Videolänge | USD Modal / Azure |
+|---|---|---|---|
+| `cuda_lean` ohne Ball | 182 | 1.01 | 0.67 / 0.91 |
+| `cuda_lean_hrp1`, hrp1 jedes Bild, float-Eingabe | 727 | 4.0 | 2.66 / 3.63 |
+
+- In `cuda_lean`: Kamerabewegung 54 s (CPU), Rückennummern 54 s (genau am Budget), YOLOX 32 s,
+  Einblendung 13 s.
+- Im Job kostet das Ballnetz 122 ms pro Bild statt 92 in der Kurzmessung (Puffer, Stapel,
+  Spitzen, CPU geteilt mit den anderen Stufen): Faktor 1.33.
+
+Schätzung mit uint8 im Produkt (Kurzmessung x 1.33, übrige Stufen 178 s pro 180 s wie oben),
+Gold-Werte aus `ml/ball/LINEAGE.md`:
+
+| Ballnetz | x Videolänge | USD Modal / Azure | Gold alle Bälle |
+|---|---|---|---|
+| 1280 px, jedes Bild | 3.1 | 2.02 / 2.76 | 76.1 % |
+| 960 px, jedes Bild | 2.4 | 1.58 / 2.15 | nicht gemessen |
+| 1280 px, jedes 3. Bild | 1.7 | 1.11 / 1.51 | 65.3 % |
+| 960 px, jedes 2. Bild | 1.7 | 1.11 / 1.52 | nicht gemessen |
+| 960 px, jedes 3. Bild (CPU-Testeinstellung) | 1.5 | 0.96 / 1.31 | 63.5 % |
+
+- Unter 1 Euro (etwa 1.08 USD) mit Ball liegt nur 960 px jedes 3. Bild, und nur auf Modal.
+- Umgesetzt (PR nach #65), ohne neue GPU-Ausgaben:
+  1. Das Produkt nimmt uint8-Netze an: `BallNet` erkennt den Eingangstyp, auch gemischt im
+     Ensemble. Die Kandidaten sind gleich (Test). Für Staging braucht es eine uint8-Datei im Bucket
+     (`ml/ball/onnx_u8.py` auf die heutige Datei).
+  2. Das Ballnetz läuft in einem eigenen Thread (`BallCandidates`, höchstens 2 wartende Stapel).
+     ONNX Runtime gibt den GIL frei, also rechnet die GPU, während der Hauptfaden Kamerabewegung,
+     YOLOX und Rückennummern macht. `timings_s["ball_net"]` ist jetzt nur noch die Wartezeit des
+     Hauptfadens, die reine Netzzeit steht in `observe_counters["ball_net_busy_ms"]`.
+     Im besten Fall wird die Laufzeit max(Netz, übrige Stufen) statt der Summe: für 1280 px auf
+     jedem Bild mit uint8 etwa 279 s Netz gegen 178 s, also 1.55 x und 1.02 USD pro Spiel auf
+     Modal. Gemessen ist das noch nicht; es braucht einen kurzen GPU-Lauf (Freigabe Lukas).
