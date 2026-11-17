@@ -8,7 +8,7 @@ import { Flight, type FlightLabels, type ReportGoal } from "./charts";
  * here (and in the active marker, own lines and numerals).
  */
 
-/** A club name that may break after «/» («SG Wädenswil/<wbr>Horgen»), for large text (UX test N11). */
+/** A club name that may break after «/» («SG Lärchenwil/<wbr>Felsegg»), for large text (UX test N11). */
 export function Breakable({ text }: { text: string }) {
   const parts = text.split("/");
   return (
@@ -143,7 +143,7 @@ export function WurfHead({
   const from = span ? span[0] : 0;
   const length = span ? span[1] : 60;
   const line = Boolean(goals && goals.length > 0);
-  // a long headline («Als Nächstes: SG Horgen/Wädenswil 1.») a size smaller, so it keeps whole
+  // a long headline («Als Nächstes: SG Felsegg/Lärchenwil 1.») a size smaller, so it keeps whole
   // words and two or three lines (review R9)
   const long = (typeof title === "string" ? title : titleText ?? "").length > 32;
   return (
@@ -162,7 +162,7 @@ export function WurfHead({
       {/* above the drawn line: the controls in the head stay reachable */}
       <div className="relative z-10 min-w-0">
         {kick && <p className="mb-2 text-[15px] font-semibold md:mb-3.5 md:text-[15px]">{kick}</p>}
-        {/* long club names («SG Wädenswil/Horgen») wrap instead of running out (UX test N11) */}
+        {/* long club names («SG Lärchenwil/Felsegg») wrap instead of running out (UX test N11) */}
         <h1 className={cn("leading-[.96] [overflow-wrap:break-word]", long ? "text-[28px] md:text-[40px] lg:text-[52px]" : "text-[32px] md:text-[48px] lg:text-[58px]")}>{title}</h1>
         {meta && <div className="mt-[18px] text-sm font-semibold">{meta}</div>}
         {children}

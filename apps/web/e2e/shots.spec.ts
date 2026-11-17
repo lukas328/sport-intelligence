@@ -44,7 +44,7 @@ test("court from the hall: Passt moves on; shot review: Enter takes the report e
         calibration_info: { method: "hall", hall_match: "floor" },
         camera: "fixed",
         panorama: { width: 1280, height: 720 },
-        hall: { name: "Sporthalle Seefeld", source: "match", calibrated_videos: 2 },
+        hall: { name: "Sporthalle Schilfmatt", source: "match", calibrated_videos: 2 },
         tracks: [], chunk_ms: null, chunks: null, fps: 50, detector: "yolo", elapsed_s: 40, formations: [], auto_events: null, error: null, needs_calibration: false,
       }),
     }),
@@ -67,7 +67,7 @@ test("court from the hall: Passt moves on; shot review: Enter takes the report e
   if (await page.getByTestId("open-bench").isVisible()) await page.getByTestId("open-bench").click();
   await page.getByTestId("setup-toggle").click();
   await page.getByTestId("step-court").click();
-  await expect(page.getByText("Spielfeld aus einem früheren Video derselben Halle übernommen (Sporthalle Seefeld). Liegen die orangen Linien")).toBeVisible();
+  await expect(page.getByText("Spielfeld aus einem früheren Video derselben Halle übernommen (Sporthalle Schilfmatt). Liegen die orangen Linien")).toBeVisible();
   await expect(page.getByTestId("court-preview")).toBeVisible();
   await expect(page.getByTestId("step-court")).toContainText("bitte prüfen");
   await page.getByTestId("court-confirm").click();

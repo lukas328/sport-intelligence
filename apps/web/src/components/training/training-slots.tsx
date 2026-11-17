@@ -17,7 +17,7 @@ type Season = Schemas["SeasonOut"];
 const WEEKDAYS = [1, 2, 3, 4, 5, 6, 7] as const;
 
 /**
- * The team's regular training times of a season ("Di 19:00 bis 20:30, Halle Seefeld") and the
+ * The team's regular training times of a season ("Di 19:00 bis 20:30, Halle Schilfmatt") and the
  * one action that turns them into units: from today to the end of the season, public holidays
  * preselected to skip. Running it again creates nothing twice (the API keeps existing units).
  */

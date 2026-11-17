@@ -2,7 +2,8 @@
 
 The network is never used: the fetchers are replaced by data recorded from the real sources
 (tests/fixtures/official_report, the games of ml/eval/official; player and official names
-replaced by fake ones of the same length, so the columns of the text reports stay aligned)."""
+replaced by fake ones of the same length, clubs, places and halls by invented ones, the columns of
+the text reports kept aligned)."""
 
 from __future__ import annotations
 
@@ -76,13 +77,13 @@ def test_detect_source() -> None:
 def test_parse_handball_ch_resolves_sides_and_keepers() -> None:
     r = service.parse_handball_ch(484345, ch_data())
     assert (r.home, r.away, r.final, r.half_time) == (
-        "HSG Leimental",
-        "HC Arbon",
+        "HSG Haselgrund",
+        "HC Kalmoos",
         (25, 28),
         (12, 19),
     )
     assert r.date == "2024-09-21" and r.source_url == CH_URL
-    first = r.entries[0]  # 00:42 save: the home keeper #1 stopped #6 of Arbon
+    first = r.entries[0]  # 00:42 save: the home keeper #1 stopped #6 of Kalmoos
     assert (first.kind, first.team, first.number, first.goalkeeper_number) == (
         "shot_saved",
         "away",
@@ -135,8 +136,8 @@ def test_parse_handball_ch_finds_the_keeper_by_the_field_players_role() -> None:
 def test_parse_dhb_press_report() -> None:
     r = service.parse_dhb(76839, dhb_text())
     assert (r.home, r.away, r.final, r.half_time) == (
-        "SC Magdeburg II",
-        "HC Empor Rostock",
+        "SC Fischerau II",
+        "HC Möwenhafen",
         (26, 26),
         (13, 13),
     )
@@ -199,7 +200,7 @@ async def reported_clip(api: Api, ids: dict[str, Any]) -> tuple[dict[str, Any], 
 
     from .test_matches import upload
 
-    m = await new_match(api, ids, opponent_name="HC Arbon")
+    m = await new_match(api, ids, opponent_name="HC Kalmoos")
     base = f"/v1/orgs/{ids['org']}/matches/{m['id']}"
     assert (await api.post(f"{base}/official-report", json={"url": CH_URL})).status_code == 200
     video = await upload(api, ids, m["id"], b"v" * 100)
@@ -235,7 +236,7 @@ async def test_import_handball_ch_report(
     api = make_api()
     ids = await setup_club(api)
     players = await _roster(api, ids, {7: "Lisa", 33: "Denise", 1: "Aida"})
-    m = await new_match(api, ids, opponent_name="HC Arbon")  # Leimental at home: we are home
+    m = await new_match(api, ids, opponent_name="HC Kalmoos")  # Haselgrund at home: we are home
     org = ids["org"]
     url = f"/v1/orgs/{org}/matches/{m['id']}/official-report"
     r = await api.post(url, json={"url": CH_URL})
@@ -244,7 +245,7 @@ async def test_import_handball_ch_report(
     assert (res["provider"], res["game_id"], res["home"], res["final"]) == (
         "handball_ch",
         484345,
-        "HSG Leimental",
+        "HSG Haselgrund",
         [25, 28],
     )
     assert res["created"] == 22 and res["replaced"] == 0
@@ -288,7 +289,7 @@ async def test_import_dhb_report_merges_video_goals(
     api = make_api()
     ids = await setup_club(api)
     players = await _roster(api, ids, {13: "Digana", 60: "Bako", 2: "Letuzug"})
-    m = await new_match(api, ids, opponent_name="SC Magdeburg II", is_home=False)  # we: Rostock
+    m = await new_match(api, ids, opponent_name="SC Fischerau II", is_home=False)  # we: Möwenhafen
     org = ids["org"]
     ev_url = f"/v1/orgs/{org}/matches/{m['id']}/events"
     shot = {"type": "shot", "outcome": "goal", "period": 1}
@@ -296,7 +297,7 @@ async def test_import_dhb_report_merges_video_goals(
     manual = (await api.post(ev_url, json={**shot, "side": "own", "clock_s": 95})).json()
     # read from the overlay 9 s after Zodibafa's goal at 04:31: merged into the official goal
     overlay = (await api.post(ev_url, json={**shot, "side": "own", "clock_s": 280})).json()
-    # an overlay goal without an official one (no Magdeburg goal near 50:00) stays for checking
+    # an overlay goal without an official one (no Fischerau goal near 50:00) stays for checking
     lone = (await api.post(ev_url, json={**shot, "side": "opponent", "clock_s": 3000})).json()
     # an estimated goal: the report has every goal, the estimate goes
     guess = (await api.post(ev_url, json={**shot, "side": "opponent", "clock_s": 1000})).json()
@@ -313,8 +314,8 @@ async def test_import_dhb_report_merges_video_goals(
     url = f"/v1/orgs/{org}/matches/{m['id']}/official-report"
     res = (await api.post(url, json={"url": "76839", "provider": "dhb"})).json()
     assert (res["home"], res["away"], res["final"]) == (
-        "SC Magdeburg II",
-        "HC Empor Rostock",
+        "SC Fischerau II",
+        "HC Möwenhafen",
         [26, 26],
     )
     assert (res["matched_video_goals"], res["kept_manual_goals"], res["unmatched_video_goals"]) == (
@@ -339,7 +340,7 @@ async def test_import_dhb_report_merges_video_goals(
             "t_ms": 300_000,
             "confidence": 0.95,
         }
-        # the last goal of the first half at 30:00, scored by Magdeburg (the opponent)
+        # the last goal of the first half at 30:00, scored by Fischerau (the opponent)
         ht = next(e for e in events if e["clock_s"] == 1800 and e["type"] == "shot")
         assert (ht["period"], ht["side"], ht["shot_type"]) == (1, "opponent", "penalty")
         timeouts = [e["side"] for e in events if e["type"] == "timeout"]
@@ -401,7 +402,7 @@ async def test_analysis_after_import_does_not_count_goals_twice(
 
     api = make_api()
     ids = await setup_club(api)
-    m = await new_match(api, ids, opponent_name="HC Arbon")  # home: the overlay's left team is us
+    m = await new_match(api, ids, opponent_name="HC Kalmoos")  # home: the overlay's left team is us
     org = ids["org"]
     r = await api.post(f"/v1/orgs/{org}/matches/{m['id']}/official-report", json={"url": CH_URL})
     assert r.status_code == 200, r.text
@@ -488,7 +489,7 @@ async def test_goal_comparison_and_review(
 ) -> None:
     api = make_api()
     ids = await setup_club(api)
-    m = await new_match(api, ids, opponent_name="SC Magdeburg II", is_home=False)
+    m = await new_match(api, ids, opponent_name="SC Fischerau II", is_home=False)
     org = ids["org"]
     base = f"/v1/orgs/{org}/matches/{m['id']}"
     cmp_url, review_url = f"{base}/official-report/comparison", f"{base}/official-report/review"
@@ -525,7 +526,7 @@ async def test_goal_comparison_and_review(
     assert (cmp["imported"], cmp["provider"], cmp["home"], cmp["window_s"]) == (
         True,
         "dhb",
-        "SC Magdeburg II",
+        "SC Fischerau II",
         20.0,
     )
     # 52 goals in the report; merged on import: Zodibafa's goal at 04:31

@@ -104,7 +104,8 @@ export const CLUB_COLOURS = [
   ["maroon", "#8a1538"],
   ["orange", "#b35900"],
   ["green", "#157a3a"],
-  ["blue", "#1f4fd6"],
+  // not #1f4fd6: the old onboarding stored that blue for every club, it reads as «not chosen»
+  ["blue", "#1d4ed8"],
   ["navy", "#173a73"],
   ["purple", "#5b2d8e"],
   ["black", "#17191c"],
@@ -112,7 +113,7 @@ export const CLUB_COLOURS = [
 
 export type ClubColourKey = (typeof CLUB_COLOURS)[number][0];
 
-/** The opponent the check colours are shown against (the demo season's TV Thalwil): black and white. */
+/** The opponent the check colours are shown against (the demo season's TSV Seewald): black and white. */
 export const CHECK_OPPONENT = ["#17191c", "#ffffff"] as const;
 
 /** Shifts `c` towards `to` until it reaches `need` contrast on `ground`. */

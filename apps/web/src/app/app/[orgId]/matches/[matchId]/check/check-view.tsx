@@ -662,7 +662,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
                 {answered.map((x, i) => (
                   <li key={id(x.q)} className="flex min-h-12 flex-wrap items-center justify-between gap-x-3 gap-y-1 border-b border-rule py-1.5 text-[17px]" data-testid="check-answered-row">
                     <span className="min-w-0">
-                      {/* the match clock per goal moment, the video time small beside it: five «Tor Lakers Stäfa» in a row are told apart (H3, H8) */}
+                      {/* the match clock per goal moment, the video time small beside it: five «Tor Seehasen Sälmatt» in a row are told apart (H3, H8) */}
                       {x.q.kind === "goal" && (
                         <span className="mr-2 font-mono text-[15px] font-semibold text-ink-2">{x.q.c.clock_s != null ? `${clock(x.q.c.clock_s)} · ${t("videoAt", { video: clock(x.q.c.goal_ms / 1000) })}` : t("videoAt", { video: clock(x.q.c.goal_ms / 1000) })}</span>
                       )}

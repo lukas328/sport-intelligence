@@ -347,7 +347,7 @@ async def test_a_long_silent_upload_is_given_up_and_can_be_removed(
     m = await new_match(api, ids)
     r = await api.post(
         f"/v1/orgs/{org}/matches/{m['id']}/videos",
-        json={"filename": "konstanz.mp4", "size_bytes": 3_000_000_000, "content_type": "video/mp4"},
+        json={"filename": "moorfeld.mp4", "size_bytes": 3_000_000_000, "content_type": "video/mp4"},
     )
     assert r.status_code == 201, r.text
     vid = r.json()["video"]["id"] if "video" in r.json() else r.json()["id"]

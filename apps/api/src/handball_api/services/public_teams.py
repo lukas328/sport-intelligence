@@ -40,7 +40,7 @@ async def search(ctx: Ctx, q: str) -> list[dict[str, Any]]:
     tokens = _tokens(q)
     if len("".join(tokens)) < MIN_QUERY:
         raise ProblemError(422, "query-too-short", "Type at least three letters")
-    # «Wädenswil Herren 1»: the team's words are not in the club's name; search the club by the
+    # «Lärchenwil Herren 1»: the team's words are not in the club's name; search the club by the
     # rest (UX test N27), the team list of the club follows anyway
     club_words = [t for t in tokens if not TEAM_WORD.fullmatch(t)]
     tokens = club_words or tokens
@@ -53,7 +53,7 @@ async def search(ctx: Ctx, q: str) -> list[dict[str, Any]]:
                 found.append((not ch.fold(c.name).startswith(tokens[0]), c.name, c))
         fuzzy = False
         if not found:
-            # a typo («Wädenswill», «Thalwill»): words one letter apart (UX test N10)
+            # a typo («Lärchenwill», «Farnwill»): words one letter apart (UX test N10)
             for c in await ch.clubs(ctx.db):
                 words = ch.fold(f"{c.name} {c.city or ''}").replace("/", " ").split()
                 if all(any(_near(t, w) for w in words) for t in tokens):

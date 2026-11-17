@@ -24,7 +24,7 @@ const official = (
   estimated: true,
   number: 7,
   player_id: null,
-  name: "ZIMMERLI Lisa",
+  name: "ZUFALL Lisa",
   score: [1, 0],
   penalty: false,
   status: "missing",

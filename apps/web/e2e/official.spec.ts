@@ -70,7 +70,7 @@ test("onboarding: find the team, take one over, ask a claimed club for access, a
   await page.route(`${claimedBase}/matches`, (route) =>
     json(route, [
       { id: "00000000-0000-4000-8000-00000000a001", team_id: fx.CLAIMED_TEAM, kind: "match", kickoff_at: "2026-11-07T17:00:00Z", opponent_name: "TSV Seewald", is_home: true, score_own: 26, score_opponent: 18, status: "finished", has_video: false, is_demo: false, competition: null },
-      { id: "00000000-0000-4000-8000-00000000a002", team_id: fx.CLAIMED_TEAM, kind: "match", kickoff_at: "2026-11-22T18:30:00Z", opponent_name: "HSG Rheinau", is_home: false, score_own: null, score_opponent: null, status: "scheduled", has_video: false, is_demo: false, competition: null },
+      { id: "00000000-0000-4000-8000-00000000a002", team_id: fx.CLAIMED_TEAM, kind: "match", kickoff_at: "2026-11-22T18:30:00Z", opponent_name: "HSG Auenfeld", is_home: false, score_own: null, score_opponent: null, status: "scheduled", has_video: false, is_demo: false, competition: null },
     ]),
   );
   await page.route(`**/v1/orgs/${fx.CLAIMED_ORG}`, (route) => {

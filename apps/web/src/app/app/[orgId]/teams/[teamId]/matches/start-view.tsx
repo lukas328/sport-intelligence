@@ -437,7 +437,7 @@ export function NextOpponent({ orgId, teamId, next, played }: { orgId: string; t
   const format = useFormatter();
   const date = new Date(next.kickoff_at);
   // the last duel with video: its Minifeld and a line
-  // «SG Horgen/Wädenswil 1» and «SG Horgen/Wädenswil (M2)» are one opponent (review R7)
+  // «SG Felsegg/Lärchenwil 1» and «SG Felsegg/Lärchenwil (M2)» are one opponent (review R7)
   const met = played.find((m) => sameOpponent(m.opponent_name, next.opponent_name) && m.score_own != null && m.has_video);
   const duel = played.find((m) => sameOpponent(m.opponent_name, next.opponent_name) && m.score_own != null);
   const g = useMatchGraphics(orgId, met?.id ?? "");

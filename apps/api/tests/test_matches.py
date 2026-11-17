@@ -58,19 +58,19 @@ async def upload(
 
 
 async def test_opponent_spellings_are_one_opponent(make_api: Callable[[], Api]) -> None:
-    """«SG Horgen/Wädenswil 1» from the league and «SG Horgen/Wädenswil (M2)» from the cup are
+    """«SG Felsegg/Lärchenwil 1» from the league and «SG Felsegg/Lärchenwil (M2)» from the cup are
     the same opponent; a club's second team stays its own (review R7)."""
     api = make_api()
     ids = await setup_club(api)
-    first = await new_match(api, ids, opponent_name="SG Horgen/Wädenswil 1")
+    first = await new_match(api, ids, opponent_name="SG Felsegg/Lärchenwil 1")
     cup = await new_match(
-        api, ids, opponent_name="SG Horgen/Wädenswil (M2)", kickoff_at="2026-11-14T18:00:00+01:00"
+        api, ids, opponent_name="SG Felsegg/Lärchenwil (M2)", kickoff_at="2026-11-14T18:00:00+01:00"
     )
     second = await new_match(
-        api, ids, opponent_name="SG Horgen/Wädenswil 2", kickoff_at="2026-11-21T18:00:00+01:00"
+        api, ids, opponent_name="SG Felsegg/Lärchenwil 2", kickoff_at="2026-11-21T18:00:00+01:00"
     )
     assert cup["opponent"]["id"] == first["opponent"]["id"]
-    assert cup["opponent"]["name"] == "SG Horgen/Wädenswil 1"
+    assert cup["opponent"]["name"] == "SG Felsegg/Lärchenwil 1"
     assert second["opponent"]["id"] != first["opponent"]["id"]
 
 
@@ -810,11 +810,11 @@ async def test_opponent_colour_is_said_remembered_never_guessed(
     org = ids["org"]
     base = f"/v1/orgs/{org}/teams/{ids['team']}/matches"
     # nobody said a colour: unknown, although kit_opponent holds the pipeline default
-    first = await new_match(api, ids, opponent_name="TSV Thalwil")
+    first = await new_match(api, ids, opponent_name="TSV Farnwil")
     assert first["opponent_colors"] == {"color": None, "second": None, "source": None}
     listed = (await api.get(base)).json()
     assert listed[0]["opponent_color"] is None
-    # said for this match (the question "Welche Farbe trägt Thalwil?")
+    # said for this match (the question "Welche Farbe trägt Farnwil?")
     murl = f"/v1/orgs/{org}/matches/{first['id']}"
     said = (await api.patch(murl, json={"opponent_kit": "#1e4fa0"})).json()
     assert said["opponent_colors"] == {"color": "#1e4fa0", "second": None, "source": "match"}

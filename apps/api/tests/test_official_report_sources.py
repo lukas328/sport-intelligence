@@ -2,7 +2,8 @@
 (Sportradar) imported into a match.
 
 The network is never used: the fetchers are replaced by pages recorded from the real sources
-(tests/fixtures/official_report, player and official names replaced by fake ones), and the
+(tests/fixtures/official_report, player and official names replaced by fake ones, clubs, places
+and halls by invented ones), and the
 download itself runs against an httpx mock transport."""
 
 from __future__ import annotations
@@ -112,8 +113,8 @@ def test_parse_nuliga_page_germany() -> None:
     r = service.parse_nuliga(8390512, BHV_URL, page("nuliga_bhv_8390512.html"))
     assert (r.provider, r.game_id, r.source_url) == ("nuliga", 8390512, BHV_URL)
     assert (r.home, r.away, r.final, r.half_time) == (
-        "HC Erlangen III",
-        "TSV Lohr",
+        "HC Kieferngrund III",
+        "TSV Lindenfurt",
         (39, 28),
         (18, 14),
     )
@@ -156,8 +157,8 @@ def test_parse_nuliga_page_austria() -> None:
     """ÖHB (English labels in part, team names with a slash)."""
     r = service.parse_nuliga(81811, OEHB_URL, page("nuliga_oehb_81811.html"))
     assert (r.home, r.away, r.final, r.half_time, r.date) == (
-        "HIB Handball Graz",
-        "SG TV Gleisdorf/HC Weiz",
+        "HIB Handball Weinleiten",
+        "SG TV Ackerdorf/HC Hügelweid",
         (28, 36),
         (11, 18),
         "2026-05-02",
@@ -187,8 +188,8 @@ def test_parse_nuliga_pdf() -> None:
     """The PDF (oehb.at links it for every game): two log columns, long names wrap."""
     r = service.parse_nuliga_pdf(92532, OEHB_PDF, page("nuliga_oehb_92532.txt"))
     assert (r.home, r.away, r.final, r.half_time) == (
-        "HC LINZ AG",
-        "HSG Holding Graz",
+        "HC TRAUNECK AG",
+        "HSG Holding Weinleiten",
         (36, 29),
         (17, 16),
     )
@@ -225,8 +226,8 @@ def test_parse_nuliga_pdf() -> None:
 def test_parse_hla_report() -> None:
     r = service.parse_hla(70984286, page("hla_70984286.txt"))
     assert (r.home, r.away, r.final, r.half_time) == (
-        "JAGS Voslau",
-        "HSG Lipizzanerheimat",
+        "JAGS Quellau",
+        "HSG Fohlenweide",
         (30, 25),
         (15, 12),
     )
@@ -326,11 +327,12 @@ async def test_dhb_download_follows_redirects_on_the_same_host_only(
 async def test_import_nuliga_report(
     make_api: Callable[[], Api], recorded: list[str], owner_conn: Any
 ) -> None:
-    """We are TSV Lohr (away). The unverified club then sees only the numbers of the other team."""
+    """We are TSV Lindenfurt (away). The unverified club then sees only the numbers of the other
+    team."""
     api = make_api()
     ids = await setup_club(api)
     players = await _roster(api, ids, {5: "Gerd", 24: "Lino", 25: "Paddy"})
-    m = await new_match(api, ids, opponent_name="HC Erlangen III", is_home=False)
+    m = await new_match(api, ids, opponent_name="HC Kieferngrund III", is_home=False)
     org = ids["org"]
     url = f"/v1/orgs/{org}/matches/{m['id']}/official-report"
     r = await api.post(url, json={"url": BHV_URL})
@@ -351,7 +353,7 @@ async def test_import_nuliga_report(
     penalty = next(e for e in goals if e["shot_type"] == "penalty")
     assert (penalty["side"], penalty["clock_s"], penalty["player_id"]) == ("own", 247, players[25])
     assert penalty["attributes"]["score"] == [3, 2]  # own first
-    second_half = next(e for e in goals if e["clock_s"] == 1871)  # 31:11, Lohr
+    second_half = next(e for e in goals if e["clock_s"] == 1871)  # 31:11, Lindenfurt
     assert (second_half["period"], second_half["player_id"]) == (2, players[5])
     misses = [e for e in events if e["type"] == "shot" and e["outcome"] == "miss"]
     assert Counter(e["side"] for e in misses) == {"own": 2, "opponent": 1}
@@ -368,8 +370,8 @@ async def test_import_nuliga_report(
         "provider": "nuliga",
         "game_id": 8390512,
         "url": BHV_URL,
-        "home": "HC Erlangen III",
-        "away": "TSV Lohr",
+        "home": "HC Kieferngrund III",
+        "away": "TSV Lindenfurt",
     }
     comparison = (await api.get(f"{url}/comparison")).json()
     assert (comparison["provider"], comparison["counts"]["official"]) == ("nuliga", 67)
@@ -395,7 +397,7 @@ async def test_import_nuliga_pdf_and_hla_report(
     api = make_api()
     ids = await setup_club(api)
     org = ids["org"]
-    m = await new_match(api, ids, opponent_name="HSG Holding Graz")  # we are HC Linz (home)
+    m = await new_match(api, ids, opponent_name="HSG Holding Weinleiten")  # we: HC Trauneck, home
     url = f"/v1/orgs/{org}/matches/{m['id']}/official-report"
     res = (await api.post(url, json={"url": OEHB_PDF})).json()
     assert (res["provider"], res["game_id"], res["created"], res["final"]) == (
@@ -411,7 +413,7 @@ async def test_import_nuliga_pdf_and_hla_report(
     assert (last["period"], last["side"]) == (2, "opponent")
 
     # HLA: the result and the missed 7-metres, with a note that the log is missing
-    hla = await new_match(api, ids, opponent_name="HSG Lipizzanerheimat")  # we: Vöslau, home
+    hla = await new_match(api, ids, opponent_name="HSG Fohlenweide")  # we: Quellau, home
     hla_url = f"/v1/orgs/{org}/matches/{hla['id']}/official-report"
     r = await api.post(hla_url, json={"url": "70984286", "provider": "hla"})
     assert r.status_code == 200, r.text

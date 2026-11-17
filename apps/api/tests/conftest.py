@@ -280,7 +280,7 @@ async def setup_club(
     api: Api, email: str = "coach@hc-test.ch", youth: bool = False
 ) -> dict[str, Any]:
     """Register, create org and team. Returns ids."""
-    assert (await api.register(email, name="Coach Carter")).status_code == 201
+    assert (await api.register(email, name="Coach Imhof")).status_code == 201
     org = (await api.post("/v1/orgs", json={"name": "HC Test", "primary_color": "#112233"})).json()
     team = (
         await api.post(

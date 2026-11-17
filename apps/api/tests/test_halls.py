@@ -41,8 +41,8 @@ async def _video(api: Api, ids: dict[str, Any], **match: Any) -> tuple[str, str,
 
 
 def test_hall_names_compare_without_case_accents_and_spaces() -> None:
-    assert fold("  Sporthalle  Untermosen ") == fold("sporthalle untermosen")
-    assert fold("Turnhalle Stäfa") == fold("TURNHALLE STAFA")
+    assert fold("  Sporthalle  Moosgarten ") == fold("sporthalle moosgarten")
+    assert fold("Turnhalle Sälmatt") == fold("TURNHALLE SALMATT")
     assert fold("Halle Süd") != fold("Halle Nord")
 
 
@@ -55,7 +55,7 @@ async def test_the_clicked_court_of_a_hall_is_offered_to_its_later_videos(
     jobs: MemoryJobQueue = api.app.state.jobs
 
     # first video of the hall: the automatic court failed (flat view), the coach clicks it once
-    first, job, payload = await _video(api, ids, venue="Sporthalle Untermosen")
+    first, job, payload = await _video(api, ids, venue="Sporthalle Moosgarten")
     assert "hall_references" not in payload  # nothing marked in this hall yet
     await _finish(
         api,
@@ -63,7 +63,7 @@ async def test_the_clicked_court_of_a_hall_is_offered_to_its_later_videos(
         {"needs_calibration": True, "calibration": None, "tracks": [], "panorama": PANORAMA},
     )
     a = (await api.get(f"/v1/orgs/{org}/videos/{first}/analysis")).json()
-    assert a["hall"] == {"name": "Sporthalle Untermosen", "source": "match", "calibrated_videos": 0}
+    assert a["hall"] == {"name": "Sporthalle Moosgarten", "source": "match", "calibrated_videos": 0}
     pts = [{"image": [100 * i, 50 * i + 5], "court": [10 * i, 5 * (i % 2)]} for i in range(4)]
     body = {"points": pts, "space": "panorama"}
     assert (
@@ -77,13 +77,13 @@ async def test_the_clicked_court_of_a_hall_is_offered_to_its_later_videos(
 
     # the next home game in the same hall (name written differently): the worker gets the court
     second, job2, payload2 = await _video(
-        api, ids, venue="sporthalle  untermosen", kickoff_at="2026-11-14T18:00:00+01:00"
+        api, ids, venue="sporthalle  moosgarten", kickoff_at="2026-11-14T18:00:00+01:00"
     )
     refs = payload2["hall_references"]
     assert [r["video_id"] for r in refs] == [first]
     assert refs[0]["panorama_key"].endswith(f"/{first}/analysis/panorama.jpg")
     assert refs[0]["homography"][0][0] == 2.0 and refs[0]["image_size"] == [3600, 1100]
-    assert refs[0]["hall"] == "Sporthalle Untermosen"
+    assert refs[0]["hall"] == "Sporthalle Moosgarten"
     a2 = (await api.get(f"/v1/orgs/{org}/videos/{second}/analysis")).json()
     assert a2["hall"]["calibrated_videos"] == 1
     # the court carried over is shown as an automatic court for the coach to check
@@ -119,7 +119,7 @@ async def test_the_clicked_court_of_a_hall_is_offered_to_its_later_videos(
         await api.post(f"/v1/orgs/{org}/videos/{second}/calibration/confirm")
     ).status_code == 200
     _, _, later = await _video(
-        api, ids, venue="Sporthalle Untermosen", kickoff_at="2026-12-05T18:00:00+01:00"
+        api, ids, venue="Sporthalle Moosgarten", kickoff_at="2026-12-05T18:00:00+01:00"
     )
     assert [r["video_id"] for r in later["hall_references"]] == [second, first]
 
@@ -178,7 +178,7 @@ async def test_references_read_one_court_per_video_in_sql(
     ids = await setup_club(api)
     org = ids["org"]
     jobs: MemoryJobQueue = api.app.state.jobs
-    first, job, _ = await _video(api, ids, venue="Sporthalle Untermosen")
+    first, job, _ = await _video(api, ids, venue="Sporthalle Moosgarten")
     await _finish(
         api,
         job,
@@ -196,7 +196,7 @@ async def test_references_read_one_court_per_video_in_sql(
             {"calibration": _court("user_correction"), "tracks": _tracks(), "panorama": PANORAMA},
         )
     second, _, payload = await _video(
-        api, ids, venue="Sporthalle Untermosen", kickoff_at="2026-11-14T18:00:00+01:00"
+        api, ids, venue="Sporthalle Moosgarten", kickoff_at="2026-11-14T18:00:00+01:00"
     )
     assert [r["video_id"] for r in payload["hall_references"]] == [first]
     query_counter.clear()
@@ -210,7 +210,7 @@ async def test_references_read_one_court_per_video_in_sql(
 
 async def _hall_video(api: Api, ids: dict[str, Any], kickoff: str) -> tuple[str, str, str]:
     """A home game in the confirmed hall: (match id, video id, analysis job id)."""
-    m = await new_match(api, ids, venue="Sporthalle Untermosen", kickoff_at=kickoff)
+    m = await new_match(api, ids, venue="Sporthalle Moosgarten", kickoff_at=kickoff)
     vid = (await upload(api, ids, m["id"], b"v" * 100))["id"]
     jobs: MemoryJobQueue = api.app.state.jobs
     await _ingest(api, jobs.jobs[-1][2], jobs.jobs[-1][3]["prefix"], audio=False)

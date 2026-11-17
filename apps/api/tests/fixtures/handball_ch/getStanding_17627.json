@@ -9,7 +9,7 @@
     {
      "teamId": 41523,
      "clubId": 140771,
-     "name": "SG Horgen/Wädenswil 1",
+     "name": "SG Felsegg/Lärchenwil 1",
      "rank": 1,
      "games": 6,
      "won": 6,
@@ -23,7 +23,7 @@
     {
      "teamId": 40762,
      "clubId": 140558,
-     "name": "SG Stäfa / Meilen",
+     "name": "SG Sälmatt / Weidried",
      "rank": 2,
      "games": 7,
      "won": 4,
@@ -37,7 +37,7 @@
     {
      "teamId": 41831,
      "clubId": 140685,
-     "name": "HC Goldach-Rorschach 2",
+     "name": "HC Gerstach-Seefurt 2",
      "rank": 3,
      "games": 6,
      "won": 4,
@@ -51,7 +51,7 @@
     {
      "teamId": 41503,
      "clubId": 140633,
-     "name": "SG Handball Züri Oberland 1",
+     "name": "SG Handball Hügelland 1",
      "rank": 4,
      "games": 8,
      "won": 3,
@@ -65,7 +65,7 @@
     {
      "teamId": 40742,
      "clubId": 140371,
-     "name": "TV Thalwil",
+     "name": "TV Farnwil",
      "rank": 5,
      "games": 6,
      "won": 3,
@@ -79,7 +79,7 @@
     {
      "teamId": 41280,
      "clubId": 140568,
-     "name": "HC Stammheim 1",
+     "name": "HC Hagmatt 1",
      "rank": 6,
      "games": 6,
      "won": 2,
@@ -93,7 +93,7 @@
     {
      "teamId": 41343,
      "clubId": 140582,
-     "name": "Grün-Weiss Effretikon 1",
+     "name": "Grün-Weiss Erlikofen 1",
      "rank": 7,
      "games": 4,
      "won": 1,
@@ -107,7 +107,7 @@
     {
      "teamId": 41833,
      "clubId": 140390,
-     "name": "Blaui Schwänli Schwamendingen",
+     "name": "Blaui Möwli Brachfeld",
      "rank": 8,
      "games": 5,
      "won": 1,
@@ -121,7 +121,7 @@
     {
      "teamId": 41387,
      "clubId": 140373,
-     "name": "SG Uster / Volketswil",
+     "name": "SG Brunnmatt / Grubenau",
      "rank": 9,
      "games": 5,
      "won": 0,
@@ -135,7 +135,7 @@
     {
      "teamId": 41402,
      "clubId": 140550,
-     "name": "HC Neftenbach 1",
+     "name": "HC Tobelacker 1",
      "rank": 10,
      "games": 5,
      "won": 0,
@@ -149,7 +149,7 @@
     {
      "teamId": 41109,
      "clubId": 140319,
-     "name": "HC Kaltenbach 1 [Rückzug]",
+     "name": "HC Kühlbrunn 1 [Rückzug]",
      "rank": 11,
      "games": 0,
      "won": 0,

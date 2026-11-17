@@ -77,7 +77,7 @@ export function AppShell({
   const upload = analyses(mode) ? uploadHref(org.id, team?.id ?? null) : null;
   const [palette, setPalette] = useState(false);
   const searchHref = analyses(mode) && team ? `/app/${org.id}/teams/${team.id}/scenes?focus=1` : null;
-  // the club's name only when it says more than the team's (K7: «TV Thalwil» once, not twice)
+  // the club's name only when it says more than the team's (K7: «TV Farnwil» once, not twice)
   const clubName = clubNameShown(org.name, team?.name ?? null);
 
   // menus and dialogs render at the end of <body>: give the document the club's colours too
