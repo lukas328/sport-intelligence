@@ -50,7 +50,23 @@ Produkt importiert nichts daraus).
 
 ## 4. Messungen
 
-(folgt)
+### 4.1 Basis: Produkt heute (`main` e089b570, 2026-11-17)
+
+Was `auto_calibrate` auf den 70 Stücken meldet (noch ohne Wahrheit, also ohne richtig/falsch):
+
+| | Entwicklung (33) | Endtest (37) | alle (70) |
+|---|---|---|---|
+| Feld akzeptiert | 6 | 9 | 15 (21 %) |
+| `no_floor` | 10 | 12 | 22 |
+| `flat_view` | 8 | 8 | 16 |
+| `court` | 8 | 4 | 12 |
+| `camera_motion` | 1 | 3 | 4 |
+| `few_people` | 0 | 1 | 1 |
+
+62 Stücke haben eine bewegte Kamera (14 akzeptiert), 8 eine feste (1 akzeptiert). Auf
+Sicht: bei akzeptierten Feldern liegt das Feld in der Schwenkmitte ungefähr richtig, an den
+Schwenkenden daneben (Kamerabewegung). Fehler in Metern und der Anteil falsch akzeptiert folgen mit
+der Wahrheit (Runde 1: Entwicklung, 63 Bilder).
 
 ## 5. Was nicht geholfen hat
 

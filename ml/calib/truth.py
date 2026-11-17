@@ -397,6 +397,8 @@ def items(a: argparse.Namespace) -> None:
     out = []
     for p in ps:
         pid = p["id"]
+        if a.split and p["split"] != a.split:
+            continue
         if not (a.cache / f"{pid}.obs.npz").exists():
             continue
         for fr in truth_frames(a.cache, pid):
@@ -540,6 +542,7 @@ def main() -> None:
     p.add_argument("cache", type=Path)
     p.add_argument("out", type=Path)
     p.add_argument("--results", type=Path)
+    p.add_argument("--split", choices=["dev", "test"])
     p.set_defaults(fn=items)
     p = sub.add_parser("pull")
     p.add_argument("answers", type=Path)
