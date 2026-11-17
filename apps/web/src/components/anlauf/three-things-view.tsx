@@ -63,6 +63,10 @@ export function ThreeThingsView({
   }
   return (
     <div>
+      {/* what the three things are, where they first appear: on Start and in the match (R20) */}
+      <p className="m-0 mb-3 max-w-[72ch] text-[15px] text-ink-2" data-testid="things-explain">
+        {t("thingsExplain")}
+      </p>
       {/* one thing fills the row (figure and text left, the bundle large right), two share it */}
       <ol className={cn("m-0 grid list-none grid-cols-1 border-t-2 border-ink p-0", things.length === 2 ? "md:grid-cols-2" : things.length >= 3 && "md:grid-cols-3")} data-testid="three-things">
         {things.map((x, i) => (

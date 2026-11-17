@@ -47,7 +47,14 @@ from handball_api.models import (
     Team,
     User,
 )
-from handball_api.models.enums import MatchFormatKey, MatchStatus, OrgRole, TeamGender, TeamRole
+from handball_api.models.enums import (
+    MatchFormatKey,
+    MatchStatus,
+    OrgRole,
+    Position,
+    TeamGender,
+    TeamRole,
+)
 from handball_api.schemas.official import AccessApproveIn, ClaimIn, SuggestionAcceptIn
 from handball_api.schemas.orgs import OrgCreate
 from handball_api.services import (
@@ -59,6 +66,7 @@ from handball_api.services import (
     training,
 )
 from handball_api.services import orgs as org_service
+from handball_api.services import roster as roster_service
 from handball_api.services.context import Ctx
 from handball_api.services.policies import Action, Actor, authorize, can
 
@@ -72,6 +80,10 @@ SYNC_EVERY = timedelta(hours=20)
 SYNC_BATCH = 20
 REPORT_AFTER = timedelta(minutes=90)  # a game is over and the log complete
 REPORT_WINDOW = timedelta(days=7)
+# the reports of the season's earlier games (a team taken over in mid-season, a game whose report
+# was only offered): imported by the tick too, so the scorers of every report count everywhere
+# (app review R3); a game without a log by then is asked this often and then left alone
+REPORT_BACKFILL_TRIES = 3
 REPORT_BATCH = 20
 # a game without a game log yet: asked again after an hour, then after ever longer waits
 REPORT_RETRY = timedelta(hours=1)
@@ -927,10 +939,14 @@ async def add_from_suggestion(
 ) -> Player:
     p = s.payload
     season = await _team_season(ctx, team)
+    raw = p.get("stats")
+    stats: dict[str, Any] = raw if isinstance(raw, dict) else {}
     player = Player(
         organization_id=team.organization_id,
         first_name=str(p.get("first_name") or "?")[:80],
         last_name=str(p.get("last_name") or "?")[:80],
+        # a goalkeeper in the federation's statistics is the roster's goalkeeper (R4)
+        main_position=Position.TW if stats.get("goalkeeper") else None,
     )
     ctx.db.add(player)
     await ctx.db.flush()
@@ -947,6 +963,8 @@ async def add_from_suggestion(
         )
     )
     await ctx.db.flush()
+    # the reports read before the player was in the roster count for the player now (R3)
+    await roster_service.link_numbers(ctx, season.id, team.id)
     return player
 
 
@@ -1012,6 +1030,8 @@ async def accept(
             if number is None:
                 raise ProblemError(409, "jersey-number-taken", "The number is taken")
             entry.jersey_number = number
+        await ctx.db.flush()
+        await roster_service.link_numbers(ctx, entry.season_id, entry.team_id)
         out["player_id"] = entry.player_id
     elif s.kind in ("match_new", "match_moved", "report"):
         if s.kind == "match_new":
@@ -1241,8 +1261,10 @@ async def _sync_due_team(ctx: Ctx, team: Team) -> int:
     return new
 
 
-async def _import_due_report(ctx: Ctx, m: Match) -> None:
+async def _import_due_report(ctx: Ctx, m: Match, now: datetime) -> None:
     await import_report(ctx, m)
+    if m.kickoff_at < now - REPORT_WINDOW:
+        return  # an earlier game filled in: no note for each of them in the bell (R5)
     await training.notify(
         ctx,
         m.organization_id,
@@ -1293,7 +1315,8 @@ async def run_due(ctx: Ctx, now: datetime | None = None) -> dict[str, int]:
                     Match.official_game_id.is_not(None),
                     Match.official_report_at.is_(None),
                     Match.kickoff_at < now - REPORT_AFTER,
-                    Match.kickoff_at > now - REPORT_WINDOW,
+                    (Match.kickoff_at > now - REPORT_WINDOW)
+                    | (Match.official_report_tries < REPORT_BACKFILL_TRIES),
                     Match.official_report_retry_at.is_(None)
                     | (Match.official_report_retry_at <= now),
                 )
@@ -1333,7 +1356,7 @@ async def run_due(ctx: Ctx, now: datetime | None = None) -> dict[str, int]:
                     m = await ctx.db.get(Match, match_id)
                     if m is None:
                         continue
-                    await _import_due_report(ctx, m)
+                    await _import_due_report(ctx, m, now)
                 out["reports"] += 1
             except ProblemError as exc:
                 if _upstream_down(exc):

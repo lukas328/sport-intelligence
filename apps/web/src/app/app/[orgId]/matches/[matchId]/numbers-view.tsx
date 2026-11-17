@@ -6,6 +6,8 @@ import { Check } from "lucide-react";
 import { useState } from "react";
 import { SectionHead } from "@/components/anlauf/blocks";
 import type { MatchGraphics } from "@/lib/graphics";
+import { againstCovered, ownKeepers } from "@/lib/keepers";
+import { mainSource } from "@/lib/telegram";
 import { cn } from "@/lib/utils";
 import { Drill, N, type Stats, useDrill } from "./analysis-views";
 import type { EventFilter } from "@/components/analysis/event-list";
@@ -58,17 +60,32 @@ export function NumbersView({
     const own = (graphics?.goals ?? []).filter((g) => g.team === "own" && ((playerId != null && g.player_id === playerId) || (g.player_id == null && number != null && g.number === number)));
     return own.length > 0 && own.every((g) => g.confirmed);
   };
+  // a number the roster does not know says so («#16, nicht im Kader»), no empty name (R4)
   const who = (id: string | null, number: number | null) => {
     const r = roster.find((x) => x.player_id === id) ?? (number != null ? roster.find((x) => x.jersey_number === number) : undefined);
-    return { number: r?.jersey_number ?? number, name: r ? `${r.first_name} ${r.last_name}` : t("unknown") };
+    return { number: r?.jersey_number ?? number, name: r ? `${r.first_name} ${r.last_name}` : number != null ? t("notInRoster") : t("unknown") };
   };
-  const keeperIds = new Set(Object.values(stats?.goalkeepers ?? {}).filter((k) => k.side === "own").map((k) => k.player_id));
-  const field = Object.values(stats?.players ?? {})
-    .filter((p) => p.side === "own" && !keeperIds.has(p.player_id) && (p.shots > 0 || p.goals > 0 || p.suspensions > 0))
+  // only the own goalkeepers, by the roster's goalkeepers (R4); the saves without a named keeper
+  // are in the team's figure, not a row of their own
+  const keepers = ownKeepers(Object.values(stats?.goalkeepers ?? {}).filter((k) => k.faced > 0), roster);
+  const keeperIds = new Set(keepers.map((k) => k.player_id).filter((id): id is string => id != null));
+  const ownRows = Object.values(stats?.players ?? {}).filter((p) => p.side === "own");
+  const field = ownRows
+    .filter((p) => !(p.player_id != null && keeperIds.has(p.player_id)) && (p.shots > 0 || p.goals > 0 || p.suspensions > 0))
     .sort((a, b) => b.goals - a.goals || b.shots - a.shots);
   const scorers = field.filter((p) => p.goals > 0);
   const shown = all ? field : scorers.slice(0, FIELD_ROWS);
-  const keepers = Object.values(stats?.goalkeepers ?? {}).filter((k) => k.side === "own" && k.faced > 0);
+  // what the team has but no player: a goal or a 7 m without a number in the report, so the
+  // table adds up to the team's figures («3 von 7 Siebenmetern» in the tips, R2)
+  const sum = (k: "goals" | "seven_m_goals" | "seven_m_shots" | "suspensions" | "shots") => ownRows.reduce((n, p) => n + p[k], 0);
+  const rest = stats
+    ? { goals: stats.own.goals - sum("goals"), sevenGoals: stats.own.seven_m_goals - sum("seven_m_goals"), sevenShots: stats.own.seven_m_shots - sum("seven_m_shots"), suspensions: stats.own.suspensions - sum("suspensions"), shots: stats.own.shots - sum("shots") }
+    : null;
+  const restShown = rest != null && (rest.goals > 0 || rest.sevenShots > 0 || rest.suspensions > 0);
+  // goals against in a keeper's row only when every one of them is credited to a keeper
+  const againstKnown = againstCovered(keepers, stats?.own.goals_against ?? 0);
+  const savesRest = (stats?.own.saves ?? 0) - keepers.reduce((n, k) => n + k.saves, 0);
+  const fromReport = stats ? mainSource(stats.quality.sources) === "report" : false;
   const zones = stats?.opponent.goal_zones ?? {};
   const marked = Object.values(zones).reduce((n, z) => n + z.goals, 0);
   const phases = graphics?.phases ?? [];
@@ -78,7 +95,7 @@ export function NumbersView({
   const td = "py-2.5 text-right tabular-nums";
   return (
     <div className="space-y-12">
-      <p className="max-w-[90ch] text-[15px] text-ink-2 md:text-[15px]">{graphics && !graphics.has_report ? t("introVideo") : t("intro")}</p>
+      <p className="max-w-[90ch] text-[15px] text-ink-2 md:text-[15px]">{graphics && !graphics.has_report ? t("introVideo") : fromReport ? t("introReport") : t("intro")}</p>
       <div className="grid gap-x-12 gap-y-12 lg:grid-cols-[minmax(0,1fr)_340px]">
         <div className="min-w-0 space-y-12">
           {field.length > 0 && (
@@ -91,7 +108,7 @@ export function NumbersView({
                     <th scope="col" className={th}>{t("goals")}</th>
                     <th scope="col" className={th}>{t("sevenM")}</th>
                     <th scope="col" className={th}>{t("twoMin")}</th>
-                    {shotsKnown && <th scope="col" className={cn(th, "max-sm:hidden")}>{t("shots")}</th>}
+                    {shotsKnown && <th scope="col" className={cn(th, "max-sm:hidden")}>{fromReport ? t("shotsPlain") : t("shots")}</th>}
                     {shotsKnown && <th scope="col" className={th}>{t("rate")}</th>}
                     <th scope="col" className={cn(th, "max-sm:hidden")}>{t("confirmed")}</th>
                   </tr>
@@ -121,6 +138,20 @@ export function NumbersView({
                       </tr>
                     );
                   })}
+                  {restShown && rest && (
+                    <tr className="border-b border-rule text-ink-2" data-testid="numbers-rest">
+                      <th scope="row" className="py-2.5 text-left font-normal">
+                        <b className="font-num mr-3 inline-block w-8 text-lg" />
+                        {t("noNumber")}
+                      </th>
+                      <td className={td}>{rest.goals || ""}</td>
+                      <td className={td}>{rest.sevenShots > 0 ? `${rest.sevenGoals}/${rest.sevenShots}` : ""}</td>
+                      <td className={td}>{rest.suspensions || ""}</td>
+                      {shotsKnown && <td className={cn(td, "max-sm:hidden")}>{rest.shots > 0 ? rest.shots : ""}</td>}
+                      {shotsKnown && <td className={td} />}
+                      <td className={cn(td, "max-sm:hidden")} />
+                    </tr>
+                  )}
                 </tbody>
               </table>
               {!all && field.length > shown.length && (
@@ -140,8 +171,8 @@ export function NumbersView({
                 <thead>
                   <tr className="border-b-2 border-ink">
                     <th scope="col" className={cn(th, "text-left")}>{t("numberName")}</th>
-                    <th scope="col" className={th}>{t("against")}</th>
-                    <th scope="col" className={th}>{t("saves")}</th>
+                    {againstKnown && <th scope="col" className={th}>{t("against")}</th>}
+                    <th scope="col" className={th}>{fromReport ? t("savesPlain") : t("saves")}</th>
                     <th scope="col" className={th}>{t("sevenMSaved")}</th>
                   </tr>
                 </thead>
@@ -154,7 +185,7 @@ export function NumbersView({
                           <b className="font-num mr-3 inline-block w-8 text-lg text-club-text">{w.number ?? ""}</b>
                           {w.name}
                         </th>
-                        <td className={td}>{cell(k.goals_against, `${t("against")}: ${w.name}`, { side: "opponent", type: "shot", outcome: "goal" })}</td>
+                        {againstKnown && <td className={td}>{cell(k.goals_against, `${t("against")}: ${w.name}`, { side: "opponent", type: "shot", outcome: "goal" })}</td>}
                         <td className={td}>{cell(k.saves, `${t("saves")}: ${w.name}`, { side: "opponent", type: "shot", outcome: "save" })}</td>
                         <td className={td}>{k.seven_m.faced > 0 ? t("ofN", { n: k.seven_m.saves, of: k.seven_m.faced }) : ""}</td>
                       </tr>
@@ -162,6 +193,9 @@ export function NumbersView({
                   })}
                 </tbody>
               </table>
+              {/* what the team has but no keeper, so the rows and the team's figures agree (R2) */}
+              {!againstKnown && (stats?.own.goals_against ?? 0) > 0 && <p className="mt-2 text-[15px] text-ink-2">{t("againstNone", { n: stats?.own.goals_against ?? 0 })}</p>}
+              {savesRest > 0 && <p className="mt-1 text-[15px] text-ink-2">{t("savesNone", { n: savesRest })}</p>}
             </section>
           )}
           {drill && orgId && match && <Drill drill={drill} orgId={orgId} matchId={match.id} onPlay={onPlay} names={names} close={close} />}

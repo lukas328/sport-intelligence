@@ -20,6 +20,7 @@ from handball_api.services import insights as insights_service
 from handball_api.services.context import Ctx
 from handball_api.services.drills import library
 from handball_api.services.focus import follow_for
+from handball_api.services.matches import counted
 from handball_api.services.orgs import get_team
 from handball_api.services.policies import Action
 
@@ -93,7 +94,12 @@ async def _recent_matches(ctx: Ctx, team_id: uuid.UUID) -> list[Match]:
         (
             await ctx.db.scalars(
                 select(Match)
-                .where(Match.team_id == team_id, Match.kind == "match", Match.id.in_(has_events))
+                .where(
+                    Match.team_id == team_id,
+                    Match.kind == "match",
+                    counted(),  # the example match is not the team's (R1)
+                    Match.id.in_(has_events),
+                )
                 .order_by(Match.kickoff_at.desc())
                 .limit(RECENT)
             )
