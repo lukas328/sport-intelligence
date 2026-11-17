@@ -41,6 +41,9 @@ export interface ShellValue {
   mode: Mode;
   me: ShellMe;
   setTeam: (id: string) => void;
+  /** a page that is not there (the 404) asks for the whole app frame, also on a full-screen tool
+   * route such as Prüfen (app review R5: a deleted match's «Fragen» link ended without a header) */
+  showFrame?: (on: boolean) => void;
 }
 
 export const ShellContext = createContext<ShellValue | null>(null);

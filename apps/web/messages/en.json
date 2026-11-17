@@ -3662,6 +3662,12 @@
     "allGoals": "{n, plural, one {The goal} other {All # goals}}",
     "scoutingRow": "{opponent} against {other}",
     "scoutingTag": "Watched",
+    "exampleTitle": "This is an example",
+    "exampleBody": "A demo match with made-up goals: this is what a match looks like once the analysis has worked through your video. It is not part of your team and counts in no statistics.",
+    "exampleBack": "Back to your matches",
+    "thingsExplain": "The three things: the clearest patterns in this match's goals, such as the side most goals against came from. Only what happens at least three times is shown.",
+    "tgKeepers": "In goal: {list}.",
+    "tgKeeperItem": "{name} ({saves, plural, one {1 save} other {# saves}})",
     "noticeLead": "The analysis is done, but it saw too little to ask you anything.",
     "rowParts": "{done} of {total} parts analysed",
     "rowPartsFailed": "{n, plural, one {1 part failed} other {# parts failed}}",
@@ -3975,7 +3981,14 @@
     "allNumbersNote": "Match report, shots, goalkeepers in detail, running figures",
     "unknown": "no name",
     "confirmed": "Confirmed",
-    "confirmedYes": "all goals confirmed"
+    "confirmedYes": "all goals confirmed",
+    "notInRoster": "not in the squad",
+    "noNumber": "without a number in the match report",
+    "introReport": "All figures from the match report. Shots, saves and turnovers only appear where the match report lists them.",
+    "shotsPlain": "Shots",
+    "savesPlain": "Saves",
+    "againstNone": "{n, plural, one {The goal against is} other {The # goals against are}} not credited to a goalkeeper.",
+    "savesNone": "{n, plural, one {One save is} other {# saves are}} not credited to a goalkeeper of the squad."
   },
   "entry": {
     "ask": "What is your team called?",

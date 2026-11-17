@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { halfScore, mainKeeper, mainSource, scoreSequence, shortName, topScorers } from "./telegram";
+import { halfScore, keeperSaves, mainKeeper, mainSource, scoreSequence, shortName, topScorers } from "./telegram";
 
 const pts = [
   { clock_s: 0, own: 0, opp: 0 },
@@ -34,6 +34,17 @@ describe("telegram", () => {
     expect(topScorers(players, { a: "Lea Brunner", b: "Mia Graf" }, 3, (k) => ` (${k} vom 7-m)`)).toEqual(["Brunner 7", "Graf 5 (2 vom 7-m)"]);
     expect(mainKeeper([{ side: "own", player_id: "k", number: 1, saves: 11 }], { k: "Nora Meier" })).toEqual({ name: "Meier", saves: 11 });
     expect(mainKeeper([{ side: "own", player_id: "k", number: 1, saves: 0 }], {})).toBeNull();
+    // every keeper with saves, never the saves without a named keeper (R2)
+    const rows = [
+      { side: "own" as const, player_id: "k", number: 1, saves: 16 },
+      { side: "own" as const, player_id: null, number: 16, saves: 3 },
+      { side: "own" as const, player_id: null, number: null, saves: 1 },
+      { side: "opponent" as const, player_id: null, number: 12, saves: 9 },
+    ];
+    expect(keeperSaves(rows, { k: "Nora Meier" })).toEqual([
+      { name: "Meier", saves: 16 },
+      { name: "#16", saves: 3 },
+    ]);
   });
 
   it("says where the figures come from", () => {
