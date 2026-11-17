@@ -8,6 +8,12 @@ are drawn by the website over the picture, as real text in the visitor's languag
 seeded demo club (HC Zürichsee, invented players, synthetic videos), never real people, and only
 what the app really shows.
 
+The website tells its own story with the demo match (a defeat, 16:18; `scripts/make_demo.py`),
+while the seeded club in the app won its match 26:18. So no picture shows a score or the match's
+headline («Gewonnen.»), and none shows the season's sentence: the pictures are cut-outs of what
+matters, in the app's own brightness (no darkened surroundings), and the numbers the story needs
+(9 von 18 über aussen rechts) are in them. `captures/ergebnis-*.webp` are no longer used.
+
 ## Make them all again
 
 With the local stack running (web on :3000 with the seeded demo data):
@@ -52,15 +58,14 @@ warns. After either step, look at the pictures on the site at 390 and 1280 px.
 
 | Picture | Shows | Where |
 |---|---|---|
-| `hero-laptop` | the team's start page after a match on a laptop (transparent around), ring on the shots of the first thing | start page, head (from 1024 px) |
-| `hero-phone` | the same page on a phone, taller than the screen; the site runs it slowly down and back in its phone frame | start page head, «Über uns» |
+| `hero-thing` | cut-out of the first of the three things, «9 von 18, Gegentore über aussen rechts», «Alle 9» and the shots, ring on the shots (transparent around) | start page, head |
 | `step-upload` | phone, «Video hochladen»: which match is the video from? | step 2 (start page, «So funktioniert es») |
 | `step-check` | phone, «Passt das Spielfeld?» with the four yellow points and «Passt» | step 3 |
-| `step-result` | phone, the first of the three things with its shots on the half court | «So funktioniert es», step 4 |
-| `get-video` | browser, a match: video, the scene that plays, all goals on the timeline | «Was du bekommst» 1, «So sieht es aus» |
-| `get-search` | browser, «Szenen»: the search, the answer with its base, «Alle 24 abspielen» | «Was du bekommst» 2, «So sieht es aus» |
-| `get-season` | browser, «Saison»: what repeats, one bar per match, the shots on the court | «Was du bekommst» 3, «So sieht es aus» |
-| `share` | phone, a collection: «So kommt es im Chat an» and «Link teilen» | start page «Fürs Team», «So sieht es aus» |
+| `step-result` | phone, the first of the three things with its shots on the half court | «So funktioniert es», step 4; «Über uns» |
+| `get-video` | browser, a match: video, the scene that plays, all goals on the timeline | «So sieht es aus» |
+| `get-search` | browser, «Szenen»: the search, the answer with its base, «Alle 24 abspielen» | «So sieht es aus» |
+| `get-season` | browser, «Saison», cut below the title: what repeats, one bar per match, the shots on the court | «So sieht es aus» |
+| `share` | phone, a collection: «So kommt es im Chat an» and «Link teilen» | «So sieht es aus», «Über uns», «Daten» |
 
 ## A new picture
 
@@ -68,5 +73,5 @@ Add `templates/<name>.html` (copy one that is close), a screen to `SHOTS` in `ca
 needs one, the callout texts under `product.<name>` in all three message files, and use
 `<ProductShot name="<name>" …>` on the page. Keep the style: the same phone size (`PHONE_SCREEN`
 in `stage.js`), the Keil, yellow rings with an ink edge, at most two callouts, and each label
-short (it wraps at under half the picture's width). On a picture shown under 28rem wide the labels
-turn into numbers with the words below it.
+short (it wraps at under half the picture's width). On a picture shown under 28rem wide arrows and labels
+go and the words stand below it.

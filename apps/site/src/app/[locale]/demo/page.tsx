@@ -42,7 +42,7 @@ export default async function Demo({ params }: Props) {
       </p>
       <WurfHead
         kick={m.match.when}
-        title={m.match.won}
+        title={m.match.lost}
         own={v.final.own}
         opp={v.final.opp}
         ownName={v.own}
@@ -54,7 +54,7 @@ export default async function Demo({ params }: Props) {
       <div className="wrap">
         {/* what is on this page, in four lines: the visitor knows where to look first */}
         <nav aria-labelledby="guide" className="mt-8 border-2 border-ink bg-paper p-5 md:p-6">
-          <h2 id="guide" className="font-slant text-[1.5rem] md:text-[1.75rem]">
+          <h2 id="guide" className="text-[1.5rem] md:text-[1.75rem]">
             {t.guideTitle}
           </h2>
           <ol className="mt-3 grid grid-cols-1 gap-x-8 sm:grid-cols-2 lg:grid-cols-4">
@@ -80,12 +80,11 @@ export default async function Demo({ params }: Props) {
           <p className="measure mt-3 text-[1.0625rem] text-ink-2">{t.thingsNote}</p>
           <Things
             things={v.things}
-            legend={{ solid: m.things.legendSolid, dashed: m.things.legendDashed, thin: m.things.legendThin }}
+            legend={{ solid: m.things.legendSolid, thin: m.things.legendThin }}
             selectable
             pickHint={t.pick}
             scenesOf={t.scenesOf}
             timesOf={t.timesOf}
-            estimated={t.estimated}
             noVideo={t.noVideo}
           />
           <div className="mt-10 max-w-[44rem]">

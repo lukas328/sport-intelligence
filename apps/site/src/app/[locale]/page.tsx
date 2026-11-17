@@ -3,30 +3,21 @@ import type { CSSProperties } from "react";
 import Link from "next/link";
 import plans from "@handball/plans";
 import { DemoCamera } from "@/components/demo-camera";
-import { Phone } from "@/components/device";
 import { HallPlan } from "@/components/hall-plan";
 import { ProductShot } from "@/components/product-shot";
 import { JsonLd } from "@/components/json-ld";
-import { DemoLink, KitScope, ShirtPicker, StartLink } from "@/components/kit";
+import { DemoLink, KitScope, StartLink } from "@/components/kit";
 import { Reveal } from "@/components/reveal";
+import { BeforeAfter, Evening, TeamChat, When } from "@/components/story";
 import { TeamField } from "@/components/team-field";
-import { productShot } from "@/lib/product-shots";
+import { Things } from "@/components/things";
 import { APP_LOCALE, fmt, messages, type Locale } from "@/lib/i18n";
 import { pageMeta } from "@/lib/seo";
 import { graph, organization, softwareApplication, webPage, website } from "@/lib/schema";
-import { PRICES_FINAL, SITE_UPDATED } from "@/lib/site";
+import { SITE_UPDATED } from "@/lib/site";
+import { saturday, threeMatchesLater } from "@/lib/story";
 import { demoView } from "@/lib/things";
-import { GUIDES } from "../../../content/ratgeber";
 
-/** The three guides that exist in every language, shown on the start page. */
-const FEATURED = ["handballspiel-filmen", "videoanalyse-amateurteam", "video-im-verein-einwilligung"];
-
-/**
- * Product pictures (public/product, made by scripts/product-shots from the real app with the
- * invented demo club): the hero phone's screen, and the three pictures of «Was du bekommst».
- */
-const HERO_PHONE = productShot("hero-phone");
-const GET = ["get-video", "get-search", "get-season"] as const;
 /** shown width of a picture in a step card (three columns from md) */
 const STEP_SIZES = "(min-width: 1216px) 362px, (min-width: 768px) 30vw, calc(100vw - 2rem)";
 
@@ -38,17 +29,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 /**
- * The start page (K24, docs/research/R4-websites.md): one promise with the real app, three steps,
- * what a coach gets, the demo to touch, sharing, why we do it, trust, price, start. Short texts;
- * the details live on the pages behind the links.
+ * The start page as one week of an invented team (docs/ux-test/livegang/BEFUNDE-2.md, W5, W22):
+ * the promise with the answer cut out of the app; Saturday 7 pm, lost with only a feeling;
+ * Saturday 10 pm, the three things; one of the goals from above; how you get there; Tuesday, four
+ * scenes in the team chat; three matches later the right wing is closed. Then the video in the
+ * club, the price and the team field. The match is the demo match, so its numbers are the demo's.
  */
 export default async function Home({ params }: Props) {
   const { locale } = await params;
   const m = messages(locale);
   const t = m.home;
   const v = demoView(m);
+  const sat = saturday();
+  const later = threeMatchesLater();
   const team = plans.plans.find((p) => p.plan === "team")!;
   const app = APP_LOCALE[locale];
+  const wing = fmt(m.things.concededText, { zone: m.things.zones[sat.zone as keyof typeof m.things.zones] });
   return (
     <KitScope>
       <JsonLd
@@ -61,66 +57,119 @@ export default async function Home({ params }: Props) {
       />
       <Reveal />
 
-      {/* 1 · the promise and the real app */}
+      {/* 1 · the promise, the way in, and the answer from the app */}
       <section
         aria-labelledby="hero"
-        className="on-club relative overflow-hidden bg-club text-club-ink shadow-[inset_0_0_0_2px_var(--club-edge)] [clip-path:polygon(0_0,100%_0,100%_96%,0_100%)] md:[clip-path:polygon(0_0,100%_0,100%_calc(100%-5rem),0_100%)]"
+        className="on-club relative overflow-hidden bg-club text-club-ink shadow-[inset_0_0_0_2px_var(--club-edge)] [clip-path:polygon(0_0,100%_0,100%_97%,0_100%)] md:[clip-path:polygon(0_0,100%_0,100%_calc(100%-4rem),0_100%)]"
       >
-        <div className="wrap grid grid-cols-1 items-center gap-10 pt-8 pb-20 md:pt-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:pb-32">
+        <div className="wrap grid grid-cols-1 items-center gap-10 pt-8 pb-16 md:pt-14 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:gap-14 lg:pb-28">
           <div className="min-w-0">
             <p className="text-base font-semibold md:text-[1.0625rem]">{t.kick}</p>
             <h1 id="hero" className="mt-3 text-[2.75rem] leading-[.95] md:text-[4.5rem]">
               {t.title}
             </h1>
             <p className="mt-5 max-w-[34rem] text-[1.1875rem] leading-normal font-medium md:mt-6 md:text-[1.375rem]">{t.lead}</p>
-            <div className="mt-7 flex flex-col gap-3 min-[480px]:flex-row min-[480px]:flex-wrap">
-              <StartLink appLocale={app} className="btn btn-ink shadow-[0_0_0_2px_var(--club-ink)]">
-                {m.cta.start}
-              </StartLink>
+            <div className="mt-8">
+              <TeamField id="team" label={t.teamLabel} button={t.teamButton} example={t.teamExample} appLocale={app} onClub />
+            </div>
+            <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-3">
               <DemoLink href={`/${locale}/demo/`} className="btn border-club-ink text-club-ink hover:bg-[color-mix(in_srgb,var(--club-ink)_12%,transparent)]">
                 {m.cta.demo}
               </DemoLink>
+              <p className="text-[1.0625rem] font-medium">{fmt(t.price, { price: team.price_chf_month, days: team.trial_days })}</p>
             </div>
-            <p className="mt-4 text-[1.0625rem] font-medium">
-              {fmt(t.price, { price: team.price_chf_month, days: team.trial_days })}
-              {!PRICES_FINAL && <> {m.pricing.draft}</>}
-            </p>
           </div>
-          <div className="relative min-w-0">
+          <div className="rise min-w-0" style={{ "--d": 1 } as CSSProperties}>
             <ProductShot
-              name="hero-laptop"
-              alt={t.heroDesktopAlt}
-              labels={m.product["hero-laptop"]}
+              name="hero-thing"
+              alt={t.heroAlt}
+              labels={m.product["hero-thing"]}
               framed={false}
-              sizes="(min-width: 1216px) 560px, 46vw"
-              className="rise -ml-4 hidden w-[98%] lg:block"
+              priority
+              sizes="(min-width: 1216px) 520px, (min-width: 1024px) 44vw, (min-width: 520px) 480px, calc(100vw - 2rem)"
+              className="mx-auto max-w-[32.5rem] lg:mr-0"
             />
-            <div className="rise lg:absolute lg:-right-1 lg:-bottom-12 lg:w-[35%]" style={{ "--d": 2 } as CSSProperties}>
-              <Phone src={HERO_PHONE.src} srcSet={HERO_PHONE.srcSet} sizes="(min-width: 1024px) 13rem, 17rem" width={HERO_PHONE.width} height={HERO_PHONE.height} alt={t.heroPhoneAlt} scroll priority className="max-w-[17rem] lg:max-w-none" />
-            </div>
-            <p className="mt-4 text-center text-base font-medium lg:mt-3 lg:mr-[40%] lg:text-left">{t.shotNote}</p>
+            <p className="mt-2 text-base font-medium lg:text-right">{t.shotNote}</p>
+          </div>
+        </div>
+      </section>
+
+      {/* 2 · Saturday, 7 pm: the problem (W6, W23, W25), the evening after the defeat */}
+      <section aria-labelledby="problem" className="-mt-10 bg-ink pt-10 text-ground md:-mt-16 md:pt-16">
+        <div className="wrap grid grid-cols-1 items-center gap-10 py-14 md:py-20 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-16">
+          <div data-reveal className="min-w-0">
+            <When dark>{t.problemWhen}</When>
+            <h2 id="problem" className="mt-4 text-[2.5rem] md:text-[4rem]">
+              {t.problemTitle}
+            </h2>
+            <p className="mt-6 max-w-[36rem] text-[1.1875rem] text-[#dcdfe2] md:text-[1.3125rem]">{t.problemText}</p>
+            <p className="mt-3 max-w-[36rem] text-[1.1875rem] text-[#dcdfe2] md:text-[1.3125rem]">{t.problemRest}</p>
+            <p className="mt-6 text-[1.25rem] font-bold md:text-[1.4375rem]">{t.problemBuild}</p>
+          </div>
+          <div data-reveal style={{ "--d": 1 } as CSSProperties} className="min-w-0">
+            <Evening t={t.problemCard} score={sat.score} />
           </div>
         </div>
       </section>
 
       <div className="wrap">
-        {/* 2 · three steps */}
-        <section aria-labelledby="steps" className="mt-14 md:mt-20">
+        {/* 3 · Saturday, 10 pm: what you get, the three things (W7) */}
+        <section aria-labelledby="get" className="mt-20 md:mt-28">
+          <div data-reveal className="max-w-[44rem]">
+            <When>{t.getWhen}</When>
+            <h2 id="get" className="mt-4 text-[2.25rem] md:text-[3.5rem]">
+              {t.getTitle}
+            </h2>
+            <p className="mt-4 text-[1.1875rem] md:text-[1.3125rem]">{fmt(t.getText, { n: sat.n, of: sat.of })}</p>
+          </div>
+          <div data-reveal style={{ "--d": 1 } as CSSProperties} className="mt-6">
+            <Things things={v.things} scenesHref={`/${locale}/demo/`} />
+          </div>
+          <p className="mt-4 text-[1.0625rem] text-ink-2">{t.getMore}</p>
+        </section>
+
+        {/* 4 · one of the nine from above: the demo to touch (W12) */}
+        <section aria-labelledby="demo" className="mt-20 md:mt-28">
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)] lg:gap-12">
+            <div data-reveal className="min-w-0">
+              <p className="text-[1.0625rem] font-semibold text-ink-2">{t.demoKick}</p>
+              <h2 id="demo" className="mt-2 text-[2.25rem] md:text-[3rem]">
+                {fmt(t.demoTitle, { n: sat.n })}
+              </h2>
+              <p className="mt-4">{t.demoText}</p>
+              <DemoLink href={`/${locale}/demo/`} className="btn btn-ink mt-6">
+                {t.demoLink}
+              </DemoLink>
+            </div>
+            <div data-reveal style={{ "--d": 1 } as CSSProperties} className="min-w-0">
+              <DemoCamera
+                view="halfB"
+                desktopWidth={720}
+                shotLabel={false}
+                scene={v.scene}
+                text={{ label: m.camera.label, pause: m.camera.pause, play: m.camera.play, notFound: m.camera.notFound, noBall: m.camera.noBall, caption: v.scene.label }}
+                legend={{ own: v.own, opp: v.opp, ref: m.camera.legendRef, number: m.camera.legendNumber, ball: m.camera.legendBall }}
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* 5 · how you get there: film, upload, check (W9, W20) */}
+        <section aria-labelledby="steps" className="mt-20 md:mt-28">
           <div data-reveal className="max-w-[40rem]">
-            <h2 id="steps" className="text-[2.25rem] md:text-[3.5rem]">
+            <p className="text-[1.0625rem] font-semibold text-ink-2">{t.stepsKick}</p>
+            <h2 id="steps" className="mt-2 text-[2.25rem] md:text-[3.5rem]">
               {t.stepsTitle}
             </h2>
-            <p className="mt-3 text-[1.1875rem] text-ink-2 md:text-[1.3125rem]">{t.stepsLead}</p>
+            <p className="mt-3 text-[1.1875rem] md:text-[1.3125rem]">{t.stepsLead}</p>
           </div>
           {/* picture, title and text in rows shared by the three steps, so the titles line up */}
           <ol className="mt-10 grid grid-cols-1 gap-12 md:grid-cols-3 md:grid-rows-[auto_auto_1fr] md:gap-x-8 md:gap-y-0">
             {t.steps.map((s, i) => (
               <li key={s.title} data-reveal style={{ "--d": i } as CSSProperties} className="flex flex-col md:row-span-3 md:grid md:grid-rows-subgrid">
                 {i === 0 ? (
-                  <div className="relative grid aspect-[640/620] place-items-center border-2 md:self-start border-ink bg-paper p-3">
-                    <div className="w-full max-w-[16.5rem]">
-                      <HallPlan label={m.filming.planLabel} camera={m.filming.planCamera} field={m.filming.planField} corner={m.filming.planCorner} />
-                    </div>
+                  <div className="flex aspect-[640/620] items-center border-2 border-ink bg-paper md:self-start [&_figure]:my-0 [&_figure]:w-full">
+                    <HallPlan label={m.filming.planLabel} camera={m.filming.planCamera} field={m.filming.planField} corner={m.filming.planCorner} framed={false} />
                   </div>
                 ) : (
                   <ProductShot
@@ -135,7 +184,7 @@ export default async function Home({ params }: Props) {
                   <span aria-hidden className="font-num text-[3.5rem] leading-[.8] text-club-text">
                     {i + 1}
                   </span>
-                  <h3 className="font-slant text-[1.75rem] leading-none">{s.title}</h3>
+                  <h3 className="text-[1.5rem] leading-tight">{s.title}</h3>
                 </div>
                 <p className="mt-3">{s.text}</p>
               </li>
@@ -151,73 +200,12 @@ export default async function Home({ params }: Props) {
           </div>
         </section>
 
-        {/* 3 · what every match gives you */}
-        <section aria-labelledby="get" className="mt-24 md:mt-32">
-          <h2 id="get" data-reveal className="max-w-[44rem] text-[2.25rem] md:text-[3.5rem]">
-            {t.getTitle}
-          </h2>
-          <ul className="mt-10 flex flex-col gap-16 md:gap-24">
-            {t.get.map((g, i) => (
-              <li key={g.title} className="grid grid-cols-1 items-center gap-6 md:grid-cols-12 md:gap-10">
-                <div data-reveal className={i % 2 ? "md:order-2 md:col-span-7 md:col-start-6" : "md:col-span-7"}>
-                  <ProductShot name={GET[i]!} alt={g.alt} labels={m.product[GET[i]!]} sizes="(min-width: 1216px) 650px, (min-width: 768px) 56vw, calc(100vw - 2rem)" />
-                </div>
-                <div data-reveal style={{ "--d": 1 } as CSSProperties} className={i % 2 ? "md:order-1 md:col-span-4 md:col-start-1" : "md:col-span-4 md:col-start-9"}>
-                  <span aria-hidden className="font-num block text-[3rem] leading-[.8] text-club-text">
-                    {i + 1}
-                  </span>
-                  <h3 className="font-slant mt-3 text-[2rem] leading-none md:text-[2.375rem]">{g.title}</h3>
-                  <p className="mt-3 text-[1.1875rem]">{g.text}</p>
-                </div>
-              </li>
-            ))}
-          </ul>
-          <p className="mt-8 text-base text-ink-2">{t.shotNote}</p>
-        </section>
-
-        {/* 4 · the demo to touch */}
-        <section aria-labelledby="demo" className="mt-24 md:mt-32">
-          <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)] lg:gap-12">
-            <div data-reveal className="min-w-0">
-              <p className="text-[1.0625rem] font-semibold text-ink-2">{t.demoKick}</p>
-              <h2 id="demo" className="mt-2 text-[2.25rem] md:text-[3rem]">
-                {t.demoTitle}
-              </h2>
-              <p className="mt-4">{t.demoText}</p>
-              <DemoLink href={`/${locale}/demo/`} className="btn btn-ink mt-6">
-                {t.demoLink}
-              </DemoLink>
-            </div>
-            <div data-reveal style={{ "--d": 1 } as CSSProperties} className="min-w-0">
-              <DemoCamera
-                view="halfB"
-                desktopWidth={720}
-                scene={v.scene}
-                text={{ label: m.camera.label, pause: m.camera.pause, play: m.camera.play, notFound: m.camera.notFound, noBall: m.camera.noBall, caption: v.scene.label }}
-                legend={{ own: v.own, opp: v.opp, ref: m.camera.legendRef, number: m.camera.legendNumber, ball: m.camera.legendBall }}
-              />
-            </div>
-          </div>
-          <div data-reveal className="mt-10 max-w-[44rem]">
-            <ShirtPicker question={m.kit.question} hint={m.kit.hint} names={m.kit.names} />
-          </div>
-        </section>
-
-        {/* 5 · one link for the team */}
-        <section aria-labelledby="share" className="mt-24 md:mt-32">
+        {/* 6 · Tuesday: four scenes in the team chat (W26, W28) */}
+        <section aria-labelledby="share" className="mt-20 md:mt-28">
           <div className="grid grid-cols-1 items-center gap-10 md:grid-cols-2 md:gap-16">
-            <div data-reveal className="order-2 md:order-1">
-              <ProductShot
-                name="share"
-                alt={t.shareAlt}
-                labels={m.product.share}
-                sizes="(min-width: 768px) 30rem, calc(100vw - 2rem)"
-                className="mx-auto max-w-[30rem]"
-              />
-            </div>
-            <div data-reveal style={{ "--d": 1 } as CSSProperties} className="order-1 md:order-2">
-              <p className="text-[1.0625rem] font-semibold text-ink-2">{t.shareKick}</p>
-              <h2 id="share" className="mt-2 text-[2.25rem] md:text-[3rem]">
+            <div data-reveal className="min-w-0">
+              <When>{t.shareWhen}</When>
+              <h2 id="share" className="mt-4 text-[2.25rem] md:text-[3rem]">
                 {t.shareTitle}
               </h2>
               <p className="mt-4 text-[1.1875rem]">{t.shareText}</p>
@@ -230,71 +218,57 @@ export default async function Home({ params }: Props) {
                 ))}
               </ul>
             </div>
+            <div data-reveal style={{ "--d": 1 } as CSSProperties} className="min-w-0">
+              <TeamChat t={t.chat} team={v.own} />
+            </div>
           </div>
         </section>
-      </div>
 
-      {/* 6 · why we do it */}
-      <section aria-labelledby="story" className="mt-24 bg-ink text-ground md:mt-32">
-        <div className="wrap py-16 md:py-24">
-          <p data-reveal className="text-[1.0625rem] font-semibold text-[#b9bec4]">
-            {t.storyKick}
-          </p>
-          <h2 id="story" data-reveal className="mt-3 max-w-[52rem] text-[2.5rem] md:text-[4.25rem]">
-            {t.storyTitle}
-          </h2>
-          <p data-reveal className="mt-6 max-w-[40rem] text-[1.1875rem] text-[#dcdfe2] md:text-[1.3125rem]">
-            {t.storyText}
-          </p>
-          <ul className="mt-12 grid grid-cols-1 gap-8 border-t-2 border-[#3a3d42] pt-8 sm:grid-cols-3">
-            {t.storyFacts.map((f, i) => (
-              <li key={f.text} data-reveal style={{ "--d": i } as CSSProperties}>
-                <i aria-hidden className="mark-band mb-5 block h-2 w-14" />
-                <span aria-hidden className="font-num block text-[4.5rem] leading-[.85] md:text-[6rem]">
-                  {f.figure}
-                </span>
-                <span className="mt-2 block text-[1.125rem] font-semibold">
-                  <span className="sr-only">{f.figure} </span>
-                  {f.text}
-                </span>
-              </li>
-            ))}
-          </ul>
-          <p data-reveal className="mt-12 flex flex-wrap items-center gap-x-4 gap-y-2 text-[1.0625rem] text-[#dcdfe2]">
-            <SwissFlag />
-            <span className="max-w-[40rem]">{t.storySwiss}</span>
-            <Link href={`/${locale}/ueber-uns/`} className="link text-ground">
-              {t.storyLink}
-            </Link>
-          </p>
-        </div>
-      </section>
+        {/* 7 · three matches later: the right wing is closed (W27) */}
+        <section aria-labelledby="after" className="mt-20 md:mt-28">
+          <div className="grid grid-cols-1 items-end gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] lg:gap-16">
+            <div data-reveal className="min-w-0">
+              <When>{t.afterWhen}</When>
+              <h2 id="after" className="mt-4 text-[2.5rem] md:text-[4rem]">
+                {t.afterTitle}
+              </h2>
+              <p className="mt-4 text-[1.1875rem] md:text-[1.3125rem]">{fmt(t.afterText, { before: sat.n, beforeOf: sat.of, after: later.n, afterOf: later.of })}</p>
+              <p className="mt-4 text-base text-ink-2">{t.afterNote}</p>
+            </div>
+            <div data-reveal style={{ "--d": 1 } as CSSProperties} className="min-w-0">
+              <BeforeAfter t={t} before={sat} after={later} zone={wing} />
+            </div>
+          </div>
+        </section>
 
-      <div className="wrap">
-        {/* 7 · trust */}
-        <section aria-labelledby="trust" className="mt-20 md:mt-28">
+        {/* 8 · the video stays in the club */}
+        <section aria-labelledby="trust" className="mt-20 border-t-2 border-ink pt-12 md:mt-28">
           <h2 id="trust" data-reveal className="text-[2.25rem] md:text-[3rem]">
             {t.trustTitle}
           </h2>
           <ul className="mt-8 grid grid-cols-1 gap-8 md:grid-cols-3">
             {t.trust.map((x, i) => (
               <li key={x.title} data-reveal style={{ "--d": i } as CSSProperties} className="border-t-2 border-ink pt-5">
-                <h3 className="font-slant text-[1.5rem] leading-tight">{x.title}</h3>
+                <h3 className="text-[1.375rem] leading-tight">{x.title}</h3>
                 <p className="mt-2">{x.text}</p>
               </li>
             ))}
           </ul>
-          <div className="mt-4 flex flex-wrap gap-x-8">
+          <p data-reveal className="mt-8 flex flex-wrap items-center gap-x-4 gap-y-2 text-[1.0625rem]">
+            <SwissFlag />
+            <span className="max-w-[40rem]">{t.trustSwiss}</span>
+          </p>
+          <div className="mt-2 flex flex-wrap gap-x-8">
             <Link href={`/${locale}/daten/`} className="link">
               {m.cta.data}
             </Link>
-            <Link href={`/${locale}/fakten/`} className="link">
-              {t.trustHonest}
+            <Link href={`/${locale}/ueber-uns/`} className="link">
+              {t.trustLink}
             </Link>
           </div>
         </section>
 
-        {/* 8 · price */}
+        {/* 9 · price (W4, W11) */}
         <section aria-labelledby="price" className="mt-20 md:mt-28">
           <div data-reveal className="grid grid-cols-1 items-end gap-6 border-2 border-ink bg-paper p-6 md:grid-cols-[auto_minmax(0,1fr)_auto] md:gap-10 md:p-10">
             <p className="flex items-baseline gap-3">
@@ -303,12 +277,9 @@ export default async function Home({ params }: Props) {
             </p>
             <div>
               <h2 id="price" className="text-[2rem] md:text-[2.5rem]">
-                {t.priceTitle}
+                {fmt(t.priceTitle, { price: team.price_chf_month })}
               </h2>
-              <p className="mt-2">
-                {fmt(t.priceText, { days: team.trial_days })}
-                {!PRICES_FINAL && <> {m.pricing.draft}</>}
-              </p>
+              <p className="mt-2">{fmt(t.priceText, { days: team.trial_days })}</p>
             </div>
             <div className="flex flex-col gap-2">
               <StartLink appLocale={app} className="btn btn-ink">
@@ -319,27 +290,6 @@ export default async function Home({ params }: Props) {
               </Link>
             </div>
           </div>
-        </section>
-
-        {/* 9 · guides */}
-        <section aria-labelledby="guides" className="mt-20 md:mt-28">
-          <div className="section-head flex flex-wrap items-baseline justify-between gap-x-6">
-            <h2 id="guides" className="text-[1.875rem] md:text-[2.375rem]">
-              {m.guides.homeTitle}
-            </h2>
-            <Link href={`/${locale}/ratgeber/`} className="link">
-              {m.guides.all}
-            </Link>
-          </div>
-          <ul className="mt-2 grid grid-cols-1 md:grid-cols-3">
-            {FEATURED.map((slug) => GUIDES.find((g) => g.slug === slug)!).map((g) => (
-              <li key={g.slug} className="border-b border-rule py-5 md:border-b-0 md:px-6 md:first:pl-0 md:[&+li]:border-l md:[&+li]:border-l-rule">
-                <Link href={`/${locale}/ratgeber/${g.slug}/`} className="font-slant text-[1.375rem] leading-tight hover:underline">
-                  {g.title[locale] ?? g.title.de}
-                </Link>
-              </li>
-            ))}
-          </ul>
         </section>
 
         {/* 10 · start */}

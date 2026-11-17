@@ -24,15 +24,28 @@ function Figure({ caption, children }: { caption?: ReactNode; children: ReactNod
  * with a wide-angle lens (0.5x, about 120 degrees). Drawn to scale: both goals and goal areas are in
  * the picture, the two near corners are not. Labels sit outside the court.
  */
-export function HallCamera({ label, camera, field, corner, caption }: { label: string; camera: string; field: string; corner?: string; caption?: ReactNode }) {
+export function HallCamera({ label, camera, field, corner, caption, framed = true }: { label: string; camera: string; field: string; corner?: string; caption?: ReactNode; framed?: boolean }) {
   // camera at (20, 29.5) in court metres: the near goal areas just fit; rays at 60 degrees either side of straight ahead
   const cx = 20;
   const cy = 29.5;
   const k = Math.tan((60 * Math.PI) / 180); // dx per dy
   const yAt = (x: number) => cy - Math.abs(x - cx) / k;
+  // «Ecke nicht im Bild» under each near corner, outside the camera's view, in two short lines
+  const words = (corner ?? "").split(" ");
+  const cut = Math.ceil(words.length / 2);
+  const lines = words.length > 2 ? [words.slice(0, cut).join(" "), words.slice(cut).join(" ")] : [corner ?? ""];
+  const cornerText = (x: number, anchor: "start" | "end") => (
+    <text x={x} y={23.4} textAnchor={anchor} fill="var(--ink)" style={SMALL}>
+      {lines.map((l, i) => (
+        <tspan key={i} x={x} dy={i ? 1.9 : 0}>
+          {l}
+        </tspan>
+      ))}
+    </text>
+  );
   return (
     <Figure caption={caption}>
-      <svg viewBox="-6 -6 52 43" role="img" aria-label={label} className="block w-full border-2 border-ink">
+      <svg viewBox="-6 -6 52 43" role="img" aria-label={label} className={framed ? "block w-full border-2 border-ink" : "block w-full"}>
         <rect x={-6} y={-6} width={52} height={43} fill="var(--paper)" />
         <path d={`M${cx} ${cy} L-6 ${yAt(-6).toFixed(2)} L-6 -6 L46 -6 L46 ${yAt(46).toFixed(2)} Z`} fill="var(--club)" fillOpacity={0.13} />
         <path d={`M-6 ${yAt(-6).toFixed(2)} L${cx} ${cy} L46 ${yAt(46).toFixed(2)}`} fill="none" stroke="var(--club-line)" strokeWidth={0.2} strokeDasharray="0.8 0.6" />
@@ -40,12 +53,8 @@ export function HallCamera({ label, camera, field, corner, caption }: { label: s
         {corner && (
           <g>
             <path d="M0 20l2.6 -2.6M0 17.4l2.6 2.6M40 20l-2.6 -2.6M40 17.4l-2.6 2.6" stroke="var(--loss)" strokeWidth={0.35} />
-            <text x={1.3} y={23.2} textAnchor="middle" fill="var(--ink)" style={SMALL}>
-              {corner}
-            </text>
-            <text x={38.7} y={23.2} textAnchor="middle" fill="var(--ink)" style={SMALL}>
-              {corner}
-            </text>
+            {cornerText(-5.2, "start")}
+            {cornerText(45.2, "end")}
           </g>
         )}
         <rect x={18} y={cy} width={4} height={2.2} fill="var(--ink)" />

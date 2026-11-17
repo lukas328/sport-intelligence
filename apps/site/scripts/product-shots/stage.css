@@ -72,6 +72,18 @@ body {
   display: block;
 }
 
+/* a cut-out of the app: the piece that matters, in its own brightness, with an ink edge */
+.card {
+  position: absolute;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+  box-shadow: var(--shadow);
+}
+.card > .screen,
+.card.screen {
+  background: var(--paper);
+}
+
 /* phone: ink body, rounded (phones are round) */
 .phone {
   position: absolute;

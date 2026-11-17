@@ -18,9 +18,8 @@ export function NavLinks({ locale, links, stacked = false }: { locale: string; l
               href={href}
               aria-current={on ? "page" : undefined}
               className={cn(
-                "font-slant relative inline-flex min-h-12 items-center whitespace-nowrap px-2 text-[1.125rem] hover:underline",
+                "relative inline-flex min-h-12 items-center whitespace-nowrap px-2.5 text-[1.125rem] font-semibold text-ink hover:underline",
                 stacked && "w-full border-b border-rule px-0 text-[1.375rem]",
-                on ? "text-ink" : "text-ink-2",
               )}
             >
               {label}

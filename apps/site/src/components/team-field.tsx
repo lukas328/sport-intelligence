@@ -12,7 +12,7 @@ export function TeamField({ id, label, button, example, appLocale, onClub = fals
   const { shirt, chosen } = useShirt();
   return (
     <form action={START_ACTION} method="get" role="search" className="w-full max-w-[34rem]">
-      <label htmlFor={id} className={`font-slant block text-[1.5rem] leading-tight md:text-[1.875rem] ${onClub ? "text-club-ink" : "text-ink"}`}>
+      <label htmlFor={id} className={`block text-[1.375rem] leading-tight font-bold md:text-[1.625rem] ${onClub ? "text-club-ink" : "text-ink"}`}>
         {label}
       </label>
       <div className="mt-3 flex flex-col gap-2 min-[480px]:flex-row">
