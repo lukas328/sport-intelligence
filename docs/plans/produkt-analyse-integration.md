@@ -278,3 +278,27 @@ Lesart:
 - Offen, mit der UX-Sitzung abzustimmen:
   - das CUDA-Image in der CI bauen (Grösse 7.7 GB, Laufzeit);
   - den Ausführungsort bestimmen (Azure Serverless T4, `docs/plans/gpu-analyse.md`).
+
+### Schritt 5 vorbereitet: ReID und Rollen aus dem Bucket (2026-11-17)
+
+- `HB_REID_MODEL` und `HB_ROLE_MODEL` können jetzt wie die Ballnetze Schlüssel im
+  Artifacts-Bucket sein, mit `HB_REID_MODEL_SHA256` bzw. `HB_ROLE_MODEL_SHA256`
+  (`analysis.resolve_models`, gemeinsamer Cache).
+  - Fehlt die Datei oder stimmt die SHA nicht, bleibt der Schritt aus, wie heute ohne Datei.
+  - Status in `stats.reid_model_status` und `stats.role_model_status`.
+- Wozu: ReID überträgt eine einmal gelesene Rückennummer auf andere Stücke derselben Person
+  (ADR 027) und gleicht so einen Teil des Nummernverlusts durch das Gate aus. Auf dem
+  NLB-Clip 2017 stieg die Spielzeit mit Nummer von 1 716 s auf 2 375 s
+  (`ml/models/reid-fastreid.md`).
+- `reid.onnx` aus FastReID BoT-R50 (`ml/scripts/export_reid.py`, jetzt mit `dynamo=False` für
+  neuere torch-Versionen): 94 MB, SHA-256
+  `6f3e1b1d05347d36adcf09ecb0d759bd36b73748248800ede5f46849679e16f0`.
+  - 162 ms pro Crop auf 4 CPU-Kernen. Mit `HB_REID_EVERY=30` (einmal pro Sekunde, etwa 15
+    Spieler im Bild) wären das etwa 2.5 CPU-Sekunden pro Videosekunde, also nur fürs
+    CUDA-Image.
+  - Testphase: Die Gewichte sind auf MSMT17 trainiert (nur nichtkommerzielle Forschung,
+    Q-ML-5); nicht für einen Livegang.
+- Rollen-Klassifikator (`ml/roles`): nur der Ladeweg ist vorbereitet. Kein Modell, weil er auf
+  unseren Clips Spieler in dunklen Trikots oft für Schiedsrichter hält (`ml/roles/README.md`);
+  vor einem Einsatz braucht er die Abstimmung über die ganze Spur.
+- Hochladen in den Staging-Bucket (mit den Ballnetzen) erst nach Lukas' Freigabe.

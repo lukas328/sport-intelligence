@@ -47,4 +47,5 @@ if __name__ == "__main__":
         output_names=["f"],
         dynamic_axes={"x": {0: "n"}, "f": {0: "n"}},
         opset_version=17,
+        dynamo=False,  # the classic exporter: newer torch versions default to dynamo (onnxscript)
     )

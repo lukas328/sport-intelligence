@@ -44,9 +44,13 @@ class JobSettings(BaseSettings):
     # game under the job timeout on a CPU worker; on the 4-core profile reading every torso cost
     # 1.4 to 2.8 s per video second, the gate about 0.5
     number_budget: float = 0.75
+    # local file or artifacts-bucket key (fetched like the ball nets, with its checksum); test
+    # phase: the FastReID weights are trained on MSMT17 (non-commercial), see ml/models
     reid_model: str = "/models/reid.onnx"
+    reid_model_sha256: str = ""
     reid_every: int = 30  # frames: about once per second per player
     role_model: str = "/models/roles.onnx"  # player / goalkeeper / referee (ml/roles)
+    role_model_sha256: str = ""
     role_every: int = 30
     hallboard_every_s: float = 1.0  # hall scoreboard reading when the video has no overlay
     hallboard_full_every_s: float = 4.0  # whole-frame search for the board while it is not in view
