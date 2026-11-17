@@ -254,5 +254,5 @@ page.out = out;
 page.chosen = svg("0 0 512 512", mark(Object.assign({}, CHOSEN, { color: "two" })));
 page.chosenInk = svg("0 0 512 512", mark(Object.assign({}, CHOSEN, { color: "ink" })));
 page.finalInk = svg("0 0 512 512", fin("ink"));
-fs.writeFileSync(path.join(here, "data.json"), JSON.stringify(page));
+fs.writeFileSync(path.join(here, "data.json"), JSON.stringify(page) + "\n");
 console.log("ok", Object.keys(out).length, "final files,", V.length, "variants");
