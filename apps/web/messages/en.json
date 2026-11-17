@@ -1420,7 +1420,10 @@
     "unknownPlayer": "Unassigned",
     "xgNote": "xG: expected goals, estimated from shot position and situation.",
     "formLast": "{n, plural, one {The last match.} other {The last # matches, newest on the right.}}",
-    "emptyText": "The season grows here with every match: results, what repeats and who scores. Create your first match and upload the video."
+    "emptyText": "The season grows here with every match: results, what repeats and who scores. Create your first match and upload the video.",
+    "noFiguresTitle": "No figures for the season yet.",
+    "noFiguresText": "The season counts matches with recorded goals and shots. In your matches with video the analysis has not found any yet: answer the open questions there or enter the result.",
+    "toMatches": "To the matches"
   },
   "notifications": {
     "title": "Notifications",

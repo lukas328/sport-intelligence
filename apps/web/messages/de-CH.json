@@ -1420,7 +1420,10 @@
     "unknownPlayer": "Nicht zugeordnet",
     "xgNote": "xG: erwartete Tore, geschätzt aus Wurfposition und Situation.",
     "formLast": "{n, plural, one {Das letzte Spiel.} other {Die letzten # Spiele, das neueste rechts.}}",
-    "emptyText": "Mit jedem Spiel wächst hier die Saison: Resultate, was sich wiederholt und wer trifft. Leg dein erstes Spiel an und lade das Video hoch."
+    "emptyText": "Mit jedem Spiel wächst hier die Saison: Resultate, was sich wiederholt und wer trifft. Leg dein erstes Spiel an und lade das Video hoch.",
+    "noFiguresTitle": "Noch keine Zahlen für die Saison.",
+    "noFiguresText": "Die Saison zählt Spiele mit erfassten Toren und Würfen. In deinen Spielen mit Video hat die Analyse noch keine gefunden: Beantworte dort die offenen Fragen oder trag das Resultat ein.",
+    "toMatches": "Zu den Spielen"
   },
   "notifications": {
     "title": "Mitteilungen",

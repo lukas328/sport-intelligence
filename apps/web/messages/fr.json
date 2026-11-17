@@ -1420,7 +1420,10 @@
     "unknownPlayer": "Non attribué",
     "xgNote": "xG : buts attendus, estimés d'après la position et la situation du tir.",
     "formLast": "{n, plural, one {Le dernier match.} other {Les # derniers matchs, le plus récent à droite.}}",
-    "emptyText": "La saison grandit ici à chaque match : résultats, ce qui se répète et qui marque. Crée ton premier match et charge la vidéo."
+    "emptyText": "La saison grandit ici à chaque match : résultats, ce qui se répète et qui marque. Crée ton premier match et charge la vidéo.",
+    "noFiguresTitle": "Pas encore de chiffres pour la saison.",
+    "noFiguresText": "La saison compte les matchs avec des buts et des tirs saisis. Dans tes matchs avec vidéo, l'analyse n'en a pas encore trouvé : réponds aux questions ouvertes ou saisis le résultat.",
+    "toMatches": "Vers les matchs"
   },
   "notifications": {
     "title": "Notifications",
