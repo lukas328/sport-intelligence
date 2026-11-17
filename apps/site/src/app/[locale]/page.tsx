@@ -4,7 +4,7 @@ import Link from "next/link";
 import plans from "@handball/plans";
 import { CameraLegend, DemoCamera } from "@/components/demo-camera";
 import { HallPlan } from "@/components/hall-plan";
-import { HeroThings } from "@/components/hero-things";
+import { HeroFilm } from "@/components/hero-film";
 import { ProductShot } from "@/components/product-shot";
 import { JsonLd } from "@/components/json-ld";
 import { DemoLink, KitScope, StartLink } from "@/components/kit";
@@ -73,7 +73,7 @@ export default async function Home({ params }: Props) {
         <div className="wrap grid grid-cols-1 items-center gap-10 pt-8 pb-16 md:pt-14 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:gap-14 lg:pb-28">
           <div className="min-w-0">
             <p className="text-base font-semibold md:text-[1.0625rem]">{t.kick}</p>
-            <h1 id="hero" className="mt-3 text-[2.75rem] leading-[.95] md:text-[4.5rem]">
+            <h1 id="hero" className="mt-3 text-[2.75rem] leading-[.95] md:text-[4.5rem] lg:text-[3.875rem] xl:text-[4.5rem]">
               {t.title}
             </h1>
             <p className="mt-5 max-w-[34rem] text-[1.1875rem] leading-normal font-medium md:mt-6 md:text-[1.375rem]">{t.lead}</p>
@@ -88,9 +88,19 @@ export default async function Home({ params }: Props) {
               <span>{fmt(t.price, { price: team.price_chf_month, days: team.trial_days })}</span>
             </p>
           </div>
-          <div className="rise min-w-0 lg:pl-4" style={{ "--d": 1 } as CSSProperties}>
+          <div className="min-w-0 lg:pl-4">
             <div className="mx-auto max-w-[32.5rem] lg:mr-0">
-              <HeroThings things={v.things} label={t.heroLabel} note={t.heroNote} />
+              <HeroFilm
+                things={v.things}
+                court={sat}
+                text={{
+                  ...t.film,
+                  label: fmt(t.film.label, { n: sat.n, of: sat.of }),
+                  count: fmt(t.film.count, { n: sat.n, of: sat.of }),
+                  score: `${v.own} ${sat.score} ${v.opp}`,
+                  note: t.heroNote,
+                }}
+              />
             </div>
           </div>
         </div>

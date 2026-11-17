@@ -450,6 +450,181 @@
   }
 }
 
+/* the start page's hero film (components/hero-film.tsx, BEFUNDE-2 L4): the markup is the resting
+   end state; the animations play it from the video to the three things once, about eight seconds */
+.film-video,
+.film-scan,
+.film-ghost,
+.film-status-0,
+.film-status-1 {
+  opacity: 0;
+  visibility: hidden;
+}
+.film-rest {
+  opacity: 0.32;
+}
+.film-dot {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .film-video {
+    animation: film-out 3.9s ease-in both;
+  }
+  .film-pan {
+    animation: film-pan 3.9s cubic-bezier(0.3, 0.1, 0.3, 1) both;
+  }
+  .film-progress {
+    animation: film-progress 3.2s linear both;
+  }
+  .film-scan {
+    animation: film-scan 1.5s cubic-bezier(0.5, 0, 0.5, 1) 1.9s both;
+  }
+  .film-rec {
+    animation: film-blink 1s steps(2, jump-none) 3;
+  }
+  .film-lines {
+    animation: film-in 0.7s ease-out 3.2s both;
+  }
+  .film-dot {
+    animation: film-pop 0.36s cubic-bezier(0.3, 1.6, 0.5, 1) both;
+    animation-delay: calc(3.5s + var(--i, 0) * 60ms);
+  }
+  .film-rest {
+    animation: film-rest 0.6s ease-out 5.6s both;
+  }
+  .film-zone {
+    animation: film-in 0.6s ease-out 5.6s both;
+  }
+  .film-count {
+    animation: film-drop 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) 5.9s both;
+  }
+  .film-row {
+    animation: film-up 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    animation-delay: calc(6.4s + var(--i, 0) * 350ms);
+  }
+  .film-ghost {
+    animation: film-s0 calc(6.6s + var(--i, 0) * 350ms) linear both;
+  }
+  .film-shimmer {
+    animation: film-blink 1.2s ease-in-out infinite;
+  }
+  .film-status-0 {
+    animation: film-s0 2.6s linear both;
+  }
+  .film-status-1 {
+    animation: film-s1 4s linear 2.4s both;
+  }
+  .film-status-2 {
+    animation: film-in 0.4s ease-out 6.3s both;
+  }
+  .film-replay {
+    animation: film-in 0.5s ease-out 7.8s both;
+  }
+  /* below the first screen the film waits until it is seen (components/hero-film.tsx) */
+  .film-hold :is(.film-video, .film-pan, .film-progress, .film-scan, .film-rec, .film-ghost, .film-lines, .film-dot, .film-rest, .film-zone, .film-count, .film-row, .film-status, .film-replay) {
+    animation-play-state: paused;
+  }
+}
+@keyframes film-out {
+  0%,
+  82% {
+    opacity: 1;
+    visibility: visible;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+@keyframes film-pan {
+  from {
+    transform: scale(1.14) translateX(2%);
+  }
+  to {
+    transform: scale(1.02);
+  }
+}
+@keyframes film-progress {
+  from {
+    transform: scaleX(0.02);
+  }
+  to {
+    transform: scaleX(0.96);
+  }
+}
+@keyframes film-scan {
+  0% {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-100%);
+  }
+  100% {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(320%);
+  }
+}
+@keyframes film-blink {
+  50% {
+    opacity: 0.2;
+  }
+}
+@keyframes film-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes film-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+}
+@keyframes film-rest {
+  from {
+    opacity: 1;
+  }
+}
+@keyframes film-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-0.5rem);
+  }
+}
+@keyframes film-up {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+}
+@keyframes film-s0 {
+  0%,
+  92% {
+    opacity: 1;
+    visibility: visible;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+@keyframes film-s1 {
+  0% {
+    opacity: 0;
+    visibility: visible;
+  }
+  5%,
+  94% {
+    opacity: 1;
+    visibility: visible;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
 @keyframes rise {
   from {
     opacity: 0;
