@@ -86,15 +86,19 @@ def _sha256(path: Path) -> str:
     return h.hexdigest()
 
 
-def resolve_ball_models(settings: JobSettings, s3: Any = None) -> tuple[list[Path], str]:
-    """Local files for `HB_BALL_MODEL` and a status: "off" (not set), "ok", "missing" (no such
+def resolve_models(
+    value: str, sha256: str, settings: JobSettings, s3: Any = None
+) -> tuple[list[Path], str]:
+    """Local files for a model setting (comma-separated local paths or artifacts-bucket keys,
+    their SHA-256 in the same order) and a status: "off" (not set), "ok", "missing" (no such
     file or bucket key), "sha_mismatch", "sha_missing" (a bucket key without its checksum).
-    Bucket keys are fetched once into `ball_cache_dir` (cached file reused after its checksum
-    matched); local paths are checked against their checksum when one is given."""
-    names = _entries(settings.ball_model)
+    Bucket keys are fetched once into `ball_cache_dir` (the model cache; a cached file is reused
+    after its checksum matched); local paths are checked against their checksum when one is
+    given."""
+    names = _entries(value)
     if not names:
         return [], "off"
-    shas = _entries(settings.ball_model_sha256)
+    shas = _entries(sha256)
     cache = Path(settings.ball_cache_dir)
     paths: list[Path] = []
     for k, name in enumerate(names):
@@ -112,7 +116,7 @@ def resolve_ball_models(settings: JobSettings, s3: Any = None) -> tuple[list[Pat
                 try:
                     s3.download_file(settings.s3_bucket_artifacts, name, str(part), Config=TRANSFER)
                 except Exception as exc:  # no such key or storage error: the old path runs
-                    log.warning("ball_model_download_failed", key=name, error=str(exc))
+                    log.warning("model_download_failed", key=name, error=str(exc))
                     part.unlink(missing_ok=True)
                     return [], "missing"
                 if _sha256(part) != sha:
@@ -123,6 +127,11 @@ def resolve_ball_models(settings: JobSettings, s3: Any = None) -> tuple[list[Pat
             return [], "sha_mismatch"
         paths.append(local)
     return paths, "ok"
+
+
+def resolve_ball_models(settings: JobSettings, s3: Any = None) -> tuple[list[Path], str]:
+    """`resolve_models` for `HB_BALL_MODEL` / `HB_BALL_MODEL_SHA256`."""
+    return resolve_models(settings.ball_model, settings.ball_model_sha256, settings, s3)
 
 
 def load_ball_net(settings: JobSettings, s3: Any = None) -> tuple[BallNet | None, str]:
@@ -152,17 +161,27 @@ def load_number_reader(settings: JobSettings) -> NumberReader | None:
     return NumberReader(det, rec, threads=settings.detector_threads or None)
 
 
-def load_role_classifier(settings: JobSettings) -> RoleClassifier | None:
-    """Player / goalkeeper / referee from appearance, when the model is installed (ml/roles)."""
-    path = Path(settings.role_model)
-    return (
-        RoleClassifier(path, threads=settings.detector_threads or None) if path.is_file() else None
-    )
+def load_role_classifier(
+    settings: JobSettings, s3: Any = None
+) -> tuple[RoleClassifier | None, str]:
+    """Player / goalkeeper / referee from appearance (ml/roles), when `HB_ROLE_MODEL` is a local
+    file or a bucket key with its checksum (`HB_ROLE_MODEL_SHA256`); and the status of
+    `resolve_models` ("missing" for the image default without the file is the normal case)."""
+    paths, status = resolve_models(settings.role_model, settings.role_model_sha256, settings, s3)
+    if status != "ok":
+        return None, status
+    return RoleClassifier(paths[0], threads=settings.detector_threads or None), status
 
 
-def load_embedder(settings: JobSettings) -> Embedder | None:
-    path = Path(settings.reid_model)
-    return Embedder(path, threads=settings.detector_threads or None) if path.is_file() else None
+def load_embedder(settings: JobSettings, s3: Any = None) -> tuple[Embedder | None, str]:
+    """Person re-identification (`HB_REID_MODEL`, local file or bucket key with
+    `HB_REID_MODEL_SHA256`) and the status of `resolve_models`. TEST PHASE: the FastReID weights
+    were trained on MSMT17 (non-commercial research only, ml/models/reid-fastreid.md, Q-ML-5);
+    not for a real go-live."""
+    paths, status = resolve_models(settings.reid_model, settings.reid_model_sha256, settings, s3)
+    if status != "ok":
+        return None, status
+    return Embedder(paths[0], threads=settings.detector_threads or None), status
 
 
 CHUNK_MS = 30_000
@@ -654,7 +673,7 @@ def _run_learned(
         )
         rep.stage("observe")
         # "cached": a re-run on stored observations (their ball candidates, if any, are reused)
-        ball_status = "cached"
+        ball_status = reid_status = role_status = "cached"
         if obs is None:
             video = work / "proxy.mp4"
             s3.download_file(bucket, proxy_key, str(video), Config=TRANSFER)
@@ -670,6 +689,8 @@ def _run_learned(
             del spread
             numbers = load_number_reader(settings)
             ball_net, ball_status = load_ball_net(settings, s3)
+            embedder, reid_status = load_embedder(settings, s3)
+            roles, role_status = load_role_classifier(settings, s3)
             # no overlay: the hall's own scoreboard, when the camera shows it (raw recordings)
             board = (
                 HallBoardReader(
@@ -692,9 +713,9 @@ def _run_learned(
                 number_every=max(1, settings.number_every),
                 number_gate=settings.number_gate,
                 number_budget=settings.number_budget,
-                embedder=load_embedder(settings),
+                embedder=embedder,
                 embed_every=max(1, settings.reid_every),
-                roles=load_role_classifier(settings),
+                roles=roles,
                 role_every=max(1, settings.role_every),
                 ball_net=ball_net,
                 ball_every=max(1, settings.ball_every),
@@ -780,6 +801,8 @@ def _run_learned(
                     "camera": view["camera"],
                     "motion": obs.motion.stats,
                     "ball_model_status": ball_status,
+                    "reid_model_status": reid_status,
+                    "role_model_status": role_status,
                     "observe_counters": getattr(obs, "counters", {}),
                 },
                 "formations": [],
@@ -841,6 +864,8 @@ def _run_learned(
             "stats": {
                 **result.extra,
                 "ball_model_status": ball_status,
+                "reid_model_status": reid_status,
+                "role_model_status": role_status,
                 "observe_counters": getattr(obs, "counters", {}),
             },
             "formations": detect_formations(result),
