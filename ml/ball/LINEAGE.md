@@ -298,7 +298,9 @@ every 0.5 s from 4 s before to 1 s after the logged time, plus 3 outside), 546 w
 hidden / ring wrong (click the ball if visible) / no ball in the picture / unsure. Bias: the owner
 judges the tracker's point (rings shown), so this is a dev label set like gold v1, not the ring-free
 final test. OWLv2 ran every 4th frame here (every 2nd on gold v1), the rescoring weights were learned
-on every 2nd.
+on every 2nd. Test-split exposure: while inspecting the file layout, the metadata and the frame-0
+candidate numbers (no image, no tracker output) of one test clip (w01) were printed once; no test
+frame was drawn or scored. Recorded here for completeness; judged not to bias the test.
 
 ## 7. Things tried that did not help or were set aside
 
