@@ -342,8 +342,12 @@ Lesart:
 - Die Staging-Einstellungen (`HB_BALL_MODEL`, `HB_BALL_MODEL_SHA256`, `HB_REID_MODEL`,
   `HB_REID_MODEL_SHA256`) setzt die UX-Sitzung in Terraform. Eine Änderung gibt eine neue
   Revision, darum erst nach Lukas' laufendem Spiel.
-- **Schutz:** Ballnetz und ReID laufen nur, wenn ONNX Runtime CUDA nutzen kann
-  (`HB_BALL_REQUIRE_GPU`, `HB_REID_REQUIRE_GPU`, Standard an). Sonst bleiben sie aus, mit Status
-  `no_gpu`. Ohne GPU bräuchte ein ganzes Spiel mit Ballnetz Tage. Für den Probelauf auf Staging
-  (ohne GPU, nur ein kurzer Clip) `HB_BALL_REQUIRE_GPU=false` dazusetzen und danach wieder
-  entfernen.
+- **Schutz:** Ballnetz und ReID laufen nur, wenn ONNX Runtime CUDA nutzen kann.
+  - Ohne GPU bleiben sie aus, Status `no_gpu`. Ohne GPU bräuchte ein ganzes Spiel mit Ballnetz
+    Tage.
+  - Auf der CPU nur mit `HB_BALL_ALLOW_CPU=1`, und dann nur für Videos bis `HB_BALL_MAX_MINUTES`
+    (Standard 3). Längere Videos bekommen den Status `too_long_for_cpu`.
+  - Probelauf auf Staging (ohne GPU, kurzer Clip): `HB_BALL_ALLOW_CPU=1` dazusetzen.
+- Das Log `analysis_done` meldet jetzt `ball_model_status`, `reid_model_status` und die Zähler der
+  Beobachtung (`number_crops`, `number_frames_skipped`, angebotene und gelesene Boxen). Die
+  UX-Sitzung liest nur Logs.

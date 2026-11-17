@@ -786,6 +786,12 @@ def test_side_hint_reaches_the_event_baseline() -> None:
     assert seen == ["right", None]
 
 
+@pytest.fixture(autouse=True)
+def _cuda_for_model_loaders(monkeypatch: pytest.MonkeyPatch) -> None:
+    """The model loader tests run as if CUDA were there; the GPU rule has its own test."""
+    monkeypatch.setattr(analysis, "_has_cuda", lambda: True)
+
+
 def _tiny_ball_net(path: Path) -> Path:
     import onnx
     from onnx import TensorProto, helper
@@ -808,14 +814,14 @@ def test_ball_net_switch(tmp_path: Path) -> None:
     """HB_BALL_MODEL: empty or a missing file keeps the YOLOX ball path; installed files load the
     ball net(s) (two = ensemble, one = single net), and the result names the path it used."""
     assert analysis.load_ball_net(JobSettings(ball_model="")) == (None, "off")
-    missing = JobSettings(ball_model=str(tmp_path / "missing.onnx"), ball_require_gpu=False)
+    missing = JobSettings(ball_model=str(tmp_path / "missing.onnx"))
     assert analysis.load_ball_net(missing) == (None, "missing")
     hr1 = _tiny_ball_net(tmp_path / "hr1.onnx")
     hrp1 = _tiny_ball_net(tmp_path / "hrp1.onnx")
     both = f"{hr1}, {hrp1}"
-    net, status = analysis.load_ball_net(JobSettings(ball_model=both, ball_require_gpu=False))
+    net, status = analysis.load_ball_net(JobSettings(ball_model=both))
     assert status == "ok" and net is not None and len(net.sessions) == 2
-    single, _ = analysis.load_ball_net(JobSettings(ball_model=str(hrp1), ball_require_gpu=False))
+    single, _ = analysis.load_ball_net(JobSettings(ball_model=str(hrp1)))
     assert single is not None and len(single.sessions) == 1
     # one of two files missing: no half ensemble, the old path stays
     part = f"{hr1},{tmp_path / 'nope.onnx'}"
@@ -823,7 +829,7 @@ def test_ball_net_switch(tmp_path: Path) -> None:
     # a local file with a wrong checksum is not used
     bad = JobSettings(ball_model=str(hr1), ball_model_sha256="0" * 64)
     assert analysis.load_ball_net(bad) == (None, "sha_mismatch")
-    settings = JobSettings(ball_model=both, ball_require_gpu=False)
+    settings = JobSettings(ball_model=both)
     empty: Any = SimpleNamespace(ball_cands={})
     with_cands: Any = SimpleNamespace(ball_cands={3: [(1.0, 2.0, 0.5)]})
     assert analysis._ball_version(empty, settings) == "yolox"
@@ -850,9 +856,7 @@ def test_ball_net_from_bucket_with_checksum(tmp_path: Path) -> None:
     key = f"models/ball/ball_hrp1-{sha[:12]}.onnx"
     s3 = _BucketS3({("artifacts", key): src})
     cache = tmp_path / "cache"
-    ok = JobSettings(
-        ball_model=key, ball_model_sha256=sha, ball_cache_dir=str(cache), ball_require_gpu=False
-    )
+    ok = JobSettings(ball_model=key, ball_model_sha256=sha, ball_cache_dir=str(cache))
     net, status = analysis.load_ball_net(ok, s3)
     assert status == "ok" and net is not None
     # cached: the second job does not download again
@@ -863,16 +867,13 @@ def test_ball_net_from_bucket_with_checksum(tmp_path: Path) -> None:
         ball_model=key,
         ball_model_sha256="f" * 64,
         ball_cache_dir=str(cache),
-        ball_require_gpu=False,
     )
     assert analysis.load_ball_net(wrong, s3) == (None, "sha_mismatch")
     assert not list(cache.glob("ffffffffffff-*"))
     # a bucket key needs its checksum; an unknown key falls back
-    nosha = JobSettings(ball_model=key, ball_require_gpu=False)
+    nosha = JobSettings(ball_model=key)
     assert analysis.load_ball_net(nosha, s3) == (None, "sha_missing")
-    nokey = JobSettings(
-        ball_model="models/ball/x.onnx", ball_model_sha256=sha, ball_require_gpu=False
-    )
+    nokey = JobSettings(ball_model="models/ball/x.onnx", ball_model_sha256=sha)
     assert analysis.load_ball_net(nokey, s3) == (None, "missing")
 
 
@@ -897,9 +898,7 @@ def test_reid_and_role_models_from_bucket_or_file(tmp_path: Path) -> None:
     default = JobSettings(reid_model="/models/reid.onnx", role_model="/models/roles.onnx")
     assert analysis.load_embedder(default) == (None, "missing")
     assert analysis.load_role_classifier(default) == (None, "missing")
-    ok = JobSettings(
-        reid_model=key, reid_model_sha256=sha, ball_cache_dir=cache, reid_require_gpu=False
-    )
+    ok = JobSettings(reid_model=key, reid_model_sha256=sha, ball_cache_dir=cache)
     emb, status = analysis.load_embedder(ok, s3)
     assert status == "ok" and emb is not None
     roles = JobSettings(role_model=key, role_model_sha256=sha, ball_cache_dir=cache)
@@ -913,15 +912,21 @@ def test_reid_and_role_models_from_bucket_or_file(tmp_path: Path) -> None:
 def test_ball_net_and_reid_need_a_gpu_by_default(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """Without CUDA the ball nets and ReID stay off unless explicitly allowed (a whole game on a
-    CPU worker would take days); with CUDA (faked here) they load."""
+    """Without CUDA the ball nets and ReID stay off; HB_BALL_ALLOW_CPU=1 lets them run on a CPU
+    for videos of at most HB_BALL_MAX_MINUTES (a whole game on a CPU worker would take days)."""
     net = _tiny_ball_net(tmp_path / "hr1.onnx")
     monkeypatch.setattr(analysis, "_has_cuda", lambda: False)
-    assert analysis.load_ball_net(JobSettings(ball_model=str(net))) == (None, "no_gpu")
-    assert analysis.load_embedder(JobSettings(reid_model=str(net))) == (None, "no_gpu")
-    allowed = JobSettings(ball_model=str(net), ball_require_gpu=False)
-    assert analysis.load_ball_net(allowed)[1] == "ok"
+    assert analysis.load_ball_net(JobSettings(ball_model=str(net)), None, 60) == (None, "no_gpu")
+    assert analysis.load_embedder(JobSettings(reid_model=str(net)), None, 60) == (None, "no_gpu")
+    cpu = JobSettings(ball_model=str(net), reid_model=str(net), ball_allow_cpu=True)
+    assert analysis.load_ball_net(cpu, None, 120)[1] == "ok"
+    assert analysis.load_embedder(cpu, None, 120)[1] == "ok"
+    assert analysis.load_ball_net(cpu, None, 181) == (None, "too_long_for_cpu")
+    assert analysis.load_embedder(cpu, None, 3600) == (None, "too_long_for_cpu")
+    assert analysis.load_ball_net(cpu, None, None) == (None, "too_long_for_cpu")
+    longer = JobSettings(ball_model=str(net), ball_allow_cpu=True, ball_max_minutes=10)
+    assert analysis.load_ball_net(longer, None, 500)[1] == "ok"
     assert analysis.load_ball_net(JobSettings(ball_model=""))[1] == "off"
     monkeypatch.setattr(analysis, "_has_cuda", lambda: True)
-    assert analysis.load_ball_net(JobSettings(ball_model=str(net)))[1] == "ok"
+    assert analysis.load_ball_net(JobSettings(ball_model=str(net)), None, 3600)[1] == "ok"
     assert analysis.load_embedder(JobSettings(reid_model=str(net)))[1] == "ok"

@@ -28,9 +28,11 @@ class JobSettings(BaseSettings):
     # nets hr1/hrp1 contain DeepSport data (non-commercial) and must be replaced before go-live.
     ball_model: str = ""
     ball_model_sha256: str = ""
-    # the ball nets only with a GPU: on a CPU worker they take about 1 to 2 s per frame (a whole
-    # game: days). False only for a short trial run on a CPU worker.
-    ball_require_gpu: bool = True
+    # the ball nets and ReID only with a GPU (CUDA): on a CPU worker the nets take about 1 to 2 s
+    # per frame (a whole game: days), ReID about 2.5 CPU s per video second. ball_allow_cpu=1 lets
+    # them run on a CPU for videos of at most ball_max_minutes (short trial runs).
+    ball_allow_cpu: bool = False
+    ball_max_minutes: float = 3.0
     ball_cache_dir: str = "/tmp/handball-models"  # noqa: S108
     ball_every: int = 1  # every 2nd frame costs about 6 points on gold v1 (11 on fast balls)
     ball_batch: int = 8
@@ -51,8 +53,6 @@ class JobSettings(BaseSettings):
     # phase: the FastReID weights are trained on MSMT17 (non-commercial), see ml/models
     reid_model: str = "/models/reid.onnx"
     reid_model_sha256: str = ""
-    # re-identification only with a GPU (about 2.5 CPU seconds per video second on a CPU worker)
-    reid_require_gpu: bool = True
     reid_every: int = 30  # frames: about once per second per player
     role_model: str = "/models/roles.onnx"  # player / goalkeeper / referee (ml/roles)
     role_model_sha256: str = ""

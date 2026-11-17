@@ -140,19 +140,36 @@ def _has_cuda() -> bool:
     return "CUDAExecutionProvider" in ort.get_available_providers()
 
 
-def load_ball_net(settings: JobSettings, s3: Any = None) -> tuple[BallNet | None, str]:
+def _cpu_gate(settings: JobSettings, video_s: float | None) -> str | None:
+    """Why a GPU-only model may not run here, or None: "no_gpu" without CUDA unless
+    `ball_allow_cpu`; "too_long_for_cpu" on a CPU for a video longer than `ball_max_minutes`
+    (or of unknown length)."""
+    if _has_cuda():
+        return None
+    if not settings.ball_allow_cpu:
+        return "no_gpu"
+    if video_s is None or video_s > 60 * settings.ball_max_minutes:
+        return "too_long_for_cpu"
+    return None
+
+
+def load_ball_net(
+    settings: JobSettings, s3: Any = None, video_s: float | None = None
+) -> tuple[BallNet | None, str]:
     """The 3-frame ball net(s) of `HB_BALL_MODEL` and the status of `resolve_ball_models`; None
-    (the YOLOX ball path stays) unless all files are there with the right checksum and, with
-    `ball_require_gpu` (default), ONNX Runtime can use CUDA ("no_gpu" otherwise). Test phase:
+    (the YOLOX ball path stays) unless all files are there with the right checksum and ONNX
+    Runtime can use CUDA (`_cpu_gate`: on a CPU only with `ball_allow_cpu` and a short video).
+    Test phase:
     the nets contain DeepSport data, see ballnet.py."""
     paths, status = resolve_ball_models(settings, s3)
     if status != "ok":
         if status != "off":
             log.warning("ball_model_unavailable", status=status, model=settings.ball_model)
         return None, status
-    if settings.ball_require_gpu and not _has_cuda():
-        log.warning("ball_model_needs_gpu", model=settings.ball_model)
-        return None, "no_gpu"
+    gate = _cpu_gate(settings, video_s)
+    if gate is not None:
+        log.warning("ball_model_needs_gpu", model=settings.ball_model, status=gate)
+        return None, gate
     return BallNet(paths, threads=settings.detector_threads or None), status
 
 
@@ -183,7 +200,9 @@ def load_role_classifier(
     return RoleClassifier(paths[0], threads=settings.detector_threads or None), status
 
 
-def load_embedder(settings: JobSettings, s3: Any = None) -> tuple[Embedder | None, str]:
+def load_embedder(
+    settings: JobSettings, s3: Any = None, video_s: float | None = None
+) -> tuple[Embedder | None, str]:
     """Person re-identification (`HB_REID_MODEL`, local file or bucket key with
     `HB_REID_MODEL_SHA256`) and the status of `resolve_models`. TEST PHASE: the FastReID weights
     were trained on MSMT17 (non-commercial research only, ml/models/reid-fastreid.md, Q-ML-5);
@@ -191,9 +210,10 @@ def load_embedder(settings: JobSettings, s3: Any = None) -> tuple[Embedder | Non
     paths, status = resolve_models(settings.reid_model, settings.reid_model_sha256, settings, s3)
     if status != "ok":
         return None, status
-    if settings.reid_require_gpu and not _has_cuda():
-        log.warning("reid_model_needs_gpu", model=settings.reid_model)
-        return None, "no_gpu"
+    gate = _cpu_gate(settings, video_s)
+    if gate is not None:
+        log.warning("reid_model_needs_gpu", model=settings.reid_model, status=gate)
+        return None, gate
     return Embedder(paths[0], threads=settings.detector_threads or None), status
 
 
@@ -701,8 +721,9 @@ def _run_learned(
             reader = _overlay_reader(spread, fps, total / fps if fps else 0.0)
             del spread
             numbers = load_number_reader(settings)
-            ball_net, ball_status = load_ball_net(settings, s3)
-            embedder, reid_status = load_embedder(settings, s3)
+            video_s = total / fps if fps and total else None
+            ball_net, ball_status = load_ball_net(settings, s3, video_s)
+            embedder, reid_status = load_embedder(settings, s3, video_s)
             roles, role_status = load_role_classifier(settings, s3)
             # no overlay: the hall's own scoreboard, when the camera shows it (raw recordings)
             board = (
@@ -893,6 +914,9 @@ def _run_learned(
             job_id=job_id,
             tracks=len(payload["tracks"]),
             elapsed_s=payload["elapsed_s"],
+            ball_model_status=ball_status,
+            reid_model_status=reid_status,
+            **getattr(obs, "counters", {}),
         )
         return payload
     except CalibrationError as exc:
