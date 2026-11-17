@@ -3321,11 +3321,17 @@
     "home": "contre {opponent}",
     "away": "à l'extérieur chez {opponent}",
     "noMatches": "Pas encore de match cette saison.",
-    "source": "Selon les feuilles de match et la saisie, comme sur les pages de match. Les minutes de jeu ne sont pas saisies. Tirs sans les tirs contrés.",
+    "source": "Selon les feuilles de match et la saisie, comme sur les pages de match. Une présence compte pour qui figure sur la feuille de match ou a un chiffre. Les minutes de jeu ne sont pas saisies. Tirs sans les tirs contrés.",
     "noMatchesYet": "Pas encore de match joué cette saison. Les chiffres apparaissent après le premier match avec feuille de match ou saisie.",
-    "summaryPlayed": "{matches, plural, one {1 match} other {# matchs}}, impliqué dans {involved}",
+    "summaryPlayed": "{matches, plural, one {1 match} other {# matchs}}, {involved, plural, one {1 présence} other {# présences}}",
     "number": "Numéro",
-    "analysedBasis": "Buts et pénalités sur tous les matchs, le reste seulement sur {k} de {n, plural, one {# match} other {# matchs}} analysés."
+    "analysedBasis": "Buts, 7 m, pénalités et arrêts sur tous les matchs, le reste seulement sur {k} de {n, plural, one {# match} other {# matchs}} analysés.",
+    "sevenMSaves": "7 m arrêtés",
+    "sourceCol": "Source",
+    "fromAnalysis": "Analyse",
+    "fromReport": "Feuille de match",
+    "reportBasis": "Tous les chiffres viennent des feuilles de match. Tirs, réussite et pertes de balle s'ajoutent avec la première vidéo analysée.",
+    "reportBasisKeeper": "Tous les chiffres viennent des feuilles de match. Tirs cadrés et taux d'arrêts s'ajoutent avec la première vidéo analysée."
   },
   "slots": {
     "title": "Horaires d'entraînement {season}",

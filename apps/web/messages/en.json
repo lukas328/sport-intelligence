@@ -3321,11 +3321,17 @@
     "home": "vs {opponent}",
     "away": "away at {opponent}",
     "noMatches": "No matches this season yet.",
-    "source": "From the match reports and what was tagged, as on the match pages. Playing minutes are not recorded. Shots without blocked ones.",
+    "source": "From the match reports and what was tagged, as on the match pages. An appearance counts for anyone listed in the match report or with a figure. Playing minutes are not recorded. Shots without blocked ones.",
     "noMatchesYet": "No match played this season yet. The figures appear after the first match with a match report or tagging.",
-    "summaryPlayed": "{matches, plural, one {1 match} other {# matches}}, involved in {involved}",
+    "summaryPlayed": "{matches, plural, one {1 match} other {# matches}}, {involved, plural, one {1 appearance} other {# appearances}}",
     "number": "Number",
-    "analysedBasis": "Goals and suspensions from all matches, everything else only from {k} of {n, plural, one {# match} other {# matches}} with analysis."
+    "analysedBasis": "Goals, 7 m, suspensions and saves from all matches, everything else only from {k} of {n, plural, one {# match} other {# matches}} with analysis.",
+    "sevenMSaves": "7 m saved",
+    "sourceCol": "Source",
+    "fromAnalysis": "Analysis",
+    "fromReport": "Match report",
+    "reportBasis": "All figures come from the match reports. Shots, shooting rate and turnovers are added with the first analysed video.",
+    "reportBasisKeeper": "All figures come from the match reports. Shots faced and save rate are added with the first analysed video."
   },
   "slots": {
     "title": "Training times {season}",

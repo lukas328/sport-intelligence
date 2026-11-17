@@ -40,6 +40,9 @@ class OfficialReport:
     half_time: tuple[int, int] | None = None
     entries: list[OfficialEntry] = field(default_factory=list)
     notes: list[str] = field(default_factory=list)  # shown as warnings of the import
+    # shirt numbers of the players on the match sheet per side ("home", "away"): who played,
+    # also without a goal or a save (appearances, app review A3); empty when the source has none
+    lineup: dict[str, list[int]] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)

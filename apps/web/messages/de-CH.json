@@ -3321,11 +3321,17 @@
     "home": "gegen {opponent}",
     "away": "auswärts bei {opponent}",
     "noMatches": "Noch keine Spiele in dieser Saison.",
-    "source": "Aus den Spielberichten und dem, was erfasst wurde, wie auf den Spielseiten. Spielminuten werden nicht erfasst. Würfe ohne geblockte.",
+    "source": "Aus den Spielberichten und dem, was erfasst wurde, wie auf den Spielseiten. Ein Einsatz zählt, wer im Spielbericht aufgeführt ist oder eine Zahl hat. Spielminuten werden nicht erfasst. Würfe ohne geblockte.",
     "noMatchesYet": "Noch kein gespieltes Spiel in dieser Saison. Die Zahlen erscheinen nach dem ersten Spiel mit Spielbericht oder Erfassung.",
-    "summaryPlayed": "{matches, plural, one {1 Spiel} other {# Spiele}}, an {involved} beteiligt",
+    "summaryPlayed": "{matches, plural, one {1 Spiel} other {# Spiele}}, {involved, plural, one {1 Einsatz} other {# Einsätze}}",
     "number": "Nummer",
-    "analysedBasis": "Tore und Strafen aus allen Spielen, alles andere nur aus {k} von {n, plural, one {# Spiel} other {# Spielen}} mit Analyse."
+    "analysedBasis": "Tore, 7 m, Strafen und Paraden aus allen Spielen, alles andere nur aus {k} von {n, plural, one {# Spiel} other {# Spielen}} mit Analyse.",
+    "sevenMSaves": "7 m gehalten",
+    "sourceCol": "Quelle",
+    "fromAnalysis": "Analyse",
+    "fromReport": "Spielbericht",
+    "reportBasis": "Alle Zahlen aus den Spielberichten. Würfe, Wurfquote und Ballverluste kommen mit dem ersten analysierten Video dazu.",
+    "reportBasisKeeper": "Alle Zahlen aus den Spielberichten. Würfe aufs Tor und gehaltene Würfe kommen mit dem ersten analysierten Video dazu."
   },
   "slots": {
     "title": "Trainingszeiten {season}",

@@ -10810,6 +10810,11 @@ export interface components {
              * @default false
              */
             analysed?: boolean;
+            /**
+             * Appeared
+             * @default false
+             */
+            appeared?: boolean;
             attendance: components["schemas"]["AttendanceStatus"] | null;
             /** Competition */
             competition: string | null;
@@ -10843,10 +10848,16 @@ export interface components {
             score_own: number | null;
             /** Shooting Pct */
             shooting_pct: number | null;
+            /** Source */
+            source?: ("analysis" | "report") | null;
             /** Tagged */
             tagged: boolean;
         };
-        /** SeasonLineTotals */
+        /**
+         * SeasonLineTotals
+         * @description Goals, 7 m goals, suspensions, cards and saves over every match (the official report has
+         *     them); every other figure over the analysed matches only.
+         */
         SeasonLineTotals: {
             /**
              * Analysed Matches
@@ -10875,6 +10886,11 @@ export interface components {
             posts: number;
             /** Red Cards */
             red_cards: number;
+            /**
+             * Report Matches
+             * @default 0
+             */
+            report_matches?: number;
             /** Save Pct */
             save_pct: number | null;
             /** Saved */

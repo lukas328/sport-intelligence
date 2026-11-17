@@ -3,7 +3,12 @@
 Figures come from the match statistics (`events.stats_for`, one source per goal), so they
 agree with the match page; the event ids from `handball_metrics.stats.player_event_ids`,
 which applies the same rules to the same events. Matches as in the season statistics: every
-played match of the team's season (a result stored or events)."""
+played match of the team's season (a result stored or events).
+
+Without an analysis a match's figures come from the official report: goals, 7 m, suspensions,
+cards and the goalkeeper's saves (credited by the report). Who played comes from the report's
+match sheet (`report_extra.official_report.lineup`, or the cached handball.ch sheet of a linked
+game), so a goalkeeper without a save still has the appearance (app review A3)."""
 
 from __future__ import annotations
 
@@ -13,6 +18,8 @@ from typing import Any, Literal
 from sqlalchemy import select
 
 from handball_api.core.errors import ProblemError
+from handball_api.integrations import handball_ch as ch
+from handball_api.integrations.official_reports.handball_ch import lineup_of
 from handball_api.models import Attendance, Event, Match, Opponent, Player, RosterEntry
 from handball_api.models.enums import AttendanceStatus
 from handball_api.schemas.season_line import (
@@ -29,7 +36,7 @@ from handball_api.services.events import _to_metric
 from handball_api.services.insights import _played_matches
 from handball_api.services.orgs import get_season, get_team
 from handball_api.services.policies import Action, can
-from handball_metrics.stats import LINE_KEYS, player_event_ids
+from handball_metrics.stats import LINE_KEYS, OFFICIAL_SOURCES, player_event_ids
 
 # figures the match statistics count per field player (`players`) and per goalkeeper
 FIELD_KEYS = (
@@ -46,8 +53,19 @@ FIELD_KEYS = (
     "suspensions",
 )
 PRESENT = (AttendanceStatus.PRESENT, AttendanceStatus.LATE)
-# what the official report knows of a player: the rest only a match with an analysis has
-REPORT_KEYS = ("goals", "suspensions", "yellow_cards", "red_cards")
+# what the official report knows of a player: the rest only a match with an analysis has. The
+# report credits a save to the goalkeeper who made it; the shots a goalkeeper faced (and so the
+# goals against and the save rate) need playing minutes the report does not have (A3, A12)
+REPORT_KEYS = (
+    "goals",
+    "seven_m_goals",
+    "seven_m_shots",
+    "suspensions",
+    "yellow_cards",
+    "red_cards",
+    "saves",
+    "seven_m_saves",
+)
 
 
 def _ratio(a: int, b: int) -> float | None:
@@ -133,7 +151,11 @@ async def season_line(
     pid = str(player.id)
     lines: list[SeasonLineMatch] = []
     for m in matches:
-        lines.append(await _match_line(ctx, m, pid, events.get(m.id, []), names, attendance))
+        sheet = await _sheet(ctx, m)
+        appeared = entry.jersey_number is not None and entry.jersey_number in (sheet or ())
+        lines.append(
+            await _match_line(ctx, m, pid, events.get(m.id, []), names, attendance, appeared)
+        )
     return SeasonLine(
         player_id=player.id,
         team_id=team_id,
@@ -147,6 +169,20 @@ async def season_line(
     )
 
 
+async def _sheet(ctx: Ctx, m: Match) -> set[int] | None:
+    """Our shirt numbers on the match's official sheet: stored by the report import, else the
+    cached handball.ch sheet of the linked game (no request to handball.ch); None unknown."""
+    stored = ((m.report_extra or {}).get("official_report") or {}).get("lineup")
+    if isinstance(stored, list) and stored:
+        return {int(n) for n in stored if isinstance(n, int)}
+    if m.official_game_id is None or m.official_provider != ch.PROVIDER:
+        return None
+    rows = await ch.cached_sheet(ctx.db, m.official_game_id)
+    if not rows:
+        return None
+    return set(lineup_of(rows).get("home" if m.is_home else "away", []))
+
+
 async def _match_line(
     ctx: Ctx,
     m: Match,
@@ -154,6 +190,7 @@ async def _match_line(
     rows: list[Event],
     names: dict[uuid.UUID, str],
     attendance: dict[uuid.UUID, Attendance],
+    appeared: bool = False,
 ) -> SeasonLineMatch:
     stats = await events_service.stats_for(ctx, m)
     ids = player_event_ids([_to_metric(e) for e in rows], pid)
@@ -162,6 +199,7 @@ async def _match_line(
     opp = m.score_opponent if m.score_opponent is not None else stats["opponent"]["goals"]
     tagged = bool(stats["quality"]["events"])
     analysed = bool(stats["quality"].get("analysed"))
+    report = any(src in OFFICIAL_SOURCES for src in stats["quality"].get("sources", {}))
     att = attendance.get(m.id)
     return SeasonLineMatch(
         match_id=m.id,
@@ -174,7 +212,9 @@ async def _match_line(
         result=_result(own, opp),
         tagged=tagged,
         analysed=analysed,
-        involved=any(ids[k] for k in LINE_KEYS),
+        source="analysis" if analysed else "report" if report else None,
+        appeared=appeared,
+        involved=appeared or any(ids[k] for k in LINE_KEYS),
         attendance=att.status if att else None,
         response=att.response if att else None,
         figures=figures,
@@ -198,6 +238,7 @@ def _totals(lines: list[SeasonLineMatch]) -> SeasonLineTotals:
         matches=len(lines),
         tagged_matches=sum(line.tagged for line in lines),
         analysed_matches=len(rated),
+        report_matches=sum(line.source == "report" for line in lines),
         matches_involved=sum(line.involved for line in lines),
         matches_present=sum(line.attendance in PRESENT for line in lines),
         shooting_pct=_ratio(rated_goals, sums["shots"]),

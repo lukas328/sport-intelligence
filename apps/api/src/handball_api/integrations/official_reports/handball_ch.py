@@ -61,6 +61,7 @@ def parse_handball_ch(game_id: int, data: dict[str, Any]) -> OfficialReport:
         for p in data.get("gamePlayerStats") or []
         if p.get("function") == "goalkeeper"
     }
+    lineup = lineup_of(data.get("gamePlayerStats") or [])
     entries: list[OfficialEntry] = []
     for e in data.get("gameLog") or []:
         kind = _ch_kind(str(e.get("actionText") or ""))
@@ -122,7 +123,20 @@ def parse_handball_ch(game_id: int, data: dict[str, Any]) -> OfficialReport:
         final=(int(final[0]), int(final[1])) if None not in final else None,
         half_time=(int(half[0]), int(half[1])) if None not in half else None,
         entries=sorted(entries, key=lambda x: x.clock_s),
+        lineup=lineup,
     )
+
+
+def lineup_of(rows: list[dict[str, Any]]) -> dict[str, list[int]]:
+    """Shirt numbers of the players and goalkeepers on the match sheet, per side (officials
+    left out): who played in the game, also without an entry in the log."""
+    out: dict[str, set[int]] = {}
+    for p in rows:
+        number = parse_number(p.get("dressNr"))
+        if number is None or p.get("function") not in ("player", "goalkeeper"):
+            continue
+        out.setdefault("home" if p.get("isHome") else "away", set()).add(number)
+    return {side: sorted(numbers) for side, numbers in out.items()}
 
 
 async def fetch_handball_ch(game_id: int) -> dict[str, Any]:

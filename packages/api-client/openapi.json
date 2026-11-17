@@ -15803,6 +15803,11 @@
             "title": "Analysed",
             "type": "boolean"
           },
+          "appeared": {
+            "default": false,
+            "title": "Appeared",
+            "type": "boolean"
+          },
           "attendance": {
             "anyOf": [
               {
@@ -15923,6 +15928,21 @@
             ],
             "title": "Shooting Pct"
           },
+          "source": {
+            "anyOf": [
+              {
+                "enum": [
+                  "analysis",
+                  "report"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source"
+          },
           "tagged": {
             "title": "Tagged",
             "type": "boolean"
@@ -15950,6 +15970,7 @@
         "type": "object"
       },
       "SeasonLineTotals": {
+        "description": "Goals, 7 m goals, suspensions, cards and saves over every match (the official report has\nthem); every other figure over the analysed matches only.",
         "properties": {
           "analysed_matches": {
             "default": 0,
@@ -15998,6 +16019,11 @@
           },
           "red_cards": {
             "title": "Red Cards",
+            "type": "integer"
+          },
+          "report_matches": {
+            "default": 0,
+            "title": "Report Matches",
             "type": "integer"
           },
           "save_pct": {
