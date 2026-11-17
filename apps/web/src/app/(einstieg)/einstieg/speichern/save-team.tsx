@@ -91,7 +91,8 @@ export function SaveTeam() {
 
   return (
     <section className="mx-auto max-w-xl space-y-4" aria-live="polite" data-testid="entry-saving">
-      {state === "saving" && <p className="text-[19px]">{t("saving")}</p>}
+      {/* a team by hand fetches nothing from the federation: say only what happens */}
+      {state === "saving" && <p className="text-[19px]">{t(params.get("team") ? "saving" : "savingByName")}</p>}
       {state === "access" && (
         <>
           <h1 className="font-slant text-[34px] leading-tight">{t("accessTitle")}</h1>

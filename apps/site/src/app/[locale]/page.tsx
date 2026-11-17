@@ -101,6 +101,7 @@ export default async function Home({ params }: Props) {
                 button={t.teamButton}
                 example={t.teamExample}
                 after={t.teamAfter}
+                manual={t.teamManual}
                 appLocale={app}
                 onClub
               />
@@ -349,14 +350,7 @@ export default async function Home({ params }: Props) {
               </li>
             ))}
           </ul>
-          <p
-            data-reveal
-            className="mt-8 flex flex-wrap items-center gap-x-4 gap-y-2 text-[1.0625rem]"
-          >
-            <SwissFlag />
-            <span className="max-w-[40rem]">{t.trustSwiss}</span>
-          </p>
-          <div className="mt-2 flex flex-wrap gap-x-8">
+          <div className="mt-8 flex flex-wrap gap-x-8">
             <Link href={`/${locale}/daten/`} className="link">
               {m.cta.data}
             </Link>
@@ -410,6 +404,7 @@ export default async function Home({ params }: Props) {
               button={t.teamButton}
               example={t.teamExample}
               after={t.teamAfter}
+              manual={t.teamManual}
               appLocale={app}
             />
             <DemoLink href={`/${locale}/demo/`} className="link mt-4">
@@ -432,15 +427,6 @@ function Tick() {
         strokeWidth={3}
         strokeLinecap="square"
       />
-    </svg>
-  );
-}
-
-function SwissFlag() {
-  return (
-    <svg viewBox="0 0 32 32" aria-hidden className="size-8 shrink-0">
-      <rect width="32" height="32" fill="#d52b1e" />
-      <path d="M13 6h6v7h7v6h-7v7h-6v-7H6v-6h7z" fill="#fff" />
     </svg>
   );
 }

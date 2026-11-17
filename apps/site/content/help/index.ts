@@ -72,9 +72,9 @@ export const HELP: HelpEntry[] = [
     group: "team",
     title: { de: "Team und Kader", fr: "Équipe et effectif", en: "Team and squad" },
     summary: {
-      de: "Kader vom Verband, was fehlt, wer ist wer im Video, Trainerbank.",
-      fr: "Effectif de la fédération, ce qui manque, qui est qui dans la vidéo, staff.",
-      en: "Squad from the federation, what is missing, who is who in the video, coaching staff.",
+      de: "Kader von handball.ch oder von Hand, was fehlt, wer ist wer im Video, Trainerbank.",
+      fr: "Effectif de handball.ch ou à la main, ce qui manque, qui est qui dans la vidéo, staff.",
+      en: "Squad from handball.ch or by hand, what is missing, who is who in the video, coaching staff.",
     },
     keywords: { de: "kader nummer spieler trainerbank einladen", fr: "effectif numéro joueurs staff inviter", en: "squad number players staff invite" },
   },
