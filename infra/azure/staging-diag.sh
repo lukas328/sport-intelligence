@@ -34,6 +34,10 @@ if [ -n "${DIAG_ASSET:-}" ]; then
 else
   where="analysis IS NOT NULL ORDER BY updated_at DESC LIMIT 1"
 fi
+echo "== the 8 newest processing jobs (any asset)"
+q "SELECT coalesce(jsonb_agg(to_jsonb(r)), '[]'::jsonb) FROM (SELECT id, video_asset_id, kind, status,
+   progress, error, created_at, updated_at FROM processing_jobs ORDER BY created_at DESC LIMIT 8) r" \
+  | tail -1 | jq . | tee "$OUT/recent_jobs.json"
 asset=$(q "SELECT id FROM video_assets WHERE $where" | tail -1)
 [ -n "$asset" ] || { echo "no asset found"; exit 1; }
 echo "== asset $asset"
@@ -44,7 +48,7 @@ q "SELECT analysis FROM video_assets WHERE id = '$asset'" | tail -1 >"$OUT/asset
 echo "analysis: $(wc -c <"$OUT/asset_analysis.json") bytes, keys: $(jq -c 'keys' "$OUT/asset_analysis.json")"
 jq '.stats // {} | {ball_summary, observe_counters, ball_model_status, reid_model_status, role_model_status}' \
   "$OUT/asset_analysis.json" || true
-q "SELECT coalesce(json_agg(r ORDER BY r.created_at), '[]') FROM (SELECT id, kind, pipeline_version,
+q "SELECT coalesce(jsonb_agg(to_jsonb(r) ORDER BY r.created_at), '[]'::jsonb) FROM (SELECT id, kind, pipeline_version,
    status, progress, stages, error, created_at, updated_at FROM processing_jobs
    WHERE video_asset_id = '$asset') r" | tail -1 | jq . >"$OUT/jobs.json"
 jq -r '.[] | "\(.created_at) \(.kind) \(.status) \(.error // "")"' "$OUT/jobs.json"
