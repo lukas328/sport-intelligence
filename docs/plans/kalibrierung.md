@@ -288,6 +288,29 @@ Ausserhalb der Kalibrierung geändert auf `main` seit der Basis: Grenzen für au
 Anpassungen der Kamerabewegung (`motion.fit_rotation`); die Basis wurde auf den gespeicherten
 Bewegungen gerechnet, sie betrifft das nicht.
 
+### 4.8 Endtest (Runde 2) und nächster Schritt (2026-11-18, Nachtauftrag)
+
+**Endtest nicht gemessen:** In der Datenbank von Runde 2 ist nur 1 der 69 Bilder gespeichert
+(c002, 22:50 UTC; weder in `lines` noch in der alten Sammlung `truth` mehr). Entweder ist nur ein
+Bild gemacht, oder weitere Speicherungen kamen nicht an (die Seite meldet einen Fehler als
+"Nicht gespeichert"). Zu klären mit Lukas; die Auswertung läuft danach in Minuten. Bis dahin gilt
+nur die Entwicklungs-Messung (4.7), und die ist mit 1 richtigen Feld dünn.
+
+**Vorschlag nächster Schritt: Feld im Bild anpassen (tiefe Kameras und unstimmige Bewegung).**
+Von den 24 abgelehnten Entwicklungs-Stücken scheitern 7 an `flat_view` (tiefe Kamera) und 8 an
+`no_floor` (Kamerabewegung über die Bilder nicht stimmig, 4.2). Beides umgeht eine Anpassung des
+Feldes pro Bild an die Bildlinien (Konzept 4.3): kein Draufsicht-Schritt, keine über alle Bilder
+stimmige Bewegung nötig; die Bilder werden über die Bewegung nur verbunden, wo sie stimmt.
+- Aufwand: etwa 4 bis 6 Arbeitstage, nur CPU. Prototyp in `ml/calib` auf den 30 Entwicklungs-
+  Stücken (2 Tage), Prüfschritt für das neue Verfahren (die Prüfwerte der Draufsicht passen nicht
+  mehr; 1 Tag), Übernahme ins Produkt hinter `auto_calibrate` mit Tests (1 bis 2 Tage), Messung
+  einmal auf dem Endtest (1 Tag, wenn Runde 2 gelabelt ist).
+- Erwarteter Gewinn: ehrlich unsicher. Kandidaten sind 15 der 30 Entwicklungs-Stücke; Ziel 5 bis
+  10 richtige Felder (17 bis 33 %) statt 1, bei höchstens 1 falsch akzeptierten. Die Wahrheit für
+  diese Stücke liegt vor, ein Fehlschlag zeigt sich also nach dem Prototyp (Tag 2), nicht erst am
+  Ende.
+- Fernsehbild mit Zoom und Schnitten bleibt geparkt (4.4).
+
 ## 5. Was nicht geholfen hat
 
 | Was | Wo | Zahlen | Warum verworfen |
