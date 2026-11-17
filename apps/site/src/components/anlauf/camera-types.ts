@@ -33,6 +33,6 @@ export interface CameraScene {
   aim?: Pt | null;
   /** the scorer's way: solid when confirmed, dashed when estimated */
   confirmed: boolean;
-  /** label at the shot spot, e.g. "Tor Seewald 39:55" */
+  /** label at the shot spot, e.g. "Tor Nachtwind 39:55" */
   label?: string | null;
 }

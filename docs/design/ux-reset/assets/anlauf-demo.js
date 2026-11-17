@@ -36,8 +36,8 @@ var GOALS = {
   them: goals(31, { ra: 9, rl: 3, rm: 2, la: 2, rr: 1, kr: 1 }, 3),
   us: goals(47, { kr: 7, la: 3, ra: 3, rl: 3, rm: 3, rr: 3, m7: 2, gs: 2 }, 3),
   themGs: goals(53, { gs: 6 }, 2, true),
-  staefa: goals(61, { gs: 4, rl: 3 }, 1), rheinau: goals(71, { rl: 5, kr: 3 }, 1),
-  season: goals(83, { ra: 10 }, 2) /* rechts aussen in the two matches before Thalwil */
+  staefa: goals(61, { gs: 4, rl: 3 }, 1), glutwind: goals(71, { rl: 5, kr: 3 }, 1),
+  season: goals(83, { ra: 10 }, 2) /* rechts aussen in the two matches before Nachtwind */
 };
 /* which goals a bundle shows, and in whose colour. key = the thing it belongs to */
 var BUNDLES = {
@@ -45,17 +45,17 @@ var BUNDLES = {
   gs: { team: "them", pick: function () { return GOALS.themGs; }, rest: function () { return GOALS.them; } },
   kr: { team: "us", pick: function () { return GOALS.us.filter(function (g) { return g.zone === "kr"; }); }, rest: function () { return GOALS.us.filter(function (g) { return g.zone !== "kr"; }); } },
   staefa: { team: "them", opp: "staefa", pick: function () { return GOALS.staefa.filter(function (g) { return g.zone === "gs"; }); }, rest: function () { return GOALS.staefa.filter(function (g) { return g.zone !== "gs"; }); } },
-  rheinau: { team: "them", opp: "rheinau", pick: function () { return GOALS.rheinau.filter(function (g) { return g.zone === "rl"; }); }, rest: function () { return GOALS.rheinau.filter(function (g) { return g.zone !== "rl"; }); } },
+  glutwind: { team: "them", opp: "glutwind", pick: function () { return GOALS.glutwind.filter(function (g) { return g.zone === "rl"; }); }, rest: function () { return GOALS.glutwind.filter(function (g) { return g.zone !== "rl"; }); } },
   saison: { team: "them", pick: function () { return GOALS.them.filter(function (g) { return g.zone === "ra"; }).concat(GOALS.season); }, rest: function () { return []; } }
 };
 
 /* ---------- goal difference minute by minute, from the goal sequence of the match report ----------
    API: report.goals[] = { minute, team } ; the line is the running difference. */
 var FLOW = {
-  thalwil: [[0, 0], [2, 1], [3, 0], [5, 1], [7, 0], [9, 1], [11, 2], [12, 1], [14, 2], [16, 1], [17, 2], [19, 3], [20, 2], [22, 3], [23, 2], [24, 3], [25, 2], [26, 3], [27, 4], [28, 3], [29, 4], [30, 4], [32, 5], [35, 6], [36, 7], [38.6, 6], [39.9, 5], [41, 4], [42, 3], [43.8, 2], [46, 3], [48, 4], [49, 3], [50, 4], [51, 5], [53, 6], [54, 7], [55, 6], [56, 7], [57, 8], [58, 9], [58.5, 8], [60, 8]],
-  horgen: [[0, 0], [6, 1], [12, 3], [18, 4], [24, 4], [30, 6], [36, 7], [42, 8], [48, 9], [54, 10], [60, 10]]
+  nachtwind: [[0, 0], [2, 1], [3, 0], [5, 1], [7, 0], [9, 1], [11, 2], [12, 1], [14, 2], [16, 1], [17, 2], [19, 3], [20, 2], [22, 3], [23, 2], [24, 3], [25, 2], [26, 3], [27, 4], [28, 3], [29, 4], [30, 4], [32, 5], [35, 6], [36, 7], [38.6, 6], [39.9, 5], [41, 4], [42, 3], [43.8, 2], [46, 3], [48, 4], [49, 3], [50, 4], [51, 5], [53, 6], [54, 7], [55, 6], [56, 7], [57, 8], [58, 9], [58.5, 8], [60, 8]],
+  blitzfang: [[0, 0], [6, 1], [12, 3], [18, 4], [24, 4], [30, 6], [36, 7], [42, 8], [48, 9], [54, 10], [60, 10]]
 };
-/* goals of the Thalwil match for the timeline under the video (minutes) */
+/* goals of the Nachtwind match for the timeline under the video (minutes) */
 var RAIL = {
   us: [2, 5, 9, 11, 14, 17, 19, 22, 24, 26, 27, 29, 29.5, 32, 35, 36, 46, 48, 50, 51, 53, 54, 56, 57, 58, 59.5],
   them: [3, 7, 12, 16, 20, 23, 25, 28, 30, 39, 40, 41, 42, 43, 44, 49, 55, 58.5],
@@ -74,7 +74,7 @@ var CAM = {
     them: [[5, [[1.4, 0.5], [0.8, 0.8], [1.1, 1.2], [2.0, 1.6], [3.0, 2.2], [3.9, 2.9]], 1], [9, [[15.6, 9.0], [14.6, 7.8], [13.2, 6.5], [11.8, 5.6], [10.5, 5.0]], 1], [14, [[14.8, 12.8], [14.0, 11.6], [13.0, 10.6], [12.1, 10.0]], 0], [22, [[13.2, 17.4], [12.6, 16.4], [11.6, 15.3], [10.9, 14.6]], 1], [3, [[0.8, 19.5], [1.0, 19.2], [1.3, 18.9], [1.6, 18.6]], 0], [18, [[6.2, 12.6], [6.3, 11.4], [6.6, 9.8], [6.7, 8.4], [6.6, 7.4]], 0]],
     ref: [[12.0, 1.6], [10.8, 1.4], [9.6, 1.5]],
     ball: [[0, 1.3, "them", 14], [1.5, 2.6, "them", 9], [4.6, 6, "them", 5]],
-    scorer: 5, shot: [3.9, 2.9], aim: [0.15, 8.9], est: false, label: "Tor Thalwil 39:55"
+    scorer: 5, shot: [3.9, 2.9], aim: [0.15, 8.9], est: false, label: "Tor Nachtwind 39:55"
   },
   /* our goal from the circle, 18:02: here the ball was not found in the picture */
   kr: {
@@ -83,17 +83,17 @@ var CAM = {
     them: [[1, [[0.9, 10.6], [1.0, 10.4], [1.1, 10.2], [1.2, 10.1]], 1], [6, [[4.0, 3.0], [4.1, 3.4], [4.2, 3.7], [4.2, 3.9]], 0], [12, [[6.2, 6.6], [6.4, 7.2], [6.4, 7.6], [6.3, 7.9]], 0], [15, [[6.7, 9.0], [6.6, 9.6], [6.4, 10.0], [6.3, 10.2]], 0], [17, [[6.6, 11.8], [6.6, 11.6], [6.5, 11.6], [6.5, 11.7]], 1], [19, [[6.3, 13.8], [6.3, 13.6], [6.3, 13.5], [6.3, 13.4]], 0], [21, [[4.4, 16.4], [4.4, 16.3], [4.4, 16.2], [4.4, 16.1]], 0]],
     ref: [[13.0, 18.6], [12.0, 18.8], [11.2, 18.8]],
     ball: [],
-    scorer: 8, scorerTeam: "us", shot: [5.9, 9.9], aim: [0.15, 9.4], est: true, label: "Tor Zürichsee 18:02"
+    scorer: 8, scorerTeam: "us", shot: [5.9, 9.9], aim: [0.15, 9.4], est: true, label: "Tor Tannengrün 18:02"
   }
 };
 
 /* ---------- the season ---------- */
 var SEASON = {
-  diff: [["3.10.", "Rüti", 5], ["10.10.", "Wädenswil", -3], ["17.10.", "Horgen", 10], ["24.10.", "Meilen", 1], ["31.10.", "Stäfa", -7], ["7.11.", "Thalwil", 8]],
-  /* matches with a finished analysis: Rüti, Stäfa, Thalwil */
+  diff: [["3.10.", "Rüti", 5], ["10.10.", "Rotdorn", -3], ["17.10.", "Blitzfang", 10], ["24.10.", "Sturmfalke", 1], ["31.10.", "Wirbelstern", -7], ["7.11.", "Nachtwind", 8]],
+  /* matches with a finished analysis: Rüti, Wirbelstern, Nachtwind */
   themes: [
     { t: "Gegentore über rechts aussen", s: "In jedem Spiel mit Video die häufigste Seite.", n: "19 Szenen", series: [5, 5, 9], of: [22, 26, 18], who: "them" },
-    { t: "Ballverluste", s: "Stäfa war der Ausreisser, sonst um 10.", n: "36 Szenen", series: [10, 15, 11], of: null, who: "us" },
+    { t: "Ballverluste", s: "Wirbelstern war der Ausreisser, sonst um 10.", n: "36 Szenen", series: [10, 15, 11], of: null, who: "us" },
     { t: "Tore vom Kreis", s: "Von 3 auf 7 in drei Spielen.", n: "14 Szenen", series: [3, 4, 7], of: [27, 19, 26], who: "us" }
   ]
 };

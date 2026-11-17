@@ -67,9 +67,9 @@ Taktikkamera aus «Einblendung».
 4. **Gelb und Weiss.** Auf der eigenen Fläche werden Linien und Ziffern in Tinte gezeichnet. Auf dem
    Grund trägt eine gelbe Linie ihre schwarze Paspel und bleibt gelb. Die weisse Fläche bekommt eine
    Kante in Tinte. Getestet mit Rot, Blau, Gelb, Schwarz, Weiss, Grün (`farben.jpg` und die Knöpfe).
-   Kollisionen: Blau oder Grün gegen das petrolfarbene Thalwil lassen Thalwil in Weiss antreten.
+   Kollisionen: Blau oder Grün gegen das petrolfarbene Nachtwind lassen Nachtwind in Weiss antreten.
 5. **Gegnerfarbe unbekannt.** Die Gästehälfte ist Hallengrau `#646b73` mit weissen Linien und der
-   Zeile «Farbe nicht bekannt». Im Bild steht ein Knopf «Welche Farbe trägt Thalwil?» mit sechs
+   Zeile «Farbe nicht bekannt». Im Bild steht ein Knopf «Welche Farbe trägt Nachtwind?» mit sechs
    Trikotfarben; die Wahl gilt für alle Spiele gegen diesen Gegner. Ist der eigene Verein schwarz,
    wird das Grau heller (`#8b9198`). Siehe `gegner-unbekannt.jpg`.
 6. **Video und Zahlen.** Hell und ruhig, aber oben steht als Streifen dasselbe Gesicht ohne Bahnen:

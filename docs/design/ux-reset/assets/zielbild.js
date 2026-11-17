@@ -1,7 +1,7 @@
 /* ===== Zielbild: puts every screen of anlauf-screens.js on the page =====
    Only for this presentation page. The one switch is the club colour (six demo colours);
-   the opponent is TSV Thalwil in black, or unknown where a frame says so. */
-var ZB = { club: "blau", opp: "thalwil" };
+   the opponent is TSV Nachtwind in black, or unknown where a frame says so. */
+var ZB = { club: "blau", opp: "nachtwind" };
 
 function frame(id, form, fn, opt) {
   var el = document.createElement("div");

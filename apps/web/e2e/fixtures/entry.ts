@@ -5,8 +5,8 @@
  * (page.route), as official.spec.ts does for the signed-in official data.
  */
 
-export const CLUB = { id: 9101, name: "SG Seeufer/Rebhalde", city: "Seeufer" };
-const OTHER = { id: 9102, name: "HC Uferweg", city: "Uferweg" };
+export const CLUB = { id: 9101, name: "SG Ulmgarten/Kiesenau", city: "Ulmgarten" };
+const OTHER = { id: 9102, name: "HC Murnwil", city: "Murnwil" };
 
 export const hit = (official_id: number, name: string, in_app = false, club = CLUB) => ({
   official_id,
@@ -18,9 +18,9 @@ export const hit = (official_id: number, name: string, in_app = false, club = CL
   fuzzy: false,
 });
 
-export const HITS = [hit(81001, "SG Seeufer/Rebhalde"), hit(81002, "SG Seeufer/Rebhalde 2"), hit(82001, "HC Uferweg Herren", false, OTHER)];
+export const HITS = [hit(81001, "SG Ulmgarten/Kiesenau"), hit(81002, "SG Ulmgarten/Kiesenau 2"), hit(82001, "HC Murnwil Herren", false, OTHER)];
 /** a team someone has already taken over in the app */
-export const TAKEN = hit(83001, "TV Rebhalde Herren", true, { id: 9103, name: "TV Rebhalde", city: "Rebhalde" });
+export const TAKEN = hit(83001, "TV Kiesenau Herren", true, { id: 9103, name: "TV Kiesenau", city: "Kiesenau" });
 
 const game = (days: number, opponent: string, own: number | null, opp: number | null, home = true) => ({
   opponent,
@@ -30,7 +30,7 @@ const game = (days: number, opponent: string, own: number | null, opp: number | 
   half_own: own == null ? null : Math.floor(own / 2),
   half_opp: opp == null ? null : Math.floor(opp / 2),
   kickoff_at: new Date(Date.now() + days * 86_400_000).toISOString(),
-  venue: "Halle Seeufer",
+  venue: "Halle Ulmgarten",
 });
 
 export function preview(h: ReturnType<typeof hit>, scorers: boolean) {
@@ -41,13 +41,13 @@ export function preview(h: ReturnType<typeof hit>, scorers: boolean) {
     league: h.league,
     group_name: h.group_name,
     season: "2026/27",
-    last: game(-3, "HC Uferweg", 28, 26),
+    last: game(-3, "HC Murnwil", 28, 26),
     next: game(4, "TV Bergli", null, null, false),
     rank: 3,
     table: [
       { rank: 2, name: "TV Bergli", games: 8, points: 12, goal_difference: 21, own: false },
       { rank: 3, name: h.name, games: 8, points: 11, goal_difference: 9, own: true },
-      { rank: 4, name: "HC Uferweg", games: 8, points: 9, goal_difference: -4, own: false },
+      { rank: 4, name: "HC Murnwil", games: 8, points: 9, goal_difference: -4, own: false },
     ],
     form: ["w", "w", "l", "w", "d"],
     run: { result: "w", count: 1 },

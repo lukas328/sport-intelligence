@@ -3139,7 +3139,7 @@
     "title": "Find your team",
     "intro": "Find your team in the official handball.ch data. The matches, results and players come with it.",
     "label": "Team or club",
-    "placeholder": "e.g. Bergtal",
+    "placeholder": "e.g. Talvenau",
     "hint": "At least three letters.",
     "results": "Teams found",
     "noHits": "No team found for “{q}”.",
@@ -4052,7 +4052,7 @@
   "entry": {
     "ask": "What is your team called?",
     "label": "Team or town",
-    "placeholder": "e.g. Seewald",
+    "placeholder": "e.g. Brimmwil",
     "search": "Search",
     "short": "At least three letters.",
     "none": "No team found for «{q}».",

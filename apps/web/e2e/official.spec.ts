@@ -14,7 +14,7 @@ test("onboarding: find the team, take one over, ask a claimed club for access, a
   let joined: unknown = null;
   await page.route("**/v1/official/teams?*", (route) => {
     const q = new URL(route.request().url()).searchParams.get("q") ?? "";
-    return json(route, /seeblick|bergtal|see/i.test(q) ? fx.searchHits : []);
+    return json(route, /brimmwil|talvenau/i.test(q) ? fx.searchHits : []);
   });
   await page.route("**/v1/official/teams/*/claim", (route) => {
     const id = route.request().url().split("/").at(-2)!;
@@ -29,30 +29,30 @@ test("onboarding: find the team, take one over, ask a claimed club for access, a
   await register(page, uniqueEmail("official"), "Coach Offiziell");
   await expect(page).toHaveURL(/\/onboarding/);
   const search = page.getByTestId("official-search");
-  await search.getByLabel("Team oder Verein").fill("Seeblick");
+  await search.getByLabel("Team oder Verein").fill("Brimmwil");
   const results = page.getByRole("list", { name: "Gefundene Teams" });
   // grouped by club; a team already in the app shows who decides
-  await expect(results.getByRole("heading", { name: /HC Seeblick/ })).toBeVisible();
-  await expect(results.getByRole("heading", { name: /SG Bergtal/ })).toBeVisible();
+  await expect(results.getByRole("heading", { name: /HC Brimmwil/ })).toBeVisible();
+  await expect(results.getByRole("heading", { name: /SG Talvenau/ })).toBeVisible();
   await expect(page.getByTestId("official-team")).toHaveCount(3);
-  await expect(page.getByTestId("official-team").filter({ hasText: "SG Bergtal Herren" })).toContainText("schon in der App");
+  await expect(page.getByTestId("official-team").filter({ hasText: "SG Talvenau Herren" })).toContainText("schon in der App");
   await expectAccessible(page);
 
   // a coach of the claimed club asks its admins for access, with a message
-  const bergtal = page.getByTestId("official-team").filter({ hasText: "SG Bergtal Herren" });
-  await bergtal.getByRole("button", { name: "Diesem Team beitreten" }).click();
-  await bergtal.getByLabel(/Nachricht/).fill("Ich trainiere die Herren seit diesem Sommer.");
-  await bergtal.getByRole("button", { name: "Anfrage senden" }).click();
-  await expect(page.getByText(/^Anfrage gesendet. Die Trainer von SG Bergtal sehen sie in der App./)).toBeVisible();
+  const talvenau = page.getByTestId("official-team").filter({ hasText: "SG Talvenau Herren" });
+  await talvenau.getByRole("button", { name: "Diesem Team beitreten" }).click();
+  await talvenau.getByLabel(/Nachricht/).fill("Ich trainiere die Herren seit diesem Sommer.");
+  await talvenau.getByRole("button", { name: "Anfrage senden" }).click();
+  await expect(page.getByText(/^Anfrage gesendet. Die Trainer von SG Talvenau sehen sie in der App./)).toBeVisible();
   expect(claims.at(-1)).toEqual({ id: "72001", body: { club_id: 9002, message: "Ich trainiere die Herren seit diesem Sommer." } });
 
   // a player asks to join that team
-  await bergtal.getByRole("button", { name: "Als Spieler beitreten" }).click();
-  await bergtal.getByLabel("Vorname").fill("Lara");
-  await bergtal.getByLabel("Nachname").fill("Muster");
-  await bergtal.getByLabel(/Rückennummer/).fill("11");
-  await bergtal.getByRole("button", { name: "Beitritt anfragen" }).click();
-  await expect(page.getByText("Anfrage gesendet. Sobald sie bestätigt ist, bist du im Team SG Bergtal Herren.")).toBeVisible();
+  await talvenau.getByRole("button", { name: "Als Spieler beitreten" }).click();
+  await talvenau.getByLabel("Vorname").fill("Lara");
+  await talvenau.getByLabel("Nachname").fill("Muster");
+  await talvenau.getByLabel(/Rückennummer/).fill("11");
+  await talvenau.getByRole("button", { name: "Beitritt anfragen" }).click();
+  await expect(page.getByText("Anfrage gesendet. Sobald sie bestätigt ist, bist du im Team SG Talvenau Herren.")).toBeVisible();
   expect(joined).toMatchObject({ first_name: "Lara", last_name: "Muster", jersey_number: 11, role: "player" });
   // the coach's steps (club, team, squad, invite) are not the player's
   await expect(page.getByText(/Schritt 1 von/)).toHaveCount(0);
@@ -69,7 +69,7 @@ test("onboarding: find the team, take one over, ask a claimed club for access, a
   });
   await page.route(`${claimedBase}/matches`, (route) =>
     json(route, [
-      { id: "00000000-0000-4000-8000-00000000a001", team_id: fx.CLAIMED_TEAM, kind: "match", kickoff_at: "2026-11-07T17:00:00Z", opponent_name: "TSV Seewald", is_home: true, score_own: 26, score_opponent: 18, status: "finished", has_video: false, is_demo: false, competition: null },
+      { id: "00000000-0000-4000-8000-00000000a001", team_id: fx.CLAIMED_TEAM, kind: "match", kickoff_at: "2026-11-07T17:00:00Z", opponent_name: "TSV Nachtwind", is_home: true, score_own: 26, score_opponent: 18, status: "finished", has_video: false, is_demo: false, competition: null },
       { id: "00000000-0000-4000-8000-00000000a002", team_id: fx.CLAIMED_TEAM, kind: "match", kickoff_at: "2026-11-22T18:30:00Z", opponent_name: "HSG Auenfeld", is_home: false, score_own: null, score_opponent: null, status: "scheduled", has_video: false, is_demo: false, competition: null },
     ]),
   );
@@ -78,11 +78,11 @@ test("onboarding: find the team, take one over, ask a claimed club for access, a
     patched = route.request().postDataJSON();
     return json(route, {});
   });
-  await page.getByTestId("official-team").filter({ hasText: "HC Seeblick Herren 1" }).getByTestId("claim").click();
+  await page.getByTestId("official-team").filter({ hasText: "HC Brimmwil Herren 1" }).getByTestId("claim").click();
   await expect(page.getByRole("heading", { level: 1, name: "Ist das dein Team?" })).toBeVisible();
   await expect(page.getByText("Schritt 2 von 2")).toBeVisible();
   const done = page.getByTestId("claim-done");
-  await expect(done.getByRole("heading", { name: "HC Seeblick Herren 1" })).toBeVisible();
+  await expect(done.getByRole("heading", { name: "HC Brimmwil Herren 1" })).toBeVisible();
   await expect(done).toContainText("3 Personen im Kader, mit Nummern");
   await expect(done).toContainText("2 Spiele im Spielplan, 1 gespielt");
   await expect(done).toContainText("Tabelle: Rang 2");
@@ -105,7 +105,7 @@ test("onboarding: find the team, take one over, ask a claimed club for access, a
 /** A club and team made by hand, then the official answers for that team. */
 async function coachWithTeam(page: Page) {
   await register(page, uniqueEmail("official-inbox"), "Coach Abgleich");
-  await clubByHand(page, "HC Seeblick");
+  await clubByHand(page, "HC Brimmwil");
   await page.getByLabel("Teamname").fill("Herren 1");
   await page.getByRole("button", { name: "Zum Team" }).click();
   await page.waitForURL(/\/app\/[^/]+\/teams\/[^/?#]+/);
@@ -159,6 +159,6 @@ test("suggestion inbox: squad with a doubled number, a report to import, the tab
   await expect(page.getByTestId("official-reports")).toHaveCount(0);
 
   // the table marks the own team
-  await expect(page.getByTestId("official-standing").locator("tr[aria-current]")).toContainText("HC Seeblick Herren 1");
+  await expect(page.getByTestId("official-standing").locator("tr[aria-current]")).toContainText("HC Brimmwil Herren 1");
   await expectAccessible(page);
 });

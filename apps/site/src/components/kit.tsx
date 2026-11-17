@@ -7,7 +7,7 @@ import { DEMO_CLUB, kit, kitVars, SHIRTS } from "@/lib/color";
 import { withKit } from "@/lib/links";
 import { startUrl } from "@/lib/site";
 
-/** The demo opponent: black with white (TSV Seewald). The clash rule decides how it shows. */
+/** The demo opponent: black with white (TSV Nachtwind). The clash rule decides how it shows. */
 export const DEMO_OPPONENT = ["#17191c", "#ffffff"] as const;
 
 export type ShirtKey = (typeof SHIRTS)[number][0];

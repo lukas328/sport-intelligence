@@ -113,7 +113,7 @@ export const CLUB_COLOURS = [
 
 export type ClubColourKey = (typeof CLUB_COLOURS)[number][0];
 
-/** The opponent the check colours are shown against (the demo season's TSV Seewald): black and white. */
+/** The opponent the check colours are shown against (the demo season's TSV Nachtwind): black and white. */
 export const CHECK_OPPONENT = ["#17191c", "#ffffff"] as const;
 
 /** Shifts `c` towards `to` until it reaches `need` contrast on `ground`. */

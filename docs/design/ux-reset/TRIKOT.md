@@ -33,7 +33,7 @@ neither, it is ink on cloth.
 - The club picks two colours and a pattern at onboarding and sees the shirt change at once.
 - The opponent's colour comes from the match's jersey colours (the app already asks for them in
   "Spiel anlegen") or from what was chosen for that opponent before. Unknown: neutral
-  `#3d4449`, and one tap on the kit chip asks "Welche Farbe trägt Thalwil?" (eight shirts).
+  `#3d4449`, and one tap on the kit chip asks "Welche Farbe trägt Nachtwind?" (eight shirts).
   Never guess a colour.
 - **Clash rule**, as with real away kits: if `--opp-a` is too close to `--kit-a` (same hue
   family and similar lightness), the opponent is shown in its second colour, or in ink.

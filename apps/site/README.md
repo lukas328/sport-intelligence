@@ -40,7 +40,7 @@ centre lives at `{site}/{de|fr|en}/hilfe/{slug}/`; the app links there with `HB_
 - Prices: `@handball/plans` (`packages/plans/plans.json`), generated from the API plan table with
   `make plans`; CI fails when it is out of date.
 - Demo match: `public/demo/match.json`, a fictional match from `scripts/make_demo.py` (a fixed plan,
-  HC Zürichsee against TSV Seewald, lost 27:29 with 11 of 29 goals conceded over the right wing, and seeded random shots, times and
+  HC Tannengrün against TSV Nachtwind, lost 27:29 with 11 of 29 goals conceded over the right wing, and seeded random shots, times and
   numbers; statistics from `handball_metrics`); regenerate with `make plans`. `src/lib/demo.ts` turns it
   into what the pages draw (zones, invented runs, the three things, one scene on the tactics camera);
   the page says «Erfundenes Spiel» at the top. Everything invented is handball-typical: shot spots

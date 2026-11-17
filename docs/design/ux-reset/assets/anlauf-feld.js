@@ -91,7 +91,7 @@ function zones(svg) {
 
 /* ---------- Flight: the run of the match in the Wurf head, goal difference, ours up ---------- */
 function flight(svg) {
-  var data = FLOW[svg.dataset.flow || "thalwil"], W = +svg.dataset.w, H = +svg.dataset.h, pad = W < 500 ? 16 : 32, U = (H - 34) / 10, base = H - 18, small = W < 500;
+  var data = FLOW[svg.dataset.flow || "nachtwind"], W = +svg.dataset.w, H = +svg.dataset.h, pad = W < 500 ? 16 : 32, U = (H - 34) / 10, base = H - 18, small = W < 500;
   function x(m) { return pad + (W - 2 * pad - 14) * m / 60; } function y(v) { return base - v * U; }
   function at(m) { var v = 0; data.forEach(function (p) { if (p[0] <= m) v = p[1]; }); return v; }
   var pts = []; data.forEach(function (p, i) { if (i) pts.push([x(p[0]), y(data[i - 1][1])]); pts.push([x(p[0]), y(p[1])]); });
