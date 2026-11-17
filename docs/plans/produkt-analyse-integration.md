@@ -667,9 +667,18 @@ pro 60-min-Spiel: Modal T4 0.66 USD/h, Azure T4 mit 4 vCPU und 16 GiB 0.90 USD/h
   weil das Netz bei 960 px die Bewegungsunschärfe offenbar besser verträgt. Würfe und harte Pässe
   bekommen so jedes Bild.
 - Für Azure unter 1.08 USD bliebe nur 960 px jedes 2. Bild (1.02 USD, Gold 65.6 %).
-- Umsetzung: Die uint8-Datei (`ml/ball/onnx_u8.py` auf `ball_hrp1_fp16`) muss in den Bucket, dazu
-  `HB_BALL_MODEL`, `HB_BALL_MODEL_SHA256`, `HB_BALL_WIDTH=960`, `HB_BALL_EVERY=1` für das
-  GPU-Image. Das ist Sache der UX-Sitzung über die Hauptsitzung. Testphase: hrp1 enthält
-  DeepSport und ist vor Go-live zu ersetzen.
+- Umsetzung:
+  - Die uint8-Datei liegt im Staging-Bucket `handball-testdata` (Freigabe b), per Rückdownload mit
+    SHA geprüft: `models/ball/ball_hrp1_fp16_u8-8efd55d05333.onnx`, SHA-256
+    `8efd55d0533301889c0b3715bff3fa708a9e4f9be3b2d8162a4c56377a70253f`. Erzeugt mit
+    `ml/ball/onnx_u8.py` aus `ball_hrp1_fp16-37153d8dfc83.onnx`; im Produkt (`BallNet`, 960 px)
+    gibt sie auf echten Bildern dieselben Kandidaten wie die float-Datei.
+  - `Dockerfile.cuda`: `HB_BALL_WIDTH=960`, `HB_BALL_EVERY=1` als Standard. `HB_BALL_MODEL` und
+    `HB_BALL_MODEL_SHA256` setzt die UX-Sitzung über Terraform.
+  - Offen: Der Preis von 0.87 USD gilt mit YOLOX jedes 3. Bild und Nummern-Budget 0.3. Das
+    GPU-Image hat noch YOLOX auf jedem Bild und Nummern ohne Gate und Budget (Entscheid vom
+    2026-11-17). Damit wird es teurer: Auftrag 13 kostete schon ohne Ball 1.09 USD.
+  - Staging ohne GPU behält die CPU-Testeinstellung (jedes 3. Bild).
+  - Testphase: hrp1 enthält DeepSport und ist vor Go-live zu ersetzen.
 - Damit ist das adaptive Rechnen mit Wurf-Fenstern (Abschnitt oben) nicht mehr nötig: Es wäre
   teurer (1.03 bis 1.09 USD) und schlechter.
