@@ -80,8 +80,8 @@ test("no goal found by the analysis: after Prüfen the result, course, goals and
     if (n < 2) await expect(page.getByText(`Frage ${n + 3} von 5`)).toBeVisible();
     else await expect(page.getByText("Frage 5 von 5")).toBeVisible();
     await page.getByRole("button", { name: who }).click();
-    // then «Von wo?» in the same question (H7): not seen here
-    await page.getByTestId("spot-unknown").click();
+    // then «Von wo?» offered in the same question (H7), skipped as an equal choice (W33)
+    await page.getByTestId("spot-skip").click();
   }
   // the weaker moment lies 5.6 s after the confirmed goal at 0:24: a goal already known is never
   // asked again (A6), so the round is done; it is not counted anywhere

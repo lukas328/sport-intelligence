@@ -3714,7 +3714,7 @@
     "more": "If you like: {n, plural, one {1 more question} other {# more questions}}",
     "reloading": "The court is being taken over and the video analysed again with it. This takes a few minutes. You can close the page; the new questions will be here afterwards.",
     "mainDone": "The most important moments are checked.",
-    "mainDoneText": "{n, plural, one {1 more moment could be a goal.} other {# more moments could be goals.}} {batch, plural, one {It takes} other {The next # take}} about {minutes, plural, one {1 minute} other {# minutes}} with “From where?”.",
+    "mainDoneText": "{n, plural, one {1 more moment could be a goal.} other {# more moments could be goals.}} {batch, plural, one {It takes} other {The next # take}} about {minutes, plural, one {1 minute} other {# minutes}}.",
     "goOn": "Check more",
     "roundDone": "Checked for today.",
     "leftOpen": "{n, plural, one {1 moment stays open.} other {# moments stay open.}} Until they are answered, the score is an interim one.",
@@ -4074,6 +4074,8 @@
   "spot": {
     "question": "From where?",
     "why": "Tap where the shot came from.",
+    "whyOptional": "If you like: tap where the shot came from. That is what the three things are made of.",
+    "skip": "Skip",
     "courtLabel": "Attacked half, goal at the top. Left and right as the attack sees them.",
     "zone": {
       "la": "Left wing",
