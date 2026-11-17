@@ -136,6 +136,12 @@ def observe_one(p: dict[str, Any], cache: Path, model: Path, threads: int) -> st
                 cv2.imwrite(str(frames_dir / f"{i:05d}.jpg"), im, [cv2.IMWRITE_JPEG_QUALITY, 92])
         cv2.imwrite(str(cache / f"{pid}.hall.jpg"), obs.motion.background())
         obs.motion.save(cache / f"{pid}.motion.npz")
+        # the hall image's sample frames, so a corrected motion can render the hall again
+        np.savez_compressed(
+            cache / f"{pid}.samples.npz",
+            index=np.array([i for i, _ in obs.motion.samples]),
+            frames=np.stack([f for _, f in obs.motion.samples]),
+        )
         ob.save_observations(obs, cache / f"{pid}.obs.npz")
         (cache / f"{pid}.timings.json").write_text(json.dumps(obs.timings_s))
     finally:
@@ -164,6 +170,10 @@ def load(cache: Path, pid: str) -> tuple[Any, Any]:
     from handball_vision.motion import CameraMotion
 
     motion = CameraMotion.load(cache / f"{pid}.motion.npz")
+    samples = cache / f"{pid}.samples.npz"
+    if samples.exists():
+        z = np.load(samples)
+        motion.samples = [(int(i), f) for i, f in zip(z["index"], z["frames"], strict=True)]
     obs = ob.load_observations(cache / f"{pid}.obs.npz", motion)
     hall = cv2.imread(str(cache / f"{pid}.hall.jpg"))
     return obs, hall

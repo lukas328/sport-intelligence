@@ -68,6 +68,22 @@ Sicht: bei akzeptierten Feldern liegt das Feld in der Schwenkmitte ungefähr ric
 Schwenkenden daneben (Kamerabewegung). Fehler in Metern und der Anteil falsch akzeptiert folgen mit
 der Wahrheit (Runde 1: Entwicklung, 63 Bilder).
 
+### 4.2 Diagnose ohne Wahrheit (Entwicklung, 2026-11-17)
+
+- **`flat_view` ist echt:** Die Brennweite der bewegten Kamera um den Faktor 0.5 bis 1.2 zu
+  verändern, ändert den Blickwinkel kaum (c001, c014, c038: 7 bis 9 Grad). Die Kameras stehen
+  tatsächlich tief (2.8 bis 4 m, Bankhöhe oder Tribüne unten). 7 der 33 Entwicklungs-Stücke.
+- **`no_floor` kommt von der Kamerabewegung:** Die Linien eines einzelnen Bildes liegen im Median zu
+  40 bis 66 % auf zwei Bodenrichtungen, alle Bilder zusammen nur zu 15 bis 33 % (alle 9
+  `no_floor`-Stücke der Entwicklung; ein gutes Stück, c067: 84 % gegen 67 %). Die Drehungen sind
+  zwischen den Bildern um etwa ein Grad oder mehr daneben, wie im Nachtrag von ADR 025 für die
+  SGWH-Streams beschrieben, aber hier in fast allen Hallen.
+
 ## 5. Was nicht geholfen hat
 
-(folgt)
+| Was | Wo | Zahlen | Warum verworfen |
+|---|---|---|---|
+| Schwelle `MIN_VIEW_DEG` von 10 auf 3 Grad | 6 `flat_view`-Stücke der Entwicklung | 3 Felder neu akzeptiert, alle 3 auf Sicht falsch (Linien neben den Feldlinien) | Die Draufsicht ist bei tiefer Kamera unzuverlässig; die Schwelle schützt zu Recht. Tiefe Kameras brauchen eine Anpassung im Bild. |
+| Brennweite bewegter Kameras skalieren (0.5 bis 1.2) | c001, c014, c038 | Blickwinkel bleibt bei 7 bis 9 Grad; c038 bei 1.2 akzeptiert, ohne Prüfung | Nicht die Ursache von `flat_view`. |
+| Radiale Verzeichnung k1 (-0.3 bis +0.06) auf den Liniensegmenten | 9 `no_floor`-Stücke und c000 | Bodenanteil ändert sich um höchstens 0.03, keines erreicht 0.35 | Nicht die Ursache von `no_floor`; die Kamerabewegung ist es. |
+| Drehung jedes Linienbildes nachkorrigieren (höchstens 3 Grad pro Achse, `ml/calib/motion_refine.py`) | 9 `no_floor`-Stücke | Bodenanteil steigt (z. B. 0.18 auf 0.34, 0.24 auf 0.42), aber 0 neue Felder: die Stücke scheitern dann an `flat_view` (2) oder `court` (3); Korrekturen im Median 2 bis 3 Grad | Vorläufig: verdächtig grosse Korrekturen (Überanpassung pro Bild möglich) und das Hallenbild wurde nicht neu gerechnet (Beispielbilder nicht gespeichert; ab jetzt in `run.py`). Mit der Wahrheit nochmals prüfen. |
