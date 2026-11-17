@@ -9,7 +9,8 @@ import { ProductShot } from "@/components/product-shot";
 import { JsonLd } from "@/components/json-ld";
 import { DemoLink, KitScope, StartLink } from "@/components/kit";
 import { Reveal } from "@/components/reveal";
-import { BeforeAfter, Evening, TeamChat, When } from "@/components/story";
+import { BeforeAfter, Evening, When } from "@/components/story";
+import { PhoneChat } from "@/components/phone-chat";
 import { TeamField } from "@/components/team-field";
 import { Things } from "@/components/things";
 import { APP_LOCALE, fmt, messages, type Locale } from "@/lib/i18n";
@@ -311,7 +312,7 @@ export default async function Home({ params }: Props) {
               </ul>
             </div>
             <div data-reveal style={{ "--d": 1 } as CSSProperties} className="min-w-0">
-              <TeamChat t={t.chat} team={v.own} />
+              <PhoneChat t={t.chat} locale={locale} />
             </div>
           </div>
         </section>
