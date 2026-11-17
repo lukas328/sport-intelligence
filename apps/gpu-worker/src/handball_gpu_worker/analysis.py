@@ -14,6 +14,7 @@ can mark the court instead of seeing an error.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import shutil
 import tempfile
@@ -29,6 +30,7 @@ from handball_jobkit import TRANSFER, JobSettings, Reporter, s3_client, upload_d
 from handball_vision import __version__ as vision_version
 from handball_vision import formation, goalcandidates, hallmatch, scoreboard
 from handball_vision import observe as learned
+from handball_vision.ballnet import BallNet
 from handball_vision.calibration import (
     Calibration,
     CalibrationError,
@@ -70,6 +72,77 @@ def load_detector(settings: JobSettings) -> YoloxDetector | None:
     if not path.is_file():
         return None
     return YoloxDetector(path, threads=settings.detector_threads or None)
+
+
+def _entries(value: str) -> list[str]:
+    return [v.strip() for v in value.split(",") if v.strip()]
+
+
+def _sha256(path: Path) -> str:
+    h = hashlib.sha256()
+    with path.open("rb") as f:
+        for block in iter(lambda: f.read(1 << 20), b""):
+            h.update(block)
+    return h.hexdigest()
+
+
+def resolve_ball_models(settings: JobSettings, s3: Any = None) -> tuple[list[Path], str]:
+    """Local files for `HB_BALL_MODEL` and a status: "off" (not set), "ok", "missing" (no such
+    file or bucket key), "sha_mismatch", "sha_missing" (a bucket key without its checksum).
+    Bucket keys are fetched once into `ball_cache_dir` (cached file reused after its checksum
+    matched); local paths are checked against their checksum when one is given."""
+    names = _entries(settings.ball_model)
+    if not names:
+        return [], "off"
+    shas = _entries(settings.ball_model_sha256)
+    cache = Path(settings.ball_cache_dir)
+    paths: list[Path] = []
+    for k, name in enumerate(names):
+        sha = shas[k].lower() if k < len(shas) else ""
+        local = Path(name)
+        if not local.is_file():
+            if s3 is None:
+                return [], "missing"
+            if not sha:
+                return [], "sha_missing"
+            local = cache / f"{sha[:12]}-{Path(name).name}"
+            if not local.is_file():
+                cache.mkdir(parents=True, exist_ok=True)
+                part = local.with_suffix(".part")
+                try:
+                    s3.download_file(settings.s3_bucket_artifacts, name, str(part), Config=TRANSFER)
+                except Exception as exc:  # no such key or storage error: the old path runs
+                    log.warning("ball_model_download_failed", key=name, error=str(exc))
+                    part.unlink(missing_ok=True)
+                    return [], "missing"
+                if _sha256(part) != sha:
+                    part.unlink(missing_ok=True)
+                    return [], "sha_mismatch"
+                part.rename(local)
+        if sha and _sha256(local) != sha:
+            return [], "sha_mismatch"
+        paths.append(local)
+    return paths, "ok"
+
+
+def load_ball_net(settings: JobSettings, s3: Any = None) -> tuple[BallNet | None, str]:
+    """The 3-frame ball net(s) of `HB_BALL_MODEL` and the status of `resolve_ball_models`; None
+    (the YOLOX ball path stays) unless all files are there with the right checksum. Test phase:
+    the nets contain DeepSport data, see ballnet.py."""
+    paths, status = resolve_ball_models(settings, s3)
+    if status != "ok":
+        if status != "off":
+            log.warning("ball_model_unavailable", status=status, model=settings.ball_model)
+        return None, status
+    return BallNet(paths, threads=settings.detector_threads or None), status
+
+
+def _ball_version(obs: learned.Observations, settings: JobSettings) -> str:
+    """Which ball path the result used: the ball net files' names, or the YOLOX boxes."""
+    if not getattr(obs, "ball_cands", None):
+        return "yolox"
+    names = [Path(p).stem for p in _entries(settings.ball_model)]
+    return "+".join(names) or "ballnet"
 
 
 def load_number_reader(settings: JobSettings) -> NumberReader | None:
@@ -570,6 +643,8 @@ def _run_learned(
             else None
         )
         rep.stage("observe")
+        # "cached": a re-run on stored observations (their ball candidates, if any, are reused)
+        ball_status = "cached"
         if obs is None:
             video = work / "proxy.mp4"
             s3.download_file(bucket, proxy_key, str(video), Config=TRANSFER)
@@ -584,6 +659,7 @@ def _run_learned(
             reader = _overlay_reader(spread, fps, total / fps if fps else 0.0)
             del spread
             numbers = load_number_reader(settings)
+            ball_net, ball_status = load_ball_net(settings, s3)
             # no overlay: the hall's own scoreboard, when the camera shows it (raw recordings)
             board = (
                 HallBoardReader(
@@ -608,6 +684,9 @@ def _run_learned(
                 embed_every=max(1, settings.reid_every),
                 roles=load_role_classifier(settings),
                 role_every=max(1, settings.role_every),
+                ball_net=ball_net,
+                ball_every=max(1, settings.ball_every),
+                ball_batch=max(1, settings.ball_batch),
             )
             overlay = _overlay_summary(reader)
             play = clock_play(reader, board)
@@ -678,10 +757,18 @@ def _run_learned(
                 "chunks": 0,
                 "chunk_ms": CHUNK_MS,
                 "detector": "model",
-                "versions": {"vision": vision_version, "detector": detector.model},
+                "versions": {
+                    "vision": vision_version,
+                    "detector": detector.model,
+                    "ball": _ball_version(obs, settings),
+                },
                 "timings_s": {k: round(v, 2) for k, v in obs.timings_s.items()},
                 "elapsed_s": round(time.perf_counter() - started, 1),
-                "stats": {"camera": view["camera"], "motion": obs.motion.stats},
+                "stats": {
+                    "camera": view["camera"],
+                    "motion": obs.motion.stats,
+                    "ball_model_status": ball_status,
+                },
                 "formations": [],
                 "scoreboard": overlay,
                 "goal_candidates": goal_candidates(obs),
@@ -730,10 +817,14 @@ def _run_learned(
             "chunks": chunks,
             "chunk_ms": CHUNK_MS,
             "detector": result.detector_source,
-            "versions": {"vision": vision_version, "detector": detector.model},
+            "versions": {
+                "vision": vision_version,
+                "detector": detector.model,
+                "ball": _ball_version(obs, settings),
+            },
             "timings_s": {k: round(v, 2) for k, v in result.timings_s.items()},
             "elapsed_s": round(time.perf_counter() - started, 1),
-            "stats": result.extra,
+            "stats": {**result.extra, "ball_model_status": ball_status},
             "formations": detect_formations(result),
             "events": events_payload(result, side_hint),
             "scoreboard": overlay,

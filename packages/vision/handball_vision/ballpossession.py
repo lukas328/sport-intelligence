@@ -161,6 +161,7 @@ def from_observations(
     result: Any,
     min_score: float = 0.35,
     play: Sequence[tuple[int, int]] | None = None,
+    min_conf: float = 0.0,
 ) -> dict[str, Any] | None:
     """Ball path, holders, possessions and transfers for an analysed video.
 
@@ -172,53 +173,32 @@ def from_observations(
     `play`: the stretches (start_ms, end_ms) in which the match clock runs
     (`scoreboard.play_intervals`). Balls outside them are ignored: in breaks, timeouts and before
     and after the game warm-up balls, ball racks and loose balls are not the game ball. None or
-    empty (no clock read): every ball counts. `ball_gated_by_clock` says which it was."""
-    from handball_vision import balltrack
+    empty (no clock read): every ball counts. `ball_gated_by_clock` says which it was.
 
-    motion = obs.motion
-    fw = motion.frame_size[0]
+    With ball net candidates in the observations (`obs.ball_cands`, `HB_BALL_MODEL`) the path comes
+    from tracker v2 (`balltrack2`, frame pixels, points below `min_conf` left out); otherwise from
+    the YOLOX "sports ball" boxes and `balltrack` (`min_score`). `ball_model` says which."""
     gate = sorted(play) if play else None
-    starts = [a for a, _ in gate or []]
-    ms = 1000 / obs.fps
-    peaks: list[balltrack.Peak] = []
-    seen = False
-    for fo in obs.frames:
-        if not fo.balls:
-            continue
-        seen = True
-        if gate is not None:
-            k = bisect.bisect_right(starts, fo.index * ms) - 1
-            if k < 0 or fo.index * ms > gate[k][1]:
-                continue
-        h = motion.frame_to_canvas(fo.index)
-        if h is None:
-            continue
-        for d in fo.balls:
-            x, y = _apply(h, (d.x1 + d.x2) / 2, (d.y1 + d.y2) / 2)
-            peaks.append(balltrack.Peak(fo.index, x, y, float(d.score)))
-    if not seen or (not peaks and gate is None):
-        return None
     gated = {
         "ball_gated_by_clock": gate is not None,
         "in_play_s": round(sum(b - a for a, b in gate) / 1000, 1) if gate else None,
     }
-    if not peaks:  # balls only while the clock stood
+    cands: Mapping[int, Sequence[tuple[float, float, float]]] = (
+        getattr(obs, "ball_cands", None) or {}
+    )
+    found = _path_v2(obs, cands, gate, min_conf) if cands else _path_v1(obs, gate, min_score)
+    if found is None:
+        return None
+    path, stats, model = found
+    if not path and not stats:  # balls only while the clock stood
         return {
             **gated,
+            "ball_model": model,
             "path_stats": {},
             "summary": summary([], [], obs.fps),
             "possessions": [],
             "transfers": [],
         }
-    step = obs.frames[1].index - obs.frames[0].index if len(obs.frames) > 1 else 1
-    path, stats = balltrack.track(
-        peaks,
-        obs.fps,
-        max_speed=0.9 * fw,  # about 30 m/s on a broadcast view of the court
-        radius=fw / 160,
-        min_score=min_score,
-        max_gap=3 * step,
-    )
     people = {fo.index: fo.people for fo in obs.frames}
     boxes: dict[int, list[Box]] = defaultdict(list)
     for p in result.points:
@@ -226,18 +206,14 @@ def from_observations(
             continue
         d = people[p.frame][p.det_index]
         boxes[p.frame].append((p.track_id, d.x1, d.y1, d.x2, d.y2))
-    ball: dict[int, tuple[float, float]] = {}
-    for bpnt in path:
-        if bpnt.frame not in boxes:
-            continue
-        h = motion.canvas_to_frame(bpnt.frame)
-        if h is not None:
-            ball[bpnt.frame] = _apply(h, bpnt.x, bpnt.y)
+    ball = {f: xy for f, xy in path.items() if f in boxes}
+    ms = 1000 / obs.fps
     teams = {tid: str(v["label"]) for tid, v in result.teams.items()}
     pos = possessions(holders(ball, boxes), teams, obs.fps)
     moves = transfers(pos, obs.fps)
     return {
         **gated,
+        "ball_model": model,
         "path_stats": stats,
         "summary": summary(pos, moves, obs.fps),
         "possessions": [
@@ -260,3 +236,94 @@ def from_observations(
             for m in moves
         ],
     }
+
+
+PathResult = tuple[dict[int, tuple[float, float]], dict[str, Any], str]
+
+
+def _in_play(gate: list[tuple[int, int]] | None, starts: list[int], t_ms: float) -> bool:
+    if gate is None:
+        return True
+    k = bisect.bisect_right(starts, t_ms) - 1
+    return k >= 0 and t_ms <= gate[k][1]
+
+
+def _path_v1(obs: Any, gate: list[tuple[int, int]] | None, min_score: float) -> PathResult | None:
+    """YOLOX ball boxes -> camera-compensated canvas peaks -> `balltrack` -> frame pixels."""
+    from handball_vision import balltrack
+
+    motion = obs.motion
+    fw = motion.frame_size[0]
+    starts = [a for a, _ in gate or []]
+    ms = 1000 / obs.fps
+    peaks: list[balltrack.Peak] = []
+    seen = False
+    for fo in obs.frames:
+        if not fo.balls:
+            continue
+        seen = True
+        if not _in_play(gate, starts, fo.index * ms):
+            continue
+        h = motion.frame_to_canvas(fo.index)
+        if h is None:
+            continue
+        for d in fo.balls:
+            x, y = _apply(h, (d.x1 + d.x2) / 2, (d.y1 + d.y2) / 2)
+            peaks.append(balltrack.Peak(fo.index, x, y, float(d.score)))
+    if not seen or (not peaks and gate is None):
+        return None
+    if not peaks:
+        return {}, {}, "yolox"
+    step = obs.frames[1].index - obs.frames[0].index if len(obs.frames) > 1 else 1
+    path, stats = balltrack.track(
+        peaks,
+        obs.fps,
+        max_speed=0.9 * fw,  # about 30 m/s on a broadcast view of the court
+        radius=fw / 160,
+        min_score=min_score,
+        max_gap=3 * step,
+    )
+    out: dict[int, tuple[float, float]] = {}
+    for bpnt in path:
+        h = motion.canvas_to_frame(bpnt.frame)
+        if h is not None:
+            out[bpnt.frame] = _apply(h, bpnt.x, bpnt.y)
+    return out, dict(stats), "yolox"
+
+
+def ball_path_v2(
+    obs: Any,
+    cands: Mapping[int, Sequence[tuple[float, float, float]]],
+    gate: list[tuple[int, int]] | None = None,
+) -> tuple[int, list[tuple[float, float] | None], list[float]]:
+    """Tracker v2 over the ball net candidates: (first frame, point per frame from there, confidence
+    per frame), frame pixels. Frames without a net run or outside play have no candidates."""
+    from handball_vision import balltrack2
+
+    first, last = min(cands), max(cands)
+    starts = [a for a, _ in gate or []]
+    ms = 1000 / obs.fps
+    peaks = [
+        list(cands.get(f, ())) if _in_play(gate, starts, f * ms) else []
+        for f in range(first, last + 1)
+    ]
+    out, conf = balltrack2.track_windows(peaks, obs.fps, float(obs.motion.frame_size[0]))
+    return first, out, conf
+
+
+def _path_v2(
+    obs: Any,
+    cands: Mapping[int, Sequence[tuple[float, float, float]]],
+    gate: list[tuple[int, int]] | None,
+    min_conf: float,
+) -> PathResult:
+    first, out, conf = ball_path_v2(obs, cands, gate)
+    path = {
+        first + k: q
+        for k, (q, c) in enumerate(zip(out, conf, strict=True))
+        if q is not None and c >= min_conf
+    }
+    stats = {"frames": len(out), "points": len(path)}
+    if not path and gate is not None:
+        return {}, {}, "ballnet"
+    return path, stats, "ballnet"
