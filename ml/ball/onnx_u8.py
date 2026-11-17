@@ -5,8 +5,9 @@ The exported nets take N,9,H,W float32 RGB 0..255; the product builds that on th
 channels first, float32: about 21 ms per frame on the T4 machine, and four times the bytes to copy
 to the GPU). The new graph takes N,H,W,9 uint8: the three decoded BGR frames t-G, t, t+G joined
 along the channel axis (one `np.concatenate`), and does the channel order, the transpose and the
-cast itself: Gather (BGR to RGB per frame), Transpose, Cast, then the original net. Works on the
-fp32 and the fp16 files (the fp16 file keeps float32 inputs). Output unchanged.
+cast itself: Cast (first, as TensorRT wants it), Gather (BGR to RGB per frame), Transpose, then
+the original net. Works on the fp32 and the fp16 files (the fp16 file keeps float32 inputs).
+Output unchanged.
 
     python ml/ball/onnx_u8.py ball_hrp1_fp16.onnx ball_hrp1_fp16_u8.onnx [--check]
 """
@@ -35,9 +36,11 @@ def to_u8(src: Path, dst: Path) -> None:
     # the original input becomes an inner tensor fed by the new preprocessing nodes
     g.initializer.append(numpy_helper.from_array(np.array(BGR_TO_RGB, np.int64), "u8_rgb_idx"))
     pre = [
-        helper.make_node("Gather", [U8_INPUT, "u8_rgb_idx"], ["u8_rgb"], axis=3),
-        helper.make_node("Transpose", ["u8_rgb"], ["u8_chw"], perm=[0, 3, 1, 2]),
-        helper.make_node("Cast", ["u8_chw"], [name], to=TensorProto.FLOAT),
+        # Cast first: TensorRT takes a uint8 network input only when it goes straight into a
+        # Cast (no uint8 intermediates; job 14 failed with Gather on uint8)
+        helper.make_node("Cast", [U8_INPUT], ["u8_float"], to=TensorProto.FLOAT),
+        helper.make_node("Gather", ["u8_float", "u8_rgb_idx"], ["u8_rgb"], axis=3),
+        helper.make_node("Transpose", ["u8_rgb"], [name], perm=[0, 3, 1, 2]),
     ]
     nodes = pre + list(g.node)
     del g.node[:]

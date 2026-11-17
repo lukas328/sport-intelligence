@@ -340,7 +340,7 @@ def test_learned_path_needs_calibration_then_reuses_observations(
     # 4 s are too short for goal candidates: what the observation pass would give for a game
     seen: list[int] = []
 
-    def fake_candidates(obs: Any) -> dict[str, Any]:
+    def fake_candidates(obs: Any, play: Any = None) -> dict[str, Any]:
         seen.append(len(obs.frames))
         return {"template": "t", "candidates": [{"t_ms": 4000, "rate": 1}]}
 
@@ -651,7 +651,7 @@ def test_an_earlier_court_of_the_hall_comes_before_the_automatic_one(
     monkeypatch.setattr(analysis, "upload_dir_files", lambda *a: None)
     monkeypatch.setattr(analysis, "_store_view", lambda *a: None)
     monkeypatch.setattr(analysis, "_hall_calibration", hall_calibration)
-    monkeypatch.setattr(analysis, "goal_candidates", lambda obs: None)
+    monkeypatch.setattr(analysis, "goal_candidates", lambda obs, play=None: None)
     monkeypatch.setattr(learned, "observe", lambda *a, **kw: Obs())
     monkeypatch.setattr(learned, "save_observations", lambda *a: None)
     monkeypatch.setattr(learned, "auto_calibrate", auto)
