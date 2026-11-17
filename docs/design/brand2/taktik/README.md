@@ -24,24 +24,29 @@ Ausgearbeitet gegenüber v06, ohne den Charakter zu ändern (Vergleich oben auf 
 - Kreis und Kreuz 2 bis 4 Einheiten zur Mitte; die Feldlinien setzen mit 11 Einheiten Luft aus.
 
 **Wortmarke** (`final/wortmarke-zweizeilig.svg`): «Handball Intelligence» in Kanit ExtraBold
-Italic, der Titelschrift der App, «Intelligence» im Blau des Laufs. Dazu quer und gestapelt.
+Italic, der Titelschrift der App, in Tinte. Dazu quer und gestapelt.
 
 Das sieht man: «Ein Spielzug, wie die Trainerin ihn an die Tafel malt.»
 
 ## Farben
 
+**Entscheid E10 (Lukas, 17. November 2026): eine Farbe überall.** In der App, auf der Website, im
+Favicon, in den App-Icons, im Teilen-Bild und im Spielbericht (PDF) steht das Logo in Tinte auf hellem Grund und
+in Weiss auf dunklem. Die Farben gehören den Teams, und die Website ist Creme, Grün und Schwarz:
+Blau und Rot im Logo standen quer dazu. Auch der Kopf der Startseite der Website bekommt keine
+zweifarbige Ausnahme: dort steht die Wortmarke nur in der Kopfzeile, und gross gezeigt würde sie mit
+den App-Bildern im Vereinsgrün um die Aufmerksamkeit streiten.
+
 | Name | Wert | Wofür |
 |---|---|---|
-| Tinte | `#111316` | Feld, Wortmarke «Handball»; einfarbige Fassung |
-| Markerblau | `#1d47d1` | unsere Spielerin, der Lauf, «Intelligence» |
-| Markerrot | `#e1251b` | der Verteidiger |
+| Tinte | `#111316` | Zeichen und Wortmarke auf hellem Grund (alle Dateien ohne Zusatz) |
+| Weiss | `#ffffff` | auf dunklem Grund (`-weiss`, `-negativ`) |
 | Tafelweiss | `#f7f8f6` | Grund des App-Icons und des Teilen-Bilds |
+| Markerblau, Markerrot | `#1d47d1`, `#e1251b` | nur noch im Beleg `-zweifarbig`, nirgends verwendet |
 
-- **In der App:** nur Tinte (`zeichen-tinte.svg`, `favicon-32-tinte.svg`, `favicon-16-tinte.svg`)
-  oder Weiss auf dunklem Grund (`zeichen-weiss.svg`, `favicon-32-weiss.svg`). Die Farben gehören in der App den Teams; das Logo nimmt keine.
-- **Ausserhalb der App** (App-Icon, Website, Teilen-Bild, Jacke, Banner): die zweifarbige Fassung.
-- **Auf einer Vereinsfarbe** immer einfarbig: Weiss auf Blau, Rot, Schwarz, Grün; Tinte auf Gelb
-  und Weiss.
+- **Auf einer Vereinsfarbe:** Weiss auf Blau, Rot, Schwarz, Grün; Tinte auf Gelb und Weiss.
+- `publish.js` kopiert die Dateien unverändert in `apps/web`, `apps/site` und `apps/mobile` und
+  baut `favicon.ico` (16, 32, 48 px).
 
 ## Schutzraum und Mindestgrösse
 
@@ -64,17 +69,18 @@ Das sieht man: «Ein Spielzug, wie die Trainerin ihn an die Tafel malt.»
 - Den Pfeil neu zeichnen, glätten oder durch ein Pfeil-Symbol ersetzen. Er ist die Hand im Zeichen und ein fester Pfad.
 - Ein Play-Dreieck in den Kreis setzen (Nähe zu «Once Sport»), das Zeichen «XO» nennen oder auf
   Rasengrün und Parkettbraun stellen (Nähe zu Playbook-Apps anderer Sportarten).
-- Die zweifarbige Fassung auf eine Vereinsfarbe legen.
+- Die zweifarbige Fassung verwenden (sie ist seit dem 17. November 2026 nur noch Beleg).
 
 ## Dateien in `final/`
 
 | Datei | Was |
 |---|---|
-| `zeichen.svg`, `zeichen-tinte.svg`, `zeichen-tinte-akzent.svg`, `zeichen-weiss.svg`, `zeichen-negativ.svg`, `zeichen-1024.png` | das Zeichen in allen Farben |
-| `wortmarke-quer*.svg`, `wortmarke-zweizeilig*.svg`, `wortmarke-gestapelt*.svg` | je farbig, `-einfarbig`, `-negativ` (auf Tinte) und `-weiss` (transparent); Schrift als Pfade |
-| `favicon-16.svg`, `favicon-16.png`, `favicon-32.svg`, `favicon-32.png` | eigene Zeichnungen auf dem Pixelraster, zweifarbig; 32 px mit vier 9-Meter-Punkten, 16 px ohne |
-| `favicon-32-tinte.svg`, `favicon-32-weiss.svg`, `favicon-16-tinte.svg` | dieselben für die App (Tinte, Weiss) |
-| `app-icon.svg`, `app-icon-1024.png`, `app-icon-512.png` | iOS: volle Fläche, ohne Ecken (iOS rundet selbst) |
+| `zeichen.svg` (Tinte), `zeichen-tinte.svg`, `zeichen-weiss.svg`, `zeichen-negativ.svg`, `zeichen-1024.png`, `zeichen-48.png`, `zeichen-tinte-288.png`, `zeichen-weiss-288.png` | das Zeichen; die 288-px-Bilder für die Anmeldung der Handy-App |
+| `zeichen-zweifarbig.svg`, `zeichen-tinte-akzent.svg` | Belege, nicht verwendet |
+| `wortmarke-quer*.svg`, `wortmarke-zweizeilig*.svg`, `wortmarke-gestapelt*.svg` | je Tinte, `-negativ` (auf Tinte), `-weiss` (transparent) und `-zweifarbig` (Beleg); Schrift als Pfade |
+| `favicon-16.svg`, `favicon-16.png`, `favicon-32.svg`, `favicon-32.png` | eigene Zeichnungen auf dem Pixelraster, in Tinte; 32 px mit vier 9-Meter-Punkten, 16 px ohne (`-zweifarbig` als Beleg) |
+| `favicon-32-tinte.svg`, `favicon-32-weiss.svg`, `favicon-16-tinte.svg` | dieselben in Tinte und Weiss |
+| `app-icon.svg`, `app-icon-1024.png`, `app-icon-512.png`, `app-icon-192.png`, `app-icon-180.png` | iOS und Web: volle Fläche, ohne Ecken (iOS rundet selbst) |
 | `app-icon-maske.svg`, `app-icon-maske-1024.png`, `app-icon-maske-512.png` | Android adaptiv und Web-Manifest «maskable»: Zeichen in der sicheren Zone (Kreis mit 80 % Durchmesser) |
 | `app-icon-einfarbig.svg` | Android «Designs» (einfarbiges Symbol, transparent) |
 | `open-graph.svg`, `open-graph.png` | Vorschau geteilter Links, 1200 × 630 |
@@ -86,6 +92,7 @@ npm i opentype.js@1.3.4
 node docs/design/brand2/taktik/build.js    # Varianten, final/*.svg, data.json
 node docs/design/brand2/taktik/page.js     # index.html
 node docs/design/brand2/taktik/render.js   # final/*.png, shots/
+node docs/design/brand2/taktik/publish.js  # in die Apps kopieren, favicon.ico
 ```
 
 Schriften in `fonts/`, alle SIL Open Font License: Kanit, Archivo, Familjen Grotesk, Bricolage

@@ -15,12 +15,18 @@ const { chromium } = require('playwright'); const path = require('path'); const 
   };
   await png('favicon-16.svg', 'favicon-16.png', 16, 16);
   await png('favicon-32.svg', 'favicon-32.png', 32, 32);
+  await png('zeichen.svg', 'zeichen-48.png', 48, 48);
   await png('app-icon.svg', 'app-icon-1024.png', 1024, 1024);
   await png('app-icon.svg', 'app-icon-512.png', 512, 512);
+  await png('app-icon.svg', 'app-icon-192.png', 192, 192);
+  await png('app-icon.svg', 'app-icon-180.png', 180, 180);
   await png('app-icon-maske.svg', 'app-icon-maske-1024.png', 1024, 1024);
   await png('app-icon-maske.svg', 'app-icon-maske-512.png', 512, 512);
   await png('open-graph.svg', 'open-graph.png', 1200, 630);
   await png('zeichen.svg', 'zeichen-1024.png', 1024, 1024);
+  /* the mobile app's sign-in mark, light and dark */
+  await png('zeichen-tinte.svg', 'zeichen-tinte-288.png', 288, 288);
+  await png('zeichen-weiss.svg', 'zeichen-weiss-288.png', 288, 288);
   /* page screenshots, one per section */
   const p = await b.newPage({ viewport: { width: 1360, height: 1000 } });
   const errs = []; p.on('console', m => m.type() === 'error' && errs.push(m.text())); p.on('pageerror', e => errs.push(e.message));

@@ -199,25 +199,31 @@ V.forEach((v) => { W(`varianten/${v.id}.svg`, svg("0 0 512 512", mark(Object.ass
 
 const wmRec = WM.find((w) => w.id === WM_REC);
 const fin = (c) => mark(Object.assign({}, FINAL, { color: c }));
+/* Decision E10 (17 November 2026): one colour everywhere. The mark and the word mark are ink on
+   light grounds and white on dark ones, in the app, on the website, in the icons, mails and share
+   pictures. The two-coloured version (Markerblau, Markerrot) stays only as a record, `-zweifarbig`,
+   and is used nowhere. */
 const out = {
-  "zeichen.svg": svg("0 0 512 512", fin("two")),
+  "zeichen.svg": svg("0 0 512 512", fin("ink")),
   "zeichen-tinte.svg": svg("0 0 512 512", fin("ink")),
   "zeichen-tinte-akzent.svg": svg("0 0 512 512", fin("accent")),
   "zeichen-negativ.svg": svg("0 0 512 512", `<rect width="512" height="512" fill="${INK}"/>` + mark(Object.assign({}, FINAL, { color: "#ffffff" }))),
   "zeichen-weiss.svg": svg("0 0 512 512", fin("#ffffff")),
-  "favicon-16.svg": svg("0 0 16 16", px16(INK, BLUE, RED)),
+  "favicon-16.svg": svg("0 0 16 16", px16(INK)),
+  "favicon-16-zweifarbig.svg": svg("0 0 16 16", px16(INK, BLUE, RED)),
   "favicon-16-tinte.svg": svg("0 0 16 16", px16(INK)),
-  "favicon-32.svg": svg("0 0 32 32", px32(INK, BLUE, RED)),
+  "favicon-32.svg": svg("0 0 32 32", px32(INK)),
+  "favicon-32-zweifarbig.svg": svg("0 0 32 32", px32(INK, BLUE, RED)),
   "favicon-32-tinte.svg": svg("0 0 32 32", px32(INK)),
   "favicon-32-weiss.svg": svg("0 0 32 32", px32("#ffffff")),
-  "app-icon.svg": svg("0 0 1024 1024", `<rect width="1024" height="1024" fill="${BOARD}"/><g transform="translate(-6 34) scale(2.02)">${fin("two")}</g>`),
-  "app-icon-maske.svg": svg("0 0 1024 1024", `<rect width="1024" height="1024" fill="${BOARD}"/><g transform="translate(240 250) scale(1.0625)">${fin("two")}</g>`),
+  "app-icon.svg": svg("0 0 1024 1024", `<rect width="1024" height="1024" fill="${BOARD}"/><g transform="translate(-6 34) scale(2.02)">${fin("ink")}</g>`),
+  "app-icon-maske.svg": svg("0 0 1024 1024", `<rect width="1024" height="1024" fill="${BOARD}"/><g transform="translate(240 250) scale(1.0625)">${fin("ink")}</g>`),
   "app-icon-einfarbig.svg": svg("0 0 1024 1024", `<g transform="translate(240 250) scale(1.0625)">${fin("#ffffff")}</g>`)
 };
 [["quer", "quer"], ["zweizeilig", "zweizeilig"], ["gestapelt", "gestapelt"]].forEach(([l, n]) => {
   const c = lockup(wmRec, l, FINAL), k = lockup(wmRec, l, FINAL, { mark: "ink", ink: INK, accent: INK }), w = lockup(wmRec, l, FINAL, { mark: "#ffffff", ink: "#ffffff", accent: "#ffffff" });
-  out[`wortmarke-${n}.svg`] = svg(c.vb, c.body);
-  out[`wortmarke-${n}-einfarbig.svg`] = svg(k.vb, k.body);
+  out[`wortmarke-${n}.svg`] = svg(k.vb, k.body);
+  out[`wortmarke-${n}-zweifarbig.svg`] = svg(c.vb, c.body);
   out[`wortmarke-${n}-negativ.svg`] = svg(w.vb, `<rect x="-2000" y="-2000" width="6000" height="6000" fill="${INK}"/>` + w.body);
   out[`wortmarke-${n}-weiss.svg`] = svg(w.vb, w.body);
 });
@@ -229,8 +235,10 @@ const out = {
   const block = size * 0.95 + size * 1.0 + 28 + ts * 2.4, top = (630 - block) / 2;
   const a = text(wmRec.font, "Handball", x0, top + size * 0.95, size, { track: wmRec.track }), b = text(wmRec.font, "Intelligence", x0, top + size * 1.95, size, { track: wmRec.track });
   const c1 = text("Archivo-ExtraBold", t1, x0, top + size * 1.95 + 28 + ts * 1.1, ts), c2 = text("Archivo-ExtraBold", t2, x0, top + size * 1.95 + 28 + ts * 2.4, ts);
-  out["open-graph.svg"] = svg("0 0 1200 630", `<rect width="1200" height="630" fill="${BOARD}"/><g transform="translate(${mx.toFixed(1)} ${my.toFixed(1)}) scale(${k})">${fin("two")}</g><path d="${a.d}" fill="${INK}"/><path d="${b.d}" fill="${BLUE}"/><path d="${c1.d}" fill="#5a6068"/><path d="${c2.d}" fill="#5a6068"/>`);
+  out["open-graph.svg"] = svg("0 0 1200 630", `<rect width="1200" height="630" fill="${BOARD}"/><g transform="translate(${mx.toFixed(1)} ${my.toFixed(1)}) scale(${k})">${fin("ink")}</g><path d="${a.d}" fill="${INK}"/><path d="${b.d}" fill="${INK}"/><path d="${c1.d}" fill="#5a6068"/><path d="${c2.d}" fill="#5a6068"/>`);
 }
+/* the record of the two-coloured mark, drawn last so the mask ids of the files above stay */
+out["zeichen-zweifarbig.svg"] = svg("0 0 512 512", fin("two"));
 Object.keys(out).forEach((n) => W("final/" + n, out[n]));
 
 /* everything the page shows, as data for the page script */
