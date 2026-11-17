@@ -24,6 +24,13 @@ Dauer, Kosten, Auffälligkeiten). Vor dem Commit `git pull --rebase`, danach pus
 - Ergebnis: Kaggle-Dataset `handball-gpu-profile-game1` (summary.json, je Einstellung ein JSON,
   bench_nets.json). Die Integrations-Sitzung holt es ab und trägt die Zahlen in den Plan ein.
 - Bei "budget"/"spend limit" abbrechen und melden.
+- **Stand lokale Sitzung 2026-11-17 mittags, läuft:** `handball-gpu-profile-game1` auf Kaggle
+  **nicht verwenden**, das sind CPU-Zahlen. ONNX Runtime fand im debian_slim-Image
+  `libcublasLt.so.12` nicht und rechnete still auf der CPU (`bench_nets.json`:
+  `CPUExecutionProvider`); nur cuda_image und cuda_ball_ens wurden fertig, dann griff das Budget.
+  Korrigiert in `profile_gpu.py` (Image wie `Dockerfile.cuda`, Abbruch wenn nicht auf der GPU).
+  Neuer Lauf unter dem Namen `handball-gpu-profile-game1-gpu` (Volume und Kaggle), die
+  Kurzmessung zeigt jetzt `CUDAExecutionProvider`. Ergebnis folgt unter "Erledigt".
 
 
 Gemeinsam für 3 bis 10: OWLv2 wie Auftrag 2, Rechnung mit den gemessenen ~210 s pro Segment auf
