@@ -153,7 +153,7 @@ jobs:
         if: always() && steps.mode.outputs.mode == 'status' && inputs.diag
         run: |
           az postgres flexible-server firewall-rule delete -g "$rg" --server-name "$(terraform output -raw postgres_server)" \
-            --rule-name "gh-diag-${{ github.run_id }}" --yes -o none || true
+            --name "gh-diag-${{ github.run_id }}" --yes -o none || true
 
       - name: Diagnosis artefact
         if: always() && steps.mode.outputs.mode == 'status' && inputs.diag

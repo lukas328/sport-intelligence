@@ -26,7 +26,7 @@ dsn=$(az keyvault secret show --vault-name "$kv" -n hb-admin-dsn --query value -
 echo "::add-mask::$dsn"
 ip=$(curl -fsS https://api.ipify.org)
 az postgres flexible-server firewall-rule create -g "$rg" --server-name "$(terraform output -raw postgres_server)" \
-  --rule-name "$FW_RULE" --start-ip-address "$ip" --end-ip-address "$ip" -o none
+  --name "$FW_RULE" --start-ip-address "$ip" --end-ip-address "$ip" -o none
 
 q() { PGCONNECT_TIMEOUT=20 psql "$dsn" -v ON_ERROR_STOP=1 -At -c "SET app.bypass_rls = 'on'; $1"; }
 if [ -n "${DIAG_ASSET:-}" ]; then
