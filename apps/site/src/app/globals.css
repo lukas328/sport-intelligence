@@ -5,7 +5,9 @@
  * eyes (docs/site/KONZEPT.md): body text 19 px, nothing important under 16 px, targets 48 px.
  * Cloth ground, ink for text, buttons and links. The club colour is the visitor's (a tap on a
  * shirt), set as custom properties by lib/color.ts; it appears only in the Wurf head, the Keil,
- * own lines and numerals. Yellow means «schau hier» and always comes with a word.
+ * own lines and numerals; until a visitor picks a shirt it is the demo club's pine green, which is
+ * also the website's own colour (cream, green, ink). Yellow means «schau hier» and always comes
+ * with a word.
  */
 :root {
   --ground: #eceae5;
@@ -16,26 +18,27 @@
   --attn: #ffd23c;
   --win: #17703f;
   --loss: #a8261e;
-  --court: #0f2333;
-  --court-bar: #0a0d11;
-  --court-text: #c7ced5;
+  /* the tactics camera on the website: ink court, cream lines (lib/color.ts COURT) */
+  --court: #1c1d20;
+  --court-bar: #0e0f11;
+  --court-text: #d9d6cf;
 
-  /* blue club against the demo opponent (black and white), from lib/color.ts kit() */
-  --club: #1f4fd6;
+  /* the demo club's pine green against the demo opponent (black and white), lib/color.ts kit() */
+  --club: #10684a;
   --club-2: #ffffff;
   --club-ink: #ffffff;
-  --club-edge: #1f4fd6;
-  --club-text: #1f4fd6;
-  --club-line: #1f4fd6;
+  --club-edge: #10684a;
+  --club-text: #10684a;
+  --club-line: #10684a;
   --club-pipe: transparent;
-  --club-dot: #1f4fd6;
+  --club-dot: #10684a;
   --opp: #17191c;
   --opp-ink: #ffffff;
   --opp-edge: #17191c;
   --opp-line: #17191c;
   --opp-pipe: transparent;
   --opp-dot: #17191c;
-  --club-cam: #1f4fd6;
+  --club-cam: #10684a;
   --club-cam-ink: #ffffff;
   --opp-cam: #ffffff;
   --opp-cam-ink: #0a0d11;

@@ -416,7 +416,7 @@ def main() -> None:
         "/v1/orgs",
         json={
             "name": CLUB,
-            "primary_color": "#1f4fd6",
+            "primary_color": "#10684a",
             "secondary_color": "#ffffff",
         },
     ).json()["id"]
@@ -553,7 +553,7 @@ def main() -> None:
                 "is_home": spec["home"],
                 "competition": "2. Liga Herren",
                 "venue": "Sporthalle Rotweg, Horgen" if spec["home"] else None,
-                "kit_own": "#1f4fd6",
+                "kit_own": "#10684a",
                 "kit_own_gk": "#f28c00",
                 "opponent_kit": spec["kit"],
                 "kit_opponent": spec["kit"],

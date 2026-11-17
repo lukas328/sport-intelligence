@@ -1,6 +1,6 @@
 /*
  * The look of every product picture: the site's tokens (src/app/globals.css), square corners
- * except phones and the laptop lid, ink frames, a club blue Keil behind the device, one soft
+ * except phones and the laptop lid, ink frames, a club green Keil behind the device, one soft
  * shadow. Rings are yellow with an ink edge: yellow means «schau hier», and the website always
  * puts a word next to it (the callouts are HTML on the page, not in the picture).
  */
@@ -16,7 +16,7 @@
   --ink: #16171a;
   --rule: #d6d3cc;
   --attn: #ffd23c;
-  --club: #1f4fd6;
+  --club: #10684a;
   --shadow: 0 34px 60px -22px rgb(10 13 17 / 0.5), 0 10px 22px -12px rgb(10 13 17 / 0.3);
 }
 
@@ -38,7 +38,7 @@ body {
   background: transparent;
 }
 
-/* the Keil: club blue from a slanted edge down to the bottom, like the heads on the site */
+/* the Keil: the club colour (the demo club's green) from a slanted edge down to the bottom, like the heads on the site */
 .keil {
   position: absolute;
   inset: 0;
