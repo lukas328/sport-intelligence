@@ -170,7 +170,10 @@ def load_ball_net(
     if gate is not None:
         log.warning("ball_model_needs_gpu", model=settings.ball_model, status=gate)
         return None, gate
-    return BallNet(paths, threads=settings.detector_threads or None), status
+    return (
+        BallNet(paths, threads=settings.detector_threads or None, width=settings.ball_width),
+        status,
+    )
 
 
 def _ball_version(obs: learned.Observations, settings: JobSettings) -> str:

@@ -175,3 +175,18 @@ def test_ball_net_path_rows_for_storage() -> None:
     # the YOLOX path keeps no rows
     plain, result2 = _observed()
     assert "path_rows" not in (bp.from_observations(plain, result2) or {})
+
+
+def test_ball_net_on_every_third_frame_fills_the_frames_between() -> None:
+    obs, result = _observed()
+    obs = _with_ball_net(obs)
+    obs.ball_cands = {f: c for f, c in obs.ball_cands.items() if f % 3 == 0}
+    first, path, conf = bp.ball_path_v2(obs, obs.ball_cands)
+    assert first == 0 and len(path) == len(conf) == 298  # frames 0 to 297
+    # the frames between the net's frames get points while the ball is seen
+    between = [path[f] for f in range(1, 140) if f % 3]
+    assert sum(q is not None for q in between) > 0.9 * len(between)
+    q = path[100]
+    assert q is not None and abs(q[0] - (100 + 2 * 100)) < 12  # player 1's ball at frame 100
+    out = bp.from_observations(obs, result)
+    assert out is not None and {p["track_id"] for p in out["possessions"]} == {1, 3}
