@@ -1,0 +1,1353 @@
+{
+ "note": "Shot end test round 1: owner answers (2026-11-17) on 212 product shot candidates (goalcandidates, rate <= 2) in one segment per game of the 42 never-trained test-set-2 halls; page clip = cand_t - 5 s to cand_t + 2 s. state shot/foul/none; kind goal/save/miss/unclear. No release time was set. Frozen end test: no development or tuning on it.",
+ "answers": [
+  {
+   "seg": "AT_Challenge_Lauterach_HandballTirol_2021_s1",
+   "cand_t": 32.7,
+   "clip_t0": 27.7,
+   "state": "foul"
+  },
+  {
+   "seg": "AT_Challenge_Lauterach_HandballTirol_2021_s1",
+   "cand_t": 53.1,
+   "clip_t0": 48.1,
+   "state": "shot",
+   "kind": "save"
+  },
+  {
+   "seg": "AT_Challenge_Lauterach_HandballTirol_2021_s1",
+   "cand_t": 76.7,
+   "clip_t0": 71.7,
+   "state": "shot",
+   "kind": "goal"
+  },
+  {
+   "seg": "AT_Challenge_Lauterach_HandballTirol_2021_s1",
+   "cand_t": 102.9,
+   "clip_t0": 97.9,
+   "state": "shot",
+   "kind": "miss"
+  },
+  {
+   "seg": "AT_Challenge_Lauterach_HandballTirol_2021_s1",
+   "cand_t": 134.1,
+   "clip_t0": 129.1,
+   "state": "shot",
+   "kind": "save"
+  },
+  {
+   "seg": "AT_Challenge_Lauterach_HandballTirol_2021_s1",
+   "cand_t": 173.9,
+   "clip_t0": 168.9,
+   "state": "none"
+  },
+  {
+   "seg": "CH_NLA_BSVBern_WackerThun_2013-09-14_s3",
+   "cand_t": 6.1,
+   "clip_t0": 1.1,
+   "state": "none"
+  },
+  {
+   "seg": "CH_NLA_BSVBern_WackerThun_2013-09-14_s3",
+   "cand_t": 29.3,
+   "clip_t0": 24.3,
+   "state": "none"
+  },
+  {
+   "seg": "CH_NLA_BSVBern_WackerThun_2013-09-14_s3",
+   "cand_t": 54.1,
+   "clip_t0": 49.1,
+   "state": "none"
+  },
+  {
+   "seg": "CH_NLA_BSVBern_WackerThun_2013-09-14_s3",
+   "cand_t": 66.5,
+   "clip_t0": 61.5,
+   "state": "none"
+  },
+  {
+   "seg": "CH_NLA_BSVBern_WackerThun_2013-09-14_s3",
+   "cand_t": 113.3,
+   "clip_t0": 108.3,
+   "state": "none"
+  },
+  {
+   "seg": "CH_NLA_BSVBern_WackerThun_2013-09-14_s3",
+   "cand_t": 154.5,
+   "clip_t0": 149.5,
+   "state": "shot",
+   "kind": "miss"
+  },
+  {
+   "seg": "CH_NLA_GCAmicitia_KriensLuzern_ca2018_s1",
+   "cand_t": 43.5,
+   "clip_t0": 38.5,
+   "state": "none"
+  },
+  {
+   "seg": "CH_NLA_GCAmicitia_KriensLuzern_ca2018_s1",
+   "cand_t": 73.9,
+   "clip_t0": 68.9,
+   "state": "shot",
+   "kind": "goal"
+  },
+  {
+   "seg": "CH_NLA_GCAmicitia_KriensLuzern_ca2018_s1",
+   "cand_t": 95.5,
+   "clip_t0": 90.5,
+   "state": "none"
+  },
+  {
+   "seg": "CH_NLA_GCAmicitia_KriensLuzern_ca2018_s1",
+   "cand_t": 145.3,
+   "clip_t0": 140.3,
+   "state": "none"
+  },
+  {
+   "seg": "CH_NLA_GCAmicitia_KriensLuzern_ca2018_s1",
+   "cand_t": 160.9,
+   "clip_t0": 155.9,
+   "state": "none"
+  },
+  {
+   "seg": "CH_NLA_GCAmicitia_KriensLuzern_ca2018_s1",
+   "cand_t": 169.1,
+   "clip_t0": 164.1,
+   "state": "shot",
+   "kind": "miss"
+  },
+  {
+   "seg": "CH_NLA_KriensLuzern_SuhrAarau_ca2018_s4",
+   "cand_t": 9.7,
+   "clip_t0": 4.7,
+   "state": "shot",
+   "kind": "goal"
+  },
+  {
+   "seg": "CH_NLA_KriensLuzern_SuhrAarau_ca2018_s4",
+   "cand_t": 29.7,
+   "clip_t0": 24.7,
+   "state": "none"
+  },
+  {
+   "seg": "CH_NLA_KriensLuzern_SuhrAarau_ca2018_s4",
+   "cand_t": 62.9,
+   "clip_t0": 57.9,
+   "state": "none"
+  },
+  {
+   "seg": "CH_NLA_KriensLuzern_SuhrAarau_ca2018_s4",
+   "cand_t": 109.5,
+   "clip_t0": 104.5,
+   "state": "shot",
+   "kind": "goal"
+  },
+  {
+   "seg": "CH_NLA_KriensLuzern_SuhrAarau_ca2018_s4",
+   "cand_t": 152.7,
+   "clip_t0": 147.7,
+   "state": "none"
+  },
+  {
+   "seg": "CH_NLA_KriensLuzern_SuhrAarau_ca2018_s4",
+   "cand_t": 160.9,
+   "clip_t0": 155.9,
+   "state": "none"
+  },
+  {
+   "seg": "CH_NLA_PlayoffF1_WackerThun_Kadetten_2013-05-11_s4",
+   "cand_t": 26.5,
+   "clip_t0": 21.5,
+   "state": "none"
+  },
+  {
+   "seg": "CH_NLA_PlayoffF1_WackerThun_Kadetten_2013-05-11_s4",
+   "cand_t": 57.1,
+   "clip_t0": 52.1,
+   "state": "none"
+  },
+  {
+   "seg": "CH_NLA_PlayoffF1_WackerThun_Kadetten_2013-05-11_s4",
+   "cand_t": 90.1,
+   "clip_t0": 85.1,
+   "state": "none"
+  },
+  {
+   "seg": "CH_NLA_PlayoffF1_WackerThun_Kadetten_2013-05-11_s4",
+   "cand_t": 108.5,
+   "clip_t0": 103.5,
+   "state": "none"
+  },
+  {
+   "seg": "CH_NLA_PlayoffF1_WackerThun_Kadetten_2013-05-11_s4",
+   "cand_t": 116.7,
+   "clip_t0": 111.7,
+   "state": "shot",
+   "kind": "goal"
+  },
+  {
+   "seg": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07_s3",
+   "cand_t": 4.9,
+   "clip_t0": 0,
+   "state": "none"
+  },
+  {
+   "seg": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07_s3",
+   "cand_t": 54.1,
+   "clip_t0": 49.1,
+   "state": "none"
+  },
+  {
+   "seg": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07_s3",
+   "cand_t": 84.5,
+   "clip_t0": 79.5,
+   "state": "shot",
+   "kind": "goal"
+  },
+  {
+   "seg": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07_s3",
+   "cand_t": 99.9,
+   "clip_t0": 94.9,
+   "state": "none"
+  },
+  {
+   "seg": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07_s3",
+   "cand_t": 108.1,
+   "clip_t0": 103.1,
+   "state": "shot",
+   "kind": "goal"
+  },
+  {
+   "seg": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07_s3",
+   "cand_t": 138.5,
+   "clip_t0": 133.5,
+   "state": "none"
+  },
+  {
+   "seg": "CH_NLA_SuhrAarau_KriensLuzern_ca2018_s1",
+   "cand_t": 30.9,
+   "clip_t0": 25.9,
+   "state": "shot",
+   "kind": "goal"
+  },
+  {
+   "seg": "CH_NLA_SuhrAarau_KriensLuzern_ca2018_s1",
+   "cand_t": 63.5,
+   "clip_t0": 58.5,
+   "state": "none"
+  },
+  {
+   "seg": "CH_NLA_SuhrAarau_KriensLuzern_ca2018_s1",
+   "cand_t": 81.9,
+   "clip_t0": 76.9,
+   "state": "none"
+  },
+  {
+   "seg": "CH_NLA_SuhrAarau_KriensLuzern_ca2018_s1",
+   "cand_t": 127.9,
+   "clip_t0": 122.9,
+   "state": "shot",
+   "kind": "goal"
+  },
+  {
+   "seg": "CH_NLA_SuhrAarau_KriensLuzern_ca2018_s1",
+   "cand_t": 161.3,
+   "clip_t0": 156.3,
+   "state": "none"
+  },
+  {
+   "seg": "CH_NLA_SuhrAarau_KriensLuzern_ca2018_s1",
+   "cand_t": 170.1,
+   "clip_t0": 165.1,
+   "state": "shot",
+   "kind": "goal"
+  },
+  {
+   "seg": "CH_NLB_TVBirsfelden_GSKadetten_ca2025_s0",
+   "cand_t": 5.1,
+   "clip_t0": 0.1,
+   "state": "shot",
+   "kind": "save"
+  },
+  {
+   "seg": "CH_NLB_TVBirsfelden_GSKadetten_ca2025_s0",
+   "cand_t": 40.1,
+   "clip_t0": 35.1,
+   "state": "none"
+  },
+  {
+   "seg": "CH_NLB_TVBirsfelden_GSKadetten_ca2025_s0",
+   "cand_t": 80.3,
+   "clip_t0": 75.3,
+   "state": "shot",
+   "kind": "goal"
+  },
+  {
+   "seg": "CH_NLB_TVBirsfelden_GSKadetten_ca2025_s0",
+   "cand_t": 96.3,
+   "clip_t0": 91.3,
+   "state": "shot",
+   "kind": "goal"
+  },
+  {
+   "seg": "CH_NLB_TVBirsfelden_GSKadetten_ca2025_s0",
+   "cand_t": 130.3,
+   "clip_t0": 125.3,
+   "state": "none"
+  },
+  {
+   "seg": "CH_NLB_TVBirsfelden_GSKadetten_ca2025_s0",
+   "cand_t": 156.5,
+   "clip_t0": 151.5,
+   "state": "shot",
+   "kind": "goal"
+  },
+  {
+   "seg": "CH_Nati_Schweiz_Rumaenien_2024-01-04_s1",
+   "cand_t": 4.7,
+   "clip_t0": 0,
+   "state": "none"
+  },
+  {
+   "seg": "CH_Nati_Schweiz_Rumaenien_2024-01-04_s1",
+   "cand_t": 12.9,
+   "clip_t0": 7.9,
+   "state": "none"
+  },
+  {
+   "seg": "CH_Nati_Schweiz_Rumaenien_2024-01-04_s1",
+   "cand_t": 28.1,
+   "clip_t0": 23.1,
+   "state": "none"
+  },
+  {
+   "seg": "CH_Nati_Schweiz_Rumaenien_2024-01-04_s1",
+   "cand_t": 66.7,
+   "clip_t0": 61.7,
+   "state": "none"
+  },
+  {
+   "seg": "CH_Nati_Schweiz_Rumaenien_2024-01-04_s1",
+   "cand_t": 160.1,
+   "clip_t0": 155.1,
+   "state": "shot",
+   "kind": "save"
+  },
+  {
+   "seg": "CH_Nati_Schweiz_Rumaenien_2024-01-04_s1",
+   "cand_t": 175.7,
+   "clip_t0": 170.7,
+   "state": "none"
+  },
+  {
+   "seg": "CH_RegioCup_HalbF_Frauen1_2017-03_s0",
+   "cand_t": 32.5,
+   "clip_t0": 27.5,
+   "state": "shot",
+   "kind": "goal"
+  },
+  {
+   "seg": "CH_RegioCup_HalbF_Frauen1_2017-03_s0",
+   "cand_t": 41.9,
+   "clip_t0": 36.9,
+   "state": "none"
+  },
+  {
+   "seg": "CH_RegioCup_HalbF_Frauen1_2017-03_s0",
+   "cand_t": 58.7,
+   "clip_t0": 53.7,
+   "state": "shot",
+   "kind": "goal"
+  },
+  {
+   "seg": "CH_RegioCup_HalbF_Frauen1_2017-03_s0",
+   "cand_t": 95.1,
+   "clip_t0": 90.1,
+   "state": "shot",
+   "kind": "miss"
+  },
+  {
+   "seg": "CH_RegioCup_HalbF_Frauen1_2017-03_s0",
+   "cand_t": 105.3,
+   "clip_t0": 100.3,
+   "state": "none"
+  },
+  {
+   "seg": "CH_RegioCup_HalbF_Frauen1_2017-03_s0",
+   "cand_t": 170.9,
+   "clip_t0": 165.9,
+   "state": "none"
+  },
+  {
+   "seg": "CH_SGPilatus_Staefa_ca2024_s4",
+   "cand_t": 6.1,
+   "clip_t0": 1.1,
+   "state": "shot",
+   "kind": "goal"
+  },
+  {
+   "seg": "CH_SGPilatus_Staefa_ca2024_s4",
+   "cand_t": 39.3,
+   "clip_t0": 34.3,
+   "state": "none"
+  },
+  {
+   "seg": "CH_SGPilatus_Staefa_ca2024_s4",
+   "cand_t": 54.1,
+   "clip_t0": 49.1,
+   "state": "none"
+  },
+  {
+   "seg": "CH_SGPilatus_Staefa_ca2024_s4",
+   "cand_t": 92.1,
+   "clip_t0": 87.1,
+   "state": "shot",
+   "kind": "goal"
+  },
+  {
+   "seg": "CH_SGPilatus_Staefa_ca2024_s4",
+   "cand_t": 156.3,
+   "clip_t0": 151.3,
+   "state": "none"
+  },
+  {
+   "seg": "CH_SGPilatus_Staefa_ca2024_s4",
+   "cand_t": 170.3,
+   "clip_t0": 165.3,
+   "state": "shot",
+   "kind": "miss"
+  },
+  {
+   "seg": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20_s0",
+   "cand_t": 0.5,
+   "clip_t0": 0,
+   "state": "shot",
+   "kind": "goal"
+  },
+  {
+   "seg": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20_s0",
+   "cand_t": 19.7,
+   "clip_t0": 14.7,
+   "state": "foul"
+  },
+  {
+   "seg": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20_s0",
+   "cand_t": 44.7,
+   "clip_t0": 39.7,
+   "state": "none"
+  },
+  {
+   "seg": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20_s0",
+   "cand_t": 83.5,
+   "clip_t0": 78.5,
+   "state": "none"
+  },
+  {
+   "seg": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20_s0",
+   "cand_t": 119.7,
+   "clip_t0": 114.7,
+   "state": "shot",
+   "kind": "goal"
+  },
+  {
+   "seg": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20_s0",
+   "cand_t": 135.5,
+   "clip_t0": 130.5,
+   "state": "none"
+  },
+  {
+   "seg": "CH_U17E_Final_HSGNordwest_SuhrAarau_ca2017_s4",
+   "cand_t": 81.9,
+   "clip_t0": 76.9,
+   "state": "none"
+  },
+  {
+   "seg": "CH_U17E_Final_HSGNordwest_SuhrAarau_ca2017_s4",
+   "cand_t": 98.1,
+   "clip_t0": 93.1,
+   "state": "none"
+  },
+  {
+   "seg": "CH_U17E_Final_HSGNordwest_SuhrAarau_ca2017_s4",
+   "cand_t": 122.1,
+   "clip_t0": 117.1,
+   "state": "none"
+  },
+  {
+   "seg": "CH_U17E_Final_HSGNordwest_SuhrAarau_ca2017_s4",
+   "cand_t": 155.9,
+   "clip_t0": 150.9,
+   "state": "shot",
+   "kind": "save"
+  },
+  {
+   "seg": "CH_U17E_Final_HSGNordwest_SuhrAarau_ca2017_s4",
+   "cand_t": 170.3,
+   "clip_t0": 165.3,
+   "state": "none"
+  },
+  {
+   "seg": "CH_U17E_Final_Pfadi_HSGNordwest_ca2019_s3",
+   "cand_t": 5.9,
+   "clip_t0": 0.9,
+   "state": "none"
+  },
+  {
+   "seg": "CH_U17E_Final_Pfadi_HSGNordwest_ca2019_s3",
+   "cand_t": 62.7,
+   "clip_t0": 57.7,
+   "state": "shot",
+   "kind": "unclear"
+  },
+  {
+   "seg": "CH_U17E_Final_Pfadi_HSGNordwest_ca2019_s3",
+   "cand_t": 95.9,
+   "clip_t0": 90.9,
+   "state": "none"
+  },
+  {
+   "seg": "CH_U17E_Final_Pfadi_HSGNordwest_ca2019_s3",
+   "cand_t": 109.3,
+   "clip_t0": 104.3,
+   "state": "none"
+  },
+  {
+   "seg": "CH_U17E_Final_Pfadi_HSGNordwest_ca2019_s3",
+   "cand_t": 125.7,
+   "clip_t0": 120.7,
+   "state": "shot",
+   "kind": "goal"
+  },
+  {
+   "seg": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10_s1",
+   "cand_t": 33.7,
+   "clip_t0": 28.7,
+   "state": "shot",
+   "kind": "goal"
+  },
+  {
+   "seg": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10_s1",
+   "cand_t": 78.1,
+   "clip_t0": 73.1,
+   "state": "none"
+  },
+  {
+   "seg": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10_s1",
+   "cand_t": 87.5,
+   "clip_t0": 82.5,
+   "state": "none"
+  },
+  {
+   "seg": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10_s1",
+   "cand_t": 110.5,
+   "clip_t0": 105.5,
+   "state": "shot",
+   "kind": "goal"
+  },
+  {
+   "seg": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10_s1",
+   "cand_t": 140.5,
+   "clip_t0": 135.5,
+   "state": "none"
+  },
+  {
+   "seg": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10_s1",
+   "cand_t": 154.7,
+   "clip_t0": 149.7,
+   "state": "none"
+  },
+  {
+   "seg": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20_s4",
+   "cand_t": 23.3,
+   "clip_t0": 18.3,
+   "state": "shot",
+   "kind": "goal"
+  },
+  {
+   "seg": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20_s4",
+   "cand_t": 76.9,
+   "clip_t0": 71.9,
+   "state": "shot",
+   "kind": "save"
+  },
+  {
+   "seg": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20_s4",
+   "cand_t": 85.9,
+   "clip_t0": 80.9,
+   "state": "shot",
+   "kind": "goal"
+  },
+  {
+   "seg": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20_s4",
+   "cand_t": 135.7,
+   "clip_t0": 130.7,
+   "state": "shot",
+   "kind": "save"
+  },
+  {
+   "seg": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20_s4",
+   "cand_t": 144.1,
+   "clip_t0": 139.1,
+   "state": "none"
+  },
+  {
+   "seg": "ES_1Nacional_AnaitasunaB_Trapagaran_2026_s3",
+   "cand_t": 0.5,
+   "clip_t0": 0,
+   "state": "none"
+  },
+  {
+   "seg": "ES_1Nacional_AnaitasunaB_Trapagaran_2026_s3",
+   "cand_t": 31.5,
+   "clip_t0": 26.5,
+   "state": "shot",
+   "kind": "miss"
+  },
+  {
+   "seg": "ES_1Nacional_AnaitasunaB_Trapagaran_2026_s3",
+   "cand_t": 65.3,
+   "clip_t0": 60.3,
+   "state": "none"
+  },
+  {
+   "seg": "ES_1Nacional_AnaitasunaB_Trapagaran_2026_s3",
+   "cand_t": 100.7,
+   "clip_t0": 95.7,
+   "state": "none"
+  },
+  {
+   "seg": "ES_1Nacional_AnaitasunaB_Trapagaran_2026_s3",
+   "cand_t": 156.7,
+   "clip_t0": 151.7,
+   "state": "shot",
+   "kind": "goal"
+  },
+  {
+   "seg": "ES_1Nacional_AnaitasunaB_Trapagaran_2026_s3",
+   "cand_t": 170.3,
+   "clip_t0": 165.3,
+   "state": "none"
+  },
+  {
+   "seg": "ES_1Nacional_Huarte_Erreka_2026_s3",
+   "cand_t": 6.5,
+   "clip_t0": 1.5,
+   "state": "none"
+  },
+  {
+   "seg": "ES_1Nacional_Huarte_Erreka_2026_s3",
+   "cand_t": 72.3,
+   "clip_t0": 67.3,
+   "state": "shot",
+   "kind": "miss"
+  },
+  {
+   "seg": "ES_1Nacional_Huarte_Erreka_2026_s3",
+   "cand_t": 82.7,
+   "clip_t0": 77.7,
+   "state": "none"
+  },
+  {
+   "seg": "ES_1Nacional_Huarte_Erreka_2026_s3",
+   "cand_t": 90.9,
+   "clip_t0": 85.9,
+   "state": "foul"
+  },
+  {
+   "seg": "ES_1Nacional_Huarte_Erreka_2026_s3",
+   "cand_t": 131.7,
+   "clip_t0": 126.7,
+   "state": "shot",
+   "kind": "goal"
+  },
+  {
+   "seg": "ES_1Nacional_Huarte_Erreka_2026_s3",
+   "cand_t": 141.9,
+   "clip_t0": 136.9,
+   "state": "none"
+  },
+  {
+   "seg": "ES_1Nacional_PalmaDelRio_2026_s3",
+   "cand_t": 10.7,
+   "clip_t0": 5.7,
+   "state": "shot",
+   "kind": "goal"
+  },
+  {
+   "seg": "ES_1Nacional_PalmaDelRio_2026_s3",
+   "cand_t": 31.1,
+   "clip_t0": 26.1,
+   "state": "none"
+  },
+  {
+   "seg": "ES_1Nacional_PalmaDelRio_2026_s3",
+   "cand_t": 83.7,
+   "clip_t0": 78.7,
+   "state": "none"
+  },
+  {
+   "seg": "ES_1Nacional_PalmaDelRio_2026_s3",
+   "cand_t": 138.7,
+   "clip_t0": 133.7,
+   "state": "none"
+  },
+  {
+   "seg": "ES_1Nacional_PalmaDelRio_2026_s3",
+   "cand_t": 168.3,
+   "clip_t0": 163.3,
+   "state": "none"
+  },
+  {
+   "seg": "ES_2Nacional_MarniB_Almoradi_2026_s4",
+   "cand_t": 34.5,
+   "clip_t0": 29.5,
+   "state": "shot",
+   "kind": "goal"
+  },
+  {
+   "seg": "ES_2Nacional_MarniB_Almoradi_2026_s4",
+   "cand_t": 59.1,
+   "clip_t0": 54.1,
+   "state": "shot",
+   "kind": "goal"
+  },
+  {
+   "seg": "ES_2Nacional_MarniB_Almoradi_2026_s4",
+   "cand_t": 68.1,
+   "clip_t0": 63.1,
+   "state": "none"
+  },
+  {
+   "seg": "ES_2Nacional_MarniB_Almoradi_2026_s4",
+   "cand_t": 92.7,
+   "clip_t0": 87.7,
+   "state": "none"
+  },
+  {
+   "seg": "ES_2Nacional_MarniB_Almoradi_2026_s4",
+   "cand_t": 100.9,
+   "clip_t0": 95.9,
+   "state": "shot",
+   "kind": "save"
+  },
+  {
+   "seg": "ES_2Nacional_MarniB_Almoradi_2026_s4",
+   "cand_t": 142.9,
+   "clip_t0": 137.9,
+   "state": "none"
+  },
+  {
+   "seg": "ES_HonorPlata_Bordils_Zamora_2018_s0",
+   "cand_t": 61.1,
+   "clip_t0": 56.1,
+   "state": "none"
+  },
+  {
+   "seg": "ES_HonorPlata_Bordils_Zamora_2018_s0",
+   "cand_t": 115.9,
+   "clip_t0": 110.9,
+   "state": "none"
+  },
+  {
+   "seg": "ES_HonorPlata_Bordils_Zamora_2018_s0",
+   "cand_t": 141.9,
+   "clip_t0": 136.9,
+   "state": "none"
+  },
+  {
+   "seg": "ES_HonorPlata_Bordils_Zamora_2018_s0",
+   "cand_t": 175.3,
+   "clip_t0": 170.3,
+   "state": "none"
+  },
+  {
+   "seg": "FI_Karsinta_Dynamo_GrIFK_2015_s3",
+   "cand_t": 15.1,
+   "clip_t0": 10.1,
+   "state": "none"
+  },
+  {
+   "seg": "FI_Karsinta_Dynamo_GrIFK_2015_s3",
+   "cand_t": 40.3,
+   "clip_t0": 35.3,
+   "state": "none"
+  },
+  {
+   "seg": "FI_Karsinta_Dynamo_GrIFK_2015_s3",
+   "cand_t": 78.9,
+   "clip_t0": 73.9,
+   "state": "shot",
+   "kind": "save"
+  },
+  {
+   "seg": "FI_Karsinta_Dynamo_GrIFK_2015_s3",
+   "cand_t": 116.9,
+   "clip_t0": 111.9,
+   "state": "none"
+  },
+  {
+   "seg": "FI_Karsinta_Dynamo_GrIFK_2015_s3",
+   "cand_t": 125.1,
+   "clip_t0": 120.1,
+   "state": "none"
+  },
+  {
+   "seg": "FI_Karsinta_Dynamo_GrIFK_2015_s3",
+   "cand_t": 148.7,
+   "clip_t0": 143.7,
+   "state": "shot",
+   "kind": "goal"
+  },
+  {
+   "seg": "FR_N1_SudMayenne_GrandLibournais_2025_s0",
+   "cand_t": 4.9,
+   "clip_t0": 0,
+   "state": "none"
+  },
+  {
+   "seg": "FR_N1_SudMayenne_GrandLibournais_2025_s0",
+   "cand_t": 40.9,
+   "clip_t0": 35.9,
+   "state": "none"
+  },
+  {
+   "seg": "FR_N1_SudMayenne_GrandLibournais_2025_s0",
+   "cand_t": 62.7,
+   "clip_t0": 57.7,
+   "state": "shot",
+   "kind": "goal"
+  },
+  {
+   "seg": "FR_N1_SudMayenne_GrandLibournais_2025_s0",
+   "cand_t": 105.3,
+   "clip_t0": 100.3,
+   "state": "shot",
+   "kind": "goal"
+  },
+  {
+   "seg": "FR_N1_SudMayenne_GrandLibournais_2025_s0",
+   "cand_t": 144.9,
+   "clip_t0": 139.9,
+   "state": "none"
+  },
+  {
+   "seg": "FR_N1_SudMayenne_GrandLibournais_2025_s0",
+   "cand_t": 164.7,
+   "clip_t0": 159.7,
+   "state": "none"
+  },
+  {
+   "seg": "IT_SerieA2_Flavioni_Salerno_2026_s3",
+   "cand_t": 11.7,
+   "clip_t0": 6.7,
+   "state": "none"
+  },
+  {
+   "seg": "IT_SerieA2_Flavioni_Salerno_2026_s3",
+   "cand_t": 22.3,
+   "clip_t0": 17.3,
+   "state": "shot",
+   "kind": "save"
+  },
+  {
+   "seg": "IT_SerieA2_Flavioni_Salerno_2026_s3",
+   "cand_t": 55.9,
+   "clip_t0": 50.9,
+   "state": "shot",
+   "kind": "goal"
+  },
+  {
+   "seg": "IT_SerieA2_Flavioni_Salerno_2026_s3",
+   "cand_t": 119.3,
+   "clip_t0": 114.3,
+   "state": "shot",
+   "kind": "goal"
+  },
+  {
+   "seg": "IT_SerieA2_Flavioni_Salerno_2026_s3",
+   "cand_t": 133.9,
+   "clip_t0": 128.9,
+   "state": "shot",
+   "kind": "goal"
+  },
+  {
+   "seg": "IT_SerieA2_Flavioni_Salerno_2026_s3",
+   "cand_t": 146.5,
+   "clip_t0": 141.5,
+   "state": "none"
+  },
+  {
+   "seg": "IT_SerieA2_Leno_MedalpTirol_2020_s3",
+   "cand_t": 6.9,
+   "clip_t0": 1.9,
+   "state": "none"
+  },
+  {
+   "seg": "IT_SerieA2_Leno_MedalpTirol_2020_s3",
+   "cand_t": 19.7,
+   "clip_t0": 14.7,
+   "state": "none"
+  },
+  {
+   "seg": "IT_SerieA2_Leno_MedalpTirol_2020_s3",
+   "cand_t": 71.3,
+   "clip_t0": 66.3,
+   "state": "none"
+  },
+  {
+   "seg": "IT_SerieA2_Leno_MedalpTirol_2020_s3",
+   "cand_t": 83.5,
+   "clip_t0": 78.5,
+   "state": "shot",
+   "kind": "goal"
+  },
+  {
+   "seg": "IT_SerieA2_Leno_MedalpTirol_2020_s3",
+   "cand_t": 111.1,
+   "clip_t0": 106.1,
+   "state": "shot",
+   "kind": "save"
+  },
+  {
+   "seg": "IT_SerieA2_Leno_MedalpTirol_2020_s3",
+   "cand_t": 122.9,
+   "clip_t0": 117.9,
+   "state": "none"
+  },
+  {
+   "seg": "IT_SerieA2_Malo_Crenna_2018_s1",
+   "cand_t": 0.5,
+   "clip_t0": 0,
+   "state": "none"
+  },
+  {
+   "seg": "IT_SerieA2_Malo_Crenna_2018_s1",
+   "cand_t": 46.7,
+   "clip_t0": 41.7,
+   "state": "shot",
+   "kind": "save"
+  },
+  {
+   "seg": "IT_SerieA2_Malo_Crenna_2018_s1",
+   "cand_t": 59.9,
+   "clip_t0": 54.9,
+   "state": "none"
+  },
+  {
+   "seg": "IT_SerieA2_Malo_Crenna_2018_s1",
+   "cand_t": 68.5,
+   "clip_t0": 63.5,
+   "state": "shot",
+   "kind": "goal"
+  },
+  {
+   "seg": "IT_SerieA2_Malo_Crenna_2018_s1",
+   "cand_t": 129.1,
+   "clip_t0": 124.1,
+   "state": "shot",
+   "kind": "miss"
+  },
+  {
+   "seg": "IT_SerieA2_Malo_Crenna_2018_s1",
+   "cand_t": 175.3,
+   "clip_t0": 170.3,
+   "state": "none"
+  },
+  {
+   "seg": "Int_Olympia_Finale_Frankreich_Daenemark_2021_s3",
+   "cand_t": 17.1,
+   "clip_t0": 12.1,
+   "state": "none"
+  },
+  {
+   "seg": "Int_Olympia_Finale_Frankreich_Daenemark_2021_s3",
+   "cand_t": 64.1,
+   "clip_t0": 59.1,
+   "state": "shot",
+   "kind": "save"
+  },
+  {
+   "seg": "Int_Olympia_Finale_Frankreich_Daenemark_2021_s3",
+   "cand_t": 74.7,
+   "clip_t0": 69.7,
+   "state": "shot",
+   "kind": "save"
+  },
+  {
+   "seg": "Int_Olympia_Finale_Frankreich_Daenemark_2021_s3",
+   "cand_t": 88.7,
+   "clip_t0": 83.7,
+   "state": "none"
+  },
+  {
+   "seg": "Int_Olympia_Finale_Frankreich_Daenemark_2021_s3",
+   "cand_t": 100.9,
+   "clip_t0": 95.9,
+   "state": "none"
+  },
+  {
+   "seg": "NL_1Divisie_JongSEW_Wijhe_2024_s3",
+   "cand_t": 34.1,
+   "clip_t0": 29.1,
+   "state": "shot",
+   "kind": "goal"
+  },
+  {
+   "seg": "NL_1Divisie_JongSEW_Wijhe_2024_s3",
+   "cand_t": 54.1,
+   "clip_t0": 49.1,
+   "state": "none"
+  },
+  {
+   "seg": "NL_1Divisie_JongSEW_Wijhe_2024_s3",
+   "cand_t": 87.5,
+   "clip_t0": 82.5,
+   "state": "none"
+  },
+  {
+   "seg": "NL_1Divisie_JongSEW_Wijhe_2024_s3",
+   "cand_t": 126.1,
+   "clip_t0": 121.1,
+   "state": "none"
+  },
+  {
+   "seg": "NL_1Divisie_JongSEW_Wijhe_2024_s3",
+   "cand_t": 135.1,
+   "clip_t0": 130.1,
+   "state": "none"
+  },
+  {
+   "seg": "NL_1Divisie_JongSEW_Wijhe_2024_s3",
+   "cand_t": 168.5,
+   "clip_t0": 163.5,
+   "state": "shot",
+   "kind": "save"
+  },
+  {
+   "seg": "NL_2Divisie_SEW2_Tukkers_2019_s2",
+   "cand_t": 39.9,
+   "clip_t0": 34.9,
+   "state": "none"
+  },
+  {
+   "seg": "NL_2Divisie_SEW2_Tukkers_2019_s2",
+   "cand_t": 82.9,
+   "clip_t0": 77.9,
+   "state": "shot",
+   "kind": "goal"
+  },
+  {
+   "seg": "NL_2Divisie_SEW2_Tukkers_2019_s2",
+   "cand_t": 98.3,
+   "clip_t0": 93.3,
+   "state": "none"
+  },
+  {
+   "seg": "NL_2Divisie_SEW2_Tukkers_2019_s2",
+   "cand_t": 107.1,
+   "clip_t0": 102.1,
+   "state": "shot",
+   "kind": "goal"
+  },
+  {
+   "seg": "NL_2Divisie_SEW2_Tukkers_2019_s2",
+   "cand_t": 155.1,
+   "clip_t0": 150.1,
+   "state": "shot",
+   "kind": "miss"
+  },
+  {
+   "seg": "NL_2Divisie_SEW2_Tukkers_2019_s2",
+   "cand_t": 163.5,
+   "clip_t0": 158.5,
+   "state": "none"
+  },
+  {
+   "seg": "NL_2Divisie_VZV2_SEW2_2019_s4",
+   "cand_t": 1.5,
+   "clip_t0": 0,
+   "state": "none"
+  },
+  {
+   "seg": "NL_2Divisie_VZV2_SEW2_2019_s4",
+   "cand_t": 63.3,
+   "clip_t0": 58.3,
+   "state": "none"
+  },
+  {
+   "seg": "NL_2Divisie_VZV2_SEW2_2019_s4",
+   "cand_t": 77.9,
+   "clip_t0": 72.9,
+   "state": "none"
+  },
+  {
+   "seg": "NL_2Divisie_VZV2_SEW2_2019_s4",
+   "cand_t": 152.3,
+   "clip_t0": 147.3,
+   "state": "none"
+  },
+  {
+   "seg": "NL_2Divisie_VZV2_SEW2_2019_s4",
+   "cand_t": 162.5,
+   "clip_t0": 157.5,
+   "state": "none"
+  },
+  {
+   "seg": "NL_Frauen_Final_VOC_SEW_2026_s4",
+   "cand_t": 53.3,
+   "clip_t0": 48.3,
+   "state": "shot",
+   "kind": "goal"
+  },
+  {
+   "seg": "NL_Frauen_Final_VOC_SEW_2026_s4",
+   "cand_t": 70.9,
+   "clip_t0": 65.9,
+   "state": "none"
+  },
+  {
+   "seg": "NL_Frauen_Final_VOC_SEW_2026_s4",
+   "cand_t": 88.1,
+   "clip_t0": 83.1,
+   "state": "none"
+  },
+  {
+   "seg": "NL_Frauen_Final_VOC_SEW_2026_s4",
+   "cand_t": 112.3,
+   "clip_t0": 107.3,
+   "state": "shot",
+   "kind": "miss"
+  },
+  {
+   "seg": "NL_Frauen_Final_VOC_SEW_2026_s4",
+   "cand_t": 156.7,
+   "clip_t0": 151.7,
+   "state": "none"
+  },
+  {
+   "seg": "NL_Frauen_Final_VOC_SEW_2026_s4",
+   "cand_t": 168.9,
+   "clip_t0": 163.9,
+   "state": "none"
+  },
+  {
+   "seg": "NO_Frauen_3Div_Sogndal_Askoey_2019_s0",
+   "cand_t": 19.1,
+   "clip_t0": 14.1,
+   "state": "none"
+  },
+  {
+   "seg": "NO_Frauen_3Div_Sogndal_Askoey_2019_s0",
+   "cand_t": 44.7,
+   "clip_t0": 39.7,
+   "state": "none"
+  },
+  {
+   "seg": "NO_Frauen_3Div_Sogndal_Askoey_2019_s0",
+   "cand_t": 72.1,
+   "clip_t0": 67.1,
+   "state": "shot",
+   "kind": "goal"
+  },
+  {
+   "seg": "NO_Frauen_3Div_Sogndal_Askoey_2019_s0",
+   "cand_t": 129.3,
+   "clip_t0": 124.3,
+   "state": "none"
+  },
+  {
+   "seg": "NO_Frauen_3Div_Sogndal_Askoey_2019_s0",
+   "cand_t": 142.1,
+   "clip_t0": 137.1,
+   "state": "none"
+  },
+  {
+   "seg": "NO_Frauen_3Div_Sogndal_Askoey_2019_s0",
+   "cand_t": 174.7,
+   "clip_t0": 169.7,
+   "state": "shot",
+   "kind": "goal"
+  },
+  {
+   "seg": "PT_Frauen_Madeira_Gaia_2022_s4",
+   "cand_t": 17.3,
+   "clip_t0": 12.3,
+   "state": "none"
+  },
+  {
+   "seg": "PT_Frauen_Madeira_Gaia_2022_s4",
+   "cand_t": 44.1,
+   "clip_t0": 39.1,
+   "state": "none"
+  },
+  {
+   "seg": "PT_Frauen_Madeira_Gaia_2022_s4",
+   "cand_t": 56.5,
+   "clip_t0": 51.5,
+   "state": "none"
+  },
+  {
+   "seg": "PT_Frauen_Madeira_Gaia_2022_s4",
+   "cand_t": 90.7,
+   "clip_t0": 85.7,
+   "state": "none"
+  },
+  {
+   "seg": "PT_Frauen_Madeira_Gaia_2022_s4",
+   "cand_t": 133.5,
+   "clip_t0": 128.5,
+   "state": "none"
+  },
+  {
+   "seg": "PT_Frauen_Madeira_Gaia_2022_s4",
+   "cand_t": 147.1,
+   "clip_t0": 142.1,
+   "state": "none"
+  },
+  {
+   "seg": "SE_Allsvenskan_Torslanda_Amo_2018_s4",
+   "cand_t": 38.1,
+   "clip_t0": 33.1,
+   "state": "none"
+  },
+  {
+   "seg": "SE_Allsvenskan_Torslanda_Amo_2018_s4",
+   "cand_t": 67.9,
+   "clip_t0": 62.9,
+   "state": "none"
+  },
+  {
+   "seg": "SE_Allsvenskan_Torslanda_Amo_2018_s4",
+   "cand_t": 98.7,
+   "clip_t0": 93.7,
+   "state": "shot",
+   "kind": "goal"
+  },
+  {
+   "seg": "SE_Allsvenskan_Torslanda_Amo_2018_s4",
+   "cand_t": 121.1,
+   "clip_t0": 116.1,
+   "state": "shot",
+   "kind": "goal"
+  },
+  {
+   "seg": "SE_Allsvenskan_Torslanda_Amo_2018_s4",
+   "cand_t": 129.3,
+   "clip_t0": 124.3,
+   "state": "none"
+  },
+  {
+   "seg": "SE_Allsvenskan_Torslanda_Amo_2018_s4",
+   "cand_t": 153.9,
+   "clip_t0": 148.9,
+   "state": "shot",
+   "kind": "goal"
+  },
+  {
+   "seg": "SE_Amateur_Sala_Vaesteras_2022_s1",
+   "cand_t": 8.1,
+   "clip_t0": 3.1,
+   "state": "none"
+  },
+  {
+   "seg": "SE_Amateur_Sala_Vaesteras_2022_s1",
+   "cand_t": 77.7,
+   "clip_t0": 72.7,
+   "state": "none"
+  },
+  {
+   "seg": "SE_Amateur_Sala_Vaesteras_2022_s1",
+   "cand_t": 135.3,
+   "clip_t0": 130.3,
+   "state": "none"
+  },
+  {
+   "seg": "SE_Amateur_Sala_Vaesteras_2022_s1",
+   "cand_t": 146.1,
+   "clip_t0": 141.1,
+   "state": "none"
+  },
+  {
+   "seg": "SE_Amateur_Sala_Vaesteras_2022_s1",
+   "cand_t": 154.1,
+   "clip_t0": 149.1,
+   "state": "none"
+  },
+  {
+   "seg": "SE_Amateur_Sala_Vaesteras_2022_s1",
+   "cand_t": 162.3,
+   "clip_t0": 157.3,
+   "state": "none"
+  },
+  {
+   "seg": "SE_Test_Hammarby_Skanela_2026_s3",
+   "cand_t": 24.9,
+   "clip_t0": 19.9,
+   "state": "shot",
+   "kind": "miss"
+  },
+  {
+   "seg": "SE_Test_Hammarby_Skanela_2026_s3",
+   "cand_t": 69.5,
+   "clip_t0": 64.5,
+   "state": "none"
+  },
+  {
+   "seg": "SE_Test_Hammarby_Skanela_2026_s3",
+   "cand_t": 104.7,
+   "clip_t0": 99.7,
+   "state": "none"
+  },
+  {
+   "seg": "SE_Test_Hammarby_Skanela_2026_s3",
+   "cand_t": 112.9,
+   "clip_t0": 107.9,
+   "state": "shot",
+   "kind": "goal"
+  },
+  {
+   "seg": "SE_Test_Hammarby_Skanela_2026_s3",
+   "cand_t": 145.1,
+   "clip_t0": 140.1,
+   "state": "shot",
+   "kind": "save"
+  },
+  {
+   "seg": "US_NYCity_NYAC_2019_s3",
+   "cand_t": 10.1,
+   "clip_t0": 5.1,
+   "state": "none"
+  },
+  {
+   "seg": "US_NYCity_NYAC_2019_s3",
+   "cand_t": 34.5,
+   "clip_t0": 29.5,
+   "state": "none"
+  },
+  {
+   "seg": "US_NYCity_NYAC_2019_s3",
+   "cand_t": 42.7,
+   "clip_t0": 37.7,
+   "state": "none"
+  },
+  {
+   "seg": "US_NYCity_NYAC_2019_s3",
+   "cand_t": 73.3,
+   "clip_t0": 68.3,
+   "state": "none"
+  },
+  {
+   "seg": "US_NYCity_NYAC_2019_s3",
+   "cand_t": 81.7,
+   "clip_t0": 76.7,
+   "state": "shot",
+   "kind": "save"
+  },
+  {
+   "seg": "US_NYCity_NYAC_2019_s3",
+   "cand_t": 112.7,
+   "clip_t0": 107.7,
+   "state": "none"
+  }
+ ]
+}

@@ -174,7 +174,7 @@ gemessen. Was nicht darauf einzahlt, wird geparkt oder verworfen. Begründungen 
 **Jetzt (diese Woche, nur CPU und Labeln):**
 | Prio | Was | Warum zuerst |
 |---|---|---|
-| 1 | **Wurf-Endtest festlegen und labeln:** mindestens 100 Würfe aus mindestens 15 nie trainierten Hallen (Gold- und Testset-2-Hallen), durch Anschauen gefunden; gelabelt **ohne Kandidatenringe** und mit Sichtbarkeitsstufen; Lukas prüft Ja/Nein | Ohne ihn ist keine Entscheidung belastbar. Ohne Ringe zu labeln misst zugleich die Verzerrung der Labels (ersetzt den separaten Verzerrungstest). |
+| 1 | **Wurf-Endtest festlegen und labeln:** mindestens 100 Würfe aus mindestens 15 nie trainierten Hallen (Gold- und Testset-2-Hallen), durch Anschauen gefunden; gelabelt **ohne Kandidatenringe** und mit Sichtbarkeitsstufen; Lukas prüft Ja/Nein | Ohne ihn ist keine Entscheidung belastbar. Ohne Ringe zu labeln misst zugleich die Verzerrung der Labels (ersetzt den separaten Verzerrungstest). **Stand 17.11.:** Runde 1 von Lukas geprüft: 76 Würfe aus 33 Hallen (212 Kandidaten). Runde 2 mit 215 weiteren Kandidaten liegt bereit (längere Clips). Danach Abwurf und Ballpositionen ohne Ringe. |
 | 2 | **Auslieferbarer Tracker:** Bewertung ohne OWLv2 neu lernen; das ist ab jetzt die Hauptzahl (heute 78.6 % statt 84.0 % mit OWLv2) | Nur was ins Produkt kann, zählt. |
 | 3 | **Sicherheit pro Punkt und "weiss nicht"** im Tracker, mit Precision-Recall-Kurve | Ein falscher Punkt mitten im Wurf ist schlimmer als eine Lücke; ohne das ist keine Analyse verlässlich. |
 | 4 | Entwicklungssatz: die 61 protokollierten Würfe vorlabeln (Lukas prüft danach) | Zum Verbessern des Trackers auf Würfen, ohne den Endtest zu verbrauchen. |

@@ -1,0 +1,1940 @@
+{
+ "note": "Shot end test round 2: product shot candidates at rate 4 (goalcandidates) in the same 42 test-set-2 segments, minus the 212 of round 1 and anything within 3 s of them; page clip = cand_t - 6 s to cand_t + 4 s (clamped to the 180 s segment). Owner answers go to artifact L2SY9nT53ESjKc322EvH2F, collection shots2. Frozen end test: no development or tuning on it.",
+ "items": [
+  {
+   "id": "AT_Challenge_Lauterach_HandballTirol_2021_s1@13.1",
+   "k": "000",
+   "seg": "AT_Challenge_Lauterach_HandballTirol_2021_s1",
+   "t0": 7.1,
+   "cand_t": 13.1,
+   "score": 2.517,
+   "rank": 6
+  },
+  {
+   "id": "AT_Challenge_Lauterach_HandballTirol_2021_s1@23.9",
+   "k": "001",
+   "seg": "AT_Challenge_Lauterach_HandballTirol_2021_s1",
+   "t0": 17.9,
+   "cand_t": 23.9,
+   "score": 0.269,
+   "rank": 11
+  },
+  {
+   "id": "AT_Challenge_Lauterach_HandballTirol_2021_s1@116.9",
+   "k": "002",
+   "seg": "AT_Challenge_Lauterach_HandballTirol_2021_s1",
+   "t0": 110.9,
+   "cand_t": 116.9,
+   "score": 1.522,
+   "rank": 7
+  },
+  {
+   "id": "AT_Challenge_Lauterach_HandballTirol_2021_s1@125.1",
+   "k": "003",
+   "seg": "AT_Challenge_Lauterach_HandballTirol_2021_s1",
+   "t0": 119.1,
+   "cand_t": 125.1,
+   "score": 0.937,
+   "rank": 8
+  },
+  {
+   "id": "AT_Challenge_Lauterach_HandballTirol_2021_s1@142.3",
+   "k": "004",
+   "seg": "AT_Challenge_Lauterach_HandballTirol_2021_s1",
+   "t0": 136.3,
+   "cand_t": 142.3,
+   "score": 0.36,
+   "rank": 10
+  },
+  {
+   "id": "AT_Challenge_Lauterach_HandballTirol_2021_s1@151.7",
+   "k": "005",
+   "seg": "AT_Challenge_Lauterach_HandballTirol_2021_s1",
+   "t0": 145.7,
+   "cand_t": 151.7,
+   "score": 0.916,
+   "rank": 9
+  },
+  {
+   "id": "CH_NLA_BSVBern_WackerThun_2013-09-14_s3@18.3",
+   "k": "006",
+   "seg": "CH_NLA_BSVBern_WackerThun_2013-09-14_s3",
+   "t0": 12.3,
+   "cand_t": 18.3,
+   "score": 1.246,
+   "rank": 9
+  },
+  {
+   "id": "CH_NLA_BSVBern_WackerThun_2013-09-14_s3@74.7",
+   "k": "007",
+   "seg": "CH_NLA_BSVBern_WackerThun_2013-09-14_s3",
+   "t0": 68.7,
+   "cand_t": 74.7,
+   "score": 2.213,
+   "rank": 6
+  },
+  {
+   "id": "CH_NLA_BSVBern_WackerThun_2013-09-14_s3@84.1",
+   "k": "008",
+   "seg": "CH_NLA_BSVBern_WackerThun_2013-09-14_s3",
+   "t0": 78.1,
+   "cand_t": 84.1,
+   "score": 1.059,
+   "rank": 10
+  },
+  {
+   "id": "CH_NLA_BSVBern_WackerThun_2013-09-14_s3@131.3",
+   "k": "009",
+   "seg": "CH_NLA_BSVBern_WackerThun_2013-09-14_s3",
+   "t0": 125.3,
+   "cand_t": 131.3,
+   "score": 0.582,
+   "rank": 11
+  },
+  {
+   "id": "CH_NLA_BSVBern_WackerThun_2013-09-14_s3@139.5",
+   "k": "010",
+   "seg": "CH_NLA_BSVBern_WackerThun_2013-09-14_s3",
+   "t0": 133.5,
+   "cand_t": 139.5,
+   "score": 2.014,
+   "rank": 8
+  },
+  {
+   "id": "CH_NLA_BSVBern_WackerThun_2013-09-14_s3@176.3",
+   "k": "011",
+   "seg": "CH_NLA_BSVBern_WackerThun_2013-09-14_s3",
+   "t0": 170.0,
+   "cand_t": 176.3,
+   "score": 2.159,
+   "rank": 7
+  },
+  {
+   "id": "CH_NLA_GCAmicitia_KriensLuzern_ca2018_s1@11.3",
+   "k": "012",
+   "seg": "CH_NLA_GCAmicitia_KriensLuzern_ca2018_s1",
+   "t0": 5.3,
+   "cand_t": 11.3,
+   "score": 0.61,
+   "rank": 10
+  },
+  {
+   "id": "CH_NLA_GCAmicitia_KriensLuzern_ca2018_s1@21.7",
+   "k": "013",
+   "seg": "CH_NLA_GCAmicitia_KriensLuzern_ca2018_s1",
+   "t0": 15.7,
+   "cand_t": 21.7,
+   "score": 1.065,
+   "rank": 7
+  },
+  {
+   "id": "CH_NLA_GCAmicitia_KriensLuzern_ca2018_s1@34.3",
+   "k": "014",
+   "seg": "CH_NLA_GCAmicitia_KriensLuzern_ca2018_s1",
+   "t0": 28.3,
+   "cand_t": 34.3,
+   "score": 0.922,
+   "rank": 8
+  },
+  {
+   "id": "CH_NLA_GCAmicitia_KriensLuzern_ca2018_s1@53.5",
+   "k": "015",
+   "seg": "CH_NLA_GCAmicitia_KriensLuzern_ca2018_s1",
+   "t0": 47.5,
+   "cand_t": 53.5,
+   "score": 0.405,
+   "rank": 11
+  },
+  {
+   "id": "CH_NLA_GCAmicitia_KriensLuzern_ca2018_s1@82.1",
+   "k": "016",
+   "seg": "CH_NLA_GCAmicitia_KriensLuzern_ca2018_s1",
+   "t0": 76.1,
+   "cand_t": 82.1,
+   "score": 1.686,
+   "rank": 6
+  },
+  {
+   "id": "CH_NLA_GCAmicitia_KriensLuzern_ca2018_s1@135.7",
+   "k": "017",
+   "seg": "CH_NLA_GCAmicitia_KriensLuzern_ca2018_s1",
+   "t0": 129.7,
+   "cand_t": 135.7,
+   "score": 0.774,
+   "rank": 9
+  },
+  {
+   "id": "CH_NLA_KriensLuzern_SuhrAarau_ca2018_s4@18.1",
+   "k": "018",
+   "seg": "CH_NLA_KriensLuzern_SuhrAarau_ca2018_s4",
+   "t0": 12.1,
+   "cand_t": 18.1,
+   "score": 0.983,
+   "rank": 11
+  },
+  {
+   "id": "CH_NLA_KriensLuzern_SuhrAarau_ca2018_s4@91.5",
+   "k": "019",
+   "seg": "CH_NLA_KriensLuzern_SuhrAarau_ca2018_s4",
+   "t0": 85.5,
+   "cand_t": 91.5,
+   "score": 1.379,
+   "rank": 8
+  },
+  {
+   "id": "CH_NLA_KriensLuzern_SuhrAarau_ca2018_s4@124.1",
+   "k": "020",
+   "seg": "CH_NLA_KriensLuzern_SuhrAarau_ca2018_s4",
+   "t0": 118.1,
+   "cand_t": 124.1,
+   "score": 2.507,
+   "rank": 6
+  },
+  {
+   "id": "CH_NLA_KriensLuzern_SuhrAarau_ca2018_s4@133.3",
+   "k": "021",
+   "seg": "CH_NLA_KriensLuzern_SuhrAarau_ca2018_s4",
+   "t0": 127.3,
+   "cand_t": 133.3,
+   "score": 1.552,
+   "rank": 7
+  },
+  {
+   "id": "CH_NLA_KriensLuzern_SuhrAarau_ca2018_s4@144.5",
+   "k": "022",
+   "seg": "CH_NLA_KriensLuzern_SuhrAarau_ca2018_s4",
+   "t0": 138.5,
+   "cand_t": 144.5,
+   "score": 1.038,
+   "rank": 10
+  },
+  {
+   "id": "CH_NLA_KriensLuzern_SuhrAarau_ca2018_s4@169.9",
+   "k": "023",
+   "seg": "CH_NLA_KriensLuzern_SuhrAarau_ca2018_s4",
+   "t0": 163.9,
+   "cand_t": 169.9,
+   "score": 1.337,
+   "rank": 9
+  },
+  {
+   "id": "CH_NLA_PlayoffF1_WackerThun_Kadetten_2013-05-11_s4@43.7",
+   "k": "024",
+   "seg": "CH_NLA_PlayoffF1_WackerThun_Kadetten_2013-05-11_s4",
+   "t0": 37.7,
+   "cand_t": 43.7,
+   "score": 0.167,
+   "rank": 8
+  },
+  {
+   "id": "CH_NLA_PlayoffF1_WackerThun_Kadetten_2013-05-11_s4@70.1",
+   "k": "025",
+   "seg": "CH_NLA_PlayoffF1_WackerThun_Kadetten_2013-05-11_s4",
+   "t0": 64.1,
+   "cand_t": 70.1,
+   "score": 0.807,
+   "rank": 5
+  },
+  {
+   "id": "CH_NLA_PlayoffF1_WackerThun_Kadetten_2013-05-11_s4@80.1",
+   "k": "026",
+   "seg": "CH_NLA_PlayoffF1_WackerThun_Kadetten_2013-05-11_s4",
+   "t0": 74.1,
+   "cand_t": 80.1,
+   "score": 0.487,
+   "rank": 7
+  },
+  {
+   "id": "CH_NLA_PlayoffF1_WackerThun_Kadetten_2013-05-11_s4@99.7",
+   "k": "027",
+   "seg": "CH_NLA_PlayoffF1_WackerThun_Kadetten_2013-05-11_s4",
+   "t0": 93.7,
+   "cand_t": 99.7,
+   "score": -0.015,
+   "rank": 9
+  },
+  {
+   "id": "CH_NLA_PlayoffF1_WackerThun_Kadetten_2013-05-11_s4@132.3",
+   "k": "028",
+   "seg": "CH_NLA_PlayoffF1_WackerThun_Kadetten_2013-05-11_s4",
+   "t0": 126.3,
+   "cand_t": 132.3,
+   "score": 0.745,
+   "rank": 6
+  },
+  {
+   "id": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07_s3@33.3",
+   "k": "029",
+   "seg": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07_s3",
+   "t0": 27.3,
+   "cand_t": 33.3,
+   "score": 0.918,
+   "rank": 10
+  },
+  {
+   "id": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07_s3@45.9",
+   "k": "030",
+   "seg": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07_s3",
+   "t0": 39.9,
+   "cand_t": 45.9,
+   "score": 1.226,
+   "rank": 8
+  },
+  {
+   "id": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07_s3@117.3",
+   "k": "031",
+   "seg": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07_s3",
+   "t0": 111.3,
+   "cand_t": 117.3,
+   "score": 1.6,
+   "rank": 7
+  },
+  {
+   "id": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07_s3@149.7",
+   "k": "032",
+   "seg": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07_s3",
+   "t0": 143.7,
+   "cand_t": 149.7,
+   "score": 1.733,
+   "rank": 6
+  },
+  {
+   "id": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07_s3@164.1",
+   "k": "033",
+   "seg": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07_s3",
+   "t0": 158.1,
+   "cand_t": 164.1,
+   "score": 0.374,
+   "rank": 11
+  },
+  {
+   "id": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07_s3@176.3",
+   "k": "034",
+   "seg": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07_s3",
+   "t0": 170.0,
+   "cand_t": 176.3,
+   "score": 1.051,
+   "rank": 9
+  },
+  {
+   "id": "CH_NLA_SuhrAarau_KriensLuzern_ca2018_s1@6.9",
+   "k": "035",
+   "seg": "CH_NLA_SuhrAarau_KriensLuzern_ca2018_s1",
+   "t0": 0.9,
+   "cand_t": 6.9,
+   "score": 1.305,
+   "rank": 6
+  },
+  {
+   "id": "CH_NLA_SuhrAarau_KriensLuzern_ca2018_s1@55.3",
+   "k": "036",
+   "seg": "CH_NLA_SuhrAarau_KriensLuzern_ca2018_s1",
+   "t0": 49.3,
+   "cand_t": 55.3,
+   "score": 0.784,
+   "rank": 9
+  },
+  {
+   "id": "CH_NLA_SuhrAarau_KriensLuzern_ca2018_s1@73.1",
+   "k": "037",
+   "seg": "CH_NLA_SuhrAarau_KriensLuzern_ca2018_s1",
+   "t0": 67.1,
+   "cand_t": 73.1,
+   "score": -0.32,
+   "rank": 11
+  },
+  {
+   "id": "CH_NLA_SuhrAarau_KriensLuzern_ca2018_s1@95.1",
+   "k": "038",
+   "seg": "CH_NLA_SuhrAarau_KriensLuzern_ca2018_s1",
+   "t0": 89.1,
+   "cand_t": 95.1,
+   "score": 1.135,
+   "rank": 8
+  },
+  {
+   "id": "CH_NLA_SuhrAarau_KriensLuzern_ca2018_s1@104.1",
+   "k": "039",
+   "seg": "CH_NLA_SuhrAarau_KriensLuzern_ca2018_s1",
+   "t0": 98.1,
+   "cand_t": 104.1,
+   "score": 0.466,
+   "rank": 10
+  },
+  {
+   "id": "CH_NLA_SuhrAarau_KriensLuzern_ca2018_s1@136.1",
+   "k": "040",
+   "seg": "CH_NLA_SuhrAarau_KriensLuzern_ca2018_s1",
+   "t0": 130.1,
+   "cand_t": 136.1,
+   "score": 1.172,
+   "rank": 7
+  },
+  {
+   "id": "CH_NLB_TVBirsfelden_GSKadetten_ca2025_s0@31.1",
+   "k": "041",
+   "seg": "CH_NLB_TVBirsfelden_GSKadetten_ca2025_s0",
+   "t0": 25.1,
+   "cand_t": 31.1,
+   "score": 0.729,
+   "rank": 8
+  },
+  {
+   "id": "CH_NLB_TVBirsfelden_GSKadetten_ca2025_s0@48.3",
+   "k": "042",
+   "seg": "CH_NLB_TVBirsfelden_GSKadetten_ca2025_s0",
+   "t0": 42.3,
+   "cand_t": 48.3,
+   "score": 2.896,
+   "rank": 6
+  },
+  {
+   "id": "CH_NLB_TVBirsfelden_GSKadetten_ca2025_s0@106.3",
+   "k": "043",
+   "seg": "CH_NLB_TVBirsfelden_GSKadetten_ca2025_s0",
+   "t0": 100.3,
+   "cand_t": 106.3,
+   "score": 0.771,
+   "rank": 7
+  },
+  {
+   "id": "CH_NLB_TVBirsfelden_GSKadetten_ca2025_s0@120.9",
+   "k": "044",
+   "seg": "CH_NLB_TVBirsfelden_GSKadetten_ca2025_s0",
+   "t0": 114.9,
+   "cand_t": 120.9,
+   "score": 0.421,
+   "rank": 9
+  },
+  {
+   "id": "CH_NLB_TVBirsfelden_GSKadetten_ca2025_s0@138.5",
+   "k": "045",
+   "seg": "CH_NLB_TVBirsfelden_GSKadetten_ca2025_s0",
+   "t0": 132.5,
+   "cand_t": 138.5,
+   "score": 0.305,
+   "rank": 10
+  },
+  {
+   "id": "CH_NLB_TVBirsfelden_GSKadetten_ca2025_s0@165.3",
+   "k": "046",
+   "seg": "CH_NLB_TVBirsfelden_GSKadetten_ca2025_s0",
+   "t0": 159.3,
+   "cand_t": 165.3,
+   "score": 0.134,
+   "rank": 11
+  },
+  {
+   "id": "CH_Nati_Schweiz_Rumaenien_2024-01-04_s1@36.3",
+   "k": "047",
+   "seg": "CH_Nati_Schweiz_Rumaenien_2024-01-04_s1",
+   "t0": 30.3,
+   "cand_t": 36.3,
+   "score": 1.003,
+   "rank": 7
+  },
+  {
+   "id": "CH_Nati_Schweiz_Rumaenien_2024-01-04_s1@58.5",
+   "k": "048",
+   "seg": "CH_Nati_Schweiz_Rumaenien_2024-01-04_s1",
+   "t0": 52.5,
+   "cand_t": 58.5,
+   "score": 0.258,
+   "rank": 10
+  },
+  {
+   "id": "CH_Nati_Schweiz_Rumaenien_2024-01-04_s1@76.1",
+   "k": "049",
+   "seg": "CH_Nati_Schweiz_Rumaenien_2024-01-04_s1",
+   "t0": 70.1,
+   "cand_t": 76.1,
+   "score": -0.159,
+   "rank": 11
+  },
+  {
+   "id": "CH_Nati_Schweiz_Rumaenien_2024-01-04_s1@85.1",
+   "k": "050",
+   "seg": "CH_Nati_Schweiz_Rumaenien_2024-01-04_s1",
+   "t0": 79.1,
+   "cand_t": 85.1,
+   "score": 1.16,
+   "rank": 6
+  },
+  {
+   "id": "CH_Nati_Schweiz_Rumaenien_2024-01-04_s1@136.9",
+   "k": "051",
+   "seg": "CH_Nati_Schweiz_Rumaenien_2024-01-04_s1",
+   "t0": 130.9,
+   "cand_t": 136.9,
+   "score": 0.485,
+   "rank": 8
+  },
+  {
+   "id": "CH_Nati_Schweiz_Rumaenien_2024-01-04_s1@149.5",
+   "k": "052",
+   "seg": "CH_Nati_Schweiz_Rumaenien_2024-01-04_s1",
+   "t0": 143.5,
+   "cand_t": 149.5,
+   "score": 0.481,
+   "rank": 9
+  },
+  {
+   "id": "CH_RegioCup_HalbF_Frauen1_2017-03_s0@2.7",
+   "k": "053",
+   "seg": "CH_RegioCup_HalbF_Frauen1_2017-03_s0",
+   "t0": 0,
+   "cand_t": 2.7,
+   "score": 1.771,
+   "rank": 9
+  },
+  {
+   "id": "CH_RegioCup_HalbF_Frauen1_2017-03_s0@14.9",
+   "k": "054",
+   "seg": "CH_RegioCup_HalbF_Frauen1_2017-03_s0",
+   "t0": 8.9,
+   "cand_t": 14.9,
+   "score": 1.158,
+   "rank": 10
+  },
+  {
+   "id": "CH_RegioCup_HalbF_Frauen1_2017-03_s0@72.7",
+   "k": "055",
+   "seg": "CH_RegioCup_HalbF_Frauen1_2017-03_s0",
+   "t0": 66.7,
+   "cand_t": 72.7,
+   "score": 2.163,
+   "rank": 8
+  },
+  {
+   "id": "CH_RegioCup_HalbF_Frauen1_2017-03_s0@113.7",
+   "k": "056",
+   "seg": "CH_RegioCup_HalbF_Frauen1_2017-03_s0",
+   "t0": 107.7,
+   "cand_t": 113.7,
+   "score": 2.427,
+   "rank": 6
+  },
+  {
+   "id": "CH_RegioCup_HalbF_Frauen1_2017-03_s0@138.7",
+   "k": "057",
+   "seg": "CH_RegioCup_HalbF_Frauen1_2017-03_s0",
+   "t0": 132.7,
+   "cand_t": 138.7,
+   "score": 2.282,
+   "rank": 7
+  },
+  {
+   "id": "CH_RegioCup_HalbF_Frauen1_2017-03_s0@151.3",
+   "k": "058",
+   "seg": "CH_RegioCup_HalbF_Frauen1_2017-03_s0",
+   "t0": 145.3,
+   "cand_t": 151.3,
+   "score": 0.902,
+   "rank": 11
+  },
+  {
+   "id": "CH_SGPilatus_Staefa_ca2024_s4@25.5",
+   "k": "059",
+   "seg": "CH_SGPilatus_Staefa_ca2024_s4",
+   "t0": 19.5,
+   "cand_t": 25.5,
+   "score": 0.62,
+   "rank": 9
+  },
+  {
+   "id": "CH_SGPilatus_Staefa_ca2024_s4@82.7",
+   "k": "060",
+   "seg": "CH_SGPilatus_Staefa_ca2024_s4",
+   "t0": 76.7,
+   "cand_t": 82.7,
+   "score": 0.397,
+   "rank": 10
+  },
+  {
+   "id": "CH_SGPilatus_Staefa_ca2024_s4@100.3",
+   "k": "061",
+   "seg": "CH_SGPilatus_Staefa_ca2024_s4",
+   "t0": 94.3,
+   "cand_t": 100.3,
+   "score": 1.457,
+   "rank": 7
+  },
+  {
+   "id": "CH_SGPilatus_Staefa_ca2024_s4@122.7",
+   "k": "062",
+   "seg": "CH_SGPilatus_Staefa_ca2024_s4",
+   "t0": 116.7,
+   "cand_t": 122.7,
+   "score": 1.93,
+   "rank": 6
+  },
+  {
+   "id": "CH_SGPilatus_Staefa_ca2024_s4@131.9",
+   "k": "063",
+   "seg": "CH_SGPilatus_Staefa_ca2024_s4",
+   "t0": 125.9,
+   "cand_t": 131.9,
+   "score": 0.183,
+   "rank": 11
+  },
+  {
+   "id": "CH_SGPilatus_Staefa_ca2024_s4@147.5",
+   "k": "064",
+   "seg": "CH_SGPilatus_Staefa_ca2024_s4",
+   "t0": 141.5,
+   "cand_t": 147.5,
+   "score": 1.009,
+   "rank": 8
+  },
+  {
+   "id": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20_s0@71.1",
+   "k": "065",
+   "seg": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20_s0",
+   "t0": 65.1,
+   "cand_t": 71.1,
+   "score": 0.89,
+   "rank": 7
+  },
+  {
+   "id": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20_s0@91.7",
+   "k": "066",
+   "seg": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20_s0",
+   "t0": 85.7,
+   "cand_t": 91.7,
+   "score": 0.722,
+   "rank": 9
+  },
+  {
+   "id": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20_s0@111.5",
+   "k": "067",
+   "seg": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20_s0",
+   "t0": 105.5,
+   "cand_t": 111.5,
+   "score": 0.42,
+   "rank": 11
+  },
+  {
+   "id": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20_s0@144.3",
+   "k": "068",
+   "seg": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20_s0",
+   "t0": 138.3,
+   "cand_t": 144.3,
+   "score": 1.267,
+   "rank": 6
+  },
+  {
+   "id": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20_s0@157.5",
+   "k": "069",
+   "seg": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20_s0",
+   "t0": 151.5,
+   "cand_t": 157.5,
+   "score": 0.811,
+   "rank": 8
+  },
+  {
+   "id": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20_s0@166.7",
+   "k": "070",
+   "seg": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20_s0",
+   "t0": 160.7,
+   "cand_t": 166.7,
+   "score": 0.621,
+   "rank": 10
+  },
+  {
+   "id": "CH_U17E_Final_HSGNordwest_SuhrAarau_ca2017_s4@2.5",
+   "k": "071",
+   "seg": "CH_U17E_Final_HSGNordwest_SuhrAarau_ca2017_s4",
+   "t0": 0,
+   "cand_t": 2.5,
+   "score": 0.804,
+   "rank": 6
+  },
+  {
+   "id": "CH_U17E_Final_HSGNordwest_SuhrAarau_ca2017_s4@12.9",
+   "k": "072",
+   "seg": "CH_U17E_Final_HSGNordwest_SuhrAarau_ca2017_s4",
+   "t0": 6.9,
+   "cand_t": 12.9,
+   "score": 0.007,
+   "rank": 9
+  },
+  {
+   "id": "CH_U17E_Final_HSGNordwest_SuhrAarau_ca2017_s4@23.1",
+   "k": "073",
+   "seg": "CH_U17E_Final_HSGNordwest_SuhrAarau_ca2017_s4",
+   "t0": 17.1,
+   "cand_t": 23.1,
+   "score": 1.493,
+   "rank": 5
+  },
+  {
+   "id": "CH_U17E_Final_HSGNordwest_SuhrAarau_ca2017_s4@47.1",
+   "k": "074",
+   "seg": "CH_U17E_Final_HSGNordwest_SuhrAarau_ca2017_s4",
+   "t0": 41.1,
+   "cand_t": 47.1,
+   "score": -0.925,
+   "rank": 10
+  },
+  {
+   "id": "CH_U17E_Final_HSGNordwest_SuhrAarau_ca2017_s4@55.3",
+   "k": "075",
+   "seg": "CH_U17E_Final_HSGNordwest_SuhrAarau_ca2017_s4",
+   "t0": 49.3,
+   "cand_t": 55.3,
+   "score": 0.776,
+   "rank": 8
+  },
+  {
+   "id": "CH_U17E_Final_HSGNordwest_SuhrAarau_ca2017_s4@147.7",
+   "k": "076",
+   "seg": "CH_U17E_Final_HSGNordwest_SuhrAarau_ca2017_s4",
+   "t0": 141.7,
+   "cand_t": 147.7,
+   "score": 0.792,
+   "rank": 7
+  },
+  {
+   "id": "CH_U17E_Final_Pfadi_HSGNordwest_ca2019_s3@31.1",
+   "k": "077",
+   "seg": "CH_U17E_Final_Pfadi_HSGNordwest_ca2019_s3",
+   "t0": 25.1,
+   "cand_t": 31.1,
+   "score": 0.068,
+   "rank": 7
+  },
+  {
+   "id": "CH_U17E_Final_Pfadi_HSGNordwest_ca2019_s3@42.9",
+   "k": "078",
+   "seg": "CH_U17E_Final_Pfadi_HSGNordwest_ca2019_s3",
+   "t0": 36.9,
+   "cand_t": 42.9,
+   "score": -0.374,
+   "rank": 9
+  },
+  {
+   "id": "CH_U17E_Final_Pfadi_HSGNordwest_ca2019_s3@72.7",
+   "k": "079",
+   "seg": "CH_U17E_Final_Pfadi_HSGNordwest_ca2019_s3",
+   "t0": 66.7,
+   "cand_t": 72.7,
+   "score": -0.048,
+   "rank": 8
+  },
+  {
+   "id": "CH_U17E_Final_Pfadi_HSGNordwest_ca2019_s3@87.7",
+   "k": "080",
+   "seg": "CH_U17E_Final_Pfadi_HSGNordwest_ca2019_s3",
+   "t0": 81.7,
+   "cand_t": 87.7,
+   "score": 0.536,
+   "rank": 6
+  },
+  {
+   "id": "CH_U17E_Final_Pfadi_HSGNordwest_ca2019_s3@117.5",
+   "k": "081",
+   "seg": "CH_U17E_Final_Pfadi_HSGNordwest_ca2019_s3",
+   "t0": 111.5,
+   "cand_t": 117.5,
+   "score": -0.411,
+   "rank": 10
+  },
+  {
+   "id": "CH_U17E_Final_Pfadi_HSGNordwest_ca2019_s3@156.9",
+   "k": "082",
+   "seg": "CH_U17E_Final_Pfadi_HSGNordwest_ca2019_s3",
+   "t0": 150.9,
+   "cand_t": 156.9,
+   "score": 1.567,
+   "rank": 5
+  },
+  {
+   "id": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10_s1@0.5",
+   "k": "083",
+   "seg": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10_s1",
+   "t0": 0,
+   "cand_t": 0.5,
+   "score": -0.295,
+   "rank": 10
+  },
+  {
+   "id": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10_s1@23.7",
+   "k": "084",
+   "seg": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10_s1",
+   "t0": 17.7,
+   "cand_t": 23.7,
+   "score": 1.426,
+   "rank": 6
+  },
+  {
+   "id": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10_s1@41.9",
+   "k": "085",
+   "seg": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10_s1",
+   "t0": 35.9,
+   "cand_t": 41.9,
+   "score": -0.088,
+   "rank": 9
+  },
+  {
+   "id": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10_s1@118.7",
+   "k": "086",
+   "seg": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10_s1",
+   "t0": 112.7,
+   "cand_t": 118.7,
+   "score": 0.926,
+   "rank": 8
+  },
+  {
+   "id": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10_s1@127.1",
+   "k": "087",
+   "seg": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10_s1",
+   "t0": 121.1,
+   "cand_t": 127.1,
+   "score": -0.317,
+   "rank": 11
+  },
+  {
+   "id": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10_s1@175.1",
+   "k": "088",
+   "seg": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10_s1",
+   "t0": 169.1,
+   "cand_t": 175.1,
+   "score": 1.291,
+   "rank": 7
+  },
+  {
+   "id": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20_s4@0.5",
+   "k": "089",
+   "seg": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20_s4",
+   "t0": 0,
+   "cand_t": 0.5,
+   "score": 1.891,
+   "rank": 6
+  },
+  {
+   "id": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20_s4@36.3",
+   "k": "090",
+   "seg": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20_s4",
+   "t0": 30.3,
+   "cand_t": 36.3,
+   "score": 1.67,
+   "rank": 7
+  },
+  {
+   "id": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20_s4@61.3",
+   "k": "091",
+   "seg": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20_s4",
+   "t0": 55.3,
+   "cand_t": 61.3,
+   "score": 0.835,
+   "rank": 8
+  },
+  {
+   "id": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20_s4@99.3",
+   "k": "092",
+   "seg": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20_s4",
+   "t0": 93.3,
+   "cand_t": 99.3,
+   "score": 0.2,
+   "rank": 10
+  },
+  {
+   "id": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20_s4@108.1",
+   "k": "093",
+   "seg": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20_s4",
+   "t0": 102.1,
+   "cand_t": 108.1,
+   "score": 2.703,
+   "rank": 5
+  },
+  {
+   "id": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20_s4@117.9",
+   "k": "094",
+   "seg": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20_s4",
+   "t0": 111.9,
+   "cand_t": 117.9,
+   "score": 0.676,
+   "rank": 9
+  },
+  {
+   "id": "ES_1Nacional_AnaitasunaB_Trapagaran_2026_s3@9.3",
+   "k": "095",
+   "seg": "ES_1Nacional_AnaitasunaB_Trapagaran_2026_s3",
+   "t0": 3.3,
+   "cand_t": 9.3,
+   "score": -0.471,
+   "rank": 11
+  },
+  {
+   "id": "ES_1Nacional_AnaitasunaB_Trapagaran_2026_s3@39.7",
+   "k": "096",
+   "seg": "ES_1Nacional_AnaitasunaB_Trapagaran_2026_s3",
+   "t0": 33.7,
+   "cand_t": 39.7,
+   "score": -0.15,
+   "rank": 10
+  },
+  {
+   "id": "ES_1Nacional_AnaitasunaB_Trapagaran_2026_s3@51.3",
+   "k": "097",
+   "seg": "ES_1Nacional_AnaitasunaB_Trapagaran_2026_s3",
+   "t0": 45.3,
+   "cand_t": 51.3,
+   "score": 0.008,
+   "rank": 9
+  },
+  {
+   "id": "ES_1Nacional_AnaitasunaB_Trapagaran_2026_s3@78.3",
+   "k": "098",
+   "seg": "ES_1Nacional_AnaitasunaB_Trapagaran_2026_s3",
+   "t0": 72.3,
+   "cand_t": 78.3,
+   "score": 1.559,
+   "rank": 6
+  },
+  {
+   "id": "ES_1Nacional_AnaitasunaB_Trapagaran_2026_s3@92.3",
+   "k": "099",
+   "seg": "ES_1Nacional_AnaitasunaB_Trapagaran_2026_s3",
+   "t0": 86.3,
+   "cand_t": 92.3,
+   "score": 0.219,
+   "rank": 8
+  },
+  {
+   "id": "ES_1Nacional_AnaitasunaB_Trapagaran_2026_s3@145.1",
+   "k": "100",
+   "seg": "ES_1Nacional_AnaitasunaB_Trapagaran_2026_s3",
+   "t0": 139.1,
+   "cand_t": 145.1,
+   "score": 0.833,
+   "rank": 7
+  },
+  {
+   "id": "ES_1Nacional_Huarte_Erreka_2026_s3@15.3",
+   "k": "101",
+   "seg": "ES_1Nacional_Huarte_Erreka_2026_s3",
+   "t0": 9.3,
+   "cand_t": 15.3,
+   "score": 0.601,
+   "rank": 8
+  },
+  {
+   "id": "ES_1Nacional_Huarte_Erreka_2026_s3@25.5",
+   "k": "102",
+   "seg": "ES_1Nacional_Huarte_Erreka_2026_s3",
+   "t0": 19.5,
+   "cand_t": 25.5,
+   "score": 0.198,
+   "rank": 10
+  },
+  {
+   "id": "ES_1Nacional_Huarte_Erreka_2026_s3@40.7",
+   "k": "103",
+   "seg": "ES_1Nacional_Huarte_Erreka_2026_s3",
+   "t0": 34.7,
+   "cand_t": 40.7,
+   "score": 0.062,
+   "rank": 11
+  },
+  {
+   "id": "ES_1Nacional_Huarte_Erreka_2026_s3@150.1",
+   "k": "104",
+   "seg": "ES_1Nacional_Huarte_Erreka_2026_s3",
+   "t0": 144.1,
+   "cand_t": 150.1,
+   "score": 1.575,
+   "rank": 7
+  },
+  {
+   "id": "ES_1Nacional_Huarte_Erreka_2026_s3@164.9",
+   "k": "105",
+   "seg": "ES_1Nacional_Huarte_Erreka_2026_s3",
+   "t0": 158.9,
+   "cand_t": 164.9,
+   "score": 1.768,
+   "rank": 6
+  },
+  {
+   "id": "ES_1Nacional_Huarte_Erreka_2026_s3@173.3",
+   "k": "106",
+   "seg": "ES_1Nacional_Huarte_Erreka_2026_s3",
+   "t0": 167.3,
+   "cand_t": 173.3,
+   "score": 0.541,
+   "rank": 9
+  },
+  {
+   "id": "ES_1Nacional_PalmaDelRio_2026_s3@22.9",
+   "k": "107",
+   "seg": "ES_1Nacional_PalmaDelRio_2026_s3",
+   "t0": 16.9,
+   "cand_t": 22.9,
+   "score": 1.617,
+   "rank": 7
+  },
+  {
+   "id": "ES_1Nacional_PalmaDelRio_2026_s3@39.3",
+   "k": "108",
+   "seg": "ES_1Nacional_PalmaDelRio_2026_s3",
+   "t0": 33.3,
+   "cand_t": 39.3,
+   "score": 0.799,
+   "rank": 9
+  },
+  {
+   "id": "ES_1Nacional_PalmaDelRio_2026_s3@121.1",
+   "k": "109",
+   "seg": "ES_1Nacional_PalmaDelRio_2026_s3",
+   "t0": 115.1,
+   "cand_t": 121.1,
+   "score": 1.158,
+   "rank": 8
+  },
+  {
+   "id": "ES_1Nacional_PalmaDelRio_2026_s3@130.5",
+   "k": "110",
+   "seg": "ES_1Nacional_PalmaDelRio_2026_s3",
+   "t0": 124.5,
+   "cand_t": 130.5,
+   "score": 1.714,
+   "rank": 6
+  },
+  {
+   "id": "ES_1Nacional_PalmaDelRio_2026_s3@149.5",
+   "k": "111",
+   "seg": "ES_1Nacional_PalmaDelRio_2026_s3",
+   "t0": 143.5,
+   "cand_t": 149.5,
+   "score": 1.867,
+   "rank": 5
+  },
+  {
+   "id": "ES_2Nacional_MarniB_Almoradi_2026_s4@12.1",
+   "k": "112",
+   "seg": "ES_2Nacional_MarniB_Almoradi_2026_s4",
+   "t0": 6.1,
+   "cand_t": 12.1,
+   "score": 1.456,
+   "rank": 7
+  },
+  {
+   "id": "ES_2Nacional_MarniB_Almoradi_2026_s4@25.9",
+   "k": "113",
+   "seg": "ES_2Nacional_MarniB_Almoradi_2026_s4",
+   "t0": 19.9,
+   "cand_t": 25.9,
+   "score": -0.72,
+   "rank": 10
+  },
+  {
+   "id": "ES_2Nacional_MarniB_Almoradi_2026_s4@77.7",
+   "k": "114",
+   "seg": "ES_2Nacional_MarniB_Almoradi_2026_s4",
+   "t0": 71.7,
+   "cand_t": 77.7,
+   "score": -0.786,
+   "rank": 11
+  },
+  {
+   "id": "ES_2Nacional_MarniB_Almoradi_2026_s4@110.7",
+   "k": "115",
+   "seg": "ES_2Nacional_MarniB_Almoradi_2026_s4",
+   "t0": 104.7,
+   "cand_t": 110.7,
+   "score": 1.129,
+   "rank": 9
+  },
+  {
+   "id": "ES_2Nacional_MarniB_Almoradi_2026_s4@158.1",
+   "k": "116",
+   "seg": "ES_2Nacional_MarniB_Almoradi_2026_s4",
+   "t0": 152.1,
+   "cand_t": 158.1,
+   "score": 1.679,
+   "rank": 6
+  },
+  {
+   "id": "ES_2Nacional_MarniB_Almoradi_2026_s4@169.1",
+   "k": "117",
+   "seg": "ES_2Nacional_MarniB_Almoradi_2026_s4",
+   "t0": 163.1,
+   "cand_t": 169.1,
+   "score": 1.149,
+   "rank": 8
+  },
+  {
+   "id": "ES_HonorPlata_Bordils_Zamora_2018_s0@41.7",
+   "k": "118",
+   "seg": "ES_HonorPlata_Bordils_Zamora_2018_s0",
+   "t0": 35.7,
+   "cand_t": 41.7,
+   "score": 2.508,
+   "rank": 4
+  },
+  {
+   "id": "ES_HonorPlata_Bordils_Zamora_2018_s0@50.7",
+   "k": "119",
+   "seg": "ES_HonorPlata_Bordils_Zamora_2018_s0",
+   "t0": 44.7,
+   "cand_t": 50.7,
+   "score": 2.434,
+   "rank": 5
+  },
+  {
+   "id": "ES_HonorPlata_Bordils_Zamora_2018_s0@76.5",
+   "k": "120",
+   "seg": "ES_HonorPlata_Bordils_Zamora_2018_s0",
+   "t0": 70.5,
+   "cand_t": 76.5,
+   "score": 0.975,
+   "rank": 6
+  },
+  {
+   "id": "ES_HonorPlata_Bordils_Zamora_2018_s0@86.7",
+   "k": "121",
+   "seg": "ES_HonorPlata_Bordils_Zamora_2018_s0",
+   "t0": 80.7,
+   "cand_t": 86.7,
+   "score": 0.854,
+   "rank": 7
+  },
+  {
+   "id": "FI_Karsinta_Dynamo_GrIFK_2015_s3@6.9",
+   "k": "122",
+   "seg": "FI_Karsinta_Dynamo_GrIFK_2015_s3",
+   "t0": 0.9,
+   "cand_t": 6.9,
+   "score": 0.963,
+   "rank": 9
+  },
+  {
+   "id": "FI_Karsinta_Dynamo_GrIFK_2015_s3@32.1",
+   "k": "123",
+   "seg": "FI_Karsinta_Dynamo_GrIFK_2015_s3",
+   "t0": 26.1,
+   "cand_t": 32.1,
+   "score": -0.143,
+   "rank": 11
+  },
+  {
+   "id": "FI_Karsinta_Dynamo_GrIFK_2015_s3@70.7",
+   "k": "124",
+   "seg": "FI_Karsinta_Dynamo_GrIFK_2015_s3",
+   "t0": 64.7,
+   "cand_t": 70.7,
+   "score": 1.365,
+   "rank": 7
+  },
+  {
+   "id": "FI_Karsinta_Dynamo_GrIFK_2015_s3@108.7",
+   "k": "125",
+   "seg": "FI_Karsinta_Dynamo_GrIFK_2015_s3",
+   "t0": 102.7,
+   "cand_t": 108.7,
+   "score": 0.035,
+   "rank": 10
+  },
+  {
+   "id": "FI_Karsinta_Dynamo_GrIFK_2015_s3@159.9",
+   "k": "126",
+   "seg": "FI_Karsinta_Dynamo_GrIFK_2015_s3",
+   "t0": 153.9,
+   "cand_t": 159.9,
+   "score": 1.32,
+   "rank": 8
+  },
+  {
+   "id": "FI_Karsinta_Dynamo_GrIFK_2015_s3@173.7",
+   "k": "127",
+   "seg": "FI_Karsinta_Dynamo_GrIFK_2015_s3",
+   "t0": 167.7,
+   "cand_t": 173.7,
+   "score": 1.938,
+   "rank": 6
+  },
+  {
+   "id": "FR_N1_SudMayenne_GrandLibournais_2025_s0@29.5",
+   "k": "128",
+   "seg": "FR_N1_SudMayenne_GrandLibournais_2025_s0",
+   "t0": 23.5,
+   "cand_t": 29.5,
+   "score": 1.667,
+   "rank": 6
+  },
+  {
+   "id": "FR_N1_SudMayenne_GrandLibournais_2025_s0@53.7",
+   "k": "129",
+   "seg": "FR_N1_SudMayenne_GrandLibournais_2025_s0",
+   "t0": 47.7,
+   "cand_t": 53.7,
+   "score": 0.889,
+   "rank": 9
+  },
+  {
+   "id": "FR_N1_SudMayenne_GrandLibournais_2025_s0@94.7",
+   "k": "130",
+   "seg": "FR_N1_SudMayenne_GrandLibournais_2025_s0",
+   "t0": 88.7,
+   "cand_t": 94.7,
+   "score": 1.169,
+   "rank": 8
+  },
+  {
+   "id": "FR_N1_SudMayenne_GrandLibournais_2025_s0@117.1",
+   "k": "131",
+   "seg": "FR_N1_SudMayenne_GrandLibournais_2025_s0",
+   "t0": 111.1,
+   "cand_t": 117.1,
+   "score": 1.481,
+   "rank": 7
+  },
+  {
+   "id": "FR_N1_SudMayenne_GrandLibournais_2025_s0@136.1",
+   "k": "132",
+   "seg": "FR_N1_SudMayenne_GrandLibournais_2025_s0",
+   "t0": 130.1,
+   "cand_t": 136.1,
+   "score": 0.648,
+   "rank": 10
+  },
+  {
+   "id": "FR_N1_SudMayenne_GrandLibournais_2025_s0@153.9",
+   "k": "133",
+   "seg": "FR_N1_SudMayenne_GrandLibournais_2025_s0",
+   "t0": 147.9,
+   "cand_t": 153.9,
+   "score": 0.125,
+   "rank": 11
+  },
+  {
+   "id": "IT_SerieA2_Flavioni_Salerno_2026_s3@30.7",
+   "k": "134",
+   "seg": "IT_SerieA2_Flavioni_Salerno_2026_s3",
+   "t0": 24.7,
+   "cand_t": 30.7,
+   "score": -0.0,
+   "rank": 9
+  },
+  {
+   "id": "IT_SerieA2_Flavioni_Salerno_2026_s3@47.1",
+   "k": "135",
+   "seg": "IT_SerieA2_Flavioni_Salerno_2026_s3",
+   "t0": 41.1,
+   "cand_t": 47.1,
+   "score": -0.081,
+   "rank": 10
+  },
+  {
+   "id": "IT_SerieA2_Flavioni_Salerno_2026_s3@88.7",
+   "k": "136",
+   "seg": "IT_SerieA2_Flavioni_Salerno_2026_s3",
+   "t0": 82.7,
+   "cand_t": 88.7,
+   "score": -0.316,
+   "rank": 11
+  },
+  {
+   "id": "IT_SerieA2_Flavioni_Salerno_2026_s3@99.7",
+   "k": "137",
+   "seg": "IT_SerieA2_Flavioni_Salerno_2026_s3",
+   "t0": 93.7,
+   "cand_t": 99.7,
+   "score": 2.997,
+   "rank": 6
+  },
+  {
+   "id": "IT_SerieA2_Flavioni_Salerno_2026_s3@158.5",
+   "k": "138",
+   "seg": "IT_SerieA2_Flavioni_Salerno_2026_s3",
+   "t0": 152.5,
+   "cand_t": 158.5,
+   "score": 1.92,
+   "rank": 8
+  },
+  {
+   "id": "IT_SerieA2_Flavioni_Salerno_2026_s3@170.3",
+   "k": "139",
+   "seg": "IT_SerieA2_Flavioni_Salerno_2026_s3",
+   "t0": 164.3,
+   "cand_t": 170.3,
+   "score": 2.252,
+   "rank": 7
+  },
+  {
+   "id": "IT_SerieA2_Leno_MedalpTirol_2020_s3@32.3",
+   "k": "140",
+   "seg": "IT_SerieA2_Leno_MedalpTirol_2020_s3",
+   "t0": 26.3,
+   "cand_t": 32.3,
+   "score": 0.454,
+   "rank": 10
+  },
+  {
+   "id": "IT_SerieA2_Leno_MedalpTirol_2020_s3@43.3",
+   "k": "141",
+   "seg": "IT_SerieA2_Leno_MedalpTirol_2020_s3",
+   "t0": 37.3,
+   "cand_t": 43.3,
+   "score": 2.264,
+   "rank": 6
+  },
+  {
+   "id": "IT_SerieA2_Leno_MedalpTirol_2020_s3@94.9",
+   "k": "142",
+   "seg": "IT_SerieA2_Leno_MedalpTirol_2020_s3",
+   "t0": 88.9,
+   "cand_t": 94.9,
+   "score": 0.784,
+   "rank": 9
+  },
+  {
+   "id": "IT_SerieA2_Leno_MedalpTirol_2020_s3@132.9",
+   "k": "143",
+   "seg": "IT_SerieA2_Leno_MedalpTirol_2020_s3",
+   "t0": 126.9,
+   "cand_t": 132.9,
+   "score": 2.115,
+   "rank": 8
+  },
+  {
+   "id": "IT_SerieA2_Leno_MedalpTirol_2020_s3@147.1",
+   "k": "144",
+   "seg": "IT_SerieA2_Leno_MedalpTirol_2020_s3",
+   "t0": 141.1,
+   "cand_t": 147.1,
+   "score": 0.24,
+   "rank": 11
+  },
+  {
+   "id": "IT_SerieA2_Leno_MedalpTirol_2020_s3@171.7",
+   "k": "145",
+   "seg": "IT_SerieA2_Leno_MedalpTirol_2020_s3",
+   "t0": 165.7,
+   "cand_t": 171.7,
+   "score": 2.164,
+   "rank": 7
+  },
+  {
+   "id": "IT_SerieA2_Malo_Crenna_2018_s1@25.3",
+   "k": "146",
+   "seg": "IT_SerieA2_Malo_Crenna_2018_s1",
+   "t0": 19.3,
+   "cand_t": 25.3,
+   "score": -0.59,
+   "rank": 10
+  },
+  {
+   "id": "IT_SerieA2_Malo_Crenna_2018_s1@76.7",
+   "k": "147",
+   "seg": "IT_SerieA2_Malo_Crenna_2018_s1",
+   "t0": 70.7,
+   "cand_t": 76.7,
+   "score": 1.739,
+   "rank": 7
+  },
+  {
+   "id": "IT_SerieA2_Malo_Crenna_2018_s1@102.5",
+   "k": "148",
+   "seg": "IT_SerieA2_Malo_Crenna_2018_s1",
+   "t0": 96.5,
+   "cand_t": 102.5,
+   "score": 1.877,
+   "rank": 6
+  },
+  {
+   "id": "IT_SerieA2_Malo_Crenna_2018_s1@110.7",
+   "k": "149",
+   "seg": "IT_SerieA2_Malo_Crenna_2018_s1",
+   "t0": 104.7,
+   "cand_t": 110.7,
+   "score": -0.811,
+   "rank": 11
+  },
+  {
+   "id": "IT_SerieA2_Malo_Crenna_2018_s1@141.3",
+   "k": "150",
+   "seg": "IT_SerieA2_Malo_Crenna_2018_s1",
+   "t0": 135.3,
+   "cand_t": 141.3,
+   "score": 1.718,
+   "rank": 8
+  },
+  {
+   "id": "IT_SerieA2_Malo_Crenna_2018_s1@167.1",
+   "k": "151",
+   "seg": "IT_SerieA2_Malo_Crenna_2018_s1",
+   "t0": 161.1,
+   "cand_t": 167.1,
+   "score": 0.267,
+   "rank": 9
+  },
+  {
+   "id": "Int_Olympia_Finale_Frankreich_Daenemark_2021_s3@5.9",
+   "k": "152",
+   "seg": "Int_Olympia_Finale_Frankreich_Daenemark_2021_s3",
+   "t0": 0,
+   "cand_t": 5.9,
+   "score": 0.9,
+   "rank": 5
+  },
+  {
+   "id": "Int_Olympia_Finale_Frankreich_Daenemark_2021_s3@27.3",
+   "k": "153",
+   "seg": "Int_Olympia_Finale_Frankreich_Daenemark_2021_s3",
+   "t0": 21.3,
+   "cand_t": 27.3,
+   "score": 0.497,
+   "rank": 9
+  },
+  {
+   "id": "Int_Olympia_Finale_Frankreich_Daenemark_2021_s3@43.9",
+   "k": "154",
+   "seg": "Int_Olympia_Finale_Frankreich_Daenemark_2021_s3",
+   "t0": 37.9,
+   "cand_t": 43.9,
+   "score": 0.744,
+   "rank": 7
+  },
+  {
+   "id": "Int_Olympia_Finale_Frankreich_Daenemark_2021_s3@56.1",
+   "k": "155",
+   "seg": "Int_Olympia_Finale_Frankreich_Daenemark_2021_s3",
+   "t0": 50.1,
+   "cand_t": 56.1,
+   "score": 0.518,
+   "rank": 8
+  },
+  {
+   "id": "Int_Olympia_Finale_Frankreich_Daenemark_2021_s3@175.7",
+   "k": "156",
+   "seg": "Int_Olympia_Finale_Frankreich_Daenemark_2021_s3",
+   "t0": 169.7,
+   "cand_t": 175.7,
+   "score": 0.87,
+   "rank": 6
+  },
+  {
+   "id": "NL_1Divisie_JongSEW_Wijhe_2024_s3@10.7",
+   "k": "157",
+   "seg": "NL_1Divisie_JongSEW_Wijhe_2024_s3",
+   "t0": 4.7,
+   "cand_t": 10.7,
+   "score": 0.796,
+   "rank": 9
+  },
+  {
+   "id": "NL_1Divisie_JongSEW_Wijhe_2024_s3@42.3",
+   "k": "158",
+   "seg": "NL_1Divisie_JongSEW_Wijhe_2024_s3",
+   "t0": 36.3,
+   "cand_t": 42.3,
+   "score": 2.397,
+   "rank": 6
+  },
+  {
+   "id": "NL_1Divisie_JongSEW_Wijhe_2024_s3@62.3",
+   "k": "159",
+   "seg": "NL_1Divisie_JongSEW_Wijhe_2024_s3",
+   "t0": 56.3,
+   "cand_t": 62.3,
+   "score": -0.442,
+   "rank": 11
+  },
+  {
+   "id": "NL_1Divisie_JongSEW_Wijhe_2024_s3@79.3",
+   "k": "160",
+   "seg": "NL_1Divisie_JongSEW_Wijhe_2024_s3",
+   "t0": 73.3,
+   "cand_t": 79.3,
+   "score": 1.211,
+   "rank": 8
+  },
+  {
+   "id": "NL_1Divisie_JongSEW_Wijhe_2024_s3@97.5",
+   "k": "161",
+   "seg": "NL_1Divisie_JongSEW_Wijhe_2024_s3",
+   "t0": 91.5,
+   "cand_t": 97.5,
+   "score": 0.688,
+   "rank": 10
+  },
+  {
+   "id": "NL_1Divisie_JongSEW_Wijhe_2024_s3@105.7",
+   "k": "162",
+   "seg": "NL_1Divisie_JongSEW_Wijhe_2024_s3",
+   "t0": 99.7,
+   "cand_t": 105.7,
+   "score": 1.936,
+   "rank": 7
+  },
+  {
+   "id": "NL_2Divisie_SEW2_Tukkers_2019_s2@2.9",
+   "k": "163",
+   "seg": "NL_2Divisie_SEW2_Tukkers_2019_s2",
+   "t0": 0,
+   "cand_t": 2.9,
+   "score": 0.549,
+   "rank": 9
+  },
+  {
+   "id": "NL_2Divisie_SEW2_Tukkers_2019_s2@31.9",
+   "k": "164",
+   "seg": "NL_2Divisie_SEW2_Tukkers_2019_s2",
+   "t0": 25.9,
+   "cand_t": 31.9,
+   "score": 0.227,
+   "rank": 10
+  },
+  {
+   "id": "NL_2Divisie_SEW2_Tukkers_2019_s2@55.9",
+   "k": "165",
+   "seg": "NL_2Divisie_SEW2_Tukkers_2019_s2",
+   "t0": 49.9,
+   "cand_t": 55.9,
+   "score": 1.984,
+   "rank": 6
+  },
+  {
+   "id": "NL_2Divisie_SEW2_Tukkers_2019_s2@65.9",
+   "k": "166",
+   "seg": "NL_2Divisie_SEW2_Tukkers_2019_s2",
+   "t0": 59.9,
+   "cand_t": 65.9,
+   "score": 0.895,
+   "rank": 8
+  },
+  {
+   "id": "NL_2Divisie_SEW2_Tukkers_2019_s2@74.1",
+   "k": "167",
+   "seg": "NL_2Divisie_SEW2_Tukkers_2019_s2",
+   "t0": 68.1,
+   "cand_t": 74.1,
+   "score": -0.011,
+   "rank": 11
+  },
+  {
+   "id": "NL_2Divisie_SEW2_Tukkers_2019_s2@123.9",
+   "k": "168",
+   "seg": "NL_2Divisie_SEW2_Tukkers_2019_s2",
+   "t0": 117.9,
+   "cand_t": 123.9,
+   "score": 1.651,
+   "rank": 7
+  },
+  {
+   "id": "NL_2Divisie_VZV2_SEW2_2019_s4@9.7",
+   "k": "169",
+   "seg": "NL_2Divisie_VZV2_SEW2_2019_s4",
+   "t0": 3.7,
+   "cand_t": 9.7,
+   "score": 0.546,
+   "rank": 9
+  },
+  {
+   "id": "NL_2Divisie_VZV2_SEW2_2019_s4@91.1",
+   "k": "170",
+   "seg": "NL_2Divisie_VZV2_SEW2_2019_s4",
+   "t0": 85.1,
+   "cand_t": 91.1,
+   "score": 1.03,
+   "rank": 7
+  },
+  {
+   "id": "NL_2Divisie_VZV2_SEW2_2019_s4@121.1",
+   "k": "171",
+   "seg": "NL_2Divisie_VZV2_SEW2_2019_s4",
+   "t0": 115.1,
+   "cand_t": 121.1,
+   "score": 0.745,
+   "rank": 8
+  },
+  {
+   "id": "NL_2Divisie_VZV2_SEW2_2019_s4@141.9",
+   "k": "172",
+   "seg": "NL_2Divisie_VZV2_SEW2_2019_s4",
+   "t0": 135.9,
+   "cand_t": 141.9,
+   "score": 1.624,
+   "rank": 6
+  },
+  {
+   "id": "NL_2Divisie_VZV2_SEW2_2019_s4@170.7",
+   "k": "173",
+   "seg": "NL_2Divisie_VZV2_SEW2_2019_s4",
+   "t0": 164.7,
+   "cand_t": 170.7,
+   "score": 1.822,
+   "rank": 5
+  },
+  {
+   "id": "NL_Frauen_Final_VOC_SEW_2026_s4@9.9",
+   "k": "174",
+   "seg": "NL_Frauen_Final_VOC_SEW_2026_s4",
+   "t0": 3.9,
+   "cand_t": 9.9,
+   "score": 1.243,
+   "rank": 8
+  },
+  {
+   "id": "NL_Frauen_Final_VOC_SEW_2026_s4@21.5",
+   "k": "175",
+   "seg": "NL_Frauen_Final_VOC_SEW_2026_s4",
+   "t0": 15.5,
+   "cand_t": 21.5,
+   "score": 1.61,
+   "rank": 6
+  },
+  {
+   "id": "NL_Frauen_Final_VOC_SEW_2026_s4@29.7",
+   "k": "176",
+   "seg": "NL_Frauen_Final_VOC_SEW_2026_s4",
+   "t0": 23.7,
+   "cand_t": 29.7,
+   "score": 0.639,
+   "rank": 9
+  },
+  {
+   "id": "NL_Frauen_Final_VOC_SEW_2026_s4@128.1",
+   "k": "177",
+   "seg": "NL_Frauen_Final_VOC_SEW_2026_s4",
+   "t0": 122.1,
+   "cand_t": 128.1,
+   "score": 1.341,
+   "rank": 7
+  },
+  {
+   "id": "NL_Frauen_Final_VOC_SEW_2026_s4@136.5",
+   "k": "178",
+   "seg": "NL_Frauen_Final_VOC_SEW_2026_s4",
+   "t0": 130.5,
+   "cand_t": 136.5,
+   "score": 0.234,
+   "rank": 11
+  },
+  {
+   "id": "NL_Frauen_Final_VOC_SEW_2026_s4@146.9",
+   "k": "179",
+   "seg": "NL_Frauen_Final_VOC_SEW_2026_s4",
+   "t0": 140.9,
+   "cand_t": 146.9,
+   "score": 0.592,
+   "rank": 10
+  },
+  {
+   "id": "NO_Frauen_3Div_Sogndal_Askoey_2019_s0@33.7",
+   "k": "180",
+   "seg": "NO_Frauen_3Div_Sogndal_Askoey_2019_s0",
+   "t0": 27.7,
+   "cand_t": 33.7,
+   "score": 1.406,
+   "rank": 6
+  },
+  {
+   "id": "NO_Frauen_3Div_Sogndal_Askoey_2019_s0@63.9",
+   "k": "181",
+   "seg": "NO_Frauen_3Div_Sogndal_Askoey_2019_s0",
+   "t0": 57.9,
+   "cand_t": 63.9,
+   "score": 0.331,
+   "rank": 10
+  },
+  {
+   "id": "NO_Frauen_3Div_Sogndal_Askoey_2019_s0@86.7",
+   "k": "182",
+   "seg": "NO_Frauen_3Div_Sogndal_Askoey_2019_s0",
+   "t0": 80.7,
+   "cand_t": 86.7,
+   "score": 1.345,
+   "rank": 7
+  },
+  {
+   "id": "NO_Frauen_3Div_Sogndal_Askoey_2019_s0@102.7",
+   "k": "183",
+   "seg": "NO_Frauen_3Div_Sogndal_Askoey_2019_s0",
+   "t0": 96.7,
+   "cand_t": 102.7,
+   "score": 1.315,
+   "rank": 8
+  },
+  {
+   "id": "NO_Frauen_3Div_Sogndal_Askoey_2019_s0@113.3",
+   "k": "184",
+   "seg": "NO_Frauen_3Div_Sogndal_Askoey_2019_s0",
+   "t0": 107.3,
+   "cand_t": 113.3,
+   "score": 0.24,
+   "rank": 11
+  },
+  {
+   "id": "NO_Frauen_3Div_Sogndal_Askoey_2019_s0@155.7",
+   "k": "185",
+   "seg": "NO_Frauen_3Div_Sogndal_Askoey_2019_s0",
+   "t0": 149.7,
+   "cand_t": 155.7,
+   "score": 0.373,
+   "rank": 9
+  },
+  {
+   "id": "PT_Frauen_Madeira_Gaia_2022_s4@25.5",
+   "k": "186",
+   "seg": "PT_Frauen_Madeira_Gaia_2022_s4",
+   "t0": 19.5,
+   "cand_t": 25.5,
+   "score": 0.686,
+   "rank": 11
+  },
+  {
+   "id": "PT_Frauen_Madeira_Gaia_2022_s4@34.9",
+   "k": "187",
+   "seg": "PT_Frauen_Madeira_Gaia_2022_s4",
+   "t0": 28.9,
+   "cand_t": 34.9,
+   "score": 1.198,
+   "rank": 9
+  },
+  {
+   "id": "PT_Frauen_Madeira_Gaia_2022_s4@78.7",
+   "k": "188",
+   "seg": "PT_Frauen_Madeira_Gaia_2022_s4",
+   "t0": 72.7,
+   "cand_t": 78.7,
+   "score": 0.937,
+   "rank": 10
+  },
+  {
+   "id": "PT_Frauen_Madeira_Gaia_2022_s4@108.3",
+   "k": "189",
+   "seg": "PT_Frauen_Madeira_Gaia_2022_s4",
+   "t0": 102.3,
+   "cand_t": 108.3,
+   "score": 2.412,
+   "rank": 7
+  },
+  {
+   "id": "PT_Frauen_Madeira_Gaia_2022_s4@163.7",
+   "k": "190",
+   "seg": "PT_Frauen_Madeira_Gaia_2022_s4",
+   "t0": 157.7,
+   "cand_t": 163.7,
+   "score": 2.691,
+   "rank": 6
+  },
+  {
+   "id": "PT_Frauen_Madeira_Gaia_2022_s4@176.3",
+   "k": "191",
+   "seg": "PT_Frauen_Madeira_Gaia_2022_s4",
+   "t0": 170.0,
+   "cand_t": 176.3,
+   "score": 1.248,
+   "rank": 8
+  },
+  {
+   "id": "SE_Allsvenskan_Torslanda_Amo_2018_s4@0.5",
+   "k": "192",
+   "seg": "SE_Allsvenskan_Torslanda_Amo_2018_s4",
+   "t0": 0,
+   "cand_t": 0.5,
+   "score": 0.237,
+   "rank": 11
+  },
+  {
+   "id": "SE_Allsvenskan_Torslanda_Amo_2018_s4@26.9",
+   "k": "193",
+   "seg": "SE_Allsvenskan_Torslanda_Amo_2018_s4",
+   "t0": 20.9,
+   "cand_t": 26.9,
+   "score": 0.585,
+   "rank": 7
+  },
+  {
+   "id": "SE_Allsvenskan_Torslanda_Amo_2018_s4@59.7",
+   "k": "194",
+   "seg": "SE_Allsvenskan_Torslanda_Amo_2018_s4",
+   "t0": 53.7,
+   "cand_t": 59.7,
+   "score": 0.322,
+   "rank": 10
+  },
+  {
+   "id": "SE_Allsvenskan_Torslanda_Amo_2018_s4@77.1",
+   "k": "195",
+   "seg": "SE_Allsvenskan_Torslanda_Amo_2018_s4",
+   "t0": 71.1,
+   "cand_t": 77.1,
+   "score": 0.466,
+   "rank": 9
+  },
+  {
+   "id": "SE_Allsvenskan_Torslanda_Amo_2018_s4@110.5",
+   "k": "196",
+   "seg": "SE_Allsvenskan_Torslanda_Amo_2018_s4",
+   "t0": 104.5,
+   "cand_t": 110.5,
+   "score": 0.665,
+   "rank": 6
+  },
+  {
+   "id": "SE_Allsvenskan_Torslanda_Amo_2018_s4@173.1",
+   "k": "197",
+   "seg": "SE_Allsvenskan_Torslanda_Amo_2018_s4",
+   "t0": 167.1,
+   "cand_t": 173.1,
+   "score": 0.556,
+   "rank": 8
+  },
+  {
+   "id": "SE_Amateur_Sala_Vaesteras_2022_s1@17.3",
+   "k": "198",
+   "seg": "SE_Amateur_Sala_Vaesteras_2022_s1",
+   "t0": 11.3,
+   "cand_t": 17.3,
+   "score": 0.79,
+   "rank": 7
+  },
+  {
+   "id": "SE_Amateur_Sala_Vaesteras_2022_s1@47.1",
+   "k": "199",
+   "seg": "SE_Amateur_Sala_Vaesteras_2022_s1",
+   "t0": 41.1,
+   "cand_t": 47.1,
+   "score": 0.494,
+   "rank": 9
+  },
+  {
+   "id": "SE_Amateur_Sala_Vaesteras_2022_s1@85.9",
+   "k": "200",
+   "seg": "SE_Amateur_Sala_Vaesteras_2022_s1",
+   "t0": 79.9,
+   "cand_t": 85.9,
+   "score": 0.038,
+   "rank": 11
+  },
+  {
+   "id": "SE_Amateur_Sala_Vaesteras_2022_s1@112.7",
+   "k": "201",
+   "seg": "SE_Amateur_Sala_Vaesteras_2022_s1",
+   "t0": 106.7,
+   "cand_t": 112.7,
+   "score": 0.867,
+   "rank": 6
+  },
+  {
+   "id": "SE_Amateur_Sala_Vaesteras_2022_s1@127.1",
+   "k": "202",
+   "seg": "SE_Amateur_Sala_Vaesteras_2022_s1",
+   "t0": 121.1,
+   "cand_t": 127.1,
+   "score": 0.368,
+   "rank": 10
+  },
+  {
+   "id": "SE_Amateur_Sala_Vaesteras_2022_s1@170.5",
+   "k": "203",
+   "seg": "SE_Amateur_Sala_Vaesteras_2022_s1",
+   "t0": 164.5,
+   "cand_t": 170.5,
+   "score": 0.771,
+   "rank": 8
+  },
+  {
+   "id": "SE_Test_Hammarby_Skanela_2026_s3@10.7",
+   "k": "204",
+   "seg": "SE_Test_Hammarby_Skanela_2026_s3",
+   "t0": 4.7,
+   "cand_t": 10.7,
+   "score": 0.568,
+   "rank": 8
+  },
+  {
+   "id": "SE_Test_Hammarby_Skanela_2026_s3@33.9",
+   "k": "205",
+   "seg": "SE_Test_Hammarby_Skanela_2026_s3",
+   "t0": 27.9,
+   "cand_t": 33.9,
+   "score": 3.039,
+   "rank": 5
+  },
+  {
+   "id": "SE_Test_Hammarby_Skanela_2026_s3@54.1",
+   "k": "206",
+   "seg": "SE_Test_Hammarby_Skanela_2026_s3",
+   "t0": 48.1,
+   "cand_t": 54.1,
+   "score": 1.142,
+   "rank": 7
+  },
+  {
+   "id": "SE_Test_Hammarby_Skanela_2026_s3@136.9",
+   "k": "207",
+   "seg": "SE_Test_Hammarby_Skanela_2026_s3",
+   "t0": 130.9,
+   "cand_t": 136.9,
+   "score": 0.196,
+   "rank": 9
+  },
+  {
+   "id": "SE_Test_Hammarby_Skanela_2026_s3@153.1",
+   "k": "208",
+   "seg": "SE_Test_Hammarby_Skanela_2026_s3",
+   "t0": 147.1,
+   "cand_t": 153.1,
+   "score": 1.208,
+   "rank": 6
+  },
+  {
+   "id": "US_NYCity_NYAC_2019_s3@24.1",
+   "k": "209",
+   "seg": "US_NYCity_NYAC_2019_s3",
+   "t0": 18.1,
+   "cand_t": 24.1,
+   "score": 1.346,
+   "rank": 9
+  },
+  {
+   "id": "US_NYCity_NYAC_2019_s3@104.3",
+   "k": "210",
+   "seg": "US_NYCity_NYAC_2019_s3",
+   "t0": 98.3,
+   "cand_t": 104.3,
+   "score": 0.745,
+   "rank": 11
+  },
+  {
+   "id": "US_NYCity_NYAC_2019_s3@149.3",
+   "k": "211",
+   "seg": "US_NYCity_NYAC_2019_s3",
+   "t0": 143.3,
+   "cand_t": 149.3,
+   "score": 1.159,
+   "rank": 10
+  },
+  {
+   "id": "US_NYCity_NYAC_2019_s3@157.5",
+   "k": "212",
+   "seg": "US_NYCity_NYAC_2019_s3",
+   "t0": 151.5,
+   "cand_t": 157.5,
+   "score": 1.591,
+   "rank": 6
+  },
+  {
+   "id": "US_NYCity_NYAC_2019_s3@166.1",
+   "k": "213",
+   "seg": "US_NYCity_NYAC_2019_s3",
+   "t0": 160.1,
+   "cand_t": 166.1,
+   "score": 1.453,
+   "rank": 7
+  },
+  {
+   "id": "US_NYCity_NYAC_2019_s3@174.3",
+   "k": "214",
+   "seg": "US_NYCity_NYAC_2019_s3",
+   "t0": 168.3,
+   "cand_t": 174.3,
+   "score": 1.347,
+   "rank": 8
+  }
+ ]
+}
