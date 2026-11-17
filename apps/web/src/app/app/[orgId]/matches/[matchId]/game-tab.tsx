@@ -9,7 +9,8 @@ import { buttonClass } from "@/components/ui/button";
 import { goalRuns, type MatchGraphics } from "@/lib/graphics";
 import { threeThings, type Thing } from "@/lib/three-things";
 import { usePhone } from "@/lib/use-phone";
-import { halfScore, mainKeeper, mainSource, scoreSequence, topScorers } from "@/lib/telegram";
+import { ownKeepers, withRosterIds, type RosterLike } from "@/lib/keepers";
+import { halfScore, keeperSaves, mainSource, scoreSequence, topScorers } from "@/lib/telegram";
 import type { Stats } from "./analysis-views";
 
 /**
@@ -79,10 +80,10 @@ export interface TelegramMatch {
 }
 
 /** The telegram: one paragraph of facts as a report would print it, with «Kopieren». */
-export function Telegram({ match, stats, names }: { match: TelegramMatch; stats: Stats | null; names: Record<string, string> }) {
+export function Telegram({ match, stats, names, roster = [] }: { match: TelegramMatch; stats: Stats | null; names: Record<string, string>; roster?: RosterLike[] }) {
   const t = useTranslations("anlauf");
   const [copied, setCopied] = useState(false);
-  const text = telegramText(t, match, stats, names);
+  const text = telegramText(t, match, stats, names, roster);
   if (!text) return null;
   return (
     <section data-testid="telegram">
@@ -108,7 +109,7 @@ export function Telegram({ match, stats, names }: { match: TelegramMatch; stats:
 
 type T = ReturnType<typeof useTranslations<"anlauf">>;
 
-export function telegramText(t: T, m: TelegramMatch, stats: Stats | null, names: Record<string, string>): string | null {
+export function telegramText(t: T, m: TelegramMatch, stats: Stats | null, names: Record<string, string>, roster: RosterLike[] = []): string | null {
   if (!m.score) return null;
   const timed = stats?.timeline.timed !== false;
   const points = stats?.timeline.score ?? [];
@@ -125,20 +126,25 @@ export function telegramText(t: T, m: TelegramMatch, stats: Stats | null, names:
       stats.opponent.suspensions ? t("tgPenalty", { n: stats.opponent.suspensions, team: m.opp }) : null,
     ].filter(Boolean);
     if (pens.length) parts.push(t("tgPenalties", { list: pens.join(", ") }));
-    const scorers = topScorers(Object.values(stats.players), names, 3, (k) => ` ${t("tgSeven", { n: k })}`);
+    const scorers = topScorers(withRosterIds(Object.values(stats.players), roster), names, 3, (k) => ` ${t("tgSeven", { n: k })}`);
     if (scorers.length) parts.push(t("tgScorers", { list: scorers.join(", ") }));
-    const keeper = mainKeeper(Object.values(stats.goalkeepers ?? {}), names);
-    if (keeper) parts.push(t("tgKeeper", { name: keeper.name, saves: keeper.saves }));
+    // every own keeper with saves: the figure beside counts them all (R2)
+    const keepers = keeperSaves(withRosterIds(ownKeepers(Object.values(stats.goalkeepers ?? {}), roster), roster), names);
+    if (keepers.length === 1) parts.push(t("tgKeeper", { name: keepers[0]!.name, saves: keepers[0]!.saves }));
+    else if (keepers.length > 1) parts.push(t("tgKeepers", { list: keepers.map((k) => t("tgKeeperItem", { name: k.name, saves: k.saves })).join(", ") }));
   }
   return parts.join(" ");
 }
 
 /** Three figures with their source; a figure the sources never recorded is left out. */
-export function ThreeFigures({ stats, names }: { stats: Stats; names: Record<string, string> }) {
+export function ThreeFigures({ stats, names, roster = [] }: { stats: Stats; names: Record<string, string>; roster?: RosterLike[] }) {
   const t = useTranslations("anlauf");
   const src = mainSource(stats.quality.sources);
   const from = t(src === "report" ? "fromReport" : src === "marked" ? "markedByYou" : "fromVideo");
-  const keeper = mainKeeper(Object.values(stats.goalkeepers ?? {}), names);
+  // the saves of the team; named after the keeper only when that keeper made all of them, so the
+  // figure and the telegram never give two numbers for one thing (R2: «16 Paraden» and «20 Paraden»)
+  const keepers = keeperSaves(withRosterIds(ownKeepers(Object.values(stats.goalkeepers ?? {}), roster), roster), names);
+  const keeper = keepers.length === 1 && keepers[0]!.saves === stats.own.saves ? keepers[0]! : null;
   const figs: { value: string; label: string; testid: string }[] = [];
   if (stats.own.known?.saving !== false && stats.own.saves > 0) {
     figs.push({ value: String(stats.own.saves), label: `${keeper ? t("figSavesOf", { name: keeper.name }) : t("figSaves")}, ${from}`, testid: "fig-saves" });

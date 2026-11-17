@@ -3632,7 +3632,9 @@
     "exampleTitle": "Ceci est un exemple",
     "exampleBody": "Un match de démonstration avec des buts inventés : voilà à quoi ressemble un match une fois ta vidéo analysée. Il n'appartient pas à ton équipe et ne compte dans aucune statistique.",
     "exampleBack": "Retour à tes matchs",
-    "thingsExplain": "Les trois points : les tendances les plus nettes parmi les buts de ce match, par exemple le côté par lequel la plupart des buts encaissés sont tombés. Seul ce qui revient au moins trois fois est montré."
+    "thingsExplain": "Les trois points : les tendances les plus nettes parmi les buts de ce match, par exemple le côté par lequel la plupart des buts encaissés sont tombés. Seul ce qui revient au moins trois fois est montré.",
+    "tgKeepers": "Dans les buts : {list}.",
+    "tgKeeperItem": "{name} ({saves, plural, one {1 arrêt} other {# arrêts}})"
   },
   "check": {
     "top": "Vérifier · {opponent}",
@@ -3933,7 +3935,14 @@
     "allNumbersNote": "Feuille de match, tirs, gardiens en détail, courses",
     "unknown": "sans nom",
     "confirmed": "Confirmé",
-    "confirmedYes": "tous les buts confirmés"
+    "confirmedYes": "tous les buts confirmés",
+    "notInRoster": "pas dans l'effectif",
+    "noNumber": "sans numéro dans la feuille de match",
+    "introReport": "Tous les chiffres viennent de la feuille de match. Tirs, arrêts et pertes de balle n'apparaissent que si la feuille de match les indique.",
+    "shotsPlain": "Tirs",
+    "savesPlain": "Arrêts",
+    "againstNone": "{n, plural, one {Le but encaissé n'est attribué} other {Les # buts encaissés ne sont attribués}} à aucun gardien.",
+    "savesNone": "{n, plural, one {Un arrêt n'est attribué} other {# arrêts ne sont attribués}} à aucun gardien de l'effectif."
   },
   "entry": {
     "ask": "Comment s'appelle ton équipe ?",
