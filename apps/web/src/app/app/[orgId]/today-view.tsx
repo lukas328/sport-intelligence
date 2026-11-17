@@ -514,13 +514,17 @@ function FamilyToday({ orgId }: { orgId: string }) {
   const t = useTranslations();
   const greeting = useGreeting();
   const { schedule, feeds } = useMember(orgId);
+  const { teams } = useShell();
   const dates = (schedule.items.data ?? []).slice(0, 4);
+  // dates and replies are Teamfunktionen (ADR 029): without them the tab is gone, so is this block
+  const datesOn = teams.some((x) => x.team_features);
   return (
     <div className="space-y-12">
       <PageHeader title={greeting.split(" · ")[0]!} eyebrow={greeting.split(" · ")[1]} />
       {/* parents: the overview is the first tab of Teamleben (K16) */}
       <AreaSubNav />
       <LifeHint />
+      {datesOn && (
       <Block title={t("today.myDates")} href={`/app/${orgId}/schedule`} linkLabel={t("today.allDates")}>
         {schedule.items.isLoading ? (
           <Skeleton className="h-32" />
@@ -536,7 +540,8 @@ function FamilyToday({ orgId }: { orgId: string }) {
           </ul>
         )}
       </Block>
-      <Block title={t("today.newScenes")} href={`/app/${orgId}/feed`} linkLabel={t("today.allScenes")}>
+      )}
+      <Block title={t("today.newScenesFamily")} href={`/app/${orgId}/feed`} linkLabel={t("today.allScenes")}>
         <Scenes orgId={orgId} feeds={feeds.data ?? []} loading={feeds.isLoading} />
       </Block>
     </div>
@@ -561,7 +566,8 @@ function Scenes({ orgId, feeds, loading }: { orgId: string; feeds: Schemas["Feed
                 {f.relation === "guardian" && ` · ${f.player_first_name}`}
               </span>
             </span>
-            {!f.assessed && <Badge tone="accent">{t("feed.assessNow")}</Badge>}
+            {/* the self-assessment is the player's: a parent is not asked for it */}
+            {!f.assessed && f.relation !== "guardian" && <Badge tone="accent">{t("feed.assessNow")}</Badge>}
           </Link>
         </li>
       ))}

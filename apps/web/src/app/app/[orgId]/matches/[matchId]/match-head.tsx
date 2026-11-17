@@ -62,6 +62,7 @@ export function MatchHead({ match, ownName, oppName, view, graphics, children }:
           ownName={ownName}
           oppName={oppName}
           ownColor={match.kit_own}
+          scoreless={graphics != null}
           goals={graphics ? reportGoals(graphics) : null}
           flightLabels={{ half: t("halftime", { v: "{v}" }), end: t("end", { v: "{v}" }), halfLevel: t("halftimeLevel"), endLevel: t("endLevel") }}
           meta={

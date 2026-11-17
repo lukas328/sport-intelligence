@@ -42,7 +42,10 @@ test("player: the match page leads to the own scenes, assessment first", async (
   const attendance = page.getByTestId("match-attendance");
   await attendance.locator("summary").click();
   await expect(attendance).toContainText("0 Zusagen, 0 Absagen, 1 offen");
+  // saved before the reload (a reload right away can cut the request off)
+  const saved = page.waitForResponse((r) => r.url().includes("/attendance") && r.request().method() === "PUT");
   await attendance.getByLabel("Anwesenheit von Lea Beispiel").selectOption("present");
+  await saved;
   await page.reload();
   await page.getByTestId("match-attendance").locator("summary").click();
   await expect(page.getByTestId("match-attendance").getByLabel("Anwesenheit von Lea Beispiel")).toHaveValue("present");
@@ -65,7 +68,9 @@ test("player: the match page leads to the own scenes, assessment first", async (
 
   // a unit in two days: the plan says who is out that day
   await openTraining(page);
-  await page.getByRole("button", { name: "Neue Einheit" }).click();
+  // the list of units has loaded before a new one is added (else the first answer can overtake it)
+  await expect(page.getByText(/^Noch keine Einheit geplant\./)).toBeVisible();
+  await page.getByRole("button", { name: "Einheit selbst planen" }).click();
   const unit = page.getByRole("form", { name: "Neue Einheit" });
   await unit.getByLabel("Datum").fill(new Date(Date.now() + 2 * 86400_000).toISOString().slice(0, 10));
   await unit.getByLabel("Titel").fill("Abwehr 6:0");

@@ -9,6 +9,9 @@ test("drills, notifications and team assignments", async ({ page }, info) => {
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await page.getByLabel("Teamname").fill("U17");
   await page.getByRole("button", { name: "Zum Team" }).click();
+  // the onboarding ends on Spiele with the next steps (K17); the squad page is under Team
+  await page.waitForURL(/\/teams\/[^/]+/);
+  await page.goto(page.url().replace(/(\/teams\/[^/?#]+).*/, "$1"));
   // the squad page says the state of the squad, the team sits in the eyebrow above it
   await expect(page.getByRole("heading", { level: 1, name: "Noch niemand im Kader." })).toBeVisible();
   await expect(page.getByText(/^U17 · /)).toBeVisible();
@@ -17,7 +20,7 @@ test("drills, notifications and team assignments", async ({ page }, info) => {
   // the bell shows no unread notifications for a new coach
   await expect(page.getByTestId("bell").filter({ visible: true })).toBeVisible();
   await page.getByTestId("bell").filter({ visible: true }).click();
-  await expect(page.getByText("Keine Mitteilungen.")).toBeVisible();
+  await expect(page.getByTestId("bell-empty")).toContainText("Noch nichts Neues.");
   await page.keyboard.press("Escape");
 
   // drill library with focus filter

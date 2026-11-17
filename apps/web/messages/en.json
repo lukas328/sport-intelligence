@@ -1419,7 +1419,11 @@
     "allMatches": "All matches in detail",
     "unknownPlayer": "Unassigned",
     "xgNote": "xG: expected goals, estimated from shot position and situation.",
-    "formLast": "{n, plural, one {The last match.} other {The last # matches, newest on the right.}}"
+    "formLast": "{n, plural, one {The last match.} other {The last # matches, newest on the right.}}",
+    "emptyText": "The season grows here with every match: results, what repeats and who scores. Create your first match and upload the video.",
+    "noFiguresTitle": "No figures for the season yet.",
+    "noFiguresText": "The season counts matches with recorded goals and shots. In your matches with video the analysis has not found any yet: answer the open questions there or enter the result.",
+    "toMatches": "To the matches"
   },
   "notifications": {
     "title": "Notifications",
@@ -1495,7 +1499,7 @@
   },
   "drills": {
     "title": "Drills",
-    "hint": "Handball Intelligence's own drills with set-up, procedure, coaching points, variants and a sketch. On the sketch the blue players practise, orange are their opponents.",
+    "hint": "Drills by Handball Intelligence with set-up, procedure, coaching points, variants and a sketch. On the sketch the blue players practise, orange are their opponents.",
     "minutes": "{minutes} min",
     "players": "{players} players",
     "level_basic": "Basic",
@@ -1850,7 +1854,10 @@
     "countOf": "{n} of {total}",
     "state_granted": "given",
     "state_refused": "refused",
-    "state_missing": "missing"
+    "state_missing": "missing",
+    "purpose_analysis_help_guardian": "The team may analyse match videos and recognise your child in them.",
+    "purpose_highlights_internal_help_guardian": "Scenes with your child may appear in highlights only the club sees.",
+    "purpose_highlights_public_help_guardian": "Scenes with your child may be shown publicly, for example on the club website."
   },
   "members": {
     "makeAdmin": "Make club admin",
@@ -2230,7 +2237,8 @@
     "paid": "paid",
     "open": "open",
     "reminded": "reminded",
-    "dunned": "final notice"
+    "dunned": "final notice",
+    "orderedNoMail": "Invoice {number} has been created. You find it below as a PDF. The subscription is active."
   },
   "support": {
     "help": "Help",
@@ -2772,7 +2780,8 @@
     "assessLead": "Your self-assessment is still missing",
     "assessTask": "Rate your game against {opponent}",
     "replyTask": "{n, plural, one {Reply to # date} other {Reply to # dates}}",
-    "replyHint": "In or out: the coach plans with it."
+    "replyHint": "In or out: the coach plans with it.",
+    "newScenesFamily": "New scenes of your child"
   },
   "shell": {
     "search": "Search",
@@ -3096,7 +3105,8 @@
     "notFound": "Team not found or outside Switzerland?",
     "manual": "Create a club by hand",
     "showAll": "Show all {n} teams of {club}",
-    "claiming": "We are fetching matches, squad and table from handball.ch. This takes about 15 seconds."
+    "claiming": "We are fetching matches, squad and table from handball.ch. This takes about 15 seconds.",
+    "searching": "Searching handball.ch."
   },
   "official": {
     "eyebrow": "Official data",
@@ -3872,7 +3882,8 @@
     "uploadVideo": "Upload video",
     "noAnalysisYet": "no analysis yet",
     "noVideoShort": "no video",
-    "dataReport": "from the match report"
+    "dataReport": "from the match report",
+    "trainingTips": "Training tips for this"
   },
   "numbersTab": {
     "intro": "Goals, 7 m and 2 minutes from the match report and the video, shots and saves from the tagged events.",
@@ -4099,7 +4110,7 @@
     "datesTitle": "Dates and replies",
     "datesText": "Training sessions and matches. Players reply yes or no, you see who is coming.",
     "planTitle": "Training",
-    "planText": "Plan sessions, with drills and duration.",
+    "planText": "Tips from your matches with matching drills, turned into sessions with duration.",
     "tasksTitle": "Tasks",
     "tasksText": "Scenes or collections to watch by a date. You see who has watched them.",
     "ownTitle": "Areas for players and parents",
@@ -4135,7 +4146,7 @@
     "hint_dates_player": "Here are your team's training sessions and matches. Reply so your coach can plan.",
     "hint_dates_family": "Here are your child's training sessions and matches.",
     "hint_plan_title": "Training",
-    "hint_plan_staff": "Plan your sessions with drills and duration. Only you and your assistant coaches see the plan.",
+    "hint_plan_staff": "Tips from your matches with matching drills. One click turns them into a session. Only you and your assistant coaches see the plan.",
     "hint_plan_player": "Here your coach plans the sessions.",
     "hint_plan_family": "Here the coach plans the sessions.",
     "hint_assignments_title": "Tasks",
@@ -4158,7 +4169,7 @@
   "nextSteps": {
     "title": "What comes next",
     "videoTitle": "Upload your first video",
-    "videoText": "About 40 minutes later you get the three things and all scenes.",
+    "videoText": "Then you get the three things and all scenes. How far the analysis is shows at the top of every page.",
     "videoAction": "Upload video",
     "coachTitle": "Invite your assistant coach",
     "coachText": "They see and edit everything in the team, just not the club and subscription.",

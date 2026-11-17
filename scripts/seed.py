@@ -58,8 +58,8 @@ NO_CONSENT = {14, 19}
 
 
 ZONE_FROM = {
-    "la": "über links aussen",
-    "ra": "über rechts aussen",
+    "la": "über aussen links",
+    "ra": "über aussen rechts",
     "rl": "aus dem Rückraum links",
     "rm": "aus dem Rückraum Mitte",
     "rr": "aus dem Rückraum rechts",

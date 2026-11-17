@@ -108,6 +108,7 @@ export function WurfHead({
   span,
   scoreNote,
   ownColor,
+  scoreless = false,
 }: {
   kick?: ReactNode;
   title: ReactNode;
@@ -129,6 +130,9 @@ export function WurfHead({
   scoreNote?: ReactNode;
   /** our shirt colour in this match: a square before our name like the opponent's */
   ownColor?: string | null;
+  /** the data is loaded: without a result no empty place is kept for one (it only avoids a jump
+   * while loading) */
+  scoreless?: boolean;
 }) {
   const from = span ? span[0] : 0;
   const length = span ? span[1] : 60;
@@ -151,7 +155,7 @@ export function WurfHead({
         {children}
       </div>
       <div className="flex min-w-0 flex-col">
-        <Score own={own} opp={opp} pending={pending} phoneLeft className="mt-[18px] text-[100px] md:mt-1 md:text-right md:text-[196px]" />
+        {!(scoreless && (own == null || opp == null) && !pending) && <Score own={own} opp={opp} pending={pending} phoneLeft className="mt-[18px] text-[100px] md:mt-1 md:text-right md:text-[196px]" />}
         {scoreNote && (
           // on a wide screen above the score: under it the drawn course covered it (real-video
           // test, second round, 1280 px)

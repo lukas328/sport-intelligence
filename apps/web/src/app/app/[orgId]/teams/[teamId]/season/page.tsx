@@ -110,11 +110,21 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
   if (stats?.response.status === 402) return <PlanHint orgId={orgId} />;
   const data = stats?.data as unknown as Season | undefined;
   if (!seasonId || !data || data.matches.length === 0) {
+    // a video can be in without a goal or shot found yet: then it is not «no match played», the
+    // way on is the open questions of the matches
+    const played = ((await client.GET("/v1/orgs/{org_id}/teams/{team_id}/matches", { params: { path: { org_id: orgId, team_id: teamId } } })).data ?? []).some((m) => m.has_video);
     return (
       <div className="space-y-8">
         <AreaSubNav />
-        <PageHeader eyebrow={label} title={tv("noMatchYet")} actions={tools} />
-        <p className="max-w-lg text-[17px] text-ink-2">{t("none")}</p>
+        {/* nothing to look up yet: what grows here and the one way to it (K8), no tools on
+            an empty season */}
+        <PageHeader eyebrow={label} title={played ? t("noFiguresTitle") : tv("noMatchYet")} />
+        <section className="max-w-[60ch] space-y-4" data-testid="season-empty">
+          <p className="m-0 text-[17px]">{t(played ? "noFiguresText" : "emptyText")}</p>
+          <Link href={played ? `${base}/matches` : (uploadHref(orgId, teamId) ?? `${base}/matches`)} className={buttonClass("primary")}>
+            {played ? t("toMatches") : ts("uploadVideo")}
+          </Link>
+        </section>
       </div>
     );
   }
@@ -272,6 +282,13 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
                   </li>
                 ))}
               </ul>
+            )}
+            {/* what repeats is what to train: the tips from the analysis are one step away, also
+                while Teamleben (where the training page sits) is off (K21) */}
+            {staff && rows.length > 0 && (
+              <Link href={`${base}/training`} className={cn(linkClass, "mt-2 inline-flex min-h-11 items-center text-[15px]")} data-testid="season-training-tips">
+                {ts("trainingTips")}
+              </Link>
             )}
           </section>
 

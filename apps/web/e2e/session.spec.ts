@@ -21,6 +21,11 @@ test("video session: tags, smart playlist, presentation with phone remote", asyn
       data: { opponent_name: "TV Tags", kickoff_at: "2026-11-07T18:00:00+01:00" },
     })
   ).json();
+  // Szenen opens its search once a video is there (K8): a started upload is enough for that
+  await page.request.post(`/v1/orgs/${orgId}/matches/${match.id}/videos`, {
+    headers,
+    data: { filename: "tags.mp4", size_bytes: 6_000_000, content_type: "video/mp4", role: "main" },
+  });
   for (const [i, outcome] of ["goal", "goal", "miss"].entries()) {
     await page.request.post(`/v1/orgs/${orgId}/matches/${match.id}/events`, {
       headers,
@@ -50,7 +55,8 @@ test("video session: tags, smart playlist, presentation with phone remote", asyn
   await expectAccessible(page);
 
   // presentation: text slide, presenter view, phone remote
-  await openLibrary(page, "Zum Zeigen");
+  // an empty Sammlungen page shows one way, to the scenes (K8): the older area by its address
+  await page.goto(`/app/${orgId}/teams/${teamId}/presentations`);
   await page.getByLabel("Titel").fill("Video-Sitzung Dienstag");
   await page.getByRole("button", { name: "Neue Sammlung zum Zeigen" }).click();
   await page.waitForURL(/\/presentations\/[^/]+$/);

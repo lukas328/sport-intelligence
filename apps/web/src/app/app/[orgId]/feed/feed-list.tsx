@@ -44,7 +44,8 @@ export function FeedList({ orgId }: { orgId: string }) {
                       <Check aria-hidden className="size-4" />
                       {t("assessed")}
                     </span>
-                  ) : (
+                  ) : f.relation === "guardian" ? null : (
+                    // only the player assesses (services/feed.py): parents are not asked
                     <Badge tone="accent">{t("assessNow")}</Badge>
                   )}
                   <ChevronRight aria-hidden className="size-4 shrink-0 text-muted transition-transform group-hover:translate-x-0.5" />

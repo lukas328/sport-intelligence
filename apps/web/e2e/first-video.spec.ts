@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { MATCH_VIDEO } from "./global-setup";
-import { expectAccessible, register, uniqueEmail } from "./helpers";
+import { chooseVideo, expectAccessible, register, uniqueEmail } from "./helpers";
 
 /**
  * UX test A02: after a first video in which the analysis finds no goals, the start says one
@@ -26,7 +26,7 @@ test("start after a first video without goals: one sentence, one step", async ({
   const match = (await res.json()) as { id: string };
 
   await page.goto(`/app/${org}/matches/${match.id}?tab=video`);
-  await page.getByTestId("video-file").setInputFiles(MATCH_VIDEO);
+  await chooseVideo(page, MATCH_VIDEO);
   await expect(page.getByTestId("plain-stage")).toBeVisible({ timeout: 240_000 });
   // the video plays before the analysis is done; the start speaks once it is (E06)
   await expect

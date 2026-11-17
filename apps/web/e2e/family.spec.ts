@@ -27,7 +27,7 @@ test("parent consents for own child; coach sees kit warning", async ({ page, con
   await invite.getByLabel("E-Mail").fill(parentEmail);
   // the four roles (K18): parents are invited for their child
   await invite.getByRole("radio", { name: /^Eltern/ }).check();
-  await expect(invite.getByLabel("Kind")).toContainText("Noah Kind");
+  await expect(invite.getByLabel("Kind", { exact: true })).toContainText("Noah Kind");
   await invite.getByRole("button", { name: "Einladung senden" }).click();
   await expect(page.getByText(`Einladung an ${parentEmail} geschickt.`)).toBeVisible();
 

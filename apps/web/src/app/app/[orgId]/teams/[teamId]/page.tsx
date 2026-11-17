@@ -45,11 +45,10 @@ export default async function TeamPage({ params, searchParams }: { params: Promi
   const { edit } = await searchParams;
   const client = await serverApi();
   const path = { params: { path: { org_id: orgId, team_id: teamId } } };
-  const [team, org, official, members] = await Promise.all([
+  const [team, org, official] = await Promise.all([
     client.GET("/v1/orgs/{org_id}/teams/{team_id}", path),
     client.GET("/v1/orgs/{org_id}", { params: { path: { org_id: orgId } } }),
     client.GET("/v1/orgs/{org_id}/teams/{team_id}/official", path),
-    client.GET("/v1/orgs/{org_id}/teams/{team_id}/members", path),
   ]);
   if (!team.data || !org.data) notFound();
   const t = await getTranslations("teamPage");
@@ -89,10 +88,13 @@ export default async function TeamPage({ params, searchParams }: { params: Promi
   }
 
   const seasonPath = { params: { path: { org_id: orgId, team_id: teamId, season_id: season.id } } };
-  const [roster, stats, matchList] = await Promise.all([
+  const [roster, stats, matchList, members] = await Promise.all([
     client.GET("/v1/orgs/{org_id}/teams/{team_id}/seasons/{season_id}/roster", seasonPath),
     client.GET("/v1/orgs/{org_id}/teams/{team_id}/seasons/{season_id}/stats", seasonPath),
     client.GET("/v1/orgs/{org_id}/teams/{team_id}/matches", path),
+    // the staff list feeds only the side, which players do not get; they may not read it, so it
+    // is not asked for (a 403 on every visit otherwise)
+    staff ? client.GET("/v1/orgs/{org_id}/teams/{team_id}/members", path) : Promise.resolve({ data: [] as Schemas["TeamMemberOut"][] }),
   ]);
   // before the first video nothing is missing yet (UX test H04): consents matter once scenes
   // are shared, numbers once scenes are named

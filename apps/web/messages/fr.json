@@ -1419,7 +1419,11 @@
     "allMatches": "Tous les matchs en détail",
     "unknownPlayer": "Non attribué",
     "xgNote": "xG : buts attendus, estimés d'après la position et la situation du tir.",
-    "formLast": "{n, plural, one {Le dernier match.} other {Les # derniers matchs, le plus récent à droite.}}"
+    "formLast": "{n, plural, one {Le dernier match.} other {Les # derniers matchs, le plus récent à droite.}}",
+    "emptyText": "La saison grandit ici à chaque match : résultats, ce qui se répète et qui marque. Crée ton premier match et charge la vidéo.",
+    "noFiguresTitle": "Pas encore de chiffres pour la saison.",
+    "noFiguresText": "La saison compte les matchs avec des buts et des tirs saisis. Dans tes matchs avec vidéo, l'analyse n'en a pas encore trouvé : réponds aux questions ouvertes ou saisis le résultat.",
+    "toMatches": "Vers les matchs"
   },
   "notifications": {
     "title": "Notifications",
@@ -1850,7 +1854,10 @@
     "countOf": "{n} sur {total}",
     "state_granted": "donné",
     "state_refused": "refusé",
-    "state_missing": "manquant"
+    "state_missing": "manquant",
+    "purpose_analysis_help_guardian": "L'équipe peut analyser les vidéos de match et y reconnaître ton enfant.",
+    "purpose_highlights_internal_help_guardian": "Des scènes avec ton enfant peuvent apparaître dans des highlights visibles seulement par le club.",
+    "purpose_highlights_public_help_guardian": "Des scènes avec ton enfant peuvent être montrées publiquement, par exemple sur le site du club."
   },
   "members": {
     "makeAdmin": "Nommer admin du club",
@@ -2230,7 +2237,8 @@
     "paid": "payée",
     "open": "ouverte",
     "reminded": "rappel envoyé",
-    "dunned": "sommation envoyée"
+    "dunned": "sommation envoyée",
+    "orderedNoMail": "La facture {number} a été créée. Tu la trouves ci-dessous en PDF. L'abonnement est actif."
   },
   "support": {
     "help": "Aide",
@@ -2772,7 +2780,8 @@
     "assessLead": "Ton auto-évaluation manque encore",
     "assessTask": "Évaluer le match contre {opponent}",
     "replyTask": "{n, plural, one {Répondre à # rendez-vous} other {Répondre à # rendez-vous}}",
-    "replyHint": "Présent ou non : l'entraîneur planifie avec."
+    "replyHint": "Présent ou non : l'entraîneur planifie avec.",
+    "newScenesFamily": "Nouvelles scènes de ton enfant"
   },
   "shell": {
     "search": "Chercher",
@@ -3096,7 +3105,8 @@
     "notFound": "Équipe introuvable ou hors de Suisse ?",
     "manual": "Créer un club à la main",
     "showAll": "Afficher les {n} équipes de {club}",
-    "claiming": "Nous récupérons matchs, effectif et classement sur handball.ch. Cela prend environ 15 secondes."
+    "claiming": "Nous récupérons matchs, effectif et classement sur handball.ch. Cela prend environ 15 secondes.",
+    "searching": "Recherche sur handball.ch en cours."
   },
   "official": {
     "eyebrow": "Données officielles",
@@ -3872,7 +3882,8 @@
     "uploadVideo": "Envoyer la vidéo",
     "noAnalysisYet": "pas encore d'analyse",
     "noVideoShort": "pas de vidéo",
-    "dataReport": "de la feuille de match"
+    "dataReport": "de la feuille de match",
+    "trainingTips": "Conseils d'entraînement à ce sujet"
   },
   "numbersTab": {
     "intro": "Buts, 7 m et 2 minutes de la feuille de match et de la vidéo, tirs et arrêts des événements saisis.",
@@ -4099,7 +4110,7 @@
     "datesTitle": "Rendez-vous et réponses",
     "datesText": "Entraînements et matchs. Les joueurs confirment ou se désinscrivent, tu vois qui vient.",
     "planTitle": "Entraînement",
-    "planText": "Planifier les séances, avec exercices et durée.",
+    "planText": "Des conseils tirés de vos matchs avec les exercices qui vont avec, et des séances avec leur durée.",
     "tasksTitle": "Tâches",
     "tasksText": "Des scènes ou des sélections à regarder jusqu'à une date. Tu vois qui les a vues.",
     "ownTitle": "Espaces pour joueurs et parents",
@@ -4135,7 +4146,7 @@
     "hint_dates_player": "Ici se trouvent les entraînements et matchs de ton équipe. Réponds pour que ton entraîneur puisse planifier.",
     "hint_dates_family": "Ici se trouvent les entraînements et matchs de ton enfant.",
     "hint_plan_title": "Entraînement",
-    "hint_plan_staff": "Planifie tes séances avec exercices et durée. Seuls toi et tes adjoints voient le plan.",
+    "hint_plan_staff": "Des conseils tirés de vos matchs, avec les exercices qui vont avec. Un clic en fait une séance. Seuls toi et tes adjoints voient le plan.",
     "hint_plan_player": "Ici, ton entraîneur planifie les séances.",
     "hint_plan_family": "Ici, l'entraîneur planifie les séances.",
     "hint_assignments_title": "Tâches",
@@ -4158,7 +4169,7 @@
   "nextSteps": {
     "title": "La suite",
     "videoTitle": "Télécharge ta première vidéo",
-    "videoText": "Environ 40 minutes après, tu reçois les trois points et toutes les scènes.",
+    "videoText": "Ensuite, tu reçois les trois points et toutes les scènes. L'avancement de l'analyse s'affiche en haut de chaque page.",
     "videoAction": "Télécharger une vidéo",
     "coachTitle": "Invite ton entraîneur adjoint",
     "coachText": "Il voit et modifie tout dans l'équipe, sauf le club et l'abonnement.",
