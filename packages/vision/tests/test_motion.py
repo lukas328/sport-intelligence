@@ -73,6 +73,26 @@ def test_fit_rotation_recovers_rotation_and_zoom() -> None:
     assert rms < 1.0
 
 
+@pytest.mark.filterwarnings("error")  # staging: overflow in exp, divide by zero in the fit
+def test_fit_rotation_on_degenerate_matches_stays_finite() -> None:
+    from handball_vision.motion import LOG_ZOOM_MAX
+
+    rng = np.random.default_rng(0)
+    pts = rng.normal(0, 300, (30, 2))
+    cases = [
+        (rng.normal(0, 1e-3, (30, 2)), pts),  # all matches on one spot
+        (np.zeros((30, 2)), pts),
+        (pts, np.zeros((30, 2))),
+        (pts, -5 * pts),  # mirrored and far: no rotation explains it
+        (pts, rng.normal(0, 300, (30, 2))),  # random pairs
+    ]
+    for src, dst in cases:
+        r, z, rms = fit_rotation(src, dst, 1000.0)
+        assert np.all(np.isfinite(r))
+        assert np.exp(-LOG_ZOOM_MAX) <= z <= np.exp(LOG_ZOOM_MAX)
+        assert rms == float("inf")  # not used as a registration
+
+
 def test_estimate_focal_from_rotations() -> None:
     rng = np.random.default_rng(1)
     f_true = 900.0

@@ -6,6 +6,34 @@ Dauer, Kosten, Auffälligkeiten). Vor dem Commit `git pull --rebase`, danach pus
 
 ## Offen
 
+### 15. Ballnetz im eigenen Thread mit uint8 im ganzen Job (T4), 2026-11-17 (Integrations-Sitzung), erst nach Freigabe von Lukas
+- Wozu: Auftrag 14 hat das Ballnetz allein mit uint8-Eingabe bei 62 ms pro Bild gemessen (1280 px;
+  960 px: 42 ms). Im Job kostete es 122 ms pro Bild, weil es nacheinander mit Kamera, YOLOX und
+  Nummern lief. Seit PR #67 läuft das Netz in einem eigenen Thread. Im besten Fall dauert der Job
+  dann max(Netz, Rest) statt der Summe: bei 1280 px auf jedem Bild etwa 1.55 x Videolänge und
+  1.02 USD pro Spiel. Das ist zu messen (Plan, Abschnitt GPU-Profil).
+- Was läuft: `ml/integration/profile_variants.py` (der echte `run_analysis`) auf 2 Minuten des
+  Spiels aus den Aufträgen 13 und 14, YOLOX jedes 3. Bild, Nummern-Budget 0.3, in dieser
+  Reihenfolge:
+  - `lean_u8_1280_e1`, `lean_u8_960_e1`, `lean_u8_1280_e2`, `lean_u8_960_e2`: hrp1 uint8 bei
+    1280 und 960 px, jedes bzw. jedes 2. Bild;
+  - `cuda_lean`: ohne Netz, also der Rest;
+  - `lean_ens_u8_1280_e1`: hr1 + hrp1, nur wenn die Zeit reicht.
+
+  Testphase: hr1/hrp1 enthalten DeepSport, hier wird nur gemessen.
+- Befehl (wie Auftrag 14): `modal deploy ml/gpu/profile_lean_gpu.py`, dann
+  `modal.Function.from_name("handball-profile-lean", "run_t4").spawn(2, "handball-gpu-lean-u8", 25, "lean_u8_1280_e1,lean_u8_960_e1,lean_u8_1280_e2,lean_u8_960_e2,cuda_lean,lean_ens_u8_1280_e1")`.
+- Fortsetzbar: Fertige Varianten liegen auf dem Volume `handball-gpu-out`
+  (`handball-gpu-lean-u8/`), derselbe Aufruf setzt fort. Den Proxy schneidet der Job aus dem von
+  Auftrag 14 auf dem Volume. Nach 25 Minuten startet keine neue Variante mehr. Eine laufende
+  Variante wird 2.5 Minuten vor dem harten Modal-Ende (30 min) gestoppt, damit der Upload sicher
+  kommt.
+- Erwartet: etwa 22 Minuten auf einer T4, rund 0.25 USD (höchstens 30 Minuten, 0.33 USD).
+- Ergebnis: Kaggle-Dataset `handball-gpu-lean-u8` (summary.json, je Variante ein JSON mit
+  `observe_counters.ball_net_busy_ms`). Die Integrations-Sitzung holt es ab.
+- Wichtig: In der ersten Logzeile muss `session ['CUDAExecutionProvider', ...]` stehen, sonst bricht
+  das Skript ab. Bei "budget"/"spend limit" abbrechen und melden.
+
 ### 14. Ballnetz billiger auf der T4 (Kurzmessung), 2026-11-17 (Integrations-Sitzung), erst nach Freigabe von Lukas
 - Wozu: Auftrag 13 hat das Ballnetz hrp1 auf der T4 mit 80 bis 120 ms pro Bild gemessen, dazu 21 ms
   CPU-Vorbereitung; Stapeln brachte nichts. Mit hrp1 auf jedem Bild kostet ein 60-Minuten-Spiel
