@@ -1,9 +1,14 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { Alert } from "@/components/ui/card";
 import { serverApi } from "@/lib/api";
 import { AcceptButton } from "./accept-button";
 import { personRole } from "@/lib/roles";
+
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: (await getTranslations("invite"))("title") };
+}
 
 export default async function InvitePage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;

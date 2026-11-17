@@ -56,6 +56,16 @@ describe("tactics", () => {
     }
   });
 
+  it("«Wir» is always the own role: defending in defence templates, with the ball otherwise (review R15)", () => {
+    for (const t of TEMPLATES) {
+      const f = t.doc.frames[0]!;
+      const ball = f.ball;
+      expect(ball, t.id).not.toBeNull();
+      const holder = f.tokens.reduce((best, k) => (Math.hypot(k.x - ball!.x, k.y - ball!.y) < Math.hypot(best.x - ball!.x, best.y - ball!.y) ? k : best));
+      expect(holder.side, t.id).toBe(t.category === "defence" ? "opp" : "own");
+    }
+  });
+
   it("builds a frame from tracking positions", () => {
     const f = frameFromPositions([{ track: 3, side: "own", x: 12.345, y: 3 }, { track: 9, side: "opp", x: 30, y: 10 }]);
     expect(f.tokens).toEqual([

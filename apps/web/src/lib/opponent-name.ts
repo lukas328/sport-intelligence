@@ -29,7 +29,10 @@ export function sameOpponent(a: string | null | undefined, b: string | null | un
  * the other (tables sometimes shorten names). Two such rows are no answer: «HC Thalwil» must not
  * pick «HC Thalwil 2» over «HC Thalwil».
  */
-export function findTeamRow<R extends { name?: string | null }>(rows: R[], name: string | null | undefined): R | undefined {
+export function findTeamRow<R extends { name?: string | null }>(
+  rows: R[],
+  name: string | null | undefined,
+): R | undefined {
   const key = opponentKey(name);
   if (!key) return undefined;
   const exact = rows.find((r) => opponentKey(r.name) === key);

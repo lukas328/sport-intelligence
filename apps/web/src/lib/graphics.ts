@@ -76,6 +76,22 @@ function goalRunsAsGiven(g: MatchGraphics, team?: "own" | "opp"): (GoalRun & { e
     }));
 }
 
+/**
+ * Whether the goals of a side say enough for a half court by position: one spot or one field
+ * position at least. A report gives 7 m goals and nothing else; a court with «3 / 7 m» alone is a
+ * large picture of nothing (review R12), a line says it instead (`zoneLine`).
+ */
+export function zonesWorthACourt(g: MatchGraphics, team: "own" | "opp"): boolean {
+  return g.goals.some((x) => x.team === team && (x.shot != null || (coachZone(x) != null && coachZone(x) !== "m7" && ZONE_AT[coachZone(x)!] != null)));
+}
+
+/** The goals of a side without a court: how many from 7 m, how many without a place. */
+export function zoneLine(g: MatchGraphics, team: "own" | "opp"): { m7: number; rest: number } {
+  const goals = g.goals.filter((x) => x.team === team);
+  const m7 = goals.filter((x) => coachZone(x) === "m7").length;
+  return { m7, rest: goals.length - m7 };
+}
+
 /** Goals without a shot spot: counted and listed, said honestly where drawings would be. */
 export function spotless(g: MatchGraphics, team?: "own" | "opp"): MatchGraphics["goals"] {
   return g.goals.filter((x) => x.shot == null && coachZone(x) == null && (!team || x.team === team));

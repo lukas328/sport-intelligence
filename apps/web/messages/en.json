@@ -1323,7 +1323,9 @@
     "removeArrow": "Delete arrow",
     "phaseOf": "Phase {n} of {total}",
     "legend": "Marks on the board",
-    "decimal": "."
+    "decimal": ".",
+    "legendRoles": "In defence templates we defend, otherwise we attack. «Us» always keeps the same colour.",
+    "pickTemplate": "Start from a template"
   },
   "formations": {
     "title": "Defence systems",
@@ -3667,7 +3669,8 @@
     "rowPartsFailed": "{n, plural, one {1 part failed} other {# parts failed}}",
     "rowNotice": "Analysis done, no questions: {reason}",
     "rowPartsUploading": "{n, plural, one {1 part} other {# parts}} not fully uploaded yet",
-    "rowFailedWhy": "Analysis did not work: {reason}"
+    "rowFailedWhy": "Analysis did not work: {reason}",
+    "zonesLine": "{m7, plural, one {1 goal} other {# goals}} from 7 m{rest, plural, =0 {.} one {, 1 more without a shot spot.} other {, # more without a shot spot.}}"
   },
   "check": {
     "top": "Check · {opponent}",
@@ -4302,5 +4305,19 @@
     "short_unreadable": "file unreadable",
     "short_too_short": "video too short",
     "short_generic": "did not work"
+  },
+  "formCheck": {
+    "valueMissing": "Please fill in this field.",
+    "typeMismatchEmail": "Please enter an e-mail address, for example name@club.ch.",
+    "typeMismatchUrl": "Please enter an address starting with https://.",
+    "typeMismatch": "The format does not fit.",
+    "tooShort": "Please use at least {n} characters.",
+    "tooLong": "Please use at most {n} characters.",
+    "rangeUnderflow": "Please enter at least {min}.",
+    "rangeOverflow": "Please enter at most {max}.",
+    "stepMismatch": "This value does not fit, please use the nearest whole value.",
+    "patternMismatch": "The format does not fit.",
+    "badInput": "Please enter a number.",
+    "invalid": "Please check this entry."
   }
 }

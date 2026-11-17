@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cameraScene, goalRuns, reportGoals, spotless, videoScore, type MatchGraphics, type SceneCamera } from "./graphics";
+import { cameraScene, goalRuns, reportGoals, spotless, videoScore, zoneLine, zonesWorthACourt, type MatchGraphics, type SceneCamera } from "./graphics";
 
 const G: MatchGraphics = {
   has_video: true,
@@ -40,6 +40,15 @@ describe("graphics data", () => {
     expect(own).toMatchObject({ eventId: "a", run: [[2, 6], [1.5, 1.5]], confirmed: true });
     const [opp] = goalRuns(G, "opp");
     expect(opp).toMatchObject({ run: [], shot: [10, 8], confirmed: false });
+  });
+
+  it("draws a court by position only when a goal has a spot or a field position (review R12)", () => {
+    const report = (id: string, zone: string | null) => ({ event_id: id, team: "opp" as const, minute: null, number: null, zone, run: [], shot: null, aim: null, confirmed: true, source: null, has_video: false, spot_by_coach: zone != null });
+    const onlyReport: MatchGraphics = { ...G, goals: [report("x", "m7"), report("y", "m7"), report("z", null)] };
+    expect(zonesWorthACourt(onlyReport, "opp")).toBe(false);
+    expect(zoneLine(onlyReport, "opp")).toEqual({ m7: 2, rest: 1 });
+    expect(zonesWorthACourt({ ...onlyReport, goals: [...onlyReport.goals, report("w", "ra")] }, "opp")).toBe(true);
+    expect(zonesWorthACourt(G, "opp")).toBe(true);
   });
 
   it("shows no camera without a confirmed court or without positions", () => {
