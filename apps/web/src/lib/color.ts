@@ -104,7 +104,8 @@ export const CLUB_COLOURS = [
   ["maroon", "#8a1538"],
   ["orange", "#b35900"],
   ["green", "#157a3a"],
-  ["blue", "#1f4fd6"],
+  // not #1f4fd6: the old onboarding stored that blue for every club, it reads as «not chosen»
+  ["blue", "#1d4ed8"],
   ["navy", "#173a73"],
   ["purple", "#5b2d8e"],
   ["black", "#17191c"],
