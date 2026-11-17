@@ -177,7 +177,9 @@ def from_observations(
 
     With ball net candidates in the observations (`obs.ball_cands`, `HB_BALL_MODEL`) the path comes
     from tracker v2 (`balltrack2`, frame pixels, points below `min_conf` left out); otherwise from
-    the YOLOX "sports ball" boxes and `balltrack` (`min_score`). `ball_model` says which."""
+    the YOLOX "sports ball" boxes and `balltrack` (`min_score`). `ball_model` says which. With the
+    ball net the result also carries `path_rows` (`path_rows()`, a numpy array: the caller stores
+    it and removes it before the result goes into JSON)."""
     gate = sorted(play) if play else None
     gated = {
         "ball_gated_by_clock": gate is not None,
@@ -189,7 +191,7 @@ def from_observations(
     found = _path_v2(obs, cands, gate, min_conf) if cands else _path_v1(obs, gate, min_score)
     if found is None:
         return None
-    path, stats, model = found
+    path, stats, model, conf = found
     if not path and not stats:  # balls only while the clock stood
         return {
             **gated,
@@ -211,8 +213,10 @@ def from_observations(
     teams = {tid: str(v["label"]) for tid, v in result.teams.items()}
     pos = possessions(holders(ball, boxes), teams, obs.fps)
     moves = transfers(pos, obs.fps)
+    rows = {"path_rows": path_rows(path, conf, obs.fps)} if model == "ballnet" else {}
     return {
         **gated,
+        **rows,
         "ball_model": model,
         "path_stats": stats,
         "summary": summary(pos, moves, obs.fps),
@@ -238,7 +242,8 @@ def from_observations(
     }
 
 
-PathResult = tuple[dict[int, tuple[float, float]], dict[str, Any], str]
+# path (frame -> frame px), path stats, model name, confidence per path frame (ball net only)
+PathResult = tuple[dict[int, tuple[float, float]], dict[str, Any], str, dict[int, float]]
 
 
 def _in_play(gate: list[tuple[int, int]] | None, starts: list[int], t_ms: float) -> bool:
@@ -273,7 +278,7 @@ def _path_v1(obs: Any, gate: list[tuple[int, int]] | None, min_score: float) -> 
     if not seen or (not peaks and gate is None):
         return None
     if not peaks:
-        return {}, {}, "yolox"
+        return {}, {}, "yolox", {}
     step = obs.frames[1].index - obs.frames[0].index if len(obs.frames) > 1 else 1
     path, stats = balltrack.track(
         peaks,
@@ -288,7 +293,7 @@ def _path_v1(obs: Any, gate: list[tuple[int, int]] | None, min_score: float) -> 
         h = motion.canvas_to_frame(bpnt.frame)
         if h is not None:
             out[bpnt.frame] = _apply(h, bpnt.x, bpnt.y)
-    return out, dict(stats), "yolox"
+    return out, dict(stats), "yolox", {}
 
 
 def ball_path_v2(
@@ -318,12 +323,21 @@ def _path_v2(
     min_conf: float,
 ) -> PathResult:
     first, out, conf = ball_path_v2(obs, cands, gate)
-    path = {
-        first + k: q
-        for k, (q, c) in enumerate(zip(out, conf, strict=True))
-        if q is not None and c >= min_conf
-    }
+    path: dict[int, tuple[float, float]] = {}
+    sure: dict[int, float] = {}
+    for k, (q, c) in enumerate(zip(out, conf, strict=True)):
+        if q is not None and c >= min_conf:
+            path[first + k], sure[first + k] = q, c
     stats = {"frames": len(out), "points": len(path)}
     if not path and gate is not None:
-        return {}, {}, "ballnet"
-    return path, stats, "ballnet"
+        return {}, {}, "ballnet", {}
+    return path, stats, "ballnet", sure
+
+
+def path_rows(
+    path: Mapping[int, tuple[float, float]], conf: Mapping[int, float], fps: float
+) -> Any:
+    """The ball path for storage (`analysis/ball.bin`): float32 rows t_ms, x, y (frame pixels of
+    the analysis proxy), confidence, one per frame with a point."""
+    rows = [(f * 1000 / fps, path[f][0], path[f][1], conf.get(f, 0.0)) for f in sorted(path)]
+    return np.array(rows, np.float32).reshape(-1, 4)

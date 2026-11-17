@@ -177,5 +177,12 @@ Zahlen sind eher etwas zu hoch. Der Hebel Rückennummern gehört zu Schritt 4.
 - **Lizenz (Testphase):** hr1 und hrp1 enthalten DeepSport (nicht kommerziell). Vermerkt in
   `ballnet.py`, `export_onnx.py` und den Settings; vor einem Livegang durch Netze ohne DeepSport
   ersetzen (`tracking-strategie.md` Abschnitt 9, Prio 6).
-- **Offen in Schritt 2:** Ballpfad speichern (Parquet) und an `graphics.py` liefern; Netze in den
-  Staging-Bucket laden (Skript, nur mit Freigabe von Lukas); GPU-Laufzeit messen.
+- **Schritt 2b (Ballpfad und Taktik-Kamera):** Mit Ballnetz schreibt der Worker den Pfad als
+  `analysis/ball.bin` (float32-Zeilen t_ms, x, y in Proxy-Bildpixeln, Sicherheit; etwa 1.4 MB pro
+  Spiel) und meldet ihn als `ball_path` (wird in `video_assets.analysis` übernommen). Die
+  Taktik-Kamera bekommt `ball` als Halter-Abschnitte aus `stats.ball.possessions`, nur wenn
+  `ball_model == "ballnet"`: Der YOLOX-Weg (0.2 % auf Gold) wird nicht angezeigt. Halter ohne Team
+  oder Rückennummer bleiben eine Lücke. Feldpositionen des Balls (in der Luft nicht aus der
+  Boden-Homografie) folgen mit den Ereignissen in Schritt 5.
+- **Offen in Schritt 2:** Netze in den Staging-Bucket laden (Skript, nur mit Freigabe von Lukas);
+  GPU-Laufzeit messen (Schritt 3); ein echtes Spiel mit Kalibrierung und Ballnetz durchrechnen.

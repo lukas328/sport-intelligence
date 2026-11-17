@@ -804,6 +804,7 @@ def track(
     t0 = time.perf_counter()
     ball = from_observations(obs, result, play=play)
     if ball is not None:
+        result.ball_rows = ball.pop("path_rows", None)
         result.extra["ball"] = ball
     result.timings_s["ball"] = time.perf_counter() - t0
     from handball_vision.goalcandidates import from_observations as goal_candidates
