@@ -91,7 +91,8 @@ test("player: the match page leads to the own scenes, assessment first", async (
   await player.getByLabel("Passwort").fill("correct-horse-1");
   await player.getByLabel(/Nutzungsbedingungen/).check();
   await player.getByRole("button", { name: "Konto erstellen" }).click();
-  await player.waitForURL((url) => !url.pathname.startsWith("/register"), { timeout: 30_000 });
+  // the start is Spiele (K18); wait for the redirect to land before opening the match
+  await player.waitForURL(/\/teams\/[^/]+\/matches/, { timeout: 30_000 });
 
   const playerId = "00000000-0000-4000-8000-000000000a01";
   let assessed = false;

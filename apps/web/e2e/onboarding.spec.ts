@@ -130,7 +130,8 @@ test("new club: club and team in two steps, roster from the team page, then invi
   await page.waitForURL(/\/club\/teams$/);
   // the invitation was sent from this very page: load it afresh
   await page.reload();
-  await expect(page.getByText("Paul Spieler")).toBeVisible();
+  // listed in the club's members and in the team's people (K17)
+  await expect(page.getByText("Paul Spieler").first()).toBeVisible();
   await expectAccessible(page);
 
   // enable two-factor sign-in ("Ich", tab Sicherheit), sign out, sign in with code
