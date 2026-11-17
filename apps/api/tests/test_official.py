@@ -671,6 +671,10 @@ async def test_official_games_count_toward_the_plan_limit(
         await api.get(f"/v1/orgs/{c['organization_id']}/matches/{r.json()['match_id']}")
     ).json()
     assert (match["score_own"], match["score_opponent"]) == (26, 19)
+    # taking over a game reuses the club's opponent instead of adding a second one (review R7)
+    names = [r["name"] for r in await owner_conn.fetch("SELECT name FROM opponents")]
+    keys = [handball_ch.opponent_key(n) for n in names]
+    assert len(keys) == len(set(keys)), names
     report = next(
         s for s in await suggestions(api, c, "report") if s["payload"]["game_id"] == 509192
     )

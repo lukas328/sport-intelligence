@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getFormatter, getTranslations } from "next-intl/server";
+import { sameOpponent } from "@/lib/opponent-name";
 import { PlanHint } from "@/components/billing/plan-hint";
 import { serverApi } from "@/lib/api";
 import { linkClass, SectionHead } from "@/components/anlauf/blocks";
@@ -401,11 +402,12 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
             ) : (
               <ul className="m-0 list-none p-0" data-testid="season-opponents">
                 {fixtures.map((f) => {
-                  const before = [...data.matches].filter((m) => m.opponent === f.opponent_name).sort((x, y) => y.kickoff_at.localeCompare(x.kickoff_at))[0];
+                  const before = [...data.matches].filter((m) => sameOpponent(m.opponent, f.opponent_name)).sort((x, y) => y.kickoff_at.localeCompare(x.kickoff_at))[0];
                   return (
                     <li key={f.id} className="flex min-h-11 items-center justify-between gap-3 border-t border-rule py-2.5 text-[15px] first:border-t-0">
                       <Link href={`/app/${orgId}/matches/${f.id}`} className="inline-flex min-h-11 items-center hover:underline hover:underline-offset-4">
-                        {f.opponent_name}, {format.dateTime(new Date(f.kickoff_at), { weekday: "long" })}
+                        {/* the date says it lies ahead (review R25) */}
+                        {f.opponent_name}, {format.dateTime(new Date(f.kickoff_at), { weekday: "short", day: "numeric", month: "numeric" })}
                       </Link>
                       {before ? (
                         <Link href={`/app/${orgId}/matches/${before.match_id}`} className={cn(linkClass, "text-[15px]")}>

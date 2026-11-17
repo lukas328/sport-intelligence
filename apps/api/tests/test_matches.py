@@ -57,6 +57,23 @@ async def upload(
     return dict(done.json())
 
 
+async def test_opponent_spellings_are_one_opponent(make_api: Callable[[], Api]) -> None:
+    """«SG Horgen/Wädenswil 1» from the league and «SG Horgen/Wädenswil (M2)» from the cup are
+    the same opponent; a club's second team stays its own (review R7)."""
+    api = make_api()
+    ids = await setup_club(api)
+    first = await new_match(api, ids, opponent_name="SG Horgen/Wädenswil 1")
+    cup = await new_match(
+        api, ids, opponent_name="SG Horgen/Wädenswil (M2)", kickoff_at="2026-11-14T18:00:00+01:00"
+    )
+    second = await new_match(
+        api, ids, opponent_name="SG Horgen/Wädenswil 2", kickoff_at="2026-11-21T18:00:00+01:00"
+    )
+    assert cup["opponent"]["id"] == first["opponent"]["id"]
+    assert cup["opponent"]["name"] == "SG Horgen/Wädenswil 1"
+    assert second["opponent"]["id"] != first["opponent"]["id"]
+
+
 async def test_opponents_and_match_crud(make_api: Callable[[], Api]) -> None:
     api = make_api()
     ids = await setup_club(api)

@@ -21,6 +21,7 @@ import { matchStyle } from "@/lib/color";
 import { checkCount, goalRuns, openMoments, reportGoals, useMatchGraphics, videoScore, type MatchGraphics } from "@/lib/graphics";
 import { freshMatch, openedMatches } from "@/lib/fresh-match";
 import { matchState } from "@/lib/match-state";
+import { findTeamRow, sameOpponent } from "@/lib/opponent-name";
 import { threeThings } from "@/lib/three-things";
 import { checkMinutes } from "@/lib/shot-spot";
 import { cn } from "@/lib/utils";
@@ -405,12 +406,12 @@ function GameRow({ orgId, m, canWrite }: { orgId: string; m: Match; canWrite: bo
       </div>
       {result ? (
         <p className="m-0 text-right">
-          <span className="sr-only">{`${t("scoreLabel", { own: m.score_own ?? 0, opp: m.score_opponent ?? 0 })}, ${t(result)}`}</span>
+          {/* «draw» is also the drawing tool: the result has its own word (UX test B50, review R8) */}
+          <span className="sr-only">{`${t("scoreLabel", { own: m.score_own ?? 0, opp: m.score_opponent ?? 0 })}, ${t(result === "draw" ? "drawResult" : result)}`}</span>
           <b className="font-num block text-[28px] leading-[.85] md:text-[44px]" aria-hidden>
             {m.score_own}:{m.score_opponent}
           </b>
           <small aria-hidden className={cn("mt-1 block text-[15px] font-bold md:mt-1.5 md:text-sm", result === "win" ? "text-win" : result === "loss" ? "text-loss" : "text-ink-2")}>
-            {/* «draw» is also the drawing tool: the result has its own word (UX test B50) */}
             {t(result === "draw" ? "drawResult" : result)}
           </small>
         </p>
@@ -422,7 +423,6 @@ function GameRow({ orgId, m, canWrite }: { orgId: string; m: Match; canWrite: bo
 }
 
 type Row = { teamId?: number; name?: string; rank?: number; games?: number; won?: number; drawn?: number; lost?: number; goalsFor?: number; goalsAgainst?: number; goalDifference?: number; points?: number };
-const fold = (v: string) => v.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
 
 /**
  * Nächster Gegner (SPEC 7.1, UX test B40): three facts from the federation's table and our own
@@ -434,8 +434,9 @@ export function NextOpponent({ orgId, teamId, next, played }: { orgId: string; t
   const format = useFormatter();
   const date = new Date(next.kickoff_at);
   // the last duel with video: its Minifeld and a line
-  const met = played.find((m) => m.opponent_name === next.opponent_name && m.score_own != null && m.has_video);
-  const duel = played.find((m) => m.opponent_name === next.opponent_name && m.score_own != null);
+  // «SG Horgen/Wädenswil 1» and «SG Horgen/Wädenswil (M2)» are one opponent (review R7)
+  const met = played.find((m) => sameOpponent(m.opponent_name, next.opponent_name) && m.score_own != null && m.has_video);
+  const duel = played.find((m) => sameOpponent(m.opponent_name, next.opponent_name) && m.score_own != null);
   const g = useMatchGraphics(orgId, met?.id ?? "");
   const text = useThingText();
   const first = g.data ? threeThings(goalRuns(g.data))[0] : undefined;
@@ -446,8 +447,7 @@ export function NextOpponent({ orgId, teamId, next, played }: { orgId: string; t
   });
   const table = (link.data?.standing ?? []) as Row[];
   const ownId = link.data?.official_team_id;
-  const opp = next.opponent_name ? fold(next.opponent_name) : "";
-  const row = opp ? table.find((r) => r.name && (fold(r.name) === opp || fold(r.name).includes(opp) || opp.includes(fold(r.name)))) : undefined;
+  const row = findTeamRow(table, next.opponent_name);
   const facts: string[] = [];
   if (row?.rank != null && row.points != null && row.games != null) facts.push(t("oppRank", { rank: row.rank, points: row.points, games: row.games }));
   if (row?.won != null && row.drawn != null && row.lost != null) facts.push(t("oppRecord", { won: row.won, drawn: row.drawn, lost: row.lost }));

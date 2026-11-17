@@ -12,6 +12,7 @@ from handball_api.core.colors import kit_warnings
 from handball_api.core.errors import ProblemError
 from handball_api.core.logging import get_logger
 from handball_api.core.storage import ObjectStorage
+from handball_api.integrations.handball_ch import opponent_key
 from handball_api.models import (
     Event,
     Match,
@@ -159,8 +160,16 @@ async def put_opponent_players(
 
 async def create_opponent(ctx: Ctx, data: OpponentCreate) -> Opponent:
     _require_staff(ctx)
-    existing = await ctx.db.scalar(
-        select(Opponent).where(func.lower(Opponent.name) == data.name.lower())
+    # the same opponent under another spelling is the same opponent (review R7)
+    key = opponent_key(data.name)
+    known = (await ctx.db.scalars(select(Opponent).order_by(Opponent.created_at))).all()
+    existing = next(
+        (
+            o
+            for o in known
+            if (opponent_key(o.name) == key if key else o.name.lower() == data.name.lower())
+        ),
+        None,
     )
     if existing:
         return existing
