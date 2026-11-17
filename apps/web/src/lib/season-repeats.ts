@@ -79,8 +79,15 @@ export function seasonRepeats<T extends GoalRun>(matches: SeasonMatch<T>[]): Rep
   return { conceded, scored, turnovers, matches: matches.length };
 }
 
-/** A short name for a bar: the first place name of the opponent (no club prefix, no "Au"). */
+// words of a club name that are no place: «Handball Pfannenstiel» is «Pfannenstiel» (review R11)
+const GENERIC = /^(TV|TSV|BSV|SG|HC|HSG|SC|HV|TSG|KTV|SV|STV|GC|RTV|LK|FC|HB|HG|SPV|Handball|Handballclub|Handballverein|Club|Verein|Team|Sport|Sportverein|Turnverein|Damen|Herren|Junioren|Juniorinnen|Frauen|Männer)$/i;
+
+/** A short name for a bar: the first place name of the opponent (no club prefix, no "Au", no
+ * «(M2)», no team number; of «Horgen/Wädenswil» the first place). */
 export function shortName(opponent: string): string {
-  const words = opponent.split(/[\s-]+/).filter((w) => w.length > 2 && !/^(TV|TSV|BSV|SG|HC|HSG|SC|HV|TSG|KTV|SV|STV|GC|RTV|LK|FC)$/i.test(w));
-  return words[0] ?? opponent;
+  const words = opponent
+    .replace(/\([^)]*\)/g, " ")
+    .split(/[\s/-]+/)
+    .filter((w) => w.length > 2 && !/^\d+$/.test(w) && !GENERIC.test(w));
+  return words[0] ?? opponent.trim();
 }

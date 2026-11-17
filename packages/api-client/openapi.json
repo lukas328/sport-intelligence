@@ -13582,6 +13582,10 @@
             "title": "Mail Enabled",
             "type": "boolean"
           },
+          "max_video_bytes": {
+            "title": "Max Video Bytes",
+            "type": "integer"
+          },
           "site_url": {
             "title": "Site Url",
             "type": "string"
@@ -13594,7 +13598,8 @@
         "required": [
           "site_url",
           "support_email",
-          "mail_enabled"
+          "mail_enabled",
+          "max_video_bytes"
         ],
         "title": "PublicConfig",
         "type": "object"
@@ -18988,6 +18993,17 @@
             },
             "title": "Methods",
             "type": "array"
+          },
+          "my_part": {
+            "default": "none",
+            "description": "the asking person: took the club over (needs a second person), can confirm it (club admin or coach), or has no part",
+            "enum": [
+              "claimed",
+              "can_confirm",
+              "none"
+            ],
+            "title": "My Part",
+            "type": "string"
           },
           "official_club_id": {
             "anyOf": [

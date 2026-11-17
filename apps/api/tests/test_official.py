@@ -671,6 +671,10 @@ async def test_official_games_count_toward_the_plan_limit(
         await api.get(f"/v1/orgs/{c['organization_id']}/matches/{r.json()['match_id']}")
     ).json()
     assert (match["score_own"], match["score_opponent"]) == (26, 19)
+    # taking over a game reuses the club's opponent instead of adding a second one (review R7)
+    names = [r["name"] for r in await owner_conn.fetch("SELECT name FROM opponents")]
+    keys = [handball_ch.opponent_key(n) for n in names]
+    assert len(keys) == len(set(keys)), names
     report = next(
         s for s in await suggestions(api, c, "report") if s["payload"]["game_id"] == 509192
     )
@@ -896,7 +900,10 @@ async def test_verification_by_second_official_and_operator(
     r = await api.get(f"/v1/orgs/{org}/verification")
     assert r.json()["verification"] == "unverified"
     assert r.json()["club_domains"] == ["tvt-handball.ch"]
+    # who took the club over needs a second person; that person sees the button (review R21)
+    assert r.json()["my_part"] == "claimed"
     second = await invite(api, make_api, outbox, c, "coach")  # the invitation confirms the mail
+    assert (await second.get(f"/v1/orgs/{org}/verification")).json()["my_part"] == "can_confirm"
     r = await second.post(f"/v1/orgs/{org}/verification/confirm")
     assert r.status_code == 200, r.text
     assert (r.json()["verification"], r.json()["verified_via"]) == ("verified", "second_official")

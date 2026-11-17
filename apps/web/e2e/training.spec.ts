@@ -74,7 +74,7 @@ test("drills, notifications and team assignments", async ({ page }, info) => {
   await page.goto(teamUrl.replace(/\/teams\/.*/, "/club/billing"));
   const billing = page.getByTestId("billing");
   await expect(billing).toContainText("Gratis");
-  await expect(billing).toContainText("Limiten sind in dieser Installation nicht aktiv.");
+  await expect(billing).toContainText("Zurzeit gelten diese Grenzen noch nicht");
   await expect(page.getByTestId("plans").getByRole("listitem").filter({ hasText: "CHF 39 pro Monat" })).toBeVisible();
   await expectAccessible(page);
 

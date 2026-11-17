@@ -40,5 +40,10 @@ describe("seasonRepeats", () => {
     expect(shortName("TSV Thalwil-Gattikon")).toBe("Thalwil");
     expect(shortName("TV Rüti")).toBe("Rüti");
     expect(shortName("TV Au-Wädenswil")).toBe("Wädenswil");
+    // review R11: no «Handball», no «Horgen/.»
+    expect(shortName("Handball Pfannenstiel")).toBe("Pfannenstiel");
+    expect(shortName("SG Horgen/Wädenswil (M2)")).toBe("Horgen");
+    expect(shortName("HC Goldach-Rorschach 2")).toBe("Goldach");
+    expect(shortName("SG")).toBe("SG");
   });
 });

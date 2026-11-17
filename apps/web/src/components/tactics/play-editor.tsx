@@ -251,8 +251,10 @@ export function PlayEditor({
   const segment = (on: boolean) =>
     cn("inline-flex min-h-11 items-center gap-1.5 border-2 px-3 text-[15px] font-semibold", on ? "border-ink bg-ink text-ground" : "border-ink/25 bg-paper text-ink hover:border-ink");
 
+  // the tools stay in reach while the board scrolls under them (review R14); under the sticky
+  // top bar of the app (62 px, 66 px from lg)
   const toolbar = edit && (
-    <div className="space-y-2">
+    <div className="sticky top-[62px] z-20 -mx-4 space-y-2 border-b border-rule bg-ground px-4 pt-2 pb-1 md:-mx-8 md:px-8 lg:top-[66px] lg:mx-0 lg:px-0">
       <div className="scrollbar-none -mx-1 flex gap-1 overflow-x-auto px-1 pb-1" role="toolbar" aria-label={t("tools")}>
         {TOOLS.map((k) => (
           <button key={k} type="button" aria-pressed={tool === k} onClick={() => setTool(k)} className={cn(segment(tool === k), "shrink-0")}>
@@ -271,10 +273,13 @@ export function PlayEditor({
         <span className="mx-1 h-8 w-px bg-rule" aria-hidden />
         <Button variant="secondary" size="sm" disabled={frame.tokens.length >= LIMITS.tokens} onClick={() => addToken("own")}>
           <Plus aria-hidden />
+          {/* the colour of «Wir» and «Gegner» on the board, also while drawing (review R15) */}
+          <TokenDot side="own" />
           {t("own")}
         </Button>
         <Button variant="secondary" size="sm" disabled={frame.tokens.length >= LIMITS.tokens} onClick={() => addToken("opp")}>
           <Plus aria-hidden />
+          <TokenDot side="opp" />
           {t("opp")}
         </Button>
         <Button variant="ghost" size="sm" onClick={() => change(mirrorDoc(doc))} title={t("mirrorHint")}>

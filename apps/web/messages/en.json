@@ -477,7 +477,7 @@
     "kitOwnGk": "Own goalkeeper",
     "kitOpp": "Opponent court players",
     "kitOppGk": "Opponent goalkeeper",
-    "kitsHint": "Colours help the analysis tell the teams apart.",
+    "kitsHint": "Tap a shirt to choose its colour. Colours help the analysis tell the teams apart.",
     "kitReferee": "Referees",
     "kitRefereeHint": "The referee colour helps the analysis tell referees from players. Leave it empty if you don't know it.",
     "kitRefereeClear": "Remove referee colour",
@@ -1323,7 +1323,9 @@
     "removeArrow": "Delete arrow",
     "phaseOf": "Phase {n} of {total}",
     "legend": "Marks on the board",
-    "decimal": "."
+    "decimal": ".",
+    "legendRoles": "In defence templates we defend, otherwise we attack. «Us» always keeps the same colour.",
+    "pickTemplate": "Start from a template"
   },
   "formations": {
     "title": "Defence systems",
@@ -1445,7 +1447,8 @@
     "emptyText": "The season grows here with every match: results, what repeats and who scores. Create your first match and upload the video.",
     "noFiguresTitle": "No figures for the season yet.",
     "noFiguresText": "The season counts matches with recorded goals and shots. In your matches with video the analysis has not found any yet: answer the open questions there or enter the result.",
-    "toMatches": "To the matches"
+    "toMatches": "To the matches",
+    "goalsAgainst": "Goals against"
   },
   "notifications": {
     "title": "Notifications",
@@ -1620,7 +1623,7 @@
     "status_unpaid": "unpaid",
     "trialUntil": "Trial until {date}",
     "portal": "Manage subscription",
-    "notEnforced": "Limits are not active in this installation.",
+    "notEnforced": "These limits do not apply yet: you can use everything without restriction.",
     "teams": "Teams",
     "matches": "Matches per season (largest team)",
     "storage": "Video storage",
@@ -1692,7 +1695,8 @@
       "consent-missing": "Public highlights need the consent «Public highlights» of everyone shown, for minors from their parents. Collect it with the team's consent link.",
       "forbidden": "Your role in the team does not allow public links. Ask your coach.",
       "plan": "Share links are not part of your plan.",
-      "unverified": "The club is not confirmed yet: sharing works only afterwards. How to confirm it is in the settings."
+      "unverified": "The club is not confirmed yet: sharing by link works only afterwards.",
+      "unverifiedLink": "How to confirm the club"
     },
     "card": {
       "title": "Match card",
@@ -2193,7 +2197,8 @@
     "status_rendering": "Rendering…",
     "status_failed": "Creation failed.",
     "status_blocked_consent": "Not possible because consents are missing.",
-    "newReel": "Create new highlights"
+    "newReel": "Create new highlights",
+    "needScenes": "Highlights are made from scenes: once goals are confirmed in this match’s video, you put them together here."
   },
   "parts": {
     "sideChange": "Teams changed ends before this part:",
@@ -2581,7 +2586,20 @@
     "planOwn": "Plan a session yourself",
     "noUpcoming": "No session planned yet. One click turns a training tip into a session.",
     "planOpen": "Open the training plan",
-    "tipPlannedElsewhere": "Already planned as a focus."
+    "tipPlannedElsewhere": "Already planned as a focus.",
+    "whyTitle": "Why these drills",
+    "whyLine": "The finding above is about «{focus}».",
+    "why_finishing": "They practise finishing against the goalkeeper, from different angles and under pressure.",
+    "why_wings": "They practise play on the wings: finishing from a tight angle and defending against the wingers.",
+    "why_back_court": "They practise the back court: breaking through, shooting from distance and stepping out against it.",
+    "why_pivot": "They practise the pivot: the pass in, the screen and defending against the pivot.",
+    "why_seven_m": "They practise the 7 m throw: routine, feint and calm under pressure.",
+    "why_goalkeeping": "They practise goalkeeping: position, reaction and working with the defence.",
+    "why_passing": "They practise safe passes at speed, so fewer balls are lost.",
+    "why_transition_defence": "They practise getting back: quickly back after losing the ball and closing the middle.",
+    "why_fast_break": "They practise the fast break: first and second wave, the quick pass forward.",
+    "why_defence": "They practise defence: shifting, stepping out and helping.",
+    "why_powerplay": "They practise playing with more or fewer players: using space and closing it."
   },
   "schedule": {
     "nav": "My dates",
@@ -2876,7 +2894,10 @@
     "emailResend": "Send the e-mail again",
     "emailSent": "Sent. Check your inbox and tap the link.",
     "emailFailed": "That did not work. Try again later.",
-    "later": "Later"
+    "later": "Later",
+    "newTab": "opens in a new tab",
+    "backToTeam": "Back to {team}",
+    "nextSteps": "What comes next"
   },
   "palette": {
     "newMatch": "Add a match",
@@ -3130,7 +3151,7 @@
     "claimedFound": "We found {matches, plural, one {# match} other {# matches}}, {players, plural, one {# player} other {# players}} and {reports, plural, one {# match report} other {# match reports}}.",
     "heldBack": "{n, plural, one {# more match was} other {# more matches were}} not taken over on the free plan.",
     "upgrade": "See plans",
-    "unverifiedHint": "The club is not confirmed yet: sharing and public profiles work after that. The settings explain how.",
+    "unverifiedHint": "The club is not confirmed yet: sharing and public profiles work only afterwards. How to confirm it is under Club › Federation and in «What comes next».",
     "confirmSquad": "Confirm the team",
     "notFound": "Team not found or outside Switzerland?",
     "manual": "Create a club by hand",
@@ -3218,10 +3239,10 @@
   "verification": {
     "section": "Official data",
     "title": "Club not confirmed yet",
-    "why": "Until the club is confirmed, sharing and public profiles stay off and opponents appear in match reports with numbers only. Ways to confirm:",
+    "why": "Until the club is confirmed, sharing by link and public profiles stay off, and opponents appear in match reports with numbers only.",
     "way_mail_domain": "Sign in with an e-mail address of the club.",
     "way_mail_domain_known": "Sign in with an e-mail address of the club ({domains}).",
-    "way_second_official": "A second person (admin or coach, not you) confirms here.",
+    "way_second_official": "A second person of the club (admin or coach, not the one who took it over) confirms it here.",
     "way_federation": "With a federation licence.",
     "way_operator": "Through support.",
     "confirm": "I confirm the club",
@@ -3233,7 +3254,12 @@
     "line": "The club is not confirmed yet: sharing and public profiles are off until then.",
     "lineLink": "How to confirm",
     "federationTitle": "Federation",
-    "notOfficial": "Your club is not linked to handball.ch. The link is made when you look up your team on handball.ch during setup and take it over."
+    "notOfficial": "Your club is not linked to handball.ch. The link is made when you look up your team on handball.ch during setup and take it over.",
+    "whyNumbers": "Why: the names of other teams' players are personal data. We show them, and open links to the outside, only once it is clear that you really work for this club.",
+    "ways": "How the club is confirmed:",
+    "way_second_official_invite": "A second person of the club (admin or coach) signs in and confirms it here.",
+    "inviteSecond": "Invite someone",
+    "youConfirm": "You are an admin or coach of the club and did not take it over: you can confirm it."
   },
   "playerStatus": {
     "injured": "Injured",
@@ -3518,7 +3544,7 @@
     "stepNext": "next",
     "minutesLeft": "{minutes, plural, one {about 1 minute left} other {about # minutes left}}",
     "meanwhile": "Meanwhile: the goals from the match report are already in the flow.",
-    "noThings": "Three things need more goals with video. The scenes are under Video.",
+    "noThings": "Three things need more goals with a shot spot. Scenes come once goals are confirmed in the video.",
     "telegram": "Summary",
     "copy": "Copy",
     "copied": "Copied",
@@ -3673,7 +3699,14 @@
     "rowPartsFailed": "{n, plural, one {1 part failed} other {# parts failed}}",
     "rowNotice": "Analysis done, no questions: {reason}",
     "rowPartsUploading": "{n, plural, one {1 part} other {# parts}} not fully uploaded yet",
-    "rowFailedWhy": "Analysis did not work: {reason}"
+    "rowFailedWhy": "Analysis did not work: {reason}",
+    "zonesLine": "{m7, plural, one {1 goal} other {# goals}} from 7 m{rest, plural, =0 {.} one {, 1 more without a shot spot.} other {, # more without a shot spot.}}",
+    "flightCut": "Goal sequence only up to minute {m}",
+    "demoNoVideo": "The demo match shows what the analysis makes of a match: the goals with their runs and positions. It has no video; you upload your own in one of your matches.",
+    "todayTitle": "What you can do today",
+    "todayNote": "from the match report",
+    "todayText": "The match card as a picture for the team chat and the short report to copy, even without a video.",
+    "todayCard": "Match card for the team chat"
   },
   "check": {
     "top": "Check · {opponent}",
@@ -3827,7 +3860,8 @@
     "chipNumber": "Number {n}",
     "emptyTitle": "Upload a video, then you see your scenes here.",
     "emptyText": "After the analysis every goal, every shot and every turnover is a scene. You search them with a sentence and put them together into collections.",
-    "emptyPlays": "Drawing plays works already:"
+    "emptyPlays": "Drawing plays works already:",
+    "emptySearch": "Search finds scenes from your first video on."
   },
   "teamPage": {
     "kick": "{team} · {source}",
@@ -3866,7 +3900,12 @@
     "allPeople": "All people and roles",
     "emptyText": "Enter your players with their numbers. Then scenes and figures call them by name.",
     "emptyTextPlayer": "Your coach enters the squad.",
-    "emptyAction": "Enter the squad"
+    "emptyAction": "Enter the squad",
+    "why": "Why the squad matters: with the numbers the analysis gives goals, shots and scenes to the right players, and whoever is entered as goalkeeper (TW) gets their saves.",
+    "keepersTitle": "Who plays in goal?",
+    "keepersText": "Nobody is entered as goalkeeper yet. Tap your goalkeepers: the squad and the goalkeeper figures then show their saves.",
+    "keepersMark": "Enter {name} as goalkeeper",
+    "keepersFailed": "That did not work. Try again or enter the position under «Edit squad»."
   },
   "seasonPage": {
     "kick": "{season} · {league} · after {n, plural, one {# match} other {# matches}}",
@@ -3921,7 +3960,7 @@
     "colGames": "P",
     "colDiff": "Diff.",
     "colPoints": "Pts",
-    "opponents": "Opponents",
+    "opponents": "Next opponents",
     "noMatchYet": "no match yet",
     "lastAgainst": "{own}:{opp} last time",
     "noFixtures": "No match scheduled.",
@@ -3935,7 +3974,7 @@
     "basisAll": "from {n, plural, one {the one match} other {all # matches}}",
     "bestBasis": "Goals from all matches, shooting, saves and turnovers only from analysed matches ({k} of {n})",
     "dataCount": "{k} of {n} analysed",
-    "legend": "Results and goals come from handball.ch or as you entered them. Shooting, saves and turnovers come from your videos (the analysis and what you mark); matches without that data do not count there.",
+    "legend": "Results and goals come from the official handball.ch match report or from what you entered yourself. Shooting, saves and turnovers come from your videos (the analysis and what you mark); matches without that data do not count there.",
     "colData": "Data",
     "dataVideo": "video analysed",
     "dataTagged": "entered by hand",
@@ -3947,7 +3986,9 @@
     "noVideoShort": "no video",
     "dataReport": "from the match report",
     "trainingTips": "Training tips for this",
-    "tipsAction": "Training tips"
+    "tipsAction": "Training tips",
+    "tickAgainst": "Mark: goals against",
+    "tickFor": "Mark: goals scored"
   },
   "numbersTab": {
     "intro": "Goals, 7 m and 2 minutes from the match report and the video, shots and saves from the tagged events.",
@@ -4250,7 +4291,14 @@
     "shareText": "Put together a collection and send the link to the team chat. Players do not need an account.",
     "shareAction": "Go to scenes",
     "done": "done",
-    "hide": "Hide"
+    "hide": "Hide",
+    "verifyTitle": "Have the club confirmed",
+    "verifyText": "Sharing by link works only afterwards. A second person of the club confirms it, or you sign in with an e-mail address of the club.",
+    "verifyTextYou": "Sharing by link works only afterwards. You can confirm it.",
+    "verifyAction": "How it works",
+    "progress": "{done} of {total} done",
+    "hideNote": "You can bring them back any time from the account menu at the top right.",
+    "shareLater": "Possible after the first video."
   },
   "onboardingAccount": {
     "account": "Account",
@@ -4314,5 +4362,32 @@
     "short_unreadable": "file unreadable",
     "short_too_short": "video too short",
     "short_generic": "did not work"
+  },
+  "formCheck": {
+    "valueMissing": "Please fill in this field.",
+    "typeMismatchEmail": "Please enter an e-mail address, for example name@club.ch.",
+    "typeMismatchUrl": "Please enter an address starting with https://.",
+    "typeMismatch": "The format does not fit.",
+    "tooShort": "Please use at least {n} characters.",
+    "tooLong": "Please use at most {n} characters.",
+    "rangeUnderflow": "Please enter at least {min}.",
+    "rangeOverflow": "Please enter at most {max}.",
+    "stepMismatch": "This value does not fit, please use the nearest whole value.",
+    "patternMismatch": "The format does not fit.",
+    "badInput": "Please enter a number.",
+    "invalid": "Please check this entry."
+  },
+  "uploadFacts": {
+    "title": "Good to know",
+    "label_formats": "Files",
+    "label_size": "Size",
+    "label_phone": "Phone",
+    "label_analysis": "Analysis",
+    "formats": "MP4, MOV, MKV or MTS, as phones and cameras save them. Choose several files of one match together.",
+    "size": "Up to {max} per file. A whole match in Full HD is usually a few GB; on Wi-Fi it is faster.",
+    "sizeUnknown": "A whole match in Full HD is usually a few GB; on Wi-Fi it is faster.",
+    "phone": "The upload runs in this page. If the screen goes off or you close it, it stops: open the match again and choose the same file, and it carries on where it stopped.",
+    "analysis": "It starts by itself once the video is in and runs on our servers: you can put the phone away, the bell lets you know. It counts toward your plan’s analysis minutes.",
+    "billing": "See plan"
   }
 }

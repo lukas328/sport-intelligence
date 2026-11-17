@@ -57,6 +57,8 @@ class PublicConfig(ApiModel):
     # whether mails reach people (L2): without, the app promises no mail (no sign-in links,
     # saving asks for a password, a forgotten password goes through the support)
     mail_enabled: bool
+    # the largest video file an upload takes, said before the upload (review R33)
+    max_video_bytes: int
 
 
 @router.get("/config", response_model=PublicConfig)
@@ -68,4 +70,5 @@ async def public_config(ctx: CtxDep) -> PublicConfig:
         site_url=s.site_url.rstrip("/"),
         support_email=s.support_email,
         mail_enabled=s.mail_delivers,
+        max_video_bytes=s.max_video_bytes,
     )

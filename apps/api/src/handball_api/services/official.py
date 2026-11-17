@@ -472,8 +472,19 @@ def _scores(m: Match, g: ch.OfficialGame, home: bool) -> bool:
     return True
 
 
+async def _opponents(ctx: Ctx, org_id: uuid.UUID) -> dict[str, Opponent]:
+    """The club's opponents by name key: «X 1» and «X (M2)» are one opponent (review R7). Of two
+    rows with the same key (made before the key existed) the oldest stays the one used."""
+    rows = await ctx.db.scalars(
+        select(Opponent)
+        .where(Opponent.organization_id == org_id)
+        .order_by(Opponent.created_at.desc())
+    )
+    return {ch.opponent_key(o.name): o for o in rows.all()}
+
+
 async def _opponent(ctx: Ctx, org_id: uuid.UUID, name: str, cache: dict[str, Opponent]) -> Opponent:
-    key = ch.fold(name)
+    key = ch.opponent_key(name)
     if key not in cache:
         opp = Opponent(organization_id=org_id, name=name[:120] or "?")
         ctx.db.add(opp)
@@ -490,6 +501,10 @@ async def _new_match(
         key, period_s, periods = match_formats.resolve(MatchFormatKey(team.default_format or ""))
     except ValueError:  # no or a custom default: the template of the age group
         key, period_s, periods = match_formats.resolve(match_formats.default_for(team.is_youth))
+    # our shirts: the club's colour, as for a match made by hand (review R16: synced matches
+    # showed the default blue at the upload of a club in green)
+    org = await ctx.db.get(Organization, team.organization_id)
+    kit = {"kit_own": org.primary_color} if org is not None and org.primary_color else {}
     m = Match(
         organization_id=team.organization_id,
         team_id=team.id,
@@ -506,6 +521,7 @@ async def _new_match(
         periods=periods,
         official_provider=PROVIDER,
         official_game_id=int(payload["game_id"]),
+        **kit,
     )
     ctx.db.add(m)
     await ctx.db.flush()
@@ -705,14 +721,7 @@ async def sync_team(ctx: Ctx, team: Team, *, initial: bool = False) -> dict[str,
                 )
             ).all()
         }
-        opponents = {
-            ch.fold(o.name): o
-            for o in (
-                await ctx.db.scalars(
-                    select(Opponent).where(Opponent.organization_id == team.organization_id)
-                )
-            ).all()
-        }
+        opponents = await _opponents(ctx, team.organization_id)
         now = _now()
         held = await _held_back(ctx, team, season, games, existing, now) if initial else set()
         held_new = 0
@@ -1038,7 +1047,7 @@ async def accept(
             season = await _team_season(ctx, team)
             # official games count toward the plan's matches per season (402 plan-limit-matches)
             await billing.check_new_match(ctx, team.organization_id, team.id, season.id)
-            m = await _new_match(ctx, team, season, p, {})
+            m = await _new_match(ctx, team, season, p, await _opponents(ctx, team.organization_id))
             await _played_match(ctx, team, m, p)
         else:
             found = await ctx.db.get(Match, uuid.UUID(str(p["match_id"])))

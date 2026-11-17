@@ -324,6 +324,16 @@ def fold(s: str | None) -> str:
     return "".join(c for c in s if not unicodedata.combining(c)).lower().strip()
 
 
+def opponent_key(name: str | None) -> str:
+    """One opponent under several spellings (review R7): «SG Horgen/Wädenswil 1» in the league,
+    «SG Horgen/Wädenswil (M2)» in the cup, «sg horgen-wädenswil» typed by a coach. Drops case,
+    accents, punctuation, a bracketed addition and the «1» of a club's first team; a second team
+    («… 2») stays its own. Same rule as `opponentKey` in the web (lib/opponent-name.ts)."""
+    s = re.sub(r"\([^)]*\)", " ", fold(name))
+    s = re.sub(r"[^a-z0-9]+", " ", s).strip()
+    return re.sub(r"\s+1$", "", s).replace(" ", "")
+
+
 def parse_kickoff(value: str) -> datetime:
     """handball.ch gives Swiss local time without offset."""
     return datetime.fromisoformat(value).replace(tzinfo=TZ)
