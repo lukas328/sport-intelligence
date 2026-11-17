@@ -361,16 +361,21 @@ async def demo_match(ctx: Ctx, team_id: uuid.UUID) -> Match:
 async def _demo_opponent(ctx: Ctx) -> Opponent:
     """The opponent entry of the club's example matches: the one an example already plays,
     else a new one (a real opponent of the same name stays the club's own)."""
+    org_id = ctx.require_actor().organization_id
     known = await ctx.db.scalar(
         select(Opponent)
         .join(Match, Match.opponent_id == Opponent.id)
-        .where(Match.source == DEMO_SOURCE, Opponent.name == DEMO_OPPONENT)
+        .where(
+            Opponent.organization_id == org_id,
+            Match.source == DEMO_SOURCE,
+            Opponent.name == DEMO_OPPONENT,
+        )
         .order_by(Opponent.created_at)
         .limit(1)
     )
     if known is not None:
         return known
-    opp = Opponent(organization_id=ctx.require_actor().organization_id, name=DEMO_OPPONENT)
+    opp = Opponent(organization_id=org_id, name=DEMO_OPPONENT)
     ctx.db.add(opp)
     await ctx.db.flush()
     return opp
