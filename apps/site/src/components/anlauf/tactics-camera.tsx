@@ -3,6 +3,7 @@
 import { type CSSProperties, type ReactNode, useEffect, useRef, useState } from "react";
 import { CourtLines } from "./court";
 import { ballAt, PASS_MAX_S } from "./ball";
+import type { CameraScene, SceneTrack } from "./camera-types";
 import { inView, pathOf, type Pt, sampleAt, trailOf, VIEWS, type ViewName } from "./geometry";
 
 const NS = { vectorEffect: "non-scaling-stroke" } as const;
@@ -10,41 +11,7 @@ const INK_DARK = "#0a0d11";
 const PLAY_MS = 6000;
 const CYCLE_MS = 7600;
 
-/** One tracked person of a scene, in court metres (40 x 20). */
-export interface SceneTrack {
-  team: "own" | "opp" | "ref";
-  /** shirt number, only where it was read */
-  number?: number | null;
-  /** the goalkeeper (the only one who may stand in the goal area) */
-  keeper?: boolean;
-  xy: readonly Pt[];
-}
-
-/** A stretch where the ball was found in the picture and the analysis knows who holds it. */
-export interface BallStretch {
-  /** seconds from the scene start */
-  from: number;
-  to: number;
-  team: "own" | "opp";
-  number: number;
-}
-
-export interface CameraScene {
-  /** match clock at the scene start, seconds */
-  clock: number;
-  /** length in seconds */
-  duration: number;
-  tracks: readonly SceneTrack[];
-  /** empty: the ball was not found in this scene; nothing is drawn for it */
-  ball: readonly BallStretch[];
-  scorer?: { team: "own" | "opp"; number: number } | null;
-  shot?: Pt | null;
-  aim?: Pt | null;
-  /** the scorer's way: solid when confirmed, dashed when estimated */
-  confirmed: boolean;
-  /** label at the shot spot, e.g. "Tor Thalwil 39:55" */
-  label?: string | null;
-}
+export type { BallStretch, CameraScene, SceneTrack } from "./camera-types";
 
 export function clockAt(scene: Pick<CameraScene, "clock" | "duration">, t: number): string {
   const s = scene.clock + Math.min(scene.duration, Math.floor(t * scene.duration));

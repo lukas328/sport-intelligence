@@ -4,7 +4,7 @@
  * its passes.
  */
 import { type Pt, sampleAt } from "./geometry";
-import type { BallStretch, CameraScene, SceneTrack } from "./tactics-camera";
+import type { BallStretch, CameraScene, SceneTrack } from "./camera-types";
 
 export function holderAt(scene: CameraScene, t: number): BallStretch | null {
   const sec = t * scene.duration;

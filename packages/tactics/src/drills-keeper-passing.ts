@@ -1,6 +1,6 @@
 /** Drills for the goalkeeper and for passing (own texts, see drills.ts). */
 import { L, keeper, me, op, pass, run, shot, shotLeft, sketch } from "./drill-kit";
-import type { Drill } from "./drills";
+import type { Drill } from "./drill-types";
 import { lineSpot } from "./geometry";
 
 const RM = lineSpot(11, 0);

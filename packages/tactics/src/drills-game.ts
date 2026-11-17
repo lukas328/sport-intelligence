@@ -1,6 +1,6 @@
 /** Drills for transition, fast break, defence and powerplay (own texts, see drills.ts). */
 import { L, dribble, keeper, me, op, pass, run, shot, sketch } from "./drill-kit";
-import type { Drill } from "./drills";
+import type { Drill } from "./drill-types";
 import { lineSpot } from "./geometry";
 import { attack, defence } from "./templates";
 

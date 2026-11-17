@@ -4,50 +4,10 @@
  * points, variants and a court sketch drawn with the tactics board. They are linked to the insight
  * rules: an insight about weak wing shots suggests the wing drills. Texts in de-CH, en, fr.
  */
-import type { Arrow, Token } from "./format";
 import { DRILL_LIBRARY } from "./drill-library";
+import type { Drill, Focus, Lang, Level } from "./drill-types";
 
-export type Focus =
-  | "finishing"
-  | "wings"
-  | "back_court"
-  | "pivot"
-  | "seven_m"
-  | "goalkeeping"
-  | "passing"
-  | "transition_defence"
-  | "fast_break"
-  | "defence"
-  | "powerplay";
-
-export const FOCI: Focus[] = ["finishing", "wings", "back_court", "pivot", "seven_m", "goalkeeping", "passing", "transition_defence", "fast_break", "defence", "powerplay"];
-
-export type Lang = "de-CH" | "en" | "fr";
-export type Text = Record<Lang, string>;
-export type Level = "basic" | "advanced";
-
-/** A drill drawn on the board: blue are the players who practise, orange their opponents. */
-export interface DrillSketch {
-  court: "half" | "full";
-  tokens: Token[];
-  ball: { x: number; y: number } | null;
-  arrows: Arrow[];
-  cones: [number, number][];
-}
-
-export interface Drill {
-  id: string;
-  focus: Focus[];
-  minutes: number;
-  players: string; // e.g. "6-12"
-  level: Level;
-  name: Text;
-  setup: Text;
-  procedure: Text;
-  coaching: Text;
-  variants: Text;
-  sketch: DrillSketch;
-}
+export * from "./drill-types";
 
 export const DRILLS: Drill[] = DRILL_LIBRARY;
 

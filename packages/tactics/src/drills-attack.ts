@@ -1,6 +1,6 @@
 /** Drills for finishing, wings, back court, pivot and 7 m (own texts, see drills.ts). */
 import { L, dribble, keeper, me, op, pass, run, screen, shot, sketch } from "./drill-kit";
-import type { Drill } from "./drills";
+import type { Drill } from "./drill-types";
 import { lineSpot } from "./geometry";
 
 const RM = lineSpot(11, 0);

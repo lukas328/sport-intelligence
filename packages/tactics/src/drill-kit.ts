@@ -1,6 +1,6 @@
 /** Small helpers to write the drill library: texts in three languages and court sketches. */
 import type { Arrow, Side, Token } from "./format";
-import type { DrillSketch, Text } from "./drills";
+import type { DrillSketch, Text } from "./drill-types";
 import { GOAL_X } from "./geometry";
 
 export type P = readonly [number, number];
