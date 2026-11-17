@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Bundle } from "@/components/anlauf/bundle";
 import { DemoLink } from "@/components/kit";
 import { cn } from "@/lib/cn";
@@ -26,14 +26,16 @@ function Times({ minutes, label }: { minutes: readonly number[]; label: string }
   );
 }
 
-function Picture({ thing, play }: { thing: ThingView; play: boolean }) {
+function Picture({ thing, play, from, clean, small }: { thing: ThingView; play: boolean; from: number; clean: boolean; small?: boolean }) {
   if (thing.kind === "times") return <Times minutes={thing.minutes} label={thing.label} />;
-  return <Bundle goals={thing.goals} rest={thing.rest} width={300} play={play} label={thing.label} />;
+  return <Bundle goals={thing.goals} rest={thing.rest} width={small ? 150 : 340} play={play} from={from} clean={clean} label={thing.label} />;
 }
 
 /**
  * The three things: index, numeral, unit, sentence, sub-line and the picture. With `selectable`
- * each thing is a button; the chosen one lists its scenes underneath.
+ * each thing is a button; the chosen one lists its scenes underneath (the demo page; `?ding=2`
+ * opens the second). From a tablet on the three stand side by side in exactly the same width,
+ * and their words, pictures and links each share one row, so pictures and links line up.
  */
 export function Things({
   things,
@@ -44,6 +46,7 @@ export function Things({
   timesOf,
   noVideo,
   scenesHref,
+  clean = false,
 }: {
   things: ThingView[];
   /** the line legend (the demo page); the start page leaves it out */
@@ -53,55 +56,77 @@ export function Things({
   scenesOf?: string;
   timesOf?: string;
   noVideo?: string;
-  /** on the start page the scene count leads to the demo, where the scenes are listed */
+  /** on the start page each thing leads to its scenes in the demo (`?ding=` and the list) */
   scenesHref?: string;
+  /** the quiet drawing (start page): thin runs, clear dots, nothing else */
+  clean?: boolean;
 }) {
   const [open, setOpen] = useState(0);
+  useEffect(() => {
+    if (!selectable) return;
+    const n = Number(new URLSearchParams(window.location.search).get("ding"));
+    if (Number.isInteger(n) && n >= 1 && n <= things.length) setOpen(n - 1);
+  }, [selectable, things.length]);
   const chosen = things[open]!;
+  // the lines of the three things draw one after the other
+  const starts = things.map((_, i) => things.slice(0, i).reduce((n, t) => n + t.goals.length, 0));
   return (
     <div>
       {selectable && pickHint && <p className="mt-4 text-[1.0625rem] text-ink-2">{pickHint}</p>}
-      <ol className="mt-2 grid grid-cols-1 md:grid-cols-3">
+      <ol className="mt-2 grid grid-cols-1 md:grid-cols-3 md:grid-rows-[auto_auto_auto] md:gap-x-12">
         {things.map((t, i) => {
           const body = (
             <>
-              <span className={cn("grid w-full items-start gap-x-4 md:block", t.kind === "bundle" && "grid-cols-[minmax(0,1fr)_8rem] min-[480px]:grid-cols-[minmax(0,1fr)_10rem]")}>
-                <span className="block min-w-0">
-                  <span className="font-mono text-base font-semibold text-ink-2">{t.index}</span>
-                  <span className="mt-2 flex flex-wrap items-baseline gap-x-3">
-                    <b className="font-num text-[4.5rem] leading-[.85] text-club-text md:text-[6rem]">{t.numeral}</b>
-                    <span className="font-slant text-[1.375rem] text-ink-2">{t.unit}</span>
-                  </span>
-                  <span className="mt-3 block text-[1.375rem] leading-tight font-bold">{t.text}</span>
-                  <span className="mt-1 block text-[1.0625rem] text-ink-2">{t.sub}</span>
+              <span className="block min-w-0">
+                <span className="font-mono text-base font-semibold text-ink-2">{t.index}</span>
+                <span className="mt-2 flex flex-wrap items-baseline gap-x-3">
+                  <b className="font-num text-[4.5rem] leading-[.85] text-club-text md:text-[6rem]">{t.numeral}</b>
+                  <span className="font-slant text-[1.375rem] text-ink-2">{t.unit}</span>
                 </span>
-                <span className={cn("block md:mt-5 md:max-w-[22rem]", t.kind === "bundle" ? "mt-8" : "mt-5 max-w-[22rem]")}>
-                  <Picture thing={t} play />
+                <span className="mt-3 block text-[1.375rem] leading-tight font-bold">{t.text}</span>
+                <span className="mt-1 block text-[1.0625rem] text-ink-2">{t.sub}</span>
+              </span>
+              <span className="block w-full self-start md:mt-5">
+                <span className="hidden md:block">
+                  <Picture thing={t} play from={starts[i]!} clean={clean} />
+                </span>
+                <span className="md:hidden">
+                  <Picture thing={t} play from={starts[i]!} clean={clean} small />
                 </span>
               </span>
-              {t.note && <span className="mt-2 block text-base text-ink-2">{t.note}</span>}
-              {t.scenesLabel &&
-                (scenesHref ? (
-                  <DemoLink href={scenesHref} className="btn btn-ink mt-4 min-h-12 px-4 text-[1.0625rem]">
-                    {t.scenesLabel}
-                  </DemoLink>
-                ) : (
-                  <span className="mt-4 inline-flex min-h-12 items-center bg-ink px-4 text-[1.0625rem] font-bold text-ground">{t.scenesLabel}</span>
-                ))}
+              <span className="col-span-2 block md:col-span-1">
+                {t.note && <span className="mt-2 block text-base text-ink-2">{t.note}</span>}
+                {t.scenesLabel &&
+                  (scenesHref ? (
+                    <DemoLink href={`${scenesHref}?ding=${i + 1}#szenen`} className="link mt-2 md:mt-3">
+                      {t.scenesLabel}
+                    </DemoLink>
+                  ) : (
+                    <span className="mt-4 inline-flex min-h-12 items-center bg-ink px-4 text-[1.0625rem] font-bold text-ground">{t.scenesLabel}</span>
+                  ))}
+              </span>
             </>
           );
+          // phone: words left, the picture right, the link below; from a tablet on: one column,
+          // the three parts in the rows the three things share
           const frame = cn(
-            "flex h-full w-full flex-col items-start border-b border-rule py-6 text-left md:border-b-0 md:px-6",
-            i > 0 ? "md:border-l md:border-l-rule" : "md:pl-0", i === things.length - 1 && "md:pr-0",
+            "grid h-full w-full grid-cols-[minmax(0,1fr)_8rem] items-start gap-x-4 border-b border-rule py-6 text-left min-[480px]:grid-cols-[minmax(0,1fr)_10rem]",
+            "md:row-span-3 md:grid-cols-1 md:grid-rows-subgrid md:gap-y-0 md:border-b-0",
           );
           return (
-            <li key={i} className="min-w-0">
+            <li
+              key={i}
+              className={cn(
+                "relative min-w-0 md:row-span-3 md:grid md:grid-rows-subgrid",
+                i > 0 && "md:before:absolute md:before:inset-y-6 md:before:-left-6 md:before:w-px md:before:bg-rule md:before:content-['']",
+              )}
+            >
               {selectable ? (
                 <button
                   type="button"
                   aria-pressed={open === i}
                   onClick={() => setOpen(i)}
-                  className={cn(frame, "relative cursor-pointer hover:bg-ink/[.04]", open === i && "shadow-[inset_0_6px_0_var(--ink)]")}
+                  className={cn(frame, "relative cursor-pointer hover:bg-ink/[.04] md:-mx-3 md:w-[calc(100%+1.5rem)] md:px-3", open === i && "shadow-[inset_0_6px_0_var(--ink)]")}
                 >
                   {body}
                 </button>
@@ -122,7 +147,7 @@ export function Things({
         </p>
       )}
       {selectable && scenesOf && (
-        <section aria-live="polite" className="mt-10">
+        <section id="szenen" aria-live="polite" className="mt-10 scroll-mt-4">
           <h3 className="section-head text-[1.375rem] md:text-[1.5rem]">{(chosen.kind === "times" && timesOf ? timesOf : scenesOf).replace("{i}", String(open + 1))}</h3>
           <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {chosen.scenes.map((s, i) => (

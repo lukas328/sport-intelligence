@@ -4,6 +4,7 @@ import Link from "next/link";
 import { createContext, type CSSProperties, type ReactNode, useContext, useEffect, useMemo, useState } from "react";
 import { cn } from "@/lib/cn";
 import { DEMO_CLUB, kit, kitVars, SHIRTS } from "@/lib/color";
+import { withKit } from "@/lib/links";
 import { startUrl } from "@/lib/site";
 
 /** The demo opponent: black with white (TV Muster). The clash rule decides how it shows. */
@@ -112,7 +113,7 @@ function Shirt({ hex, on }: { hex: string; on: boolean }) {
 export function DemoLink({ href, className, children }: { href: string; className?: string; children: ReactNode }) {
   const { shirt, chosen } = useShirt();
   return (
-    <Link href={chosen && shirt ? `${href}?kit=${shirt}` : href} className={className}>
+    <Link href={chosen && shirt ? withKit(href, shirt) : href} className={className}>
       {children}
     </Link>
   );

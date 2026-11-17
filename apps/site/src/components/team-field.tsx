@@ -8,7 +8,24 @@ import { START_ACTION } from "@/lib/site";
  * an example below. A plain GET form to the app's team preview (`/einstieg?q=`), no script, no
  * account; the app shows the team from the federation data and offers to save it.
  */
-export function TeamField({ id, label, button, example, appLocale, onClub = false }: { id: string; label: string; button: string; example: string; appLocale: string; onClub?: boolean }) {
+export function TeamField({
+  id,
+  label,
+  button,
+  example,
+  after,
+  appLocale,
+  onClub = false,
+}: {
+  id: string;
+  label: string;
+  button: string;
+  example: string;
+  /** what «Zeigen» brings, right under the field (S7) */
+  after?: string;
+  appLocale: string;
+  onClub?: boolean;
+}) {
   const { shirt, chosen } = useShirt();
   return (
     <form action={START_ACTION} method="get" role="search" className="w-full max-w-[34rem]">
@@ -35,6 +52,12 @@ export function TeamField({ id, label, button, example, appLocale, onClub = fals
       </div>
       <p id={`${id}-example`} className={`mt-2 text-[1.0625rem] ${onClub ? "text-club-ink" : "text-ink-2"}`}>
         {example}
+        {after && (
+          <>
+            {" "}
+            {after}
+          </>
+        )}
       </p>
     </form>
   );

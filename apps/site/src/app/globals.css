@@ -91,6 +91,11 @@
     opacity: 1;
   }
 }
+@keyframes nudge {
+  50% {
+    transform: translateX(5px);
+  }
+}
 
 @layer base {
   html {
@@ -382,6 +387,30 @@
       opacity: 0;
       animation: appear 0.5s ease-out forwards;
       animation-delay: calc(var(--i, 0) * 140ms + 0.4s);
+    }
+    /* the shot spot appears where its line ends */
+    .play .ln-dot {
+      opacity: 0;
+      animation: appear 0.25s ease-out forwards;
+      animation-delay: calc(var(--i, 0) * 140ms + 0.75s);
+    }
+    /* below the first screen the lines wait until their block glides in (components/reveal.tsx) */
+    .pre .play .ln,
+    .pre .play .ln-e,
+    .pre .play .ln-dot,
+    .pre .late,
+    .pre .nudge {
+      animation-play-state: paused;
+    }
+    /* the playhead twitches twice as if the video would start, and stays at 0:00 */
+    .nudge {
+      animation: nudge 0.5s ease-in-out 0.5s 2;
+    }
+    /* a word that comes a moment after its block (the video nobody watched, S8) */
+    .late {
+      opacity: 0;
+      animation: appear 0.6s ease-out forwards;
+      animation-delay: calc(var(--late, 1.6s));
     }
     /* start page: blocks glide in once (components/reveal.tsx), the hero pictures rise on load */
     [data-reveal] {
