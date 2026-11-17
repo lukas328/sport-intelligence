@@ -51,11 +51,22 @@ describe("site messages", () => {
       expect(msgs.footer.made).toMatch(swiss);
       expect(msgs.us.sections.map((s) => s.title)).toContain(msgs.footer.made);
       expect(msgs.home.teamAfter).toMatch(swiss);
-      expect(msgs.home.teamManual.length).toBeGreaterThan(0);
     }
     expect(de.home.trust.map((t) => t.title)).toContain("DSGVO und Schweizer DSG");
     expect(fr.home.trust.map((t) => t.title)).toContain("RGPD et LPD suisse");
     expect(en.home.trust.map((t) => t.title)).toContain("GDPR and Swiss FADP");
+  });
+
+  // U17: the team search on the website and its next step in the app (/einstieg) use the same
+  // words: the question, the button, the hint under the field and the sentence on what it covers
+  it("words the team search like the app's entry", () => {
+    for (const [lang, msgs] of [["de-CH", de], ["fr", fr], ["en", en]] as const) {
+      const app = JSON.parse(readFileSync(join(__dirname, "..", "..", "..", "web", "messages", `${lang}.json`), "utf8")).entry;
+      expect(msgs.home.teamLabel, lang).toBe(app.ask);
+      expect(msgs.home.teamButton, lang).toBe(app.search);
+      expect(msgs.home.teamHint, lang).toBe(app.short);
+      expect(msgs.home.teamAfter.endsWith(app.scope), lang).toBe(true);
+    }
   });
 
   it("uses no long dashes and no sharp s", () => {
