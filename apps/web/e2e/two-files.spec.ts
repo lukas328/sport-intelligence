@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { HALF_1, HALF_2 } from "./global-setup";
-import { chooseVideo, expectAccessible, register, uniqueEmail } from "./helpers";
+import { clubByHand, chooseVideo, expectAccessible, register, uniqueEmail } from "./helpers";
 
 /**
  * Q-VIDEO-PARTS: a coach stopped the recording at half-time and has two files. Both are chosen at
@@ -9,9 +9,7 @@ import { chooseVideo, expectAccessible, register, uniqueEmail } from "./helpers"
  */
 async function newMatch(page: Page, prefix: string): Promise<{ org: string; match: string }> {
   await register(page, uniqueEmail(prefix), "Coach Zwei Dateien");
-  await page.getByTestId("manual-club").click();
-  await page.getByLabel("Vereinsname").fill("HC Pause");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+  await clubByHand(page, "HC Pause");
   await page.getByLabel("Teamname").fill("Herren 1");
   await page.getByRole("button", { name: "Zum Team" }).click();
   await page.waitForURL(/\/teams\/[^/]+/);

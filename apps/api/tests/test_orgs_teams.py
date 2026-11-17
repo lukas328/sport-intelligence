@@ -1,8 +1,12 @@
 from __future__ import annotations
 
+import uuid
 from collections.abc import Callable
 
+import asyncpg
 import pytest
+
+from handball_api.core.colors import FALLBACK_CLUB_COLOUR
 
 from .conftest import Api, setup_club
 
@@ -44,6 +48,56 @@ async def test_club_colours(make_api: Callable[[], Api]) -> None:
     assert r.status_code == 200, r.text
     assert (r.json()["primary_color"], r.json()["secondary_color"]) == ("#c8102e", "#ffffff")
     assert (await api.patch(org, json={"secondary_color": "white"})).status_code == 422
+
+
+async def test_a_club_without_a_chosen_colour_shows_the_fallback(
+    make_api: Callable[[], Api], owner_conn: asyncpg.Connection
+) -> None:
+    """Decision E8: a club that skips the colour is shown in the neutral slate and says that it
+    has not chosen; a club stored with the old default blue counts as not chosen too (no rewrite
+    of existing rows); picking a colour makes it the club's; null goes back."""
+    api = make_api()
+    await api.register("farbe@hc-test.ch")
+    r = await api.post("/v1/orgs", json={"name": "HC Ohnefarbe"})
+    assert r.status_code == 201, r.text
+    org = r.json()
+    assert (org["primary_color"], org["color_chosen"]) == (FALLBACK_CLUB_COLOUR, False)
+    path = f"/v1/orgs/{org['id']}"
+
+    picked = (await api.patch(path, json={"primary_color": "#C8102E"})).json()
+    assert (picked["primary_color"], picked["color_chosen"]) == ("#c8102e", True)
+
+    # a club made before the decision: stored with the blue every club got
+    await owner_conn.execute(
+        "UPDATE organizations SET primary_color = '#0b6bcb' WHERE id = $1",
+        uuid.UUID(org["id"]),
+    )
+    legacy = (await api.get(path)).json()
+    assert (legacy["primary_color"], legacy["color_chosen"]) == (FALLBACK_CLUB_COLOUR, False)
+
+    back = (await api.patch(path, json={"primary_color": None})).json()
+    assert (back["primary_color"], back["color_chosen"]) == (FALLBACK_CLUB_COLOUR, False)
+
+
+async def test_matches_of_a_club_without_colour_wear_the_fallback_until_it_picks(
+    make_api: Callable[[], Api],
+) -> None:
+    """The own shirts follow the club colour or the fallback; once the club picks its colour the
+    matches without video follow (review R16), the analysis gets a real colour either way."""
+    api = make_api()
+    await api.register("kit@hc-test.ch")
+    org = (await api.post("/v1/orgs", json={"name": "HC Kit"})).json()["id"]
+    team = (
+        await api.post(f"/v1/orgs/{org}/teams", json={"name": "Herren 1", "gender": "men"})
+    ).json()["id"]
+    body = {"opponent_name": "TV Gegner", "kickoff_at": "2026-11-21T18:00:00+01:00"}
+    r = await api.post(f"/v1/orgs/{org}/teams/{team}/matches", json=body)
+    assert r.status_code == 201, r.text
+    match = r.json()["id"]
+    assert r.json()["kit_own"] == FALLBACK_CLUB_COLOUR
+    await api.patch(f"/v1/orgs/{org}", json={"primary_color": "#157a3a"})
+    after = (await api.get(f"/v1/orgs/{org}/matches/{match}")).json()
+    assert after["kit_own"] == "#157a3a"
 
 
 async def test_update_org_and_logo(make_api: Callable[[], Api]) -> None:

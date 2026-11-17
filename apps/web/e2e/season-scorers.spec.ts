@@ -1,7 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { expect, test } from "@playwright/test";
 import * as fx from "./fixtures/entry";
-import { register, uniqueEmail } from "./helpers";
+import { clubByHand, register, uniqueEmail } from "./helpers";
 
 const DB = process.env.E2E_DATABASE_URL ?? "postgresql://handball:handball@localhost:5432/handball";
 
@@ -20,9 +20,7 @@ test("season and start: one count of the scorers", async ({ page }, info) => {
     route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(fx.preview(h, true)) }),
   );
   await register(page, uniqueEmail("g6"), "Coach Zaehlung");
-  await page.getByTestId("manual-club").click();
-  await page.getByLabel("Vereinsname").fill("SG Seeufer");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+  await clubByHand(page, "SG Seeufer");
   await page.getByLabel("Teamname").fill("Herren 1");
   await page.getByRole("button", { name: "Zum Team" }).click();
   await page.waitForURL(/\/teams\/[^/]+/);

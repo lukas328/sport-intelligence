@@ -262,7 +262,7 @@ async def build(
                 "bucket_artifacts": ctx.settings.s3_bucket_artifacts,
                 "out_key": f"{match.organization_id}/highlights/{reel.id}.mp4",
                 "logo_key": org.logo_key,
-                "colour": org.primary_color,
+                "colour": org.club_colour,
                 "intro": [x for x in title if x],
                 **sources[0],
                 **({"sources": sources} if len(sources) > 1 else {}),

@@ -15,7 +15,7 @@ test("redirects to login without session", async ({ page }) => {
   await expectAccessible(page);
 });
 
-test("new club: club and team in two steps, roster from the team page, then invite a player", async ({ page, browser }, info) => {
+test("new club: club, colour and team in three steps, roster from the team page, then invite a player", async ({ page, browser }, info) => {
   test.skip(info.project.name !== "chromium", "full flow runs once");
   const started = Date.now();
   const coachEmail = uniqueEmail("coach");
@@ -24,16 +24,22 @@ test("new club: club and team in two steps, roster from the team page, then invi
   await expect(page).toHaveURL(/\/onboarding/);
   await expectAccessible(page);
 
-  // step 1: club, name and shirt; country, crest and an own colour behind «Mehr» (UX test B27)
+  // step 1: the club's name; country and crest behind «Mehr» (UX test B27)
   await page.getByTestId("manual-club").click();
   await page.getByLabel("Vereinsname").fill("HC E2E Zürich");
-  await page.getByRole("radio", { name: "Rot" }).check({ force: true });
-  await page.getByText("Mehr: Land, Wappen, eigene Farbe").click();
+  await page.getByText("Mehr: Land, Wappen").click();
   await page.getByLabel("Wappen (optional)").setInputFiles(path.join(fixtures, "logo.png"));
-  await expect(page.getByText("Schritt 1 von 2").first()).toBeVisible();
+  await expect(page.getByText("Schritt 1 von 3").first()).toBeVisible();
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
 
-  // step 2: team, and done: no roster step, nobody is invited here
+  // step 2: «Eure Vereinsfarbe», one tap (E8); «Später» would skip it
+  await expect(page.getByText("Schritt 2 von 3").first()).toBeVisible();
+  await expect(page.getByTestId("colour-later")).toBeVisible();
+  await page.getByRole("radio", { name: "Rot", exact: true }).check({ force: true });
+  await expectAccessible(page);
+  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+
+  // step 3: team, and done: no roster step, nobody is invited here
   await expect(page.getByLabel("Teamname")).toBeVisible();
   await expectAccessible(page);
   await page.getByLabel("Teamname").fill("Herren 1");

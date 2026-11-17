@@ -7,6 +7,7 @@ from typing import Any, Literal
 
 from pydantic import Field, HttpUrl, model_validator
 
+from handball_api.core.colors import FALLBACK_CLUB_COLOUR
 from handball_api.models.enums import JobStatus, MatchFormatKey, MatchStatus, VideoRole, VideoStatus
 from handball_api.schemas.common import ApiModel, HexColor, Name
 
@@ -75,7 +76,8 @@ class MatchCreate(ApiModel):
     is_home: bool = True
     competition: Name | None = None
     venue: Name | None = None
-    kit_own: HexColor = "#0b6bcb"
+    # the club's colour unless sent (services/matches.py); a scouting match: the fallback
+    kit_own: HexColor = FALLBACK_CLUB_COLOUR
     kit_own_gk: HexColor = "#f59e0b"
     kit_opponent: HexColor = "#dc2626"
     kit_opponent_gk: HexColor = "#16a34a"

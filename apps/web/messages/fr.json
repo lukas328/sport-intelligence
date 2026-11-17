@@ -301,7 +301,9 @@
       "white": "Blanc",
       "green": "Vert",
       "orange": "Orange",
-      "purple": "Violet"
+      "purple": "Violet",
+      "maroon": "Bordeaux",
+      "navy": "Bleu marine"
     },
     "crestLater": "Vous pourrez téléverser le blason plus tard.",
     "previewTitle": "Voici votre dernier match",
@@ -316,7 +318,7 @@
     "next": "Ensuite : téléverser la première vidéo ou regarder le match de démo.",
     "cancel": "Annuler",
     "stepTitle": "Premiers pas",
-    "moreClub": "Plus : pays, blason, couleur propre",
+    "moreClub": "Plus : pays, blason",
     "ownColour": "Couleur propre",
     "rosterLater": "L'effectif et les invitations se font plus tard sur la page de l'équipe.",
     "waitingTitle": "Ta demande auprès de {club} est en attente.",
@@ -325,7 +327,11 @@
     "twinText": "Est-ce la même équipe ? Alors ouvre-la au lieu de la créer une deuxième fois.",
     "twinOpen": "Ouvrir {name}",
     "twinAnyway": "Non, une autre équipe",
-    "twinCreate": "Créer une nouvelle équipe"
+    "twinCreate": "Créer une nouvelle équipe",
+    "stepColour": "Couleur",
+    "colourTitle": "La couleur de votre club",
+    "colourNote": "Elle figure en haut de l'app et sur vos matchs. Tu peux la changer à tout moment sous Club.",
+    "colourLater": "Plus tard"
   },
   "roster": {
     "title": "Équipe",
@@ -409,14 +415,16 @@
     "tab_profile": "Profil",
     "tab_security": "Sécurité",
     "tab_data": "Mes données",
-    "tab_club": "Nom et maillot",
+    "tab_club": "Nom et couleur",
     "tab_teams": "Équipes et rôles",
     "tab_billing": "Abonnement et factures",
     "tab_federation": "Fédération",
-    "clubLook": "Nom, maillot et blason",
+    "clubLook": "Nom, couleur du club et blason",
     "clubPreview": "Voici l'en-tête d'un match",
     "clubPreviewSub": "Aperçu",
-    "ownColours": "Couleurs propres au lieu du maillot"
+    "ownColours": "Couleurs propres",
+    "clubColour": "Couleur du club",
+    "clubColourNone": "Aucune choisie pour l'instant : d'ici là, votre club s'affiche en gris."
   },
   "dashboard": {
     "teamsTitle": "Équipes",
@@ -2898,7 +2906,10 @@
     "later": "Plus tard",
     "newTab": "s’ouvre dans un nouvel onglet",
     "backToTeam": "Retour à {team}",
-    "nextSteps": "La suite"
+    "nextSteps": "La suite",
+    "colourHint": "Votre club n'a pas encore de couleur.",
+    "colourHintAction": "Choisir la couleur du club",
+    "colourHintClose": "Masquer l'avis"
   },
   "palette": {
     "newMatch": "Ajouter un match",

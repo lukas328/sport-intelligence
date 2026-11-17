@@ -38,6 +38,19 @@ export async function expectAccessible(page: Page) {
   ).toEqual([]);
 }
 
+/**
+ * The onboarding by hand up to the team step: «Verein von Hand anlegen», the club's name, then
+ * «Später» at «Eure Vereinsfarbe» (the club starts without a colour, decision E8). The team step
+ * («Teamname», «Zum Team») stays in the spec. One place for the steps before the team, so a spec
+ * does not break when one is added.
+ */
+export async function clubByHand(page: Page, name: string) {
+  await page.getByTestId("manual-club").click();
+  await page.getByLabel("Vereinsname").fill(name);
+  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+  await page.getByTestId("colour-later").click();
+}
+
 export async function register(page: Page, email: string, name = "Test Trainerin") {
   await page.goto("/register");
   await page.getByLabel("Vor- und Nachname").fill(name);

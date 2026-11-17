@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { getTranslations } from "next-intl/server";
 import type { CSSProperties, ReactNode } from "react";
 import { AppShell } from "@/components/shell/app-shell";
+import { ColourHint } from "@/components/shell/colour-hint";
 import { EmailBanner } from "@/components/shell/email-banner";
 import { serverApi } from "@/lib/api";
 import { CHECK_KITS, clubStyle } from "@/lib/color";
@@ -26,7 +27,14 @@ export default async function OrgLayout({ children, params }: { children: ReactN
   // nothing pushes in on every page (UX test H13): two-factor sits in the account, the club's
   // verification is a task on the club page (Verein › Verband). One quiet line only while the
   // e-mail address is not confirmed and mails go out (L14); it can be put away.
-  const banner = me.email_verified ? null : <EmailBanner />;
+  // A club whose admin never chose its colour gets one more quiet line that leads to the choice
+  // and can be closed (decision E8).
+  const banner = (
+    <>
+      {me.email_verified ? null : <EmailBanner />}
+      <ColourHint orgId={org.id} colorChosen={org.color_chosen} isAdmin={org.my_role === "org_admin"} />
+    </>
+  );
   return (
     <div className="club min-h-dvh" style={clubStyle(kitColours[0], kitColours[1]) as CSSProperties}>
       <AppShell

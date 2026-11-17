@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { register, uniqueEmail } from "./helpers";
+import { clubByHand, register, uniqueEmail } from "./helpers";
 
 async function noHorizontalScroll(page: Page) {
   // old addresses redirect (settings to club): measure the page that stays
@@ -15,9 +15,7 @@ async function noHorizontalScroll(page: Page) {
 test("no horizontal scrolling on phones", async ({ page }, info) => {
   test.skip(info.project.name !== "mobile", "phone viewport only");
   await register(page, uniqueEmail("layout"), "Coach Mobile");
-  await page.getByTestId("manual-club").click();
-  await page.getByLabel("Vereinsname").fill("HC Schmal");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+  await clubByHand(page, "HC Schmal");
   await page.getByLabel("Teamname").fill("Junioren U15 Leistungsgruppe");
   await page.getByRole("button", { name: "Zum Team" }).click();
   await page.waitForURL(/\/teams\/[^/]+/);
@@ -42,9 +40,7 @@ test("no horizontal scrolling on phones", async ({ page }, info) => {
 test("large text at 300 px: the team name in the top bar stays readable (UX test A01)", async ({ page }, info) => {
   test.skip(info.project.name !== "chromium", "runs once");
   await register(page, uniqueEmail("a01"), "Coach Gross");
-  await page.getByTestId("manual-club").click();
-  await page.getByLabel("Vereinsname").fill("HC Lindmatt");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+  await clubByHand(page, "HC Lindmatt");
   await page.getByLabel("Teamname").fill("SG Lindmatt/Uferweg");
   await page.getByRole("button", { name: "Zum Team" }).click();
   await page.waitForURL(/\/teams\/[^/]+/);
@@ -71,9 +67,7 @@ test("large text at 300 px: the team name in the top bar stays readable (UX test
 test("unknown match, team and collection addresses answer 404 (UX test N18)", async ({ page }, info) => {
   test.skip(info.project.name !== "chromium", "runs once");
   await register(page, uniqueEmail("n18"), "Coach Adresse");
-  await page.getByTestId("manual-club").click();
-  await page.getByLabel("Vereinsname").fill("HC Adresse");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+  await clubByHand(page, "HC Adresse");
   await page.getByLabel("Teamname").fill("Herren 1");
   await page.getByRole("button", { name: "Zum Team" }).click();
   await page.waitForURL(/\/teams\/[^/]+/);
@@ -91,9 +85,7 @@ test("unknown match, team and collection addresses answer 404 (UX test N18)", as
 test("a club without video: Szenen says one sentence and the way to the video (UX test B28)", async ({ page }, info) => {
   test.skip(info.project.name !== "chromium", "runs once");
   await register(page, uniqueEmail("b28"), "Coach Leer");
-  await page.getByTestId("manual-club").click();
-  await page.getByLabel("Vereinsname").fill("HC Leer");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+  await clubByHand(page, "HC Leer");
   await page.getByLabel("Teamname").fill("Herren 1");
   await page.getByRole("button", { name: "Zum Team" }).click();
   await page.waitForURL(/\/teams\/[^/]+/);

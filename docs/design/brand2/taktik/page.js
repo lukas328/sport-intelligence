@@ -139,7 +139,7 @@ th, td { text-align: left; padding: 8px 12px 8px 0; border-bottom: 1px solid var
     <div><div class="box">${fin("wortmarke-gestapelt.svg", "", "Wortmarke gestapelt").replace("<svg ", '<svg style="max-height:260px" ')}</div><p class="cap">Gestapelt</p></div>
     <div><div class="box" style="background:#111316">${fin("wortmarke-zweizeilig-weiss.svg", "", "Wortmarke weiss")}</div><p class="cap">Weiss auf Tinte</p></div>
   </div>
-  <div class="verdict"><p><b>Farbregel:</b> In der App nur Tinte <code>#111316</code> (oder Weiss auf dunklem Grund), denn dort gehören die Farben den Teams. Ausserhalb der App Markerblau <code>#1d47d1</code> für unsere Spielerin, den Lauf und «Intelligence», Markerrot <code>#e1251b</code> für den Verteidiger, Tinte für Feld und «Handball», Tafelweiss <code>#f7f8f6</code> als Grund. Auf einer Vereinsfarbe immer einfarbig.</p></div>
+  <div class="verdict"><p><b>Farbregel (Entscheid E10, 17. November 2026):</b> Eine Farbe überall, in der App, auf der Website, im Favicon, in den App-Icons, im Teilen-Bild und im Spielbericht (PDF): Tinte <code>#111316</code> auf hellem Grund, Weiss auf dunklem. Die Farben gehören den Teams, die Website ist Creme, Grün und Schwarz. Die zweifarbige Fassung (Markerblau <code>#1d47d1</code>, Markerrot <code>#e1251b</code>) bleibt nur als Beleg (<code>-zweifarbig</code>) und wird nirgends verwendet. Tafelweiss <code>#f7f8f6</code> bleibt der Grund von App-Icon und Teilen-Bild.</p></div>
 </section>
 
 <section class="sec" id="haerte">
@@ -167,8 +167,8 @@ th, td { text-align: left; padding: 8px 12px 8px 0; border-bottom: 1px solid var
   <h2>Dateien</h2>
   <p class="lead">Alles liegt in <code>docs/design/brand2/taktik/final/</code>. Regeln (Schutzraum, Mindestgrösse, Farben, was man nicht tut) im <code>README.md</code> daneben.</p>
   <ul class="list">
-    <li>Zeichen: <code>zeichen.svg</code> (zweifarbig), <code>zeichen-tinte.svg</code>, <code>zeichen-tinte-akzent.svg</code> (Tinte, Pfeil blau), <code>zeichen-weiss.svg</code>, <code>zeichen-negativ.svg</code> (weiss auf Tinte), <code>zeichen-1024.png</code>.</li>
-    <li>Wortmarke in Kanit ExtraBold Italic, Schrift als Pfade: <code>wortmarke-quer</code>, <code>-zweizeilig</code>, <code>-gestapelt</code>, je <code>.svg</code> (farbig), <code>-einfarbig.svg</code>, <code>-negativ.svg</code>, <code>-weiss.svg</code>.</li>
+    <li>Zeichen: <code>zeichen.svg</code> (Tinte), <code>zeichen-zweifarbig.svg</code> (Beleg, nicht verwendet), <code>zeichen-tinte.svg</code>, <code>zeichen-tinte-akzent.svg</code> (Tinte, Pfeil blau), <code>zeichen-weiss.svg</code>, <code>zeichen-negativ.svg</code> (weiss auf Tinte), <code>zeichen-1024.png</code>.</li>
+    <li>Wortmarke in Kanit ExtraBold Italic, Schrift als Pfade: <code>wortmarke-quer</code>, <code>-zweizeilig</code>, <code>-gestapelt</code>, je <code>.svg</code> (Tinte), <code>-negativ.svg</code>, <code>-weiss.svg</code> und <code>-zweifarbig.svg</code> (Beleg, nicht verwendet).</li>
     <li>Favicon, eigene Zeichnungen auf dem Pixelraster: <code>favicon-32.svg</code> und <code>.png</code> (mit vier Punkten der 9-Meter-Linie), <code>favicon-16.svg</code> und <code>.png</code> (ohne 9-Meter-Linie), dazu <code>favicon-32-tinte.svg</code>, <code>favicon-32-weiss.svg</code>, <code>favicon-16-tinte.svg</code> für die App.</li>
     <li>App-Icon: <code>app-icon-1024.png</code>, <code>app-icon-512.png</code> (iOS, volle Fläche ohne Ecken), <code>app-icon-maske-1024.png</code>, <code>app-icon-maske-512.png</code> (Android adaptiv und Web «maskable», Zeichen in der sicheren Zone), <code>app-icon-einfarbig.svg</code> (Android «Designs»).</li>
     <li>Teilen: <code>open-graph.svg</code>, <code>open-graph.png</code> (1200 × 630).</li>

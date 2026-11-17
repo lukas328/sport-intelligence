@@ -8,6 +8,7 @@ from datetime import UTC, date, datetime, timedelta
 
 from sqlalchemy import func, select, update
 
+from handball_api.core.colors import FALLBACK_CLUB_COLOUR, LEGACY_DEFAULT_CLUB_COLOUR
 from handball_api.core.db import disable_system_access, enable_system_access, set_tenant
 from handball_api.core.errors import ProblemError
 from handball_api.core.storage import ObjectNotFoundError
@@ -126,18 +127,12 @@ async def build_actor(ctx: Ctx, user: User, org_id: uuid.UUID) -> tuple[Actor, O
     return actor, org
 
 
-# the kit a match gets when nobody chose one (models/matches.py)
-DEFAULT_KIT_OWN = "#0b6bcb"
-
-
 async def _matches_follow_club_colour(ctx: Ctx, org: Organization, old: str | None) -> None:
-    """A new club colour reaches the matches that still wear the old one (or the default) and
-    have no video yet: the schedule's matches made before the colour was set showed blue shirts
-    at the upload of a club in green (review R16). A match with a video keeps what its analysis
-    used; a scouting match's own side is another team."""
-    if not org.primary_color:
-        return
-    worn = {DEFAULT_KIT_OWN, *([old.lower()] if old else [])}
+    """A new club colour reaches the matches that still wear the old one (or a default: the old
+    blue, the neutral fallback) and have no video yet: the schedule's matches made before the
+    colour was set showed blue shirts at the upload of a club in green (review R16). A match with
+    a video keeps what its analysis used; a scouting match's own side is another team."""
+    worn = {LEGACY_DEFAULT_CLUB_COLOUR, FALLBACK_CLUB_COLOUR, *([old.lower()] if old else [])}
     has_video = select(VideoAsset.id).where(VideoAsset.match_id == Match.id).exists()
     await ctx.db.execute(
         update(Match)
@@ -147,7 +142,7 @@ async def _matches_follow_club_colour(ctx: Ctx, org: Organization, old: str | No
             Match.kind != "scouting",
             ~has_video,
         )
-        .values(kit_own=org.primary_color)
+        .values(kit_own=org.club_colour)
         .execution_options(synchronize_session=False)
     )
 

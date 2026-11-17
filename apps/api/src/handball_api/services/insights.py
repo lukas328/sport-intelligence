@@ -531,7 +531,7 @@ async def match_pdf(ctx: Ctx, match_id: uuid.UUID, lang: str) -> tuple[bytes, st
     )
     pdf = report_pdf.render(
         lang,
-        {"name": org.name, "primary_color": org.primary_color},
+        {"name": org.name, "primary_color": org.club_colour},
         {
             "home": home,
             "away": away,

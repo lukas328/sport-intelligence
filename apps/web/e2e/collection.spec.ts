@@ -1,13 +1,11 @@
 import { expect, test } from "@playwright/test";
-import { expectAccessible, register, uniqueEmail } from "./helpers";
+import { clubByHand, expectAccessible, register, uniqueEmail } from "./helpers";
 
 // UX test B04, B05, B17: a collection the coach trims, shares in one step and shows full screen
 test("collection: note, order, remove, rename, share with a lasting link, revoke, big screen", async ({ page, context }, info) => {
   test.skip(info.project.name !== "chromium", "runs once");
   await register(page, uniqueEmail("coll"), "Coach Sammlung");
-  await page.getByTestId("manual-club").click();
-  await page.getByLabel("Vereinsname").fill("HC Sammlung");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+  await clubByHand(page, "HC Sammlung");
   await page.getByLabel("Teamname").fill("Herren 2");
   await page.getByRole("button", { name: "Zum Team" }).click();
   await page.waitForURL(/\/teams\/[^/]+/);

@@ -25,23 +25,24 @@
   --court-text: #c7ced5;
   --court-ref: #8d97a1;
 
-  /* club and opponent (lib/color.ts kit(): blue club, unknown opponent) */
-  --club: #1f4fd6;
+  /* club and opponent (lib/color.ts kit(): a club without a chosen colour, DEFAULT_CLUB, against
+     an unknown opponent) */
+  --club: #475569;
   --club-2: #ffffff;
   --club-ink: #ffffff;
-  --club-edge: #1f4fd6;
-  --club-text: #1f4fd6;
-  --club-line: #1f4fd6;
+  --club-edge: #475569;
+  --club-text: #475569;
+  --club-line: #475569;
   --club-pipe: transparent;
-  --club-dot: #1f4fd6;
-  --opp: #646b73;
-  --opp-ink: #ffffff;
-  --opp-edge: #646b73;
-  --opp-line: #646b73;
+  --club-dot: #475569;
+  --opp: #8b9198;
+  --opp-ink: #16171a;
+  --opp-edge: #8b9198;
+  --opp-line: #8b9198;
   --opp-pipe: transparent;
-  --opp-dot: #646b73;
-  --club-cam: #1f4fd6;
-  --club-cam-ink: #ffffff;
+  --opp-dot: #8b9198;
+  --club-cam: #ffffff;
+  --club-cam-ink: #0a0d11;
   --opp-cam: #0f2333;
   --opp-cam-ink: #ffffff;
   --opp-cam-edge: #a3aeb8;

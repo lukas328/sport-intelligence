@@ -24,13 +24,15 @@ InviteeName = Annotated[str, StringConstraints(strip_whitespace=True, min_length
 class OrgCreate(ApiModel):
     name: Name
     country: Country = "CH"
-    primary_color: HexColor = "#0b6bcb"
+    # left out: the club has not chosen its colour yet and shows the neutral fallback (E8)
+    primary_color: HexColor | None = None
     secondary_color: HexColor = "#ffffff"
 
 
 class OrgUpdate(ApiModel):
     name: Name | None = None
     country: Country | None = None
+    # null: back to «not chosen», the neutral fallback
     primary_color: HexColor | None = None
     secondary_color: HexColor | None = None
 
@@ -39,8 +41,14 @@ class OrgOut(ApiModel):
     id: uuid.UUID
     name: str
     country: str
-    primary_color: str
+    primary_color: str = Field(
+        description="the colour the club is shown in: its own, or the neutral fallback "
+        "while color_chosen is false"
+    )
     secondary_color: str
+    # false: the club never picked its colour (new without a choice, or stored with the old
+    # default blue); the app offers the choice
+    color_chosen: bool
     has_logo: bool
     plan: Plan
     data_region: DataRegion

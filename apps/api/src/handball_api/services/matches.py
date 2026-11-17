@@ -247,8 +247,8 @@ async def create_match(ctx: Ctx, team_id: uuid.UUID, data: MatchCreate) -> Match
     # scouting match the own side is the other team, whose colour nobody knows by default
     if "kit_own" not in data.model_fields_set and data.kind != "scouting":
         org = await ctx.db.get(Organization, team.organization_id)
-        if org is not None and org.primary_color:
-            values["kit_own"] = org.primary_color
+        if org is not None:
+            values["kit_own"] = org.club_colour
     if opp and said:
         opp.primary_color = said
     elif opp and opp.primary_color and "kit_opponent" not in data.model_fields_set:

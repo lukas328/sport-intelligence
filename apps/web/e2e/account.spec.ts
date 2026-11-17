@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { expectAccessible, linkFromMail, register, uniqueEmail } from "./helpers";
+import { clubByHand, expectAccessible, linkFromMail, register, uniqueEmail } from "./helpers";
 
 test("forgot password: reset via e-mail link, then devices list", async ({ page }, info) => {
   test.skip(info.project.name !== "chromium", "runs once");
@@ -51,9 +51,7 @@ test("sign-in lands in the first club, server-rendered without errors", async ({
   test.skip(info.project.name !== "chromium", "runs once");
   const email = uniqueEmail("signin");
   await register(page, email);
-  await page.getByTestId("manual-club").click();
-  await page.getByLabel("Vereinsname").fill("HC Anmeldung");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+  await clubByHand(page, "HC Anmeldung");
   await page.getByLabel("Teamname").fill("Herren 1");
   await page.getByRole("button", { name: "Zum Team" }).click();
   await page.waitForURL(/\/app\/[^/]+\/teams\//);

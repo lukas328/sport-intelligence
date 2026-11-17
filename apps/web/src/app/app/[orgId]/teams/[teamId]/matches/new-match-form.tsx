@@ -13,12 +13,14 @@ import { cn } from "@/lib/utils";
 import { api } from "@/lib/client";
 import { errorKey, fieldErrors, type ErrorKey } from "@/lib/errors";
 import type { Kits } from "@/lib/kit";
+import { DEFAULT_CLUB } from "@/lib/color";
 import { DateTimeField } from "@/components/domain/date-time-field";
 import { combine, defaultKickoff } from "@/lib/date-input";
 
 const FORMATS = ["adult_2x30", "youth_2x25", "youth_2x20", "mini", "tournament"] as const;
 const KIT_DEFAULTS: Kits = {
-  own: "#0b6bcb",
+  // the club colour comes from the shell; this is the slate of a club without one (E8)
+  own: DEFAULT_CLUB,
   own_gk: "#f59e0b",
   opponent: "#dc2626",
   opponent_gk: "#16a34a",

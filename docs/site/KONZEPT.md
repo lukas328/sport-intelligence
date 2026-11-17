@@ -67,8 +67,8 @@ Dieselbe Welt wie die App (Anlauf), grosszügiger gesetzt:
   sich Kopf, Zahlen und Bündel. Der Farbmodell-Code ist derselbe wie in der App (`kit()`), mit
   Kontrastregeln für Gelb und Weiss. Die Wahl geht über den Link «Demo-Spiel ansehen» mit
   (`?farbe=rot`), ohne Speicher im Browser.
-- **Das Logo** zweifarbig quer in der Kopfzeile, nie auf der Vereinsfarbe (Logo-Regel). Im Fuss
-  die einfarbige Fassung.
+- **Das Logo** in Tinte, zweizeilig in der Kopfzeile, quer im Fuss (Entscheid E10: eine Farbe
+  überall, auch im Favicon und im Teilen-Bild).
 - **Bilder**: live gezeichnete Bausteine (Wurf-Kopf mit Verlauf, Bündel, Taktikkamera animiert,
   Zonen, Hallenplan mit Kamera) und echte Bilder der App aus `docs/screens/anlauf`, beschriftet
   «Bilder aus der App, mit Beispieldaten». Keine Fotos, keine Gesichter.
