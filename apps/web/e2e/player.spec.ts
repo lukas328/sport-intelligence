@@ -25,6 +25,12 @@ test("player: the match page leads to the own scenes, assessment first", async (
   await page.goto(teamUrl0);
   await follow(page, page.getByRole("link", { name: "Spiele", exact: true }).first(), /\/matches$/);
   await page.getByLabel("Gegner", { exact: true }).fill("TV Testdorf");
+  // kick-off now: the proposal lies in the past (a match entered by hand was mostly just played),
+  // and replies and attendance show only around and before the match
+  const now = new Date();
+  const two = (n: number) => String(n).padStart(2, "0");
+  await page.getByLabel("Datum", { exact: true }).fill(`${two(now.getDate())}.${two(now.getMonth() + 1)}.${now.getFullYear()}`);
+  await page.getByLabel("Anpfiff", { exact: true }).fill(`${two(now.getHours())}:${two(now.getMinutes())}`);
   await page.getByRole("button", { name: "Spiel anlegen" }).click();
   await page.waitForURL(/\/matches\/[0-9a-f-]{36}/);
   const matchId = page.url().match(/\/matches\/([0-9a-f-]{36})/)![1]!;
