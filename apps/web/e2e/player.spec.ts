@@ -113,17 +113,10 @@ test("player: the match page leads to the own scenes, assessment first", async (
   await player.reload();
   await expect(mine.getByRole("link", { name: "Szenen ansehen" })).toBeVisible();
 
-  // the overview: the next date is answered on the stage, the later ones without a reply are a to-do
-  const day = (n: number) => new Date(Date.now() + n * 86400_000).toISOString().slice(0, 10);
-  const date = (n: number, response: "yes" | "no" | null) => ({
-    kind: "session", id: `00000000-0000-4000-8000-00000000b00${n}`, title: "Training", team: "Damen 1", on_date: day(n), starts_at: null,
-    player_id: playerId, player_name: "Mia Muster", relation: "self", response,
-  });
-  await player.route(`**/v1/orgs/${orgId}/me/schedule`, (route) =>
-    route.fulfill({ contentType: "application/json", body: JSON.stringify([date(1, null), date(3, null), date(5, "yes"), date(8, null)]) }),
-  );
+  // a player's start is Spiele, like the staff (K18); dates and their replies live in Teamleben
   await player.goto(`/app/${orgId}`);
-  await expect(player.getByRole("link", { name: /2 Termine beantworten/ })).toHaveAttribute("href", `/app/${orgId}/schedule`);
+  await player.waitForURL(new RegExp(`/app/${orgId}/teams/${teamId}/matches`));
+  await expect(player.getByRole("link", { name: "Teamleben", exact: true }).first()).toBeVisible();
   await expectAccessible(player);
   await ctx.close();
 

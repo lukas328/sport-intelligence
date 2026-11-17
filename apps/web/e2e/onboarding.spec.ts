@@ -109,7 +109,8 @@ test("new club: club and team in two steps, roster from the team page, then invi
   await player.getByLabel("Passwort").fill("correct-horse-1");
   await player.getByLabel(/Nutzungsbedingungen/).check();
   await player.getByRole("button", { name: "Konto erstellen" }).click();
-  await expect(player.getByRole("main")).toContainText("Paul");
+  // players start on Spiele like the staff (K18: they see everything of the team)
+  await player.waitForURL(/\/teams\/[^/]+\/matches/, { timeout: 30_000 });
   // players see everything of the team (K18): the four destinations; Teamleben is off for a new team
   await expect(player.getByRole("navigation", { name: "Hauptnavigation" }).first().getByRole("link")).toHaveCount(4);
   await player.getByRole("link", { name: "Team", exact: true }).click();
