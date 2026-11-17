@@ -292,6 +292,7 @@ def court_grid(
     return px[keep], g[keep]
 
 
+MIN_EQ = 10
 MIN_EQ_DISTORTION = 16
 JITTER_RUNS = 6
 MAX_TRUTH_SPREAD_M = 0.3
@@ -311,8 +312,9 @@ def evaluate_doc(doc: dict[str, Any], size: tuple[int, int]) -> dict[str, Any]:
     if doc.get("status") == "skip":
         return entry
     n_eq = 2 * len(points) + sum(len(c) for c in lines.values())
-    if n_eq < 8 or len(points) + len(lines) < 3:
-        entry.update(consistent=False, why="too few clicks")
+    if n_eq < MIN_EQ or len(points) + len(lines) < 3:
+        # 8 unknowns: with fewer than 10 equations the clicks cannot be checked against each other
+        entry.update(consistent=False, why="too few clicks for a check")
         return entry
     h0 = np.array(doc["h"], np.float64).reshape(3, 3) if doc.get("h") else None
     # lens distortion only with enough clicks to pin it (10 unknowns instead of 8; with a handful
@@ -328,6 +330,28 @@ def evaluate_doc(doc: dict[str, Any], size: tuple[int, int]) -> dict[str, Any]:
             return entry
     med, mx = float(np.median(res)), float(res.max())
     ok = med <= 5.0 and mx <= 20.0
+    if not ok and med <= 5.0:
+        # a click that snapped to a neighbouring line: drop clicks beyond 15 px (at most a fifth
+        # of them, keeping enough equations) and fit again
+        bad = np.where(res > 15.0)[0]
+        n_clicks = len(res)
+        if 0 < len(bad) <= max(1, n_clicks // 5):
+            keys = [("p", n, None) for n in points] + [
+                ("l", n, j) for n, c in lines.items() for j in range(len(c))
+            ]
+            drop = {keys[i] for i in bad}
+            points = {n: p for n, p in points.items() if ("p", n, None) not in drop}
+            lines = {
+                n: [p for j, p in enumerate(c) if ("l", n, j) not in drop] for n, c in lines.items()
+            }
+            lines = {n: c for n, c in lines.items() if c}
+            n_eq = 2 * len(points) + sum(len(c) for c in lines.values())
+            if n_eq >= MIN_EQ:
+                dist = n_eq >= MIN_EQ_DISTORTION
+                hh, k, res = fit_clicks(points, lines, size, hh, distortion=dist)
+                med, mx = float(np.median(res)), float(res.max())
+                ok = med <= 5.0 and mx <= 20.0
+                entry["dropped_clicks"] = len(bad)
     clicks = np.array([*points.values(), *[p for c in lines.values() for p in c]], np.float64)
     gpx, gcourt = court_grid(hh, k, size, clicks)
     if ok and len(gpx):
@@ -396,14 +420,23 @@ def _rows(answers: Path) -> list[dict[str, Any]]:
     return rows
 
 
+def _pull_one(row: dict[str, Any], cache: Path) -> tuple[str, str, dict[str, Any]]:
+    pid, fr = row["id"].rsplit("_", 1)
+    img = cv2.imread(str(cache / f"{pid}.frames" / f"{int(fr):05d}.jpg"))
+    return pid, str(int(fr)), evaluate_doc(row["data"], (img.shape[1], img.shape[0]))
+
+
 def pull(a: argparse.Namespace) -> None:
+    from concurrent.futures import ProcessPoolExecutor
+
     truth_doc = json.loads(a.truth.read_text()) if a.truth.exists() else {}
-    for row in _rows(a.answers):
-        pid, fr = row["id"].rsplit("_", 1)
-        img = cv2.imread(str(a.cache / f"{pid}.frames" / f"{int(fr):05d}.jpg"))
-        entry = evaluate_doc(row["data"], (img.shape[1], img.shape[0]))
-        truth_doc.setdefault(pid, {})[str(int(fr))] = entry
+    rows = _rows(a.answers)
+    with ProcessPoolExecutor(a.jobs) as ex:
+        done = list(ex.map(_pull_one, rows, [a.cache] * len(rows)))
+    for row, (pid, fr, entry) in zip(rows, done, strict=True):
+        truth_doc.setdefault(pid, {})[fr] = entry
         if a.overlays:
+            img = cv2.imread(str(a.cache / f"{pid}.frames" / f"{int(fr):05d}.jpg"))
             a.overlays.mkdir(parents=True, exist_ok=True)
             cv2.imwrite(str(a.overlays / f"{row['id']}.jpg"), overlay(img, entry))
         print(
@@ -490,6 +523,7 @@ def main() -> None:
     p.add_argument("truth", type=Path)
     p.add_argument("--cache", type=Path, required=True)
     p.add_argument("--overlays", type=Path)
+    p.add_argument("--jobs", type=int, default=4)
     p.set_defaults(fn=pull)
     a = ap.parse_args()
     a.fn(a)

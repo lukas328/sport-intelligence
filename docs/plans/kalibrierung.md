@@ -218,6 +218,34 @@ Runde 1b (direkt nach den 28 Hauptbildern), Produkt-Abbildung in `ml/calib/data/
 Die Halle `SGHorgen` gehört im Testsatz zum Endtest: diese Bilder nur zur Prüfung, nicht zum
 Abstimmen.
 
+### 4.6 Zwischenauswertung Runde 1b (2026-11-17, 49 Bilder gespeichert)
+
+Klicks: 29 Bilder mit Klicks, 20 übersprungen. Stimmig (`clicks.py`: Median <= 5 px, Maximum
+<= 20 px, mindestens 10 Gleichungen; ein Ausreisser-Klick über 15 px darf wegfallen, höchstens
+ein Fünftel): 16 Bilder; 3 haben zu wenige Klicks für eine Gegenprobe, 10 widersprechen sich
+(meist ein bis zwei Klicks auf einer Nachbarlinie). Zusammen mit Runde 1: Wahrheit für 15
+Entwicklungs-Stücke.
+
+Heutige Auto-Kalibrierung auf diesen 15 Stücken (Entwicklung, `results_base.json`):
+
+| Klasse | Stücke | Anteil (95 % über Hallen) |
+|---|---|---|
+| richtig (Median <= 1 m) | 0 | 0 % |
+| falsch akzeptiert | 3 (c008 28.0 m, c025 6.8 m, c039 5.9 m) | 20 % [0, 40] |
+| abgelehnt | 12 (4 `flat_view`, 4 `no_floor`, 3 `court`, 1 `camera_motion`) | 80 % [60, 100] |
+
+Alle akzeptierten Felder mit Wahrheit sind falsch.
+
+Horgen-Fernseh-Clips (nur Prüfung, Endtest-Halle): h1 im Median 0.65 m (p90 0.99 m, 1 Bild mit
+Wahrheit), h2 0.96 m (p90 1.43 m; 3 Bilder: 0.18, 1.03, 1.41 m). Die Sichtschätzung (1 bis 3 m)
+war zu streng; die Felder sind an der Grenze zu "richtig".
+
+Erster grober Vorschlag für die strengere Prüfung (noch nicht geeicht, 3 falsche gegen 2
+fast richtige Felder): akzeptieren nur mit Torpfosten-Treffer `goal_score` >= 0.45, Linien
+`line_score` >= 1.0 und Boden `floor_fit` >= 0.45. Das lehnt c008 (Torpfosten 0.32), c025 (0.37)
+und c039 (Boden 0.35) ab und behält beide Horgen-Felder (0.74/1.30/0.64, 0.55/1.22/0.55). Von
+den 15 heute akzeptierten Feldern im ganzen Testsatz blieben 3 (c003, c030, c067).
+
 ## 5. Was nicht geholfen hat
 
 | Was | Wo | Zahlen | Warum verworfen |
