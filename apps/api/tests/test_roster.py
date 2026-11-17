@@ -257,10 +257,16 @@ async def test_a_number_new_in_the_roster_takes_over_the_reports_goals(
     m = await new_match(api, ids)
     events = f"/v1/orgs/{org}/matches/{m['id']}/events"
     for clock in (60, 120, 180):
-        body = {"type": "shot", "side": "own", "outcome": "goal", "clock_s": clock, "number": 7}
+        body: dict[str, object] = {
+            "type": "shot",
+            "side": "own",
+            "outcome": "goal",
+            "clock_s": clock,
+            "number": 7,
+        }
         assert (await api.post(events, json=body)).status_code == 201
     for clock, keeper in ((200, 12), (260, 7)):
-        body: dict[str, object] = {
+        body = {
             "type": "shot",
             "side": "opponent",
             "outcome": "save",
