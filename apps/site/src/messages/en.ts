@@ -115,7 +115,7 @@ const en: Messages = {
     lead: "Film your match with a phone or a camera. The same evening you see every goal as a scene and three things for your next training.",
     price: "From CHF {price} a month, {days} days free.",
     heroAlt: "A cut-out of the app after the match: 9 of 18 goals conceded on the right wing, below it the buttons All 9 and Scene 7:46 and the half court, where the shots pile up on the right wing.",
-    shotNote: "Pictures from the app, with an invented example club.",
+    shotNote: "Pictures from the app (in German), with an invented example club.",
     problemWhen: "Saturday, 7 pm",
     problemTitle: "The pros have analysts. You have Saturday night.",
     problemText: "You coach, you sub, you talk to the referee. What happened on the other side, you do not really know.",

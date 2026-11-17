@@ -115,7 +115,7 @@ const fr: Messages = {
     lead: "Filme ton match avec un téléphone ou une caméra. Le soir même, tu vois chaque but comme scène et trois choses pour le prochain entraînement.",
     price: "Dès CHF {price} par mois, {days} jours gratuits.",
     heroAlt: "Un extrait de l'app après le match : 9 buts encaissés sur 18 par l'aile droite, en dessous les boutons Les 9 et Scène 7:46 et le demi-terrain, où les tirs se concentrent à l'aile droite.",
-    shotNote: "Images de l'app, avec un club d'exemple inventé.",
+    shotNote: "Images de l'app (en allemand), avec un club d'exemple inventé.",
     problemWhen: "Samedi, 19 h",
     problemTitle: "Les pros ont des analystes. Toi, tu as le samedi soir.",
     problemText: "Tu coaches, tu fais les changements, tu parles à l'arbitre. Ce qui s'est passé de l'autre côté, tu ne le sais pas vraiment.",
