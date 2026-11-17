@@ -32,7 +32,7 @@ export default async function Guides({ params }: Props) {
     <li key={key} className="flex gap-5 border-b border-rule py-5">
       <GuideThumb slug={key} />
       <div className="min-w-0">
-        <Link href={href} hrefLang={de ? "de-CH" : undefined} lang={de ? "de-CH" : undefined} className="font-slant text-[1.5rem] leading-tight hover:underline md:text-[1.625rem]">
+        <Link href={href} hrefLang={de ? "de-CH" : undefined} lang={de ? "de-CH" : undefined} className="font-bold text-[1.5rem] leading-tight hover:underline md:text-[1.625rem]">
           {title}
         </Link>
         <p className="measure mt-1 text-ink-2" lang={de ? "de-CH" : undefined}>

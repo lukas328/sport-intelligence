@@ -73,7 +73,7 @@ export function ShirtPicker({ question, hint, names }: { question: string; hint:
   const { shirt, setShirt } = useShirt();
   return (
     <fieldset className="min-w-0">
-      <legend className="font-slant text-[1.375rem] leading-tight md:text-[1.625rem]">{question}</legend>
+      <legend className="text-[1.375rem] leading-tight font-bold md:text-[1.5rem]">{question}</legend>
       <p className="mt-1 text-[1.0625rem] text-ink-2">{hint}</p>
       <div className="mt-4 grid grid-cols-2 gap-2 min-[480px]:grid-cols-4">
         {SHIRTS.map(([key, hex]) => {

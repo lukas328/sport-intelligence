@@ -275,7 +275,7 @@ export function Steps({ items }: { items: { name: string; text: string }[] }) {
             {i + 1}
           </span>
           <div>
-            <h3 className="font-slant text-[1.375rem] md:text-[1.5rem]">{s.name}</h3>
+            <h3 className="text-[1.25rem] md:text-[1.375rem]">{s.name}</h3>
             <p className="mt-1 leading-[1.6]">{s.text}</p>
           </div>
         </li>

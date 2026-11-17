@@ -80,7 +80,7 @@ export default async function Filming({ params }: Props) {
                     {RULE_ICONS[i]}
                   </span>
                   <div>
-                    <h3 className="font-slant flex items-baseline gap-3 text-[1.5rem] leading-tight md:text-[1.75rem]">
+                    <h3 className="flex items-baseline gap-3 text-[1.5rem] leading-tight md:text-[1.75rem]">
                       <span aria-hidden className="font-num text-club-text">
                         {i + 1}
                       </span>
@@ -108,7 +108,7 @@ export default async function Filming({ params }: Props) {
           <div className="mt-6 grid grid-cols-1 gap-8 md:grid-cols-3">
             {t.check.map((g, i) => (
               <div key={g.title} data-reveal style={{ "--d": i } as CSSProperties}>
-                <h3 className="font-slant text-[1.375rem]">{g.title}</h3>
+                <h3 className="text-[1.375rem]">{g.title}</h3>
                 <ul className="mt-2">
                   {g.items.map((x) => (
                     <li key={x} className="flex gap-3 border-b border-rule py-3">

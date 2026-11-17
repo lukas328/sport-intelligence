@@ -27,7 +27,7 @@ export default async function Templates({ params }: Props) {
       <ul className="mt-10 max-w-[52rem] border-t-2 border-ink">
         {items.map(([href, title, text]) => (
           <li key={href} className="border-b border-rule py-5">
-            <Link href={href} className="font-slant text-[1.5rem] leading-tight hover:underline md:text-[1.625rem]">
+            <Link href={href} className="font-bold text-[1.5rem] leading-tight hover:underline md:text-[1.625rem]">
               {title}
             </Link>
             <p className="measure mt-1 text-ink-2">{text}</p>

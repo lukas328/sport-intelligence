@@ -7,16 +7,16 @@ lesen, hält das Produkt.
 
 ## Vor dem öffentlichen Start: braucht Lukas (Voraussetzung)
 
-Aus dem Gegenlesen (R4). Solange das fehlt, steht auf Fakten, Über uns, in `llms.txt` und in der
-Frage «Kann ich es heute schon nutzen?» der Satz «Stand [Datum]: Handball Intelligence ist vor dem
-öffentlichen Start. Betreiberangaben, AGB und Datenschutzerklärung werden bis dahin ergänzt.»
-Geschaltet über `LAUNCHED = false` in `apps/site/src/lib/site.ts` (Datum aus `SITE_UPDATED`).
+Aus dem Gegenlesen (R4). Entscheid Lukas (17.11., BEFUNDE-2 W32): Die Website beschreibt das
+Produkt so, wie es beim Release sein wird, ohne «vor dem Start», «vorgesehen», «noch nicht» oder
+«noch nicht endgültig»; kein noindex. Der Schalter `LAUNCHED` und der Standsatz sind darum weg,
+`PRICES_FINAL` ist `true`. Nur die Rechtstexte sagen weiter, dass sie Entwürfe sind. Vor dem
+Release braucht es trotzdem:
 
 - Betreiberin mit Adresse fürs Impressum (Build-Variablen `NEXT_PUBLIC_COMPANY_*`).
-- Geprüfte AGB und Datenschutzerklärung, «(Entwurf)» weg.
+- Geprüfte AGB und Datenschutzerklärung (mit den Anbietern), «(Entwurf)» weg.
 - Auf «Über uns» mindestens eine verantwortliche Person mit Funktion, mit Einverständnis.
-- Speicherort bestätigt (Q-SITE-4), dann «vorgesehen» weg.
-- Danach `LAUNCHED = true` setzen; die Knöpfe bleiben, wie sie sind.
+- Speicherort bestätigt (Q-SITE-4): die Website nennt App und Datenbank in der Schweiz, Videos in der EU.
 
 Grundlage für jede Aussage über das Produkt: `docs/ux-test/echttest/BERICHT.md` und
 `docs/OPEN_QUESTIONS.md` (Q-REC-*, Q-VIDEO-PARTS, Q-SITE-*). Kurz: Die Analyse findet das Feld und
@@ -222,8 +222,8 @@ mit Aushang (Titel «Spiel filmen: Checkliste und Aushang»), der Ratgeber die a
   gibt, leiten alle Sprachen auf `/de/`; die Sprachwahl im Fuss führt dort auf die Ratgeber-Übersicht
   der Sprache statt auf eine 404.
 - **Strukturierte Daten** (`src/lib/schema.ts`): Organization und WebSite (Start, Fakten),
-  SoftwareApplication mit den drei Plänen aus `packages/plans` als Offer ohne Preis
-  (`PRICES_FINAL = false` in `src/lib/site.ts`), WebPage/AboutPage/CollectionPage, Article und
+  SoftwareApplication mit den drei Plänen aus `packages/plans` als Offer mit Preis
+  (`PRICES_FINAL = true` in `src/lib/site.ts`, Entscheid W32), WebPage/AboutPage/CollectionPage, Article und
   BlogPosting und TechArticle mit Datum (Herausgeberin und Autorin ist die Organisation, keine Person),
   BreadcrumbList (sichtbare Brotkrümel auf Ratgebern, Blog, Anleitungen), FAQPage (Fragen, Preise,
   Ratgeber), HowTo (So funktioniert es, Filmen, 20 Minuten, Videositzung, Einwilligung). Kein
@@ -480,10 +480,10 @@ Leistung / Barrierefreiheit / Best Practices / SEO.
 2. **Google Search Console und Bing Webmaster Tools** einrichten, Sitemap einreichen.
 3. **Messung** wählen: Server-Logs (GoAccess) oder Plausible, oder nur Search Console (Abschnitt 8).
 4. **«Über uns»** ergänzen, wo es Namen und Zahlen braucht (Abschnitt 9, «Braucht Lukas»).
-5. **Preise** final machen; dann `PRICES_FINAL = true` in `src/lib/site.ts` (der Preis geht dann auch
-   in die strukturierten Daten) und «noch nicht endgültig» von den Seiten nehmen (Q-SITE-1).
+5. **Preise** bestätigen (Q-SITE-1); die Website zeigt sie seit W32 ohne Vorbehalt, auch in den
+   strukturierten Daten (`PRICES_FINAL = true`).
 6. **Rechtstexte** prüfen lassen (AGB, Datenschutz, Impressum; Firmenangaben per Build-Variable), den
-   Speicherort bestätigen (Q-SITE-4) und danach «vorgesehen» entfernen.
+   Speicherort bestätigen (Q-SITE-4); die Website nennt ihn seit W32 ohne «vorgesehen».
 7. **Einwilligungs-Ratgeber** von einer Fachperson gegenlesen lassen. Das SHV-Infoblatt «Datenschutz aufgezeichnete Spiele» (handball.ch, ab 2025/26) war am 14. November 2026 weiter nicht abrufbar (503); der Ratgeber sagt darum nur, dass es das Blatt gibt und wofür (laut SHV/RED+-FAQ vom 16. Juli 2025), nichts zum Inhalt. Sobald es lesbar ist: Absatz «Was Handball Schweiz schon regelt» nachschärfen.
 8. **fr und en** gegenlesen lassen (Romandie zuerst).
 
