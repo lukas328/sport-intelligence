@@ -350,11 +350,11 @@ const SHOTS = [
           hb.up(
             title,
             (e) =>
-              /Rüti|Stäfa|Thalwil/.test(e.textContent) && e.getBoundingClientRect().height > 60,
+              /Rebhalden|Bergtal|Seewald/.test(e.textContent) && e.getBoundingClientRect().height > 60,
           );
         if (!row) return null;
         const names = Array.from(row.querySelectorAll("*")).filter(
-          (e) => e.children.length === 0 && /^(Rüti|Stäfa|Thalwil)/.test(e.textContent.trim()),
+          (e) => e.children.length === 0 && /^(Rebhalden|Bergtal|Seewald)/.test(e.textContent.trim()),
         );
         const chart =
           names.length &&

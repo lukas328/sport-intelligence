@@ -100,7 +100,7 @@ export const SHIRTS = [
   ["purple", "#5b2d8e"],
 ] as const;
 
-/** The opponent the check colours are shown against (the demo season's TV Thalwil): black and white. */
+/** The opponent the check colours are shown against (the demo season's TSV Seewald): black and white. */
 export const CHECK_OPPONENT = ["#17191c", "#ffffff"] as const;
 
 /** Shifts `c` towards `to` until it reaches `need` contrast on `ground`. */

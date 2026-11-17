@@ -93,7 +93,7 @@ export const DEMO_GOALS = {
 };
 
 /**
- * The demo match of SPEC.md section 10: HC Zürichsee against TSV Thalwil 26:18 (13:9), with the
+ * The demo match of SPEC.md section 10: HC Zürichsee against TSV Seewald 26:18 (13:9), with the
  * goal sequence of the report (Torfolge 2:1, 5:4, 9:6, 13:9; 15:12, 17:15, 21:16, 26:18).
  */
 export const DEMO_RESULT = { own: 26, opp: 18, halftime: [13, 9] } as const;
@@ -167,7 +167,7 @@ export const DEMO_SCENE_RA: CameraScene = {
   shot: [3.9, 2.9],
   aim: [0.15, 8.9],
   confirmed: true,
-  label: "Tor Thalwil 39:55",
+  label: "Tor Seewald 39:55",
 };
 
 /** Our goal from the circle, 18:02: here the ball was not found in the picture. */
@@ -205,12 +205,12 @@ export const DEMO_SCENE_KR: CameraScene = {
 
 export const DEMO_SEASON = {
   diff: [
-    { label: "Rüti", diff: 5 },
-    { label: "Wädenswil", diff: -3 },
-    { label: "Horgen", diff: 10 },
-    { label: "Meilen", diff: 1 },
-    { label: "Stäfa", diff: -7 },
-    { label: "Thalwil", diff: 8 },
+    { label: "Rebhalden", diff: 5 },
+    { label: "Lindmatt", diff: -3 },
+    { label: "Uferweg", diff: 10 },
+    { label: "Rebberg", diff: 1 },
+    { label: "Bergtal", diff: -7 },
+    { label: "Seewald", diff: 8 },
   ],
   themes: [
     { title: "Gegentore über rechts aussen", series: [5, 5, 9], team: "opp" as const },
