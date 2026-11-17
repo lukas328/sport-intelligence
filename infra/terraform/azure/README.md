@@ -33,7 +33,9 @@ The budget alert (`budget_amount`, default 80) mails you at 80 % actual and 100 
 - Cloudflare R2: an API token (**Admin Read & Write** for now, because the migration job creates the
   buckets `hb-videos`, `hb-artifacts` and sets CORS on the video bucket), the access key id and the
   account id. Use the `.eu.` endpoint so the buckets get EU jurisdiction.
-- An e-mail provider with SMTP (Postmark, ADR 009) and SPF, DKIM, DMARC on the domain.
+- E-mail: Azure Communication Services, created by Terraform (sending domain = the site's domain,
+  data in Switzerland). Its DNS records are set by hand, see «E-mail» below. SMTP stays possible
+  (`HB_EMAIL_BACKEND=smtp`, secret `hb-smtp-password`).
 
 ## 1. Sign in
 
@@ -108,6 +110,20 @@ KV=$(terraform output -raw key_vault) && read -rsp "R2 secret key: " V && az key
 ```bash
 KV=$(terraform output -raw key_vault) && read -rsp "SMTP password: " V && az keyvault secret set --vault-name $KV -n hb-smtp-password --value "$V" -o none; unset V
 ```
+
+## E-mail (Azure Communication Services)
+
+Terraform creates the mail service, the sending domain (`mail_domain`, default: the domain of
+`app_domain`) with the sender `noreply@…` («Handball Intelligence») and the communication
+service; its access key goes to the Key Vault (`hb-acs-connection-string`). Then:
+
+1. Set the DNS records of `terraform output mail_verification_records` at Cloudflare (DNS only):
+   TXT on the domain (verification and SPF; if the domain has an SPF record already, add
+   `include:spf.protection.outlook.com` to it), the two DKIM CNAMEs, and a DMARC TXT on `_dmarc`.
+2. Deploy. The step «Mail domain» asks Azure to verify each record and waits up to ten minutes.
+   Once domain, SPF, DKIM and DKIM2 are verified, it sets `mail_live`: Terraform links the domain
+   and switches the apps to `HB_EMAIL_BACKEND=acs` (this overrides a «console» backend in
+   `extra_env`). Until then the apps keep their mail setting.
 
 ## 5. Everything else, then migrate
 

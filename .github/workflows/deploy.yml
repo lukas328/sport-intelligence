@@ -192,6 +192,40 @@ jobs:
           echo "ready=$ok" >>"$GITHUB_OUTPUT"
           echo "DNS ready: $ok"
 
+      - name: Mail domain (Azure Communication Services)
+        if: steps.mode.outputs.mode != 'status'
+        run: |
+          # the sending domain exists after the first apply with the mail service; its DNS records
+          # are set by hand (terraform output mail_verification_records). Here Azure is asked to
+          # verify what is not verified yet; once all four are, mail_live links the domain and
+          # switches the apps to it.
+          live=false
+          id=$(terraform output -raw mail_domain_id 2>/dev/null || true)
+          case "$id" in /subscriptions/*) ;; *) id="" ;; esac
+          if [ -z "$id" ]; then
+            echo "no sending domain yet (created by this apply)"
+          else
+            url="https://management.azure.com${id}?api-version=2023-03-31"
+            states() { az rest --method get --url "$url" --query "properties.verificationStates" -o json; }
+            az rest --method get --url "$url" --query "properties.verificationRecords" -o json || true
+            for t in Domain SPF DKIM DKIM2; do
+              s=$(states | python3 -c "import json,sys;print((json.load(sys.stdin) or {}).get('$t',{}).get('status',''))")
+              echo "$t: $s"
+              if [ "$s" != Verified ] && [ "$s" != VerificationRequested ] && [ "$s" != VerificationInProgress ]; then
+                az rest --method post --url "https://management.azure.com${id}/initiateVerification?api-version=2023-03-31" \
+                  --body "{\"verificationType\": \"$t\"}" -o none || echo "$t: verification not started (DNS record missing?)"
+              fi
+            done
+            for i in $(seq 1 20); do
+              n=$(states | python3 -c "import json,sys;d=json.load(sys.stdin) or {};print(sum(d.get(t,{}).get('status')=='Verified' for t in ('Domain','SPF','DKIM','DKIM2')))")
+              echo "$(date -u +%T) verified $n of 4"
+              [ "$n" = 4 ] && live=true && break
+              sleep 30
+            done
+          fi
+          echo "MAIL_LIVE=$live" >>"$GITHUB_ENV"
+          echo "mail live: $live"
+
       - name: Plan
         if: steps.mode.outputs.mode != 'status'
         run: |
@@ -200,7 +234,7 @@ jobs:
           echo "BIND=${{ steps.dns.outputs.ready }}" >>"$GITHUB_ENV"
           terraform plan -input=false -no-color -var-file=staging.tfvars \
             -var "image_tag=$tag" -var "app_domain=$APP_DOMAIN" \
-            -var "bind_custom_domain=${{ steps.dns.outputs.ready }}" -var "paused=$PAUSED" \
+            -var "bind_custom_domain=${{ steps.dns.outputs.ready }}" -var "paused=$PAUSED" -var "mail_live=$MAIL_LIVE" \
             -refresh=$REFRESH -out=tfplan | tee plan.txt
           {
             echo '### Terraform plan (staging)'
@@ -229,7 +263,7 @@ jobs:
         run: |
           terraform apply -input=false -auto-approve -no-color -var-file=staging.tfvars \
             -var "image_tag=$TAG" -var "app_domain=$APP_DOMAIN" -var "bind_custom_domain=$BIND" \
-            -var "paused=$PAUSED" -target=azurerm_container_app_job.migrate
+            -var "paused=$PAUSED" -var "mail_live=$MAIL_LIVE" -target=azurerm_container_app_job.migrate
           job=$(terraform output -raw migrate_job)
           run=$(az containerapp job start -n "$job" -g "$rg" --query name -o tsv)
           echo "migration run $run"
@@ -246,7 +280,7 @@ jobs:
         run: |
           terraform apply -input=false -auto-approve -no-color -var-file=staging.tfvars \
             -var "image_tag=$TAG" -var "app_domain=$APP_DOMAIN" -var "bind_custom_domain=$BIND" \
-            -var "paused=$PAUSED"
+            -var "paused=$PAUSED" -var "mail_live=$MAIL_LIVE"
 
       - name: Managed certificate for the app domain
         if: steps.mode.outputs.mode == 'deploy' && env.BIND == 'true'
