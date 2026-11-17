@@ -1,12 +1,10 @@
 import { expect, test } from "@playwright/test";
-import { expectAccessible, follow, register, uniqueEmail } from "./helpers";
+import { clubByHand, expectAccessible, follow, register, uniqueEmail } from "./helpers";
 
 test("live tagging courtside: clock, buttons, offline queue, sync", async ({ page, context }, info) => {
   test.skip(info.project.name !== "chromium", "runs once (service worker, offline)");
   await register(page, uniqueEmail("live"), "Coach Live");
-  await page.getByTestId("manual-club").click();
-  await page.getByLabel("Vereinsname").fill("HC Live");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+  await clubByHand(page, "HC Live");
   await page.getByLabel("Teamname").fill("Damen 2");
   await page.getByRole("button", { name: "Zum Team" }).click();
   await page.waitForURL(/\/teams\/[^/]+/);

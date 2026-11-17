@@ -1,12 +1,10 @@
 import { expect, test } from "@playwright/test";
-import { expectAccessible, openPlays, register, uniqueEmail } from "./helpers";
+import { clubByHand, expectAccessible, openPlays, register, uniqueEmail } from "./helpers";
 
 test("play library: template, edit on the board, animate, save, find", async ({ page, browser }, info) => {
   test.skip(info.project.name !== "chromium", "runs once");
   await register(page, uniqueEmail("tac"), "Coach Taktik");
-  await page.getByTestId("manual-club").click();
-  await page.getByLabel("Vereinsname").fill("HC Taktik");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+  await clubByHand(page, "HC Taktik");
   await page.getByLabel("Teamname").fill("Herren 2");
   await page.getByRole("button", { name: "Zum Team" }).click();
 

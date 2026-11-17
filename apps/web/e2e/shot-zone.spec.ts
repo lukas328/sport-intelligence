@@ -2,7 +2,7 @@ import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { expect, test } from "@playwright/test";
 import { MATCH_VIDEO } from "./global-setup";
-import { chooseVideo, expectAccessible, register, uniqueEmail } from "./helpers";
+import { clubByHand, chooseVideo, expectAccessible, register, uniqueEmail } from "./helpers";
 
 const DB = process.env.E2E_DATABASE_URL ?? "postgresql://handball:handball@localhost:5432/handball";
 
@@ -15,9 +15,7 @@ test("a confirmed goal asks «Von wo?»; three from one place make a thing; the 
   test.skip(info.project.name !== "mobile", "the phone is the case: one thumb on the small court");
   test.setTimeout(300_000);
   await register(page, uniqueEmail("wurfort"), "Coach Wurfort");
-  await page.getByTestId("manual-club").click();
-  await page.getByLabel("Vereinsname").fill("HC Wurfort");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+  await clubByHand(page, "HC Wurfort");
   await page.getByLabel("Teamname").fill("Herren 1");
   await page.getByRole("button", { name: "Zum Team" }).click();
   await page.waitForURL(/\/teams\/[^/]+/);

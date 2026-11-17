@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { expectAccessible, register, uniqueEmail } from "./helpers";
+import { clubByHand, expectAccessible, register, uniqueEmail } from "./helpers";
 
 const doc = {
   formatVersion: 1,
@@ -24,9 +24,7 @@ const doc = {
 test("share: dialog with chat text and WhatsApp, link preview tags, public page at 390 px", async ({ page, context, browser }, info) => {
   test.skip(info.project.name !== "chromium", "runs once");
   await register(page, uniqueEmail("share"), "Coach Chat");
-  await page.getByTestId("manual-club").click();
-  await page.getByLabel("Vereinsname").fill("HC Teilen");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+  await clubByHand(page, "HC Teilen");
   await page.getByLabel("Teamname").fill("Herren 1");
   await page.getByRole("button", { name: "Zum Team" }).click();
   await page.waitForURL(/\/teams\/[^/]+/);
@@ -98,9 +96,7 @@ test("share: dialog with chat text and WhatsApp, link preview tags, public page 
 test("share: a youth team gets the reason, not an error", async ({ page, context }, info) => {
   test.skip(info.project.name !== "chromium", "runs once");
   await register(page, uniqueEmail("share-youth"), "Coach Junioren");
-  await page.getByTestId("manual-club").click();
-  await page.getByLabel("Vereinsname").fill("HC Junioren");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+  await clubByHand(page, "HC Junioren");
   await page.getByLabel("Teamname").fill("U13");
   await page.getByRole("button", { name: "Zum Team" }).click();
   await page.waitForURL(/\/teams\/[^/]+/);

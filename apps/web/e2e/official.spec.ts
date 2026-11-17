@@ -1,6 +1,6 @@
 import { expect, test, type Page, type Route } from "@playwright/test";
 import * as fx from "./fixtures/official";
-import { expectAccessible, register, uniqueEmail } from "./helpers";
+import { clubByHand, expectAccessible, register, uniqueEmail } from "./helpers";
 
 // The official data come from handball.ch, which the test stack does not reach: the API's answers
 // are recorded with invented names (fixtures/official.ts) and given to the browser. What runs for
@@ -91,12 +91,13 @@ test("onboarding: find the team, take one over, ask a claimed club for access, a
   await expect(done).toContainText("Timo Brunner");
   expect(claims.at(-1)).toEqual({ id: "71001", body: { club_id: 9001 } });
   // the shirt is the label of its radio: a click on it picks the colour
-  await done.locator("label", { has: page.getByRole("radio", { name: "Rot" }) }).click();
-  await expect(done.getByRole("radio", { name: "Rot" })).toBeChecked();
+  await done.locator("label", { has: page.getByRole("radio", { name: "Rot", exact: true }) }).click();
+  await expect(done.getByRole("radio", { name: "Rot", exact: true })).toBeChecked();
   await expectAccessible(page);
   await done.getByRole("button", { name: "Stimmt, weiter" }).filter({ visible: true }).click();
   await page.waitForURL(new RegExp(`/app/${fx.CLAIMED_ORG}/teams/${fx.CLAIMED_TEAM}/matches$`));
-  expect(patched).toEqual({ primary_color: "#d3202e" });
+  // «Rot» of the club palette (white text on it at least 4.5:1, E8)
+  expect(patched).toEqual({ primary_color: "#c8102e" });
   // the players who played come into the squad; Nico Zemp (no game yet) waits in the inbox
   expect(accepted).toHaveLength(2);
 });
@@ -104,9 +105,7 @@ test("onboarding: find the team, take one over, ask a claimed club for access, a
 /** A club and team made by hand, then the official answers for that team. */
 async function coachWithTeam(page: Page) {
   await register(page, uniqueEmail("official-inbox"), "Coach Abgleich");
-  await page.getByTestId("manual-club").click();
-  await page.getByLabel("Vereinsname").fill("HC Seeblick");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+  await clubByHand(page, "HC Seeblick");
   await page.getByLabel("Teamname").fill("Herren 1");
   await page.getByRole("button", { name: "Zum Team" }).click();
   await page.waitForURL(/\/app\/[^/]+\/teams\/[^/?#]+/);

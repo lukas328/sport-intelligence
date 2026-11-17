@@ -9,8 +9,8 @@ import { useFormatter, useTranslations } from "next-intl";
 import QRCode from "qrcode";
 import { useEffect, useState, type CSSProperties, type FormEvent } from "react";
 import { Strip } from "@/components/anlauf/heads";
-import { ShirtPicker } from "@/components/anlauf/shirt-picker";
-import { clubStyle } from "@/lib/color";
+import { ClubColourPicker } from "@/components/anlauf/club-colour-picker";
+import { clubStyle, DEFAULT_CLUB } from "@/lib/color";
 import { InviteForm } from "@/components/people/invite-form";
 import { TeamPeople } from "@/components/people/team-people";
 import { personRole } from "@/lib/roles";
@@ -31,7 +31,9 @@ export function ClubSection({ org }: { org: Org }) {
   const [error, setError] = useState<ErrorKey | null>(null);
   const [saved, setSaved] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [colour, setColour] = useState(org.primary_color);
+  // null: the club has not chosen its colour (decision E8) and shows the neutral slate
+  const [chosen, setChosen] = useState<string | null>(org.color_chosen ? org.primary_color : null);
+  const colour = chosen ?? DEFAULT_CLUB;
   const [second, setSecond] = useState(org.secondary_color);
 
   async function submit(e: FormEvent<HTMLFormElement>) {
@@ -44,7 +46,7 @@ export function ClubSection({ org }: { org: Org }) {
       params: { path: { org_id: org.id } },
       body: {
         name: String(f.get("name")),
-        primary_color: String(f.get("primary_color")),
+        ...(chosen ? { primary_color: chosen } : {}),
         secondary_color: String(f.get("secondary_color")),
       },
     });
@@ -78,8 +80,8 @@ export function ClubSection({ org }: { org: Org }) {
           {error && <Alert>{t(`errors.${error}`)}</Alert>}
           {saved && <Alert kind="success">{t("common.saved")}</Alert>}
           <Input label={t("onboarding.clubName")} name="name" defaultValue={org.name} required />
-          <ShirtPicker value={colour} onChange={setColour} legend={t("onboarding.shirtTitle")} />
-          <input type="hidden" name="primary_color" value={colour} />
+          {/* «Vereinsfarbe wählen» on the club's pages leads here (#vereinsfarbe) */}
+          <ClubColourPicker id="vereinsfarbe" value={chosen} onChange={setChosen} legend={t("settings.clubColour")} note={chosen ? undefined : t("settings.clubColourNone")} />
           {/* the preview: the head of a match in the picked colour */}
           <div className="club" style={clubStyle(colour, second) as CSSProperties} data-testid="club-preview">
             <p className="mb-2 text-[15px] font-semibold text-ink-2">{t("settings.clubPreview")}</p>
@@ -88,7 +90,7 @@ export function ClubSection({ org }: { org: Org }) {
           <details>
             <summary className="min-h-11 cursor-pointer content-center text-[15px] font-bold underline decoration-[1.5px] underline-offset-4">{t("settings.ownColours")}</summary>
             <div className="grid grid-cols-2 gap-3 pt-3">
-              <Input label={t("onboarding.primaryColor")} type="color" value={colour} onChange={(e) => setColour(e.target.value)} className="h-11 w-24 p-1" />
+              <Input label={t("onboarding.primaryColor")} type="color" value={colour} onChange={(e) => setChosen(e.target.value)} className="h-11 w-24 p-1" />
               <Input label={t("onboarding.secondaryColor")} name="secondary_color" type="color" value={second} onChange={(e) => setSecond(e.target.value)} className="h-11 w-24 p-1" />
             </div>
           </details>

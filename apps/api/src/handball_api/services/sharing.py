@@ -18,6 +18,7 @@ from typing import Any
 
 from sqlalchemy import select
 
+from handball_api.core.colors import FALLBACK_CLUB_COLOUR
 from handball_api.core.db import disable_system_access, enable_system_access, set_tenant
 from handball_api.core.errors import ProblemError
 from handball_api.core.security import SecretBox, hash_token, new_token
@@ -517,7 +518,7 @@ async def preview(ctx: Ctx, token: str) -> dict[str, Any]:
         "scenes": scenes,
         "duration_s": duration,
         "kit": {
-            "a": org.primary_color if org else "#0b6bcb",
+            "a": org.club_colour if org else FALLBACK_CLUB_COLOUR,
             "b": org.secondary_color if org else "#ffffff",
         },
         "expires_at": link.expires_at,

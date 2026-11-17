@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { expect, test } from "@playwright/test";
-import { expectAccessible, follow, matchMenu, openAnalysis, openMatches, register, uniqueEmail } from "./helpers";
+import { clubByHand, expectAccessible, follow, matchMenu, openAnalysis, openMatches, register, uniqueEmail } from "./helpers";
 
 const REPORT = fileURLToPath(new URL("./fixtures/paper-report.json", import.meta.url));
 
@@ -9,9 +9,7 @@ test("paper report: import, overview, match report, shots", async ({ page }, inf
   test.skip(info.project.name !== "chromium", "runs once");
   JSON.parse(readFileSync(REPORT, "utf8")); // fixture stays valid JSON
   await register(page, uniqueEmail("paper"), "Coach Papier");
-  await page.getByTestId("manual-club").click();
-  await page.getByLabel("Vereinsname").fill("HC Papier");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+  await clubByHand(page, "HC Papier");
   await page.getByLabel("Teamname").fill("Damen 1");
   await page.getByRole("button", { name: "Zum Team" }).click();
   await follow(page, page.getByRole("link", { name: "Spiele", exact: true }).first(), /\/matches$/);

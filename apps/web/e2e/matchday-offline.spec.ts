@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { register, uniqueEmail } from "./helpers";
+import { clubByHand, register, uniqueEmail } from "./helpers";
 
 // UX test round 2, N01 and N02: the Spieltag opens again without network after a reload, and a
 // mark made offline is stored once when the network is back.
@@ -7,9 +7,7 @@ test("matchday: reload without network, offline mark stored once", async ({ page
   test.skip(info.project.name !== "mobile", "courtside is the phone");
   test.setTimeout(180_000);
   await register(page, uniqueEmail("offline"), "Coach Offline");
-  await page.getByTestId("manual-club").click();
-  await page.getByLabel("Vereinsname").fill("HC Offline");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+  await clubByHand(page, "HC Offline");
   await page.getByLabel("Teamname").fill("Herren 1");
   await page.getByRole("button", { name: "Zum Team" }).click();
   await page.waitForURL(/\/teams\/[^/]+/);
@@ -54,9 +52,7 @@ test("matchday: match clock, small keys, take back", async ({ page, context }, i
   test.skip(info.project.name !== "mobile", "courtside is the phone");
   test.setTimeout(120_000);
   await register(page, uniqueEmail("clock"), "Coach Uhr");
-  await page.getByTestId("manual-club").click();
-  await page.getByLabel("Vereinsname").fill("HC Uhr");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+  await clubByHand(page, "HC Uhr");
   await page.getByLabel("Teamname").fill("Herren 1");
   await page.getByRole("button", { name: "Zum Team" }).click();
   await page.waitForURL(/\/teams\/[^/]+/);

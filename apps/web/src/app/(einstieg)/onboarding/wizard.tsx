@@ -4,10 +4,11 @@ import type { Schemas } from "@handball/api-client";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import type { CSSProperties } from "react";
-import { clubStyle, SHIRTS } from "@/lib/color";
+import { clubStyle, DEFAULT_CLUB } from "@/lib/color";
 import { PageHeader } from "@/components/ui/page-header";
 import { useEffect, useState, type FormEvent } from "react";
-import { ShirtPicker } from "@/components/anlauf/shirt-picker";
+import { ClubColourPicker } from "@/components/anlauf/club-colour-picker";
+import { skipColourHint } from "@/lib/colour-hint";
 import { Button, buttonClass } from "@/components/ui/button";
 import { similarTeams } from "@/lib/team-names";
 import { Alert, Card } from "@/components/ui/card";
@@ -21,9 +22,11 @@ import { errorKey, fieldErrors, type ErrorKey } from "@/lib/errors";
 
 type Org = Schemas["OrgOut"];
 type Team = Schemas["TeamOut"];
-// by hand it is two steps too: name and shirt, then the team; the roster and the invitations
-// come later from the team page and the club (UX test B27)
-const STEPS = ["stepClub", "stepTeam"] as const;
+// by hand: the club's name, its colour (one tap or «Später», decision E8), then the team; the
+// roster and the invitations come later from the team page and the club (UX test B27)
+const STEPS = ["stepClub", "stepColour", "stepTeam"] as const;
+const COLOUR_STEP = 1;
+const TEAM_STEP = 2;
 // with the official data the onboarding is two steps: find the team, confirm it (SPEC 7.12)
 const OFFICIAL_STEPS = ["stepFind", "stepConfirm"] as const;
 const COUNTRIES = ["CH", "DE", "AT", "FR", "LI"] as const;
@@ -31,13 +34,16 @@ const COUNTRIES = ["CH", "DE", "AT", "FR", "LI"] as const;
 export function OnboardingWizard({ existingOrg, resume = false, waiting = [] }: { existingOrg?: Org; resume?: boolean; /** clubs whose admins have not answered an access request yet */ waiting?: string[] }) {
   const t = useTranslations();
   const router = useRouter();
-  const [step, setStep] = useState(existingOrg ? 1 : 0);
+  // a club made here before: its colour if it has none yet, else the team
+  const [step, setStep] = useState(existingOrg ? (existingOrg.color_chosen ? TEAM_STEP : COLOUR_STEP) : 0);
   const [org, setOrg] = useState<Org | undefined>(existingOrg);
   const [error, setError] = useState<ErrorKey | null>(null);
   const [fields, setFields] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
-  // the club colour as it is being picked: the welcome band shows it right away
-  const [colour, setColour] = useState(existingOrg?.primary_color ?? SHIRTS[0][1]);
+  // the club colour as it is being picked (null: none yet): the welcome band shows it right away,
+  // and the neutral slate of a club without a colour until then
+  const [chosen, setChosen] = useState<string | null>(existingOrg?.color_chosen ? existingOrg.primary_color : null);
+  const colour = chosen ?? DEFAULT_CLUB;
   const [name, setName] = useState(existingOrg?.name ?? "");
   // a new coach first looks for the team in the official data; a club by hand on request
   const [manual, setManual] = useState(false);
@@ -74,12 +80,8 @@ export function OnboardingWizard({ existingOrg, resume = false, waiting = [] }: 
     setBusy(true);
     setError(null);
     const { data, error } = await api.POST("/v1/orgs", {
-      body: {
-        name: String(f.get("name")),
-        country: String(f.get("country")),
-        primary_color: String(f.get("primary_color")),
-        secondary_color: String(f.get("secondary_color")),
-      },
+      // no colour yet: the next step asks for it
+      body: { name: String(f.get("name")), country: String(f.get("country")) },
     });
     if (error || !data) {
       setBusy(false);
@@ -99,7 +101,28 @@ export function OnboardingWizard({ existingOrg, resume = false, waiting = [] }: 
     }
     setBusy(false);
     setOrg(data);
-    setStep(1);
+    setStep(COLOUR_STEP);
+  }
+
+  async function saveColour(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!org) return;
+    if (!chosen) return skipColour();
+    setBusy(true);
+    setError(null);
+    const { data, error } = await api.PATCH("/v1/orgs/{org_id}", { params: { path: { org_id: org.id } }, body: { primary_color: chosen } });
+    setBusy(false);
+    if (error || !data) return setError(errorKey(error));
+    setOrg(data);
+    setStep(TEAM_STEP);
+  }
+
+  function skipColour() {
+    // «Später»: the club shows the neutral slate; the hint on the club's pages waits for the next visit
+    if (org) skipColourHint(org.id);
+    setChosen(null);
+    setError(null);
+    setStep(TEAM_STEP);
   }
 
   async function createTeam(e: FormEvent<HTMLFormElement>) {
@@ -178,8 +201,8 @@ export function OnboardingWizard({ existingOrg, resume = false, waiting = [] }: 
           claimed={claimed.out}
           teamName={claimed.team.name}
           league={claimed.team.league || claimed.team.group_name || ""}
-          colour={colour}
-          onColour={setColour}
+          chosen={chosen}
+          onChoose={setChosen}
           onNotMine={() => (forgetClaim(), setClaimed(null), setName(""))}
         />
       )}
@@ -189,9 +212,7 @@ export function OnboardingWizard({ existingOrg, resume = false, waiting = [] }: 
           <form onSubmit={createOrg} className="space-y-4" noValidate>
             <p className="text-muted">{t("onboarding.clubIntro")}</p>
             <Input label={t("onboarding.clubName")} name="name" required autoFocus error={fields.name} value={name} onChange={(e) => setName(e.target.value)} />
-            <ShirtPicker value={colour} onChange={setColour} legend={t("onboarding.shirtTitle")} note={t("onboarding.crestLater")} />
-            <input type="hidden" name="primary_color" value={colour} />
-            {/* the rest can wait: country, crest, a colour of one's own */}
+            {/* the rest can wait: country, crest */}
             <details className="group">
               <summary className="min-h-11 cursor-pointer content-center text-[15px] font-bold underline decoration-[1.5px] underline-offset-4">{t("onboarding.moreClub")}</summary>
               <div className="space-y-4 pt-3">
@@ -202,10 +223,6 @@ export function OnboardingWizard({ existingOrg, resume = false, waiting = [] }: 
                     </option>
                   ))}
                 </Select>
-                <div className="grid grid-cols-2 gap-3">
-                  <Input label={t("onboarding.ownColour")} type="color" value={colour} onChange={(e) => setColour(e.target.value)} className="h-11 w-24 p-1" />
-                  <Input label={t("onboarding.secondaryColor")} name="secondary_color" type="color" defaultValue="#ffffff" className="h-11 w-24 p-1" />
-                </div>
                 <Input
                   label={`${t("onboarding.logo")} (${t("common.optional")})`}
                   name="logo"
@@ -222,7 +239,30 @@ export function OnboardingWizard({ existingOrg, resume = false, waiting = [] }: 
         </Card>
       )}
 
-      {step === 1 && (
+      {step === COLOUR_STEP && !claimed && (
+        <Card>
+          <form onSubmit={saveColour} className="space-y-5" noValidate data-testid="colour-step">
+            <ClubColourPicker value={chosen} onChange={setChosen} legend={t("onboarding.colourTitle")} note={t("onboarding.colourNote")} />
+            {/* a colour outside the eight (a yellow or white club): the club page has more */}
+            <details>
+              <summary className="min-h-11 cursor-pointer content-center text-[15px] font-bold underline decoration-[1.5px] underline-offset-4">{t("onboarding.ownColour")}</summary>
+              <div className="pt-3">
+                <Input label={t("onboarding.primaryColor")} type="color" value={colour} onChange={(e) => setChosen(e.target.value)} className="h-11 w-24 p-1" />
+              </div>
+            </details>
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
+              <Button type="submit" loading={busy} data-testid="colour-next">
+                {t("common.next")}
+              </Button>
+              <Button type="button" variant="secondary" onClick={skipColour} disabled={busy} data-testid="colour-later">
+                {t("onboarding.colourLater")}
+              </Button>
+            </div>
+          </form>
+        </Card>
+      )}
+
+      {step === TEAM_STEP && (
         <Card>
           <form onSubmit={createTeam} className="space-y-4" noValidate>
             <p className="text-muted">{t("onboarding.teamIntro")}</p>

@@ -2,7 +2,7 @@ import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { expect, test } from "@playwright/test";
 import { MATCH_VIDEO } from "./global-setup";
-import { chooseVideo, register, uniqueEmail } from "./helpers";
+import { clubByHand, chooseVideo, register, uniqueEmail } from "./helpers";
 
 // the local stack's and CI's database (docker compose): the goal candidates the recognition would
 // find in a real hall video, which the 30 s synthetic clip does not give
@@ -17,9 +17,7 @@ test("no goal found by the analysis: after Prüfen the result, course, goals and
   test.skip(info.project.name !== "chromium", "runs once");
   test.setTimeout(300_000);
   await register(page, uniqueEmail("echt"), "Coach Echt");
-  await page.getByTestId("manual-club").click();
-  await page.getByLabel("Vereinsname").fill("HC Echt");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+  await clubByHand(page, "HC Echt");
   await page.getByLabel("Teamname").fill("Herren 1");
   await page.getByRole("button", { name: "Zum Team" }).click();
   await page.waitForURL(/\/teams\/[^/]+/);
@@ -148,9 +146,7 @@ test("a moved corner: Prüfen waits for the new analysis and asks what is open",
   test.skip(info.project.name !== "chromium", "runs once");
   test.setTimeout(300_000);
   await register(page, uniqueEmail("ecke"), "Coach Ecke");
-  await page.getByTestId("manual-club").click();
-  await page.getByLabel("Vereinsname").fill("HC Ecke");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+  await clubByHand(page, "HC Ecke");
   await page.getByLabel("Teamname").fill("Herren 1");
   await page.getByRole("button", { name: "Zum Team" }).click();
   await page.waitForURL(/\/teams\/[^/]+/);
@@ -214,9 +210,7 @@ test("the court question on a phone: the corners can be dragged with a finger", 
   test.setTimeout(300_000);
   await page.setViewportSize({ width: 390, height: 844 });
   await register(page, uniqueEmail("handy"), "Coach Handy");
-  await page.getByTestId("manual-club").click();
-  await page.getByLabel("Vereinsname").fill("HC Handy");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+  await clubByHand(page, "HC Handy");
   await page.getByLabel("Teamname").fill("Herren 1");
   await page.getByRole("button", { name: "Zum Team" }).click();
   await page.waitForURL(/\/teams\/[^/]+/);

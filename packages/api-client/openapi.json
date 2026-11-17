@@ -8418,7 +8418,7 @@
             "type": "string"
           },
           "kit_own": {
-            "default": "#0b6bcb",
+            "default": "#475569",
             "title": "Kit Own",
             "type": "string"
           },
@@ -11520,9 +11520,15 @@
             "type": "string"
           },
           "primary_color": {
-            "default": "#0b6bcb",
-            "title": "Primary Color",
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Primary Color"
           },
           "secondary_color": {
             "default": "#ffffff",
@@ -11552,6 +11558,10 @@
       },
       "OrgOut": {
         "properties": {
+          "color_chosen": {
+            "title": "Color Chosen",
+            "type": "boolean"
+          },
           "country": {
             "title": "Country",
             "type": "string"
@@ -11595,6 +11605,7 @@
             "$ref": "#/components/schemas/Plan"
           },
           "primary_color": {
+            "description": "the colour the club is shown in: its own, or the neutral fallback while color_chosen is false",
             "title": "Primary Color",
             "type": "string"
           },
@@ -11628,6 +11639,7 @@
           "country",
           "primary_color",
           "secondary_color",
+          "color_chosen",
           "has_logo",
           "plan",
           "data_region",

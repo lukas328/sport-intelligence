@@ -61,7 +61,11 @@ export const COURT = "#0f2333";
 export const OPPONENT_UNKNOWN = "#646b73";
 /** the unknown opponent next to a black club, which would swallow the grey */
 export const OPPONENT_UNKNOWN_ON_BLACK = "#8b9198";
-export const DEFAULT_CLUB = "#1f4fd6";
+/**
+ * A club that has not chosen its colour (decision E8): a neutral slate that no club picks, not the
+ * demo club's green, white on it 7.6:1. The API sends the same value (core/colors.py).
+ */
+export const DEFAULT_CLUB = "#475569";
 /** below this contrast two colours of the same family read as the same team on the court */
 export const CAM_SAME_LIGHTNESS = 2.5;
 
@@ -89,6 +93,24 @@ export const SHIRTS = [
   ["orange", "#e8731a"],
   ["purple", "#5b2d8e"],
 ] as const;
+
+/**
+ * The club colours a coach picks with one tap (onboarding «Eure Vereinsfarbe», Verein): typical
+ * club colours, each carrying white text at 4.5:1 or more, because the app head writes white on
+ * it (decision E8). A yellow or white club picks its own colour in the club settings.
+ */
+export const CLUB_COLOURS = [
+  ["red", "#c8102e"],
+  ["maroon", "#8a1538"],
+  ["orange", "#b35900"],
+  ["green", "#157a3a"],
+  ["blue", "#1f4fd6"],
+  ["navy", "#173a73"],
+  ["purple", "#5b2d8e"],
+  ["black", "#17191c"],
+] as const;
+
+export type ClubColourKey = (typeof CLUB_COLOURS)[number][0];
 
 /** The opponent the check colours are shown against (the demo season's TV Thalwil): black and white. */
 export const CHECK_OPPONENT = ["#17191c", "#ffffff"] as const;
@@ -194,7 +216,8 @@ export function kit(
   let o2: string;
   let oppSource: Kit["oppSource"];
   if (!known) {
-    o = luminance(c[0]) < 0.05 ? OPPONENT_UNKNOWN_ON_BLACK : OPPONENT_UNKNOWN;
+    // a black or dark grey club (the slate of a club without a colour) would swallow the grey
+    o = luminance(c[0]) < 0.05 || (hue(c[0]) < 0 && luminance(c[0]) < luminance(OPPONENT_UNKNOWN)) ? OPPONENT_UNKNOWN_ON_BLACK : OPPONENT_UNKNOWN;
     o2 = "#ffffff";
     oppSource = "unknown";
   } else {

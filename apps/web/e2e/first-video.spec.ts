@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { MATCH_VIDEO } from "./global-setup";
-import { chooseVideo, expectAccessible, register, uniqueEmail } from "./helpers";
+import { clubByHand, chooseVideo, expectAccessible, register, uniqueEmail } from "./helpers";
 
 /**
  * UX test A02: after a first video in which the analysis finds no goals, the start says one
@@ -10,9 +10,7 @@ test("start after a first video without goals: one sentence, one step", async ({
   test.skip(info.project.name !== "chromium", "runs once");
   test.setTimeout(300_000);
   await register(page, uniqueEmail("a02"), "Coach Erstvideo");
-  await page.getByTestId("manual-club").click();
-  await page.getByLabel("Vereinsname").fill("HC Erstvideo");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+  await clubByHand(page, "HC Erstvideo");
   await page.getByLabel("Teamname").fill("Herren 1");
   await page.getByRole("button", { name: "Zum Team" }).click();
   await page.waitForURL(/\/teams\/[^/]+/);

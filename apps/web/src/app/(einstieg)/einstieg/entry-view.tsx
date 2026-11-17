@@ -13,7 +13,7 @@ import { Breakable, WurfHead } from "@/components/anlauf/heads";
 import { useThingText } from "@/components/anlauf/three-things-view";
 import { buttonClass } from "@/components/ui/button";
 import { api } from "@/lib/client";
-import { clubStyle, SHIRTS } from "@/lib/color";
+import { clubStyle, DEFAULT_CLUB, SHIRTS } from "@/lib/color";
 import { goalRuns, type MatchGraphics } from "@/lib/graphics";
 import { threeThings } from "@/lib/three-things";
 import { cn } from "@/lib/utils";
@@ -51,14 +51,17 @@ export function EntryView() {
   const team = Number(params.get("team")) || null;
   const step = params.get("step");
   const name = params.get("name");
-  const [colour, setColour] = useState(FARBE[params.get("farbe") ?? ""] ?? SHIRTS[0][1]);
+  // null: no shirt tapped (here or on the website); the club starts without a colour (E8)
+  const [colour, setColour] = useState<string | null>(FARBE[params.get("farbe") ?? ""] ?? null);
   const go = (next: Record<string, string | null>) => {
     const u = new URLSearchParams(params.toString());
     for (const [k, v] of Object.entries(next)) {
       if (v == null) u.delete(k);
       else u.set(k, v);
     }
-    u.set("farbe", WORD_OF[colour] ?? "blau");
+    const word = colour ? WORD_OF[colour] : undefined;
+    if (word) u.set("farbe", word);
+    else u.delete("farbe");
     router.push(`/einstieg?${u.toString()}`);
   };
   if (step === "mail" && (team || name)) return <SaveStep club={club} team={team} name={name} colour={colour} onBack={() => go({ step: null })} />;
@@ -185,7 +188,9 @@ function SearchStep({ initial, onPick, onName }: { initial: string; onPick: (h: 
   );
 }
 
-function TeamStep({ club, team, known, colour, onColour, onSave, onBack }: { club: number; team: number; known: { name: string | null; league: string | null }; colour: string; onColour: (c: string) => void; onSave: () => void; onBack: () => void }) {
+function TeamStep({ club, team, known, colour: tapped, onColour, onSave, onBack }: { club: number; team: number; known: { name: string | null; league: string | null }; colour: string | null; onColour: (c: string) => void; onSave: () => void; onBack: () => void }) {
+  // the preview in the neutral slate until a shirt is tapped
+  const colour = tapped ?? DEFAULT_CLUB;
   const t = useTranslations("entry");
   const tc = useTranslations("onboarding");
   const format = useFormatter();
@@ -400,7 +405,7 @@ function Example() {
   );
 }
 
-function SaveStep({ club, team, name, colour, onBack }: { club: number | null; team: number | null; name: string | null; colour: string; onBack: () => void }) {
+function SaveStep({ club, team, name, colour, onBack }: { club: number | null; team: number | null; name: string | null; colour: string | null; onBack: () => void }) {
   const t = useTranslations("entry");
   const locale = useLocale();
   const mail = useMailEnabled();
@@ -413,10 +418,11 @@ function SaveStep({ club, team, name, colour, onBack }: { club: number | null; t
   const [fields, setFields] = useState<Record<string, string>>({});
   const [taken, setTaken] = useState(false);
   const [busy, setBusy] = useState(false);
-  const farbe = WORD_OF[colour] ?? "blau";
+  // the tapped shirt travels along; none tapped: none (the club picks its colour later)
+  const farbe = colour && WORD_OF[colour] ? `&farbe=${WORD_OF[colour]}` : "";
   // the team's name travels along: an occupied team's page names it and offers a club of one's own
   const teamName = typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("n");
-  const next = team && club ? `/einstieg/speichern?club=${club}&team=${team}&farbe=${farbe}${teamName ? `&n=${encodeURIComponent(teamName)}` : ""}` : `/einstieg/speichern?name=${encodeURIComponent(name ?? "")}&farbe=${farbe}`;
+  const next = team && club ? `/einstieg/speichern?club=${club}&team=${team}${farbe}${teamName ? `&n=${encodeURIComponent(teamName)}` : ""}` : `/einstieg/speichern?name=${encodeURIComponent(name ?? "")}${farbe}`;
   // the legal pages on the website: absolute from the start (L9), the address from the configuration
   const site = useSiteConfig();
   const legal = (page: string) => sitePage(site?.site_url, locale, page);

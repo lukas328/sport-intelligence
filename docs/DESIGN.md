@@ -70,15 +70,24 @@ One head per screen. Settings and forms get the Seitenkopf.
 ## Product name and logo
 
 The product is **Handball Intelligence**; the logo is «Taktik» (rules and files in
-`docs/design/brand2/taktik/README.md`, files unchanged from `final/`).
+`docs/design/brand2/taktik/README.md`, files unchanged from `final/`, copied by `publish.js`).
 
-- **In the app** only ink: `AppMark` (`components/brand.tsx`, `favicon-32-tinte.svg` below 48 px,
-  `zeichen-tinte.svg` above) in front of the club crest, and the browser favicon
-  (`app/icon.svg`). The colours in the app belong to the teams.
-- **Outside the app** two colours, Markerblau `#1d47d1` and Markerrot `#e1251b`: the word mark
-  `wortmarke-quer.svg` on sign-in, onboarding and the website (at least 220 px wide), the app
-  icons (web manifest, iOS, Android adaptive and monochrome), the Open Graph image.
-- **On a club colour** always one colour (white on blue, red, black, green; ink on yellow, white).
+- **One colour everywhere** (decision E10, 17 November 2026): ink `#111316` on light grounds,
+  white on dark ones. In the app `AppMark` (`components/brand.tsx`, `favicon-32-tinte.svg` below
+  48 px, `zeichen-tinte.svg` above) in front of the club crest and the browser favicon
+  (`app/icon.svg`, `favicon.ico`); outside it the word mark `wortmarke-quer.svg` on sign-in,
+  onboarding and the website (at least 220 px wide, two lines from 140 px), the app icons (web
+  manifest, iOS, Android adaptive and monochrome), the Open Graph images. The colours belong to
+  the teams, and the website is cream, green and black. The two-coloured version (Markerblau
+  `#1d47d1`, Markerrot `#e1251b`) is kept in `final/` only as a record (`-zweifarbig`).
+- **On a club colour** white (blue, red, black, green) or ink (yellow, white).
+- **The club colour** (decision E8): the club picks it at «Eure Vereinsfarbe» in the onboarding
+  from eight colours that carry white text at 4.5:1 or more (`CLUB_COLOURS` in `lib/color.ts`:
+  red `#c8102e`, maroon `#8a1538`, orange `#b35900`, green `#157a3a`, blue `#1f4fd6`, navy
+  `#173a73`, purple `#5b2d8e`, black `#17191c`), or later on the club page (any colour there). A
+  club without a choice shows neutral slate `#475569` (`DEFAULT_CLUB`, API
+  `FALLBACK_CLUB_COLOUR`): no club picks it and it is not the demo club's green `#10684a`. Its
+  admin sees one quiet line «Vereinsfarbe wählen» until the colour is chosen or the line closed.
 - The domain is `handball-intelligence.com` (site, `app.` for the app, mail, deep links).
 - Technical names stay: `ch.handballai.app`, the
   Expo slug, the Python package `handball_api`, User-Agent strings (Q-PROD-1).

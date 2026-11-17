@@ -8209,7 +8209,7 @@ export interface components {
             kit_opponent_gk?: string;
             /**
              * Kit Own
-             * @default #0b6bcb
+             * @default #475569
              */
             kit_own?: string;
             /**
@@ -9257,11 +9257,8 @@ export interface components {
             country?: string;
             /** Name */
             name: string;
-            /**
-             * Primary Color
-             * @default #0b6bcb
-             */
-            primary_color?: string;
+            /** Primary Color */
+            primary_color?: string | null;
             /**
              * Secondary Color
              * @default #ffffff
@@ -9275,6 +9272,8 @@ export interface components {
         };
         /** OrgOut */
         OrgOut: {
+            /** Color Chosen */
+            color_chosen: boolean;
             /** Country */
             country: string;
             /**
@@ -9296,7 +9295,10 @@ export interface components {
             /** Official Club Id */
             official_club_id?: number | null;
             plan: components["schemas"]["Plan"];
-            /** Primary Color */
+            /**
+             * Primary Color
+             * @description the colour the club is shown in: its own, or the neutral fallback while color_chosen is false
+             */
             primary_color: string;
             /** Secondary Color */
             secondary_color: string;
