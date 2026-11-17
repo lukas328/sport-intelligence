@@ -407,12 +407,12 @@
       animation: appear 0.25s ease-out forwards;
       animation-delay: calc(var(--i, 0) * 140ms + 0.75s);
     }
-    /* below the first screen the lines wait until their block glides in (components/reveal.tsx) */
-    .pre .play .ln,
-    .pre .play .ln-e,
-    .pre .play .ln-dot,
-    .pre .late,
-    .pre .nudge {
+    /* below the first screen the lines wait until their block comes into view (components/reveal.tsx) */
+    .wait .play .ln,
+    .wait .play .ln-e,
+    .wait .play .ln-dot,
+    .wait .late,
+    .wait .nudge {
       animation-play-state: paused;
     }
     /* the playhead twitches twice as if the video would start, and stays at 0:00 */
@@ -425,16 +425,11 @@
       animation: appear 0.6s ease-out forwards;
       animation-delay: calc(var(--late, 1.6s));
     }
-    /* start page: blocks glide in once (components/reveal.tsx), the hero pictures rise on load */
-    [data-reveal] {
-      transition:
-        opacity 0.7s cubic-bezier(0.2, 0.7, 0.2, 1),
-        transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
-      transition-delay: calc(var(--d, 0) * 110ms);
-    }
-    [data-reveal].pre {
-      opacity: 0;
-      transform: translateY(2rem);
+    /* blocks glide in once as they come into view (components/reveal.tsx, U19): visible as
+       rendered, the animation only plays from `in` on; the hero pictures rise on load */
+    [data-reveal].in {
+      animation: reveal-in 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+      animation-delay: calc(var(--d, 0) * 90ms);
     }
     .rise {
       animation: rise 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
@@ -453,11 +448,11 @@
     .shot-label {
       transition: opacity 0.4s ease-out 0.3s;
     }
-    .pre .shot-arrows path {
+    /* only the arrows wait; the labels are words and always stand */
+    .wait .shot-arrows path {
       stroke-dashoffset: 1;
     }
-    .pre .shot-arrows .shot-head,
-    .pre .shot-label {
+    .wait .shot-arrows .shot-head {
       opacity: 0;
     }
   }
@@ -658,6 +653,12 @@
   }
 }
 
+@keyframes reveal-in {
+  from {
+    opacity: 0;
+    transform: translateY(1rem);
+  }
+}
 @keyframes rise {
   from {
     opacity: 0;
