@@ -109,9 +109,12 @@ export function WurfHead({
   scoreNote,
   ownColor,
   scoreless = false,
+  titleText,
 }: {
   kick?: ReactNode;
   title: ReactNode;
+  /** the headline as plain text when `title` is markup: its length sets the size */
+  titleText?: string;
   own: number | null;
   opp: number | null;
   ownName: string;
@@ -136,13 +139,20 @@ export function WurfHead({
 }) {
   const from = span ? span[0] : 0;
   const length = span ? span[1] : 60;
+  const line = Boolean(goals && goals.length > 0);
+  // a long headline («Als Nächstes: SG Horgen/Wädenswil 1.») a size smaller, so it keeps whole
+  // words and two or three lines (review R9)
+  const long = (typeof title === "string" ? title : titleText ?? "").length > 32;
   return (
     <header
       data-zone="wurf"
       className={cn(
-        "relative grid grid-cols-1 px-4 pt-5 [clip-path:polygon(0_0,100%_0,100%_88%,0_100%)] md:grid-cols-[minmax(0,1fr)_minmax(0,560px)] md:gap-6 md:px-8 md:pt-9 md:[clip-path:polygon(0_0,100%_0,100%_80%,0_100%)]",
-        // without a goal sequence there is no line: the slant follows right under title and score
-        goals && goals.length > 0 ? "min-h-[400px] md:h-[410px]" : "pb-14 md:pb-20",
+        // the slanted edge rises by a fixed height, not a share: a taller head (long headline)
+        // keeps the line of the match clear of it
+        "relative grid grid-cols-1 px-4 pt-5 [clip-path:polygon(0_0,100%_0,100%_calc(100%-48px),0_100%)] md:grid-cols-[minmax(0,1fr)_minmax(0,40%)] md:gap-x-6 md:px-8 md:pt-9 md:[clip-path:polygon(0_0,100%_0,100%_calc(100%-82px),0_100%)] lg:grid-cols-[minmax(0,1fr)_minmax(0,560px)]",
+        // without a goal sequence there is no line: the slant follows right under title and score.
+        // With it the line takes the last row: under a long headline, never through it (review R9)
+        line ? "min-h-[400px] md:min-h-[410px] md:grid-rows-[auto_1fr]" : "pb-14 md:pb-20",
         waiting ? "bg-transparent text-ink shadow-[inset_0_0_0_2px_var(--ink)]" : "bg-club text-club-ink shadow-[inset_0_0_0_2px_var(--club-edge)]",
       )}
     >
@@ -150,12 +160,12 @@ export function WurfHead({
       <div className="relative z-10 min-w-0">
         {kick && <p className="mb-2 text-[15px] font-semibold md:mb-3.5 md:text-[15px]">{kick}</p>}
         {/* long club names («SG Wädenswil/Horgen») wrap instead of running out (UX test N11) */}
-        <h1 className="text-[32px] leading-[.96] [overflow-wrap:break-word] md:text-[58px]">{title}</h1>
+        <h1 className={cn("leading-[.96] [overflow-wrap:break-word]", long ? "text-[28px] md:text-[40px] lg:text-[52px]" : "text-[32px] md:text-[48px] lg:text-[58px]")}>{title}</h1>
         {meta && <div className="mt-[18px] text-sm font-semibold">{meta}</div>}
         {children}
       </div>
       <div className="flex min-w-0 flex-col">
-        {!(scoreless && (own == null || opp == null) && !pending) && <Score own={own} opp={opp} pending={pending} phoneLeft className="mt-[18px] text-[100px] md:mt-1 md:text-right md:text-[196px]" />}
+        {!(scoreless && (own == null || opp == null) && !pending) && <Score own={own} opp={opp} pending={pending} phoneLeft className="mt-[18px] text-[100px] md:mt-1 md:text-right md:text-[128px] lg:text-[196px]" />}
         {scoreNote && (
           // on a wide screen above the score: under it the drawn course covered it (real-video
           // test, second round, 1280 px)
@@ -176,10 +186,7 @@ export function WurfHead({
         {goals && goals.length > 0 && <Flight goals={goals} width={390} height={90} from={from} length={length} className="-mx-4 mt-3 mb-14 w-[calc(100%+2rem)] md:hidden" />}
       </div>
       {goals && goals.length > 0 && (
-        <>
-          <Flight goals={goals} width={1000} height={120} labels={span ? undefined : flightLabels} from={from} length={length} slant={48} className="pointer-events-none absolute right-0 bottom-[30px] left-0 hidden w-full md:block" />
-
-        </>
+        <Flight goals={goals} width={1000} height={120} labels={span ? undefined : flightLabels} from={from} length={length} slant={48} className="pointer-events-none -mx-8 mb-[30px] hidden w-[calc(100%+4rem)] self-end md:col-span-2 md:block" />
       )}
     </header>
   );

@@ -3821,7 +3821,8 @@
     "chipNumber": "Numéro {n}",
     "emptyTitle": "Télécharge une vidéo, tu verras ensuite tes scènes ici.",
     "emptyText": "Après l'analyse, chaque but, chaque tir et chaque perte de balle est une scène. Tu les cherches avec une phrase et tu les réunis en sélections.",
-    "emptyPlays": "Dessiner des systèmes de jeu, c'est déjà possible :"
+    "emptyPlays": "Dessiner des systèmes de jeu, c'est déjà possible :",
+    "emptySearch": "La recherche trouve des scènes dès la première vidéo."
   },
   "teamPage": {
     "kick": "{team} · {source}",

@@ -3821,7 +3821,8 @@
     "chipNumber": "Nummer {n}",
     "emptyTitle": "Lade ein Video hoch, dann siehst du hier deine Szenen.",
     "emptyText": "Nach der Analyse ist jedes Tor, jeder Wurf und jeder Ballverlust eine Szene. Du suchst sie mit einem Satz und stellst sie zu Sammlungen zusammen.",
-    "emptyPlays": "Spielzüge zeichnen geht schon jetzt:"
+    "emptyPlays": "Spielzüge zeichnen geht schon jetzt:",
+    "emptySearch": "Die Suche findet Szenen ab dem ersten Video."
   },
   "teamPage": {
     "kick": "{team} · {source}",

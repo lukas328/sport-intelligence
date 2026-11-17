@@ -54,6 +54,7 @@ export function MatchHead({ match, ownName, oppName, view, graphics, children }:
         <WurfHead
           kick={kick}
           title={<Breakable text={title} />}
+          titleText={title}
           own={own}
           opp={opp}
           pending={pending}

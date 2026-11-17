@@ -3821,7 +3821,8 @@
     "chipNumber": "Number {n}",
     "emptyTitle": "Upload a video, then you see your scenes here.",
     "emptyText": "After the analysis every goal, every shot and every turnover is a scene. You search them with a sentence and put them together into collections.",
-    "emptyPlays": "Drawing plays works already:"
+    "emptyPlays": "Drawing plays works already:",
+    "emptySearch": "Search finds scenes from your first video on."
   },
   "teamPage": {
     "kick": "{team} · {source}",
