@@ -23,7 +23,7 @@ export interface PlayerScene {
 export function PlayerScenesShare({ orgId, matchId, number, scenes }: { orgId: string; matchId: string; number: number; scenes: PlayerScene[] }) {
   const t = useTranslations("share");
   const [busy, setBusy] = useState(false);
-  const [target, setTarget] = useState<{ teamId: string; id: string } | null>(null);
+  const [target, setTarget] = useState<{ teamId: string; id: string; title?: string } | null>(null);
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -52,7 +52,7 @@ export function PlayerScenesShare({ orgId, matchId, number, scenes }: { orgId: s
         id = created.data?.id;
       }
       if (!id) throw new Error("collection");
-      setTarget({ teamId: match.team_id, id });
+      setTarget({ teamId: match.team_id, id, title });
       setOpen(true);
     } catch {
       setError(t("player.failed"));
@@ -67,7 +67,7 @@ export function PlayerScenesShare({ orgId, matchId, number, scenes }: { orgId: s
         <Share2 aria-hidden />
         <span className="max-sm:sr-only">{t("player.button")}</span>
       </Button>
-      {target && <ShareButton orgId={orgId} teamId={target.teamId} kind="collection" targetId={target.id} open={open} onOpenChange={setOpen} trigger={null} />}
+      {target && <ShareButton orgId={orgId} teamId={target.teamId} kind="collection" targetId={target.id} info={target.title ? { title: target.title, scenes: scenes.length } : undefined} open={open} onOpenChange={setOpen} trigger={null} />}
       {error && (
         <span role="alert" className="block text-[15px] text-error">
           {error}

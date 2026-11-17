@@ -408,7 +408,15 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
               </Button>
             )}
             {/* before the match there is no report to share yet (UX test A05) */}
-            {staff && !upcoming && <ShareButton orgId={orgId} teamId={match.team_id} kind="match" targetId={match.id} />}
+            {staff && !upcoming && (
+              <ShareButton
+                orgId={orgId}
+                teamId={match.team_id}
+                kind="match"
+                targetId={match.id}
+                info={{ title: oppName(match), team: own, opponent: oppName(match), score: match.score_own != null && match.score_opponent != null ? [match.score_own, match.score_opponent] : null }}
+              />
+            )}
             <MenuRoot>
               {/* a word, not only the dots (UX test H09) */}
               <MenuTrigger className={buttonClass("secondary")} data-testid="match-menu">
