@@ -1,0 +1,529 @@
+{
+ "c000_01124": {
+  "at": "2026-11-17T10:36:01.672Z",
+  "points": {},
+  "proposal": false,
+  "status": "skip"
+ },
+ "c001_00010": {
+  "at": "2026-11-17T10:36:49.088Z",
+  "points": {
+   "goal_area_left_front_high": [
+    712.4,
+    468.6
+   ],
+   "goal_area_left_front_low": [
+    560.9,
+    492.8
+   ],
+   "goal_area_left_high": [
+    708.8,
+    420.1
+   ],
+   "goal_area_left_low": [
+    9.7,
+    471
+   ],
+   "post_left_high": [
+    464,
+    318.3
+   ],
+   "post_left_low": [
+    317.4,
+    322
+   ]
+  },
+  "proposal": false,
+  "status": "corrected"
+ },
+ "c001_01600": {
+  "at": "2026-11-17T10:37:14.945Z",
+  "points": {
+   "corner_br": [
+    1136.4,
+    490.4
+   ],
+   "free_throw_right_side_low": [
+    1088,
+    526.7
+   ],
+   "goal_area_right_high": [
+    261.7,
+    408
+   ],
+   "goal_area_right_low": [
+    964.4,
+    474.6
+   ],
+   "post_right_high": [
+    495.5,
+    322
+   ],
+   "post_right_low": [
+    638.5,
+    326.8
+   ]
+  },
+  "proposal": false,
+  "status": "corrected"
+ },
+ "c008_01325": {
+  "at": "2026-11-17T10:38:01.238Z",
+  "points": {
+   "goal_area_left_high": [
+    667.6,
+    330.4
+   ],
+   "goal_area_left_low": [
+    141.8,
+    383.8
+   ],
+   "post_left_high": [
+    510.1,
+    345
+   ],
+   "post_left_low": [
+    404.7,
+    354.7
+   ]
+  },
+  "proposal": true,
+  "status": "corrected"
+ },
+ "c008_01955": {
+  "at": "2026-11-17T10:38:23.347Z",
+  "points": {},
+  "proposal": true,
+  "status": "skip"
+ },
+ "c009_01625": {
+  "at": "2026-11-17T10:38:45.166Z",
+  "points": {
+   "goal_area_left_high": [
+    683.3,
+    180.2
+   ],
+   "goal_area_left_low": [
+    254.4,
+    245.9
+   ],
+   "post_left_high": [
+    553.7,
+    200.8
+   ],
+   "post_left_low": [
+    467.7,
+    209.3
+   ]
+  },
+  "proposal": false,
+  "status": "corrected"
+ },
+ "c009_02000": {
+  "at": "2026-11-17T10:39:16.500Z",
+  "points": {
+   "center": [
+    53.3,
+    335.3
+   ],
+   "center_bottom": [
+    121.2,
+    712.4
+   ],
+   "center_top": [
+    38.8,
+    242
+   ],
+   "goal_area_right_high": [
+    763.3,
+    212.9
+   ],
+   "goal_area_right_low": [
+    1244.3,
+    296.5
+   ],
+   "post_right_high": [
+    892.9,
+    235.9
+   ],
+   "post_right_low": [
+    992.3,
+    252.9
+   ]
+  },
+  "proposal": false,
+  "status": "corrected"
+ },
+ "c010_01124": {
+  "at": "2026-11-17T10:40:27.932Z",
+  "points": {
+   "center": [
+    10.9,
+    455.2
+   ],
+   "corner_tr": [
+    684.5,
+    181.4
+   ],
+   "free_throw_right_side_high": [
+    545.2,
+    198.4
+   ],
+   "free_throw_right_side_low": [
+    1279.4,
+    485.5
+   ],
+   "goal_area_right_high": [
+    745.1,
+    200.8
+   ],
+   "penalty_mark_right": [
+    670,
+    334.1
+   ],
+   "post_right_high": [
+    922,
+    249.3
+   ],
+   "post_right_low": [
+    1039.5,
+    288
+   ]
+  },
+  "proposal": false,
+  "status": "corrected"
+ },
+ "c012_00170": {
+  "at": "2026-11-17T10:40:45.893Z",
+  "points": {
+   "center": [
+    3.6,
+    464.9
+   ],
+   "goal_area_right_high": [
+    764.5,
+    315.9
+   ],
+   "post_right_high": [
+    911.1,
+    341.4
+   ],
+   "post_right_low": [
+    1033.5,
+    370.4
+   ]
+  },
+  "proposal": false,
+  "status": "corrected"
+ },
+ "c012_00930": {
+  "at": "2026-11-17T10:40:51.337Z",
+  "points": {},
+  "proposal": false,
+  "status": "skip"
+ },
+ "c013_00295": {
+  "at": "2026-11-17T10:41:34.465Z",
+  "points": {
+   "corner_bl": [
+    24.2,
+    529.1
+   ],
+   "corner_tl": [
+    657.9,
+    211.7
+   ],
+   "free_throw_left_front_high": [
+    888.1,
+    349.8
+   ],
+   "free_throw_left_front_low": [
+    829.9,
+    415.3
+   ],
+   "free_throw_left_side_high": [
+    754.8,
+    215.4
+   ],
+   "goal_area_left_high": [
+    615.5,
+    232.6
+   ],
+   "goal_area_left_low": [
+    163.6,
+    457.7
+   ],
+   "penalty_mark_left": [
+    746.3,
+    363.2
+   ],
+   "post_left_high": [
+    482.2,
+    291.7
+   ],
+   "post_left_low": [
+    391.3,
+    338.9
+   ]
+  },
+  "proposal": false,
+  "status": "corrected"
+ },
+ "c013_01690": {
+  "at": "2026-11-17T10:42:51.483Z",
+  "points": {
+   "center": [
+    70.3,
+    455.2
+   ],
+   "center_bottom": [
+    456.8,
+    700
+   ],
+   "corner_br": [
+    1106.1,
+    273.5
+   ],
+   "corner_tr": [
+    512.5,
+    162
+   ],
+   "goal_area_right_high": [
+    554.9,
+    176.6
+   ],
+   "goal_area_right_low": [
+    994.7,
+    254.1
+   ],
+   "post_right_high": [
+    719.7,
+    198.7
+   ],
+   "post_right_low": [
+    805.7,
+    206.9
+   ]
+  },
+  "proposal": false,
+  "status": "corrected"
+ },
+ "c014_01260": {
+  "at": "2026-11-17T10:43:26.831Z",
+  "points": {
+   "corner_tl": [
+    716,
+    187.5
+   ],
+   "free_throw_left_side_high": [
+    837.2,
+    212.9
+   ],
+   "free_throw_left_side_low": [
+    127.2,
+    480.7
+   ],
+   "goal_area_left_high": [
+    653,
+    209.3
+   ],
+   "goal_area_left_low": [
+    117.5,
+    380.1
+   ],
+   "penalty_mark_left": [
+    768.1,
+    352.3
+   ],
+   "post_left_high": [
+    485.8,
+    257.8
+   ],
+   "post_left_low": [
+    379.2,
+    298.9
+   ]
+  },
+  "proposal": false,
+  "status": "corrected"
+ },
+ "c014_02065": {
+  "at": "2026-11-17T10:44:12.161Z",
+  "points": {
+   "corner_tr": [
+    643.3,
+    193.5
+   ],
+   "free_throw_right_side_high": [
+    527,
+    204.4
+   ],
+   "free_throw_right_side_low": [
+    1210.3,
+    529.1
+   ],
+   "goal_area_right_high": [
+    700.3,
+    219
+   ],
+   "goal_area_right_low": [
+    1232.1,
+    432.2
+   ],
+   "penalty_mark_right": [
+    580.3,
+    347.4
+   ],
+   "post_right_high": [
+    871.1,
+    280.8
+   ],
+   "post_right_low": [
+    970.4,
+    330.8
+   ]
+  },
+  "proposal": false,
+  "status": "corrected"
+ },
+ "c017_00345": {
+  "at": "2026-11-17T10:44:16.842Z",
+  "points": {},
+  "proposal": false,
+  "status": "skip"
+ },
+ "c017_02120": {
+  "at": "2026-11-17T10:44:18.717Z",
+  "points": {},
+  "proposal": false,
+  "status": "skip"
+ },
+ "c018_00390": {
+  "at": "2026-11-17T10:44:54.767Z",
+  "points": {
+   "corner_tr": [
+    960.8,
+    182.6
+   ],
+   "free_throw_right_side_high": [
+    789.9,
+    188.7
+   ],
+   "goal_area_right_front_high": [
+    945,
+    306.5
+   ],
+   "goal_area_right_front_low": [
+    1180,
+    382.5
+   ],
+   "goal_area_right_high": [
+    1062.5,
+    210.5
+   ],
+   "penalty_mark_right": [
+    994.7,
+    363.5
+   ]
+  },
+  "proposal": false,
+  "status": "corrected"
+ },
+ "c018_00955": {
+  "at": "2026-11-17T10:45:24.206Z",
+  "points": {
+   "corner_tr": [
+    529.4,
+    212.9
+   ],
+   "goal_area_right_high": [
+    631.2,
+    235.9
+   ],
+   "penalty_mark_right": [
+    567,
+    390.1
+   ],
+   "post_right_high": [
+    932.9,
+    291.7
+   ],
+   "post_right_low": [
+    1135.2,
+    330.4
+   ]
+  },
+  "proposal": false,
+  "status": "corrected"
+ },
+ "c025_00610": {
+  "at": "2026-11-17T10:46:03.118Z",
+  "points": {
+   "corner_br": [
+    1158.2,
+    376.5
+   ],
+   "corner_tr": [
+    483.4,
+    290.8
+   ],
+   "free_throw_right_side_low": [
+    1101.3,
+    422.5
+   ],
+   "goal_area_right_high": [
+    523.4,
+    294.1
+   ],
+   "goal_area_right_low": [
+    1020.1,
+    358.3
+   ],
+   "penalty_mark_right": [
+    502.8,
+    391
+   ],
+   "post_right_high": [
+    670,
+    311.1
+   ],
+   "post_right_low": [
+    770.5,
+    322
+   ]
+  },
+  "proposal": true,
+  "status": "corrected"
+ },
+ "c025_01970": {
+  "at": "2026-11-17T10:46:33.197Z",
+  "points": {
+   "corner_bl": [
+    276.2,
+    292.9
+   ],
+   "goal_area_left_high": [
+    842,
+    257.8
+   ],
+   "goal_area_left_low": [
+    396.2,
+    295.3
+   ],
+   "penalty_mark_left": [
+    823.9,
+    327.1
+   ],
+   "post_left_high": [
+    690.6,
+    265
+   ],
+   "post_left_low": [
+    600.9,
+    270.2
+   ]
+  },
+  "proposal": true,
+  "status": "corrected"
+ }
+}

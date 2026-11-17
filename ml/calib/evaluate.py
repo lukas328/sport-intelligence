@@ -31,8 +31,11 @@ CAP_M = 50.0
 
 def truth_points(entry: dict[str, Any]) -> tuple[np.ndarray, np.ndarray] | None:
     """(pixels, court metres) of one truth frame, or None when not determinable."""
-    if entry.get("status") == "skip":
+    if entry.get("status") == "skip" or entry.get("consistent") is False:
         return None
+    grid = entry.get("grid")
+    if grid and len(grid["px"]) >= 4:  # line clicks: court points from the fitted model
+        return np.array(grid["px"], np.float64), np.array(grid["court"], np.float64)
     px = entry.get("refined") or entry.get("points") or {}
     court = entry.get("court") or {}
     names = [n for n in px if n in court]

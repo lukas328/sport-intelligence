@@ -60,6 +60,37 @@ nichts die Wahrheit zum heutigen Stand hinzieht). Runde 2 wird erst nach Runde 1
 Geprüft mit künstlichen Klicks (Produkt-Felder als Wahrheit): die Kette läuft in unter einer
 Minute und ergibt für diese Felder 0.1 m.
 
+### Runde 1 (2026-11-17) und Runde 1b
+
+Lukas hat in Runde 1 20 Bilder bearbeitet (15 mit Punkten, 5 übersprungen) und dann aufgehört: auf
+Schwenkkameras sind kaum genug der benannten Punkte zu sehen, die Mittellinie fehlt oft, es dauert
+lang und ist oft nicht eindeutig. Antworten: `ml/calib/data/round1_answers.json`.
+
+Prüfung der Klicks (`ml/calib/clicks.py`, ein Modell durch alle Klicks): 8 der 15 Bilder sind
+stimmig (Median 1 bis 4 px), 7 nicht (zu wenige Punkte für eine Gegenprobe oder 7 bis 740 px
+Widerspruch). Nur die stimmigen zählen; sie decken 5 Stücke ab (c009, c013, c014, c018, c025).
+
+**Runde 1b** (`ml/calib/labelling/feld2.html`, https://claude.ai/artifact/1VT7cj8DGNM9Lv8o3evq5b):
+- Linien-Modus: Linie wählen (Seitenlinien, Torlinien, Mittellinie, 6 m, 9 m; Tasten 1 bis 9), dann
+  zwei oder mehr Klicks irgendwo auf der Linie; der Klick rastet auf die nächste erkannte Linie
+  ein (Linienmaske pro Bild, Shift oder Ziehen schaltet es aus).
+- Mehr benannte Anhalter: Wechselmarken (15.5 und 24.5 m, nah und fern), 4-m-Marken, dazu alle
+  bisherigen.
+- Live-Feld aus Punkten und Linien, auch wenn die geraden Linien allein das Feld nicht festlegen
+  (beide Seitenlinien und eine Torlinie legen 6 der 8 Freiheitsgrade fest): die offenen Richtungen
+  werden durchsucht, die Bogen-Klicks entscheiden, dann eine nichtlineare Anpassung. Gleiches
+  Verfahren in Python für die Wahrheit. Geprüft mit künstlichen Klicks aus einem echten Bild:
+  exakt (0.05 px) ohne Rauschen; mit 2 bis 4 px Rauschen liegt die Wahrheit im Median 0.07 bis
+  0.11 m, höchstens 0.39 m daneben.
+- Wahrheit pro Bild: ein 1-m-Raster von Feldpunkten, das das angepasste Modell nahe den Klicks ins
+  Bild legt; nur Punkte, die beim Stören jedes Klicks um 2 px um höchstens 0.3 m wandern.
+  Verzeichnung wird erst ab 16 Gleichungen mitgeschätzt (mit wenigen Punkten erklärt ein
+  verzeichnetes Modell auch falsch benannte Punkte).
+- Reihenfolge: zuerst das Hauptbild jedes der 28 offenen Stücke (Mitte des Schwenks, bei fester
+  Kamera das einzige Bild), danach die Schwenkenden. Die 5 Stücke mit stimmiger Wahrheit fehlen,
+  Bilder aus Runde 1 sind mit Lukas' Punkten vorausgefüllt.
+- Runde 2 (Endtest) wird vor der Freigabe auf dieselbe Seite umgestellt.
+
 ## 3. Metrik (`ml/calib/evaluate.py`)
 
 - Fehler pro Wahrheitspunkt: Bildpunkt → Kamerabewegung → Kalibrierung → Feld, Abstand zur wahren
@@ -101,6 +132,10 @@ der Wahrheit (Runde 1: Entwicklung, 63 Bilder).
   `no_floor`-Stücke der Entwicklung; ein gutes Stück, c067: 84 % gegen 67 %). Die Drehungen sind
   zwischen den Bildern um etwa ein Grad oder mehr daneben, wie im Nachtrag von ADR 025 für die
   SGWH-Streams beschrieben, aber hier in fast allen Hallen.
+
+Erste Wahrheit (Runde 1, 5 Stücke mit stimmigen Klicks): 4 abgelehnt (c009 `court`, c013
+`no_floor`, c014 `flat_view`, c018 `court`), 1 falsch akzeptiert (c025: im Median 6.8 m daneben,
+auf 132 Wahrheitspunkten). Zu wenig, um einen Prüfschritt zu eichen.
 
 Vorläufige Sichtprüfung der 6 heute akzeptierten Entwicklungs-Felder (keine Wahrheit, nur zum
 Entwickeln): c008 und c061 falsch, c040 und c067 plausibel, c025 und c039 in der Schwenkmitte nah,
