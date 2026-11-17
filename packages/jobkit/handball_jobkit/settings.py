@@ -19,6 +19,18 @@ class JobSettings(BaseSettings):
     # the file the classical background detector runs (ADR 012)
     detector_model: str = "/models/yolox_s.onnx"
     detect_every: int = 3
+    # 3-frame ball net(s) (docs/plans/produkt-analyse-integration.md step 2): comma-separated,
+    # each a local ONNX file (ml/ball/export_onnx.py) or a key in the artifacts bucket (e.g.
+    # models/ball/ball_hrp1-<sha12>.onnx), fetched once into ball_cache_dir. Two entries =
+    # ensemble (hr1 + hrp1, the default for quality), one = single net (cost comparison).
+    # ball_model_sha256: the files' SHA-256 in the same order (required for bucket keys).
+    # Empty, missing or a wrong checksum: the YOLOX "sports ball" path stays. TEST PHASE: the
+    # nets hr1/hrp1 contain DeepSport data (non-commercial) and must be replaced before go-live.
+    ball_model: str = ""
+    ball_model_sha256: str = ""
+    ball_cache_dir: str = "/tmp/handball-models"  # noqa: S108
+    ball_every: int = 1  # every 2nd frame costs about 6 points on gold v1 (11 on fast balls)
+    ball_batch: int = 8
     detector_threads: int = 0
     # shirt numbers (PP-OCRv4 text models) and re-identification (person appearance network);
     # each step runs only when its model files are installed

@@ -112,3 +112,49 @@ def test_balls_while_the_clock_stands_are_ignored() -> None:
     # the clock never ran while a ball was seen: no ball time at all, but said so
     out = bp.from_observations(obs, result, play=[(20_000, 30_000)])
     assert out is not None and out["ball_gated_by_clock"] is True and out["possessions"] == []
+
+
+def _with_ball_net(obs: Any) -> Any:
+    """The same scene with ball net candidates on every frame (`HB_BALL_MODEL`) instead of YOLOX
+    boxes: the true ball plus a weaker lamp."""
+    cands = {}
+    for fo in obs.frames:
+        row = [((b.x1 + b.x2) / 2, (b.y1 + b.y2) / 2, 0.7) for b in fo.balls]
+        row.append((1200.0, 60.0, 0.2))
+        cands[fo.index] = row
+        fo.balls = []
+    obs.ball_cands = cands
+    return obs
+
+
+@pytest.mark.parametrize("play", [None, []])
+def test_ball_net_path_without_clock(play: list[tuple[int, int]] | None) -> None:
+    obs, result = _observed()
+    out = bp.from_observations(_with_ball_net(obs), result, play=play)
+    assert out is not None and out["ball_model"] == "ballnet"
+    assert {p["track_id"] for p in out["possessions"]} == {1, 3}
+
+
+def test_ball_net_path_gated_by_clock() -> None:
+    obs, result = _observed()
+    obs = _with_ball_net(obs)
+    out = bp.from_observations(obs, result, play=[(0, 6000)])
+    assert out is not None and out["ball_model"] == "ballnet"
+    assert {p["track_id"] for p in out["possessions"]} == {1}
+    out = bp.from_observations(obs, result, play=[(20_000, 30_000)])
+    assert out is not None and out["possessions"] == []
+
+
+def test_ball_net_path_confidence_threshold() -> None:
+    obs, result = _observed()
+    obs = _with_ball_net(obs)
+    first, path, conf = bp.ball_path_v2(obs, obs.ball_cands)
+    assert first == 0 and len(path) == len(conf) == 300
+    out = bp.from_observations(obs, result, min_conf=1.01)  # nothing is that sure
+    assert out is not None and out["possessions"] == []
+
+
+def test_yolox_path_says_its_model() -> None:
+    obs, result = _observed()
+    out = bp.from_observations(obs, result)
+    assert out is not None and out["ball_model"] == "yolox"

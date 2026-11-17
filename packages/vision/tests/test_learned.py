@@ -462,3 +462,35 @@ def test_goalkeepers_by_position_and_defending_team() -> None:
             teams[10 + k], teams[20 + k] = "home", "away"
     labels = assign_goalkeepers(pts, {**teams, 99: "away"})
     assert labels == {99: "home_gk"}
+
+
+class _FakeBallNet:
+    """Stands in for `ballnet.BallNet`: one candidate per triplet, from the centre frame's mean."""
+
+    def run(self, triplets: list[list[np.ndarray]]) -> list[list[tuple[float, float, float]]]:
+        return [[(round(float(t[1].mean()), 2), 10.0, 0.5), (20.0, 30.0, 0.1)] for t in triplets]
+
+
+@pytest.mark.skipif(FFMPEG is None, reason="ffmpeg not installed")
+def test_observe_ball_net_candidates_are_stored(tmp_path: Path) -> None:
+    cfg = SyntheticConfig(seconds=2, pan=1.0)
+    video = tmp_path / "pan.mp4"
+    truth = SyntheticMatch(cfg).write(video)
+    boxes = {
+        g.index: [Detection(*o.bbox, 0.9) for o in g.objects if o.label != "ball"] for g in truth
+    }
+    obs = observe.observe(
+        video, _Oracle(boxes), detect_every=observe_step, ball_net=_FakeBallNet(), ball_batch=4
+    )
+    gap = 3 if obs.fps > 40 else 2
+    assert sorted(obs.ball_cands) == list(range(gap, len(truth) - gap))
+    assert "ball_net" in obs.timings_s
+    observe.save_observations(obs, tmp_path / "obs.npz")
+    back = observe.load_observations(tmp_path / "obs.npz", obs.motion)
+    assert sorted(back.ball_cands) == sorted(obs.ball_cands)
+    k = min(obs.ball_cands)
+    assert back.ball_cands[k][1] == (20.0, 30.0, 0.1)
+    assert back.ball_cands == obs.ball_cands  # exact: candidates are rounded (ballnet.rounded)
+    # without a ball net nothing is stored and an old file loads without candidates
+    plain = observe.observe(video, _Oracle(boxes), detect_every=observe_step)
+    assert plain.ball_cands == {}
