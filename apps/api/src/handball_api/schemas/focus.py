@@ -60,3 +60,41 @@ class FocusOut(ApiModel):
     closed_at: datetime | None
     created_at: datetime
     followup: Followup | None = None
+
+
+class TipScene(ApiModel):
+    event_id: uuid.UUID
+    t_ms: int
+    period: int | None
+    clock_s: float | None
+
+
+class TipMatch(ApiModel):
+    match_id: uuid.UUID
+    kickoff_at: datetime
+    opponent: str | None
+
+
+class TrainingTip(ApiModel):
+    """A weakness of the last matches with a training topic (K21)."""
+
+    id: str
+    key: str
+    params: dict[str, Any]
+    evidence: dict[str, Any]
+    sample: int | None
+    score: float
+    match_id: uuid.UUID = Field(description="The latest match the weakness came up in")
+    matches: int = Field(description="In how many of the analysed matches it came up")
+    of: int = Field(description="Matches analysed")
+    topics: list[str]
+    metric: str
+    drills: list[str] = Field(description="Library drill ids for the topics")
+    scenes: list[TipScene]
+
+
+class TrainingTipsOut(ApiModel):
+    matches_analysed: int
+    plan_required: bool
+    matches: list[TipMatch]
+    tips: list[TrainingTip]

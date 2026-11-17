@@ -19,8 +19,9 @@ test("player: the match page leads to the own scenes, assessment first", async (
   await page.goto(`/app/${orgId}/club/teams`);
   const playerEmail = uniqueEmail("player-scenes");
   await page.getByLabel("E-Mail").fill(playerEmail);
+  await page.getByRole("radio", { name: /^Spieler/ }).check();
   await page.getByRole("button", { name: "Einladung senden" }).click();
-  await expect(page.getByText(`Eingeladen: ${playerEmail}`)).toBeVisible();
+  await expect(page.getByText(`Einladung an ${playerEmail} geschickt.`)).toBeVisible();
   await page.goto(teamUrl0);
   await follow(page, page.getByRole("link", { name: "Spiele", exact: true }).first(), /\/matches$/);
   await page.getByLabel("Gegner", { exact: true }).fill("TV Testdorf");
@@ -41,7 +42,10 @@ test("player: the match page leads to the own scenes, assessment first", async (
   const attendance = page.getByTestId("match-attendance");
   await attendance.locator("summary").click();
   await expect(attendance).toContainText("0 Zusagen, 0 Absagen, 1 offen");
+  // saved before the reload (a reload right away can cut the request off)
+  const saved = page.waitForResponse((r) => r.url().includes("/attendance") && r.request().method() === "PUT");
   await attendance.getByLabel("Anwesenheit von Lea Beispiel").selectOption("present");
+  await saved;
   await page.reload();
   await page.getByTestId("match-attendance").locator("summary").click();
   await expect(page.getByTestId("match-attendance").getByLabel("Anwesenheit von Lea Beispiel")).toHaveValue("present");
@@ -64,7 +68,9 @@ test("player: the match page leads to the own scenes, assessment first", async (
 
   // a unit in two days: the plan says who is out that day
   await openTraining(page);
-  await page.getByRole("button", { name: "Neue Einheit" }).click();
+  // the list of units has loaded before a new one is added (else the first answer can overtake it)
+  await expect(page.getByText(/^Noch keine Einheit geplant\./)).toBeVisible();
+  await page.getByRole("button", { name: "Einheit selbst planen" }).click();
   const unit = page.getByRole("form", { name: "Neue Einheit" });
   await unit.getByLabel("Datum").fill(new Date(Date.now() + 2 * 86400_000).toISOString().slice(0, 10));
   await unit.getByLabel("Titel").fill("Abwehr 6:0");
@@ -85,7 +91,8 @@ test("player: the match page leads to the own scenes, assessment first", async (
   await player.getByLabel("Passwort").fill("correct-horse-1");
   await player.getByLabel(/Nutzungsbedingungen/).check();
   await player.getByRole("button", { name: "Konto erstellen" }).click();
-  await player.waitForURL((url) => !url.pathname.startsWith("/register"), { timeout: 30_000 });
+  // the start is Spiele (K18); wait for the redirect to land before opening the match
+  await player.waitForURL(/\/teams\/[^/]+\/matches/, { timeout: 30_000 });
 
   const playerId = "00000000-0000-4000-8000-000000000a01";
   let assessed = false;
@@ -107,17 +114,10 @@ test("player: the match page leads to the own scenes, assessment first", async (
   await player.reload();
   await expect(mine.getByRole("link", { name: "Szenen ansehen" })).toBeVisible();
 
-  // the overview: the next date is answered on the stage, the later ones without a reply are a to-do
-  const day = (n: number) => new Date(Date.now() + n * 86400_000).toISOString().slice(0, 10);
-  const date = (n: number, response: "yes" | "no" | null) => ({
-    kind: "session", id: `00000000-0000-4000-8000-00000000b00${n}`, title: "Training", team: "Damen 1", on_date: day(n), starts_at: null,
-    player_id: playerId, player_name: "Mia Muster", relation: "self", response,
-  });
-  await player.route(`**/v1/orgs/${orgId}/me/schedule`, (route) =>
-    route.fulfill({ contentType: "application/json", body: JSON.stringify([date(1, null), date(3, null), date(5, "yes"), date(8, null)]) }),
-  );
+  // a player's start is Spiele, like the staff (K18); dates and their replies live in Teamleben
   await player.goto(`/app/${orgId}`);
-  await expect(player.getByRole("link", { name: /2 Termine beantworten/ })).toHaveAttribute("href", `/app/${orgId}/schedule`);
+  await player.waitForURL(new RegExp(`/app/${orgId}/teams/${teamId}/matches`));
+  await expect(player.getByRole("link", { name: "Teamleben", exact: true }).first()).toBeVisible();
   await expectAccessible(player);
   await ctx.close();
 
@@ -153,6 +153,7 @@ test("player: the match page leads to the own scenes, assessment first", async (
   // the invitation offers the free squad entry for a player
   await page.goto(`/app/${orgId}/club/teams`);
   const invite = page.getByRole("form", { name: "Person einladen" });
+  await invite.getByRole("radio", { name: /^Spieler/ }).check();
   await expect(invite.getByLabel("Im Team").locator("option", { hasText: "#9 Lea Beispiel" })).toHaveCount(1);
 
   // Lea's season line from her name in the squad: no played match yet

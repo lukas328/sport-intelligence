@@ -13,24 +13,24 @@ from collections.abc import AsyncIterator
 from dataclasses import dataclass, field
 from typing import Any, Protocol
 
-from redis import Redis
-from redis.asyncio import Redis as AsyncRedis
+from redis.exceptions import ConnectionError as RedisConnectionError
 from redis.exceptions import RedisError
 from rq import Queue
 
 from handball_api.core.logging import get_logger
+from handball_jobkit.redisconn import async_redis, sync_redis
 
 log = get_logger("handball_api.jobs")
 
 QUEUES = ("default", "pipeline", "gpu")
 DEFAULT_TIMEOUT_S = 6 * 3600
 
-# Proxies between the containers (Azure Container Apps: a few minutes) drop idle TCP connections
-# without telling either side. A pooled connection then fails on its next use; with a health
-# check redis-py pings a connection idle for longer than this first and reconnects if it is gone.
-REDIS_OPTS: dict[str, Any] = {"health_check_interval": 30, "socket_keepalive": True}
+# Redis clients come from handball_jobkit.redisconn: health check, keepalive and retry with
+# backoff, because the proxy in front of Redis drops idle connections (Azure Container Apps).
 # a subscriber that hears nothing pings this often, so its connection never counts as idle
 SUBSCRIBE_PING_S = 60.0
+PUBLISH_TIMEOUT_S = 2.0
+PUBLISH_RETRY_PAUSE_S = 0.5
 
 
 class JobQueue(Protocol):
@@ -68,10 +68,10 @@ class MemoryJobQueue:
 
 class RqJobQueue:
     def __init__(self, redis_url: str) -> None:
-        # bounded: a hanging Redis must fail the request instead of blocking a worker thread
-        self._conn = Redis.from_url(
-            redis_url, socket_timeout=5, socket_connect_timeout=5, **REDIS_OPTS
-        )
+        # bounded (read and connect timeout): a hanging Redis must fail the request instead of
+        # blocking a worker thread. No fail-open here: a job that never reaches the queue would
+        # leave the match waiting forever, so the request fails and its transaction rolls back.
+        self._conn = sync_redis(redis_url)
 
     def enqueue(
         self,
@@ -126,18 +126,32 @@ class MemoryEventBus:
 class RedisEventBus:
     def __init__(self, redis_url: str) -> None:
         self._url = redis_url
-        self._redis = AsyncRedis.from_url(redis_url, **REDIS_OPTS)
+        # short read timeout: publishing is best effort and runs inside the caller's request
+        self._redis = async_redis(redis_url, socket_timeout=PUBLISH_TIMEOUT_S)
 
     async def publish(self, channel: str, event: dict[str, Any]) -> None:
         """Best effort: the state is already in Postgres and the browser gets a snapshot when it
-        reconnects, so a Redis hiccup must not fail (and roll back) the caller's transaction."""
-        try:
-            await self._redis.publish(channel, json.dumps(event, default=str))
-        except RedisError as e:
-            log.warning("event_publish_failed", channel=channel, error=str(e))
+        reconnects, so a Redis hiccup must not fail (and roll back) the caller's transaction.
+        The client already reconnects and retries a dropped connection; if Redis is briefly gone
+        (restart) that is over in a second, so a connection error gets one more try after a
+        pause. A timeout does not: it has already cost its time."""
+        data = json.dumps(event, default=str)
+        for attempt in (1, 2):
+            try:
+                await self._redis.publish(channel, data)
+                return
+            except RedisConnectionError as e:
+                if attempt == 1:
+                    await asyncio.sleep(PUBLISH_RETRY_PAUSE_S)
+                    continue
+                log.warning("event_publish_failed", channel=channel, error=str(e), attempts=2)
+            except RedisError as e:
+                log.warning("event_publish_failed", channel=channel, error=str(e), attempts=1)
+            return
 
     async def subscribe(self, channel: str) -> AsyncIterator[dict[str, Any]]:
-        client = AsyncRedis.from_url(self._url, **REDIS_OPTS)
+        # blocking: the listener waits up to SUBSCRIBE_PING_S per read, no short read timeout
+        client = async_redis(self._url, blocking=True)
         pubsub = client.pubsub()
         await pubsub.subscribe(channel)
         try:

@@ -13,6 +13,8 @@ import { cn } from "@/lib/utils";
 import { api } from "@/lib/client";
 import { errorKey, fieldErrors, type ErrorKey } from "@/lib/errors";
 import type { Kits } from "@/lib/kit";
+import { DateTimeField } from "@/components/domain/date-time-field";
+import { combine, formatDate, formatTime } from "@/lib/date-input";
 
 const FORMATS = ["adult_2x30", "youth_2x25", "youth_2x20", "mini", "tournament"] as const;
 const KIT_DEFAULTS: Kits = {
@@ -23,11 +25,6 @@ const KIT_DEFAULTS: Kits = {
   referee: null,
 };
 
-function localNow(): string {
-  const d = new Date();
-  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-  return d.toISOString().slice(0, 16);
-}
 
 export function NewMatchForm({ orgId, teamId }: { orgId: string; teamId: string }) {
   const t = useTranslations();
@@ -45,6 +42,9 @@ export function NewMatchForm({ orgId, teamId }: { orgId: string; teamId: string 
   const [training, setTraining] = useState(false);
   const [away, setAway] = useState(false);
   const [format, setFormat] = useState<string | null>(null);
+  // the kick-off written the Swiss way, whatever the browser's language (L16)
+  const [day, setDay] = useState(() => formatDate(new Date()));
+  const [clock, setClock] = useState(() => formatTime(new Date()));
   const team = useQuery({
     queryKey: ["team", orgId, teamId],
     queryFn: async () =>
@@ -62,12 +62,14 @@ export function NewMatchForm({ orgId, teamId }: { orgId: string; teamId: string 
     const name = String(f.get("opponent") ?? "").trim();
     const known = opponents.data?.find((o) => o.name.toLowerCase() === name.toLowerCase());
     const optional = (k: string) => String(f.get(k) ?? "").trim() || null;
+    const kickoff = combine(day, clock);
+    if (!kickoff) return setFields({ kickoff_at: t("dateField.invalid") });
     setBusy(true);
     const { data, error } = await api.POST("/v1/orgs/{org_id}/teams/{team_id}/matches", {
       params: { path: { org_id: orgId, team_id: teamId } },
       body: {
         ...(training ? { kind: "training" as const } : known ? { opponent_id: known.id } : { opponent_name: name }),
-        kickoff_at: new Date(String(f.get("kickoff"))).toISOString(),
+        kickoff_at: kickoff.toISOString(),
         is_home: !away,
         competition: optional("competition"),
         venue: optional("venue"),
@@ -128,7 +130,10 @@ export function NewMatchForm({ orgId, teamId }: { orgId: string; teamId: string 
             </datalist>
           </div>
         )}
-        <Input label={t("matches.kickoff")} name="kickoff" type="datetime-local" required defaultValue={localNow()} />
+        <div>
+          <DateTimeField date={day} time={clock} onDate={setDay} onTime={setClock} dateLabel={t("dateField.date")} timeLabel={t("matches.kickoff")} required />
+          {fields.kickoff_at && <p className="mt-1 text-xs text-error">{fields.kickoff_at}</p>}
+        </div>
         {!training ? (
           <fieldset className="space-y-1">
             <legend className="mb-1 block text-[0.9375rem] font-medium">{t("matches.homeAway")}</legend>
@@ -163,6 +168,7 @@ export function NewMatchForm({ orgId, teamId }: { orgId: string; teamId: string 
               <legend className="mb-2 block text-[0.9375rem] font-medium">{t("matches.kits")}</legend>
               <KitFields
                 kits={kits}
+                presets={shell ? { home: shell.org.primary_color, away: shell.org.secondary_color ?? null } : null}
                 unknown={opponentPicked ? [] : ["opponent", "opponent_gk"]}
                 onChange={(next) => {
                   if (next.opponent !== kits.opponent || next.opponent_gk !== kits.opponent_gk) setOpponentPicked(true);

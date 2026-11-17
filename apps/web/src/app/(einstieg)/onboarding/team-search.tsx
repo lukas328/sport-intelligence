@@ -160,6 +160,8 @@ export function OfficialTeamSearch({
         {sent && <Alert kind="success">{sent}</Alert>}
         {error && <Alert>{tr(`errors.${error}`)}</Alert>}
         {searchError && <Alert>{tr(`errors.${searchError}`)}</Alert>}
+        {/* the first search of a term asks handball.ch and can take a few seconds: say so */}
+        {searchable(term) && hits.isPending && <p className="text-sm text-muted" data-testid="official-searching">{t("searching")}</p>}
         {searchable(term) && hits.isSuccess && groups.length === 0 && <p className="text-sm text-muted">{t("noHits", { q: term })}</p>}
       </div>
 

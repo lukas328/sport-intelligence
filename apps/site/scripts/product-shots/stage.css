@@ -1,0 +1,167 @@
+/*
+ * The look of every product picture: the site's tokens (src/app/globals.css), square corners
+ * except phones and the laptop lid, ink frames, a club blue Keil behind the device, one soft
+ * shadow. Rings are yellow with an ink edge: yellow means «schau hier», and the website always
+ * puts a word next to it (the callouts are HTML on the page, not in the picture).
+ */
+@font-face {
+  font-family: "Plex Mono";
+  src: url("../../../src/fonts/ibm-plex-mono-latin-500-normal.woff2") format("woff2");
+  font-weight: 500;
+}
+
+:root {
+  --ground: #eceae5;
+  --paper: #f7f6f2;
+  --ink: #16171a;
+  --rule: #d6d3cc;
+  --attn: #ffd23c;
+  --club: #1f4fd6;
+  --shadow: 0 34px 60px -22px rgb(10 13 17 / 0.5), 0 10px 22px -12px rgb(10 13 17 / 0.3);
+}
+
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  background: transparent;
+}
+
+#stage {
+  position: relative;
+  overflow: hidden;
+  background: var(--ground);
+}
+#stage.clear {
+  background: transparent;
+}
+
+/* the Keil: club blue from a slanted edge down to the bottom, like the heads on the site */
+.keil {
+  position: absolute;
+  inset: 0;
+  background: var(--club);
+  clip-path: polygon(0 var(--from, 62%), 100% var(--to, 44%), 100% 100%, 0 100%);
+}
+/* a thin ink band on the slant, as on the app's heads */
+.keil-line {
+  position: absolute;
+  inset: 0;
+  background: var(--ink);
+  clip-path: polygon(
+    0 var(--from, 62%),
+    100% var(--to, 44%),
+    100% calc(var(--to, 44%) + 6px),
+    0 calc(var(--from, 62%) + 6px)
+  );
+}
+
+/* a screen: a window onto a capture, placed by stage.js */
+.screen {
+  position: relative;
+  overflow: hidden;
+  background: var(--paper);
+}
+.screen > img.cap {
+  position: absolute;
+  left: 0;
+  top: 0;
+  max-width: none;
+  display: block;
+}
+
+/* phone: ink body, rounded (phones are round) */
+.phone {
+  position: absolute;
+  background: var(--ink);
+  padding: 13px;
+  border-radius: 46px;
+  box-shadow: var(--shadow);
+}
+.phone > .screen {
+  border-radius: 34px;
+}
+
+/* browser window: square, ink bar with the app's address */
+.browser {
+  position: absolute;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+  box-shadow: var(--shadow);
+}
+.browser > .bar {
+  height: 30px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 12px;
+  background: var(--ink);
+}
+.browser > .bar i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #5c6168;
+}
+.browser > .bar span {
+  margin-left: 10px;
+  font:
+    500 13px/1 "Plex Mono",
+    ui-monospace,
+    monospace;
+  color: #aab2ba;
+}
+
+/* laptop: ink lid with a thin bezel, a light base */
+.laptop {
+  position: absolute;
+}
+.laptop > .lid {
+  background: var(--ink);
+  padding: 12px 12px 16px;
+  border-radius: 16px 16px 0 0;
+  box-shadow: var(--shadow);
+}
+.laptop > .lid > .screen {
+  border-radius: 2px;
+}
+.laptop > .base {
+  position: relative;
+  height: 16px;
+  margin: 0 -7%;
+  background: linear-gradient(#e3e5e8, #b4b8be 70%, #8f949b);
+  border-radius: 0 0 14px 14px;
+  box-shadow: 0 22px 34px -16px rgb(10 13 17 / 0.55);
+}
+.laptop > .base::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 15%;
+  height: 7px;
+  transform: translateX(-50%);
+  background: #9ba0a7;
+  border-radius: 0 0 8px 8px;
+}
+
+/* the highlight: yellow ring with an ink edge so it reads on light and on yellow */
+.ring {
+  position: absolute;
+  border: 4px solid var(--attn);
+  outline: 2px solid var(--ink);
+  box-shadow: inset 0 0 0 2px var(--ink);
+  pointer-events: none;
+}
+.ring.round {
+  border-radius: 999px;
+}
+
+/* the spotlight: everything but the holes a little darker (an SVG made by stage.js) */
+.veil {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}

@@ -11,7 +11,8 @@ export interface SeasonMatch<T extends GoalRun = GoalRun> {
   /** short opponent name under the bar */
   label: string;
   goals: T[];
-  turnovers: number;
+  /** null: not recorded in this match (the analysis of the video does not count them) */
+  turnovers: number | null;
 }
 
 export interface ZoneRepeat<T extends GoalRun = GoalRun> {
@@ -64,8 +65,10 @@ export function seasonRepeats<T extends GoalRun>(matches: SeasonMatch<T>[]): Rep
   const conceded = zoneRepeat(matches, "opp", ["m7", "gs"]);
   const scored = zoneRepeat(matches, "own", ["m7"]);
   let turnovers: Repeats<T>["turnovers"] = null;
-  if (matches.length >= 2) {
-    const series = matches.map((m) => m.turnovers);
+  // only when every match has them recorded: a missing count is no 0 (livegang K14)
+  const recorded = matches.map((m) => m.turnovers).filter((v): v is number => v != null);
+  if (matches.length >= 2 && recorded.length === matches.length) {
+    const series = recorded;
     const sorted = [...series].sort((a, b) => a - b);
     const median = sorted[Math.floor((sorted.length - 1) / 2)]!;
     const max = Math.max(...series);

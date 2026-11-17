@@ -30,7 +30,7 @@ export function VerifyEmail() {
       ) : (
         <Alert>{t(`errors.${state}`)}</Alert>
       )}
-      <Link href="/app" className="text-sm font-medium text-accent hover:underline">
+      <Link href="/app" className="text-sm font-medium text-accent underline decoration-[1.5px] underline-offset-4">
         {t("auth.toApp")}
       </Link>
     </div>

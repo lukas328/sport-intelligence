@@ -286,7 +286,12 @@ async def logout(ctx: Ctx, session: AuthSession) -> None:
 async def start(ctx: Ctx, email: str, locale: str, next_path: str | None) -> None:
     """The passwordless start of the public entry: a new address gets an account without a
     password (saving accepts the terms), every address gets a sign-in link that leads to
-    `next_path`. Same answer either way (no account enumeration)."""
+    `next_path`. Same answer either way (no account enumeration).
+
+    Without mail delivery an account without a password would have no way in (L2): refused, the
+    entry asks for a password then (`/auth/register`)."""
+    if not ctx.settings.mail_delivers:
+        raise ProblemError(409, "mail-unavailable", "No mail delivery: register with a password")
     user = await ctx.db.scalar(select(User).where(User.email == email))
     if user is None:
         user = User(

@@ -3,7 +3,7 @@
 import { track } from "@/lib/analytics";
 import type { Schemas } from "@handball/api-client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Crosshair, Keyboard, Maximize2, Play, X } from "lucide-react";
+import { Crosshair, Keyboard, Maximize2, Play, Share2, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, type FormEvent, type Ref } from "react";
 import { useRouter } from "next/navigation";
@@ -11,6 +11,7 @@ import { CourtCalibration, CourtPreview } from "@/components/analysis/court-cali
 import { Tagger, useRosterNames } from "@/components/analysis/tagger";
 import { FROM_VIDEO_KEY, playFromVideo } from "@/lib/play-from-video";
 import { Button } from "@/components/ui/button";
+import { ShareButton } from "@/components/sharing/share-button";
 import { Alert } from "@/components/ui/card";
 import { Segmented } from "@/components/ui/tabs";
 import { control, Input, Select } from "@/components/ui/field";
@@ -765,14 +766,16 @@ export function Workspace({
             <ul className="min-h-0 flex-1 space-y-1 overflow-auto text-sm" data-testid="clips">
               {(clips.data ?? []).length === 0 && <li className="text-muted">{t("clips.empty")}</li>}
               {(clips.data ?? []).map((c) => (
-                <li key={c.id}>
-                  <button className="w-full px-2 py-1 text-left hover:bg-surface" onClick={() => {
+                <li key={c.id} className="flex items-center gap-1">
+                  <button className="min-w-0 flex-1 px-2 py-1 text-left hover:bg-surface" onClick={() => {
                     player.current.seek(c.start_ms);
                     player.current.play();
                   }}>
                     <span className="font-score text-xs">{t("clips.range", { start: gameAt(c.start_ms), end: gameAt(c.end_ms) })}</span>{" "}
                     {c.title}
                   </button>
+                  {/* one scene as a link for the team chat (K20) */}
+                  {staff && <ShareButton orgId={orgId} teamId={match.team_id} kind="scene" targetId={c.id} trigger={<Button size="icon-sm" variant="ghost" aria-label={t("share.dialogTitle", { kind: "scene" })} data-testid="clip-share"><Share2 aria-hidden /></Button>} />}
                 </li>
               ))}
             </ul>

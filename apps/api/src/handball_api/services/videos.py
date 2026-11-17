@@ -81,12 +81,43 @@ def media_prefix_of(org_id: uuid.UUID, match_id: uuid.UUID, video_id: uuid.UUID)
 
 async def create_upload(
     ctx: Ctx, match_id: uuid.UUID, data: UploadCreate
-) -> tuple[VideoAsset, int, int]:
+) -> tuple[VideoAsset, int, int, bool]:
+    """A new upload, or the unfinished upload of the same file (name, size, camera) to go on with
+    (`resumed`): after a reload, on another device or with the browser's memory cleared, choosing
+    the file again continues where it stopped instead of answering «already in the match» (L4)."""
     match = await get_match(ctx, match_id, Action.VIDEO_UPLOAD)
     if data.size_bytes > ctx.settings.max_video_bytes:
         raise ProblemError(413, "video-too-large", "The video is too large")
     if not VIDEO_EXT.search(data.filename):
         raise ProblemError(415, "unsupported-video", "Use MP4, MOV, MKV, AVI, MTS or WebM")
+    open_upload = await ctx.db.scalar(
+        select(VideoAsset).where(
+            VideoAsset.match_id == match.id,
+            VideoAsset.role == data.role,
+            VideoAsset.filename == data.filename,
+            VideoAsset.size_bytes == data.size_bytes,
+            VideoAsset.status == VideoStatus.UPLOADING,
+            VideoAsset.upload_id.is_not(None),
+            VideoAsset.source_url.is_(None),
+        )
+    )
+    if open_upload is not None:
+        try:
+            await ctx.storage.list_parts(
+                ctx.settings.s3_bucket_videos, open_upload.storage_key, str(open_upload.upload_id)
+            )
+        except ObjectNotFoundError:
+            # the storage forgot the parts: that upload is over, a new one starts below
+            open_upload.status = VideoStatus.FAILED
+            open_upload.error = "upload expired"
+            open_upload.upload_id = None
+            await ctx.db.flush()
+        else:
+            await audit.record(
+                ctx, "video.upload_resumed", target_type="video", target_id=open_upload.id
+            )
+            count = math.ceil(open_upload.size_bytes / open_upload.part_size)
+            return open_upload, open_upload.part_size, count, True
     same = await ctx.db.scalar(
         select(VideoAsset.id).where(
             VideoAsset.match_id == match.id,
@@ -131,7 +162,7 @@ async def create_upload(
         target_id=asset.id,
         data={"size": data.size_bytes, "role": data.role},
     )
-    return asset, part_size, math.ceil(data.size_bytes / part_size)
+    return asset, part_size, math.ceil(data.size_bytes / part_size), False
 
 
 async def get_asset(
@@ -282,6 +313,10 @@ async def abort_upload(ctx: Ctx, asset_id: uuid.UUID) -> None:
     """Deletes a file of the match (an upload not finished, or a part): the parts after it move
     up, and what the analysis found in it goes with it."""
     asset = await get_asset(ctx, asset_id, Action.VIDEO_UPLOAD)
+    # cancelling an upload that is still running is part of uploading; a file that arrived is
+    # deleted by the staff only (players upload, they do not delete: K18)
+    if asset.status != VideoStatus.UPLOADING:
+        await get_asset(ctx, asset_id, Action.MATCH_DELETE)
     match = await ctx.db.get(Match, asset.match_id)
     before = await parts_of(ctx, asset.match_id)
     placed = any(p.video_id == asset.id for p in before)
@@ -603,6 +638,8 @@ async def apply_job_update(ctx: Ctx, job_id: uuid.UUID, data: JobUpdate) -> Proc
         return job  # late or duplicate callbacks are ignored (idempotent)
     if job.started_at is None and data.status != JobStatus.QUEUED:
         job.started_at = now
+    # every report (progress, heartbeat, the end) says the worker is still on it
+    job.heartbeat_at = now
     job.status = data.status
     job.progress = (
         max(job.progress, data.progress) if data.status == JobStatus.RUNNING else data.progress
@@ -893,7 +930,12 @@ async def _rosters(ctx: Ctx, match: Match) -> dict[str, list[int]]:
     kits in the job payload, so "home" is always the own kit (match.is_home only moves the
     overlay); the opponent side only when its players were entered. Empty sides are left out."""
     out: dict[str, list[int]] = {}
-    own = sorted(await roster_numbers(ctx, match.season_id, match.team_id))
+    # a scouting match: the own side is the opponent's opponent, not our roster (K3)
+    own = (
+        sorted(await roster_numbers(ctx, match.season_id, match.team_id))
+        if match.kind != "scouting"
+        else []
+    )
     if own:
         out["home"] = own
     if match.opponent_id is not None:
@@ -964,7 +1006,8 @@ async def _apply_analysis_result(
     roster: dict[int, uuid.UUID] = {}
     if isinstance(tracks, list) and any(t.get("number") is not None for t in tracks):
         owner = await ctx.db.get(Match, asset.match_id)
-        if owner is not None and owner.season_id is not None:
+        # a scouting match: the "home" kit is another team, never our players (K3)
+        if owner is not None and owner.season_id is not None and owner.kind != "scouting":
             roster = await roster_numbers(ctx, owner.season_id, owner.team_id)
     if isinstance(tracks, list):
         for t in tracks:

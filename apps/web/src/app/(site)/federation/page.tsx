@@ -19,7 +19,7 @@ export default async function FederationsPage() {
         <ul className="space-y-2">
           {list.map((f) => (
             <li key={f.id}>
-              <Link className="font-medium text-accent hover:underline" href={`/federation/${f.id}`}>{f.name}</Link>
+              <Link className="font-medium text-accent underline decoration-[1.5px] underline-offset-4" href={`/federation/${f.id}`}>{f.name}</Link>
             </li>
           ))}
         </ul>

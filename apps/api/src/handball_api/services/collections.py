@@ -33,7 +33,7 @@ from handball_api.services.context import Ctx
 from handball_api.services.insights import insights
 from handball_api.services.matches import scene_window
 from handball_api.services.orgs import get_team
-from handball_api.services.policies import Action
+from handball_api.services.policies import Action, is_coach
 
 Source = Literal["collection", "playlist", "presentation", "assignment"]
 # a scene made from an event: a little before the moment and a little after
@@ -265,12 +265,15 @@ async def _native(ctx: Ctx, collection_id: uuid.UUID) -> Collection:
             409, "read-only-source", f"A {source} is read as a collection and changed where it is"
         )
     await get_team(ctx, row.team_id, Action.PLAYLIST_WRITE)
+    # players build their own collections; the staff change any (K18)
+    if not is_coach(ctx.require_actor(), row.team_id) and row.created_by_id != ctx.user_id:
+        raise ProblemError(403, "forbidden", "Players change only their own collections")
     return row  # type: ignore[no-any-return]
 
 
 _ZONE_WORDS = {
-    "wing_right": "über rechts aussen",
-    "wing_left": "über links aussen",
+    "wing_right": "über aussen rechts",
+    "wing_left": "über aussen links",
     "back_left": "aus dem Rückraum links",
     "half_left": "aus dem Rückraum links",
     "back_centre": "aus dem Rückraum Mitte",
@@ -284,7 +287,7 @@ _ZONE_WORDS = {
 
 
 def _event_title(event: Event) -> str | None:
-    """A scene made from a goal says what it is: «7:46 Gegentor über rechts aussen» (UX test
+    """A scene made from a goal says what it is: «7:46 Gegentor über aussen rechts» (UX test
     B15; the shared page and the collection show it instead of «Szene»)."""
     if event.type != "shot" or event.outcome != "goal":
         return None

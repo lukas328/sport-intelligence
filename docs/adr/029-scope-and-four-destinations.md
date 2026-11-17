@@ -62,3 +62,18 @@ communication features that only work when everyone in the club uses the app.
 - Keeping playlists and presentations as separate objects: rejected, the coach thinks in one
   thing to show the team; a read-only mapping keeps the data without a migration.
 - Recording a visual direction here: left out on purpose; it is still being explored.
+
+## Amendment 2026-11-16 (findings K16, K18 of the live test)
+
+- **Four roles** (decided by the owner): Trainer (coach and club admin), Co-Trainer (coach rights
+  in the team, no club or subscription), Spieler, Eltern. The stored roles stay and map onto them
+  (`services/policies.py` `person_role`, `apps/web/src/lib/roles.ts`); analyst, team manager,
+  goalkeeper and athletic coach read as Co-Trainer. Players see everything of the team and work
+  with the video, so they get the same four destinations as the staff; they do not delete
+  matches or videos, invite, or change squad, team, club or subscription
+  (`docs/policy-matrix.md`).
+- **Teamleben** replaces the tabs of Team from point 3: what "Teamfunktionen" switches on (dates
+  with RSVP, training, tasks, the areas of players and parents) is one fifth destination,
+  shown only while the setting is on; Kader stays alone under Team. Parents have only Teamleben
+  (overview, dates, consents). Switching on explains first what comes, who sees what and what
+  players and parents need; switching off deletes nothing.

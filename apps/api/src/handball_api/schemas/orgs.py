@@ -10,6 +10,7 @@ from handball_api.models.enums import (
     DataRegion,
     MatchFormatKey,
     OrgRole,
+    PersonRole,
     Plan,
     TeamGender,
     TeamRole,
@@ -45,6 +46,7 @@ class OrgOut(ApiModel):
     data_region: DataRegion
     my_role: OrgRole
     two_factor_required: bool
+    two_factor_overdue: bool = False
     created_at: datetime
     # official club link (federation onboarding): none | unverified | verified
     verification: str = "none"
@@ -133,10 +135,18 @@ class TeamMemberOut(ApiModel):
     name: str
     email: str
     role: TeamRole
+    # one of the product's four roles (K18): Trainer is a coach who is club admin
+    person_role: PersonRole | None = None
 
 
 class TeamMemberUpdate(ApiModel):
     role: TeamRole
+
+
+class PersonRoleIn(ApiModel):
+    """Trainer, Co-Trainer or Spieler; parents come by invitation with their child."""
+
+    role: PersonRole
 
 
 class InvitationCreate(ApiModel):
@@ -176,6 +186,13 @@ class InvitationOut(ApiModel):
     expires_at: datetime
     accepted_at: datetime | None
     revoked_at: datetime | None
+
+
+class InvitationCreated(InvitationOut):
+    # the link to accept, for the inviter to pass on (team chat); bound to the e-mail address
+    link: str
+    # whether a mail went out with it (no mail delivery: the link is the only way, L2)
+    mailed: bool
 
 
 class InvitationPreview(ApiModel):

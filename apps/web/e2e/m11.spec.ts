@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { expectAccessible, register, uniqueEmail } from "./helpers";
+import { chooseFile, expectAccessible, register, uniqueEmail } from "./helpers";
 
 // M11: courtside marks with device time (5.3), profile page (5.8), paper photo page (5.9)
 test("coach marks during a match, opens the profile and paper pages", async ({ page }, info) => {
@@ -48,11 +48,11 @@ test("coach marks during a match, opens the profile and paper pages", async ({ p
   await page.goto("/p/nobody-123456");
   await expect(page.getByText("Dieses Profil ist nicht öffentlich.")).toBeVisible();
 
-  // paper photos (old /paper opens the dialog "Spielbericht hinzufügen"): without a model key
-  // the upload says so honestly
+  // the old paper photo address leads to Spiele: the paper report is a file of its match (K19)
   await page.goto(`/app/${orgId}/teams/${teamId}/paper`);
-  await expect(page.getByTestId("report-dialog")).toBeVisible();
-  await page.getByLabel("Foto").setInputFiles({ name: "bogen.jpg", mimeType: "image/jpeg", buffer: Buffer.from([0xff, 0xd8, 0xff, 0x00]) });
-  await page.getByRole("button", { name: "Auslesen" }).click();
-  await expect(page.getByText("Das Auslesen von Fotos ist in dieser Installation nicht eingerichtet.")).toBeVisible();
+  await expect(page).toHaveURL(/\/matches$/);
+  await page.goto(`/app/${orgId}/matches/${match.id}?tab=spiel`);
+  await chooseFile(page, "attachment-file", { name: "bogen.jpg", mimeType: "image/jpeg", buffer: Buffer.from([0xff, 0xd8, 0xff, 0xe0, 1, 2, 3, 4]) });
+  await page.getByRole("button", { name: "Datei anhängen" }).click();
+  await expect(page.getByTestId("attachment")).toContainText("bogen.jpg");
 });

@@ -35,6 +35,7 @@ from handball_api.schemas.matches import (
     MatchCreate,
     MatchGraphicsOut,
     MatchOut,
+    MatchProgressOut,
     MatchSummary,
     MatchUpdate,
     OpponentCreate,
@@ -61,7 +62,7 @@ from handball_api.schemas.matches import (
     VideoUpdate,
 )
 from handball_api.services import auth as auth_service
-from handball_api.services import events, graphics, media, videos
+from handball_api.services import events, graphics, media, progress, videos
 from handball_api.services import matches as service
 from handball_api.services import orgs as org_service
 from handball_api.services.context import Ctx
@@ -113,9 +114,25 @@ async def put_opponent_players(
 
 @router.get("/teams/{team_id}/matches", response_model=list[MatchSummary])
 async def list_matches(
-    team_id: uuid.UUID, scope: OrgDep, season_id: Annotated[uuid.UUID | None, Query()] = None
+    team_id: uuid.UUID,
+    scope: OrgDep,
+    season_id: Annotated[uuid.UUID | None, Query()] = None,
+    scouting: Annotated[
+        bool,
+        Query(
+            description="also the videos of an opponent against another team (K3); they are no "
+            "matches of the team (season figures, table) and are left out by default"
+        ),
+    ] = False,
 ) -> list[MatchSummary]:
-    return await service.list_matches(scope.ctx, team_id, season_id)
+    return await service.list_matches(scope.ctx, team_id, season_id, scouting=scouting)
+
+
+@router.get("/progress", response_model=list[MatchProgressOut], tags=["matches"])
+async def org_progress(scope: OrgDep) -> list[MatchProgressOut]:
+    """Uploads and processing of the matches the person sees, while they run and a while after
+    (the progress in the head of every page, on Spiele and in the match: K6, K13)."""
+    return await progress.for_org(scope.ctx)
 
 
 @router.post("/teams/{team_id}/matches", response_model=MatchOut, status_code=201)
@@ -125,7 +142,10 @@ async def create_match(team_id: uuid.UUID, data: MatchCreate, scope: OrgDep) -> 
 
 @router.get("/matches/{match_id}", response_model=MatchOut)
 async def get_match(match_id: uuid.UUID, scope: OrgDep) -> MatchOut:
-    return await service.match_out(scope.ctx, await service.get_match(scope.ctx, match_id))
+    match = await service.get_match(scope.ctx, match_id)
+    out = await service.match_out(scope.ctx, match)
+    out.progress = await progress.for_match(scope.ctx, match)
+    return out
 
 
 @router.patch("/matches/{match_id}", response_model=MatchOut)
@@ -145,8 +165,10 @@ async def delete_match(match_id: uuid.UUID, scope: OrgDep) -> None:
     "/matches/{match_id}/videos", response_model=UploadOut, status_code=201, tags=["videos"]
 )
 async def create_upload(match_id: uuid.UUID, data: UploadCreate, scope: OrgDep) -> UploadOut:
-    asset, part_size, count = await videos.create_upload(scope.ctx, match_id, data)
-    out = UploadOut(video=service.video_out(asset), part_size=part_size, part_count=count)
+    asset, part_size, count, resumed = await videos.create_upload(scope.ctx, match_id, data)
+    out = UploadOut(
+        video=service.video_out(asset), part_size=part_size, part_count=count, resumed=resumed
+    )
     # the request's transaction commits only after the response is sent; a client asking for the
     # part URLs right away (the seed, a fast browser) would not find the video yet (UX test B54)
     await scope.ctx.db.commit()

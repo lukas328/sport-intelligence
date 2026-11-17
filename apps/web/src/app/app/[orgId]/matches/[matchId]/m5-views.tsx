@@ -250,7 +250,7 @@ export function PhysicalView({
             </table>
           </div>
           {short > 0 && (
-            <button type="button" className="text-sm font-medium text-accent hover:underline" onClick={() => setShowShort((v) => !v)}>
+            <button type="button" className="text-sm font-medium text-accent underline decoration-[1.5px] underline-offset-4" onClick={() => setShowShort((v) => !v)}>
               {showShort ? t("hideShort") : t("showShort", { n: short })}
             </button>
           )}

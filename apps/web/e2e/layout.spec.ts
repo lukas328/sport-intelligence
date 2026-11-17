@@ -99,7 +99,7 @@ test("a club without video: Szenen says one sentence and the way to the video (U
   await page.waitForURL(/\/teams\/[^/]+/);
   await page.goto(page.url().replace(/(\/teams\/[^/?#]+).*/, "$1/scenes"));
   const empty = page.getByTestId("scenes-empty");
-  await expect(empty).toContainText("Szenen gibt es nach dem ersten Video.");
+  await expect(empty).toContainText("Lade ein Video hoch, dann siehst du hier deine Szenen.");
   await expect(empty.getByRole("link", { name: "Video hochladen" })).toBeVisible();
   await expect(page.getByTestId("scene-search")).toHaveCount(0);
   await expect(page.getByText(/0 Szenen aus 0 Spielen/)).toHaveCount(0);

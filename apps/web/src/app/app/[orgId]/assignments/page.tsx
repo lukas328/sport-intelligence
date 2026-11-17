@@ -10,7 +10,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function AssignmentsPage({ params }: { params: Promise<{ orgId: string }> }) {
   const { orgId } = await params;
   return (
-    <TeamFeaturesGate>
+    <TeamFeaturesGate tabs>
       <MyAssignments orgId={orgId} />
     </TeamFeaturesGate>
   );

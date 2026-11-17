@@ -6,6 +6,7 @@ from handball_metrics import Event, EventType, Side, compute_match_stats, expect
 from handball_metrics.stats import (
     LINE_KEYS,
     POSITIONS,
+    has_analysis,
     player_event_ids,
     position_of_zone,
     situations,
@@ -124,9 +125,14 @@ def test_zone_and_quality() -> None:
     assert s["quality"] == {
         "events": 1,
         "attempts_known": False,
+        "analysed": True,
         "low_confidence": 1,
         "sources": {"heuristic": 1},
     }
+    # the official report alone is no analysis (livegang K15)
+    official = compute_match_stats([shot(1, OWN, "goal", 1, source="official_report")])
+    assert official["quality"]["analysed"] is False
+    assert has_analysis([shot(1, OWN, "goal", 1, source="official_feed")]) is False
 
 
 def test_xg_prior() -> None:

@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+import json
 import re
+import uuid
 from collections.abc import Callable
 from typing import Any
 
+import asyncpg
 import pytest
 
 from handball_api.core.email import MemoryEmailSender
@@ -168,10 +171,48 @@ async def test_assignment_progress_for_staff(
     listing = (await coach.get(f"/v1/orgs/{org}/teams/{team}/assignments")).json()
     assert listing[0]["done"] == 1 and len(listing[0]["still_open"]) == 2
 
-    # players never see other players' progress; outside the video staff no detail
-    for api in (alia, bea, manager):
+    # players never see other players' progress; every Co-Trainer does (K18)
+    for api in (alia, bea):
         assert (await api.get(detail_url)).status_code == 403
+    assert (await manager.get(detail_url)).status_code == 200
     assert (await coach.get(f"/v1/orgs/{org}/assignments/{ids['team']}")).status_code == 404
     other = make_api()
     await setup_club(other, "other@hc-test.ch")
     assert (await other.get(f"/v1/orgs/{org}/assignments/{a['id']}")).status_code == 404
+
+
+async def test_the_bell_counts_the_questions_as_they_are_now(
+    make_api: Callable[[], Api], owner_conn: asyncpg.Connection
+) -> None:
+    """Livegang L13: «2 Fragen an dich» stayed after every question was answered. The note
+    counts the open questions afresh; with none left it says so and counts as read."""
+    from .test_matches import new_match
+    from .test_themes import ready_video
+
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    m = await new_match(api, ids)
+    await ready_video(api, ids, m["id"])  # one question open: the throw-off
+    user = await owner_conn.fetchval("SELECT id FROM users WHERE email = 'coach@hc-test.ch'")
+    params = {"match_id": m["id"], "opponent": "TV Gegner", "questions": 2, "more_moments": 0}
+    await owner_conn.execute(
+        "INSERT INTO notifications (id, organization_id, user_id, kind, params, link) "
+        "VALUES (gen_random_uuid(), $1, $2, 'analysis_questions', $3::jsonb, $4)",
+        uuid.UUID(org),
+        user,
+        json.dumps(params),
+        f"/app/{org}/matches/{m['id']}/check",
+    )
+    notes = (await api.get(f"/v1/orgs/{org}/me/notifications")).json()
+    note = notes["items"][0]
+    assert note["kind"] == "analysis_questions" and note["params"]["questions"] == 1
+    assert notes["unread"] == 1
+    r = await api.put(f"/v1/orgs/{org}/matches/{m['id']}/kickoff", json={"period": 1, "t_ms": 0})
+    assert r.status_code < 300, r.text
+    notes = (await api.get(f"/v1/orgs/{org}/me/notifications")).json()
+    note = notes["items"][0]
+    assert note["kind"] == "analysis_checked" and "questions" not in note["params"]
+    assert note["params"]["opponent"] == "TV Gegner"
+    assert note["link"] == f"/app/{org}/matches/{m['id']}" and note["read_at"] is not None
+    assert notes["unread"] == 0

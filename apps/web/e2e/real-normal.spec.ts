@@ -2,7 +2,7 @@ import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { expect, test } from "@playwright/test";
 import { MATCH_VIDEO } from "./global-setup";
-import { register, uniqueEmail } from "./helpers";
+import { chooseVideo, register, uniqueEmail } from "./helpers";
 
 // the local stack's and CI's database (docker compose): the goal candidates the recognition would
 // find in a real hall video, which the 30 s synthetic clip does not give
@@ -37,7 +37,7 @@ test("no goal found by the analysis: after Prüfen the result, course, goals and
     data: { opponent_name: "TV Neuer", kickoff_at: new Date(Date.now() - 7_200_000).toISOString() },
   });
   await page.goto(`/app/${org}/matches/${match.id}?tab=video`);
-  await page.getByTestId("video-file").setInputFiles(MATCH_VIDEO);
+  await chooseVideo(page, MATCH_VIDEO);
   await expect(page.getByTestId("plain-stage")).toBeVisible({ timeout: 240_000 });
   // away from the match while the analysis runs: it is not opened after it
   await page.goto(`/app/${org}/teams/${team}/matches`);
@@ -176,7 +176,7 @@ test("a moved corner: Prüfen waits for the new analysis and asks what is open",
     })
   ).json();
   await page.goto(`/app/${org}/matches/${match.id}?tab=video`);
-  await page.getByTestId("video-file").setInputFiles(MATCH_VIDEO);
+  await chooseVideo(page, MATCH_VIDEO);
   const analysis = async () => (await (await page.request.get(`/v1/orgs/${org}/matches/${match.id}/graphics`)).json()).analysis;
   await expect.poll(analysis, { timeout: 240_000, intervals: [2000] }).toBe("ready");
 
@@ -242,7 +242,7 @@ test("the court question on a phone: the corners can be dragged with a finger", 
     })
   ).json();
   await page.goto(`/app/${org}/matches/${match.id}?tab=video`);
-  await page.getByTestId("video-file").setInputFiles(MATCH_VIDEO);
+  await chooseVideo(page, MATCH_VIDEO);
   await expect
     .poll(async () => (await (await page.request.get(`/v1/orgs/${org}/matches/${match.id}/graphics`)).json()).analysis, { timeout: 240_000, intervals: [2000] })
     .toBe("ready");

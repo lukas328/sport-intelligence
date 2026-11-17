@@ -94,4 +94,19 @@ describe("uploadFile", () => {
     const res = await uploadFile(f, "main", { api, store, putPart: s.put, scope: "m1" });
     expect(res).toEqual({ videoId: "v1", resumed: false });
   });
+
+  it("goes on with the API's unfinished upload of the same file without the browser's memory (L4)", async () => {
+    const s = new FakeStorage();
+    s.parts.set(1, 10);
+    const store = memoryStore(); // another device, or a cleared browser
+    const api = s.api(10, 3);
+    api.create = vi.fn(async () => ({ videoId: "v1", partSize: 10, partCount: 3, resumed: true }));
+    const started: string[] = [];
+    const spy = vi.fn(s.put);
+    const res = await uploadFile(file(25), "main", { api, store, putPart: spy, scope: "m1", onStarted: (id) => started.push(id) });
+    expect(res).toEqual({ videoId: "v1", resumed: true });
+    expect(started).toEqual(["v1"]);
+    expect(spy).toHaveBeenCalledTimes(2); // part 1 was there already
+    expect(s.completed?.map((p) => p.number)).toEqual([1, 2, 3]);
+  });
 });

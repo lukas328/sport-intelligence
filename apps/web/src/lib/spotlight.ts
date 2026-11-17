@@ -108,6 +108,56 @@ export function personBox(h: Homography, x: number, y: number, size: [number, nu
   return { x: (fx - bw / 2) / size[0], y: (fy - bh) / size[1], w: bw / size[0], h: bh / size[1] };
 }
 
+export interface CropView {
+  /** the part of the video frame shown, in video pixels */
+  sx: number;
+  sy: number;
+  sw: number;
+  sh: number;
+  /** where it lands on the canvas (letterboxed, never stretched) */
+  dx: number;
+  dy: number;
+  dw: number;
+  dh: number;
+  /** canvas pixels per video pixel, the same on both axes */
+  scale: number;
+}
+
+/**
+ * What a canvas of W x H shows of a video frame vw x vh around a person's box (normalised, as
+ * personBox gives it): a crop `zoom` box heights tall with exactly the canvas's aspect, kept
+ * inside the frame; without a box the whole frame. The picture is scaled the same on both axes
+ * and letterboxed where the aspects differ, so a box mapped with `boxOnCanvas` sits on the
+ * person at any canvas size, also with a portrait or 4:3 video in the 16:9 player (livegang L5:
+ * the box stood beside the player when the crop was clamped and stretched).
+ */
+export function cropView(box: { x: number; y: number; w: number; h: number } | null, vw: number, vh: number, W: number, H: number, zoom = 3.2): CropView {
+  const fit = (sx: number, sy: number, sw: number, sh: number): CropView => {
+    const scale = Math.min(W / sw, H / sh);
+    const dw = sw * scale;
+    const dh = sh * scale;
+    return { sx, sy, sw, sh, dx: (W - dw) / 2, dy: (H - dh) / 2, dw, dh, scale };
+  };
+  if (!box || !(W > 0) || !(H > 0)) return fit(0, 0, vw, vh);
+  const aspect = W / H;
+  let ch = Math.min(vh, Math.max(box.h * vh * zoom, vh * 0.2));
+  let cw = ch * aspect;
+  if (cw > vw) {
+    // a narrow frame: as wide as it is, the height from the canvas's aspect (never taller)
+    cw = vw;
+    ch = Math.min(vh, cw / aspect);
+  }
+  const clamp = (v: number, lo: number, hi: number) => Math.min(Math.max(v, lo), Math.max(lo, hi));
+  const cx = clamp((box.x + box.w / 2) * vw - cw / 2, 0, vw - cw);
+  const cy = clamp((box.y + box.h / 2) * vh - ch / 2, 0, vh - ch);
+  return fit(cx, cy, cw, ch);
+}
+
+/** A normalised box of the frame vw x vh on the canvas of a cropView: x, y, w, h in canvas pixels. */
+export function boxOnCanvas(box: { x: number; y: number; w: number; h: number }, vw: number, vh: number, v: CropView): { x: number; y: number; w: number; h: number } {
+  return { x: v.dx + (box.x * vw - v.sx) * v.scale, y: v.dy + (box.y * vh - v.sy) * v.scale, w: box.w * vw * v.scale, h: box.h * vh * v.scale };
+}
+
 function sub(a: [number, number], b: [number, number]): [number, number] {
   return [a[0] - b[0], a[1] - b[1]];
 }

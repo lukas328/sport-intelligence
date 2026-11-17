@@ -280,7 +280,12 @@ def render(template: str, locale: str, to: str, **values: object) -> Email:
         }
     text = body.format(**values)
     first, _, rest = text.partition("\n")
-    return Email(to=to, subject=subject.format(**values), text=f"{first.rstrip()}\n{rest}")
+    return Email(
+        to=to,
+        subject=subject.format(**values),
+        text=f"{first.rstrip()}\n{rest}",
+        template=template,
+    )
 
 
 def questions(n: int, locale: str) -> str:

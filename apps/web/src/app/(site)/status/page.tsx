@@ -73,7 +73,7 @@ export default async function StatusPage() {
       {view.version && (
         <p className="text-xs text-muted">{t("version", { version: view.version, env: view.env ?? "" })}</p>
       )}
-      <a href="/status" className="text-sm font-medium text-accent hover:underline">
+      <a href="/status" className="text-sm font-medium text-accent underline decoration-[1.5px] underline-offset-4">
         {t("retry")}
       </a>
     </div>

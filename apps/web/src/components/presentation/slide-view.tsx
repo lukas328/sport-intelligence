@@ -126,7 +126,7 @@ function PlaySlide({ orgId, playId }: { orgId: string; playId: string }) {
   return (
     <div className="space-y-2">
       <p className="text-xl font-semibold">{q.data.name}</p>
-      <Board frame={frame} court={doc?.court ?? "half"} label={q.data.name} className="max-h-[70vh] w-full" />
+      <Board frame={frame} court={doc?.court ?? "half"} label={q.data.name} className="h-auto max-h-[70vh] w-full" />
       {frames.length > 1 && (
         <div className="flex justify-center gap-2">
           {frames.map((_, n) => (

@@ -118,6 +118,7 @@ async def test_public_config_gives_the_website_and_support_addresses(
     assert r.json() == {
         "site_url": "https://handball-intelligence.com",
         "support_email": "support@handball-intelligence.com",
+        "mail_enabled": True,
     }
 
 

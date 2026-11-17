@@ -43,7 +43,7 @@ from handball_api.services import audit, timeline
 from handball_api.services.context import Ctx
 from handball_api.services.matches import timeline_video
 from handball_api.services.orgs import get_team
-from handball_api.services.policies import Action, can
+from handball_api.services.policies import Action, can, is_coach
 from handball_api.services.report_pdf import _esc, _styles
 from handball_api.services.scouting_pdf import observation_text
 from handball_api.services.videos import media_prefix
@@ -64,7 +64,17 @@ async def _get(ctx: Ctx, pres_id: uuid.UUID, write: bool = False) -> Presentatio
         and not can(ctx.require_actor(), Action.PLAYLIST_READ_ALL, p.team_id)
     ):
         raise ProblemError(404, "not-found", "Presentation not found")
+    if write and not _may_change(ctx, p):
+        raise ProblemError(403, "forbidden", "Players change only their own presentations")
     return p
+
+
+def _may_change(ctx: Ctx, p: Presentation) -> bool:
+    """The staff change any presentation, players their own (K18)."""
+    actor = ctx.require_actor()
+    if not can(actor, Action.CLIP_WRITE, p.team_id):
+        return False
+    return is_coach(actor, p.team_id) or p.created_by_id == ctx.user_id
 
 
 async def list_for_team(ctx: Ctx, team_id: uuid.UUID) -> list[tuple[Presentation, int]]:
@@ -111,7 +121,7 @@ async def detail(
             .order_by(PresentationSlide.position)
         )
     ).all()
-    return p, list(slides), can(ctx.require_actor(), Action.CLIP_WRITE, p.team_id)
+    return p, list(slides), _may_change(ctx, p)
 
 
 async def update(ctx: Ctx, pres_id: uuid.UUID, data: PresentationPatch) -> Presentation:

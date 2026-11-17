@@ -119,6 +119,19 @@ class Settings(BaseSettings):
     smtp_username: str | None = None
     smtp_password: SecretStr | None = None
     smtp_starttls: bool = False
+    # Whether mails reach people (L2). Unset: SMTP and the test outbox do; the console backend
+    # only in local development, where the mail is read in the log. Set it to false while a
+    # provider is configured but not live yet. The app then promises no mail: no sign-in links,
+    # saving asks for a password, a forgotten password goes through the support.
+    mail_enabled: bool | None = None
+
+    @property
+    def mail_delivers(self) -> bool:
+        if self.mail_enabled is not None:
+            return self.mail_enabled
+        if self.email_backend == "console":
+            return self.env == "local"
+        return True
 
     max_logo_bytes: int = 1_000_000
     password_reset_ttl_minutes: int = 60

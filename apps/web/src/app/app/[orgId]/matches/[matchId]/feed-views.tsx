@@ -7,6 +7,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Button, buttonClass } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/card";
+import { PlayerScenesShare } from "@/components/sharing/player-scenes-share";
 import { Input } from "@/components/ui/field";
 import { api } from "@/lib/client";
 import { cn } from "@/lib/utils";
@@ -109,6 +110,15 @@ export function TeamFeedView({
                   </span>
                 )}
                 <span className="font-score tabular-nums">{t("notesOf", { n: noted(p), m: p.items.length })}</span>
+                {/* «Deine Szenen» of this player as a link for the chat, by number only (K20) */}
+                {p.number != null && p.items.length > 0 && (
+                  <PlayerScenesShare
+                    orgId={orgId}
+                    matchId={matchId}
+                    number={p.number}
+                    scenes={[...p.items].sort((a, b) => a.start_ms - b.start_ms).map((s) => ({ start_ms: s.start_ms, end_ms: s.end_ms, title: `${at(s.start_ms + 6000)} ${t(`reason_${s.reason}` as "reason_goal")}` }))}
+                  />
+                )}
               </p>
             </div>
             <ol>

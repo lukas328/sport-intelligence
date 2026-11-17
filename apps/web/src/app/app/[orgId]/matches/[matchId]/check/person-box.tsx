@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { personBox, positionAt, trackSamples, type Homography, type Sample } from "@/lib/spotlight";
+import { boxOnCanvas, cropView, personBox, positionAt, trackSamples, type Homography, type Sample } from "@/lib/spotlight";
 
 const ZOOM = 3.2; // the crop is this many box heights tall
 
@@ -53,22 +53,17 @@ export function PersonCrop({
       const box = pos ? personBox(homography, pos.x, pos.y, imageSize) : null;
       const vw = v.videoWidth;
       const vh = v.videoHeight;
-      if (!box) {
-        ctx.drawImage(v, 0, 0, vw, vh, 0, 0, W, H);
-        return;
-      }
-      // the crop around the box, in the video's own pixels, kept inside the frame
-      const bh = box.h * vh;
-      const ch = Math.min(vh, Math.max(bh * ZOOM, vh * 0.2));
-      const cw = Math.min(vw, (ch * W) / H);
-      const cx = Math.min(Math.max((box.x + box.w / 2) * vw - cw / 2, 0), vw - cw);
-      const cy = Math.min(Math.max((box.y + box.h / 2) * vh - ch / 2, 0), vh - ch);
-      ctx.drawImage(v, cx, cy, cw, ch, 0, 0, W, H);
-      const k = W / cw;
+      // one scale for both axes, letterboxed: the box stays on the person at every size (L5)
+      const view = cropView(box, vw, vh, W, H, ZOOM);
+      ctx.fillStyle = "black";
+      ctx.fillRect(0, 0, W, H);
+      ctx.drawImage(v, view.sx, view.sy, view.sw, view.sh, view.dx, view.dy, view.dw, view.dh);
+      if (!box) return;
+      const r = boxOnCanvas(box, vw, vh, view);
       ctx.globalAlpha = pos!.alpha;
       ctx.lineWidth = 4 * devicePixelRatio;
       ctx.strokeStyle = getComputedStyle(c).getPropertyValue("--attn").trim() || "yellow";
-      ctx.strokeRect((box.x * vw - cx) * k, (box.y * vh - cy) * k, box.w * vw * k, bh * k);
+      ctx.strokeRect(r.x, r.y, r.w, r.h);
       ctx.globalAlpha = 1;
     };
     draw();

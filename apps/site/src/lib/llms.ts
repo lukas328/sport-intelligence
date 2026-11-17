@@ -108,7 +108,7 @@ function section(locale: Locale): string[] {
     "",
     `### ${m.faq.head}`,
     "",
-    ...m.faq.items.flatMap((f) => [`**${f.q}** ${fmt(f.a, { month: team.price_chf_month, year: team.price_chf_year, ...fileVars(m) })}`, ""]),
+    ...m.faq.items.flatMap((f) => [`**${f.q}** ${fmt(f.a, { month: team.price_chf_month, year: team.price_chf_year, ...fileVars(m) })}${f.hi ? ` ${f.hi}` : ""}`, ""]),
     `### ${m.guides.title}`,
     "",
     ...guides(locale),

@@ -95,7 +95,10 @@ async def feedback(
         raise ProblemError(
             503, "email-unavailable", "The e-mail could not be sent; please try again later"
         )
-    await audit.record(ctx, "support.feedback", data={"page": context.get("page")})
+    # without mail delivery (console backend) the mail went nowhere: keep the message in the audit
+    # log so the support can read it there (L2); with mail it is in the support's inbox
+    kept = {} if ctx.settings.mail_delivers else {"message": message[:2000]}
+    await audit.record(ctx, "support.feedback", data={"page": context.get("page"), **kept})
 
 
 def chat_config(ctx: Ctx, user: User | None, locale: str) -> dict[str, Any] | None:

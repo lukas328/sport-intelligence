@@ -13,6 +13,7 @@ from handball_api.core.errors import ProblemError
 from handball_api.models import (
     Event,
     Match,
+    MatchAttachment,
     MatchSegment,
     Opponent,
     OpponentPlayer,
@@ -93,9 +94,7 @@ def video_out(v: VideoAsset, part: Part | None = None, half: int | None = None) 
 
 def _require_staff(ctx: Ctx) -> None:
     if not is_staff_somewhere(ctx.require_actor()):
-        raise ProblemError(
-            403, "forbidden", "Only coaches, analysts, team managers and admins manage opponents"
-        )
+        raise ProblemError(403, "forbidden", "Only members of a team manage opponents")
 
 
 async def list_opponents(ctx: Ctx) -> list[Opponent]:
@@ -205,8 +204,9 @@ async def create_match(ctx: Ctx, team_id: uuid.UUID, data: MatchCreate) -> Match
         data.kit_opponent if "kit_opponent" in data.model_fields_set else None
     )
     values["opponent_kit"] = said if opp else None
-    # our own shirts: the club's colour unless the form said another (real-video test E09)
-    if "kit_own" not in data.model_fields_set:
+    # our own shirts: the club's colour unless the form said another (real-video test E09); in a
+    # scouting match the own side is the other team, whose colour nobody knows by default
+    if "kit_own" not in data.model_fields_set and data.kind != "scouting":
         org = await ctx.db.get(Organization, team.organization_id)
         if org is not None and org.primary_color:
             values["kit_own"] = org.primary_color
@@ -237,7 +237,7 @@ async def create_match(ctx: Ctx, team_id: uuid.UUID, data: MatchCreate) -> Match
 
 
 async def list_matches(
-    ctx: Ctx, team_id: uuid.UUID, season_id: uuid.UUID | None = None
+    ctx: Ctx, team_id: uuid.UUID, season_id: uuid.UUID | None = None, scouting: bool = False
 ) -> list[MatchSummary]:
     await get_team(ctx, team_id, Action.MATCH_READ)
     # a report is there once its events are (UX test A02: «Spielbericht hinzufügen» only without)
@@ -257,6 +257,8 @@ async def list_matches(
     )
     if season_id:
         q = q.where(Match.season_id == season_id)
+    if not scouting:
+        q = q.where(Match.kind != "scouting")
     rows = (await ctx.db.execute(q)).all()
     return [
         MatchSummary(
@@ -274,6 +276,7 @@ async def list_matches(
             has_video=count > 0,
             opponent_color=m.opponent_kit or remembered,
             has_report=bool(has_report),
+            scouting_other=m.scouting_other,
         )
         for m, name, remembered, count, has_report in rows
     ]
@@ -677,6 +680,7 @@ async def match_out(ctx: Ctx, match: Match) -> MatchOut:
         report_extra=match.report_extra,
         videos=[video_out(v, parts.get(v.id), half.get(v.id)) for v in videos],
         jobs=[JobOut.model_validate(j) for j in jobs],
+        scouting_other=match.scouting_other,
     )
 
 
@@ -701,6 +705,8 @@ def _format(key: MatchFormatKey, period_s: int | None, periods: int | None) -> t
 async def update_match(ctx: Ctx, match_id: uuid.UUID, data: MatchUpdate) -> Match:
     match = await get_match(ctx, match_id, Action.MATCH_WRITE)
     changes = data.model_dump(exclude_unset=True)
+    if "scouting_other" in changes and (match.kind != "scouting" or not changes["scouting_other"]):
+        raise ProblemError(422, "validation", "Only a scouting match names the other team")
     fmt_keys = {"format", "period_s", "periods"}
     if fmt_keys & changes.keys():
         key = changes.get("format") or MatchFormatKey.CUSTOM
@@ -732,13 +738,24 @@ async def update_match(ctx: Ctx, match_id: uuid.UUID, data: MatchUpdate) -> Matc
 
 async def delete_match(ctx: Ctx, match_id: uuid.UUID) -> None:
     """Deletes the match with all videos, derived files and data (BRIEF 12, deletion)."""
-    match = await get_match(ctx, match_id, Action.MATCH_WRITE)
+    match = await get_match(ctx, match_id, Action.MATCH_DELETE)
     videos = (await ctx.db.scalars(select(VideoAsset).where(VideoAsset.match_id == match.id))).all()
     for v in videos:
         if v.upload_id and v.status == "uploading":
             await ctx.storage.abort_multipart(
                 ctx.settings.s3_bucket_videos, v.storage_key, v.upload_id
             )
+    # an attachment still uploading has parts only (stored files go with the prefix below)
+    for a in (
+        await ctx.db.scalars(
+            select(MatchAttachment).where(
+                MatchAttachment.match_id == match.id, MatchAttachment.upload_id.is_not(None)
+            )
+        )
+    ).all():
+        await ctx.storage.abort_multipart(
+            ctx.settings.s3_bucket_videos, a.storage_key, str(a.upload_id)
+        )
     prefix = f"{match.organization_id}/{match.id}/"
     removed = 0
     for bucket in (ctx.settings.s3_bucket_videos, ctx.settings.s3_bucket_artifacts):

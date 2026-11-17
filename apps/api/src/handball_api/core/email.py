@@ -18,6 +18,8 @@ class Email:
     text: str
     html: str | None = None
     attachments: tuple[tuple[str, str, bytes], ...] = ()  # (filename, mime type, content)
+    # the template the mail was rendered from (logged without the text by the console backend)
+    template: str | None = None
 
 
 class EmailSender(Protocol):
@@ -49,8 +51,26 @@ class MemoryEmailSender:
 
 
 class ConsoleEmailSender:
+    """Writes mails to the log instead of sending them.
+
+    Mails carry sign-in, reset and invitation links: only in local development (`full`) does the
+    log get the whole text; anywhere else it gets the recipient's domain, the subject and the
+    template, never the address or a link (L10).
+    """
+
+    def __init__(self, full: bool = False) -> None:
+        self.full = full
+
     async def send(self, email: Email) -> None:
-        get_logger("email").info("email", to=email.to, subject=email.subject, text=email.text)
+        if self.full:
+            get_logger("email").info("email", to=email.to, subject=email.subject, text=email.text)
+            return
+        get_logger("email").info(
+            "email_not_sent",
+            to_domain=email.to.rsplit("@", 1)[-1].lower(),
+            subject=email.subject,
+            template=email.template,
+        )
 
 
 class SmtpEmailSender:

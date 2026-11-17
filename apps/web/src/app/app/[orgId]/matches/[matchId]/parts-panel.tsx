@@ -21,7 +21,7 @@ type Job = Schemas["JobOut"];
  * the few things a coach may want: swap the order, analyse a half again, remove a file. Shown once
  * the match has more than one main file; with one file there is nothing to say.
  */
-export function PartsPanel({ orgId, match, jobs, staff, onChanged }: { orgId: string; match: Match; jobs: Job[]; staff: boolean; onChanged: () => void }) {
+export function PartsPanel({ orgId, match, jobs, staff, canDelete = staff, onChanged }: { orgId: string; match: Match; jobs: Job[]; staff: boolean; /** players upload but do not delete (K18) */ canDelete?: boolean; onChanged: () => void }) {
   const t = useTranslations("parts");
   const qc = useQueryClient();
   const confirm = useConfirm();
@@ -175,9 +175,11 @@ export function PartsPanel({ orgId, match, jobs, staff, onChanged }: { orgId: st
                           {t("up")}
                         </Button>
                       )}
-                      <Button size="sm" variant={short || st.kind === "duplicate" ? "primary" : "secondary"} onClick={() => void remove(v)} data-testid="part-remove" aria-label={`${t("remove")}: ${label(v)}`}>
-                        {t("remove")}
-                      </Button>
+                      {canDelete && (
+                        <Button size="sm" variant={short || st.kind === "duplicate" ? "primary" : "secondary"} onClick={() => void remove(v)} data-testid="part-remove" aria-label={`${t("remove")}: ${label(v)}`}>
+                          {t("remove")}
+                        </Button>
+                      )}
                     </div>
                   )}
                 </li>

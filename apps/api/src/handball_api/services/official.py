@@ -218,8 +218,13 @@ async def _request_access(
             org_id,
             list(admins),
             "access_request",
-            {"request_id": str(req.id)},
-            f"/app/{org_id}/settings/access-requests",
+            # who asks for which team: the admins decide on the Team page (K17)
+            {
+                "request_id": str(req.id),
+                "name": user.name,
+                "team": (await ctx.db.get(Team, team_id)).name if team_id else "",  # type: ignore[union-attr]
+            },
+            f"/app/{org_id}/teams/{team_id}" if team_id else f"/app/{org_id}/club/federation",
         )
         await audit.record(
             ctx,

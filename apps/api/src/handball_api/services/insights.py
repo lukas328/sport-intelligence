@@ -28,12 +28,13 @@ from handball_api.services.matches import (
     get_match,
     opponent_of,
     timeline_video,
+    timeline_videos,
     video_formations,
 )
 from handball_api.services.orgs import get_team
 from handball_api.services.policies import Action, visible_team_ids
 from handball_metrics.insights import VERSION, match_insights
-from handball_metrics.stats import METRICS_VERSION
+from handball_metrics.stats import METRICS_VERSION, OFFICIAL_SOURCES
 from handball_metrics.themes import THEMES_VERSION, MatchInput
 from handball_metrics.themes import season_themes as season_themes_of
 
@@ -102,7 +103,13 @@ async def insights(ctx: Ctx, match_id: uuid.UUID) -> dict[str, Any]:
             for m in await _matches_with_events(ctx, match.team_id, match.season_id)
             if m.id != match.id
         ]
-        baseline = [await events_service.stats_for(ctx, m) for m in others]
+        # the comparison only with matches that have an analysis: a match with the official
+        # report alone has no turnovers or saves, not zero of them (livegang K15)
+        baseline = [
+            s
+            for s in [await events_service.stats_for(ctx, m) for m in others]
+            if s["quality"].get("analysed")
+        ]
         cached = {
             "items": match_insights(stats, baseline) if stats["quality"]["events"] else [],
             "baseline": len(baseline),
@@ -182,21 +189,36 @@ async def season_stats(ctx: Ctx, team_id: uuid.UUID, season_id: uuid.UUID) -> di
     team = await get_team(ctx, team_id, Action.MATCH_READ)
     await billing.require_feature(ctx, "season", team.organization_id)
     version = await _season_version(ctx, team.id, season_id) + (":y" if team.is_youth else "")
-    cached = await events_service.cache_get(ctx, "season", season_id, version)
-    if cached is not None:
-        return cached
-    data = await _season_stats(ctx, team, season_id)
-    await events_service.cache_put(ctx, team.organization_id, "season", season_id, version, data)
+    data = await events_service.cache_get(ctx, "season", season_id, version)
+    if data is None:
+        data = await _season_stats(ctx, team, season_id)
+        await events_service.cache_put(
+            ctx, team.organization_id, "season", season_id, version, data
+        )
+    # whether a match has a video that plays changes without its events: read every time
+    videos = await timeline_videos(ctx, [uuid.UUID(r["match_id"]) for r in data["matches"]])
+    for r in data["matches"]:
+        r["has_video"] = uuid.UUID(r["match_id"]) in videos
+    data["totals"]["video_matches"] = sum(r["has_video"] for r in data["matches"])
     return data
 
 
+def _mean(total: float, n: int) -> float | None:
+    return round(total / n, 2) if n else None
+
+
 async def _season_stats(ctx: Ctx, team: Team, season_id: uuid.UUID) -> dict[str, Any]:
-    """Every played match counts; goals per match from its events (one source per goal, see
-    handball_metrics.stats.one_source_per_goal), from the stored result when nothing is tagged.
-    Shots, saves and turnovers come from the tagged matches; the shooting and save percentages
-    only from matches with recorded misses or saves; xG only covers shots with a position:
-    `xg_coverage` = shots with xG / shots on target, and `xg_goals` = the goals of those shots
-    (compare xG with `xg_goals`, not with all goals: report goals mostly have no position)."""
+    """Every played match counts for the result, the record and the goals: goals per match from
+    its events (one source per goal, see handball_metrics.stats.one_source_per_goal), from the
+    stored result when nothing is recorded. Everything else comes only from the matches with an
+    analysis (`has_analysis`: events beyond the official report, from the video, tagging or a
+    filled-in report), each figure only from the matches where it was recorded at all: a match
+    without that data shows the figure as missing (None), never as 0, and does not count in an
+    average or a best value (livegang K14, K15). The totals say how many matches stand behind
+    each figure (`analysed_matches`, `turnovers_matches`, `shooting_matches`, `save_matches`).
+    xG only covers shots with a position: `xg_coverage` = shots with xG / shots on target, and
+    `xg_goals` = the goals of those shots (compare xG with `xg_goals`, not with all goals:
+    report goals mostly have no position)."""
     matches = await _played_matches(ctx, team.id, season_id)
     names = {
         o.id: o.name
@@ -212,18 +234,28 @@ async def _season_stats(ctx: Ctx, team: Team, season_id: uuid.UUID) -> dict[str,
         "goals": 0,
         "goals_against": 0,
         "tagged_matches": 0,
+        "analysed_matches": 0,
         "shots": 0,
         "saves": 0,
         "turnovers": 0,
+        "turnovers_matches": 0,
+        "shooting_matches": 0,
+        "save_matches": 0,
         "xg": 0.0,
         "xg_shots": 0,
         "xg_goals": 0,
     }
-    pct = {"goals": 0, "shots": 0, "saves": 0, "goals_against": 0}  # matches with attempts
+    shooting = {"goals": 0, "shots": 0}  # matches with our misses or saved shots recorded
+    saving = {"saves": 0, "goals_against": 0}  # matches with the opponent's misses recorded
     for m in matches:
         s = await events_service.stats_for(ctx, m)
         own, opp = s["own"], s["opponent"]
         tagged = bool(s["quality"]["events"])
+        analysed = bool(s["quality"].get("analysed"))
+        known = own.get("known") or {}
+        shooting_known = analysed and own["shooting_pct"] is not None
+        saving_known = analysed and own["save_pct"] is not None
+        turnovers_known = analysed and bool(known.get("turnovers"))
         goals = own["goals"] if tagged else m.score_own or 0
         against = opp["goals"] if tagged else m.score_opponent or 0
         rows.append(
@@ -237,30 +269,46 @@ async def _season_stats(ctx: Ctx, team: Team, season_id: uuid.UUID) -> dict[str,
                 if m.score_opponent is not None
                 else opp["goals"],
                 "tagged": tagged,
+                "has_analysis": analysed,
+                "official": m.official_game_id is not None
+                or any(src in OFFICIAL_SOURCES for src in s["quality"]["sources"]),
+                # the analysis came from a filled-in match report (no video behind it)
+                "from_report": analysed
+                and set(s["quality"]["sources"]) <= {"paper_report", *OFFICIAL_SOURCES},
                 "goals": goals,
                 "goals_against": against,
-                "shots": own["shots"],
-                "shooting_pct": own["shooting_pct"],
-                "save_pct": own["save_pct"],
-                "turnovers": own["turnovers"],
-                "xg": own["xg"],
-                "xg_coverage": own["xg_coverage"],
-                "xg_goals": own["xg_goals"],
-                "xg_against": opp["xg"],
-                "xg_against_coverage": opp["xg_coverage"],
-                "xg_goals_against": opp["xg_goals"],
-                "seven_m": [own["seven_m_goals"], own["seven_m_shots"]],
+                "shots": own["shots"] if analysed else None,
+                "shooting_pct": own["shooting_pct"] if shooting_known else None,
+                "save_pct": own["save_pct"] if saving_known else None,
+                "turnovers": own["turnovers"] if turnovers_known else None,
+                "xg": own["xg"] if analysed else None,
+                "xg_coverage": own["xg_coverage"] if analysed else None,
+                "xg_goals": own["xg_goals"] if analysed else 0,
+                "xg_against": opp["xg"] if analysed else None,
+                "xg_against_coverage": opp["xg_coverage"] if analysed else None,
+                "xg_goals_against": opp["xg_goals"] if analysed else 0,
+                "seven_m": [own["seven_m_goals"], own["seven_m_shots"]] if analysed else None,
             }
         )
         totals["goals"] += goals
         totals["goals_against"] += against
         totals["tagged_matches"] += tagged
-        for k in ("shots", "saves", "turnovers", "xg_shots", "xg_goals"):
-            totals[k] += own[k]
-        totals["xg"] = round(totals["xg"] + own["xg"], 2)
-        if s["quality"]["attempts_known"]:
-            for k in pct:
-                pct[k] += own[k]
+        if analysed:
+            totals["analysed_matches"] += 1
+            for k in ("shots", "saves", "xg_shots", "xg_goals"):
+                totals[k] += own[k]
+            totals["xg"] = round(totals["xg"] + own["xg"], 2)
+        if turnovers_known:
+            totals["turnovers"] += own["turnovers"]
+            totals["turnovers_matches"] += 1
+        if shooting_known:
+            totals["shooting_matches"] += 1
+            shooting["goals"] += own["goals"]
+            shooting["shots"] += own["shots"]
+        if saving_known:
+            totals["save_matches"] += 1
+            saving["saves"] += own["saves"]
+            saving["goals_against"] += own["goals_against"]
         for p in s["players"].values():
             if p["side"] != "own" or not p.get("player_id"):
                 continue
@@ -276,14 +324,27 @@ async def _season_stats(ctx: Ctx, team: Team, season_id: uuid.UUID) -> dict[str,
                     "saves": 0,
                     "assists": 0,
                     "xg": 0.0,
+                    # the goals of the analysed matches: what `shots` are set against
+                    "shot_goals": 0,
+                    # shots behind the shooting percentage: only matches with misses recorded
+                    "pct_goals": 0,
+                    "pct_shots": 0,
                 },
             )
             row["matches"] += 1
-            for k in ("goals", "shots", "turnovers", "suspensions", "saves", "assists"):
+            for k in ("goals", "suspensions"):
                 row[k] += p.get(k, 0)
-            row["xg"] = round(row["xg"] + p.get("xg", 0.0), 2)
+            if analysed:
+                row["shot_goals"] += p.get("goals", 0)
+                for k in ("shots", "turnovers", "saves", "assists"):
+                    row[k] += p.get(k, 0)
+                row["xg"] = round(row["xg"] + p.get("xg", 0.0), 2)
+            if shooting_known:
+                row["pct_goals"] += p.get("goals", 0)
+                row["pct_shots"] += p.get("shots", 0)
     for p in players.values():
-        p["shooting_pct"] = round(p["goals"] / p["shots"], 4) if p["shots"] else None
+        g, n = p.pop("pct_goals"), p.pop("pct_shots")
+        p["shooting_pct"] = round(g / n, 4) if n else None
     if team.is_youth:
         # youth protection (addendum 01): no ranking of children, list by jersey number
         numbers = await _jersey_numbers(ctx, season_id)
@@ -299,10 +360,13 @@ async def _season_stats(ctx: Ctx, team: Team, season_id: uuid.UUID) -> dict[str,
         "totals": {
             **totals,
             "matches": len(rows),
-            "shooting_pct": round(pct["goals"] / pct["shots"], 4) if pct["shots"] else None,
-            "save_pct": round(pct["saves"] / (pct["saves"] + pct["goals_against"]), 4)
-            if pct["saves"] + pct["goals_against"]
+            "shooting_pct": round(shooting["goals"] / shooting["shots"], 4)
+            if shooting["shots"]
             else None,
+            "save_pct": round(saving["saves"] / (saving["saves"] + saving["goals_against"]), 4)
+            if saving["saves"] + saving["goals_against"]
+            else None,
+            "turnovers_per_match": _mean(totals["turnovers"], totals["turnovers_matches"]),
             "xg_coverage": round(totals["xg_shots"] / totals["shots"], 4)
             if totals["shots"]
             else None,
@@ -318,7 +382,11 @@ async def opponent_profile(ctx: Ctx, opponent_id: uuid.UUID) -> dict[str, Any]:
         raise ProblemError(404, "not-found", "Opponent not found")
     await billing.require_feature(ctx, "season", opponent.organization_id)
     visible = visible_team_ids(ctx.require_actor())
-    q = select(Match).where(Match.opponent_id == opponent.id).order_by(Match.kickoff_at)
+    q = (
+        select(Match)
+        .where(Match.opponent_id == opponent.id, Match.kind.in_(("match", "scouting")))
+        .order_by(Match.kickoff_at)
+    )
     if visible is not None:
         q = q.where(Match.team_id.in_(visible))
     matches = list((await ctx.db.scalars(q)).all())
@@ -340,7 +408,8 @@ async def opponent_profile(ctx: Ctx, opponent_id: uuid.UUID) -> dict[str, Any]:
     rows = []
     tagged = 0
     for m in matches:
-        if m.score_own is not None and m.score_opponent is not None:
+        # the record is against us; a scouting match (them against others, K3) adds what they do
+        if m.kind == "match" and m.score_own is not None and m.score_opponent is not None:
             key = (
                 "won"
                 if m.score_own > m.score_opponent
@@ -358,9 +427,14 @@ async def opponent_profile(ctx: Ctx, opponent_id: uuid.UUID) -> dict[str, Any]:
                 "score_own": m.score_own,
                 "score_opponent": m.score_opponent,
                 "events": s["quality"]["events"],
+                "analysed": bool(s["quality"].get("analysed")),
+                "kind": m.kind,
+                "scouting_other": m.scouting_other,
             }
         )
-        if not s["quality"]["events"]:
+        # the profile only from matches with an analysis: the official report has the goals,
+        # not the shots, zones or turnovers (livegang K15)
+        if not s["quality"].get("analysed"):
             continue
         tagged += 1
         opp = s["opponent"]
@@ -516,10 +590,14 @@ async def season_themes(ctx: Ctx, team_id: uuid.UUID, season_id: uuid.UUID) -> d
     cached = await events_service.cache_get(ctx, "themes", season_id, version)
     if cached is not None:
         return cached
-    matches = await _matches_with_video(ctx, team.id, season_id)
+    matches = []
     inputs = []
-    for m in matches:
+    for m in await _matches_with_video(ctx, team.id, season_id):
         stats = await events_service.stats_for(ctx, m)
+        # a video whose analysis brought nothing yet (the official goals only) says nothing
+        if not stats["quality"].get("analysed"):
+            continue
+        matches.append(m)
         items = (await insights(ctx, m.id))["insights"] if stats["quality"]["events"] else []
         inputs.append(MatchInput(match_id=str(m.id), stats=stats, insights=items))
     themes = season_themes_of(inputs)

@@ -34,7 +34,7 @@ export function MarksPanel({ orgId, matchId, onPlay }: { orgId: string; matchId:
         <ChevronDown aria-hidden className="ml-auto size-4 text-muted transition-transform group-open:rotate-180" />
       </summary>
       <div className="mt-3 space-y-3 text-sm">
-        <Link href={`/app/${orgId}/matches/${matchId}/marks`} className="font-medium text-accent hover:underline">
+        <Link href={`/app/${orgId}/matches/${matchId}/marks`} className="font-medium text-accent underline decoration-[1.5px] underline-offset-4">
           {t("open")}
         </Link>
         {(d?.sessions ?? []).map((s) => (
@@ -57,7 +57,7 @@ export function MarksPanel({ orgId, matchId, onPlay }: { orgId: string; matchId:
           </div>
         ))}
         {(d?.sessions.length ?? 0) > 0 && (
-          <button type="button" className="font-medium text-accent hover:underline" onClick={() => resync.mutate()}>
+          <button type="button" className="font-medium text-accent underline decoration-[1.5px] underline-offset-4" onClick={() => resync.mutate()}>
             {t("resync")}
           </button>
         )}

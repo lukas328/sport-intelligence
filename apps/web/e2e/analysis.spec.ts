@@ -16,12 +16,16 @@ test("paper report: import, overview, match report, shots", async ({ page }, inf
   await page.getByRole("button", { name: "Zum Team" }).click();
   await follow(page, page.getByRole("link", { name: "Spiele", exact: true }).first(), /\/matches$/);
 
-  // "Spielbericht hinzufügen" holds the photo and the file import
-  await page.getByTestId("add-report").first().click();
-  await page.getByTestId("report-dialog").getByTestId("paper-file").setInputFiles(REPORT);
-  // goalkeeper zones carry one unknown shooter: the import reports it and stays on the list
-  await expect(page.getByText("Hinweise")).toBeVisible();
-  await page.getByRole("link", { name: /TV Papierdorf/ }).click();
+  // the paper import is no longer offered in the app (K19), its API stays: the data comes that way
+  const [, orgId, teamId] = page.url().match(/\/app\/([^/]+)\/teams\/([^/?#]+)/)!;
+  const csrf = (await page.context().cookies()).find((c) => c.name === "hb_csrf")!.value;
+  const imported = await page.request.post(`/v1/orgs/${orgId}/teams/${teamId}/paper-reports`, {
+    headers: { "x-csrf-token": csrf },
+    multipart: { file: { name: "paper-report.json", mimeType: "application/json", buffer: readFileSync(REPORT) } },
+  });
+  expect(imported.ok()).toBeTruthy();
+  await page.reload();
+  await page.getByRole("link", { name: /TV Papierdorf/ }).first().click();
   await expect(page.getByRole("heading", { level: 1 })).toContainText("TV Papierdorf");
   await expect(page.getByTestId("score")).toHaveText("5:4");
   await matchMenu(page);

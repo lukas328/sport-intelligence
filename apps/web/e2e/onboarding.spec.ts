@@ -40,8 +40,10 @@ test("new club: club and team in two steps, roster from the team page, then invi
   await page.getByLabel("Liga (optional)").fill("3. Liga");
   await expect(page.getByLabel("E-Mail")).toHaveCount(0);
   await page.getByRole("button", { name: "Zum Team" }).click();
-  await page.waitForURL(/\/app\/[^/]+\/teams\/[^/?#]+$/);
-  const teamUrl = page.url();
+  // on to Spiele, where the next steps stand (K17)
+  await page.waitForURL(/\/app\/[^/]+\/teams\/[^/?#]+\/matches$/);
+  await expect(page.getByTestId("next-steps")).toBeVisible();
+  const teamUrl = page.url().replace(/\/matches$/, "");
 
   // the roster later, from the team page: by hand
   await page.goto(`${teamUrl}?edit=1`);
@@ -85,8 +87,10 @@ test("new club: club and team in two steps, roster from the team page, then invi
   await page.goto(`/app/${orgId}/club/teams`);
   const playerEmail = uniqueEmail("player");
   await page.getByLabel("E-Mail").fill(playerEmail);
+  // the four roles (K18): Co-Trainer is offered first, a player is chosen
+  await page.getByRole("radio", { name: /^Spieler/ }).check();
   await page.getByRole("button", { name: "Einladung senden" }).click();
-  await expect(page.getByText(`Eingeladen: ${playerEmail}`)).toBeVisible();
+  await expect(page.getByText(`Einladung an ${playerEmail} geschickt.`)).toBeVisible();
 
   const elapsed = Date.now() - started;
   expect(elapsed, "onboarding must take under 5 minutes").toBeLessThan(5 * 60 * 1000);
@@ -105,9 +109,10 @@ test("new club: club and team in two steps, roster from the team page, then invi
   await player.getByLabel("Passwort").fill("correct-horse-1");
   await player.getByLabel(/Nutzungsbedingungen/).check();
   await player.getByRole("button", { name: "Konto erstellen" }).click();
-  await expect(player.getByRole("main")).toContainText("Paul");
-  // "Teamfunktionen" is off for a new team: players see the start and the team only (ADR 029)
-  await expect(player.getByRole("navigation", { name: "Hauptnavigation" }).getByRole("link")).toHaveCount(2);
+  // players start on Spiele like the staff (K18: they see everything of the team)
+  await player.waitForURL(/\/teams\/[^/]+\/matches/, { timeout: 30_000 });
+  // players see everything of the team (K18): the four destinations; Teamleben is off for a new team
+  await expect(player.getByRole("navigation", { name: "Hauptnavigation" }).first().getByRole("link")).toHaveCount(4);
   await player.getByRole("link", { name: "Team", exact: true }).click();
   await expect(player.getByTestId("team-row")).toHaveCount(4);
   // players cannot edit the roster
@@ -117,19 +122,21 @@ test("new club: club and team in two steps, roster from the team page, then invi
 
   // settings: pending invitations are empty now, members list shows the player
   await page.getByTestId("account-menu").filter({ visible: true }).click();
-  await page.getByRole("menuitem", { name: "Verein", exact: true }).click();
+  // the account menu (K4): the club by its name under «Verein»
+  await page.getByRole("menuitem", { name: "HC E2E Zürich", exact: true }).click();
   await page.getByRole("link", { name: "Teams und Rollen", exact: true }).click();
   // the reload must hit the page of teams and roles, not the club page the click is leaving
   // (it raced the navigation and reloaded the club page, where the member is not listed)
   await page.waitForURL(/\/club\/teams$/);
   // the invitation was sent from this very page: load it afresh
   await page.reload();
-  await expect(page.getByText("Paul Spieler")).toBeVisible();
+  // listed in the club's members and in the team's people (K17)
+  await expect(page.getByText("Paul Spieler").first()).toBeVisible();
   await expectAccessible(page);
 
   // enable two-factor sign-in ("Ich", tab Sicherheit), sign out, sign in with code
   await page.getByTestId("account-menu").filter({ visible: true }).click();
-  await page.getByRole("menuitem", { name: "Ich", exact: true }).click();
+  await page.getByRole("menuitem", { name: "Mein Konto", exact: true }).click();
   await page.getByRole("link", { name: "Sicherheit", exact: true }).click();
   await page.getByRole("button", { name: "Einrichten" }).click();
   const secret = (await page.getByTestId("totp-secret").textContent())!.trim();

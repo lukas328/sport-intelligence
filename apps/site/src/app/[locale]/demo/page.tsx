@@ -13,6 +13,9 @@ import { demoView, MATCH } from "@/lib/things";
 
 type Props = { params: Promise<{ locale: Locale }> };
 
+/** Where the four lines of «Was du hier siehst» lead. */
+const GUIDE_IDS = ["things", "scene", "flow", "zahlen"];
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   return pageMeta(locale, "demo", messages(locale).seo.demo.title, messages(locale).seo.demo.description);
@@ -20,7 +23,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 /**
  * The demo match: invented and marked so at the top (never hidden), drawn with the app's
- * building blocks. No account, no video; one scene on the tactics camera, without a ball.
+ * building blocks. A short guide says what is on the page (K11). No account, no video; one scene
+ * on the tactics camera, with the ball (invented) and handball-typical positions.
  */
 export default async function Demo({ params }: Props) {
   const { locale } = await params;
@@ -48,13 +52,32 @@ export default async function Demo({ params }: Props) {
         flightLabels={{ half: m.match.flightHalf, end: m.match.flightEnd }}
       />
       <div className="wrap">
-        <p className="mt-6 text-[1.0625rem] text-ink-2">{t.sources}</p>
-        <div className="mt-8 max-w-[44rem]">
-          <ShirtPicker question={m.kit.question} hint={m.kit.hint} names={m.kit.names} />
-        </div>
+        {/* what is on this page, in four lines: the visitor knows where to look first */}
+        <nav aria-labelledby="guide" className="mt-8 border-2 border-ink bg-paper p-5 md:p-6">
+          <h2 id="guide" className="font-slant text-[1.5rem] md:text-[1.75rem]">
+            {t.guideTitle}
+          </h2>
+          <ol className="mt-3 grid grid-cols-1 gap-x-8 sm:grid-cols-2 lg:grid-cols-4">
+            {t.guide.map((g, i) => (
+              <li key={g.title} className="border-t border-rule py-3">
+                <a href={`#${GUIDE_IDS[i]}`} className="group flex gap-3">
+                  <span aria-hidden className="font-num text-[2.25rem] leading-[.85] text-club-text">
+                    {i + 1}
+                  </span>
+                  <span>
+                    <b className="block underline decoration-2 underline-offset-4 group-hover:decoration-[3px]">{g.title}</b>
+                    <span className="mt-1 block text-[1.0625rem] text-ink-2">{g.text}</span>
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ol>
+          <p className="mt-3 border-t border-rule pt-3 text-base text-ink-2">{t.sources}</p>
+        </nav>
 
-        <section aria-labelledby="things" className="mt-16">
+        <section aria-labelledby="things" className="mt-14">
           <SectionHead id="things" title={m.things.side} />
+          <p className="measure mt-3 text-[1.0625rem] text-ink-2">{t.thingsNote}</p>
           <Things
             things={v.things}
             legend={{ solid: m.things.legendSolid, dashed: m.things.legendDashed, thin: m.things.legendThin }}
@@ -65,10 +88,14 @@ export default async function Demo({ params }: Props) {
             estimated={t.estimated}
             noVideo={t.noVideo}
           />
+          <div className="mt-10 max-w-[44rem]">
+            <ShirtPicker question={m.kit.question} hint={m.kit.hint} names={m.kit.names} />
+          </div>
         </section>
 
         <section aria-labelledby="scene" className="mt-16">
           <SectionHead id="scene" title={m.camera.title} note={v.sceneGoal.clock} />
+          <p className="measure mt-3">{t.cameraText}</p>
           <div className="mt-6">
             <DemoCamera
               scene={v.scene}
@@ -80,7 +107,8 @@ export default async function Demo({ params }: Props) {
 
         <section aria-labelledby="flow" className="mt-16">
           <SectionHead id="flow" title={t.flowTitle} />
-          <div className="mt-6">
+          <p className="mt-3 text-[1.0625rem] text-ink-2">{fmt(t.flowLabel, { own: v.own, opp: v.opp })}</p>
+          <div className="mt-4">
             <Rail goals={v.report} label={fmt(t.flowLabel, { own: v.own, opp: v.opp })} />
             <p className="mt-2 flex justify-between text-base text-ink-2" aria-hidden>
               <span>0</span>
@@ -90,7 +118,7 @@ export default async function Demo({ params }: Props) {
           </div>
         </section>
 
-        <div className="mt-16 grid grid-cols-1 gap-16 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
+        <div id="zahlen" className="mt-16 grid grid-cols-1 gap-16 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
           <section aria-labelledby="figures">
             <SectionHead id="figures" title={t.figuresTitle} />
             <div>
