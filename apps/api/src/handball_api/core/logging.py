@@ -18,8 +18,12 @@ def configure_logging(level: str = "INFO", json: bool = True) -> None:
     renderer: structlog.types.Processor = (
         structlog.processors.JSONRenderer() if json else structlog.dev.ConsoleRenderer()
     )
+    # keep structlog's list instance: loggers cached on first use hold it, so a second configure
+    # (another app in the same process) and structlog.testing.capture_logs still reach them
+    chain = structlog.get_config()["processors"]
+    chain[:] = [*processors, renderer]
     structlog.configure(
-        processors=[*processors, renderer],
+        processors=chain,
         wrapper_class=structlog.make_filtering_bound_logger(logging.getLevelName(level.upper())),
         logger_factory=structlog.PrintLoggerFactory(file=sys.stdout),
         cache_logger_on_first_use=True,
