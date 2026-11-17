@@ -51,12 +51,20 @@ centre lives at `{site}/{de|fr|en}/hilfe/{slug}/`; the app links there with `HB_
   local app with the seeded demo club: `pnpm --filter @handball/site shots` (how:
   `scripts/product-shots/README.md`); sizes and callouts in `src/lib/product-shots.json`, the
   callout texts in `src/messages/*.ts` (`product`).
-- Start page: one invented week with the demo match (BEFUNDE-2 W5, W22): hero with the team field
-  and the answer from the app, Saturday 7 pm (lost, only a feeling), Saturday 10 pm (the three
-  things), one goal on the tactics camera, film/upload/check, Tuesday (four scenes in the team
-  chat), three matches later (3 of 26, `src/lib/story.ts`), the video in the club, price, start.
-  The pieces are in `src/components/story.tsx`. Blocks marked `data-reveal` glide in once
+- Start page: one invented week with the demo match (BEFUNDE-2 W5, W22, L1): the hero «Profis haben
+  Analysten. Du hast den Samstagabend.» with a short film of what the app does
+  (`src/components/hero-film.tsx`: a blurred hall recording, the goals conceded laid on the half
+  court, then the three things; CSS on server-rendered markup, the resting end state is the markup,
+  still with `prefers-reduced-motion`), Saturday 7 pm (lost, only a feeling), Saturday 10 pm (the
+  three things and the app on a computer), one goal on the tactics camera, film/upload/check (one
+  picture story in front of the hall), Tuesday (the team chat on a phone with the app's real link
+  preview, `src/components/phone-chat.tsx`, pictures in `public/media/teilen-vorschau-*.webp`
+  rendered by `apps/web` `lib/share/og-image.tsx`), three matches later (3 of 26,
+  `src/lib/story.ts`), the video in the club, price (the free start first), start. The pieces are
+  in `src/components/story.tsx`. Blocks marked `data-reveal` glide in once
   (`src/components/reveal.tsx`); with `prefers-reduced-motion` nothing moves.
+- The top bar: «Start», five destinations, from 1024 px a slim strip with DE · FR · EN and
+  «Anmelden»; on the phone the language first in the menu (L2, L3).
 - Help guides outside the core have `listed: false` in `content/help/index.ts`: reachable for the app's
   links, not listed, not in the sitemap, `noindex`.
 

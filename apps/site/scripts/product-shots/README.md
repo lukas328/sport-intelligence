@@ -10,12 +10,24 @@ seeded demo club (HC Zürichsee, invented players, synthetic videos), never real
 what the app really shows. The demo club plays in the website's own pine green (`#10684a`, seed
 and synthetic footage), so the pictures sit in the site's colours (cream, green, ink).
 
-The website tells its own story with the demo match (a defeat, 16:18; `scripts/make_demo.py`),
-while the seeded club in the app won its match 26:18. So no picture shows a score or the match's
-headline («Gewonnen.»), and none shows the season's sentence: the pictures are cut-outs of what
-matters, in the app's own brightness (no darkened surroundings), and the numbers the story needs
-(9 von 18 über aussen rechts) are in them. `captures/ergebnis-*.webp` are no longer used. The start page's head draws the three things itself
-(components/hero-things.tsx), so there is no `hero-thing` picture any more.
+The website tells its own story with the demo match (HC Zürichsee against TSV Seewald, lost
+27:29, 11 of 29 conceded over the right wing; `scripts/make_demo.py`), while the seeded club in the
+app won its last match 26:18. So no picture shows a score or the match's headline, and the few
+counts on a picture that belong to that match are set to the story's numbers while capturing: each
+screen in `capture.mjs` may have a `story` (texts replaced once, exactly or by pattern),
+`storyBars` (a small bar chart redrawn with other values) and `hide` (a block kept empty, e.g. an
+empty «Noch keine Notiz»). Today: the match (56 goals, the three things 11, 5 and 9 scenes), the
+search over the last three matches (26 of 77, «Gegen Seewald waren es 11 von 29»), the season (bars
+6, 9, 11 and 4, 0, 9) and the collection of the website's Tuesday («Aussen rechts zumachen», 4
+scenes). Change them together with `make_demo.py`. The start page's head draws its film itself
+(components/hero-film.tsx).
+
+The match video in every picture is a real hall recording, blurred past recognition
+(`assets/halle.webp`, made with `blur-hall.py` from one frame of a test clip; no person, face,
+number, text, logo or scoreboard can be recognised, the unblurred frame is never in the repository).
+The synthetic demo clip of the seeded app is covered by it (`S.video` in `stage.js`), and the
+website writes «Dein Spiel» over it in the visitor's language (`lettering` in
+`src/lib/product-shots.json`, drawn by `components/product-shot.tsx`).
 
 ## Make them all again
 
@@ -68,9 +80,10 @@ warns. After either step, look at the pictures on the site at 390 and 1280 px.
 | Picture | Shows | Where |
 |---|---|---|
 | `app-desktop` | browser, the whole app on a computer: a match with the video playing, the scenes of the phase, the three things, all goals on the timeline (no callouts, the page's caption says it) | start page, under the three things (S13) |
-| `step-upload` | flat cut-out, «Video hochladen»: which match is the video from? first match ringed | step 2 (start page, «So funktioniert es», «Filmen») |
-| `step-check` | flat pieces on the app's cloth: the picture with the four yellow points, «Passt das Spielfeld?» and «Passt» (ringed) | step 3 |
-| `step-result` | flat cut-out, the first of the three things with its shots on the half court, ring on the shots | «So funktioniert es», step 4; «Über uns» |
+| `step-film` | the hall, in front of it a phone on its tripod filming it (drawn, no maker, no words) | step 1 (start page, «So funktioniert es») |
+| `step-upload` | the hall, the phone in front: «Video hochladen», which match is the video from? first match ringed | step 2 (start page, «So funktioniert es», «Filmen») |
+| `step-check` | the hall, the phone in front: the hall recording with the proposed field in yellow, «Passt das Spielfeld?», «Passt» ringed | step 3 |
+| `step-result` | the hall, the phone in front: the first of the three things (11 von 29) with its runs, ring on the shots | «So funktioniert es», step 4; «Über uns» |
 | `get-video` | browser, a match: video, the scene that plays, all goals on the timeline | «So sieht es aus» |
 | `get-search` | browser, «Szenen»: the search, the answer with its base, «Alle 24 abspielen» | «So sieht es aus» |
 | `get-season` | browser, «Saison», cut below the title: what repeats, one bar per match, the shots on the court | «So sieht es aus» |
@@ -80,8 +93,8 @@ warns. After either step, look at the pictures on the site at 390 and 1280 px.
 
 Add `templates/<name>.html` (copy one that is close), a screen to `SHOTS` in `capture.mjs` if it
 needs one, the callout texts under `product.<name>` in all three message files, and use
-`<ProductShot name="<name>" …>` on the page. Keep the style: the steps as flat cut-outs at 640 x 620
-(`S.piece`, `S.stage(…, { paper: true })` or `{ cloth: true }`), the others with the same phone size
+`<ProductShot name="<name>" …>` on the page. Keep the style: the steps at 640 x 760 with the hall behind (`#stage.hall`) and a phone whose
+upper edge is in the picture (`S.phone(…, { crop, top })`), the others with the same phone size
 (`PHONE_SCREEN` in `stage.js`) or a browser window, yellow rings with an ink edge, at most two
 callouts, and each label short (it wraps at under half the picture's width). On a picture shown under 28rem wide arrows and labels
 go and the words stand below it.

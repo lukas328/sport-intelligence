@@ -79,14 +79,14 @@ export function HeroFilm({
     <figure ref={box} className="m-0">
       <div className="border-2 border-ink bg-paper text-ink shadow-[8px_8px_0_var(--ink)]">
         {/* the bar: the match and what is happening (video, analysis, three things) */}
-        <div className="flex items-center justify-between gap-3 bg-ink px-4 py-2.5 text-ground md:px-5">
-          <span className="min-w-0 truncate font-mono text-[0.9375rem] font-semibold xl:text-base xl:tracking-wide">
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 bg-ink px-4 py-2.5 text-ground md:px-5">
+          <span className="font-mono text-[0.9375rem] font-semibold xl:text-base xl:tracking-wide">
             {text.score}
           </span>
           <span
             key={`s${round}`}
             aria-hidden
-            className="grid shrink-0 font-mono text-[0.9375rem] font-semibold uppercase md:text-base"
+            className="ml-auto grid shrink-0 font-mono text-[0.9375rem] font-semibold uppercase md:text-base"
           >
             {text.status.map((s, i) => (
               <span

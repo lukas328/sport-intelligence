@@ -501,7 +501,7 @@ const de = {
     how: { title: "So funktioniert die Videoanalyse", description: "Filmen, hochladen, prüfen: Die Analyse schlägt die Tore vor und fragt dich nur, wo sie unsicher ist. Danach Szenen, Spielverlauf und Positionen von oben." },
     filming: { title: "Spiel filmen: Checkliste und Aushang", description: "Fünf Regeln und die Checkliste für den Spieltag: Handy oder Kamera hoch an der Mittellinie, beide Tore im Bild. Mit Hallenplan und Aushang zum Drucken." },
     demo: { title: "Demo-Spiel: so sieht eine Auswertung aus", description: "Ein erfundenes Spiel zum Anfassen, ohne Konto: drei Dinge, Szenen, Taktikkamera, Zahlen mit Quelle und Gegentore nach Position." },
-    pricing: { title: "Preise: gratis starten, dann ab CHF 39", description: "30 Tage gratis mit allem, auch der automatischen Analyse. Danach Team für CHF 39 im Monat oder der Gratis-Plan; Verein für mehrere Teams. Jahresrechnung per QR-Rechnung." },
+    pricing: { title: "Preise: gratis starten, dann ab CHF 39", description: "30 Tage gratis mit allem, auch der Analyse. Danach Team für CHF 39 im Monat oder der Gratis-Plan; Verein für mehrere Teams. Jahresrechnung per QR-Rechnung." },
     faq: { title: "Fragen und Antworten", description: "Handy oder Kamera? Erkennt die Analyse die Tore selbst? Wie teile ich Szenen? Die häufigsten Fragen von Trainerinnen und Trainern, kurz beantwortet." },
     data: { title: "Video im Verein: Daten und Einwilligung", description: "Für Eltern und Spieler: wer das Video sieht, wie die Einwilligung per Link geht, was für Kinder gilt, wo die Daten liegen und wann sie gelöscht werden." },
     about: { title: "Kontakt", description: "Schreib uns an die Support-Adresse, wir antworten in der Regel innert eines Arbeitstags." },
