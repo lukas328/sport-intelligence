@@ -3904,8 +3904,12 @@
     "emptyAction": "Enter the squad",
     "why": "Why the squad matters: with the numbers the analysis gives goals, shots and scenes to the right players, and whoever is entered as goalkeeper (TW) gets their saves.",
     "keepersTitle": "Who plays in goal?",
-    "keepersText": "Nobody is entered as goalkeeper yet. Tap your goalkeepers: the squad and the goalkeeper figures then show their saves.",
-    "keepersMark": "Enter {name} as goalkeeper",
+    "keepersText": "Nobody is entered as goalkeeper yet. Tap all your goalkeepers: the squad and the goalkeeper figures then show their saves.",
+    "keepersMark": "{name} in goal",
+    "keepersMore": "Tap everyone who plays in goal. Tapping again takes someone out.",
+    "keepersSome": "{n, plural, one {1 goalkeeper entered.} other {# goalkeepers entered.}}",
+    "keepersChange": "Change goalkeepers",
+    "keepersDone": "Done",
     "keepersFailed": "That did not work. Try again or enter the position under «Edit squad»."
   },
   "seasonPage": {

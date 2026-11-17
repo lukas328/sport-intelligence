@@ -91,6 +91,35 @@ _UNREACHABLE: tuple[type[BaseException], ...] = (
 )
 
 
+# Two transactions waiting on each other (40P01) or a serialization failure (40001): the
+# transaction is rolled back, and the same work done again a moment later usually succeeds.
+_CONFLICT_STATES = ("40P01", "40001")
+# A lock not granted within lock_timeout (55P03): only where a statement asked for a short wait.
+_LOCK_STATES = (*_CONFLICT_STATES, "55P03")
+
+
+def _sqlstate(exc: BaseException) -> str | None:
+    cause: BaseException | None = exc.orig if isinstance(exc, sa_exc.DBAPIError) else exc
+    for _ in range(4):  # the adapter's error, then asyncpg's beneath it
+        if cause is None:
+            return None
+        state = getattr(cause, "sqlstate", None) or getattr(cause, "pgcode", None)
+        if isinstance(state, str):
+            return state
+        cause = cause.__cause__
+    return None
+
+
+def transaction_conflict(exc: BaseException) -> bool:
+    """True for a deadlock or serialization failure: no fault of the request, worth retrying."""
+    return _sqlstate(exc) in _CONFLICT_STATES
+
+
+def lock_contended(exc: BaseException) -> bool:
+    """A conflict as above, or a lock not granted within a short lock_timeout."""
+    return _sqlstate(exc) in _LOCK_STATES
+
+
 def database_unavailable(exc: BaseException) -> bool:
     """True when a request failed because the database could not be reached (no free connection
     in the pool, the server refusing one, the connection lost), not because of the request."""

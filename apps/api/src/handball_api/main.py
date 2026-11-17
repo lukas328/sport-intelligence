@@ -12,7 +12,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from handball_api import __version__
 from handball_api.core.assistant_llm import AssistantModel, ClaudeAssistantModel
 from handball_api.core.config import Settings, get_settings
-from handball_api.core.db import database_unavailable, dispose_engine, init_engine
+from handball_api.core.db import (
+    database_unavailable,
+    dispose_engine,
+    init_engine,
+    transaction_conflict,
+)
 from handball_api.core.email import (
     AcsEmailSender,
     ConsoleEmailSender,
@@ -223,7 +228,9 @@ def create_app(
             # which answers without the id and re-raises, so the server prints a bare traceback.
             # The database out of reach (no free connection, the server refusing one) is no fault
             # of the request: 503 with Retry-After. Logged the same way, so it is not missed.
-            unavailable = database_unavailable(exc)
+            # A deadlock that still reaches here (the delete tried three times) is no fault of
+            # the request either: 503, try again.
+            unavailable = database_unavailable(exc) or transaction_conflict(exc)
             log.exception(
                 "unhandled_exception",
                 method=request.method,
