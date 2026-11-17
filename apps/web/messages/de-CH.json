@@ -3904,8 +3904,12 @@
     "emptyAction": "Kader eintragen",
     "why": "Warum der Kader zählt: Mit den Nummern ordnet die Analyse Tore, Würfe und Szenen den richtigen Spielern zu, und wer als Torhüter (TW) eingetragen ist, bekommt seine Paraden.",
     "keepersTitle": "Wer steht im Tor?",
-    "keepersText": "Noch niemand ist als Torhüter eingetragen. Tippe deine Torhüter an: Dann zeigen Kader und Torhüter-Zahlen ihre Paraden.",
-    "keepersMark": "{name} als Torhüter eintragen",
+    "keepersText": "Noch niemand ist als Torhüter eingetragen. Tippe alle deine Torhüter an: Dann zeigen Kader und Torhüter-Zahlen ihre Paraden.",
+    "keepersMark": "{name} im Tor",
+    "keepersMore": "Tippe alle an, die im Tor stehen. Nochmals tippen nimmt jemanden wieder heraus.",
+    "keepersSome": "{n, plural, one {1 Torhüter eingetragen.} other {# Torhüter eingetragen.}}",
+    "keepersChange": "Torhüter ändern",
+    "keepersDone": "Fertig",
     "keepersFailed": "Das hat nicht geklappt. Versuch es nochmals oder trag die Position unter «Kader bearbeiten» ein."
   },
   "seasonPage": {

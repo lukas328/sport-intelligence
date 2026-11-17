@@ -163,8 +163,8 @@ export default async function TeamPage({ params, searchParams }: { params: Promi
               {t("why")}
             </p>
           )}
-          {/* nobody is goalkeeper yet: one tap per keeper (review R37) */}
-          {canEdit && entries.length > 0 && !entries.some((p) => p.main_position === "TW") && (
+          {/* the keepers, one tap each; open while nobody is keeper, else one line (review R37) */}
+          {canEdit && entries.length > 0 && (
             <MarkKeepers orgId={orgId} teamId={teamId} players={[...entries].sort((a, b) => (a.jersey_number ?? 100) - (b.jersey_number ?? 100))} />
           )}
           {groups.map((g) => (
