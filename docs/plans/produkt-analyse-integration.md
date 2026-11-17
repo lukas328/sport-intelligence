@@ -568,3 +568,67 @@ Gold-Werte aus `ml/ball/LINEAGE.md`:
      Im besten Fall wird die Laufzeit max(Netz, übrige Stufen) statt der Summe: für 1280 px auf
      jedem Bild mit uint8 etwa 279 s Netz gegen 178 s, also 1.55 x und 1.02 USD pro Spiel auf
      Modal. Gemessen ist das noch nicht; es braucht einen kurzen GPU-Lauf (Freigabe Lukas).
+
+### Adaptives Ballnetz bewertet (CPU-Simulation, 2026-11-17)
+
+Idee: Ein dünner Grundtakt läuft überall (hrp1, 960 px, jedes 3. oder 4. Bild). Dicht, also jedes
+Bild, nur dort, wo es zählt: um Wurf-Kandidaten (#65) oder wo der dünne Pfad einen schnellen Ball,
+einen unsicheren Tracker oder keinen Punkt zeigt. Simuliert mit `ml/integration/adaptive_ball.py`
+aus gespeicherten Netz-Kandidaten, ohne GPU. Der dünne Pfad wird in jedem dichten Fenster durch
+`balltrack2.track` auf den dichten Kandidaten ersetzt, mit 0.5 s Rand.
+
+**Gold v1** (alle Bälle; Grundtakt 960 px jedes 3. Bild, dicht 1280 px jedes Bild; die Gold-Clips
+haben keine Wurf-Kandidaten):
+
+| Regel | dichte Bilder | alle | schnell |
+|---|---|---|---|
+| nur Grundtakt | 0 % | 63.5 % | 64.8 % |
+| Ball schneller als 900 px/s | 49 % | 70.1 % | 72.8 % |
+| kein Punkt | 35 % | 68.5 % | 67.5 % |
+| unsicher (unter 0.3) oder kein Punkt | 93 % | 75.9 % | 77.4 % |
+| alles dicht | 100 % | 76.1 % | 78.3 % |
+| Vergleich: gleichmässig 1280 jedes 2. Bild | 50 % | 69.2 % | |
+
+Die Auslöser konzentrieren den Gewinn nicht: Er wächst etwa wie der dichte Anteil. Im dünnen Takt
+springt der Tracker oft, darum löst auch eine Schwelle von 3 000 px/s noch auf 19 % der Bilder aus.
+
+**41 Wurf-Dev-Clips** (nur `split: dev`): Ball-Gold gibt es dort nicht. Gemessen wird der Anteil
+der Bilder von 3 s vor bis 1 s nach der Protokollzeit, in denen der Pfad höchstens 12 px vom dichten
+Pfad entfernt liegt (1280 px, jedes Proxy-Bild, also jedes 2. Bild dieser 50/60-fps-Clips). Die
+Clips liegen um Würfe herum, darum sind die dichten Anteile dort höher als im ganzen Spiel. Die
+Spalte "Spiel" rechnet mit der Fensterabdeckung pro Spielminute aus den 25 Dev-Segmenten.
+
+| Regel (Grundtakt jedes 3. Bild) | gleich wie dicht, Wurf-Fenster | dichte Bilder: Clips / Spiel |
+|---|---|---|
+| nur Grundtakt | 35 % | 0 / 0 % |
+| Wurf-Kandidaten Rate 2, Fenster −3/+1 s | 62 % | 34 / 13 % |
+| Wurf-Kandidaten Rate 4, −3/+1 s | 64 % | 40 / 26 % |
+| Wurf-Kandidaten Rate 2, Fenster −5/+3 s | 77 % | 66 / 26 % |
+| Wurf-Kandidaten Rate 4, −5/+3 s | 82 % | 77 / 52 % |
+| Ball schneller als 600 px/s | 85 % | 67 % / nicht gemessen |
+| Rate 2 −3/+1 s, dazu schnell (900) oder kein Punkt | 90 % | 76 % / nicht gemessen |
+
+Grundtakt jedes 4. Bild: 1 bis 2 Punkte weniger bei den Wurf-Fenstern, bei den anderen Regeln
+mehr.
+
+**Kosten pro 60-min-Spiel** (Modal; Formel wie oben: Kurzmessung uint8 x 1.33, übrige Stufen
+0.99 x; Spielanteil 80 %; die dichten Fenster brauchen einen zweiten Decode-Durchgang, weil die
+Wurf-Kandidaten erst nach dem ganzen Video feststehen; der ist hier nicht mitgerechnet):
+
+| Variante | USD | gleich wie dicht, Wurf-Fenster |
+|---|---|---|
+| 960 jedes 3., dicht 960 um Rate 2 (−3/+1 s) | 1.03 | etwa 62 % |
+| 960 jedes 3., dicht 960 um Rate 2 (−5/+3 s) | 1.09 | etwa 77 % |
+| 960 jedes 4., dicht 960 um Rate 2 (−5/+3 s) | 1.03 | etwa 76 % |
+| 960 jedes 3. ohne Fenster | 0.96 | 35 % |
+| 960 jedes Bild, nacheinander (heute) | 1.58 | 100 % (bei 960) |
+| 960 jedes Bild mit Thread, bester Fall max(Netz, Rest) | 0.69 | 100 % (bei 960) |
+| 1280 jedes Bild mit Thread, bester Fall | 1.02 | 100 % |
+
+Einschätzung:
+- Adaptiv nach Geschwindigkeit oder Unsicherheit lohnt nicht.
+- Wurf-Fenster kommen unter 1.08 USD, erhalten in den Wurf-Fenstern aber nur 62 bis 77 % des
+  dichten Pfads. Dazu kämen ein zweiter Durchgang und mehr Code.
+- Hält der Thread, was er im besten Fall verspricht (Auftrag 15), ist gleichmässig dicht bei 960 px
+  billiger und besser als jede adaptive Variante. Darum zuerst Auftrag 15 messen. Adaptiv mit
+  Wurf-Fenstern (−5/+3 s) bleibt die Rückfalloption, falls der Thread wenig bringt.
