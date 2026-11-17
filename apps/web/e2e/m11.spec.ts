@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { expectAccessible, register, uniqueEmail } from "./helpers";
+import { chooseFile, expectAccessible, register, uniqueEmail } from "./helpers";
 
 // M11: courtside marks with device time (5.3), profile page (5.8), paper photo page (5.9)
 test("coach marks during a match, opens the profile and paper pages", async ({ page }, info) => {
@@ -52,7 +52,7 @@ test("coach marks during a match, opens the profile and paper pages", async ({ p
   await page.goto(`/app/${orgId}/teams/${teamId}/paper`);
   await expect(page).toHaveURL(/\/matches$/);
   await page.goto(`/app/${orgId}/matches/${match.id}?tab=spiel`);
-  await page.getByTestId("attachment-file").setInputFiles({ name: "bogen.jpg", mimeType: "image/jpeg", buffer: Buffer.from([0xff, 0xd8, 0xff, 0xe0, 1, 2, 3, 4]) });
+  await chooseFile(page, "attachment-file", { name: "bogen.jpg", mimeType: "image/jpeg", buffer: Buffer.from([0xff, 0xd8, 0xff, 0xe0, 1, 2, 3, 4]) });
   await page.getByRole("button", { name: "Datei anhängen" }).click();
   await expect(page.getByTestId("attachment")).toContainText("bogen.jpg");
 });

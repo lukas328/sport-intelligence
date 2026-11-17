@@ -144,7 +144,12 @@ export async function follow(page: Page, link: Locator, url: RegExp) {
  * before hydration is taken by the browser but never reaches the upload (slow dev server).
  */
 export async function chooseVideo(page: Page, files: string | string[]) {
-  const input = page.getByTestId("video-file");
+  await chooseFile(page, "video-file", files);
+}
+
+/** Any file input of the app by its test id, once React listens to it (see chooseVideo). */
+export async function chooseFile(page: Page, testId: string, files: Parameters<Locator["setInputFiles"]>[0]) {
+  const input = page.getByTestId(testId);
   await expect
     .poll(() => input.evaluate((el) => Object.keys(el).some((k) => k.startsWith("__reactProps"))), { timeout: 30_000 })
     .toBe(true);
