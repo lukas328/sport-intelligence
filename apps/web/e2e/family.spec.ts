@@ -1,13 +1,11 @@
 import { expect, test } from "@playwright/test";
-import { expectAccessible, linkFromMail, register, uniqueEmail } from "./helpers";
+import { clubByHand, expectAccessible, linkFromMail, register, uniqueEmail } from "./helpers";
 
 // Addendum 01: parent role, consent per purpose, youth protection, similar-kit warning
 test("parent consents for own child; coach sees kit warning", async ({ page, context, browser }, info) => {
   test.skip(info.project.name !== "chromium", "full flow runs once");
   await register(page, uniqueEmail("coach-family"), "Coach Junior");
-  await page.getByTestId("manual-club").click();
-  await page.getByLabel("Vereinsname").fill("HC Familie");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+  await clubByHand(page, "HC Familie");
   await page.getByLabel("Teamname").fill("U13");
   await page.getByRole("button", { name: "Zum Team" }).click();
   await page.waitForURL(/\/teams\/[^/]+/);

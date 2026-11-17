@@ -29,11 +29,13 @@ export function SaveTeam() {
   const [twin, setTwin] = useState<{ org: string; id: string; name: string } | null>(null);
   const [twinOk, setTwinOk] = useState(false);
   const started = useRef(false);
-  const colour = FARBE[params.get("farbe") ?? ""] ?? SHIRTS[0][1];
+  // the shirt tapped on the way here; none: the club starts without a colour and picks it later (E8)
+  const colour: string | null = FARBE[params.get("farbe") ?? ""] ?? null;
   const second = colour === SHIRTS[4][1] || colour === SHIRTS[2][1] ? SHIRTS[3][1] : SHIRTS[4][1];
 
   const run = useCallback(async () => {
     setState("saving");
+    const colours = colour ? { primary_color: colour, secondary_color: second } : null;
     const me = await api.GET("/v1/me");
     if (!me.data) {
       router.replace(`/login?next=${encodeURIComponent(`/einstieg/speichern?${params.toString()}`)}`);
@@ -50,7 +52,7 @@ export function SaveTeam() {
       }
       const org = r.data.organization_id;
       const team = r.data.team_id;
-      await api.PATCH("/v1/orgs/{org_id}", { params: { path: { org_id: org } }, body: { primary_color: colour, secondary_color: second } });
+      if (colours) await api.PATCH("/v1/orgs/{org_id}", { params: { path: { org_id: org } }, body: colours });
       // the players who played this season come into the squad; the rest waits in the inbox
       const s = await api.GET("/v1/orgs/{org_id}/teams/{team_id}/official/suggestions", { params: { path: { org_id: org, team_id: team } } });
       const adds = ((s.data ?? []) as Suggestion[]).filter((x) => x.kind === "roster_add" && x.status === "open" && (num(x.payload.appearances) ?? 0) > 0);
@@ -63,7 +65,7 @@ export function SaveTeam() {
     if (name) {
       // the same address saves a second team into its club, not into a second club (UX test N21)
       const own = me.data.organizations.filter((o) => o.role === "org_admin");
-      const orgId = own.length === 1 ? own[0]!.id : (await api.POST("/v1/orgs", { body: { name, country: "CH", primary_color: colour, secondary_color: second } })).data?.id;
+      const orgId = own.length === 1 ? own[0]!.id : (await api.POST("/v1/orgs", { body: { name, country: "CH", ...colours } })).data?.id;
       if (!orgId) return setState("failed");
       if (own.length === 1 && !twinOk) {
         const existing = (await api.GET("/v1/orgs/{org_id}/teams", { params: { path: { org_id: orgId } } })).data ?? [];

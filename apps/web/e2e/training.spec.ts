@@ -1,12 +1,10 @@
 import { expect, test } from "@playwright/test";
-import { expectAccessible, register, uniqueEmail, openTraining } from "./helpers";
+import { clubByHand, expectAccessible, register, uniqueEmail, openTraining } from "./helpers";
 
 test("drills, notifications and team assignments", async ({ page }, info) => {
   test.skip(info.project.name !== "chromium", "runs once");
   await register(page, uniqueEmail("train"), "Coach Training");
-  await page.getByTestId("manual-club").click();
-  await page.getByLabel("Vereinsname").fill("HC Training");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+  await clubByHand(page, "HC Training");
   await page.getByLabel("Teamname").fill("U17");
   await page.getByRole("button", { name: "Zum Team" }).click();
   // the onboarding ends on Spiele with the next steps (K17); the squad page is under Team

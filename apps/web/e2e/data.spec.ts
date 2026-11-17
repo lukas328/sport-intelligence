@@ -1,13 +1,11 @@
 import { expect, test } from "@playwright/test";
-import { expectAccessible, follow, register, uniqueEmail, openTraining } from "./helpers";
+import { clubByHand, expectAccessible, follow, register, uniqueEmail, openTraining } from "./helpers";
 
 // M10: training planning (5.7), statistics matrix (5.4), assistant without a model key (5.1)
 test("coach plans a session, opens the matrix and the assistant", async ({ page, context }, info) => {
   test.skip(info.project.name !== "chromium", "full flow runs once");
   await register(page, uniqueEmail("coach-data"), "Coach Daten");
-  await page.getByTestId("manual-club").click();
-  await page.getByLabel("Vereinsname").fill("HC Daten");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+  await clubByHand(page, "HC Daten");
   await page.getByLabel("Teamname").fill("Herren 2");
   await page.getByRole("button", { name: "Zum Team" }).click();
   await page.waitForURL(/\/teams\/[^/]+/);

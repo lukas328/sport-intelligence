@@ -301,7 +301,9 @@
       "white": "White",
       "green": "Green",
       "orange": "Orange",
-      "purple": "Purple"
+      "purple": "Purple",
+      "maroon": "Maroon",
+      "navy": "Navy"
     },
     "crestLater": "You can upload the crest later.",
     "previewTitle": "This is how your last match looks",
@@ -316,7 +318,7 @@
     "next": "Next: upload the first video or watch the demo match.",
     "cancel": "Cancel",
     "stepTitle": "Getting started",
-    "moreClub": "More: country, crest, own colour",
+    "moreClub": "More: country, crest",
     "ownColour": "Own colour",
     "rosterLater": "You add the roster and invite people later on the team page.",
     "waitingTitle": "Your request to {club} is waiting.",
@@ -325,7 +327,11 @@
     "twinText": "Is it the same team? Then open it instead of creating it a second time.",
     "twinOpen": "Open {name}",
     "twinAnyway": "No, a different team",
-    "twinCreate": "Create new team"
+    "twinCreate": "Create new team",
+    "stepColour": "Colour",
+    "colourTitle": "Your club colour",
+    "colourNote": "It sits at the top of the app and on your matches. You can change it any time under Club.",
+    "colourLater": "Later"
   },
   "roster": {
     "title": "Team",
@@ -409,14 +415,16 @@
     "tab_profile": "Profile",
     "tab_security": "Security",
     "tab_data": "My data",
-    "tab_club": "Name and shirt",
+    "tab_club": "Name and colour",
     "tab_teams": "Teams and roles",
     "tab_billing": "Plan and invoices",
     "tab_federation": "Federation",
-    "clubLook": "Name, shirt and crest",
+    "clubLook": "Name, club colour and crest",
     "clubPreview": "How the head of a match looks",
     "clubPreviewSub": "Preview",
-    "ownColours": "Own colours instead of a shirt"
+    "ownColours": "Own colours",
+    "clubColour": "Club colour",
+    "clubColourNone": "None chosen yet: until then your club shows in grey."
   },
   "dashboard": {
     "teamsTitle": "Teams",
@@ -2898,7 +2906,10 @@
     "later": "Later",
     "newTab": "opens in a new tab",
     "backToTeam": "Back to {team}",
-    "nextSteps": "What comes next"
+    "nextSteps": "What comes next",
+    "colourHint": "Your club has no colour yet.",
+    "colourHintAction": "Choose club colour",
+    "colourHintClose": "Hide notice"
   },
   "palette": {
     "newMatch": "Add a match",

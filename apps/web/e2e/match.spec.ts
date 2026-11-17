@@ -1,7 +1,7 @@
 import { statSync } from "node:fs";
 import { expect, test } from "@playwright/test";
 import { MATCH_VIDEO } from "./global-setup";
-import { expectAccessible, follow, openAnalysis, register, uniqueEmail } from "./helpers";
+import { clubByHand, expectAccessible, follow, openAnalysis, register, uniqueEmail } from "./helpers";
 
 test.describe.configure({ mode: "serial" });
 
@@ -11,9 +11,7 @@ test("match: create, upload with pause and resume, processing, player, comment, 
   expect(statSync(MATCH_VIDEO).size).toBeGreaterThan(10 * 1024 * 1024);
 
   await register(page, uniqueEmail("m2"), "Coach Video");
-  await page.getByTestId("manual-club").click();
-  await page.getByLabel("Vereinsname").fill("HC Video");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+  await clubByHand(page, "HC Video");
   await page.getByLabel("Teamname").fill("Herren 1");
   await page.getByRole("button", { name: "Zum Team" }).click();
 
@@ -176,9 +174,7 @@ test("playlist: create and share with players", async ({ page }, info) => {
   test.skip(info.project.name !== "chromium", "runs once");
   test.setTimeout(300_000);
   await register(page, uniqueEmail("pl"), "Coach Playlist");
-  await page.getByTestId("manual-club").click();
-  await page.getByLabel("Vereinsname").fill("HC Playlist");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+  await clubByHand(page, "HC Playlist");
   await page.getByLabel("Teamname").fill("U19");
   await page.getByRole("button", { name: "Zum Team" }).click();
   // an empty Sammlungen page shows only the way to the scenes (K8): the playlists by address

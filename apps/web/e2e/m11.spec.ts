@@ -1,13 +1,11 @@
 import { expect, test } from "@playwright/test";
-import { chooseFile, expectAccessible, register, uniqueEmail } from "./helpers";
+import { clubByHand, chooseFile, expectAccessible, register, uniqueEmail } from "./helpers";
 
 // M11: courtside marks with device time (5.3), profile page (5.8), paper photo page (5.9)
 test("coach marks during a match, opens the profile and paper pages", async ({ page }, info) => {
   test.skip(info.project.name !== "chromium", "full flow runs once");
   await register(page, uniqueEmail("coach-m11"), "Coach Elf");
-  await page.getByTestId("manual-club").click();
-  await page.getByLabel("Vereinsname").fill("HC Elf");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+  await clubByHand(page, "HC Elf");
   await page.getByLabel("Teamname").fill("Herren 3");
   await page.getByRole("button", { name: "Zum Team" }).click();
   await page.waitForURL(/\/teams\/[^/]+/);

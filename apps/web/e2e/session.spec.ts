@@ -1,14 +1,12 @@
 import { expect, test } from "@playwright/test";
-import { expectAccessible, openLibrary, register, uniqueEmail } from "./helpers";
+import { clubByHand, expectAccessible, openLibrary, register, uniqueEmail } from "./helpers";
 
 // Addendum 01, A2: own tags and smart playlists, presentation with presenter view and phone remote.
 test("video session: tags, smart playlist, presentation with phone remote", async ({ page, context, browser }, info) => {
   test.skip(info.project.name !== "chromium", "full flow runs once");
   const email = uniqueEmail("session");
   await register(page, email, "Coach Video");
-  await page.getByTestId("manual-club").click();
-  await page.getByLabel("Vereinsname").fill("HC Sitzung");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+  await clubByHand(page, "HC Sitzung");
   await page.getByLabel("Teamname").fill("Herren 2");
   await page.getByRole("button", { name: "Zum Team" }).click();
   await page.waitForURL(/\/teams\/[^/]+/);

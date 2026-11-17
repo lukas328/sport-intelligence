@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { expectAccessible, follow, linkFromMail, register, uniqueEmail, openTraining } from "./helpers";
+import { clubByHand, expectAccessible, follow, linkFromMail, register, uniqueEmail, openTraining } from "./helpers";
 
 // The player's side of a match: the way to their own scenes, before and after the
 // self-assessment. Scenes come from the analysis; the list of the player's feeds is answered
@@ -7,9 +7,7 @@ import { expectAccessible, follow, linkFromMail, register, uniqueEmail, openTrai
 test("player: the match page leads to the own scenes, assessment first", async ({ page, browser }, info) => {
   test.skip(info.project.name !== "chromium", "full flow runs once");
   await register(page, uniqueEmail("coach-player"), "Coach Szenen");
-  await page.getByTestId("manual-club").click();
-  await page.getByLabel("Vereinsname").fill("HC Szenen");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+  await clubByHand(page, "HC Szenen");
   await page.getByLabel("Teamname").fill("Damen 1");
   await page.getByRole("button", { name: "Zum Team" }).click();
   await page.waitForURL(/\/teams\/[^/]+/);

@@ -301,7 +301,9 @@
       "white": "Weiss",
       "green": "Grün",
       "orange": "Orange",
-      "purple": "Violett"
+      "purple": "Violett",
+      "maroon": "Weinrot",
+      "navy": "Dunkelblau"
     },
     "crestLater": "Das Wappen könnt ihr später hochladen.",
     "previewTitle": "So sieht euer letztes Spiel aus",
@@ -316,7 +318,7 @@
     "next": "Als Nächstes: das erste Video hochladen oder das Demo-Spiel ansehen.",
     "cancel": "Abbrechen",
     "stepTitle": "Einstieg",
-    "moreClub": "Mehr: Land, Wappen, eigene Farbe",
+    "moreClub": "Mehr: Land, Wappen",
     "ownColour": "Eigene Farbe",
     "rosterLater": "Den Kader und die Einladungen machst du später auf der Teamseite.",
     "waitingTitle": "Deine Anfrage bei {club} wartet.",
@@ -325,7 +327,11 @@
     "twinText": "Ist das dasselbe Team? Dann öffne es, statt es ein zweites Mal anzulegen.",
     "twinOpen": "{name} öffnen",
     "twinAnyway": "Nein, ein anderes Team",
-    "twinCreate": "Neues Team anlegen"
+    "twinCreate": "Neues Team anlegen",
+    "stepColour": "Vereinsfarbe",
+    "colourTitle": "Eure Vereinsfarbe",
+    "colourNote": "Sie steht oben in der App und bei euren Spielen. Ändern kannst du sie jederzeit unter Verein.",
+    "colourLater": "Später"
   },
   "roster": {
     "title": "Team",
@@ -409,14 +415,16 @@
     "tab_profile": "Profil",
     "tab_security": "Sicherheit",
     "tab_data": "Meine Daten",
-    "tab_club": "Name und Trikot",
+    "tab_club": "Name und Farbe",
     "tab_teams": "Teams und Rollen",
     "tab_billing": "Abo und Rechnungen",
     "tab_federation": "Verband",
-    "clubLook": "Name, Trikot und Wappen",
+    "clubLook": "Name, Vereinsfarbe und Wappen",
     "clubPreview": "So sieht der Kopf eines Spiels aus",
     "clubPreviewSub": "Vorschau",
-    "ownColours": "Eigene Farben statt Trikot"
+    "ownColours": "Eigene Farben",
+    "clubColour": "Vereinsfarbe",
+    "clubColourNone": "Noch keine gewählt: Bis dahin zeigt sich euer Verein in Grau."
   },
   "dashboard": {
     "teamsTitle": "Teams",
@@ -2898,7 +2906,10 @@
     "later": "Später",
     "newTab": "öffnet in einem neuen Tab",
     "backToTeam": "Zurück zu {team}",
-    "nextSteps": "So geht es weiter"
+    "nextSteps": "So geht es weiter",
+    "colourHint": "Euer Verein hat noch keine Farbe.",
+    "colourHintAction": "Vereinsfarbe wählen",
+    "colourHintClose": "Hinweis ausblenden"
   },
   "palette": {
     "newMatch": "Neues Spiel anlegen",

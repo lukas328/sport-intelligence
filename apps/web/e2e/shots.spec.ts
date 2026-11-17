@@ -5,7 +5,7 @@ import { expect, test } from "@playwright/test";
 import { withShotReview, type ShotReviewBody } from "../src/lib/shot-candidates";
 import { shotList } from "./fixtures/shots";
 import { MATCH_VIDEO } from "./global-setup";
-import { chooseVideo, expectAccessible, follow, register, uniqueEmail } from "./helpers";
+import { clubByHand, chooseVideo, expectAccessible, follow, register, uniqueEmail } from "./helpers";
 
 // Shot review beside the video (Würfe): the video is uploaded for real, the candidate list and the
 // review answers come from a recorded list (fixtures/shots.ts) kept in step like the API keeps it.
@@ -51,9 +51,7 @@ test("court from the hall: Passt moves on; shot review: Enter takes the report e
   );
 
   await register(page, uniqueEmail("shots"), "Coach Würfe");
-  await page.getByTestId("manual-club").click();
-  await page.getByLabel("Vereinsname").fill("HC Würfe");
-  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+  await clubByHand(page, "HC Würfe");
   await page.getByLabel("Teamname").fill("Herren 1");
   await page.getByRole("button", { name: "Zum Team" }).click();
   await follow(page, page.getByRole("link", { name: "Spiele", exact: true }).first(), /\/matches$/);
