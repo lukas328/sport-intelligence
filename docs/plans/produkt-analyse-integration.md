@@ -635,3 +635,41 @@ Einschätzung:
 - Hält der Thread, was er im besten Fall verspricht (Auftrag 15), ist gleichmässig dicht bei 960 px
   billiger und besser als jede adaptive Variante. Darum zuerst Auftrag 15 messen. Adaptiv mit
   Wurf-Fenstern (−5/+3 s) bleibt die Rückfalloption, falls der Thread wenig bringt.
+
+### Ballnetz im Thread im ganzen Job (Modal-Auftrag 15, Dataset `handball-gpu-lean-u8`, 2026-11-17)
+
+2 min des Spiels aus den Aufträgen 13 und 14, T4, `run_analysis` wie im Produkt. YOLOX jedes 3.
+Bild, Nummern-Budget 0.3, hrp1 fp16 mit uint8-Eingabe, das Netz im eigenen Thread (#67). Kosten
+pro 60-min-Spiel: Modal T4 0.66 USD/h, Azure T4 mit 4 vCPU und 16 GiB 0.90 USD/h. "Netz" ist
+`ball_net_busy_ms`, "Warten" die Zeit, die der Hauptfaden auf das Netz wartete.
+
+| Variante | s für 120 s | USD Modal / Azure | Netz | Warten | verdeckt | Gold alle / schnell |
+|---|---|---|---|---|---|---|
+| ohne Ballnetz (`cuda_lean`) | 127 | 0.70 / 0.95 | | | | |
+| hrp1 1280 jedes Bild | 225 | 1.24 / 1.69 | 197 s (66 ms/Bild) | 83 s | 58 % | 76.1 / 78.3 % |
+| hrp1 1280 jedes 2. Bild | 153 | 0.84 / 1.14 | 102 s | 2.5 s | 98 % | 69.2 % / etwa 67 % |
+| **hrp1 960 jedes Bild** | **158** | **0.87 / 1.18** | 127 s (42 ms/Bild) | 14 s | 89 % | **73.0 / 81.3 %** |
+| hrp1 960 jedes 2. Bild | 137 | 0.75 / 1.02 | 66 s | 2.8 s | 96 % | 65.6 / 69.2 % |
+| hr1 + hrp1 1280 jedes Bild | 315 | 1.73 / 2.36 | 287 s | 170 s | 41 % | 80.0 % (Ensemble) |
+
+- Zum Vergleich hrp1 mit float-Eingabe ohne Thread (Auftrag 14): 4.0 x Videolänge, 2.66 USD.
+- Gold bei 960 px neu gemessen: hrp1 ONNX auf den Gold-Clips, jedes Bild, 73.0 % [66.5, 79.0],
+  schnelle Bälle 81.3 % [71.7, 88.8], 50/60 fps 64.3 %. Jedes 2. Bild: 65.6 %, schnell 69.2 %.
+  Gemessen auf der CPU mit der fp32-Datei; uint8 und fp16 geben auf der T4 denselben stärksten
+  Kandidaten (Auftrag 14).
+- Der Thread verdeckt das Netz fast ganz, solange es nicht länger braucht als der Rest (127 s für
+  120 s Video). Bei 1280 px auf jedem Bild ist es länger, darum wartet der Hauptfaden 83 s.
+- Der Rest ist mit dem Netz im Thread etwas langsamer (YOLOX 30 statt 21 s, die GPU wird geteilt).
+
+**Empfehlung für das Produkt (GPU):** hrp1 mit uint8-Eingabe, 960 px, jedes Bild, Netz im Thread.
+- 0.87 USD pro Spiel auf Modal, also unter 1 Euro; auf Azure 1.18 USD.
+- Gold 73.0 %, schnelle Bälle 81.3 %: bei den schnellen Bällen besser als 1280 px auf jedem Bild,
+  weil das Netz bei 960 px die Bewegungsunschärfe offenbar besser verträgt. Würfe und harte Pässe
+  bekommen so jedes Bild.
+- Für Azure unter 1.08 USD bliebe nur 960 px jedes 2. Bild (1.02 USD, Gold 65.6 %).
+- Umsetzung: Die uint8-Datei (`ml/ball/onnx_u8.py` auf `ball_hrp1_fp16`) muss in den Bucket, dazu
+  `HB_BALL_MODEL`, `HB_BALL_MODEL_SHA256`, `HB_BALL_WIDTH=960`, `HB_BALL_EVERY=1` für das
+  GPU-Image. Das ist Sache der UX-Sitzung über die Hauptsitzung. Testphase: hrp1 enthält
+  DeepSport und ist vor Go-live zu ersetzen.
+- Damit ist das adaptive Rechnen mit Wurf-Fenstern (Abschnitt oben) nicht mehr nötig: Es wäre
+  teurer (1.03 bis 1.09 USD) und schlechter.
