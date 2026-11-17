@@ -142,6 +142,23 @@ von Personen aus Fremdvideos (Datenschutz). Jede Bewegung respektiert `prefers-r
 | S15 | Belege: «Läuft mit drei Teams aus dem Raum Zürich» oder Satz eines Testtrainers | P2 | nur mit echten Aussagen: Lukas liefert Zitat oder Zahl, sobald es sie gibt; nichts erfinden | Lukas |
 | S16 | Handy-Ansicht noch nicht geprüft | P1 | gehört zu jeder Änderung: alles auch bei 390 px prüfen | **geprüft:** alle geänderten Abschnitte bei 390 und 1280 px (dazu 1024, 800, fr, en); kein seitliches Scrollen |
 
+## Website und Einstieg, Lukas (17.11., abends)
+
+Umsetzung im Strang W2 (eigener PR). Grenzen wie beim Website-Review: keine erfundenen Belege, keine erkennbaren Personen, jede Bewegung respektiert `prefers-reduced-motion`.
+
+| # | Befund | Prio | Einschätzung und Massnahme | Stand |
+|---|---|---|---|---|
+| L1 | «Profis haben Analysten. Du hast den Samstagabend.» ist der bessere Text und gehört ganz nach oben | P1 | stimmt: wird die Headline des Heros; der bisherige Satz «Nach dem Spiel wissen, woher die Tore kamen» rückt darunter oder in den nächsten Abschnitt | offen |
+| L2 | Oben fehlt ein Weg zurück zur Startseite | P1 | stimmt: das Logo führt zwar dorthin, das weiss aber niemand; «Start» als erster Link der Leiste (Handy: im Menü) | offen |
+| L3 | Die Sprachauswahl gehört in die Leiste oben | P1 | stimmt: DE · FR · EN in der Kopfleiste (heute nur im Footer) | offen |
+| L4 | Oben eine richtig gute Animation, die Lust auf das Produkt macht | P1 | stimmt: der Hero zeigt in Bewegung, was passiert: Video eines Spiels, die Analyse legt die Gegentore aufs Feld, daraus werden die drei Dinge; kurz, flüssig, ohne Layout-Sprung, steht bei reduzierter Bewegung | offen |
+| L5 | Von der Teamsuche in der App (`/einstieg`) und den Seiten danach kommt man nicht mehr zurück, oben ist nichts klickbar | P1 | stimmt: Logo und ein Link «Zur Website» führen zurück auf handball-intelligence.com in der gewählten Sprache; gilt für alle öffentlichen App-Seiten (Einstieg, Anmelden, Registrieren) | offen |
+| L6 | Demo-Seite: «Was du hier siehst» ist langweilig, man versteht es nicht sofort | P1 | stimmt: freundlicher und bildhaft, mit Vorschau statt Liste | offen |
+| L7 | Demo-Seite: Spielverlauf, Zahlen und Gegentore nach Position wirken chaotisch; 16:18 ist ein komisches Resultat für ein normales Spiel | P1 | stimmt: ein realistisches Resultat (Handball: meist 25 bis 35 Tore pro Team) und alle Zahlen der Geschichte neu und überall gleich (Website, Demo-Daten); der Abschnitt ruhiger geordnet | offen |
+| L8 | Das App-Bild am Computer muss richtig gut aussehen: in der Mitte eine echte Aufnahme, unkenntlich verwischt, mit Schriftzug wie «Dein Spiel»; die Oberfläche im Rahmen wirkt noch nicht top | P1 | teilweise: Bild aus einem Testclip, stark verwischt (keine Personen, Schrift, Logos erkennbar), mit Schriftzug; Komposition und Ausschnitt neu, damit die Oberfläche gut aussieht. Quelle wird Lukas genannt; eigenes Material seines Vereins wäre besser, sobald es da ist | offen |
+| L9 | «Filmen. Hochladen. Prüfen.»: anders darstellen, mit Bildern, die Lust machen, auch mit der Halle; die Kamera-Zeichnung funktioniert nicht | P1 | stimmt: Schritt 1 als Hallenbild mit Kamera statt Diagramm, alle drei als starke Bilder in einem Stil | offen |
+| L10 | Preise: Oben muss «gratis starten» stehen, nicht CHF 39 | P1 | stimmt: oben der Gratis-Einstieg (30 Tage alles, dann Gratis-Plan oder CHF 39), CHF 39 als zweiter Schritt | offen |
+
 ## Noch offen aus der ersten Runde
 
 | # | Punkt | Wo | Stand |
