@@ -99,7 +99,10 @@ Deploy vorher über die Hauptsitzung abstimmen.
      Laufzeit nicht der Engpass (Entscheid Hauptsitzung).
    - Jede Änderung mit Laufzeit, Kosten und Gold-Wert dokumentieren.
 5. **Danach die übrigen Stufen**, priorisiert nach Nutzen fürs Produkt:
-   - Kalibrierung (grösster Blocker für Taktiktafel und Wurfzonen);
+   - Kalibrierung (grösster Blocker für Taktiktafel und Wurfzonen); Kalibrierungs-Sitzung, Stand
+     2026-11-17 (`docs/plans/kalibrierung.md`): Testsatz 70 Stücke in 67 Hallen mit Klick-Wahrheit;
+     heute auf der Entwicklung 1 von 30 Feldern richtig, 5 falsch akzeptiert; strengere Feldprüfung
+     senkt die falsch akzeptierten auf 0 von 30 (richtig bleibt 1);
    - Ereignisse mit Ball (Würfe, Paraden, Ballverluste aus Ballpfad plus Wurf-Kandidaten);
    - Spieler-Tracking auf echten Spielen messen;
    - Rückennummern und ReID ins Image.

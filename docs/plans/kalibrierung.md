@@ -246,6 +246,48 @@ fast richtige Felder): akzeptieren nur mit Torpfosten-Treffer `goal_score` >= 0.
 und c039 (Boden 0.35) ab und behält beide Horgen-Felder (0.74/1.30/0.64, 0.55/1.22/0.55). Von
 den 15 heute akzeptierten Feldern im ganzen Testsatz blieben 3 (c003, c030, c067).
 
+### 4.7 Endauswertung Runde 1b und strengere Feldprüfung (2026-11-17)
+
+Klicks Runde 1b (86 Bilder): 28 übersprungen, 42 stimmig, 16 nicht (10 widersprüchlich, 5 mit zu
+wenigen Klicks für eine Gegenprobe, 1 ohne Feld). Mit Runde 1 zusammen: Wahrheit für **30 der 33
+Entwicklungs-Stücke** (46 Bilder), eingefroren in `ml/calib/truth_dev.json`; Antworten in
+`ml/calib/data/round1_answers.json` und `round1b_answers.json`.
+
+Heutige Auto-Kalibrierung (`main` vor diesem Schritt, `results_base.json`), Entwicklung, 30 Stücke
+in 30 Hallen:
+
+| Klasse | Stücke | Anteil (95 % über Hallen) |
+|---|---|---|
+| richtig (Median <= 1 m) | 1 (c067, 0.77 m) | 3 % [0, 10] |
+| falsch akzeptiert | 5 (c008 28.0 m, c061 9.3 m, c025 6.8 m, c039 3.4 m, c040 3.0 m) | 17 % [3, 33] |
+| abgelehnt | 24 (8 `no_floor`, 8 `court`, 7 `flat_view`, 1 `camera_motion`) | 80 % [63, 93] |
+
+Von den akzeptierten Feldern sind 5 von 6 falsch (Median der akzeptierten 5.1 m).
+
+**Strengere Feldprüfung** (`observe.court_doubt`): ein automatisches Feld gilt nur, wenn zusätzlich
+zu Kameraort und Leuten auf dem Feld die Torpfosten (`goal_score` >= 0.45, vorher 0.2), die
+Feldlinien (`line_score` >= 1.0) und der Boden (`floor_fit` >= 0.45) passen. Die Schwellen standen
+in der Zwischenauswertung (4.6, auf 3 falschen und den 2 Horgen-Feldern) fest, bevor die Wahrheit
+für c040, c061 und c067 da war; sie trennen auch diese richtig. Trennkraft der Merkmale auf der
+Entwicklung (1 richtig, 5 falsch; `features.py separate`): `line_score`, `floor_fit` und
+`people_on_court` trennen allein vollständig, `goal_score` allein nicht (AUC 0.6), die
+Übereinstimmung mit den Bildlinien schwach (AUC 0.7 bis 0.8), ihre Spitze gegen das verschobene
+Feld gar nicht.
+
+| Entwicklung, 30 Stücke | richtig | falsch akzeptiert | abgelehnt |
+|---|---|---|---|
+| vorher | 1 (3 %) | 5 (17 % [3, 33]) | 24 |
+| mit Prüfung (`results_strict.json`) | 1 (3 %) | **0 (0 % [0, 0])** | 29 |
+
+Im ganzen Testsatz bleiben 3 der 15 akzeptierten Felder (c003, c030, c067). Die beiden
+Horgen-Fernseh-Felder (0.65 und 0.96 m) bestehen die Prüfung (nur Prüfung, Endtest-Halle).
+Vorbehalt: nur 1 richtiges Feld auf der Entwicklung; die Torpfosten-Schwelle liegt knapp unter ihm
+(0.488). Der Endtest (Runde 2) misst, wie viele richtige Felder die Prüfung kostet.
+
+Ausserhalb der Kalibrierung geändert auf `main` seit der Basis: Grenzen für auseinanderlaufende
+Anpassungen der Kamerabewegung (`motion.fit_rotation`); die Basis wurde auf den gespeicherten
+Bewegungen gerechnet, sie betrifft das nicht.
+
 ## 5. Was nicht geholfen hat
 
 | Was | Wo | Zahlen | Warum verworfen |
