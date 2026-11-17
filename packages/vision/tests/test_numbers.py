@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import itertools
 from pathlib import Path
 from typing import Any
 
@@ -286,3 +287,72 @@ def test_reads_a_faint_number_on_a_white_shirt() -> None:
     blurred = cv2.GaussianBlur(img, (3, 3), 0)
     got = reader.read_player(blurred, (0, 0, 44, 100))
     assert got is not None and got.number == 9 and got.confidence > 0.8
+
+
+# --- number gate (cost of the shirt numbers) ---------------------------------------------------
+
+
+def _box(
+    x: float, y: float = 100.0, w: float = 40.0, h: float = 120.0
+) -> tuple[float, float, float, float]:
+    return (x, y, x + w, y + h)
+
+
+def test_gate_reads_new_boxes_and_settles_a_number() -> None:
+    from handball_vision.numbers import NumberGate, Reading
+
+    g = NumberGate(fps=25, step=6, recheck_s=5.0, sure_reads=2, max_wait_s=2.0)
+    assert g.pick(0, [_box(100), _box(400)]) == [0, 1]
+    g.note(0, 0, Reading(7, 0.95))
+    g.note(0, 1, Reading(9, 0.9))
+    # unsettled after one reading: read again at the next number frame (player moved a little)
+    assert sorted(g.pick(6, [_box(108), _box(395)])) == [0, 1]
+    g.note(6, 0, Reading(7, 0.92))
+    g.note(6, 1, None)
+    # box 0 is settled (two readings of 7): not read again before 5 s; box 1 backs off: one
+    # step after its first failed read, two after the second
+    assert g.pick(12, [_box(115), _box(390)]) == [1]
+    g.note(12, 1, None)
+    assert g.pick(18, [_box(120), _box(385)]) == []
+    assert g.pick(24, [_box(120), _box(385)]) == [1]
+    g.note(24, 1, Reading(9, 0.9))  # its second confident 9 out of two: settled too
+    assert g.pick(30, [_box(120), _box(385)]) == []
+    assert sorted(g.pick(6 + 5 * 25 + 30, [_box(120), _box(385)])) == [0, 1]  # rechecks
+
+
+def test_gate_backs_off_after_failed_reads_up_to_the_limit() -> None:
+    from handball_vision.numbers import NumberGate
+
+    g = NumberGate(fps=25, step=6, max_wait_s=2.0)
+    reads = []
+    for f in range(0, 25 * 10, 6):
+        for k in g.pick(f, [_box(200)]):
+            reads.append(f)
+            g.note(f, k, None)
+    gaps = [b - a for a, b in itertools.pairwise(reads)]
+    assert gaps[:3] == [6, 12, 24]  # doubling
+    assert max(gaps) <= 50 + 6  # never more than about 2 s
+    assert len(reads) < 25 * 10 / 6 / 3  # far fewer reads than every number frame
+
+
+def test_gate_caps_reads_per_frame_unsettled_and_tall_first() -> None:
+    from handball_vision.numbers import NumberGate
+
+    g = NumberGate(fps=25, step=6, max_per_frame=2)
+    boxes = [_box(100, h=90), _box(300, h=200), _box(600, h=150)]
+    assert g.pick(0, boxes) == [1, 2]
+    # the one left out is still due at the next number frame
+    assert 0 in g.pick(6, boxes)
+
+
+def test_gate_forgets_lost_boxes() -> None:
+    from handball_vision.numbers import NumberGate, Reading
+
+    g = NumberGate(fps=25, step=6, lost_s=1.0, sure_reads=2)
+    g.pick(0, [_box(100)])
+    g.note(0, 0, Reading(5, 0.95))
+    g.pick(6, [_box(100)])
+    g.note(6, 0, Reading(5, 0.95))  # settled
+    assert g.pick(12, [_box(100)]) == []
+    # gone for longer than a second, then a box at the same place is a new player
+    assert g.pick(12 + 40, [_box(100)]) == [0]
