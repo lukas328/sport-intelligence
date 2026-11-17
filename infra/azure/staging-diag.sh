@@ -34,6 +34,15 @@ if [ -n "${DIAG_ASSET:-}" ]; then
 else
   where="analysis IS NOT NULL ORDER BY updated_at DESC LIMIT 1"
 fi
+echo "== video assets of the last 24 hours with their jobs"
+q "SELECT coalesce(jsonb_agg(to_jsonb(r) ORDER BY r.created_at), '[]'::jsonb) FROM (SELECT v.id, v.match_id,
+   v.filename, v.status, v.size_bytes, v.upload_id IS NOT NULL AS multipart_open, v.error, v.created_at,
+   v.updated_at, (v.analysis IS NOT NULL) AS has_analysis,
+   (SELECT coalesce(jsonb_agg(jsonb_build_object('kind', j.kind, 'status', j.status, 'progress', j.progress,
+      'error', j.error, 'created_at', j.created_at, 'updated_at', j.updated_at) ORDER BY j.created_at), '[]'::jsonb)
+    FROM processing_jobs j WHERE j.video_asset_id = v.id) AS jobs
+   FROM video_assets v WHERE v.created_at > now() - interval '24 hours') r" \
+  | tail -1 | jq . | tee "$OUT/recent_assets.json"
 echo "== the 8 newest processing jobs (any asset)"
 q "SELECT coalesce(jsonb_agg(to_jsonb(r)), '[]'::jsonb) FROM (SELECT id, video_asset_id, kind, status,
    progress, error, created_at, updated_at FROM processing_jobs ORDER BY created_at DESC LIMIT 8) r" \
