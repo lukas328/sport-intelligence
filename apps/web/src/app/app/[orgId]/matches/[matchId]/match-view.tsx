@@ -444,7 +444,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
             )}
             <MenuRoot>
               {/* a word, not only the dots (UX test H09) */}
-              <MenuTrigger className={buttonClass("secondary")} data-testid="match-menu">
+              <MenuTrigger className={buttonClass("secondary", "md", "data-[state=open]:bg-ink data-[state=open]:text-ground")} data-testid="match-menu">
                 <MoreHorizontal aria-hidden />
                 {t("common.more")}
               </MenuTrigger>
@@ -478,6 +478,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
                     {t("matches.edit")}
                   </MenuItem>
                 )}
+                {canDelete && <MenuSeparator />}
                 {canDelete && (
                   <MenuItem
                     danger

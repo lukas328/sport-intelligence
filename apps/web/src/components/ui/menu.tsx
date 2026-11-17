@@ -9,6 +9,20 @@ import { cn } from "@/lib/utils";
 export const MenuRoot = M.Root;
 export const MenuTrigger = M.Trigger;
 
+/**
+ * The panel of every drop-down menu (finding A1): a 2 px ink frame with the hard offset shadow of
+ * the app's sheets, no soft ring. The bell's panel uses the same surface.
+ */
+export const MENU_SURFACE =
+  "club z-50 overflow-hidden border-2 border-ink bg-paper text-[15px] text-ink shadow-[4px_4px_0_var(--ink)] animate-fade";
+
+/** One entry as the app writes a choice: semi-bold, ink icons, inverted (ink, light text) while it
+ * is the chosen one, by mouse or keyboard. */
+export const MENU_ITEM =
+  "flex min-h-11 w-full cursor-pointer select-none items-center gap-3 px-3 py-2 text-left font-semibold text-ink no-underline outline-none " +
+  "data-[highlighted]:bg-ink data-[highlighted]:text-ground data-[disabled]:cursor-default data-[disabled]:opacity-50 " +
+  "[&_svg]:size-[18px] [&_svg]:shrink-0 [&_svg]:text-ink data-[highlighted]:[&_svg]:text-ground";
+
 export function MenuContent({ children, align = "end", className, side }: { children: ReactNode; align?: "start" | "end" | "center"; className?: string; side?: "top" | "bottom" | "right" | "left" }) {
   return (
     <M.Portal>
@@ -17,10 +31,7 @@ export function MenuContent({ children, align = "end", className, side }: { chil
         side={side}
         sideOffset={6}
         collisionPadding={12}
-        className={cn(
-          "club z-50 min-w-56 overflow-hidden bg-raised p-1.5 text-sm ring-1 ring-border animate-fade",
-          className,
-        )}
+        className={cn(MENU_SURFACE, "min-w-56 p-1.5", className)}
       >
         {children}
       </M.Content>
@@ -28,9 +39,9 @@ export function MenuContent({ children, align = "end", className, side }: { chil
   );
 }
 
-const item =
-  "flex w-full cursor-pointer select-none items-center gap-3 px-3 py-2 text-left outline-none" +
-  "data-[highlighted]:bg-surface data-[disabled]:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:text-muted";
+// a destructive entry: red, with room above it (callers put a separator before it)
+const DANGER =
+  "mt-1 text-loss [&_svg]:text-loss data-[highlighted]:bg-loss data-[highlighted]:text-white data-[highlighted]:[&_svg]:text-white";
 
 export function MenuItem({
   children,
@@ -56,7 +67,7 @@ export function MenuItem({
   newTab?: string;
   testId?: string;
 }) {
-  const cls = cn(item, danger && "text-error [&_svg]:text-error");
+  const cls = cn(MENU_ITEM, danger && DANGER);
   const body = (
     <>
       {icon}
@@ -72,7 +83,7 @@ export function MenuItem({
             {children}
             <span className="sr-only"> ({newTab})</span>
           </span>
-          <ExternalLink aria-hidden className="size-3.5 text-ink-2" />
+          <ExternalLink aria-hidden className="!size-3.5" />
         </a>
       </M.Item>
     );
@@ -104,5 +115,6 @@ export function MenuLabel({ children }: { children: ReactNode }) {
 }
 
 export function MenuSeparator() {
-  return <M.Separator className="my-1.5 h-px bg-border" />;
+  // full width and firm, like the rule over a section of the match sheet
+  return <M.Separator className="-mx-1.5 my-1.5 h-0.5 bg-ink/80" />;
 }

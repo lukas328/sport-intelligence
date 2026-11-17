@@ -26,7 +26,7 @@ import { coachRights } from "@/lib/roles";
 import { DEST_ICON } from "./icons";
 
 const item =
-  "flex cursor-pointer items-center gap-3 px-3 py-2.5 text-sm outline-none data-[selected=true]:bg-surface [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:text-muted";
+  "group flex min-h-11 cursor-pointer items-center gap-3 px-3 py-2 text-[15px] font-semibold outline-none data-[selected=true]:bg-ink data-[selected=true]:text-ground [&_svg]:size-[18px] [&_svg]:shrink-0 [&_svg]:text-ink data-[selected=true]:[&_svg]:text-ground";
 const group = "px-1.5 [&_[cmdk-group-heading]]:eyebrow [&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:pt-3 [&_[cmdk-group-heading]]:pb-1";
 
 /** ⌘K: jump anywhere, switch team, find a match, ask the data. */
@@ -64,7 +64,7 @@ export function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenCh
     <D.Root open={open} onOpenChange={onOpenChange}>
       <D.Portal>
         <D.Overlay className="fixed inset-0 z-50 bg-[var(--overlay)] animate-fade" />
-        <D.Content className="club fixed inset-x-3 top-[12dvh] z-50 mx-auto max-w-xl overflow-hidden bg-raised ring-1 ring-border animate-rise">
+        <D.Content className="club fixed inset-x-3 top-[12dvh] z-50 mx-auto max-w-xl overflow-hidden border-2 border-ink bg-paper shadow-[4px_4px_0_var(--ink)] animate-rise">
           <D.Title className="sr-only">{t("palette.title")}</D.Title>
           <D.Description className="sr-only">{t("palette.placeholder")}</D.Description>
           <Command label={t("palette.title")} loop>
@@ -72,7 +72,7 @@ export function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenCh
               value={q}
               onValueChange={setQ}
               placeholder={t("palette.placeholder")}
-              className="w-full border-b border-border/70 bg-transparent px-5 py-4 text-base outline-none placeholder:text-muted"
+              className="w-full border-b-2 border-ink bg-transparent px-5 py-4 text-base outline-none placeholder:text-muted"
             />
             <Command.List className="max-h-[min(60dvh,26rem)] overflow-y-auto pb-2">
               <Command.Empty className="px-5 py-8 text-center text-sm text-muted">{t("palette.empty")}</Command.Empty>
@@ -119,8 +119,8 @@ export function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenCh
                       <Command.Item key={m.id} value={`match ${m.opponent_name} ${when} ${m.competition ?? ""}`} onSelect={() => go(`${base}/matches/${m.id}`)} className={item}>
                         <Clapperboard />
                         <span className="flex-1 truncate">{m.opponent_name || t("matches.training")}</span>
-                        <span className="text-xs text-muted tabular-nums">
-                          {score && <span className="mr-2 font-semibold text-foreground">{score}</span>}
+                        <span className="text-xs text-muted tabular-nums group-data-[selected=true]:text-ground/80">
+                          {score && <span className="mr-2 font-semibold text-foreground group-data-[selected=true]:text-ground">{score}</span>}
                           {when}
                         </span>
                       </Command.Item>
