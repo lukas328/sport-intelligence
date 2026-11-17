@@ -7,6 +7,7 @@ DeepSport, siehe `docs/plans/tracking-strategie.md` Abschnitt 9). Massstab: **Ko
 1 Euro pro Spiel**; die Dauer ist zweitrangig.
 
 Rollen: Die **Hauptsitzung** (Ball-Forschung, Projektleitung, Merges nach `main`) koordiniert. Die
+**Kalibrierungs-Sitzung** (Zweig `claude/kalibrierung`, ab 2026-11-16) übernimmt Schritt 5, Kalibrierung, parallel und mit eigenem Plan in `docs/plans/kalibrierung.md`; sie meidet `observe()`, Ball und Job-Runner. Die
 **Integrations-Sitzung** setzt diesen Plan um, auf ihrem eigenen Zweig, mit Pull Requests; die
 Hauptsitzung merged bei grüner CI. Die **UX-Sitzung** besitzt Website und Deploy-Workflow
 (`infra/`, `.github/workflows/deploy.yml`, `wrangler.jsonc`, `apps/site`): Änderungen an Infra und
