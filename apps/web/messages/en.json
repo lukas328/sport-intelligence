@@ -4358,5 +4358,18 @@
     "patternMismatch": "The format does not fit.",
     "badInput": "Please enter a number.",
     "invalid": "Please check this entry."
+  },
+  "uploadFacts": {
+    "title": "Good to know",
+    "label_formats": "Files",
+    "label_size": "Size",
+    "label_phone": "Phone",
+    "label_analysis": "Analysis",
+    "formats": "MP4, MOV, MKV or MTS, as phones and cameras save them. Choose several files of one match together.",
+    "size": "Up to {max} per file. A whole match in Full HD is usually a few GB; on Wi-Fi it is faster.",
+    "sizeUnknown": "A whole match in Full HD is usually a few GB; on Wi-Fi it is faster.",
+    "phone": "The upload runs in this page. If the screen goes off or you close it, it stops: open the match again and choose the same file, and it carries on where it stopped.",
+    "analysis": "It starts by itself once the video is in and runs on our servers: you can put the phone away, the bell lets you know. It counts toward your plan’s analysis minutes.",
+    "billing": "See plan"
   }
 }

@@ -4358,5 +4358,18 @@
     "patternMismatch": "Das Format stimmt nicht.",
     "badInput": "Bitte gib eine Zahl ein.",
     "invalid": "Bitte prüf diese Angabe."
+  },
+  "uploadFacts": {
+    "title": "Gut zu wissen",
+    "label_formats": "Dateien",
+    "label_size": "Grösse",
+    "label_phone": "Handy",
+    "label_analysis": "Analyse",
+    "formats": "MP4, MOV, MKV oder MTS, so wie Handy und Kamera sie speichern. Mehrere Dateien eines Spiels wählst du zusammen aus.",
+    "size": "Bis {max} pro Datei. Ein ganzes Spiel in Full HD hat meist einige GB; im WLAN geht es schneller.",
+    "sizeUnknown": "Ein ganzes Spiel in Full HD hat meist einige GB; im WLAN geht es schneller.",
+    "phone": "Der Upload läuft in dieser Seite. Geht der Bildschirm aus oder schliesst du sie, hält er an: Öffne das Spiel wieder und wähl dieselbe Datei, dann geht es dort weiter.",
+    "analysis": "Sie startet von selbst, sobald das Video da ist, und läuft auf unseren Servern: Du kannst das Handy weglegen, die Glocke meldet sich. Sie zählt zu den Analyseminuten deines Abos.",
+    "billing": "Abo ansehen"
   }
 }

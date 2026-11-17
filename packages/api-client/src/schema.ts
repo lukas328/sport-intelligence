@@ -10065,6 +10065,8 @@ export interface components {
         PublicConfig: {
             /** Mail Enabled */
             mail_enabled: boolean;
+            /** Max Video Bytes */
+            max_video_bytes: number;
             /** Site Url */
             site_url: string;
             /** Support Email */

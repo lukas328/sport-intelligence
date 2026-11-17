@@ -4358,5 +4358,18 @@
     "patternMismatch": "Le format ne convient pas.",
     "badInput": "Merci de saisir un nombre.",
     "invalid": "Merci de vérifier cette donnée."
+  },
+  "uploadFacts": {
+    "title": "Bon à savoir",
+    "label_formats": "Fichiers",
+    "label_size": "Taille",
+    "label_phone": "Téléphone",
+    "label_analysis": "Analyse",
+    "formats": "MP4, MOV, MKV ou MTS, tels que le téléphone et la caméra les enregistrent. Plusieurs fichiers d’un match se choisissent ensemble.",
+    "size": "Jusqu’à {max} par fichier. Un match entier en Full HD fait en général quelques GB ; en Wi-Fi, c’est plus rapide.",
+    "sizeUnknown": "Un match entier en Full HD fait en général quelques GB ; en Wi-Fi, c’est plus rapide.",
+    "phone": "Le téléchargement se fait dans cette page. Si l’écran s’éteint ou si tu la fermes, il s’arrête : rouvre le match et choisis le même fichier, il reprend là où il s’était arrêté.",
+    "analysis": "Elle démarre d’elle-même dès que la vidéo est là et tourne sur nos serveurs : tu peux poser ton téléphone, la cloche te prévient. Elle compte dans les minutes d’analyse de ton abonnement.",
+    "billing": "Voir l’abonnement"
   }
 }
