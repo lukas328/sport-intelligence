@@ -477,7 +477,7 @@
     "kitOwnGk": "Own goalkeeper",
     "kitOpp": "Opponent court players",
     "kitOppGk": "Opponent goalkeeper",
-    "kitsHint": "Colours help the analysis tell the teams apart.",
+    "kitsHint": "Tap a shirt to choose its colour. Colours help the analysis tell the teams apart.",
     "kitReferee": "Referees",
     "kitRefereeHint": "The referee colour helps the analysis tell referees from players. Leave it empty if you don't know it.",
     "kitRefereeClear": "Remove referee colour",

@@ -477,7 +477,7 @@
     "kitOwnGk": "Notre gardien",
     "kitOpp": "Joueurs adverses",
     "kitOppGk": "Gardien adverse",
-    "kitsHint": "Les couleurs aident l'analyse à distinguer les équipes.",
+    "kitsHint": "Touche un maillot pour choisir sa couleur. Les couleurs aident l'analyse à distinguer les équipes.",
     "kitReferee": "Arbitres",
     "kitRefereeHint": "La couleur des arbitres aide l'analyse à distinguer les arbitres des joueurs. Laisse vide si tu ne la connais pas.",
     "kitRefereeClear": "Retirer la couleur des arbitres",

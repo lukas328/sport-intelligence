@@ -489,6 +489,10 @@ async def _new_match(
         key, period_s, periods = match_formats.resolve(MatchFormatKey(team.default_format or ""))
     except ValueError:  # no or a custom default: the template of the age group
         key, period_s, periods = match_formats.resolve(match_formats.default_for(team.is_youth))
+    # our shirts: the club's colour, as for a match made by hand (review R16: synced matches
+    # showed the default blue at the upload of a club in green)
+    org = await ctx.db.get(Organization, team.organization_id)
+    kit = {"kit_own": org.primary_color} if org is not None and org.primary_color else {}
     m = Match(
         organization_id=team.organization_id,
         team_id=team.id,
@@ -505,6 +509,7 @@ async def _new_match(
         periods=periods,
         official_provider=PROVIDER,
         official_game_id=int(payload["game_id"]),
+        **kit,
     )
     ctx.db.add(m)
     await ctx.db.flush()

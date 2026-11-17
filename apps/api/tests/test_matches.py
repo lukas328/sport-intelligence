@@ -870,6 +870,36 @@ async def test_a_new_match_takes_the_club_colour_and_no_invented_opponent(
     assert m["opponent_colors"] is None or m["opponent_colors"].get("color") is None
 
 
+async def test_a_new_club_colour_reaches_the_matches_without_video(
+    make_api: Callable[[], Api],
+) -> None:
+    """Review R16: the schedule's matches were made before the club chose its colour and showed
+    blue shirts at the upload of a club in green. A new club colour reaches the matches that wear
+    the old one and have no video; a match with a video and a shirt chosen for it stay."""
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    plain = await new_match(api, ids, opponent_name="TV Ohnevideo")
+    chosen = await new_match(
+        api,
+        ids,
+        opponent_name="TV Weiss",
+        kit_own="#ffffff",
+        kickoff_at="2026-11-14T18:00:00+01:00",
+    )
+    filmed = await new_match(
+        api, ids, opponent_name="TV Video", kickoff_at="2026-11-21T18:00:00+01:00"
+    )
+    await upload(api, ids, filmed["id"], b"x" * 1024)
+    r = await api.patch(f"/v1/orgs/{org}", json={"primary_color": "#12804a"})
+    assert r.status_code == 200, r.text
+    kit = {
+        m["id"]: (await api.get(f"/v1/orgs/{org}/matches/{m['id']}")).json()["kit_own"].lower()
+        for m in (plain, chosen, filmed)
+    }
+    assert kit == {plain["id"]: "#12804a", chosen["id"]: "#ffffff", filmed["id"]: "#112233"}
+
+
 async def test_the_remembered_opponent_colour_goes_to_the_analysis(
     make_api: Callable[[], Api],
 ) -> None:
