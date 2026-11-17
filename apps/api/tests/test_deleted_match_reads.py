@@ -16,7 +16,7 @@ from structlog.testing import capture_logs
 from handball_api.core.errors import PROBLEM_MEDIA_TYPE
 from handball_api.services import matches as matches_service
 
-from .conftest import Api, setup_club
+from .conftest import Api, _dsn, setup_club
 from .test_matches import new_match
 
 ROUNDS = 4
@@ -179,3 +179,41 @@ async def test_storage_failing_after_the_delete_is_logged(
     assert (await api.get(f"/v1/orgs/{org}/matches/{m['id']}")).status_code == 404
     left = [e for e in logs if e["event"] == "match_files_left"]
     assert left and left[0]["prefix"] == f"{org}/{m['id']}/"
+
+
+async def test_a_view_answers_while_its_cached_statistics_are_locked(
+    make_api: Callable[[], Api], owner_conn: asyncpg.Connection, test_db: str
+) -> None:
+    """The stats cache is only a cache: with its row locked (the match being deleted, another
+    view writing it), the view answers at once without storing it, instead of waiting into a
+    deadlock with the delete (CI 17.11.: «deadlock detected» on DELETE FROM stats_cache)."""
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    demo = (await api.post(f"/v1/orgs/{org}/teams/{ids['team']}/demo-match")).json()
+    url = f"/v1/orgs/{org}/matches/{demo['id']}/stats"
+    first = await api.get(url)
+    assert first.status_code == 200
+    scope = uuid.UUID(demo["id"])
+    # an outdated row, so the next view computes and wants to write it ...
+    await owner_conn.execute("UPDATE stats_cache SET version = 'stale' WHERE scope_id = $1", scope)
+    # ... while another transaction holds it
+    holder = await asyncpg.connect(_dsn(test_db))
+    try:
+        tr = holder.transaction()
+        await tr.start()
+        await holder.execute("SELECT 1 FROM stats_cache WHERE scope_id = $1 FOR UPDATE", scope)
+        started = asyncio.get_running_loop().time()
+        r = await asyncio.wait_for(api.get(url), 10)
+        took = asyncio.get_running_loop().time() - started
+        assert r.status_code == 200
+        assert r.json() == first.json()
+        assert took < 1.0  # below Postgres' deadlock_timeout: no deadlock with the delete
+        await tr.rollback()
+    finally:
+        await holder.close()
+    versions = await owner_conn.fetch("SELECT version FROM stats_cache WHERE scope_id = $1", scope)
+    assert "stale" in [v["version"] for v in versions]  # not stored while locked
+    assert (await api.get(url)).status_code == 200  # and stored on the next view
+    versions = await owner_conn.fetch("SELECT version FROM stats_cache WHERE scope_id = $1", scope)
+    assert "stale" not in [v["version"] for v in versions]
