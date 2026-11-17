@@ -207,6 +207,17 @@ Aufwand grob: Teilen an Schnitten und Bewegung pro Einstellung 1 bis 2 Tage, Gru
 Schnitten, dazu das Staging-Video) 1 Tag: zusammen etwa 4 bis 5 Arbeitstage. Berührt den
 Beobachtungsdurchlauf (Kamerabewegung) nur über deren Ergebnis; `observe()` selbst bleibt.
 
+### 4.5 Fernseh-Clips Horgen 2017 (10 min), Sichtprüfung 2026-11-17
+
+Die Integrations-Sitzung fand auf zwei 10-min-Ausschnitten des Staging-Videos (Horgen 2017, NLB)
+ein automatisches Feld (310 bzw. 283 Spuren), auf dem ganzen Video nicht (`camera_motion`). Feld
+des Produkts auf je 4 Bildern über die Kamerabewegung gelegt: grob plausibel (Orientierung, ferne
+Seitenlinie an der Wand, Mittellinie durch den Mittelkreis in h2), aber die 6-m-Bögen liegen
+teils sichtbar neben den Toren, geschätzt 1 bis 3 m. Messung: die 8 Bilder hängen als Zusatz in
+Runde 1b (direkt nach den 28 Hauptbildern), Produkt-Abbildung in `ml/calib/data/horgen_product.json`.
+Die Halle `SGHorgen` gehört im Testsatz zum Endtest: diese Bilder nur zur Prüfung, nicht zum
+Abstimmen.
+
 ## 5. Was nicht geholfen hat
 
 | Was | Wo | Zahlen | Warum verworfen |
