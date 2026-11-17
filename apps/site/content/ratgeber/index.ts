@@ -66,7 +66,7 @@ export const GUIDES: Guide[] = [
     metaTitle: { de: "Videoanalyse im Amateurhandball", fr: "L'analyse vidéo en handball amateur", en: "Video analysis for amateur handball teams" },
     answer: {
       de: "Sie zeigt dir, was im Spiel wirklich passiert ist, und deinem Team Szenen statt Worte. Sie ersetzt weder das Training noch dein Auge, und sie kostet Zeit. Am meisten bringt sie mit einer Frage pro Spiel und wenigen Szenen.",
-      fr: "Elle te montre ce qui s'est vraiment passé pendant le match, et à ton équipe des séquences plutôt que des mots. Elle ne remplace ni l'entraînement ni ton œil, et elle prend du temps. Elle apporte le plus avec une question par match et peu de séquences.",
+      fr: "Elle te montre ce qui s'est vraiment passé pendant le match, et à ton équipe des scènes plutôt que des mots. Elle ne remplace ni l'entraînement ni ton œil, et elle prend du temps. Elle apporte le plus avec une question par match et peu de scènes.",
       en: "It shows you what really happened in the match, and shows your team scenes instead of words. It replaces neither training nor your eye, and it takes time. It helps most with one question per match and a few scenes.",
     },
     description: {
@@ -74,7 +74,7 @@ export const GUIDES: Guide[] = [
       fr: "Ce que l'analyse vidéo apporte vraiment à une équipe de handball amateur, ce qu'elle n'apporte pas, combien de temps elle prend et comment commencer.",
       en: "What video analysis really gives an amateur handball team, what it does not, how much time it takes and how to start small.",
     },
-    product: { de: "Handball Intelligence nimmt dir das Suchen und Schneiden ab: Die Analyse schlägt die Tore vor, du bestätigst sie und hast jedes Tor als Szene. Bei genug Toren zeigt sie drei Dinge zum Mitnehmen, über die Saison, was sich wiederholt. Was das Team sehen soll, schickst du als Sammlung per Link in den Teamchat, ohne Konto für die Spieler.", fr: "Handball Intelligence t'épargne la recherche et le montage : l'analyse propose les buts, tu les confirmes et tu as chaque but en séquence. Avec assez de buts, elle montre trois choses à retenir, et sur la saison ce qui se répète. Ce que l'équipe doit voir, tu l'envoies en sélection par lien dans le chat de l'équipe, sans compte pour les joueurs.", en: "Handball Intelligence takes the searching and cutting off your hands: the analysis suggests the goals, you confirm them and have every goal as a scene. With enough goals it shows three things to take away, and over the season what repeats. What the team should see, you send as a collection by link to the team chat, with no account for the players." },
+    product: { de: "Handball Intelligence nimmt dir das Suchen und Schneiden ab: Die Analyse schlägt die Tore vor, du bestätigst sie und hast jedes Tor als Szene. Bei genug Toren zeigt sie drei Dinge zum Mitnehmen, über die Saison, was sich wiederholt. Was das Team sehen soll, schickst du als Sammlung per Link in den Teamchat, ohne Konto für die Spieler.", fr: "Handball Intelligence t'épargne la recherche et le montage : l'analyse propose les buts, tu les confirmes et tu as chaque but comme scène. Avec assez de buts, elle montre trois choses à retenir, et sur la saison ce qui se répète. Ce que l'équipe doit voir, tu l'envoies en sélection par lien dans le chat de l'équipe, sans compte pour les joueurs.", en: "Handball Intelligence takes the searching and cutting off your hands: the analysis suggests the goals, you confirm them and have every goal as a scene. With enough goals it shows three things to take away, and over the season what repeats. What the team should see, you send as a collection by link to the team chat, with no account for the players." },
     related: ["spiel-auswerten-20-minuten", "szenen-im-training-zeigen", "wege-zur-videoanalyse"],
   },
   {
@@ -87,10 +87,10 @@ export const GUIDES: Guide[] = [
     metaTitle: { de: "Handballspiel in 20 Minuten auswerten", fr: "Analyser un match en 20 minutes" },
     answer: {
       de: "Schau nicht das ganze Spiel noch einmal. Nimm dir eine Frage vor, spring zu den Toren und Gegentoren und mach zu jeder Szene einen Strich. Nach 20 Minuten hast du ein Muster und drei Szenen für das Team.",
-      fr: "Ne revois pas tout le match. Prends une question, saute aux buts marqués et encaissés et fais un bâton pour chaque séquence. Après 20 minutes, tu as une tendance et trois séquences pour l'équipe.",
+      fr: "Ne revois pas tout le match. Prends une question, saute aux buts marqués et encaissés et fais un bâton pour chaque scène. Après 20 minutes, tu as une tendance et trois scènes pour l'équipe.",
     },
-    description: { de: "Eine Frage, der Spielverlauf, die Gegentore, eine Strichliste und drei Szenen: so wertest du ein Handballspiel in 20 Minuten aus. Mit Vorlage.", fr: "Une question, l'évolution du score, les buts encaissés, une feuille de pointage et trois séquences : analyser un match de handball en 20 minutes." },
-    product: { de: "Mit Handball Intelligence fällt das Spulen weg: Nach dem Prüfen springst du mit einem Tipp zu jedem Tor. Die Strichliste nach Position führt die App für dich, aus dem Wurfort, den du pro Tor antippst, und die drei Szenen fürs Team legst du in eine Sammlung und schickst den Link.", fr: "Avec Handball Intelligence, plus besoin de rembobiner : après la vérification, tu sautes d'une touche à chaque but. La feuille de pointage par poste, l'app la tient pour toi, à partir du lieu de tir que tu indiques pour chaque but, et les trois séquences pour l'équipe vont dans une sélection dont tu envoies le lien." },
+    description: { de: "Eine Frage, der Spielverlauf, die Gegentore, eine Strichliste und drei Szenen: so wertest du ein Handballspiel in 20 Minuten aus. Mit Vorlage.", fr: "Une question, l'évolution du score, les buts encaissés, une feuille de pointage et trois scènes : analyser un match de handball en 20 minutes." },
+    product: { de: "Mit Handball Intelligence fällt das Spulen weg: Nach dem Prüfen springst du mit einem Tipp zu jedem Tor. Die Strichliste nach Position führt die App für dich, aus dem Wurfort, den du pro Tor antippst, und die drei Szenen fürs Team legst du in eine Sammlung und schickst den Link.", fr: "Avec Handball Intelligence, plus besoin de rembobiner : après la vérification, tu sautes d'une touche à chaque but. La feuille de pointage par poste, l'app la tient pour toi, à partir du lieu de tir que tu indiques pour chaque but, et les trois scènes pour l'équipe vont dans une sélection dont tu envoies le lien." },
     related: ["gegentore-nach-position", "gegenstoss-und-ballverluste", "szenen-im-training-zeigen"],
   },
   {
@@ -103,10 +103,10 @@ export const GUIDES: Guide[] = [
     metaTitle: { de: "Gegentore nach Position lesen", fr: "Buts encaissés par poste" },
     answer: {
       de: "Zähl die Gegentore danach, von wo geworfen wurde: Aussen, Rückraum links, Mitte, rechts, Kreis, Siebenmeter, Gegenstoss. Eine Häufung zeigt dir, wo du zuerst hinschaust. Ob es an der Abwehr, am Torhüter oder an Ballverlusten liegt, sagt dir erst die Szene.",
-      fr: "Compte les buts encaissés selon l'endroit d'où le tir est parti : ailes, arrière gauche, demi-centre, arrière droit, pivot, jet de 7 mètres, contre-attaque. Une accumulation te montre où regarder en premier. Si c'est la défense, le gardien ou les pertes de balle, seule la séquence te le dit.",
+      fr: "Compte les buts encaissés selon l'endroit d'où le tir est parti : ailes, arrière gauche, demi-centre, arrière droit, pivot, jet de 7 mètres, contre-attaque. Une accumulation te montre où regarder en premier. Si c'est la défense, le gardien ou les pertes de balle, seule la scène te le dit.",
     },
     description: { de: "Gegentore nach Wurfposition zählen, Häufungen richtig lesen und typische Ursachen erkennen: Rückraum, Aussen, Kreis, Siebenmeter, Gegenstoss.", fr: "Compter les buts encaissés selon la position du tir, bien lire les accumulations et reconnaître les causes : arrières, ailes, pivot, 7 mètres." },
-    product: { de: "Handball Intelligence zählt die Gegentore nach Position für dich, aus dem Wurfort, den du beim Prüfen pro Tor antippst. Zu jeder Häufung gibt es die Szenen mit einem Tipp, und die Saison zeigt, ob sie in mehreren Spielen auftaucht.", fr: "Handball Intelligence compte les buts encaissés par poste pour toi, à partir du lieu de tir que tu indiques pour chaque but à la vérification. Chaque accumulation a ses séquences à une touche, et la saison montre si elle revient sur plusieurs matchs." },
+    product: { de: "Handball Intelligence zählt die Gegentore nach Position für dich, aus dem Wurfort, den du beim Prüfen pro Tor antippst. Zu jeder Häufung gibt es die Szenen mit einem Tipp, und die Saison zeigt, ob sie in mehreren Spielen auftaucht.", fr: "Handball Intelligence compte les buts encaissés par poste pour toi, à partir du lieu de tir que tu indiques pour chaque but à la vérification. Chaque accumulation a ses scènes à une touche, et la saison montre si elle revient sur plusieurs matchs." },
     related: ["spiel-auswerten-20-minuten", "wurfquote-torhueterquote", "handball-begriffe"],
   },
   {
@@ -122,7 +122,7 @@ export const GUIDES: Guide[] = [
       fr: "Compte combien de buts les deux équipes marquent sur contre-attaque, et regarde les pertes de balle juste avant. Le plus souvent, la cause n'est pas dans le repli, mais quelques secondes plus tôt : une mauvaise passe, un marcher, un tir précipité.",
     },
     description: { de: "Gegenstoss, zweite Welle, Ballverlust: was du zählst, wo du im Video hinschaust und was daraus fürs Training folgt.", fr: "Contre-attaque, deuxième vague, perte de balle : ce que tu comptes, où regarder dans la vidéo et ce que ça donne pour l'entraînement." },
-    product: { de: "Handball Intelligence zeigt Gegentore nach Gegenstoss als eigenes Ding, mit den Szenen dazu. Ballverluste kommen aus dem Spielbericht, oder du markierst sie im Video; von jeder Szene aus spulst du ein paar Sekunden zurück und siehst, was davor passiert ist.", fr: "Handball Intelligence montre les buts encaissés sur contre-attaque comme un point à part, avec les séquences. Les pertes de balle viennent de la feuille de match, ou tu les marques dans la vidéo ; depuis chaque séquence, tu reviens quelques secondes en arrière pour voir ce qui s'est passé avant." },
+    product: { de: "Handball Intelligence zeigt Gegentore nach Gegenstoss als eigenes Ding, mit den Szenen dazu. Ballverluste kommen aus dem Spielbericht, oder du markierst sie im Video; von jeder Szene aus spulst du ein paar Sekunden zurück und siehst, was davor passiert ist.", fr: "Handball Intelligence montre les buts encaissés sur contre-attaque comme un point à part, avec les scènes. Les pertes de balle viennent de la feuille de match, ou tu les marques dans la vidéo ; depuis chaque scène, tu reviens quelques secondes en arrière pour voir ce qui s'est passé avant." },
     related: ["spiel-auswerten-20-minuten", "gegentore-nach-position", "szenen-im-training-zeigen"],
   },
   {
@@ -147,14 +147,14 @@ export const GUIDES: Guide[] = [
     published: "2026-11-13",
     updated: "2026-11-16",
     locales: ["de", "fr"],
-    title: { de: "Wie zeige ich Szenen, ohne das halbe Training zu verlieren?", fr: "Comment montrer des séquences sans perdre la moitié de l'entraînement ?" },
+    title: { de: "Wie zeige ich Szenen, ohne das halbe Training zu verlieren?", fr: "Comment montrer des scènes sans perdre la moitié de l'entraînement ?" },
     metaTitle: { de: "Videositzung: Szenen im Training zeigen", fr: "Séance vidéo à l'entraînement" },
     answer: {
       de: "Zeig höchstens fünf Szenen zu einem Thema, in zehn Minuten. Beginne mit einer guten Szene, sag vorher, worauf alle schauen sollen, und geh danach gleich in die Übung dazu.",
-      fr: "Montre au plus cinq séquences sur un thème, en dix minutes. Commence par une bonne séquence, dis avant à quoi tout le monde doit faire attention, et passe ensuite tout de suite à l'exercice qui va avec.",
+      fr: "Montre au plus cinq scènes sur un thème, en dix minutes. Commence par une bonne scène, dis avant à quoi tout le monde doit faire attention, et passe ensuite tout de suite à l'exercice qui va avec.",
     },
-    description: { de: "Eine Videositzung in zehn Minuten: ein Thema, drei bis fünf Szenen, wie du darüber sprichst und was bei Kindern und Jugendlichen gilt.", fr: "Une séance vidéo en dix minutes : un thème, trois à cinq séquences, comment en parler et ce qui vaut avec des enfants et des jeunes." },
-    product: { de: "In Handball Intelligence legst du die Szenen mit einem Tipp in eine Sammlung, schreibst eine Notiz dazu und zeigst sie am Bildschirm oder Beamer, Szene für Szene. Für zu Hause schickst du denselben Link in den Teamchat, ohne Konto für die Spieler.", fr: "Dans Handball Intelligence, tu mets les séquences d'une touche dans une sélection, tu ajoutes une note et tu les montres à l'écran ou au projecteur, séquence après séquence. Pour la maison, tu envoies le même lien dans le chat de l'équipe, sans compte pour les joueurs." },
+    description: { de: "Eine Videositzung in zehn Minuten: ein Thema, drei bis fünf Szenen, wie du darüber sprichst und was bei Kindern und Jugendlichen gilt.", fr: "Une séance vidéo en dix minutes : un thème, trois à cinq scènes, comment en parler et ce qui vaut avec des enfants et des jeunes." },
+    product: { de: "In Handball Intelligence legst du die Szenen mit einem Tipp in eine Sammlung, schreibst eine Notiz dazu und zeigst sie am Bildschirm oder Beamer, Szene für Szene. Für zu Hause schickst du denselben Link in den Teamchat, ohne Konto für die Spieler.", fr: "Dans Handball Intelligence, tu mets les scènes d'une touche dans une sélection, tu ajoutes une note et tu les montres à l'écran ou au projecteur, scène après scène. Pour la maison, tu envoies le même lien dans le chat de l'équipe, sans compte pour les joueurs." },
     related: ["spiel-auswerten-20-minuten", "videoanalyse-amateurteam", "video-im-verein-einwilligung"],
   },
   {
@@ -207,7 +207,7 @@ export const GUIDES: Guide[] = [
     metaTitle: { de: "Wege zur Videoanalyse im Vergleich", fr: "Analyse vidéo : les solutions comparées" },
     answer: {
       de: "Vier Wege: das Video von Hand durchsehen und schneiden, eine automatische Kamera, eine Analyse-Software zum Markieren und eine automatische Analyse wie Handball Intelligence. Welcher passt, hängt von deiner Zeit, deinem Budget und deiner Halle ab.",
-      fr: "Quatre solutions : revoir et découper la vidéo à la main, une caméra automatique, un logiciel pour marquer les séquences et une analyse automatique comme Handball Intelligence. Le bon choix dépend de ton temps, de ton budget et de ta salle.",
+      fr: "Quatre solutions : revoir et découper la vidéo à la main, une caméra automatique, un logiciel pour marquer les scènes et une analyse automatique comme Handball Intelligence. Le bon choix dépend de ton temps, de ton budget et de ta salle.",
     },
     description: { de: "Von Hand schneiden, automatische Kamera, Analyse-Software oder automatische Analyse: die Wege zur Videoanalyse im Handball ehrlich verglichen.", fr: "À la main, caméra automatique, logiciel d'analyse ou analyse automatique : les solutions d'analyse vidéo au handball, comparées honnêtement." },
     related: ["videoanalyse-amateurteam", "handballspiel-filmen", "spiel-auswerten-20-minuten"],
