@@ -6,32 +6,6 @@ Dauer, Kosten, Auffälligkeiten). Vor dem Commit `git pull --rebase`, danach pus
 
 ## Offen
 
-### 14. Ballnetz billiger auf der T4 (Kurzmessung), 2026-11-17 (Integrations-Sitzung), freigegeben von Lukas (17.11.)
-- Wozu: Auftrag 13 hat das Ballnetz hrp1 auf der T4 mit 80 bis 120 ms pro Bild gemessen, dazu 21 ms
-  CPU-Vorbereitung; Stapeln brachte nichts. Mit hrp1 auf jedem Bild kostet ein 60-Minuten-Spiel
-  etwa 3 USD. Gesucht ist der billigere Weg (Plan `docs/plans/produkt-analyse-integration.md`,
-  Abschnitt GPU-Profil T4).
-- Was läuft: (1) `ml/integration/bench_ballnet.py`: hrp1 allein auf 120 echten Dreiergruppen, bei
-  1280 und 960 px: wie im Produkt, uint8-Eingabe mit Vorbereitung im Graphen
-  (`ml/ball/onnx_u8.py`), dasselbe mit IO-Binding, TensorRT fp16 (uint8- und float-Eingabe).
-  (2) `ml/integration/profile_variants.py`: der ganze Produkt-Job auf 3 Minuten des Spiels aus
-  Auftrag 13 mit YOLOX auf jedem 3. Bild und Nummern-Budget 0.3, ohne Ballnetz (`cuda_lean`) und
-  mit hrp1 auf jedem Bild (`cuda_lean_hrp1`). Testphase: hrp1 enthält DeepSport, hier wird nur
-  gemessen.
-- Befehl (wie Auftrag 12 auf diesem PC): `modal deploy ml/gpu/bench_ballnet_gpu.py`, dann
-  `modal.Function.from_name("handball-bench-ballnet", "run_t4").spawn(3, "handball-gpu-bench-ballnet", 25, "cuda_lean,cuda_lean_hrp1")`.
-  Alternativ `modal run --detach ml/gpu/bench_ballnet_gpu.py`.
-- Fortsetzbar: jede fertige Variante liegt auf dem Volume `handball-gpu-out`
-  (`handball-gpu-bench-ballnet/`, auch der TensorRT-Cache); derselbe Aufruf setzt fort. Stopp:
-  nach 25 Minuten startet keine neue Variante mehr, nach 30 Minuten beendet Modal die Funktion
-  sicher.
-- Erwartet: etwa 25 Minuten auf einer T4, rund 0.30 USD (höchstens 30 Minuten, 0.35 USD).
-- Ergebnis: Kaggle-Dataset `handball-gpu-bench-ballnet` (bench.json, bench_summary.json,
-  cuda_lean.json, cuda_lean_hrp1.json, summary.json). Die Integrations-Sitzung holt es ab.
-- Wichtig: In der ersten Logzeile muss `session ['CUDAExecutionProvider', ...]` stehen, sonst bricht
-  das Skript selbst ab. Fehlt `TensorrtExecutionProvider` unter "available", laufen die übrigen
-  Varianten trotzdem; bitte melden. Bei "budget"/"spend limit" abbrechen und melden.
-
 Gemeinsam für 3 bis 10: OWLv2 wie Auftrag 2, Rechnung mit den gemessenen ~210 s pro Segment auf
 einer T4 (inkl. Download) und 0.66 USD/h (7.23 USD für 11.0 h). `--budget-h 10` lässt Luft bis 11 h
 für den Upload. Jeder Auftrag ist für sich, sie dürfen parallel laufen (Modal-Ausgabenlimit für
@@ -108,6 +82,43 @@ Summe 3 bis 10: 841 Segmente, etwa 49 GPU-Stunden, etwa 32 USD. Falls ein Auftra
 Auftrag 3 (mit `--resume-from <Dataset des Teillaufs>`).
 
 ## Erledigt
+
+### 14. Ballnetz billiger auf der T4 (Kurzmessung), erledigt 2026-11-17
+- Ergebnis: `lukasde1000/handball-gpu-bench-ballnet` (Status ready): `bench.json`,
+  `bench_summary.json`, `cuda_lean.json`, `cuda_lean_hrp1.json`, `summary.json`. Der
+  TensorRT-Cache bleibt auf dem Volume (`handball-gpu-bench-ballnet/trt-cache`).
+- Lauf: 23.7 min auf der T4, alles fertig (kein Budget-Stopp). Erste Logzeile: `session
+  ['CUDAExecutionProvider', ...]`, `available` mit `TensorrtExecutionProvider` (ORT 1.22.0).
+- Kosten laut `modal billing report`: 0.32 USD (Grenze 0.35).
+- hrp1 allein, ms pro Bild (CPU-Vorbereitung + Netz = total), 120 Dreiergruppen:
+
+  | Variante | 1280 px | 960 px | gleicher Top-Kandidat |
+  |---|---|---|---|
+  | f32 (wie Produkt, fp16-Netz) | 21 + 71 = 92 | 15 + 40 = 55 | 1.0 |
+  | u8 (Vorbereitung im Graphen) | 17 + 46 = 62 | 14 + 28 = 42 | 1.0 |
+  | u8 + IO-Binding | 17 + 46 = 62 | 16 + 29 = 45 | 1.0 |
+  | TensorRT f32 | 40 + 62 = 101 | 25 + 31 = 55 | 0.992 / 1.0 |
+  | TensorRT u8 | Fehler | Fehler | |
+
+  Bestes: u8 bei 960 px, 42 ms (knapp halb so viel wie heute). IO-Binding bringt nichts.
+  TensorRT bringt nichts: kaum schnelleres Netz, langsamere Vorbereitung, Engine-Bau 379 s
+  (einmalig, jetzt im Cache). TensorRT u8 geht nicht: TensorRT kennt keine uint8-Zwischenwerte
+  (Gather/Transpose "UNSUPPORTED_NODE") und verlangt Shape-Profile für die dynamische Eingabe
+  `u8_chw`.
+- Ganzer Job auf 3 min Video (YOLOX jedes 3. Bild, Nummern-Budget 0.3):
+
+  | Einstellung | Zeit für 3 min | min pro Spiel | USD/Spiel Modal | USD/Spiel Azure |
+  |---|---|---|---|---|
+  | cuda_lean | 182 s | 61 | 0.67 | 0.91 |
+  | cuda_lean_hrp1 | 727 s | 242 | 2.66 | 3.63 |
+
+  In `cuda_lean_hrp1` braucht `ball_net` 549 s für 4500 Bilder, also 122 ms pro Bild: der
+  Produkt-Pfad (f32, 1280) ist im Job langsamer als in der Kurzmessung (92 ms). Mit u8 bei 960 px
+  wären es nach der Kurzmessung etwa 190 s statt 549 s, also rund 1.2 USD statt 2.66 pro Spiel.
+- Auffällig wie in Auftrag 13: `tracks` 0 und `needs_calibration` true in beiden Einstellungen.
+- Änderung der lokalen Sitzung vor dem Start: harte Frist in `bench_ballnet_gpu.py`, damit
+  laufende Schritte nach 27.5 min enden und der Kaggle-Upload vor Modals 30-min-Grenze sicher
+  passiert (wurde hier nicht gebraucht).
 
 ### 13. Laufzeit und Kosten der Produkt-Analyse auf einer T4, erledigt 2026-11-17
 - Ergebnis: `lukasde1000/handball-gpu-profile-game1-gpu` (Status ready): `summary.json`,
