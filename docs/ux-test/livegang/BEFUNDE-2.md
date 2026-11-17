@@ -26,11 +26,11 @@ Schwere: 🔴 blockiert einen Trainer · 🟡 stört · ⚪ Kleinigkeit.
 
 | # | Punkt | Stand |
 |---|---|---|
-| E1 | GPU-Kontingent bei Azure beantragen (Serverless T4, Switzerland North), siehe `docs/plans/gpu-analyse.md` | offen |
+| E1 | GPU-Kontingent bei Azure beantragen (Serverless T4, Switzerland North), siehe `docs/plans/gpu-analyse.md` | zurückgestellt (17.11.): bis das Produkt fertig ist, auf Staging nur Ausschnitte von 5 bis 10 min auf CPU |
 | E2 | Mail-Anbieter (Empfehlung Azure Communication Services), danach `HB_MAIL_ENABLED=true` | offen |
 | E3 | Cloudflare: «Builds for non-production branches» ausschalten (sonst roter Check auf jedem neuen Zweig) | offen |
-| E4 | CUDA-Image des gpu-workers in der CI bauen (Vorschlag der Hauptsitzung) | offen, Entscheid |
-| E5 | Neue Staging-Variablen für Ballnetz und Wiedererkennung (`HB_BALL_MODEL`, `HB_REID_MODEL` mit SHA256) beim nächsten Deploy setzen | offen, Okay von Lukas |
+| E4 | CUDA-Image des gpu-workers in der CI bauen (Vorschlag der Hauptsitzung) | zurückgestellt (17.11.), wie E1 |
+| E5 | Staging-Variablen für Ballnetz und Wiedererkennung: schlanke CPU-Variante wird gemessen (ein Netz, `HB_BALL_ALLOW_CPU=1`, `HB_BALL_MAX_MINUTES=10`, `HB_BALL_EVERY=3`); endgültige Werte kommen von der Hauptsitzung | wartet, noch nicht setzen |
 | E6 | Aufräumen: alte Zweige, Testkonto `e2e-entry…`, DNS `test.` und `asuid.test` (Löschen war für Claude gesperrt) | offen |
 | E7 | Optional: Partnerschaft J+S und SHV für die Übungsbibliothek anfragen (`docs/research/R1-uebungsbibliothek.md`) | offen |
 
@@ -39,4 +39,4 @@ Schwere: 🔴 blockiert einen Trainer · 🟡 stört · ⚪ Kleinigkeit.
 | # | Punkt | Stand |
 |---|---|---|
 | B1 | App-Feinschliff (#57) gemergt, Deploy wartet auf den laufenden Analyse-Lauf (zweite Halbzeit, vom Watchdog um 05:00 UTC neu gestartet) | wartet |
-| B2 | Erste Halbzeit von Lukas' Spiel nach dem Lauf mit «Analyse neu starten» anstossen | offen |
+| B2 | Danach testet Lukas mit Ausschnitten von 5 bis 10 min statt ganzer Spiele | offen |
