@@ -246,19 +246,23 @@ def test_whole_frame_search_backs_off_without_a_board() -> None:
 
 
 def test_time_budget_leaves_reads_out() -> None:
-    import time as _time
+    """A fake clock: every text detection takes 50 ms, independent of the machine's load."""
+    now = [0.0]
 
     class _Slow(_FakeOcr):
         def detect(self, img: NDArray[Any]) -> list[NDArray[np.float32]]:
-            _time.sleep(0.05)
+            now[0] += 0.05
             return super().detect(img)
 
     ocr = _Slow()
     ocr.text = "WERBUNG"
     # budget 1 % of the video time: 50 ms per search allows one search per 5 s of video
-    reader = hb.HallBoardReader(ocr, fps=10, full_every_s=1.0, full_max_s=1.0, budget_share=0.01)
+    reader = hb.HallBoardReader(
+        ocr, fps=10, full_every_s=1.0, full_max_s=1.0, budget_share=0.01, clock=lambda: now[0]
+    )
     blank = _scene(None, 0)
     for i in range(0, 10 * 60, 10):  # one minute
         reader.add(i, blank)
     assert reader.stats.skipped > 0
-    assert reader.stats.seconds <= 0.01 * 60 + 0.1
+    assert 10 <= reader.stats.full <= 14  # about one search per 5 s of video
+    assert reader.stats.seconds <= 0.01 * 60 + 0.05 + 1e-9
