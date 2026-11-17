@@ -6,33 +6,6 @@ Dauer, Kosten, Auffälligkeiten). Vor dem Commit `git pull --rebase`, danach pus
 
 ## Offen
 
-### 13. Laufzeit und Kosten der Produkt-Analyse auf einer T4, 2026-11-17 (Integrations-Sitzung)
-- Wozu: Entscheid GPU-Verarbeitung (Plan `docs/plans/produkt-analyse-integration.md` Schritte 3 und
-  4). Die CPU-Kette braucht 4.4 x Videolänge (Plan Abschnitt 4); gesucht sind die Zeiten pro Stufe
-  auf einer T4 mit und ohne Ballnetze und daraus die Kosten pro 60-Minuten-Spiel.
-- Was läuft: `ml/integration/profile_variants.py` (der echte `run_analysis` mit lokalen Attrappen
-  für S3 und API) auf 5 Minuten von AT_Cup_Feldkirch_Bregenz_2021 (`handball-segs-l10`), fünf
-  Einstellungen nacheinander (cuda_image, cuda_ball_ens, cuda_ball_hrp1, cuda_ball_ens_lean,
-  cpu_image) plus Kurzmessung der Ballnetze (fp32/fp16, Stapel 1/4/8). Die Ballnetze werden im
-  Container aus `handball-ball-hrmodels` nach ONNX exportiert. Testphase: hr1/hrp1 enthalten
-  DeepSport, hier wird nur gemessen.
-- Befehl: `modal run --detach ml/gpu/profile_gpu.py --minutes 5 --tag game1`
-- Fortsetzbar: jede fertige Einstellung liegt auf dem Volume `handball-gpu-out`
-  (`handball-gpu-profile-game1/`); derselbe Befehl setzt fort. `--budget-min 90` hält vor einer
-  weiteren Einstellung an, wenn 90 Minuten verbraucht sind.
-- Erwartet: etwa 1 h auf einer T4, rund 0.70 USD (Obergrenze mit Budget: 1.5 h, etwa 1 USD).
-- Ergebnis: Kaggle-Dataset `handball-gpu-profile-game1` (summary.json, je Einstellung ein JSON,
-  bench_nets.json). Die Integrations-Sitzung holt es ab und trägt die Zahlen in den Plan ein.
-- Bei "budget"/"spend limit" abbrechen und melden.
-- **Stand lokale Sitzung 2026-11-17 mittags, läuft:** `handball-gpu-profile-game1` auf Kaggle
-  **nicht verwenden**, das sind CPU-Zahlen. ONNX Runtime fand im debian_slim-Image
-  `libcublasLt.so.12` nicht und rechnete still auf der CPU (`bench_nets.json`:
-  `CPUExecutionProvider`); nur cuda_image und cuda_ball_ens wurden fertig, dann griff das Budget.
-  Korrigiert in `profile_gpu.py` (Image wie `Dockerfile.cuda`, Abbruch wenn nicht auf der GPU).
-  Neuer Lauf unter dem Namen `handball-gpu-profile-game1-gpu` (Volume und Kaggle), die
-  Kurzmessung zeigt jetzt `CUDAExecutionProvider`. Ergebnis folgt unter "Erledigt".
-
-
 Gemeinsam für 3 bis 10: OWLv2 wie Auftrag 2, Rechnung mit den gemessenen ~210 s pro Segment auf
 einer T4 (inkl. Download) und 0.66 USD/h (7.23 USD für 11.0 h). `--budget-h 10` lässt Luft bis 11 h
 für den Upload. Jeder Auftrag ist für sich, sie dürfen parallel laufen (Modal-Ausgabenlimit für
@@ -109,6 +82,40 @@ Summe 3 bis 10: 841 Segmente, etwa 49 GPU-Stunden, etwa 32 USD. Falls ein Auftra
 Auftrag 3 (mit `--resume-from <Dataset des Teillaufs>`).
 
 ## Erledigt
+
+### 13. Laufzeit und Kosten der Produkt-Analyse auf einer T4, erledigt 2026-11-17
+- Ergebnis: `lukasde1000/handball-gpu-profile-game1-gpu` (Status ready): `summary.json`,
+  `cuda_image.json`, `cuda_ball_ens.json`, `cuda_ball_hrp1.json`, `cuda_ball_ens_lean.json`,
+  `bench_nets.json`, `proxy_s.txt`. **Nicht** `handball-gpu-profile-game1` verwenden (CPU-Zahlen,
+  siehe unten).
+- Geprüft: ONNX Runtime 1.23.2 auf `CUDAExecutionProvider` (Prüfung beim Start und in
+  `bench_nets.json`), alle vier Einstellungen ohne Fehler, `ball_model_status` ok.
+- Zahlen (5 min Video, 7500 Bilder, hochgerechnet auf ein 60-min-Spiel):
+
+  | Einstellung | Zeit für 5 min | min pro Spiel | USD/Spiel Modal | USD/Spiel Azure |
+  |---|---|---|---|---|
+  | cuda_image | 496 s | 99 | 1.09 | 1.49 |
+  | cuda_ball_hrp1 | 1378 s | 276 | 3.03 | 4.13 |
+  | cuda_ball_ens_lean | 1755 s | 351 | 3.86 | 5.26 |
+  | cuda_ball_ens | 1873 s | 374 | 4.12 | 5.62 |
+
+  Grösste Blöcke: `ball_net` 890 s (hrp1) bis 1369 s (beide Netze), etwa 120 ms pro Bild und Netz;
+  `numbers` immer etwa 216 s; `detection` 126 s (jedes Bild) bzw. 37 s (jedes 3.); `camera_motion`
+  etwa 90 s. Kurzmessung: fp16 hr1 80 ms, hrp1 99 ms pro Aufruf; Stapel 4/8 bringen nichts.
+- Nicht gerechnet: `cpu_image`, das Budget (90 min) griff nach 96 min. Die CPU-Referenz ist der
+  bestehende CPU-Profillauf (4.4 x Videolänge).
+- Auffällig in allen Einstellungen (auch im CPU-Lauf): `tracks` 0, `needs_calibration` true mit
+  `flat_view`, `ball` None. Die Analyse liefert auf diesem Ausschnitt also keine Spuren; die
+  Zeiten sind trotzdem die der vollen Kette (observe), aber das sollte die Integrations-Sitzung
+  prüfen.
+- Kosten laut `modal billing report`: 3.58 USD gesamt statt 0.70 geplant. 2.32 USD für den ersten
+  Lauf (CPU-Rückfall, 104 min, unbrauchbar), 0.03 USD Fehlversuch (onnxconverter-common 1.14.0
+  bricht mit numpy 2.5 ab), 1.24 USD für den gültigen Lauf (96 min T4 plus Image-Bau).
+- Korrekturen in `ml/gpu/profile_gpu.py`: onnxconverter-common 1.16.0; Image auf
+  `nvidia/cuda:12.6.3-cudnn-runtime-ubuntu24.04` wie `Dockerfile.cuda` (auf debian_slim fand
+  ONNX Runtime `libcublasLt.so.12` nicht und rechnete still auf der CPU); CPU-torch für den
+  Export; `_check_cuda` bricht ab, wenn ONNX Runtime nicht auf der GPU ist. Gestartet mit
+  `modal deploy` + `spawn` (siehe Auftrag 12).
 
 ### 12. Vorlabels für den Wurf-Goldstandard (61 Wurf-Clips), erledigt 2026-11-17
 - Ergebnis: `lukasde1000/handball-gpu-prelabel-shots` (Status ready, hochgeladen 2026-11-17 02:16
