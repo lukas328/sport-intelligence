@@ -138,3 +138,15 @@ export async function follow(page: Page, link: Locator, url: RegExp) {
     await page.waitForURL(url);
   }
 }
+
+/**
+ * Chooses the video file(s) in the upload panel once React listens to the input: a file chosen
+ * before hydration is taken by the browser but never reaches the upload (slow dev server).
+ */
+export async function chooseVideo(page: Page, files: string | string[]) {
+  const input = page.getByTestId("video-file");
+  await expect
+    .poll(() => input.evaluate((el) => Object.keys(el).some((k) => k.startsWith("__reactProps"))), { timeout: 30_000 })
+    .toBe(true);
+  await input.setInputFiles(files);
+}

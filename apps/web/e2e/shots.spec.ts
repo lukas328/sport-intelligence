@@ -5,7 +5,7 @@ import { expect, test } from "@playwright/test";
 import { withShotReview, type ShotReviewBody } from "../src/lib/shot-candidates";
 import { shotList } from "./fixtures/shots";
 import { MATCH_VIDEO } from "./global-setup";
-import { expectAccessible, follow, register, uniqueEmail } from "./helpers";
+import { chooseVideo, expectAccessible, follow, register, uniqueEmail } from "./helpers";
 
 // Shot review beside the video (Würfe): the video is uploaded for real, the candidate list and the
 // review answers come from a recorded list (fixtures/shots.ts) kept in step like the API keeps it.
@@ -60,7 +60,7 @@ test("court from the hall: Passt moves on; shot review: Enter takes the report e
   await page.getByLabel("Gegner", { exact: true }).fill("TV Testdorf");
   await page.getByRole("button", { name: "Spiel anlegen" }).click();
   await expect(page.getByRole("heading", { level: 1 })).toContainText("TV Testdorf");
-  await page.getByTestId("video-file").setInputFiles(MATCH_VIDEO);
+  await chooseVideo(page, MATCH_VIDEO);
   await expect(page.getByTestId("player").filter({ visible: true })).toBeVisible({ timeout: 180_000 });
 
   // court from the hall: one look at the orange lines, "Passt", and on to the next open step

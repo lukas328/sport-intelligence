@@ -2,7 +2,7 @@ import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { expect, test } from "@playwright/test";
 import { MATCH_VIDEO } from "./global-setup";
-import { expectAccessible, register, uniqueEmail } from "./helpers";
+import { chooseVideo, expectAccessible, register, uniqueEmail } from "./helpers";
 
 const DB = process.env.E2E_DATABASE_URL ?? "postgresql://handball:handball@localhost:5432/handball";
 
@@ -31,7 +31,7 @@ test("a confirmed goal asks «Von wo?»; three from one place make a thing; the 
     })
   ).json();
   await page.goto(`/app/${org}/matches/${match.id}?tab=video`);
-  await page.getByTestId("video-file").setInputFiles(MATCH_VIDEO);
+  await chooseVideo(page, MATCH_VIDEO);
   await expect
     .poll(async () => (await (await page.request.get(`/v1/orgs/${org}/matches/${match.id}/graphics`)).json()).analysis, { timeout: 240_000, intervals: [2000] })
     .toBe("ready");
