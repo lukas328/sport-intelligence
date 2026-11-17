@@ -3894,7 +3894,12 @@
     "allPeople": "All people and roles",
     "emptyText": "Enter your players with their numbers. Then scenes and figures call them by name.",
     "emptyTextPlayer": "Your coach enters the squad.",
-    "emptyAction": "Enter the squad"
+    "emptyAction": "Enter the squad",
+    "why": "Why the squad matters: with the numbers the analysis gives goals, shots and scenes to the right players, and whoever is entered as goalkeeper (TW) gets their saves.",
+    "keepersTitle": "Who plays in goal?",
+    "keepersText": "Nobody is entered as goalkeeper yet. Tap your goalkeepers: the squad and the goalkeeper figures then show their saves.",
+    "keepersMark": "Enter {name} as goalkeeper",
+    "keepersFailed": "That did not work. Try again or enter the position under «Edit squad»."
   },
   "seasonPage": {
     "kick": "{season} · {league} · after {n, plural, one {# match} other {# matches}}",

@@ -3894,7 +3894,12 @@
     "allPeople": "Toutes les personnes et rôles",
     "emptyText": "Saisis tes joueurs avec leur numéro. Les scènes et les chiffres les appellent alors par leur nom.",
     "emptyTextPlayer": "Ton entraîneur saisit l'effectif.",
-    "emptyAction": "Saisir l'effectif"
+    "emptyAction": "Saisir l'effectif",
+    "why": "Pourquoi l’effectif compte : avec les numéros, l’analyse attribue buts, tirs et scènes aux bons joueurs, et qui est inscrit comme gardien (TW) reçoit ses arrêts.",
+    "keepersTitle": "Qui est dans les buts ?",
+    "keepersText": "Personne n’est encore inscrit comme gardien. Touche tes gardiens : l’effectif et les chiffres des gardiens montrent alors leurs arrêts.",
+    "keepersMark": "Inscrire {name} comme gardien",
+    "keepersFailed": "Cela n’a pas marché. Réessaie ou saisis la position sous «Modifier l'effectif»."
   },
   "seasonPage": {
     "kick": "{season} · {league} · après {n, plural, one {# match} other {# matchs}}",
