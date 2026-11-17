@@ -5351,7 +5351,7 @@ export interface components {
             calibration_error?: string | null;
             /**
              * Calibration Info
-             * @description automatic calibration: goal fit, players on the court, camera position; method 'hall' when the court was carried over from an earlier video of the hall (reference_video_id); hall_tried lists earlier videos that did not fit
+             * @description automatic calibration: goal fit, players on the court, camera position; method 'hall' when the court was carried over from an earlier video of the hall (reference_video_id; sure when the hall images matched well enough not to ask); hall_tried lists earlier videos that did not fit
              */
             calibration_info?: {
                 [key: string]: unknown;
@@ -10065,6 +10065,8 @@ export interface components {
         PublicConfig: {
             /** Mail Enabled */
             mail_enabled: boolean;
+            /** Max Video Bytes */
+            max_video_bytes: number;
             /** Site Url */
             site_url: string;
             /** Support Email */
@@ -11925,6 +11927,13 @@ export interface components {
             club_domains: string[];
             /** Methods */
             methods: string[];
+            /**
+             * My Part
+             * @description the asking person: took the club over (needs a second person), can confirm it (club admin or coach), or has no part
+             * @default none
+             * @enum {string}
+             */
+            my_part?: "claimed" | "can_confirm" | "none";
             /** Official Club Id */
             official_club_id: number | null;
             /** Official Provider */

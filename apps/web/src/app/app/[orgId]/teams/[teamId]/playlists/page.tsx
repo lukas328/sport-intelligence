@@ -1,8 +1,13 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { EmptyState } from "@/components/ui/card";
 import { serverApi } from "@/lib/api";
 import { NewPlaylist } from "./new-playlist";
+
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: (await getTranslations("library"))("playlists") };
+}
 
 export default async function PlaylistsPage({ params }: { params: Promise<{ orgId: string; teamId: string }> }) {
   const { orgId, teamId } = await params;

@@ -22,6 +22,8 @@ import type { Stats } from "./analysis-views";
 /** The actions under the three things: the team collection, the highlights, a picture. */
 export function GameActions({ collect, onHighlights, onPicture }: { collect: ReactNode; onHighlights?: () => void; onPicture?: () => void }) {
   const t = useTranslations("anlauf");
+  // nothing to do: no empty row that leaves a gap
+  if (!collect && !onHighlights && !onPicture) return null;
   return (
     <div className="flex flex-wrap items-center gap-x-5 gap-y-3" data-testid="game-actions">
       {collect}

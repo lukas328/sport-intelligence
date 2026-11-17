@@ -477,7 +477,7 @@
     "kitOwnGk": "Eigener Torhüter",
     "kitOpp": "Gegner Feldspieler",
     "kitOppGk": "Gegner Torhüter",
-    "kitsHint": "Die Farben helfen der Analyse, die Teams zu unterscheiden.",
+    "kitsHint": "Tippe auf ein Trikot, um seine Farbe zu wählen. Die Farben helfen der Analyse, die Teams zu unterscheiden.",
     "kitReferee": "Schiedsrichter",
     "kitRefereeHint": "Die Schiedsrichterfarbe hilft der Analyse, Schiedsrichter von Spielern zu unterscheiden. Leer lassen, wenn unbekannt.",
     "kitRefereeClear": "Schiedsrichterfarbe entfernen",
@@ -953,6 +953,7 @@
     "courtFromHall": "Spielfeld aus einem früheren Video derselben Halle übernommen ({hall}). Kurz prüfen, ob es passt.",
     "courtFromHallCheck": "Spielfeld aus einem früheren Video derselben Halle übernommen ({hall}). Liegen die orangen Linien auf den Linien der Halle?",
     "courtFromHallOk": "Spielfeld aus einem früheren Video derselben Halle übernommen ({hall}) und bestätigt.",
+    "courtFromHallSure": "Spielfeld aus einem früheren Video derselben Halle übernommen. Die Hallenbilder passen genau, du musst nichts prüfen.",
     "courtFits": "Passt",
     "courtRemark": "Neu markieren",
     "courtPreviewAlt": "Hallenbild mit dem übernommenen Spielfeld in Orange",
@@ -1323,7 +1324,9 @@
     "removeArrow": "Pfeil löschen",
     "phaseOf": "Phase {n} von {total}",
     "legend": "Zeichen auf der Tafel",
-    "decimal": ","
+    "decimal": ",",
+    "legendRoles": "In Abwehr-Vorlagen verteidigen wir, sonst greifen wir an. «Wir» hat immer dieselbe Farbe.",
+    "pickTemplate": "Mit einer Vorlage starten"
   },
   "formations": {
     "title": "Abwehrsysteme",
@@ -1445,7 +1448,8 @@
     "emptyText": "Mit jedem Spiel wächst hier die Saison: Resultate, was sich wiederholt und wer trifft. Leg dein erstes Spiel an und lade das Video hoch.",
     "noFiguresTitle": "Noch keine Zahlen für die Saison.",
     "noFiguresText": "Die Saison zählt Spiele mit erfassten Toren und Würfen. In deinen Spielen mit Video hat die Analyse noch keine gefunden: Beantworte dort die offenen Fragen oder trag das Resultat ein.",
-    "toMatches": "Zu den Spielen"
+    "toMatches": "Zu den Spielen",
+    "goalsAgainst": "Gegentore"
   },
   "notifications": {
     "title": "Mitteilungen",
@@ -1620,7 +1624,7 @@
     "status_unpaid": "unbezahlt",
     "trialUntil": "Testphase bis {date}",
     "portal": "Abo verwalten",
-    "notEnforced": "Limiten sind in dieser Installation nicht aktiv.",
+    "notEnforced": "Zurzeit gelten diese Grenzen noch nicht: Du nutzt alles ohne Einschränkung.",
     "teams": "Teams",
     "matches": "Spiele pro Saison (grösstes Team)",
     "storage": "Videospeicher",
@@ -1692,7 +1696,8 @@
       "consent-missing": "Öffentliche Highlights brauchen die Einwilligung «Highlights öffentlich» von allen, die darin vorkommen, bei Minderjährigen von den Eltern. Hol sie mit dem Einwilligungslink im Team.",
       "forbidden": "Mit deiner Rolle im Team kannst du keine öffentlichen Links erstellen. Frag deinen Trainer.",
       "plan": "Links zum Teilen gehören nicht zu deinem Abo.",
-      "unverified": "Der Verein ist noch nicht bestätigt: Teilen geht erst danach. Wie das geht, steht in den Einstellungen."
+      "unverified": "Der Verein ist noch nicht bestätigt: Teilen per Link geht erst danach.",
+      "unverifiedLink": "So bestätigst du den Verein"
     },
     "card": {
       "title": "Spielkarte",
@@ -2193,7 +2198,8 @@
     "status_rendering": "Wird gerendert…",
     "status_failed": "Erstellen fehlgeschlagen.",
     "status_blocked_consent": "Wegen fehlender Einwilligungen nicht möglich.",
-    "newReel": "Neue Highlights erstellen"
+    "newReel": "Neue Highlights erstellen",
+    "needScenes": "Highlights entstehen aus Szenen: Sobald im Video dieses Spiels Tore bestätigt sind, stellst du sie hier zusammen."
   },
   "parts": {
     "sideChange": "Seitenwechsel vor diesem Teil:",
@@ -2581,7 +2587,20 @@
     "planOwn": "Einheit selbst planen",
     "noUpcoming": "Noch keine Einheit geplant. Aus einem Trainingstipp wird mit einem Klick eine Einheit.",
     "planOpen": "Zum Trainingsplan",
-    "tipPlannedElsewhere": "Schon als Schwerpunkt eingeplant."
+    "tipPlannedElsewhere": "Schon als Schwerpunkt eingeplant.",
+    "whyTitle": "Warum diese Übungen",
+    "whyLine": "Der Befund oben betrifft «{focus}».",
+    "why_finishing": "Sie üben den Abschluss gegen den Torhüter, aus verschiedenen Winkeln und unter Druck.",
+    "why_wings": "Sie üben das Spiel über die Flügel: den Abschluss aus spitzem Winkel und das Verteidigen gegen die Aussen.",
+    "why_back_court": "Sie üben den Rückraum: Durchbruch, Wurf aus der zweiten Reihe und das Heraustreten dagegen.",
+    "why_pivot": "Sie üben den Kreis: Anspiel, Sperre und das Verteidigen gegen den Kreisläufer.",
+    "why_seven_m": "Sie üben den 7-m-Wurf: Ablauf, Täuschung und Ruhe unter Druck.",
+    "why_goalkeeping": "Sie üben den Torhüter: Stellung, Reaktion und das Zusammenspiel mit der Abwehr.",
+    "why_passing": "Sie üben sichere Pässe im Tempo, damit weniger Bälle verloren gehen.",
+    "why_transition_defence": "Sie üben den Rückzug: nach dem Ballverlust schnell zurück und die Mitte zu.",
+    "why_fast_break": "Sie üben den Gegenstoss: erste und zweite Welle, der schnelle Pass nach vorn.",
+    "why_defence": "Sie üben die Abwehr: Verschieben, Heraustreten und Helfen.",
+    "why_powerplay": "Sie üben Über- und Unterzahl: Räume nutzen und Räume schliessen."
   },
   "schedule": {
     "nav": "Meine Termine",
@@ -2876,7 +2895,10 @@
     "emailResend": "Mail nochmals schicken",
     "emailSent": "Gesendet. Schau in dein Postfach und tippe auf den Link.",
     "emailFailed": "Das ging gerade nicht. Versuch es später nochmals.",
-    "later": "Später"
+    "later": "Später",
+    "newTab": "öffnet in einem neuen Tab",
+    "backToTeam": "Zurück zu {team}",
+    "nextSteps": "So geht es weiter"
   },
   "palette": {
     "newMatch": "Neues Spiel anlegen",
@@ -3130,7 +3152,7 @@
     "claimedFound": "Wir haben {matches, plural, one {# Spiel} other {# Spiele}}, {players} Spieler und {reports, plural, one {# Spielbericht} other {# Spielberichte}} gefunden.",
     "heldBack": "{n, plural, one {# weiteres Spiel ist} other {# weitere Spiele sind}} im Gratis-Plan nicht übernommen.",
     "upgrade": "Plan ansehen",
-    "unverifiedHint": "Der Verein ist noch nicht bestätigt: Teilen und öffentliche Profile gehen erst danach. Wie das geht, steht in den Einstellungen.",
+    "unverifiedHint": "Der Verein ist noch nicht bestätigt: Teilen und öffentliche Profile gehen erst danach. Wie das geht, steht unter Verein › Verband und in «So geht es weiter».",
     "confirmSquad": "Team bestätigen",
     "notFound": "Team nicht gefunden oder ausserhalb der Schweiz?",
     "manual": "Verein von Hand anlegen",
@@ -3218,10 +3240,10 @@
   "verification": {
     "section": "Offizielle Daten",
     "title": "Verein noch nicht bestätigt",
-    "why": "Bis der Verein bestätigt ist, bleiben Teilen und öffentliche Profile aus, und Gegner stehen in den Spielberichten nur mit Nummer. So geht es:",
+    "why": "Bis der Verein bestätigt ist, bleiben Teilen per Link und öffentliche Profile aus, und Gegner stehen in den Spielberichten nur mit Nummer.",
     "way_mail_domain": "Mit einer E-Mail-Adresse des Vereins anmelden.",
     "way_mail_domain_known": "Mit einer E-Mail-Adresse des Vereins anmelden ({domains}).",
-    "way_second_official": "Eine zweite Person (Admin oder Trainer, nicht du) bestätigt hier.",
+    "way_second_official": "Eine zweite Person aus dem Verein (Admin oder Trainer, nicht wer ihn übernommen hat) bestätigt ihn hier.",
     "way_federation": "Mit einer Lizenz des Verbands.",
     "way_operator": "Über den Support.",
     "confirm": "Ich bestätige den Verein",
@@ -3233,7 +3255,12 @@
     "line": "Der Verein ist noch nicht bestätigt: Teilen und öffentliche Profile sind bis dahin aus.",
     "lineLink": "So geht es",
     "federationTitle": "Verband",
-    "notOfficial": "Dein Verein ist nicht mit handball.ch verbunden. Die Verbindung entsteht, wenn du dein Team beim Einstieg über handball.ch suchst und übernimmst."
+    "notOfficial": "Dein Verein ist nicht mit handball.ch verbunden. Die Verbindung entsteht, wenn du dein Team beim Einstieg über handball.ch suchst und übernimmst.",
+    "whyNumbers": "Warum: Die Namen von Spielerinnen und Spielern anderer Teams sind Personendaten. Wir zeigen sie und öffnen Links nach aussen erst, wenn feststeht, dass du wirklich für diesen Verein arbeitest.",
+    "ways": "So wird der Verein bestätigt:",
+    "way_second_official_invite": "Eine zweite Person aus dem Verein (Admin oder Trainer) meldet sich an und bestätigt ihn hier.",
+    "inviteSecond": "Person einladen",
+    "youConfirm": "Du bist Admin oder Trainer im Verein und hast ihn nicht übernommen: Du kannst ihn bestätigen."
   },
   "playerStatus": {
     "injured": "Verletzt",
@@ -3518,8 +3545,8 @@
     "stepNext": "danach",
     "minutesLeft": "{minutes, plural, one {noch etwa 1 Minute} other {noch etwa # Minuten}}",
     "meanwhile": "In der Zwischenzeit: die Tore aus dem Spielbericht stehen schon im Verlauf.",
-    "noThings": "Für drei Dinge braucht es mehr Tore mit Video. Die Szenen findest du unter Video.",
-    "telegram": "Telegramm",
+    "noThings": "Für drei Dinge braucht es mehr Tore mit Wurfort. Szenen gibt es, sobald Tore im Video bestätigt sind.",
+    "telegram": "Kurzbericht",
     "copy": "Kopieren",
     "copied": "Kopiert",
     "check": "Prüfen",
@@ -3673,7 +3700,14 @@
     "rowPartsFailed": "{n, plural, one {1 Teil gescheitert} other {# Teile gescheitert}}",
     "rowNotice": "Analyse fertig, keine Fragen: {reason}",
     "rowPartsUploading": "{n, plural, one {1 Teil} other {# Teile}} noch nicht ganz hochgeladen",
-    "rowFailedWhy": "Analyse nicht geklappt: {reason}"
+    "rowFailedWhy": "Analyse nicht geklappt: {reason}",
+    "zonesLine": "{m7, plural, one {1 Tor} other {# Tore}} von 7 m{rest, plural, =0 {.} one {, 1 weiteres ohne Wurfort.} other {, # weitere ohne Wurfort.}}",
+    "flightCut": "Torfolge nur bis {m}. Minute",
+    "demoNoVideo": "Das Demo-Spiel zeigt, was die Analyse aus einem Spiel macht: die Tore mit ihren Wegen und Positionen. Ein Video gehört nicht dazu; dein eigenes lädst du in einem deiner Spiele hoch.",
+    "todayTitle": "Das kannst du heute schon",
+    "todayNote": "aus dem Spielbericht",
+    "todayText": "Die Spielkarte als Bild für den Teamchat und den Kurzbericht zum Kopieren, noch ohne Video.",
+    "todayCard": "Spielkarte für den Teamchat"
   },
   "check": {
     "top": "Prüfen · {opponent}",
@@ -3720,7 +3754,7 @@
     "more": "Wenn du magst: {n, plural, one {1 weitere Frage} other {# weitere Fragen}}",
     "reloading": "Das Feld wird übernommen und das Video damit neu ausgewertet. Das dauert einige Minuten. Du kannst die Seite schliessen; die neuen Fragen stehen danach hier.",
     "mainDone": "Die wichtigsten Momente sind geprüft.",
-    "mainDoneText": "{n, plural, one {1 weiterer Moment könnte ein Tor sein.} other {# weitere Momente könnten Tore sein.}} {batch, plural, one {Er dauert} other {Die nächsten # dauern}} mit «Von wo?» etwa {minutes, plural, one {1 Minute} other {# Minuten}}.",
+    "mainDoneText": "{n, plural, one {1 weiterer Moment könnte ein Tor sein.} other {# weitere Momente könnten Tore sein.}} {batch, plural, one {Er dauert} other {Die nächsten # dauern}} etwa {minutes, plural, one {1 Minute} other {# Minuten}}.",
     "goOn": "Mehr prüfen",
     "roundDone": "Für heute geprüft.",
     "leftOpen": "{n, plural, one {1 Moment bleibt offen.} other {# Momente bleiben offen.}} Bis sie beantwortet sind, ist das Resultat ein Zwischenstand.",
@@ -3827,7 +3861,8 @@
     "chipNumber": "Nummer {n}",
     "emptyTitle": "Lade ein Video hoch, dann siehst du hier deine Szenen.",
     "emptyText": "Nach der Analyse ist jedes Tor, jeder Wurf und jeder Ballverlust eine Szene. Du suchst sie mit einem Satz und stellst sie zu Sammlungen zusammen.",
-    "emptyPlays": "Spielzüge zeichnen geht schon jetzt:"
+    "emptyPlays": "Spielzüge zeichnen geht schon jetzt:",
+    "emptySearch": "Die Suche findet Szenen ab dem ersten Video."
   },
   "teamPage": {
     "kick": "{team} · {source}",
@@ -3866,7 +3901,12 @@
     "allPeople": "Alle Leute und Rollen",
     "emptyText": "Trag deine Spieler mit Nummer ein. Dann nennen Szenen und Zahlen sie beim Namen.",
     "emptyTextPlayer": "Dein Trainer trägt den Kader ein.",
-    "emptyAction": "Kader eintragen"
+    "emptyAction": "Kader eintragen",
+    "why": "Warum der Kader zählt: Mit den Nummern ordnet die Analyse Tore, Würfe und Szenen den richtigen Spielern zu, und wer als Torhüter (TW) eingetragen ist, bekommt seine Paraden.",
+    "keepersTitle": "Wer steht im Tor?",
+    "keepersText": "Noch niemand ist als Torhüter eingetragen. Tippe deine Torhüter an: Dann zeigen Kader und Torhüter-Zahlen ihre Paraden.",
+    "keepersMark": "{name} als Torhüter eintragen",
+    "keepersFailed": "Das hat nicht geklappt. Versuch es nochmals oder trag die Position unter «Kader bearbeiten» ein."
   },
   "seasonPage": {
     "kick": "{season} · {league} · nach {n, plural, =1 {einem Spiel} =2 {zwei Spielen} =3 {drei Spielen} =4 {vier Spielen} =5 {fünf Spielen} =6 {sechs Spielen} =7 {sieben Spielen} =8 {acht Spielen} =9 {neun Spielen} =10 {zehn Spielen} other {# Spielen}}",
@@ -3921,7 +3961,7 @@
     "colGames": "Sp.",
     "colDiff": "Diff.",
     "colPoints": "Pkt.",
-    "opponents": "Gegner",
+    "opponents": "Nächste Gegner",
     "noMatchYet": "noch kein Spiel",
     "lastAgainst": "{own}:{opp} im letzten Spiel",
     "noFixtures": "Kein Spiel angesetzt.",
@@ -3935,7 +3975,7 @@
     "basisAll": "aus {n, plural, one {dem einen Spiel} other {allen # Spielen}}",
     "bestBasis": "Tore aus allen Spielen, Wurfquote, Paraden und Ballverluste nur aus Spielen mit Analyse ({k} von {n})",
     "dataCount": "{k} von {n} mit Analyse",
-    "legend": "Resultat und Tore kommen von handball.ch oder so, wie du sie eingetragen hast. Wurfquote, gehaltene Würfe und Ballverluste kommen aus deinen Videos (Analyse und was du markierst); Spiele ohne diese Daten zählen dort nicht mit.",
+    "legend": "Resultat und Tore kommen aus dem offiziellen Spielbericht von handball.ch oder aus deinen eigenen Angaben. Wurfquote, gehaltene Würfe und Ballverluste kommen aus deinen Videos (Analyse und was du markierst); Spiele ohne diese Daten zählen dort nicht mit.",
     "colData": "Daten",
     "dataVideo": "Video analysiert",
     "dataTagged": "von Hand erfasst",
@@ -3947,7 +3987,9 @@
     "noVideoShort": "kein Video",
     "dataReport": "aus dem Spielbericht",
     "trainingTips": "Trainingstipps dazu",
-    "tipsAction": "Trainingstipps"
+    "tipsAction": "Trainingstipps",
+    "tickAgainst": "Strich: Gegentore",
+    "tickFor": "Strich: Tore"
   },
   "numbersTab": {
     "intro": "Tore, 7 m und 2 Minuten aus Spielbericht und Video, Würfe und Paraden aus den markierten Ereignissen.",
@@ -4087,6 +4129,8 @@
   "spot": {
     "question": "Von wo?",
     "why": "Tippe an, von wo geworfen wurde.",
+    "whyOptional": "Wenn du magst: Tippe an, von wo geworfen wurde. Daraus entstehen die drei Dinge.",
+    "skip": "Überspringen",
     "courtLabel": "Angegriffene Hälfte, Tor oben. Links und rechts aus Sicht des Angriffs.",
     "zone": {
       "la": "Aussen links",
@@ -4250,7 +4294,14 @@
     "shareText": "Stell eine Sammlung zusammen und schick den Link in den Teamchat. Spieler brauchen dafür kein Konto.",
     "shareAction": "Zu den Szenen",
     "done": "erledigt",
-    "hide": "Ausblenden"
+    "hide": "Ausblenden",
+    "verifyTitle": "Lass den Verein bestätigen",
+    "verifyText": "Teilen per Link geht erst danach. Eine zweite Person aus dem Verein bestätigt ihn, oder du meldest dich mit einer E-Mail-Adresse des Vereins an.",
+    "verifyTextYou": "Teilen per Link geht erst danach. Du kannst ihn bestätigen.",
+    "verifyAction": "So geht es",
+    "progress": "{done} von {total} erledigt",
+    "hideNote": "Zurückholen kannst du sie jederzeit im Konto-Menü oben rechts.",
+    "shareLater": "Geht nach dem ersten Video."
   },
   "onboardingAccount": {
     "account": "Konto",
@@ -4314,5 +4365,32 @@
     "short_unreadable": "Datei nicht lesbar",
     "short_too_short": "Video zu kurz",
     "short_generic": "nicht geklappt"
+  },
+  "formCheck": {
+    "valueMissing": "Bitte füll dieses Feld aus.",
+    "typeMismatchEmail": "Bitte gib eine E-Mail-Adresse ein, zum Beispiel name@verein.ch.",
+    "typeMismatchUrl": "Bitte gib eine Adresse ein, die mit https:// beginnt.",
+    "typeMismatch": "Das Format stimmt nicht.",
+    "tooShort": "Bitte mindestens {n} Zeichen.",
+    "tooLong": "Bitte höchstens {n} Zeichen.",
+    "rangeUnderflow": "Bitte mindestens {min}.",
+    "rangeOverflow": "Bitte höchstens {max}.",
+    "stepMismatch": "Dieser Wert passt nicht, bitte nimm den nächsten ganzen Wert.",
+    "patternMismatch": "Das Format stimmt nicht.",
+    "badInput": "Bitte gib eine Zahl ein.",
+    "invalid": "Bitte prüf diese Angabe."
+  },
+  "uploadFacts": {
+    "title": "Gut zu wissen",
+    "label_formats": "Dateien",
+    "label_size": "Grösse",
+    "label_phone": "Handy",
+    "label_analysis": "Analyse",
+    "formats": "MP4, MOV, MKV oder MTS, so wie Handy und Kamera sie speichern. Mehrere Dateien eines Spiels wählst du zusammen aus.",
+    "size": "Bis {max} pro Datei. Ein ganzes Spiel in Full HD hat meist einige GB; im WLAN geht es schneller.",
+    "sizeUnknown": "Ein ganzes Spiel in Full HD hat meist einige GB; im WLAN geht es schneller.",
+    "phone": "Der Upload läuft in dieser Seite. Geht der Bildschirm aus oder schliesst du sie, hält er an: Öffne das Spiel wieder und wähl dieselbe Datei, dann geht es dort weiter.",
+    "analysis": "Sie startet von selbst, sobald das Video da ist, und läuft auf unseren Servern: Du kannst das Handy weglegen, die Glocke meldet sich. Sie zählt zu den Analyseminuten deines Abos.",
+    "billing": "Abo ansehen"
   }
 }

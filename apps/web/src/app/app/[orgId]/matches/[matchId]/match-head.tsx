@@ -5,7 +5,7 @@ import { useFormatter, useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { AttnTag } from "@/components/anlauf/blocks";
 import { Breakable, Strip, WurfHead } from "@/components/anlauf/heads";
-import { openMoments, reportGoals, videoScore, type MatchGraphics } from "@/lib/graphics";
+import { openMoments, reportCut, reportGoals, videoScore, type MatchGraphics } from "@/lib/graphics";
 
 type Match = Schemas["MatchOut"];
 
@@ -42,7 +42,7 @@ export function MatchHead({ match, ownName, oppName, view, graphics, children }:
   // with goal moments still open the score is an interim one (third real-video test G1)
   const moments = graphics ? openMoments(graphics) : 0;
   const note = fromVideo ? (moments > 0 ? t("scoreSoFar", { n: moments }) : t("scoreFromVideo")) : undefined;
-  const colourOpen = !match.opponent_colors?.color && match.opponent ? <AttnTag className="ml-2">{t("colourOpen")}</AttnTag> : null;
+  const colourOpen = !match.opponent_colors?.color && match.opponent && match.source !== "demo" ? <AttnTag className="ml-2">{t("colourOpen")}</AttnTag> : null;
   return (
     <div className="bleed-x -mt-6 lg:-mt-8">
       {scoreText && (
@@ -54,6 +54,7 @@ export function MatchHead({ match, ownName, oppName, view, graphics, children }:
         <WurfHead
           kick={kick}
           title={<Breakable text={title} />}
+          titleText={title}
           own={own}
           opp={opp}
           pending={pending}
@@ -64,7 +65,8 @@ export function MatchHead({ match, ownName, oppName, view, graphics, children }:
           ownColor={match.kit_own}
           scoreless={graphics != null}
           goals={graphics ? reportGoals(graphics) : null}
-          flightLabels={{ half: t("halftime", { v: "{v}" }), end: t("end", { v: "{v}" }), halfLevel: t("halftimeLevel"), endLevel: t("endLevel") }}
+          goalsUntil={graphics ? reportCut(graphics, match.score_own, match.score_opponent, (match.period_s * match.periods) / 60) : null}
+          flightLabels={{ half: t("halftime", { v: "{v}" }), end: t("end", { v: "{v}" }), halfLevel: t("halftimeLevel"), endLevel: t("endLevel"), cut: t("flightCut", { m: "{m}" }) }}
           meta={
             <>
               {half}

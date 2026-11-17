@@ -139,3 +139,17 @@ async def test_rate_limited_route_answers_while_redis_is_down(app: FastAPI) -> N
     ) as c:
         r = await c.post("/_test/limited")
     assert r.status_code == 200, r.text
+
+
+def test_a_logger_cached_before_a_second_configure_is_still_captured() -> None:
+    """configure_logging runs once per app; a logger cached before a later app's configure must
+    still reach capture_logs (CI failed depending on the order of tests on a worker)."""
+    from handball_api.core.logging import configure_logging, get_logger
+
+    configure_logging()
+    logger = get_logger("handball_api.tests.cached")
+    logger.info("first_use")  # cached on first use
+    configure_logging()
+    with capture_logs() as logs:
+        logger.warning("after_reconfigure")
+    assert [e["event"] for e in logs] == ["after_reconfigure"]

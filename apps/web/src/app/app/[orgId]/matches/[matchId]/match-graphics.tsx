@@ -6,7 +6,7 @@ import { AttnTag, CameraKey, SectionHead } from "@/components/anlauf/blocks";
 import { Zones } from "@/components/anlauf/bundle";
 import { Rail } from "@/components/anlauf/charts";
 import { clockOf, SceneCamera } from "@/components/anlauf/three-things-view";
-import { goalRuns, reportGoals, type MatchGraphics } from "@/lib/graphics";
+import { goalRuns, reportGoals, zoneLine, zonesWorthACourt, type MatchGraphics } from "@/lib/graphics";
 import { cn } from "@/lib/utils";
 
 /** Gegentore and eigene Tore by position: counts at the zones, the shot spots as dots. */
@@ -22,6 +22,16 @@ export function MatchZones({ graphics, row = false, only }: { graphics: MatchGra
       {sides.map((s) => {
         const goals = goalRuns(graphics, s.team);
         if (goals.length === 0) return null;
+        if (!zonesWorthACourt(graphics, s.team)) {
+          // only 7 m from the report: one line, not a large half court with one number (review R12)
+          const line = zoneLine(graphics, s.team);
+          return (
+            <section key={s.team} data-testid={`zones-line-${s.team}`}>
+              <SectionHead as="h3" title={s.title} note={t("byPosition")} />
+              <p className="m-0 text-[15px] text-ink-2">{t("zonesLine", line)}</p>
+            </section>
+          );
+        }
         return (
           <section key={s.team}>
             <SectionHead as="h3" title={s.title} note={`${t("byPosition")}, ${goals.length}`} />

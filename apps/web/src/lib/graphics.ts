@@ -76,6 +76,22 @@ function goalRunsAsGiven(g: MatchGraphics, team?: "own" | "opp"): (GoalRun & { e
     }));
 }
 
+/**
+ * Whether the goals of a side say enough for a half court by position: one spot or one field
+ * position at least. A report gives 7 m goals and nothing else; a court with «3 / 7 m» alone is a
+ * large picture of nothing (review R12), a line says it instead (`zoneLine`).
+ */
+export function zonesWorthACourt(g: MatchGraphics, team: "own" | "opp"): boolean {
+  return g.goals.some((x) => x.team === team && (x.shot != null || (coachZone(x) != null && coachZone(x) !== "m7" && ZONE_AT[coachZone(x)!] != null)));
+}
+
+/** The goals of a side without a court: how many from 7 m, how many without a place. */
+export function zoneLine(g: MatchGraphics, team: "own" | "opp"): { m7: number; rest: number } {
+  const goals = g.goals.filter((x) => x.team === team);
+  const m7 = goals.filter((x) => coachZone(x) === "m7").length;
+  return { m7, rest: goals.length - m7 };
+}
+
 /** Goals without a shot spot: counted and listed, said honestly where drawings would be. */
 export function spotless(g: MatchGraphics, team?: "own" | "opp"): MatchGraphics["goals"] {
   return g.goals.filter((x) => x.shot == null && coachZone(x) == null && (!team || x.team === team));
@@ -110,6 +126,19 @@ export function videoGoals(g: MatchGraphics): MatchGraphics["goals"] {
 
 export function reportGoals(g: MatchGraphics): ReportGoal[] {
   return g.report_goals.filter((x): x is { minute: number; team: "own" | "opp" } => x.minute != null);
+}
+
+/**
+ * Where the goal sequence of the report stops when goals are missing after it (fewer goals than
+ * the result, the last one well before the end): the line of the match ends there instead of
+ * running flat to minute 60 (review R13). Null when the sequence is complete or nothing is known.
+ */
+export function reportCut(g: MatchGraphics, own: number | null | undefined, opp: number | null | undefined, length = 60): number | null {
+  const goals = reportGoals(g);
+  if (own == null || opp == null || goals.length === 0 || g.span) return null;
+  if (goals.length >= own + opp) return null;
+  const last = Math.max(...goals.map((x) => x.minute));
+  return last < length - 1 ? last : null;
 }
 
 /** The tactics camera's scene, or null when there is nothing measured to show. */

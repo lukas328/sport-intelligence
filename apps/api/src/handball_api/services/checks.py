@@ -113,6 +113,28 @@ def signals(r: dict[str, Any]) -> dict[str, Any]:
     return out
 
 
+# a court the worker carried over from an earlier video of the same hall (whose court a person
+# set) counts as confirmed when the two hall images agree well: this many floor matches (where
+# hallmatch's confidence reaches 1) at this median error at most; a weaker match is asked
+HALL_SURE_FLOOR_INLIERS = 60
+HALL_SURE_ERROR_PX = 3.0
+
+
+def hall_court_sure(asset: VideoAsset | None) -> bool:
+    """The court of this file came from a confirmed court of the same hall and the hall images
+    matched well: «Passt das Spielfeld?» is not asked again (livegang round 2, A11)."""
+    info = (asset.analysis or {}).get("calibration_info") if asset is not None else None
+    if not isinstance(info, dict) or info.get("method") != "hall":
+        return False
+    floor, error = info.get("floor_inliers"), info.get("error_px")
+    return (
+        isinstance(floor, int)
+        and floor >= HALL_SURE_FLOOR_INLIERS
+        and isinstance(error, int | float)
+        and error <= HALL_SURE_ERROR_PX
+    )
+
+
 def little_found(asset: VideoAsset | None, court_ok: bool | None) -> str | None:
     """Why the analysis of this file found too little to ask about, or None: the court not
     recognised (and not set by a person: then camera_motion, no_floor, flat_view, few_people or

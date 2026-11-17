@@ -146,7 +146,8 @@ def _shown_field(
 
 
 async def _field_confirmed(ctx: Ctx, asset: VideoAsset | None) -> bool | None:
-    """None without a video; True once a person confirmed the court (or set it by hand)."""
+    """None without a video; True once a person confirmed the court (or set it by hand), or
+    when it was carried over from a confirmed court of the same hall with a sure match."""
     if asset is None:
         return None
     cal = await ctx.db.scalar(
@@ -155,7 +156,9 @@ async def _field_confirmed(ctx: Ctx, asset: VideoAsset | None) -> bool | None:
         .order_by(CameraCalibration.created_at.desc())
         .limit(1)
     )
-    return cal is not None and cal.source == "user_correction"
+    if cal is not None and cal.source == "user_correction":
+        return True
+    return checks.hall_court_sure(asset)
 
 
 def _has_tracking(asset: VideoAsset | None) -> bool:

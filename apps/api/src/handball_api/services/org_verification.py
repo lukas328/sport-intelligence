@@ -176,8 +176,22 @@ async def operator_set(ctx: Ctx, org_id: uuid.UUID, verified: bool) -> Organizat
     return org
 
 
-def status(org: Organization) -> dict[str, Any]:
+def my_part(ctx: Ctx | None, org: Organization, user: User | None) -> str:
+    """What the person asking can do for the verification (review R21): who took the club over
+    needs a second person ("claimed"); a club admin or coach who did not can confirm
+    ("can_confirm"); anybody else has no part ("none")."""
+    if ctx is None or user is None or ctx.actor is None or org.verification != UNVERIFIED:
+        return "none"
+    if user.id == org.claimed_by_id:
+        return "claimed"
+    actor = ctx.actor
+    coach = any(r == TeamRole.COACH for r in actor.team_roles.values())
+    return "can_confirm" if actor.is_org_admin or coach else "none"
+
+
+def status(org: Organization, ctx: Ctx | None = None, user: User | None = None) -> dict[str, Any]:
     return {
+        "my_part": my_part(ctx, org, user),
         "verification": org.verification,
         "verified_via": org.verified_via,
         "verified_at": org.verified_at,

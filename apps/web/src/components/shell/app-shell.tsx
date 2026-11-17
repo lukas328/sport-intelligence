@@ -199,10 +199,12 @@ export function AppShell({
                     {t("search")}
                   </button>
                 )}
+                {/* the frame's action in outline: the one filled button is the page's own
+                    (review R32: «Video hochladen» stood as strong as the page's main action) */}
                 {upload && (
                   <Link
                     href={upload}
-                    className={buttonClass("primary", "md")}
+                    className={buttonClass("secondary", "md")}
                     data-testid="upload-video"
                   >
                     {t("upload")}
@@ -237,7 +239,7 @@ export function AppShell({
               {upload && (
                 <Link
                   href={upload}
-                  className="flex h-11 shrink-0 items-center justify-center gap-1 border-2 border-ink bg-ink px-2.5 text-[15px] font-bold text-ground no-underline max-[439px]:w-11 max-[439px]:px-0"
+                  className="flex h-11 shrink-0 items-center justify-center gap-1 border-2 border-ink bg-transparent px-2.5 text-[15px] font-bold text-ink no-underline max-[439px]:w-11 max-[439px]:px-0"
                   aria-label={t("upload")}
                   data-testid="upload-video-compact"
                 >

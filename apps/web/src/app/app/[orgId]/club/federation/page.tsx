@@ -12,8 +12,9 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function ClubFederationPage({ params }: { params: Promise<{ orgId: string }> }) {
   const { orgId } = await params;
   const { org, teams, access } = await loadSettings(orgId);
-  // not a 404 (UX test B32): others go to the club; a club without the link learns how it comes
-  if (!access.isAdmin) redirect(`/app/${orgId}/club`);
+  // not a 404 (UX test B32): others go to the club; a club without the link learns how it comes.
+  // Coaches see the verification (they may be the second person, review R21), not the requests
+  if (!access.isAdmin && access.coachOf === 0) redirect(`/app/${orgId}/club`);
   if (!access.official) {
     const t = await getTranslations("verification");
     return (
@@ -26,7 +27,7 @@ export default async function ClubFederationPage({ params }: { params: Promise<{
   return (
     <section id="official-section" className="space-y-8">
       <Verification orgId={org.id} />
-      <AccessRequests orgId={org.id} teams={teams.map((x) => ({ id: x.id, name: x.name }))} />
+      {access.isAdmin && <AccessRequests orgId={org.id} teams={teams.map((x) => ({ id: x.id, name: x.name }))} />}
     </section>
   );
 }
