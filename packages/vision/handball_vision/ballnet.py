@@ -17,6 +17,13 @@ GIL, so on a GPU machine the net runs while the main thread does camera motion, 
 numbers (job 14: the GPU waited during those stages). At most `IN_FLIGHT` batches wait for the
 worker, so the decoded frames they hold stay bounded.
 
+Memory: glibc raises its mmap threshold each time a large block is freed, so after the first
+batches the net's inputs and outputs (about 150 MB per batch at 960 px) come from the heap instead
+of mmap; with the main thread allocating at the same time (camera motion, detection) the heap
+fragments and the process grew by about 2.5 GB per minute of video on the CPU (60 s clip: 2.4 to
+5.7 GB). `fixed_mmap_threshold()` (called when the worker starts) pins the threshold at 1 MB, as
+the environment variable MALLOC_MMAP_THRESHOLD_ would: the same clip stays at 2.4 GB.
+
 LICENCE NOTE (test phase only): hr1 and hrp1 were trained with DeepSport data (non-commercial,
 `ml/ball/LINEAGE.md` section 2, D5). Before a real go-live they must be replaced by nets trained
 without DeepSport (`docs/plans/tracking-strategie.md` section 9, step 6).
@@ -40,6 +47,31 @@ from handball_vision.balltrack2 import merge_candidates
 U8 = NDArray[Any]
 Peak = tuple[float, float, float]
 IN_FLIGHT = 2  # batches queued for the worker thread before `add` waits
+MMAP_THRESHOLD = 1 << 20  # bytes; larger blocks come from mmap and go back to the system on free
+_M_MMAP_THRESHOLD = -3  # mallopt parameter (glibc malloc.h)
+
+
+def fixed_mmap_threshold(size: int = MMAP_THRESHOLD) -> bool:
+    """Pin glibc's mmap threshold (no dynamic raising, see the module note). True when set; False
+    off glibc (no `mallopt`) or when MALLOC_MMAP_THRESHOLD_ is set already (the operator's value
+    wins)."""
+    import ctypes
+    import ctypes.util
+    import os
+
+    if "MALLOC_MMAP_THRESHOLD_" in os.environ:
+        return False
+    name = ctypes.util.find_library("c")
+    if not name:
+        return False
+    try:
+        libc = ctypes.CDLL(name)
+        mallopt = libc.mallopt
+    except (OSError, AttributeError):
+        return False
+    mallopt.argtypes = [ctypes.c_int, ctypes.c_int]
+    mallopt.restype = ctypes.c_int
+    return bool(mallopt(_M_MMAP_THRESHOLD, size))
 
 
 def frame_gap(fps: float) -> int:
@@ -162,6 +194,8 @@ class BallCandidates:
         self.pending: list[tuple[int, list[U8]]] = []
         self.result: dict[int, list[Peak]] = {}
         self.busy_s = 0.0
+        if threaded:
+            fixed_mmap_threshold()
         self.pool = ThreadPoolExecutor(1, thread_name_prefix="ballnet") if threaded else None
         self.futures: deque[Future[None]] = deque()
 
