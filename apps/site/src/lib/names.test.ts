@@ -7,7 +7,8 @@ import { describe, expect, it } from "vitest";
  * names of the earlier demo (real places on Lake Zurich) must not come back: not in the files the
  * website serves (public/, text and file names), not in its texts (src/messages, content). A
  * picture cannot be read here, so pictures with words in them are made by scripts
- * (scripts/product-shots, e.g. share-preview.mjs for the chat preview) and made again on a change.
+ * (scripts/product-shots, e.g. share-preview.mjs for the chat preview, the templates of the steps
+ * with their words in de, fr and en, checked here) and made again on a change.
  */
 const OLD = ["Zürichsee", "Zurichsee", "Seewald", "Moosbach", "Bergtal", "Rebhalden", "Lindmatt", "Uferweg", "Seeblick", "Thalwil", "Horgen"];
 const PATTERN = new RegExp(OLD.join("|"), "i");
@@ -31,8 +32,8 @@ describe("no names of the earlier demo", () => {
     expect(hits).toEqual([]);
   });
 
-  it("in the text files in public/, the messages and the content", () => {
-    const hits = ["public", "src/messages", "content"]
+  it("in the text files in public/, the messages, the content and the words of the pictures", () => {
+    const hits = ["public", "src/messages", "content", "scripts/product-shots/templates"]
       .flatMap((d) => files(join(site, d)))
       .filter((f) => !BINARY.test(f))
       .filter((f) => PATTERN.test(readFileSync(f, "utf8")))

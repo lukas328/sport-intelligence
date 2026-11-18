@@ -148,8 +148,9 @@
   }
 
   /**
-   * A cut-out of the app for the steps: `crop` = [x, y, w, h] in app CSS px, in a flat frame with
-   * the app's ink edge at `left`, `top`, `width` (outer, stage px). Returns the map like `screen`.
+   * A cut-out of the app (app-result, video-phone): `crop` = [x, y, w, h] in app CSS px, in a flat
+   * frame with the app's ink edge at `left`, `top`, `width` (outer, stage px). Returns the map
+   * like `screen`.
    */
   function cut(name, crop, { left, top, width }) {
     const el = document.createElement("div");

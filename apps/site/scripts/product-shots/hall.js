@@ -1,12 +1,11 @@
 /*
- * The hall as a drawing (steps «Filmen» and «Prüfen», U1 and U3): a handball court of 40 x 20 m
- * with its goal areas, 9 m lines and goals, in a hall, seen through a camera in true perspective.
- * Calm and sharp in the site's colours (cream, the club's green, ink), no people, no words.
- * step-film looks at it from behind and above the filming phone; step-check from the phone
- * itself, as the picture the app asks about.
+ * The hall as a drawing (step «Prüfen», U33): a handball court of 40 x 20 m with its goal areas,
+ * 9 m lines and goals, in a hall, seen through a camera in true perspective. Calm and sharp in
+ * the site's colours (cream, the club's green, ink; `colors` for another palette), no people,
+ * no words. step-check shows it from the stand as the picture the app asks about.
  *
  * Metres: x along the court (0 to 40), y across it from the far sideline (0) to the near one
- * (20), z up. `HALL.view({ eye, look, focal, cx, cy })` returns the projection and the drawing
+ * (20), z up. `HALL.view({ eye, look, focal, cx, cy, colors })` returns the projection and the drawing
  * helpers; everything it draws is an SVG string in pixels.
  */
 (function () {

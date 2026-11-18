@@ -58,7 +58,7 @@ body {
 }
 
 /*
- * The steps (U1, U3) and the phone picture of the app: one moment of the app cut out flat and
+ * The cut-outs (app-result, the phone picture of the app): one moment of the app cut out flat and
  * large on the app's cloth, with the app's own edge (2 px ink, square, no shadow: the app has
  * none), so its words read on a phone. `S.cut` places one.
  */
