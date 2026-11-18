@@ -3,7 +3,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { DialogContent, DialogRoot, DialogTrigger } from "@/components/ui/dialog";
 import { buttonClass } from "@/components/ui/button";
 import { api } from "@/lib/client";
@@ -11,6 +11,7 @@ import type { MatchGraphics } from "@/lib/graphics";
 import { checkMinutes, goalsWithoutSpot, type SpotAnswer, type SpotOrientation, type SpotZone, spotCounts } from "@/lib/shot-spot";
 import type { Pt } from "./geometry";
 import { ShotSpotPicker } from "./shot-spot-picker";
+import { Term } from "@/components/ui/term";
 
 type Goal = MatchGraphics["goals"][number];
 
@@ -126,11 +127,15 @@ export function SpotStatus({ orgId, matchId, graphics, things, compact }: { orgI
 /** Under the scene of a goal (a thing's scene, Punkt 1): its place and «Wurfort ändern» (V4). */
 export function SceneSpot({ orgId, matchId, graphics, eventId, label }: { orgId: string; matchId: string; graphics: MatchGraphics; eventId: string; label: string }) {
   const text = useSpotText();
+  const t = useTranslations("spot");
+  const tg = useTranslations("glossary");
   const goal = graphics.goals.find((x) => x.event_id === eventId);
   if (!goal) return null;
+  // «Wurfort» explained where it first shows on the match page (A17)
+  const term = (w: ReactNode) => <Term explain={tg("spot")}>{w}</Term>;
   return (
     <p className="m-0 mt-1.5 flex flex-wrap items-center gap-x-3 text-[15px]" data-testid="scene-spot">
-      <span className="text-ink-2">{text(goal)}</span>
+      <span className="text-ink-2">{goal.zone ? t.rich(goal.spot_by_coach ? "ofTerm" : "ofEstimatedTerm", { zone: t(`zone.${goal.zone}` as "zone.la"), term }) : text(goal)}</span>
       <SpotChange orgId={orgId} matchId={matchId} goal={goal} label={label} />
     </p>
   );

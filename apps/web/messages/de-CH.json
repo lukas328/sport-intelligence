@@ -1660,7 +1660,8 @@
     "status_invoice_open": "Rechnung offen",
     "status_invoice_paid": "per Rechnung bezahlt",
     "current": "Aktueller Plan",
-    "trialAfter": "Danach gilt der Gratis-Plan, bis du dich entscheidest. Nichts wird gelöscht."
+    "trialAfter": "Danach gilt der Gratis-Plan, bis du dich entscheidest. Nichts wird gelöscht.",
+    "gpuTerm": "<term>Analyseminuten</term> diesen Monat"
   },
   "share": {
     "button": "Teilen",
@@ -3593,7 +3594,10 @@
       "blue": "Blau",
       "black": "Schwarz",
       "white": "Weiss",
-      "yellow": "Gelb"
+      "yellow": "Gelb",
+      "green": "Grün",
+      "orange": "Orange",
+      "purple": "Violett"
     },
     "scenesTitle": "{count, plural, one {1 Szene} other {# Szenen}} aus {matches, plural, one {einem Spiel} other {# Spielen}}.",
     "scenesKick": "Szenen · {matches, plural, one {1 Spiel} other {# Spiele}} mit Video",
@@ -3726,7 +3730,8 @@
     "todayCard": "Spielkarte für den Teamchat",
     "pictureBusy": "Die Spielkarte wird erstellt …",
     "pictureSaved": "Bild gespeichert, du findest es bei deinen Downloads.",
-    "pictureFailed": "Das Bild liess sich gerade nicht erstellen. Versuch es nochmals."
+    "pictureFailed": "Das Bild liess sich gerade nicht erstellen. Versuch es nochmals.",
+    "scenesKickTerm": "<term>Szenen</term> · {matches, plural, one {1 Spiel} other {# Spiele}} mit Video"
   },
   "check": {
     "top": "Prüfen · {opponent}",
@@ -4216,7 +4221,9 @@
     "sideVideoLeft": "So wie im Video: das Tor links.",
     "sideVideoRight": "So wie im Video: das Tor rechts.",
     "pause": "Anhalten",
-    "play": "Abspielen"
+    "play": "Abspielen",
+    "ofTerm": "<term>Wurfort</term>: {zone}",
+    "ofEstimatedTerm": "<term>Wurfort</term>: {zone}, geschätzt"
   },
   "personRoles": {
     "trainer": "Trainer",
@@ -4428,5 +4435,11 @@
     "phone": "Der Upload läuft in dieser Seite. Geht der Bildschirm aus oder schliesst du sie, hält er an: Öffne das Spiel wieder und wähl dieselbe Datei, dann geht es dort weiter.",
     "analysis": "Sie startet von selbst, sobald das Video da ist, und läuft auf unseren Servern: Du kannst das Handy weglegen, die Glocke meldet sich. Sie zählt zu den Analyseminuten deines Abos.",
     "billing": "Abo ansehen"
+  },
+  "glossary": {
+    "scene": "Eine Szene ist ein Moment im Video, meist ein Tor oder ein Wurf, mit den Sekunden davor. Du findest sie hier über alle Spiele mit Video.",
+    "spot": "Der Wurfort ist die Stelle, von der aus geworfen wurde, etwa Aussen rechts oder Kreis. Daraus entstehen die Bilder nach Position.",
+    "collection": "Eine Sammlung sind Szenen, die du zusammenstellst, etwa für die Videositzung oder ein Training. Du kannst sie mit dem Team teilen.",
+    "analysisMinutes": "So viele Minuten hat die Videoanalyse diesen Monat an euren Videos gerechnet. Je länger ein Video, desto mehr Minuten braucht es."
   }
 }

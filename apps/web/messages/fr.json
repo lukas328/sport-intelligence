@@ -1660,7 +1660,8 @@
     "status_invoice_open": "facture ouverte",
     "status_invoice_paid": "payé sur facture",
     "current": "Offre actuelle",
-    "trialAfter": "Ensuite le plan gratuit s'applique jusqu'à ta décision. Rien n'est supprimé."
+    "trialAfter": "Ensuite le plan gratuit s'applique jusqu'à ta décision. Rien n'est supprimé.",
+    "gpuTerm": "<term>Minutes d'analyse</term> ce mois"
   },
   "share": {
     "button": "Partager",
@@ -3593,7 +3594,10 @@
       "blue": "Bleu",
       "black": "Noir",
       "white": "Blanc",
-      "yellow": "Jaune"
+      "yellow": "Jaune",
+      "green": "Vert",
+      "orange": "Orange",
+      "purple": "Violet"
     },
     "scenesTitle": "{count, plural, one {1 scène} other {# scènes}} de {matches, plural, one {un match} other {# matchs}}.",
     "scenesKick": "Scènes · {matches, plural, one {1 match} other {# matchs}} avec vidéo",
@@ -3726,7 +3730,8 @@
     "todayCard": "Carte du match pour le chat",
     "pictureBusy": "La carte du match se crée …",
     "pictureSaved": "Image enregistrée, tu la trouves dans tes téléchargements.",
-    "pictureFailed": "L'image n'a pas pu être créée pour l'instant. Réessaie."
+    "pictureFailed": "L'image n'a pas pu être créée pour l'instant. Réessaie.",
+    "scenesKickTerm": "<term>Scènes</term> · {matches, plural, one {1 match} other {# matchs}} avec vidéo"
   },
   "check": {
     "top": "Vérifier · {opponent}",
@@ -4216,7 +4221,9 @@
     "sideVideoLeft": "Comme dans la vidéo : le but à gauche.",
     "sideVideoRight": "Comme dans la vidéo : le but à droite.",
     "pause": "Pause",
-    "play": "Lecture"
+    "play": "Lecture",
+    "ofTerm": "<term>Lieu du tir</term> : {zone}",
+    "ofEstimatedTerm": "<term>Lieu du tir</term> : {zone}, estimé"
   },
   "personRoles": {
     "trainer": "Entraîneur",
@@ -4428,5 +4435,11 @@
     "phone": "Le téléchargement se fait dans cette page. Si l’écran s’éteint ou si tu la fermes, il s’arrête : rouvre le match et choisis le même fichier, il reprend là où il s’était arrêté.",
     "analysis": "Elle démarre d’elle-même dès que la vidéo est là et tourne sur nos serveurs : tu peux poser ton téléphone, la cloche te prévient. Elle compte dans les minutes d’analyse de ton abonnement.",
     "billing": "Voir l’abonnement"
+  },
+  "glossary": {
+    "scene": "Une scène est un moment de la vidéo, le plus souvent un but ou un tir, avec les secondes qui précèdent. Tu les trouves ici pour tous les matchs avec vidéo.",
+    "spot": "Le lieu du tir est l'endroit d'où le tir est parti, par exemple ailier droit ou pivot. Les images par poste en sont tirées.",
+    "collection": "Une sélection, ce sont des scènes que tu rassembles, pour la séance vidéo ou un entraînement. Tu peux la partager avec l'équipe.",
+    "analysisMinutes": "Le nombre de minutes que l'analyse vidéo a calculé sur vos vidéos ce mois. Plus une vidéo est longue, plus il en faut."
   }
 }

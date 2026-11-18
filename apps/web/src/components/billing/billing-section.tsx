@@ -3,10 +3,11 @@
 import { problemCode } from "@handball/api-client";
 import { useQuery } from "@tanstack/react-query";
 import { useFormatter, useTranslations } from "next-intl";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { InvoiceOrder } from "./invoice-order";
 import { Button } from "@/components/ui/button";
 import { Alert, Skeleton } from "@/components/ui/card";
+import { Term } from "@/components/ui/term";
 import { api } from "@/lib/client";
 import { cn } from "@/lib/utils";
 
@@ -36,13 +37,13 @@ interface Billing {
 }
 
 /** Usage against the plan; red only when a limit is enforced and reached (limits off: ink). */
-function Meter({ label, used, limit, unit = "", enforced }: { label: string; used: number; limit: number | null; unit?: string; enforced: boolean }) {
+function Meter({ label, shown, used, limit, unit = "", enforced }: { label: string; /** the label as shown, e.g. with an explained word (A17) */ shown?: ReactNode; used: number; limit: number | null; unit?: string; enforced: boolean }) {
   const share = limit ? Math.min(1, used / limit) : 0;
   // limits off: the usage as text, no bar that reads full or over
   if (!enforced)
     return (
       <div className="flex justify-between gap-2 border-b border-foreground/10 py-1.5 text-sm">
-        <span>{label}</span>
+        <span>{shown ?? label}</span>
         <span className="tabular-nums">
           {used}
           {unit}
@@ -52,7 +53,7 @@ function Meter({ label, used, limit, unit = "", enforced }: { label: string; use
   return (
     <div className="space-y-1 text-sm">
       <div className="flex justify-between gap-2">
-        <span>{label}</span>
+        <span>{shown ?? label}</span>
         <span className="tabular-nums">
           {used}
           {unit} / {limit == null ? "∞" : `${limit}${unit}`}
@@ -70,6 +71,7 @@ export function BillingSection({ orgId }: { orgId: string }) {
   const t = useTranslations("billing");
   const tc = useTranslations("common");
   const te = useTranslations("errors");
+  const tg = useTranslations("glossary");
   const format = useFormatter();
   const [problem, setProblem] = useState<string | null>(null);
   const [goalkeepers, setGoalkeepers] = useState(0);
@@ -149,7 +151,7 @@ export function BillingSection({ orgId }: { orgId: string }) {
           <Meter enforced={b.enforced} label={t("teams")} used={b.usage.teams} limit={b.limits.teams} />
           <Meter enforced={b.enforced} label={t("matches")} used={b.usage.max_matches_per_season} limit={b.limits.matches_per_season} />
           <Meter enforced={b.enforced} label={t("storage")} used={gb(b.usage.storage_bytes)} limit={b.limits.storage_gb} unit=" GB" />
-          <Meter enforced={b.enforced} label={t("gpu")} used={b.usage.gpu_minutes} limit={b.limits.gpu_minutes_month} unit=" min" />
+          <Meter enforced={b.enforced} label={t("gpu")} shown={t.rich("gpuTerm", { term: (w) => <Term explain={tg("analysisMinutes")}>{w}</Term> })} used={b.usage.gpu_minutes} limit={b.limits.gpu_minutes_month} unit=" min" />
         </div>
         {/* the plans as rows of one sheet, not cards inside the card */}
         <ul className="divide-y divide-foreground/10 border-t-2 border-foreground" data-testid="plans">

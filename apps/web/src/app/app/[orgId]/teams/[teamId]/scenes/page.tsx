@@ -5,6 +5,7 @@ import { linkClass, SectionHead } from "@/components/anlauf/blocks";
 import { CollectionList } from "@/components/collections/collection-list";
 import { buttonClass } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
+import { Term } from "@/components/ui/term";
 import { serverApi } from "@/lib/api";
 import { worksWithVideo } from "@/lib/roles";
 import { SearchView } from "../search/search-view";
@@ -53,7 +54,7 @@ export default async function ScenesPage({
     <>
       <div>
         <SectionHead
-          title={<span id="all-collections">{t("collections")}</span>}
+          title={<span id="all-collections"><Term explain={(await getTranslations("glossary"))("collection")}>{t("collections")}</Term></span>}
           action={
             <Link href={`${base}/collections`} className={linkClass}>
               {t("newCollection")}

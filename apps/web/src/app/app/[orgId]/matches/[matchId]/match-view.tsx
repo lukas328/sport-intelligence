@@ -9,7 +9,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent } from "react";
 import Link from "next/link";
 import { useEscape } from "@/lib/use-escape";
-import { ArrowLeftRight, Check, ChevronDown, ChartNoAxesColumn, Clapperboard, FileDown, Hand, MoreHorizontal, Pencil, Plus, Radio, Shield, Trash2 } from "lucide-react";
+import { ArrowLeftRight, Check, ChevronDown, ChartNoAxesColumn, Clapperboard, FileDown, Hand, Info, MoreHorizontal, Pencil, Plus, Radio, Shield, Trash2 } from "lucide-react";
 import { useRosterNames } from "@/components/analysis/tagger";
 import { DEFAULT_CLUB, matchStyle } from "@/lib/color";
 import { markOpened } from "@/lib/fresh-match";
@@ -192,6 +192,10 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
   // Escape closes the Werkbank like its «Schliessen» (A15)
   const benchRef = useRef<HTMLElement>(null);
   useEscape(bench, () => setBench(false), benchRef);
+  // «So rechnen wir» beside the source line, opened by its info sign (A17)
+  const [howOpen, setHowOpen] = useState(false);
+  const howRef = useRef<HTMLParagraphElement>(null);
+  useEscape(howOpen, () => setHowOpen(false), howRef);
   // deep links (?t=ms), e.g. a scene from Szenen or a play drawn on a video moment: the moment
   // plays in the full player, so it opens (behind the stage it would seek out of sight)
   // a moment in the full player: it opens, and the moment is sought once the video can
@@ -388,7 +392,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
     <div className="space-y-8" style={matchStyle(club, oppKit) as CSSProperties}>
       <MatchHead match={match} ownName={own} oppName={oppName(match)} view={view} graphics={graphics.data}>
         {staff && !example && match.opponent && !match.opponent_colors?.color && <AskColour orgId={orgId} matchId={match.id} opponent={oppName(match)} />}
-        {/* a known colour can be changed right in the head, five shirts (UX test B31) */}
+        {/* a known colour can be changed right in the head, the eight shirts (UX test B31, A17) */}
         {staff && !example && match.opponent && match.opponent_colors?.color && (
           <details className="mt-2.5 text-sm font-bold" data-testid="change-colour">
             <summary className="inline-flex min-h-11 cursor-pointer list-none items-center gap-2 underline decoration-[1.5px] underline-offset-4 [&::-webkit-details-marker]:hidden">
@@ -513,12 +517,30 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
       </div>
 
       {sourceParts.length > 0 && (
-        <div className="-mt-6 flex flex-wrap items-center gap-x-3.5 gap-y-1 text-[15px] text-ink-2 md:text-[15px]" data-testid="source-line">
-          {ta("sources")}: {sourceParts.join(" · ")}
-          <details className="inline">
-            <summary className="cursor-pointer font-bold text-ink underline decoration-[1.5px] underline-offset-4">{ta("howCounted")}</summary>
-            <span className="mt-1 block max-w-[66ch] text-ink-2" data-testid="how-counted">{graphics.data?.has_report ? ta("howCountedText") : ta("howCountedVideo")}</span>
-          </details>
+        <div className="-mt-6 text-[15px] text-ink-2" data-testid="source-line">
+          {/* «So rechnen wir» as the info sign right beside the source it explains (A17) */}
+          <p className="m-0 flex flex-wrap items-center gap-x-1">
+            <span>
+              {ta("sources")}: {sourceParts.join(" · ")}
+            </span>
+            <button
+              type="button"
+              onClick={() => setHowOpen((v) => !v)}
+              aria-expanded={howOpen}
+              aria-controls="how-counted"
+              aria-label={ta("howCounted")}
+              title={ta("howCounted")}
+              className="-my-2 inline-flex size-11 cursor-pointer items-center justify-center text-ink"
+              data-testid="how-counted-open"
+            >
+              <Info aria-hidden className="size-5" strokeWidth={2.4} />
+            </button>
+          </p>
+          {howOpen && (
+            <p id="how-counted" ref={howRef} className="m-0 mt-1 max-w-[66ch] border-l-4 border-rule pl-3 text-ink-2" data-testid="how-counted">
+              <b className="text-ink">{ta("howCounted")}:</b> {graphics.data?.has_report ? ta("howCountedText") : ta("howCountedVideo")}
+            </p>
+          )}
         </div>
       )}
 

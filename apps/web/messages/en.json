@@ -1660,7 +1660,8 @@
     "status_invoice_open": "invoice open",
     "status_invoice_paid": "paid by invoice",
     "current": "Current plan",
-    "trialAfter": "After that the free plan applies until you decide. Nothing is deleted."
+    "trialAfter": "After that the free plan applies until you decide. Nothing is deleted.",
+    "gpuTerm": "<term>Analysis minutes</term> this month"
   },
   "share": {
     "button": "Share",
@@ -3593,7 +3594,10 @@
       "blue": "Blue",
       "black": "Black",
       "white": "White",
-      "yellow": "Yellow"
+      "yellow": "Yellow",
+      "green": "Green",
+      "orange": "Orange",
+      "purple": "Purple"
     },
     "scenesTitle": "{count, plural, one {1 scene} other {# scenes}} from {matches, plural, one {one match} other {# matches}}.",
     "scenesKick": "Scenes · {matches, plural, one {1 match} other {# matches}} with video",
@@ -3726,7 +3730,8 @@
     "todayCard": "Match card for the team chat",
     "pictureBusy": "Making the match card …",
     "pictureSaved": "Picture saved, you find it in your downloads.",
-    "pictureFailed": "The picture could not be made just now. Try again."
+    "pictureFailed": "The picture could not be made just now. Try again.",
+    "scenesKickTerm": "<term>Scenes</term> · {matches, plural, one {1 match} other {# matches}} with video"
   },
   "check": {
     "top": "Check · {opponent}",
@@ -4216,7 +4221,9 @@
     "sideVideoLeft": "As in the video: the goal on the left.",
     "sideVideoRight": "As in the video: the goal on the right.",
     "pause": "Pause",
-    "play": "Play"
+    "play": "Play",
+    "ofTerm": "<term>Shot from</term>: {zone}",
+    "ofEstimatedTerm": "<term>Shot from</term>: {zone}, estimated"
   },
   "personRoles": {
     "trainer": "Coach",
@@ -4428,5 +4435,11 @@
     "phone": "The upload runs in this page. If the screen goes off or you close it, it stops: open the match again and choose the same file, and it carries on where it stopped.",
     "analysis": "It starts by itself once the video is in and runs on our servers: you can put the phone away, the bell lets you know. It counts toward your plan’s analysis minutes.",
     "billing": "See plan"
+  },
+  "glossary": {
+    "scene": "A scene is a moment in the video, mostly a goal or a shot, with the seconds before it. You find them here across all matches with video.",
+    "spot": "Where the shot was taken from, such as right wing or pivot. The pictures by position are made from it.",
+    "collection": "A collection is scenes you put together, for the video session or a training. You can share it with the team.",
+    "analysisMinutes": "How many minutes the video analysis worked on your videos this month. The longer a video, the more minutes it takes."
   }
 }
