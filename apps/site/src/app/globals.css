@@ -117,6 +117,12 @@
     box-shadow: 0 0 0 0.9rem rgb(255 210 60 / 0);
   }
 }
+@keyframes stick {
+  from {
+    opacity: 0;
+    transform: scale(1.25) rotate(-7deg);
+  }
+}
 @keyframes nudge {
   50% {
     transform: translateX(5px);
@@ -466,6 +472,13 @@
       animation: appear 0.6s ease-out forwards;
       animation-delay: calc(var(--late, 1.6s));
     }
+    /* the start page's sticker over the unwatched video slaps on once after «nie angeschaut» (U39) */
+    .stick {
+      animation: stick 0.55s cubic-bezier(0.3, 1.5, 0.5, 1) 2.3s both;
+    }
+    .wait .stick {
+      animation-play-state: paused;
+    }
     /* blocks glide in once as they come into view (components/reveal.tsx, U19): visible as
        rendered, the animation only plays from `in` on; the hero pictures rise on load */
     [data-reveal].in {
@@ -695,6 +708,57 @@
   100% {
     opacity: 0;
     visibility: hidden;
+  }
+}
+
+/* Saturday's card on the demo page (components/week/match-run.tsx, U36): the score on the blurred
+   video bumps with each goal; in the turn a goal also flashes the video softly and shows «Tor» with
+   the new score for a moment. Only drawn while the film plays, still with reduced motion */
+.run-flash,
+.run-goal {
+  opacity: 0;
+}
+.run-goal {
+  transform: translate(-50%, -50%);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .run-flash {
+    animation: run-flash 0.45s ease-out both;
+  }
+  .run-goal {
+    animation: run-goal 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  .run-bump {
+    animation: run-bump 0.3s ease-out both;
+  }
+}
+@keyframes run-bump {
+  from {
+    color: var(--attn);
+    transform: scale(1.18);
+  }
+}
+@keyframes run-flash {
+  from {
+    opacity: 0.4;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@keyframes run-goal {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+  18%,
+  72% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1);
   }
 }
 

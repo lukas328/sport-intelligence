@@ -33,10 +33,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
  * The start page as one week of an invented team (BEFUNDE-2 W5, W22; BEFUNDE-3 U6, U18): not a
  * video platform but what to change in training, as one thread: a pattern found, a question to
  * the assistant, a training tip and the scenes for the team, checked three matches later. The
- * promise with the three things turning in a card; Saturday 7 pm, lost with only a feeling;
+ * promise with the three things turning in a card; Saturday 7 pm, lost with only a feeling and a video (BEFUNDE-4 U39: a sticker says the video is enough and leads to «So funktioniert es»);
  * Saturday 10 pm, the three things and the real app on a computer; Sunday, the question to the
  * assistant, then what it means for training (BEFUNDE-4 U30: pattern, why, drill, effect, the loop
- * of the demo week); how you get there in three lines; Tuesday, the training tip and four scenes in the
+ * of the demo week); Tuesday, the training tip and four scenes in the
  * team chat; three matches later the right wing is closed, as a green block across the page.
  * Then the video in the club, the price and the team field. About 600 words (U18); the tactics
  * camera lives on the demo page, the step pictures on «So funktioniert es». The match is the demo
@@ -149,7 +149,7 @@ export default async function Home({ params }: Props) {
             <p className="mt-6 text-[1.25rem] font-bold md:text-[1.4375rem]">{t.problemBuild}</p>
           </div>
           <div data-reveal style={{ "--d": 1 } as CSSProperties} className="min-w-0">
-            <Evening t={t.problemCard} score={sat.score} />
+            <Evening t={t.problemCard} score={sat.score} how={{ text: m.cta.how, href: `/${locale}/so-funktioniert-es/` }} />
           </div>
         </div>
       </section>
@@ -211,10 +211,9 @@ export default async function Home({ params }: Props) {
           <LoopTile
             kick={t.loopKick}
             title={t.loopTitle}
-            steps={t.loop.map((s, i) => ({
+            steps={t.loop.map((s) => ({
               title: s.title,
               text: fmt(s.text, { n: sat.n, of: sat.of, drill: DRILLS.defence_6_0_shift.name[DRILL_LANG[locale]] }),
-              href: `/${locale}/demo/${["#warum", "#warum", "#einsicht", "#naechstes"][i]}`,
             }))}
             link={t.loopLink}
             demoHref={`/${locale}/demo/`}
@@ -225,32 +224,6 @@ export default async function Home({ params }: Props) {
             drillLabel={fmt(m.demo.sketchLabel, { name: DRILLS.defence_6_0_shift.name[DRILL_LANG[locale]] })}
             bars={seasonRightWing().map((s) => s.n)}
           />
-        </section>
-
-        {/* 5 · how you get there: three short lines, the pictures live on «So funktioniert es» (U18) */}
-        <section aria-labelledby="steps" className="mt-20 md:mt-28">
-          <p className="text-[1.0625rem] font-semibold text-ink-2">{t.stepsKick}</p>
-          <h2 id="steps" className="mt-2 text-[2.25rem] md:text-[3rem]">
-            {t.stepsTitle}
-          </h2>
-          <ol className="mt-6 grid grid-cols-1 border-t-2 border-ink md:grid-cols-3 md:gap-x-8">
-            {t.steps.map((x, i) => (
-              <li
-                key={x.title}
-                className="flex items-baseline gap-4 border-b border-rule py-4 md:border-b-0 md:py-5"
-              >
-                <span aria-hidden className="font-num text-[2.5rem] leading-[.8] text-club-text">
-                  {i + 1}
-                </span>
-                <p>
-                  <b>{x.title}:</b> {x.text}
-                </p>
-              </li>
-            ))}
-          </ol>
-          <Link href={`/${locale}/so-funktioniert-es/`} className="link mt-2">
-            {m.cta.how}
-          </Link>
         </section>
 
         {/* 6 · Tuesday: four scenes in the team chat (W26, W28) */}

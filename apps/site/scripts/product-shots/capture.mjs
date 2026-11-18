@@ -16,8 +16,7 @@
  * HB_API_ORIGIN (only for a second dev server, see below), HB_DEMO_HLS_DIR (see localMedia),
  * PLAYWRIGHT_CHROMIUM_PATH (optional, a Chromium binary under /opt/pw-browsers).
  */
-import { existsSync, mkdirSync, readFileSync, statSync, truncateSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadChromium } from "./playwright.mjs";
@@ -142,8 +141,9 @@ function pageHelpers() {
 const PHONE = { width: 390, height: 844, scale: 2 };
 const DESKTOP = { width: 1280, height: 860, scale: 2 };
 /**
- * The steps (U1, U3): one moment of the app cut out large, so its words read at 390 px. A narrow
- * phone (360), so the cut-out holds fewer, bigger letters; three times the density for the 2x file.
+ * The cut-outs (app-result, video-phone): one moment of the app large, so its words read at
+ * 390 px. A narrow phone (360), so the cut-out holds fewer, bigger letters; three times the
+ * density for the 2x file.
  */
 const PHONE_STEP = { width: 360, height: 780, scale: 3 };
 
@@ -315,112 +315,7 @@ const SHOTS = [
     },
   },
   {
-    // step 2 (U1): «Zu welchem Spiel gehört das Video?» with the matches, large
-    name: "step-hochladen",
-    size: PHONE_STEP,
-    async open(p) {
-      await p.goto(`${p.__team}?upload=1`, { waitUntil: "networkidle" });
-      await p.getByRole("dialog").first().waitFor({ state: "visible", timeout: 15000 });
-      await p.waitForTimeout(700);
-    },
-    find: {
-      dialog: () => document.querySelector('[role="dialog"]'),
-      title: (hb) => hb.text("Video hochladen", document.querySelector('[role="dialog"]')),
-      question: (hb) => hb.text(/Zu welchem Spiel/, document.querySelector('[role="dialog"]')),
-      first: (hb) => hb.text("SG Blitzfang", document.querySelector('[role="dialog"]'))?.closest("button, a, label, li") ?? null,
-      second: (hb) => hb.text("TV Silberpfeil", document.querySelector('[role="dialog"]'))?.closest("button, a, label, li") ?? null,
-    },
-  },
-  {
-    // step 2 (U1): the same match while its video goes up, the bar and «… % hochgeladen». This
-    // one writes: it starts a real upload of an empty file the size of a match video into the
-    // first match and holds it there, so run it only on a stack of your own (capture.mjs runs it
-    // only when named) and seed again afterwards
-    name: "step-hochladen-laeuft",
-    size: PHONE_STEP,
-    writes: true,
-    async open(p) {
-      await p.goto(`${p.__team}?upload=1`, { waitUntil: "networkidle" });
-      const dialog = p.getByRole("dialog").first();
-      await dialog.waitFor({ state: "visible", timeout: 15000 });
-      await dialog.getByText("SG Blitzfang").first().click();
-      const input = p.getByTestId("video-file").first();
-      await input.waitFor({ state: "attached", timeout: 30000 });
-      // the parts go up until about an eighth of the file is there, then the rest waits: the
-      // picture shows a running upload without filling the stack's storage
-      const file = matchFile();
-      const partSize = 5 * 1024 * 1024;
-      const stopAt = Math.ceil((FILE_SIZE * 0.12) / partSize);
-      let parts = 0;
-      await p.route(
-        (url) => /[?&]partNumber=/.test(url.search),
-        (route) => {
-          if (route.request().method() !== "PUT") return route.continue();
-          parts += 1;
-          return parts <= stopAt ? route.continue() : new Promise(() => {});
-        },
-      );
-      await input.setInputFiles(file);
-      const anyway = p.getByRole("button", { name: "Jetzt hochladen" });
-      if (await anyway.isVisible({ timeout: 3000 }).catch(() => false)) await anyway.click();
-      const progress = p.getByTestId("upload-progress");
-      await progress.waitFor({ timeout: 30000 });
-      await p.waitForFunction(
-        (want) => {
-          const m = document.querySelector('[data-testid="upload-progress"]')?.textContent?.match(/(\d+)\s*%/);
-          return m && Number(m[1]) >= want;
-        },
-        11,
-        { timeout: 120000 },
-      );
-      await p.waitForTimeout(1500);
-      await p.getByTestId("upload-running").evaluate((el) => {
-        window.__hb.hideTabBar();
-        el.scrollIntoView({ block: "center" });
-      });
-      await p.waitForTimeout(400);
-    },
-    find: {
-      running: () => document.querySelector('[data-testid="upload-running"]'),
-      progress: () => document.querySelector('[data-testid="upload-progress"]'),
-      heading: () => document.querySelector("h1"),
-    },
-  },
-  {
-    // step 3 (U1): «Passt das Spielfeld?» with the picture and its yellow field, large
-    name: "step-pruefen",
-    // taller than a phone, so the picture and the answers are on one capture
-    size: { ...PHONE_STEP, height: 960 },
-    async open(p) {
-      await openMatch(p);
-      const check = await p.getByTestId("check-link").first().getAttribute("href");
-      if (!check) throw new Error("no link «Prüfen»");
-      await p.goto(new URL(check, APP).toString(), { waitUntil: "networkidle" });
-      await p.getByRole("heading", { level: 1 }).or(p.getByRole("heading", { level: 2 })).first().waitFor({ timeout: 15000 });
-      await settle(p);
-      await p.evaluate(() => {
-        window.__hb.hideTabBar();
-        const pic = window.__hb.text(/^Zieh die vier gelben Punkte/)?.closest("section, div");
-        const top = pic ? pic.getBoundingClientRect().top + window.scrollY - 330 : 0;
-        window.scrollTo(0, Math.max(0, top));
-      });
-      await p.waitForTimeout(400);
-    },
-    find: {
-      // the picture the question is about (the frame of the video with the proposed field)
-      picture: () => {
-        const imgs = Array.from(document.querySelectorAll("img, canvas, video, svg")).filter((e) => e.getBoundingClientRect().width > 250);
-        return imgs.sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top)[0] ?? null;
-      },
-      hint: (hb) => hb.text(/^Zieh die vier gelben Punkte/),
-      count: (hb) => hb.text(/^Frage \d+ von \d+$/),
-      question: () => document.querySelector("h1") ?? document.querySelector("h2"),
-      yes: () => Array.from(document.querySelectorAll("button")).find((b) => b.textContent.trim() === "Passt") ?? null,
-      no: () => Array.from(document.querySelectorAll("button")).find((b) => b.textContent.trim() === "Weiss nicht") ?? null,
-    },
-  },
-  {
-    // step 4 (U3): the first of the three things with its shots on the court, large
+    // the first of the three things with its shots on the court, large («Über uns», app-result)
     name: "step-dinge",
     size: PHONE_STEP,
     async open(p) {
@@ -550,19 +445,6 @@ const SHOTS = [
   },
 ];
 
-/** The match file of step-hochladen-laeuft: empty (sparse), the size of a phone's match video. */
-const FILE_SIZE = Math.round(3.4 * 1024 ** 3);
-function matchFile() {
-  const dir = join(tmpdir(), "hb-product-shots");
-  mkdirSync(dir, { recursive: true });
-  const file = join(dir, "Spiel.mp4");
-  if (!existsSync(file) || statSync(file).size !== FILE_SIZE) {
-    writeFileSync(file, "");
-    truncateSync(file, FILE_SIZE);
-  }
-  return file;
-}
-
 /** See API_ORIGIN. */
 async function sameOrigin(ctx) {
   if (!API_ORIGIN) return;
@@ -682,7 +564,7 @@ async function main() {
   const meta = existsSync(META) ? JSON.parse(readFileSync(META, "utf8")) : {};
   const { state, team } = await login(browser);
   const failed = [];
-  // a screen that writes into the account runs only when named (see step-hochladen-laeuft)
+  // a screen that writes into the account (`writes: true`, none today) runs only when named
   for (const shot of SHOTS.filter((s) => (only.length ? only.includes(s.name) : !s.writes))) {
     const { width, height, scale } = shot.size;
     const ctx = await browser.newContext({

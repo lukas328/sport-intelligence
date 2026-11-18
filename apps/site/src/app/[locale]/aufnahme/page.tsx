@@ -148,7 +148,7 @@ export default async function Filming({ params }: Props) {
             </Link>
           </div>
           <div data-reveal style={{ "--d": 1 } as CSSProperties}>
-            <ProductShot name="step-upload" alt={t.afterAlt} labels={{}} sizes="(min-width: 768px) 26rem, calc(100vw - 2rem)" />
+            <ProductShot name={`step-upload-${locale}`} alt={t.afterAlt} labels={{}} sizes="(min-width: 768px) 26rem, calc(100vw - 2rem)" />
           </div>
         </section>
 

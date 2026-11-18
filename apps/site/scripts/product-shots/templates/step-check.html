@@ -1,40 +1,115 @@
 <!doctype html>
-<!-- Step «Prüfen» (U1, U3): the app's question large. Two cut-outs of the same screen of the real
-     app (capture step-pruefen), flat on the app's cloth with its ink edge: above, the picture the
-     question is about, with the field the analysis proposes in the app's yellow (four corner
-     points, the near ones at the picture's edge, as the app sets them); below, «Frage 1 von 1»,
-     «Passt das Spielfeld?» and «Passt» ringed. The picture shows the hall of step 1 as the phone on
-     its tripod sees it (hall.js, sharp, no people) instead of the synthetic demo clip. -->
+<!-- Step «Prüfen» (U33, after Lukas' design): above, the picture the app asks about: the hall of
+     step 1 seen from the stand (hall.js, drawn, no people; a little higher than the tripod, so
+     the whole court shows large), the court light, the goal areas green, a few players, and the
+     field the analysis proposes in the app's yellow with its four corner points. Over it
+     the paper card of the question with the app's words (check.questionOf, fieldQuestion,
+     fieldYes, dontKnow): «Frage 1 von 1», «Passt das Spielfeld?», «Passt» in ink and «Weiss
+     nicht»; a yellow tag «ein Tipp» with a check. One white line at the foot: «Höchstens zehn
+     Fragen pro Spiel.» In de, fr and en. -->
 <meta charset="utf-8" />
 <link rel="stylesheet" href="../stage.css" />
+<style>
+  .pic {
+    position: absolute;
+    left: 26px;
+    top: 30px;
+    width: 588px;
+    height: 300px;
+    border: 3px solid var(--ink);
+    box-shadow: var(--hard);
+    transform: rotate(-1.5deg);
+    overflow: hidden;
+    background: #343a40;
+  }
+  .ask {
+    left: 30px;
+    top: 270px;
+    width: 452px;
+    padding: 18px 22px 22px;
+  }
+  .ask small {
+    display: block;
+    font-size: 19px;
+    font-weight: 500;
+    color: #53565b;
+  }
+  .ask h3 {
+    margin: 6px 0 18px;
+    font-size: 47px;
+    line-height: 1.02;
+  }
+  .ask .btns {
+    display: flex;
+    gap: 12px;
+  }
+  .ask .btns span {
+    flex: 1 1 0;
+    padding: 15px 14px;
+    font-size: 21px;
+    font-weight: 700;
+    border: 2px solid var(--ink);
+    white-space: nowrap;
+  }
+  .ask .btns span:first-child {
+    background: var(--ink);
+    color: #fff;
+  }
+  .tag {
+    left: 430px;
+    top: 368px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px 14px 16px;
+  }
+  .tag i {
+    display: block;
+    width: 50px;
+    height: 50px;
+  }
+  .tag b {
+    font-size: 34px;
+    line-height: 0.95;
+  }
+</style>
 <div id="stage"></div>
 <script src="../stage.js"></script>
 <script src="../hall.js"></script>
+<script src="../steps.js"></script>
 <script>
-  S.stage(640, 640, { cloth: true });
-  const NAME = "step-pruefen";
-  const frame = S.rect(NAME, "picture", [16, 190.7, 328, 200]);
-  const count = S.rect(NAME, "count", [16, 578, 91, 21.7]);
-  const yes = S.rect(NAME, "yes", [16, 765, 328, 56]);
-  // the picture inside the player's dark frame (measured on the capture: 16:9, 8 px in from the
-  // frame's sides, 17 px from its top)
-  const pic = [frame[0] + 17.7, frame[1] + 17.3, frame[2] - 35.4, (frame[2] - 35.4) * (9 / 16)];
+  const W = 640;
+  const H = 640;
+  S.stage(W, H, { steps: true, langs: ["de", "fr", "en"], budget1x: 70 * 1024, budget2x: 120 * 1024 });
+  const T = S.t({
+    de: { word: "Prüfen", count: "Frage 1 von 1", q: "Passt das Spielfeld?", yes: "Passt", no: "Weiss nicht", tip: ["ein", "Tipp"], say: "Höchstens zehn Fragen pro Spiel." },
+    fr: { word: "Vérifier", count: "Question 1 sur 1", q: "Le terrain est-il juste ?", yes: "C’est bon", no: "Je ne sais pas", tip: ["un", "geste"], say: "Dix questions au plus par match." },
+    en: { word: "Check", count: "Question 1 of 1", q: "Is the court right?", yes: "Looks right", no: "Don’t know", tip: ["one", "tap"], say: "At most ten questions per match." },
+  });
+  const { K, ground, ghost, say, add, ICON } = STEPS;
 
-  // above right: the picture in its frame
-  const a = S.cut(NAME, frame, { left: 236, top: 28, width: 376 });
-  // below left: the question with its answers, from «Frage 1 von 1» to under «Passt»
-  const y0 = count[1] - 10;
-  const b = S.cut(NAME, [8, y0, 344, yes[1] + yes[3] + 8 - y0], { left: 28, top: 0, width: 492 });
-  const bEl = b.el.parentElement;
-  bEl.style.top = `${640 - 28 - bEl.offsetHeight}px`;
+  const g = [];
+  g.push(`<rect width="${W}" height="${H}" fill="${K.night}"/>`);
+  // the club's green, slanted, at the foot right
+  g.push(`<path d="M${W} 300V${H}H250Z" fill="${K.pitch}"/>`);
+  ground(g.join(""));
+  ghost(T.word, { left: "-14px", top: "430px" });
 
-  // the camera's view of the hall over the app's picture, with the proposed field
-  const [x, y, w, h] = a([pic[0] - 1, pic[1] - 1, pic[2] + 2, pic[3] + 2]);
-  const v = HALL.view({ eye: [20, 24.2, 3.1], look: [20, 8.5, 0], focal: w * 0.269, cx: w / 2, cy: h * 0.4273, line: 0.55 });
-  const { C, P } = v;
-  const inset = 4;
-  // where the near sideline (y = 20) meets the picture's left or right edge (the view looks
-  // across the court from its near side, so x runs from right to left in the picture)
+  // the picture: the camera's view of the hall (from the tripod at the centre line, 3 m)
+  const pic = add(`<div class="pic"></div>`);
+  const pw = 588 - 6;
+  const ph = 300 - 6;
+  const v = HALL.view({
+    eye: [20, 43, 15],
+    look: [20, 9, 0],
+    focal: pw * 0.62,
+    cx: pw / 2,
+    cy: ph * 0.42,
+    line: 0.75,
+    colors: { wall: "#343a40", wall2: "#2a2f34", paper: "#59606a", floor: "#353a40", court: "#efe6cc", zone: K.pitch, ink: K.ink, ink2: "#8a9099" },
+  });
+  const { P } = v;
+  // where the near sideline (y = 20) meets the picture's left or right edge
   function edge(want) {
     let lo = 0;
     let hi = 40;
@@ -45,18 +120,34 @@
     }
     return P([(lo + hi) / 2, 20, 0]);
   }
-  const corners = [P([0, 0, 0]), P([40, 0, 0]), edge(inset), edge(w - inset)];
+  const inset = 16;
+  const corners = [P([0, 0, 0]), P([40, 0, 0]), edge(inset), edge(pw - inset)];
   const mid = [P([20, 0, 0]), P([20, 20, 0])];
   const pts = (list) => list.map((p) => p.map((n) => n.toFixed(1)).join(" ")).join(" L");
-  const box = document.createElement("div");
-  Object.assign(box.style, { position: "absolute", left: `${x}px`, top: `${y}px`, width: `${w}px`, height: `${h}px` });
-  box.innerHTML = `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" style="display:block;overflow:visible">
-    <clipPath id="pic"><rect width="${w}" height="${h}"/></clipPath>
-    <g clip-path="url(#pic)"><rect width="${w}" height="${h}" fill="${C.wall}"/>${v.hall({ wallTop: 12 })}${v.goal(-1)}${v.goal(1)}</g>
-    <path d="M${pts(corners)} Z M${pts(mid)}" fill="rgb(255 210 60 / .12)" stroke="${C.attn}" stroke-width="2.4" stroke-linejoin="round"/>
-    ${corners.map(([cx, cy]) => `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="7.5" fill="${C.attn}" stroke="${C.ink}" stroke-width="2.6"/>`).join("")}
+  // a few players: a defence at the goal on the left of the picture (green) and the attack (white)
+  const ours = [[6.5, 4], [7.2, 7.5], [7.5, 10.2], [7, 13], [2.2, 9.6]];
+  const theirs = [[10.2, 3], [10.8, 7.4], [10.2, 11.6], [11.6, 14.8]];
+  const dot = (p, fill) => {
+    const [x, y] = P([40 - p[0], p[1], 0]);
+    return `<circle cx="${x.toFixed(1)}" cy="${(y - 3).toFixed(1)}" r="5.5" fill="${fill}" stroke="${K.ink}" stroke-width="1.8"/>`;
+  };
+  pic.innerHTML = `<svg viewBox="0 0 ${pw} ${ph}" width="${pw}" height="${ph}" style="display:block">
+    ${v.hall({ wallTop: 12 })}${v.goal(-1)}${v.goal(1)}
+    ${ours.map((p) => dot(p, K.pitch3)).join("")}${theirs.map((p) => dot(p, "#fff")).join("")}
+    <path d="M${pts(corners)} Z M${pts(mid)}" fill="rgb(255 210 60 / .16)" stroke="${K.attn}" stroke-width="4" stroke-linejoin="round"/>
+    ${corners.map(([cx, cy]) => `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="12" fill="${K.attn}" stroke="${K.ink}" stroke-width="3.2"/>`).join("")}
   </svg>`;
-  a.el.append(box);
-  S.ring(b, yes, 4);
+
+  // the question, as the app asks it
+  const ask = add(`<div class="pc ask" style="--tilt:-2deg"><small></small><h3 class="disp"></h3><div class="btns"><span></span><span></span></div></div>`);
+  ask.querySelector("small").textContent = T.count;
+  ask.querySelector("h3").textContent = T.q;
+  const [yes, no] = ask.querySelectorAll(".btns span");
+  yes.textContent = T.yes;
+  no.textContent = T.no;
+  // one tap, that is all
+  const tag = add(`<div class="yc tag" style="--tilt:-6deg"><i>${ICON.check}</i><b class="disp"></b></div>`);
+  tag.querySelector("b").innerHTML = T.tip.join("<br>");
+  say(T.say);
   S.done();
 </script>

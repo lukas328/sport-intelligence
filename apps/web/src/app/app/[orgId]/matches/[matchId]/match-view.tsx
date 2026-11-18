@@ -39,6 +39,7 @@ import { Button, buttonClass } from "@/components/ui/button";
 import { Input, Select } from "@/components/ui/field";
 import { api } from "@/lib/client";
 import { isMatchDay } from "@/lib/match-day";
+import { MATCHDAY_OFFERED } from "@/lib/features";
 import { cn } from "@/lib/utils";
 import { useOpponentName } from "@/lib/opponent";
 import { formatClock } from "@/lib/format";
@@ -444,7 +445,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
                 <em className="grid h-[30px] min-w-[30px] place-items-center bg-attn px-1 font-sans text-base font-extrabold text-attn-ink not-italic">{checks}</em>
               </Link>
             )}
-            {liveFirst && (
+            {MATCHDAY_OFFERED && liveFirst && (
               <Link href={`${base}/matchday`} className={buttonClass("primary")} data-testid="live-link">
                 <Radio aria-hidden />
                 {t("live.open")}
@@ -473,12 +474,12 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
                 </MenuItem>
                 {/* the match card is «Als Bild für den Chat» in Tab Spiel now; the Spieltag only
                     before the result is in; the preparation lives in «Gegner» (UX test B35) */}
-                {staff && !liveFirst && match.score_own == null && (
+                {MATCHDAY_OFFERED && staff && !liveFirst && match.score_own == null && (
                   <MenuItem href={`${base}/matchday`} icon={<Radio />} testId="live-link">
                     {t("live.open")}
                   </MenuItem>
                 )}
-                {staff && match.score_own == null && (
+                {MATCHDAY_OFFERED && staff && match.score_own == null && (
                   <MenuItem href={`${base}/matchday?mode=marks`} icon={<Hand />} testId="marks-link">
                     {t("marks.title")}
                   </MenuItem>
@@ -700,8 +701,8 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
         <div className="animate-fade space-y-10">
           {/* before the match: the opponent's facts and «Spieltag starten»; the video comes after (UX test N16) */}
           {upcoming && match.opponent && (
-            <section className="grid gap-8 md:grid-cols-[minmax(0,1fr)_340px]" data-testid="before-match">
-              <div className="space-y-3">
+            <section className={cn("grid gap-8", MATCHDAY_OFFERED && "md:grid-cols-[minmax(0,1fr)_340px]")} data-testid="before-match">
+              {MATCHDAY_OFFERED && <div className="space-y-3">
                 <h2 className="text-[26px]">{ta("beforeTitle")}</h2>
                 <p className="m-0 max-w-[60ch] text-[17px]">{ta("beforeText")}</p>
                 {staff && (
@@ -710,7 +711,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
                     {t("live.open")}
                   </Link>
                 )}
-              </div>
+              </div>}
               <NextOpponent orgId={orgId} teamId={match.team_id} next={{ id: match.id, kickoff_at: match.kickoff_at, opponent_name: oppName(match), is_home: match.is_home } as Schemas["MatchSummary"]} played={(teamMatches.data ?? []).filter((m) => m.score_own != null)} />
             </section>
           )}

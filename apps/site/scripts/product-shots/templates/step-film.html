@@ -1,66 +1,62 @@
 <!doctype html>
-<!-- Step «Filmen» (U1, U3): where the camera goes, as a calm drawing in the site's colours. The
-     hall seen from behind and above the camera: the whole court with both goals, the camera on a
-     tall tripod at the centre line (about 3 m high, just off the court), its place ringed in
-     yellow, and what it sees, from goal to goal. True perspective (hall.js); only the tripod is
-     drawn larger than life, so it can be seen. No words, so it works in every language («3 m»
-     reads in all three); the text beside it says the rest. The same square frame as the other
-     steps. -->
+<!-- Step «Filmen» (U33, after Lukas' design): where the camera goes. The whole court from above,
+     a little turned, on the dark court ground with the club's green around it: a defence 6-0 in
+     green against the attack in white, the ball in yellow. The camera (the yellow disc) stands at
+     the middle of the near sideline, and its light covers the whole court: the dotted yellow line
+     runs from the camera round both goals, so both are in the picture. «3m» on the big yellow
+     card beside it, the step's word in the back, one white line at the foot, in de, fr and en.
+     Tried and set aside (18.11.): the court in perspective from behind the camera, flat or high
+     (the near corners run out of the picture or the court gets small), and only one half large
+     (then the second goal is not in the picture, which is the point of the step). -->
 <meta charset="utf-8" />
 <link rel="stylesheet" href="../stage.css" />
-<div id="stage"><svg id="art" xmlns="http://www.w3.org/2000/svg"></svg></div>
+<div id="stage"></div>
 <script src="../stage.js"></script>
-<script src="../hall.js"></script>
+<script src="../steps.js"></script>
 <script>
   const W = 640;
   const H = 640;
-  S.stage(W, H, { budget1x: 60 * 1024, budget2x: 110 * 1024 });
-  const v = HALL.view({ eye: [20, 31, 46], look: [20, 12.5, 0], focal: 660, cx: W / 2, cy: 344, line: 1.2 });
-  const { C, P, poly, path, curve } = v;
-  const art = [v.hall({ wallTop: 22, near: 70 })];
+  S.stage(W, H, { steps: true, langs: ["de", "fr", "en"], budget1x: 70 * 1024, budget2x: 120 * 1024 });
+  const T = S.t({
+    de: { word: "Filmen", say: "Hoch an die Mittellinie. Beide Tore im Bild." },
+    fr: { word: "Filmer", say: "En hauteur, à la ligne médiane. Les deux buts dans l’image." },
+    en: { word: "Film", say: "High up at the halfway line. Both goals in view." },
+  });
+  const { K, court, dots, ground, ghost, say, camera, add, path } = STEPS;
 
-  // the camera's place: just off the court at the centre line. The tripod and the phone are drawn
-  // as a sign at a fixed size (true to scale, a 3 m tripod against a 40 m court would be a stroke)
-  const [fx, fy] = P([20, 24.2, 0]);
-  const TH = 178; // the tripod's height in px, foot to phone
-  const lens = [fx, fy - TH - 18];
-  // what the camera sees: from its lens to the far corners, the court in its light
-  art.push(poly([lens, [-1.5, -0.8, 0], [41.5, -0.8, 0]], `fill="${C.attn}" fill-opacity=".26"`));
-  for (const corner of [[0, 0, 0], [40, 0, 0]])
-    art.push(path([lens, corner], `stroke="${C.ink}" stroke-width="1.8" stroke-dasharray="2 6" stroke-linecap="round"`));
-  art.push(v.goal(-1), v.goal(1));
-  // a yellow ring on the floor, in the floor's perspective
-  const ring = curve((t) => [20 + 2.1 * Math.cos(t), 24.2 + 2.1 * Math.sin(t), 0], 0, 2 * Math.PI, 72);
-  const ringD = `M${ring.map((p) => P(p).map((n) => n.toFixed(1)).join(" ")).join(" L")}Z`;
-  art.push(`<path d="${ringD}" fill="${C.attn}" fill-opacity=".45" stroke="${C.ink}" stroke-width="9"/>`);
-  art.push(`<path d="${ringD}" fill="none" stroke="${C.attn}" stroke-width="5"/>`);
-  // the tripod: three legs to the head, the column up to the phone
-  const head = [fx, fy - TH + 34];
-  const crown = [fx, fy - TH];
-  const leg = `stroke="${C.ink}" stroke-width="5" stroke-linecap="round" fill="none"`;
-  const feet = [[fx - 34, fy + 9], [fx + 34, fy + 9], [fx + 4, fy - 12]];
-  art.push(`<path d="M${feet[2].join(" ")}L${head.join(" ")}" ${leg} stroke-width="4"/>`);
-  art.push(`<path d="M${head.join(" ")}L${crown.join(" ")}" ${leg} stroke-width="7"/>`);
-  art.push(`<path d="M${feet[0].join(" ")}L${head.join(" ")}L${feet[1].join(" ")}" ${leg} stroke-linejoin="round"/>`);
-  // the phone across, filming the court: its back to us, the lenses top left
-  const pw = 88;
-  const ph = 44;
-  const r = { x: fx - pw / 2, y: crown[1] - ph + 6 };
-  art.push(`<rect x="${fx - 12}" y="${crown[1] - 4}" width="24" height="12" fill="${C.ink}"/>`);
-  art.push(`<rect x="${r.x}" y="${r.y}" width="${pw}" height="${ph}" rx="9" fill="${C.ink}"/>`);
-  art.push(`<rect x="${r.x + 9}" y="${r.y + 8}" width="34" height="27" rx="8" fill="#33363b"/>`);
-  art.push(`<circle cx="${r.x + 21}" cy="${r.y + 18}" r="6" fill="#0b0c0d" stroke="#7a8089" stroke-width="1.5"/>`);
-  art.push(`<circle cx="${r.x + 34}" cy="${r.y + 26}" r="4" fill="#0b0c0d" stroke="#7a8089" stroke-width="1.5"/>`);
-  // the height: «3 m» beside the tripod
-  const mx = fx + 78;
-  art.push(`<path d="M${mx} ${fy}V${crown[1] - ph / 2}M${mx - 9} ${fy}h18M${mx - 9} ${crown[1] - ph / 2}h18" stroke="${C.ink}" stroke-width="2.4" fill="none"/>`);
-  art.push(`<text x="${mx + 16}" y="${(fy + crown[1] - ph / 2) / 2 + 9}" font-family="Plex Mono, ui-monospace, monospace" font-weight="500" font-size="26" fill="${C.ink}">3 m</text>`);
+  // a defence 6-0 at the left goal (ours, green) against the attack (theirs, white), the ball
+  const OURS = [[0.9, 10], [6.6, 3.6], [7.4, 7.2], [7.7, 10.1], [7.4, 12.9], [6.6, 16.4], [4.2, 19]];
+  const THEIRS = [[10.6, 2.6], [11.4, 7.1], [7.9, 8.8], [10.4, 11.8], [11.2, 15.6], [9.6, 18.3], [39.1, 10]];
+  const BALL = [12.2, 7.6];
 
-  const svg = document.getElementById("art");
-  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
-  svg.setAttribute("width", W);
-  svg.setAttribute("height", H);
-  svg.style.display = "block";
-  svg.innerHTML = `<rect width="${W}" height="${H}" fill="${C.ground}"/>` + art.join("");
+  // the court from above, turned by 5 degrees, 13.4 px per metre, its middle at [322, 238]
+  const s = 13.4;
+  const c = Math.cos((-5 * Math.PI) / 180);
+  const d = Math.sin((-5 * Math.PI) / 180);
+  const M = ([x, y]) => [322 + s * ((x - 20) * c - (y - 10) * d), 238 + s * ((x - 20) * d + (y - 10) * c)];
+  // the camera: at the centre line, a few metres behind the near sideline
+  const cam = M([20, 23.2]);
+
+  const g = [];
+  g.push(`<rect width="${W}" height="${H}" fill="${K.night}"/>`);
+  // the hall's floor around the court in the club's green
+  g.push(`<path d="${path(M, [[-6, -4], [46, -4], [46, 24], [-6, 24]], true)}" fill="${K.pitch2}"/>`);
+  g.push(court(M, { floor: K.night2, zone: K.pitch, w: 2.6 }));
+  // what the camera sees: from the lens over the whole court, both goals included
+  const fan = [cam, M([-1.3, 20.5]), M([-1.3, -0.5]), M([41.3, -0.5]), M([41.3, 20.5])];
+  g.push(`<defs><radialGradient id="light" cx="${cam[0]}" cy="${cam[1]}" r="520" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="${K.attn}" stop-opacity=".38"/><stop offset="1" stop-color="${K.attn}" stop-opacity=".07"/></radialGradient></defs>`);
+  g.push(`<path d="M${fan.map((p) => p.map((n) => n.toFixed(1)).join(" ")).join("L")}Z" fill="url(#light)"/>`);
+  const dash = `stroke="${K.attn}" stroke-width="3.4" stroke-dasharray="1 8" stroke-linecap="round" stroke-linejoin="round" fill="none"`;
+  g.push(`<path d="M${[fan[4], cam, fan[1], fan[2], fan[3], fan[4]].map((p) => p.map((n) => n.toFixed(1)).join(" ")).join("L")}" ${dash}/>`);
+  g.push(dots(M, OURS, { fill: K.pitch3, r: 10 }));
+  g.push(dots(M, THEIRS, { fill: "#fff", r: 10 }));
+  g.push(dots(M, [BALL], { fill: K.attn, r: 5.5, ew: 2 }));
+  ground(g.join(""));
+
+  ghost(T.word, { left: "-12px", top: "-8px" });
+  camera(cam, 34);
+  // how high: on the big card beside the camera
+  add(`<div class="yc heavy" style="--tilt:-5deg;left:388px;top:388px;font-size:92px;padding:8px 20px 14px">3<span style="margin-left:.06em">m</span></div>`);
+  say(T.say);
   S.done();
 </script>
