@@ -75,10 +75,12 @@ export default async function How({ params }: Props) {
 
         <section aria-labelledby="shots" className="mt-16">
           <SectionHead id="shots" title={t.shotsTitle} note={t.shotsNote} />
-          {/* one story with the four pictures (L13): the picture stays, the steps pass by */}
+          {/* one story with the four pictures (L13, U31): a stage with a play on the half court */}
           <AppTour
             label={t.tourLabel}
+            hint={t.tourHint}
             items={t.shots.map((s, i) => ({
+              player: t.tourPlayers[i]!,
               name: SHOTS[i]!,
               alt: s.alt,
               caption: s.caption,
