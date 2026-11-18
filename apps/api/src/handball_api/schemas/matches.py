@@ -628,12 +628,16 @@ class AnalysisOut(ApiModel):
         "hall_tried lists earlier videos that did not fit",
     )
     hall: HallOut | None = None
-    calibration_state: Literal["confirmed", "suggested", "missing", "updating"] = Field(
+    calibration_state: Literal[
+        "confirmed", "suggested", "missing", "updating", "undeterminable"
+    ] = Field(
         default="missing",
         description="confirmed: set or confirmed by a person (or carried over from such a court "
         "with a sure hall match); suggested: the automatic court, a proposal to confirm or to "
-        "click anew; missing: no court; updating: a clicked court is being applied",
+        "click anew (calibration_suggestion); missing: no court; updating: a clicked court is "
+        "being applied; undeterminable: the coach said it cannot be set on this video",
     )
+    calibration_suggestion: CalibrationSuggestionOut | None = None
     court_clicks: CourtClicksIn | None = Field(
         default=None, description="the coach's latest line clicks, to edit them again"
     )
@@ -706,6 +710,34 @@ class CourtClicksIn(ApiModel):
         return self
 
 
+class CalibrationSuggestionOut(ApiModel):
+    """The court proposed while calibration_state is "suggested"; confirming it is
+    POST .../calibration/confirm."""
+
+    source: Literal["hall", "auto"] = Field(
+        description="hall: carried over from an earlier video of the same hall; auto: found "
+        "automatically"
+    )
+    homography: list[list[float]] = Field(description="court metres -> image px (3x3)")
+    image_size: tuple[int, int]
+    space: Literal["panorama"] = "panorama"
+    from_video_id: uuid.UUID | None = None
+    from_kickoff_at: datetime | None = Field(
+        default=None, description="kickoff of the match of from_video_id, for the label"
+    )
+
+
+class CourtUndeterminableIn(ApiModel):
+    reason: Literal["too_far", "cut", "other"] | None = None
+
+
+class PerClickOut(ApiModel):
+    lines: dict[str, list[float | None]] = Field(
+        description="px per click, as the request listed them; null for a dropped click"
+    )
+    points: dict[str, float]
+
+
 class ClickResidualOut(ApiModel):
     median: float
     max: float
@@ -724,6 +756,7 @@ class CourtClicksOut(ApiModel):
     dropped: list[DroppedClickOut] = Field(
         default_factory=list, description="clicks left out as off the line (a neighbouring line)"
     )
+    per_click_px: PerClickOut
 
 
 class CourtClicksJobOut(CourtClicksOut):

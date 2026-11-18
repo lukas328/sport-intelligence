@@ -83,6 +83,10 @@ async def test_checking_clicks_gives_the_court_and_stores_nothing(
     out = r.json()
     assert out["image_size"] == [PANORAMA["width"], PANORAMA["height"]]
     assert out["residual_px"]["median"] < 1.0 and out["dropped"] == []
+    per = out["per_click_px"]
+    assert per["points"] == {}
+    assert {k: len(v) for k, v in per["lines"].items()} == {k: len(v) for k, v in _lines().items()}
+    assert all(px is not None and px < 2.0 for v in per["lines"].values() for px in v)
     grid = np.array([(x, y) for x in range(0, 13, 2) for y in range(0, 21, 4)], float)
     got = clicks._project(np.array(out["homography"]), grid)
     assert np.abs(got - clicks._project(H, grid)).max() < 2.0
@@ -119,6 +123,10 @@ async def test_clicks_that_give_no_court_are_refused_with_a_code(
         r = await api.post(f"/v1/orgs/{ids['org']}/videos/{vid}/calibration/{path}", json=body)
         assert r.status_code == 422, r.text
         assert r.json()["type"].endswith(":" + code)
+        if code == "clicks-disagree":
+            worst = r.json()["worst"]
+            assert worst["kind"] == "line" and worst["name"] in body["lines"]
+            assert worst["px"] > 20 and r.json()["median_px"] >= 0
 
 
 async def test_the_clicked_court_reruns_the_analysis_and_serves_the_hall(
@@ -140,6 +148,7 @@ async def test_the_clicked_court_reruns_the_analysis_and_serves_the_hall(
     assert r.status_code == 202, r.text
     out = r.json()
     assert out["dropped"] == [{"kind": "line", "name": "side_near", "index": 3}]
+    assert out["per_click_px"]["lines"]["side_near"][3] is None
     _, func, job, payload = jobs.jobs[-1]
     assert func == "handball_gpu_worker.analysis.run_analysis" and job == out["job_id"]
     assert payload["calibration_space"] == "panorama"
@@ -239,6 +248,11 @@ async def test_the_automatic_court_is_a_suggestion_until_confirmed(
         },
     )
     assert await _state(api, org, vid) == "suggested"
+    a = (await api.get(f"/v1/orgs/{org}/videos/{vid}/analysis")).json()
+    sug = a["calibration_suggestion"]
+    assert sug["source"] == "auto" and sug["from_video_id"] is None
+    assert sug["homography"] == _court("heuristic")["homography"]
+    assert sug["image_size"] == [PANORAMA["width"], PANORAMA["height"]]
     r = await api.post(f"/v1/orgs/{org}/videos/{vid}/calibration/confirm")
     assert r.status_code == 200, r.text
     assert await _state(api, org, vid) == "confirmed"
@@ -272,3 +286,57 @@ async def test_a_court_from_the_hall_is_confirmed_only_with_a_sure_match(
         },
     )
     assert await _state(api, org, second) == state
+    sug = (await api.get(f"/v1/orgs/{org}/videos/{second}/analysis")).json()[
+        "calibration_suggestion"
+    ]
+    if state == "confirmed":
+        assert sug is None
+    else:
+        assert sug["source"] == "hall" and sug["from_video_id"] == first
+        assert sug["from_kickoff_at"] is not None
+
+
+async def test_an_undeterminable_court_closes_its_question_until_clicked(
+    make_api: Callable[[], Api],
+) -> None:
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    jobs: MemoryJobQueue = api.app.state.jobs
+    m_vid, job, payload = await _video(api, ids)
+    match_id = payload["match_id"]
+    await _finish(
+        api,
+        job,
+        {
+            "calibration": _court("heuristic"),
+            "tracks": _tracks(),
+            "panorama": PANORAMA,
+            "chunks": 1,
+            "chunk_ms": 30_000,
+        },
+    )
+
+    async def field_asked() -> bool:
+        g = (await api.get(f"/v1/orgs/{org}/matches/{match_id}/graphics")).json()
+        return any(c["kind"] == "field" for c in g["checks"] + g.get("more_checks", []))
+
+    assert await field_asked()
+    r = await api.post(
+        f"/v1/orgs/{org}/videos/{m_vid}/calibration/undeterminable", json={"reason": "too_far"}
+    )
+    assert r.status_code == 204, r.text
+    assert await _state(api, org, m_vid) == "undeterminable"
+    assert not await field_asked()
+    # clicking the court after all undoes it
+    r = await api.post(
+        f"/v1/orgs/{org}/videos/{m_vid}/calibration/clicks",
+        json={"space": "panorama", "lines": _lines()},
+    )
+    assert r.status_code == 202, r.text
+    await _finish(
+        api,
+        jobs.jobs[-1][2],
+        {"calibration": _court("user_correction"), "tracks": _tracks(), "panorama": PANORAMA},
+    )
+    assert await _state(api, org, m_vid) == "confirmed"

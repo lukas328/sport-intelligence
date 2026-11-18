@@ -120,6 +120,15 @@ HALL_SURE_FLOOR_INLIERS = 60
 HALL_SURE_ERROR_PX = 3.0
 
 
+UNDETERMINABLE = "court_undeterminable"  # analysis meta: {"reason": too_far, cut or other}
+
+
+def court_undeterminable(asset: VideoAsset | None) -> bool:
+    """The coach said the court cannot be set on this video: its court question is closed for
+    good (not even behind «Mehr prüfen») and no positions are drawn."""
+    return asset is not None and isinstance((asset.analysis or {}).get(UNDETERMINABLE), dict)
+
+
 def hall_court_sure(asset: VideoAsset | None) -> bool:
     """The court of this file came from a confirmed court of the same hall and the hall images
     matched well: «Passt das Spielfeld?» is not asked again (livegang round 2, A11)."""

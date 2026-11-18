@@ -4999,6 +4999,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/videos/{video_id}/calibration/undeterminable": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Court Undeterminable
+         * @description «Nicht bestimmbar»: the court cannot be set on this video. Its court question is closed
+         *     for good, no positions are drawn; clicking the court later undoes it.
+         */
+        post: operations["court_undeterminable_v1_orgs__org_id__videos__video_id__calibration_undeterminable_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/videos/{video_id}/complete": {
         parameters: {
             query?: never;
@@ -5441,11 +5462,12 @@ export interface components {
             } | null;
             /**
              * Calibration State
-             * @description confirmed: set or confirmed by a person (or carried over from such a court with a sure hall match); suggested: the automatic court, a proposal to confirm or to click anew; missing: no court; updating: a clicked court is being applied
+             * @description confirmed: set or confirmed by a person (or carried over from such a court with a sure hall match); suggested: the automatic court, a proposal to confirm or to click anew (calibration_suggestion); missing: no court; updating: a clicked court is being applied; undeterminable: the coach said it cannot be set on this video
              * @default missing
              * @enum {string}
              */
-            calibration_state?: "confirmed" | "suggested" | "missing" | "updating";
+            calibration_state?: "confirmed" | "suggested" | "missing" | "updating" | "undeterminable";
+            calibration_suggestion?: components["schemas"]["CalibrationSuggestionOut"] | null;
             /** Camera */
             camera?: ("fixed" | "moving") | null;
             /** Chunk Ms */
@@ -5960,6 +5982,42 @@ export interface components {
                 number,
                 number
             ];
+        };
+        /**
+         * CalibrationSuggestionOut
+         * @description The court proposed while calibration_state is "suggested"; confirming it is
+         *     POST .../calibration/confirm.
+         */
+        CalibrationSuggestionOut: {
+            /**
+             * From Kickoff At
+             * @description kickoff of the match of from_video_id, for the label
+             */
+            from_kickoff_at?: string | null;
+            /** From Video Id */
+            from_video_id?: string | null;
+            /**
+             * Homography
+             * @description court metres -> image px (3x3)
+             */
+            homography: number[][];
+            /** Image Size */
+            image_size: [
+                number,
+                number
+            ];
+            /**
+             * Source
+             * @description hall: carried over from an earlier video of the same hall; auto: found automatically
+             * @enum {string}
+             */
+            source: "hall" | "auto";
+            /**
+             * Space
+             * @default panorama
+             * @constant
+             */
+            space?: "panorama";
         };
         /**
          * CandidateGoal
@@ -6678,6 +6736,7 @@ export interface components {
              * Format: uuid
              */
             job_id: string;
+            per_click_px: components["schemas"]["PerClickOut"];
             /** @description distance of the clicks to the court */
             residual_px: components["schemas"]["ClickResidualOut"];
         };
@@ -6698,6 +6757,7 @@ export interface components {
                 number,
                 number
             ];
+            per_click_px: components["schemas"]["PerClickOut"];
             /** @description distance of the clicks to the court */
             residual_px: components["schemas"]["ClickResidualOut"];
         };
@@ -6733,6 +6793,11 @@ export interface components {
                     number
                 ];
             };
+        };
+        /** CourtUndeterminableIn */
+        CourtUndeterminableIn: {
+            /** Reason */
+            reason?: ("too_far" | "cut" | "other") | null;
         };
         /**
          * DataRegion
@@ -9723,6 +9788,20 @@ export interface components {
             password: string;
             /** Token */
             token: string;
+        };
+        /** PerClickOut */
+        PerClickOut: {
+            /**
+             * Lines
+             * @description px per click, as the request listed them; null for a dropped click
+             */
+            lines: {
+                [key: string]: (number | null)[];
+            };
+            /** Points */
+            points: {
+                [key: string]: number;
+            };
         };
         /**
          * PersonRole
@@ -23545,6 +23624,40 @@ export interface operations {
                         [key: string]: string;
                     };
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    court_undeterminable_v1_orgs__org_id__videos__video_id__calibration_undeterminable_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                video_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CourtUndeterminableIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {

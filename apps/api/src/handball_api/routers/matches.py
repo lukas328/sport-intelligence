@@ -35,6 +35,7 @@ from handball_api.schemas.matches import (
     CourtClicksJobOut,
     CourtClicksOut,
     CourtModelOut,
+    CourtUndeterminableIn,
     LinkImport,
     MatchCreate,
     MatchGraphicsOut,
@@ -354,6 +355,16 @@ async def submit_court_clicks(
         scope.ctx, video_id, data.points, data.lines, data.space, data.frame_ms
     )
     return {**found, "job_id": job.id}
+
+
+@router.post("/videos/{video_id}/calibration/undeterminable", status_code=204, tags=["analysis"])
+async def court_undeterminable(
+    video_id: uuid.UUID, data: CourtUndeterminableIn, scope: OrgDep
+) -> Response:
+    """«Nicht bestimmbar»: the court cannot be set on this video. Its court question is closed
+    for good, no positions are drawn; clicking the court later undoes it."""
+    await court_clicks.undeterminable(scope.ctx, video_id, data.reason)
+    return Response(status_code=204)
 
 
 @router.post("/videos/{video_id}/calibration/from/{source_id}", status_code=202, tags=["analysis"])
