@@ -76,7 +76,7 @@ export function useShirt() {
 export function ShirtPicker({ question, hint, names }: { question: string; hint: string; names: Record<ShirtKey, string> }) {
   const { shirt, setShirt } = useShirt();
   return (
-    <fieldset className="min-w-0">
+    <fieldset className="min-w-0 print:hidden">
       <legend className="text-[1.375rem] leading-tight font-bold md:text-[1.5rem]">{question}</legend>
       <p className="mt-1 text-[1.0625rem] text-ink-2">{hint}</p>
       <div className="mt-4 grid grid-cols-[repeat(auto-fill,minmax(min(100%,9.75rem),1fr))] gap-2">
@@ -149,7 +149,7 @@ export function ShirtMenu({ label, chosenLabel, names }: { label: string; chosen
   };
 
   return (
-    <div className="relative">
+    <div className="relative print:hidden">
       <button
         ref={button}
         type="button"
