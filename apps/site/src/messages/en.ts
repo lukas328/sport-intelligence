@@ -239,22 +239,22 @@ const en: Messages = {
       {
         title: "Film",
         text: "Phone or camera high at the halfway line, both goals in the picture with the wide angle. Fixed is best, panning is fine too. Keep filming through half time.",
-        alt: "Drawing: a hall seen from above, the camera on a tall tripod at the halfway line, about 3 metres high. It sees the whole court with both goals.",
+        alt: "Drawing: the whole court from above, the camera at the halfway line, beside it 3m on a yellow card. Its light covers the whole court with both goals. Below: High up at the halfway line. Both goals in view.",
       },
       {
         title: "Upload",
         text: "In the app, pick the match, then the video, ideally on Wi-Fi. The analysis finds the court and the players and looks for the goal moments. You do not have to stay: the bell tells you when it is done.",
-        alt: "The app when uploading: which match is this video from? Two matches to choose from. Below, the bar: 12 % uploaded (420 MB of 3.4 GB).",
+        alt: "Drawn after the app: the card Upload video with the question Which match is the video from? and the matches TSV Nachtwind, 14 Nov, chosen, and SG Blitzfang. Over it a yellow card: 12 %, the bar, 420 MB of 3.4 GB. Below: Put the phone away. The bell tells you.",
       },
       {
         title: "Check",
         text: "Where the analysis is unsure, it asks you, with the short scene: is the court right? Goal or not, for whom? At most ten questions per match, usually in a few minutes, and skipping them all works too. Where the shot came from, you tap if you like.",
-        alt: "The app while checking: the picture from the video with the suggested court in yellow, four points on the corners. Below, question 1 of 1: is the court right? and the button Looks right.",
+        alt: "Drawn after the app: the hall with the suggested court in yellow, four yellow points on the corners. Over it the question: Question 1 of 1, Is the court right?, with the buttons Looks right and Don't know, beside it one tap. Below: At most ten questions per match.",
       },
       {
         title: "Watch and share",
         text: "Score, run of the match, every goal as a scene and the positions from above. If you tapped where each goal was thrown from (the shot spot), the three things come on top: the three biggest patterns for training, from three goals out of the same zone. The scenes that matter go to the team chat as a collection, a choice of scenes behind one link.",
-        alt: "The first of the three things on a phone: 11 of 29 goals conceded on the right wing, below it the half court with the shots, all from the right wing.",
+        alt: "Large: 11 of 29 goals conceded on the right wing, below it the half court with the shot spots, all on the right wing. Over it the collection for the team chat: Close the right wing, 4 scenes, HC Tannengrün Men 1, and the button Share link.",
       },
     ],
     honestAll: "The full list, point by point",
@@ -292,7 +292,7 @@ const en: Messages = {
     checkPrint: "Checklist to print",
     afterTitle: "Then: upload.",
     afterText: "At home on Wi-Fi, open the match in the app and pick the video. The analysis does the rest.",
-    afterAlt: "The app when uploading: which match is this video from? Two matches to choose from. Below, the bar: 12 % uploaded (420 MB of 3.4 GB).",
+    afterAlt: "Drawn after the app: the card Upload video with the question Which match is the video from? and the matches TSV Nachtwind, 14 Nov, chosen, and SG Blitzfang. Over it a yellow card: 12 %, the bar, 420 MB of 3.4 GB. Below: Put the phone away. The bell tells you.",
     moreTitle: "In detail",
     more: [
       { q: "Not everything fits in the picture?", a: "Higher, a few metres further back or more wide angle. Better both goals with some margin than close and sharp. If the two near corners are missing, that is fine." },

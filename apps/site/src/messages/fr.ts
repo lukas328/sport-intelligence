@@ -239,22 +239,22 @@ const fr: Messages = {
       {
         title: "Filmer",
         text: "Téléphone ou caméra en hauteur à la ligne médiane, les deux buts dans l'image grâce au grand-angle. Fixe, c'est le mieux, suivre le jeu, ça va aussi. Laisse tourner pendant la pause.",
-        alt: "Dessin : une salle vue d'en haut, la caméra sur un grand trépied à la ligne médiane, à environ 3 mètres de haut. Elle voit tout le terrain avec les deux buts.",
+        alt: "Dessin : tout le terrain vu d'en haut, la caméra à la ligne médiane, à côté 3m sur une carte jaune. Sa lumière couvre tout le terrain avec les deux buts. En dessous : En hauteur, à la ligne médiane. Les deux buts dans l'image.",
       },
       {
         title: "Téléverser",
         text: "Dans l'app, choisis le match, puis la vidéo, idéalement en wifi. L'analyse trouve le terrain et les joueurs et cherche les moments de but. Pas besoin de rester : la cloche te prévient quand elle a terminé.",
-        alt: "L'app au téléversement : à quel match appartient la vidéo ? Deux matchs au choix. En dessous, la barre : 12 % téléversé (420 Mo sur 3,4 Go).",
+        alt: "Dessin d'après l'app : la carte Téléverser la vidéo avec la question De quel match vient la vidéo ? et les matchs TSV Nachtwind, 14 nov., choisi, et SG Blitzfang. Par-dessus, une carte jaune : 12 %, la barre, 420 Mo sur 3,4 Go. En dessous : Pose le téléphone. La cloche te prévient.",
       },
       {
         title: "Vérifier",
         text: "Là où l'analyse hésite, elle te demande, avec la courte scène : le terrain est-il juste ? But ou pas, pour qui ? Dix questions au plus par match, en général en quelques minutes, et tout passer est possible aussi. D'où le tir est parti, tu le touches si tu veux.",
-        alt: "L'app pendant la vérification : l'image de la vidéo avec le terrain proposé en jaune, quatre points aux coins. En dessous, question 1 sur 1 : le terrain est-il juste ? et le bouton C'est bon.",
+        alt: "Dessin d'après l'app : la salle avec le terrain proposé en jaune, quatre points jaunes aux coins. Par-dessus, la question : Question 1 sur 1, le terrain est-il juste ?, avec les boutons C'est bon et Je ne sais pas, à côté un geste. En dessous : Dix questions au plus par match.",
       },
       {
         title: "Regarder et partager",
         text: "Résultat, déroulement, chaque but comme scène et les positions vues d'en haut. Si tu as touché pour les buts l'endroit d'où le tir est parti (le lieu de tir), les trois points s'ajoutent : les trois plus grands schémas pour l'entraînement, dès trois buts de la même zone. Les scènes importantes, tu les envoies en sélection dans le chat de l'équipe, un choix de scènes derrière un lien.",
-        alt: "La première des trois choses sur le téléphone : 11 buts encaissés sur 29 par l'aile droite, en dessous le demi-terrain avec les tirs, tous à l'aile droite.",
+        alt: "En grand : 11 buts encaissés sur 29 par l'aile droite, en dessous le demi-terrain avec les lieux de tir, tous à l'aile droite. Par-dessus, la sélection pour le chat de l'équipe : Fermer l'aile droite, 4 scènes, HC Tannengrün Hommes 1, et le bouton Partager le lien.",
       },
     ],
     honestAll: "La liste complète, point par point",
@@ -292,7 +292,7 @@ const fr: Messages = {
     checkPrint: "Liste à imprimer",
     afterTitle: "Ensuite : téléverser.",
     afterText: "À la maison, en Wi-Fi, ouvre le match dans l'app et choisis la vidéo. L'analyse fait le reste.",
-    afterAlt: "L'app au téléversement : à quel match appartient la vidéo ? Deux matchs au choix. En dessous, la barre : 12 % téléversé (420 Mo sur 3,4 Go).",
+    afterAlt: "Dessin d'après l'app : la carte Téléverser la vidéo avec la question De quel match vient la vidéo ? et les matchs TSV Nachtwind, 14 nov., choisi, et SG Blitzfang. Par-dessus, une carte jaune : 12 %, la barre, 420 Mo sur 3,4 Go. En dessous : Pose le téléphone. La cloche te prévient.",
     moreTitle: "En détail",
     more: [
       { q: "Tout ne rentre pas dans l'image ?", a: "Plus haut, quelques mètres plus en arrière ou plus de grand-angle. Mieux vaut les deux buts avec un peu de marge que proche et net. S'il manque les deux coins proches, ce n'est pas grave." },

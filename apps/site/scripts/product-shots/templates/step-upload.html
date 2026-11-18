@@ -1,26 +1,111 @@
 <!doctype html>
-<!-- Step «Hochladen» (U1, U3): the one moment large. Two cut-outs of the real app (captures
-     step-hochladen and step-hochladen-laeuft), flat on the app's cloth with its ink edge: above,
-     «Video hochladen», «Zu welchem Spiel gehört das Video?» with the two matches (the latest
-     one in ink, as the app proposes it); below, the same match a moment later while its video goes up: the bar and
-     «12 % hochgeladen (420 MB von 3.4 GB)». The same square frame as the other steps. -->
+<!-- Step «Hochladen» (U33, after Lukas' design): the app's sheet «Video hochladen» as a paper card
+     (which match the video is from: TSV Nachtwind, the website's match, chosen in ink; SG
+     Blitzfang below), overlapped by the big yellow card of the upload running: «12 %», the bar,
+     «420 MB VON 3.4 GB», the words of the app (upload.progress). A dotted ball path runs up to a
+     small yellow ball: the video goes up. The step's word in the back, the bell and one white
+     line at the foot: the coach can put the phone away. In de, fr and en. -->
 <meta charset="utf-8" />
 <link rel="stylesheet" href="../stage.css" />
+<style>
+  .sheet {
+    left: 38px;
+    top: 50px;
+    width: 438px;
+    padding: 22px 0 10px;
+  }
+  .sheet h3 {
+    margin: 0 24px;
+    font-size: 36px;
+    line-height: 1.05;
+  }
+  .sheet p {
+    margin: 10px 24px 16px;
+    font-size: 21px;
+    font-weight: 600;
+  }
+  .sheet .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    margin: 0 14px;
+    padding: 15px 14px;
+    font-size: 22px;
+    font-weight: 700;
+  }
+  .sheet .row span {
+    font-weight: 500;
+    font-size: 20px;
+  }
+  .sheet .row.on {
+    background: var(--ink);
+    color: #fff;
+  }
+  .sheet .row + .row {
+    color: var(--ink);
+  }
+  .sheet .row:not(.on) span {
+    color: #53565b;
+  }
+  .up {
+    left: 236px;
+    top: 266px;
+    width: 360px;
+    padding: 18px 24px 18px;
+  }
+  .up .heavy {
+    font-size: 122px;
+    letter-spacing: -0.02em;
+  }
+  .up .bar {
+    margin-top: 18px;
+    height: 20px;
+    border: 3px solid var(--ink);
+    background: linear-gradient(90deg, var(--ink) 12%, transparent 12%);
+  }
+  .up .mono {
+    margin-top: 12px;
+    font-size: 19px;
+  }
+</style>
 <div id="stage"></div>
 <script src="../stage.js"></script>
+<script src="../steps.js"></script>
 <script>
-  S.stage(640, 640, { cloth: true });
-  const title = S.rect("step-hochladen", "title", [24, 92.3, 140.7, 28]);
-  const second = S.rect("step-hochladen", "second", [24, 227.7, 312, 56]);
-  const running = S.rect("step-hochladen-laeuft", "running", [16, 452.7, 328, 157.3]);
+  const W = 640;
+  const H = 640;
+  S.stage(W, H, { steps: true, langs: ["de", "fr", "en"], budget1x: 70 * 1024, budget2x: 120 * 1024 });
+  const T = S.t({
+    de: { word: "Hochladen", title: "Video hochladen", ask: "Zu welchem Spiel gehört das Video?", a: ["TSV Nachtwind", "14. Nov."], b: ["SG Blitzfang", "29. Okt."], pct: "12 %", size: "420 MB von 3.4 GB", say: "Handy weglegen. Die Glocke meldet sich." },
+    fr: { word: "Téléverser", title: "Téléverser la vidéo", ask: "De quel match vient la vidéo ?", a: ["TSV Nachtwind", "14 nov."], b: ["SG Blitzfang", "29 oct."], pct: "12 %", size: "420 Mo sur 3,4 Go", say: "Pose le téléphone. La cloche te prévient." },
+    en: { word: "Upload", title: "Upload video", ask: "Which match is the video from?", a: ["TSV Nachtwind", "14 Nov"], b: ["SG Blitzfang", "29 Oct"], pct: "12 %", size: "420 MB of 3.4 GB", say: "Put the phone away. The bell tells you." },
+  });
+  const { K, ground, ghost, say, add } = STEPS;
 
-  // above left: from the sheet's title to under the second match
-  const y0 = title[1] - 18;
-  const a = S.cut("step-hochladen", [8, y0, 344, second[1] + second[3] + 14 - y0], { left: 28, top: 28, width: 540 });
-  // below right: the bar, how much is up, and that the coach can go on meanwhile
-  const y1 = running[1] - 14;
-  const b = S.cut("step-hochladen-laeuft", [8, y1, 344, 96], { left: 72, top: 0, width: 540 });
-  const bEl = b.el.parentElement;
-  bEl.style.top = `${640 - 28 - bEl.offsetHeight}px`;
+  const g = [];
+  g.push(`<rect width="${W}" height="${H}" fill="${K.night}"/>`);
+  // the club's green, slanted, behind the sheet
+  g.push(`<path d="M0 0H${W}V84L0 166Z" fill="${K.pitch}"/>`);
+  g.push(`<path d="M0 166L${W} 84V92L0 174Z" fill="${K.pitch2}"/>`);
+  // the ball's way up: dotted, from the foot to the yellow ball at the top
+  const way = "M70 506C150 430 250 290 470 210S560 140 588 100";
+  g.push(`<path d="${way}" fill="none" stroke="${K.attn}" stroke-width="3.6" stroke-dasharray="1 10" stroke-linecap="round"/>`);
+  g.push(`<g transform="translate(588 92)"><circle r="17" fill="${K.attn}" stroke="${K.ink}" stroke-width="3"/><path d="M-15 -5C-5 -1 5 -9 13 -9M-6 15C-2 6 7 3 16 5M-3 -16C-9 -6 -9 6 -6 15" fill="none" stroke="${K.ink}" stroke-width="2.4"/></g>`);
+  ground(g.join(""));
+
+  ghost(T.word, { left: "-18px", top: "330px" });
+  const sheet = add(`<div class="pc sheet" style="--tilt:-3deg"><h3 class="disp"></h3><p></p><div class="row on"><b></b><span></span></div><div class="row"><b></b><span></span></div></div>`);
+  sheet.querySelector("h3").textContent = T.title;
+  sheet.querySelector("p").textContent = T.ask;
+  const rows = sheet.querySelectorAll(".row");
+  [T.a, T.b].forEach(([name, date], i) => {
+    rows[i].querySelector("b").textContent = name;
+    rows[i].querySelector("span").textContent = date;
+  });
+  const up = add(`<div class="yc up" style="--tilt:2deg"><div class="heavy"></div><div class="bar"></div><div class="mono"></div></div>`);
+  up.querySelector(".heavy").textContent = T.pct;
+  up.querySelector(".mono").textContent = T.size;
+  say(T.say, "bell");
   S.done();
 </script>

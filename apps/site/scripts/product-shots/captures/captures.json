@@ -36,41 +36,6 @@
       "scenes": [48, 1630, 304, 132]
     }
   },
-  "step-hochladen": {
-    "width": 1080,
-    "height": 2340,
-    "scale": 3,
-    "rects": {
-      "dialog": [0, 205, 1080, 2153],
-      "title": [72, 277, 422, 84],
-      "question": [72, 421, 936, 61],
-      "first": [72, 512, 936, 168],
-      "second": [72, 683, 936, 168]
-    }
-  },
-  "step-hochladen-laeuft": {
-    "width": 1080,
-    "height": 2340,
-    "scale": 3,
-    "rects": {
-      "running": [48, 1358, 984, 472],
-      "progress": [48, 1406, 984, 60],
-      "heading": [48, -4611, 611, 54]
-    }
-  },
-  "step-pruefen": {
-    "width": 1080,
-    "height": 2880,
-    "scale": 3,
-    "rects": {
-      "picture": [48, 572, 984, 600],
-      "hint": [84, 1352, 912, 131],
-      "count": [48, 1734, 273, 65],
-      "question": [48, 1799, 984, 228],
-      "yes": [48, 2295, 984, 168],
-      "no": [48, 2493, 984, 156]
-    }
-  },
   "szenen": {
     "width": 2560,
     "height": 1880,

@@ -67,7 +67,7 @@ export default async function How({ params }: Props) {
                 )}
               </div>
               <div data-reveal style={{ "--d": 1 } as CSSProperties} className="col-span-2 mt-6 md:col-span-1 md:mt-0">
-                <StepPicture step={i} alt={s.alt} />
+                <StepPicture step={i} locale={locale} alt={s.alt} />
               </div>
             </li>
           ))}
