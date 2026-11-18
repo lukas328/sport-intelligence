@@ -114,7 +114,7 @@ export default async function Demo({ params }: Props) {
           <SectionHead id="scene" title={m.camera.title} note={v.sceneGoal.clock} />
           {/* U24: the half where the scene plays, goal at the top as everywhere on the site, labelled;
               on a wide screen the text and the legend beside it */}
-          <div className="mt-6 grid grid-cols-1 gap-x-12 gap-y-6 lg:grid-cols-[minmax(0,46rem)_minmax(0,1fr)]">
+          <div className="mt-6 grid grid-cols-1 gap-x-12 gap-y-6 lg:grid-cols-[minmax(0,46rem)_minmax(16rem,1fr)]">
             <div className="lg:col-start-2 lg:row-start-1">
               <p className="measure">{t.cameraText}</p>
               <div className="mt-6">
