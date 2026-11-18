@@ -64,14 +64,6 @@ q "SELECT coalesce(jsonb_agg(to_jsonb(r) ORDER BY r.created_at), '[]'::jsonb) FR
     FROM processing_jobs j WHERE j.video_asset_id = v.id) AS jobs
    FROM video_assets v WHERE v.created_at > now() - interval '24 hours') r" \
   | tail -1 | jq . | tee "$OUT/recent_assets.json"
-# One-off database questions: every diag-queries/*.sql runs read-only (no writes possible).
-for f in "$(dirname "$0")"/diag-queries/*.sql; do
-  [ -e "$f" ] || continue
-  n=$(basename "$f" .sql)
-  echo "== sql $n (read only)"
-  PGCONNECT_TIMEOUT=20 PGOPTIONS="-c default_transaction_read_only=on -c app.bypass_rls=on" \
-    psql "$dsn" -v ON_ERROR_STOP=1 -X -f "$f" 2>&1 | tee "$OUT/sql-$n.txt" | head -200 || true
-done
 # One-off data fixes, only with the input oneoff: every oneoff/*.sql runs in one transaction
 # that rolls back on any error (the files check their own row counts first).
 if [ "${ONEOFF:-false}" = true ]; then
@@ -82,6 +74,14 @@ if [ "${ONEOFF:-false}" = true ]; then
       psql "$dsn" -v ON_ERROR_STOP=1 -X --single-transaction -f "$f" 2>&1 | tee "$OUT/oneoff-$(basename "$f" .sql).txt"
   done
 fi
+# One-off database questions: every diag-queries/*.sql runs read-only (no writes possible).
+for f in "$(dirname "$0")"/diag-queries/*.sql; do
+  [ -e "$f" ] || continue
+  n=$(basename "$f" .sql)
+  echo "== sql $n (read only)"
+  PGCONNECT_TIMEOUT=20 PGOPTIONS="-c default_transaction_read_only=on -c app.bypass_rls=on" \
+    psql "$dsn" -v ON_ERROR_STOP=1 -X -f "$f" 2>&1 | tee "$OUT/sql-$n.txt" | head -200 || true
+done
 echo "== the 8 newest processing jobs (any asset)"
 q "SELECT coalesce(jsonb_agg(to_jsonb(r)), '[]'::jsonb) FROM (SELECT id, video_asset_id, kind, status,
    progress, error, created_at, updated_at FROM processing_jobs ORDER BY created_at DESC LIMIT 8) r" \
