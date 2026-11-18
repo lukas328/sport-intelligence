@@ -227,16 +227,19 @@ const out = {
   out[`wortmarke-${n}-negativ.svg`] = svg(w.vb, `<rect x="-2000" y="-2000" width="6000" height="6000" fill="${INK}"/>` + w.body);
   out[`wortmarke-${n}-weiss.svg`] = svg(w.vb, w.body);
 });
-/* open graph: 1200 x 630, everything at least 60 px from every edge */
-{
+/* open graph: 1200 x 630, everything at least 60 px from every edge. open-graph.svg is the default
+   (the web app and the site's og.png); the website has one per language with the start page's
+   tagline (apps/site/src/messages/*.ts, home.kick), broken by hand into lines that fit. */
+function openGraph(lines) {
   const M = 60, k = 1.12, mx = M - 24 * k, my = (630 - 415 * k) / 2 - 42 * k, x0 = M + 464 * k + 50, avail = 1200 - M - x0;
   const w0 = text(wmRec.font, "Intelligence", 0, 0, 100, { track: wmRec.track }).w, size = Math.min(118, Math.floor(100 * avail / w0));
-  const t1 = "Spielanalyse für Handball-", t2 = "trainerinnen und -trainer", tw = Math.max(text("Archivo-ExtraBold", t1, 0, 0, 100).w, text("Archivo-ExtraBold", t2, 0, 0, 100).w), ts = Math.min(30, Math.floor(100 * avail / tw));
-  const block = size * 0.95 + size * 1.0 + 28 + ts * 2.4, top = (630 - block) / 2;
+  const tw = Math.max(...lines.map((t) => text("Archivo-ExtraBold", t, 0, 0, 100).w)), ts = Math.min(30, Math.floor(100 * avail / tw));
+  const lead = (i) => ts * (1.1 + 1.3 * i), block = size * 0.95 + size * 1.0 + 28 + lead(lines.length - 1), top = (630 - block) / 2;
   const a = text(wmRec.font, "Handball", x0, top + size * 0.95, size, { track: wmRec.track }), b = text(wmRec.font, "Intelligence", x0, top + size * 1.95, size, { track: wmRec.track });
-  const c1 = text("Archivo-ExtraBold", t1, x0, top + size * 1.95 + 28 + ts * 1.1, ts), c2 = text("Archivo-ExtraBold", t2, x0, top + size * 1.95 + 28 + ts * 2.4, ts);
-  out["open-graph.svg"] = svg("0 0 1200 630", `<rect width="1200" height="630" fill="${BOARD}"/><g transform="translate(${mx.toFixed(1)} ${my.toFixed(1)}) scale(${k})">${fin("ink")}</g><path d="${a.d}" fill="${INK}"/><path d="${b.d}" fill="${INK}"/><path d="${c1.d}" fill="#5a6068"/><path d="${c2.d}" fill="#5a6068"/>`);
+  const tag = lines.map((t, i) => `<path d="${text("Archivo-ExtraBold", t, x0, top + size * 1.95 + 28 + lead(i), ts).d}" fill="#5a6068"/>`).join("");
+  return svg("0 0 1200 630", `<rect width="1200" height="630" fill="${BOARD}"/><g transform="translate(${mx.toFixed(1)} ${my.toFixed(1)}) scale(${k})">${fin("ink")}</g><path d="${a.d}" fill="${INK}"/><path d="${b.d}" fill="${INK}"/>${tag}`);
 }
+out["open-graph.svg"] = openGraph(["Spielanalyse für Handball-", "trainerinnen und -trainer"]);
 /* the record of the two-coloured mark, drawn last so the mask ids of the files above stay */
 out["zeichen-zweifarbig.svg"] = svg("0 0 512 512", fin("two"));
 Object.keys(out).forEach((n) => W("final/" + n, out[n]));
@@ -255,4 +258,11 @@ page.chosen = svg("0 0 512 512", mark(Object.assign({}, CHOSEN, { color: "two" }
 page.chosenInk = svg("0 0 512 512", mark(Object.assign({}, CHOSEN, { color: "ink" })));
 page.finalInk = svg("0 0 512 512", fin("ink"));
 fs.writeFileSync(path.join(here, "data.json"), JSON.stringify(page) + "\n");
-console.log("ok", Object.keys(out).length, "final files,", V.length, "variants");
+/* the website's picture per language, drawn last so no file above changes; not part of the page */
+const SITE_OG = {
+  de: ["Spielanalyse mit KI für Handball-", "trainerinnen und -trainer"],
+  fr: ["Analyse de match avec IA pour", "les entraîneuses et entraîneurs", "de handball"],
+  en: ["Match analysis with AI", "for handball coaches"],
+};
+Object.entries(SITE_OG).forEach(([l, lines]) => W(`final/open-graph-${l}.svg`, openGraph(lines)));
+console.log("ok", Object.keys(out).length + Object.keys(SITE_OG).length, "final files,", V.length, "variants");

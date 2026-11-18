@@ -84,6 +84,7 @@ den App-Bildern im Vereinsgrün um die Aufmerksamkeit streiten.
 | `app-icon-maske.svg`, `app-icon-maske-1024.png`, `app-icon-maske-512.png` | Android adaptiv und Web-Manifest «maskable»: Zeichen in der sicheren Zone (Kreis mit 80 % Durchmesser) |
 | `app-icon-einfarbig.svg` | Android «Designs» (einfarbiges Symbol, transparent) |
 | `open-graph.svg`, `open-graph.png` | Vorschau geteilter Links, 1200 × 630 |
+| `open-graph-de/-fr/-en.svg` und `.png` | die Link-Vorschau der Website je Sprache (`apps/site/public/og-de.png` usw.), mit der Zeile der Startseite (`home.kick`) |
 
 ## Bauen
 

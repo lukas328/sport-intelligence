@@ -72,10 +72,10 @@ export default async function Data({ params }: Props) {
           <SectionHead id="board" title={t.boardTitle} />
           <p className="measure mt-4">{t.board}</p>
           <div className="flex flex-wrap gap-x-8">
-            <Link href={`/${locale}/datenschutz/`} className="link">
+            <Link href={`/${locale}/datenschutz/`} className="link print-url">
               {t.privacyLink}
             </Link>
-            <Link href={`/${locale}/aufnahme/#notice`} className="link">
+            <Link href={`/${locale}/aufnahme/#notice`} className="link print-url">
               {m.filming.noticeTitle}
             </Link>
           </div>

@@ -82,7 +82,7 @@ export function AppTour({ items, label, hint }: { items: TourItem[]; label: stri
       {/* the calm version: step under step, the picture right under its text */}
       <ol aria-label={label} className="grid gap-16 md:gap-20 stage:hidden">
         {items.map((s, i) => (
-          <li key={s.name} className="min-w-0">
+          <li key={s.name} className="min-w-0 print:break-inside-avoid">
             <div className="max-w-[34rem]">
               <p className="flex items-baseline gap-4">
                 <span aria-hidden className="font-num text-[3rem] leading-[.8] text-club-text">
