@@ -2628,7 +2628,14 @@
     "answered_no": "Annulé",
     "hintStaff": "Entraînements et matchs des 30 prochains jours avec les réponses.",
     "planTraining": "Planifier un entraînement",
-    "scheduleMatch": "Programmer un match"
+    "scheduleMatch": "Programmer un match",
+    "titleStaff": "Rendez-vous",
+    "official": "Calendrier",
+    "officialHint": "Les matchs du calendrier officiel apparaissent ici d’eux-mêmes.",
+    "scheduleOther": "Programmer un match hors calendrier",
+    "noneStaff": "Aucun rendez-vous dans les 30 prochains jours.",
+    "replies": "{yes, plural, one {# vient} other {# viennent}}, {no, plural, one {# ne vient pas} other {# ne viennent pas}}",
+    "noReplies": "pas encore de réponses"
   },
   "marks": {
     "title": "Jour de match : retenir des scènes",

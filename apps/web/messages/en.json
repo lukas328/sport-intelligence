@@ -2628,7 +2628,14 @@
     "answered_no": "Declined",
     "hintStaff": "Trainings and matches of the next 30 days with the replies.",
     "planTraining": "Plan a training",
-    "scheduleMatch": "Schedule a match"
+    "scheduleMatch": "Schedule a match",
+    "titleStaff": "Dates",
+    "official": "Schedule",
+    "officialHint": "Matches from the official schedule appear here by themselves.",
+    "scheduleOther": "Add a match outside the official schedule",
+    "noneStaff": "No dates in the next 30 days.",
+    "replies": "{yes} coming, {no} not coming",
+    "noReplies": "no replies yet"
   },
   "marks": {
     "title": "Matchday: keep scenes",

@@ -2628,7 +2628,14 @@
     "answered_no": "Abgesagt",
     "hintStaff": "Trainings und Spiele der nächsten 30 Tage mit den Zu- und Absagen.",
     "planTraining": "Training planen",
-    "scheduleMatch": "Spiel ansetzen"
+    "scheduleMatch": "Spiel ansetzen",
+    "titleStaff": "Termine",
+    "official": "Spielplan",
+    "officialHint": "Die Spiele aus dem offiziellen Spielplan stehen von selbst hier.",
+    "scheduleOther": "Spiel ausserhalb des Spielplans ansetzen",
+    "noneStaff": "Keine Termine in den nächsten 30 Tagen.",
+    "replies": "{yes, plural, one {# kommt} other {# kommen}}, {no, plural, one {# kommt nicht} other {# kommen nicht}}",
+    "noReplies": "noch keine Antworten"
   },
   "marks": {
     "title": "Spieltag: Szenen merken",
