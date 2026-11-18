@@ -1409,6 +1409,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/calibration/court-model": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Court Model
+         * @description The clickable court lines and points for the calibration dialog (court metres).
+         */
+        get: operations["court_model_v1_orgs__org_id__calibration_court_model_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/clips": {
         parameters: {
             query?: never;
@@ -4897,6 +4917,48 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/videos/{video_id}/calibration/clicks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Submit Court Clicks
+         * @description The court through the clicked lines: stored as the coach's court (user correction, also
+         *     offered to later videos of the hall), and the analysis runs again with it.
+         */
+        post: operations["submit_court_clicks_v1_orgs__org_id__videos__video_id__calibration_clicks_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org_id}/videos/{video_id}/calibration/clicks/check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Check Court Clicks
+         * @description The court through the clicked lines and points, nothing stored (for the live overlay).
+         *     422 clicks-too-few, clicks-disagree or clicks-unknown when they give no court.
+         */
+        post: operations["check_court_clicks_v1_orgs__org_id__videos__video_id__calibration_clicks_check_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/videos/{video_id}/calibration/confirm": {
         parameters: {
             query?: never;
@@ -5383,6 +5445,8 @@ export interface components {
             chunk_ms: number | null;
             /** Chunks */
             chunks: number | null;
+            /** @description the coach's latest line clicks, to edit them again */
+            court_clicks?: components["schemas"]["CourtClicksIn"] | null;
             /** Detector */
             detector: string | null;
             /** Elapsed S */
@@ -6065,6 +6129,13 @@ export interface components {
             /** Verification */
             verification?: string | null;
         };
+        /** ClickResidualOut */
+        ClickResidualOut: {
+            /** Max */
+            max: number;
+            /** Median */
+            median: number;
+        };
         /** Clip */
         Clip: {
             /** Event Id */
@@ -6542,6 +6613,121 @@ export interface components {
             title: string;
         };
         /**
+         * CourtClicksIn
+         * @description Clicks on court lines and named court points (handball_court.clicks: LINES, KEYPOINTS).
+         */
+        CourtClicksIn: {
+            /**
+             * Frame Ms
+             * @default 0
+             */
+            frame_ms?: number;
+            /**
+             * Lines
+             * @description line name (side_near, side_far, goal_left, goal_right, centre, six_left, six_right, nine_left, nine_right) -> two or more clicks on it
+             */
+            lines?: {
+                [key: string]: [
+                    number,
+                    number
+                ][];
+            };
+            /**
+             * Points
+             * @description named court point -> its click
+             */
+            points?: {
+                [key: string]: [
+                    number,
+                    number
+                ];
+            };
+            /**
+             * Space
+             * @default panorama
+             * @enum {string}
+             */
+            space?: "frame" | "panorama";
+        };
+        /** CourtClicksJobOut */
+        CourtClicksJobOut: {
+            /**
+             * Dropped
+             * @description clicks left out as off the line (a neighbouring line)
+             */
+            dropped?: components["schemas"]["DroppedClickOut"][];
+            /**
+             * Homography
+             * @description court metres -> image px (3x3)
+             */
+            homography: number[][];
+            /** Image Size */
+            image_size: [
+                number,
+                number
+            ];
+            /**
+             * Job Id
+             * Format: uuid
+             */
+            job_id: string;
+            /** @description distance of the clicks to the court */
+            residual_px: components["schemas"]["ClickResidualOut"];
+        };
+        /** CourtClicksOut */
+        CourtClicksOut: {
+            /**
+             * Dropped
+             * @description clicks left out as off the line (a neighbouring line)
+             */
+            dropped?: components["schemas"]["DroppedClickOut"][];
+            /**
+             * Homography
+             * @description court metres -> image px (3x3)
+             */
+            homography: number[][];
+            /** Image Size */
+            image_size: [
+                number,
+                number
+            ];
+            /** @description distance of the clicks to the court */
+            residual_px: components["schemas"]["ClickResidualOut"];
+        };
+        /** CourtLineOut */
+        CourtLineOut: {
+            /**
+             * Court
+             * @description polyline in court metres
+             */
+            court: [
+                number,
+                number
+            ][];
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "line" | "arc";
+        };
+        /**
+         * CourtModelOut
+         * @description The clickable court: x 0..40 m from the left goal line, y 0..20 m from the bottom side.
+         */
+        CourtModelOut: {
+            /** Lines */
+            lines: {
+                [key: string]: components["schemas"]["CourtLineOut"];
+            };
+            /** Points */
+            points: {
+                [key: string]: [
+                    number,
+                    number
+                ];
+            };
+        };
+        /**
          * DataRegion
          * @enum {string}
          */
@@ -6665,6 +6851,21 @@ export interface components {
             team_name: string | null;
             /** Updated At */
             updated_at: string | null;
+        };
+        /** DroppedClickOut */
+        DroppedClickOut: {
+            /**
+             * Index
+             * @description the click's index on its line; null for a point
+             */
+            index: number | null;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "point" | "line";
+            /** Name */
+            name: string;
         };
         /** EventIn */
         EventIn: {
@@ -14884,6 +15085,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["UrlOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    court_model_v1_orgs__org_id__calibration_court_model_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourtModelOut"];
                 };
             };
             /** @description Validation Error */
@@ -23164,6 +23396,78 @@ export interface operations {
                     "application/json": {
                         [key: string]: string;
                     };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    submit_court_clicks_v1_orgs__org_id__videos__video_id__calibration_clicks_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                video_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CourtClicksIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourtClicksJobOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    check_court_clicks_v1_orgs__org_id__videos__video_id__calibration_clicks_check_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                video_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CourtClicksIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourtClicksOut"];
                 };
             };
             /** @description Validation Error */

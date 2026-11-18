@@ -628,6 +628,9 @@ class AnalysisOut(ApiModel):
         "hall_tried lists earlier videos that did not fit",
     )
     hall: HallOut | None = None
+    court_clicks: CourtClicksIn | None = Field(
+        default=None, description="the coach's latest line clicks, to edit them again"
+    )
     error_code: str | None = Field(
         default=None,
         description="calibration, unreadable, too_short, timeout, stalled or generic",
@@ -658,6 +661,79 @@ class CalibrationIn(ApiModel):
     # "frame": image points in the video frame at frame_ms; "panorama": on the hall image
     space: Literal["frame", "panorama"] = "frame"
     frame_ms: int = Field(default=0, ge=0)
+
+
+Pixel = tuple[float, float]
+
+
+def _finite_px(p: Pixel) -> Pixel:
+    if not all(math.isfinite(v) and abs(v) <= 20_000 for v in p):
+        raise ValueError("image point too far outside the image")
+    return p
+
+
+class CourtClicksIn(ApiModel):
+    """Clicks on court lines and named court points (handball_court.clicks: LINES, KEYPOINTS)."""
+
+    # "panorama": on the hall image of the last analysis; "frame": the video frame at frame_ms
+    space: Literal["frame", "panorama"] = "panorama"
+    frame_ms: int = Field(default=0, ge=0)
+    lines: dict[str, list[Pixel]] = Field(
+        default_factory=dict,
+        max_length=12,
+        description="line name (side_near, side_far, goal_left, goal_right, centre, six_left, "
+        "six_right, nine_left, nine_right) -> two or more clicks on it",
+    )
+    points: dict[str, Pixel] = Field(
+        default_factory=dict, max_length=40, description="named court point -> its click"
+    )
+
+    @model_validator(mode="after")
+    def _sizes(self) -> CourtClicksIn:
+        for clicks in self.lines.values():
+            if len(clicks) > 12:
+                raise ValueError("at most 12 clicks per line")
+            for p in clicks:
+                _finite_px(p)
+        for p in self.points.values():
+            _finite_px(p)
+        return self
+
+
+class ClickResidualOut(ApiModel):
+    median: float
+    max: float
+
+
+class DroppedClickOut(ApiModel):
+    kind: Literal["point", "line"]
+    name: str
+    index: int | None = Field(description="the click's index on its line; null for a point")
+
+
+class CourtClicksOut(ApiModel):
+    homography: list[list[float]] = Field(description="court metres -> image px (3x3)")
+    image_size: tuple[int, int]
+    residual_px: ClickResidualOut = Field(description="distance of the clicks to the court")
+    dropped: list[DroppedClickOut] = Field(
+        default_factory=list, description="clicks left out as off the line (a neighbouring line)"
+    )
+
+
+class CourtClicksJobOut(CourtClicksOut):
+    job_id: uuid.UUID
+
+
+class CourtLineOut(ApiModel):
+    kind: Literal["line", "arc"]
+    court: list[tuple[float, float]] = Field(description="polyline in court metres")
+
+
+class CourtModelOut(ApiModel):
+    """The clickable court: x 0..40 m from the left goal line, y 0..20 m from the bottom side."""
+
+    lines: dict[str, CourtLineOut]
+    points: dict[str, tuple[float, float]]
 
 
 class PanoramaOut(ApiModel):
