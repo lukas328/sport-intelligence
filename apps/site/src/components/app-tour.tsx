@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { type CSSProperties, useCallback, useEffect, useRef, useState } from "react";
+import { HalfCourtLines } from "@/components/anlauf/court";
 import { ProductShot } from "@/components/product-shot";
 import { cn } from "@/lib/cn";
 import { productShot, type ShotName } from "@/lib/product-shots";
+import { DEFENCE, PLAY_BOX, PLAYERS, ballPath, passPath, percent, progressFor, stepAt } from "@/lib/tour-play";
 
 export interface TourItem {
   name: ShotName;
@@ -14,107 +16,258 @@ export interface TourItem {
   labels: Record<string, string>;
   /** the word on the match video («Dein Spiel») */
   lettering?: string;
+  /** the player's name in the play: the app's place the picture shows (Spiele, Szenen, Saison, Team) */
+  player: string;
 }
 
+/** each step gets this much scrolling on the stage */
+const STEP_VH = 75;
+
 /**
- * «So sieht es in der App aus» (BEFUNDE-2 L13, BEFUNDE-3 U5) as one story: on a wide screen the
- * picture stays while the four steps pass by on the left (Szene antippen, Szenen suchen, Saison,
- * Link ins Team). The first step starts level with the picture, and each step becomes the one
- * shown when its first line reaches the picture's top, so text and picture always line up; a step
- * is about two thirds of the screen high, and the numbers 1 to 4 beside the picture say where you
- * are (and jump there). The labels sit half over the picture's edge so it keeps its air. On the
- * phone, on a narrower screen and with reduced motion: the calm version, step under step, each
- * with its picture large. All four pictures are in the page from the start in the same cell, so
- * nothing moves the layout when they change.
+ * «So sieht es in der App aus» (BEFUNDE-2 L13, BEFUNDE-3 U5, BEFUNDE-4 U31) as one story. On a wide
+ * and tall enough screen a stage fills the screen and stays while you scroll through it: on the
+ * left a play on the half court (four players, the ball goes from one to the next) with the text of
+ * the step under it, on the right the picture, large. Text, picture and play follow one number,
+ * worked out from how far the stage has travelled through its track, so the text always belongs to
+ * the picture. A tap on a player jumps to his step. With reduced motion nothing flies or fades: the
+ * ball and the step simply change. On the phone and on smaller screens the calm version: step under
+ * step, each with its picture large.
  */
-export function AppTour({ items, label }: { items: TourItem[]; label: string }) {
+export function AppTour({ items, label, hint }: { items: TourItem[]; label: string; hint: string }) {
   const [at, setAt] = useState(0);
-  const steps = useRef<(HTMLLIElement | null)[]>([]);
+  const track = useRef<HTMLDivElement>(null);
+  const stage = useRef<HTMLDivElement>(null);
+  const n = items.length;
 
   useEffect(() => {
-    if (typeof IntersectionObserver === "undefined") return;
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const e of entries) {
-          if (!e.isIntersecting) continue;
-          const i = steps.current.indexOf(e.target as HTMLLIElement);
-          if (i >= 0) setAt(i);
-        }
-      },
-      // a thin line at the picture's top (the stage sticks at 12vh): the step crossing it is shown
-      { rootMargin: "-12% 0px -87% 0px" },
-    );
-    for (const el of steps.current) if (el) io.observe(el);
-    return () => io.disconnect();
-  }, []);
+    let raf = 0;
+    const measure = () => {
+      raf = 0;
+      const t = track.current;
+      const s = stage.current;
+      if (!t || !s || !s.offsetParent) return;
+      const run = t.offsetHeight - s.offsetHeight;
+      const moved = s.getBoundingClientRect().top - t.getBoundingClientRect().top;
+      setAt(stepAt(run > 0 ? moved / run : 0, n));
+    };
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(measure);
+    };
+    measure();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      cancelAnimationFrame(raf);
+    };
+  }, [n]);
 
-  const go = (i: number) => steps.current[i]?.scrollIntoView({ behavior: "smooth", block: "start" });
+  const go = useCallback(
+    (i: number) => {
+      const t = track.current;
+      const s = stage.current;
+      if (!t || !s) return;
+      const top = parseFloat(getComputedStyle(s).top) || 0;
+      const run = t.offsetHeight - s.offsetHeight;
+      const y = window.scrollY + t.getBoundingClientRect().top - top + progressFor(i, n) * run;
+      const calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      window.scrollTo({ top: Math.round(y) + 1, behavior: calm ? "auto" : "smooth" });
+    },
+    [n],
+  );
 
   return (
-    <div className="mt-8 grid grid-cols-1 motion-safe:xl:grid-cols-[minmax(0,17rem)_minmax(0,1fr)] motion-safe:xl:gap-x-8">
-      <ol aria-label={label} className="grid gap-16 md:gap-20 motion-safe:xl:block">
+    <div className="mt-8">
+      {/* the calm version: step under step, the picture right under its text */}
+      <ol aria-label={label} className="grid gap-16 md:gap-20 stage:hidden">
         {items.map((s, i) => (
-          <li
-            key={s.name}
-            ref={(el) => {
-              steps.current[i] = el;
-            }}
-            className="motion-safe:xl:min-h-[65vh] motion-safe:xl:scroll-mt-[12vh] motion-safe:xl:last:min-h-[80vh]"
-          >
-            <div className="min-w-0">
-              <div className={cn("max-w-[34rem] transition-opacity duration-300 motion-safe:xl:opacity-40", i === at && "motion-safe:xl:opacity-100")}>
-                <p className="flex items-baseline gap-4">
-                  <span aria-hidden className="font-num text-[3rem] leading-[.8] text-club-text">
-                    {i + 1}
-                  </span>
-                  <span className="text-[1.5rem] leading-tight font-bold md:text-[1.75rem]">{s.caption}</span>
-                </p>
-                <p className="mt-3 text-[1.125rem]">{s.text}</p>
-              </div>
-              {/* the calm version: the picture right under its step, large */}
-              <div className="mt-6 max-w-[52rem] motion-safe:xl:hidden">
-                <ProductShot name={s.name} alt={s.alt} labels={s.labels} lettering={s.lettering} sizes="(min-width: 900px) 832px, calc(100vw - 2rem)" />
-              </div>
+          <li key={s.name} className="min-w-0">
+            <div className="max-w-[34rem]">
+              <p className="flex items-baseline gap-4">
+                <span aria-hidden className="font-num text-[3rem] leading-[.8] text-club-text">
+                  {i + 1}
+                </span>
+                <span className="text-[1.5rem] leading-tight font-bold md:text-[1.75rem]">{s.caption}</span>
+              </p>
+              <p className="mt-3 text-[1.125rem]">{s.text}</p>
+            </div>
+            <div className="mt-6 max-w-[52rem]">
+              <ProductShot name={s.name} alt={s.alt} labels={s.labels} lettering={s.lettering} sizes="(min-width: 900px) 832px, calc(100vw - 2rem)" />
             </div>
           </li>
         ))}
       </ol>
-      {/* the stage on a wide screen: the picture of the step in view, the others faded out, each
-          no taller than the screen leaves room for; beside it the four numbers, the one shown
-          filled. The numbers stand in their own column, so the pictures' heights never move them */}
-      <div className="hidden motion-safe:xl:block">
-        <div className="sticky top-[12vh] grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3">
-          <div className="grid pl-[4.5rem] pr-[5rem]">
+
+      {/* the stage: wider than the page's column (94 per cent of the screen, up to 120 rem, never narrower than the column), a track
+          with one stretch of scrolling per step, and in it the part that stays */}
+      <div
+        ref={track}
+        data-tour-track
+        className="relative hidden stage:block stage:ml-[calc((100%-max(100%,min(100vw-4rem,94vw,120rem)))/2)] stage:w-[max(100%,min(100vw-4rem,94vw,120rem))]"
+        style={{ height: `calc(90vh + ${n * STEP_VH}vh)` }}
+      >
+        <div
+          ref={stage}
+          className="sticky top-[5vh] grid h-[90vh] grid-cols-[clamp(21rem,25vw,34rem)_minmax(0,1fr)] items-center gap-x-6"
+        >
+          <div className="grid content-center gap-8">
+            <Play items={items} at={at} go={go} label={label} hint={hint} />
+            <ol aria-label={label} className="grid">
+              {items.map((s, i) => (
+                <li
+                  key={s.name}
+                  aria-current={i === at ? "step" : undefined}
+                  className={cn(
+                    "[grid-area:1/1] transition-[opacity,translate] ease-out motion-reduce:transition-none",
+                    i === at ? "opacity-100 delay-150 duration-500" : "pointer-events-none translate-y-3 opacity-0 duration-200 motion-reduce:translate-y-0",
+                  )}
+                >
+                  <p className="flex items-baseline gap-4">
+                    <span aria-hidden className="font-num text-[3.5rem] leading-[.8] text-club-text">
+                      {i + 1}
+                    </span>
+                    <span className="text-[1.625rem] leading-tight font-bold min-[100rem]:text-[1.875rem]">{s.caption}</span>
+                  </p>
+                  <p className="mt-4 text-[1.1875rem]">{s.text}</p>
+                </li>
+              ))}
+            </ol>
+          </div>
+          {/* the pictures in one cell, the one of the step shown; each no taller than the stage
+              leaves room for, with air on both sides for the labels over its edges */}
+          <div className="grid h-full items-center px-[5rem]">
             {items.map((s, i) => {
               const { width, height } = productShot(s.name);
               return (
-                <div key={s.name} className={cn("grid [grid-area:1/1] place-items-start transition-opacity duration-500", i === at ? "opacity-100" : "invisible opacity-0")}>
-                  <div className="w-full" style={{ maxWidth: `min(100%, calc((80vh - 2.5rem) * ${(width / height).toFixed(3)}))` }}>
-                    <ProductShot name={s.name} alt={s.alt} labels={s.labels} lettering={s.lettering} edge sizes="(min-width: 1280px) 720px, 50vw" />
+                <div
+                  key={s.name}
+                  className={cn(
+                    "grid [grid-area:1/1] justify-items-center transition-[opacity,scale] ease-out motion-reduce:transition-none",
+                    i === at ? "scale-100 opacity-100 delay-100 duration-500" : "pointer-events-none scale-[.985] opacity-0 duration-300 motion-reduce:scale-100",
+                  )}
+                >
+                  <div className="w-full" style={{ maxWidth: `min(100%, calc((90vh - 4rem) * ${(width / height).toFixed(3)}))` }}>
+                    <ProductShot name={s.name} alt={s.alt} labels={s.labels} lettering={s.lettering} edge sizes="(min-width: 1280px) 1200px, 60vw" />
                   </div>
                 </div>
               );
             })}
           </div>
-          <div role="group" aria-label={label} className="grid gap-2">
-            {items.map((s, i) => (
-              <button
-                key={s.name}
-                type="button"
-                onClick={() => go(i)}
-                aria-label={`${i + 1}: ${s.caption}`}
-                aria-current={i === at ? "step" : undefined}
-                className={cn(
-                  "font-num grid size-11 cursor-pointer place-items-center border-2 border-ink text-[1.25rem] transition-colors",
-                  i === at ? "bg-ink text-ground" : "bg-transparent text-ink hover:bg-ink/10",
-                )}
-              >
-                {i + 1}
-              </button>
-            ))}
-          </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+/**
+ * The play: the half court in the tactics camera's colours (ink, cream lines), the four players as
+ * buttons (number and the app's place), the passes played so far as lines, the next ones dashed,
+ * and the ball (yellow) with the player of the step shown. When the step changes the ball flies
+ * along the passing lines and the player who gets it lights up.
+ */
+function Play({ items, at, go, label, hint }: { items: TourItem[]; at: number; go: (i: number) => void; label: string; hint: string }) {
+  const ball = useRef<HTMLSpanElement>(null);
+  const last = useRef(at);
+  const flight = useRef<Animation | null>(null);
+
+  useEffect(() => {
+    const from = last.current;
+    last.current = at;
+    const el = ball.current;
+    if (from === at || !el || typeof el.animate !== "function") return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const frames: Keyframe[] = ballPath(from, at).map(({ at: p, offset }) => ({ ...percent(p), offset }));
+    // still in the air (a fast scroll): go on from where the ball is, not from the last player
+    const prev = flight.current;
+    if (prev && prev.playState === "running") {
+      const { left, top } = getComputedStyle(el);
+      prev.cancel();
+      frames[0] = { left, top, offset: 0 };
+    }
+    const legs = Math.abs(at - from);
+    flight.current = el.animate(frames, { duration: Math.min(560 + (legs - 1) * 300, 1300), easing: "cubic-bezier(.45,.05,.3,1)" });
+  }, [at]);
+
+  useEffect(() => () => flight.current?.cancel(), []);
+
+  const [x0, y0, w, h] = PLAY_BOX;
+  return (
+    <div className="on-court border-2 border-ink bg-court shadow-[6px_6px_0_var(--ink)]">
+      <div role="group" aria-label={label} className="relative [container-type:inline-size]" style={{ aspectRatio: `${w} / ${h}` }}>
+        <svg aria-hidden viewBox={`${x0} ${y0} ${w} ${h}`} className="absolute inset-0 block h-full w-full">
+          <HalfCourtLines ink="var(--court-text)" opacity={0.42} />
+          {DEFENCE.map(([x, y], i) => (
+            <circle key={i} cx={x} cy={y} r={0.42} fill="none" stroke="var(--court-text)" strokeWidth={0.13} opacity={0.4} />
+          ))}
+          {PLAYERS.slice(0, -1).map((_, i) => {
+            const done = i < at;
+            return (
+              <g key={i} fill="none" strokeLinecap="round">
+                <path d={passPath(i)} stroke="var(--court-text)" strokeWidth={0.12} strokeDasharray="0.45 0.4" opacity={0.45} />
+                <path
+                  d={passPath(i)}
+                  pathLength={1}
+                  stroke="var(--attn)"
+                  strokeWidth={0.2}
+                  strokeDasharray="1"
+                  strokeLinecap="butt"
+                  className="transition-[stroke-dashoffset] duration-500 ease-out motion-reduce:transition-none"
+                  style={{ strokeDashoffset: done ? 0 : 1 }}
+                />
+              </g>
+            );
+          })}
+        </svg>
+
+        {items.map((s, i) => {
+          const on = i === at;
+          return (
+            <button
+              key={s.name}
+              type="button"
+              onClick={() => go(i)}
+              aria-label={`${i + 1} ${s.player}: ${s.caption}`}
+              aria-current={on ? "step" : undefined}
+              className="group absolute z-[1] flex -translate-x-1/2 -translate-y-6 cursor-pointer flex-col items-center px-1 pb-1 outline-offset-0"
+              style={percent(PLAYERS[i]!)}
+            >
+              <span className="grid size-12 place-items-center">
+                <span
+                  aria-hidden
+                  key={on ? "on" : "off"}
+                  style={{ borderRadius: "50%" } as CSSProperties}
+                  className={cn(
+                    "upright grid size-[2.125rem] place-items-center border-2 text-[1.0625rem] leading-none transition-[background-color,scale] duration-300 motion-reduce:transition-none",
+                    on
+                      ? "scale-110 border-court-text bg-club text-club-ink motion-safe:animate-[catch_1.1s_ease-out_both]"
+                      : "border-court-text bg-court text-court-text group-hover:bg-[#34363a]",
+                  )}
+                >
+                  {i + 1}
+                </span>
+              </span>
+              <span
+                className={cn(
+                  "upright -mt-1 bg-court/85 px-1 text-[1rem] leading-tight whitespace-nowrap transition-colors duration-300 motion-reduce:transition-none",
+                  on ? "text-attn motion-safe:delay-500" : "text-court-text group-hover:underline",
+                )}
+              >
+                {s.player}
+              </span>
+            </button>
+          );
+        })}
+
+        {/* the ball, with the player of the step shown (a little above and right of him) */}
+        <span aria-hidden className="pointer-events-none absolute z-[2] block size-0" style={percent(PLAYERS[at]!)} ref={ball}>
+          <span
+            style={{ borderRadius: "50%" }}
+            className="absolute top-[-1.55rem] left-[0.55rem] block size-[1.0625rem] border-2 border-ink bg-attn shadow-[0_0_0_2px_var(--court)]"
+          />
+        </span>
+      </div>
+      <p className="border-t-2 border-court-bar bg-court-bar px-4 py-2 text-[1rem] text-court-text">{hint}</p>
     </div>
   );
 }
