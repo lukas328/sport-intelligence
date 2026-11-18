@@ -56,7 +56,7 @@ export function DemoGuide({
       <Bundle goals={thing.goals} width={260} clean box={THING_BOX} label="" className="h-full" />
       <p className="absolute top-2 left-3 flex items-baseline gap-1.5">
         <b className="font-num text-[2.25rem] leading-none text-club-text">{thing.numeral}</b>
-        <span className="font-slant text-base text-ink-2">{thing.unit}</span>
+        <span className="upright text-base text-ink-2">{thing.unit}</span>
       </p>
     </div>,
     // 2 · one frame of the scene on the tactics camera
@@ -104,7 +104,7 @@ export function DemoGuide({
                 {pictures[i]}
               </span>
               <span className="mt-3 flex items-baseline gap-2">
-                <span aria-hidden className="font-num text-[1.75rem] leading-none text-club-text">
+                <span aria-hidden className="upright text-[1.5rem] leading-none text-club-text">
                   {i + 1}
                 </span>
                 <b className="text-[1.125rem] leading-tight underline decoration-2 underline-offset-4 group-hover:decoration-[3px]">

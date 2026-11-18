@@ -1,33 +1,31 @@
 "use client";
 
 import { FARBE, useShirt } from "@/components/kit";
-import { START_ACTION, byHandUrl } from "@/lib/site";
+import { START_ACTION } from "@/lib/site";
 
 /**
  * «Wie heisst dein Team?»: the main way in. One field, one button, the label above the field and
- * an example below. A plain GET form to the app's team preview (`/einstieg?q=`), no script, no
- * account; the app shows the team from the federation data and offers to save it. The federation
- * data covers teams in Switzerland only, so `after` says so and `manual` links straight to the way by
- * hand, without a search that finds nothing first.
+ * the hint below, in the same words as the app's search it leads to (U17). A plain GET form to the
+ * app's team preview (`/einstieg?q=`), no script, no account; the app shows the team from the
+ * federation data and offers to save it. The federation data covers teams in Switzerland only, so
+ * `after` says so; the way by hand is in the app's search, one step on (U16).
  */
 export function TeamField({
   id,
   label,
   button,
-  example,
+  hint,
   after,
-  manual,
   appLocale,
   onClub = false,
 }: {
   id: string;
   label: string;
   button: string;
-  example: string;
-  /** what «Zeigen» brings, right under the field (S7) */
+  /** «Vereinsname oder Ort, mindestens drei Buchstaben.» */
+  hint: string;
+  /** what the search brings, right under the hint (S7, U16) */
   after?: string;
-  /** the link to the way by hand, right after `after` */
-  manual?: string;
   appLocale: string;
   onClub?: boolean;
 }) {
@@ -46,7 +44,7 @@ export function TeamField({
           minLength={3}
           autoComplete="organization"
           enterKeyHint="search"
-          aria-describedby={`${id}-example`}
+          aria-describedby={`${id}-hint`}
           className="min-h-16 w-full min-w-0 flex-1 border-2 border-ink bg-paper px-4 text-[1.25rem] text-ink shadow-[0_0_0_2px_var(--club-ink)] outline-offset-4"
         />
         {chosen && shirt && <input type="hidden" name="farbe" value={FARBE[shirt]} />}
@@ -55,22 +53,10 @@ export function TeamField({
           {button}
         </button>
       </div>
-      <p id={`${id}-example`} className={`mt-2 text-[1.0625rem] ${onClub ? "text-club-ink" : "text-ink-2"}`}>
-        {example}
+      <p id={`${id}-hint`} className={`mt-2 text-[1.0625rem] ${onClub ? "text-club-ink" : "text-ink-2"}`}>
+        {hint}
       </p>
-      {after && (
-        <p className={`mt-2 max-w-[34rem] text-[1.0625rem] ${onClub ? "text-club-ink" : "text-ink-2"}`}>
-          {after}
-          {manual && (
-            <>
-              {" "}
-              <a href={byHandUrl(appLocale, chosen && shirt ? FARBE[shirt] : undefined)} className={`font-bold underline decoration-2 underline-offset-4 ${onClub ? "text-club-ink" : "text-ink"}`}>
-                {manual}
-              </a>
-            </>
-          )}
-        </p>
-      )}
+      {after && <p className={`mt-2 max-w-[34rem] text-[1.0625rem] ${onClub ? "text-club-ink" : "text-ink-2"}`}>{after}</p>}
     </form>
   );
 }

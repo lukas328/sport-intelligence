@@ -66,3 +66,37 @@ export function threeMatchesLater(): StoryCourt {
   }
   return { n: dots.filter((d) => d.ra).length, of: dots.length, dots };
 }
+
+export interface StoryAnswer {
+  /** goals conceded over the zone of the first thing, and all goals conceded */
+  n: number;
+  of: number;
+  first: number;
+  second: number;
+  /** who scored them, most first: shirt number and goals */
+  shooters: { number: number; n: number }[];
+  /** goals conceded after a fast break (the training tip of the week) */
+  fast: number;
+}
+
+/**
+ * Sunday: the question to the assistant («Kamen die wirklich immer über rechts?») answered from
+ * the demo match the way the app's assistant does it: the figures come from a query on the goals
+ * conceded with their shot spot (apps/api services/assistant.py), never typed in by hand.
+ */
+export function sundayAnswer(): StoryAnswer {
+  const goals = demoGoals(MATCH);
+  const zone = threeThings(goals)[0]!.zone;
+  const conceded = goals.filter((g) => g.team === "opp");
+  const wing = conceded.filter((g) => g.zone === zone);
+  const by = new Map<number, number>();
+  for (const g of wing) if (g.number != null) by.set(g.number, (by.get(g.number) ?? 0) + 1);
+  return {
+    n: wing.length,
+    of: conceded.length,
+    first: wing.filter((g) => g.period === 1).length,
+    second: wing.filter((g) => g.period !== 1).length,
+    shooters: [...by].map(([number, n]) => ({ number, n })).sort((a, b) => b.n - a.n || a.number - b.number),
+    fast: conceded.filter((g) => g.zone === "gs").length,
+  };
+}

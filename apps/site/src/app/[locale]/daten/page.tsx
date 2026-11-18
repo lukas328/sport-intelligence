@@ -3,15 +3,24 @@ import Link from "next/link";
 import { KitScope } from "@/components/kit";
 import { MailLine } from "@/components/mail-line";
 import { ProductShot } from "@/components/product-shot";
+import { ConsentArt } from "@/components/head-art";
 import { PageHead, SectionHead, Updated } from "@/components/wurf-head";
 import { messages, type Locale } from "@/lib/i18n";
+import type { Messages } from "@/messages/de";
 import { pageMeta } from "@/lib/seo";
+import { PAGE_UPDATED } from "@/lib/site";
 
 type Props = { params: Promise<{ locale: Locale }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   return pageMeta(locale, "daten", messages(locale).seo.data.title, messages(locale).seo.data.description);
+}
+
+/** The four points of the consent, by their names (the part before the colon). */
+function consentPoints(t: Messages["data"]): string[] {
+  const list = t.sections.find((s) => "items" in s && s.items);
+  return list && "items" in list && list.items ? list.items.map((x) => x.split(/\s?:/)[0]!) : [];
 }
 
 /** For parents, players and the board: what happens with the video, how consent works. */
@@ -21,9 +30,12 @@ export default async function Data({ params }: Props) {
   const t = m.data;
   return (
     <KitScope>
-      <PageHead kick={t.kick} title={t.head} lead={t.lead}>
-        <Updated locale={locale} />
-      </PageHead>
+      <PageHead
+        kick={t.kick}
+        title={t.head}
+        lead={t.lead}
+        aside={<ConsentArt title={t.card.title} note={t.card.note} yes={t.card.yes} no={t.card.no} items={consentPoints(t)} />}
+      />
       <div className="wrap">
         <div className="mt-12 grid grid-cols-1 gap-x-16 md:grid-cols-2">
           {t.sections.map((s, i) => (
@@ -68,6 +80,7 @@ export default async function Data({ params }: Props) {
             </Link>
           </div>
         </section>
+        <Updated locale={locale} date={PAGE_UPDATED.daten} />
       </div>
     </KitScope>
   );

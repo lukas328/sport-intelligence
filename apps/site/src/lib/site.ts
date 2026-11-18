@@ -8,10 +8,22 @@ export const STATUS_URL = process.env.NEXT_PUBLIC_STATUS_URL ?? "";
 export const SITE_NAME = "Handball Intelligence";
 
 /**
- * Date of the last content review of the core pages («Stand» on the page, lastmod in the sitemap,
- * dateModified in structured data). Change it when the texts are reviewed again.
+ * Date of the last content review of the core pages (lastmod in the sitemap, dateModified in
+ * structured data, the date of llms.txt and «Fakten»). Change it when the texts are reviewed again.
  */
 export const SITE_UPDATED = "2026-11-17";
+
+/**
+ * The pages that show «Stand» under their content (BEFUNDE-3 U26): only where a reader needs to
+ * know how current the page is, each with the day its text was last reviewed. Marketing pages
+ * carry no date; a guide carries its own (content/ratgeber `updated`).
+ */
+export const PAGE_UPDATED = {
+  /** Daten und Einwilligung: for parents and the board */
+  daten: "2026-11-17",
+  /** Fakten auf einen Blick: the site's statements in one table, the same as llms.txt */
+  fakten: SITE_UPDATED,
+} as const;
 
 /**
  * The prices of packages/plans go into structured data as offers. The website describes the

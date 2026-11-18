@@ -36,6 +36,20 @@ function lines(text: string) {
  * Everything longer lives in the guide «Handballspiel filmen» and the help «Spiel richtig filmen».
  * The rules are the steps of the HowTo, word for word.
  */
+/** A sentence with links in it: each {name} becomes its link, the words around it stay text. */
+function sentence(template: string, links: Record<string, [string, string]>) {
+  return template.split(/(\{\w+\})/).map((part, i) => {
+    const link = links[part.slice(1, -1)];
+    return link ? (
+      <Link key={i} href={link[0]} className="font-bold underline decoration-2 underline-offset-4 hover:decoration-[3px]">
+        {link[1]}
+      </Link>
+    ) : (
+      part
+    );
+  });
+}
+
 export default async function Filming({ params }: Props) {
   const { locale } = await params;
   const m = messages(locale);
@@ -81,7 +95,7 @@ export default async function Filming({ params }: Props) {
                   </span>
                   <div>
                     <h3 className="flex items-baseline gap-3 text-[1.5rem] leading-tight md:text-[1.75rem]">
-                      <span aria-hidden className="font-num text-club-text">
+                      <span aria-hidden className="upright text-club-text">
                         {i + 1}
                       </span>
                       {r.title}
@@ -144,23 +158,14 @@ export default async function Filming({ params }: Props) {
           <div className="mt-2 max-w-[48rem]">
             <Faq items={t.more.map((f) => ({ q: f.q, a: <p>{fmt(f.a, files)}</p> }))} />
           </div>
-          <ul className="mt-6 flex flex-col gap-x-8 md:flex-row md:flex-wrap">
-            <li>
-              <Link href={`/${locale}/ratgeber/handballspiel-filmen/`} className="link">
-                {t.guideLink}
-              </Link>
-            </li>
-            <li>
-              <Link href={`/${locale}/hilfe/aufnahme/`} className="link">
-                {t.helpLink}
-              </Link>
-            </li>
-            <li>
-              <Link href={`/${locale}/rechner/speicher/`} className="link">
-                {t.storageLink}
-              </Link>
-            </li>
-          </ul>
+          {/* the deeper pages in one sentence (U28) */}
+          <p className="measure mt-6">
+            {sentence(t.moreLine, {
+              guide: [`/${locale}/ratgeber/handballspiel-filmen/`, t.guideLink],
+              help: [`/${locale}/hilfe/aufnahme/`, t.helpLink],
+              storage: [`/${locale}/rechner/speicher/`, t.storageLink],
+            })}
+          </p>
         </section>
 
         {/* 5 · the notice: readable from three metres, one A4 page, no hyphenation, a line to fill in by hand */}

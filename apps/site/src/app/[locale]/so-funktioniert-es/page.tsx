@@ -2,12 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import type { CSSProperties } from "react";
 import { AppTour } from "@/components/app-tour";
-import { ProductShot } from "@/components/product-shot";
+import { StepPicture } from "@/components/step-picture";
 import { Reveal } from "@/components/reveal";
 import { Honest } from "@/components/honest";
 import { KitScope, StartLink } from "@/components/kit";
 import { JsonLd } from "@/components/json-ld";
-import { PageHead, SectionHead, Updated } from "@/components/wurf-head";
+import { StepsArt } from "@/components/head-art";
+import { PageHead, SectionHead } from "@/components/wurf-head";
 import { graph, howTo } from "@/lib/schema";
 import { APP_LOCALE, messages, type Locale } from "@/lib/i18n";
 import { pageMeta } from "@/lib/seo";
@@ -15,17 +16,11 @@ import { pageMeta } from "@/lib/seo";
 type Props = { params: Promise<{ locale: Locale }> };
 
 /**
- * Product pictures (public/product, scripts/product-shots): one per step after filming, and under
- * «So sieht es in der App aus» the same pictures as on the start page plus sharing.
+ * Product pictures (public/product, scripts/product-shots): one per step (components/step-picture,
+ * the same set as on the start page), and under «So sieht es in der App aus» the same pictures as
+ * on the start page plus sharing.
  */
-const STEPS = ["step-film", "step-upload", "step-check", "step-result"] as const;
 const SHOTS = ["get-video", "get-search", "get-season", "share"] as const;
-
-/** K9, L9, L11: each step with its picture, one style with the start page: the hall, the phone
- * filming it, then the app in front of the same hall; the text says the rest. */
-function StepPicture({ i, alt }: { i: number; alt: string }) {
-  return <ProductShot name={STEPS[i]!} alt={alt} labels={{}} sizes="(min-width: 768px) 26rem, calc(100vw - 2rem)" />;
-}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
@@ -50,9 +45,7 @@ export default async function How({ params }: Props) {
         )}
       />
       <Reveal />
-      <PageHead kick={t.title} title={t.head} lead={t.lead}>
-        <Updated locale={locale} />
-      </PageHead>
+      <PageHead kick={t.title} title={t.head} lead={t.lead} aside={<StepsArt steps={t.steps} label={t.stepsLabel} />} />
       <div className="wrap">
         <ol className="mt-12">
           {t.steps.map((s, i) => (
@@ -74,7 +67,7 @@ export default async function How({ params }: Props) {
                 )}
               </div>
               <div data-reveal style={{ "--d": 1 } as CSSProperties} className="col-span-2 mt-6 md:col-span-1 md:mt-0">
-                <StepPicture i={i} alt={s.alt} />
+                <StepPicture step={i} alt={s.alt} />
               </div>
             </li>
           ))}

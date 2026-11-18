@@ -57,6 +57,20 @@ body {
   background: transparent;
 }
 
+/*
+ * The steps (U1, U3) and the phone picture of the app: one moment of the app cut out flat and
+ * large on the app's cloth, with the app's own edge (2 px ink, square, no shadow: the app has
+ * none), so its words read on a phone. `S.cut` places one.
+ */
+.cut {
+  position: absolute;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+}
+.cut > .screen {
+  background: var(--paper);
+}
+
 /* the Keil: the club colour (the demo club's green) from a slanted edge down to the bottom, like the heads on the site */
 .keil {
   position: absolute;
@@ -222,11 +236,4 @@ body {
   border-radius: 50%;
   background: #fff;
   transform: translate(-50%, -50%);
-}
-
-/* the hall as a backdrop of a step: the same blurred recording, a little darker, in the site's green */
-#stage.hall {
-  background:
-    linear-gradient(180deg, rgb(16 104 74 / 0.08), rgb(9 46 33 / 0.55)),
-    url("assets/halle.webp") center / cover no-repeat;
 }
