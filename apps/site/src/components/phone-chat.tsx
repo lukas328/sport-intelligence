@@ -11,9 +11,9 @@ const CLOTH = "#e9e3d8";
  * looks when the coach shares a collection. A neutral phone (no maker's mark) and a general
  * messenger (bubbles on a cloth, the own ones green), not any one app's design or name. The link
  * preview is the app's real preview picture of the collection (apps/web lib/share/og-image.tsx,
- * rendered for «Aussen rechts zumachen», 4 scenes) with the real title and description; the
- * earlier messages are blurred, so the chat looks lived in without anything to read. Players
- * appear by their shirt numbers only. Everything inside is one picture for screen readers.
+ * rendered for «Aussen rechts zumachen», 4 scenes) with the real title and description; one earlier
+ * message, as sharp as the rest, so the chat looks lived in (U21). Players appear by their shirt
+ * numbers only. Everything inside is one picture for screen readers.
  */
 export function PhoneChat({ t, locale }: { t: Messages["home"]["chat"]; locale: string }) {
   return (
@@ -64,14 +64,11 @@ export function PhoneChat({ t, locale }: { t: Messages["home"]["chat"]; locale: 
               backgroundSize: "14px 14px",
             }}
           >
-            {/* earlier messages: there, but blurred */}
-            <div className="flex flex-col gap-1.5 opacity-80 [filter:blur(2.4px)]">
-              {t.filler.map((f, i) => (
-                <div key={i} className={i === 1 ? "ml-auto max-w-[70%] rounded-[0.9rem] rounded-tr-[0.3rem] px-2.5 py-1.5" : "max-w-[78%] rounded-[0.9rem] rounded-tl-[0.3rem] bg-white px-2.5 py-1.5"} style={i === 1 ? { backgroundColor: OWN } : undefined}>
-                  {i !== 1 && <b className="block text-[0.75rem] text-[#9a4b1d]">{f.from}</b>}
-                  <span className="block text-[0.8125rem] leading-snug">{f.text}</span>
-                </div>
-              ))}
+            {/* one earlier message, sharp like the rest (U21): the chat is lived in, nothing looks broken */}
+            <div className="max-w-[78%] rounded-[0.9rem] rounded-tl-[0.3rem] bg-white px-2.5 py-1.5 shadow-[0_1px_0_rgb(0_0_0/.08)]">
+              <b className="block text-[0.75rem] text-[#9a4b1d]">{t.earlier.from}</b>
+              <span className="block text-[0.8125rem] leading-snug">{t.earlier.text}</span>
+              <span className="block text-right text-[0.6875rem] text-[#5f6368]">{t.earlier.time}</span>
             </div>
             <span className="mx-auto my-1 rounded-[999px] bg-white/85 px-3 py-0.5 text-[0.75rem] font-semibold text-[#5f6368] shadow-[0_1px_0_rgb(0_0_0/.06)]">{t.day}</span>
 

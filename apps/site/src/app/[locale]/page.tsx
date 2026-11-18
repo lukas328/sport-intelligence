@@ -2,10 +2,9 @@ import type { Metadata } from "next";
 import type { CSSProperties } from "react";
 import Link from "next/link";
 import plans from "@handball/plans";
-import { CameraLegend, DemoCamera } from "@/components/demo-camera";
+import { AskCard } from "@/components/ask-card";
 import { HeroFilm } from "@/components/hero-film";
 import { ProductShot } from "@/components/product-shot";
-import { StepPicture } from "@/components/step-picture";
 import { JsonLd } from "@/components/json-ld";
 import { DemoLink, KitScope, StartLink } from "@/components/kit";
 import { Reveal } from "@/components/reveal";
@@ -17,7 +16,7 @@ import { APP_LOCALE, fmt, messages, type Locale } from "@/lib/i18n";
 import { pageMeta } from "@/lib/seo";
 import { graph, organization, softwareApplication, webPage, website } from "@/lib/schema";
 import { SITE_UPDATED } from "@/lib/site";
-import { saturday, threeMatchesLater } from "@/lib/story";
+import { saturday, sundayAnswer, threeMatchesLater } from "@/lib/story";
 import { demoView } from "@/lib/things";
 
 type Props = { params: Promise<{ locale: Locale }> };
@@ -28,13 +27,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 /**
- * The start page as one week of an invented team (docs/ux-test/livegang/BEFUNDE-2.md, W5, W22):
- * the promise with the three things turning in a card; Saturday 7 pm, lost with only a feeling;
- * Saturday 10 pm, the three things and the real app on a computer; one of the goals from above;
- * how you get there; Tuesday, four scenes in the team chat; three matches later the right wing is
- * closed, as a green block across the page. Then the video in the club, the price and the team
- * field. The match is the demo match, so its numbers are the demo's. The colours are the
- * website's own (cream, green, ink); the demo club plays in that green (S11).
+ * The start page as one week of an invented team (BEFUNDE-2 W5, W22; BEFUNDE-3 U6, U18): not a
+ * video platform but what to change in training, as one thread: a pattern found, a question to
+ * the assistant, a training tip and the scenes for the team, checked three matches later. The
+ * promise with the three things turning in a card; Saturday 7 pm, lost with only a feeling;
+ * Saturday 10 pm, the three things and the real app on a computer; Sunday, the question to the
+ * assistant; how you get there in three lines; Tuesday, the training tip and four scenes in the
+ * team chat; three matches later the right wing is closed, as a green block across the page.
+ * Then the video in the club, the price and the team field. About 600 words (U18); the tactics
+ * camera lives on the demo page, the step pictures on «So funktioniert es». The match is the demo
+ * match, so its numbers are the demo's, and the page says once, in the hero, that it is invented
+ * (U25). The colours are the website's own (cream, green, ink); the demo club plays in that green.
  */
 export default async function Home({ params }: Props) {
   const { locale } = await params;
@@ -43,23 +46,18 @@ export default async function Home({ params }: Props) {
   const v = demoView(m);
   const sat = saturday();
   const later = threeMatchesLater();
+  const answer = sundayAnswer();
   const team = plans.plans.find((p) => p.plan === "team")!;
   const app = APP_LOCALE[locale];
   const wing = fmt(m.things.concededText, {
     zone: m.things.zones[sat.zone as keyof typeof m.things.zones],
   });
-  // on the start page each thing leads to its scenes in the demo
+  // on the start page each thing leads to its scenes in the demo; the halves stand in the hero (U18)
   const things = v.things.map((x) => ({
     ...x,
+    sub: "",
     scenesLabel: fmt(m.things.scenesLink, { n: x.goals.length }),
   }));
-  const legend = {
-    own: v.own,
-    opp: v.opp,
-    ref: m.camera.legendRef,
-    number: m.camera.legendNumber,
-    ball: m.camera.legendBall,
-  };
   return (
     <KitScope>
       <JsonLd
@@ -77,8 +75,10 @@ export default async function Home({ params }: Props) {
         aria-labelledby="hero"
         className="on-club relative overflow-hidden bg-club text-club-ink shadow-[inset_0_0_0_2px_var(--club-edge)] [clip-path:polygon(0_0,100%_0,100%_97%,0_100%)] md:[clip-path:polygon(0_0,100%_0,100%_calc(100%-4rem),0_100%)]"
       >
-        <div className="wrap grid grid-cols-1 items-center gap-10 pt-8 pb-16 md:pt-14 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:gap-14 lg:pb-28">
-          <div className="min-w-0">
+        {/* on the phone: headline, film, then the lead and the way in (U22); from lg the film
+            stands on the right across both rows */}
+        <div className="wrap grid grid-cols-1 gap-x-14 pt-8 pb-16 md:pt-14 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:grid-rows-[auto_1fr] lg:pb-28">
+          <div className="min-w-0 lg:col-start-1 lg:row-start-1">
             <p className="text-base font-semibold md:text-[1.0625rem]">{t.kick}</p>
             <h1
               id="hero"
@@ -86,30 +86,8 @@ export default async function Home({ params }: Props) {
             >
               {t.title}
             </h1>
-            <p className="mt-5 max-w-[34rem] text-[1.1875rem] leading-normal font-medium md:mt-6 md:text-[1.375rem]">
-              {t.lead}
-            </p>
-            {/* one main action: the team search, with what it brings right under it (S7) */}
-            <div className="mt-8">
-              <TeamField
-                id="team"
-                label={t.teamLabel}
-                button={t.teamButton}
-                example={t.teamExample}
-                after={t.teamAfter}
-                manual={t.teamManual}
-                appLocale={app}
-                onClub
-              />
-            </div>
-            <p className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-1 text-[1.0625rem] font-medium">
-              <DemoLink href={`/${locale}/demo/`} className="link text-club-ink">
-                {m.cta.demo}
-              </DemoLink>
-              <span>{fmt(t.price, { price: team.price_chf_month, days: team.trial_days })}</span>
-            </p>
           </div>
-          <div className="min-w-0 lg:pl-4">
+          <div className="mt-8 min-w-0 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mt-0 lg:self-center lg:pl-4">
             <div className="mx-auto max-w-[32.5rem] lg:mr-0">
               <HeroFilm
                 things={v.things}
@@ -119,10 +97,30 @@ export default async function Home({ params }: Props) {
                   label: fmt(t.film.label, { n: sat.n, of: sat.of }),
                   count: fmt(t.film.count, { n: sat.n, of: sat.of }),
                   score: `${v.own} ${sat.score} ${v.opp}`,
-                  note: t.heroNote,
+                  note: t.example,
                 }}
               />
             </div>
+          </div>
+          <div className="mt-8 min-w-0 lg:col-start-1 lg:row-start-2 lg:mt-0">
+            <p className="max-w-[34rem] text-[1.1875rem] leading-normal font-medium md:mt-6 md:text-[1.375rem]">
+              {t.lead}
+            </p>
+            {/* one main action, the team search; one second, the demo match (U16) */}
+            <div className="mt-8">
+              <TeamField
+                id="team"
+                label={t.teamLabel}
+                button={t.teamButton}
+                hint={t.teamHint}
+                after={t.teamAfter}
+                appLocale={app}
+                onClub
+              />
+            </div>
+            <DemoLink href={`/${locale}/demo/`} className="link mt-4 text-[1.0625rem] font-medium text-club-ink">
+              {m.cta.demo}
+            </DemoLink>
           </div>
         </div>
       </section>
@@ -177,101 +175,57 @@ export default async function Home({ params }: Props) {
               labels={{}}
               sizes="(min-width: 1216px) 1152px, calc(100vw - 2rem)"
               framed={false}
-              caption={
-                <>
-                  {t.getMore} <span className="text-ink-2">{t.shotNote}</span>
-                </>
-              }
+              caption={t.getMore}
             />
           </div>
         </section>
 
-        {/* 4 · one of the nine from above: the demo to touch (W12), in the site's colours (S10) */}
-        <section aria-labelledby="demo" className="mt-20 md:mt-28">
-          <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.45fr)] lg:gap-12">
+        {/* 4 · Sunday: ask your matches (U6), the assistant's answer with its source */}
+        <section aria-labelledby="ask" className="mt-20 md:mt-28">
+          <div className="grid grid-cols-1 items-center gap-10 md:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] md:gap-14">
             <div data-reveal className="min-w-0">
-              <p className="text-[1.0625rem] font-semibold text-ink-2">{t.demoKick}</p>
-              <h2 id="demo" className="mt-2 text-[2.25rem] md:text-[3rem]">
-                {fmt(t.demoTitle, { n: sat.n })}
+              <When>{t.askWhen}</When>
+              <h2 id="ask" className="mt-4 text-[2.25rem] md:text-[3rem]">
+                {t.askTitle}
               </h2>
-              <p className="mt-4">{t.demoText}</p>
-              <div className="mt-6 hidden lg:block">
-                <CameraLegend legend={legend} list />
-              </div>
-              <DemoLink href={`/${locale}/demo/`} className="btn btn-ink mt-8 max-lg:hidden">
-                {t.demoLink}
-              </DemoLink>
+              <p className="mt-4 text-[1.1875rem]">{t.askText}</p>
             </div>
             <div data-reveal style={{ "--d": 1 } as CSSProperties} className="min-w-0">
-              <DemoCamera
-                view="halfB"
-                desktopWidth={720}
-                shotLabel={false}
-                ballLine={false}
-                scene={v.scene}
-                text={{
-                  label: m.camera.label,
-                  pause: m.camera.pause,
-                  play: m.camera.play,
-                  notFound: m.camera.notFound,
-                  noBall: m.camera.noBall,
-                  caption: v.scene.label,
-                }}
+              <AskCard
+                t={t.ask}
+                a={answer}
+                team={`${v.own} ${t.chat.group}`}
+                opp={v.opp}
+                scenesHref={`/${locale}/demo/#things`}
               />
-              <div className="lg:hidden">
-                <CameraLegend legend={legend} />
-                <DemoLink href={`/${locale}/demo/`} className="btn btn-ink mt-6">
-                  {t.demoLink}
-                </DemoLink>
-              </div>
             </div>
           </div>
         </section>
 
-        {/* 5 · how you get there: film, upload, check (W9, W20) */}
+        {/* 5 · how you get there: three short lines, the pictures live on «So funktioniert es» (U18) */}
         <section aria-labelledby="steps" className="mt-20 md:mt-28">
-          <div data-reveal className="max-w-[40rem]">
-            <p className="text-[1.0625rem] font-semibold text-ink-2">{t.stepsKick}</p>
-            <h2 id="steps" className="mt-2 text-[2.25rem] md:text-[3.5rem]">
-              {t.stepsTitle}
-            </h2>
-            <p className="mt-3 text-[1.1875rem] md:text-[1.3125rem]">{t.stepsLead}</p>
-          </div>
-          {/* one look for the three (S11): the same frame and shape, flat, the words under each
-              picture; picture, points, title and text in rows shared by the three, so they line up */}
-          <ol className="mt-10 grid grid-cols-1 gap-12 md:grid-cols-3 md:grid-rows-[auto_auto_auto_1fr] md:gap-x-8 md:gap-y-0">
-            {t.steps.map((s, i) => (
+          <p className="text-[1.0625rem] font-semibold text-ink-2">{t.stepsKick}</p>
+          <h2 id="steps" className="mt-2 text-[2.25rem] md:text-[3rem]">
+            {t.stepsTitle}
+          </h2>
+          <ol className="mt-6 grid grid-cols-1 border-t-2 border-ink md:grid-cols-3 md:gap-x-8">
+            {t.steps.map((x, i) => (
               <li
-                key={s.title}
-                data-reveal
-                style={{ "--d": i } as CSSProperties}
-                className="flex flex-col md:row-span-4 md:grid md:grid-rows-subgrid"
+                key={x.title}
+                className="flex items-baseline gap-4 border-b border-rule py-4 md:border-b-0 md:py-5"
               >
-                {/* the steps' pictures (U1): the same set as «So funktioniert es», small here */}
-                <StepPicture step={i} alt={s.alt} size="small" />
-                <ul className="mt-4 grid gap-1.5 pl-5 text-[1.0625rem] leading-snug font-semibold [list-style:square]">
-                  {s.points.map((x) => (
-                    <li key={x}>{x}</li>
-                  ))}
-                </ul>
-                <div className="mt-5 flex items-baseline gap-4">
-                  <span aria-hidden className="font-num text-[3.5rem] leading-[.8] text-club-text">
-                    {i + 1}
-                  </span>
-                  <h3 className="text-[1.5rem] leading-tight">{s.title}</h3>
-                </div>
-                <p className="mt-3">{s.text}</p>
+                <span aria-hidden className="font-num text-[2.5rem] leading-[.8] text-club-text">
+                  {i + 1}
+                </span>
+                <p>
+                  <b>{x.title}:</b> {x.text}
+                </p>
               </li>
             ))}
           </ol>
-          <div className="mt-6 flex flex-wrap gap-x-8">
-            <Link href={`/${locale}/so-funktioniert-es/`} className="link">
-              {m.cta.how}
-            </Link>
-            <Link href={`/${locale}/aufnahme/`} className="link">
-              {m.cta.filming}
-            </Link>
-          </div>
+          <Link href={`/${locale}/so-funktioniert-es/`} className="link mt-2">
+            {m.cta.how}
+          </Link>
         </section>
 
         {/* 6 · Tuesday: four scenes in the team chat (W26, W28) */}
@@ -282,7 +236,7 @@ export default async function Home({ params }: Props) {
               <h2 id="share" className="mt-4 text-[2.25rem] md:text-[3rem]">
                 {t.shareTitle}
               </h2>
-              <p className="mt-4 text-[1.1875rem]">{t.shareText}</p>
+              <p className="mt-4 text-[1.1875rem]">{fmt(t.shareText, { fast: answer.fast })}</p>
               <ul className="mt-6 border-t-2 border-ink">
                 {t.sharePoints.map((x) => (
                   <li key={x} className="flex gap-3 border-b border-rule py-3 font-semibold">
@@ -323,7 +277,6 @@ export default async function Home({ params }: Props) {
           <div data-reveal style={{ "--d": 1 } as CSSProperties} className="mt-12 md:mt-16">
             <BeforeAfter t={t} before={sat} after={later} zone={wing} />
           </div>
-          <p className="mt-10 text-base">{t.afterNote}</p>
         </div>
       </section>
 
@@ -399,9 +352,7 @@ export default async function Home({ params }: Props) {
               id="team-end"
               label={t.teamLabel}
               button={t.teamButton}
-              example={t.teamExample}
-              after={t.teamAfter}
-              manual={t.teamManual}
+              hint={t.teamHint}
               appLocale={app}
             />
             <DemoLink href={`/${locale}/demo/`} className="link mt-4">

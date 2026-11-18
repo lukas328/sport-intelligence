@@ -84,7 +84,7 @@ export function Things({
                   <span className="upright text-[1.25rem] text-ink-2">{t.unit}</span>
                 </span>
                 <span className="mt-3 block text-[1.375rem] leading-tight font-bold">{t.text}</span>
-                <span className="mt-1 block text-[1.0625rem] text-ink-2">{t.sub}</span>
+                {t.sub && <span className="mt-1 block text-[1.0625rem] text-ink-2">{t.sub}</span>}
               </span>
               <span className="block w-full self-start md:mt-5">
                 <span className="hidden md:block">
