@@ -10,7 +10,7 @@
  * helpers; everything it draws is an SVG string in pixels.
  */
 (function () {
-  const C = {
+  const C0 = {
     paper: "#f7f6f2",
     ground: "#eceae5",
     wall: "#e3dfd6",
@@ -31,7 +31,9 @@
   /** a curve: points of f(t) for t from a to b */
   const curve = (f, a, b, n = 40) => Array.from({ length: n + 1 }, (_, i) => f(a + ((b - a) * i) / n));
 
-  function view({ eye, look, focal, cx, cy, line = 1 }) {
+  function view({ eye, look, focal, cx, cy, line = 1, colors }) {
+    // `colors` overrides the palette (the steps draw the hall on their dark ground)
+    const C = { ...C0, ...colors };
     const fwd = norm(sub(look, eye));
     const right = norm(cross(fwd, [0, 0, 1]));
     const up = cross(right, fwd);
@@ -63,7 +65,7 @@
     function nine(side) {
       const gx = side < 0 ? 0 : 40;
       const s = side < 0 ? 1 : -1;
-      const a = Math.acos(Math.min(1, 8.5 / 9));
+      const a = Math.asin(Math.min(1, 8.5 / 9));
       return [
         ...curve((t) => [gx + s * 9 * Math.cos(t), 8.5 - 9 * Math.sin(t), 0], a, 0),
         ...curve((t) => [gx + s * 9 * Math.cos(t), 11.5 + 9 * Math.sin(t), 0], 0, a),
@@ -113,5 +115,5 @@
     return { P, px, poly, path, curve, zone, nine, goal, hall, C };
   }
 
-  window.HALL = { view, C, curve };
+  window.HALL = { view, C: C0, curve };
 })();
