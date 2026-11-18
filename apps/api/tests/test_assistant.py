@@ -274,6 +274,9 @@ def test_number_validator() -> None:
     assert invented_numbers("in 2 Halbzeiten und 60 Minuten", allowed) == []
     assert invented_numbers("13 Tore", allowed) == ["13"]
     assert invented_numbers("Differenz -0.2", numbers_from({"difference": -0.2})) == []
+    # the digit groups of an id are no numbers (a UUID with "-4711-" let an invented 4711 pass)
+    ids = numbers_from({"match_id": "1f2e3d4c-4711-4abc-8def-0123456789ab", "goals": 18})
+    assert invented_numbers("Wert: 18. Dazu 4711 Extra.", ids) == ["4711"]
     assert Usage(1_000_000, 1_000_000).cost_usd("claude-opus-5-5") == 24.0
 
 

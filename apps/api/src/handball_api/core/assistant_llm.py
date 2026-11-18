@@ -23,6 +23,9 @@ MODEL = "claude-opus-5-5"
 # list prices in USD per million tokens (input, output, cache read, cache write)
 PRICES_USD = {MODEL: (4.0, 20.0, 0.20, 5.0)}
 _NUM = re.compile(r"(?<![\w.])-?\d+(?:[.,]\d+)?")
+# ids in tool results are no numbers: the digit groups of a UUID ("...-4711-...") would otherwise
+# allow an invented "4711" by chance (about one UUID in 4000; a flaky test, CI 18.11.)
+_UUID = re.compile(r"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}")
 
 
 @dataclass
@@ -139,7 +142,7 @@ def numbers_from(value: Any, out: set[float] | None = None) -> set[float]:
         if v <= 1:
             out |= {round(v * 100), round(v * 100, 1)}
     elif isinstance(value, str):
-        for raw in _NUM.findall(value):
+        for raw in _NUM.findall(_UUID.sub(" ", value)):
             numbers_from(_parse(raw), out)
     elif isinstance(value, dict):
         for v in value.values():
