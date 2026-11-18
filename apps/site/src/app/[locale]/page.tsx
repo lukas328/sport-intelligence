@@ -81,9 +81,22 @@ export default async function Home({ params }: Props) {
         aria-labelledby="hero"
         className="on-club relative overflow-hidden bg-club text-club-ink shadow-[inset_0_0_0_2px_var(--club-edge)] [clip-path:polygon(0_0,100%_0,100%_97%,0_100%)] md:[clip-path:polygon(0_0,100%_0,100%_calc(100%-4rem),0_100%)]"
       >
+        {/* a hall in the background, grey and soft in the club colour, rising from below (U48) */}
+        <img
+          src="/media/halle-kopf-1000.webp"
+          srcSet="/media/halle-kopf-1000.webp 1000w, /media/halle-kopf-1600.webp 1600w"
+          sizes="100vw"
+          alt=""
+          aria-hidden
+          width={1600}
+          height={690}
+          decoding="async"
+          fetchPriority="low"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-[70%] w-full object-cover object-bottom opacity-40 mix-blend-soft-light md:opacity-60 [mask-image:linear-gradient(to_bottom,transparent,#000_70%)] print:hidden"
+        />
         {/* on the phone: headline, film, then the lead and the way in (U22); from lg the film
             stands on the right across both rows */}
-        <div className="wrap grid grid-cols-1 gap-x-14 pt-8 pb-16 md:pt-14 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:grid-rows-[auto_1fr] lg:pb-28">
+        <div className="wrap relative grid grid-cols-1 gap-x-14 pt-8 pb-16 md:pt-14 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:grid-rows-[auto_1fr] lg:pb-28">
           <div className="min-w-0 lg:col-start-1 lg:row-start-1">
             <p className="text-base font-semibold md:text-[1.0625rem]">{t.kick}</p>
             <h1
