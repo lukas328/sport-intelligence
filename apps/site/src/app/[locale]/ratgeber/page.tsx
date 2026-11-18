@@ -3,8 +3,9 @@ import Link from "next/link";
 import { JsonLd } from "@/components/json-ld";
 import { GuideThumb } from "@/components/guide-thumb";
 import { KitScope } from "@/components/kit";
-import { PageHead, SectionHead } from "@/components/wurf-head";
-import { HTML_LANG, fmt, messages, type Locale } from "@/lib/i18n";
+import { TopicTiles } from "@/components/head-art";
+import { PageHead, SectionHead, Updated } from "@/components/wurf-head";
+import { fmt, messages, type Locale } from "@/lib/i18n";
 import { graph, webPage } from "@/lib/schema";
 import { pageMeta } from "@/lib/seo";
 import { pageUrl } from "@/lib/site";
@@ -27,7 +28,6 @@ export default async function Guides({ params }: Props) {
   const t = m.guides;
   const own = GUIDES.filter((g) => g.locales.includes(locale));
   const german = GUIDES.filter((g) => !g.locales.includes(locale));
-  const date = new Intl.DateTimeFormat(HTML_LANG[locale], { dateStyle: "long", timeZone: "Europe/Zurich" });
   const item = (key: string, href: string, title: string, text: string, de: boolean) => (
     <li key={key} className="flex gap-5 border-b border-rule py-5">
       <GuideThumb slug={key} />
@@ -43,6 +43,14 @@ export default async function Guides({ params }: Props) {
   );
   const row = (g: Guide, l: Locale) => item(g.slug, `/${l}/ratgeber/${g.slug}/`, g.title[l]!, g.answer[l]!, l !== locale);
   const latest = GUIDES.map((g) => g.updated).sort().at(-1) ?? "";
+  // the tiles in the head: each topic with its number of pages (the filming page and the tools count)
+  const counted = (n: number) => (n === 1 ? t.countOne : fmt(t.count, { count: n }));
+  const tiles = [
+    ...ORDER.map((group) => ({ id: `g-${group}`, name: t.groups[group], count: own.filter((g) => g.group === group).length + (group === "filmen" ? 1 : 0) })),
+    { id: "g-tools", name: m.tools.groupTitle, count: 3 },
+  ]
+    .filter((x) => x.count > 0)
+    .map((x) => ({ ...x, countText: counted(x.count) }));
   return (
     <KitScope>
       <JsonLd
@@ -51,9 +59,7 @@ export default async function Guides({ params }: Props) {
           hasPart: own.map((g) => ({ "@id": `${pageUrl(locale, `ratgeber/${g.slug}`)}#artikel` })),
         })}
       />
-      <PageHead kick={t.title} title={t.head} lead={t.lead}>
-        {latest && <p className="mt-5 text-[1.0625rem] text-ink-2">{fmt(t.updated, { date: date.format(new Date(latest)) })}</p>}
-      </PageHead>
+      <PageHead kick={t.title} title={t.head} lead={t.lead} aside={<TopicTiles tiles={tiles} label={t.topicsLabel} />} />
       <div className="wrap">
         {ORDER.map((group) => {
           const items = own.filter((g) => g.group === group);
@@ -82,6 +88,7 @@ export default async function Guides({ params }: Props) {
             <ul className="max-w-[52rem]">{german.map((g) => row(g, "de"))}</ul>
           </section>
         )}
+        {latest && <Updated locale={locale} date={latest} />}
       </div>
     </KitScope>
   );

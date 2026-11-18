@@ -32,6 +32,20 @@ describe("site messages", () => {
     for (const [k, v] of texts) expect(v.normalize("NFC"), k).not.toMatch(/(?<!con)s\u00e9quence/i);
   });
 
+  // «Fragen» in the Ratgeber's frame (BEFUNDE-3 U8): every question sits in one of the four themes,
+  // each theme holds at least one; the open-up line is the label of «So hilft …:» without its colon
+  it("groups the questions on «Fragen» by theme", () => {
+    for (const msgs of [de, fr, en]) {
+      const themes = Object.keys(msgs.faq.groups);
+      expect(themes).toEqual(["filmen", "analyse", "team", "preise"]);
+      for (const q of msgs.faq.items) expect(themes, q.q).toContain(q.g);
+      for (const g of themes) expect(msgs.faq.items.some((q) => q.g === g), g).toBe(true);
+      expect(msgs.faq.hiLabel.startsWith(msgs.faq.more)).toBe(true);
+    }
+    expect(fr.faq.items.map((q) => q.g)).toEqual(de.faq.items.map((q) => q.g));
+    expect(en.faq.items.map((q) => q.g)).toEqual(de.faq.items.map((q) => q.g));
+  });
+
   it("puts the filming page in five short rules, with panning allowed", () => {
     for (const msgs of [de, fr, en]) {
       expect(msgs.filming.rules).toHaveLength(5);

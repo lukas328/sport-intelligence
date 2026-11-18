@@ -7,7 +7,8 @@ import { Reveal } from "@/components/reveal";
 import { Honest } from "@/components/honest";
 import { KitScope, StartLink } from "@/components/kit";
 import { JsonLd } from "@/components/json-ld";
-import { PageHead, SectionHead, Updated } from "@/components/wurf-head";
+import { StepsArt } from "@/components/head-art";
+import { PageHead, SectionHead } from "@/components/wurf-head";
 import { graph, howTo } from "@/lib/schema";
 import { APP_LOCALE, messages, type Locale } from "@/lib/i18n";
 import { pageMeta } from "@/lib/seo";
@@ -50,9 +51,7 @@ export default async function How({ params }: Props) {
         )}
       />
       <Reveal />
-      <PageHead kick={t.title} title={t.head} lead={t.lead}>
-        <Updated locale={locale} />
-      </PageHead>
+      <PageHead kick={t.title} title={t.head} lead={t.lead} aside={<StepsArt steps={t.steps} label={t.stepsLabel} />} />
       <div className="wrap">
         <ol className="mt-12">
           {t.steps.map((s, i) => (

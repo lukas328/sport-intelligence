@@ -364,9 +364,10 @@ export default async function Home({ params }: Props) {
         <section aria-labelledby="price" className="mt-20 md:mt-28">
           <div
             data-reveal
-            className="grid grid-cols-1 items-end gap-6 border-2 border-ink bg-paper p-6 md:grid-cols-[auto_minmax(0,1fr)_auto] md:gap-10 md:p-10"
+            className="grid grid-cols-1 items-center gap-6 border-2 border-ink bg-paper p-6 md:grid-cols-[auto_minmax(0,1fr)_auto] md:gap-10 md:p-10"
           >
-            <p className="flex items-baseline gap-3">
+            {/* the days with their words under them, centred on the title like the buttons (U27) */}
+            <p className="flex items-baseline gap-3 md:flex-col md:items-start md:gap-2">
               <b className="font-num text-[5rem] leading-[.8] text-club-text md:text-[7rem]">
                 {team.trial_days}
               </b>

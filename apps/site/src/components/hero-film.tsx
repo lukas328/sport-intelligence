@@ -159,7 +159,7 @@ export function HeroFilm({
                   className="h-full"
                 />
               )}
-              <p className="film-count absolute top-3 left-3 border-2 border-ink bg-paper px-2.5 py-1 font-slant text-[1.0625rem] leading-tight md:top-4 md:left-4 md:text-[1.25rem]">
+              <p className="film-count absolute top-3 left-3 border-2 border-ink bg-paper px-2.5 py-1 upright text-[1.0625rem] leading-tight md:top-4 md:left-4 md:text-[1.25rem]">
                 {picked === null || picked === 0 ? text.count : things[picked]!.text}
               </p>
             </div>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { LangLinks } from "@/components/nav-links";
 import { LOCALE_NAMES, LOCALES, messages, type Locale } from "@/lib/i18n";
 import { STATUS_URL, SUPPORT_EMAIL } from "@/lib/site";
+import { blogInFooter } from "../../content/blog";
 import { GUIDES } from "../../content/ratgeber";
 
 export function Footer({ locale }: { locale: Locale }) {
@@ -58,7 +59,7 @@ export function Footer({ locale }: { locale: Locale }) {
           ["preise", m.nav.pricing],
           ["ratgeber", m.nav.guides],
           ["fakten", m.nav.facts],
-          ["blog", m.nav.blog],
+          ...(blogInFooter() ? [["blog", m.nav.blog] as [string, string]] : []),
         ])}
         {col(m.footer.support, support)}
         <div>
