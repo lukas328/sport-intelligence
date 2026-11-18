@@ -630,7 +630,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
           </p>
         )}
         {staff && !example && !main && (
-          <section id="upload" className="scroll-mt-24 space-y-4" aria-label={t("upload.title")}>
+          <section id="upload" className="max-w-3xl scroll-mt-24 space-y-4" aria-label={t("upload.title")}>
             <p className="m-0 max-w-[60ch] text-[17px] font-bold">{ta("noVideoBlock")}</p>
             {/* the field first (A11); the shirts after it, before «Mehr»: they are saved at once,
                 also while the upload runs. The analysis separates the teams by their shirts:
