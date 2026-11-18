@@ -66,6 +66,9 @@ STALLED_ERROR = "stalled: no report from the worker"
 # without persistence, on staging with every deploy), it is enqueued again
 QUEUED_CHECK_S = 5 * 60
 LOST_ERROR = "lost from the queue"
+# a worker reports a job whose work horse was killed (out of memory) with this prefix
+# (handball_jobkit.rqworker.WORKER_LOST): restarted once at once, not after RESTART_AFTER_S
+WORKER_LOST = "worker lost"
 
 # measured: only once the step has gone this far and run this long (an early pace misleads)
 MEASURED_MIN = {"ingest": (0.05, 60.0), "analysis": (0.1, 120.0)}
@@ -593,9 +596,6 @@ async def watchdog(ctx: Ctx, now: datetime | None = None) -> dict[str, int]:
     """Jobs that went silent (their worker is gone: restarted, out of memory): restarted once,
     the second time ended as failed so the coach sees it and can try again. The worker ticks it
     every few minutes; each job is handled within its own club (RLS)."""
-    from handball_api.schemas.matches import JobUpdate
-    from handball_api.services import videos  # imports this module
-
     now = now or datetime.now(UTC)
     await enable_system_access(ctx.db, reason="job watchdog: running jobs of all clubs")
     found = (
@@ -620,44 +620,57 @@ async def watchdog(ctx: Ctx, now: datetime | None = None) -> dict[str, int]:
         limit = RESTART_AFTER_S if job.heartbeat_at is not None else _old_limit(job)
         if (now - last).total_seconds() < limit:
             continue
-        asset = await ctx.db.get(VideoAsset, job.video_asset_id) if job.video_asset_id else None
-        match = await ctx.db.get(Match, job.match_id)
-        if asset is None or match is None:
-            continue
-        siblings = list(
-            (
-                await ctx.db.scalars(
-                    select(ProcessingJob).where(ProcessingJob.video_asset_id == asset.id)
-                )
-            ).all()
-        )
-        if not _restarted(siblings, job.kind) and job.kind in ("ingest", "analysis"):
-            job.status = JobStatus.CANCELLED
-            job.finished_at = now
-            job.error = f"{STALLED_ERROR} since {last.isoformat()}"
-            await ctx.db.flush()
-            if job.kind == "ingest":
-                await videos.start_ingest(ctx, asset)
-            else:
-                await videos.start_analysis(ctx, asset, match)
-            log.warning("job_restarted", job=str(job.id), kind=job.kind, silent_since=str(last))
-            restarted += 1
-        else:
-            await videos.apply_job_update(
-                ctx,
-                job.id,
-                JobUpdate(
-                    status=JobStatus.FAILED,
-                    progress=job.progress,
-                    error=f"{STALLED_ERROR} (timeout) since {last.isoformat()}",
-                ),
-            )
-            log.warning("job_failed_silent", job=str(job.id), kind=job.kind)
-            failed += 1
+        outcome = await restart_or_fail(ctx, job, now, f"since {last.isoformat()}")
+        restarted += outcome == "restarted"
+        failed += outcome == "failed"
     await ctx.db.flush()
     requeued = await requeue_lost(ctx, now)
     abandoned = await abandon_uploads(ctx, now)
     return {"restarted": restarted, "failed": failed, "requeued": requeued, "abandoned": abandoned}
+
+
+async def restart_or_fail(ctx: Ctx, job: ProcessingJob, now: datetime, why: str) -> str | None:
+    """A running job whose worker is gone (silent, or its work horse was killed): an ingest or
+    analysis job is started again the first time (a new job; the old one cancelled with
+    STALLED_ERROR, so `_restarted` sees it), the second time, and for other kinds, it ends as
+    failed («stalled»: the coach can try again). "restarted", "failed", or None when the job has
+    no file or match. Runs within the job's club (the caller set the tenant)."""
+    from handball_api.schemas.matches import JobUpdate
+    from handball_api.services import videos  # imports this module
+
+    asset = await ctx.db.get(VideoAsset, job.video_asset_id) if job.video_asset_id else None
+    match = await ctx.db.get(Match, job.match_id)
+    if asset is None or match is None:
+        return None
+    siblings = list(
+        (
+            await ctx.db.scalars(
+                select(ProcessingJob).where(ProcessingJob.video_asset_id == asset.id)
+            )
+        ).all()
+    )
+    if not _restarted(siblings, job.kind) and job.kind in ("ingest", "analysis"):
+        job.status = JobStatus.CANCELLED
+        job.finished_at = now
+        job.error = f"{STALLED_ERROR} {why}"
+        await ctx.db.flush()
+        if job.kind == "ingest":
+            await videos.start_ingest(ctx, asset)
+        else:
+            await videos.start_analysis(ctx, asset, match)
+        log.warning("job_restarted", job=str(job.id), kind=job.kind, why=why)
+        return "restarted"
+    await videos.apply_job_update(
+        ctx,
+        job.id,
+        JobUpdate(
+            status=JobStatus.FAILED,
+            progress=job.progress,
+            error=f"{STALLED_ERROR} (timeout) {why}",
+        ),
+    )
+    log.warning("job_failed_silent", job=str(job.id), kind=job.kind, why=why)
+    return "failed"
 
 
 async def requeue_lost(ctx: Ctx, now: datetime | None = None) -> int:
