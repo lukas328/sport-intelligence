@@ -263,7 +263,7 @@ const en: Messages = {
     shots: [{ alt: "A match in the app: the video with a timeline of all goals on the left, the list of scenes on the right, the current one in yellow.", caption: "Every goal as a scene: tap it, and the video jumps there.", text: "On the right the scenes of the phase, below all goals of the match on one line. You tap, the video plays right there." }, { alt: "Scenes in the app: search for goal conceded, right wing, last 3 with video, answer 26 of 77 goals conceded on the right wing and the button to play all 26.", caption: "Searching scenes: the number and its scenes.", text: "Type what you are looking for, say goal conceded, right wing, last three matches. The number says what it is worked out from (26 of 77), and all scenes play in a row." }, { alt: "The season in the app: five matches, and the right wing stays open. Below, the topics that repeat, with one bar per match, on the right the half court with the shots.", caption: "The season: what repeats.", text: "One bar per match shows whether a topic stays or goes away. Next to it the shots of all matches on the half court." }, { alt: "How a collection arrives in the chat: a card in the club colour titled Close the right wing, below it the team and 4 scenes. Further down the button to share the link.", caption: "One link for the team, no account for the players.", text: "The key scenes go to the team chat as a collection by link. Opening it needs no account, and the link expires." }],
     tourLabel: "The four pictures from the app",
     tourPlayers: ["Matches", "Scenes", "Season", "Team"],
-    tourHint: "Tap a player to jump to their picture.",
+    tourHint: "Tap a number and the ball jumps to its picture.",
     stepsLabel: "The four steps",
   },
   filming: {
