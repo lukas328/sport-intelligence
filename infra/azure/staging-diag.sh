@@ -10,6 +10,17 @@ set -euo pipefail
 mkdir -p "$OUT/artefacts"
 
 ws=$(az monitor log-analytics workspace list -g "$rg" --query "[0].customerId" -o tsv)
+# One-off questions: every diag-queries/*.kql next to this script runs as a Log Analytics query.
+for f in "$(dirname "$0")"/diag-queries/*.kql; do
+  [ -e "$f" ] || continue
+  n=$(basename "$f" .kql)
+  echo "== query $n"
+  if az monitor log-analytics query -w "$ws" -o json --analytics-query "$(cat "$f")" >"$OUT/kql-$n.json" 2>"$OUT/kql-$n.err"; then
+    jq -r '(.[0] // {} | keys_unsorted | @tsv), (.[] | [.[] | tostring] | @tsv)' "$OUT/kql-$n.json" | cut -c1-500 | head -300
+  else
+    echo "(query failed: $(head -c 300 "$OUT/kql-$n.err"))"
+  fi
+done
 echo "== worker logs (worker and gpu-worker), last 24 hours"
 az monitor log-analytics query -w "$ws" -o json --analytics-query "ContainerAppConsoleLogs_CL
   | where TimeGenerated > ago(24h) | where ContainerAppName_s contains 'worker'

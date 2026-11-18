@@ -1,0 +1,1 @@
+ContainerAppSystemLogs_CL | where TimeGenerated between (datetime(2026-11-17T08:30:00Z) .. datetime(2026-11-17T09:10:00Z)) | where ContainerAppName_s !endswith "-api" and ContainerAppName_s !has "worker" and ContainerAppName_s !has "redis" and ContainerAppName_s !has "web" | project TimeGenerated, ContainerAppName_s, Reason_s, Log_s | order by TimeGenerated asc
