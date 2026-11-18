@@ -7,15 +7,12 @@
  * «aussen rechts», with invented follow-up matches, marked as an example on the page.
  */
 import { demoGoals, type DemoGoal, clockOf } from "@/lib/demo";
+import type { ScorePoint } from "@/lib/match-run";
 import { laterCourt, saturday, threeMatchesLater, type StoryDot } from "@/lib/story";
 import { MATCH } from "@/lib/things";
 import { threeThings } from "@/lib/three-things";
 
-export interface ScorePoint {
-  clock_s: number;
-  own: number;
-  opp: number;
-}
+export type { ScorePoint };
 
 export interface PhaseGoal {
   id: string;

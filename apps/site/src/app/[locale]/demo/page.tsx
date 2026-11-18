@@ -64,6 +64,8 @@ export default async function Demo({ params }: Props) {
     ahead: t.ahead,
     behind: t.behind,
     halfMark: fmt(t.halfMark, { score: half }),
+    video: m.home.film.video,
+    goal: t.runGoal,
     marks: [
       { at: run.from, text: before.score },
       { at: run.to, text: run.score },
