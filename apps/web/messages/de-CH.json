@@ -978,7 +978,10 @@
     "courtConfirmError": "Das Spielfeld konnte nicht bestätigt werden. Bitte nochmals versuchen.",
     "hallOnce": "Einmal pro Halle markieren: die nächsten Videos aus derselben Halle ({hall}) übernehmen das Spielfeld.",
     "hallUnknown": "Den Spielort beim Spiel eintragen: dann übernehmen die nächsten Videos aus dieser Halle das Spielfeld.",
-    "confidenceUnmeasured": "Güte nicht gemessen, bitte in Prüfen bestätigen"
+    "confidenceUnmeasured": "Güte nicht gemessen, bitte in Prüfen bestätigen",
+    "courtUndeterminable": "Du hast angegeben, dass sich das Spielfeld in diesem Video nicht bestimmen lässt: keine Positionen und Laufwege.",
+    "courtUpdating": "Dein Spielfeld wird übernommen, die Analyse läuft.",
+    "courtMarkAnyway": "Doch markieren"
   },
   "tabs": {
     "video": "Video",
@@ -2879,7 +2882,9 @@
     "sourceHallMatch": "Feld aus dieser Halle, Spiel vom {date}",
     "errorNoHallImage": "Das Hallenbild fehlt noch: es entsteht mit der ersten Analyse. Markiere das Spielfeld, sobald die Analyse fertig ist.",
     "stateUpdating": "Dein Spielfeld wird gerade übernommen, die Analyse läuft. Danach kannst du es hier wieder ändern.",
-    "stateUndeterminable": "Du hast angegeben, dass sich das Spielfeld in diesem Video nicht bestimmen lässt. Markierst du es doch, gilt dein Spielfeld."
+    "stateUndeterminable": "Du hast angegeben, dass sich das Spielfeld in diesem Video nicht bestimmen lässt. Markierst du es doch, gilt dein Spielfeld.",
+    "qualityAmbiguous": "Die Klicks passen zu zwei verschiedenen Spielfeldern.",
+    "ambiguousLine": "Auf «{line}» liegt ein Klick daneben, und die Klicks zeigen nicht, welcher. Lösche den falschen oder leere die Linie und setze sie neu."
   },
   "today": {
     "uploadHint": "Lade das Video hoch. Zahlen, Szenen und drei Dinge entstehen danach von selbst.",

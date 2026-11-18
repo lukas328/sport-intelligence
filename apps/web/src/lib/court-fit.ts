@@ -562,6 +562,9 @@ export interface ClickFit {
   dropped: ClickRef[];
   /** the click that agrees least with the court (not dropped) */
   worst: (ClickRef & { px: number }) | null;
+  /** a dropped click whose line has another click that could be the wrong one just as well:
+   * the clicks cannot tell which court is meant (the server keeps either) */
+  ambiguous?: string;
   equations: number;
 }
 
@@ -635,8 +638,11 @@ export function fitClicks(clicks: Clicks, size: [number, number], model: CourtMo
   const full = residuals(h, c, prep);
   const kept = all.map((ref, i) => ({ ref, px: full[i]! })).filter((x) => !dropped.some((dr) => sameRef(dr, x.ref)));
   const w = kept.reduce((m, x) => (x.px > m.px ? x : m), kept[0]!);
+  const passes = !(med > MAX_MEDIAN_PX || mx > MAX_CLICK_PX);
+  const unsure = passes ? ambiguousDrop(h, c, cur, dropped, prep) : null;
   return {
-    status: med > MAX_MEDIAN_PX || mx > MAX_CLICK_PX ? "disagree" : "ok",
+    status: passes && !unsure ? "ok" : "disagree",
+    ...(unsure ? { ambiguous: unsure } : {}),
     homography: H,
     residualPx: full,
     medianPx: med,
@@ -645,6 +651,36 @@ export function fitClicks(clicks: Clicks, size: [number, number], model: CourtMo
     worst: w ? { ...w.ref, px: w.px } : null,
     equations: nEq,
   };
+}
+
+/**
+ * Whether a dropped line click could just as well be right: dropping another click of the same
+ * line instead also passes, with a different court. Then the clicks cannot tell which court is
+ * meant (e.g. a wrong third click on a line whose position nothing else checks): the line's name.
+ */
+function ambiguousDrop(h: M3, original: Clicks, kept: Clicks, dropped: ClickRef[], prep: Prepared): string | null {
+  for (const d of dropped) {
+    if (d.kind !== "line") continue;
+    const line = original.lines[d.name] ?? [];
+    for (let k = 0; k < line.length; k++) {
+      if (k === d.index || dropped.some((x) => x.kind === "line" && x.name === d.name && x.index === k)) continue;
+      // the other choice: this click out, the dropped one back
+      const alt: Clicks = { points: kept.points, lines: { ...kept.lines, [d.name]: line.filter((_, j) => j !== k && !dropped.some((x) => x.kind === "line" && x.name === d.name && x.index === j && j !== d.index)) } };
+      const f = refine(h, alt, prep, 30);
+      if (median(f.r) > MAX_MEDIAN_PX || Math.max(...f.r) > MAX_CLICK_PX) continue;
+      const inv = inv3(h);
+      const invAlt = inv3(f.h);
+      if (!inv || !invAlt) continue;
+      // the two courts apart by more than half a metre where the clicks are
+      const apart = line.some((p) => {
+        const a = project(inv, p[0], p[1]);
+        const b = project(invAlt, p[0], p[1]);
+        return Math.hypot(a[0] - b[0], a[1] - b[1]) > 0.5;
+      });
+      if (apart) return d.name;
+    }
+  }
+  return null;
 }
 
 /**

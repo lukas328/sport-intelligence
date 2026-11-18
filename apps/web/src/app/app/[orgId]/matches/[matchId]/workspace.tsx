@@ -894,12 +894,13 @@ function AnalysisPanel({
   if (!analysis || analysis.status === "none") return null;
   const canMark = canCalibrate && analysis.status === "ready" && analysis.panorama != null;
   const unconfirmed = courtUnconfirmed(analysis);
+  const courtState = analysis.calibration_state;
   const info = (analysis.calibration_info ?? {}) as { reason?: string; method?: string };
   const REASONS = ["camera_motion", "no_floor", "flat_view", "few_people", "court"] as const;
   const reason = REASONS.find((r) => r === info.reason) ?? (analysis.needs_calibration && analysis.calibration_error ? "court" : null);
   const hallName = analysis.hall?.name ?? null;
   const fromHall = courtFromHall(analysis);
-  const hallCheck = canMark && fromHall && unconfirmed;
+  const hallCheck = canMark && fromHall && unconfirmed && courtState !== "undeterminable";
   const hallConfirmed = fromHall && analysis.calibration?.source === "user_correction";
   const hallSure = !hallConfirmed && courtFromHallSure(analysis);
   return (
@@ -914,15 +915,19 @@ function AnalysisPanel({
           <span className="block text-xs">{t("failureCredit")}</span>
         </Alert>
       )}
-      {analysis.status === "ready" && analysis.needs_calibration && (
+      {analysis.status === "ready" && analysis.needs_calibration && courtState !== "undeterminable" && (
         <Alert kind="info">
           {t(canMark ? "needsCalibration" : "needsCalibrationStaff")}
           {/* why the automatic court failed, in the coach's words (ADR 025: a reason code) */}
           {reason && <span className="mt-1 block text-muted">{t(`calibReason_${reason}`)}</span>}
         </Alert>
       )}
-      {/* one sentence: does the court fit */}
-      {analysis.status === "ready" && !analysis.needs_calibration && (
+      {/* one sentence: does the court fit (the coach said it cannot be set, or it is being applied) */}
+      {analysis.status === "ready" && (courtState === "undeterminable" || courtState === "updating") ? (
+        <p className="text-[0.9375rem]" data-testid="court-state">
+          {t(courtState === "undeterminable" ? "courtUndeterminable" : "courtUpdating")}
+        </p>
+      ) : analysis.status === "ready" && !analysis.needs_calibration ? (
         <p className="text-[0.9375rem]">
           {fromHall
             ? hallSure
@@ -932,7 +937,7 @@ function AnalysisPanel({
               ? t("checkCourt")
               : t("courtOk")}
         </p>
-      )}
+      ) : null}
       {/* a court from the hall is checked here in one look, not in the marking dialog */}
       {hallCheck && <CourtPreview orgId={orgId} videoId={videoId} analysis={analysis} alt={t("courtPreviewAlt")} />}
       {/* a court marked once is carried over to the next videos of the same hall */}
@@ -959,12 +964,13 @@ function AnalysisPanel({
           onClick={() => setMarking("suggest")}
           data-testid="mark-court"
         >
-          {t(analysis.needs_calibration ? "markCourt" : unconfirmed ? "checkCourtButton" : "realign")}
+          {t(courtState === "undeterminable" ? "courtMarkAnyway" : analysis.needs_calibration ? "markCourt" : unconfirmed ? "checkCourtButton" : "realign")}
         </Button>
       )}
       {confirmFailed && <Alert className="py-2">{t("courtConfirmError")}</Alert>}
       {marking && <CourtCalibration orgId={orgId} videoId={videoId} analysis={analysis} start={marking} onClose={() => setMarking(false)} />}
-      {analysis.chunks != null && analysis.chunk_ms != null && analysis.chunks > 0 && (
+      {/* no positions on a court the coach said cannot be set */}
+      {courtState !== "undeterminable" && analysis.chunks != null && analysis.chunk_ms != null && analysis.chunks > 0 && (
         <MiniCourt
           baseUrl={`/v1/orgs/${orgId}/videos/${videoId}/tracks`}
           chunkMs={analysis.chunk_ms}
@@ -976,7 +982,7 @@ function AnalysisPanel({
         />
       )}
       {/* the legend of the mini court: nothing to explain without it */}
-      {analysis.chunks != null && analysis.chunks > 0 && (
+      {courtState !== "undeterminable" && analysis.chunks != null && analysis.chunks > 0 && (
         <div className="flex flex-wrap gap-3 text-xs text-muted">
           {(["home", "away", "referee"] as const).map((k) => (
             <span key={k} className="flex items-center gap-1">

@@ -135,6 +135,26 @@ describe("court fit from clicked lines", () => {
     expect(fit.medianPx!).toBeLessThanOrEqual(MAX_MEDIAN_PX);
   });
 
+  it("does not take a court when a wrong click could be any of a line's clicks", () => {
+    // the centre line's place is checked by nothing else: a wrong third click on it makes two
+    // courts fit, one of them with the right click left out (the server would keep either)
+    const H = [
+      [30, 16, 40],
+      [0, -13.75, 650],
+      [0, 0.025, 1],
+    ];
+    const at = (x: number, y: number) => project(H, [x, y]);
+    const clicks: Clicks = {
+      points: {},
+      lines: { side_near: [at(5, 0), at(18, 0), at(33, 0)], side_far: [at(7, 20), at(20, 20), at(32, 20)], goal_left: [at(0, 4), at(0, 15)], centre: [at(20, 3), at(20, 17), at(26, 10)] },
+    };
+    const fit = fitClicks(clicks, SIZE);
+    expect(fit.status).toBe("disagree");
+    expect(fit.ambiguous).toBe("centre");
+    // without the wrong click the same lines are taken
+    expect(fitClicks({ points: {}, lines: { ...clicks.lines, centre: clicks.lines.centre!.slice(0, 2) } }, SIZE).status).toBe("ok");
+  });
+
   it("refuses too few clicks to check, but draws a court from eight equations", () => {
     const few: Clicks = { points: { corner_tl: [500, 300] }, lines: { side_near: on(CAMERA, "side_near", [0.1, 0.3]), goal_left: on(CAMERA, "goal_left", [0.3, 0.7]) } };
     expect(equations(few)).toBe(6);

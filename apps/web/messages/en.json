@@ -978,7 +978,10 @@
     "courtConfirmError": "The court could not be confirmed. Please try again.",
     "hallOnce": "Mark once per hall: the next videos from the same hall ({hall}) take the court over.",
     "hallUnknown": "Enter the venue on the match: the next videos from this hall then take the court over.",
-    "confidenceUnmeasured": "quality not measured, please confirm in Check"
+    "confidenceUnmeasured": "quality not measured, please confirm in Check",
+    "courtUndeterminable": "You said the court cannot be determined in this video: no positions and no paths.",
+    "courtUpdating": "Your court is being applied, the analysis is running.",
+    "courtMarkAnyway": "Mark it after all"
   },
   "tabs": {
     "video": "Video",
@@ -2879,7 +2882,9 @@
     "sourceHallMatch": "Court from this hall, match of {date}",
     "errorNoHallImage": "The hall image is not there yet: it comes with the first analysis. Mark the court once the analysis is done.",
     "stateUpdating": "Your court is being applied, the analysis is running. Afterwards you can change it here again.",
-    "stateUndeterminable": "You said the court cannot be determined in this video. If you mark it after all, your court counts."
+    "stateUndeterminable": "You said the court cannot be determined in this video. If you mark it after all, your court counts.",
+    "qualityAmbiguous": "The clicks fit two different courts.",
+    "ambiguousLine": "One click on “{line}” is off, and the clicks do not show which one. Delete the wrong one or clear the line and set it again."
   },
   "today": {
     "uploadHint": "Upload the video. Stats, scenes and three things follow automatically.",

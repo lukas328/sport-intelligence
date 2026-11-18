@@ -136,7 +136,9 @@ test("a click on the wrong line is named, undo takes it back; «Nicht bestimmbar
   const [sx, sy] = await screenOf(page, 26, 10);
   if (info.project.name === "mobile") await page.touchscreen.tap(sx, sy);
   else await page.mouse.click(sx, sy);
+  // which of the centre line's clicks is wrong the clicks do not show: named, not saved
   await expect(page.getByTestId("calibration-hint")).toContainText("Mittellinie");
+  await expect(page.getByTestId("calibration-save")).toBeDisabled();
   await page.getByTestId("calibration-undo").click();
   await expect(page.getByTestId("calibration-save")).toBeEnabled();
   // the court cannot be read after all: say so, with the reason

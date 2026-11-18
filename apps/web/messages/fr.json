@@ -978,7 +978,10 @@
     "courtConfirmError": "Le terrain n'a pas pu être confirmé. Réessaie.",
     "hallOnce": "Une fois par salle : les prochaines vidéos de la même salle ({hall}) reprennent le terrain.",
     "hallUnknown": "Indique le lieu du match : les prochaines vidéos de cette salle reprendront alors le terrain.",
-    "confidenceUnmeasured": "qualité non mesurée, à confirmer dans Vérifier"
+    "confidenceUnmeasured": "qualité non mesurée, à confirmer dans Vérifier",
+    "courtUndeterminable": "Tu as indiqué que le terrain ne peut pas être déterminé dans cette vidéo : pas de positions ni de trajets.",
+    "courtUpdating": "Ton terrain est en cours de reprise, l'analyse tourne.",
+    "courtMarkAnyway": "Marquer quand même"
   },
   "tabs": {
     "video": "Vidéo",
@@ -2879,7 +2882,9 @@
     "sourceHallMatch": "Terrain de cette salle, match du {date}",
     "errorNoHallImage": "L'image de la salle manque encore : elle naît avec la première analyse. Marque le terrain dès que l'analyse est terminée.",
     "stateUpdating": "Ton terrain est en cours de reprise, l'analyse tourne. Ensuite, tu pourras le modifier ici.",
-    "stateUndeterminable": "Tu as indiqué que le terrain ne peut pas être déterminé dans cette vidéo. Si tu le marques quand même, ton terrain compte."
+    "stateUndeterminable": "Tu as indiqué que le terrain ne peut pas être déterminé dans cette vidéo. Si tu le marques quand même, ton terrain compte.",
+    "qualityAmbiguous": "Les clics correspondent à deux terrains différents.",
+    "ambiguousLine": "Sur « {line} », un clic est à côté, et les clics ne montrent pas lequel. Efface le mauvais ou vide la ligne et replace-la."
   },
   "today": {
     "uploadHint": "Téléversez la vidéo. Statistiques, scènes et trois points suivent automatiquement.",

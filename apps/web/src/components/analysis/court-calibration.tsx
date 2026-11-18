@@ -6,6 +6,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Eraser, Magnet, Minus, Plus, Scan, Undo2, X } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   CalibrationStage,
   type OverlayTone,
@@ -222,6 +223,16 @@ export function CourtCalibration({
 
   // the court the clicks give, and whether it passes (the server's word where it has spoken)
   const verdict = useMemo(() => {
+    // the clicks cannot tell which of two courts is meant: never saved, whatever the server says
+    if (local?.ambiguous)
+      return {
+        ok: false,
+        median: local.medianPx,
+        homography: local.homography,
+        worst: null as ClickRef | null,
+        dropped: local.dropped,
+        ambiguous: local.ambiguous,
+      };
     if (checked?.kind === "ok")
       return {
         ok: true,
@@ -387,6 +398,14 @@ export function CourtCalibration({
     }
   };
   useEffect(() => {
+    // the page under the dialog does not scroll along (a phone swipes the picture)
+    const before = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = before;
+    };
+  }, []);
+  useEffect(() => {
     dialog.current?.focus();
     const h = (e: KeyboardEvent) => onKey.current(e);
     window.addEventListener("keydown", h);
@@ -417,6 +436,7 @@ export function CourtCalibration({
       };
     if (local.status === "no-court") return { tone: "bad", text: t("qualityNoCourt"), fill: 1 };
     const px = (verdict.median ?? 0).toFixed(1);
+    if ("ambiguous" in verdict && verdict.ambiguous) return { tone: "bad", text: t("qualityAmbiguous"), fill: 0.5 };
     return verdict.ok
       ? {
           tone: "ok",
@@ -430,7 +450,9 @@ export function CourtCalibration({
         };
   })();
   const hint =
-    verdict.worst && !verdict.ok
+    "ambiguous" in verdict && verdict.ambiguous
+      ? t("ambiguousLine", { line: lineLabel(verdict.ambiguous) })
+      : verdict.worst && !verdict.ok
       ? t("disagreeLine", { line: lineLabel(verdict.worst.name) })
       : verdict.ok && verdict.dropped.length > 0
         ? t("droppedLine", { line: lineLabel(verdict.dropped[0]!.name) })
@@ -496,7 +518,8 @@ export function CourtCalibration({
 
   const skipBlock =
     undeterminable &&
-    state !== "undeterminable" &&
+    // for a court still open (suggested or missing): the API keeps a confirmed court over it
+    (state === "suggested" || state === "missing") &&
     (asking ? (
       <div className="space-y-2 border-2 border-ink p-3" role="group" aria-labelledby="calib-why">
         <p id="calib-why" className="text-[15px] font-semibold">
@@ -531,7 +554,7 @@ export function CourtCalibration({
       </Button>
     ));
 
-  return (
+  const content = (
     <div
       className="fixed inset-0 z-50 flex items-stretch justify-center bg-black/60 sm:p-4 [@media(max-height:520px)]:p-0"
       onClick={close}
@@ -845,6 +868,9 @@ export function CourtCalibration({
       </div>
     </div>
   );
+  // on top of everything (the page head, a section with its own stacking): in the body; the
+  // server (and a test) renders it in place
+  return typeof document === "undefined" ? content : createPortal(content, document.body);
 }
 
 const toolClass =
