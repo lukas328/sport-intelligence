@@ -99,12 +99,12 @@ export function AppTour({ items, label, hint }: { items: TourItem[]; label: stri
         ))}
       </ol>
 
-      {/* the stage: wider than the page's column (the screen less 4 rem each side, up to 120 rem, never narrower than the column), a track
+      {/* the stage: wider than the page's column (94 per cent of the screen, up to 120 rem, never narrower than the column), a track
           with one stretch of scrolling per step, and in it the part that stays */}
       <div
         ref={track}
         data-tour-track
-        className="relative hidden stage:block stage:ml-[calc((100%-max(100%,min(100vw-8rem,120rem)))/2)] stage:w-[max(100%,min(calc(100vw-8rem),120rem))]"
+        className="relative hidden stage:block stage:ml-[calc((100%-max(100%,min(100vw-4rem,94vw,120rem)))/2)] stage:w-[max(100%,min(100vw-4rem,94vw,120rem))]"
         style={{ height: `calc(90vh + ${n * STEP_VH}vh)` }}
       >
         <div
@@ -232,7 +232,7 @@ function Play({ items, at, go, label, hint }: { items: TourItem[]; at: number; g
                   key={on ? "on" : "off"}
                   style={{ borderRadius: "50%" } as CSSProperties}
                   className={cn(
-                    "upright grid size-[2.125rem] place-items-center border-2 text-[1.0625rem] leading-none transition-[background-color,scale] duration-300",
+                    "upright grid size-[2.125rem] place-items-center border-2 text-[1.0625rem] leading-none transition-[background-color,scale] duration-300 motion-reduce:transition-none",
                     on
                       ? "scale-110 border-court-text bg-club text-club-ink motion-safe:animate-[catch_.7s_ease-out]"
                       : "border-court-text bg-court text-court-text group-hover:bg-[#34363a]",
@@ -243,7 +243,7 @@ function Play({ items, at, go, label, hint }: { items: TourItem[]; at: number; g
               </span>
               <span
                 className={cn(
-                  "upright -mt-1 bg-court/85 px-1 text-[1rem] leading-tight whitespace-nowrap transition-colors duration-300",
+                  "upright -mt-1 bg-court/85 px-1 text-[1rem] leading-tight whitespace-nowrap transition-colors duration-300 motion-reduce:transition-none",
                   on ? "text-attn" : "text-court-text group-hover:underline",
                 )}
               >
