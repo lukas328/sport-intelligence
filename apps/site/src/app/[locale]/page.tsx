@@ -8,7 +8,7 @@ import { ProductShot } from "@/components/product-shot";
 import { JsonLd } from "@/components/json-ld";
 import { DemoLink, KitScope, StartLink } from "@/components/kit";
 import { Reveal } from "@/components/reveal";
-import { BeforeAfter, Evening, When } from "@/components/story";
+import { Evening, When } from "@/components/story";
 import { PhoneChat } from "@/components/phone-chat";
 import { TeamField } from "@/components/team-field";
 import { Things } from "@/components/things";
@@ -17,6 +17,7 @@ import { pageMeta } from "@/lib/seo";
 import { graph, organization, softwareApplication, webPage, website } from "@/lib/schema";
 import { SITE_UPDATED } from "@/lib/site";
 import { saturday, sundayAnswer, threeMatchesLater } from "@/lib/story";
+import { SeasonBars } from "@/components/week/season-bars";
 import { demoView } from "@/lib/things";
 import { DRILL_LANG, DRILLS } from "@/lib/drills";
 import { seasonRightWing } from "@/lib/week";
@@ -50,12 +51,11 @@ export default async function Home({ params }: Props) {
   const v = demoView(m);
   const sat = saturday();
   const later = threeMatchesLater();
+  const season = seasonRightWing();
+  const d = m.demo;
   const answer = sundayAnswer();
   const team = plans.plans.find((p) => p.plan === "team")!;
   const app = APP_LOCALE[locale];
-  const wing = fmt(m.things.concededText, {
-    zone: m.things.zones[sat.zone as keyof typeof m.things.zones],
-  });
   // on the start page each thing leads to its scenes in the demo; the halves stand in the hero (U18)
   const things = v.things.map((x) => ({
     ...x,
@@ -272,8 +272,20 @@ export default async function Home({ params }: Props) {
               })}
             </p>
           </div>
+          {/* the same season bars as the demo match (U46): one bar per match, tap one for its goals */}
           <div data-reveal style={{ "--d": 1 } as CSSProperties} className="mt-12 md:mt-16">
-            <BeforeAfter t={t} before={sat} after={later} zone={wing} />
+            <SeasonBars
+              matches={season}
+              text={{
+                label: d.nextLabel,
+                of: season.map((x) => fmt(d.nextOf, { n: x.n, of: x.of })),
+                bars: season.map((x) => fmt(d.nextBar, { opp: x.opp, n: x.n, of: x.of })),
+                courts: season.map((x) => fmt(d.nextCourt, { opp: x.opp, n: x.n, of: x.of })),
+                demo: d.nextDemo,
+                example: d.nextTag,
+              }}
+            />
+            <p className="mt-6 inline-block border-2 border-dashed border-club-ink px-3 py-1 text-[1.0625rem] font-semibold">{d.nextExample}</p>
           </div>
         </div>
       </section>
