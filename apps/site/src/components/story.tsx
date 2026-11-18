@@ -58,7 +58,7 @@ export function Evening({ t, score }: { t: Messages["home"]["problemCard"]; scor
 }
 
 /** One half court with the goals conceded as dots: the right wing in ink, the rest faint. */
-function Court({ court, label }: { court: StoryCourt; label: string }) {
+export function Court({ court, label }: { court: StoryCourt; label: string }) {
   const k = 300 / HALF_BOX[2];
   return (
     <svg viewBox={HALF_BOX.join(" ")} role="img" aria-label={label} className="block w-full">
