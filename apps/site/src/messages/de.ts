@@ -110,6 +110,7 @@ const de = {
     legendNumber: "Zahl: Rückennummer",
     legendBall: "Ball: wer ihn hat",
     ballLine: "Am Ball, Sekunde für Sekunde (Rückennummer)",
+    half: "Halbes Feld, Tor oben: die Hälfte, in der die Szene spielt",
   },
   home: {
     kick: "Spielanalyse mit KI für Handballtrainerinnen und -trainer",
@@ -308,7 +309,7 @@ const de = {
     guideTitle: "Was du hier siehst",
     guide: [{ title: "Drei Dinge zum Mitnehmen", text: "Woher die Tore kamen, mit den Szenen dazu." }, { title: "Die Szene von oben", text: "Ein Gegentor auf der Taktikkamera, zum Abspielen." }, { title: "Spielverlauf", text: "Wer wann getroffen hat, über 60 Minuten." }, { title: "Zahlen und Positionen", text: "Jede Zahl mit Quelle, die Gegentore nach Position." }],
     thingsNote: "Nach derselben Regel gerechnet wie in der App: aus dem Wurfort, den du nach einem Tor antippst.",
-    cameraText: "Das Gegentor zu Punkt 1, von oben: Die Abwehr steht vor dem 6-m-Raum, der Angriff um 9 m, nur der Torhüter im Torraum. Zwei Pässe, dann der Wurf. Pause hält die Szene an.",
+    cameraText: "Die Taktikkamera zeigt eine Szene von oben, aus dem Video berechnet. Hier das Gegentor zu Punkt 1: Die Abwehr steht vor dem 6-m-Raum, der Angriff um 9 m, nur der Torhüter im Torraum. Zwei Pässe, dann der Wurf. Pause hält die Szene an.",
     sources: "Quellen: Tore aus dem Spielbericht · Laufwege aus dem Video · Würfe und Paraden von Hand markiert",
     pick: "Tippe auf einen Punkt, um seine Szenen zu sehen.",
     scenesOf: "Szenen zu Punkt {i}",

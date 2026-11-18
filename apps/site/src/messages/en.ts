@@ -112,6 +112,7 @@ const en: Messages = {
     legendNumber: "Number: shirt number",
     legendBall: "Ball: who has it",
     ballLine: "On the ball, second by second (shirt number)",
+    half: "Half court, goal at the top: the half where the scene plays",
   },
   home: {
     kick: "Match analysis with AI for handball coaches",
@@ -310,7 +311,7 @@ const en: Messages = {
     guideTitle: "What you see here",
     guide: [{ title: "Three things to take away", text: "Where the goals came from, with their scenes." }, { title: "The scene from above", text: "A goal conceded on the tactics camera, to play." }, { title: "Run of the match", text: "Who scored when, over 60 minutes." }, { title: "Figures and positions", text: "Every figure with its source, goals conceded by position." }],
     thingsNote: "Computed by the same rule as in the app: from the shot spot you tap after a goal.",
-    cameraText: "The goal conceded for point 1, from above: the defence in front of the 6 m area, the attack around 9 m, only the goalkeeper in the goal area. Two passes, then the shot. Pause stops the scene.",
+    cameraText: "The tactics camera shows a scene from above, worked out from the video. Here the goal conceded for point 1: the defence in front of the 6 m area, the attack around 9 m, only the goalkeeper in the goal area. Two passes, then the shot. Pause stops the scene.",
     sources: "Sources: goals from the match report · paths from the video · shots and saves marked by hand",
     pick: "Tap a point to see its scenes.",
     scenesOf: "Scenes for point {i}",

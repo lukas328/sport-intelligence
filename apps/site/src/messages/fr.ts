@@ -112,6 +112,7 @@ const fr: Messages = {
     legendNumber: "Chiffre : numéro de maillot",
     legendBall: "Ballon : qui l'a",
     ballLine: "Au ballon, seconde par seconde (numéro de maillot)",
+    half: "Demi-terrain, but en haut : la moitié où se joue la scène",
   },
   home: {
     kick: "Analyse de match avec IA pour les entraîneuses et entraîneurs de handball",
@@ -310,7 +311,7 @@ const fr: Messages = {
     guideTitle: "Ce que tu vois ici",
     guide: [{ title: "Trois choses à retenir", text: "D'où venaient les buts, avec les scènes." }, { title: "La scène vue d'en haut", text: "Un but encaissé sur la caméra tactique, à lancer." }, { title: "Déroulement", text: "Qui a marqué quand, sur 60 minutes." }, { title: "Chiffres et positions", text: "Chaque chiffre avec sa source, les buts encaissés par position." }],
     thingsNote: "Calculé selon la même règle que dans l'app : à partir du lieu de tir que tu touches après un but.",
-    cameraText: "Le but encaissé du point 1, vu d'en haut : la défense devant la zone des 6 m, l'attaque autour de 9 m, seul le gardien dans la zone. Deux passes, puis le tir. Pause arrête la scène.",
+    cameraText: "La caméra tactique montre une scène vue d'en haut, calculée à partir de la vidéo. Ici le but encaissé du point 1 : la défense devant la zone des 6 m, l'attaque autour de 9 m, seul le gardien dans la zone. Deux passes, puis le tir. Pause arrête la scène.",
     sources: "Sources : buts de la feuille de match · trajets de la vidéo · tirs et arrêts marqués à la main",
     pick: "Touche un point pour voir ses scènes.",
     scenesOf: "Scènes du point {i}",

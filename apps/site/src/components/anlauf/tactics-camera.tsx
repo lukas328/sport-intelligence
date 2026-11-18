@@ -1,6 +1,7 @@
 "use client";
 
 import { type CSSProperties, type ReactNode, useEffect, useRef, useState } from "react";
+import { cn } from "@/lib/cn";
 import { CourtLines } from "./court";
 import { ballAt, PASS_MAX_S } from "./ball";
 import type { CameraScene, SceneTrack } from "./camera-types";
@@ -221,7 +222,14 @@ export function TacticsCamera({
           <CameraFrame scene={scene} view={view} width={width} dot={dot} t={t} labels={showLabels} />
         </svg>
         {text.caption && (
-          <figcaption className="max-sm:static max-sm:max-w-none max-sm:border-t max-sm:border-[#33353a] absolute top-4 right-4 max-w-[70%] bg-[rgb(14_15_17/0.92)] px-3 py-2 text-base font-bold text-[#f2f0eb]">
+          // over the picture's corner on the wide view; under it on the phone and on the half court
+          // with the goal at the top, where the corner is the goal (U24)
+          <figcaption
+            className={cn(
+              "bg-[rgb(14_15_17/0.92)] px-3 py-2 text-base font-bold text-[#f2f0eb]",
+              V.turn ? "border-t border-[#33353a]" : "max-sm:static max-sm:max-w-none max-sm:border-t max-sm:border-[#33353a] absolute top-4 right-4 max-w-[70%]",
+            )}
+          >
             {text.caption}
             {text.captionSmall && <small className="mt-0.5 block font-mono text-sm font-medium text-court-text">{text.captionSmall}</small>}
           </figcaption>
