@@ -33,10 +33,11 @@ export function When({ children, dark = false, onClub = false }: { children: Rea
  */
 export function Evening({ t, score, how }: { t: Messages["home"]["problemCard"]; score: string; how?: { text: string; href: string } }) {
   return (
-    <div className="pb-2">
+    // overflow-x clip: the sticker starts larger (stick keyframes) and must never widen the page
+    <div className="overflow-x-clip pb-2">
       <EveningCard t={t} score={score} />
       {how && (
-        <div className="stick relative z-[1] mr-2 -mt-5 ml-auto w-fit max-w-[22rem] -rotate-2 border-2 border-ink bg-attn px-4 pt-3 pb-1.5 text-ink shadow-[6px_6px_0_#000] md:-mt-7 md:mr-6">
+        <div className="stick relative z-[1] mr-3 -mt-5 ml-auto w-fit max-w-[min(22rem,calc(100%-1.5rem))] origin-right -rotate-2 border-2 border-ink bg-attn px-4 pt-3 pb-1.5 text-ink shadow-[6px_6px_0_#000] md:-mt-7 md:mr-6">
           <p className="text-[1.1875rem] leading-snug font-bold">{t.sticker}</p>
           <Link href={how.href} className="link text-[1.0625rem]">
             {how.text}
