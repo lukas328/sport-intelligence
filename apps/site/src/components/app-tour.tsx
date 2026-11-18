@@ -169,6 +169,7 @@ export function AppTour({ items, label, hint }: { items: TourItem[]; label: stri
 function Play({ items, at, go, label, hint }: { items: TourItem[]; at: number; go: (i: number) => void; label: string; hint: string }) {
   const ball = useRef<HTMLSpanElement>(null);
   const last = useRef(at);
+  const flight = useRef<Animation | null>(null);
 
   useEffect(() => {
     const from = last.current;
@@ -176,14 +177,19 @@ function Play({ items, at, go, label, hint }: { items: TourItem[]; at: number; g
     const el = ball.current;
     if (from === at || !el || typeof el.animate !== "function") return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const way = ballPath(from, at);
+    const frames: Keyframe[] = ballPath(from, at).map(({ at: p, offset }) => ({ ...percent(p), offset }));
+    // still in the air (a fast scroll): go on from where the ball is, not from the last player
+    const prev = flight.current;
+    if (prev && prev.playState === "running") {
+      const { left, top } = getComputedStyle(el);
+      prev.cancel();
+      frames[0] = { left, top, offset: 0 };
+    }
     const legs = Math.abs(at - from);
-    const a = el.animate(
-      way.map(({ at: p, offset }) => ({ ...percent(p), offset })),
-      { duration: Math.min(560 + (legs - 1) * 300, 1300), easing: "cubic-bezier(.45,.05,.3,1)" },
-    );
-    return () => a.cancel();
+    flight.current = el.animate(frames, { duration: Math.min(560 + (legs - 1) * 300, 1300), easing: "cubic-bezier(.45,.05,.3,1)" });
   }, [at]);
+
+  useEffect(() => () => flight.current?.cancel(), []);
 
   const [x0, y0, w, h] = PLAY_BOX;
   return (
@@ -234,7 +240,7 @@ function Play({ items, at, go, label, hint }: { items: TourItem[]; at: number; g
                   className={cn(
                     "upright grid size-[2.125rem] place-items-center border-2 text-[1.0625rem] leading-none transition-[background-color,scale] duration-300 motion-reduce:transition-none",
                     on
-                      ? "scale-110 border-court-text bg-club text-club-ink motion-safe:animate-[catch_.7s_ease-out]"
+                      ? "scale-110 border-court-text bg-club text-club-ink motion-safe:animate-[catch_1.1s_ease-out_both]"
                       : "border-court-text bg-court text-court-text group-hover:bg-[#34363a]",
                   )}
                 >
@@ -244,7 +250,7 @@ function Play({ items, at, go, label, hint }: { items: TourItem[]; at: number; g
               <span
                 className={cn(
                   "upright -mt-1 bg-court/85 px-1 text-[1rem] leading-tight whitespace-nowrap transition-colors duration-300 motion-reduce:transition-none",
-                  on ? "text-attn" : "text-court-text group-hover:underline",
+                  on ? "text-attn motion-safe:delay-500" : "text-court-text group-hover:underline",
                 )}
               >
                 {s.player}

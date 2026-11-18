@@ -100,9 +100,17 @@
     opacity: 1;
   }
 }
-/* a player of the app tour's play gets the ball: one ring goes out from him */
+/* a player of the app tour's play gets the ball: he waits for it, lights up as it arrives and
+   one ring goes out from him */
 @keyframes catch {
-  0% {
+  0%,
+  50% {
+    background-color: var(--court);
+    color: var(--court-text);
+    scale: 1;
+    box-shadow: 0 0 0 0 rgb(255 210 60 / 0.75);
+  }
+  56% {
     box-shadow: 0 0 0 0 rgb(255 210 60 / 0.75);
   }
   100% {
