@@ -71,6 +71,18 @@ variable "postgres_sku" {
   default     = "B_Standard_B1ms"
 }
 
+variable "postgres_user_connections" {
+  description = "Connections the Postgres server leaves to the apps (max_connections minus the slots Azure reserves); B1ms: 50 minus about 15. Verify with the diagnosis (diag-queries, SHOW max_connections)."
+  type        = number
+  default     = 35
+}
+
+variable "postgres_spare_connections" {
+  description = "Connections kept free for the migration job, a diagnosis and a person with psql."
+  type        = number
+  default     = 6
+}
+
 variable "postgres_storage_mb" {
   type    = number
   default = 32768

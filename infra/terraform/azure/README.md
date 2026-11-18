@@ -205,8 +205,14 @@ the registry (~ CHF 5), Postgres storage (~ CHF 4) and a few cents for Key Vault
 
 - `HB_GPU_BACKEND=local`: the analysis runs on the CPU of the gpu-worker container. Slow but enough for
   the pilot; the Modal backend is not implemented yet (`apps/gpu-worker/.../backends/base.py`).
-- Redis keeps no data on restart. Queued jobs are lost if the container restarts; this is acceptable
-  for the pilot (ADR 001 keeps state in Postgres).
+- Redis writes an append-only file to a small Azure Files share (`azurerm_storage_share.redis`), so
+  queued jobs survive a restart of its replica. The API watchdog also enqueues again a job that waits
+  but is missing from the queue (`progress.requeue_lost`).
+- Postgres connections: the API's processes x max replicas x (pool + overflow) plus
+  `postgres_spare_connections` must fit `postgres_user_connections` (check `db_connections`, part of
+  every plan). Postgres logs and metrics go to Log Analytics (`diag-postgres`, with
+  `log_connections`); `infra/azure/diag-queries/postgres-connections.kql` and the diagnosis show who
+  holds the connections.
 - Postgres accepts connections from all Azure services (TLS and long passwords). Private access in the
   VNet is the next hardening step.
 - Not yet covered: off-site backup bucket and scheduled `backup.sh`, alerts from `infra/monitoring/alerts.md`.
