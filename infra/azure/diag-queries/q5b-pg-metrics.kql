@@ -1,1 +1,0 @@
-AzureMetrics | where ResourceProvider == "MICROSOFT.DBFORPOSTGRESQL" and MetricName in ("active_connections", "connections_failed") | where TimeGenerated between (datetime(2026-11-17T08:40:00Z) .. datetime(2026-11-17T09:05:00Z)) | summarize mx=max(Maximum), tot=sum(Total) by MetricName, bin(TimeGenerated, 1m) | order by TimeGenerated asc

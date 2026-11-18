@@ -1,1 +1,0 @@
-ContainerAppConsoleLogs_CL | where TimeGenerated between (datetime(2026-11-17T08:40:00Z) .. datetime(2026-11-17T09:05:00Z)) | where ContainerAppName_s endswith "-api" | summarize replicas=dcount(ContainerGroupName_s), revisions=make_set(RevisionName_s) by bin(TimeGenerated, 1m) | order by TimeGenerated asc

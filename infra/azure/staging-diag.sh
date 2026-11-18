@@ -16,7 +16,8 @@ for f in "$(dirname "$0")"/diag-queries/*.kql; do
   n=$(basename "$f" .kql)
   echo "== query $n"
   if az monitor log-analytics query -w "$ws" -o json --analytics-query "$(cat "$f")" >"$OUT/kql-$n.json" 2>"$OUT/kql-$n.err"; then
-    jq -r '(.[0] // {} | keys_unsorted | @tsv), (.[] | [.[] | tostring] | @tsv)' "$OUT/kql-$n.json" | cut -c1-500 | head -300
+    jq -r '(.[0] // {} | keys_unsorted | @tsv), (.[] | [.[] | tostring] | @tsv)' "$OUT/kql-$n.json" >"$OUT/kql-$n.tsv" || true
+    echo "rows: $(($(wc -l <"$OUT/kql-$n.tsv") - 1))"; cut -c1-500 "$OUT/kql-$n.tsv" | sed -n '1,300p'
   else
     echo "(query failed: $(head -c 300 "$OUT/kql-$n.err"))"
   fi
