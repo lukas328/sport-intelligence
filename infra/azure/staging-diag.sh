@@ -21,6 +21,15 @@ grep 'analysis_done' "$OUT/workers-24h.log" || echo "(none in 24 hours)"
 echo "== warnings and errors"
 grep -Ei '\[(warning|error|critical) *\]|"level": ?"(warning|error|critical)"|Traceback|Killed|OOM' "$OUT/workers-24h.log" | cut -c1-600 || echo "(none)"
 
+echo "== API requests on upload and video endpoints, last 24 hours (time, method, path with ids masked, status; no addresses)"
+az monitor log-analytics query -w "$ws" -o json --analytics-query "ContainerAppConsoleLogs_CL
+  | where TimeGenerated > ago(24h) | where ContainerAppName_s contains 'api'
+  | where Log_s has_any ('/videos', '/uploads', '/upload', '/parts', 'unhandled_exception')
+  | project TimeGenerated, Log_s | order by TimeGenerated asc" >"$RUNNER_TEMP/api-uploads.json"
+jq -r '.[] | "\(.TimeGenerated) \(.Log_s)"' "$RUNNER_TEMP/api-uploads.json" \
+  | grep -E '"(GET|POST|PUT|PATCH|DELETE) [^"]*(videos|upload|parts)' \
+  | sed -E 's/[0-9]{1,3}(\.[0-9]{1,3}){3}(:[0-9]+)?//g; s/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/:id/g; s/\?[^ "]*//g' \
+  | sed -E 's/^([^ ]+) .*"([A-Z]+) ([^ ]+) HTTP[^"]*" ([0-9]{3}).*/\1 \2 \3 \4/' | tee "$OUT/api-uploads.txt" | tail -200 || echo "(none)"
 kv=$(terraform output -raw key_vault)
 dsn=$(az keyvault secret show --vault-name "$kv" -n hb-admin-dsn --query value -o tsv)
 echo "::add-mask::$dsn"
