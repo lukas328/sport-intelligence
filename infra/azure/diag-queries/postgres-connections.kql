@@ -1,0 +1,18 @@
+// Postgres connections over the last 24 hours, per 5 minutes: the server's metric (active
+// connections, failed connections) and, from the server log, who opened connections (user and
+// application_name; the API names each process "hb-api <host> <pid>"). Needs the diagnostic
+// setting "diag-postgres" (infra/terraform/azure/main.tf); before it, the tables are empty.
+let metrics = AzureMetrics
+  | where TimeGenerated > ago(24h)
+  | where ResourceProvider == "MICROSOFT.DBFORPOSTGRESQL"
+  | where MetricName in ("active_connections", "connections_failed", "connections_succeeded")
+  | summarize value = max(Maximum) by bin(TimeGenerated, 5m), what = MetricName;
+let opened = AzureDiagnostics
+  | where TimeGenerated > ago(24h)
+  | where ResourceProvider == "MICROSOFT.DBFORPOSTGRESQL" and Category == "PostgreSQLLogs"
+  | where Message has "connection authorized" or Message has "too many"
+  | extend user = extract(@"user=(\S+)", 1, Message), app = extract(@"application_name=(.+?)( SSL|$)", 1, Message)
+  | extend what = iff(Message has "too many", "refused", strcat("opened ", user, " ", replace_regex(app, @" \d+$", "")))
+  | summarize value = todouble(count()) by bin(TimeGenerated, 5m), what;
+union metrics, opened
+| order by TimeGenerated asc, what asc
