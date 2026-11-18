@@ -4,7 +4,8 @@ import type { Schemas } from "@handball/api-client";
 import { useEffect, useState } from "react";
 import { CourtCalibration } from "@/components/analysis/court-calibration";
 import { Button } from "@/components/ui/button";
-import { HALL_H, HALL_H_OFF, HALL_SIZE, drawHall } from "@/lib/synthetic-hall";
+import { HALL_H, HALL_H_OFF, HALL_SIZE } from "@/lib/synthetic-hall";
+import { drawHall } from "./draw-hall";
 
 type State = "hall" | "auto" | "missing" | "confirmed";
 
