@@ -17,7 +17,8 @@ not help: `docs/plans/kalibrierung.md` (German).
 | experiments (rejected) | `motion_refine.py`, `experiments/best_window.py` |
 
 Data: `truth_dev.json` (30 dev pieces, 46 frames), `data/round1_answers.json`,
-`data/round1b_answers.json` (raw clicks), `results_base.json` (product before the stricter check),
+`data/round1b_answers.json`, `data/round2_answers.json` (raw clicks), `truth_test.json` (28 end-test
+pieces, 61 frames; the end test is used once, nothing is tuned on it), `results_base.json` (product before the stricter check),
 `results_strict.json` (with it), `data/horgen_product.json` and `data/truth_horgen.json` (two
 10-minute TV clips, end-test hall: check only).
 
@@ -30,7 +31,9 @@ Data: `truth_dev.json` (30 dev pieces, 46 frames), `data/round1_answers.json`,
 | 2026-11-17 | round 1b (lines with snapping): 86 frames, 42 consistent | truth for 30 of 33 dev pieces |
 | 2026-11-17 | product before #72 | correct 1 (3 %), wrongly accepted 5 (17 %, 95 % [3, 33]), rejected 24 |
 | 2026-11-17 | #72: `court_doubt` (goal >= 0.45, lines >= 1.0, floor >= 0.45), thresholds set before half the truth was in | correct 1, wrongly accepted 0 (0 %), rejected 29 |
-| 2026-11-18 | round 2 (end test) | only 1 of 69 frames saved; end test not measured yet |
+| 2026-11-18 | round 2 (end test): 101 frames, 64 saved, 61 consistent | truth for 28 of 37 end-test pieces (26 halls) |
+| 2026-11-18 | end test, product before #72 | correct 1 (4 %), wrongly accepted 7 (25 %, 95 % [11, 40]), rejected 20 |
+| 2026-11-18 | end test, with #72 | correct 0, wrongly accepted 2 (7 %, 95 % [0, 18]), rejected 26 |
 
 Rejected along the way (each with numbers in the plan, section 5): lowering `MIN_VIEW_DEG`, scaling
 the focal length, radial distortion on the segments, rotation refinement per marking frame,
@@ -43,3 +46,4 @@ calibrating on the best window, line agreement with the stored segments.
     # answers exported from the page's database (collection "lines") into ANSWERS/
     uv run --project packages/vision python ml/calib/clicks.py pull ANSWERS truth.json --cache CACHE
     uv run --project packages/vision python ml/calib/evaluate.py ml/calib/results_X.json truth.json --split dev
+    uv run --project packages/vision python ml/calib/evaluate.py ml/calib/results_X.json ml/calib/truth_test.json --split test
