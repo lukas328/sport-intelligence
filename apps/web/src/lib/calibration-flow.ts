@@ -5,7 +5,8 @@
  */
 import { LINE_NAMES, POINT_NAMES, type ClickRef, type Clicks, type LineName, type PointName, type Pt } from "@/lib/court-fit";
 
-/** After this many clicks on a line the next line is chosen. */
+/** After this many clicks on a line the dialog offers the next line (a button, never a silent
+ * switch: a fourth click stays on the chosen line, the solver takes up to 12 per line). */
 export const CLICKS_PER_LINE = 3;
 
 type Undo =
@@ -79,6 +80,14 @@ function nextLine(c: Clicks, after: LineName): LineName {
   return after;
 }
 
+/** The line to offer once the chosen one has its clicks (null while it needs more, or when every
+ * line has clicks). */
+export function offeredLine(s: FlowState): LineName | null {
+  if (s.mode !== "line" || (s.clicks.lines[s.line]?.length ?? 0) < CLICKS_PER_LINE) return null;
+  const n = nextLine(s.clicks, s.line);
+  return n === s.line ? null : n;
+}
+
 function nextPoint(c: Clicks, after: PointName): PointName {
   const i = POINT_NAMES.indexOf(after);
   for (let k = 1; k <= POINT_NAMES.length; k++) {
@@ -115,7 +124,6 @@ export function flowReducer(s: FlowState, a: FlowAction): FlowState {
         clicks,
         history: [...s.history, { kind: "line", name }],
         selected: { kind: "line", name, index: l.length - 1 },
-        line: l.length >= CLICKS_PER_LINE ? nextLine(clicks, name) : name,
       };
     }
     case "move": {

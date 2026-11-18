@@ -29,7 +29,7 @@ async function fakeApi(page: Page, withLineEndpoints: boolean): Promise<Call[]> 
         const fit = { homography: f.homography, image_size: [1280, 720], residual_px: { median: f.medianPx, max: f.maxPx }, dropped: f.dropped.map((d) => ({ kind: d.kind, name: d.name, index: d.kind === "line" ? d.index : null })), per_click_px: { lines: {}, points: {} } };
         return path.endsWith("/check") ? json(200, fit) : json(202, { ...fit, job_id: "j" });
       }
-      if (path.endsWith("/calibration/undeterminable")) return req.method() === "GET" ? json(405, { type: "about:blank", title: "Method Not Allowed", status: 405 }) : route.fulfill({ status: 204 });
+      if (path.endsWith("/calibration/undeterminable")) return route.fulfill({ status: 204 });
     }
     return json(404, { type: "about:blank", title: "Not Found", status: 404, detail: "Not Found" });
   });
@@ -57,8 +57,14 @@ async function clickTheLines(page: Page, touch: boolean): Promise<number> {
     taps++;
   };
   for (const x of [5, 18, 33]) await tap(x, 0, 0, 2);
+  // three clicks: the next line is offered as a button, the chosen one stays
+  await expect(page.getByTestId("line-side_near")).toHaveAttribute("aria-pressed", "true");
+  await page.getByTestId("calibration-next").click();
+  taps++;
   await expect(page.getByTestId("line-side_far")).toHaveAttribute("aria-pressed", "true");
   for (const x of [7, 20, 32]) await tap(x, 20, 0, -2);
+  await page.getByTestId("calibration-next").click();
+  taps++;
   await expect(page.getByTestId("line-goal_left")).toHaveAttribute("aria-pressed", "true");
   for (const y of [4, 15]) await tap(0, y, 2, 0);
   await page.getByTestId("line-centre").click();
@@ -74,8 +80,9 @@ test("the court from this hall: one tap «Passt»", async ({ page }) => {
   await expect(dialog).toBeVisible();
   await expect(page.getByTestId("suggestion-source")).toHaveText("Feld aus dieser Halle: Sporthalle Kieselgrund");
   await expect(page.getByTestId("overlay-suggest")).toBeAttached();
-  // without its endpoint there is no «Nicht bestimmbar»
-  await expect(page.getByTestId("calibration-undeterminable")).toHaveCount(0);
+  // «Nicht bestimmbar» is offered without asking the API first (no probe on its endpoint)
+  await expect(page.getByTestId("calibration-undeterminable")).toBeVisible();
+  expect(calls.some((c) => c.path.endsWith("/calibration/undeterminable"))).toBe(false);
   await page.getByTestId("calibration-confirm").click();
   await expect(dialog).toBeHidden();
   expect(calls.filter((c) => c.method === "POST").map((c) => c.path)).toEqual(["/v1/orgs/demo/videos/demo/calibration/confirm"]);

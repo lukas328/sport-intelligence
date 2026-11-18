@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CLICKS_PER_LINE, countOn, flowReducer, initialFlow, type FlowAction, type FlowState } from "./calibration-flow";
+import { CLICKS_PER_LINE, countOn, flowReducer, initialFlow, offeredLine, type FlowAction, type FlowState } from "./calibration-flow";
 import { equations, fitClicks, type Pt } from "./court-fit";
 import { HALL_H, HALL_SIZE, project } from "./synthetic-hall";
 
@@ -23,17 +23,25 @@ describe("calibration dialog flow", () => {
     expect(run(s, { type: "correct" }).step).toBe("mark");
   });
 
-  it("goes on to the next line after three clicks and gives a court the server takes", () => {
+  it("offers the next line after three clicks, keeps a fourth on the chosen one, gives a court the server takes", () => {
     let s = initialFlow({ suggestion: false });
-    for (const x of [5, 18, 33]) s = run(s, { type: "place", p: at(x, 0) });
-    expect(s.line).toBe("side_far");
+    for (const x of [5, 18]) s = run(s, { type: "place", p: at(x, 0) });
+    expect(offeredLine(s)).toBeNull();
+    s = run(s, { type: "place", p: at(33, 0) });
+    // three clicks: the next line is offered, the chosen one stays (no silent switch)
+    expect(s.line).toBe("side_near");
+    expect(offeredLine(s)).toBe("side_far");
+    s = run(s, { type: "place", p: at(26, 0) });
+    expect(s.clicks.lines.side_near).toHaveLength(4);
+    s = run(s, { type: "line", name: offeredLine(s)! });
     for (const x of [7, 20, 32]) s = run(s, { type: "place", p: at(x, 20) });
-    expect(s.line).toBe("goal_left");
+    expect(offeredLine(s)).toBe("goal_left");
+    s = run(s, { type: "line", name: "goal_left" });
     s = run(s, { type: "place", p: at(0, 4) }, { type: "place", p: at(0, 15) });
     // two clicks: the line stays chosen until the coach picks another
     expect(s.line).toBe("goal_left");
     s = run(s, { type: "line", name: "centre" }, { type: "place", p: at(20, 3) }, { type: "place", p: at(20, 17) });
-    expect(equations(s.clicks)).toBe(10);
+    expect(equations(s.clicks)).toBe(11);
     expect(CLICKS_PER_LINE).toBe(3);
     const fit = fitClicks(s.clicks, HALL_SIZE);
     expect(fit.status).toBe("ok");
