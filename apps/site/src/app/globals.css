@@ -117,6 +117,12 @@
     box-shadow: 0 0 0 0.9rem rgb(255 210 60 / 0);
   }
 }
+@keyframes stick {
+  from {
+    opacity: 0;
+    transform: scale(1.25) rotate(-7deg);
+  }
+}
 @keyframes nudge {
   50% {
     transform: translateX(5px);
@@ -465,6 +471,13 @@
       opacity: 0;
       animation: appear 0.6s ease-out forwards;
       animation-delay: calc(var(--late, 1.6s));
+    }
+    /* the start page's sticker over the unwatched video slaps on once after «nie angeschaut» (U39) */
+    .stick {
+      animation: stick 0.55s cubic-bezier(0.3, 1.5, 0.5, 1) 2.3s both;
+    }
+    .wait .stick {
+      animation-play-state: paused;
     }
     /* blocks glide in once as they come into view (components/reveal.tsx, U19): visible as
        rendered, the animation only plays from `in` on; the hero pictures rise on load */
