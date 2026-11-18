@@ -331,6 +331,12 @@
     text-align: left;
     padding-left: 0;
   }
+  /* the app tour's pictures behind their live cut-outs (BEFUNDE-4 U34, components/tour-cuts.tsx):
+     the capture steps back, grey and pale, so the cut-outs carry the colour and the words */
+  .tour-dim img {
+    filter: grayscale(1) contrast(0.9);
+    opacity: 0.55;
+  }
   /*
    * product pictures (components/product-shot.tsx): ink arrows over the picture, labels as text
    * in yellow («schau hier», always with a word). The label grows with the picture but never
@@ -419,6 +425,15 @@
       font-weight: 600;
       line-height: 1.3;
     }
+  }
+  /* the steps of «So funktioniert es»: while the one ball runs through them (components/ball-run.tsx)
+     it stands for each step's own ball */
+  [data-run] [data-ball] {
+    visibility: hidden;
+  }
+  /* and where the way is drawn, a step's own short way goes */
+  [data-way] .step-way {
+    display: none;
   }
   /* the stage: 76rem, from 1600 px a wider 90rem for pictures and sections (BEFUNDE-3 U4); text
      columns keep their own measure (40rem and the like) inside it */

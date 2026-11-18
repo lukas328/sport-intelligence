@@ -17,7 +17,17 @@
   const crop = [0, 0, c.w, Math.min(c.h, timeline[1] + timeline[3] + 14)];
   const k = (W - 4) / c.w;
   // a wide screen full of small text: more weight than the default, still loaded only when seen
-  S.stage(W, Math.round(30 + crop[3] * k + 4), { budget1x: 170 * 1024, budget2x: 340 * 1024 });
+  S.stage(W, Math.round(30 + crop[3] * k + 4), {
+    densities: [1, 2, 3],
+    budget1x: 170 * 1024,
+    budget2x: 420 * 1024,
+    budget3x: 800 * 1024,
+    // in each club colour too (U45: the start page wears the shirt the visitor picked), one 2x file each:
+    // the colour shows in the club mark, the tabs, the legend and 27 marks on the timeline
+    colours: true,
+    colourDensities: [2],
+    colourBudget2x: 300 * 1024,
+  });
   const s = S.browser("video", crop, { left: 0, top: 0, width: W });
   document.querySelector(".browser").style.boxShadow = "none";
   // the picture of the player (above its controls), and the player's line of a 60-minute video at

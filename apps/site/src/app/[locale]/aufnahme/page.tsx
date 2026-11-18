@@ -6,7 +6,7 @@ import { HallPlan } from "@/components/hall-plan";
 import { JsonLd } from "@/components/json-ld";
 import { KitScope } from "@/components/kit";
 import { PrintButton } from "@/components/print-button";
-import { ProductShot } from "@/components/product-shot";
+import { StepArt } from "@/components/step-art";
 import { Reveal } from "@/components/reveal";
 import { PageHead, SectionHead } from "@/components/wurf-head";
 import { fileVars } from "@/lib/files";
@@ -148,7 +148,7 @@ export default async function Filming({ params }: Props) {
             </Link>
           </div>
           <div data-reveal style={{ "--d": 1 } as CSSProperties}>
-            <ProductShot name={`step-upload-${locale}`} alt={t.afterAlt} labels={{}} sizes="(min-width: 768px) 26rem, calc(100vw - 2rem)" />
+            <StepArt step={1} art={m.how.art} label={t.afterAlt} />
           </div>
         </section>
 

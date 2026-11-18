@@ -7,17 +7,15 @@
 <div id="stage"><div class="keil" style="--from: 72%; --to: 44%"></div></div>
 <script src="../stage.js"></script>
 <script>
-  S.stage(720, 430);
+  S.stage(720, 430, { densities: [1, 2, 3] });
   const bars = S.rect("saison", "bars", [728, 445, 132, 85]);
-  const dots = S.rect("saison", "dots", [1201, 420, 41, 48]);
   const court = S.rect("saison", "court", [908, 399, 340, 276]);
   // from «Was sich wiederholt» (just above the rows with the bars) to the bottom of the capture
   const c = S.cap("saison");
   const from = court[1] - 120;
   const s = S.browser("saison", [16, from, 1248, c.h - from], { left: 28, top: 30, width: 664 });
-  S.ring(s, bars, 6);
-  S.ring(s, dots, 8, true);
-  S.callout("bars", S.at(s, bars, -0.45, 0.5), S.at(s, bars, -0.06, 0.5), "l", 0);
-  S.callout("dots", S.at(s, court, 0.62, 0.62), S.at(s, dots, 0.15, 0.95), "br", -0.25);
+  // the place the tour pulls out (U34, tour-cuts.tsx): the first theme that repeats, from its
+  // title (left, at the content's edge) to its bars, one per match
+  S.mark("bars", s, [32, bars[1] - 14, bars[0] + bars[2] - 32, bars[3] + 22]);
   S.done();
 </script>

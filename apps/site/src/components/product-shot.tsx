@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
-import { arrow, productShot, type ShotName } from "@/lib/product-shots";
+import { type ShotFiles, ShotImage } from "@/components/shot-image";
+import { arrow, productShot, type Shirt, type ShotName } from "@/lib/product-shots";
 import { cn } from "@/lib/cn";
 
 /**
@@ -28,7 +29,7 @@ export function ProductShot({
   alt: string;
   /** the callout texts by id (messages: product.<name>) */
   labels: Record<string, string>;
-  /** how wide the picture is shown, for the browser's choice between 1x and 2x */
+  /** how wide the picture is shown (lib/product-shots SHOT_SIZES), for the browser's choice of file */
   sizes: string;
   priority?: boolean;
   /** an ink frame around the picture, like the site's boxes (not for the transparent hero) */
@@ -59,31 +60,22 @@ export function ProductShot({
   // at the edge, each label moves out to the nearer side at its height; its arrow starts there
   const callouts = shot.callouts.filter((c) => labels[c.id]).map((c) => (edge ? { ...c, from: [c.from[0] < 50 ? 0 : 100, c.from[1]] as [number, number], place: "edge" as const } : c));
   if (edge) spread(callouts, (24 / shot.height) * 100 + 9);
-  const img = (
-    <img
-      src={shot.src}
-      srcSet={shot.srcSet}
-      sizes={sizes}
-      alt={alt}
-      width={shot.width}
-      height={shot.height}
-      loading={priority ? "eager" : "lazy"}
-      decoding="async"
-      className="block h-auto w-full"
-    />
-  );
   return (
     <figure className={cn("shot m-0", className)}>
       <div className={cn("relative [container-type:inline-size]", framed && "border-2 border-ink")}>
-        {small ? (
-          // art direction: the phone picture under 40rem, each with its own size, so nothing moves
-          <picture>
-            <source media={PHONE_MEDIA} srcSet={small.srcSet} sizes={phoneSizes} width={small.width} height={small.height} />
-            {img}
-          </picture>
-        ) : (
-          img
-        )}
+        <ShotImage
+          files={filesOf(name)}
+          phoneFiles={phone ? filesOf(phone) : undefined}
+          phoneMedia={PHONE_MEDIA}
+          sizes={sizes}
+          phoneSizes={phoneSizes}
+          width={shot.width}
+          height={shot.height}
+          phoneWidth={small?.width}
+          phoneHeight={small?.height}
+          alt={alt}
+          priority={priority}
+        />
         {lettering && shot.lettering && (
           <Lettering box={shot.lettering} className={small ? "max-sm:hidden" : undefined}>
             {lettering}
@@ -142,6 +134,20 @@ export function ProductShot({
       {caption && <figcaption className="mt-3 text-[1.0625rem]">{caption}</figcaption>}
     </figure>
   );
+}
+
+/**
+ * The files of a picture in the demo club's green and in each club colour it is made in (U45);
+ * the shirt «green» is the green. ShotImage picks the visitor's shirt.
+ */
+function filesOf(name: ShotName): Partial<Record<Shirt, ShotFiles>> & { green: ShotFiles } {
+  const green = productShot(name);
+  const by: Partial<Record<Shirt, ShotFiles>> & { green: ShotFiles } = { green: { src: green.src, srcSet: green.srcSet } };
+  for (const c of green.colours) {
+    const s = productShot(name, c);
+    by[c] = { src: s.src, srcSet: s.srcSet };
+  }
+  return by;
 }
 
 /** where the phone picture takes over: under the site's `sm` (40rem), as in the classes above */

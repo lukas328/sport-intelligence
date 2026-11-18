@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ProductShot } from "@/components/product-shot";
+import { appShot, SHOT_SIZES } from "@/lib/product-shots";
 import { JsonLd } from "@/components/json-ld";
 import { KitScope, StartLink } from "@/components/kit";
 import { MailLine } from "@/components/mail-line";
@@ -59,10 +60,10 @@ export default async function AboutUs({ params }: Props) {
           <div className="min-w-0">
             <div className="lg:sticky lg:top-6">
               <figure className="m-0 max-w-[26rem]">
-                <ProductShot name="app-result" alt={t.shotAlt} labels={{}} sizes="(min-width: 1024px) 26rem, calc(100vw - 2rem)" />
+                <ProductShot name={appShot("app-result", locale)} alt={t.shotAlt} labels={{}} sizes={SHOT_SIZES.narrow(26)} />
                 <figcaption className="mt-3 text-[1.0625rem] text-ink-2">{t.shotCaption}</figcaption>
               </figure>
-              <ProductShot name="share" alt={m.home.shareAlt} labels={m.product.share} sizes="(min-width: 1024px) 26rem, calc(100vw - 2rem)" className="mt-10 max-w-[26rem]" />
+              <ProductShot name={appShot("share", locale)} alt={m.home.shareAlt} labels={m.product.share} sizes={SHOT_SIZES.narrow(26)} className="mt-10 max-w-[26rem]" />
             </div>
           </div>
         </div>

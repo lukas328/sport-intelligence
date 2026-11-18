@@ -19,9 +19,10 @@ import uuid
 from typing import Any
 
 import numpy as np
+from sqlalchemy import select
 
 from handball_api.core.errors import ProblemError
-from handball_api.models import ProcessingJob, VideoAsset
+from handball_api.models import CameraCalibration, ProcessingJob, VideoAsset
 from handball_api.models.enums import VideoStatus
 from handball_api.services import audit, videos
 from handball_api.services.context import Ctx
@@ -205,6 +206,16 @@ async def undeterminable(ctx: Ctx, asset_id: uuid.UUID, reason: str | None) -> N
     """The coach says the court cannot be set on this video (too far, cut, other): the court
     question is closed for good and no positions are drawn. Clicking the court later undoes it."""
     asset = await videos.get_asset(ctx, asset_id, Action.VIDEO_UPLOAD)
+    cal = await ctx.db.scalar(
+        select(CameraCalibration)
+        .where(CameraCalibration.video_asset_id == asset.id)
+        .order_by(CameraCalibration.created_at.desc())
+        .limit(1)
+    )
+    if await videos.calibration_state(ctx, asset, cal, None) == "confirmed":
+        raise ProblemError(
+            409, "court-confirmed", "The court of this video is set: click it anew to change it"
+        )
     asset.analysis = {
         **(asset.analysis or {}),
         videos.UNDETERMINABLE: {"reason": reason or "other"},

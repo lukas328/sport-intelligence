@@ -1,84 +1,154 @@
 {
-  "app-desktop": {
+  "app-desktop-de": {
     "width": 1200,
-    "height": 907,
+    "height": 913,
+    "densities": [1, 2, 3],
+    "colours": ["blue", "red", "yellow", "black", "white", "orange", "purple"
+   ],
+    "colourDensities": [2],
     "callouts": [],
-    "lettering": [2.66, 25.37, 65.72, 40.9]
+    "lettering": [2.66, 25.82, 65.72, 40.6]
   },
-  "app-result": {
+  "app-desktop-en": {
+    "width": 1200,
+    "height": 913,
+    "densities": [1, 2, 3],
+    "colours": ["blue", "red", "yellow", "black", "white", "orange", "purple"
+   ],
+    "colourDensities": [2],
+    "callouts": [],
+    "lettering": [2.66, 25.82, 65.72, 40.6]
+  },
+  "app-desktop-fr": {
+    "width": 1200,
+    "height": 913,
+    "densities": [1, 2, 3],
+    "colours": ["blue", "red", "yellow", "black", "white", "orange", "purple"
+   ],
+    "colourDensities": [2],
+    "callouts": [],
+    "lettering": [2.66, 25.82, 65.72, 40.6]
+  },
+  "app-result-de": {
     "width": 640,
     "height": 640,
+    "densities": [1, 2],
     "callouts": []
   },
-  "get-search": {
+  "app-result-en": {
+    "width": 640,
+    "height": 640,
+    "densities": [1, 2],
+    "callouts": []
+  },
+  "app-result-fr": {
+    "width": 640,
+    "height": 640,
+    "densities": [1, 2],
+    "callouts": []
+  },
+  "get-search-de": {
     "width": 720,
     "height": 520,
-    "callouts": [
-      {
-        "id": "answer",
-        "from": [72.52, 58.95],
-        "to": [66.49, 58.95],
-        "place": "r",
-        "bend": 0
-      },
-      {
-        "id": "play",
-        "from": [16.32, 88.16],
-        "to": [16.32, 80.85],
-        "place": "bl",
-        "bend": 0
-      }
-    ]
+    "densities": [1, 2, 3],
+    "callouts": [],
+    "marks": {
+      "answer": [5.28, 48.8, 64.05, 20.26],
+      "play": [5.56, 70.55, 21.49, 9.62]
+    }
   },
-  "get-season": {
+  "get-search-en": {
+    "width": 720,
+    "height": 520,
+    "densities": [1, 2, 3],
+    "callouts": [],
+    "marks": {
+      "answer": [5.28, 40.05, 64.05, 20.26],
+      "play": [5.56, 61.8, 15.49, 9.62]
+    }
+  },
+  "get-search-fr": {
+    "width": 720,
+    "height": 520,
+    "densities": [1, 2, 3],
+    "callouts": [],
+    "marks": {
+      "answer": [5.28, 48.8, 64.05, 20.26],
+      "play": [5.56, 70.55, 15.45, 9.62]
+    }
+  },
+  "get-season-de": {
     "width": 720,
     "height": 430,
-    "callouts": [
-      {
-        "id": "bars",
-        "from": [52.1, 39.66],
-        "to": [55.88, 39.66],
-        "place": "l",
-        "bend": 0
-      },
-      {
-        "id": "dots",
-        "from": [85.17, 50.22],
-        "to": [91.16, 37.38],
-        "place": "br",
-        "bend": -0.25
-      }
-    ]
+    "densities": [1, 2, 3],
+    "callouts": [],
+    "marks": {
+      "bars": [4.51, 31.02, 62.48, 16.61]
+    }
   },
-  "get-video": {
+  "get-season-en": {
+    "width": 720,
+    "height": 430,
+    "densities": [1, 2, 3],
+    "callouts": [],
+    "marks": {
+      "bars": [4.51, 31.02, 62.48, 16.61]
+    }
+  },
+  "get-season-fr": {
+    "width": 720,
+    "height": 430,
+    "densities": [1, 2, 3],
+    "callouts": [],
+    "marks": {
+      "bars": [4.51, 31.02, 62.48, 16.61]
+    }
+  },
+  "get-video-de": {
     "width": 720,
     "height": 520,
-    "callouts": [
-      {
-        "id": "tap",
-        "from": [36.34, 22.09],
-        "to": [69.19, 42.1],
-        "place": "t",
-        "bend": 0.22
-      },
-      {
-        "id": "timeline",
-        "from": [43.78, 69.38],
-        "to": [31.38, 76.82],
-        "place": "tl",
-        "bend": -0.2
-      }
-    ],
-    "lettering": [5.34, 14.36, 61.99, 40.38]
+    "densities": [1, 2, 3],
+    "callouts": [],
+    "marks": {
+      "tap": [69.27, 38.36, 25.81, 7.49],
+      "timeline": [4.79, 73.67, 63.1, 13.51]
+    },
+    "lettering": [5.34, 14.36, 61.99, 40.34]
   },
-  "share": {
+  "get-video-en": {
+    "width": 720,
+    "height": 520,
+    "densities": [1, 2, 3],
+    "callouts": [],
+    "marks": {
+      "tap": [69.27, 38.36, 25.81, 7.49],
+      "timeline": [4.79, 73.67, 63.1, 13.51]
+    },
+    "lettering": [5.34, 14.36, 61.99, 40.34]
+  },
+  "get-video-fr": {
+    "width": 720,
+    "height": 520,
+    "densities": [1, 2, 3],
+    "callouts": [],
+    "marks": {
+      "tap": [69.27, 38.36, 25.81, 7.49],
+      "timeline": [4.79, 73.67, 63.1, 13.51]
+    },
+    "lettering": [5.34, 14.36, 61.99, 40.34]
+  },
+  "share-de": {
     "width": 640,
     "height": 620,
+    "densities": [1, 2, 3],
+    "colours": ["blue", "red", "yellow", "black", "white", "orange", "purple"
+   ],
+    "colourDensities": [1, 2],
     "callouts": [
       {
         "id": "chat",
         "from": [30.47, 40.32],
-        "to": [38.99, 21.74],
+        "to": [38.99, 21.73],
         "place": "br",
         "bend": 0.2,
         "max": 31
@@ -86,76 +156,95 @@
       {
         "id": "nologin",
         "from": [30.47, 95.16],
-        "to": [38.27, 81.12],
+        "to": [38.27, 81.09],
         "place": "tr",
         "bend": -0.2,
         "max": 31
       }
-    ]
+    ],
+    "marks": {
+      "chat": [37.28, 8.1, 55.75, 44.56],
+      "nologin": [37.12, 76.51, 19.63, 9.16]
+    }
   },
-  "step-check-de": {
+  "share-en": {
     "width": 640,
-    "height": 640,
-    "callouts": []
+    "height": 620,
+    "densities": [1, 2, 3],
+    "colours": ["blue", "red", "yellow", "black", "white", "orange", "purple"
+   ],
+    "colourDensities": [1, 2],
+    "callouts": [
+      {
+        "id": "chat",
+        "from": [30.47, 40.32],
+        "to": [38.99, 21.78],
+        "place": "br",
+        "bend": 0.2,
+        "max": 31
+      },
+      {
+        "id": "nologin",
+        "from": [30.47, 95.16],
+        "to": [38.26, 81.14],
+        "place": "tr",
+        "bend": -0.2,
+        "max": 31
+      }
+    ],
+    "marks": {
+      "chat": [37.28, 8.15, 55.75, 44.56],
+      "nologin": [37.12, 76.56, 19.32, 9.16]
+    }
   },
-  "step-check-en": {
+  "share-fr": {
     "width": 640,
-    "height": 640,
-    "callouts": []
+    "height": 620,
+    "densities": [1, 2, 3],
+    "colours": ["blue", "red", "yellow", "black", "white", "orange", "purple"
+   ],
+    "colourDensities": [1, 2],
+    "callouts": [
+      {
+        "id": "chat",
+        "from": [30.47, 40.32],
+        "to": [38.99, 21.78],
+        "place": "br",
+        "bend": 0.2,
+        "max": 31
+      },
+      {
+        "id": "nologin",
+        "from": [30.47, 95.16],
+        "to": [38.37, 81.14],
+        "place": "tr",
+        "bend": -0.2,
+        "max": 31
+      }
+    ],
+    "marks": {
+      "chat": [37.28, 8.15, 55.75, 44.56],
+      "nologin": [37.12, 76.56, 25.01, 9.16]
+    }
   },
-  "step-check-fr": {
-    "width": 640,
-    "height": 640,
-    "callouts": []
-  },
-  "step-film-de": {
-    "width": 640,
-    "height": 640,
-    "callouts": []
-  },
-  "step-film-en": {
-    "width": 640,
-    "height": 640,
-    "callouts": []
-  },
-  "step-film-fr": {
-    "width": 640,
-    "height": 640,
-    "callouts": []
-  },
-  "step-result-de": {
-    "width": 640,
-    "height": 640,
-    "callouts": []
-  },
-  "step-result-en": {
-    "width": 640,
-    "height": 640,
-    "callouts": []
-  },
-  "step-result-fr": {
-    "width": 640,
-    "height": 640,
-    "callouts": []
-  },
-  "step-upload-de": {
-    "width": 640,
-    "height": 640,
-    "callouts": []
-  },
-  "step-upload-en": {
-    "width": 640,
-    "height": 640,
-    "callouts": []
-  },
-  "step-upload-fr": {
-    "width": 640,
-    "height": 640,
-    "callouts": []
-  },
-  "video-phone": {
+  "video-phone-de": {
     "width": 640,
     "height": 853,
+    "densities": [1, 2],
+    "callouts": [],
+    "lettering": [2.62, 0.67, 94.75, 40.03]
+  },
+  "video-phone-en": {
+    "width": 640,
+    "height": 853,
+    "densities": [1, 2],
+    "callouts": [],
+    "lettering": [2.62, 0.67, 94.75, 40.03]
+  },
+  "video-phone-fr": {
+    "width": 640,
+    "height": 853,
+    "densities": [1, 2],
     "callouts": [],
     "lettering": [2.62, 0.67, 94.75, 40.03]
   }

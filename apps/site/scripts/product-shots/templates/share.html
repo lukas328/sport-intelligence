@@ -1,18 +1,21 @@
 <!doctype html>
 <!-- Sharing: a collection on the phone, «So kommt es im Chat an» with the card the team sees in its
-     chat, and «Link teilen». -->
+     chat, and «Link teilen». No rings since U34: the tour outlines the two places and pulls them
+     out as live components; «Über uns» and «Daten» point at them with their callouts. -->
 <meta charset="utf-8" />
 <link rel="stylesheet" href="../stage.css" />
 <div id="stage"><div class="keil" style="--from: 76%; --to: 52%"></div></div>
 <script src="../stage.js"></script>
 <script>
-  S.stage(640, 620);
+  // in each club colour too (U45): the card in the team chat is the club's colour, large
+  S.stage(640, 620, { densities: [1, 2, 3], colours: true });
   const s = S.phone("teilen-phone", { left: 214, bottom: 26 });
   const card = S.rect("teilen-phone", "card", [16, 295, 358, 275]);
   const share = S.rect("teilen-phone", "share", [16, 750, 118, 48]);
-  S.ring(s, card, 4);
-  S.ring(s, share, 5);
   S.callout("chat", [195, 250], S.at(s, card, 0.02, 0.3), "br", 0.2, 31);
   S.callout("nologin", [195, 590], S.at(s, share, 0.02, 0.5), "tr", -0.2, 31);
+  // the places the tour pulls out (U34, tour-cuts.tsx); «Über uns» and «Daten» keep the callouts
+  S.mark("chat", s, card, 4);
+  S.mark("nologin", s, share, 5);
   S.done();
 </script>

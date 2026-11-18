@@ -22,6 +22,11 @@ for f in "$(dirname "$0")"/diag-queries/*.kql; do
     echo "(query failed: $(head -c 300 "$OUT/kql-$n.err"))"
   fi
 done
+echo "== redis container: args, volume mounts, volumes"
+redis_app=$(az containerapp list -g "$rg" --query "[?contains(name,'redis')].name | [0]" -o tsv)
+if [ -n "$redis_app" ]; then
+  az containerapp show -g "$rg" -n "$redis_app" --query "{args: properties.template.containers[0].args, command: properties.template.containers[0].command, mounts: properties.template.containers[0].volumeMounts, volumes: properties.template.volumes, revision: properties.latestRevisionName}" -o json || true
+fi
 echo "== worker logs (worker and gpu-worker), last 24 hours"
 az monitor log-analytics query -w "$ws" -o json --analytics-query "ContainerAppConsoleLogs_CL
   | where TimeGenerated > ago(24h) | where ContainerAppName_s contains 'worker'

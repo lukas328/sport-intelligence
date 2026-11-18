@@ -15,9 +15,10 @@ explains all clicks; then a robust least-squares fit from the best starts.
 
 A result counts only when the clicks agree with one court: median distance <= 5 px and at most
 20 px for any click; clicks beyond 15 px (a click on a neighbouring line) may be dropped, one at
-a time, at most a fifth of them. With fewer than 10 equations the clicks cannot be checked
-against each other and are refused. Same method as the truth of the calibration test set
-(`ml/calib/clicks.py`), without lens distortion.
+a time, at most a fifth of them, and only when no other choice of clicks on that line explains
+them with another court (two clicks left on a line no longer check each other). With fewer
+than 10 equations the clicks cannot be checked against each other and are refused. Same method
+as the truth of the calibration test set (`ml/calib/clicks.py`), without lens distortion.
 
 Pure numpy and scipy (extra "clicks" of this package), so the API can check clicks without the
 vision stack; `handball_vision.courtclicks` wraps the result as a `Calibration`.
@@ -99,6 +100,8 @@ MIN_EQUATIONS = 10  # 8 unknowns and a check
 MAX_MEDIAN_PX = 5.0
 MAX_CLICK_PX = 20.0
 DROP_PX = 15.0
+SAME_COURT_M = 0.5  # two fits further apart than this at the clicks are two different courts
+RIVAL_PX = 3.0  # a swap that explains the clicks within this of the accepted court is a rival
 
 
 @dataclass(frozen=True)
@@ -300,6 +303,56 @@ def _fit(points: dict[str, Px], lines: dict[str, list[Px]], starts: list[F64]) -
     return best[1], best[2]
 
 
+def _agrees(r: F64) -> bool:
+    return bool(len(r) and np.median(r) <= MAX_MEDIAN_PX and r.max() <= MAX_CLICK_PX)
+
+
+def _refuse_if_ambiguous(
+    h: F64,
+    res: F64,
+    pts: dict[str, Px],
+    lns: dict[str, list[tuple[int, Px]]],
+    dropped: list[Click],
+    lines: dict[str, list[Px]],
+    size: tuple[int, int],
+) -> None:
+    """A dropped click is only safe when its line still checks the others: with two clicks left
+    on a line, keeping the dropped one and dropping the other may explain the clicks as well,
+    with another court (a click 6 m off the centre line). Each such swap is fitted anew; if one
+    explains the clicks about as well (worst click within RIVAL_PX of the accepted court's) and
+    puts the court elsewhere, the clicks are refused, naming the line."""
+    inv = np.linalg.inv(h)
+    for d in dropped:
+        if d.kind != "line" or d.name not in lns:
+            continue
+        for k, _ in lns[d.name]:
+            trial = {
+                n: ([(j, p) for j, p in c if j != k] + ([(d.index, lines[n][d.index])]))
+                if n == d.name
+                else c
+                for n, c in lns.items()
+            }
+            plain = {n: [p for _, p in c] for n, c in trial.items()}
+            starts = _starts(pts, plain, size)
+            if not starts:
+                continue
+            h2, r2 = _fit(pts, plain, starts)
+            if not _agrees(r2) or r2.max() > res.max() + RIVAL_PX:
+                continue
+            px = np.array([*pts.values(), *[p for c in plain.values() for p in c]], np.float64)
+            gap = np.linalg.norm(_project(inv, px) - _project(np.linalg.inv(h2), px), axis=1)
+            if np.isfinite(gap).all() and gap.max() <= SAME_COURT_M:
+                continue
+            raise ClicksError(
+                "disagree",
+                f"the clicks on {d.name} fit two different courts: click it once more where the "
+                "line is clearly visible",
+                worst=d,
+                worst_px=None,
+                median_px=None,
+            )
+
+
 def fit_clicks(
     points: dict[str, Px], lines: dict[str, list[Px]], image_size: tuple[int, int]
 ) -> ClicksFit:
@@ -375,6 +428,8 @@ def fit_clicks(
             worst_px=round(mx, 2),
             median_px=round(med, 2),
         )
+    if dropped:  # only an accepted court is worth the extra fits
+        _refuse_if_ambiguous(h, res, pts, lns, dropped, lines, image_size)
     return ClicksFit(
         np.asarray(h / h[2, 2], np.float64), [round(float(x), 2) for x in res], dropped, used
     )
