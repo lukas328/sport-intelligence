@@ -114,6 +114,9 @@ services:
     environment:
       HB_API_INTERNAL_URL: http://api:8000
       HB_S3_PUBLIC_URL: http://localhost:9000
+      # the component pages under /dev (e2e of the calibration dialog); local and CI stack only,
+      # staging and production run from Terraform without it
+      HB_DEV_PAGES: "1"
     ports: ["3000:3000"]
     depends_on:
       api: { condition: service_healthy }
