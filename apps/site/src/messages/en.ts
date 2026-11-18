@@ -474,7 +474,7 @@ const en: Messages = {
     analysis: "Automatic analysis",
     analysisSub: "Finds the court, players, ball and goals in the video. Every goal becomes a scene.",
     goalkeepers: "Goalkeepers",
-    goalkeepersSub: "Saves and shots saved per goalkeeper, by shot zone and goal zone. At no extra cost.",
+    goalkeepersSub: "Saves, goals against and save rate per goalkeeper, by shot zone and goal zone. At no extra cost in Team and Club.",
     featureNames: {
       events: "Record the match report and matchday",
       insights: "Three things and training tips",

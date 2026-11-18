@@ -6,6 +6,7 @@ import { useState } from "react";
 import { CourtHeatmap } from "@/components/analysis/court-full";
 import { GoalGrid } from "@/components/analysis/goal-grid";
 import { EmptyState, Sheet } from "@/components/ui/card";
+import { KeeperLock, useKeeperModule } from "@/components/billing/keeper-lock";
 import { api } from "@/lib/client";
 import { cn } from "@/lib/utils";
 import { Drill, N, useDrill, type KeeperRow, type ViewProps } from "./analysis-views";
@@ -27,6 +28,9 @@ export function KeepersView({ orgId, match, teamName, stats, names, onPlay }: Vi
   // only the own goalkeepers, by the roster's goalkeepers (app review R4: the table mixed both
   // teams, a field player and a number without a name); hooks before any early return
   const roster = useRosterNames(orgId, match.team_id, match.season_id);
+  // the goalkeeper module is part of Team and Verein, not of Gratis (Lukas, 18.11.2026)
+  const keeperModule = useKeeperModule();
+  if (!keeperModule) return <KeeperLock orgId={orgId} />;
   // the example match's keepers are invented numbers, never the roster's goalkeepers (A4)
   const rows = ownKeepers(Object.values(stats.goalkeepers ?? {}), match.source === "demo" ? [] : (roster.data ?? []));
   if (rows.length === 0) return <EmptyState title={t("none")}>{t("assignHint")}</EmptyState>;

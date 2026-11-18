@@ -203,6 +203,9 @@ async def season_stats(ctx: Ctx, team_id: uuid.UUID, season_id: uuid.UUID) -> di
     for r in data["matches"]:
         r["has_video"] = uuid.UUID(r["match_id"]) in videos
     data["totals"]["video_matches"] = sum(r["has_video"] for r in data["matches"])
+    if not await billing.allows(ctx, "goalkeepers", team.organization_id):
+        # a goalkeeper's saves are part of the goalkeeper module; the team's figures stay
+        data["players"] = [{**p, "saves": None} for p in data["players"]]
     return data
 
 

@@ -28,7 +28,7 @@ from handball_api.models import (
 )
 from handball_api.models.enums import VideoRole
 from handball_api.schemas.events import EventIn, EventOut, EventPatch
-from handball_api.services import audit, roster, timeline
+from handball_api.services import audit, billing, roster, timeline
 from handball_api.services.context import Ctx
 from handball_api.services.matches import get_match
 from handball_api.services.policies import Action
@@ -317,7 +317,13 @@ def estimate_possessions(events: list[MEvent]) -> dict[str, int]:
 
 
 async def match_stats(ctx: Ctx, match_id: uuid.UUID) -> dict[str, Any]:
-    return await stats_for(ctx, await get_match(ctx, match_id))
+    """The match statistics; the per-goalkeeper figures (`goalkeepers`) only with the goalkeeper
+    module of the plan, else empty in the same shape (the team's saves stay, like the score)."""
+    match = await get_match(ctx, match_id)
+    data = await stats_for(ctx, match)
+    if not await billing.allows(ctx, "goalkeepers", match.organization_id):
+        data = {**data, "goalkeepers": {}}
+    return data
 
 
 async def stats_for(ctx: Ctx, match: Match) -> dict[str, Any]:
@@ -579,8 +585,10 @@ async def import_feed(ctx: Ctx, match_id: uuid.UUID, data: bytes, filename: str)
 
 async def shot_export(ctx: Ctx, match_id: uuid.UUID) -> dict[str, Any]:
     """P2 preparation (goalkeeper anticipation trainer): shots with metadata and the video times in
-    the goal cameras. Only own staff; opponent shooters by number only (4.9)."""
+    the goal cameras. Only own staff; opponent shooters by number only (4.9). Part of the
+    goalkeeper module of the plan."""
     match = await get_match(ctx, match_id, Action.CLIP_WRITE)
+    await billing.require_feature(ctx, "goalkeepers", match.organization_id)
     cams = (
         await ctx.db.scalars(
             select(VideoAsset).where(

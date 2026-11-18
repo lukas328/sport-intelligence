@@ -167,8 +167,8 @@ export function BillingSection({ orgId }: { orgId: string }) {
                   p.matches_per_season == null ? t("matchesUnlimited") : t("matchesN", { count: p.matches_per_season }),
                   t("storageN", { gb: p.storage_gb }),
                   p.features.includes("tracking") ? t("withAnalysis") : t("withoutAnalysis"),
-                  // the goalkeeper functions are part of the plan, no add-on (A9)
-                  p.features.includes("tracking") ? t("withKeepers") : null,
+                  // the goalkeeper module: Team and Verein, no add-on (A9), not Gratis (18.11.2026)
+                  p.features.includes("goalkeepers") ? t("withKeepers") : null,
                   p.trial_days > 0 ? t("trial", { days: p.trial_days }) : null,
                 ]
                   .filter(Boolean)

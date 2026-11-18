@@ -2031,6 +2031,7 @@ export interface paths {
         /**
          * Shot Export
          * @description Shots with metadata and goal-camera times (export API for the goalkeeper trainer, P2).
+         *     Part of the goalkeeper module (plan feature `goalkeepers`): 402 plan-required without it.
          */
         get: operations["shot_export_v1_orgs__org_id__matches__match_id__exports_shots_get"];
         put?: never;
@@ -2642,7 +2643,8 @@ export interface paths {
          *     (null without shots); players have `xg_shots`, goalkeepers `xg_shots`, `xg_coverage` and
          *     `gsax` (null unless at least 70 % of the saves and of the goals have xG). Shot zones include
          *     `empty_goal` (shots on the empty goal, from any distance) apart from `long_range` (over
-         *     15 m).
+         *     15 m). `goalkeepers` (the figures per goalkeeper) is empty without the goalkeeper module of
+         *     the plan (feature `goalkeepers`); the team's saves stay.
          */
         get: operations["match_stats_v1_orgs__org_id__matches__match_id__stats_get"];
         put?: never;
@@ -3469,7 +3471,8 @@ export interface paths {
         };
         /**
          * Goalkeeper Card
-         * @description A6 shooter card for goalkeepers (number, position, preferred goal zones).
+         * @description A6 shooter card for goalkeepers (number, position, preferred goal zones). Part of the
+         *     goalkeeper module (plan feature `goalkeepers`): 402 plan-required without it.
          */
         get: operations["goalkeeper_card_v1_orgs__org_id__scouting__report_id__goalkeeper_card_get"];
         put?: never;
@@ -4541,7 +4544,8 @@ export interface paths {
          * @description A player's season line: per played match (as in the season statistics) date, opponent,
          *     result and the player's figures as the match statistics count them (one source per goal),
          *     each with the ids of its events in `events` (same keys) to open the clips, and season
-         *     `totals`. Goalkeepers: `faced`, `saves`, `goals_against`, credited by the keeper on the shot.
+         *     `totals`. Goalkeepers: `faced`, `saves`, `goals_against`, credited by the keeper on the shot
+         *     (0, without events and save rate, without the goalkeeper module of the plan).
          *     `attendance` is the recorded presence; playing minutes are not recorded. The staff read
          *     every player of the team, players only their own line.
          */
@@ -4604,7 +4608,8 @@ export interface paths {
          *     against `xg`) and the same for the opponent (`xg_against`, `xg_against_coverage`,
          *     `xg_goals_against`); totals have `matches`, `tagged_matches`, `xg`, `xg_shots`, `xg_goals`
          *     and `xg_coverage` = shots with xG / shots on target (null without shots), and
-         *     shooting/save percentages only from matches with recorded misses or saves.
+         *     shooting/save percentages only from matches with recorded misses or saves. A player's `saves`
+         *     (credited to the goalkeeper) are null without the goalkeeper module of the plan.
          */
         get: operations["season_stats_v1_orgs__org_id__teams__team_id__seasons__season_id__stats_get"];
         put?: never;
@@ -9566,6 +9571,11 @@ export interface components {
              */
             created_at: string;
             data_region: components["schemas"]["DataRegion"];
+            /**
+             * Features
+             * @description the plan features the club can use now (every feature where plans are not enforced), e.g. `goalkeepers` for the goalkeeper figures
+             */
+            features?: string[];
             /** Has Logo */
             has_logo: boolean;
             /**

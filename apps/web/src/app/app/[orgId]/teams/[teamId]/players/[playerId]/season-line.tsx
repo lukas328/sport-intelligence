@@ -7,6 +7,7 @@ import { useFormatter, useTranslations } from "next-intl";
 import { BackLink } from "@/components/ui/back-link";
 import { EmptyState } from "@/components/ui/card";
 import { PageHead } from "@/components/anlauf/heads";
+import { KeeperLock, useKeeperModule } from "@/components/billing/keeper-lock";
 import { useShell } from "@/components/shell/context";
 import { api } from "@/lib/client";
 import { cn } from "@/lib/utils";
@@ -25,6 +26,7 @@ export function SeasonLineView({ orgId, teamId, playerId }: { orgId: string; tea
   const t = useTranslations("seasonLine");
   const format = useFormatter();
   const { mode } = useShell();
+  const keeperModule = useKeeperModule();
   const staff = mode === "staff";
   const team = { org_id: orgId, team_id: teamId };
   const line = useQuery({
@@ -106,6 +108,11 @@ export function SeasonLineView({ orgId, teamId, playerId }: { orgId: string; tea
           />
         </div>
       </div>
+      {/* a goalkeeper's figures are the goalkeeper module (Team and Verein, Lukas 18.11.2026) */}
+      {keeper && !keeperModule ? (
+        <KeeperLock orgId={orgId} />
+      ) : (
+      <>
       {/* the season in one printed row, every count leads to its scenes; nothing played: one sentence */}
       {l.totals.matches === 0 ? (
         <p className="text-[15px] text-ink-2" data-testid="season-line-empty">{t("noMatchesYet")}</p>
@@ -166,6 +173,8 @@ export function SeasonLineView({ orgId, teamId, playerId }: { orgId: string; tea
         </div>
       )}
       <p className="text-[15px] text-ink-2">{t("source")}</p>
+      </>
+      )}
     </div>
   );
 }
