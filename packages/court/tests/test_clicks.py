@@ -136,3 +136,27 @@ def test_court_model_lists_every_clickable_line_and_point() -> None:
     six = lines["six_left"]["court"]
     assert all(abs(np.hypot(x, max(0, abs(y - 10) - 1.5)) - 6) < 0.01 for x, y in six)
     assert model["points"]["corner_tl"] == list(courtclicks.KEYPOINTS["corner_tl"])
+
+
+def test_a_dropped_click_that_leaves_two_courts_is_refused() -> None:
+    # sidelines, one goal line and the centre line fix the court with two clicks each; a third
+    # centre-line click 6 m off makes two courts: one with each pair of centre clicks
+    h = np.array([[30.0, 12.0, 80.0], [-1.0, -14.0, 640.0], [0.0005, 0.012, 1.0]])
+    c = courtclicks._DENSE
+
+    def on(name: str, ts: list[float]) -> list[tuple[float, float]]:
+        d = c[name]
+        pts = courtclicks._project(h, d[[int(t * (len(d) - 1)) for t in ts]])
+        return [(float(x), float(y)) for x, y in pts]
+
+    off = courtclicks._project(h, np.array([[26.0, 14.0]]))[0]
+    lines = {
+        "side_near": on("side_near", [0.1, 0.5, 0.9]),
+        "side_far": on("side_far", [0.1, 0.5, 0.9]),
+        "goal_left": on("goal_left", [0.3, 0.7]),
+        "centre": [*on("centre", [0.2, 0.8]), (float(off[0]), float(off[1]))],
+    }
+    with pytest.raises(ClicksError, match="two different courts") as exc:
+        courtclicks.fit_clicks({}, lines, SIZE)
+    assert exc.value.code == "disagree"
+    assert exc.value.worst is not None and exc.value.worst.name == "centre"

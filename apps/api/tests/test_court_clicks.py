@@ -340,3 +340,7 @@ async def test_an_undeterminable_court_closes_its_question_until_clicked(
         {"calibration": _court("user_correction"), "tracks": _tracks(), "panorama": PANORAMA},
     )
     assert await _state(api, org, m_vid) == "confirmed"
+    # a set court is not undeterminable: the request is refused and nothing changes
+    r = await api.post(f"/v1/orgs/{org}/videos/{m_vid}/calibration/undeterminable", json={})
+    assert r.status_code == 409 and r.json()["type"].endswith(":court-confirmed")
+    assert await _state(api, org, m_vid) == "confirmed"
