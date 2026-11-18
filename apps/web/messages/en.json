@@ -3901,7 +3901,10 @@
     "finishedTextNone": "The other questions are put aside. The bell is quiet.",
     "skippedLeft": "{n, plural, one {You skipped 1 question. It waits} other {You skipped # questions. They wait}} under “Check more”, whenever you like.",
     "skipAll": "Done for this match: skip all the others",
-    "noneOpen": "no question open"
+    "noneOpen": "no question open",
+    "fieldLines": "Mark with the lines",
+    "fieldLinesDone": "Marked with the lines",
+    "fieldUndeterminable": "Cannot be determined"
   },
   "scenesPage": {
     "searchLabel": "Search scenes",

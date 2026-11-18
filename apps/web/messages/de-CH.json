@@ -3901,7 +3901,10 @@
     "finishedTextNone": "Die übrigen Fragen sind weggelegt. Die Glocke ist ruhig.",
     "skippedLeft": "{n, plural, one {1 Frage hast du übersprungen. Sie wartet} other {# Fragen hast du übersprungen. Sie warten}} unter «Mehr prüfen», wann immer du magst.",
     "skipAll": "Für dieses Spiel fertig: alle übrigen überspringen",
-    "noneOpen": "keine Frage offen"
+    "noneOpen": "keine Frage offen",
+    "fieldLines": "Mit Linien markieren",
+    "fieldLinesDone": "Mit Linien markiert",
+    "fieldUndeterminable": "Nicht bestimmbar"
   },
   "scenesPage": {
     "searchLabel": "Szenen suchen",

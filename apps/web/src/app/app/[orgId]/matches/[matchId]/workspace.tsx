@@ -869,7 +869,8 @@ function AnalysisPanel({
   onConfirmed?: () => void;
 }) {
   const t = useTranslations("analysis");
-  const [marking, setMarking] = useState(false);
+  // the court dialog; «Neu markieren» beside the court preview goes straight to the lines
+  const [marking, setMarking] = useState<false | "suggest" | "mark">(false);
   const qc = useQueryClient();
   const confirm = useMutation({
     mutationFn: async () => {
@@ -947,7 +948,7 @@ function AnalysisPanel({
           <Button onClick={confirmCourt} loading={confirming} data-testid="court-confirm">
             {t("courtFits")}
           </Button>
-          <Button variant="secondary" onClick={() => setMarking(true)} data-testid="mark-court">
+          <Button variant="secondary" onClick={() => setMarking("mark")} data-testid="mark-court">
             {t("courtRemark")}
           </Button>
         </div>
@@ -955,14 +956,14 @@ function AnalysisPanel({
         <Button
           variant={analysis.needs_calibration ? "primary" : "secondary"}
           size={analysis.needs_calibration || unconfirmed ? "md" : "sm"}
-          onClick={() => setMarking(true)}
+          onClick={() => setMarking("suggest")}
           data-testid="mark-court"
         >
           {t(analysis.needs_calibration ? "markCourt" : unconfirmed ? "checkCourtButton" : "realign")}
         </Button>
       )}
       {confirmFailed && <Alert className="py-2">{t("courtConfirmError")}</Alert>}
-      {marking && <CourtCalibration orgId={orgId} videoId={videoId} analysis={analysis} onClose={() => setMarking(false)} />}
+      {marking && <CourtCalibration orgId={orgId} videoId={videoId} analysis={analysis} start={marking} onClose={() => setMarking(false)} />}
       {analysis.chunks != null && analysis.chunk_ms != null && analysis.chunks > 0 && (
         <MiniCourt
           baseUrl={`/v1/orgs/${orgId}/videos/${videoId}/tracks`}

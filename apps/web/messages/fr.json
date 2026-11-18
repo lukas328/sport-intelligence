@@ -3901,7 +3901,10 @@
     "finishedTextNone": "Les autres questions sont mises de côté. La cloche est calme.",
     "skippedLeft": "{n, plural, one {Tu as passé 1 question. Elle attend} other {Tu as passé # questions. Elles attendent}} sous « Vérifier plus », quand tu veux.",
     "skipAll": "Terminé pour ce match : passer toutes les autres",
-    "noneOpen": "aucune question ouverte"
+    "noneOpen": "aucune question ouverte",
+    "fieldLines": "Marquer avec les lignes",
+    "fieldLinesDone": "Marqué avec les lignes",
+    "fieldUndeterminable": "Impossible à déterminer"
   },
   "scenesPage": {
     "searchLabel": "Chercher des scènes",

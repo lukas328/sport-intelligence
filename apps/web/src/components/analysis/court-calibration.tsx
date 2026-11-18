@@ -103,6 +103,8 @@ export function CourtCalibration({
   analysis,
   onClose,
   imageSrc,
+  onDone,
+  start = "suggest",
 }: {
   orgId: string;
   videoId: string;
@@ -110,6 +112,10 @@ export function CourtCalibration({
   onClose: () => void;
   /** the hall image, when not the video's panorama (the component page) */
   imageSrc?: string;
+  /** after an answer was saved: «Passt», a court from the clicks, «nicht bestimmbar» */
+  onDone?: (answer: "confirmed" | "saved" | "undeterminable") => void;
+  /** «mark»: the coach already looked at the suggestion (beside it «Neu markieren»): to the lines */
+  start?: "suggest" | "mark";
 }) {
   const t = useTranslations("calibrate");
   const format = useFormatter();
@@ -144,7 +150,7 @@ export function CourtCalibration({
   });
   const [flow, dispatch] = useReducer(
     flowReducer,
-    { suggestion: suggestion != null, clicks: prefill },
+    { suggestion: suggestion != null && start === "suggest", clicks: prefill },
     initialFlow,
   );
   const [model, setModel] = useState<CourtModel>(LOCAL_COURT_MODEL);
@@ -281,9 +287,10 @@ export function CourtCalibration({
 
   const close = useCallback(() => onClose(), [onClose]);
 
-  async function done() {
+  async function done(answer: "confirmed" | "saved" | "undeterminable") {
     await qc.invalidateQueries({ queryKey: ["analysis", videoId] });
     onClose();
+    onDone?.(answer);
   }
 
   async function confirm() {
@@ -292,7 +299,7 @@ export function CourtCalibration({
     const ok = await confirmCourt(orgId, videoId);
     setBusy(null);
     if (!ok) return setError(t("errorConfirm"));
-    await done();
+    await done("confirmed");
   }
 
   async function save() {
@@ -301,7 +308,7 @@ export function CourtCalibration({
     setError(null);
     const r = await saveCourt(orgId, videoId, flow.clicks, verdict.homography, model);
     setBusy(null);
-    if (r.kind === "ok") return done();
+    if (r.kind === "ok") return done("saved");
     if (r.kind === "refused") return setError(problemText(r.problem));
     setError(t("errorSave"));
   }
@@ -311,7 +318,7 @@ export function CourtCalibration({
     setError(null);
     const r = await markUndeterminable(orgId, videoId, reason);
     setBusy(null);
-    if (r.kind === "ok") return done();
+    if (r.kind === "ok") return done("undeterminable");
     if (r.kind === "missing") setUndeterminable(false);
     setError(t("errorSave"));
   }
