@@ -8,7 +8,7 @@
  * everything on the stage is in CSS pixels of the stage (the 1x picture).
  */
 (function () {
-  const shot = { callouts: [], warnings: [], transparent: false };
+  const shot = { callouts: [], warnings: [], transparent: false, uses: [] };
   /**
    * the language of a picture with words in it (compose.mjs opens it once per language of
    * `stage(…, { langs })` with ?lang=xx and writes <name>-<lang>.webp)
@@ -22,6 +22,8 @@
   function cap(name) {
     const c = (window.CAPTURES || {})[name];
     if (!c) throw new Error(`capture «${name}» is missing: run capture.mjs`);
+    // a picture made of captures is a picture of the app: compose.mjs makes it in each club colour
+    if (!shot.uses.includes(name)) shot.uses.push(name);
     const s = c.scale || 1;
     const rects = {};
     for (const [k, r] of Object.entries(c.rects || {})) rects[k] = r.map((v) => v / s);
@@ -37,8 +39,10 @@
   }
 
   /**
-   * the stage: size in CSS px of the 1x picture; `clear` leaves the background transparent,
-   * `budget1x` and `budget2x` set another weight than compose.mjs's default
+   * the stage: size in CSS px of the 1x picture; `clear` leaves the background transparent;
+   * `densities` the files compose.mjs writes (default [1, 2]; [1, 2, 3] for a picture the page
+   * shows large, U44); `budget1x`, `budget2x` and `budget3x` another weight than the default;
+   * `colours` (and `colourDensities`) also each club colour of variants.mjs (U45)
    */
   function stage(width, height, opts = {}) {
     const el = document.getElementById("stage");
@@ -52,14 +56,20 @@
     if (opts.paper) el.classList.add("paper");
     // or on the app's cloth, for pieces of a page (not a sheet)
     if (opts.cloth) el.classList.add("cloth");
-    // or the dark court ground of the four steps (stage.css «#stage.steps», steps.js)
-    if (opts.steps) el.classList.add("steps");
     shot.width = width;
     shot.height = height;
     // another weight than compose.mjs's default (bytes of the 1x and the 2x file): lower for a
     // picture the page loads at once, higher for a wide screen full of small text
     if (opts.budget1x) shot.budget1x = opts.budget1x;
     if (opts.budget2x) shot.budget2x = opts.budget2x;
+    if (opts.budget3x) shot.budget3x = opts.budget3x;
+    if (opts.densities) shot.densities = opts.densities;
+    // a picture of the app in each club colour too (U45), at these densities (compose.mjs)
+    if (opts.colours) shot.colours = true;
+    if (opts.colourDensities) shot.colourDensities = opts.colourDensities;
+    if (opts.colourBudget2x) shot.colourBudget2x = opts.colourBudget2x;
+    // the club colour compose.mjs makes it in: the Keil follows the app
+    if (window.CLUB) el.style.setProperty("--club", window.CLUB);
     // words in the picture: one file per language (de, fr, en), see `lang` and `t`
     if (opts.langs) shot.langs = opts.langs;
     document.documentElement.lang = lang;
@@ -245,6 +255,18 @@
     return onStage(map.el, [x, y, w, hh]);
   }
 
+  /**
+   * A place the page pulls out of the picture (U34, «Ausriss»): the app box `r` (with `pad`
+   * stage px around it) under the name `id`. The page dims the picture, outlines this place and
+   * shows it enlarged beside it as a live component in the visitor's language (components/
+   * tour-cuts.tsx); the manifest holds the box in per cent of the picture (`marks`).
+   */
+  function mark(id, map, r, pad = 6) {
+    const [x, y, w, h] = onStage(map.el, map(r));
+    shot.marks = { ...(shot.marks || {}), [id]: [x - pad, y - pad, w + 2 * pad, h + 2 * pad] };
+    return shot.marks[id];
+  }
+
   /** where the website writes a word over the picture (a box on the stage, see `video`) */
   function lettering(box) {
     shot.lettering = box;
@@ -263,5 +285,5 @@
     window.READY = shot;
   }
 
-  window.S = { lang, t, cap, rect, stage, screen, piece, cut, phone, browser, onStage, ring, spot, at, callout, video, lettering, done };
+  window.S = { lang, t, cap, rect, stage, screen, piece, cut, phone, browser, onStage, ring, spot, at, callout, video, lettering, mark, done };
 })();

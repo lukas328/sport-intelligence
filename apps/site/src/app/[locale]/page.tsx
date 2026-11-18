@@ -5,6 +5,7 @@ import plans from "@handball/plans";
 import { AskCard } from "@/components/ask-card";
 import { HeroFilm } from "@/components/hero-film";
 import { ProductShot } from "@/components/product-shot";
+import { appShot, SHOT_SIZES } from "@/lib/product-shots";
 import { JsonLd } from "@/components/json-ld";
 import { DemoLink, KitScope, StartLink } from "@/components/kit";
 import { Reveal } from "@/components/reveal";
@@ -172,12 +173,12 @@ export default async function Home({ params }: Props) {
           {/* the real app on a computer: the match with its video and scenes (S13) */}
           <div data-reveal className="mt-12 md:mt-16">
             <ProductShot
-              name="app-desktop"
-              phone="video-phone"
+              name={appShot("app-desktop", locale)}
+              phone={appShot("video-phone", locale)}
               alt={t.appAlt}
               lettering={t.film.video}
               labels={{}}
-              sizes="(min-width: 1216px) 1152px, calc(100vw - 2rem)"
+              sizes={SHOT_SIZES.column()}
               framed={false}
               caption={t.getMore}
             />

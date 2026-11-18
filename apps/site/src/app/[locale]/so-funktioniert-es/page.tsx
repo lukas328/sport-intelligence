@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import type { CSSProperties } from "react";
 import { AppTour } from "@/components/app-tour";
-import { StepPicture } from "@/components/step-picture";
+import { BallRun } from "@/components/ball-run";
+import { StepArt } from "@/components/step-art";
+import { cn } from "@/lib/cn";
 import { Reveal } from "@/components/reveal";
 import { Honest } from "@/components/honest";
 import { KitScope, StartLink } from "@/components/kit";
@@ -10,17 +12,57 @@ import { JsonLd } from "@/components/json-ld";
 import { StepsArt } from "@/components/head-art";
 import { PageHead, SectionHead } from "@/components/wurf-head";
 import { graph, howTo } from "@/lib/schema";
-import { APP_LOCALE, messages, type Locale } from "@/lib/i18n";
+import { APP_LOCALE, fmt, messages, type Locale } from "@/lib/i18n";
 import { pageMeta } from "@/lib/seo";
+import { appShot } from "@/lib/product-shots";
+import { COLLECTION, SEARCH, SEASON_BARS, tourTimeline } from "@/lib/tour-cuts";
+import { AnswerCut, BarsCut, ButtonCut, ChatCut, SceneCut, TimelineCut, type TourCut } from "@/components/tour-cuts";
 
 type Props = { params: Promise<{ locale: Locale }> };
 
 /**
- * Product pictures (public/product, scripts/product-shots): one per step (components/step-picture,
- * the same set as on the start page), and under «So sieht es in der App aus» the same pictures as
- * on the start page plus sharing.
+ * The four steps are drawn live on the page (components/step-art.tsx, no pictures); under «So
+ * sieht es in der App aus» the product pictures (public/product, scripts/product-shots): the same
+ * as on the start page plus sharing.
  */
 const SHOTS = ["get-video", "get-search", "get-season", "share"] as const;
+
+/**
+ * The places each tour picture pulls out as live cut-outs (U34, components/tour-cuts.tsx): the
+ * app's words in the page's language, the captures' figures (lib/tour-cuts.ts).
+ */
+function tourCuts(shot: (typeof SHOTS)[number], m: ReturnType<typeof messages>): TourCut[] {
+  const a = m.product.app;
+  const p = m.product;
+  if (shot === "get-video") {
+    const t = tourTimeline();
+    return [
+      { id: "tap", label: p["get-video"].tap, content: <SceneCut clock={t.scene.clock} what={fmt(a.goal, { team: "TSV Nachtwind", clock: t.scene.clock })} playing={a.playing} /> },
+      { id: "timeline", label: p["get-video"].timeline, content: <TimelineCut t={t} words={a} /> },
+    ];
+  }
+  if (shot === "get-search")
+    return [
+      {
+        id: "answer",
+        label: p["get-search"].answer,
+        content: <AnswerCut n={SEARCH.n} of={fmt(a.answerOf, { of: SEARCH.of })} base={fmt(a.answerBase, { percent: SEARCH.percent, n: SEARCH.last.n, of: SEARCH.last.of })} />,
+      },
+      { id: "play", label: fmt(p["get-search"].play, { n: SEARCH.n }), content: <ButtonCut>{fmt(a.playAll, { n: SEARCH.n })}</ButtonCut> },
+    ];
+  if (shot === "get-season")
+    return [
+      {
+        id: "bars",
+        label: p["get-season"].bars,
+        content: <BarsCut title={a.wingTheme} text={fmt(a.everyMatch, { n: SEARCH.n, of: SEARCH.of })} scenes={fmt(a.scenes, { n: SEARCH.n })} bars={SEASON_BARS} />,
+      },
+    ];
+  return [
+    { id: "chat", label: p.share.chat, content: <ChatCut title={a.collection} team={a.team} meta={fmt(a.collectionMeta, { n: COLLECTION.scenes, length: COLLECTION.length })} /> },
+    { id: "nologin", label: p.share.nologin, content: <ButtonCut>{a.shareLink}</ButtonCut> },
+  ];
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
@@ -47,31 +89,39 @@ export default async function How({ params }: Props) {
       <Reveal />
       <PageHead kick={t.title} title={t.head} lead={t.lead} aside={<StepsArt steps={t.steps} label={t.stepsLabel} />} />
       <div className="wrap">
-        <ol className="mt-12">
-          {t.steps.map((s, i) => (
-            <li
-              key={s.title}
-              id={`schritt-${i + 1}`}
-              className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-5 border-t-2 border-ink py-10 md:grid-cols-[6rem_minmax(0,1fr)_minmax(0,26rem)] md:gap-x-10 print:grid-cols-[4.5rem_minmax(0,1fr)_minmax(0,15rem)] print:gap-x-6 print:py-6"
-            >
-              <span aria-hidden className="font-num text-[4.5rem] leading-[.85] text-club-text md:text-[6.5rem]">
-                {i + 1}
-              </span>
-              <div data-reveal>
-                <h2 className="text-[2rem] md:text-[2.5rem]">{s.title}</h2>
-                <p className="measure mt-3">{s.text}</p>
-                {i === 0 && (
-                  <Link href={`/${locale}/aufnahme/`} className="link mt-2">
-                    {m.cta.filming}
-                  </Link>
-                )}
-              </div>
-              <div data-reveal style={{ "--d": 1 } as CSSProperties} className="col-span-2 mt-6 md:col-span-1 md:mt-0 print:col-span-1 print:mt-0">
-                <StepPicture step={i} locale={locale} alt={s.alt} />
-              </div>
-            </li>
-          ))}
-        </ol>
+        {/* the four steps (U47): text and drawing share the row, left and right in turn; the
+            drawings are cut-outs on the page's ground, and one ball path runs through them */}
+        <div data-steps className="relative mt-14 md:mt-20">
+          <BallRun />
+          <ol className="relative grid gap-20 md:gap-24 lg:gap-10">
+            {t.steps.map((s, i) => {
+              const flip = i % 2 === 1;
+              return (
+                <li key={s.title} id={`schritt-${i + 1}`} className="grid grid-cols-1 items-center gap-y-8 lg:grid-cols-12 lg:gap-x-10">
+                  <div data-reveal className={cn("relative z-[2] lg:col-span-5 lg:row-start-1", flip ? "lg:col-start-8" : "lg:col-start-1")}>
+                    <p aria-hidden className="font-num text-[6rem] leading-[.8] text-club-text md:text-[8rem] lg:text-[10rem]">
+                      {i + 1}
+                    </p>
+                    <h2 className="mt-3 text-[2.5rem] md:text-[3.25rem] lg:mt-4 lg:text-[3.5rem]">{s.title}</h2>
+                    <p className="measure mt-4 text-[1.1875rem] lg:text-[1.25rem]">{s.text}</p>
+                    {i === 0 && (
+                      <Link href={`/${locale}/aufnahme/`} className="link mt-2">
+                        {m.cta.filming}
+                      </Link>
+                    )}
+                  </div>
+                  <div
+                    data-reveal
+                    style={{ "--d": 1 } as CSSProperties}
+                    className={cn("relative z-[1] -mx-2 sm:mx-0 lg:col-span-7 lg:row-start-1", flip ? "lg:col-start-1" : "lg:col-start-6")}
+                  >
+                    <StepArt step={i} art={t.art} label={s.alt} />
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
+        </div>
 
         <section aria-labelledby="shots" className="mt-16">
           <SectionHead id="shots" title={t.shotsTitle} note={t.shotsNote} />
@@ -81,11 +131,12 @@ export default async function How({ params }: Props) {
             hint={t.tourHint}
             items={t.shots.map((s, i) => ({
               player: t.tourPlayers[i]!,
-              name: SHOTS[i]!,
+              name: appShot(SHOTS[i]!, locale),
+              base: SHOTS[i]!,
               alt: s.alt,
               caption: s.caption,
               text: s.text,
-              labels: m.product[SHOTS[i]!],
+              cuts: tourCuts(SHOTS[i]!, m),
               lettering: SHOTS[i] === "get-video" ? m.home.film.video : undefined,
             }))}
           />
