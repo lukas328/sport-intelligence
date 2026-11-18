@@ -28,7 +28,11 @@ test("live tagging courtside: clock, buttons, offline queue, sync", async ({ pag
   await page.getByLabel("Anpfiff", { exact: true }).fill(`${two(now.getHours())}:${two(now.getMinutes())}`);
   await page.getByRole("button", { name: "Spiel anlegen" }).click();
   // Spieltag opens on the six big keys; the capture per player sits behind «Pro Spielerin erfassen»
-  await page.getByTestId("live-link").click();
+  // Spieltag is in the backlog (A21): no way into it from the match, the address still opens it
+  await page.waitForURL(/\/matches\/[0-9a-f-]{36}/);
+  await expect(page.getByTestId("match-menu")).toBeVisible();
+  await expect(page.getByTestId("live-link")).toHaveCount(0);
+  await page.goto(page.url().replace(/(\/matches\/[^/?#]+).*$/, "$1/matchday"));
   await expect(page.getByTestId("marks")).toBeVisible();
   // its own top line stands fully in the window: «Beenden» is the way back (no bar pushed above the page)
   await page.evaluate(() => window.scrollTo(0, 0));
