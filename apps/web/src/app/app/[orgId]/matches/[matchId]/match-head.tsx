@@ -66,7 +66,7 @@ export function MatchHead({ match, ownName, oppName, view, graphics, children }:
           scoreless={graphics != null}
           goals={graphics ? reportGoals(graphics) : null}
           goalsUntil={graphics ? reportCut(graphics, match.score_own, match.score_opponent, (match.period_s * match.periods) / 60) : null}
-          flightLabels={{ half: t("halftime", { v: "{v}" }), end: t("end", { v: "{v}" }), halfLevel: t("halftimeLevel"), endLevel: t("endLevel"), cut: t("flightCut", { m: "{m}" }) }}
+          flightLabels={{ half: t("halftime", { v: "{v}" }), end: t("end", { v: "{v}" }), cut: t("flightCut", { m: "{m}" }) }}
           meta={
             <>
               {half}

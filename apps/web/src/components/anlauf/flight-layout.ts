@@ -26,13 +26,18 @@ export function diffAt(flow: readonly [number, number][], m: number): number {
 
 export const signed = (v: number) => `${v > 0 ? "+" : ""}${v}`;
 
+/** The score after the goals up to minute `m`, ours first: «13:15» (A12: the score, never the
+ * difference, under the line of the difference) */
+export function scoreAt(goals: readonly ReportGoal[], m: number): string {
+  const upTo = goals.filter((g) => g.minute <= m);
+  const own = upTo.filter((g) => g.team === "own").length;
+  return `${own}:${upTo.length - own}`;
+}
+
 export interface FlightLabels {
-  /** "{v}" is replaced by the signed difference */
+  /** "{v}" is replaced by the score at that moment, ours first ("Halbzeit 13:15") */
   half: string;
   end: string;
-  /** said instead when the difference is zero ("Halbzeit, Gleichstand") */
-  halfLevel?: string;
-  endLevel?: string;
   /** the goal sequence stops early (`until`): said at its end instead of the end label, "{m}" is
    * the minute ("Torfolge bis 41'") */
   cut?: string;
@@ -99,8 +104,7 @@ export function flightLayout(goals: readonly ReportGoal[], width: number, height
   const end: Pt = [x(stop), y(endV)];
   const out: FlightLabel[] = [];
   if (labels) {
-    const half = diffAt(flow, (from + length) / 2);
-    const say = (tpl: string, level: string | undefined, v: number) => (v === 0 && level ? level : tpl.replace("{v}", signed(v)));
+    const say = (tpl: string, m: number) => tpl.replace("{v}", scoreAt(goals, m));
     const place = (text: string, cx: number, anchor: FlightLabel["anchor"]) => {
       const w = text.length * charWidth;
       const x0 = anchor === "middle" ? cx - w / 2 : anchor === "end" ? cx - w : cx;
@@ -113,13 +117,13 @@ export function flightLayout(goals: readonly ReportGoal[], width: number, height
       const box: FlightLabel["box"] = [x0, baseline - LABEL_SIZE + 3, x1, baseline + 3];
       out.push({ text, x: cx, y: baseline, anchor, box });
     };
-    if (stop === length || stop > (from + length) / 2 + 2) place(say(labels.half, labels.halfLevel, half), x((from + length) / 2), "middle");
+    if (stop === length || stop > (from + length) / 2 + 2) place(say(labels.half, (from + length) / 2), x((from + length) / 2), "middle");
     if (stop < length) {
       // where the sequence stops: said right of the dot, the empty axis after it is the gap
       place((labels.cut ?? "{m}'").replace("{m}", String(Math.floor(stop))), end[0] + 12, "start");
     } else {
       // the end label to the left of the end dot, clear of it
-      place(say(labels.end, labels.endLevel, endV), end[0] - 12, "end");
+      place(say(labels.end, stop), end[0] - 12, "end");
     }
   }
   return { pts, base, end, labels: out };

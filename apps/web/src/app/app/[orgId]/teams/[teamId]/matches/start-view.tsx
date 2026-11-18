@@ -298,7 +298,7 @@ function useHeadProps(m: Match | null, next: Match | null, g: MatchGraphics | nu
     // without a result (and once the data is there) no large empty place for one: the head stays
     // short and what matters comes up (second round A10)
     scoreless: g != null || !m.has_video,
-    flightLabels: { half: t("halftime", { v: "{v}" }), end: t("end", { v: "{v}" }), halfLevel: t("halftimeLevel"), endLevel: t("endLevel"), cut: t("flightCut", { m: "{m}" }) },
+    flightLabels: { half: t("halftime", { v: "{v}" }), end: t("end", { v: "{v}" }), cut: t("flightCut", { m: "{m}" }) },
   };
 }
 

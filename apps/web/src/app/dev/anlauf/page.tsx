@@ -62,7 +62,7 @@ export default async function AnlaufPage({ searchParams }: { searchParams: Promi
               ownName="HC Tannengrün"
               oppName="TSV Nachtwind"
               goals={DEMO_REPORT}
-              flightLabels={{ half: "Halbzeit {v}", end: "Schluss {v}", halfLevel: "Halbzeit, Gleichstand", endLevel: "Schluss, Gleichstand" }}
+              flightLabels={{ half: "Halbzeit {v}", end: "Schluss {v}" }}
             />
             <div className="mt-6 grid gap-8 px-4 md:grid-cols-2 md:px-8">
               <Strip name="HC Tannengrün gegen TSV Nachtwind" sub="Samstag, Meisterschaft" own={DEMO_RESULT.own} opp={DEMO_RESULT.opp} />

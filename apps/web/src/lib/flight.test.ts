@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { floorAt, flightLayout, type ReportGoal } from "@/components/anlauf/flight-layout";
 
-const LABELS = { half: "Halbzeit {v}", end: "Schluss {v}", halfLevel: "Halbzeit, Gleichstand", endLevel: "Schluss, Gleichstand" };
+const LABELS = { half: "Halbzeit {v}", end: "Schluss {v}" };
 
 /** goals from a sequence of +1 / -1 */
 function seq(steps: number[]): ReportGoal[] {
@@ -49,10 +49,13 @@ describe("flight labels", () => {
     });
   }
 
-  it("says «Gleichstand» instead of 0", () => {
+  it("says the score, ours first, never the difference (A12)", () => {
     const L = flightLayout(seq(CASES["level at half time"]!), 1000, 120, 60, LABELS, 48);
-    expect(L.labels[0]!.text).toBe("Halbzeit, Gleichstand");
-    expect(flightLayout(seq([1, 1, -1]), 1000, 120, 60, LABELS).labels[0]!.text).not.toContain("0");
+    expect(L.labels[0]!.text).toBe("Halbzeit 4:4");
+    expect(L.labels[1]!.text).toBe("Schluss 10:6");
+    const behind = flightLayout(seq(CASES["always behind"]!), 1000, 120, 60, LABELS, 48);
+    expect(behind.labels.map((l) => l.text)).toEqual(["Halbzeit 1:5", "Schluss 3:9"]);
+    for (const l of [...L.labels, ...behind.labels]) expect(l.text).not.toMatch(/[+-]\d/);
   });
 
   it("ends the line where an incomplete sequence stops and says so (review R13)", () => {
