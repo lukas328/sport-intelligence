@@ -54,6 +54,8 @@ const en: Messages = {
   kit: {
     question: "What colour does your team wear?",
     hint: "Tap a colour. The head, the numbers and the lines take it on.",
+    menu: "Try your club colour",
+    menuChosen: "Club colour: {name}",
     names: {
       blue: "Blue",
       red: "Red",

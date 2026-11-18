@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import type { CSSProperties } from "react";
 import Link from "next/link";
-import { KitScope, ShirtPicker, StartLink } from "@/components/kit";
+import { KitScope, ShirtMenu, ShirtPicker, StartLink } from "@/components/kit";
 import { PhoneChat } from "@/components/phone-chat";
 import { Reveal } from "@/components/reveal";
 import { When } from "@/components/story";
@@ -159,11 +159,15 @@ export default async function Demo({ params }: Props) {
   return (
     <KitScope>
       <Reveal />
-      <p role="note" className="border-b-2 border-ink bg-attn py-4 text-[1.0625rem] text-ink">
-        <span className="wrap block">
-          <b>{t.banner}</b> {t.bannerText}
-        </span>
-      </p>
+      {/* the yellow band: the match is invented; next to it the colour, so it is found at once (U42) */}
+      <div className="relative z-20 border-b-2 border-ink bg-attn py-3 text-ink">
+        <div className="wrap flex flex-wrap items-center justify-between gap-x-8 gap-y-3">
+          <p role="note" className="min-w-0 flex-[1_1_28rem] text-[1.0625rem]">
+            <b>{t.banner}</b> {t.bannerText}
+          </p>
+          <ShirtMenu label={m.kit.menu} chosenLabel={m.kit.menuChosen} names={m.kit.names} />
+        </div>
+      </div>
       <WurfHead
         kick={t.kick}
         title={fmt(t.head, { score })}

@@ -52,6 +52,8 @@ const de = {
   kit: {
     question: "Welche Farbe trägt dein Team?",
     hint: "Tippe auf eine Farbe. Kopf, Zahlen und Linien nehmen sie an.",
+    menu: "Probier deine Vereinsfarbe",
+    menuChosen: "Vereinsfarbe: {name}",
     names: {
       blue: "Blau",
       red: "Rot",
