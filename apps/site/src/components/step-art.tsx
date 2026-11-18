@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from "react";
-import { BallIcon } from "@/components/ball-icon";
+import { BallIcon, RunBall } from "@/components/ball-icon";
 import { cn } from "@/lib/cn";
 import { fmt } from "@/lib/i18n";
 import { saturday } from "@/lib/story";
@@ -112,6 +112,7 @@ function Frame({ h, label, className, children }: { h: number; label: string; cl
     <div
       role="img"
       aria-label={label}
+      data-frame
       className={cn("step-art relative w-full select-none", className)}
       style={{ aspectRatio: `${W} / ${h}`, containerType: "inline-size", "--u": `calc(100cqi / ${W})` } as CSSProperties}
     >
@@ -137,12 +138,21 @@ function Card({ yellow, tilt, style, className, children }: { yellow?: boolean; 
   );
 }
 
-/** the ball of a step, where the ball path passes (components/ball-run.tsx) */
+/**
+ * The ball of a step, where the ball path passes (components/ball-run.tsx), right after the
+ * drawing's court so the cards lie over it. With it the running ball's place in this drawing
+ * (`data-run-ball`): over the court, under the cards, shown only while the ball is here.
+ */
 function Ball({ x, y, h, size = 34 }: { x: number; y: number; h: number; size?: number }) {
   return (
-    <span data-ball aria-hidden className="step-ball pointer-events-none absolute z-[2] block -translate-x-1/2 -translate-y-1/2" style={at(x, y, h, { width: u(size), height: u(size) })}>
-      <BallIcon />
-    </span>
+    <>
+      <span data-ball aria-hidden className="pointer-events-none absolute block -translate-x-1/2 -translate-y-1/2" style={at(x, y, h, { width: u(size), height: u(size) })}>
+        <BallIcon />
+      </span>
+      <span data-run-ball aria-hidden className="pointer-events-none invisible absolute top-0 left-0 block size-0">
+        <RunBall />
+      </span>
+    </>
   );
 }
 
@@ -184,7 +194,7 @@ const ICON_CHECK = (
  * yellow fan, dotted edges), «3m» on the yellow card beside it, the sentence on a paper card.
  */
 function Film({ t, label }: { t: Art["film"]; label: string }) {
-  const H = 500;
+  const H = 520;
   const M = top(320, 186, 13.6, -4, [20, 10]);
   const OURS: Pt[] = [[0.9, 10], [6.6, 3.6], [7.4, 7.2], [7.7, 10.1], [7.4, 12.9], [6.6, 16.4]];
   const THEIRS: Pt[] = [[10.6, 2.6], [11.4, 7.1], [7.9, 8.8], [10.4, 11.8], [11.2, 15.6], [9.6, 18.3], [39.1, 10]];
@@ -211,7 +221,7 @@ function Film({ t, label }: { t: Art["film"]; label: string }) {
           3m
         </span>
       </Card>
-      <Card tilt={2} style={at(18, 384, H, { width: u(300), padding: `${u(12)} ${u(16)} ${u(14)}` })}>
+      <Card tilt={2} style={at(18, 380, H, { width: u(318), padding: `${u(12)} ${u(16)} ${u(14)}` })}>
         <p className="leading-[1.2] font-bold" style={{ fontSize: tx(23) }}>
           {t.say}
         </p>
@@ -227,13 +237,15 @@ function Film({ t, label }: { t: Art["film"]; label: string }) {
  * coach can put the phone away.
  */
 function Upload({ t, label }: { t: Art["upload"]; label: string }) {
-  const H = 590;
+  const H = 604;
   return (
     <Frame h={H} label={label}>
       <svg aria-hidden viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 block h-full w-full overflow-visible">
-        {/* the video goes up: a dotted way from the upload to the ball */}
-        <path d="M520 262C540 210 560 160 586 96" fill="none" stroke={INK} strokeWidth={2.4} strokeDasharray="0.5 8" strokeLinecap="round" />
+        {/* the video goes up: a dotted way from the upload to the ball (the ball path's own way
+            takes its place where it runs, globals.css) */}
+        <path className="step-way" d="M520 280C540 220 560 160 586 96" fill="none" stroke={INK} strokeWidth={2.4} strokeDasharray="0.5 8" strokeLinecap="round" />
       </svg>
+      <Ball x={592} y={84} h={H} />
       <Card tilt={-3} style={at(20, 34, H, { width: u(450), padding: `${u(22)} 0 ${u(12)}` })}>
         <p className="font-slant leading-[1.02]" style={{ fontSize: tx(40, 1.25), margin: `0 ${u(22)}` }}>
           {t.title}
@@ -254,7 +266,7 @@ function Upload({ t, label }: { t: Art["upload"]; label: string }) {
           </p>
         ))}
       </Card>
-      <Card yellow tilt={2} style={at(262, 262, H, { width: u(350), padding: `${u(18)} ${u(24)}` })}>
+      <Card yellow tilt={2} style={at(262, 280, H, { width: u(350), padding: `${u(18)} ${u(24)}` })}>
         <span className="font-num block leading-[.85] whitespace-nowrap" style={{ fontSize: u(118) }}>
           {t.pct}
         </span>
@@ -263,11 +275,10 @@ function Upload({ t, label }: { t: Art["upload"]; label: string }) {
           {t.size}
         </span>
       </Card>
-      <Ball x={592} y={84} h={H} />
-      <Disc x={50} y={540} h={H} size={64}>
+      <Disc x={50} y={552} h={H} size={64}>
         {ICON_BELL}
       </Disc>
-      <p className="absolute font-bold leading-[1.2] text-balance" style={at(98, 518, H, { width: u(300), fontSize: tx(23) })}>
+      <p className="absolute font-bold leading-[1.2] text-balance" style={at(98, 530, H, { width: u(300), fontSize: tx(23) })}>
         {t.say}
       </p>
     </Frame>
@@ -306,7 +317,7 @@ function fit(raw: (p: Pt, z?: number) => Pt, [bx, by, bw]: readonly [number, num
  * Step 3, «Prüfen»: the court as the camera sees it from the stand, in line art, and the field the
  * analysis proposes in yellow with its four corner points. Over it the paper card of the question
  * with the app's words («Frage 1 von 1», «Passt das Spielfeld?», «Passt» in ink, «Weiss nicht»), the
- * ball on «Passt», the yellow tag «ein Tipp» with a check, and the line under it.
+ * yellow tag «ein Tipp» with a check, and the line under it.
  */
 function Check({ t, label }: { t: Art["check"]; label: string }) {
   const H = 590;
@@ -331,6 +342,8 @@ function Check({ t, label }: { t: Art["check"]; label: string }) {
     const [x, y] = M(p);
     return [x, y - 4];
   };
+  // the ball with the attack, as in step 1
+  const ballAt = lift([9.4, 8.4]);
   return (
     <Frame h={H} label={label}>
       <svg aria-hidden viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 block h-full w-full overflow-visible">
@@ -346,6 +359,7 @@ function Check({ t, label }: { t: Art["check"]; label: string }) {
           <circle key={i} cx={f1(x)} cy={f1(y)} r={11} fill="var(--attn)" stroke={INK} strokeWidth={3} />
         ))}
       </svg>
+      <Ball x={ballAt[0]} y={ballAt[1]} h={H} size={24} />
       <Card tilt={-2} style={at(22, 240, H, { width: u(440), padding: `${u(18)} ${u(22)} ${u(22)}` })}>
         <p className="font-medium text-ink-2" style={{ fontSize: tx(19) }}>
           {t.count}
@@ -362,7 +376,6 @@ function Check({ t, label }: { t: Art["check"]; label: string }) {
           </span>
         </p>
       </Card>
-      <Ball x={196} y={434} h={H} />
       <Card yellow tilt={-6} className="flex items-center" style={at(436, 330, H, { gap: u(12), padding: `${u(12)} ${u(20)} ${u(14)} ${u(16)}` })}>
         <span aria-hidden className="block shrink-0" style={{ width: u(46), height: u(46) }}>
           {ICON_CHECK}
@@ -386,7 +399,7 @@ function Check({ t, label }: { t: Art["check"]; label: string }) {
  * rechts zumachen» on the club's colour, «4 Szenen», the team and «Link teilen».
  */
 function Result({ t, label }: { t: Art["result"]; label: string }) {
-  const H = 600;
+  const H = 622;
   const story = saturday();
   const spots = story.dots.filter((x) => x.ra).map((x) => x.at);
   const others = story.dots.filter((x) => !x.ra).map((x) => x.at);
@@ -437,7 +450,7 @@ function Result({ t, label }: { t: Art["result"]; label: string }) {
           {t.what}
         </p>
       </Card>
-      <Card tilt={-2} style={at(22, 384, H, { width: u(404) })}>
+      <Card tilt={-2} style={at(22, 372, H, { width: u(410) })}>
         <p className="font-slant border-b-2 border-ink bg-club leading-[1.02] text-club-ink" style={{ fontSize: tx(31, 1.125), padding: `${u(14)} ${u(18)} ${u(16)}` }}>
           {t.title}
         </p>

@@ -63,7 +63,7 @@ export default async function How({ params }: Props) {
                       {i + 1}
                     </p>
                     <h2 className="mt-3 text-[2.5rem] md:text-[3.25rem] lg:mt-4 lg:text-[3.5rem]">{s.title}</h2>
-                    <p className="measure mt-4 text-[1.1875rem]">{s.text}</p>
+                    <p className="measure mt-4 text-[1.1875rem] lg:text-[1.25rem]">{s.text}</p>
                     {i === 0 && (
                       <Link href={`/${locale}/aufnahme/`} className="link mt-2">
                         {m.cta.filming}

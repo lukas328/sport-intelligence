@@ -5,6 +5,24 @@
  */
 export type XY = readonly [number, number];
 
+/**
+ * Where the ball is (its height on the way) when the screen's middle is at `m`: at step i's ball
+ * while the middle of step i's row (`rows[i]`) is in the middle, in between in proportion, and held
+ * at the first and the last ball before and after.
+ */
+export function ballY(rows: readonly number[], pts: readonly XY[], m: number): number {
+  const n = Math.min(rows.length, pts.length);
+  if (!n) return m;
+  if (m <= rows[0]!) return pts[0]![1];
+  for (let i = 1; i < n; i++) {
+    if (m <= rows[i]!) {
+      const t = (m - rows[i - 1]!) / Math.max(1, rows[i]! - rows[i - 1]!);
+      return pts[i - 1]![1] + t * (pts[i]![1] - pts[i - 1]![1]);
+    }
+  }
+  return pts[n - 1]![1];
+}
+
 export function ballWay(pts: readonly XY[]): string {
   if (!pts.length) return "";
   const f = (v: number) => v.toFixed(1);

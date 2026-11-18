@@ -9,3 +9,12 @@ export function BallIcon({ className }: { className?: string }) {
     </svg>
   );
 }
+
+/** The running ball of components/ball-run.tsx, centred on its (size-0) parent, with a hard shadow. */
+export function RunBall() {
+  return (
+    <span className="absolute -top-[1.25rem] -left-[1.25rem] block size-[2.5rem] drop-shadow-[3px_3px_0_var(--ink)]">
+      <BallIcon />
+    </span>
+  );
+}

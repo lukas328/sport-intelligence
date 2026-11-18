@@ -425,6 +425,10 @@
   [data-run] [data-ball] {
     visibility: hidden;
   }
+  /* and where the way is drawn, a step's own short way goes */
+  [data-way] .step-way {
+    display: none;
+  }
   /* the stage: 76rem, from 1600 px a wider 90rem for pictures and sections (BEFUNDE-3 U4); text
      columns keep their own measure (40rem and the like) inside it */
   .wrap {
