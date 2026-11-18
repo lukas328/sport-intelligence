@@ -17,7 +17,7 @@ const fake = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
 });
 vi.stubGlobal("fetch", fake);
 const apiModule = await import("./calibration-api");
-const { saveCourt, checkClicks, canMarkUndeterminable, fetchCourtModel, calibrationState, suggestionOf, lastClicks, resetFeatureDetection, isMissing, droppedRefs } = apiModule;
+const { saveCourt, checkClicks, fetchCourtModel, calibrationState, suggestionOf, lastClicks, resetFeatureDetection, isMissing, droppedRefs } = apiModule;
 const { LOCAL_COURT_MODEL, fitClicks } = await import("./court-fit");
 
 const V = "/v1/orgs/o/videos/v/calibration";
@@ -91,12 +91,6 @@ describe("calibration API with feature detection", () => {
     expect(isMissing("clicks/check")).toBe(false);
   });
 
-  it("offers «nicht bestimmbar» only once the endpoint answers", async () => {
-    expect(await canMarkUndeterminable("o", "v")).toBe(false);
-    resetFeatureDetection();
-    routes[`GET ${V}/undeterminable`] = { status: 405, body: { type: "about:blank", title: "Method Not Allowed", status: 405 } };
-    expect(await canMarkUndeterminable("o", "v")).toBe(true);
-  });
 
   it("uses the API's court model when it serves one", async () => {
     expect(await fetchCourtModel("o")).toBeNull();

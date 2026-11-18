@@ -2884,7 +2884,8 @@
     "stateUpdating": "Your court is being applied, the analysis is running. Afterwards you can change it here again.",
     "stateUndeterminable": "You said the court cannot be determined in this video. If you mark it after all, your court counts.",
     "qualityAmbiguous": "The clicks fit two different courts.",
-    "ambiguousLine": "One click on “{line}” is off, and the clicks do not show which one. Delete the wrong one or clear the line and set it again."
+    "ambiguousLine": "One click on “{line}” is off, and the clicks do not show which one. Delete the wrong one or clear the line and set it again.",
+    "nextLine": "Next: {line}"
   },
   "today": {
     "uploadHint": "Upload the video. Stats, scenes and three things follow automatically.",
