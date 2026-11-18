@@ -23,7 +23,8 @@ const sameRef = (a: ClickRef | null, b: ClickRef | null) => !!a && !!b && a.kind
 
 const LOUPE = 128; // css px
 const MAGNIFY = 3; // loupe pixels per screen pixel of the picture
-const HIT = 22; // screen px around a click that grab it
+const HIT = 16; // screen px around a click that grab it
+const SLOP = 5; // screen px a press may wander and still be a tap
 
 /**
  * The hall image with the court and the clicks on it. One finger or the mouse: press, see the
@@ -49,9 +50,11 @@ export const CalibrationStage = forwardRef<
     onPlace: (p: Pt) => void;
     onDrag: (ref: ClickRef, p: Pt) => void;
     onMove: (ref: ClickRef, p: Pt, prev: Pt) => void;
+    /** a tap right on a click: it becomes the one the arrow keys move */
+    onSelect: (ref: ClickRef) => void;
     onZoomChange?: (zoomed: boolean) => void;
   }
->(function CalibrationStage({ src, alt, label, size, model, overlay, clicks, current, selected, flagged, interactive, snap, onPlace, onDrag, onMove, onZoomChange }, ref) {
+>(function CalibrationStage({ src, alt, label, size, model, overlay, clicks, current, selected, flagged, interactive, snap, onPlace, onDrag, onMove, onSelect, onZoomChange }, ref) {
   const [W, H] = size;
   const full: View = { x: 0, y: 0, w: W, h: H };
   const [view, setView] = useState<View>(full);
@@ -64,7 +67,7 @@ export const CalibrationStage = forwardRef<
   const pointers = useRef(new Map<number, { x: number; y: number }>());
   const gesture = useRef<
     | { kind: "place"; id: number; at: Pt; shift: boolean }
-    | { kind: "drag"; id: number; ref: ClickRef; prev: Pt; at: Pt }
+    | { kind: "drag"; id: number; ref: ClickRef; prev: Pt; at: Pt; press: Pt; sx: number; sy: number; moved: boolean; shift: boolean }
     | { kind: "pinch"; view: View; dist: number; mid: Pt }
     | null
   >(null);
@@ -217,8 +220,8 @@ export const CalibrationStage = forwardRef<
     const p = toImage(e.clientX, e.clientY);
     const hit = nearest(p);
     if (hit) {
-      gesture.current = { kind: "drag", id: e.pointerId, ref: hit.ref, prev: hit.at, at: hit.at };
-      setDrag({ ref: hit.ref, p: hit.at });
+      // a drag once the finger moves; a tap beside the click still places one
+      gesture.current = { kind: "drag", id: e.pointerId, ref: hit.ref, prev: hit.at, at: hit.at, press: p, sx: e.clientX, sy: e.clientY, moved: false, shift: e.shiftKey };
       aimAt(hit.at, e.clientX, false);
       return;
     }
@@ -244,10 +247,13 @@ export const CalibrationStage = forwardRef<
     }
     const p = toImage(e.clientX, e.clientY);
     if (g?.kind === "drag" && g.id === e.pointerId) {
-      g.at = p;
-      setDrag({ ref: g.ref, p });
-      onDrag(g.ref, p);
-      aimAt(p, e.clientX, false);
+      if (!g.moved && Math.hypot(e.clientX - g.sx, e.clientY - g.sy) < SLOP) return;
+      g.moved = true;
+      // the click follows the finger by the finger's way (it does not jump under it)
+      g.at = [g.prev[0] + p[0] - g.press[0], g.prev[1] + p[1] - g.press[1]];
+      setDrag({ ref: g.ref, p: g.at });
+      onDrag(g.ref, g.at);
+      aimAt(g.at, e.clientX, false);
       follow(e.clientX, e.clientY);
       return;
     }
@@ -271,7 +277,10 @@ export const CalibrationStage = forwardRef<
     if (g?.kind === "drag" && g.id === e.pointerId) {
       gesture.current = null;
       setDrag(null);
-      if (Math.hypot(g.at[0] - g.prev[0], g.at[1] - g.prev[1]) > 0.01) onMove(g.ref, g.at, g.prev);
+      if (g.moved) {
+        if (Math.hypot(g.at[0] - g.prev[0], g.at[1] - g.prev[1]) > 0.01) onMove(g.ref, g.at, g.prev);
+      } else if (Math.hypot(g.press[0] - g.prev[0], g.press[1] - g.prev[1]) * scale < SLOP + 1) onSelect(g.ref);
+      else onPlace(g.shift || e.shiftKey ? g.press : snapped(g.press));
       if (e.pointerType !== "mouse") setAim(null);
       return;
     }

@@ -6,7 +6,11 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Eraser, Magnet, Minus, Plus, Scan, Undo2, X } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
-import { CalibrationStage, type OverlayTone, type StageHandle } from "@/components/analysis/calibration-stage";
+import {
+  CalibrationStage,
+  type OverlayTone,
+  type StageHandle,
+} from "@/components/analysis/calibration-stage";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/card";
 import {
@@ -49,8 +53,10 @@ import { cn } from "@/lib/utils";
 type Analysis = Schemas["AnalysisOut"];
 
 const flipY = (y: number) => COURT.width - y;
-const courtPath = (pts: readonly Point[]) => pts.map(([x, y], i) => `${i === 0 ? "M" : "L"}${x} ${flipY(y)}`).join(" ");
-const imagePath = (pts: Pt[]) => pts.map(([x, y], i) => `${i === 0 ? "M" : "L"}${x.toFixed(1)} ${y.toFixed(1)}`).join(" ");
+const courtPath = (pts: readonly Point[]) =>
+  pts.map(([x, y], i) => `${i === 0 ? "M" : "L"}${x} ${flipY(y)}`).join(" ");
+const imagePath = (pts: Pt[]) =>
+  pts.map(([x, y], i) => `${i === 0 ? "M" : "L"}${x.toFixed(1)} ${y.toFixed(1)}`).join(" ");
 const keyOf = (c: Clicks) => JSON.stringify(c);
 
 /** The small court on a chip, the chosen line or point drawn strong. */
@@ -60,10 +66,26 @@ function MiniCourt({ line, point, className }: { line?: string; point?: Pt; clas
     <svg viewBox="-1.5 -1.5 43 23" className={cn("h-[22px] w-11 shrink-0", className)} aria-hidden>
       <rect x={-1.5} y={-1.5} width={43} height={23} fill="var(--court)" />
       {Object.entries(COURT.lines).map(([name, pts]) => (
-        <path key={name} d={courtPath(pts)} fill="none" stroke="var(--court-text)" strokeOpacity={0.55} strokeWidth={0.5} />
+        <path
+          key={name}
+          d={courtPath(pts)}
+          fill="none"
+          stroke="var(--court-text)"
+          strokeOpacity={0.55}
+          strokeWidth={0.5}
+        />
       ))}
       {l && <path d={courtPath(l.court)} fill="none" stroke="var(--attn)" strokeWidth={2.2} />}
-      {point && <circle cx={point[0]} cy={flipY(point[1])} r={2.2} fill="var(--attn)" stroke="var(--court)" strokeWidth={0.6} />}
+      {point && (
+        <circle
+          cx={point[0]}
+          cy={flipY(point[1])}
+          r={2.2}
+          fill="var(--attn)"
+          stroke="var(--court)"
+          strokeWidth={0.6}
+        />
+      )}
     </svg>
   );
 }
@@ -102,16 +124,29 @@ export function CourtCalibration({
   }, [analysis, pano.width, pano.height]);
   // a court confirmed before (realign): shown under the clicks until they give one
   const existing: Homography | null =
-    state === "confirmed" && analysis.calibration && analysis.calibration.image_size[0] === pano.width && analysis.calibration.image_size[1] === pano.height ? analysis.calibration.homography : null;
+    state === "confirmed" &&
+    analysis.calibration &&
+    analysis.calibration.image_size[0] === pano.width &&
+    analysis.calibration.image_size[1] === pano.height
+      ? analysis.calibration.homography
+      : null;
 
   // the coach's last clicks, to edit them again (only what the dialog offers)
   const [prefill] = useState(() => {
     const c = lastClicks(analysis, LOCAL_COURT_MODEL);
     if (!c) return null;
-    const points = Object.fromEntries(Object.entries(c.points).filter(([n]) => POINT_NAMES.includes(n as PointName)));
-    return Object.keys(c.lines).length || Object.keys(points).length ? { lines: c.lines, points } : null;
+    const points = Object.fromEntries(
+      Object.entries(c.points).filter(([n]) => POINT_NAMES.includes(n as PointName)),
+    );
+    return Object.keys(c.lines).length || Object.keys(points).length
+      ? { lines: c.lines, points }
+      : null;
   });
-  const [flow, dispatch] = useReducer(flowReducer, { suggestion: suggestion != null, clicks: prefill }, initialFlow);
+  const [flow, dispatch] = useReducer(
+    flowReducer,
+    { suggestion: suggestion != null, clicks: prefill },
+    initialFlow,
+  );
   const [model, setModel] = useState<CourtModel>(LOCAL_COURT_MODEL);
   const [fit, setFit] = useState<{ key: string; fit: ClickFit } | null>(null);
   const [dragFit, setDragFit] = useState<Homography | null>(null);
@@ -153,33 +188,77 @@ export function CourtCalibration({
 
   // the server's check of the same clicks, after a pause (not on every click)
   useEffect(() => {
-    if (!local || local.equations < MIN_EQUATIONS || (local.status !== "ok" && local.status !== "disagree")) return;
+    if (
+      !local ||
+      local.equations < MIN_EQUATIONS ||
+      (local.status !== "ok" && local.status !== "disagree")
+    )
+      return;
     const key = clicksKey;
     const clicks = flow.clicks;
     const id = window.setTimeout(() => {
-      void checkClicks(orgId, videoId, { space: "panorama", frame_ms: 0, lines: clicks.lines, points: clicks.points }).then((outcome) => setServer({ key, outcome }));
+      void checkClicks(orgId, videoId, {
+        space: "panorama",
+        frame_ms: 0,
+        lines: clicks.lines,
+        points: clicks.points,
+      }).then((outcome) => setServer({ key, outcome }));
     }, 700);
     return () => window.clearTimeout(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- the clicks by value
   }, [local, clicksKey, orgId, videoId]);
-  const checked = server?.key === clicksKey && server.outcome.kind !== "missing" && server.outcome.kind !== "error" ? server.outcome : null;
+  const checked =
+    server?.key === clicksKey &&
+    server.outcome.kind !== "missing" &&
+    server.outcome.kind !== "error"
+      ? server.outcome
+      : null;
 
   // the court the clicks give, and whether it passes (the server's word where it has spoken)
   const verdict = useMemo(() => {
-    if (checked?.kind === "ok") return { ok: true, median: checked.value.residual_px.median, homography: checked.value.homography as Homography, worst: null as ClickRef | null, dropped: droppedRefs(checked.value.dropped) };
-    if (checked?.kind === "refused") return { ok: false, median: checked.problem.median_px ?? local?.medianPx ?? null, homography: local?.homography ?? null, worst: serverRef(checked.problem) ?? local?.worst ?? null, dropped: local?.dropped ?? [], problem: checked.problem };
-    return { ok: local?.status === "ok", median: local?.medianPx ?? null, homography: local?.homography ?? null, worst: local?.status === "disagree" ? (local.worst as ClickRef | null) : null, dropped: local?.dropped ?? [] };
+    if (checked?.kind === "ok")
+      return {
+        ok: true,
+        median: checked.value.residual_px.median,
+        homography: checked.value.homography as Homography,
+        worst: null as ClickRef | null,
+        dropped: droppedRefs(checked.value.dropped),
+      };
+    if (checked?.kind === "refused")
+      return {
+        ok: false,
+        median: checked.problem.median_px ?? local?.medianPx ?? null,
+        homography: local?.homography ?? null,
+        worst: serverRef(checked.problem) ?? local?.worst ?? null,
+        dropped: local?.dropped ?? [],
+        problem: checked.problem,
+      };
+    return {
+      ok: local?.status === "ok",
+      median: local?.medianPx ?? null,
+      homography: local?.homography ?? null,
+      worst: local?.status === "disagree" ? (local.worst as ClickRef | null) : null,
+      dropped: local?.dropped ?? [],
+    };
   }, [checked, local]);
 
-  const equations = 2 * Object.keys(flow.clicks.points).length + Object.values(flow.clicks.lines).reduce((s, l) => s + l.length, 0);
+  const equations =
+    2 * Object.keys(flow.clicks.points).length +
+    Object.values(flow.clicks.lines).reduce((s, l) => s + l.length, 0);
   const marking = flow.step === "mark";
   const overlay: { homography: Homography; tone: OverlayTone } | null = !marking
     ? suggestion && { homography: suggestion.homography, tone: "suggest" }
     : dragFit
       ? { homography: dragFit, tone: "draft" }
       : verdict.homography
-        ? { homography: verdict.homography, tone: verdict.ok ? "fit" : local?.status === "need-more" ? "draft" : "bad" }
-        : (suggestion ?? (existing ? { homography: existing } : null)) && { homography: (suggestion?.homography ?? existing)!, tone: "suggest" };
+        ? {
+            homography: verdict.homography,
+            tone: verdict.ok ? "fit" : local?.status === "need-more" ? "draft" : "bad",
+          }
+        : (suggestion ?? (existing ? { homography: existing } : null)) && {
+            homography: (suggestion?.homography ?? existing)!,
+            tone: "suggest",
+          };
 
   const onDrag = useCallback(
     (ref: ClickRef, p: Pt) => {
@@ -238,7 +317,11 @@ export function CourtCalibration({
   }
 
   const lineLabel = (n: string) =>
-    LINE_NAMES.includes(n as LineName) ? t(`lines.${n}` as "lines.side_near") : POINT_NAMES.includes(n as PointName) ? t(`points.${n}` as "points.corner_bl") : n;
+    LINE_NAMES.includes(n as LineName)
+      ? t(`lines.${n}` as "lines.side_near")
+      : POINT_NAMES.includes(n as PointName)
+        ? t(`points.${n}` as "points.corner_bl")
+        : n;
   function problemText(p: ClickProblem): string {
     if (p.code === "no-hall-image") return t("errorNoHallImage");
     if (p.code === "clicks-too-few") return t("errorTooFew");
@@ -259,7 +342,8 @@ export function CourtCalibration({
       else close();
       return;
     }
-    if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.tagName === "SELECT")) return;
+    if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.tagName === "SELECT"))
+      return;
     if (!marking) {
       if (e.key === "Enter" && suggestion && el?.tagName !== "BUTTON") {
         e.preventDefault();
@@ -285,7 +369,11 @@ export function CourtCalibration({
     else if (k.startsWith("Arrow") && flow.selected) {
       e.preventDefault();
       const step = e.shiftKey ? 5 : 0.5;
-      dispatch({ type: "nudge", dx: k === "ArrowLeft" ? -step : k === "ArrowRight" ? step : 0, dy: k === "ArrowUp" ? -step : k === "ArrowDown" ? step : 0 });
+      dispatch({
+        type: "nudge",
+        dx: k === "ArrowLeft" ? -step : k === "ArrowRight" ? step : 0,
+        dy: k === "ArrowUp" ? -step : k === "ArrowDown" ? step : 0,
+      });
     } else if (k === "Enter" && el?.tagName !== "BUTTON" && verdict.ok) {
       e.preventDefault();
       void save();
@@ -298,19 +386,41 @@ export function CourtCalibration({
     return () => window.removeEventListener("keydown", h);
   }, []);
 
-  const current = marking ? (flow.mode === "line" ? { kind: "line" as const, name: flow.line } : { kind: "point" as const, name: flow.point }) : null;
+  const current = marking
+    ? flow.mode === "line"
+      ? { kind: "line" as const, name: flow.line }
+      : { kind: "point" as const, name: flow.point }
+    : null;
   const flagged = [...verdict.dropped, ...(verdict.worst ? [verdict.worst] : [])];
   const need = Math.max(0, (local?.homography ? MIN_EQUATIONS : PREVIEW_EQUATIONS) - equations);
 
   // the quality bar: how many clicks are still needed, then how far the clicks lie off the court
   const quality = (() => {
-    if (!local || equations < PREVIEW_EQUATIONS || local.status === "too-few") return { tone: "muted", text: t("qualityFew", { n: Math.max(1, PREVIEW_EQUATIONS - equations, need) }), fill: Math.min(1, equations / MIN_EQUATIONS) };
-    if (local.status === "need-more") return { tone: "muted", text: t("qualityMore", { n: MIN_EQUATIONS - equations }), fill: Math.min(1, equations / MIN_EQUATIONS) };
+    if (!local || equations < PREVIEW_EQUATIONS || local.status === "too-few")
+      return {
+        tone: "muted",
+        text: t("qualityFew", { n: Math.max(1, PREVIEW_EQUATIONS - equations, need) }),
+        fill: Math.min(1, equations / MIN_EQUATIONS),
+      };
+    if (local.status === "need-more")
+      return {
+        tone: "muted",
+        text: t("qualityMore", { n: MIN_EQUATIONS - equations }),
+        fill: Math.min(1, equations / MIN_EQUATIONS),
+      };
     if (local.status === "no-court") return { tone: "bad", text: t("qualityNoCourt"), fill: 1 };
     const px = (verdict.median ?? 0).toFixed(1);
     return verdict.ok
-      ? { tone: "ok", text: t("qualityOk", { px }), fill: Math.max(0.08, 1 - (verdict.median ?? 0) / (2 * MAX_MEDIAN_PX)) }
-      : { tone: "bad", text: t("qualityBad", { px, max: MAX_MEDIAN_PX }), fill: Math.max(0.05, 1 - (verdict.median ?? 0) / (2 * MAX_MEDIAN_PX)) };
+      ? {
+          tone: "ok",
+          text: t("qualityOk", { px }),
+          fill: Math.max(0.08, 1 - (verdict.median ?? 0) / (2 * MAX_MEDIAN_PX)),
+        }
+      : {
+          tone: "bad",
+          text: t("qualityBad", { px, max: MAX_MEDIAN_PX }),
+          fill: Math.max(0.05, 1 - (verdict.median ?? 0) / (2 * MAX_MEDIAN_PX)),
+        };
   })();
   const hint =
     verdict.worst && !verdict.ok
@@ -331,13 +441,21 @@ export function CourtCalibration({
         onClick={() => dispatch({ type: "line", name })}
         className={cn(
           "flex min-h-11 shrink-0 cursor-pointer items-center gap-2 border-2 px-2 py-1 text-left text-[15px] font-semibold",
-          active ? "border-ink bg-ink text-ground" : "border-rule bg-paper text-ink hover:border-ink",
+          active
+            ? "border-ink bg-ink text-ground"
+            : "border-rule bg-paper text-ink hover:border-ink",
         )}
         data-testid={`line-${name}`}
       >
         <MiniCourt line={name} />
-        <span className="min-w-0 flex-1 leading-tight">{t(`lines.${name}`)}</span>
-        <span aria-hidden className={cn("font-mono text-[13px] tabular-nums", active ? "text-ground" : "text-ink-2")}>
+        <span className="min-w-0 flex-1 leading-tight hyphens-auto">{t(`lines.${name}`)}</span>
+        <span
+          aria-hidden
+          className={cn(
+            "shrink-0 font-mono text-[13px] tabular-nums",
+            active ? "text-ground" : "text-ink-2",
+          )}
+        >
           {n > 0 ? `${n}/3` : <kbd className="max-lg:hidden">{i + 1}</kbd>}
         </span>
       </button>
@@ -355,17 +473,23 @@ export function CourtCalibration({
         onClick={() => dispatch({ type: "point", name })}
         className={cn(
           "flex min-h-11 shrink-0 cursor-pointer items-center gap-2 border-2 px-2 py-1 text-left text-[15px] font-semibold",
-          active ? "border-ink bg-ink text-ground" : set ? "border-ink bg-paper text-ink" : "border-rule bg-paper text-ink hover:border-ink",
+          active
+            ? "border-ink bg-ink text-ground"
+            : set
+              ? "border-ink bg-paper text-ink"
+              : "border-rule bg-paper text-ink hover:border-ink",
         )}
         data-testid={`point-${name}`}
       >
         <MiniCourt point={model.points[name] ?? LOCAL_COURT_MODEL.points[name]} />
-        <span className="min-w-0 flex-1 leading-tight">{t(`points.${name}`)}</span>
+        <span className="min-w-0 flex-1 leading-tight hyphens-auto">{t(`points.${name}`)}</span>
       </button>
     );
   };
 
-  const skipBlock = undeterminable && state !== "undeterminable" &&
+  const skipBlock =
+    undeterminable &&
+    state !== "undeterminable" &&
     (asking ? (
       <div className="space-y-2 border-2 border-ink p-3" role="group" aria-labelledby="calib-why">
         <p id="calib-why" className="text-[15px] font-semibold">
@@ -373,7 +497,14 @@ export function CourtCalibration({
         </p>
         <div className="flex flex-wrap gap-2">
           {(["too_far", "cut", "other"] as const).map((r) => (
-            <Button key={r} variant="secondary" size="sm" onClick={() => void skip(r)} loading={busy === "skip"} data-testid={`skip-${r}`}>
+            <Button
+              key={r}
+              variant="secondary"
+              size="sm"
+              onClick={() => void skip(r)}
+              loading={busy === "skip"}
+              data-testid={`skip-${r}`}
+            >
               {t(`reason_${r}`)}
             </Button>
           ))}
@@ -383,13 +514,21 @@ export function CourtCalibration({
         </div>
       </div>
     ) : (
-      <Button variant="quiet" size="sm" onClick={() => setAsking(true)} data-testid="calibration-undeterminable">
+      <Button
+        variant="quiet"
+        size="sm"
+        onClick={() => setAsking(true)}
+        data-testid="calibration-undeterminable"
+      >
         {t("undeterminable")}
       </Button>
     ));
 
   return (
-    <div className="fixed inset-0 z-50 flex items-stretch justify-center bg-black/60 sm:p-4" onClick={close}>
+    <div
+      className="fixed inset-0 z-50 flex items-stretch justify-center bg-black/60 sm:p-4 [@media(max-height:520px)]:p-0"
+      onClick={close}
+    >
       <div
         ref={dialog}
         role="dialog"
@@ -404,14 +543,23 @@ export function CourtCalibration({
           <h2 id="calibrate-title" className="text-lg font-semibold">
             {marking ? t("title") : t("titleCheck")}
           </h2>
-          <Button variant="ghost" size="icon" onClick={close} aria-label={t("close")} data-testid="calibration-close">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={close}
+            aria-label={t("close")}
+            data-testid="calibration-close"
+          >
             <X aria-hidden />
           </Button>
         </div>
 
-        <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)] grid-rows-[auto_minmax(0,1fr)] lg:grid-cols-[minmax(0,1fr)_23rem] lg:grid-rows-1 [@media(orientation:landscape)_and_(max-height:520px)]:grid-cols-[minmax(0,1fr)_17rem] [@media(orientation:landscape)_and_(max-height:520px)]:grid-rows-1">
+        <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)] grid-rows-[auto_minmax(0,1fr)] lg:grid-cols-[minmax(0,1fr)_26rem] lg:grid-rows-1 [@media(orientation:landscape)_and_(max-height:520px)]:grid-cols-[minmax(0,1fr)_17rem] [@media(orientation:landscape)_and_(max-height:520px)]:grid-rows-1">
           <div className="flex min-h-0 flex-col bg-[var(--court-bar)]">
-            <div className="relative mx-auto w-full max-h-[52vh] lg:max-h-none lg:min-h-0 lg:flex-1 [@media(orientation:landscape)_and_(max-height:520px)]:max-h-none [@media(orientation:landscape)_and_(max-height:520px)]:min-h-0 [@media(orientation:landscape)_and_(max-height:520px)]:flex-1" style={{ aspectRatio: `${pano.width} / ${pano.height}` }}>
+            <div
+              className="relative mx-auto w-full max-h-[52vh] lg:max-h-none lg:min-h-0 lg:flex-1 [@media(orientation:landscape)_and_(max-height:520px)]:max-h-none [@media(orientation:landscape)_and_(max-height:520px)]:min-h-0 [@media(orientation:landscape)_and_(max-height:520px)]:flex-1"
+              style={{ aspectRatio: `${pano.width} / ${pano.height}` }}
+            >
               <CalibrationStage
                 ref={stage}
                 src={src}
@@ -429,6 +577,7 @@ export function CourtCalibration({
                 onPlace={(p) => dispatch({ type: "place", p })}
                 onDrag={onDrag}
                 onMove={(ref, p, prev) => dispatch({ type: "move", ref, p, prev })}
+                onSelect={(ref) => dispatch({ type: "select", ref })}
                 onZoomChange={setZoomed}
               />
             </div>
@@ -436,28 +585,76 @@ export function CourtCalibration({
             <div className="flex shrink-0 flex-wrap items-center gap-1 px-1 py-1 text-[var(--court-text)]">
               {marking && (
                 <>
-                  <button type="button" onClick={() => dispatch({ type: "undo" })} disabled={flow.history.length === 0} className={toolClass} aria-label={t("undoLabel")} data-testid="calibration-undo">
+                  <button
+                    type="button"
+                    onClick={() => dispatch({ type: "undo" })}
+                    disabled={flow.history.length === 0}
+                    className={toolClass}
+                    aria-label={t("undoLabel")}
+                    data-testid="calibration-undo"
+                  >
                     <Undo2 aria-hidden className="size-5" />
                     <span className="max-sm:sr-only">{t("undo")}</span>
                   </button>
-                  <button type="button" onClick={() => dispatch({ type: "clearLine" })} disabled={countOn(flow.clicks, flow.mode === "line" ? flow.line : flow.point) === 0} className={toolClass} aria-label={flow.mode === "line" ? t("clearLineLabel", { line: t(`lines.${flow.line}`) }) : t("clearPoint")} data-testid="calibration-clear-line">
+                  <button
+                    type="button"
+                    onClick={() => dispatch({ type: "clearLine" })}
+                    disabled={
+                      countOn(flow.clicks, flow.mode === "line" ? flow.line : flow.point) === 0
+                    }
+                    className={toolClass}
+                    aria-label={
+                      flow.mode === "line"
+                        ? t("clearLineLabel", { line: t(`lines.${flow.line}`) })
+                        : t("clearPoint")
+                    }
+                    data-testid="calibration-clear-line"
+                  >
                     <Eraser aria-hidden className="size-5" />
-                    <span className="max-sm:sr-only">{flow.mode === "line" ? t("clearLine") : t("clearPoint")}</span>
+                    <span className="max-sm:sr-only">
+                      {flow.mode === "line" ? t("clearLine") : t("clearPoint")}
+                    </span>
                   </button>
-                  <button type="button" onClick={() => dispatch({ type: "snap" })} aria-pressed={flow.snap} className={cn(toolClass, flow.snap && "bg-white/15")} aria-label={t("snapLabel")} title={t("snapLabel")} data-testid="calibration-snap">
+                  <button
+                    type="button"
+                    onClick={() => dispatch({ type: "snap" })}
+                    aria-pressed={flow.snap}
+                    className={cn(toolClass, flow.snap && "bg-white/15")}
+                    aria-label={t("snapLabel")}
+                    title={t("snapLabel")}
+                    data-testid="calibration-snap"
+                  >
                     <Magnet aria-hidden className="size-5" />
                     <span className="max-sm:sr-only">{t("snap")}</span>
                   </button>
                 </>
               )}
               <span className="flex-1" />
-              <button type="button" onClick={() => stage.current?.zoom(1 / 1.5)} disabled={!zoomed} className={toolClass} aria-label={t("zoomOut")}>
+              <button
+                type="button"
+                onClick={() => stage.current?.zoom(1 / 1.5)}
+                disabled={!zoomed}
+                className={toolClass}
+                aria-label={t("zoomOut")}
+              >
                 <Minus aria-hidden className="size-5" />
               </button>
-              <button type="button" onClick={() => stage.current?.zoom(1.5)} className={toolClass} aria-label={t("zoomIn")} data-testid="calibration-zoom-in">
+              <button
+                type="button"
+                onClick={() => stage.current?.zoom(1.5)}
+                className={toolClass}
+                aria-label={t("zoomIn")}
+                data-testid="calibration-zoom-in"
+              >
                 <Plus aria-hidden className="size-5" />
               </button>
-              <button type="button" onClick={() => stage.current?.fit()} disabled={!zoomed} className={toolClass} aria-label={t("zoomFit")}>
+              <button
+                type="button"
+                onClick={() => stage.current?.fit()}
+                disabled={!zoomed}
+                className={toolClass}
+                aria-label={t("zoomFit")}
+              >
                 <Scan aria-hidden className="size-5" />
               </button>
             </div>
@@ -470,7 +667,12 @@ export function CourtCalibration({
                   <p className="text-[15px] font-semibold" data-testid="suggestion-source">
                     {suggestion.source === "hall"
                       ? suggestion.kickoffAt
-                        ? t("sourceHallMatch", { date: format.dateTime(new Date(suggestion.kickoffAt), { day: "numeric", month: "short" }) })
+                        ? t("sourceHallMatch", {
+                            date: format.dateTime(new Date(suggestion.kickoffAt), {
+                              day: "numeric",
+                              month: "short",
+                            }),
+                          })
                         : suggestion.label
                           ? t("sourceHallLabel", { label: suggestion.label })
                           : t("sourceHall")
@@ -480,43 +682,32 @@ export function CourtCalibration({
                 </>
               ) : (
                 <>
-                  <p className="text-[15px]" aria-live="polite" data-testid="calibration-instruction">
-                    {flow.mode === "line" ? t("lineNow", { line: t(`lines.${flow.line}`) }) : t("pointNow", { point: t(`points.${flow.point}`) })}
+                  <p
+                    className="text-[15px]"
+                    aria-live="polite"
+                    data-testid="calibration-instruction"
+                  >
+                    {flow.mode === "line"
+                      ? t("lineNow", { line: t(`lines.${flow.line}`) })
+                      : t("pointNow", { point: t(`points.${flow.point}`) })}
                   </p>
-                  <div className="space-y-1.5" data-testid="calibration-quality">
-                    <div className="flex items-baseline justify-between gap-2">
-                      <span className="text-sm font-semibold">{t("qualityTitle")}</span>
-                      {verdict.median != null && local?.status !== "need-more" && local?.status !== "too-few" && (
-                        <span className="font-mono text-[13px] tabular-nums text-ink-2">{t("pxShort", { px: verdict.median.toFixed(1) })}</span>
-                      )}
-                    </div>
-                    <div
-                      role="meter"
-                      aria-label={t("qualityTitle")}
-                      aria-valuemin={0}
-                      aria-valuemax={100}
-                      aria-valuenow={Math.round(quality.fill * 100)}
-                      aria-valuetext={quality.text}
-                      className="h-2 w-full bg-rule"
-                    >
-                      <div className={cn("h-full", quality.tone === "ok" ? "bg-win" : quality.tone === "bad" ? "bg-loss" : "bg-ink-2")} style={{ width: `${Math.round(quality.fill * 100)}%` }} />
-                    </div>
-                    <p className={cn("text-sm", quality.tone === "ok" ? "text-win" : quality.tone === "bad" ? "text-loss" : "text-ink-2")} aria-live="polite" data-testid="calibration-quality-text">
-                      {quality.text}
-                    </p>
-                    {hint && (
-                      <p className="text-sm text-ink" data-testid="calibration-hint">
-                        {hint}
-                      </p>
-                    )}
-                  </div>
                   {equations === 0 && <p className="text-sm text-ink-2">{t("markIntro")}</p>}
                   {!advanced ? (
-                    <div role="group" aria-label={t("linesGroup")} className="flex gap-1.5 overflow-x-auto pb-1 max-lg:snap-x lg:grid lg:grid-cols-1 lg:overflow-visible [@media(orientation:landscape)_and_(max-height:520px)]:grid [@media(orientation:landscape)_and_(max-height:520px)]:overflow-visible" data-testid="line-chips">
+                    <div
+                      role="group"
+                      aria-label={t("linesGroup")}
+                      className="grid grid-cols-2 gap-1.5 [@media(orientation:landscape)_and_(max-height:520px)]:grid-cols-1"
+                      data-testid="line-chips"
+                    >
                       {LINE_NAMES.map(lineChip)}
                     </div>
                   ) : (
-                    <div role="group" aria-label={t("pointsGroup")} className="flex gap-1.5 overflow-x-auto pb-1 lg:grid lg:grid-cols-1 lg:overflow-visible [@media(orientation:landscape)_and_(max-height:520px)]:grid [@media(orientation:landscape)_and_(max-height:520px)]:overflow-visible" data-testid="point-chips">
+                    <div
+                      role="group"
+                      aria-label={t("pointsGroup")}
+                      className="grid grid-cols-2 gap-1.5 [@media(orientation:landscape)_and_(max-height:520px)]:grid-cols-1"
+                      data-testid="point-chips"
+                    >
                       {POINT_NAMES.map(pointChip)}
                     </div>
                   )}
@@ -543,25 +734,98 @@ export function CourtCalibration({
               {error && <Alert>{error}</Alert>}
             </div>
             {/* the answer in the thumb zone */}
-            <div className="shrink-0 space-y-2 border-t border-rule bg-raised p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+            <div className="shrink-0 space-y-2 border-t border-rule bg-raised p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] [@media(max-height:520px)]:space-y-1 [@media(max-height:520px)]:p-2">
               {!marking && suggestion ? (
                 <div className="grid grid-cols-2 gap-2">
-                  <Button onClick={() => void confirm()} loading={busy === "confirm"} data-testid="calibration-confirm">
+                  <Button
+                    onClick={() => void confirm()}
+                    loading={busy === "confirm"}
+                    data-testid="calibration-confirm"
+                  >
                     {t("fits")}
                   </Button>
-                  <Button variant="secondary" onClick={() => dispatch({ type: "correct" })} data-testid="calibration-correct">
+                  <Button
+                    variant="secondary"
+                    onClick={() => dispatch({ type: "correct" })}
+                    data-testid="calibration-correct"
+                  >
                     {t("correct")}
                   </Button>
                 </div>
               ) : (
-                <Button className="w-full" onClick={() => void save()} disabled={!verdict.ok} loading={busy === "save"} data-testid="calibration-save">
-                  {t("save")}
-                </Button>
+                <>
+                  <div className="space-y-1.5" data-testid="calibration-quality">
+                    <div className="flex items-baseline justify-between gap-2">
+                      <span className="text-sm font-semibold">{t("qualityTitle")}</span>
+                      {verdict.median != null &&
+                        local?.status !== "need-more" &&
+                        local?.status !== "too-few" && (
+                          <span className="font-mono text-[13px] tabular-nums text-ink-2">
+                            {t("pxShort", { px: verdict.median.toFixed(1) })}
+                          </span>
+                        )}
+                    </div>
+                    <div
+                      role="meter"
+                      aria-label={t("qualityTitle")}
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-valuenow={Math.round(quality.fill * 100)}
+                      aria-valuetext={quality.text}
+                      className="h-2 w-full bg-rule"
+                    >
+                      <div
+                        className={cn(
+                          "h-full",
+                          quality.tone === "ok"
+                            ? "bg-win"
+                            : quality.tone === "bad"
+                              ? "bg-loss"
+                              : "bg-ink-2",
+                        )}
+                        style={{ width: `${Math.round(quality.fill * 100)}%` }}
+                      />
+                    </div>
+                    <p
+                      className={cn(
+                        "text-sm",
+                        quality.tone === "ok"
+                          ? "text-win"
+                          : quality.tone === "bad"
+                            ? "text-loss"
+                            : "text-ink-2",
+                      )}
+                      aria-live="polite"
+                      data-testid="calibration-quality-text"
+                    >
+                      {quality.text}
+                    </p>
+                    {hint && (
+                      <p className="text-sm text-ink" data-testid="calibration-hint">
+                        {hint}
+                      </p>
+                    )}
+                  </div>
+                  <Button
+                    className="w-full"
+                    onClick={() => void save()}
+                    disabled={!verdict.ok}
+                    loading={busy === "save"}
+                    data-testid="calibration-save"
+                  >
+                    {t("save")}
+                  </Button>
+                </>
               )}
               {(skipBlock || (marking && suggestion)) && (
                 <div className="flex flex-wrap items-center gap-x-2">
                   {marking && suggestion && (
-                    <Button variant="quiet" size="sm" onClick={() => dispatch({ type: "suggest" })} data-testid="calibration-back">
+                    <Button
+                      variant="quiet"
+                      size="sm"
+                      onClick={() => dispatch({ type: "suggest" })}
+                      data-testid="calibration-back"
+                    >
                       {t("backToSuggestion")}
                     </Button>
                   )}
@@ -583,28 +847,69 @@ const toolClass =
 function serverRef(p: ClickProblem): ClickRef | null {
   const w = p.worst;
   if (!w) return null;
-  return w.kind === "point" ? { kind: "point", name: w.name } : { kind: "line", name: w.name, index: w.index ?? 0 };
+  return w.kind === "point"
+    ? { kind: "point", name: w.name }
+    : { kind: "line", name: w.name, index: w.index ?? 0 };
 }
 
 /**
  * The hall image with the current court drawn on it, read-only: enough to say "Passt" without
  * opening the marking dialog. Nothing when the court is not on the hall image.
  */
-export function CourtPreview({ orgId, videoId, analysis, alt }: { orgId: string; videoId: string; analysis: Analysis; alt: string }) {
+export function CourtPreview({
+  orgId,
+  videoId,
+  analysis,
+  alt,
+}: {
+  orgId: string;
+  videoId: string;
+  analysis: Analysis;
+  alt: string;
+}) {
   const pano = analysis.panorama;
   const cal = analysis.calibration;
-  if (!pano || !cal || cal.image_size[0] !== pano.width || cal.image_size[1] !== pano.height) return null;
+  if (!pano || !cal || cal.image_size[0] !== pano.width || cal.image_size[1] !== pano.height)
+    return null;
   return (
-    <div className="relative overflow-hidden bg-black ring-1 ring-inset ring-border" data-testid="court-preview">
+    <div
+      className="relative overflow-hidden bg-black ring-1 ring-inset ring-border"
+      data-testid="court-preview"
+    >
       {/* eslint-disable-next-line @next/next/no-img-element -- authenticated API image, not a static asset */}
-      <img src={`/v1/orgs/${orgId}/videos/${videoId}/panorama`} alt={alt} width={pano.width} height={pano.height} className="block h-auto w-full" />
-      <svg viewBox={`0 0 ${pano.width} ${pano.height}`} className="pointer-events-none absolute inset-0 size-full" aria-hidden>
+      <img
+        src={`/v1/orgs/${orgId}/videos/${videoId}/panorama`}
+        alt={alt}
+        width={pano.width}
+        height={pano.height}
+        className="block h-auto w-full"
+      />
+      <svg
+        viewBox={`0 0 ${pano.width} ${pano.height}`}
+        className="pointer-events-none absolute inset-0 size-full"
+        aria-hidden
+      >
         {/* a dark halo under the orange: the lines must stand out on any hall floor, also outdoors on a phone */}
         {courtPolylines(cal.homography).map((line, i) => (
-          <path key={`h${i}`} d={imagePath(line)} fill="none" stroke="#000" strokeOpacity={0.55} strokeWidth={5} vectorEffect="non-scaling-stroke" />
+          <path
+            key={`h${i}`}
+            d={imagePath(line)}
+            fill="none"
+            stroke="#000"
+            strokeOpacity={0.55}
+            strokeWidth={5}
+            vectorEffect="non-scaling-stroke"
+          />
         ))}
         {courtPolylines(cal.homography).map((line, i) => (
-          <path key={i} d={imagePath(line)} fill="none" stroke="#f97316" strokeWidth={2.5} vectorEffect="non-scaling-stroke" />
+          <path
+            key={i}
+            d={imagePath(line)}
+            fill="none"
+            stroke="#f97316"
+            strokeWidth={2.5}
+            vectorEffect="non-scaling-stroke"
+          />
         ))}
       </svg>
     </div>

@@ -36,6 +36,7 @@ export type FlowAction =
   /** a dragged click: `prev` is where it was when the drag began (one undo for the drag) */
   | { type: "move"; ref: ClickRef; p: Pt; prev?: Pt }
   | { type: "nudge"; dx: number; dy: number }
+  | { type: "select"; ref: ClickRef }
   | { type: "undo" }
   | { type: "clearLine"; name?: string }
   | { type: "clearAll" }
@@ -122,6 +123,8 @@ export function flowReducer(s: FlowState, a: FlowAction): FlowState {
       if (!prev) return s;
       return { ...s, clicks: setClick(s.clicks, a.ref, a.p), history: [...s.history, { kind: "move", ref: a.ref, prev }], selected: a.ref };
     }
+    case "select":
+      return clickAt(s.clicks, a.ref) ? { ...s, selected: a.ref } : s;
     case "nudge": {
       const ref = s.selected;
       const p = ref && clickAt(s.clicks, ref);
