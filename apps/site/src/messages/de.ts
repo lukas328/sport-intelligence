@@ -151,9 +151,9 @@ const de = {
     loopTitle: "Was heisst das fürs Training?",
     loop: [
       { title: "Muster", text: "{n} von {of} Gegentoren über aussen rechts." },
-      { title: "Warum", text: "Die Szenen und die Positionen von oben. Die Ursache erkennst du selbst." },
-      { title: "Übung", text: "Eine Übung aus der Bibliothek, etwa «{drill}»." },
-      { title: "Wirkung", text: "Der Saisonbalken zeigt Spiel für Spiel, ob es hält." },
+      { title: "Warum", text: "Szenen und Positionen von oben. Die Ursache siehst du." },
+      { title: "Übung", text: "Aus der Bibliothek, etwa «{drill}»." },
+      { title: "Wirkung", text: "Der Saisonbalken zeigt, ob es hält." },
     ],
     loopLink: "Die ganze Woche im Demo-Spiel",
     stepsKick: "So kommst du dahin",
@@ -627,7 +627,7 @@ const de = {
   seo: {
     how: { title: "So funktioniert die Videoanalyse", description: "Filmen, hochladen, prüfen: Die Analyse findet die Tore, du beantwortest ein paar Fragen. Danach Szenen, Spielverlauf und Positionen von oben." },
     filming: { title: "Spiel filmen: Checkliste und Aushang", description: "Fünf Regeln und die Checkliste für den Spieltag: Handy oder Kamera hoch an der Mittellinie, beide Tore im Bild. Mit Hallenplan und Aushang zum Drucken." },
-    demo: { title: "Demo-Spiel: von 27:29 zum Plan für Dienstag", description: "Eine Woche mit einem erfundenen Spiel, ohne Konto: der Knick im Spiel, drei Dinge mit Szenen von oben, die Übung fürs Training, der Link fürs Team und ob es im nächsten Spiel hält." },
+    demo: { title: "Demo-Spiel: von 27:29 zum Plan für Dienstag", description: "Ein erfundenes Spiel als Trainerwoche, ohne Konto: der Knick im Spiel, drei Dinge mit Szenen von oben, die Übung fürs Training und ob es hält." },
     pricing: { title: "Preise: gratis starten, dann ab CHF 39", description: "30 Tage gratis mit allem, auch der Analyse. Danach Team für CHF 39 im Monat oder der Gratis-Plan; Verein für mehrere Teams. Jahresrechnung per QR-Rechnung." },
     faq: { title: "Fragen und Antworten", description: "Handy oder Kamera? Erkennt die Analyse die Tore selbst? Wie teile ich Szenen? Die häufigsten Fragen von Trainerinnen und Trainern, kurz beantwortet." },
     data: { title: "Video im Verein: Daten und Einwilligung", description: "Für Eltern und Spieler: wer das Video sieht, wie die Einwilligung per Link geht, was für Kinder gilt, wo die Daten liegen und wann sie gelöscht werden." },

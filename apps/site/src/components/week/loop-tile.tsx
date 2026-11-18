@@ -46,7 +46,7 @@ export function LoopTile({
   const pictures = [
     <div key="m" className="flex h-full items-center justify-center gap-2 bg-paper">
       <b className="font-num text-[3.5rem] leading-none text-club-text">{numeral}</b>
-      <span className="upright text-[1.125rem] text-ink-2">{unit}</span>
+      <span className="font-num text-[1.75rem] leading-none text-ink-2">/{unit}</span>
     </div>,
     <div key="w" className="on-court h-full bg-court">
       <svg viewBox={VIEWS.halfB.box.join(" ")} className="block h-full w-full" preserveAspectRatio="xMidYMin slice">

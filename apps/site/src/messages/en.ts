@@ -153,9 +153,9 @@ const en: Messages = {
     loopTitle: "What does it mean for training?",
     loop: [
       { title: "Pattern", text: "{n} of {of} goals conceded on the right wing." },
-      { title: "Why", text: "The scenes and the positions from above. You see the cause yourself." },
-      { title: "Drill", text: "A drill from the library, for example \"{drill}\"." },
-      { title: "Effect", text: "The season bar shows match by match whether it holds." },
+      { title: "Why", text: "Scenes and positions from above. You see the cause." },
+      { title: "Drill", text: "From the library, for example \"{drill}\"." },
+      { title: "Effect", text: "The season bar shows whether it holds." },
     ],
     loopLink: "The whole week in the demo match",
     stepsKick: "How you get there",
@@ -629,7 +629,7 @@ const en: Messages = {
   seo: {
     how: { title: "How the video analysis works", description: "Film, upload, check: the analysis finds the goals, you answer a few questions. Then scenes, run of play and positions from above." },
     filming: { title: "Filming a match: checklist and notice", description: "Five rules and the match day checklist: phone or camera high at the halfway line, both goals in the picture. With a hall plan and a notice to print." },
-    demo: { title: "Demo match: from 27:29 to Tuesday's plan", description: "One week with an invented match, no account needed: the turn in the match, three things with their scenes from above, the drill for training, the link for the team and whether it holds in the next match." },
+    demo: { title: "Demo match: from 27:29 to Tuesday's plan", description: "An invented match as a coach's week, no account: the turn in the match, three things with scenes from above, the drill for training and whether it holds." },
     pricing: { title: "Prices: start for free, then from CHF 39", description: "30 days free with everything, automatic analysis included. Then Team for CHF 39 a month or the free plan; Club for several teams. Yearly QR invoice." },
     faq: { title: "Questions and answers", description: "Phone or camera? Does the analysis find the goals by itself? How do I share scenes? The most common coaches' questions, answered briefly." },
     data: { title: "Video in the club: data and consent", description: "For parents and players: who sees the video, how consent works by link, what applies to children, where the data is stored and when it is deleted." },

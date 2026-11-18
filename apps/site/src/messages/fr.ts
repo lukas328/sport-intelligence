@@ -153,9 +153,9 @@ const fr: Messages = {
     loopTitle: "Qu'est-ce que ça change à l'entraînement ?",
     loop: [
       { title: "Tendance", text: "{n} des {of} buts encaissés par l'aile droite." },
-      { title: "Pourquoi", text: "Les scènes et les positions vues d'en haut. La cause, tu la vois toi-même." },
-      { title: "Exercice", text: "Un exercice de la bibliothèque, par exemple « {drill} »." },
-      { title: "Effet", text: "La barre de la saison montre match après match si ça tient." },
+      { title: "Pourquoi", text: "Scènes et positions vues d'en haut. La cause, tu la vois." },
+      { title: "Exercice", text: "De la bibliothèque, par exemple « {drill} »." },
+      { title: "Effet", text: "La barre de la saison montre si ça tient." },
     ],
     loopLink: "Toute la semaine dans le match de démo",
     stepsKick: "Comment tu y arrives",
@@ -629,7 +629,7 @@ const fr: Messages = {
   seo: {
     how: { title: "Comment fonctionne l'analyse vidéo", description: "Filmer, téléverser, vérifier : l'analyse trouve les buts, tu réponds à quelques questions. Puis scènes, évolution du score et positions." },
     filming: { title: "Filmer un match : liste et affiche", description: "Cinq règles et la liste du jour de match : téléphone ou caméra en hauteur à la ligne médiane, les deux buts dans l'image. Avec plan de la salle et affiche." },
-    demo: { title: "Match de démo : de 27:29 au plan de mardi", description: "Une semaine avec un match inventé, sans compte : la cassure du match, trois choses avec leurs scènes vues d'en haut, l'exercice pour l'entraînement, le lien pour l'équipe et si ça tient au match suivant." },
+    demo: { title: "Match de démo : de 27:29 au plan de mardi", description: "Un match inventé, la semaine d'un entraîneur, sans compte : la cassure, trois choses avec leurs scènes vues d'en haut, l'exercice et si ça tient." },
     pricing: { title: "Prix : commencer gratuitement, puis dès CHF 39", description: "30 jours gratuits avec tout, analyse comprise. Ensuite Équipe pour CHF 39 par mois ou la formule gratuite ; Club pour plusieurs équipes. Facture annuelle QR." },
     faq: { title: "Questions et réponses", description: "Téléphone ou caméra ? L'analyse trouve-t-elle les buts seule ? Comment partager des scènes ? Les questions fréquentes des entraîneurs, en bref." },
     data: { title: "Vidéo au club : données et consentement", description: "Pour les parents et les joueurs : qui voit la vidéo, le consentement par lien, ce qui vaut pour les enfants, où sont les données et quand elles sont effacées." },
