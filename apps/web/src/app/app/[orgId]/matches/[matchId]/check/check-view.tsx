@@ -12,6 +12,7 @@ import { personGroups } from "@/lib/check-budget";
 import { VideoPlayer, type PlayerHandle } from "@/components/video/player";
 import type { Homography } from "@/lib/spotlight";
 import { CORNERS, cornersOf, FieldCheck } from "./field-check";
+import { CourtCalibration } from "@/components/analysis/court-calibration";
 import type { Pt } from "@/lib/court-calibration";
 import { PersonCrop } from "./person-box";
 import { Strip } from "@/components/anlauf/heads";
@@ -258,6 +259,8 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
   const inPano = cal && panoSize && cal.image_size[0] === panoSize[0] && cal.image_size[1] === panoSize[1];
   const startCorners = panoSize ? cornersOf(inPano ? (cal.homography as Homography) : null, panoSize) : null;
   const [moved, setMoved] = useState<Pt[] | null>(null);
+  // the corners out of the picture (a camera at one end): the court marked by its lines instead
+  const [byLines, setByLines] = useState(false);
   const corners = moved ?? startCorners;
 
   const roster = useRosterNames(orgId, match.team_id, match.season_id);
@@ -746,10 +749,39 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
             {current.kind === "field" && panoSize && (
               <figcaption className="flex flex-wrap items-center justify-between gap-3 bg-[rgb(10_13_17/0.9)] px-3 py-2 text-[15px] font-semibold text-[#eef2f5]">
                 <span>{t("fieldDrag")}</span>
-                <button type="button" disabled={!moved} onClick={() => setMoved(null)} className="min-h-11 cursor-pointer border-[1.5px] border-[#8d97a1] bg-transparent px-3 font-bold text-white disabled:cursor-default disabled:opacity-50" data-testid="field-reset">
-                  {t("fieldReset")}
-                </button>
+                <span className="flex flex-wrap gap-2">
+                  <button type="button" disabled={!moved} onClick={() => setMoved(null)} className="min-h-11 cursor-pointer border-[1.5px] border-[#8d97a1] bg-transparent px-3 font-bold text-white disabled:cursor-default disabled:opacity-50" data-testid="field-reset">
+                    {t("fieldReset")}
+                  </button>
+                  {fieldData && (
+                    <button type="button" onClick={() => setByLines(true)} className="min-h-11 cursor-pointer border-[1.5px] border-[#8d97a1] bg-transparent px-3 font-bold text-white" data-testid="field-lines">
+                      {t("fieldLines")}
+                    </button>
+                  )}
+                </span>
               </figcaption>
+            )}
+            {byLines && current.kind === "field" && fieldData?.panorama && (
+              <CourtCalibration
+                orgId={orgId}
+                videoId={current.videoId}
+                analysis={fieldData}
+                onClose={() => setByLines(false)}
+                onDone={(how) =>
+                  void answer({
+                    key: "lines",
+                    label: t(how === "undeterminable" ? "fieldUndeterminable" : "fieldLinesDone"),
+                    run: async () => {
+                      setFieldsConfirmed((f) => [...f, current.videoId]);
+                      setMoved(null);
+                      void qc.invalidateQueries({ queryKey: ["analysis"] });
+                      void qc.invalidateQueries({ queryKey: ["graphics", match.id] });
+                      // a clicked court runs the analysis again: wait for it, then ask what it found
+                      if (how !== "undeterminable") await reload(true);
+                    },
+                  })
+                }
+              />
             )}
             {current.kind === "goal" && (
               <figcaption className={cn("flex flex-wrap items-center justify-between gap-x-3 gap-y-1 bg-[rgb(10_13_17/0.9)] px-3 py-1.5 text-[#eef2f5]", spotStep && "max-md:hidden")}>

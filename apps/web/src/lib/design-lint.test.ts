@@ -43,6 +43,7 @@ const COLOUR_FILES = new Set([
   "components/tactics/board-theme.ts",
   "components/analysis/court-half.tsx",
   "components/analysis/court-calibration.tsx",
+  "components/analysis/calibration-stage.tsx",
   "components/analysis/court-full.tsx",
   "components/analysis/goal-grid.tsx",
   "components/oauth-buttons.tsx",
