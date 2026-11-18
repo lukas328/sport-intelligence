@@ -135,7 +135,7 @@ export function KickoffPanel({
                       aria-invalid={clockInvalid || undefined}
                       aria-describedby={clockInvalid ? `clock-error-${p}` : undefined}
                       // Escape leaves the field without saving
-                      onKeyDown={(e) => e.key === "Escape" && setClockFor(null)}
+                      onKeyDown={(e) => e.key === "Escape" && (e.preventDefault(), setClockFor(null))}
                       className="font-score tabular-nums"
                       autoFocus
                     />

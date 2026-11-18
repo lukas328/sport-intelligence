@@ -2,7 +2,7 @@
 
 import { Plus, X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useId } from "react";
+import { useId, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/card";
 import { REFEREE_PICK, kitWarnings, type Kits, type TeamKitKey } from "@/lib/kit";
@@ -59,7 +59,14 @@ export function KitFields({
   // a kit nobody chose stays empty and is not compared (third real-video test G7: the form
   // filled the opponent in red and warned of «Ähnliche Farben» for a red club)
   const isOpen = (k: TeamKitKey) => unknown.includes(k);
-  const similar = kitWarnings({ ...kits, ...Object.fromEntries(unknown.map((k) => [k, null])) });
+  // the hint on similar colours only after a choice here (finding A11): before, it stood under
+  // the defaults and read like an error
+  const [touched, setTouched] = useState(false);
+  const similar = touched ? kitWarnings({ ...kits, ...Object.fromEntries(unknown.map((k) => [k, null])) }) : [];
+  const pick = (next: Kits) => {
+    setTouched(true);
+    onChange(next);
+  };
   const referee = `${t("matches.kitReferee")} (${t("common.optional")})`;
   return (
     <>
@@ -76,7 +83,7 @@ export function KitFields({
                 key={which}
                 type="button"
                 aria-pressed={same(kits.own, colour)}
-                onClick={() => onChange({ ...kits, own: colour })}
+                onClick={() => pick({ ...kits, own: colour })}
                 className={cn(
                   "inline-flex min-h-11 cursor-pointer items-center gap-2 border-2 px-3 text-[15px] font-bold",
                   same(kits.own, colour) ? "border-ink bg-ink text-ground" : "border-ink bg-transparent text-ink",
@@ -101,7 +108,7 @@ export function KitFields({
                 name={`kit_${k}`}
                 type="color"
                 value={kits[k]}
-                onChange={(e) => onChange({ ...kits, [k]: e.target.value })}
+                onChange={(e) => pick({ ...kits, [k]: e.target.value })}
                 className={PICKER}
               />
             </span>
@@ -120,7 +127,7 @@ export function KitFields({
                 name="kit_referee"
                 type="color"
                 value={kits.referee ?? REFEREE_PICK}
-                onChange={(e) => onChange({ ...kits, referee: e.target.value })}
+                onChange={(e) => pick({ ...kits, referee: e.target.value })}
                 className={PICKER}
               />
             </span>

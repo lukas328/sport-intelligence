@@ -553,7 +553,9 @@
     "kitHome": "Home shirt",
     "kitAway": "Away shirt",
     "otherWaysFile": "No video? Create the match and enter the result. Attach the paper report to the match as a photo or PDF; the official report from handball.ch comes by itself.",
-    "uploadBackToList": "Back to the list of matches"
+    "uploadBackToList": "Back to the list of matches",
+    "newHint": "Friendly or opponent video",
+    "newOwnMatch": "Add a match of your own"
   },
   "upload": {
     "title": "Upload video",
@@ -591,7 +593,6 @@
     "tip3": "Best: the whole match in one file. Did you stop at half-time, or did the phone or camera split the recording? Just choose all files of the match together. They are analysed as one match.",
     "guide": "Full filming guide",
     "chooseVideo": "Choose video",
-    "more": "More: another camera, a link, technical details",
     "mayClose": "You can close the page. When the analysis is done, the bell at the top tells you.",
     "notVideo": "This file is not a video (MP4, MOV or MKV). Choose the file from the camera or the phone.",
     "secondFile": "This match already has a video. If you choose the second half or another piece here, it is added after it and analysed with it.",
@@ -622,7 +623,8 @@
     "failedAgain": "If it fails again, it is mostly the connection. Try later on Wi-Fi, or start over.",
     "ownKit": "Which shirt do you wear in this match?",
     "ownKitSaved": "Saved.",
-    "otherGame": "“{name}” is named quite differently from “{first}”, which is already in this match. Does the file really belong here? Another game gets a match of its own. The upload goes on."
+    "otherGame": "“{name}” is named quite differently from “{first}”, which is already in this match. Does the file really belong here? Another game gets a match of its own. The upload goes on.",
+    "moreAll": "More: how to film, files and size, another camera, link"
   },
   "processing": {
     "title": "Processing",
@@ -1051,7 +1053,9 @@
     "edgeScenes_turnovers": "Watch the opponent's turnovers",
     "edgeScenes_fastBreaks": "Watch the fast-break goals",
     "concededByPosition": "Goals conceded by position",
-    "ofShots": "{n, plural, one {from # shot} other {from # shots}}"
+    "ofShots": "{n, plural, one {from # shot} other {from # shots}}",
+    "flowAbove": "Above: {team} ahead",
+    "flowBelow": "Below: {team} ahead"
   },
   "shotsView": {
     "title": "Shots",
@@ -1332,7 +1336,7 @@
     "viewIntro": "Press Play to see the play phase by phase.",
     "hint_move": "Drag players and the ball like on a magnetic board. Tap an arrow to delete it.",
     "hint_run": "Drag from the player to where he runs. Curves work too.",
-    "hint_pass": "Drag from the player with the ball to the team-mate.",
+    "hint_pass": "Drag from the player with the ball to the team-mate. The pass snaps to the nearest team-mate.",
     "hint_dribble": "Drag from the player to where he dribbles.",
     "hint_screen": "Drag from the player to where he sets the screen.",
     "hint_ball": "Tap a player or a spot: the ball goes there.",
@@ -1666,6 +1670,7 @@
     "status_invoice_paid": "paid by invoice",
     "current": "Current plan",
     "trialAfter": "After that the free plan applies until you decide. Nothing is deleted.",
+    "gpuTerm": "<term>Analysis minutes</term> this month",
     "withKeepers": "Goalkeeper analysis included"
   },
   "share": {
@@ -1726,7 +1731,8 @@
       "save": "Save picture",
       "alt": "Match card {team} against {opponent}, {score}",
       "file": "match-card",
-      "noScore": "The match card is ready once the result is entered."
+      "noScore": "The match card is ready once the result is entered.",
+      "making": "Being made …"
     },
     "player": {
       "button": "Share scenes",
@@ -3614,7 +3620,10 @@
       "blue": "Blue",
       "black": "Black",
       "white": "White",
-      "yellow": "Yellow"
+      "yellow": "Yellow",
+      "green": "Green",
+      "orange": "Orange",
+      "purple": "Purple"
     },
     "scenesTitle": "{count, plural, one {1 scene} other {# scenes}} from {matches, plural, one {one match} other {# matches}}.",
     "scenesKick": "Scenes · {matches, plural, one {1 match} other {# matches}} with video",
@@ -3627,8 +3636,6 @@
     "matrix": "Table",
     "open": "Open",
     "allCollections": "All collections",
-    "halftimeLevel": "Half time, level",
-    "endLevel": "Full time, level",
     "stageMode": "Stage",
     "modeVideo": "Video",
     "modeTaktik": "Tactics",
@@ -3747,6 +3754,10 @@
     "todayNote": "from the match report",
     "todayText": "The match card as a picture for the team chat and the short report to copy, even without a video.",
     "todayCard": "Match card for the team chat",
+    "pictureBusy": "Making the match card …",
+    "pictureSaved": "Picture saved, you find it in your downloads.",
+    "pictureFailed": "The picture could not be made just now. Try again.",
+    "scenesKickTerm": "<term>Scenes</term> · {matches, plural, one {1 match} other {# matches}} with video",
     "exampleBand": "Example · invented figures"
   },
   "check": {
@@ -3903,6 +3914,8 @@
     "emptyText": "After the analysis every goal, every shot and every turnover is a scene. You search them with a sentence and put them together into collections.",
     "emptyPlays": "Drawing plays works already:",
     "emptySearch": "Search finds scenes from your first video on.",
+    "emptyAnswer": "No scenes yet. Upload a video, then you find every goal here.",
+    "emptyAnswerRead": "No scenes yet. As soon as a video of your team is uploaded, you find every goal here.",
     "backToCollection": "Back to the collection “{title}”",
     "addToCollection": "{n, plural, one {1 scene} other {# scenes}} to the collection"
   },
@@ -3952,7 +3965,16 @@
     "keepersSome": "{n, plural, one {1 goalkeeper entered.} other {# goalkeepers entered.}}",
     "keepersChange": "Change goalkeepers",
     "keepersDone": "Done",
-    "keepersFailed": "That did not work. Try again or enter the position under «Edit squad»."
+    "keepersFailed": "That did not work. Try again or enter the position under «Edit squad».",
+    "positionsTitle": "Who plays where?",
+    "positionsText": "Choose a position and tap everyone who plays it. Tapping again takes it away. With positions the squad sorts the players, and figures by position get their people.",
+    "positionsPick": "Position",
+    "positionsTap": "Who plays {position}?",
+    "positionsMark": "{name} plays {position}",
+    "positionsMissing": "{n, plural, one {1 court player without a position.} other {# court players without a position.}}",
+    "positionsAll": "All court players have a position.",
+    "positionsChange": "Change positions",
+    "positionsFailed": "That did not work. Try again or enter the position under «Edit squad»."
   },
   "seasonPage": {
     "kick": "{season} · {league} · after {n, plural, one {# match} other {# matches}}",
@@ -4229,7 +4251,9 @@
     "sideVideoLeft": "As in the video: the goal on the left.",
     "sideVideoRight": "As in the video: the goal on the right.",
     "pause": "Pause",
-    "play": "Play"
+    "play": "Play",
+    "ofTerm": "<term>Shot from</term>: {zone}",
+    "ofEstimatedTerm": "<term>Shot from</term>: {zone}, estimated"
   },
   "personRoles": {
     "trainer": "Coach",
@@ -4441,5 +4465,11 @@
     "phone": "The upload runs in this page. If the screen goes off or you close it, it stops: open the match again and choose the same file, and it carries on where it stopped.",
     "analysis": "It starts by itself once the video is in and runs on our servers: you can put the phone away, the bell lets you know. It counts toward your plan’s analysis minutes.",
     "billing": "See plan"
+  },
+  "glossary": {
+    "scene": "A scene is a moment in the video, mostly a goal or a shot, with the seconds before it. You find them here across all matches with video.",
+    "spot": "Where the shot was taken from, such as right wing or pivot. The pictures by position are made from it.",
+    "collection": "A collection is scenes you put together, for the video session or a training. You can share it with the team.",
+    "analysisMinutes": "How many minutes the video analysis worked on your videos this month. The longer a video, the more minutes it takes."
   }
 }

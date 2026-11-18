@@ -1,11 +1,13 @@
 "use client";
 
 import { ownDrought } from "@/lib/drought";
+import { usePhone } from "@/lib/use-phone";
+import { scoreFlow } from "@/lib/score-flow";
 import type { Schemas } from "@handball/api-client";
 import { ZONE_LABELS } from "@handball/court";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { CourtHalf, ShotDot } from "@/components/analysis/court-half";
 import { EventList, type EventFilter } from "@/components/analysis/event-list";
 import { GoalGrid } from "@/components/analysis/goal-grid";
@@ -373,76 +375,86 @@ function ScoreChart({
   span?: readonly [number, number] | null;
 }) {
   const tc = useTranslations("anlauf");
-  const w = 600;
-  const h = 210;
-  const right = 34;
+  const t = useTranslations("stats");
+  const clip = useId().replace(/:/g, "");
+  // on a phone a narrower drawing, so the numbers keep their size instead of shrinking to 8 px
+  const phone = usePhone();
+  const w = phone ? 360 : 600;
+  const h = phone ? 200 : 210;
+  const left = 30;
+  const right = 58;
   const minT = span ? span[0] * 60 : 0;
   const maxT = span ? Math.max(minT + 60, span[1] * 60) : Math.max(periodS * periods, ...points.map((p) => p.clock_s));
   const range = maxT - minT;
-  const tickStep = range > 2400 ? 15 : range > 600 ? 5 : 1;
+  const tickStep = range > 2400 ? (phone ? 30 : 15) : range > 600 ? (phone ? 10 : 5) : 1;
   const ticks = Array.from({ length: Math.floor(maxT / 60 / tickStep) + 1 }, (_, i) => i * tickStep).filter((m) => m * 60 >= minT);
-  const maxG = Math.max(5, ...points.map((p) => Math.max(p.own, p.opp)));
-  const gridStep = maxG > 20 ? 10 : 5;
-  const grid = Array.from({ length: Math.floor(maxG / gridStep) + 1 }, (_, i) => i * gridStep);
-  const X = (s: number) => 28 + ((Math.min(maxT, Math.max(minT, s)) - minT) / range) * (w - 28 - right);
-  const Y = (g: number) => h - 22 - (g / maxG) * (h - 34);
+  const { top, grid } = scoreFlow(points);
+  const X = (s: number) => left + ((Math.min(maxT, Math.max(minT, s)) - minT) / range) * (w - left - right);
+  const y0 = 10;
+  const y1 = h - 26;
+  const Y = (d: number) => y0 + ((top - d) / (2 * top)) * (y1 - y0);
   const last = points.at(-1) ?? { clock_s: 0, own: 0, opp: 0 };
-  // goals missing after the last one (fewer than the result, well before the end): the lines end
-  // there and say so, instead of running flat to the end of the axis (review R13)
+  // goals missing after the last one (fewer than the result, well before the end): the line ends
+  // there and says so, instead of running flat to the end of the axis (review R13)
   const cut = !span && final != null && last.own + last.opp < final.own + final.opp && last.clock_s < maxT - 60 ? last.clock_s : null;
   const endT = cut ?? maxT;
-  const step = (key: "own" | "opp") =>
-    points.map((p, i) => `${i ? `H${X(p.clock_s)}` : `M${X(minT)} ${Y(0)} H${X(p.clock_s)}`} V${Y(p[key])}`).join(" ") + ` H${X(endT)}`;
+  const line = points.map((p, i) => `${i ? `H${X(p.clock_s)}` : `M${X(minT)} ${Y(0)} H${X(p.clock_s)}`} V${Y(p.own - p.opp)}`).join(" ") + ` H${X(endT)}`;
+  // the same line closed along the middle: the lead tinted, ours above, theirs below
+  const area = `${line} V${Y(0)} H${X(minT)} Z`;
   const timed = points.every((p) => p.clock_s > 0 || (p.own === 0 && p.opp === 0));
-  // end labels: keep them apart when the score is close
-  let yo = Y(last.own);
-  let yp = Y(last.opp);
-  if (Math.abs(yo - yp) < 13) {
-    const mid = (yo + yp) / 2;
-    const up = last.own >= last.opp;
-    yo = mid + (up ? -7 : 7);
-    yp = mid + (up ? 7 : -7);
-  }
+  const endY = Y(last.own - last.opp);
   return (
     <figure className="space-y-3">
+      {/* what above and below the middle means, in words beside the drawing, never on the line */}
       <figcaption className="flex flex-wrap gap-x-5 gap-y-1 text-[0.9375rem]">
         <span className="inline-flex items-center gap-2 font-medium">
-          <span aria-hidden className="h-0.5 w-5 rounded-full bg-accent" />
-          {own}
+          <span aria-hidden className="h-3 w-5 border-t-[2.5px] border-accent bg-accent/15" />
+          {t("flowAbove", { team: own })}
         </span>
         <span className="inline-flex items-center gap-2 text-muted">
-          <span aria-hidden className="h-0 w-5 border-t-2 border-dashed border-muted" />
-          {opp}
+          <span aria-hidden className="h-3 w-5 border-b-[2.5px] border-accent bg-muted/15" />
+          {t("flowBelow", { team: opp })}
         </span>
       </figcaption>
       <svg viewBox={`0 0 ${w} ${h}`} role="img" aria-label={`${own} ${last.own}, ${opp} ${last.opp}`} className="w-full">
+        <defs>
+          <clipPath id={`${clip}a`}>
+            <rect x={0} y={0} width={w} height={Y(0)} />
+          </clipPath>
+          <clipPath id={`${clip}b`}>
+            <rect x={0} y={Y(0)} width={w} height={h - Y(0)} />
+          </clipPath>
+        </defs>
         {grid.map((g) => (
           <g key={g}>
-            <line x1={X(minT)} x2={X(maxT)} y1={Y(g)} y2={Y(g)} stroke="var(--border)" strokeWidth={g === 0 ? 1.2 : 0.6} />
-            <text x={X(minT) - 8} y={Y(g) + 3.5} fontSize="13" textAnchor="end" fill="var(--muted)">
-              {g}
-            </text>
+            <line x1={X(minT)} x2={X(maxT)} y1={Y(g)} y2={Y(g)} stroke={g === 0 ? "var(--ink)" : "var(--border)"} strokeWidth={g === 0 ? 1.2 : 0.6} />
+            {/* the size of the lead; above the middle ours, below theirs, as the words say */}
+            {g !== 0 && (
+              <text x={X(minT) - 8} y={Y(g) + 4.5} fontSize="13" textAnchor="end" fill="var(--muted)">
+                {Math.abs(g)}
+              </text>
+            )}
           </g>
         ))}
         {Array.from({ length: periods - 1 }, (_, i) => (i + 1) * periodS)
           .filter((at) => at > minT && at < maxT)
           .map((at, i) => (
-          <line key={i} x1={X(at)} x2={X(at)} y1={8} y2={h - 22} stroke="var(--muted)" strokeOpacity={0.4} strokeDasharray="3 4" />
-        ))}
+            <line key={i} x1={X(at)} x2={X(at)} y1={y0} y2={y1} stroke="var(--muted)" strokeOpacity={0.4} strokeDasharray="3 4" />
+          ))}
         {ticks.map((m) => (
           <text key={m} x={X(m * 60)} y={h - 6} fontSize="13" textAnchor="middle" fill="var(--muted)">
             {m}&apos;
           </text>
         ))}
-        {timed && <path d={step("opp")} fill="none" stroke="var(--muted)" strokeWidth={1.8} strokeDasharray="5 3" />}
-        {timed && <path d={step("own")} fill="none" stroke="var(--accent)" strokeWidth={2.5} strokeLinejoin="round" />}
         {timed && (
           <>
-            <text x={X(endT) + 6} y={yo + 4} fontSize="14" fontWeight="700" fill="var(--accent)">
-              {last.own}
-            </text>
-            <text x={X(endT) + 6} y={yp + 4} fontSize="14" fontWeight="600" fill="var(--muted)">
-              {last.opp}
+            <path d={area} fill="var(--accent)" fillOpacity={0.16} clipPath={`url(#${clip}a)`} />
+            <path d={area} fill="var(--muted)" fillOpacity={0.16} clipPath={`url(#${clip}b)`} />
+            <path d={line} fill="none" stroke="var(--accent)" strokeWidth={2.5} strokeLinejoin="round" />
+            <circle cx={X(endT)} cy={endY} r={4} fill="var(--accent)" />
+            {/* one end value: the score, ours first (A12, A14) */}
+            <text x={X(endT) + 8} y={Math.min(Math.max(endY + 5, y0 + 10), y1)} fontSize="14" fontWeight="700" fill="var(--ink)">
+              {`${last.own}:${last.opp}`}
             </text>
           </>
         )}

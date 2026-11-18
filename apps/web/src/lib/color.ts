@@ -79,10 +79,8 @@ export const CHECK_KITS = {
   gruen: ["#12804a", "#ffffff"],
 } as const satisfies Record<string, readonly [string, string]>;
 
-/** The shirts a coach picks an unknown opponent's colour from (SPEC 7.13). */
-export const ASK_SHIRTS = { red: "#d3202e", blue: "#1f4fd6", black: "#17191c", white: "#ffffff", yellow: "#f6c500" } as const;
-
-/** The eight shirt colours of the onboarding (SPEC 7.12): what a coach knows without a picker. */
+/** The eight shirt colours of the onboarding (SPEC 7.12): what a coach knows without a picker;
+ * also the shirts an unknown opponent's colour is picked from (SPEC 7.13, A17). */
 export const SHIRTS = [
   ["blue", "#1f4fd6"],
   ["red", "#d3202e"],

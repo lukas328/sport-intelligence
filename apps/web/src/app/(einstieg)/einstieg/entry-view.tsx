@@ -340,7 +340,9 @@ export function TeamFacts({ p, hideNext = false, hideScorers = false }: { p: Pre
           <LeagueTable rows={rows} testid="entry-table" />
         </section>
       )}
-      <div className="space-y-10">
+      {/* nothing beside the table when scorers and the next game are shown elsewhere (A10) */}
+      {((p.scorers.length > 0 && !hideScorers) || (p.next && !hideNext)) && (
+        <div className="space-y-10">
         {p.scorers.length > 0 && !hideScorers && (
           <section>
             <SectionHead title={t("scorers")} note={t("scorersBasis", { n: p.scorer_games })} />
@@ -363,7 +365,8 @@ export function TeamFacts({ p, hideNext = false, hideScorers = false }: { p: Pre
             </p>
           </section>
         )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

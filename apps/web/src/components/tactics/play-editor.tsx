@@ -25,7 +25,8 @@ import { api } from "@/lib/client";
 import { useConfirm } from "@/components/ui/confirm";
 import { errorKey, type ErrorKey } from "@/lib/errors";
 import { cn } from "@/lib/utils";
-import { Board, type Tool } from "./board";
+import { Board, boardRatio, type Tool } from "./board";
+import { usePhone } from "@/lib/use-phone";
 import { TokenDot, ToolIcon } from "./tool-icon";
 
 type Play = Schemas["PlayOut"];
@@ -134,6 +135,7 @@ export function PlayEditor({
   const [clock, setClock] = useState(0);
   const [dirty, setDirty] = useState(false);
   const [big, setBig] = useState(false);
+  const phone = usePhone();
   const [notice, setNotice] = useState<string | null>(null);
   const [failure, setFailure] = useState<ErrorKey | "invalid" | null>(null);
   const frame = doc.frames[Math.min(idx, doc.frames.length - 1)]!;
@@ -174,7 +176,10 @@ export function PlayEditor({
   useEffect(() => {
     const onKey = (e: globalThis.KeyboardEvent) => {
       const el = e.target as HTMLElement | null;
-      if (e.key === "Escape" && big) setBig(false);
+      if (e.key === "Escape" && big) {
+        e.preventDefault();
+        setBig(false);
+      }
       if (!edit || (el && /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName))) return;
       const mod = e.ctrlKey || e.metaKey;
       if (mod && e.key.toLowerCase() === "z") {
@@ -385,7 +390,12 @@ export function PlayEditor({
           aria-modal={big || undefined}
           aria-label={big ? t("board") : undefined}
         >
-          <div className={cn("relative", big && "min-h-0 min-w-0 flex-1")}>
+          {/* as wide as the column allows up to the courts' one largest width, and no wider than
+              its height fits on the screen: the court itself, no empty band beside it (A14, A16) */}
+          <div
+            className={cn("relative", big ? "min-h-0 min-w-0 flex-1" : "court-frame")}
+            style={big ? undefined : { maxWidth: `min(100%, var(--court-max), calc((100svh - 10rem) * ${boardRatio(doc.court, !phone).toFixed(3)}))` }}
+          >
             <Board
               frame={shownFrame}
               live={live}
@@ -397,7 +407,7 @@ export function PlayEditor({
               onGestureStart={h.begin}
               onChange={(f) => setFrame(f, false)}
               label={play?.name ? `${t("board")}: ${play.name}` : t("board")}
-              className={big ? "h-full" : "h-auto max-h-[78svh]"}
+              className={big ? "h-full" : "h-auto"}
             />
             {empty && edit && (
               <p className="pointer-events-none absolute inset-x-4 top-1/2 -translate-y-1/2 bg-paper/95 p-3 text-center text-[15px] ring-1 ring-ink/20">{t("emptyBoard")}</p>

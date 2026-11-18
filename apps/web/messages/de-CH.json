@@ -553,7 +553,9 @@
     "kitHome": "Heimtrikot",
     "kitAway": "Auswärtstrikot",
     "otherWaysFile": "Ohne Video? Leg das Spiel an und trag das Resultat ein. Den Papierbericht hängst du im Spiel als Foto oder PDF an; der offizielle Bericht von handball.ch kommt von selbst.",
-    "uploadBackToList": "Zurück zur Liste der Spiele"
+    "uploadBackToList": "Zurück zur Liste der Spiele",
+    "newHint": "Testspiel oder Gegner-Video",
+    "newOwnMatch": "Ein eigenes Spiel anlegen"
   },
   "upload": {
     "title": "Video hochladen",
@@ -591,7 +593,6 @@
     "tip3": "Am besten das ganze Spiel in einer Datei. Hast du in der Pause gestoppt oder hat das Handy oder die Kamera die Aufnahme geteilt? Wähl einfach alle Dateien des Spiels zusammen aus. Sie werden als ein Spiel ausgewertet.",
     "guide": "Ausführliche Filmanleitung",
     "chooseVideo": "Video wählen",
-    "more": "Mehr: andere Kamera, Link, Technik",
     "mayClose": "Du kannst die Seite schliessen. Ist die Analyse fertig, meldet sich die Glocke oben.",
     "notVideo": "Diese Datei ist kein Video (MP4, MOV oder MKV). Wähl die Datei aus der Kamera oder vom Handy.",
     "secondFile": "Dieses Spiel hat schon ein Video. Wählst du hier die 2. Halbzeit oder ein weiteres Stück aus, kommt es hinten dazu und wird mit ausgewertet.",
@@ -622,7 +623,8 @@
     "failedAgain": "Klappt es wieder nicht, liegt es meist an der Verbindung. Versuch es später im WLAN, oder starte neu.",
     "ownKit": "Welches Trikot tragt ihr in diesem Spiel?",
     "ownKitSaved": "Gespeichert.",
-    "otherGame": "«{name}» heisst ganz anders als «{first}», das schon in diesem Spiel liegt. Gehört die Datei wirklich hierher? Ein anderes Spiel legst du als eigenes Spiel an. Der Upload läuft weiter."
+    "otherGame": "«{name}» heisst ganz anders als «{first}», das schon in diesem Spiel liegt. Gehört die Datei wirklich hierher? Ein anderes Spiel legst du als eigenes Spiel an. Der Upload läuft weiter.",
+    "moreAll": "Mehr: so filmst du, Dateien und Grösse, andere Kamera, Link"
   },
   "processing": {
     "title": "Verarbeitung",
@@ -1051,7 +1053,9 @@
     "edgeScenes_turnovers": "Ballverluste des Gegners ansehen",
     "edgeScenes_fastBreaks": "Gegenstosstore ansehen",
     "concededByPosition": "Gegentore nach Position",
-    "ofShots": "{n, plural, one {aus # Wurf} other {aus # Würfen}}"
+    "ofShots": "{n, plural, one {aus # Wurf} other {aus # Würfen}}",
+    "flowAbove": "Oben: {team} vorne",
+    "flowBelow": "Unten: {team} vorne"
   },
   "shotsView": {
     "title": "Würfe",
@@ -1332,7 +1336,7 @@
     "viewIntro": "Drück «Abspielen», um den Spielzug Phase für Phase zu sehen.",
     "hint_move": "Zieh Spieler und Ball wie auf einer Magnettafel. Tippe einen Pfeil an, um ihn zu löschen.",
     "hint_run": "Zieh vom Spieler aus, wohin er läuft. Kurven gehen auch.",
-    "hint_pass": "Zieh vom Spieler mit Ball zum Mitspieler.",
+    "hint_pass": "Zieh vom Spieler mit Ball zum Mitspieler. Der Pass rastet beim Mitspieler ein, der am nächsten liegt.",
     "hint_dribble": "Zieh vom Spieler aus, wohin er mit Ball prellt.",
     "hint_screen": "Zieh vom Spieler zur Stelle, wo er die Sperre stellt.",
     "hint_ball": "Tippe auf einen Spieler oder eine Stelle: dort ist der Ball.",
@@ -1666,6 +1670,7 @@
     "status_invoice_paid": "per Rechnung bezahlt",
     "current": "Aktueller Plan",
     "trialAfter": "Danach gilt der Gratis-Plan, bis du dich entscheidest. Nichts wird gelöscht.",
+    "gpuTerm": "<term>Analyseminuten</term> diesen Monat",
     "withKeepers": "Torhüter-Auswertung inbegriffen"
   },
   "share": {
@@ -1726,7 +1731,8 @@
       "save": "Bild speichern",
       "alt": "Spielkarte {team} gegen {opponent}, {score}",
       "file": "spielkarte",
-      "noScore": "Die Spielkarte gibt es, sobald das Resultat eingetragen ist."
+      "noScore": "Die Spielkarte gibt es, sobald das Resultat eingetragen ist.",
+      "making": "Wird erstellt …"
     },
     "player": {
       "button": "Szenen teilen",
@@ -3614,7 +3620,10 @@
       "blue": "Blau",
       "black": "Schwarz",
       "white": "Weiss",
-      "yellow": "Gelb"
+      "yellow": "Gelb",
+      "green": "Grün",
+      "orange": "Orange",
+      "purple": "Violett"
     },
     "scenesTitle": "{count, plural, one {1 Szene} other {# Szenen}} aus {matches, plural, one {einem Spiel} other {# Spielen}}.",
     "scenesKick": "Szenen · {matches, plural, one {1 Spiel} other {# Spiele}} mit Video",
@@ -3627,8 +3636,6 @@
     "matrix": "Tabelle",
     "open": "Öffnen",
     "allCollections": "Alle Sammlungen",
-    "halftimeLevel": "Halbzeit, Gleichstand",
-    "endLevel": "Schluss, Gleichstand",
     "stageMode": "Bühne",
     "modeVideo": "Video",
     "modeTaktik": "Feld von oben",
@@ -3747,6 +3754,10 @@
     "todayNote": "aus dem Spielbericht",
     "todayText": "Die Spielkarte als Bild für den Teamchat und den Kurzbericht zum Kopieren, noch ohne Video.",
     "todayCard": "Spielkarte für den Teamchat",
+    "pictureBusy": "Die Spielkarte wird erstellt …",
+    "pictureSaved": "Bild gespeichert, du findest es bei deinen Downloads.",
+    "pictureFailed": "Das Bild liess sich gerade nicht erstellen. Versuch es nochmals.",
+    "scenesKickTerm": "<term>Szenen</term> · {matches, plural, one {1 Spiel} other {# Spiele}} mit Video",
     "exampleBand": "Beispiel · erfundene Zahlen"
   },
   "check": {
@@ -3903,6 +3914,8 @@
     "emptyText": "Nach der Analyse ist jedes Tor, jeder Wurf und jeder Ballverlust eine Szene. Du suchst sie mit einem Satz und stellst sie zu Sammlungen zusammen.",
     "emptyPlays": "Spielzüge zeichnen geht schon jetzt:",
     "emptySearch": "Die Suche findet Szenen ab dem ersten Video.",
+    "emptyAnswer": "Noch keine Szenen. Lade ein Video hoch, dann findest du hier jedes Tor.",
+    "emptyAnswerRead": "Noch keine Szenen. Sobald ein Video eures Teams hochgeladen ist, findest du hier jedes Tor.",
     "backToCollection": "Zurück zur Sammlung «{title}»",
     "addToCollection": "{n, plural, one {1 Szene} other {# Szenen}} zur Sammlung"
   },
@@ -3952,7 +3965,16 @@
     "keepersSome": "{n, plural, one {1 Torhüter eingetragen.} other {# Torhüter eingetragen.}}",
     "keepersChange": "Torhüter ändern",
     "keepersDone": "Fertig",
-    "keepersFailed": "Das hat nicht geklappt. Versuch es nochmals oder trag die Position unter «Kader bearbeiten» ein."
+    "keepersFailed": "Das hat nicht geklappt. Versuch es nochmals oder trag die Position unter «Kader bearbeiten» ein.",
+    "positionsTitle": "Wer spielt wo?",
+    "positionsText": "Wähl eine Position und tippe alle an, die sie spielen. Nochmals tippen nimmt sie wieder weg. Mit den Positionen ordnet der Kader die Spieler, und Zahlen nach Position bekommen ihre Leute.",
+    "positionsPick": "Position",
+    "positionsTap": "Wer spielt {position}?",
+    "positionsMark": "{name} spielt {position}",
+    "positionsMissing": "{n, plural, one {1 Feldspieler ohne Position.} other {# Feldspieler ohne Position.}}",
+    "positionsAll": "Alle Feldspieler haben eine Position.",
+    "positionsChange": "Positionen ändern",
+    "positionsFailed": "Das hat nicht geklappt. Versuch es nochmals oder trag die Position unter «Kader bearbeiten» ein."
   },
   "seasonPage": {
     "kick": "{season} · {league} · nach {n, plural, =1 {einem Spiel} =2 {zwei Spielen} =3 {drei Spielen} =4 {vier Spielen} =5 {fünf Spielen} =6 {sechs Spielen} =7 {sieben Spielen} =8 {acht Spielen} =9 {neun Spielen} =10 {zehn Spielen} other {# Spielen}}",
@@ -4229,7 +4251,9 @@
     "sideVideoLeft": "So wie im Video: das Tor links.",
     "sideVideoRight": "So wie im Video: das Tor rechts.",
     "pause": "Anhalten",
-    "play": "Abspielen"
+    "play": "Abspielen",
+    "ofTerm": "<term>Wurfort</term>: {zone}",
+    "ofEstimatedTerm": "<term>Wurfort</term>: {zone}, geschätzt"
   },
   "personRoles": {
     "trainer": "Trainer",
@@ -4441,5 +4465,11 @@
     "phone": "Der Upload läuft in dieser Seite. Geht der Bildschirm aus oder schliesst du sie, hält er an: Öffne das Spiel wieder und wähl dieselbe Datei, dann geht es dort weiter.",
     "analysis": "Sie startet von selbst, sobald das Video da ist, und läuft auf unseren Servern: Du kannst das Handy weglegen, die Glocke meldet sich. Sie zählt zu den Analyseminuten deines Abos.",
     "billing": "Abo ansehen"
+  },
+  "glossary": {
+    "scene": "Eine Szene ist ein Moment im Video, meist ein Tor oder ein Wurf, mit den Sekunden davor. Du findest sie hier über alle Spiele mit Video.",
+    "spot": "Der Wurfort ist die Stelle, von der aus geworfen wurde, etwa Aussen rechts oder Kreis. Daraus entstehen die Bilder nach Position.",
+    "collection": "Eine Sammlung sind Szenen, die du zusammenstellst, etwa für die Videositzung oder ein Training. Du kannst sie mit dem Team teilen.",
+    "analysisMinutes": "So viele Minuten hat die Videoanalyse diesen Monat an euren Videos gerechnet. Je länger ein Video, desto mehr Minuten braucht es."
   }
 }

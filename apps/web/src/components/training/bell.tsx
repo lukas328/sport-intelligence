@@ -6,6 +6,7 @@ import * as M from "@radix-ui/react-dropdown-menu";
 import { Bell } from "lucide-react";
 import Link from "next/link";
 import { useFormatter, useNow, useTranslations } from "next-intl";
+import { MENU_SURFACE } from "@/components/ui/menu";
 import { api } from "@/lib/client";
 import { checkMinutes } from "@/lib/shot-spot";
 import { cn } from "@/lib/utils";
@@ -75,10 +76,10 @@ export function NotificationBell({ orgId }: { orgId: string }) {
           sideOffset={6}
           collisionPadding={12}
           aria-label={t("title")}
-          className="club z-50 w-[22rem] max-w-[calc(100vw-1.5rem)] overflow-hidden bg-raised text-sm ring-1 ring-border animate-fade"
+          className={cn(MENU_SURFACE, "w-[22rem] max-w-[calc(100vw-1.5rem)]")}
         >
-          <div className="flex items-center justify-between border-b border-border/70 px-4 py-3">
-            <p className="font-semibold">{t("title")}</p>
+          <div className="flex items-center justify-between border-b-2 border-ink px-4 py-3">
+            <p className="font-bold">{t("title")}</p>
             {unread > 0 && (
               <button className="text-xs font-medium text-accent underline decoration-[1.5px] underline-offset-4" onClick={() => read.mutate([])}>
                 {t("markAll")}
@@ -98,12 +99,12 @@ export function NotificationBell({ orgId }: { orgId: string }) {
                 <Link
                   href={n.link ?? `/app/${orgId}`}
                   onClick={() => !n.read_at && read.mutate([n.id])}
-                  className={cn("flex gap-3 px-3 py-2.5 outline-none data-[highlighted]:bg-surface", !n.read_at && "font-medium")}
+                  className={cn("group flex gap-3 px-3 py-2.5 no-underline outline-none data-[highlighted]:bg-ink data-[highlighted]:text-ground", !n.read_at && "font-semibold")}
                 >
-                  <span aria-hidden className={cn("mt-1.5 size-2 shrink-0 rounded-full", n.read_at ? "bg-transparent" : "bg-accent")} />
+                  <span aria-hidden className={cn("mt-1.5 size-2 shrink-0 rounded-full", n.read_at ? "bg-transparent" : "bg-accent group-data-[highlighted]:bg-ground")} />
                   <span className="min-w-0">
                     {text(n)}
-                    <span className="block text-xs font-normal text-muted">{[matchDay(n), format.relativeTime(new Date(n.created_at), now)].filter(Boolean).join(" · ")}</span>
+                    <span className="block text-xs font-normal text-muted group-data-[highlighted]:text-ground/80">{[matchDay(n), format.relativeTime(new Date(n.created_at), now)].filter(Boolean).join(" · ")}</span>
                   </span>
                 </Link>
               </M.Item>

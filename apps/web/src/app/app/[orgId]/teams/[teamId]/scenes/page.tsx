@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
-import { Search } from "lucide-react";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { linkClass, SectionHead } from "@/components/anlauf/blocks";
 import { CollectionList } from "@/components/collections/collection-list";
 import { buttonClass } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
+import { Term } from "@/components/ui/term";
 import { serverApi } from "@/lib/api";
 import { worksWithVideo } from "@/lib/roles";
 import { SearchView } from "../search/search-view";
+import { EmptySceneSearch } from "./empty-search";
 import { ScenesHead } from "./scenes-head";
 import { ScenesView } from "./scenes-view";
 import { CollectionBack } from "./collection-back";
@@ -31,7 +32,7 @@ export default async function ScenesPage({
   // a question asked from elsewhere (?q, ?chips, ?view) is read by the search itself; without a
   // video there is nothing to answer it with. ?collection= opens the scenes for a collection
   // («Szene dazu»): found scenes go into it, a link leads back (A5)
-  const { collection: intoId } = await searchParams;
+  const { collection: intoId, focus } = await searchParams;
   const t = await getTranslations("scenesPage");
   const ta = await getTranslations("anlauf");
   const client = await serverApi();
@@ -58,7 +59,7 @@ export default async function ScenesPage({
     <>
       <div>
         <SectionHead
-          title={<span id="all-collections">{t("collections")}</span>}
+          title={<span id="all-collections"><Term explain={(await getTranslations("glossary"))("collection")}>{t("collections")}</Term></span>}
           action={
             <Link href={`${base}/collections`} className={linkClass}>
               {t("newCollection")}
@@ -142,22 +143,9 @@ export default async function ScenesPage({
       <div>
         {back}
         <PageHeader title={(await getTranslations("shell"))("scenes")} />
-        {/* «Suchen» leads here: the field is there, it says from when it finds something (review R6) */}
-        <label className="mb-10 flex min-h-16 max-w-3xl items-center gap-3 border-2 border-rule bg-paper px-[18px] text-xl font-semibold text-ink-2">
-          <Search aria-hidden className="size-[22px] shrink-0" strokeWidth={2.2} />
-          <span className="sr-only">{t("searchLabel")}</span>
-          <input
-            disabled
-            aria-describedby="scenes-empty-search"
-            placeholder={t("placeholder")}
-            className="min-w-0 flex-1 cursor-not-allowed bg-transparent font-semibold text-ink-2 outline-none placeholder:text-ink-2"
-            data-testid="scene-search"
-          />
-        </label>
+        {/* «Suchen» leads here: the field takes the question and answers it (review R6, A6) */}
+        <EmptySceneSearch uploadHref={canWrite ? `${base}/matches?upload=1` : null} focus={focus === "1"} />
         <section className="max-w-[60ch] space-y-4" data-testid="scenes-empty">
-          <p id="scenes-empty-search" className="m-0 text-[15px] font-semibold text-ink-2">
-            {t("emptySearch")}
-          </p>
           <p className="font-slant m-0 text-[28px] leading-tight md:text-[34px]">{t("emptyTitle")}</p>
           <p className="m-0 text-[17px]">{t("emptyText")}</p>
           {canWrite && (

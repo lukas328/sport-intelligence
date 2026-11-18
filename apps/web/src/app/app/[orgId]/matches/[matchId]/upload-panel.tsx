@@ -7,7 +7,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { looksLikeVideo } from "@/lib/video-file";
 import { useEarlyFiles } from "@/lib/early-files";
 import { sitePage, useSiteConfig } from "@/lib/site-config";
-import { useEffect, useRef, useState, type DragEvent, type FormEvent } from "react";
+import { useEffect, useRef, useState, type DragEvent, type FormEvent, type ReactNode } from "react";
 import { KitFields } from "@/components/domain/kit-fields";
 import { UploadFacts } from "@/components/upload/upload-facts";
 import { useOptionalShell } from "@/components/shell/context";
@@ -92,6 +92,7 @@ export function UploadPanel({
   stuck = [],
   progressFiles = [],
   existing = [],
+  shirts,
 }: {
   orgId: string;
   matchId: string;
@@ -104,6 +105,8 @@ export function UploadPanel({
   progressFiles?: FileProgress[];
   /** the names of the files already in the match: a file of another game is pointed out (A5) */
   existing?: string[];
+  /** a question about the shirts from the page (the opponent's colour), shown with ours before «Mehr» */
+  shirts?: ReactNode;
 }) {
   const t = useTranslations();
   const qc = useQueryClient();
@@ -340,8 +343,6 @@ export function UploadPanel({
   const busyHere = state.kind !== "idle" && state.kind !== "done" && state.kind !== "same";
   return (
     <div className="space-y-5">
-      {/* our shirt before the first video: it helps the analysis tell the teams apart (K2) */}
-      {kits && role === "main" && !hasMain && <OwnKit orgId={orgId} matchId={matchId} kits={kits} />}
       {/* a further main file (the second half) comes after the first and is analysed with it:
           said right here, before choosing (Q-VIDEO-PARTS) */}
       {hasMain && role === "main" && (
@@ -407,18 +408,7 @@ export function UploadPanel({
           {t("upload.mismatch", { name: mismatch.filename, size: formatBytes(mismatch.size_bytes) })}
         </Alert>
       )}
-      {/* one thing first: the file; what to film in three plain lines (UX test H05) */}
-      <ul className="m-0 list-none space-y-1.5 p-0 text-[17px]" data-testid="upload-tips">
-        <li>{t("upload.tip1")}</li>
-        <li>{t("upload.tip2")}</li>
-        <li>{t("upload.tip3")}</li>
-      </ul>
-      {/* files, size, the phone going to sleep, the analysis: answered before the file (R33) */}
-      <UploadFacts />
-      {/* the guide on the website, its address from the configuration */}
-      {site && <a href={sitePage(site.site_url, locale, "aufnahme/")} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center text-[17px] font-bold text-ink underline decoration-[1.5px] underline-offset-4">
-        {t("upload.guide")}
-      </a>}
+      {/* the field first (finding A11): what to film, files, size and the analysis are behind «Mehr» below */}
       <label
         onDragOver={(e) => {
           e.preventDefault();
@@ -554,10 +544,27 @@ export function UploadPanel({
           )}
         </Alert>
       )}
-      {/* the rest can wait: another camera, a link, the technical details */}
-      <details className="text-[15px]">
-        <summary className="min-h-11 cursor-pointer content-center font-semibold">{t("upload.more")}</summary>
+      {/* our shirt: it helps the analysis tell the teams apart (K2); saved at once, also while the
+          upload runs */}
+      {kits && role === "main" && !hasMain && <OwnKit orgId={orgId} matchId={matchId} kits={kits} />}
+      {shirts}
+      {/* the rest can wait: how to film, files and size, another camera, a link (A11: about 200 words
+          stood before the field) */}
+      <details className="text-[15px]" data-testid="upload-more">
+        <summary className="min-h-11 cursor-pointer content-center font-semibold">{t("upload.moreAll")}</summary>
         <div className="mt-3 space-y-5">
+          <ul className="m-0 list-none space-y-1.5 p-0 text-[17px]" data-testid="upload-tips">
+            <li>{t("upload.tip1")}</li>
+            <li>{t("upload.tip2")}</li>
+            <li>{t("upload.tip3")}</li>
+          </ul>
+          <UploadFacts />
+          {/* the guide on the website, its address from the configuration */}
+          {site && (
+            <a href={sitePage(site.site_url, locale, "aufnahme/")} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center text-[17px] font-bold text-ink underline decoration-[1.5px] underline-offset-4">
+              {t("upload.guide")}
+            </a>
+          )}
           <div className="max-w-xs">
             <Select label={t("upload.role")} value={role} onChange={(e) => setRole(e.target.value as Role)} disabled={uploading}>
               {ROLES.map((r) => (

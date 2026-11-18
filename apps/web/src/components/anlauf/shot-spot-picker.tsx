@@ -101,7 +101,7 @@ export function ShotSpotPicker({
   );
 
   const field = (
-    <svg viewBox={orientationBox(orientation).join(" ")} role="group" aria-label={side ? t("courtLabelVideo", { side: orientation }) : t("courtLabel")} className="block w-full touch-manipulation select-none" data-orientation={orientation}>
+    <svg viewBox={orientationBox(orientation).join(" ")} role="group" aria-label={side ? t("courtLabelVideo", { side: orientation }) : t("courtLabel")} className="court-frame block touch-manipulation select-none" data-orientation={orientation}>
       <g ref={court} transform={`matrix(${orientationMatrix(orientation).join(" ")})`}>
         <HalfCourtLines />
         {COURT_ZONES.map((z) => (

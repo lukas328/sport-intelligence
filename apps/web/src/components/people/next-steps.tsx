@@ -35,7 +35,7 @@ export function showNextSteps(team: string) {
  * comes back from the account menu (review R36). A club taken over from handball.ch has a fourth
  * step: have it confirmed, before sharing works (review R21).
  */
-export function NextSteps({ hasVideo }: { hasVideo: boolean }) {
+export function NextSteps({ hasVideo, row = false }: { hasVideo: boolean; row?: boolean }) {
   const t = useTranslations("nextSteps");
   const { org, team } = useShell();
   const coach = team ? coachRights(org.my_role, team.my_role) : false;
@@ -110,9 +110,10 @@ export function NextSteps({ hasVideo }: { hasVideo: boolean }) {
   return (
     <section aria-labelledby="next-steps" data-testid="next-steps">
       <SectionHead title={<span id="next-steps">{t("title")}</span>} note={t("progress", { done: doneCount, total: steps.length })} />
-      <ol className="m-0 list-none p-0">
+      {/* in a wide column (Spiele before the first video, A10) the steps stand side by side */}
+      <ol className={cn("m-0 list-none p-0", row && "md:grid md:grid-cols-[repeat(auto-fit,minmax(15rem,1fr))] md:gap-x-8")}>
         {steps.map((s, i) => (
-          <li key={s.key} className="grid grid-cols-[28px_minmax(0,1fr)] gap-x-3 border-t border-rule py-3">
+          <li key={s.key} className="grid grid-cols-[28px_minmax(0,1fr)] content-start gap-x-3 border-t border-rule py-3">
             <span aria-hidden className={cn("font-num grid size-7 place-items-center text-[17px]", s.done ? "bg-ink text-ground" : "border-2 border-ink")}>
               {s.done ? <Check className="size-4" strokeWidth={3} /> : i + 1}
             </span>

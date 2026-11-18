@@ -117,13 +117,14 @@ export function goalArea(r: number): string {
 
 /** Views of the whole court for the tactics camera. */
 export const VIEWS = {
-  /** our left half wide (desktop stage) */
-  camL: { box: [-1.2, -1.2, 34, 22.4], turn: false },
+  /** the whole court, both goals, the attack on the left goal (desktop stage). It once ended
+   * at 33 m and cut the right goal off, which read like a fault (finding A14) */
+  camL: { box: [-1.2, -1.2, 42.4, 22.4], turn: false },
   /** left half turned, goal at the top (phone, tiles) */
   halfB: { box: [-0.6, -1.2, 21.2, 17.2], turn: true },
   halfDeep: { box: [-0.6, -0.9, 21.2, 18.6], turn: true },
-  /** the right half wide: the attack on the goal at x = 40, as the video shows it (G3) */
-  camR: { box: [7.2, -1.2, 34, 22.4], turn: false },
+  /** the whole court for an attack on the goal at x = 40, as the video shows it (G3) */
+  camR: { box: [-1.2, -1.2, 42.4, 22.4], turn: false },
   /** the right half turned, its goal at the top (a rotation, not a mirror) */
   halfBR: { box: [-0.6, -1.2, 21.2, 17.2], turn: false, m: [0, -1, -1, 0, 20, 40] },
 } as const satisfies Record<string, { box: readonly [number, number, number, number]; turn: boolean; m?: readonly [number, number, number, number, number, number] }>;
