@@ -31,6 +31,10 @@ from handball_api.schemas.matches import (
     ClipOut,
     CommentCreate,
     CommentOut,
+    CourtClicksIn,
+    CourtClicksJobOut,
+    CourtClicksOut,
+    CourtModelOut,
     LinkImport,
     MatchCreate,
     MatchGraphicsOut,
@@ -62,7 +66,7 @@ from handball_api.schemas.matches import (
     VideoUpdate,
 )
 from handball_api.services import auth as auth_service
-from handball_api.services import events, graphics, media, progress, videos
+from handball_api.services import court_clicks, events, graphics, media, progress, videos
 from handball_api.services import matches as service
 from handball_api.services import orgs as org_service
 from handball_api.services.context import Ctx
@@ -316,6 +320,40 @@ async def calibrate(video_id: uuid.UUID, data: CalibrationIn, scope: OrgDep) -> 
     ]
     job = await videos.calibrate_manually(scope.ctx, video_id, points, data.space, data.frame_ms)
     return {"job_id": str(job.id)}
+
+
+@router.get("/calibration/court-model", response_model=CourtModelOut, tags=["analysis"])
+async def court_model(scope: OrgDep) -> dict[str, Any]:
+    """The clickable court lines and points for the calibration dialog (court metres)."""
+    return court_clicks.model()
+
+
+@router.post(
+    "/videos/{video_id}/calibration/clicks/check", response_model=CourtClicksOut, tags=["analysis"]
+)
+async def check_court_clicks(
+    video_id: uuid.UUID, data: CourtClicksIn, scope: OrgDep
+) -> dict[str, Any]:
+    """The court through the clicked lines and points, nothing stored (for the live overlay).
+    422 clicks-too-few, clicks-disagree or clicks-unknown when they give no court."""
+    return await court_clicks.check(scope.ctx, video_id, data.points, data.lines, data.space)
+
+
+@router.post(
+    "/videos/{video_id}/calibration/clicks",
+    status_code=202,
+    response_model=CourtClicksJobOut,
+    tags=["analysis"],
+)
+async def submit_court_clicks(
+    video_id: uuid.UUID, data: CourtClicksIn, scope: OrgDep
+) -> dict[str, Any]:
+    """The court through the clicked lines: stored as the coach's court (user correction, also
+    offered to later videos of the hall), and the analysis runs again with it."""
+    job, found = await court_clicks.submit(
+        scope.ctx, video_id, data.points, data.lines, data.space, data.frame_ms
+    )
+    return {**found, "job_id": job.id}
 
 
 @router.post("/videos/{video_id}/calibration/from/{source_id}", status_code=202, tags=["analysis"])

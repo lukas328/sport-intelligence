@@ -57,6 +57,9 @@ PIPELINE_VERSION = "0.2.0"
 # keys of VideoAsset.analysis: the court points the coach clicked (of the last run that succeeded
 # with them, reused by every later run) and those of a run still going
 CLICKED, PENDING = "court_points", "court_points_pending"
+LINE_CLICKS = (
+    "court_clicks"  # the coach's latest line clicks (services/court_clicks), to edit again
+)
 INGEST_FUNC = "handball_worker.ingest.run_ingest"
 ANALYSIS_FUNC = "handball_gpu_worker.analysis.run_analysis"
 SYNC_FUNC = "handball_gpu_worker.sync.run_sync"
@@ -1109,6 +1112,8 @@ async def _apply_analysis_result(
     asset.analysis["signals"] = checks.signals(r)
     if clicked is not None:
         asset.analysis[CLICKED] = clicked
+    if isinstance(before.get(LINE_CLICKS), dict):
+        asset.analysis[LINE_CLICKS] = before[LINE_CLICKS]
     if pending is not None:  # a newer run with clicked points is still running
         asset.analysis[PENDING] = pending
     auto = r.get("events")
@@ -1236,6 +1241,7 @@ async def analysis(ctx: Ctx, asset_id: uuid.UUID) -> dict[str, object]:
         "calibration_error": meta.get("calibration_error"),
         "calibration_info": _with_sure(asset, meta.get("calibration_info")),
         "hall": await halls.summary(ctx, asset, match) if match is not None else None,
+        "court_clicks": meta.get(LINE_CLICKS) if isinstance(meta.get(LINE_CLICKS), dict) else None,
         "error_code": failure_code(job.error)
         if job is not None and job.status == "failed"
         else None,
