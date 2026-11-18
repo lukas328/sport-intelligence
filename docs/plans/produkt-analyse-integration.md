@@ -717,3 +717,49 @@ Budget 0.3 auf der T4 entspricht also 0.5 auf der CPU, 1.0 entspricht 1.7.
 
   Umgesetzt in `apps/gpu-worker/Dockerfile.cuda`. Staging (CPU) bleibt unverändert.
 - Nachtrag folgt: Mittelweg auf Clip A, alle drei Varianten auf Clip B.
+
+### Pausenerkennung über die Hallentafel verbessert (2026-11-18)
+
+Befund: Auf Lukas' Clips H1 und H2 (je 10 min) habe ich die Uhr-Lesungen ausgewertet, so wie das
+Produkt sie liest (`HallBoardReader` auf jedem Bild). Die Tafel war oft genug lesbar (H1: 118
+Lesungen, H2: 39), aber `scoreboard.play_intervals` verlor die Läufe aus drei Gründen:
+1. **Fehllesungen in Folge:** Die Sekundenziffer wird oft mehrmals hintereinander falsch gelesen
+   (z. B. 5 als 9, 15:59 statt 15:55). Bisher wurde nur eine einzelne Fehllesung übersprungen.
+2. **Andere Anzeigen dazwischen:** Strafzeit-Uhren zählen herunter (1:59, 1:58; 0:14 bis 0:09),
+   eine zweite Anzeige läuft etwa sechs Minuten hinter der Matchuhr her (H1, Minute 8). Sie
+   brachen die Läufe der Matchuhr und standen an deren Rändern im Weg.
+3. **Neustart nach stehender Uhr:** Eine Uhr, die lange stand und dann weiterlief, passte nicht
+   mehr zum ersten Wert des Laufs (H2: 8:56 steht, läuft ab 40 s weiter).
+
+Änderungen in `scoreboard.play_intervals` / `_clock_runs`:
+- bis zu 4 Fehllesungen in Folge zwischen zwei passenden Lesungen werden übersprungen;
+- zählt eine Richtung klar mehr (mindestens 3 x so viel Uhrzeit), werden die Läufe der anderen
+  Richtung (Strafzeiten) weggelassen und die Läufe neu gesucht;
+- ein Lauf darf mit stehender Uhr beginnen; verglichen wird mit dem letzten Wert, bevor die Uhr
+  wieder lief;
+- eine Lücke von mindestens 30 s, in der die Uhr mindestens die Hälfte der Zeit lief, gilt ganz
+  als Spiel (Tafel aus dem Bild, Spiel lief weiter). Wo die kurzen Halte in der Lücke lagen, weiss
+  man nicht. Für die Ball-Sperre ist es besser, einen losen Ball zu behalten, als echtes Spiel zu
+  verwerfen.
+
+Messung: Die Matchuhr selbst ist die Wahrheit. Zwischen ihrer ersten und letzten Lesung lief sie
+auf H1 480 s (20:51 bis 28:51), auf H2 312 s (8:56 bis 14:08). Verglichen wird, wie viel Video in
+dieser Spanne als Spiel gilt:
+
+| | H1: Spiel in der Spanne (Uhr lief 480 s) | H2 (Uhr lief 312 s) |
+|---|---|---|
+| vorher | 322 s (67 %) | 5 s (2 %) |
+| nachher, ohne Füllen der Lücken | 481 s (100 %) | 315 s (101 %) |
+| nachher, mit Füllen (Standard) | 538 s (112 %) | 442 s (142 %) |
+
+- Ohne Füllen stimmt die Summe genau. Die Spielzeit einer Lücke wird dann aber an deren Rändern
+  angesetzt, also teils an der falschen Stelle.
+- Mit Füllen zählen auch die kurzen Halte in solchen Lücken als Spiel: H2 hat 7 min ohne Tafel,
+  darin lief die Uhr 289 von 416 s.
+- Die Regel `clock_too_sparse` (Spiel unter 20 % des Videos: keine Sperre) greift auf H1 und H2
+  nicht mehr. Die Ball-Sperre wirkt damit jetzt auch auf H2.
+- Nicht gemessen: die Wirkung auf Ballpfad und Ballbesitz (braucht einen neuen Lauf), und Lukas'
+  99-min-Video (dessen Lesungen sind nicht gespeichert).
+- Rückfall, falls die Tafel ganz fehlt: Er ist schon da (`clock_too_sparse` sperrt dann nicht).
+  Für eine eigene Pausenerkennung ohne Tafel bietet sich die `no_play`-Regel der Tor-Kandidaten
+  an (Kamera geparkt, Spieler zusammengedrängt). Das ist ein eigener Schritt.
