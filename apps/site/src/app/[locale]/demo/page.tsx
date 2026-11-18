@@ -57,9 +57,10 @@ export default async function Demo({ params }: Props) {
     <KitScope>
       <p
         role="note"
-        className="border-b-2 border-ink bg-attn px-4 py-4 text-[1.0625rem] text-ink md:px-8"
+        className="border-b-2 border-ink bg-attn py-4 text-[1.0625rem] text-ink"
       >
-        <span className="wrap block !px-0">
+        {/* on the stage's line, like the head below (U4) */}
+        <span className="wrap block">
           <b>{t.banner}</b> {t.bannerText}
         </span>
       </p>

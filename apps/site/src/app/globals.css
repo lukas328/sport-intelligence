@@ -114,6 +114,14 @@
       scroll-padding-top: 1rem;
     }
   }
+  /* very wide screens (BEFUNDE-3 U4): from 1920 px everything grows a little with the screen,
+     up to 18 px at 2560 px, so the 90rem stage and the type fill the room in the same proportions;
+     the user's own font setting stays the base (percent, not pixels) */
+  @media (min-width: 120rem) {
+    html {
+      font-size: clamp(100%, calc(100% + (100vw - 120rem) / 320), 112.5%);
+    }
+  }
   body,
   .cloth {
     background-color: var(--ground);
