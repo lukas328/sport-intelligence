@@ -5,6 +5,10 @@ description = "Handball court geometry (generated from spec/court.json)"
 requires-python = ">=3.12"
 dependencies = []
 
+[project.optional-dependencies]
+# handball_court.clicks: the court from clicked lines (manual calibration)
+clicks = ["numpy>=1.26", "scipy>=1.14"]
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
