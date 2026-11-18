@@ -256,7 +256,10 @@ async def test_checkout_webhooks_and_portal(
     assert (await api.get(f"/v1/orgs/{org}/matches/{m['id']}/insights")).status_code == 200
     # a second checkout no longer gets a trial
     await api.post(f"/v1/orgs/{org}/billing/checkout", json={"plan": "club"})
-    assert billing_on.calls[-1][1][2] == 0
+    # typed as the list's element: the remove_item assert above narrowed calls[-1]
+    call: tuple[str, Any] = billing_on.calls[-1]
+    kind, (_customer, _items, trial, _success) = call
+    assert (kind, trial) == ("checkout", 0)
     assert (
         (await api.post(f"/v1/orgs/{org}/billing/portal"))
         .json()["url"]
