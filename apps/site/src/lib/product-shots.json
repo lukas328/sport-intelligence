@@ -5,6 +5,11 @@
     "callouts": [],
     "lettering": [2.66, 25.37, 65.72, 40.9]
   },
+  "app-result": {
+    "width": 640,
+    "height": 640,
+    "callouts": []
+  },
   "get-search": {
     "width": 720,
     "height": 520,
@@ -129,6 +134,21 @@
     "callouts": []
   },
   "step-result": {
+    "width": 640,
+    "height": 640,
+    "callouts": []
+  },
+  "step-result-de": {
+    "width": 640,
+    "height": 640,
+    "callouts": []
+  },
+  "step-result-en": {
+    "width": 640,
+    "height": 640,
+    "callouts": []
+  },
+  "step-result-fr": {
     "width": 640,
     "height": 640,
     "callouts": []
