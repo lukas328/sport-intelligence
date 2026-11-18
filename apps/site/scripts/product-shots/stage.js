@@ -9,6 +9,11 @@
  */
 (function () {
   const shot = { callouts: [], warnings: [], transparent: false };
+  /**
+   * the language of a picture with words in it (compose.mjs opens it once per language of
+   * `stage(…, { langs })` with ?lang=xx and writes <name>-<lang>.webp)
+   */
+  const lang = new URLSearchParams(location.search).get("lang") || "de";
   /** every phone shows the app at the same size, so the pictures belong together */
   const PHONE_SCREEN = 380;
   window.SHOT = shot;
@@ -47,12 +52,17 @@
     if (opts.paper) el.classList.add("paper");
     // or on the app's cloth, for pieces of a page (not a sheet)
     if (opts.cloth) el.classList.add("cloth");
+    // or the dark court ground of the four steps (stage.css «#stage.steps», steps.js)
+    if (opts.steps) el.classList.add("steps");
     shot.width = width;
     shot.height = height;
     // another weight than compose.mjs's default (bytes of the 1x and the 2x file): lower for a
     // picture the page loads at once, higher for a wide screen full of small text
     if (opts.budget1x) shot.budget1x = opts.budget1x;
     if (opts.budget2x) shot.budget2x = opts.budget2x;
+    // words in the picture: one file per language (de, fr, en), see `lang` and `t`
+    if (opts.langs) shot.langs = opts.langs;
+    document.documentElement.lang = lang;
     return el;
   }
 
@@ -239,6 +249,12 @@
     shot.lettering = box;
   }
 
+  /** the entry of `table` ({ de, fr, en }) in the picture's language */
+  function t(table) {
+    if (!(lang in table)) throw new Error(`no text for «${lang}»`);
+    return table[lang];
+  }
+
   /** waits for the pictures, then tells compose.mjs the stage is ready */
   async function done() {
     await document.fonts.ready;
@@ -246,5 +262,5 @@
     window.READY = shot;
   }
 
-  window.S = { cap, rect, stage, screen, piece, cut, phone, browser, onStage, ring, spot, at, callout, video, lettering, done };
+  window.S = { lang, t, cap, rect, stage, screen, piece, cut, phone, browser, onStage, ring, spot, at, callout, video, lettering, done };
 })();

@@ -6,7 +6,7 @@
  */
 @font-face {
   font-family: "Plex Mono";
-  src: url("../../../src/fonts/ibm-plex-mono-latin-500-normal.woff2") format("woff2");
+  src: url("../../src/fonts/ibm-plex-mono-latin-500-normal.woff2") format("woff2");
   font-weight: 500;
 }
 
@@ -236,4 +236,112 @@ body {
   border-radius: 50%;
   background: #fff;
   transform: translate(-50%, -50%);
+}
+
+/*
+ * The four steps of «So funktioniert es» (U33, after Lukas' design): a dark court ground with
+ * the club's green, big yellow cards with heavy slanted numbers, the step's word as a ghost in
+ * the back, one white line at the foot. The site's own fonts, so the words are the site's.
+ * steps.js draws the courts; the templates place the cards.
+ */
+@font-face {
+  font-family: "Kanit";
+  src: url("../../src/fonts/kanit-latin-800-italic.woff2") format("woff2");
+  font-weight: 800;
+  font-style: italic;
+}
+@font-face {
+  font-family: "Kanit";
+  src: url("../../src/fonts/kanit-latin-900-italic.woff2") format("woff2");
+  font-weight: 900;
+  font-style: italic;
+}
+@font-face {
+  font-family: "Hanken";
+  src: url("../../src/fonts/hanken-grotesk-latin-wght-normal.woff2") format("woff2");
+  font-weight: 100 900;
+}
+
+#stage.steps {
+  /* the site's ink, a step softer, and the club's green */
+  --night: #25292d;
+  --night-2: #2f3439;
+  --night-3: #3a4046;
+  --pitch: #10684a;
+  --pitch-2: #0d5a40;
+  --pitch-3: #1b7d5a;
+  --chalk: #f3f1ec;
+  --hard: 8px 8px 0 rgb(10 12 14 / 0.6);
+  background: var(--night);
+  color: var(--chalk);
+  font-family: "Hanken", ui-sans-serif, sans-serif;
+}
+#stage.steps > svg.ground {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+/* the step's word in the back, slanted like the site's display type */
+.ghost {
+  position: absolute;
+  font: italic 900 210px/0.78 "Kanit", sans-serif;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  color: rgb(255 255 255 / 0.035);
+  -webkit-text-stroke: 2px rgb(255 255 255 / 0.1);
+  text-transform: uppercase;
+  pointer-events: none;
+}
+/* the one white line at the foot */
+.say {
+  position: absolute;
+  left: 40px;
+  right: 40px;
+  bottom: 34px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  font-weight: 700;
+  font-size: 28px;
+  line-height: 1.22;
+  color: #fff;
+  text-wrap: balance;
+}
+.say svg {
+  flex: none;
+  margin-top: 2px;
+}
+/* a card: square, an ink edge, a hard shadow, a little tilted */
+.yc,
+.pc {
+  position: absolute;
+  border: 3px solid var(--ink);
+  box-shadow: var(--hard);
+  transform: rotate(var(--tilt, 0deg));
+}
+.yc {
+  background: var(--attn);
+  color: var(--ink);
+}
+.pc {
+  background: var(--paper);
+  color: var(--ink);
+}
+.disp {
+  font-family: "Kanit", sans-serif;
+  font-style: italic;
+  font-weight: 800;
+}
+.heavy {
+  font-family: "Kanit", sans-serif;
+  font-style: italic;
+  font-weight: 900;
+  line-height: 0.82;
+  white-space: nowrap;
+}
+.mono {
+  font-family: "Plex Mono", ui-monospace, monospace;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
