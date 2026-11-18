@@ -4,7 +4,9 @@ import { join } from "node:path";
 import { goalDistance, halfSpot, SHOT_MIN } from "@/lib/demo";
 import { MATCH } from "@/lib/things";
 import de from "@/messages/de";
-import { saturday, threeMatchesLater } from "./story";
+import en from "@/messages/en";
+import fr from "@/messages/fr";
+import { saturday, sundayAnswer, threeMatchesLater } from "./story";
 
 describe("the start page's week", () => {
   it("starts with the demo match: lost 27:29, 11 of 29 over the right wing", () => {
@@ -24,6 +26,26 @@ describe("the start page's week", () => {
       expect(d.at[0]).toBeGreaterThanOrEqual(0);
       expect(d.at[0]).toBeLessThanOrEqual(20);
     }
+  });
+});
+
+describe("Sunday's question to the assistant (U6)", () => {
+  it("answers from the demo match: 11 of 29, 5 before and 6 after the break, number 7 seven, number 22 four", () => {
+    const a = sundayAnswer();
+    expect([a.n, a.of, a.first, a.second]).toEqual([11, 29, 5, 6]);
+    expect(a.shooters).toEqual([
+      { number: 7, n: 7 },
+      { number: 22, n: 4 },
+    ]);
+    expect(a.fast).toBe(5);
+  });
+
+  it("names the drill of the app's library for the fast breaks against, in every language", () => {
+    const drills = JSON.parse(readFileSync(join(__dirname, "..", "..", "..", "api", "src", "handball_api", "services", "drills.json"), "utf8")) as { id: string; name: Record<string, string> }[];
+    const name = drills.find((d) => d.id === "transition_3v2_back")!.name;
+    expect(de.home.shareText).toContain(`«${name["de-CH"]}»`);
+    expect(fr.home.shareText).toContain(`« ${name.fr} »`);
+    expect(en.home.shareText).toContain(`"${name.en}"`);
   });
 });
 

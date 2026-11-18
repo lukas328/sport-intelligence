@@ -43,3 +43,11 @@ export const BLOG: BlogPost[] = [
     },
   },
 ];
+
+/** The blog appears in the footer only once it holds this many posts (BEFUNDE-3 U28). */
+export const BLOG_FOOTER_FROM = 3;
+
+/** Whether the footer links the blog: enough posts of its own (moved posts do not count). */
+export function blogInFooter(posts: BlogPost[] = BLOG): boolean {
+  return posts.filter((p) => !p.movedTo).length >= BLOG_FOOTER_FROM;
+}

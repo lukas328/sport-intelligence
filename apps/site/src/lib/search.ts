@@ -25,3 +25,11 @@ export function searchHelp(entries: HelpEntry[], locale: HelpLocale, query: stri
     .filter((x): x is { e: HelpEntry; score: number } => x !== null);
   return scored.sort((a, b) => b.score - a.score).map((x) => x.e);
 }
+
+/** Whether a text holds every word of the query (an empty query matches everything). */
+export function matchesAll(text: string, query: string): boolean {
+  const words = normalise(query).split(/\s+/).filter(Boolean);
+  if (!words.length) return true;
+  const t = normalise(text);
+  return words.every((w) => t.includes(w));
+}

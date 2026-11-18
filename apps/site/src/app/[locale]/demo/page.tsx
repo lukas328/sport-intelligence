@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Rail } from "@/components/anlauf/charts";
-import { DemoCamera } from "@/components/demo-camera";
+import { CameraLegend, DemoCamera } from "@/components/demo-camera";
 import { DemoGuide } from "@/components/demo-guide";
 import { KitScope, ShirtPicker, StartLink } from "@/components/kit";
 import { Things } from "@/components/things";
@@ -57,9 +57,10 @@ export default async function Demo({ params }: Props) {
     <KitScope>
       <p
         role="note"
-        className="border-b-2 border-ink bg-attn px-4 py-4 text-[1.0625rem] text-ink md:px-8"
+        className="border-b-2 border-ink bg-attn py-4 text-[1.0625rem] text-ink"
       >
-        <span className="wrap block !px-0">
+        {/* on the stage's line, like the head below (U4) */}
+        <span className="wrap block">
           <b>{t.banner}</b> {t.bannerText}
         </span>
       </p>
@@ -112,27 +113,42 @@ export default async function Demo({ params }: Props) {
 
         <section aria-labelledby="scene" className="mt-16">
           <SectionHead id="scene" title={m.camera.title} note={v.sceneGoal.clock} />
-          <p className="measure mt-3">{t.cameraText}</p>
-          <div className="mt-6">
-            <DemoCamera
-              scene={v.scene}
-              text={{
-                label: m.camera.label,
-                pause: m.camera.pause,
-                play: m.camera.play,
-                notFound: m.camera.notFound,
-                noBall: m.camera.noBall,
-                caption: v.scene.label,
-                ballLine: m.camera.ballLine,
-              }}
-              legend={{
-                own: v.own,
-                opp: v.opp,
-                ref: m.camera.legendRef,
-                number: m.camera.legendNumber,
-                ball: m.camera.legendBall,
-              }}
-            />
+          {/* U24: the half where the scene plays, goal at the top as everywhere on the site, labelled;
+              on a wide screen the text and the legend beside it */}
+          <div className="mt-6 grid grid-cols-1 gap-x-12 gap-y-6 lg:grid-cols-[minmax(0,46rem)_minmax(16rem,1fr)]">
+            <div className="lg:col-start-2 lg:row-start-1">
+              <p className="measure">{t.cameraText}</p>
+              <div className="mt-6">
+                <CameraLegend
+                  list
+                  legend={{
+                    own: v.own,
+                    opp: v.opp,
+                    ref: m.camera.legendRef,
+                    number: m.camera.legendNumber,
+                    ball: m.camera.legendBall,
+                  }}
+                />
+              </div>
+            </div>
+            <div className="lg:col-start-1 lg:row-start-1">
+              <DemoCamera
+                scene={v.scene}
+                view="halfB"
+                desktopWidth={736}
+                shotLabel={false}
+                text={{
+                  label: `${m.camera.label} ${m.camera.half}.`,
+                  pause: m.camera.pause,
+                  play: m.camera.play,
+                  notFound: m.camera.notFound,
+                  noBall: m.camera.noBall,
+                  caption: v.scene.label,
+                  captionSmall: m.camera.half,
+                  ballLine: m.camera.ballLine,
+                }}
+              />
+            </div>
           </div>
         </section>
 
@@ -196,12 +212,12 @@ export default async function Demo({ params }: Props) {
                           {t.source[f.source]}
                         </span>
                       </th>
-                      <td className="font-num text-[1.5rem]">
+                      <td className="upright text-[1.375rem]">
                         {f.key === "shootingPct" && f.own != null
                           ? fmt(t.pct, { v: f.own })
                           : f.own}
                       </td>
-                      <td className="font-num text-[1.5rem]">
+                      <td className="upright text-[1.375rem]">
                         {f.key === "shootingPct" && f.opp != null
                           ? fmt(t.pct, { v: f.opp })
                           : f.opp}
@@ -240,7 +256,7 @@ export default async function Demo({ params }: Props) {
                         style={{ width: `${(z.n / zones[0]!.n) * 100}%` }}
                       />
                     </span>
-                    <span className="font-num text-right text-[1.5rem]">{z.n}</span>
+                    <span className="upright text-right text-[1.375rem]">{z.n}</span>
                   </li>
                 ))}
               </ul>

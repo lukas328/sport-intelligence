@@ -81,10 +81,10 @@ export function Things({
                 <span className="font-mono text-base font-semibold text-ink-2">{t.index}</span>
                 <span className="mt-2 flex flex-wrap items-baseline gap-x-3">
                   <b className="font-num text-[4.5rem] leading-[.85] text-club-text md:text-[6rem]">{t.numeral}</b>
-                  <span className="font-slant text-[1.375rem] text-ink-2">{t.unit}</span>
+                  <span className="upright text-[1.25rem] text-ink-2">{t.unit}</span>
                 </span>
                 <span className="mt-3 block text-[1.375rem] leading-tight font-bold">{t.text}</span>
-                <span className="mt-1 block text-[1.0625rem] text-ink-2">{t.sub}</span>
+                {t.sub && <span className="mt-1 block text-[1.0625rem] text-ink-2">{t.sub}</span>}
               </span>
               <span className="block w-full self-start md:mt-5">
                 <span className="hidden md:block">
@@ -152,7 +152,7 @@ export function Things({
           <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {chosen.scenes.map((s, i) => (
               <li key={i} className="flex min-h-14 items-center gap-3 border-b border-rule py-2 text-[1.0625rem]">
-                <span className="font-num w-16 text-[1.375rem]">{s.clock}</span>
+                <span className="upright w-16 text-[1.25rem]">{s.clock}</span>
                 <span className="min-w-0">{s.text.replace(`${s.clock} · `, "")}</span>
               </li>
             ))}

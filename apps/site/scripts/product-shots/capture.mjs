@@ -16,7 +16,8 @@
  * HB_API_ORIGIN (only for a second dev server, see below), HB_DEMO_HLS_DIR (see localMedia),
  * PLAYWRIGHT_CHROMIUM_PATH (optional, a Chromium binary under /opt/pw-browsers).
  */
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, statSync, truncateSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadChromium } from "./playwright.mjs";
@@ -139,9 +140,12 @@ function pageHelpers() {
 }
 
 const PHONE = { width: 390, height: 844, scale: 2 };
-/** phone screens cut out flat and shown large on the site (the steps): sharper sources */
-const PHONE_SHARP = { ...PHONE, scale: 4 };
 const DESKTOP = { width: 1280, height: 860, scale: 2 };
+/**
+ * The steps (U1, U3): one moment of the app cut out large, so its words read at 390 px. A narrow
+ * phone (360), so the cut-out holds fewer, bigger letters; three times the density for the 2x file.
+ */
+const PHONE_STEP = { width: 360, height: 780, scale: 3 };
 
 /**
  * The screens. `open` brings the page into place; `find` names the boxes compose.mjs needs (each
@@ -176,99 +180,6 @@ const SHOTS = [
       });
     },
     find: {},
-  },
-  {
-    // the first of the three things on the phone: the number, the words, the shots on the court
-    name: "dinge-phone",
-    size: PHONE_SHARP,
-    async open(p) {
-      await p.evaluate(() => {
-        const t = window.__hb.text("1 von 3") ?? window.__hb.text(/^1\s*von\s*3$/);
-        // «1 von 3» high on the screen, so the half court and the scenes fit under it
-        if (t) window.scrollTo(0, t.getBoundingClientRect().top + window.scrollY - 110);
-        window.__hb.hideTabBar();
-      });
-      await p.waitForTimeout(400);
-    },
-    find: {
-      thing: (hb) =>
-        hb.union(
-          [
-            hb.text("1 von 3") ?? hb.text(/^1\s*von\s*3$/),
-            hb.text("Gegentore über aussen rechts"),
-          ].filter(Boolean),
-        ),
-      dots: (hb) => hb.dots("Gegentore über aussen rechts"),
-    },
-  },
-  {
-    name: "hochladen-phone",
-    size: PHONE_SHARP,
-    async open(p) {
-      // the header's «Video hochladen» opens the same sheet with ?upload=1
-      await p.goto(`${p.__team}?upload=1`, { waitUntil: "networkidle" });
-      await p.getByRole("dialog").first().waitFor({ state: "visible", timeout: 15000 });
-      await p.waitForTimeout(700);
-    },
-    find: {
-      dialog: () => document.querySelector('[role="dialog"]'),
-      first: (hb) => {
-        const d = document.querySelector('[role="dialog"]');
-        const q = d && hb.text(/Zu welchem Spiel/, d);
-        const opts = d ? Array.from(d.querySelectorAll("button, a, [role=option], label")) : [];
-        // the first match in the list: below the question, wider than half the sheet
-        const qy = q ? q.getBoundingClientRect().bottom : 0;
-        return (
-          opts.find((b) => {
-            const r = b.getBoundingClientRect();
-            return r.top >= qy - 2 && r.width > d.getBoundingClientRect().width / 2;
-          }) ?? null
-        );
-      },
-    },
-  },
-  {
-    name: "pruefen-phone",
-    size: PHONE_SHARP,
-    async open(p) {
-      await openMatch(p);
-      const check = await p.getByTestId("check-link").first().getAttribute("href");
-      if (!check) throw new Error("no link «Prüfen»");
-      await p.goto(new URL(check, APP).toString(), { waitUntil: "networkidle" });
-      await p
-        .getByRole("heading", { level: 1 })
-        .or(p.getByRole("heading", { level: 2 }))
-        .first()
-        .waitFor({ timeout: 15000 });
-      await settle(p);
-      // the picture with its points, the question and the answers
-      await p.evaluate(() =>
-        window.scrollTo(0, Math.max(0, document.body.scrollHeight - window.innerHeight)),
-      );
-      await p.waitForTimeout(400);
-    },
-    find: {
-      // the four yellow points the analysis proposes (round, yellow, small)
-      points: (hb) =>
-        hb.union(
-          Array.from(document.querySelectorAll("body *")).filter((e) => {
-            const r = e.getBoundingClientRect();
-            if (r.width < 8 || r.width > 40) return false;
-            const cs = getComputedStyle(e);
-            const fill = e.getAttribute("fill") ?? "";
-            return (
-              /255, 210, 60/.test(cs.backgroundColor) ||
-              /255, 210, 60/.test(cs.fill) ||
-              /#ffd23c/i.test(fill)
-            );
-          }),
-        ),
-      question: () => document.querySelector("h1") ?? document.querySelector("h2"),
-      yes: () =>
-        Array.from(document.querySelectorAll("button")).find(
-          (b) => b.textContent.trim() === "Passt",
-        ) ?? null,
-    },
   },
   {
     name: "video",
@@ -404,6 +315,184 @@ const SHOTS = [
     },
   },
   {
+    // step 2 (U1): «Zu welchem Spiel gehört das Video?» with the matches, large
+    name: "step-hochladen",
+    size: PHONE_STEP,
+    async open(p) {
+      await p.goto(`${p.__team}?upload=1`, { waitUntil: "networkidle" });
+      await p.getByRole("dialog").first().waitFor({ state: "visible", timeout: 15000 });
+      await p.waitForTimeout(700);
+    },
+    find: {
+      dialog: () => document.querySelector('[role="dialog"]'),
+      title: (hb) => hb.text("Video hochladen", document.querySelector('[role="dialog"]')),
+      question: (hb) => hb.text(/Zu welchem Spiel/, document.querySelector('[role="dialog"]')),
+      first: (hb) => hb.text("SG Blitzfang", document.querySelector('[role="dialog"]'))?.closest("button, a, label, li") ?? null,
+      second: (hb) => hb.text("TV Silberpfeil", document.querySelector('[role="dialog"]'))?.closest("button, a, label, li") ?? null,
+    },
+  },
+  {
+    // step 2 (U1): the same match while its video goes up, the bar and «… % hochgeladen». This
+    // one writes: it starts a real upload of an empty file the size of a match video into the
+    // first match and holds it there, so run it only on a stack of your own (capture.mjs runs it
+    // only when named) and seed again afterwards
+    name: "step-hochladen-laeuft",
+    size: PHONE_STEP,
+    writes: true,
+    async open(p) {
+      await p.goto(`${p.__team}?upload=1`, { waitUntil: "networkidle" });
+      const dialog = p.getByRole("dialog").first();
+      await dialog.waitFor({ state: "visible", timeout: 15000 });
+      await dialog.getByText("SG Blitzfang").first().click();
+      const input = p.getByTestId("video-file").first();
+      await input.waitFor({ state: "attached", timeout: 30000 });
+      // the parts go up until about an eighth of the file is there, then the rest waits: the
+      // picture shows a running upload without filling the stack's storage
+      const file = matchFile();
+      const partSize = 5 * 1024 * 1024;
+      const stopAt = Math.ceil((FILE_SIZE * 0.12) / partSize);
+      let parts = 0;
+      await p.route(
+        (url) => /[?&]partNumber=/.test(url.search),
+        (route) => {
+          if (route.request().method() !== "PUT") return route.continue();
+          parts += 1;
+          return parts <= stopAt ? route.continue() : new Promise(() => {});
+        },
+      );
+      await input.setInputFiles(file);
+      const anyway = p.getByRole("button", { name: "Jetzt hochladen" });
+      if (await anyway.isVisible({ timeout: 3000 }).catch(() => false)) await anyway.click();
+      const progress = p.getByTestId("upload-progress");
+      await progress.waitFor({ timeout: 30000 });
+      await p.waitForFunction(
+        (want) => {
+          const m = document.querySelector('[data-testid="upload-progress"]')?.textContent?.match(/(\d+)\s*%/);
+          return m && Number(m[1]) >= want;
+        },
+        11,
+        { timeout: 120000 },
+      );
+      await p.waitForTimeout(1500);
+      await p.getByTestId("upload-running").evaluate((el) => {
+        window.__hb.hideTabBar();
+        el.scrollIntoView({ block: "center" });
+      });
+      await p.waitForTimeout(400);
+    },
+    find: {
+      running: () => document.querySelector('[data-testid="upload-running"]'),
+      progress: () => document.querySelector('[data-testid="upload-progress"]'),
+      heading: () => document.querySelector("h1"),
+    },
+  },
+  {
+    // step 3 (U1): «Passt das Spielfeld?» with the picture and its yellow field, large
+    name: "step-pruefen",
+    // taller than a phone, so the picture and the answers are on one capture
+    size: { ...PHONE_STEP, height: 960 },
+    async open(p) {
+      await openMatch(p);
+      const check = await p.getByTestId("check-link").first().getAttribute("href");
+      if (!check) throw new Error("no link «Prüfen»");
+      await p.goto(new URL(check, APP).toString(), { waitUntil: "networkidle" });
+      await p.getByRole("heading", { level: 1 }).or(p.getByRole("heading", { level: 2 })).first().waitFor({ timeout: 15000 });
+      await settle(p);
+      await p.evaluate(() => {
+        window.__hb.hideTabBar();
+        const pic = window.__hb.text(/^Zieh die vier gelben Punkte/)?.closest("section, div");
+        const top = pic ? pic.getBoundingClientRect().top + window.scrollY - 330 : 0;
+        window.scrollTo(0, Math.max(0, top));
+      });
+      await p.waitForTimeout(400);
+    },
+    find: {
+      // the picture the question is about (the frame of the video with the proposed field)
+      picture: () => {
+        const imgs = Array.from(document.querySelectorAll("img, canvas, video, svg")).filter((e) => e.getBoundingClientRect().width > 250);
+        return imgs.sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top)[0] ?? null;
+      },
+      hint: (hb) => hb.text(/^Zieh die vier gelben Punkte/),
+      count: (hb) => hb.text(/^Frage \d+ von \d+$/),
+      question: () => document.querySelector("h1") ?? document.querySelector("h2"),
+      yes: () => Array.from(document.querySelectorAll("button")).find((b) => b.textContent.trim() === "Passt") ?? null,
+      no: () => Array.from(document.querySelectorAll("button")).find((b) => b.textContent.trim() === "Weiss nicht") ?? null,
+    },
+  },
+  {
+    // step 4 (U3): the first of the three things with its shots on the court, large
+    name: "step-dinge",
+    size: PHONE_STEP,
+    async open(p) {
+      await openMatch(p);
+      await p.evaluate(() => {
+        const t = window.__hb.text("1 von 3") ?? window.__hb.text(/^1\s*von\s*3$/);
+        // under the sticky head, with room above the number
+        if (t) window.scrollTo(0, t.getBoundingClientRect().top + window.scrollY - 96);
+        window.__hb.hideTabBar();
+      });
+      await p.waitForTimeout(500);
+    },
+    find: {
+      kicker: (hb) => hb.text("1 von 3") ?? hb.text(/^1\s*von\s*3$/),
+      title: () => Array.from(document.querySelectorAll("h2, h3")).find((h) => /^Gegentore\s+über\s+aussen\s+rechts$/.test(h.textContent.trim())),
+      dots: (hb) => {
+        const t = Array.from(document.querySelectorAll("h2, h3")).find((h) => /^Gegentore\s+über\s+aussen\s+rechts$/.test(h.textContent.trim()));
+        const box = t && hb.up(t, (e) => e.querySelector("svg circle"));
+        return box ? hb.union(box.querySelectorAll("svg circle")) : null;
+      },
+      court: (hb) => {
+        const t = Array.from(document.querySelectorAll("h2, h3")).find((h) => /^Gegentore\s+über\s+aussen\s+rechts$/.test(h.textContent.trim()));
+        const box = t && hb.up(t, (e) => e.querySelector("svg circle"));
+        const svg = box && Array.from(box.querySelectorAll("svg")).sort((a, b) => b.getBoundingClientRect().width - a.getBoundingClientRect().width)[0];
+        return svg ?? null;
+      },
+      scenes: () => Array.from(document.querySelectorAll("button, a")).find((b) => /^\d+ Szenen$/.test(b.textContent.trim())) ?? null,
+    },
+  },
+  {
+    // the app picture of the start page as a phone shows it (U22): the video, under it the
+    // scenes of the phase, the one playing in yellow
+    name: "video-phone",
+    // tall enough for the video and the list under it on one capture
+    size: { ...PHONE_STEP, height: 1500 },
+    hide: [/^\d+:\d\d \/ \d+:\d\d$/],
+    async open(p) {
+      await openMatch(p);
+      const scene = await p.evaluate(async () => {
+        const [, org, match] = location.pathname.match(/\/app\/([^/]+)\/matches\/([^/?]+)/) ?? [];
+        const r = await fetch(`/v1/orgs/${org}/matches/${match}/graphics`, { credentials: "include" });
+        const goals = ((await r.json()).goals ?? []).filter((g) => g.team === "opp" && g.zone === "ra" && g.t_ms != null).sort((a, b) => a.minute - b.minute);
+        return goals[1]?.event_id ?? null;
+      });
+      if (!scene) throw new Error("no second goal over the right wing");
+      const url = new URL(p.url());
+      url.search = `?tab=video&scene=${scene}`;
+      await p.goto(url.toString(), { waitUntil: "load", timeout: 90000 });
+      await p.getByTestId("next-scene").or(p.getByRole("button", { name: /Szene merken/ })).first().waitFor({ timeout: 15000 });
+      await settle(p);
+      await p.waitForTimeout(1200);
+      await p.evaluate(() => {
+        window.__hb.hideTabBar();
+        const v = document.querySelector("video");
+        if (v) window.scrollTo(0, Math.max(0, v.getBoundingClientRect().top + window.scrollY - 64));
+      });
+      await p.waitForTimeout(500);
+    },
+    find: {
+      video: () => document.querySelector("video"),
+      active: (hb) => {
+        const t = hb.text(/läuft gerade/);
+        return t && hb.up(t, (e) => e.tagName === "BUTTON" || e.tagName === "A" || e.tagName === "LI");
+      },
+      list: (hb) => {
+        const t = hb.text(/läuft gerade/);
+        return t && hb.up(t, (e) => e.tagName === "UL" || e.tagName === "OL");
+      },
+      phase: (hb) => hb.text(/^Minute \d+ bis \d+$/),
+    },
+  },
+  {
     name: "teilen-phone",
     size: PHONE,
     async open(p) {
@@ -460,6 +549,19 @@ const SHOTS = [
     },
   },
 ];
+
+/** The match file of step-hochladen-laeuft: empty (sparse), the size of a phone's match video. */
+const FILE_SIZE = Math.round(3.4 * 1024 ** 3);
+function matchFile() {
+  const dir = join(tmpdir(), "hb-product-shots");
+  mkdirSync(dir, { recursive: true });
+  const file = join(dir, "Spiel.mp4");
+  if (!existsSync(file) || statSync(file).size !== FILE_SIZE) {
+    writeFileSync(file, "");
+    truncateSync(file, FILE_SIZE);
+  }
+  return file;
+}
 
 /** See API_ORIGIN. */
 async function sameOrigin(ctx) {
@@ -580,7 +682,8 @@ async function main() {
   const meta = existsSync(META) ? JSON.parse(readFileSync(META, "utf8")) : {};
   const { state, team } = await login(browser);
   const failed = [];
-  for (const shot of SHOTS.filter((s) => !only.length || only.includes(s.name))) {
+  // a screen that writes into the account runs only when named (see step-hochladen-laeuft)
+  for (const shot of SHOTS.filter((s) => (only.length ? only.includes(s.name) : !s.writes))) {
     const { width, height, scale } = shot.size;
     const ctx = await browser.newContext({
       storageState: state,

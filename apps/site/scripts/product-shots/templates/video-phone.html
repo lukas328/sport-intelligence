@@ -1,0 +1,31 @@
+<!doctype html>
+<!-- The app picture of the start page as a phone shows it (U22): the same match as app-desktop
+     on the app at phone width (capture video-phone), as two cut-outs with the app's ink edge on a
+     clear ground (the page's cloth shows through): the video (a real hall recording, blurred past
+     recognition; the website writes «Dein Spiel» over it), and under it
+     the goals of the phase, the one playing in yellow. Large enough to read on a phone; the page
+     shows it instead of app-desktop under 40rem (components/product-shot.tsx, `phone`). -->
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../stage.css" />
+<div id="stage"></div>
+<script src="../stage.js"></script>
+<script>
+  const NAME = "video-phone";
+  const vid = S.rect(NAME, "video", [16, 63.7, 328, 184.7]);
+  const active = S.rect(NAME, "active", [16, 929, 328, 62.3]);
+  const W = 640;
+  const GAP = 20;
+  // the video (the app's controls under it stay out: the picture is about video and scenes)
+  const cropA = [8, vid[1] - 2, 344, vid[3] + 4];
+  // the goals around the one playing: two before it, one after (rows of the list)
+  const row = active[3];
+  const cropB = [8, active[1] - 2 * row - 4, 344, 4 * row + 8];
+  const k = (W - 4) / 344;
+  const hA = cropA[3] * k + 4;
+  const hB = cropB[3] * k + 4;
+  S.stage(W, Math.round(hA + GAP + hB), { clear: true });
+  const a = S.cut(NAME, cropA, { left: 0, top: 0, width: W });
+  S.lettering(S.video(a, vid));
+  S.cut(NAME, cropB, { left: 0, top: Math.round(hA + GAP), width: W });
+  S.done();
+</script>

@@ -137,6 +137,21 @@
     return screen(el, name, crop);
   }
 
+  /**
+   * A cut-out of the app for the steps: `crop` = [x, y, w, h] in app CSS px, in a flat frame with
+   * the app's ink edge at `left`, `top`, `width` (outer, stage px). Returns the map like `screen`.
+   */
+  function cut(name, crop, { left, top, width }) {
+    const el = document.createElement("div");
+    el.className = "cut";
+    Object.assign(el.style, { left: `${left}px`, top: `${top}px`, width: `${width}px` });
+    const scr = document.createElement("div");
+    scr.className = "screen";
+    el.append(scr);
+    document.getElementById("stage").append(el);
+    return screen(scr, name, crop);
+  }
+
   /** where a box inside `el` sits on the stage */
   function onStage(el, [x, y, w, h]) {
     const s = document.getElementById("stage").getBoundingClientRect();
@@ -231,5 +246,5 @@
     window.READY = shot;
   }
 
-  window.S = { cap, rect, stage, screen, piece, phone, browser, onStage, ring, spot, at, callout, video, lettering, done };
+  window.S = { cap, rect, stage, screen, piece, cut, phone, browser, onStage, ring, spot, at, callout, video, lettering, done };
 })();

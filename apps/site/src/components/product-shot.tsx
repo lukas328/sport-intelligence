@@ -20,6 +20,8 @@ export function ProductShot({
   caption,
   lettering,
   edge = false,
+  phone,
+  phoneSizes = "calc(100vw - 2rem)",
   className,
 }: {
   name: ShotName;
@@ -43,40 +45,54 @@ export function ProductShot({
    * keeps its air (BEFUNDE-2 L13); the place around the picture must leave them room
    */
   edge?: boolean;
+  /**
+   * another picture for phones (under 40rem), cut for their width (U22): the browser takes it
+   * instead of `name`; the callouts are the main picture's, so give it only where there are none
+   */
+  phone?: ShotName;
+  /** how wide the phone picture is shown */
+  phoneSizes?: string;
   className?: string;
 }) {
   const shot = productShot(name);
+  const small = phone ? productShot(phone) : null;
   // at the edge, each label moves out to the nearer side at its height; its arrow starts there
   const callouts = shot.callouts.filter((c) => labels[c.id]).map((c) => (edge ? { ...c, from: [c.from[0] < 50 ? 0 : 100, c.from[1]] as [number, number], place: "edge" as const } : c));
   if (edge) spread(callouts, (24 / shot.height) * 100 + 9);
+  const img = (
+    <img
+      src={shot.src}
+      srcSet={shot.srcSet}
+      sizes={sizes}
+      alt={alt}
+      width={shot.width}
+      height={shot.height}
+      loading={priority ? "eager" : "lazy"}
+      decoding="async"
+      className="block h-auto w-full"
+    />
+  );
   return (
     <figure className={cn("shot m-0", className)}>
       <div className={cn("relative [container-type:inline-size]", framed && "border-2 border-ink")}>
-        <img
-          src={shot.src}
-          srcSet={shot.srcSet}
-          sizes={sizes}
-          alt={alt}
-          width={shot.width}
-          height={shot.height}
-          loading={priority ? "eager" : "lazy"}
-          decoding="async"
-          className="block h-auto w-full"
-        />
+        {small ? (
+          // art direction: the phone picture under 40rem, each with its own size, so nothing moves
+          <picture>
+            <source media={PHONE_MEDIA} srcSet={small.srcSet} sizes={phoneSizes} width={small.width} height={small.height} />
+            {img}
+          </picture>
+        ) : (
+          img
+        )}
         {lettering && shot.lettering && (
-          <span
-            aria-hidden
-            className="pointer-events-none absolute grid place-items-center text-center font-slant leading-none text-white [text-shadow:0_.04em_.3em_rgb(0_0_0/.45)]"
-            style={{
-              left: `${shot.lettering[0]}%`,
-              top: `${shot.lettering[1]}%`,
-              width: `${shot.lettering[2]}%`,
-              height: `${shot.lettering[3]}%`,
-              fontSize: `${(shot.lettering[2] * 0.11).toFixed(2)}cqw`,
-            }}
-          >
+          <Lettering box={shot.lettering} className={small ? "max-sm:hidden" : undefined}>
             {lettering}
-          </span>
+          </Lettering>
+        )}
+        {lettering && small?.lettering && (
+          <Lettering box={small.lettering} className="sm:hidden">
+            {lettering}
+          </Lettering>
         )}
         {callouts.length > 0 && (
           <>
@@ -125,6 +141,31 @@ export function ProductShot({
       )}
       {caption && <figcaption className="mt-3 text-[1.0625rem]">{caption}</figcaption>}
     </figure>
+  );
+}
+
+/** where the phone picture takes over: under the site's `sm` (40rem), as in the classes above */
+const PHONE_MEDIA = "(max-width: 39.99rem)";
+
+/** the word over the match video, in a box of the picture ([x, y, w, h] in per cent) */
+function Lettering({ box, className, children }: { box: [number, number, number, number]; className?: string; children: ReactNode }) {
+  return (
+    <span
+      aria-hidden
+      className={cn(
+        "pointer-events-none absolute grid place-items-center text-center font-slant leading-none text-white [text-shadow:0_.04em_.3em_rgb(0_0_0/.45)]",
+        className,
+      )}
+      style={{
+        left: `${box[0]}%`,
+        top: `${box[1]}%`,
+        width: `${box[2]}%`,
+        height: `${box[3]}%`,
+        fontSize: `${(box[2] * 0.11).toFixed(2)}cqw`,
+      }}
+    >
+      {children}
+    </span>
   );
 }
 
