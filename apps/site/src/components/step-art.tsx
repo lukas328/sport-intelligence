@@ -19,7 +19,7 @@ import type { Messages } from "@/messages/de";
  * 14 px. The ball of each step carries `data-ball`: components/ball-run.tsx runs one ball path
  * through the four (the ball shown there replaces them while it runs).
  *
- * Ported from the earlier picture templates (scripts/product-shots, steps.js and hall.js).
+ * Ported from the earlier picture templates of the steps (scripts/product-shots, until U47).
  */
 
 type Pt = readonly [number, number];

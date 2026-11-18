@@ -18,9 +18,9 @@ import { pageMeta } from "@/lib/seo";
 type Props = { params: Promise<{ locale: Locale }> };
 
 /**
- * Product pictures (public/product, scripts/product-shots): one per step (components/step-picture,
- * the same set as on the start page), and under «So sieht es in der App aus» the same pictures as
- * on the start page plus sharing.
+ * The four steps are drawn live on the page (components/step-art.tsx, no pictures); under «So
+ * sieht es in der App aus» the product pictures (public/product, scripts/product-shots): the same
+ * as on the start page plus sharing.
  */
 const SHOTS = ["get-video", "get-search", "get-season", "share"] as const;
 

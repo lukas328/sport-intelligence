@@ -93,66 +93,6 @@
       }
     ]
   },
-  "step-check-de": {
-    "width": 640,
-    "height": 640,
-    "callouts": []
-  },
-  "step-check-en": {
-    "width": 640,
-    "height": 640,
-    "callouts": []
-  },
-  "step-check-fr": {
-    "width": 640,
-    "height": 640,
-    "callouts": []
-  },
-  "step-film-de": {
-    "width": 640,
-    "height": 640,
-    "callouts": []
-  },
-  "step-film-en": {
-    "width": 640,
-    "height": 640,
-    "callouts": []
-  },
-  "step-film-fr": {
-    "width": 640,
-    "height": 640,
-    "callouts": []
-  },
-  "step-result-de": {
-    "width": 640,
-    "height": 640,
-    "callouts": []
-  },
-  "step-result-en": {
-    "width": 640,
-    "height": 640,
-    "callouts": []
-  },
-  "step-result-fr": {
-    "width": 640,
-    "height": 640,
-    "callouts": []
-  },
-  "step-upload-de": {
-    "width": 640,
-    "height": 640,
-    "callouts": []
-  },
-  "step-upload-en": {
-    "width": 640,
-    "height": 640,
-    "callouts": []
-  },
-  "step-upload-fr": {
-    "width": 640,
-    "height": 640,
-    "callouts": []
-  },
   "video-phone": {
     "width": 640,
     "height": 853,

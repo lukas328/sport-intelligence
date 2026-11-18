@@ -243,12 +243,12 @@ const de = {
       {
         title: "Prüfen",
         text: "Wo die Analyse unsicher ist, fragt sie dich, mit der kurzen Szene dazu: Passt das Spielfeld? Tor oder nicht, für wen? Höchstens zehn Fragen pro Spiel, meist in ein paar Minuten, und alle überspringen geht auch. Von wo geworfen wurde, tippst du an, wenn du magst.",
-        alt: "Gezeichnet nach der App: die Halle mit dem vorgeschlagenen Spielfeld in Gelb, vier gelbe Punkte an den Ecken. Darüber die Frage: Frage 1 von 1, Passt das Spielfeld?, mit den Knöpfen Passt und Weiss nicht, daneben ein Tipp. Darunter steht: Höchstens zehn Fragen pro Spiel.",
+        alt: "Gezeichnet nach der App: das Spielfeld von der Tribüne aus, das vorgeschlagene Feld in Gelb, vier gelbe Punkte an den Ecken. Darunter die Frage: Frage 1 von 1, Passt das Spielfeld?, mit den Knöpfen Passt und Weiss nicht, daneben ein Tipp. Darunter steht: Höchstens zehn Fragen pro Spiel.",
       },
       {
         title: "Anschauen und teilen",
         text: "Resultat, Spielverlauf, jedes Tor als Szene und die Positionen von oben. Hast du bei den Toren angetippt, von wo geworfen wurde (der Wurfort), kommen die drei Dinge dazu: die drei grössten Muster fürs Training, ab drei Toren aus derselben Zone. Die wichtigsten Szenen schickst du als Sammlung in den Teamchat, eine Auswahl hinter einem Link.",
-        alt: "Gross: 11 von 29 Gegentoren über aussen rechts, darunter das halbe Feld mit den Wurforten, alle aussen rechts. Darüber die Sammlung für den Teamchat: Aussen rechts zumachen, 4 Szenen, HC Tannengrün Herren 1, und der Knopf Link teilen.",
+        alt: "Gross: 11 von 29 Gegentoren über aussen rechts, daneben das halbe Feld mit den Wurforten der 29 Gegentore, die 11 aussen rechts in Gelb. Darunter die Sammlung für den Teamchat: Aussen rechts zumachen, 4 Szenen, HC Tannengrün Herren 1, und der Knopf Link teilen.",
       },
     ],
     honestAll: "Die ganze Liste, Punkt für Punkt",

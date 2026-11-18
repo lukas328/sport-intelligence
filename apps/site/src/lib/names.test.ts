@@ -7,8 +7,8 @@ import { describe, expect, it } from "vitest";
  * names of the earlier demo (real places on Lake Zurich) must not come back: not in the files the
  * website serves (public/, text and file names), not in its texts (src/messages, content). A
  * picture cannot be read here, so pictures with words in them are made by scripts
- * (scripts/product-shots, e.g. share-preview.mjs for the chat preview, the templates of the steps
- * with their words in de, fr and en, checked here) and made again on a change.
+ * (scripts/product-shots, e.g. share-preview.mjs for the chat preview, and the templates
+ * with their words, checked here) and made again on a change.
  */
 const OLD = ["Zürichsee", "Zurichsee", "Seewald", "Moosbach", "Bergtal", "Rebhalden", "Lindmatt", "Uferweg", "Seeblick", "Thalwil", "Horgen"];
 const PATTERN = new RegExp(OLD.join("|"), "i");
