@@ -1674,7 +1674,10 @@
     "current": "Offre actuelle",
     "trialAfter": "Ensuite le plan gratuit s'applique jusqu'à ta décision. Rien n'est supprimé.",
     "gpuTerm": "<term>Minutes d'analyse</term> ce mois",
-    "withKeepers": "Analyse des gardiens incluse"
+    "withKeepers": "Analyse des gardiens incluse",
+    "keepersLocked": "Analyse des gardiens dans l'abonnement Équipe",
+    "keepersLockedText": "Arrêts, buts encaissés, taux d'arrêts et zones par gardien ainsi que la fiche des tireurs sont inclus dans les abonnements Équipe et Club. Le gardien et ses arrêts se saisissent dans chaque abonnement.",
+    "keepersLockedLink": "Voir l'abonnement"
   },
   "share": {
     "button": "Partager",

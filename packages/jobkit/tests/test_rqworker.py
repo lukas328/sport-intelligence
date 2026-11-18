@@ -100,3 +100,26 @@ def test_shutdown_signal_is_remembered(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr("signal.signal", lambda *_a: None)
     w.request_stop(15, None)
     assert w.shutdown_requested
+
+
+def test_a_killed_work_horse_is_reported_to_the_api(monkeypatch: pytest.MonkeyPatch) -> None:
+    from handball_jobkit import rqworker
+    from handball_jobkit.reporter import Reporter
+
+    sent: list[tuple[str, dict[str, Any]]] = []
+
+    def send(
+        self: Reporter, body: dict[str, Any], force: bool = False, terminal: bool = False
+    ) -> None:
+        sent.append((self.url, body))
+
+    monkeypatch.setattr(Reporter, "_send", send)
+    job = "3f2b8c1e-0000-4000-8000-000000000001"
+    assert rqworker.report_lost(job, 9) is True  # waitpid status of SIGKILL
+    url, body = sent[0]
+    assert url.endswith(f"/internal/jobs/{job}")
+    assert body["status"] == "failed"
+    assert body["error"] == "worker lost: work horse killed by signal 9 (likely out of memory)"
+    assert rqworker.report_lost("tick-watchdog", 9) is False  # not a job of the API
+    assert len(sent) == 1
+    assert rqworker.lost_error(256).startswith("worker lost: work horse ended unexpectedly")

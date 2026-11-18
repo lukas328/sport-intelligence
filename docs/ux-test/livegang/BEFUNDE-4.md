@@ -39,6 +39,7 @@ wird erst auf sein Zeichen. Prio P1 (vor dem nächsten Test), P2 (bald), P3 (sp�
 ## Erledigt aus Runde 3 (Antworten Lukas, 18.11.)
 
 - Torhüter im Gratis-Plan angehakt: bleibt so, Torhüter wird ein Standard-Feature.
+  - Nachtrag 18.11.2026 (Nachmittag): Lukas hat umentschieden, die Torhüter-Auswertung gibt es erst ab Team (CHF 39) und im Verein, nicht mehr im Gratis-Plan. Plan-Feature `goalkeepers` in `services/plans.py`; die API gibt dem Gratis-Plan keine Zahlen pro Torhüter mehr (Werferkarte und Wurf-Export 402, `goalkeepers` in den Spielzahlen leer), die App zeigt dort den Hinweis «Torhüter-Auswertung im Team-Plan», die Preisseite hakt «Torhüter» nur bei Team und Verein an. Wer im Tor steht und die Paraden erfassen bleibt in jedem Plan.
 - Stripe und der frühere Torhüter-Zuschlag: Auf Staging ist Stripe nicht eingerichtet (`checkout_available` false), niemand konnte den Zuschlag über Stripe buchen. Nichts zu tun.
 - Lizenz Wiedererkennungsmodell (MSMT17): zur Kenntnis genommen, vor dem Verkauf klären.
 - Testspuren im Konto TV Thalwil: entfernt am 18.11. (Run 44261823276): Spielzug «Test Claude Review», Entwurfs-Sammlung «Gegen Demo HC Beispiel» mit 2 Szenen, Teamleben wieder aus (hielt keine Termine, Zusagen oder Trainings). Nachkontrolle: nichts übrig.

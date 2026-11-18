@@ -474,7 +474,7 @@ const fr: Messages = {
     analysis: "Analyse automatique",
     analysisSub: "Trouve le terrain, les joueurs, le ballon et les buts dans la vidéo. Chaque but devient une scène.",
     goalkeepers: "Gardiens",
-    goalkeepersSub: "Arrêts et tirs arrêtés par gardien, par zone de tir et zone du but. Sans supplément.",
+    goalkeepersSub: "Arrêts, buts encaissés et taux d'arrêts par gardien, par zone de tir et zone du but. Sans supplément dans Équipe et Club.",
     featureNames: {
       events: "Saisir la feuille de match et le jour de match",
       insights: "Trois points et conseils d'entraînement",

@@ -26,6 +26,7 @@
       "features": [
         "assistant",
         "events",
+        "goalkeepers",
         "insights",
         "pdf_reports",
         "season",
@@ -47,6 +48,7 @@
         "assistant",
         "club_stats",
         "events",
+        "goalkeepers",
         "insights",
         "pdf_reports",
         "priority",

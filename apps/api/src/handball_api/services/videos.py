@@ -683,6 +683,17 @@ async def apply_job_update(ctx: Ctx, job_id: uuid.UUID, data: JobUpdate) -> Proc
     now = datetime.now(UTC)
     if job.status in (JobStatus.SUCCEEDED, JobStatus.CANCELLED):
         return job  # late or duplicate callbacks are ignored (idempotent)
+    from handball_api.services import progress  # imports this module
+
+    if (
+        data.status == JobStatus.FAILED
+        and (data.error or "").startswith(progress.WORKER_LOST)
+        and job.status == JobStatus.RUNNING
+    ):
+        # the worker reports a killed work horse (out of memory): restarted once at once,
+        # ended as failed the second time, not left «running» until the watchdog notices
+        await progress.restart_or_fail(ctx, job, datetime.now(UTC), f"({data.error})")
+        return job
     if job.started_at is None and data.status != JobStatus.QUEUED:
         job.started_at = now
     # every report (progress, heartbeat, the end) says the worker is still on it

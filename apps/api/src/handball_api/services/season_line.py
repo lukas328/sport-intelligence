@@ -68,6 +68,22 @@ REPORT_KEYS = (
 )
 
 
+# the goalkeeper's figures: part of the goalkeeper module of the plan
+KEEPER_KEYS = ("faced", "saves", "goals_against", "seven_m_faced", "seven_m_saves")
+
+
+def _without_keeper(line: SeasonLineMatch) -> SeasonLineMatch:
+    """The line without the goalkeeper figures (a plan without the goalkeeper module): same
+    shape, the figures 0 without events, no save rate; whether the player took part stays."""
+    return line.model_copy(
+        update={
+            "figures": line.figures.model_copy(update=dict.fromkeys(KEEPER_KEYS, 0)),
+            "events": line.events.model_copy(update={k: [] for k in KEEPER_KEYS}),
+            "save_pct": None,
+        }
+    )
+
+
 def _ratio(a: int, b: int) -> float | None:
     return round(a / b, 4) if b else None
 
@@ -156,6 +172,8 @@ async def season_line(
         lines.append(
             await _match_line(ctx, m, pid, events.get(m.id, []), names, attendance, appeared)
         )
+    if not await billing.allows(ctx, "goalkeepers", team.organization_id):
+        lines = [_without_keeper(line) for line in lines]
     return SeasonLine(
         player_id=player.id,
         team_id=team_id,

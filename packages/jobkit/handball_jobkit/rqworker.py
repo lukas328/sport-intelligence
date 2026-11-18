@@ -11,11 +11,19 @@ connection sits silent for almost seven minutes, longer than the idle timeout of
 front of Redis, which then cuts it ("could not connect to Redis instance: Connection closed by
 server" every few minutes). A shorter `worker_ttl` keeps every BLPOP well inside that timeout;
 the price is one cheap heartbeat per minute or so.
+
+A work horse the system kills (out of memory: "Work-horse terminated unexpectedly; waitpid
+returned 9") cannot report its end, and the API would show the job running until its watchdog
+noticed the silence (30 to 40 minutes). `ResilientWorker.handle_work_horse_killed` reports it at
+once as failed with WORKER_LOST; the API restarts the job once and ends it the second time
+(services/progress.restart_or_fail).
 """
 
 from __future__ import annotations
 
+import os
 import time
+import uuid
 from collections.abc import Callable, Sequence
 from typing import Any
 
@@ -24,11 +32,47 @@ from redis import Redis
 from redis.exceptions import RedisError
 from rq import Queue, Worker
 
+from handball_jobkit.reporter import Reporter, ReportError
+from handball_jobkit.settings import JobSettings
+
 log = structlog.get_logger("worker.rq")
 
 WORKER_TTL_S = 90  # BLPOP waits 75 s, read timeout 85 s (RQ derives both from the TTL)
 RESTART_BACKOFF_S = (1.0, 60.0)  # first wait, cap
 HEALTHY_RUN_S = 300.0  # a worker that ran this long resets the backoff
+# the API matches this prefix (services/progress.WORKER_LOST): keep both the same
+WORKER_LOST = "worker lost"
+
+
+def lost_error(ret_val: int) -> str:
+    """The error a killed work horse is reported with (signal 9: most likely out of memory)."""
+    if os.WIFSIGNALED(ret_val):
+        sig = os.WTERMSIG(ret_val)
+        why = " (likely out of memory)" if sig == 9 else ""
+        return f"{WORKER_LOST}: work horse killed by signal {sig}{why}"
+    return f"{WORKER_LOST}: work horse ended unexpectedly (status {ret_val})"
+
+
+def report_lost(job_id: str, ret_val: int, settings: JobSettings | None = None) -> bool:
+    """Tell the API that the job's work horse is gone; False for jobs the API does not track
+    (not a job id of the API, e.g. the ticks) or when the API cannot be reached."""
+    try:
+        uuid.UUID(job_id)
+    except ValueError:
+        return False
+    s = settings or JobSettings()
+    rep = Reporter(s.api_internal_url, s.internal_token, job_id, {"lost": 1.0}, heartbeat_s=None)
+    try:
+        rep._send(
+            {"status": "failed", "progress": 0.0, "error": lost_error(ret_val)}, terminal=True
+        )
+    except ReportError as exc:
+        log.warning("worker_lost_report_failed", job=job_id, error=str(exc))
+        return False
+    finally:
+        rep.client.close()
+    log.warning("worker_lost_reported", job=job_id, status=ret_val)
+    return True
 
 
 class ResilientWorker(Worker):
@@ -49,6 +93,13 @@ class ResilientWorker(Worker):
     def request_stop(self, signum: Any, frame: Any) -> None:
         self.shutdown_requested = True
         super().request_stop(signum, frame)  # type: ignore[no-untyped-call]
+
+    def handle_work_horse_killed(self, job: Any, retpid: int, ret_val: int, rusage: Any) -> None:
+        super().handle_work_horse_killed(job, retpid, ret_val, rusage)  # type: ignore[no-untyped-call]
+        try:
+            report_lost(str(job.id), ret_val)
+        except Exception as exc:  # the worker must go on with the next job
+            log.warning("worker_lost_report_failed", job=str(job.id), error=str(exc))
 
     def run_maintenance_tasks(self) -> None:
         super().run_maintenance_tasks()  # type: ignore[no-untyped-call]

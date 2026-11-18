@@ -1674,7 +1674,10 @@
     "current": "Aktueller Plan",
     "trialAfter": "Danach gilt der Gratis-Plan, bis du dich entscheidest. Nichts wird gelöscht.",
     "gpuTerm": "<term>Analyseminuten</term> diesen Monat",
-    "withKeepers": "Torhüter-Auswertung inbegriffen"
+    "withKeepers": "Torhüter-Auswertung inbegriffen",
+    "keepersLocked": "Torhüter-Auswertung im Team-Plan",
+    "keepersLockedText": "Paraden, Gegentore, Fangquote und Torzonen pro Torhüter und die Werferkarte gibt es im Team- und im Vereins-Plan. Wer im Tor steht und die Paraden erfasst du in jedem Plan.",
+    "keepersLockedLink": "Zum Abo"
   },
   "share": {
     "button": "Teilen",
