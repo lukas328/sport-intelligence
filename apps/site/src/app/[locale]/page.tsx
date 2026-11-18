@@ -211,10 +211,9 @@ export default async function Home({ params }: Props) {
           <LoopTile
             kick={t.loopKick}
             title={t.loopTitle}
-            steps={t.loop.map((s, i) => ({
+            steps={t.loop.map((s) => ({
               title: s.title,
               text: fmt(s.text, { n: sat.n, of: sat.of, drill: DRILLS.defence_6_0_shift.name[DRILL_LANG[locale]] }),
-              href: `/${locale}/demo/${["#warum", "#warum", "#einsicht", "#naechstes"][i]}`,
             }))}
             link={t.loopLink}
             demoHref={`/${locale}/demo/`}
