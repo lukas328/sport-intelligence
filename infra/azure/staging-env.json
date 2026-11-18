@@ -1,0 +1,5 @@
+{
+  "HB_REID_MODEL": "models/reid/reid-6f3e1b1d0534.onnx",
+  "HB_REID_MODEL_SHA256": "6f3e1b1d05347d36adcf09ecb0d759bd36b73748248800ede5f46849679e16f0",
+  "HB_ROLE_MODEL": ""
+}

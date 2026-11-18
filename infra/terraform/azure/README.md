@@ -160,6 +160,11 @@ optional_secrets = ["HB_GOOGLE_CLIENT_SECRET"]
 The same works for Apple (`HB_APPLE_PRIVATE_KEY`), Stripe, `HB_ANTHROPIC_API_KEY` and `HB_SENTRY_DSN`.
 Redirect URI for Google and Apple: `https://<app_domain>/v1/auth/oauth/<google|apple>/callback`.
 
+Non-secret settings that belong to the code, such as the analysis models (`HB_REID_MODEL` with its
+checksum, `HB_ROLE_MODEL` empty while the role model is off), live in
+`infra/azure/staging-env.json`. Every deploy merges that file into `extra_env` of the stored
+settings file; a key set to `null` there is removed.
+
 ## 6. Custom domain with a managed certificate
 
 In Cloudflare DNS (record **DNS only**, grey cloud, so Azure can issue the certificate):
