@@ -75,8 +75,8 @@ export default async function Pricing({ params }: Props) {
                   aria-hidden
                   className={
                     i === 0
-                      ? "font-num text-[2rem] leading-none normal-case"
-                      : "font-num text-[2rem] leading-none text-club-text normal-case"
+                      ? "upright text-[1.75rem] leading-none normal-case"
+                      : "upright text-[1.75rem] leading-none text-club-text normal-case"
                   }
                 >
                   {i + 1}

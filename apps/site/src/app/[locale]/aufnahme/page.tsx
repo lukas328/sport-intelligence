@@ -81,7 +81,7 @@ export default async function Filming({ params }: Props) {
                   </span>
                   <div>
                     <h3 className="flex items-baseline gap-3 text-[1.5rem] leading-tight md:text-[1.75rem]">
-                      <span aria-hidden className="font-num text-club-text">
+                      <span aria-hidden className="upright text-club-text">
                         {i + 1}
                       </span>
                       {r.title}

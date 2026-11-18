@@ -197,12 +197,12 @@ export default async function Demo({ params }: Props) {
                           {t.source[f.source]}
                         </span>
                       </th>
-                      <td className="font-num text-[1.5rem]">
+                      <td className="upright text-[1.375rem]">
                         {f.key === "shootingPct" && f.own != null
                           ? fmt(t.pct, { v: f.own })
                           : f.own}
                       </td>
-                      <td className="font-num text-[1.5rem]">
+                      <td className="upright text-[1.375rem]">
                         {f.key === "shootingPct" && f.opp != null
                           ? fmt(t.pct, { v: f.opp })
                           : f.opp}
@@ -241,7 +241,7 @@ export default async function Demo({ params }: Props) {
                         style={{ width: `${(z.n / zones[0]!.n) * 100}%` }}
                       />
                     </span>
-                    <span className="font-num text-right text-[1.5rem]">{z.n}</span>
+                    <span className="upright text-right text-[1.375rem]">{z.n}</span>
                   </li>
                 ))}
               </ul>

@@ -263,9 +263,14 @@
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.02em;
   }
-  .score-echo {
-    color: transparent;
-    -webkit-text-stroke: 1.5px var(--club-ink);
+  /* the numbers and short labels in small sizes (BEFUNDE-3 U27): the slanted display face gets
+     restless below about 2 rem, so they stand upright in the text face, heavy and tabular */
+  .upright {
+    font-family: var(--font-sans);
+    font-style: normal;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
   }
   .mark-band {
     background: var(--club);

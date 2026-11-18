@@ -3,16 +3,10 @@ import { Flight, type FlightLabels, type ReportGoal } from "@/components/anlauf/
 import { cn } from "@/lib/cn";
 import { HTML_LANG, fmt, messages, type Locale } from "@/lib/i18n";
 
-/** The result: our goals, theirs underlined in the opponent's colour; two offset outlines behind. */
+/** The result: our goals, theirs underlined in the opponent's colour (no echo copies, BEFUNDE-3 U27). */
 export function Score({ own, opp, label, className }: { own: number; opp: number; label: string; className?: string }) {
   return (
     <div className={cn("font-num relative whitespace-nowrap", className)} style={{ lineHeight: 0.8 }} role="img" aria-label={label}>
-      <span aria-hidden className="score-echo absolute top-0 right-0 opacity-[.22] [transform:translate(-.2em,-.04em)] max-md:right-auto max-md:left-0 max-md:[transform:translate(.2em,-.06em)]">
-        {own}:{opp}
-      </span>
-      <span aria-hidden className="score-echo absolute top-0 right-0 opacity-[.42] [transform:translate(-.1em,-.02em)] max-md:right-auto max-md:left-0 max-md:[transform:translate(.1em,-.03em)]">
-        {own}:{opp}
-      </span>
       <span aria-hidden className="relative block">
         {own}:<u className="decoration-opp [text-decoration-skip-ink:none] [text-decoration-thickness:.045em] [text-underline-offset:.06em]">{opp}</u>
       </span>
@@ -69,7 +63,7 @@ export function WurfHead({
       </div>
       <div className="mt-6 flex min-w-0 flex-col md:mt-0">
         {scoreNote && <p className="mb-2 text-base font-semibold md:text-right md:text-[1.0625rem]">{scoreNote}</p>}
-        <p className="font-slant flex flex-wrap gap-x-6 gap-y-1 text-base md:justify-end md:text-[1.0625rem]" aria-hidden>
+        <p className="upright flex flex-wrap gap-x-6 gap-y-1 text-base md:justify-end md:text-[1.0625rem]" aria-hidden>
           <span>{ownName}</span>
           <span>
             <i className="mr-2 inline-block size-3.5 bg-opp align-[-1px] shadow-[0_0_0_1.5px_var(--club-ink)]" />
