@@ -369,7 +369,7 @@ export function MatchCardShare({ orgId, matchId }: { orgId: string; matchId: str
           {/* eslint-disable-next-line @next/next/no-img-element -- a picture made on the server for this match */}
           <img src={src} alt={t("card.title")} width={128} height={128} className={cn("size-32 border border-rule bg-surface", state === "loading" && "opacity-0")} onLoad={() => setState("ok")} onError={() => setState("none")} />
           {state === "loading" && (
-            <span role="status" className="absolute inset-0 grid place-items-center border border-rule px-2 text-center text-[13px] font-semibold text-ink-2" data-testid="card-making">
+            <span role="status" className="absolute inset-0 grid place-items-center border border-rule px-2 text-center text-xs font-semibold text-ink-2" data-testid="card-making">
               <span aria-hidden className="absolute inset-0 bg-surface motion-safe:animate-pulse" />
               <span className="relative">{t("card.making")}</span>
             </span>
