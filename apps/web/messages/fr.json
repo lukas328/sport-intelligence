@@ -1718,7 +1718,8 @@
       "save": "Enregistrer l'image",
       "alt": "Carte de match {team} contre {opponent}, {score}",
       "file": "carte-de-match",
-      "noScore": "La carte de match est disponible dès que le résultat est saisi."
+      "noScore": "La carte de match est disponible dès que le résultat est saisi.",
+      "making": "En création …"
     },
     "player": {
       "button": "Partager les scènes",
@@ -3720,7 +3721,10 @@
     "todayTitle": "Ce que tu peux faire dès aujourd’hui",
     "todayNote": "d’après la feuille de match",
     "todayText": "La carte du match en image pour le chat de l’équipe et le résumé à copier, déjà sans vidéo.",
-    "todayCard": "Carte du match pour le chat"
+    "todayCard": "Carte du match pour le chat",
+    "pictureBusy": "La carte du match se crée …",
+    "pictureSaved": "Image enregistrée, tu la trouves dans tes téléchargements.",
+    "pictureFailed": "L'image n'a pas pu être créée pour l'instant. Réessaie."
   },
   "check": {
     "top": "Vérifier · {opponent}",

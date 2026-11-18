@@ -27,6 +27,7 @@ import {
   type ShellValue,
 } from "./context";
 import { TeamSwitcher } from "./team-switcher";
+import { useEscapeDetails } from "@/lib/use-escape";
 
 export function AppShell({
   org,
@@ -68,6 +69,8 @@ export function AppShell({
   const [framed, setFramed] = useState<string | null>(null);
   const showFrame = useCallback((on: boolean) => setFramed(on ? window.location.pathname : null), []);
   const [pageUpload, setPageUpload] = useState<string | null>(null);
+  // Escape closes an open «Mehr» in the page too, not only dialogs (A15)
+  useEscapeDetails();
   const value = useMemo<ShellValue>(
     () => ({ org, orgs, teams, team, mode, me, setTeam, showFrame, setPageUpload }),
     [org, orgs, teams, team, mode, me, setTeam, showFrame],

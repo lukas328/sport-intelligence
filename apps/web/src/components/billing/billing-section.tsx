@@ -6,7 +6,7 @@ import { useFormatter, useTranslations } from "next-intl";
 import { useState } from "react";
 import { InvoiceOrder } from "./invoice-order";
 import { Button } from "@/components/ui/button";
-import { Alert } from "@/components/ui/card";
+import { Alert, Skeleton } from "@/components/ui/card";
 import { api } from "@/lib/client";
 import { cn } from "@/lib/utils";
 
@@ -68,6 +68,8 @@ function Meter({ label, used, limit, unit = "", enforced }: { label: string; use
 /** Plan, usage and Stripe checkout/portal for org admins (BRIEF 13). */
 export function BillingSection({ orgId }: { orgId: string }) {
   const t = useTranslations("billing");
+  const tc = useTranslations("common");
+  const te = useTranslations("errors");
   const format = useFormatter();
   const [problem, setProblem] = useState<string | null>(null);
   const [goalkeepers, setGoalkeepers] = useState(0);
@@ -76,7 +78,37 @@ export function BillingSection({ orgId }: { orgId: string }) {
     queryFn: async () => ((await api.GET("/v1/orgs/{org_id}/billing", { params: { path: { org_id: orgId } } })).data ?? null) as Billing | null,
   });
   const b = q.data;
-  if (!b) return null;
+  // while the plan loads: the shape of the section, not a blank second (finding A15)
+  if (!b)
+    return (
+      <section id="billing" aria-labelledby="billing-title" aria-busy={q.isPending || undefined} className="space-y-3" data-testid="billing-loading">
+        <h2 id="billing-title" className="text-lg font-semibold">
+          {t("title")}
+        </h2>
+        {q.isPending ? (
+          <div className="space-y-4 border-t border-foreground/15 pt-5">
+            <p role="status" className="sr-only">
+              {tc("loading")}
+            </p>
+            <Skeleton className="h-6 w-56 max-w-full" />
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Skeleton className="h-8" />
+              <Skeleton className="h-8" />
+              <Skeleton className="h-8" />
+              <Skeleton className="h-8" />
+            </div>
+            <Skeleton className="h-36" />
+          </div>
+        ) : (
+          <Alert kind="error">
+            {te("generic")}{" "}
+            <button type="button" onClick={() => void q.refetch()} className="cursor-pointer font-bold underline underline-offset-4">
+              {tc("retry")}
+            </button>
+          </Alert>
+        )}
+      </section>
+    );
   async function go(path: "/v1/orgs/{org_id}/billing/checkout" | "/v1/orgs/{org_id}/billing/portal", plan?: string) {
     const res =
       path === "/v1/orgs/{org_id}/billing/checkout"

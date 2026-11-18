@@ -1718,7 +1718,8 @@
       "save": "Save picture",
       "alt": "Match card {team} against {opponent}, {score}",
       "file": "match-card",
-      "noScore": "The match card is ready once the result is entered."
+      "noScore": "The match card is ready once the result is entered.",
+      "making": "Being made …"
     },
     "player": {
       "button": "Share scenes",
@@ -3720,7 +3721,10 @@
     "todayTitle": "What you can do today",
     "todayNote": "from the match report",
     "todayText": "The match card as a picture for the team chat and the short report to copy, even without a video.",
-    "todayCard": "Match card for the team chat"
+    "todayCard": "Match card for the team chat",
+    "pictureBusy": "Making the match card …",
+    "pictureSaved": "Picture saved, you find it in your downloads.",
+    "pictureFailed": "The picture could not be made just now. Try again."
   },
   "check": {
     "top": "Check · {opponent}",

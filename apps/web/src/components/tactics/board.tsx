@@ -227,7 +227,10 @@ export function Board({
       onGestureStart?.();
       update({ tokens: frame.tokens.filter((x) => x.id !== k.id) });
       onSelect?.(null);
-    } else if (e.key === "Escape") onSelect?.(null);
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      onSelect?.(null);
+    }
   }
 
   function onBallKey(e: KeyboardEvent) {

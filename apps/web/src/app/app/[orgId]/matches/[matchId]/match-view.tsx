@@ -8,6 +8,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent } from "react";
 import Link from "next/link";
+import { useEscape } from "@/lib/use-escape";
 import { ArrowLeftRight, Check, ChevronDown, ChartNoAxesColumn, Clapperboard, FileDown, Hand, MoreHorizontal, Pencil, Plus, Radio, Shield, Trash2 } from "lucide-react";
 import { useRosterNames } from "@/components/analysis/tagger";
 import { DEFAULT_CLUB, matchStyle } from "@/lib/color";
@@ -188,6 +189,9 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
   const stats = useStats(orgId, initial.id);
   const graphics = useMatchGraphics(orgId, initial.id);
   const [bench, setBench] = useState(false);
+  // Escape closes the Werkbank like its «Schliessen» (A15)
+  const benchRef = useRef<HTMLElement>(null);
+  useEscape(bench, () => setBench(false), benchRef);
   // deep links (?t=ms), e.g. a scene from Szenen or a play drawn on a video moment: the moment
   // plays in the full player, so it opens (behind the stage it would seek out of sight)
   // a moment in the full player: it opens, and the moment is sought once the video can
@@ -240,7 +244,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
   // the Spielkarte, rendered on the server: into the chat by the share sheet, else saved (K20)
   const cardPicture =
     match.score_own != null && match.score_opponent != null
-      ? () => void shareMatchCard(orgId, match.id, `${t("share.card.file")}-${oppName(match)}-${match.score_own}-${match.score_opponent}.png`.replace(/\s+/g, "-"))
+      ? () => shareMatchCard(orgId, match.id, `${t("share.card.file")}-${oppName(match)}-${match.score_own}-${match.score_opponent}.png`.replace(/\s+/g, "-"))
       : undefined;
   const telegram = (
     <Telegram
@@ -601,7 +605,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
         {main ? (
           // the workbench (events, defence systems, comments, feedback) is behind one tap, with or
           // without the stage; it stays mounted, so jumps from the other tabs still reach its player
-          <section hidden={!bench} aria-labelledby="bench-title" className="border-t-2 border-ink pt-6">
+          <section ref={benchRef} hidden={!bench} aria-labelledby="bench-title" className="border-t-2 border-ink pt-6">
             {(
               <div className="mb-4 flex items-center justify-between gap-3">
                 <h2 id="bench-title" className="text-[26px]">

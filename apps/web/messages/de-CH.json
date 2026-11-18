@@ -1718,7 +1718,8 @@
       "save": "Bild speichern",
       "alt": "Spielkarte {team} gegen {opponent}, {score}",
       "file": "spielkarte",
-      "noScore": "Die Spielkarte gibt es, sobald das Resultat eingetragen ist."
+      "noScore": "Die Spielkarte gibt es, sobald das Resultat eingetragen ist.",
+      "making": "Wird erstellt …"
     },
     "player": {
       "button": "Szenen teilen",
@@ -3720,7 +3721,10 @@
     "todayTitle": "Das kannst du heute schon",
     "todayNote": "aus dem Spielbericht",
     "todayText": "Die Spielkarte als Bild für den Teamchat und den Kurzbericht zum Kopieren, noch ohne Video.",
-    "todayCard": "Spielkarte für den Teamchat"
+    "todayCard": "Spielkarte für den Teamchat",
+    "pictureBusy": "Die Spielkarte wird erstellt …",
+    "pictureSaved": "Bild gespeichert, du findest es bei deinen Downloads.",
+    "pictureFailed": "Das Bild liess sich gerade nicht erstellen. Versuch es nochmals."
   },
   "check": {
     "top": "Prüfen · {opponent}",

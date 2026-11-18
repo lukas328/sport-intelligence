@@ -197,7 +197,7 @@ function Scene({
             onSave(String(new FormData(e.currentTarget).get("c") ?? "").trim());
             setEditing(false);
           }}
-          onKeyDown={(e) => e.key === "Escape" && setEditing(false)}
+          onKeyDown={(e) => e.key === "Escape" && (e.preventDefault(), setEditing(false))}
         >
           <Input label={t("comment")} name="c" defaultValue={note ?? ""} maxLength={1000} autoFocus />
           <Button type="submit" variant="secondary" size="sm">

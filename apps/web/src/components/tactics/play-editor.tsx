@@ -174,7 +174,10 @@ export function PlayEditor({
   useEffect(() => {
     const onKey = (e: globalThis.KeyboardEvent) => {
       const el = e.target as HTMLElement | null;
-      if (e.key === "Escape" && big) setBig(false);
+      if (e.key === "Escape" && big) {
+        e.preventDefault();
+        setBig(false);
+      }
       if (!edit || (el && /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName))) return;
       const mod = e.ctrlKey || e.metaKey;
       if (mod && e.key.toLowerCase() === "z") {
