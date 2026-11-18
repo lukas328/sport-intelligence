@@ -1,13 +1,4 @@
 {
-  "dinge-phone": {
-    "width": 1560,
-    "height": 3376,
-    "scale": 4,
-    "rects": {
-      "thing": [64, 439, 1432, 438],
-      "dots": [1272, 1223, 164, 177]
-    }
-  },
   "ergebnis-laptop": {
     "width": 2880,
     "height": 1880,
@@ -23,25 +14,6 @@
     "scale": 2,
     "rects": {}
   },
-  "hochladen-phone": {
-    "width": 1560,
-    "height": 3376,
-    "scale": 4,
-    "rects": {
-      "dialog": [0, 294, 1560, 3106],
-      "first": [96, 704, 1368, 224]
-    }
-  },
-  "pruefen-phone": {
-    "width": 1560,
-    "height": 3376,
-    "scale": 4,
-    "rects": {
-      "points": [129, 415, 1302, 251],
-      "question": [64, 1796, 1432, 304],
-      "yes": [64, 2457, 1432, 224]
-    }
-  },
   "saison": {
     "width": 2560,
     "height": 1640,
@@ -50,6 +22,53 @@
       "bars": [1456, 816, 264, 181],
       "dots": [2389, 783, 79, 91],
       "court": [1816, 736, 680, 552]
+    }
+  },
+  "step-dinge": {
+    "width": 1080,
+    "height": 2340,
+    "scale": 3,
+    "rects": {
+      "kicker": [48, 287, 984, 57],
+      "title": [48, 553, 984, 62],
+      "dots": [878, 868, 113, 122],
+      "court": [48, 789, 984, 798],
+      "scenes": [48, 1630, 304, 132]
+    }
+  },
+  "step-hochladen": {
+    "width": 1080,
+    "height": 2340,
+    "scale": 3,
+    "rects": {
+      "dialog": [0, 205, 1080, 2153],
+      "title": [72, 277, 422, 84],
+      "question": [72, 421, 936, 61],
+      "first": [72, 512, 936, 168],
+      "second": [72, 683, 936, 168]
+    }
+  },
+  "step-hochladen-laeuft": {
+    "width": 1080,
+    "height": 2340,
+    "scale": 3,
+    "rects": {
+      "running": [48, 1358, 984, 472],
+      "progress": [48, 1406, 984, 60],
+      "heading": [48, -4611, 611, 54]
+    }
+  },
+  "step-pruefen": {
+    "width": 1080,
+    "height": 2880,
+    "scale": 3,
+    "rects": {
+      "picture": [48, 572, 984, 600],
+      "hint": [84, 1352, 912, 131],
+      "count": [48, 1734, 273, 65],
+      "question": [48, 1799, 984, 228],
+      "yes": [48, 2295, 984, 168],
+      "no": [48, 2493, 984, 156]
     }
   },
   "szenen": {

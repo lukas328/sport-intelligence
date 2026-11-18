@@ -147,9 +147,9 @@ const fr: Messages = {
     stepsTitle: "Filmer. Téléverser. Vérifier.",
     stepsLead: "L'analyse propose et ne demande que là où elle hésite.",
     steps: [
-      { title: "Filmer", text: "Téléphone ou caméra en hauteur à la ligne médiane, les deux buts dans l'image. Fixe, c'est le mieux, mais tu peux suivre le jeu.", alt: "Un téléphone à l'horizontale sur un trépied devant la salle : il filme le match en grand angle.", points: ["Caméra en hauteur, en grand angle", "Les deux buts et les surfaces de but dans l'image"] },
-      { title: "Téléverser", text: "Choisis la vidéo. L'app montre où en est l'analyse et te prévient quand elle est terminée.", alt: "L'app au téléversement : à quel match appartient la vidéo ? En dessous, deux matchs au choix, le premier encadré de jaune.", points: ["Choisir le match, puis la vidéo", "La cloche te prévient quand c'est prêt"] },
-      { title: "Vérifier", text: "L'analyse propose le terrain et les buts. Là où elle hésite, elle te demande : dix questions au plus par match, en général quelques minutes.", alt: "L'app pendant la vérification : l'image de la vidéo avec quatre points jaunes aux coins du terrain, puis la question le terrain est-il juste ? et le bouton C'est bon.", points: ["L'analyse propose le terrain", "Toucher une fois suffit"] },
+      { title: "Filmer", text: "Téléphone ou caméra en hauteur à la ligne médiane, les deux buts dans l'image. Fixe, c'est le mieux, mais tu peux suivre le jeu.", alt: "Dessin : une salle vue d'en haut, la caméra sur un grand trépied à la ligne médiane, à environ 3 mètres de haut. Elle voit tout le terrain avec les deux buts.", points: ["Caméra en hauteur, en grand angle", "Les deux buts et les surfaces de but dans l'image"] },
+      { title: "Téléverser", text: "Choisis la vidéo. L'app montre où en est l'analyse et te prévient quand elle est terminée.", alt: "L'app au téléversement : à quel match appartient la vidéo ? Deux matchs au choix. En dessous, la barre : 12 % téléversé (420 Mo sur 3,4 Go).", points: ["Choisir le match, puis la vidéo", "La cloche te prévient quand c'est prêt"] },
+      { title: "Vérifier", text: "L'analyse propose le terrain et les buts. Là où elle hésite, elle te demande : dix questions au plus par match, en général quelques minutes.", alt: "L'app pendant la vérification : l'image de la vidéo avec le terrain proposé en jaune, quatre points aux coins. En dessous, question 1 sur 1 : le terrain est-il juste ? et le bouton C'est bon.", points: ["L'analyse propose le terrain", "Toucher une fois suffit"] },
     ],
     shareWhen: "Mardi, avant l'entraînement",
     shareTitle: "Quatre scènes dans le chat de l'équipe.",
@@ -231,17 +231,17 @@ const fr: Messages = {
       {
         title: "Filmer",
         text: "Téléphone ou caméra en hauteur à la ligne médiane, les deux buts dans l'image grâce au grand-angle. Fixe, c'est le mieux, suivre le jeu, ça va aussi. Laisse tourner pendant la pause.",
-        alt: "Un téléphone à l'horizontale sur un trépied devant la salle : il filme le match en grand angle.",
+        alt: "Dessin : une salle vue d'en haut, la caméra sur un grand trépied à la ligne médiane, à environ 3 mètres de haut. Elle voit tout le terrain avec les deux buts.",
       },
       {
         title: "Téléverser",
         text: "Dans l'app, choisis le match, puis la vidéo, idéalement en wifi. L'analyse trouve le terrain et les joueurs et cherche les moments de but. Pas besoin de rester : la cloche te prévient quand elle a terminé.",
-        alt: "Téléverser une vidéo dans l'app : à quel match appartient la vidéo ? Deux matchs au choix et « Ou créer un nouveau match ».",
+        alt: "L'app au téléversement : à quel match appartient la vidéo ? Deux matchs au choix. En dessous, la barre : 12 % téléversé (420 Mo sur 3,4 Go).",
       },
       {
         title: "Vérifier",
         text: "Là où l'analyse hésite, elle te demande, avec la courte scène : le terrain est-il juste ? But ou pas, pour qui ? Dix questions au plus par match, en général en quelques minutes, et tout passer est possible aussi. D'où le tir est parti, tu le touches si tu veux.",
-        alt: "Une question de la vérification : le terrain est-il juste ? Au-dessus, l'image de la vidéo avec quatre points jaunes aux coins du terrain, en dessous les boutons C'est bon et Je ne sais pas.",
+        alt: "L'app pendant la vérification : l'image de la vidéo avec le terrain proposé en jaune, quatre points aux coins. En dessous, question 1 sur 1 : le terrain est-il juste ? et le bouton C'est bon.",
       },
       {
         title: "Regarder et partager",
@@ -281,7 +281,7 @@ const fr: Messages = {
     checkPrint: "Liste à imprimer",
     afterTitle: "Ensuite : téléverser.",
     afterText: "À la maison, en Wi-Fi, ouvre le match dans l'app et choisis la vidéo. L'analyse fait le reste.",
-    afterAlt: "Téléverser la vidéo dans l'app : à quel match appartient la vidéo ? Deux matchs au choix et « Ou créer un nouveau match ».",
+    afterAlt: "L'app au téléversement : à quel match appartient la vidéo ? Deux matchs au choix. En dessous, la barre : 12 % téléversé (420 Mo sur 3,4 Go).",
     moreTitle: "En détail",
     more: [
       { q: "Tout ne rentre pas dans l'image ?", a: "Plus haut, quelques mètres plus en arrière ou plus de grand-angle. Mieux vaut les deux buts avec un peu de marge que proche et net. S'il manque les deux coins proches, ce n'est pas grave." },

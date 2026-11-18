@@ -5,6 +5,7 @@ import plans from "@handball/plans";
 import { CameraLegend, DemoCamera } from "@/components/demo-camera";
 import { HeroFilm } from "@/components/hero-film";
 import { ProductShot } from "@/components/product-shot";
+import { StepPicture } from "@/components/step-picture";
 import { JsonLd } from "@/components/json-ld";
 import { DemoLink, KitScope, StartLink } from "@/components/kit";
 import { Reveal } from "@/components/reveal";
@@ -18,11 +19,6 @@ import { graph, organization, softwareApplication, webPage, website } from "@/li
 import { SITE_UPDATED } from "@/lib/site";
 import { saturday, threeMatchesLater } from "@/lib/story";
 import { demoView } from "@/lib/things";
-
-/** shown width of a picture in a step card (three columns from md) */
-const STEP_SIZES = "(min-width: 1216px) 362px, (min-width: 768px) 30vw, calc(100vw - 2rem)";
-/** the three steps' pictures (scripts/product-shots: 640 x 760, one style) */
-const STEPS = ["step-film", "step-upload", "step-check"] as const;
 
 type Props = { params: Promise<{ locale: Locale }> };
 
@@ -250,9 +246,8 @@ export default async function Home({ params }: Props) {
                 style={{ "--d": i } as CSSProperties}
                 className="flex flex-col md:row-span-4 md:grid md:grid-rows-subgrid"
               >
-                {/* one picture story in one style (L9, L11): the hall, the phone filming it on its
-                    tripod, then the app in front of the same hall */}
-                <ProductShot name={STEPS[i]!} alt={s.alt} labels={{}} sizes={STEP_SIZES} />
+                {/* the steps' pictures (U1): the same set as «So funktioniert es», small here */}
+                <StepPicture step={i} alt={s.alt} size="small" />
                 <ul className="mt-4 grid gap-1.5 pl-5 text-[1.0625rem] leading-snug font-semibold [list-style:square]">
                   {s.points.map((x) => (
                     <li key={x}>{x}</li>

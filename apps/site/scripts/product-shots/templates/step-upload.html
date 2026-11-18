@@ -1,20 +1,26 @@
 <!doctype html>
-<!-- Step «Hochladen» (L9, L11): the phone in front of the hall (the same blurred recording as
-     step 1, so the three steps are one picture story), «Video hochladen», which match is the
-     video from, the first match ringed. The phone comes in from the top edge and leaves at the
-     bottom: the screen is what matters. -->
+<!-- Step «Hochladen» (U1, U3): the one moment large. Two cut-outs of the real app (captures
+     step-hochladen and step-hochladen-laeuft), flat on the app's cloth with its ink edge: above,
+     «Video hochladen», «Zu welchem Spiel gehört das Video?» with the two matches (the latest
+     one in ink, as the app proposes it); below, the same match a moment later while its video goes up: the bar and
+     «12 % hochgeladen (420 MB von 3.4 GB)». The same square frame as the other steps. -->
 <meta charset="utf-8" />
 <link rel="stylesheet" href="../stage.css" />
-<div id="stage"><div class="keil" style="--from: 88%; --to: 70%"></div></div>
+<div id="stage"></div>
 <script src="../stage.js"></script>
 <script>
-  S.stage(640, 760);
-  document.getElementById("stage").classList.add("hall");
-  const dialog = S.rect("hochladen-phone", "dialog", [0, 74, 390, 776]);
-  const first = S.rect("hochladen-phone", "first", [24, 176, 342, 56]);
-  // the screen from the sheet's top: the phone's upper edge in the picture, the rest runs out below
-  const c = S.cap("hochladen-phone");
-  const s = S.phone("hochladen-phone", { left: 117, width: 380, crop: [0, dialog[1], c.w, c.h - dialog[1]], top: 40 });
-  S.ring(s, first, 5);
+  S.stage(640, 640, { cloth: true });
+  const title = S.rect("step-hochladen", "title", [24, 92.3, 140.7, 28]);
+  const second = S.rect("step-hochladen", "second", [24, 227.7, 312, 56]);
+  const running = S.rect("step-hochladen-laeuft", "running", [16, 452.7, 328, 157.3]);
+
+  // above left: from the sheet's title to under the second match
+  const y0 = title[1] - 18;
+  const a = S.cut("step-hochladen", [8, y0, 344, second[1] + second[3] + 14 - y0], { left: 28, top: 28, width: 540 });
+  // below right: the bar, how much is up, and that the coach can go on meanwhile
+  const y1 = running[1] - 14;
+  const b = S.cut("step-hochladen-laeuft", [8, y1, 344, 96], { left: 72, top: 0, width: 540 });
+  const bEl = b.el.parentElement;
+  bEl.style.top = `${640 - 28 - bEl.offsetHeight}px`;
   S.done();
 </script>

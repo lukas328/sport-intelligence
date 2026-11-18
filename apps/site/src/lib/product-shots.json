@@ -90,22 +90,22 @@
   },
   "step-check": {
     "width": 640,
-    "height": 760,
+    "height": 640,
     "callouts": []
   },
   "step-film": {
     "width": 640,
-    "height": 760,
+    "height": 640,
     "callouts": []
   },
   "step-result": {
     "width": 640,
-    "height": 760,
+    "height": 640,
     "callouts": []
   },
   "step-upload": {
     "width": 640,
-    "height": 760,
+    "height": 640,
     "callouts": []
   }
 }
