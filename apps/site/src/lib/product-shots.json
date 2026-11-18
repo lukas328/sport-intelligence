@@ -107,5 +107,11 @@
     "width": 640,
     "height": 640,
     "callouts": []
+  },
+  "video-phone": {
+    "width": 640,
+    "height": 853,
+    "callouts": [],
+    "lettering": [2.62, 0.67, 94.75, 40.03]
   }
 }

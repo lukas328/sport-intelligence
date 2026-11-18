@@ -92,6 +92,7 @@ warns. After either step, look at the pictures on the site at 390 and 1280 px.
 | Picture | Shows | Where |
 |---|---|---|
 | `app-desktop` | browser, the whole app on a computer: a match with the video playing, the scenes of the phase, the three things, all goals on the timeline (no callouts, the page's caption says it) | start page, under the three things (S13) |
+| `video-phone` | the same match at phone width, two cut-outs on a clear ground: the video («Dein Spiel» written by the page) and under it four goals of the phase, the one playing in yellow | start page instead of `app-desktop` under 40rem (`<ProductShot phone="video-phone">`, a `<picture>` with its own size, U22) |
 | `step-film` | drawn: the hall from behind and above the camera, the whole court with both goals, the camera on a tall tripod at the centre line (3 m), its place ringed, what it sees in yellow | step 1 (start page small, «So funktioniert es») |
 | `step-upload` | two cut-outs: «Video hochladen», which match is the video from? (the two matches); below, a moment later, the bar and «12 % hochgeladen (420 MB von 3.4 GB)» | step 2 (start page small, «So funktioniert es», «Filmen») |
 | `step-check` | two cut-outs: the picture with the proposed field in yellow (the drawn hall as the camera sees it); below, «Frage 1 von 1», «Passt das Spielfeld?», «Passt» ringed | step 3 (start page small, «So funktioniert es») |

@@ -451,6 +451,48 @@ const SHOTS = [
     },
   },
   {
+    // the app picture of the start page as a phone shows it (U22): the video, under it the
+    // scenes of the phase, the one playing in yellow
+    name: "video-phone",
+    // tall enough for the video and the list under it on one capture
+    size: { ...PHONE_STEP, height: 1500 },
+    hide: [/^\d+:\d\d \/ \d+:\d\d$/],
+    async open(p) {
+      await openMatch(p);
+      const scene = await p.evaluate(async () => {
+        const [, org, match] = location.pathname.match(/\/app\/([^/]+)\/matches\/([^/?]+)/) ?? [];
+        const r = await fetch(`/v1/orgs/${org}/matches/${match}/graphics`, { credentials: "include" });
+        const goals = ((await r.json()).goals ?? []).filter((g) => g.team === "opp" && g.zone === "ra" && g.t_ms != null).sort((a, b) => a.minute - b.minute);
+        return goals[1]?.event_id ?? null;
+      });
+      if (!scene) throw new Error("no second goal over the right wing");
+      const url = new URL(p.url());
+      url.search = `?tab=video&scene=${scene}`;
+      await p.goto(url.toString(), { waitUntil: "load", timeout: 90000 });
+      await p.getByTestId("next-scene").or(p.getByRole("button", { name: /Szene merken/ })).first().waitFor({ timeout: 15000 });
+      await settle(p);
+      await p.waitForTimeout(1200);
+      await p.evaluate(() => {
+        window.__hb.hideTabBar();
+        const v = document.querySelector("video");
+        if (v) window.scrollTo(0, Math.max(0, v.getBoundingClientRect().top + window.scrollY - 64));
+      });
+      await p.waitForTimeout(500);
+    },
+    find: {
+      video: () => document.querySelector("video"),
+      active: (hb) => {
+        const t = hb.text(/läuft gerade/);
+        return t && hb.up(t, (e) => e.tagName === "BUTTON" || e.tagName === "A" || e.tagName === "LI");
+      },
+      list: (hb) => {
+        const t = hb.text(/läuft gerade/);
+        return t && hb.up(t, (e) => e.tagName === "UL" || e.tagName === "OL");
+      },
+      phase: (hb) => hb.text(/^Minute \d+ bis \d+$/),
+    },
+  },
+  {
     name: "teilen-phone",
     size: PHONE,
     async open(p) {

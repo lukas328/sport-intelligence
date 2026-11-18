@@ -171,6 +171,7 @@ export default async function Home({ params }: Props) {
           <div data-reveal className="mt-12 md:mt-16">
             <ProductShot
               name="app-desktop"
+              phone="video-phone"
               alt={t.appAlt}
               lettering={t.film.video}
               labels={{}}
