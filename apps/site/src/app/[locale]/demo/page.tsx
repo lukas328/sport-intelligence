@@ -23,9 +23,6 @@ import { matchPhases, preparedAnswers, seasonRightWing } from "@/lib/week";
 
 type Props = { params: Promise<{ locale: Locale }> };
 
-/** The six steps of the week and where they are on the page. */
-const STEPS = ["samstag", "warum", "einsicht", "dienstag", "fragen", "naechstes"] as const;
-
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   return pageMeta(locale, "demo", messages(locale).seo.demo.title, messages(locale).seo.demo.description);
@@ -181,22 +178,6 @@ export default async function Demo({ params }: Props) {
       />
 
       <div className="wrap">
-        {/* the week in six steps, each a jump to its part */}
-        <nav aria-label={t.weekLabel} className="mt-8">
-          <ol className="grid grid-cols-2 gap-2 min-[480px]:grid-cols-3 lg:grid-cols-6">
-            {t.week.map((w, i) => (
-              <li key={w} className="min-w-0">
-                <a href={`#${STEPS[i]}`} className="group flex min-h-14 items-center gap-3 border-2 border-ink/25 bg-paper px-3 py-2 font-semibold hover:border-ink">
-                  <span aria-hidden className="font-num text-[1.75rem] leading-none text-club-text">
-                    {i + 1}
-                  </span>
-                  <span className="min-w-0 leading-tight underline decoration-2 underline-offset-4 group-hover:decoration-[3px]">{w}</span>
-                </a>
-              </li>
-            ))}
-          </ol>
-        </nav>
-
         {/* 1 · Saturday: the match in 20 seconds */}
         <section aria-labelledby="samstag" className="mt-16 scroll-mt-24 md:mt-20">
           <div data-reveal className="max-w-[44rem]">
