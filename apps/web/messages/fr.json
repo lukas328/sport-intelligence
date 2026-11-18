@@ -413,7 +413,7 @@
     "twoFactorAdmins": "Pour les admins du club, elle est obligatoire après 14 jours.",
     "teamFeatures": "Fonctions d'équipe",
     "teamFeaturesHint": "Entraînement, dates, réponses, tâches et espaces pour joueurs et parents. Désactivé, tout reste enregistré et revient à la réactivation.",
-    "me": "Moi",
+    "me": "Mon compte",
     "tab_profile": "Profil",
     "tab_security": "Sécurité",
     "tab_data": "Mes données",
@@ -439,7 +439,7 @@
     "youthBadge": "Juniors"
   },
   "account": {
-    "title": "Compte",
+    "title": "Mot de passe et appareils",
     "emailUnverified": "Votre adresse e-mail n'est pas encore confirmée.",
     "resend": "Renvoyer l'e-mail de confirmation",
     "resent": "E-mail de confirmation envoyé.",
@@ -461,7 +461,13 @@
     "method_google": "Google",
     "method_apple": "Apple",
     "method_password_reset": "Mot de passe réinitialisé",
-    "sessionsAll": "Afficher les {n} appareils"
+    "sessionsAll": "Afficher les {n} appareils",
+    "nameLabel": "Nom",
+    "saveName": "Enregistrer le nom",
+    "nameSaved": "Enregistré.",
+    "emailLabel": "E-mail",
+    "emailHint": "Tu te connectes avec cette adresse, les notifications par e-mail y sont envoyées.",
+    "languageLabel": "Langue"
   },
   "team": {
     "roster": "Équipe",
@@ -1494,7 +1500,11 @@
     "access_request_team": "{name} veut rejoindre {team} et t'attend.",
     "access_request_named": "{name} veut rejoindre votre club et t'attend.",
     "analysis_checked": "Tout est vérifié. L'analyse calcule avec tes réponses.",
-    "analysis_checked_match": "Tout est vérifié contre {opponent}. L'analyse calcule avec tes réponses."
+    "analysis_checked_match": "Tout est vérifié contre {opponent}. L'analyse calcule avec tes réponses.",
+    "official_report_match": "La feuille de match officielle contre {opponent} est disponible.",
+    "feed_ready_match": "Tes scènes du match contre {opponent} sont prêtes.",
+    "scouting_ready_match": "Le rapport de préparation sur {opponent} est prêt.",
+    "matchOn": "Match du {date}"
   },
   "assignments": {
     "title": "Tâches",
@@ -1649,14 +1659,14 @@
     "withoutAnalysis": "Feuille de match et scènes",
     "trial": "{days} jours d'essai gratuit",
     "choose": "Choisir {plan}",
-    "goalkeepers": "Module gardien (CHF {price} par gardien et mois), nombre :",
     "unavailable": "Le paiement en ligne n'est pas encore configuré.",
     "needs2fa": "Les paiements nécessitent la connexion à deux facteurs.",
     "failed": "Cela n'a pas fonctionné. Réessaie.",
     "status_invoice_open": "facture ouverte",
     "status_invoice_paid": "payé sur facture",
     "current": "Offre actuelle",
-    "trialAfter": "Ensuite le plan gratuit s'applique jusqu'à ta décision. Rien n'est supprimé."
+    "trialAfter": "Ensuite le plan gratuit s'applique jusqu'à ta décision. Rien n'est supprimé.",
+    "withKeepers": "Analyse des gardiens incluse"
   },
   "share": {
     "button": "Partager",
@@ -2564,7 +2574,7 @@
     "empty": "encore vide",
     "hintTips": "Ce que vous devriez travailler ensuite, tiré de vos matchs. En un clic, cela devient une séance avec exercices et les scènes correspondantes.",
     "library": "Tous les exercices",
-    "tipsTitle": "Conseils d'entraînement tirés de l'analyse",
+    "tipsTitle": "Conseils d'entraînement tirés de vos matchs",
     "tipsFrom": "Tirés de {n, plural, one {votre dernier match analysé} other {vos # derniers matchs analysés}}.",
     "tipsError": "Les conseils ne peuvent pas être chargés pour l'instant. Réessaie dans un moment.",
     "tipsPlan": "Les conseils d'entraînement font partie de l'analyse de match, absente de votre abonnement.",
@@ -2610,7 +2620,9 @@
     "why_transition_defence": "Ils travaillent le repli : revenir vite après la perte de balle et fermer l’axe.",
     "why_fast_break": "Ils travaillent la contre-attaque : première et deuxième vague, la passe rapide vers l’avant.",
     "why_defence": "Ils travaillent la défense : glisser, sortir et aider.",
-    "why_powerplay": "Ils travaillent la supériorité et l’infériorité numérique : utiliser les espaces et les fermer."
+    "why_powerplay": "Ils travaillent la supériorité et l’infériorité numérique : utiliser les espaces et les fermer.",
+    "tipsFromReports": "Tirés {n, plural, one {de la feuille de match du dernier match} other {des feuilles de match des # derniers matchs}}.",
+    "tipsFromBoth": "Tirés de {k, plural, one {1 match analysé} other {# matchs analysés}} et de {m, plural, one {1 feuille de match} other {# feuilles de match}}."
   },
   "schedule": {
     "nav": "Mes rendez-vous",
@@ -2628,7 +2640,14 @@
     "answered_no": "Annulé",
     "hintStaff": "Entraînements et matchs des 30 prochains jours avec les réponses.",
     "planTraining": "Planifier un entraînement",
-    "scheduleMatch": "Programmer un match"
+    "scheduleMatch": "Programmer un match",
+    "titleStaff": "Rendez-vous",
+    "official": "Calendrier",
+    "officialHint": "Les matchs du calendrier officiel apparaissent ici d’eux-mêmes.",
+    "scheduleOther": "Programmer un match hors calendrier",
+    "noneStaff": "Aucun rendez-vous dans les 30 prochains jours.",
+    "replies": "{yes, plural, one {# vient} other {# viennent}}, {no, plural, one {# ne vient pas} other {# ne viennent pas}}",
+    "noReplies": "pas encore de réponses"
   },
   "marks": {
     "title": "Jour de match : retenir des scènes",
@@ -2878,7 +2897,7 @@
     "collections": "Sélections",
     "matrix": "Tableau",
     "scenesSections": "Rubriques des scènes",
-    "me": "Moi",
+    "me": "Mon compte",
     "club": "Club",
     "twoFactorDue": "Activer la double authentification",
     "uploadShort": "Vidéo",
@@ -3251,7 +3270,7 @@
     "accessExplain": "Ces personnes ont choisi votre équipe sur handball.ch. L'équipe n'existe qu'une fois : accueille-les, elles travaillent alors dans la même équipe."
   },
   "verification": {
-    "section": "Données officielles",
+    "section": "Fédération",
     "title": "Club pas encore confirmé",
     "why": "Tant que le club n'est pas confirmé, le partage par lien et les profils publics restent désactivés et les adversaires n'apparaissent qu'avec leur numéro dans les feuilles de match.",
     "way_mail_domain": "Se connecter avec une adresse e-mail du club.",
@@ -3321,11 +3340,17 @@
     "home": "contre {opponent}",
     "away": "à l'extérieur chez {opponent}",
     "noMatches": "Pas encore de match cette saison.",
-    "source": "Selon les feuilles de match et la saisie, comme sur les pages de match. Les minutes de jeu ne sont pas saisies. Tirs sans les tirs contrés.",
+    "source": "Selon les feuilles de match et la saisie, comme sur les pages de match. Une présence compte pour qui figure sur la feuille de match ou a un chiffre. Les minutes de jeu ne sont pas saisies. Tirs sans les tirs contrés.",
     "noMatchesYet": "Pas encore de match joué cette saison. Les chiffres apparaissent après le premier match avec feuille de match ou saisie.",
-    "summaryPlayed": "{matches, plural, one {1 match} other {# matchs}}, impliqué dans {involved}",
+    "summaryPlayed": "{matches, plural, one {1 match} other {# matchs}}, {involved, plural, one {1 présence} other {# présences}}",
     "number": "Numéro",
-    "analysedBasis": "Buts et pénalités sur tous les matchs, le reste seulement sur {k} de {n, plural, one {# match} other {# matchs}} analysés."
+    "analysedBasis": "Buts, 7 m, pénalités et arrêts sur tous les matchs, le reste seulement sur {k} de {n, plural, one {# match} other {# matchs}} analysés.",
+    "sevenMSaves": "7 m arrêtés",
+    "sourceCol": "Source",
+    "fromAnalysis": "Analyse",
+    "fromReport": "Feuille de match",
+    "reportBasis": "Tous les chiffres viennent des feuilles de match. Tirs, réussite et pertes de balle s'ajoutent avec la première vidéo analysée.",
+    "reportBasisKeeper": "Tous les chiffres viennent des feuilles de match. Tirs cadrés et taux d'arrêts s'ajoutent avec la première vidéo analysée."
   },
   "slots": {
     "title": "Horaires d'entraînement {season}",
@@ -3434,7 +3459,8 @@
       "kr": "du pivot",
       "gs": "en contre-attaque",
       "m7": "sur jet de 7 m"
-    }
+    },
+    "fromMatchFailed": "La sélection n’a pas pu être créée. Réessaie."
   },
   "consentLink": {
     "invalid": "Ce lien n’est plus valable. Demande le nouveau dans l’équipe.",
@@ -3720,7 +3746,8 @@
     "todayTitle": "Ce que tu peux faire dès aujourd’hui",
     "todayNote": "d’après la feuille de match",
     "todayText": "La carte du match en image pour le chat de l’équipe et le résumé à copier, déjà sans vidéo.",
-    "todayCard": "Carte du match pour le chat"
+    "todayCard": "Carte du match pour le chat",
+    "exampleBand": "Exemple · chiffres inventés"
   },
   "check": {
     "top": "Vérifier · {opponent}",
@@ -3875,7 +3902,9 @@
     "emptyTitle": "Télécharge une vidéo, tu verras ensuite tes scènes ici.",
     "emptyText": "Après l'analyse, chaque but, chaque tir et chaque perte de balle est une scène. Tu les cherches avec une phrase et tu les réunis en sélections.",
     "emptyPlays": "Dessiner des systèmes de jeu, c'est déjà possible :",
-    "emptySearch": "La recherche trouve des scènes dès la première vidéo."
+    "emptySearch": "La recherche trouve des scènes dès la première vidéo.",
+    "backToCollection": "Retour à la sélection «{title}»",
+    "addToCollection": "{n, plural, one {1 scène} other {# scènes}} dans la sélection"
   },
   "teamPage": {
     "kick": "{team} · {source}",
@@ -4047,7 +4076,8 @@
     "shotsPlain": "Tirs",
     "savesPlain": "Arrêts",
     "againstNone": "{n, plural, one {Le but encaissé n'est attribué} other {Les # buts encaissés ne sont attribués}} à aucun gardien.",
-    "savesNone": "{n, plural, one {Un arrêt n'est attribué} other {# arrêts ne sont attribués}} à aucun gardien de l'effectif."
+    "savesNone": "{n, plural, one {Un arrêt n'est attribué} other {# arrêts ne sont attribués}} à aucun gardien de l'effectif.",
+    "againstNoMinutes": "Sans les minutes de jeu dans la feuille de match, les buts encaissés ne peuvent être attribués à aucun gardien."
   },
   "entry": {
     "ask": "Comment s'appelle ton équipe ?",

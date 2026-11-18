@@ -609,6 +609,86 @@ async def reply(ctx: Ctx, data: MyReply) -> dict[str, Any]:
     return {"response": a.response}
 
 
+async def team_dates(ctx: Ctx, team_id: uuid.UUID, days: int = 30) -> list[dict[str, Any]]:
+    """Teamleben, Termine for the staff (A7): the team's trainings and matches of the next
+    `days` days with the replies so far. The matches of the official schedule are matches of the
+    team already (the sync makes them), so they appear once, marked `official`; when none falls
+    into the window, the next one still stands there (a coach plans across the winter break)."""
+    team = await get_team(ctx, team_id, Action.TEAM_READ)
+    today = _now().date()
+    start = datetime.combine(today, time.min, UTC)
+    end = datetime.combine(today + timedelta(days=days + 1), time.min, UTC)
+    sessions = (
+        await ctx.db.scalars(
+            select(TrainingSession).where(
+                TrainingSession.team_id == team.id,
+                TrainingSession.on_date >= today,
+                TrainingSession.on_date <= today + timedelta(days=days),
+            )
+        )
+    ).all()
+    upcoming = select(Match).where(Match.team_id == team.id, counted(), Match.kickoff_at >= start)
+    matches = list(
+        await ctx.db.scalars(upcoming.where(Match.kickoff_at < end).order_by(Match.kickoff_at))
+    )
+    if not matches:
+        nxt = await ctx.db.scalar(upcoming.order_by(Match.kickoff_at).limit(1))
+        matches = [nxt] if nxt is not None else []
+    names = {
+        o.id: o.name
+        for o in (
+            await ctx.db.scalars(
+                select(Opponent).where(
+                    Opponent.id.in_([m.opponent_id for m in matches if m.opponent_id])
+                )
+            )
+        ).all()
+    }
+    targets = [s.id for s in sessions] + [m.id for m in matches]
+    replies: dict[tuple[uuid.UUID, str], int] = {}
+    if targets:
+        for a in (
+            await ctx.db.scalars(
+                select(Attendance).where(
+                    (Attendance.session_id.in_(targets)) | (Attendance.match_id.in_(targets))
+                )
+            )
+        ).all():
+            target = a.session_id or a.match_id
+            if target is not None and a.response in ("yes", "no"):
+                replies[(target, a.response)] = replies.get((target, a.response), 0) + 1
+    out: list[dict[str, Any]] = [
+        {
+            "kind": "session",
+            "id": s.id,
+            "title": s.title,
+            "on_date": s.on_date,
+            "starts_at": s.starts_at,
+            "venue": s.location,
+            "official": False,
+            "yes": replies.get((s.id, "yes"), 0),
+            "no": replies.get((s.id, "no"), 0),
+        }
+        for s in sessions
+    ]
+    out += [
+        {
+            "kind": "match",
+            "id": m.id,
+            "title": names.get(m.opponent_id) if m.opponent_id else None,
+            "on_date": m.kickoff_at.date(),
+            "starts_at": m.kickoff_at,
+            "venue": m.venue,
+            "official": m.official_game_id is not None,
+            "yes": replies.get((m.id, "yes"), 0),
+            "no": replies.get((m.id, "no"), 0),
+        }
+        for m in matches
+    ]
+    out.sort(key=lambda i: (i["on_date"], i["starts_at"].isoformat() if i["starts_at"] else ""))
+    return out
+
+
 # ---- calendar -----------------------------------------------------------------------------------
 
 

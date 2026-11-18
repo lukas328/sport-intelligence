@@ -3,8 +3,9 @@
 The match insights of the most recent matches with events are put together: a weakness that has a
 training topic (`focus.follow_for`) becomes a tip with its numbers, the matches it came up in, the
 scenes of the latest of them and drills from the library for its topic. Weaknesses that come back
-in several matches come first. With no analysed match there is nothing to say, and the answer says
-so honestly (`matches_analysed` is 0).
+in several matches come first. With no match there is nothing to say, and the answer says so
+honestly (`matches_analysed` is 0); it also says how many of the matches have an analysis of their
+own and how many are known only from the official report (A8).
 """
 
 from __future__ import annotations
@@ -23,6 +24,7 @@ from handball_api.services.focus import follow_for
 from handball_api.services.matches import counted
 from handball_api.services.orgs import get_team
 from handball_api.services.policies import Action
+from handball_metrics.stats import OFFICIAL_SOURCES
 
 RECENT = 5  # matches with events looked at
 MAX_TIPS = 3
@@ -110,8 +112,24 @@ async def _recent_matches(ctx: Ctx, team_id: uuid.UUID) -> list[Match]:
 async def tips(ctx: Ctx, team_id: uuid.UUID) -> dict[str, Any]:
     team = await get_team(ctx, team_id, Action.MATCH_READ)
     matches = await _recent_matches(ctx, team.id)
+    # where the tips come from, said honestly (A8): matches with data of their own (video,
+    # tagging) and matches known only from the federation's report
+    analysed = set(
+        (
+            await ctx.db.scalars(
+                select(Event.match_id)
+                .where(
+                    Event.match_id.in_([m.id for m in matches]),
+                    Event.source.not_in(OFFICIAL_SOURCES),
+                )
+                .distinct()
+            )
+        ).all()
+    )
     out: dict[str, Any] = {
         "matches_analysed": len(matches),
+        "matches_with_analysis": len(analysed),
+        "matches_from_report": len(matches) - len(analysed),
         "plan_required": False,
         "matches": [],
         "tips": [],

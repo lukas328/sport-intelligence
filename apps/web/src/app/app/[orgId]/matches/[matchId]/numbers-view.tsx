@@ -194,7 +194,7 @@ export function NumbersView({
                 </tbody>
               </table>
               {/* what the team has but no keeper, so the rows and the team's figures agree (R2) */}
-              {!againstKnown && (stats?.own.goals_against ?? 0) > 0 && <p className="mt-2 text-[15px] text-ink-2">{t("againstNone", { n: stats?.own.goals_against ?? 0 })}</p>}
+              {!againstKnown && (stats?.own.goals_against ?? 0) > 0 && <p className="mt-2 text-[15px] text-ink-2">{fromReport ? t("againstNoMinutes") : t("againstNone", { n: stats?.own.goals_against ?? 0 })}</p>}
               {savesRest > 0 && <p className="mt-1 text-[15px] text-ink-2">{t("savesNone", { n: savesRest })}</p>}
             </section>
           )}

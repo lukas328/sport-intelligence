@@ -26,13 +26,11 @@ interface Billing {
   status: string | null;
   trial_ends_at: string | null;
   current_period_end: string | null;
-  goalkeeper_seats: number;
   enforced: boolean;
   checkout_available: boolean;
   limits: { teams: number; matches_per_season: number | null; storage_gb: number; gpu_minutes_month: number };
   usage: { teams: number; storage_bytes: number; gpu_minutes: number; max_matches_per_season: number };
   plans: PlanRow[];
-  goalkeeper_addon_chf: number;
 }
 
 /** Usage against the plan; red only when a limit is enforced and reached (limits off: ink). */
@@ -70,7 +68,6 @@ export function BillingSection({ orgId }: { orgId: string }) {
   const t = useTranslations("billing");
   const format = useFormatter();
   const [problem, setProblem] = useState<string | null>(null);
-  const [goalkeepers, setGoalkeepers] = useState(0);
   const q = useQuery({
     queryKey: ["billing", orgId],
     queryFn: async () => ((await api.GET("/v1/orgs/{org_id}/billing", { params: { path: { org_id: orgId } } })).data ?? null) as Billing | null,
@@ -80,11 +77,12 @@ export function BillingSection({ orgId }: { orgId: string }) {
   async function go(path: "/v1/orgs/{org_id}/billing/checkout" | "/v1/orgs/{org_id}/billing/portal", plan?: string) {
     const res =
       path === "/v1/orgs/{org_id}/billing/checkout"
-        ? await api.POST(path, { params: { path: { org_id: orgId } }, body: { plan: plan as "team", goalkeeper_seats: goalkeepers } })
+        ? await api.POST(path, { params: { path: { org_id: orgId } }, body: { plan: plan as "team" } })
         : await api.POST(path, { params: { path: { org_id: orgId } } });
     if (res.error || !res.data) return setProblem(problemCode(res.error) ?? "generic");
     window.location.assign(res.data.url);
   }
+  const trialOn = Boolean(b.trial_ends_at && new Date(b.trial_ends_at).getTime() > Date.now());
   const gb = (bytes: number) => Math.round((bytes / 1024 ** 3) * 10) / 10;
   return (
     <section id="billing" aria-labelledby="billing-title" className="space-y-3">
@@ -95,10 +93,11 @@ export function BillingSection({ orgId }: { orgId: string }) {
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <p>
             <span className="font-semibold">{t(`plan_${b.plan as "free"}`)}</span>
-            {b.status && <span className="ml-2 text-sm text-muted">{t(`status_${b.status as "active"}`)}</span>}
+            {/* «Team · Testphase»: the parts as text with their separator, not glued by margins (A12) */}
+            {b.status && !(b.status === "trialing" && trialOn) && <span className="text-sm text-muted">{` · ${t(`status_${b.status as "active"}`)}`}</span>}
             {/* the trial at sign-up has no Stripe status: shown by its end (UX test Z8) */}
-            {b.trial_ends_at && new Date(b.trial_ends_at).getTime() > Date.now() && (
-              <span className="ml-2 text-sm">{t("trialUntil", { date: format.dateTime(new Date(b.trial_ends_at), { dateStyle: "medium" }) })}</span>
+            {trialOn && (
+              <span className="text-sm">{` · ${t("trialUntil", { date: format.dateTime(new Date(b.trial_ends_at!), { dateStyle: "medium" }) })}`}</span>
             )}
           </p>
           {b.trial_ends_at && new Date(b.trial_ends_at).getTime() > Date.now() && !b.status && (
@@ -134,6 +133,8 @@ export function BillingSection({ orgId }: { orgId: string }) {
                   p.matches_per_season == null ? t("matchesUnlimited") : t("matchesN", { count: p.matches_per_season }),
                   t("storageN", { gb: p.storage_gb }),
                   p.features.includes("tracking") ? t("withAnalysis") : t("withoutAnalysis"),
+                  // the goalkeeper functions are part of the plan, no add-on (A9)
+                  p.features.includes("tracking") ? t("withKeepers") : null,
                   p.trial_days > 0 ? t("trial", { days: p.trial_days }) : null,
                 ]
                   .filter(Boolean)
@@ -147,21 +148,10 @@ export function BillingSection({ orgId }: { orgId: string }) {
             </li>
           ))}
         </ul>
-        <label className="flex flex-wrap items-center gap-2 text-sm">
-          {t("goalkeepers", { price: b.goalkeeper_addon_chf })}
-          <input
-            type="number"
-            min={0}
-            max={20}
-            value={goalkeepers}
-            onChange={(e) => setGoalkeepers(Math.max(0, Math.min(20, Number(e.target.value) || 0)))}
-            className="min-h-9 w-20 bg-raised ring-1 ring-inset ring-border px-2"
-          />
-        </label>
         {!b.checkout_available && <p className="text-xs text-muted">{t("unavailable")}</p>}
         {problem && <Alert>{problem === "two-factor-required" ? t("needs2fa") : t("failed")}</Alert>}
       </div>
-      <InvoiceOrder orgId={orgId} goalkeepers={goalkeepers} />
+      <InvoiceOrder orgId={orgId} />
     </section>
   );
 }

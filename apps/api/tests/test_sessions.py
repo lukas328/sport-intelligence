@@ -285,3 +285,52 @@ async def test_focus_playlist_skips_events_outside_the_video(
         "SELECT start_ms, end_ms FROM clips WHERE match_id = $1::uuid", m["id"]
     )
     assert all(0 <= w["start_ms"] < w["end_ms"] <= 300_000 for w in windows), windows
+
+
+async def test_team_dates_show_the_official_schedule(
+    make_api: Callable[[], Api], owner_conn: asyncpg.Connection
+) -> None:
+    """A7: Teamleben, Termine shows the staff the team's trainings and matches, the matches of
+    the official schedule once and marked; without a match in the next 30 days the next one."""
+    api = make_api()
+    ids = await setup_club(api)
+    org, team, season = ids["org"], ids["team"], ids["season"]
+    url = f"/v1/orgs/{org}/teams/{team}/dates"
+    assert (await api.get(url)).json() == []
+
+    far = (datetime.now(UTC) + timedelta(days=45)).date()
+    later = await new_match(api, ids, opponent_name="TV Rotdorn", kickoff_at=f"{far}T18:00:00Z")
+    await owner_conn.execute(
+        "UPDATE matches SET official_game_id = 509192, official_provider = 'handball_ch' "
+        "WHERE id = $1::uuid",
+        later["id"],
+    )
+    # nothing in the next 30 days: the next match of the schedule still stands there
+    dates = (await api.get(url)).json()
+    assert [(d["kind"], d["title"], d["official"]) for d in dates] == [
+        ("match", "TV Rotdorn", True)
+    ]
+
+    soon = (datetime.now(UTC) + timedelta(days=2)).date()
+    s = await api.post(f"/v1/orgs/{org}/teams/{team}/sessions", json={"on_date": f"{soon}"})
+    friendly = await new_match(
+        api, ids, opponent_name="SG Blitzfang", kickoff_at=f"{soon}T19:00:00Z"
+    )
+    await new_match(api, ids, opponent_name="BSV Wirbelstern", kickoff_at="2020-01-04T18:00:00Z")
+    roster = f"/v1/orgs/{org}/teams/{team}/seasons/{season}/roster"
+    lena = (
+        await api.post(roster, json={"first_name": "Lena", "last_name": "M", "jersey_number": 7})
+    ).json()["player_id"]
+    user_id = await owner_conn.fetchval("SELECT id FROM users LIMIT 1")
+    await owner_conn.execute("UPDATE players SET user_id = $1 WHERE id = $2::uuid", user_id, lena)
+    body = {"kind": "match", "id": friendly["id"], "player_id": lena, "response": "yes"}
+    assert (await api.put(f"/v1/orgs/{org}/me/attendance", json=body)).status_code == 200
+
+    dates = (await api.get(url)).json()
+    # the window holds a match now: the far one waits; the past one never shows
+    assert [(d["kind"], d["title"], d["official"]) for d in dates] == [
+        ("session", None, False),
+        ("match", "SG Blitzfang", False),
+    ]
+    assert dates[0]["id"] == s.json()["id"]
+    assert (dates[1]["yes"], dates[1]["no"]) == (1, 0)

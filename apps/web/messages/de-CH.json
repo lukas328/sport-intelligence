@@ -413,7 +413,7 @@
     "twoFactorAdmins": "Für Vereinsadmins ist sie nach 14 Tagen Pflicht.",
     "teamFeatures": "Teamfunktionen",
     "teamFeaturesHint": "Training, Termine, Zusagen, Aufgaben und eigene Bereiche für Spieler und Eltern. Ausgeschaltet bleibt alles gespeichert und kommt beim Einschalten zurück.",
-    "me": "Ich",
+    "me": "Mein Konto",
     "tab_profile": "Profil",
     "tab_security": "Sicherheit",
     "tab_data": "Meine Daten",
@@ -439,7 +439,7 @@
     "youthBadge": "Nachwuchs"
   },
   "account": {
-    "title": "Konto",
+    "title": "Passwort und Geräte",
     "emailUnverified": "Deine E-Mail-Adresse ist noch nicht bestätigt.",
     "resend": "Bestätigungsmail erneut senden",
     "resent": "Bestätigungsmail gesendet.",
@@ -461,7 +461,13 @@
     "method_google": "Google",
     "method_apple": "Apple",
     "method_password_reset": "Passwort zurückgesetzt",
-    "sessionsAll": "Alle {n} Geräte anzeigen"
+    "sessionsAll": "Alle {n} Geräte anzeigen",
+    "nameLabel": "Name",
+    "saveName": "Name speichern",
+    "nameSaved": "Gespeichert.",
+    "emailLabel": "E-Mail",
+    "emailHint": "Mit dieser Adresse meldest du dich an, an sie gehen die Mitteilungen per E-Mail.",
+    "languageLabel": "Sprache"
   },
   "team": {
     "roster": "Team",
@@ -1494,7 +1500,11 @@
     "access_request_team": "{name} möchte zu {team} und wartet auf dich.",
     "access_request_named": "{name} möchte in euren Verein und wartet auf dich.",
     "analysis_checked": "Alles geprüft. Die Analyse rechnet mit deinen Antworten.",
-    "analysis_checked_match": "Alles geprüft gegen {opponent}. Die Analyse rechnet mit deinen Antworten."
+    "analysis_checked_match": "Alles geprüft gegen {opponent}. Die Analyse rechnet mit deinen Antworten.",
+    "official_report_match": "Der offizielle Spielbericht gegen {opponent} ist da.",
+    "feed_ready_match": "Deine Szenen aus dem Spiel gegen {opponent} sind da.",
+    "scouting_ready_match": "Der Vorbereitungsbericht zu {opponent} ist da.",
+    "matchOn": "Spiel vom {date}"
   },
   "assignments": {
     "title": "Aufgaben",
@@ -1649,14 +1659,14 @@
     "withoutAnalysis": "Spielbericht und Szenen",
     "trial": "{days} Tage gratis testen",
     "choose": "{plan} wählen",
-    "goalkeepers": "Torhüter-Modul (CHF {price} pro Torhüter und Monat), Anzahl:",
     "unavailable": "Online-Zahlung ist noch nicht eingerichtet.",
     "needs2fa": "Für Zahlungen braucht es die Zwei-Faktor-Anmeldung.",
     "failed": "Das hat nicht geklappt. Bitte erneut versuchen.",
     "status_invoice_open": "Rechnung offen",
     "status_invoice_paid": "per Rechnung bezahlt",
     "current": "Aktueller Plan",
-    "trialAfter": "Danach gilt der Gratis-Plan, bis du dich entscheidest. Nichts wird gelöscht."
+    "trialAfter": "Danach gilt der Gratis-Plan, bis du dich entscheidest. Nichts wird gelöscht.",
+    "withKeepers": "Torhüter-Auswertung inbegriffen"
   },
   "share": {
     "button": "Teilen",
@@ -2564,7 +2574,7 @@
     "empty": "noch leer",
     "hintTips": "Was ihr als Nächstes trainieren solltet, aus euren Spielen. Mit einem Klick wird daraus eine Einheit mit Übungen und den passenden Szenen.",
     "library": "Alle Übungen",
-    "tipsTitle": "Trainingstipps aus der Analyse",
+    "tipsTitle": "Trainingstipps aus euren Spielen",
     "tipsFrom": "Aus {n, plural, one {eurem letzten Spiel} other {euren letzten # Spielen}} mit Analyse.",
     "tipsError": "Die Trainingstipps lassen sich gerade nicht laden. Versuch es gleich nochmals.",
     "tipsPlan": "Trainingstipps gehören zur Spielanalyse und sind in eurem Abo nicht dabei.",
@@ -2610,7 +2620,9 @@
     "why_transition_defence": "Sie üben den Rückzug: nach dem Ballverlust schnell zurück und die Mitte zu.",
     "why_fast_break": "Sie üben den Gegenstoss: erste und zweite Welle, der schnelle Pass nach vorn.",
     "why_defence": "Sie üben die Abwehr: Verschieben, Heraustreten und Helfen.",
-    "why_powerplay": "Sie üben Über- und Unterzahl: Räume nutzen und Räume schliessen."
+    "why_powerplay": "Sie üben Über- und Unterzahl: Räume nutzen und Räume schliessen.",
+    "tipsFromReports": "Aus den Spielberichten {n, plural, one {des letzten Spiels} other {der letzten # Spiele}}.",
+    "tipsFromBoth": "Aus {k, plural, one {1 Spiel} other {# Spielen}} mit Analyse und {m, plural, one {1 Spielbericht} other {# Spielberichten}}."
   },
   "schedule": {
     "nav": "Meine Termine",
@@ -2628,7 +2640,14 @@
     "answered_no": "Abgesagt",
     "hintStaff": "Trainings und Spiele der nächsten 30 Tage mit den Zu- und Absagen.",
     "planTraining": "Training planen",
-    "scheduleMatch": "Spiel ansetzen"
+    "scheduleMatch": "Spiel ansetzen",
+    "titleStaff": "Termine",
+    "official": "Spielplan",
+    "officialHint": "Die Spiele aus dem offiziellen Spielplan stehen von selbst hier.",
+    "scheduleOther": "Spiel ausserhalb des Spielplans ansetzen",
+    "noneStaff": "Keine Termine in den nächsten 30 Tagen.",
+    "replies": "{yes, plural, one {# kommt} other {# kommen}}, {no, plural, one {# kommt nicht} other {# kommen nicht}}",
+    "noReplies": "noch keine Antworten"
   },
   "marks": {
     "title": "Spieltag: Szenen merken",
@@ -2878,7 +2897,7 @@
     "collections": "Sammlungen",
     "matrix": "Tabelle",
     "scenesSections": "Bereiche der Szenen",
-    "me": "Ich",
+    "me": "Mein Konto",
     "club": "Verein",
     "twoFactorDue": "Zwei-Faktor-Anmeldung einrichten",
     "uploadShort": "Video",
@@ -3251,7 +3270,7 @@
     "accessExplain": "Diese Personen haben euer Team auf handball.ch gewählt. Das Team gibt es nur einmal: Nimm sie auf, dann arbeiten sie im selben Team."
   },
   "verification": {
-    "section": "Offizielle Daten",
+    "section": "Verband",
     "title": "Verein noch nicht bestätigt",
     "why": "Bis der Verein bestätigt ist, bleiben Teilen per Link und öffentliche Profile aus, und Gegner stehen in den Spielberichten nur mit Nummer.",
     "way_mail_domain": "Mit einer E-Mail-Adresse des Vereins anmelden.",
@@ -3321,11 +3340,17 @@
     "home": "gegen {opponent}",
     "away": "auswärts bei {opponent}",
     "noMatches": "Noch keine Spiele in dieser Saison.",
-    "source": "Aus den Spielberichten und dem, was erfasst wurde, wie auf den Spielseiten. Spielminuten werden nicht erfasst. Würfe ohne geblockte.",
+    "source": "Aus den Spielberichten und dem, was erfasst wurde, wie auf den Spielseiten. Ein Einsatz zählt, wer im Spielbericht aufgeführt ist oder eine Zahl hat. Spielminuten werden nicht erfasst. Würfe ohne geblockte.",
     "noMatchesYet": "Noch kein gespieltes Spiel in dieser Saison. Die Zahlen erscheinen nach dem ersten Spiel mit Spielbericht oder Erfassung.",
-    "summaryPlayed": "{matches, plural, one {1 Spiel} other {# Spiele}}, an {involved} beteiligt",
+    "summaryPlayed": "{matches, plural, one {1 Spiel} other {# Spiele}}, {involved, plural, one {1 Einsatz} other {# Einsätze}}",
     "number": "Nummer",
-    "analysedBasis": "Tore und Strafen aus allen Spielen, alles andere nur aus {k} von {n, plural, one {# Spiel} other {# Spielen}} mit Analyse."
+    "analysedBasis": "Tore, 7 m, Strafen und Paraden aus allen Spielen, alles andere nur aus {k} von {n, plural, one {# Spiel} other {# Spielen}} mit Analyse.",
+    "sevenMSaves": "7 m gehalten",
+    "sourceCol": "Quelle",
+    "fromAnalysis": "Analyse",
+    "fromReport": "Spielbericht",
+    "reportBasis": "Alle Zahlen aus den Spielberichten. Würfe, Wurfquote und Ballverluste kommen mit dem ersten analysierten Video dazu.",
+    "reportBasisKeeper": "Alle Zahlen aus den Spielberichten. Würfe aufs Tor und gehaltene Würfe kommen mit dem ersten analysierten Video dazu."
   },
   "slots": {
     "title": "Trainingszeiten {season}",
@@ -3434,7 +3459,8 @@
       "kr": "vom Kreis",
       "gs": "nach Gegenstoss",
       "m7": "per 7-Meter"
-    }
+    },
+    "fromMatchFailed": "Die Sammlung liess sich nicht erstellen. Bitte nochmals versuchen."
   },
   "consentLink": {
     "invalid": "Dieser Link gilt nicht mehr. Frag im Team nach dem neuen.",
@@ -3720,7 +3746,8 @@
     "todayTitle": "Das kannst du heute schon",
     "todayNote": "aus dem Spielbericht",
     "todayText": "Die Spielkarte als Bild für den Teamchat und den Kurzbericht zum Kopieren, noch ohne Video.",
-    "todayCard": "Spielkarte für den Teamchat"
+    "todayCard": "Spielkarte für den Teamchat",
+    "exampleBand": "Beispiel · erfundene Zahlen"
   },
   "check": {
     "top": "Prüfen · {opponent}",
@@ -3875,7 +3902,9 @@
     "emptyTitle": "Lade ein Video hoch, dann siehst du hier deine Szenen.",
     "emptyText": "Nach der Analyse ist jedes Tor, jeder Wurf und jeder Ballverlust eine Szene. Du suchst sie mit einem Satz und stellst sie zu Sammlungen zusammen.",
     "emptyPlays": "Spielzüge zeichnen geht schon jetzt:",
-    "emptySearch": "Die Suche findet Szenen ab dem ersten Video."
+    "emptySearch": "Die Suche findet Szenen ab dem ersten Video.",
+    "backToCollection": "Zurück zur Sammlung «{title}»",
+    "addToCollection": "{n, plural, one {1 Szene} other {# Szenen}} zur Sammlung"
   },
   "teamPage": {
     "kick": "{team} · {source}",
@@ -4047,7 +4076,8 @@
     "shotsPlain": "Würfe",
     "savesPlain": "Paraden",
     "againstNone": "{n, plural, one {Das Gegentor ist} other {Die # Gegentore sind}} keinem Torhüter zugeordnet.",
-    "savesNone": "{n, plural, one {Eine Parade ist} other {# Paraden sind}} keinem Torhüter aus dem Kader zugeordnet."
+    "savesNone": "{n, plural, one {Eine Parade ist} other {# Paraden sind}} keinem Torhüter aus dem Kader zugeordnet.",
+    "againstNoMinutes": "Ohne Spielminuten im Spielbericht lassen sich Gegentore keinem Torhüter zuordnen."
   },
   "entry": {
     "ask": "Wie heisst dein Team?",

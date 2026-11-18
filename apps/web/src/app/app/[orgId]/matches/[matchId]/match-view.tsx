@@ -212,10 +212,12 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
   const example = match.source === "demo";
   const own = scouting ? (match.scouting_other ?? t("progress.otherTeam")) : ownName(teamName, shell?.org.name ?? teamName);
   const more = useRef<HTMLDetailsElement>(null);
-  const roster = useRosterNames(orgId, match.team_id, match.season_id);
+  // the example names nobody of the team: its players are invented numbers, never the roster (A4)
+  const rosterQuery = useRosterNames(orgId, match.team_id, match.season_id);
+  const rosterRows = useMemo(() => (example ? [] : (rosterQuery.data ?? [])), [example, rosterQuery.data]);
   const names = useMemo(
-    () => Object.fromEntries((roster.data ?? []).map((r) => [r.player_id, playerLabel(r.jersey_number, `${r.first_name} ${r.last_name}`)])),
-    [roster.data],
+    () => Object.fromEntries(rosterRows.map((r) => [r.player_id, playerLabel(r.jersey_number, `${r.first_name} ${r.last_name}`)])),
+    [rosterRows],
   );
 
   const jobs = latestJobs(match.jobs.map((j) => ({ ...j, ...live[j.id] }) as Job));
@@ -240,7 +242,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
       match={{ own, opp: oppName(match), score: match.score_own != null && match.score_opponent != null ? [match.score_own, match.score_opponent] : null, half: match.halftime_own != null && match.halftime_opponent != null ? [match.halftime_own, match.halftime_opponent] : null, venue: match.venue ?? null, periodS: match.period_s, periods: match.periods }}
       stats={stats.data ?? null}
       names={names}
-      roster={roster.data ?? []}
+      roster={rosterRows}
     />
   );
   // a played match without video (not the example): what works today stands first (review R39)
@@ -734,7 +736,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
             )}
             <div className="space-y-10">
               {graphics.data && goalRuns(graphics.data).length > 0 && <MatchZones graphics={graphics.data} />}
-              {stats.data && <ThreeFigures stats={stats.data} names={names} roster={roster.data ?? []} />}
+              {stats.data && <ThreeFigures stats={stats.data} names={names} roster={rosterRows} />}
             </div>
           </div>
           {/* everything else of the match, as before, one step away (UX test B08); not before the
@@ -765,7 +767,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
 
       {view === "numbers" && (
         <div className="animate-fade">
-          <NumbersView stats={stats.data ?? null} graphics={graphics.data ?? null} roster={roster.data ?? []} orgId={orgId} match={match} names={names} onPlay={main ? onPlay : undefined}>
+          <NumbersView stats={stats.data ?? null} graphics={graphics.data ?? null} roster={rosterRows} orgId={orgId} match={match} names={names} onPlay={main ? onPlay : undefined}>
           {graphics.data && goalRuns(graphics.data).length > 0 && <MatchZones graphics={graphics.data} row />}
           {stats.data && stats.data.quality.events > 0 && (
             <section id="numbers-overview" className="scroll-mt-24">

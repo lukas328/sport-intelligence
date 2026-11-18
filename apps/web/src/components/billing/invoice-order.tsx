@@ -14,7 +14,7 @@ import { useMailEnabled } from "@/lib/site-config";
 const chf = (cents: number) => `CHF ${(cents / 100).toFixed(2)}`;
 
 /** Annual subscription by invoice with Swiss QR bill (addendum 01, 4.10). */
-export function InvoiceOrder({ orgId, goalkeepers }: { orgId: string; goalkeepers: number }) {
+export function InvoiceOrder({ orgId }: { orgId: string }) {
   const t = useTranslations("invoices");
   const tr = useTranslations();
   const format = useFormatter();
@@ -26,9 +26,9 @@ export function InvoiceOrder({ orgId, goalkeepers }: { orgId: string; goalkeeper
   const [done, setDone] = useState<string | null>(null);
   const org = { org_id: orgId };
   const price = useQuery({
-    queryKey: ["annual", orgId, plan, goalkeepers],
+    queryKey: ["annual", orgId, plan],
     queryFn: async () =>
-      (await api.GET("/v1/orgs/{org_id}/billing/annual", { params: { path: org, query: { plan, goalkeeper_seats: goalkeepers } } })).data,
+      (await api.GET("/v1/orgs/{org_id}/billing/annual", { params: { path: org, query: { plan } } })).data,
   });
   const list = useQuery({
     queryKey: ["invoices", orgId],
@@ -56,7 +56,6 @@ export function InvoiceOrder({ orgId, goalkeepers }: { orgId: string; goalkeeper
     const v = (k: string) => String(f.get(k) ?? "").trim();
     order.mutate({
       plan,
-      goalkeeper_seats: goalkeepers,
       voucher: v("voucher") || null,
       contact: {
         name: v("name"),

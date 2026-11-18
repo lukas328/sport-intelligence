@@ -11,7 +11,7 @@ import sys
 from pathlib import Path
 
 from handball_api.core.config import Settings
-from handball_api.services.plans import GOALKEEPER_ADDON_CHF, PLANS
+from handball_api.services.plans import PLANS
 
 OUT = Path(__file__).with_name("plans.json")
 
@@ -21,7 +21,6 @@ def build() -> str:
     data = {
         "currency": "CHF",
         "annual_months": s.invoice_annual_months,
-        "goalkeeper_addon_chf_month": GOALKEEPER_ADDON_CHF,
         "plans": [
             {
                 "plan": p.plan.value,

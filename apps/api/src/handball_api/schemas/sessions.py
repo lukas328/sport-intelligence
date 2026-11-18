@@ -143,5 +143,20 @@ class ScheduleItem(ApiModel):
     response: Literal["yes", "no"] | None
 
 
+class TeamDate(ApiModel):
+    """A date of the team for its staff (Teamleben, Termine, A7): a training or a match, the
+    matches of the official schedule marked as such, with the replies so far."""
+
+    kind: Literal["session", "match"]
+    id: uuid.UUID
+    title: str | None
+    on_date: date
+    starts_at: datetime | None
+    venue: str | None = None
+    official: bool = False
+    yes: int = 0
+    no: int = 0
+
+
 class CalendarLink(ApiModel):
     url: str

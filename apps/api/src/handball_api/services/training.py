@@ -5,6 +5,7 @@ from __future__ import annotations
 import uuid
 from datetime import UTC, datetime
 from typing import Any
+from zoneinfo import ZoneInfo
 
 from sqlalchemy import ColumnElement, delete, func, select, update
 
@@ -16,6 +17,7 @@ from handball_api.models import (
     Match,
     Membership,
     Notification,
+    Opponent,
     Play,
     Player,
     Playlist,
@@ -53,6 +55,8 @@ async def notify(
 ) -> None:
     users = list(dict.fromkeys(user_ids))
     mid = params.get("match_id")
+    if isinstance(mid, str):
+        params = await _with_match(ctx, mid, params)
     if users and isinstance(mid, str):
         # one note per thing (app review R5): a newer note about the same match replaces the
         # older one («Der offizielle Spielbericht ist da» twice, the failed analysis that ran again)
@@ -71,6 +75,30 @@ async def notify(
     from handball_api.services import push
 
     await push.enqueue(ctx, list(dict.fromkeys(user_ids)), kind, link)
+
+
+ZURICH = ZoneInfo("Europe/Zurich")
+
+
+async def _with_match(ctx: Ctx, match_id: str, params: dict[str, Any]) -> dict[str, Any]:
+    """A note about a match names it (A12): the opponent and the day of the match, so «Der
+    offizielle Spielbericht ist da» says which one."""
+    if params.get("opponent") and params.get("date"):
+        return params
+    try:
+        match = await ctx.db.get(Match, uuid.UUID(match_id))
+    except ValueError:
+        return params
+    if match is None:
+        return params
+    out = dict(params)
+    if not out.get("opponent") and match.opponent_id:
+        opp = await ctx.db.get(Opponent, match.opponent_id)
+        if opp is not None:
+            out["opponent"] = opp.name
+    # the day as the club lives it (a 22:30 kickoff stays on its day)
+    out.setdefault("date", match.kickoff_at.astimezone(ZURICH).date().isoformat())
+    return out
 
 
 def _group(kind: str) -> str:

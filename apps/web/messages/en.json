@@ -413,7 +413,7 @@
     "twoFactorAdmins": "For club admins it is required after 14 days.",
     "teamFeatures": "Team features",
     "teamFeaturesHint": "Training, dates, RSVP, tasks and own areas for players and parents. Switched off, everything stays stored and comes back when you switch it on.",
-    "me": "Me",
+    "me": "My account",
     "tab_profile": "Profile",
     "tab_security": "Security",
     "tab_data": "My data",
@@ -439,7 +439,7 @@
     "youthBadge": "Youth"
   },
   "account": {
-    "title": "Account",
+    "title": "Password and devices",
     "emailUnverified": "Your e-mail address is not confirmed yet.",
     "resend": "Send confirmation e-mail again",
     "resent": "Confirmation e-mail sent.",
@@ -461,7 +461,13 @@
     "method_google": "Google",
     "method_apple": "Apple",
     "method_password_reset": "Password reset",
-    "sessionsAll": "Show all {n} devices"
+    "sessionsAll": "Show all {n} devices",
+    "nameLabel": "Name",
+    "saveName": "Save name",
+    "nameSaved": "Saved.",
+    "emailLabel": "Email",
+    "emailHint": "You sign in with this address, and email notifications go to it.",
+    "languageLabel": "Language"
   },
   "team": {
     "roster": "Team",
@@ -1494,7 +1500,11 @@
     "access_request_team": "{name} wants to join {team} and is waiting for you.",
     "access_request_named": "{name} wants to join your club and is waiting for you.",
     "analysis_checked": "All checked. The analysis works with your answers.",
-    "analysis_checked_match": "All checked against {opponent}. The analysis works with your answers."
+    "analysis_checked_match": "All checked against {opponent}. The analysis works with your answers.",
+    "official_report_match": "The official match report against {opponent} is in.",
+    "feed_ready_match": "Your scenes from the match against {opponent} are ready.",
+    "scouting_ready_match": "The preparation report on {opponent} is ready.",
+    "matchOn": "Match on {date}"
   },
   "assignments": {
     "title": "Assignments",
@@ -1649,14 +1659,14 @@
     "withoutAnalysis": "Match report and scenes",
     "trial": "{days} days free trial",
     "choose": "Choose {plan}",
-    "goalkeepers": "Goalkeeper module (CHF {price} per goalkeeper and month), number:",
     "unavailable": "Online payment is not set up yet.",
     "needs2fa": "Payments need two-factor sign-in.",
     "failed": "That did not work. Please try again.",
     "status_invoice_open": "invoice open",
     "status_invoice_paid": "paid by invoice",
     "current": "Current plan",
-    "trialAfter": "After that the free plan applies until you decide. Nothing is deleted."
+    "trialAfter": "After that the free plan applies until you decide. Nothing is deleted.",
+    "withKeepers": "Goalkeeper analysis included"
   },
   "share": {
     "button": "Share",
@@ -2564,7 +2574,7 @@
     "empty": "still empty",
     "hintTips": "What to train next, from your matches. One click turns it into a session with drills and the matching scenes.",
     "library": "All drills",
-    "tipsTitle": "Training tips from the analysis",
+    "tipsTitle": "Training tips from your matches",
     "tipsFrom": "From {n, plural, one {your last analysed match} other {your last # analysed matches}}.",
     "tipsError": "The training tips cannot be loaded right now. Try again in a moment.",
     "tipsPlan": "Training tips are part of the match analysis, which your plan does not include.",
@@ -2610,7 +2620,9 @@
     "why_transition_defence": "They practise getting back: quickly back after losing the ball and closing the middle.",
     "why_fast_break": "They practise the fast break: first and second wave, the quick pass forward.",
     "why_defence": "They practise defence: shifting, stepping out and helping.",
-    "why_powerplay": "They practise playing with more or fewer players: using space and closing it."
+    "why_powerplay": "They practise playing with more or fewer players: using space and closing it.",
+    "tipsFromReports": "From the match {n, plural, one {report of the last match} other {reports of the last # matches}}.",
+    "tipsFromBoth": "From {k, plural, one {1 analysed match} other {# analysed matches}} and {m, plural, one {1 match report} other {# match reports}}."
   },
   "schedule": {
     "nav": "My dates",
@@ -2628,7 +2640,14 @@
     "answered_no": "Declined",
     "hintStaff": "Trainings and matches of the next 30 days with the replies.",
     "planTraining": "Plan a training",
-    "scheduleMatch": "Schedule a match"
+    "scheduleMatch": "Schedule a match",
+    "titleStaff": "Dates",
+    "official": "Schedule",
+    "officialHint": "Matches from the official schedule appear here by themselves.",
+    "scheduleOther": "Add a match outside the official schedule",
+    "noneStaff": "No dates in the next 30 days.",
+    "replies": "{yes} coming, {no} not coming",
+    "noReplies": "no replies yet"
   },
   "marks": {
     "title": "Matchday: keep scenes",
@@ -2878,7 +2897,7 @@
     "collections": "Collections",
     "matrix": "Table",
     "scenesSections": "Scene sections",
-    "me": "Me",
+    "me": "My account",
     "club": "Club",
     "twoFactorDue": "Set up two-factor sign-in",
     "uploadShort": "Video",
@@ -3251,7 +3270,7 @@
     "accessExplain": "These people chose your team on handball.ch. The team exists only once: admit them and they work in the same team."
   },
   "verification": {
-    "section": "Official data",
+    "section": "Federation",
     "title": "Club not confirmed yet",
     "why": "Until the club is confirmed, sharing by link and public profiles stay off, and opponents appear in match reports with numbers only.",
     "way_mail_domain": "Sign in with an e-mail address of the club.",
@@ -3321,11 +3340,17 @@
     "home": "vs {opponent}",
     "away": "away at {opponent}",
     "noMatches": "No matches this season yet.",
-    "source": "From the match reports and what was tagged, as on the match pages. Playing minutes are not recorded. Shots without blocked ones.",
+    "source": "From the match reports and what was tagged, as on the match pages. An appearance counts for anyone listed in the match report or with a figure. Playing minutes are not recorded. Shots without blocked ones.",
     "noMatchesYet": "No match played this season yet. The figures appear after the first match with a match report or tagging.",
-    "summaryPlayed": "{matches, plural, one {1 match} other {# matches}}, involved in {involved}",
+    "summaryPlayed": "{matches, plural, one {1 match} other {# matches}}, {involved, plural, one {1 appearance} other {# appearances}}",
     "number": "Number",
-    "analysedBasis": "Goals and suspensions from all matches, everything else only from {k} of {n, plural, one {# match} other {# matches}} with analysis."
+    "analysedBasis": "Goals, 7 m, suspensions and saves from all matches, everything else only from {k} of {n, plural, one {# match} other {# matches}} with analysis.",
+    "sevenMSaves": "7 m saved",
+    "sourceCol": "Source",
+    "fromAnalysis": "Analysis",
+    "fromReport": "Match report",
+    "reportBasis": "All figures come from the match reports. Shots, shooting rate and turnovers are added with the first analysed video.",
+    "reportBasisKeeper": "All figures come from the match reports. Shots faced and save rate are added with the first analysed video."
   },
   "slots": {
     "title": "Training times {season}",
@@ -3434,7 +3459,8 @@
       "kr": "from the circle",
       "gs": "on a fast break",
       "m7": "from the 7 m line"
-    }
+    },
+    "fromMatchFailed": "The collection could not be created. Please try again."
   },
   "consentLink": {
     "invalid": "This link is no longer valid. Ask the team for the new one.",
@@ -3720,7 +3746,8 @@
     "todayTitle": "What you can do today",
     "todayNote": "from the match report",
     "todayText": "The match card as a picture for the team chat and the short report to copy, even without a video.",
-    "todayCard": "Match card for the team chat"
+    "todayCard": "Match card for the team chat",
+    "exampleBand": "Example · invented figures"
   },
   "check": {
     "top": "Check · {opponent}",
@@ -3875,7 +3902,9 @@
     "emptyTitle": "Upload a video, then you see your scenes here.",
     "emptyText": "After the analysis every goal, every shot and every turnover is a scene. You search them with a sentence and put them together into collections.",
     "emptyPlays": "Drawing plays works already:",
-    "emptySearch": "Search finds scenes from your first video on."
+    "emptySearch": "Search finds scenes from your first video on.",
+    "backToCollection": "Back to the collection “{title}”",
+    "addToCollection": "{n, plural, one {1 scene} other {# scenes}} to the collection"
   },
   "teamPage": {
     "kick": "{team} · {source}",
@@ -4047,7 +4076,8 @@
     "shotsPlain": "Shots",
     "savesPlain": "Saves",
     "againstNone": "{n, plural, one {The goal against is} other {The # goals against are}} not credited to a goalkeeper.",
-    "savesNone": "{n, plural, one {One save is} other {# saves are}} not credited to a goalkeeper of the squad."
+    "savesNone": "{n, plural, one {One save is} other {# saves are}} not credited to a goalkeeper of the squad.",
+    "againstNoMinutes": "Without playing minutes in the match report, goals against cannot be credited to a goalkeeper."
   },
   "entry": {
     "ask": "What is your team called?",

@@ -67,6 +67,7 @@ PLANS: dict[Plan, PlanSpec] = {
         assistant_usd_month=25.0,
     ),
 }
-GOALKEEPER_ADDON_CHF = 7
+# The goalkeeper add-on (CHF 7 per goalkeeper and month) is gone since 18.11.2026 (A9): the
+# goalkeeper functions are part of Team and Verein, without a surcharge.
 # fair use for "unlimited" matches; above this the UI asks to contact support
 FAIR_USE_MATCHES_PER_SEASON = 80
