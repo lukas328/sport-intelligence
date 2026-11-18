@@ -350,3 +350,20 @@ gemessen in Runde 1b) in den Kalibrier-Dialog übernehmen, und das Feld pro Hall
 | Drehung jedes Linienbildes nachkorrigieren (höchstens 3 Grad pro Achse, `ml/calib/motion_refine.py`, `run.py calibrate --refine`) | 33 Entwicklungs-Stücke, Hallenbild neu gerechnet | Bodenanteil steigt (z. B. 0.18 auf 0.34); Felder 6 auf 8: neu c009, c013, c038, verloren c025; auf Sicht c009 und c038 falsch, c013 unklar; Korrekturen im Median 2 bis 3 Grad | Mehr falsch akzeptierte Felder; die Korrektur passt jedes Bild an die Linien an, auch an die falschen (Überanpassung). Verworfen. |
 | Kalibrierung auf dem besten Fenster (8 Linienbilder, etwa 29 s, höchster Bodenanteil; Idee der Integrations-Sitzung, `ml/calib/experiments/best_window.py`) | 33 Entwicklungs-Stücke | Felder 6 auf 8: neu c013, c033, c038, c048, c051, weg c008, c039, c040; alle 5 neuen auf Sicht falsch (c051 höchstens teilweise) | Der hohe Bodenanteil im Fenster kommt auch von wenigen Linien (Überanpassung), die Feldsuche findet dort ebenso falsche Felder. Verworfen. Muster aus drei Versuchen: jede Lockerung bringt vor allem falsch akzeptierte Felder; zuerst braucht es einen Prüfschritt. |
 | Prüfwert "Feldlinien auf erkannten Segmenten" (Anteil der projizierten Feldlinien innerhalb 4 px der gespeicherten Liniensegmente, Median über die Linienbilder) | 6 akzeptierte Entwicklungs-Stücke und die 3 neuen | alle 0.07 bis 0.17; die auf Sicht falschen (c008 0.08, c009 0.12, c038 0.17) nicht tiefer als die plausiblen (c040 0.08, c067 0.14) | Die gespeicherten Segmente sind zu dünn; ein Prüfwert braucht die Linien der Bilder selbst. Neu mit der Wahrheit. |
+
+## 6. Hand-Kalibrierung aus Linien-Klicks (Umsetzung ab 2026-11-18)
+
+Lukas' Entscheid nach dem Endtest (4.10): Das Feld setzt der Trainer mit Linien-Klicks, einmal pro
+Halle. Das automatische Feld bleibt nur ein Vorschlag zum Bestätigen.
+
+| Schritt | PR | Inhalt |
+|---|---|---|
+| Löser | #81 | `handball_court.clicks` (numpy, scipy): Feld aus Klicks auf benannte Linien und Punkte, Prüfung Median <= 5 px und jeder Klick <= 20 px, Fehlklicks auf der Nachbarlinie einzeln verworfen; `handball_vision.courtclicks` als Hülle |
+| API | #91 | `GET calibration/court-model`, `POST videos/{id}/calibration/clicks/check` (synchron, speichert nichts), `POST videos/{id}/calibration/clicks` (Feld als Punktpaare über den bestehenden Weg, Neustart der Analyse, Hallen-Referenz) |
+| Zustand | #92 | `calibration_state` in der Analyse: confirmed, suggested, missing, updating |
+| Dialog | UX-Sitzung | Linie wählen, 2 bis 3 Klicks, Einrasten, Live-Overlay, unter 1 min |
+| Ende-zu-Ende | offen | Staging mit einem echten Clip, abgesprochen mit der Hauptsitzung, danach Deploy |
+
+Der GPU-Worker bleibt unverändert: Er bekommt das geklickte Feld als Punktpaare, nämlich die
+Stellen der behaltenen Klicks und das sichtbare 2.5-m-Raster. Punktpaare aus einer Homographie
+ergeben genau diese Homographie.
