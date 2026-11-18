@@ -213,10 +213,20 @@ def _stats(per: dict[str, dict]) -> dict[str, float]:
     return out
 
 
+def load_marks(path: Path) -> dict[str, list[tuple[float, str]]]:
+    """{segment: [[t_s, outcome], ...]}, or the frozen end-test file (ml/gold/data/
+    shot_endtest_marks.json: "segments" and "shots" [{seg, t_s, kind}])."""
+    raw = json.loads(path.read_text())
+    if isinstance(raw, dict) and "shots" in raw:
+        out: dict[str, list[tuple[float, str]]] = {seg: [] for seg in raw.get("segments", [])}
+        for sh in raw["shots"]:
+            out.setdefault(sh["seg"], []).append((float(sh["t_s"]), str(sh["kind"])))
+        return out
+    return {k: [(float(t), str(o)) for t, o in v] for k, v in raw.items()}
+
+
 def score(marks_path: Path, out: Path, boot: int = 2000) -> None:
-    marks = {
-        k: [(float(t), str(o)) for t, o in v] for k, v in json.loads(marks_path.read_text()).items()
-    }
+    marks = load_marks(marks_path)
     per = _per_segment(marks, out)
     games = sorted({p["game"] for p in per.values()})
     by_game = {g: [s for s, p in per.items() if p["game"] == g] for g in games}
