@@ -2884,7 +2884,8 @@
     "stateUpdating": "Dein Spielfeld wird gerade übernommen, die Analyse läuft. Danach kannst du es hier wieder ändern.",
     "stateUndeterminable": "Du hast angegeben, dass sich das Spielfeld in diesem Video nicht bestimmen lässt. Markierst du es doch, gilt dein Spielfeld.",
     "qualityAmbiguous": "Die Klicks passen zu zwei verschiedenen Spielfeldern.",
-    "ambiguousLine": "Auf «{line}» liegt ein Klick daneben, und die Klicks zeigen nicht, welcher. Lösche den falschen oder leere die Linie und setze sie neu."
+    "ambiguousLine": "Auf «{line}» liegt ein Klick daneben, und die Klicks zeigen nicht, welcher. Lösche den falschen oder leere die Linie und setze sie neu.",
+    "nextLine": "Weiter mit: {line}"
   },
   "today": {
     "uploadHint": "Lade das Video hoch. Zahlen, Szenen und drei Dinge entstehen danach von selbst.",

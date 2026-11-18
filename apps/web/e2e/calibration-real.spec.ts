@@ -74,7 +74,9 @@ async function tapLines(page: Page, h: number[][]) {
   };
   await page.getByTestId("line-side_near").click();
   for (const x of [5, 18, 33]) await tap(x, 0);
+  await page.getByTestId("calibration-next").click();
   for (const x of [7, 20, 32]) await tap(x, 20);
+  await page.getByTestId("calibration-next").click();
   for (const y of [4, 15]) await tap(0, y);
   await page.getByTestId("line-centre").click();
   for (const y of [3, 17]) await tap(20, y);

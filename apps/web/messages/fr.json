@@ -2884,7 +2884,8 @@
     "stateUpdating": "Ton terrain est en cours de reprise, l'analyse tourne. Ensuite, tu pourras le modifier ici.",
     "stateUndeterminable": "Tu as indiqué que le terrain ne peut pas être déterminé dans cette vidéo. Si tu le marques quand même, ton terrain compte.",
     "qualityAmbiguous": "Les clics correspondent à deux terrains différents.",
-    "ambiguousLine": "Sur « {line} », un clic est à côté, et les clics ne montrent pas lequel. Efface le mauvais ou vide la ligne et replace-la."
+    "ambiguousLine": "Sur « {line} », un clic est à côté, et les clics ne montrent pas lequel. Efface le mauvais ou vide la ligne et replace-la.",
+    "nextLine": "Continuer avec : {line}"
   },
   "today": {
     "uploadHint": "Téléversez la vidéo. Statistiques, scènes et trois points suivent automatiquement.",

@@ -157,7 +157,9 @@ export const CalibrationStage = forwardRef<
   function snapped(p: Pt): Pt {
     const ctx = pixels.current;
     if (!snap || !ctx) return p;
-    const radius = Math.min(40, Math.max(6, 14 * per));
+    // only a few screen pixels around the tap: in a hall with the lines of several sports a
+    // wide pull lands on the wrong one, and a refused try is harmless where a wrong court is not
+    const radius = Math.min(12, Math.max(4, 6 * per));
     const m = snapMargin(radius);
     const x0 = Math.max(0, Math.floor(p[0] - m));
     const y0 = Math.max(0, Math.floor(p[1] - m));

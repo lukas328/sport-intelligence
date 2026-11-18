@@ -127,21 +127,6 @@ export function droppedRefs(d: DroppedClick[] | undefined): ClickRef[] {
   return (d ?? []).map((x): ClickRef => (x.kind === "point" ? { kind: "point", name: x.name } : { kind: "line", name: x.name, index: x.index ?? 0 }));
 }
 
-/** Whether «nicht bestimmbar» can be saved: a GET on the POST endpoint answers 405 where it
- * exists (an older API answers 404). */
-export async function canMarkUndeterminable(orgId: string, videoId: string): Promise<boolean> {
-  if (missing.has("undeterminable")) return false;
-  try {
-    const res = await fetch(`/v1/orgs/${orgId}/videos/${videoId}/calibration/undeterminable`, { credentials: "same-origin", headers: { accept: "application/json" } });
-    if (res.status === 405) return true;
-    const json: unknown = await res.json().catch(() => null);
-    if (routeMissing(res.status, json)) missing.add("undeterminable");
-    return res.ok;
-  } catch {
-    return false;
-  }
-}
-
 export function markUndeterminable(orgId: string, videoId: string, reason: UndeterminableReason): Promise<Outcome<unknown>> {
   return outcome("undeterminable", () => api.POST("/v1/orgs/{org_id}/videos/{video_id}/calibration/undeterminable", { ...path(orgId, videoId), body: { reason } }));
 }

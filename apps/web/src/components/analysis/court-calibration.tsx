@@ -16,7 +16,6 @@ import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/card";
 import {
   calibrationState,
-  canMarkUndeterminable,
   checkClicks,
   confirmCourt,
   droppedRefs,
@@ -30,7 +29,7 @@ import {
   type ServerFit,
   type UndeterminableReason,
 } from "@/lib/calibration-api";
-import { countOn, flowReducer, initialFlow } from "@/lib/calibration-flow";
+import { countOn, flowReducer, initialFlow, offeredLine } from "@/lib/calibration-flow";
 import { courtPolylines } from "@/lib/court-calibration";
 import {
   LINE_NAMES,
@@ -158,7 +157,8 @@ export function CourtCalibration({
   const [fit, setFit] = useState<{ key: string; fit: ClickFit } | null>(null);
   const [dragFit, setDragFit] = useState<Homography | null>(null);
   const [server, setServer] = useState<{ key: string; outcome: Outcome<ServerFit> } | null>(null);
-  const [undeterminable, setUndeterminable] = useState(false);
+  // «nicht bestimmbar» is offered; hidden again only if its endpoint turns out missing
+  const [undeterminable, setUndeterminable] = useState(true);
   const [asking, setAsking] = useState(false);
   const [advanced, setAdvanced] = useState(false);
   const [busy, setBusy] = useState<"confirm" | "save" | "skip" | null>(null);
@@ -166,18 +166,17 @@ export function CourtCalibration({
   const [zoomed, setZoomed] = useState(false);
   const stage = useRef<StageHandle>(null);
   const dialog = useRef<HTMLDivElement>(null);
+  const offered = offeredLine(flow);
   const clicksKey = keyOf(flow.clicks);
 
-  // the API's court model and whether «nicht bestimmbar» can be saved (missing endpoints: the
-  // local model, no button)
+  // the API's court model (a missing endpoint: the local model)
   useEffect(() => {
     let live = true;
     void fetchCourtModel(orgId).then((m) => live && m && setModel(m));
-    void canMarkUndeterminable(orgId, videoId).then((ok) => live && setUndeterminable(ok));
     return () => {
       live = false;
     };
-  }, [orgId, videoId]);
+  }, [orgId]);
 
   // the local fit after each change of the clicks (after the click is painted)
   useEffect(() => {
@@ -722,6 +721,17 @@ export function CourtCalibration({
                       : t("pointNow", { point: t(`points.${flow.point}`) })}
                   </p>
                   {equations === 0 && <p className="text-sm text-ink-2">{t("markIntro")}</p>}
+                  {offered && (
+                    // three clicks on the line: the next one is offered, the choice stays with the coach
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => dispatch({ type: "line", name: offered })}
+                      data-testid="calibration-next"
+                    >
+                      {t("nextLine", { line: t(`lines.${offered}`) })}
+                    </Button>
+                  )}
                   {!advanced ? (
                     <div
                       role="group"
