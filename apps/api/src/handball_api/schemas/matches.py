@@ -628,6 +628,12 @@ class AnalysisOut(ApiModel):
         "hall_tried lists earlier videos that did not fit",
     )
     hall: HallOut | None = None
+    calibration_state: Literal["confirmed", "suggested", "missing", "updating"] = Field(
+        default="missing",
+        description="confirmed: set or confirmed by a person (or carried over from such a court "
+        "with a sure hall match); suggested: the automatic court, a proposal to confirm or to "
+        "click anew; missing: no court; updating: a clicked court is being applied",
+    )
     court_clicks: CourtClicksIn | None = Field(
         default=None, description="the coach's latest line clicks, to edit them again"
     )

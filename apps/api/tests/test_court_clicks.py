@@ -168,3 +168,107 @@ async def test_the_clicked_court_reruns_the_analysis_and_serves_the_hall(
         api, ids, venue="Sporthalle Moosgarten", kickoff_at="2026-11-14T18:00:00+01:00"
     )
     assert [ref["video_id"] for ref in payload2["hall_references"]] == [first]
+
+
+async def _state(api: Api, org: str, vid: str) -> str:
+    a = (await api.get(f"/v1/orgs/{org}/videos/{vid}/analysis")).json()
+    return str(a["calibration_state"])
+
+
+async def test_calibration_state_follows_the_court_from_missing_to_confirmed(
+    make_api: Callable[[], Api],
+) -> None:
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    jobs: MemoryJobQueue = api.app.state.jobs
+    vid = await _needs_court(api, ids)
+    assert await _state(api, org, vid) == "missing"
+    r = await api.post(
+        f"/v1/orgs/{org}/videos/{vid}/calibration/clicks",
+        json={"space": "panorama", "lines": _lines()},
+    )
+    assert r.status_code == 202, r.text
+    assert await _state(api, org, vid) == "updating"
+    await _finish(
+        api,
+        jobs.jobs[-1][2],
+        {"calibration": _court("user_correction"), "tracks": _tracks(), "panorama": PANORAMA},
+    )
+    assert await _state(api, org, vid) == "confirmed"
+
+
+async def test_a_failed_run_after_clicks_is_not_updating_forever(
+    make_api: Callable[[], Api],
+) -> None:
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    jobs: MemoryJobQueue = api.app.state.jobs
+    vid = await _needs_court(api, ids)
+    await api.post(
+        f"/v1/orgs/{org}/videos/{vid}/calibration/clicks",
+        json={"space": "panorama", "lines": _lines()},
+    )
+    token = {"x-internal-token": api.app.state.settings.internal_token.get_secret_value()}
+    r = await api.http.post(
+        f"/internal/jobs/{jobs.jobs[-1][2]}",
+        headers=token,
+        json={"status": "failed", "progress": 1, "error": "timeout"},
+    )
+    assert r.status_code == 200, r.text
+    assert await _state(api, org, vid) == "missing"
+
+
+async def test_the_automatic_court_is_a_suggestion_until_confirmed(
+    make_api: Callable[[], Api],
+) -> None:
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    vid, job, _ = await _video(api, ids)
+    info = {"goal_score": 0.6, "line_score": 1.3, "floor_fit": 0.5}
+    await _finish(
+        api,
+        job,
+        {
+            "calibration": _court("heuristic"),
+            "calibration_info": info,
+            "tracks": _tracks(),
+            "panorama": PANORAMA,
+        },
+    )
+    assert await _state(api, org, vid) == "suggested"
+    r = await api.post(f"/v1/orgs/{org}/videos/{vid}/calibration/confirm")
+    assert r.status_code == 200, r.text
+    assert await _state(api, org, vid) == "confirmed"
+
+
+@pytest.mark.parametrize(("floor", "state"), [(140, "confirmed"), (20, "suggested")])
+async def test_a_court_from_the_hall_is_confirmed_only_with_a_sure_match(
+    make_api: Callable[[], Api], floor: int, state: str
+) -> None:
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    first, job, _ = await _video(api, ids, venue="Sporthalle Moosgarten")
+    await _finish(
+        api,
+        job,
+        {"calibration": _court("user_correction"), "tracks": _tracks(), "panorama": PANORAMA},
+    )
+    second, job2, _ = await _video(
+        api, ids, venue="Sporthalle Moosgarten", kickoff_at="2026-11-14T18:00:00+01:00"
+    )
+    info = {"method": "hall", "reference_video_id": first, "floor_inliers": floor, "error_px": 1.5}
+    await _finish(
+        api,
+        job2,
+        {
+            "calibration": _court("heuristic"),
+            "calibration_info": info,
+            "tracks": _tracks(),
+            "panorama": PANORAMA,
+        },
+    )
+    assert await _state(api, org, second) == state

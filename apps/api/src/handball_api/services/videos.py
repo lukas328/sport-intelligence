@@ -1194,6 +1194,39 @@ def _with_sure(asset: VideoAsset, info: Any) -> Any:
     return {**info, "sure": checks.hall_court_sure(asset)}
 
 
+async def calibration_state(
+    ctx: Ctx, asset: VideoAsset, cal: CameraCalibration | None, job: ProcessingJob | None
+) -> str:
+    """Where the court of this file stands, for the calibration dialog:
+
+    - "updating": a court the coach clicked is being applied (its analysis runs);
+    - "confirmed": a person set or confirmed it, or it was carried over from a court a person set
+      with a sure hall match (same rule as graphics._court_ok: positions are drawn);
+    - "suggested": the automatic court, or one carried over without a sure match: shown as a
+      proposal to confirm (POST .../calibration/confirm) or to click anew;
+    - "missing": no court (needs_calibration)."""
+    meta = asset.analysis or {}
+    pending = meta.get(PENDING)
+    if (
+        isinstance(pending, dict)
+        and job is not None
+        and pending.get("job_id") == str(job.id)
+        and job.status in (JobStatus.QUEUED, JobStatus.RUNNING)
+    ):
+        return "updating"
+    if cal is None or meta.get("needs_calibration"):
+        return "missing"
+    if cal.source == "user_correction" or checks.hall_court_sure(asset):
+        return "confirmed"
+    info = meta.get("calibration_info")
+    if isinstance(info, dict) and info.get("method") == "hall":
+        ref = str(info.get("reference_video_id") or "")
+        siblings = {str(p.video_id) for p in await parts_of(ctx, asset.match_id)}
+        if ref and ref in siblings - {str(asset.id)}:
+            return "confirmed"  # the court a person set on another part of this match
+    return "suggested"
+
+
 async def analysis(ctx: Ctx, asset_id: uuid.UUID) -> dict[str, object]:
     asset = await get_asset(ctx, asset_id)
     cal = await ctx.db.scalar(
@@ -1242,6 +1275,7 @@ async def analysis(ctx: Ctx, asset_id: uuid.UUID) -> dict[str, object]:
         "calibration_info": _with_sure(asset, meta.get("calibration_info")),
         "hall": await halls.summary(ctx, asset, match) if match is not None else None,
         "court_clicks": meta.get(LINE_CLICKS) if isinstance(meta.get(LINE_CLICKS), dict) else None,
+        "calibration_state": await calibration_state(ctx, asset, cal, job),
         "error_code": failure_code(job.error)
         if job is not None and job.status == "failed"
         else None,

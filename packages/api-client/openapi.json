@@ -196,6 +196,18 @@
             "description": "automatic calibration: goal fit, players on the court, camera position; method 'hall' when the court was carried over from an earlier video of the hall (reference_video_id; sure when the hall images matched well enough not to ask); hall_tried lists earlier videos that did not fit",
             "title": "Calibration Info"
           },
+          "calibration_state": {
+            "default": "missing",
+            "description": "confirmed: set or confirmed by a person (or carried over from such a court with a sure hall match); suggested: the automatic court, a proposal to confirm or to click anew; missing: no court; updating: a clicked court is being applied",
+            "enum": [
+              "confirmed",
+              "suggested",
+              "missing",
+              "updating"
+            ],
+            "title": "Calibration State",
+            "type": "string"
+          },
           "camera": {
             "anyOf": [
               {

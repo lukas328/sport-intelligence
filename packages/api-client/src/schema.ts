@@ -5439,6 +5439,13 @@ export interface components {
             calibration_info?: {
                 [key: string]: unknown;
             } | null;
+            /**
+             * Calibration State
+             * @description confirmed: set or confirmed by a person (or carried over from such a court with a sure hall match); suggested: the automatic court, a proposal to confirm or to click anew; missing: no court; updating: a clicked court is being applied
+             * @default missing
+             * @enum {string}
+             */
+            calibration_state?: "confirmed" | "suggested" | "missing" | "updating";
             /** Camera */
             camera?: ("fixed" | "moving") | null;
             /** Chunk Ms */
