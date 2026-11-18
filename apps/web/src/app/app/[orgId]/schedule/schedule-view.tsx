@@ -103,7 +103,7 @@ export function TeamDateRow({ orgId, item: i }: { orgId: string; item: Schemas["
           ) : (
             what
           )}
-          {i.official && <span className="ml-2 inline-block border-[1.5px] border-foreground px-1.5 text-[0.8125rem] font-semibold">{t("official")}</span>}
+          {i.official && <span className="ml-2 inline-block border-[1.5px] border-foreground px-1.5 text-[0.875rem] font-semibold">{t("official")}</span>}
         </p>
         <p className="text-[0.9375rem] text-muted">
           {[format.dateTime(when, i.starts_at ? { weekday: "long", hour: "2-digit", minute: "2-digit" } : { weekday: "long" }), i.venue, replies].filter(Boolean).join(" · ")}
