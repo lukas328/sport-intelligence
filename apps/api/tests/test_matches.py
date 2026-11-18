@@ -755,6 +755,14 @@ def test_analysis_kits_send_the_referee_only_when_known_and_distinct() -> None:
     assert analysis_kits({**kits, "referee": "#ff6a13"}) == {**base, "referee": "#ff6a13"}
 
 
+def test_analysis_kits_leave_out_an_own_kit_nobody_chose() -> None:
+    kits: dict[str, str | None] = {"own": "#1f4fd6", "own_gk": "#f59e0b", "opponent": None}
+    # the old preselected blues and the neutral fallback are no colour the club wears
+    for unchosen in ("#1f4fd6", "#0B6BCB", "#475569"):
+        assert analysis_kits({**kits, "own": unchosen}) == {"home_gk": "#f59e0b"}
+    assert analysis_kits({**kits, "own": "#e8c300"}) == {"home": "#e8c300", "home_gk": "#f59e0b"}
+
+
 async def test_referee_kit_is_a_user_choice(make_api: Callable[[], Api]) -> None:
     api = make_api()
     ids = await setup_club(api)

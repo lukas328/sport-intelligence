@@ -449,6 +449,32 @@ def test_teams_are_labelled_relative_to_the_match_colours() -> None:
     assert labels[16] == labels[17] == "referee"
 
 
+def test_teams_told_apart_with_one_team_kit_or_none() -> None:
+    """Without an away kit (or without any team kit) the two big colour groups are still two
+    teams: the one nearer the known kit wears it (staging 2026-11-17: a wrong own kit and the
+    keeper colour of the yellow team, no away kit; all players became one team)."""
+    from handball_vision.teams import TeamAssigner, bgr_to_lab, relabel_by_clusters
+
+    rng = np.random.default_rng(6)
+    colours: dict[int, tuple[np.ndarray, int]] = {}
+    yellow, red = bgr_to_lab((0, 200, 230)), bgr_to_lab((40, 30, 200))
+    for tid in range(8):
+        colours[tid] = (yellow + rng.normal(0, 3, 3), 200)
+    for tid in range(8, 16):
+        colours[tid] = (red + rng.normal(0, 3, 3), 200)
+    only_home = relabel_by_clusters(colours, {"home": bgr_to_lab((40, 40, 210))})  # reddish
+    assert all(only_home[t] == "away" for t in range(8))
+    assert all(only_home[t] == "home" for t in range(8, 16))
+    only_away = relabel_by_clusters(colours, {"away": bgr_to_lab((40, 40, 210))})
+    assert all(only_away[t] == "home" for t in range(8))
+    none = relabel_by_clusters(colours, {"home_gk": bgr_to_lab((10, 160, 245))})
+    assert {none[t] for t in range(8)} != {none[t] for t in range(8, 16)}  # two teams, a guess
+    assert len({none[t] for t in range(16)}) == 2
+    # the per-track colour vote copes with fewer than two kits
+    assert TeamAssigner({}).classify(yellow) == ("home", 0.0)
+    assert TeamAssigner({"home_gk": (10, 160, 245)}).classify(red) == ("home_gk", 0.0)
+
+
 def test_a_keeper_kit_worn_by_a_whole_team_is_a_field_kit() -> None:
     from handball_vision.pipeline import crowded_keepers
     from handball_vision.tracking import TrackPoint
