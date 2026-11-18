@@ -145,9 +145,9 @@ const de = {
     stepsTitle: "Filmen. Hochladen. Prüfen.",
     stepsLead: "Die Analyse schlägt vor und fragt nur, wo sie unsicher ist.",
     steps: [
-      { title: "Filmen", text: "Handy oder Kamera hoch an die Mittellinie, beide Tore im Bild. Fest ist am besten, schwenken geht auch.", alt: "Ein Handy quer auf einem Stativ vor der Halle: Es filmt das Spiel, mit Weitwinkel.", points: ["Kamera hoch, mit Weitwinkel", "Beide Tore und Torräume im Bild"] },
-      { title: "Hochladen", text: "Video wählen. Die App zeigt, wie weit die Analyse ist, und meldet sich, wenn sie fertig ist.", alt: "Die App beim Hochladen: Zu welchem Spiel gehört das Video? Darunter zwei Spiele zur Auswahl, das erste gelb umrandet.", points: ["Spiel wählen, dann das Video", "Die Glocke meldet, wenn es fertig ist"] },
-      { title: "Prüfen", text: "Die Analyse schlägt Spielfeld und Tore vor. Wo sie unsicher ist, fragt sie dich: höchstens zehn Fragen pro Spiel, meist ein paar Minuten.", alt: "Die App beim Prüfen: das Bild aus dem Video mit vier gelben Punkten an den Ecken des Feldes, darunter die Frage Passt das Spielfeld? und der Knopf Passt.", points: ["Die Analyse schlägt das Feld vor", "Einmal tippen genügt"] },
+      { title: "Filmen", text: "Handy oder Kamera hoch an die Mittellinie, beide Tore im Bild. Fest ist am besten, schwenken geht auch.", alt: "Gezeichnet: eine Halle von oben, die Kamera auf einem hohen Stativ an der Mittellinie, etwa 3 Meter hoch. Sie sieht das ganze Feld mit beiden Toren.", points: ["Kamera hoch, mit Weitwinkel", "Beide Tore und Torräume im Bild"] },
+      { title: "Hochladen", text: "Video wählen. Die App zeigt, wie weit die Analyse ist, und meldet sich, wenn sie fertig ist.", alt: "Die App beim Hochladen: Zu welchem Spiel gehört das Video? Zwei Spiele zur Auswahl. Darunter der Balken: 12 % hochgeladen (420 MB von 3.4 GB).", points: ["Spiel wählen, dann das Video", "Die Glocke meldet, wenn es fertig ist"] },
+      { title: "Prüfen", text: "Die Analyse schlägt Spielfeld und Tore vor. Wo sie unsicher ist, fragt sie dich: höchstens zehn Fragen pro Spiel, meist ein paar Minuten.", alt: "Die App beim Prüfen: das Bild aus dem Video mit dem vorgeschlagenen Feld in Gelb, vier Punkte an den Ecken. Darunter Frage 1 von 1: Passt das Spielfeld? und der Knopf Passt.", points: ["Die Analyse schlägt das Feld vor", "Einmal tippen genügt"] },
     ],
     shareWhen: "Dienstag, vor dem Training",
     shareTitle: "Vier Szenen in den Teamchat.",
@@ -229,17 +229,17 @@ const de = {
       {
         title: "Filmen",
         text: "Handy oder Kamera hoch an die Mittellinie, mit Weitwinkel beide Tore im Bild. Fest ist am besten, schwenken geht auch. In der Pause weiterfilmen.",
-        alt: "Ein Handy quer auf einem Stativ vor der Halle: Es filmt das Spiel, mit Weitwinkel.",
+        alt: "Gezeichnet: eine Halle von oben, die Kamera auf einem hohen Stativ an der Mittellinie, etwa 3 Meter hoch. Sie sieht das ganze Feld mit beiden Toren.",
       },
       {
         title: "Hochladen",
         text: "In der App das Spiel wählen, dann das Video, am besten im WLAN. Die Analyse findet Feld und Spieler und sucht die Tor-Momente. Du musst nicht dabeibleiben: Die Glocke meldet, wenn sie fertig ist.",
-        alt: "Video hochladen in der App: Zu welchem Spiel gehört das Video? Zwei Spiele zur Auswahl und «Oder ein neues Spiel anlegen».",
+        alt: "Die App beim Hochladen: Zu welchem Spiel gehört das Video? Zwei Spiele zur Auswahl. Darunter der Balken: 12 % hochgeladen (420 MB von 3.4 GB).",
       },
       {
         title: "Prüfen",
         text: "Wo die Analyse unsicher ist, fragt sie dich, mit der kurzen Szene dazu: Passt das Spielfeld? Tor oder nicht, für wen? Höchstens zehn Fragen pro Spiel, meist in ein paar Minuten, und alle überspringen geht auch. Von wo geworfen wurde, tippst du an, wenn du magst.",
-        alt: "Eine Frage beim Prüfen: Passt das Spielfeld? Darüber das Bild aus dem Video mit vier gelben Punkten an den Ecken des Feldes, darunter die Knöpfe Passt und Weiss nicht.",
+        alt: "Die App beim Prüfen: das Bild aus dem Video mit dem vorgeschlagenen Feld in Gelb, vier Punkte an den Ecken. Darunter Frage 1 von 1: Passt das Spielfeld? und der Knopf Passt.",
       },
       {
         title: "Anschauen und teilen",
@@ -280,7 +280,7 @@ const de = {
     checkPrint: "Checkliste zum Ausdrucken",
     afterTitle: "Danach: hochladen.",
     afterText: "Zu Hause im WLAN das Spiel in der App öffnen und das Video wählen. Den Rest macht die Analyse.",
-    afterAlt: "Video hochladen in der App: Zu welchem Spiel gehört das Video? Zwei Spiele zur Auswahl und «Oder ein neues Spiel anlegen».",
+    afterAlt: "Die App beim Hochladen: Zu welchem Spiel gehört das Video? Zwei Spiele zur Auswahl. Darunter der Balken: 12 % hochgeladen (420 MB von 3.4 GB).",
     moreTitle: "Genauer",
     more: [
       { q: "Es passt nicht alles ins Bild?", a: "Höher, ein paar Meter weiter zurück oder mehr Weitwinkel. Lieber beide Tore mit etwas Rand als nah und scharf. Fehlen die zwei nahen Ecken, ist das in Ordnung." },

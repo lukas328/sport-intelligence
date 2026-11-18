@@ -1,139 +1,66 @@
 <!doctype html>
-<!-- Step «Filmen» (BEFUNDE-2 L9): the hall, and in front of it the phone on its tripod, filming
-     it across, wide. The hall is a real recording blurred past recognition (assets/halle.webp, no
-     person, number, text or logo); the phone is drawn (no maker), its screen shows what it films,
-     with a neutral camera interface: recording, the time, the wide angle (.5) chosen. No words,
-     so the picture works in every language; the website says the rest under it. -->
+<!-- Step «Filmen» (U1, U3): where the camera goes, as a calm drawing in the site's colours. The
+     hall seen from behind and above the camera: the whole court with both goals, the camera on a
+     tall tripod at the centre line (about 3 m high, just off the court), its place ringed in
+     yellow, and what it sees, from goal to goal. True perspective (hall.js); only the tripod is
+     drawn larger than life, so it can be seen. No words, so it works in every language («3 m»
+     reads in all three); the text beside it says the rest. The same square frame as the other
+     steps. -->
 <meta charset="utf-8" />
 <link rel="stylesheet" href="../stage.css" />
-<style>
-  .cam {
-    position: absolute;
-    left: 88px;
-    top: 150px;
-    width: 464px;
-    height: 238px;
-    padding: 12px;
-    border-radius: 40px;
-    background: #121315;
-    box-shadow:
-      0 0 0 1px #2b2d31 inset,
-      0 40px 70px -24px rgb(10 13 17 / 0.75),
-      0 14px 26px -12px rgb(10 13 17 / 0.5);
-  }
-  .cam .scr {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    border-radius: 29px;
-    overflow: hidden;
-    background: url("../assets/halle.webp") 46% 40% / 128% auto no-repeat;
-  }
-  /* a camera interface of no particular maker */
-  .rec {
-    position: absolute;
-    left: 50%;
-    top: 12px;
-    transform: translateX(-50%);
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    padding: 4px 10px 4px 8px;
-    border-radius: 7px;
-    background: rgb(214 52 44 / 0.95);
-    color: #fff;
-    font: 600 14px/1 "Plex Mono", ui-monospace, monospace;
-    letter-spacing: 0.04em;
-  }
-  .rec i {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #fff;
-  }
-  .zoom {
-    position: absolute;
-    left: 50%;
-    bottom: 12px;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 6px;
-    padding: 4px;
-    border-radius: 999px;
-    background: rgb(10 13 17 / 0.45);
-    font: 600 13px/1 "Plex Mono", ui-monospace, monospace;
-  }
-  .zoom b {
-    display: grid;
-    place-items: center;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    color: #fff;
-    background: rgb(10 13 17 / 0.4);
-  }
-  .zoom b.on {
-    color: var(--attn);
-    font-size: 14px;
-  }
-  .shutter {
-    position: absolute;
-    right: 14px;
-    top: 50%;
-    width: 44px;
-    height: 44px;
-    margin-top: -22px;
-    border-radius: 50%;
-    border: 3px solid #fff;
-    display: grid;
-    place-items: center;
-  }
-  .shutter i {
-    width: 18px;
-    height: 18px;
-    border-radius: 4px;
-    background: #e0453b;
-  }
-  /* thirds, faint, as camera apps draw them */
-  .grid {
-    position: absolute;
-    inset: 0;
-    background:
-      linear-gradient(90deg, transparent calc(33.3% - 0.5px), rgb(255 255 255 / 0.28) 0 calc(33.3% + 0.5px), transparent 0 calc(66.6% - 0.5px), rgb(255 255 255 / 0.28) 0 calc(66.6% + 0.5px), transparent 0),
-      linear-gradient(180deg, transparent calc(33.3% - 0.5px), rgb(255 255 255 / 0.28) 0 calc(33.3% + 0.5px), transparent 0 calc(66.6% - 0.5px), rgb(255 255 255 / 0.28) 0 calc(66.6% + 0.5px), transparent 0);
-  }
-  .tripod {
-    position: absolute;
-    inset: 0;
-  }
-</style>
-<div id="stage">
-  <div class="keil" style="--from: 88%; --to: 70%"></div>
-  <svg class="tripod" viewBox="0 0 640 760" aria-hidden="true">
-    <!-- three legs from the head, out of the picture at the bottom -->
-    <g stroke="#121315" stroke-linecap="round">
-      <path d="M320 422 L150 780" stroke-width="13" />
-      <path d="M320 422 L490 780" stroke-width="13" />
-      <path d="M320 422 L322 780" stroke-width="11" stroke="#25272b" />
-      <path d="M214 600 L426 600" stroke-width="5" stroke="#25272b" />
-    </g>
-    <!-- the column and the head -->
-    <rect x="309" y="378" width="22" height="58" rx="5" fill="#25272b" />
-    <circle cx="320" cy="392" r="17" fill="#121315" />
-    <rect x="292" y="380" width="56" height="12" rx="4" fill="#121315" />
-  </svg>
-  <div class="cam">
-    <div class="scr">
-      <div class="grid"></div>
-      <div class="rec"><i></i>00:47:12</div>
-      <div class="shutter"><i></i></div>
-      <div class="zoom"><b class="on">.5</b><b>1×</b><b>2</b></div>
-    </div>
-  </div>
-</div>
+<div id="stage"><svg id="art" xmlns="http://www.w3.org/2000/svg"></svg></div>
 <script src="../stage.js"></script>
+<script src="../hall.js"></script>
 <script>
-  S.stage(640, 760);
-  document.getElementById("stage").classList.add("hall");
+  const W = 640;
+  const H = 640;
+  S.stage(W, H, { budget1x: 60 * 1024, budget2x: 110 * 1024 });
+  const v = HALL.view({ eye: [20, 31, 46], look: [20, 12.5, 0], focal: 660, cx: W / 2, cy: 344, line: 1.2 });
+  const { C, P, poly, path, curve } = v;
+  const art = [v.hall({ wallTop: 22, near: 70 })];
+
+  // the camera's place: just off the court at the centre line. The tripod and the phone are drawn
+  // as a sign at a fixed size (true to scale, a 3 m tripod against a 40 m court would be a stroke)
+  const [fx, fy] = P([20, 24.2, 0]);
+  const TH = 178; // the tripod's height in px, foot to phone
+  const lens = [fx, fy - TH - 18];
+  // what the camera sees: from its lens to the far corners, the court in its light
+  art.push(poly([lens, [-1.5, -0.8, 0], [41.5, -0.8, 0]], `fill="${C.attn}" fill-opacity=".26"`));
+  for (const corner of [[0, 0, 0], [40, 0, 0]])
+    art.push(path([lens, corner], `stroke="${C.ink}" stroke-width="1.8" stroke-dasharray="2 6" stroke-linecap="round"`));
+  art.push(v.goal(-1), v.goal(1));
+  // a yellow ring on the floor, in the floor's perspective
+  const ring = curve((t) => [20 + 2.1 * Math.cos(t), 24.2 + 2.1 * Math.sin(t), 0], 0, 2 * Math.PI, 72);
+  const ringD = `M${ring.map((p) => P(p).map((n) => n.toFixed(1)).join(" ")).join(" L")}Z`;
+  art.push(`<path d="${ringD}" fill="${C.attn}" fill-opacity=".45" stroke="${C.ink}" stroke-width="9"/>`);
+  art.push(`<path d="${ringD}" fill="none" stroke="${C.attn}" stroke-width="5"/>`);
+  // the tripod: three legs to the head, the column up to the phone
+  const head = [fx, fy - TH + 34];
+  const crown = [fx, fy - TH];
+  const leg = `stroke="${C.ink}" stroke-width="5" stroke-linecap="round" fill="none"`;
+  const feet = [[fx - 34, fy + 9], [fx + 34, fy + 9], [fx + 4, fy - 12]];
+  art.push(`<path d="M${feet[2].join(" ")}L${head.join(" ")}" ${leg} stroke-width="4"/>`);
+  art.push(`<path d="M${head.join(" ")}L${crown.join(" ")}" ${leg} stroke-width="7"/>`);
+  art.push(`<path d="M${feet[0].join(" ")}L${head.join(" ")}L${feet[1].join(" ")}" ${leg} stroke-linejoin="round"/>`);
+  // the phone across, filming the court: its back to us, the lenses top left
+  const pw = 88;
+  const ph = 44;
+  const r = { x: fx - pw / 2, y: crown[1] - ph + 6 };
+  art.push(`<rect x="${fx - 12}" y="${crown[1] - 4}" width="24" height="12" fill="${C.ink}"/>`);
+  art.push(`<rect x="${r.x}" y="${r.y}" width="${pw}" height="${ph}" rx="9" fill="${C.ink}"/>`);
+  art.push(`<rect x="${r.x + 9}" y="${r.y + 8}" width="34" height="27" rx="8" fill="#33363b"/>`);
+  art.push(`<circle cx="${r.x + 21}" cy="${r.y + 18}" r="6" fill="#0b0c0d" stroke="#7a8089" stroke-width="1.5"/>`);
+  art.push(`<circle cx="${r.x + 34}" cy="${r.y + 26}" r="4" fill="#0b0c0d" stroke="#7a8089" stroke-width="1.5"/>`);
+  // the height: «3 m» beside the tripod
+  const mx = fx + 78;
+  art.push(`<path d="M${mx} ${fy}V${crown[1] - ph / 2}M${mx - 9} ${fy}h18M${mx - 9} ${crown[1] - ph / 2}h18" stroke="${C.ink}" stroke-width="2.4" fill="none"/>`);
+  art.push(`<text x="${mx + 16}" y="${(fy + crown[1] - ph / 2) / 2 + 9}" font-family="Plex Mono, ui-monospace, monospace" font-weight="500" font-size="26" fill="${C.ink}">3 m</text>`);
+
+  const svg = document.getElementById("art");
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  svg.setAttribute("width", W);
+  svg.setAttribute("height", H);
+  svg.style.display = "block";
+  svg.innerHTML = `<rect width="${W}" height="${H}" fill="${C.ground}"/>` + art.join("");
   S.done();
 </script>

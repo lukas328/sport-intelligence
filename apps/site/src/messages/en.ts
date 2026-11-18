@@ -147,9 +147,9 @@ const en: Messages = {
     stepsTitle: "Film. Upload. Check.",
     stepsLead: "The analysis suggests and only asks where it is unsure.",
     steps: [
-      { title: "Film", text: "Phone or camera high up at the halfway line, both goals in the picture. Fixed is best, panning works too.", alt: "A phone on its side on a tripod in front of the hall, filming the match with the wide angle.", points: ["Camera high, with a wide angle", "Both goals and goal areas in the picture"] },
-      { title: "Upload", text: "Pick the video. The app shows how far the analysis is and tells you when it is done.", alt: "The app when uploading: which match is this video from? Below it two matches to choose from, the first ringed in yellow.", points: ["Pick the match, then the video", "The bell tells you when it is ready"] },
-      { title: "Check", text: "The analysis suggests the court and the goals. Where it is unsure, it asks you: at most ten questions per match, usually a few minutes.", alt: "The app while checking: the picture from the video with four yellow points on the corners of the court, below it the question is the court right? and the button Fits.", points: ["The analysis suggests the court", "Tap once, that is it"] },
+      { title: "Film", text: "Phone or camera high up at the halfway line, both goals in the picture. Fixed is best, panning works too.", alt: "Drawing: a hall seen from above, the camera on a tall tripod at the halfway line, about 3 metres high. It sees the whole court with both goals.", points: ["Camera high, with a wide angle", "Both goals and goal areas in the picture"] },
+      { title: "Upload", text: "Pick the video. The app shows how far the analysis is and tells you when it is done.", alt: "The app when uploading: which match is this video from? Two matches to choose from. Below, the bar: 12 % uploaded (420 MB of 3.4 GB).", points: ["Pick the match, then the video", "The bell tells you when it is ready"] },
+      { title: "Check", text: "The analysis suggests the court and the goals. Where it is unsure, it asks you: at most ten questions per match, usually a few minutes.", alt: "The app while checking: the picture from the video with the suggested court in yellow, four points on the corners. Below, question 1 of 1: is the court right? and the button Looks right.", points: ["The analysis suggests the court", "Tap once, that is it"] },
     ],
     shareWhen: "Tuesday, before training",
     shareTitle: "Four scenes in the team chat.",
@@ -231,17 +231,17 @@ const en: Messages = {
       {
         title: "Film",
         text: "Phone or camera high at the halfway line, both goals in the picture with the wide angle. Fixed is best, panning is fine too. Keep filming through half time.",
-        alt: "A phone on its side on a tripod in front of the hall, filming the match with the wide angle.",
+        alt: "Drawing: a hall seen from above, the camera on a tall tripod at the halfway line, about 3 metres high. It sees the whole court with both goals.",
       },
       {
         title: "Upload",
         text: "In the app, pick the match, then the video, ideally on Wi-Fi. The analysis finds the court and the players and looks for the goal moments. You do not have to stay: the bell tells you when it is done.",
-        alt: "Uploading a video in the app: which match is this video from? Two matches to choose from and \"Or create a new match\".",
+        alt: "The app when uploading: which match is this video from? Two matches to choose from. Below, the bar: 12 % uploaded (420 MB of 3.4 GB).",
       },
       {
         title: "Check",
         text: "Where the analysis is unsure, it asks you, with the short scene: is the court right? Goal or not, for whom? At most ten questions per match, usually in a few minutes, and skipping them all works too. Where the shot came from, you tap if you like.",
-        alt: "A question while checking: is the court right? Above, the picture from the video with four yellow dots on the corners of the court, below the buttons Fits and Not sure.",
+        alt: "The app while checking: the picture from the video with the suggested court in yellow, four points on the corners. Below, question 1 of 1: is the court right? and the button Looks right.",
       },
       {
         title: "Watch and share",
@@ -282,7 +282,7 @@ const en: Messages = {
     checkPrint: "Checklist to print",
     afterTitle: "Then: upload.",
     afterText: "At home on Wi-Fi, open the match in the app and pick the video. The analysis does the rest.",
-    afterAlt: "Uploading a video in the app: which match is this video from? Two matches to choose from and \"Or create a new match\".",
+    afterAlt: "The app when uploading: which match is this video from? Two matches to choose from. Below, the bar: 12 % uploaded (420 MB of 3.4 GB).",
     moreTitle: "In detail",
     more: [
       { q: "Not everything fits in the picture?", a: "Higher, a few metres further back or more wide angle. Better both goals with some margin than close and sharp. If the two near corners are missing, that is fine." },
