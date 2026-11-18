@@ -158,7 +158,7 @@ const en: Messages = {
     ],
     shareWhen: "Tuesday, before training",
     shareTitle: "Four scenes in the team chat.",
-    shareText: "The four clearest scenes go to the team chat as a collection, one link for all. The players see for themselves where the gap is. On top, the app suggests training tips with drills, here \"Getting back 2 against 3 after a turnover\" against the {fast} goals conceded from fast breaks.",
+    shareText: "The four clearest scenes go to the team chat as a collection: a choice of scenes behind one link. The players see for themselves where the gap is. On top, the app suggests training tips with drills, here \"Getting back 2 against 3 after a turnover\" against the {fast} goals conceded from fast breaks.",
     sharePoints: ["No account", "Shirt numbers, not names", "The link expires"],
     shareAlt: "How a collection arrives in the chat: a card in the club colour titled Close the right wing, below it the team and 4 scenes. Further down the button to share the link.",
     chat: {
@@ -206,26 +206,26 @@ const en: Messages = {
     canTitle: "What the analysis does",
     can: [
       "Find the court in the video and follow the players and the ball. If the camera stands the same way in the same hall again, it takes the court over from an earlier video.",
-      "Suggest the moments when a goal was scored, and only ask where it is unsure. If there is a match report, it takes the goals and scorers from it.",
-      "Every goal as a scene in the video, with the result, the run of play and the positions from above on the tactics camera.",
+      "Find the moments when a goal was scored. If there is a match report, it takes the goals and scorers from it.",
+      "Every goal as a scene in the video, with the result, the run of play and the tactics camera: the scene from above, with every player.",
       "Read shirt numbers where they can be seen in the picture.",
-      "Turn the goals with a shot spot into three things to take home, with the scenes behind them.",
+      "Turn the goals whose shot spot you tapped into the three things: the three biggest patterns, with the scenes behind them.",
     ],
     notTitle: "What you do",
     not: [
       "Answer a few questions where the analysis is unsure: at most ten per match, usually in a few minutes. You can also skip them all.",
-      "Confirm the court with a single tap. You only set corners when the analysis is unsure, and only once per hall and camera spot.",
+      "Confirm the court with a single tap. You only set corners when the analysis cannot find the court for sure, and only once per hall and camera spot.",
       "If you like, tap where a goal was thrown from. That is what the three things are made of.",
       "Mark saves and missed shots, if you want them.",
       "Decide which scenes the team sees, and share the link.",
     ],
     notFiles: "Analyse a match made of two files. Only the first one is analysed.",
-    note: "Every number comes with its base, for example 11 of 29, and every number has its scenes.",
+    note: "Every number says what it is worked out from, for example 11 of 29 rather than 38 per cent, and every number has its scenes.",
   },
   how: {
     title: "How it works",
     head: "From the match to the analysis, in four steps.",
-    lead: "You film and upload, the analysis runs. It suggests, only asks where it is unsure, and you get every goal as a scene.",
+    lead: "You film and upload, the analysis runs, you answer a few questions. Then you have every goal as a scene.",
     steps: [
       {
         title: "Film",
@@ -244,14 +244,14 @@ const en: Messages = {
       },
       {
         title: "Watch and share",
-        text: "Score, run of the match, every goal as a scene and the positions from above; with enough goals and their shot spots, three things to take away. The scenes that matter go to the team chat as a collection, by link.",
+        text: "Score, run of the match, every goal as a scene and the positions from above. If you tapped where each goal was thrown from (the shot spot), the three things come on top: the three biggest patterns for training, from three goals out of the same zone. The scenes that matter go to the team chat as a collection, a choice of scenes behind one link.",
         alt: "The first of the three things on a phone: 11 of 29 goals conceded on the right wing, below it the half court with the shots, all from the right wing.",
       },
     ],
     honestAll: "The full list, point by point",
     shotsTitle: "What it looks like in the app",
     shotsNote: "Pictures from the app, with an invented example club.",
-    shots: [{ alt: "A match in the app: the video with a timeline of all goals on the left, the list of scenes on the right, the current one in yellow.", caption: "Every goal as a scene: tap it, and the video jumps there.", text: "On the right the scenes of the phase, below all goals of the match on one line. You tap, the video plays right there." }, { alt: "Scenes in the app: search for goal conceded, right wing, last 3 with video, answer 26 of 77 goals conceded on the right wing and the button to play all 26.", caption: "Searching scenes: the answer with its basis.", text: "Type what you are looking for, say goal conceded, right wing, last three matches. The number comes with its basis, and all scenes play in a row." }, { alt: "The season in the app: five matches, and the right wing stays open. Below, the topics that repeat, with one bar per match, on the right the half court with the shots.", caption: "The season: what repeats.", text: "One bar per match shows whether a topic stays or goes away. Next to it the shots of all matches on the half court." }, { alt: "How a collection arrives in the chat: a card in the club colour titled Close the right wing, below it the team and 4 scenes. Further down the button to share the link.", caption: "One link for the team, no account for the players.", text: "The key scenes go to the team chat as a collection by link. Opening it needs no account, and the link expires." }],
+    shots: [{ alt: "A match in the app: the video with a timeline of all goals on the left, the list of scenes on the right, the current one in yellow.", caption: "Every goal as a scene: tap it, and the video jumps there.", text: "On the right the scenes of the phase, below all goals of the match on one line. You tap, the video plays right there." }, { alt: "Scenes in the app: search for goal conceded, right wing, last 3 with video, answer 26 of 77 goals conceded on the right wing and the button to play all 26.", caption: "Searching scenes: the number and its scenes.", text: "Type what you are looking for, say goal conceded, right wing, last three matches. The number says what it is worked out from (26 of 77), and all scenes play in a row." }, { alt: "The season in the app: five matches, and the right wing stays open. Below, the topics that repeat, with one bar per match, on the right the half court with the shots.", caption: "The season: what repeats.", text: "One bar per match shows whether a topic stays or goes away. Next to it the shots of all matches on the half court." }, { alt: "How a collection arrives in the chat: a card in the club colour titled Close the right wing, below it the team and 4 scenes. Further down the button to share the link.", caption: "One link for the team, no account for the players.", text: "The key scenes go to the team chat as a collection by link. Opening it needs no account, and the link expires." }],
     tourLabel: "The four pictures from the app",
   },
   filming: {
@@ -501,7 +501,7 @@ const en: Messages = {
     principles: [
       { title: "Result before machine", text: "You see what came out. Where the analysis is unsure, it asks you instead of hiding it." },
       { title: "Little manual work", text: "A few questions instead of hours of cutting. No typing." },
-      { title: "Every number with its base", text: "11 of 29, not 38 per cent. And with every number the scenes, so you see for yourself what is behind it." },
+      { title: "Every number with its base", text: "11 of 29, not 38 per cent: the base says what a number is worked out from. And with every number the scenes, so you see for yourself what is behind it." },
     ],
     whoTitle: "Who we are",
     who: "What we stand for and where we are heading is on the page \"About us\".",
@@ -519,7 +519,7 @@ const en: Messages = {
     uid: "Company number",
   },
   seo: {
-    how: { title: "How the video analysis works", description: "Film, upload, check: the analysis suggests the goals and only asks you where it is unsure. Then scenes, run of play and positions from above." },
+    how: { title: "How the video analysis works", description: "Film, upload, check: the analysis finds the goals, you answer a few questions. Then scenes, run of play and positions from above." },
     filming: { title: "Filming a match: checklist and notice", description: "Five rules and the match day checklist: phone or camera high at the halfway line, both goals in the picture. With a hall plan and a notice to print." },
     demo: { title: "Demo match: what an analysis looks like", description: "An invented match to explore, no account needed: three things, scenes, tactics camera, figures with their source and goals conceded by position." },
     pricing: { title: "Prices: start for free, then from CHF 39", description: "30 days free with everything, automatic analysis included. Then Team for CHF 39 a month or the free plan; Club for several teams. Yearly QR invoice." },
@@ -549,7 +549,7 @@ const en: Messages = {
     related: "Read on",
     faqTitle: "Short answers",
     productTitle: "How Handball Intelligence helps",
-    productText: "The app takes part of this work off your hands. It finds the court and the players, suggests the goals and only asks you where it is unsure. Then you have every goal as a scene and the positions from above.",
+    productText: "The app takes part of this work off your hands. It finds the court, the players and the goals. Then you have every goal as a scene and the positions from above.",
     productLink: "How it works",
     all: "All guides",
   },
@@ -561,7 +561,7 @@ const en: Messages = {
     metaTitle: "Facts at a glance",
     description: "Handball Intelligence in brief: what it is, who it is for, what you need, what it can and cannot do, prices, data location and contact. For quoting.",
     head: "Handball Intelligence in brief.",
-    lead: "Handball Intelligence is a web app for video analysis for handball coaches. You film a match with a phone or camera and upload it. The analysis suggests the goals and only asks you where it is unsure. Then you see every goal as a scene, the run of play and the positions from above.",
+    lead: "Handball Intelligence is a web app for video analysis for handball coaches. You film a match with a phone or camera and upload it. The analysis finds the goals, you check with a few questions. Then you see every goal as a scene, the run of play and the positions from above.",
     tableTitle: "The facts",
     tableCaption: "Handball Intelligence: the key facts",
     rows: [
@@ -572,7 +572,7 @@ const en: Messages = {
       { k: "How it works", v: "Film, upload, wait until the app says it is done, then check: where the analysis is unsure, it asks you, such as whether the court is right or whether a goal was scored in a moment. At most ten questions per match, usually answered in a few minutes; you can also skip them all. If the camera stands the same way in the same hall again, the analysis takes the court over for the next video. You tap the shot spot of a goal if you like." },
       { k: "With a match report", v: "If there is an official match report, goals and scorers come from it: automatically for teams in Switzerland, otherwise via the link to the report (handball.ch, DHB, nuLiga or HLA). The app works out their time in the video from the throw-off you confirm and does not ask about those goals again." },
       { k: "Analysis time", v: "The analysis runs in the background. The app shows how far it is and roughly how long it still takes, and tells you when it is done." },
-      { k: "What you get", v: "Result and run of play, every confirmed goal as a scene in the video, positions from above, three things to take home when there are enough goals with a shot spot, and a link for the team." },
+      { k: "What you get", v: "Result and run of play, every confirmed goal as a scene in the video, positions from above, the three things once you have tapped the shot spot for enough goals, and a link for the team." },
       { k: "What you do", v: "Answer a few questions where the analysis is unsure, confirm the court with a single tap, tap the shot spot if you like, mark saves and missed shots if you want them, and decide which scenes the team sees." },
       { k: "Other ways", v: "Cameras such as Veo or Pixellot film with their own camera and usually a subscription. Handball Intelligence needs no camera of its own: a phone or an existing camera is enough, and it analyses videos, also from a Veo download link. Whether Veo detects handball events automatically, Veo does not say (as of 13 November 2026). More in the German and French guide on ways to video analysis." },
       { k: "Prices", v: "Free without automatic analysis. Team: CHF {team} a month. Club: CHF {club} a month for up to {clubTeams} teams. 30 days free." },
@@ -608,7 +608,7 @@ const en: Messages = {
       {
         title: "You have the last word",
         text: [
-          "The analysis suggests and asks you where it is unsure. What you say counts, and every number has its scenes, so you see for yourself what is behind it.",
+          "The analysis suggests, you decide. What you say counts, and every number has its scenes, so you see for yourself what is behind it.",
         ],
       },
       {
@@ -636,7 +636,7 @@ const en: Messages = {
     contactTitle: "Write to us",
     contact: "Questions, criticism or a match where the analysis gets stuck: write to us at {email}.",
     homeTitle: "Who is behind it",
-    homeText: "We build video analysis for club handball coaches who do it as volunteers. The analysis suggests and only asks where it is unsure, and the video belongs to your club.",
+    homeText: "We build video analysis for club handball coaches who do it as volunteers. The analysis does the counting, you decide, and the video belongs to your club.",
     homeLink: "About us",
   },
   tools: {
@@ -713,7 +713,7 @@ const en: Messages = {
       title: "Calculate shooting and save percentage",
       metaTitle: "Calculator: shooting and save percentage",
       description: "Handball calculator: shooting percentage from goals and shots, goalkeeper save percentage from saves and goals conceded, with a sentence and its base to copy.",
-      lead: "Enter goals and shots, or saves and goals conceded. The calculator shows the percentage with its base, the way you can tell your team.",
+      lead: "Enter goals and shots, or saves and goals conceded. The calculator shows the percentage with its base, that is how many shots it rests on, the way you can tell your team.",
       shooting: "Shooting percentage",
       goals: "Goals",
       shots: "Shots",
@@ -762,7 +762,7 @@ const en: Messages = {
   },
   product: {
     "get-video": { tap: "Tap it, and the scene plays", timeline: "All goals on one line" },
-    "get-search": { answer: "The answer with its basis", play: "Play them all in a row" },
+    "get-search": { answer: "The number and where it comes from", play: "Play them all in a row" },
     "get-season": { bars: "One bar per match", dots: "Three matches, the same side" },
     share: { chat: "How it arrives in the team chat", nologin: "One link, no account needed" },
   },

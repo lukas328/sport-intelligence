@@ -156,7 +156,7 @@ const de = {
     ],
     shareWhen: "Dienstag, vor dem Training",
     shareTitle: "Vier Szenen in den Teamchat.",
-    shareText: "Die vier deutlichsten Szenen gehen als Sammlung in den Teamchat, ein Link für alle. Die Spieler sehen selbst, wo die Lücke ist. Dazu schlägt die App Trainingstipps mit Übungen vor, hier «Rückzug 3 gegen 2 nach Ballverlust» gegen die {fast} Gegentore nach Gegenstoss.",
+    shareText: "Die vier deutlichsten Szenen gehen als Sammlung in den Teamchat: eine Auswahl von Szenen hinter einem Link. Die Spieler sehen selbst, wo die Lücke ist. Dazu schlägt die App Trainingstipps mit Übungen vor, hier «Rückzug 3 gegen 2 nach Ballverlust» gegen die {fast} Gegentore nach Gegenstoss.",
     sharePoints: ["Ohne Konto", "Rückennummern statt Namen", "Der Link läuft ab"],
     shareAlt: "So kommt eine Sammlung im Chat an: eine Karte in der Vereinsfarbe mit dem Titel Aussen rechts zumachen, darunter das Team und 4 Szenen. Weiter unten der Knopf Link teilen.",
     chat: {
@@ -204,26 +204,26 @@ const de = {
     canTitle: "Das macht die Analyse",
     can: [
       "Das Spielfeld im Video finden und Spielerinnen, Spieler und Ball verfolgen. Steht die Kamera in derselben Halle wieder gleich, übernimmt sie das Spielfeld aus einem früheren Video.",
-      "Die Momente vorschlagen, in denen ein Tor gefallen ist, und nur dort fragen, wo sie unsicher ist. Gibt es einen Spielbericht, übernimmt sie Tore und Torschützen daraus.",
-      "Jedes Tor als Szene im Video, dazu Resultat, Spielverlauf und die Positionen von oben auf der Taktikkamera.",
+      "Die Momente finden, in denen ein Tor gefallen ist. Gibt es einen Spielbericht, übernimmt sie Tore und Torschützen daraus.",
+      "Jedes Tor als Szene im Video, dazu Resultat, Spielverlauf und die Taktikkamera: die Szene von oben, mit allen Spielern.",
       "Rückennummern lesen, wo sie im Bild zu sehen sind.",
-      "Aus den Toren mit Wurfort drei Dinge zum Mitnehmen machen, mit den Szenen dazu.",
+      "Aus den Toren, bei denen du den Wurfort angetippt hast, die drei Dinge machen: die drei grössten Muster, mit den Szenen dazu.",
     ],
     notTitle: "Das machst du",
     not: [
       "Ein paar Fragen beantworten, wo die Analyse unsicher ist: höchstens zehn pro Spiel, meist in ein paar Minuten. Du kannst sie auch alle überspringen.",
-      "Das Spielfeld mit einem Tippen bestätigen. Ecken setzt du nur, wenn die Analyse unsicher ist, und pro Halle und Kameraplatz nur einmal.",
+      "Das Spielfeld mit einem Tippen bestätigen. Ecken setzt du nur, wenn die Analyse das Feld nicht sicher findet, und pro Halle und Kameraplatz nur einmal.",
       "Wenn du magst, nach einem Tor antippen, von wo geworfen wurde. Daraus entstehen die drei Dinge.",
       "Paraden und Fehlwürfe markieren, wenn du sie willst.",
       "Entscheiden, welche Szenen das Team sieht, und den Link teilen.",
     ],
     notFiles: "Ein Spiel aus zwei Dateien auswerten. Ausgewertet wird nur die erste.",
-    note: "Jede Zahl steht mit ihrer Basis da, zum Beispiel 11 von 29, und zu jeder gehören die Szenen.",
+    note: "Jede Zahl sagt, woraus sie gerechnet ist, zum Beispiel 11 von 29 statt 38 Prozent, und zu jeder gehören die Szenen.",
   },
   how: {
     title: "So funktioniert es",
     head: "Vom Spiel zur Auswertung, in vier Schritten.",
-    lead: "Du filmst und lädst hoch, die Analyse rechnet. Sie schlägt vor, fragt nur, wo sie unsicher ist, und du bekommst jedes Tor als Szene.",
+    lead: "Du filmst und lädst hoch, die Analyse rechnet, du beantwortest ein paar Fragen. Danach hast du jedes Tor als Szene.",
     steps: [
       {
         title: "Filmen",
@@ -242,14 +242,14 @@ const de = {
       },
       {
         title: "Anschauen und teilen",
-        text: "Resultat, Spielverlauf, jedes Tor als Szene und die Positionen von oben; bei genug Toren mit Wurfort drei Dinge zum Mitnehmen. Die wichtigsten Szenen schickst du als Sammlung per Link in den Teamchat.",
+        text: "Resultat, Spielverlauf, jedes Tor als Szene und die Positionen von oben. Hast du bei den Toren angetippt, von wo geworfen wurde (der Wurfort), kommen die drei Dinge dazu: die drei grössten Muster fürs Training, ab drei Toren aus derselben Zone. Die wichtigsten Szenen schickst du als Sammlung in den Teamchat, eine Auswahl hinter einem Link.",
         alt: "Das erste der drei Dinge am Handy: 11 von 29 Gegentoren über aussen rechts, darunter das halbe Feld mit den Würfen, alle aussen rechts.",
       },
     ],
     honestAll: "Die ganze Liste, Punkt für Punkt",
     shotsTitle: "So sieht es in der App aus",
     shotsNote: "Bilder aus der App, mit einem erfundenen Beispielverein.",
-    shots: [{ alt: "Ein Spiel in der App: links das Video mit der Zeitleiste aller Tore, rechts die Liste der Szenen, die laufende gelb markiert.", caption: "Jedes Tor als Szene: antippen, und das Video springt hin.", text: "Rechts die Szenen der Phase, unten alle Tore des Spiels auf einer Linie. Du tippst, das Video läuft genau dort." }, { alt: "Szenen in der App: Suche nach Gegentor, aussen rechts, letzte 3 mit Video, Antwort 26 von 77 Gegentoren über aussen rechts und der Knopf Alle 26 abspielen.", caption: "Szenen suchen: die Antwort mit ihrer Basis.", text: "Schreib, was du suchst, zum Beispiel Gegentor, aussen rechts, letzte drei Spiele. Die Zahl steht mit ihrer Basis da, und alle Szenen laufen am Stück." }, { alt: "Saison in der App: Titel Fünf Spiele. Und aussen rechts bleibt offen. Darunter Themen, die sich wiederholen, mit einem Balken pro Spiel, rechts das halbe Feld mit den Würfen.", caption: "Die Saison: was sich wiederholt.", text: "Ein Balken pro Spiel zeigt, ob ein Thema bleibt oder weg ist. Daneben die Würfe aus allen Spielen auf dem halben Feld." }, { alt: "So kommt eine Sammlung im Chat an: eine Karte in der Vereinsfarbe mit dem Titel Aussen rechts zumachen, darunter das Team und 4 Szenen. Weiter unten der Knopf Link teilen.", caption: "Ein Link fürs Team, ohne Konto für die Spieler.", text: "Die wichtigsten Szenen kommen als Sammlung per Link in den Teamchat. Wer ihn öffnet, braucht kein Konto, und der Link läuft ab." }],
+    shots: [{ alt: "Ein Spiel in der App: links das Video mit der Zeitleiste aller Tore, rechts die Liste der Szenen, die laufende gelb markiert.", caption: "Jedes Tor als Szene: antippen, und das Video springt hin.", text: "Rechts die Szenen der Phase, unten alle Tore des Spiels auf einer Linie. Du tippst, das Video läuft genau dort." }, { alt: "Szenen in der App: Suche nach Gegentor, aussen rechts, letzte 3 mit Video, Antwort 26 von 77 Gegentoren über aussen rechts und der Knopf Alle 26 abspielen.", caption: "Szenen suchen: die Zahl und die Szenen dazu.", text: "Schreib, was du suchst, zum Beispiel Gegentor, aussen rechts, letzte drei Spiele. Die Zahl sagt, woraus sie gerechnet ist (26 von 77), und alle Szenen laufen am Stück." }, { alt: "Saison in der App: Titel Fünf Spiele. Und aussen rechts bleibt offen. Darunter Themen, die sich wiederholen, mit einem Balken pro Spiel, rechts das halbe Feld mit den Würfen.", caption: "Die Saison: was sich wiederholt.", text: "Ein Balken pro Spiel zeigt, ob ein Thema bleibt oder weg ist. Daneben die Würfe aus allen Spielen auf dem halben Feld." }, { alt: "So kommt eine Sammlung im Chat an: eine Karte in der Vereinsfarbe mit dem Titel Aussen rechts zumachen, darunter das Team und 4 Szenen. Weiter unten der Knopf Link teilen.", caption: "Ein Link fürs Team, ohne Konto für die Spieler.", text: "Die wichtigsten Szenen kommen als Sammlung per Link in den Teamchat. Wer ihn öffnet, braucht kein Konto, und der Link läuft ab." }],
     tourLabel: "Die vier Bilder aus der App",
   },
   filming: {
@@ -499,7 +499,7 @@ const de = {
     principles: [
       { title: "Ergebnis vor Technik", text: "Du siehst, was herauskommt. Wo die Analyse unsicher ist, fragt sie dich, statt es zu verstecken." },
       { title: "Wenig Handarbeit", text: "Ein paar Fragen statt Stunden schneiden. Eintippen musst du nichts." },
-      { title: "Jede Zahl mit ihrer Basis", text: "11 von 29, nicht 38 Prozent. Und zu jeder Zahl die Szenen, damit du selbst siehst, was dahinter steckt." },
+      { title: "Jede Zahl mit ihrer Basis", text: "11 von 29, nicht 38 Prozent: die Basis sagt, woraus eine Zahl gerechnet ist. Und zu jeder Zahl die Szenen, damit du selbst siehst, was dahinter steckt." },
     ],
     whoTitle: "Wer wir sind",
     who: "Wofür wir stehen und wohin es gehen soll, steht auf der Seite «Über uns».",
@@ -517,7 +517,7 @@ const de = {
     uid: "UID",
   },
   seo: {
-    how: { title: "So funktioniert die Videoanalyse", description: "Filmen, hochladen, prüfen: Die Analyse schlägt die Tore vor und fragt dich nur, wo sie unsicher ist. Danach Szenen, Spielverlauf und Positionen von oben." },
+    how: { title: "So funktioniert die Videoanalyse", description: "Filmen, hochladen, prüfen: Die Analyse findet die Tore, du beantwortest ein paar Fragen. Danach Szenen, Spielverlauf und Positionen von oben." },
     filming: { title: "Spiel filmen: Checkliste und Aushang", description: "Fünf Regeln und die Checkliste für den Spieltag: Handy oder Kamera hoch an der Mittellinie, beide Tore im Bild. Mit Hallenplan und Aushang zum Drucken." },
     demo: { title: "Demo-Spiel: so sieht eine Auswertung aus", description: "Ein erfundenes Spiel zum Anfassen, ohne Konto: drei Dinge, Szenen, Taktikkamera, Zahlen mit Quelle und Gegentore nach Position." },
     pricing: { title: "Preise: gratis starten, dann ab CHF 39", description: "30 Tage gratis mit allem, auch der Analyse. Danach Team für CHF 39 im Monat oder der Gratis-Plan; Verein für mehrere Teams. Jahresrechnung per QR-Rechnung." },
@@ -547,7 +547,7 @@ const de = {
     related: "Mehr dazu",
     faqTitle: "Kurze Antworten",
     productTitle: "So hilft dir Handball Intelligence",
-    productText: "Die App nimmt dir einen Teil dieser Arbeit ab. Sie findet Feld und Spieler, schlägt die Tore vor und fragt dich nur, wo sie unsicher ist. Danach hast du jedes Tor als Szene und die Positionen von oben.",
+    productText: "Die App nimmt dir einen Teil dieser Arbeit ab. Sie findet Feld, Spieler und Tore. Danach hast du jedes Tor als Szene und die Positionen von oben.",
     productLink: "So funktioniert es",
     all: "Alle Ratgeber",
   },
@@ -559,7 +559,7 @@ const de = {
     metaTitle: "Fakten auf einen Blick",
     description: "Handball Intelligence in Kürze: was es ist, für wen, was du brauchst, was die Analyse macht und was du machst, Preise, Datenstandort und Kontakt. Zum Zitieren.",
     head: "Handball Intelligence in Kürze.",
-    lead: "Handball Intelligence ist eine Web-App zur Videoanalyse für Handballtrainerinnen und -trainer. Du filmst ein Spiel mit Handy oder Kamera und lädst es hoch. Die Analyse schlägt die Tore vor und fragt dich nur, wo sie unsicher ist. Danach siehst du jedes Tor als Szene, den Spielverlauf und die Positionen von oben.",
+    lead: "Handball Intelligence ist eine Web-App zur Videoanalyse für Handballtrainerinnen und -trainer. Du filmst ein Spiel mit Handy oder Kamera und lädst es hoch. Die Analyse findet die Tore, du prüfst mit ein paar Fragen. Danach siehst du jedes Tor als Szene, den Spielverlauf und die Positionen von oben.",
     tableTitle: "Die Fakten",
     tableCaption: "Handball Intelligence: die wichtigsten Angaben",
     rows: [
@@ -570,7 +570,7 @@ const de = {
       { k: "Wie es abläuft", v: "Filmen, hochladen, warten, bis die App «fertig» meldet, dann prüfen: Wo die Analyse unsicher ist, fragt sie dich, etwa ob das Spielfeld passt oder ob in einem Moment ein Tor gefallen ist. Höchstens zehn Fragen pro Spiel, meist in ein paar Minuten beantwortet; du kannst sie auch alle überspringen. Steht die Kamera in derselben Halle wieder gleich, übernimmt die Analyse das Spielfeld fürs nächste Video. Den Wurfort eines Tors tippst du an, wenn du magst." },
       { k: "Mit Spielbericht", v: "Gibt es einen offiziellen Spielbericht, kommen Tore und Torschützen daraus: für Teams aus der Schweiz von selbst, sonst über den Link zum Spielbericht (handball.ch, DHB, nuLiga oder HLA). Die App rechnet ihre Zeit im Video über den Anwurf, den du beim Prüfen bestätigst, und fragt solche Tore nicht noch einmal." },
       { k: "Dauer der Analyse", v: "Die Analyse läuft im Hintergrund. Die App zeigt dir, wie weit sie ist und wie lange es etwa noch dauert, und meldet sich, wenn sie fertig ist." },
-      { k: "Was du bekommst", v: "Resultat und Spielverlauf, jedes bestätigte Tor als Szene im Video, die Positionen von oben, bei genug Toren mit Wurfort drei Dinge zum Mitnehmen und einen Link fürs Team." },
+      { k: "Was du bekommst", v: "Resultat und Spielverlauf, jedes bestätigte Tor als Szene im Video, die Positionen von oben, die drei Dinge, sobald du bei genug Toren den Wurfort angetippt hast, und einen Link fürs Team." },
       { k: "Was du machst", v: "Ein paar Fragen beantworten, wo die Analyse unsicher ist, das Spielfeld mit einem Tippen bestätigen, den Wurfort antippen, wenn du magst, Paraden und Fehlwürfe markieren, wenn du sie willst, und entscheiden, welche Szenen das Team sieht." },
       { k: "Andere Wege", v: "Kameras wie Veo oder Pixellot filmen mit eigener Kamera und meist mit Abo. Handball Intelligence braucht keine eigene Kamera: Ein Handy oder eine vorhandene Kamera reicht, und es wertet Videos aus, auch über einen Download-Link von Veo. Ob Veo bei Handball Ereignisse automatisch erkennt, gibt Veo nicht an (Stand 13. November 2026). Mehr im Ratgeber «Welche Wege zur Videoanalyse gibt es für ein Handballteam?»." },
       { k: "Preise", v: "Gratis ohne automatische Analyse. Team: CHF {team} im Monat. Verein: CHF {club} im Monat für bis zu {clubTeams} Teams. 30 Tage gratis." },
@@ -606,7 +606,7 @@ const de = {
       {
         title: "Du hast das letzte Wort",
         text: [
-          "Die Analyse schlägt vor und fragt dich, wo sie unsicher ist. Was du sagst, gilt, und zu jeder Zahl gehören die Szenen, damit du selbst siehst, was dahinter steckt.",
+          "Die Analyse schlägt vor, du entscheidest. Was du sagst, gilt, und zu jeder Zahl gehören die Szenen, damit du selbst siehst, was dahinter steckt.",
         ],
       },
       {
@@ -634,7 +634,7 @@ const de = {
     contactTitle: "Schreib uns",
     contact: "Fragen, Kritik oder ein Spiel, bei dem die Analyse nicht weiterkommt: Schreib uns an {email}.",
     homeTitle: "Wer dahinter steht",
-    homeText: "Wir bauen Videoanalyse für Trainerinnen und Trainer im Vereinshandball, die das im Ehrenamt machen. Die Analyse schlägt vor und fragt nur, wo sie unsicher ist, und das Video gehört deinem Verein.",
+    homeText: "Wir bauen Videoanalyse für Trainerinnen und Trainer im Vereinshandball, die das im Ehrenamt machen. Die Analyse nimmt dir das Zählen ab, entscheiden tust du, und das Video gehört deinem Verein.",
     homeLink: "Über uns",
   },
   tools: {
@@ -711,7 +711,7 @@ const de = {
       title: "Wurfquote und Torhüterquote berechnen",
       metaTitle: "Rechner: Wurfquote und Torhüterquote",
       description: "Rechner für Handball: Wurfquote aus Toren und Würfen, Torhüterquote aus Paraden und Gegentoren, mit dem Satz samt Basis zum Kopieren. Ohne Anmeldung.",
-      lead: "Gib Tore und Würfe ein, oder Paraden und Gegentore. Der Rechner zeigt die Quote mit ihrer Basis, so wie du sie dem Team sagen kannst.",
+      lead: "Gib Tore und Würfe ein, oder Paraden und Gegentore. Der Rechner zeigt die Quote mit ihrer Basis, also aus wie vielen Würfen sie stammt, so wie du sie dem Team sagen kannst.",
       shooting: "Wurfquote",
       goals: "Tore",
       shots: "Würfe",
@@ -761,7 +761,7 @@ const de = {
   /** callouts on the product pictures (components/product-shot.tsx), by picture and callout */
   product: {
     "get-video": { tap: "Antippen, und die Szene läuft", timeline: "Alle Tore auf einer Linie" },
-    "get-search": { answer: "Die Antwort mit ihrer Basis", play: "Alle am Stück abspielen" },
+    "get-search": { answer: "Die Zahl und woraus sie kommt", play: "Alle am Stück abspielen" },
     "get-season": { bars: "Ein Balken pro Spiel", dots: "Drei Spiele, dieselbe Seite" },
     share: { chat: "So kommt es im Teamchat an", nologin: "Ein Link, kein Konto nötig" },
   },

@@ -158,7 +158,7 @@ const fr: Messages = {
     ],
     shareWhen: "Mardi, avant l'entraînement",
     shareTitle: "Quatre scènes dans le chat de l'équipe.",
-    shareText: "Les quatre scènes les plus claires partent dans le chat de l'équipe comme sélection, un lien pour toutes. Les joueurs voient eux-mêmes où est le trou. En plus, l'app propose des conseils d'entraînement avec des exercices, ici « Repli à 2 contre 3 après la perte » contre les {fast} buts encaissés sur contre-attaque.",
+    shareText: "Les quatre scènes les plus claires partent dans le chat de l'équipe comme sélection : un choix de scènes derrière un lien. Les joueurs voient eux-mêmes où est le trou. En plus, l'app propose des conseils d'entraînement avec des exercices, ici « Repli à 2 contre 3 après la perte » contre les {fast} buts encaissés sur contre-attaque.",
     sharePoints: ["Sans compte", "Des numéros au lieu des noms", "Le lien expire"],
     shareAlt: "Voici comment une sélection arrive dans le chat : une carte aux couleurs du club avec le titre Fermer l'aile droite, puis l'équipe et 4 scènes. Plus bas, le bouton pour partager le lien.",
     chat: {
@@ -206,26 +206,26 @@ const fr: Messages = {
     canTitle: "Ce que fait l'analyse",
     can: [
       "Trouver le terrain dans la vidéo et suivre les joueuses, les joueurs et le ballon. Si la caméra est placée de la même façon dans la même salle, elle reprend le terrain d'une vidéo précédente.",
-      "Proposer les moments où un but est tombé, et ne demander que là où elle hésite. S'il y a une feuille de match, elle en reprend les buts et les buteurs.",
-      "Chaque but comme scène dans la vidéo, avec le résultat, l'évolution du score et les positions vues d'en haut sur la caméra tactique.",
+      "Trouver les moments où un but est tombé. S'il y a une feuille de match, elle en reprend les buts et les buteurs.",
+      "Chaque but comme scène dans la vidéo, avec le résultat, l'évolution du score et la caméra tactique : la scène vue d'en haut, avec tous les joueurs.",
       "Lire les numéros de maillot là où ils sont visibles dans l'image.",
-      "À partir des buts avec lieu de tir, tirer trois points à retenir, avec les scènes.",
+      "À partir des buts dont tu as touché le lieu de tir, tirer les trois points : les trois plus grands schémas, avec les scènes.",
     ],
     notTitle: "Ce que tu fais",
     not: [
       "Répondre à quelques questions là où l'analyse hésite : dix au plus par match, en général en quelques minutes. Tu peux aussi toutes les passer.",
-      "Confirmer le terrain en touchant une fois. Tu ne places les coins que si l'analyse hésite, et une seule fois par salle et par emplacement de caméra.",
+      "Confirmer le terrain en touchant une fois. Tu ne places les coins que si l'analyse ne trouve pas le terrain avec certitude, et une seule fois par salle et par emplacement de caméra.",
       "Si tu veux, toucher l'endroit d'où un but a été tiré. C'est de là que viennent les trois points.",
       "Marquer les arrêts et les tirs manqués, si tu les veux.",
       "Décider quelles scènes l'équipe voit, et partager le lien.",
     ],
     notFiles: "Analyser un match composé de deux fichiers. Seul le premier est analysé.",
-    note: "Chaque chiffre est donné avec sa base, par exemple 11 sur 29, et chacun a ses scènes.",
+    note: "Chaque chiffre dit de quoi il est calculé, par exemple 11 sur 29 plutôt que 38 pour cent, et chacun a ses scènes.",
   },
   how: {
     title: "Comment ça marche",
     head: "Du match à l'analyse, en quatre étapes.",
-    lead: "Tu filmes et tu téléverses, l'analyse calcule. Elle propose, ne demande que là où elle hésite, et tu as chaque but comme scène.",
+    lead: "Tu filmes et tu téléverses, l'analyse calcule, tu réponds à quelques questions. Ensuite tu as chaque but comme scène.",
     steps: [
       {
         title: "Filmer",
@@ -244,14 +244,14 @@ const fr: Messages = {
       },
       {
         title: "Regarder et partager",
-        text: "Résultat, déroulement, chaque but comme scène et les positions vues d'en haut ; avec assez de buts et leur lieu de tir, trois choses à retenir. Les scènes importantes, tu les envoies en sélection par lien dans le chat de l'équipe.",
+        text: "Résultat, déroulement, chaque but comme scène et les positions vues d'en haut. Si tu as touché pour les buts l'endroit d'où le tir est parti (le lieu de tir), les trois points s'ajoutent : les trois plus grands schémas pour l'entraînement, dès trois buts de la même zone. Les scènes importantes, tu les envoies en sélection dans le chat de l'équipe, un choix de scènes derrière un lien.",
         alt: "La première des trois choses sur le téléphone : 11 buts encaissés sur 29 par l'aile droite, en dessous le demi-terrain avec les tirs, tous à l'aile droite.",
       },
     ],
     honestAll: "La liste complète, point par point",
     shotsTitle: "Voici à quoi ça ressemble dans l'app",
     shotsNote: "Images de l'app, avec un club d'exemple inventé.",
-    shots: [{ alt: "Un match dans l'app : à gauche la vidéo avec la frise de tous les buts, à droite la liste des scènes, celle en cours en jaune.", caption: "Chaque but comme scène : tu touches, et la vidéo saute au bon endroit.", text: "À droite les scènes de la phase, en bas tous les buts du match sur une ligne. Tu touches, la vidéo démarre exactement là." }, { alt: "Scènes dans l'app : recherche but encaissé, aile droite, 3 derniers avec vidéo, réponse 26 buts encaissés sur 77 par l'aile droite et le bouton pour les regarder tous.", caption: "Chercher des scènes : la réponse avec sa base.", text: "Écris ce que tu cherches, par exemple but encaissé, aile droite, trois derniers matchs. Le chiffre arrive avec sa base, et toutes les scènes passent d'affilée." }, { alt: "La saison dans l'app : cinq matchs, et l'aile droite reste ouverte. En dessous, les thèmes qui se répètent, avec une barre par match, à droite le demi-terrain avec les tirs.", caption: "La saison : ce qui se répète.", text: "Une barre par match montre si un thème reste ou disparaît. À côté, les tirs de tous les matchs sur le demi-terrain." }, { alt: "Voici comment une sélection arrive dans le chat : une carte aux couleurs du club avec le titre Fermer l'aile droite, puis l'équipe et 4 scènes. Plus bas, le bouton pour partager le lien.", caption: "Un lien pour l'équipe, sans compte pour les joueurs.", text: "Les scènes importantes partent en sélection par lien dans le chat de l'équipe. Pour l'ouvrir, pas besoin de compte, et le lien expire." }],
+    shots: [{ alt: "Un match dans l'app : à gauche la vidéo avec la frise de tous les buts, à droite la liste des scènes, celle en cours en jaune.", caption: "Chaque but comme scène : tu touches, et la vidéo saute au bon endroit.", text: "À droite les scènes de la phase, en bas tous les buts du match sur une ligne. Tu touches, la vidéo démarre exactement là." }, { alt: "Scènes dans l'app : recherche but encaissé, aile droite, 3 derniers avec vidéo, réponse 26 buts encaissés sur 77 par l'aile droite et le bouton pour les regarder tous.", caption: "Chercher des scènes : le chiffre et ses scènes.", text: "Écris ce que tu cherches, par exemple but encaissé, aile droite, trois derniers matchs. Le chiffre dit de quoi il est calculé (26 sur 77), et toutes les scènes passent d'affilée." }, { alt: "La saison dans l'app : cinq matchs, et l'aile droite reste ouverte. En dessous, les thèmes qui se répètent, avec une barre par match, à droite le demi-terrain avec les tirs.", caption: "La saison : ce qui se répète.", text: "Une barre par match montre si un thème reste ou disparaît. À côté, les tirs de tous les matchs sur le demi-terrain." }, { alt: "Voici comment une sélection arrive dans le chat : une carte aux couleurs du club avec le titre Fermer l'aile droite, puis l'équipe et 4 scènes. Plus bas, le bouton pour partager le lien.", caption: "Un lien pour l'équipe, sans compte pour les joueurs.", text: "Les scènes importantes partent en sélection par lien dans le chat de l'équipe. Pour l'ouvrir, pas besoin de compte, et le lien expire." }],
     tourLabel: "Les quatre images de l'app",
   },
   filming: {
@@ -501,7 +501,7 @@ const fr: Messages = {
     principles: [
       { title: "Le résultat avant la technique", text: "Tu vois ce qui en ressort. Là où l'analyse hésite, elle te le demande au lieu de le cacher." },
       { title: "Peu de travail manuel", text: "Quelques questions au lieu d'heures de découpage. Rien à taper." },
-      { title: "Chaque chiffre avec sa base", text: "11 sur 29, pas 38 pour cent. Et pour chaque chiffre les scènes, pour que tu voies toi-même ce qu'il y a derrière." },
+      { title: "Chaque chiffre avec sa base", text: "11 sur 29, pas 38 pour cent : la base dit de quoi un chiffre est calculé. Et pour chaque chiffre les scènes, pour que tu voies toi-même ce qu'il y a derrière." },
     ],
     whoTitle: "Qui nous sommes",
     who: "Ce que nous défendons et où nous allons figure sur la page « Qui sommes-nous ».",
@@ -519,7 +519,7 @@ const fr: Messages = {
     uid: "IDE",
   },
   seo: {
-    how: { title: "Comment fonctionne l'analyse vidéo", description: "Filmer, téléverser, vérifier : l'analyse propose les buts et ne te demande que là où elle hésite. Puis scènes, évolution du score et positions." },
+    how: { title: "Comment fonctionne l'analyse vidéo", description: "Filmer, téléverser, vérifier : l'analyse trouve les buts, tu réponds à quelques questions. Puis scènes, évolution du score et positions." },
     filming: { title: "Filmer un match : liste et affiche", description: "Cinq règles et la liste du jour de match : téléphone ou caméra en hauteur à la ligne médiane, les deux buts dans l'image. Avec plan de la salle et affiche." },
     demo: { title: "Match de démo : voir une analyse", description: "Un match inventé à explorer, sans compte : trois points, scènes, caméra tactique, chiffres avec leur source et buts encaissés par position." },
     pricing: { title: "Prix : commencer gratuitement, puis dès CHF 39", description: "30 jours gratuits avec tout, analyse comprise. Ensuite Équipe pour CHF 39 par mois ou la formule gratuite ; Club pour plusieurs équipes. Facture annuelle QR." },
@@ -549,7 +549,7 @@ const fr: Messages = {
     related: "Pour aller plus loin",
     faqTitle: "Réponses courtes",
     productTitle: "Ce que Handball Intelligence fait pour toi",
-    productText: "L'app te décharge d'une partie de ce travail. Elle trouve le terrain et les joueurs, propose les buts et ne te demande que là où elle hésite. Ensuite tu as chaque but comme scène vidéo et les positions vues d'en haut.",
+    productText: "L'app te décharge d'une partie de ce travail. Elle trouve le terrain, les joueurs et les buts. Ensuite tu as chaque but comme scène vidéo et les positions vues d'en haut.",
     productLink: "Comment ça marche",
     all: "Tous les guides",
   },
@@ -561,7 +561,7 @@ const fr: Messages = {
     metaTitle: "L'essentiel en bref",
     description: "Handball Intelligence en bref : ce que c'est, pour qui, ce qu'il faut, ce que ça sait faire et pas, état des prix, lieu des données et contact. À citer.",
     head: "Handball Intelligence en bref.",
-    lead: "Handball Intelligence est une app web d'analyse vidéo pour les entraîneuses et entraîneurs de handball. Tu filmes un match avec un téléphone ou une caméra et tu le téléverses. L'analyse propose les buts et ne te demande que là où elle hésite. Ensuite tu vois chaque but comme scène vidéo, l'évolution du score et les positions vues d'en haut.",
+    lead: "Handball Intelligence est une app web d'analyse vidéo pour les entraîneuses et entraîneurs de handball. Tu filmes un match avec un téléphone ou une caméra et tu le téléverses. L'analyse trouve les buts, tu vérifies avec quelques questions. Ensuite tu vois chaque but comme scène vidéo, l'évolution du score et les positions vues d'en haut.",
     tableTitle: "Les faits",
     tableCaption: "Handball Intelligence : les informations essentielles",
     rows: [
@@ -572,7 +572,7 @@ const fr: Messages = {
       { k: "Déroulement", v: "Filmer, téléverser la vidéo, attendre que l'app annonce « terminé », puis vérifier : là où l'analyse hésite, elle te demande, par exemple si le terrain est juste ou si un but est tombé à un moment. Dix questions au plus par match, en général répondues en quelques minutes ; tu peux aussi toutes les passer. Si la caméra est placée de la même façon dans la même salle, l'analyse reprend le terrain pour la vidéo suivante. Le lieu de tir d'un but, tu le touches si tu veux." },
       { k: "Avec feuille de match", v: "S'il y a une feuille de match officielle, les buts et les buteurs en viennent : automatiquement pour les équipes de Suisse, sinon par le lien vers la feuille de match (handball.ch, DHB, nuLiga ou HLA). L'app calcule leur moment dans la vidéo à partir de l'engagement que tu confirmes, et ne redemande pas ces buts." },
       { k: "Durée de l'analyse", v: "L'analyse tourne en arrière-plan. L'app te montre où elle en est et combien de temps il reste environ, et te prévient quand elle est terminée." },
-      { k: "Ce que tu reçois", v: "Résultat et évolution du score, chaque but confirmé comme scène vidéo, les positions vues d'en haut, avec assez de buts avec lieu de tir trois points à retenir, et un lien pour l'équipe." },
+      { k: "Ce que tu reçois", v: "Résultat et évolution du score, chaque but confirmé comme scène vidéo, les positions vues d'en haut, les trois points dès que tu as touché le lieu de tir d'assez de buts, et un lien pour l'équipe." },
       { k: "Ce que tu fais", v: "Répondre à quelques questions là où l'analyse hésite, confirmer le terrain en touchant une fois, toucher le lieu de tir si tu veux, marquer les arrêts et les tirs manqués si tu les veux, et décider quelles scènes l'équipe voit." },
       { k: "Autres solutions", v: "Des caméras comme Veo ou Pixellot filment avec leur propre caméra et le plus souvent un abonnement. Handball Intelligence n'a pas besoin de caméra à lui : un téléphone ou une caméra existante suffit, et il analyse des vidéos, aussi via un lien de téléchargement Veo. Veo n'indique pas s'il reconnaît automatiquement des actions de handball (état au 13 novembre 2026). Plus dans le guide « Quelles solutions d'analyse vidéo pour une équipe de handball ? »." },
       { k: "Prix", v: "Gratuit sans analyse automatique. Équipe : CHF {team} par mois. Club : CHF {club} par mois jusqu'à {clubTeams} équipes. 30 jours gratuits." },
@@ -608,7 +608,7 @@ const fr: Messages = {
       {
         title: "Tu as le dernier mot",
         text: [
-          "L'analyse propose et te demande là où elle hésite. Ce que tu dis compte, et chaque chiffre a ses scènes, pour que tu voies toi-même ce qu'il y a derrière.",
+          "L'analyse propose, tu décides. Ce que tu dis compte, et chaque chiffre a ses scènes, pour que tu voies toi-même ce qu'il y a derrière.",
         ],
       },
       {
@@ -636,7 +636,7 @@ const fr: Messages = {
     contactTitle: "Écris-nous",
     contact: "Une question, une critique ou un match où l'analyse bloque : écris-nous à {email}.",
     homeTitle: "Qui est derrière",
-    homeText: "Nous construisons l'analyse vidéo pour les entraîneuses et entraîneurs de club bénévoles. L'analyse propose et ne demande que là où elle hésite, et la vidéo appartient à ton club.",
+    homeText: "Nous construisons l'analyse vidéo pour les entraîneuses et entraîneurs de club bénévoles. L'analyse compte à ta place, c'est toi qui décides, et la vidéo appartient à ton club.",
     homeLink: "Qui sommes-nous",
   },
   tools: {
@@ -713,7 +713,7 @@ const fr: Messages = {
       title: "Calculer le pourcentage de tirs et d'arrêts",
       metaTitle: "Calculateur : tirs et arrêts au handball",
       description: "Calculateur de handball : pourcentage de réussite au tir à partir des buts et des tirs, pourcentage d'arrêts du gardien, avec la phrase et sa base à copier.",
-      lead: "Entre les buts et les tirs, ou les arrêts et les buts encaissés. Le calculateur montre le pourcentage avec sa base, comme tu peux le dire à l'équipe.",
+      lead: "Entre les buts et les tirs, ou les arrêts et les buts encaissés. Le calculateur montre le pourcentage avec sa base, c'est-à-dire sur combien de tirs il repose, comme tu peux le dire à l'équipe.",
       shooting: "Réussite au tir",
       goals: "Buts",
       shots: "Tirs",
@@ -762,7 +762,7 @@ const fr: Messages = {
   },
   product: {
     "get-video": { tap: "Touche, et la scène démarre", timeline: "Tous les buts sur une ligne" },
-    "get-search": { answer: "La réponse avec sa base", play: "Tout regarder d'affilée" },
+    "get-search": { answer: "Le chiffre et d'où il vient", play: "Tout regarder d'affilée" },
     "get-season": { bars: "Une barre par match", dots: "Trois matchs, le même côté" },
     share: { chat: "Ce qui arrive dans le chat de l'équipe", nologin: "Un lien, sans compte" },
   },
