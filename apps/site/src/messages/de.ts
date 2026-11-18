@@ -876,9 +876,27 @@ const de = {
   /** callouts on the product pictures (components/product-shot.tsx), by picture and callout */
   product: {
     "get-video": { tap: "Antippen, und die Szene läuft", timeline: "Alle Tore auf einer Linie" },
-    "get-search": { answer: "Die Zahl und woraus sie kommt", play: "Alle am Stück abspielen" },
-    "get-season": { bars: "Ein Balken pro Spiel", dots: "Drei Spiele, dieselbe Seite" },
+    "get-search": { answer: "Die Antwort, mit ihrer Basis", play: "Alle {n} Szenen am Stück" },
+    "get-season": { bars: "Ein Balken pro Spiel" },
     share: { chat: "So kommt es im Teamchat an", nologin: "Ein Link, kein Konto nötig" },
+    /** the app's own words at the places the app tour pulls out of its pictures (U34, apps/web/messages) */
+    app: {
+      goal: "Tor {team} {clock}",
+      playing: "läuft gerade",
+      throwOff: "Anwurf",
+      halfTime: "Halbzeit",
+      fullTime: "Schluss",
+      answerOf: "von {of} Gegentoren über aussen rechts",
+      answerBase: "{percent} Prozent. Gegen Nachtwind waren es {n} von {of}.",
+      playAll: "Alle {n} abspielen",
+      wingTheme: "Gegentore über aussen rechts",
+      everyMatch: "In jedem Spiel mit Video die häufigste Seite. {n} von {of}.",
+      scenes: "{n} Szenen",
+      collection: "Aussen rechts zumachen",
+      team: "HC Tannengrün Herren 1",
+      collectionMeta: "{n} Szenen, kein Spielzug · {length}",
+      shareLink: "Link teilen",
+    },
   },
 };
 

@@ -47,10 +47,15 @@ centre lives at `{site}/{de|fr|en}/hilfe/{slug}/`; the app links there with `HB_
   and runs stay outside the goal area, the scene has a 6:0 defence in front of 6 m, the attack
   around 9 m, only the goalkeeper in the goal area, and the ball in every frame (tested in
   `src/lib/demo.test.ts`). The visitor's colour comes in with `?kit=red` (no storage).
-- Product pictures: `public/product/*.webp` (1x and @2x), made by `scripts/product-shots` from the
-  local app with the seeded demo club: `pnpm --filter @handball/site shots` (how:
-  `scripts/product-shots/README.md`); sizes and callouts in `src/lib/product-shots.json`, the
-  callout texts in `src/messages/*.ts` (`product`).
+- Product pictures: `public/product/*.webp` (1x, 2x and for the large ones 3x, each app picture in
+  de, fr and en), made by `scripts/product-shots` from the local app with the seeded demo club:
+  `pnpm --filter @handball/site shots` (how: `scripts/product-shots/README.md`); sizes and callouts
+  in `src/lib/product-shots.json`, the callout texts in `src/messages/*.ts` (`product`).
+  **Capture or component** (the rule, BEFUNDE-4 U34): a capture of the app is the proof, the whole
+  app frame as it really is; anything the text points at, anything that must be readable,
+  translated or in the visitor's colour is a live component on the page in the site's fonts and
+  tokens (the app tour's cut-outs, `src/components/tour-cuts.tsx`; the steps of «So funktioniert
+  es» follow the same rule). Details in `scripts/product-shots/README.md`.
 - Start page: one invented week with the demo match (BEFUNDE-2 W5, W22, L1): the hero «Profis haben
   Analysten. Du hast den Samstagabend.» with a short film of what the app does
   (`src/components/hero-film.tsx`: a blurred hall recording, the goals conceded laid on the half

@@ -331,6 +331,12 @@
     text-align: left;
     padding-left: 0;
   }
+  /* the app tour's pictures behind their live cut-outs (BEFUNDE-4 U34, components/tour-cuts.tsx):
+     the capture steps back, grey and pale, so the cut-outs carry the colour and the words */
+  .tour-dim img {
+    filter: grayscale(1) contrast(0.9);
+    opacity: 0.55;
+  }
   /*
    * product pictures (components/product-shot.tsx): ink arrows over the picture, labels as text
    * in yellow («schau hier», always with a word). The label grows with the picture but never

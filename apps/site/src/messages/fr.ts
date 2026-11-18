@@ -876,9 +876,26 @@ const fr: Messages = {
   },
   product: {
     "get-video": { tap: "Touche, et la scène démarre", timeline: "Tous les buts sur une ligne" },
-    "get-search": { answer: "Le chiffre et d'où il vient", play: "Tout regarder d'affilée" },
-    "get-season": { bars: "Une barre par match", dots: "Trois matchs, le même côté" },
+    "get-search": { answer: "La réponse, avec sa base", play: "Les {n} scènes d'affilée" },
+    "get-season": { bars: "Une barre par match" },
     share: { chat: "Ce qui arrive dans le chat de l'équipe", nologin: "Un lien, sans compte" },
+    app: {
+      goal: "But {team} {clock}",
+      playing: "en cours",
+      throwOff: "Engagement",
+      halfTime: "Mi-temps",
+      fullTime: "Fin",
+      answerOf: "sur {of} buts encaissés par l'ailier droit",
+      answerBase: "{percent} pour cent. Contre Nachtwind, {n} sur {of}.",
+      playAll: "Lire les {n}",
+      wingTheme: "Buts encaissés par l'ailier droit",
+      everyMatch: "Le côté le plus fréquent dans chaque match avec vidéo. {n} sur {of}.",
+      scenes: "{n} scènes",
+      collection: "Fermer l'aile droite",
+      team: "HC Tannengrün Hommes 1",
+      collectionMeta: "{n} scènes, aucun système · {length}",
+      shareLink: "Partager le lien",
+    },
   },
 };
 

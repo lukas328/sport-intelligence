@@ -876,9 +876,26 @@ const en: Messages = {
   },
   product: {
     "get-video": { tap: "Tap it, and the scene plays", timeline: "All goals on one line" },
-    "get-search": { answer: "The number and where it comes from", play: "Play them all in a row" },
-    "get-season": { bars: "One bar per match", dots: "Three matches, the same side" },
+    "get-search": { answer: "The answer, with its basis", play: "All {n} scenes in a row" },
+    "get-season": { bars: "One bar per match" },
     share: { chat: "How it arrives in the team chat", nologin: "One link, no account needed" },
+    app: {
+      goal: "Goal {team} {clock}",
+      playing: "playing now",
+      throwOff: "Throw-off",
+      halfTime: "Half time",
+      fullTime: "Full time",
+      answerOf: "of {of} goals conceded down the right wing",
+      answerBase: "{percent} percent. Against Nachtwind it was {n} of {of}.",
+      playAll: "Play all {n}",
+      wingTheme: "Goals conceded down the right wing",
+      everyMatch: "The most frequent side in every match with video. {n} of {of}.",
+      scenes: "{n} scenes",
+      collection: "Close the right wing",
+      team: "HC Tannengrün Men 1",
+      collectionMeta: "{n} scenes, no play · {length}",
+      shareLink: "Share link",
+    },
   },
 };
 

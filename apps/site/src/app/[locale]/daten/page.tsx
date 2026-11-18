@@ -3,6 +3,7 @@ import Link from "next/link";
 import { KitScope } from "@/components/kit";
 import { MailLine } from "@/components/mail-line";
 import { ProductShot } from "@/components/product-shot";
+import { appShot, SHOT_SIZES } from "@/lib/product-shots";
 import { ConsentArt } from "@/components/head-art";
 import { PageHead, SectionHead, Updated } from "@/components/wurf-head";
 import { messages, type Locale } from "@/lib/i18n";
@@ -57,11 +58,11 @@ export default async function Data({ params }: Props) {
               {/* what players and parents get: a link, nothing more (product picture from the app) */}
               {i === 0 && (
                 <ProductShot
-                  name="share"
+                  name={appShot("share", locale)}
                   alt={m.home.shareAlt}
                   labels={m.product.share}
                   caption={t.shareCaption}
-                  sizes="(min-width: 768px) 26rem, calc(100vw - 2rem)"
+                  sizes={SHOT_SIZES.half(26)}
                   className="mt-6 max-w-[26rem]"
                 />
               )}

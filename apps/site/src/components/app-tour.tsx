@@ -2,18 +2,20 @@
 
 import { type CSSProperties, useCallback, useEffect, useRef, useState } from "react";
 import { HalfCourtLines } from "@/components/anlauf/court";
-import { ProductShot } from "@/components/product-shot";
+import { type TourCut, TourShot } from "@/components/tour-cuts";
 import { cn } from "@/lib/cn";
-import { productShot, type ShotName } from "@/lib/product-shots";
+import { productShot, SHOT_SIZES, type ShotName } from "@/lib/product-shots";
 import { DEFENCE, PLAY_BOX, PLAYERS, ballPath, passPath, percent, progressFor, stepAt } from "@/lib/tour-play";
 
 export interface TourItem {
   name: ShotName;
+  /** the picture without its language (get-search …), for the places of its cut-outs */
+  base: string;
   alt: string;
   caption: string;
   text: string;
-  /** the callout texts by id */
-  labels: Record<string, string>;
+  /** the places pulled out of the picture as live cut-outs (U34) */
+  cuts: TourCut[];
   /** the word on the match video («Dein Spiel») */
   lettering?: string;
   /** the player's name in the play: the app's place the picture shows (Spiele, Szenen, Saison, Team) */
@@ -93,7 +95,7 @@ export function AppTour({ items, label, hint }: { items: TourItem[]; label: stri
               <p className="mt-3 text-[1.125rem]">{s.text}</p>
             </div>
             <div className="mt-6 max-w-[52rem]">
-              <ProductShot name={s.name} alt={s.alt} labels={s.labels} lettering={s.lettering} sizes="(min-width: 900px) 832px, calc(100vw - 2rem)" />
+              <TourShot mode="flow" name={s.name} base={s.base} alt={s.alt} cuts={s.cuts} lettering={s.lettering} sizes={SHOT_SIZES.narrow(52)} />
             </div>
           </li>
         ))}
@@ -148,7 +150,7 @@ export function AppTour({ items, label, hint }: { items: TourItem[]; label: stri
                   )}
                 >
                   <div className="w-full" style={{ maxWidth: `min(100%, calc((90vh - 4rem) * ${(width / height).toFixed(3)}))` }}>
-                    <ProductShot name={s.name} alt={s.alt} labels={s.labels} lettering={s.lettering} edge sizes="(min-width: 1280px) 1200px, 60vw" />
+                    <TourShot mode="stage" name={s.name} base={s.base} alt={s.alt} cuts={s.cuts} lettering={s.lettering} sizes={SHOT_SIZES.tour(width / height, 4, 0.9)} />
                   </div>
                 </div>
               );

@@ -12,8 +12,11 @@ import { JsonLd } from "@/components/json-ld";
 import { StepsArt } from "@/components/head-art";
 import { PageHead, SectionHead } from "@/components/wurf-head";
 import { graph, howTo } from "@/lib/schema";
-import { APP_LOCALE, messages, type Locale } from "@/lib/i18n";
+import { APP_LOCALE, fmt, messages, type Locale } from "@/lib/i18n";
 import { pageMeta } from "@/lib/seo";
+import { appShot } from "@/lib/product-shots";
+import { COLLECTION, SEARCH, SEASON_BARS, tourTimeline } from "@/lib/tour-cuts";
+import { AnswerCut, BarsCut, ButtonCut, ChatCut, SceneCut, TimelineCut, type TourCut } from "@/components/tour-cuts";
 
 type Props = { params: Promise<{ locale: Locale }> };
 
@@ -23,6 +26,43 @@ type Props = { params: Promise<{ locale: Locale }> };
  * as on the start page plus sharing.
  */
 const SHOTS = ["get-video", "get-search", "get-season", "share"] as const;
+
+/**
+ * The places each tour picture pulls out as live cut-outs (U34, components/tour-cuts.tsx): the
+ * app's words in the page's language, the captures' figures (lib/tour-cuts.ts).
+ */
+function tourCuts(shot: (typeof SHOTS)[number], m: ReturnType<typeof messages>): TourCut[] {
+  const a = m.product.app;
+  const p = m.product;
+  if (shot === "get-video") {
+    const t = tourTimeline();
+    return [
+      { id: "tap", label: p["get-video"].tap, content: <SceneCut clock={t.scene.clock} what={fmt(a.goal, { team: "TSV Nachtwind", clock: t.scene.clock })} playing={a.playing} /> },
+      { id: "timeline", label: p["get-video"].timeline, content: <TimelineCut t={t} words={a} /> },
+    ];
+  }
+  if (shot === "get-search")
+    return [
+      {
+        id: "answer",
+        label: p["get-search"].answer,
+        content: <AnswerCut n={SEARCH.n} of={fmt(a.answerOf, { of: SEARCH.of })} base={fmt(a.answerBase, { percent: SEARCH.percent, n: SEARCH.last.n, of: SEARCH.last.of })} />,
+      },
+      { id: "play", label: fmt(p["get-search"].play, { n: SEARCH.n }), content: <ButtonCut>{fmt(a.playAll, { n: SEARCH.n })}</ButtonCut> },
+    ];
+  if (shot === "get-season")
+    return [
+      {
+        id: "bars",
+        label: p["get-season"].bars,
+        content: <BarsCut title={a.wingTheme} text={fmt(a.everyMatch, { n: SEARCH.n, of: SEARCH.of })} scenes={fmt(a.scenes, { n: SEARCH.n })} bars={SEASON_BARS} />,
+      },
+    ];
+  return [
+    { id: "chat", label: p.share.chat, content: <ChatCut title={a.collection} team={a.team} meta={fmt(a.collectionMeta, { n: COLLECTION.scenes, length: COLLECTION.length })} /> },
+    { id: "nologin", label: p.share.nologin, content: <ButtonCut>{a.shareLink}</ButtonCut> },
+  ];
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
@@ -91,11 +131,12 @@ export default async function How({ params }: Props) {
             hint={t.tourHint}
             items={t.shots.map((s, i) => ({
               player: t.tourPlayers[i]!,
-              name: SHOTS[i]!,
+              name: appShot(SHOTS[i]!, locale),
+              base: SHOTS[i]!,
               alt: s.alt,
               caption: s.caption,
               text: s.text,
-              labels: m.product[SHOTS[i]!],
+              cuts: tourCuts(SHOTS[i]!, m),
               lettering: SHOTS[i] === "get-video" ? m.home.film.video : undefined,
             }))}
           />
