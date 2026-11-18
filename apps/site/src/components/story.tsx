@@ -3,6 +3,7 @@
  * after the defeat and the right wing before and after (the team chat: components/phone-chat.tsx).
  */
 import type { ReactNode } from "react";
+import Link from "next/link";
 import { HalfCourtLines } from "@/components/anlauf/court";
 import { HALF_BOX } from "@/components/anlauf/geometry";
 import { cn } from "@/lib/cn";
@@ -23,8 +24,30 @@ export function When({ children, dark = false, onClub = false }: { children: Rea
   );
 }
 
-/** Saturday, 7 pm: the score, the feeling and the video nobody watches (W25). */
-export function Evening({ t, score }: { t: Messages["home"]["problemCard"]; score: string }) {
+/**
+ * Saturday, 7 pm: the score, the feeling and the video nobody watches (W25). Over the video row a
+ * yellow sticker says the turn (BEFUNDE-4 U39): the video is all it takes, the app does the
+ * analysis, with the way to «So funktioniert es». It sits in the flow under the card, pulled up
+ * over its lower edge, so it never covers the words at any width; it slaps on once after «nie
+ * angeschaut», and simply stands there without JavaScript or with reduced motion.
+ */
+export function Evening({ t, score, how }: { t: Messages["home"]["problemCard"]; score: string; how?: { text: string; href: string } }) {
+  return (
+    <div className="pb-2">
+      <EveningCard t={t} score={score} />
+      {how && (
+        <div className="stick relative z-[1] mr-2 -mt-5 ml-auto w-fit max-w-[22rem] -rotate-2 border-2 border-ink bg-attn px-4 pt-3 pb-1.5 text-ink shadow-[6px_6px_0_#000] md:-mt-7 md:mr-6">
+          <p className="text-[1.1875rem] leading-snug font-bold">{t.sticker}</p>
+          <Link href={how.href} className="link text-[1.0625rem]">
+            {how.text}
+          </Link>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function EveningCard({ t, score }: { t: Messages["home"]["problemCard"]; score: string }) {
   return (
     <div role="img" aria-label={fmt(t.label, { score })} className="border-2 border-[#3a3d42] bg-[#1f2125] p-6 md:p-8">
       <div aria-hidden>

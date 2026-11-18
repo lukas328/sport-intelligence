@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import type { CSSProperties } from "react";
 import Link from "next/link";
-import { KitScope, ShirtPicker, StartLink } from "@/components/kit";
+import { KitScope, ShirtMenu, ShirtPicker, StartLink } from "@/components/kit";
 import { PhoneChat } from "@/components/phone-chat";
 import { Reveal } from "@/components/reveal";
 import { When } from "@/components/story";
@@ -22,9 +22,6 @@ import { threeThings } from "@/lib/three-things";
 import { matchPhases, preparedAnswers, seasonRightWing } from "@/lib/week";
 
 type Props = { params: Promise<{ locale: Locale }> };
-
-/** The six steps of the week and where they are on the page. */
-const STEPS = ["samstag", "warum", "einsicht", "dienstag", "fragen", "naechstes"] as const;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
@@ -64,6 +61,8 @@ export default async function Demo({ params }: Props) {
     ahead: t.ahead,
     behind: t.behind,
     halfMark: fmt(t.halfMark, { score: half }),
+    video: m.home.film.video,
+    goal: t.runGoal,
     marks: [
       { at: run.from, text: before.score },
       { at: run.to, text: run.score },
@@ -160,11 +159,15 @@ export default async function Demo({ params }: Props) {
   return (
     <KitScope>
       <Reveal />
-      <p role="note" className="border-b-2 border-ink bg-attn py-4 text-[1.0625rem] text-ink">
-        <span className="wrap block">
-          <b>{t.banner}</b> {t.bannerText}
-        </span>
-      </p>
+      {/* the yellow band: the match is invented; next to it the colour, so it is found at once (U42) */}
+      <div className="relative z-20 border-b-2 border-ink bg-attn py-3 text-ink">
+        <div className="wrap flex flex-wrap items-center justify-between gap-x-8 gap-y-3">
+          <p role="note" className="min-w-0 flex-[1_1_28rem] text-[1.0625rem]">
+            <b>{t.banner}</b> {t.bannerText}
+          </p>
+          <ShirtMenu label={m.kit.menu} chosenLabel={m.kit.menuChosen} names={m.kit.names} />
+        </div>
+      </div>
       <WurfHead
         kick={t.kick}
         title={fmt(t.head, { score })}
@@ -179,22 +182,6 @@ export default async function Demo({ params }: Props) {
       />
 
       <div className="wrap">
-        {/* the week in six steps, each a jump to its part */}
-        <nav aria-label={t.weekLabel} className="mt-8">
-          <ol className="grid grid-cols-2 gap-2 min-[480px]:grid-cols-3 lg:grid-cols-6">
-            {t.week.map((w, i) => (
-              <li key={w} className="min-w-0">
-                <a href={`#${STEPS[i]}`} className="group flex min-h-14 items-center gap-3 border-2 border-ink/25 bg-paper px-3 py-2 font-semibold hover:border-ink">
-                  <span aria-hidden className="font-num text-[1.75rem] leading-none text-club-text">
-                    {i + 1}
-                  </span>
-                  <span className="min-w-0 leading-tight underline decoration-2 underline-offset-4 group-hover:decoration-[3px]">{w}</span>
-                </a>
-              </li>
-            ))}
-          </ol>
-        </nav>
-
         {/* 1 · Saturday: the match in 20 seconds */}
         <section aria-labelledby="samstag" className="mt-16 scroll-mt-24 md:mt-20">
           <div data-reveal className="max-w-[44rem]">
