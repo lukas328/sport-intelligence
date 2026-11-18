@@ -2564,7 +2564,7 @@
     "empty": "noch leer",
     "hintTips": "Was ihr als Nächstes trainieren solltet, aus euren Spielen. Mit einem Klick wird daraus eine Einheit mit Übungen und den passenden Szenen.",
     "library": "Alle Übungen",
-    "tipsTitle": "Trainingstipps aus der Analyse",
+    "tipsTitle": "Trainingstipps aus euren Spielen",
     "tipsFrom": "Aus {n, plural, one {eurem letzten Spiel} other {euren letzten # Spielen}} mit Analyse.",
     "tipsError": "Die Trainingstipps lassen sich gerade nicht laden. Versuch es gleich nochmals.",
     "tipsPlan": "Trainingstipps gehören zur Spielanalyse und sind in eurem Abo nicht dabei.",
@@ -2610,7 +2610,9 @@
     "why_transition_defence": "Sie üben den Rückzug: nach dem Ballverlust schnell zurück und die Mitte zu.",
     "why_fast_break": "Sie üben den Gegenstoss: erste und zweite Welle, der schnelle Pass nach vorn.",
     "why_defence": "Sie üben die Abwehr: Verschieben, Heraustreten und Helfen.",
-    "why_powerplay": "Sie üben Über- und Unterzahl: Räume nutzen und Räume schliessen."
+    "why_powerplay": "Sie üben Über- und Unterzahl: Räume nutzen und Räume schliessen.",
+    "tipsFromReports": "Aus den Spielberichten {n, plural, one {des letzten Spiels} other {der letzten # Spiele}}.",
+    "tipsFromBoth": "Aus {k, plural, one {1 Spiel} other {# Spielen}} mit Analyse und {m, plural, one {1 Spielbericht} other {# Spielberichten}}."
   },
   "schedule": {
     "nav": "Meine Termine",

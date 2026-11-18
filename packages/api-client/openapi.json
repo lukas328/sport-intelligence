@@ -18900,7 +18900,20 @@
             "type": "array"
           },
           "matches_analysed": {
+            "description": "Matches the tips are drawn from (with events)",
             "title": "Matches Analysed",
+            "type": "integer"
+          },
+          "matches_from_report": {
+            "default": 0,
+            "description": "Of these, matches known only from the official report",
+            "title": "Matches From Report",
+            "type": "integer"
+          },
+          "matches_with_analysis": {
+            "default": 0,
+            "description": "Of these, matches with data beyond the official report",
+            "title": "Matches With Analysis",
             "type": "integer"
           },
           "plan_required": {

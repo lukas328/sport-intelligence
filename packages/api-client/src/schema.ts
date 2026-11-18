@@ -11930,8 +11930,23 @@ export interface components {
         TrainingTipsOut: {
             /** Matches */
             matches: components["schemas"]["TipMatch"][];
-            /** Matches Analysed */
+            /**
+             * Matches Analysed
+             * @description Matches the tips are drawn from (with events)
+             */
             matches_analysed: number;
+            /**
+             * Matches From Report
+             * @description Of these, matches known only from the official report
+             * @default 0
+             */
+            matches_from_report?: number;
+            /**
+             * Matches With Analysis
+             * @description Of these, matches with data beyond the official report
+             * @default 0
+             */
+            matches_with_analysis?: number;
             /** Plan Required */
             plan_required: boolean;
             /** Tips */

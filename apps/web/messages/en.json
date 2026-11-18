@@ -2564,7 +2564,7 @@
     "empty": "still empty",
     "hintTips": "What to train next, from your matches. One click turns it into a session with drills and the matching scenes.",
     "library": "All drills",
-    "tipsTitle": "Training tips from the analysis",
+    "tipsTitle": "Training tips from your matches",
     "tipsFrom": "From {n, plural, one {your last analysed match} other {your last # analysed matches}}.",
     "tipsError": "The training tips cannot be loaded right now. Try again in a moment.",
     "tipsPlan": "Training tips are part of the match analysis, which your plan does not include.",
@@ -2610,7 +2610,9 @@
     "why_transition_defence": "They practise getting back: quickly back after losing the ball and closing the middle.",
     "why_fast_break": "They practise the fast break: first and second wave, the quick pass forward.",
     "why_defence": "They practise defence: shifting, stepping out and helping.",
-    "why_powerplay": "They practise playing with more or fewer players: using space and closing it."
+    "why_powerplay": "They practise playing with more or fewer players: using space and closing it.",
+    "tipsFromReports": "From the match {n, plural, one {report of the last match} other {reports of the last # matches}}.",
+    "tipsFromBoth": "From {k, plural, one {1 analysed match} other {# analysed matches}} and {m, plural, one {1 match report} other {# match reports}}."
   },
   "schedule": {
     "nav": "My dates",

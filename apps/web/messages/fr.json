@@ -2564,7 +2564,7 @@
     "empty": "encore vide",
     "hintTips": "Ce que vous devriez travailler ensuite, tiré de vos matchs. En un clic, cela devient une séance avec exercices et les scènes correspondantes.",
     "library": "Tous les exercices",
-    "tipsTitle": "Conseils d'entraînement tirés de l'analyse",
+    "tipsTitle": "Conseils d'entraînement tirés de vos matchs",
     "tipsFrom": "Tirés de {n, plural, one {votre dernier match analysé} other {vos # derniers matchs analysés}}.",
     "tipsError": "Les conseils ne peuvent pas être chargés pour l'instant. Réessaie dans un moment.",
     "tipsPlan": "Les conseils d'entraînement font partie de l'analyse de match, absente de votre abonnement.",
@@ -2610,7 +2610,9 @@
     "why_transition_defence": "Ils travaillent le repli : revenir vite après la perte de balle et fermer l’axe.",
     "why_fast_break": "Ils travaillent la contre-attaque : première et deuxième vague, la passe rapide vers l’avant.",
     "why_defence": "Ils travaillent la défense : glisser, sortir et aider.",
-    "why_powerplay": "Ils travaillent la supériorité et l’infériorité numérique : utiliser les espaces et les fermer."
+    "why_powerplay": "Ils travaillent la supériorité et l’infériorité numérique : utiliser les espaces et les fermer.",
+    "tipsFromReports": "Tirés {n, plural, one {de la feuille de match du dernier match} other {des feuilles de match des # derniers matchs}}.",
+    "tipsFromBoth": "Tirés de {k, plural, one {1 match analysé} other {# matchs analysés}} et de {m, plural, one {1 feuille de match} other {# feuilles de match}}."
   },
   "schedule": {
     "nav": "Mes rendez-vous",
