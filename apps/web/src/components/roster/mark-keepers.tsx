@@ -51,7 +51,7 @@ export function MarkKeepers({ orgId, teamId, players }: { orgId: string; teamId:
   }
   if (!open) {
     return (
-      <p className="m-0 flex flex-wrap items-baseline gap-x-3 gap-y-1 text-[15px] md:col-span-3" data-testid="mark-keepers">
+      <p className="m-0 flex flex-wrap items-baseline gap-x-3 gap-y-1 text-[15px] md:col-span-full" data-testid="mark-keepers">
         <span>{t("keepersSome", { n: keepers.length })}</span>
         <button ref={opener} type="button" onClick={() => setOpen(true)} className="cursor-pointer font-semibold underline underline-offset-4" data-testid="keepers-open">
           {t("keepersChange")}
@@ -60,7 +60,7 @@ export function MarkKeepers({ orgId, teamId, players }: { orgId: string; teamId:
     );
   }
   return (
-    <section ref={panel} className="max-w-[70ch] space-y-3 border-l-4 border-attn pl-4 md:col-span-3" data-testid="mark-keepers" aria-labelledby="mark-keepers-title">
+    <section ref={panel} className="max-w-[70ch] space-y-3 border-l-4 border-attn pl-4 md:col-span-full" data-testid="mark-keepers" aria-labelledby="mark-keepers-title">
       <h2 id="mark-keepers-title" className="font-slant m-0 text-xl">
         {t("keepersTitle")}
       </h2>

@@ -146,10 +146,11 @@ export default async function TeamPage({ params, searchParams }: { params: Promi
         }
       />
       <div className={cn("grid gap-x-8 gap-y-12", staff ? "lg:grid-cols-[minmax(0,1fr)_300px] xl:grid-cols-[minmax(0,1fr)_340px]" : "")}>
-        <div className="grid gap-x-8 gap-y-8 md:grid-cols-3">
+        {/* three position groups side by side; beside the staff column at 1024 px two, so names keep one line (A18) */}
+        <div className={cn("grid gap-x-8 gap-y-8 md:grid-cols-3", staff && "lg:grid-cols-2 xl:grid-cols-3")}>
           {/* an empty squad: what it is for and the one way to fill it (K8) */}
           {entries.length === 0 && (
-            <section className="max-w-[60ch] space-y-4 md:col-span-3" data-testid="roster-empty">
+            <section className="max-w-[60ch] space-y-4 md:col-span-full" data-testid="roster-empty">
               <p className="m-0 text-[17px]">{canEdit ? t("emptyText") : t("emptyTextPlayer")}</p>
               {canEdit && (
                 <Link href={`${base}?edit=1`} className={buttonClass("primary")}>
@@ -160,7 +161,7 @@ export default async function TeamPage({ params, searchParams }: { params: Promi
           )}
           {/* what the squad is for, said once (review R37) */}
           {canEdit && entries.length > 0 && (
-            <p className="m-0 max-w-[70ch] text-[15px] text-ink-2 md:col-span-3" data-testid="roster-why">
+            <p className="m-0 max-w-[70ch] text-[15px] text-ink-2 md:col-span-full" data-testid="roster-why">
               {t("why")}
             </p>
           )}
@@ -171,7 +172,7 @@ export default async function TeamPage({ params, searchParams }: { params: Promi
           {/* the court positions the same way: a position, then the players (A14) */}
           {canEdit && entries.length > 0 && <MarkPositions orgId={orgId} teamId={teamId} players={entries} />}
           {groups.map((g) => (
-            <section key={g.key} aria-labelledby={`group-${g.key}`} className={cn(g.key === "other" && "md:col-span-3")}>
+            <section key={g.key} aria-labelledby={`group-${g.key}`} className={cn(g.key === "other" && "md:col-span-full")}>
               <h2 id={`group-${g.key}`} className="font-slant mb-3 flex items-baseline gap-2.5 border-b border-rule pb-3 text-xl">
                 {onlyOther ? t("group_all") : t(`group_${g.key}`)}
                 <span className="font-sans text-[15px] font-medium text-ink-2 tabular-nums">{g.rows.length}</span>

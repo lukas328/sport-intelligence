@@ -61,7 +61,7 @@ export function MarkPositions({ orgId, teamId, players }: { orgId: string; teamI
   }
   if (!open) {
     return (
-      <p className="m-0 flex flex-wrap items-baseline gap-x-3 gap-y-1 text-[15px] md:col-span-3" data-testid="mark-positions">
+      <p className="m-0 flex flex-wrap items-baseline gap-x-3 gap-y-1 text-[15px] md:col-span-full" data-testid="mark-positions">
         <span>{missing > 0 ? t("positionsMissing", { n: missing }) : t("positionsAll")}</span>
         <button ref={opener} type="button" onClick={() => setOpen(true)} className="cursor-pointer font-semibold underline underline-offset-4" data-testid="positions-open">
           {t("positionsChange")}
@@ -70,7 +70,7 @@ export function MarkPositions({ orgId, teamId, players }: { orgId: string; teamI
     );
   }
   return (
-    <section ref={panel} className="max-w-[70ch] space-y-3 border-l-4 border-attn pl-4 md:col-span-3" data-testid="mark-positions" aria-labelledby="mark-positions-title">
+    <section ref={panel} className="max-w-[70ch] space-y-3 border-l-4 border-attn pl-4 md:col-span-full" data-testid="mark-positions" aria-labelledby="mark-positions-title">
       <h2 id="mark-positions-title" className="font-slant m-0 text-xl">
         {t("positionsTitle")}
       </h2>
