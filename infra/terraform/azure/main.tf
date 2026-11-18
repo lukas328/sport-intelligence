@@ -304,6 +304,43 @@ resource "azurerm_postgresql_flexible_server_firewall_rule" "azure" {
   end_ip_address   = "0.0.0.0"
 }
 
+# Postgres logs and metrics in Log Analytics, next to the apps' logs: who connects (with the API's
+# application_name per process), connection counts and failures. Staging 17.11.: the connection
+# errors could not be explained because none of this was collected.
+resource "azurerm_monitor_diagnostic_setting" "postgres" {
+  name                       = "diag-postgres"
+  target_resource_id         = azurerm_postgresql_flexible_server.this.id
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.this.id
+
+  enabled_log {
+    category = "PostgreSQLLogs"
+  }
+
+  enabled_metric {
+    category = "AllMetrics"
+  }
+}
+
+resource "azurerm_postgresql_flexible_server_configuration" "log_connections" {
+  for_each  = toset(["log_connections", "log_disconnections"])
+  name      = each.key
+  server_id = azurerm_postgresql_flexible_server.this.id
+  value     = "on"
+}
+
+# The API's connections must fit the server's free slots, with room for the migration job and a
+# diagnosis: a plan with more replicas, processes or pool than the server takes fails here instead
+# of on a busy afternoon.
+check "db_connections" {
+  assert {
+    condition = (
+      local.api_db.processes * local.python_apps.api.max * (local.api_db.pool + local.api_db.overflow)
+      + var.postgres_spare_connections <= var.postgres_user_connections
+    )
+    error_message = "API connections (processes x max replicas x (pool + overflow)) plus the spare ones exceed postgres_user_connections."
+  }
+}
+
 # --- Container Apps -----------------------------------------------------------------------------
 
 resource "azurerm_container_app_environment" "this" {
@@ -414,6 +451,10 @@ locals {
     asyncio.run(main())
   PY
 
+  # API connections to Postgres per process; all replicas together must fit the server's free
+  # slots (check "db_connections")
+  api_db = { processes = 2, pool = 3, overflow = 1 }
+
   python_apps = {
     api = {
       image   = "hb-api"
@@ -422,14 +463,14 @@ locals {
       min     = 1
       max     = 3
       ingress = true
-      # Database connections: processes (2 at cpu 0.5) x replicas (max 3) x (pool + overflow)
-      # = 2 x 3 x 5 = 30, below the 50 of the B1ms server with room for the migration job. With
-      # more replicas, processes or a bigger server, size these again.
+      # Database connections: processes x replicas x (pool + overflow), checked against the
+      # server's free slots by the check "db_connections" below (17.11.: TooManyConnections when
+      # the HTTP scaler started a second replica)
       env = {
         FORWARDED_ALLOW_IPS = "*"
-        HB_WORKERS          = "2"
-        HB_DB_POOL_SIZE     = "4"
-        HB_DB_MAX_OVERFLOW  = "1"
+        HB_WORKERS          = tostring(local.api_db.processes)
+        HB_DB_POOL_SIZE     = tostring(local.api_db.pool)
+        HB_DB_MAX_OVERFLOW  = tostring(local.api_db.overflow)
       }
     }
     worker = {
@@ -463,6 +504,35 @@ locals {
   }
 }
 
+# Redis keeps the job queue. Without persistence every restart of its replica (platform moves,
+# a change to this app) wiped out the jobs that were only waiting (staging 17.11.). An append-only
+# file on a small Azure Files share brings them back; the queue is small, so the share is too.
+resource "azurerm_storage_account" "redis" {
+  name                            = substr("st${local.unique}redis", 0, 24)
+  resource_group_name             = azurerm_resource_group.this.name
+  location                        = var.location
+  account_tier                    = "Standard"
+  account_replication_type        = "LRS"
+  min_tls_version                 = "TLS1_2"
+  allow_nested_items_to_be_public = false
+  tags                            = local.tags
+}
+
+resource "azurerm_storage_share" "redis" {
+  name               = "redis"
+  storage_account_id = azurerm_storage_account.redis.id
+  quota              = 1
+}
+
+resource "azurerm_container_app_environment_storage" "redis" {
+  name                         = "redis-data"
+  container_app_environment_id = azurerm_container_app_environment.this.id
+  account_name                 = azurerm_storage_account.redis.name
+  share_name                   = azurerm_storage_share.redis.name
+  access_key                   = azurerm_storage_account.redis.primary_access_key
+  access_mode                  = "ReadWrite"
+}
+
 resource "azurerm_container_app" "redis" {
   name                         = local.app_names.redis
   resource_group_name          = azurerm_resource_group.this.name
@@ -490,8 +560,23 @@ resource "azurerm_container_app" "redis" {
       image  = "docker.io/library/redis:7-alpine"
       cpu    = 0.25
       memory = "0.5Gi"
-      # via sh: the azurerm provider cannot read back an empty argument ("--save" "")
-      command = ["sh", "-c", "exec redis-server --save '' --appendonly no --maxmemory 384mb"]
+      # via sh: the azurerm provider cannot read back an empty argument ("--save" ""). The
+      # append-only file on the share survives a restart; fsync once a second is enough for a
+      # queue that the watchdog repairs anyway (a lost waiting job is enqueued again).
+      command = [
+        "sh", "-c",
+        "exec redis-server --dir /data --appendonly yes --appendfsync everysec --save '' --maxmemory 384mb",
+      ]
+      volume_mounts {
+        name = "data"
+        path = "/data"
+      }
+    }
+
+    volume {
+      name         = "data"
+      storage_name = azurerm_container_app_environment_storage.redis.name
+      storage_type = "AzureFile"
     }
   }
 
