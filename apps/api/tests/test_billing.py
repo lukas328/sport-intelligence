@@ -138,7 +138,8 @@ async def test_free_plan_limits(make_api: Callable[[], Api], billing_on: FakeGat
     b = (await api.get(f"/v1/orgs/{org}/billing")).json()
     assert b["usage"]["max_matches_per_season"] == 2
     assert b["usage"]["storage_bytes"] == 100
-    assert b["features"] == ["events"]
+    assert b["features"] == ["events"]  # no goalkeeper module in the free plan (18.11.2026)
+    assert (await api.get(f"/v1/orgs/{org}")).json()["features"] == ["events"]
 
 
 async def test_gpu_minutes_from_analysis_runs(make_api: Callable[[], Api]) -> None:
@@ -250,7 +251,8 @@ async def test_checkout_webhooks_and_portal(
     assert "goalkeeper_seats" not in b and "goalkeeper_addon_chf" not in b
     # a subscription booked with the former goalkeeper add-on runs on without it (A9)
     assert billing_on.calls[-1] == ("remove_item", ("si_gk",))
-    assert "tracking" in b["features"]
+    # the goalkeeper module comes with Team, not with Gratis (18.11.2026)
+    assert "tracking" in b["features"] and "goalkeepers" in b["features"]
     # paid features unlocked
     m = await new_match(api, ids)
     assert (await api.get(f"/v1/orgs/{org}/matches/{m['id']}/insights")).status_code == 200

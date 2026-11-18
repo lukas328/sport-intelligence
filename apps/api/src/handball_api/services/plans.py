@@ -17,6 +17,9 @@ FEATURES = (
     "club_stats",
     "priority",  # priority processing queue
     "assistant",  # ask your data (5.1), capped per month by assistant_usd_month
+    # goalkeeper figures: saves, goals against, save rate, goal and shot zones per keeper, the
+    # keeper card in scouting. Marking who keeps goal and recording saves stay in every plan.
+    "goalkeepers",
 )
 
 
@@ -67,7 +70,8 @@ PLANS: dict[Plan, PlanSpec] = {
         assistant_usd_month=25.0,
     ),
 }
-# The goalkeeper add-on (CHF 7 per goalkeeper and month) is gone since 18.11.2026 (A9): the
-# goalkeeper functions are part of Team and Verein, without a surcharge.
+# The goalkeeper add-on (CHF 7 per goalkeeper and month) is gone since 18.11.2026 (A9). The
+# goalkeeper module ("goalkeepers") is part of Team and Verein without a surcharge, but not of the
+# free plan (owner decision 18.11.2026 afternoon, reverses A9's "in every plan").
 # fair use for "unlimited" matches; above this the UI asks to contact support
 FAIR_USE_MATCHES_PER_SEASON = 80
