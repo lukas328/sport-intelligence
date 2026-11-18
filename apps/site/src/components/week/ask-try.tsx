@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { cn } from "@/lib/cn";
 import { fmt } from "@/lib/i18n";
-import { sendWeek, type WeekDetail } from "./events";
+import { sendWeek, useHydrated, type WeekDetail } from "./events";
 
 export interface Prepared {
   question: string;
@@ -24,7 +24,7 @@ export interface Prepared {
  */
 export function AskTry({ items, bar, team, pick: pickLabel, how }: { items: Prepared[]; bar: string; team: string; pick: string; how: string }) {
   const [pick, setPick] = useState(0);
-  const q = items[pick]!;
+  const js = useHydrated();
   return (
     <div>
       <div role="group" aria-label={pickLabel} className="grid grid-cols-1 gap-2 sm:grid-cols-3">
@@ -48,7 +48,10 @@ export function AskTry({ items, bar, team, pick: pickLabel, how }: { items: Prep
           <span className="uppercase">{bar}</span>
           <span>{team}</span>
         </p>
-        <div key={pick} aria-live="polite" className="ask-in grid gap-5 p-4 md:p-6">
+        {(js ? [pick] : items.map((_, i) => i)).map((i) => {
+          const q = items[i]!;
+          return (
+        <div key={i} aria-live="polite" className="ask-in grid gap-5 border-b-2 border-ink p-4 last:border-b-0 md:p-6">
           <p className="ml-auto max-w-[85%] bg-club px-4 py-3 text-[1.125rem] leading-snug font-semibold text-club-ink shadow-[inset_0_0_0_2px_var(--club-edge)]">{q.question}</p>
           <div>
             <p className="text-[1.125rem] leading-normal md:text-[1.1875rem]">{q.answer}</p>
@@ -78,6 +81,8 @@ export function AskTry({ items, bar, team, pick: pickLabel, how }: { items: Prep
             </ol>
           </details>
         </div>
+          );
+        })}
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 /**
  * The demo week's parts talk to each other through one window event: an answer of «Frag deine
@@ -26,6 +26,16 @@ export function useWeek(on: (d: WeekDetail) => void) {
     window.addEventListener(WEEK_EVENT, h);
     return () => window.removeEventListener(WEEK_EVENT, h);
   }, [on]);
+}
+
+/**
+ * false until the page runs scripts: tabs and switches then show every panel one under the other,
+ * so the whole page reads without JavaScript; once hydrated only the chosen one stays.
+ */
+export function useHydrated(): boolean {
+  const [on, setOn] = useState(false);
+  useEffect(() => setOn(true), []);
+  return on;
 }
 
 export function reducedMotion(): boolean {

@@ -330,7 +330,7 @@ export default async function Demo({ params }: Props) {
         </section>
 
         {/* 4 · Tuesday: the collection in the team chat, the player's view without an account */}
-        <section aria-labelledby="dienstag" className="mt-20 grid grid-cols-1 items-center gap-10 md:mt-28 lg:grid-cols-[minmax(0,0.75fr)_minmax(0,1.25fr)] lg:gap-10">
+        <section aria-labelledby="dienstag" className="mt-20 grid grid-cols-1 items-center gap-10 md:mt-28 xl:grid-cols-[minmax(0,0.75fr)_minmax(0,1.25fr)] xl:gap-10">
           <div data-reveal className="min-w-0">
             <When>{t.tueWhen}</When>
             <h2 id="dienstag" className="mt-4 scroll-mt-24 text-[2.25rem] md:text-[3.25rem]">
@@ -344,15 +344,15 @@ export default async function Demo({ params }: Props) {
         </section>
 
         {/* 5 · ask your matches, to try: three prepared questions */}
-        <section aria-labelledby="fragen" className="mt-20 md:mt-28">
-          <div data-reveal className="max-w-[44rem]">
+        <section aria-labelledby="fragen" className="mt-20 grid grid-cols-1 items-start gap-x-14 md:mt-28 lg:grid-cols-[minmax(0,0.7fr)_minmax(0,1.3fr)]">
+          <div data-reveal className="max-w-[44rem] lg:sticky lg:top-8">
             <When>{t.askWhen}</When>
             <h2 id="fragen" className="mt-4 scroll-mt-24 text-[2.25rem] md:text-[3.25rem]">
               {t.askTitle}
             </h2>
             <p className="mt-3 text-[1.1875rem]">{t.askText}</p>
           </div>
-          <div className="mt-8 max-w-[52rem]">
+          <div className="mt-8 min-w-0 lg:mt-2">
             <AskTry items={prepared} bar={m.home.ask.bar} team={`${v.own} ${m.home.chat.group}`} pick={t.askPick} how={m.home.ask.how} />
           </div>
         </section>

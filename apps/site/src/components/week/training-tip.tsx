@@ -5,6 +5,7 @@ import { CourtLines, HalfCourtLines } from "@/components/anlauf/court";
 import { HALF_BOX, type Pt } from "@/components/anlauf/geometry";
 import { cn } from "@/lib/cn";
 import type { Drill, DrillLang } from "@/lib/drills";
+import { useHydrated } from "./events";
 
 const NS = { vectorEffect: "non-scaling-stroke" } as const;
 
@@ -86,7 +87,7 @@ export function DrillSketch({ drill, label }: { drill: Drill; label: string }) {
  */
 export function TrainingTip({ drills, lang, text }: { drills: Drill[]; lang: DrillLang; text: TipText }) {
   const [pick, setPick] = useState(0);
-  const d = drills[pick]!;
+  const js = useHydrated();
   return (
     <div className="border-2 border-ink bg-paper shadow-[8px_8px_0_var(--ink)]">
       <div role="group" className="grid grid-cols-2 border-b-2 border-ink">
@@ -102,14 +103,17 @@ export function TrainingTip({ drills, lang, text }: { drills: Drill[]; lang: Dri
           </button>
         ))}
       </div>
-      <div key={d.id} className="grid grid-cols-1 gap-5 p-4 sm:grid-cols-[minmax(0,15rem)_minmax(0,1fr)] md:p-6">
+      {(js ? [pick] : drills.map((_, i) => i)).map((i) => {
+        const d = drills[i]!;
+        return (
+      <div key={d.id} className="grid grid-cols-1 gap-5 border-b-2 border-ink p-4 last-of-type:border-b-0 sm:grid-cols-[minmax(0,15rem)_minmax(0,1fr)] md:p-6">
         <div className="border-2 border-ink">
-          <DrillSketch drill={d} label={text.sketchLabels[pick]!} />
+          <DrillSketch drill={d} label={text.sketchLabels[i]!} />
         </div>
         <div className="min-w-0">
-          <p className="inline-flex items-center gap-2 bg-[color-mix(in_srgb,var(--attn)_45%,var(--paper))] px-2 py-0.5 text-base font-semibold">{text.focus[pick]}</p>
+          <p className="inline-flex items-center gap-2 bg-[color-mix(in_srgb,var(--attn)_45%,var(--paper))] px-2 py-0.5 text-base font-semibold">{text.focus[i]}</p>
           <h4 className="mt-2 text-[1.5rem] leading-tight font-bold">{d.name[lang]}</h4>
-          <p className="mt-1 text-base text-ink-2">{text.meta[pick]}</p>
+          <p className="mt-1 text-base text-ink-2">{text.meta[i]}</p>
           <p className="mt-3 text-[1.0625rem]">{d.setup[lang]}</p>
           <details className="group mt-3 border-t-2 border-ink pt-2">
             <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 font-semibold">
@@ -128,8 +132,10 @@ export function TrainingTip({ drills, lang, text }: { drills: Drill[]; lang: Dri
             </dl>
           </details>
         </div>
-        <p className="border-t border-rule pt-3 text-base text-ink-2 sm:col-span-2">{text.sources[pick]}</p>
+        <p className="border-t border-rule pt-3 text-base text-ink-2 sm:col-span-2">{text.sources[i]}</p>
       </div>
+        );
+      })}
       <p className="border-t-2 border-ink bg-ink px-4 py-3 text-[1.0625rem] font-semibold text-ground md:px-6">{text.plan}</p>
     </div>
   );

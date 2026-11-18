@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/cn";
 import type { Phase, ScorePoint } from "@/lib/week";
-import { reducedMotion, useWeek } from "./events";
+import { reducedMotion, useHydrated, useWeek } from "./events";
 
 export interface PhaseText {
   when: string;
@@ -51,6 +51,7 @@ export function MatchRun({ score, phases, own, opp, text }: { score: ScorePoint[
   const [pick, setPick] = useState(1);
   const box = useRef<HTMLDivElement>(null);
   const run = phases[1]!;
+  const js = useHydrated();
 
   // seconds of match per millisecond, slower in the turn
   const play = useCallback(() => {
@@ -173,6 +174,14 @@ export function MatchRun({ score, phases, own, opp, text }: { score: ScorePoint[
           })}
         </div>
         <div aria-live="polite" className="mt-4">
+          {!js &&
+            text.phases.map((x, i) =>
+              i === pick ? null : (
+                <p key={x.title} className="measure mb-2 text-[1.0625rem]">
+                  <b>{x.when}, {x.title}:</b> {x.text}
+                </p>
+              ),
+            )}
           <p className="measure text-[1.125rem] font-semibold">{text.phases[pick]!.text}</p>
           {text.phases[pick]!.goals.length > 0 && (
             <>

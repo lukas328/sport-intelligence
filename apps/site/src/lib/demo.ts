@@ -432,7 +432,8 @@ export function sceneGap(scene: CameraScene): { at: Pt; near: Pt | null } | null
   const sc = scene.tracks.find((x) => x.team === scene.scorer!.team && x.number === scene.scorer!.number);
   if (!sc) return null;
   const last = scene.ball.at(-1);
-  const t = last ? Math.min(0.92, Math.max(0.45, last.from / scene.duration + 0.06)) : 0.8;
+  // a pass to the scorer: just after it arrives; a run with the ball all the way: before the shot
+  const t = last && scene.ball.length > 1 ? Math.min(0.92, Math.max(0.45, last.from / scene.duration + 0.06)) : 0.85;
   const half = (p: Pt): Pt => [p[1], p[0]];
   const at = half(sampleAt(sc.xy, t));
   const others = scene.tracks.filter((x) => x.team !== "ref" && x.team !== scene.scorer!.team && !x.keeper).map((x) => half(sampleAt(x.xy, t)));
