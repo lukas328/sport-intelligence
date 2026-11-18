@@ -4,11 +4,12 @@ import { checkMinutes } from "@/lib/shot-spot";
 import { ShareButton, shareMatchCard } from "@/components/sharing/share-button";
 import type { Schemas } from "@handball/api-client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent } from "react";
 import Link from "next/link";
-import { ArrowLeftRight, Check, ChevronDown, ChartNoAxesColumn, Clapperboard, FileDown, Hand, MoreHorizontal, Pencil, Plus, Radio, Shield, Trash2, Upload } from "lucide-react";
+import { useEscape } from "@/lib/use-escape";
+import { ArrowLeftRight, Check, ChevronDown, ChartNoAxesColumn, Clapperboard, FileDown, Hand, Info, MoreHorizontal, Pencil, Plus, Radio, Shield, Trash2 } from "lucide-react";
 import { useRosterNames } from "@/components/analysis/tagger";
 import { DEFAULT_CLUB, matchStyle } from "@/lib/color";
 import { markOpened } from "@/lib/fresh-match";
@@ -160,6 +161,13 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
     window.addEventListener("popstate", readAddress);
     return () => window.removeEventListener("popstate", readAddress);
   }, [readAddress]);
+  // a link to this page with another address (the frame's «Video hochladen» on a match without
+  // video, A11): the tab follows it, and #upload brings the field into view
+  const address = useSearchParams().toString();
+  useEffect(() => {
+    readAddress();
+    if (window.location.hash === "#upload") requestAnimationFrame(() => requestAnimationFrame(() => document.getElementById("upload")?.scrollIntoView({ behavior: "smooth" })));
+  }, [address, readAddress]);
   const TAB_WORD: Record<View, string> = { game: "spiel", video: "video", numbers: "zahlen" };
   const setView = useCallback((v: View, n: number | null = null, sceneId: string | null = null) => {
     // a tab the coach chose is not changed by the default afterwards
@@ -181,6 +189,13 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
   const stats = useStats(orgId, initial.id);
   const graphics = useMatchGraphics(orgId, initial.id);
   const [bench, setBench] = useState(false);
+  // Escape closes the Werkbank like its «Schliessen» (A15)
+  const benchRef = useRef<HTMLElement>(null);
+  useEscape(bench, () => setBench(false), benchRef);
+  // «So rechnen wir» beside the source line, opened by its info sign (A17)
+  const [howOpen, setHowOpen] = useState(false);
+  const howRef = useRef<HTMLParagraphElement>(null);
+  useEscape(howOpen, () => setHowOpen(false), howRef);
   // deep links (?t=ms), e.g. a scene from Szenen or a play drawn on a video moment: the moment
   // plays in the full player, so it opens (behind the stage it would seek out of sight)
   // a moment in the full player: it opens, and the moment is sought once the video can
@@ -212,10 +227,12 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
   const example = match.source === "demo";
   const own = scouting ? (match.scouting_other ?? t("progress.otherTeam")) : ownName(teamName, shell?.org.name ?? teamName);
   const more = useRef<HTMLDetailsElement>(null);
-  const roster = useRosterNames(orgId, match.team_id, match.season_id);
+  // the example names nobody of the team: its players are invented numbers, never the roster (A4)
+  const rosterQuery = useRosterNames(orgId, match.team_id, match.season_id);
+  const rosterRows = useMemo(() => (example ? [] : (rosterQuery.data ?? [])), [example, rosterQuery.data]);
   const names = useMemo(
-    () => Object.fromEntries((roster.data ?? []).map((r) => [r.player_id, playerLabel(r.jersey_number, `${r.first_name} ${r.last_name}`)])),
-    [roster.data],
+    () => Object.fromEntries(rosterRows.map((r) => [r.player_id, playerLabel(r.jersey_number, `${r.first_name} ${r.last_name}`)])),
+    [rosterRows],
   );
 
   const jobs = latestJobs(match.jobs.map((j) => ({ ...j, ...live[j.id] }) as Job));
@@ -233,14 +250,14 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
   // the Spielkarte, rendered on the server: into the chat by the share sheet, else saved (K20)
   const cardPicture =
     match.score_own != null && match.score_opponent != null
-      ? () => void shareMatchCard(orgId, match.id, `${t("share.card.file")}-${oppName(match)}-${match.score_own}-${match.score_opponent}.png`.replace(/\s+/g, "-"))
+      ? () => shareMatchCard(orgId, match.id, `${t("share.card.file")}-${oppName(match)}-${match.score_own}-${match.score_opponent}.png`.replace(/\s+/g, "-"))
       : undefined;
   const telegram = (
     <Telegram
       match={{ own, opp: oppName(match), score: match.score_own != null && match.score_opponent != null ? [match.score_own, match.score_opponent] : null, half: match.halftime_own != null && match.halftime_opponent != null ? [match.halftime_own, match.halftime_opponent] : null, venue: match.venue ?? null, periodS: match.period_s, periods: match.periods }}
       stats={stats.data ?? null}
       names={names}
-      roster={roster.data ?? []}
+      roster={rosterRows}
     />
   );
   // a played match without video (not the example): what works today stands first (review R39)
@@ -270,6 +287,13 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
   const matchDay = isMatchDay(match.kickoff_at);
   const liveFirst = staff && match.score_own == null && !main && matchDay && match.source !== "paper_report" && !example;
   const uploadFirst = staff && !main && !liveFirst && match.source !== "paper_report" && !example;
+  // this match's upload field is the one way to upload from here: the frame's button leads to it
+  const setPageUpload = shell?.setPageUpload;
+  useEffect(() => {
+    if (!setPageUpload || !uploadFirst) return;
+    setPageUpload(`/app/${orgId}/matches/${match.id}?tab=video#upload`);
+    return () => setPageUpload(null);
+  }, [setPageUpload, uploadFirst, orgId, match.id]);
   // the progress of the uploads and the processing (K13, B4): the API's view, with the uploads of
   // this tab laid over; shown while it runs, and when something failed
   const local = useLocalUploads();
@@ -370,7 +394,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
     <div className="space-y-8" style={matchStyle(club, oppKit) as CSSProperties}>
       <MatchHead match={match} ownName={own} oppName={oppName(match)} view={view} graphics={graphics.data}>
         {staff && !example && match.opponent && !match.opponent_colors?.color && <AskColour orgId={orgId} matchId={match.id} opponent={oppName(match)} />}
-        {/* a known colour can be changed right in the head, five shirts (UX test B31) */}
+        {/* a known colour can be changed right in the head, the eight shirts (UX test B31, A17) */}
         {staff && !example && match.opponent && match.opponent_colors?.color && (
           <details className="mt-2.5 text-sm font-bold" data-testid="change-colour">
             <summary className="inline-flex min-h-11 cursor-pointer list-none items-center gap-2 underline decoration-[1.5px] underline-offset-4 [&::-webkit-details-marker]:hidden">
@@ -426,12 +450,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
                 {t("live.open")}
               </Link>
             )}
-            {uploadFirst && view !== "video" && Date.parse(match.kickoff_at) <= Date.now() && (
-              <Button onClick={() => (setView("video"), document.getElementById("upload")?.scrollIntoView({ behavior: "smooth" }))}>
-                <Upload aria-hidden />
-                {t("upload.title")}
-              </Button>
-            )}
+            {/* no own «Video hochladen» here: the frame's button leads to this match's field (A11) */}
             {/* before the match there is no report to share yet (UX test A05) */}
             {staff && !upcoming && (
               <ShareButton
@@ -444,7 +463,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
             )}
             <MenuRoot>
               {/* a word, not only the dots (UX test H09) */}
-              <MenuTrigger className={buttonClass("secondary")} data-testid="match-menu">
+              <MenuTrigger className={buttonClass("secondary", "md", "data-[state=open]:bg-ink data-[state=open]:text-ground")} data-testid="match-menu">
                 <MoreHorizontal aria-hidden />
                 {t("common.more")}
               </MenuTrigger>
@@ -478,6 +497,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
                     {t("matches.edit")}
                   </MenuItem>
                 )}
+                {canDelete && <MenuSeparator />}
                 {canDelete && (
                   <MenuItem
                     danger
@@ -499,12 +519,30 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
       </div>
 
       {sourceParts.length > 0 && (
-        <div className="-mt-6 flex flex-wrap items-center gap-x-3.5 gap-y-1 text-[15px] text-ink-2 md:text-[15px]" data-testid="source-line">
-          {ta("sources")}: {sourceParts.join(" · ")}
-          <details className="inline">
-            <summary className="cursor-pointer font-bold text-ink underline decoration-[1.5px] underline-offset-4">{ta("howCounted")}</summary>
-            <span className="mt-1 block max-w-[66ch] text-ink-2" data-testid="how-counted">{graphics.data?.has_report ? ta("howCountedText") : ta("howCountedVideo")}</span>
-          </details>
+        <div className="-mt-6 text-[15px] text-ink-2" data-testid="source-line">
+          {/* «So rechnen wir» as the info sign right beside the source it explains (A17) */}
+          <p className="m-0 flex flex-wrap items-center gap-x-1">
+            <span>
+              {ta("sources")}: {sourceParts.join(" · ")}
+            </span>
+            <button
+              type="button"
+              onClick={() => setHowOpen((v) => !v)}
+              aria-expanded={howOpen}
+              aria-controls="how-counted"
+              aria-label={ta("howCounted")}
+              title={ta("howCounted")}
+              className="-my-2 inline-flex size-11 cursor-pointer items-center justify-center text-ink"
+              data-testid="how-counted-open"
+            >
+              <Info aria-hidden className="size-5" strokeWidth={2.4} />
+            </button>
+          </p>
+          {howOpen && (
+            <p id="how-counted" ref={howRef} className="m-0 mt-1 max-w-[66ch] border-l-4 border-rule pl-3 text-ink-2" data-testid="how-counted">
+              <b className="text-ink">{ta("howCounted")}:</b> {graphics.data?.has_report ? ta("howCountedText") : ta("howCountedVideo")}
+            </p>
+          )}
         </div>
       )}
 
@@ -591,7 +629,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
         {main ? (
           // the workbench (events, defence systems, comments, feedback) is behind one tap, with or
           // without the stage; it stays mounted, so jumps from the other tabs still reach its player
-          <section hidden={!bench} aria-labelledby="bench-title" className="border-t-2 border-ink pt-6">
+          <section ref={benchRef} hidden={!bench} aria-labelledby="bench-title" className="border-t-2 border-ink pt-6">
             {(
               <div className="mb-4 flex items-center justify-between gap-3">
                 <h2 id="bench-title" className="text-[26px]">
@@ -616,17 +654,28 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
           </p>
         )}
         {staff && !example && !main && (
-          <section id="upload" className="scroll-mt-24 space-y-4" aria-label={t("upload.title")}>
+          <section id="upload" className="max-w-3xl scroll-mt-24 space-y-4" aria-label={t("upload.title")}>
             <p className="m-0 max-w-[60ch] text-[17px] font-bold">{ta("noVideoBlock")}</p>
-            {/* the analysis separates the teams by their shirts: without the opponent's colour it
-                guesses worse, so it is asked before the upload, with the reason (E09) */}
-            {match.opponent && !match.opponent_colors?.color && (
-              <div className="max-w-[60ch] border-l-4 border-attn pl-3" data-testid="upload-ask-colour">
-                <p className="m-0 text-[15px]">{ta("colourTip", { opponent: oppName(match) })}</p>
-                <AskColour orgId={orgId} matchId={match.id} opponent={oppName(match)} />
-              </div>
-            )}
-            <UploadPanel orgId={orgId} matchId={match.id} kits={scouting ? null : ownKits} stuck={stuckUploads} progressFiles={progress?.files ?? []} existing={match.videos.filter((v) => v.role === "main" && !v.duplicate_of).map((v) => v.filename)} onUploaded={() => void qc.invalidateQueries({ queryKey: key })} />
+            {/* the field first (A11); the shirts after it, before «Mehr»: they are saved at once,
+                also while the upload runs. The analysis separates the teams by their shirts:
+                without the opponent's colour it guesses worse, so it is asked with the reason (E09) */}
+            <UploadPanel
+              orgId={orgId}
+              matchId={match.id}
+              kits={scouting ? null : ownKits}
+              stuck={stuckUploads}
+              progressFiles={progress?.files ?? []}
+              existing={match.videos.filter((v) => v.role === "main" && !v.duplicate_of).map((v) => v.filename)}
+              onUploaded={() => void qc.invalidateQueries({ queryKey: key })}
+              shirts={
+                match.opponent && !match.opponent_colors?.color ? (
+                  <div className="max-w-[60ch] border-l-4 border-attn pl-3" data-testid="upload-ask-colour">
+                    <p className="m-0 text-[15px]">{ta("colourTip", { opponent: oppName(match) })}</p>
+                    <AskColour orgId={orgId} matchId={match.id} opponent={oppName(match)} />
+                  </div>
+                ) : null
+              }
+            />
           </section>
         )}
         <PartsPanel orgId={orgId} match={match} jobs={jobs} staff={staff} canDelete={canDelete} onChanged={() => void qc.invalidateQueries({ queryKey: key })} />
@@ -734,7 +783,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
             )}
             <div className="space-y-10">
               {graphics.data && goalRuns(graphics.data).length > 0 && <MatchZones graphics={graphics.data} />}
-              {stats.data && <ThreeFigures stats={stats.data} names={names} roster={roster.data ?? []} />}
+              {stats.data && <ThreeFigures stats={stats.data} names={names} roster={rosterRows} />}
             </div>
           </div>
           {/* everything else of the match, as before, one step away (UX test B08); not before the
@@ -765,7 +814,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
 
       {view === "numbers" && (
         <div className="animate-fade">
-          <NumbersView stats={stats.data ?? null} graphics={graphics.data ?? null} roster={roster.data ?? []} orgId={orgId} match={match} names={names} onPlay={main ? onPlay : undefined}>
+          <NumbersView stats={stats.data ?? null} graphics={graphics.data ?? null} roster={rosterRows} orgId={orgId} match={match} names={names} onPlay={main ? onPlay : undefined}>
           {graphics.data && goalRuns(graphics.data).length > 0 && <MatchZones graphics={graphics.data} row />}
           {stats.data && stats.data.quality.events > 0 && (
             <section id="numbers-overview" className="scroll-mt-24">

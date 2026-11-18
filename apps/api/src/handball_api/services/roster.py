@@ -40,6 +40,7 @@ from handball_api.schemas.roster import (
 from handball_api.services import audit
 from handball_api.services.context import Ctx
 from handball_api.services.csv_import import parse_roster_csv
+from handball_api.services.matches import counted
 from handball_api.services.orgs import get_season, get_team
 from handball_api.services.policies import Action, can
 
@@ -75,7 +76,10 @@ async def link_numbers(ctx: Ctx, season_id: uuid.UUID, team_id: uuid.UUID) -> in
     nums = await numbers(ctx, season_id, team_id)
     if not nums:
         return 0
-    matches = select(Match.id).where(Match.season_id == season_id, Match.team_id == team_id)
+    # never the example match: its numbers are invented and name nobody of the roster (A4)
+    matches = select(Match.id).where(
+        Match.season_id == season_id, Match.team_id == team_id, counted()
+    )
     linked = 0
     for number, pid in nums.items():
         r = await ctx.db.execute(

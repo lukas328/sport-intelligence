@@ -3,6 +3,7 @@ statistics count them (one source per goal)."""
 
 from __future__ import annotations
 
+import json
 import uuid
 from collections.abc import Callable
 from typing import Any
@@ -188,3 +189,87 @@ async def test_season_line(
     other = make_api()
     await setup_club(other, "other@hc-test.ch")
     assert (await other.get(f"{base}/{lp}/line")).status_code == 404
+
+
+async def test_season_line_takes_saves_and_appearances_from_the_report(
+    make_api: Callable[[], Api],
+    monkeypatch: pytest.MonkeyPatch,
+    owner_conn: Any,
+) -> None:
+    """A3: a goalkeeper with saves in the official report has them in the season line (source
+    «Spielbericht»), and every player on the report's match sheet has the appearance, also
+    without a goal or a save."""
+    from handball_api.integrations import handball_ch as ch
+    from handball_api.services import official_report
+
+    from .test_official_report import CH_URL, ch_data
+
+    async def recorded(game_id: int) -> dict[str, Any]:
+        return ch_data()
+
+    monkeypatch.setattr(official_report, "fetch_handball_ch", recorded)
+    coach = make_api()
+    ids = await setup_club(coach)
+    org = ids["org"]
+    add = roster_url(ids)
+
+    async def player(first: str, number: int, position: str | None = None) -> str:
+        body: dict[str, Any] = {"first_name": first, "last_name": "X", "jersey_number": number}
+        if position:
+            body["main_position"] = position
+        r = await coach.post(add, json=body)
+        assert r.status_code == 201, r.text
+        return str(r.json()["player_id"])
+
+    aida = await player("Aida", 1, "TW")  # saves in the report
+    vera = await player("Vera", 40, "TW")  # on the match sheet
+    zoe = await player("Zoe", 99)  # not on the match sheet
+    m = (await new_match(coach, ids, opponent_name="HC Kalmoos"))["id"]
+    r = await coach.post(f"/v1/orgs/{org}/matches/{m}/official-report", json={"url": CH_URL})
+    assert r.status_code == 200, r.text
+    match = (await coach.get(f"/v1/orgs/{org}/matches/{m}")).json()
+    assert match["report_extra"]["official_report"]["lineup"] == [1, 40]
+
+    stats = (await coach.get(f"/v1/orgs/{org}/matches/{m}/stats")).json()
+    saves = stats["goalkeepers"][f"own:p:{aida}"]["saves"]
+    assert saves > 0
+    base = f"/v1/orgs/{org}/teams/{ids['team']}/seasons/{ids['season']}/players"
+    line = (await coach.get(f"{base}/{aida}/line")).json()
+    one = line["matches"][0]
+    assert one["source"] == "report" and not one["analysed"] and one["appeared"]
+    assert one["involved"] and one["figures"]["saves"] == saves
+    totals = line["totals"]
+    # the saves reach the season figures; the shots faced need minutes the report lacks
+    assert totals["saves"] == saves and totals["faced"] == 0 and totals["save_pct"] is None
+    assert totals["matches"] == 1 and totals["matches_involved"] == 1
+    assert totals["report_matches"] == 1 and totals["analysed_matches"] == 0
+
+    second = (await coach.get(f"{base}/{vera}/line")).json()
+    assert second["matches"][0]["appeared"] and second["totals"]["matches_involved"] == 1
+    absent = (await coach.get(f"{base}/{zoe}/line")).json()
+    assert not absent["matches"][0]["appeared"] and absent["totals"]["matches_involved"] == 0
+
+    # the season statistics count the report's saves for the goalkeeper as well
+    season = (
+        await coach.get(f"/v1/orgs/{org}/teams/{ids['team']}/seasons/{ids['season']}/stats")
+    ).json()
+    row = next(p for p in season["players"] if p["player_id"] == aida)
+    assert row["saves"] == saves
+
+    # a report imported before the match sheet was stored: the cached handball.ch sheet of the
+    # linked game stands in (no request to handball.ch)
+    await owner_conn.execute(
+        "UPDATE matches SET report_extra = '{}'::jsonb, official_provider = 'handball_ch', "
+        "official_game_id = 484345 WHERE id = $1",
+        uuid.UUID(m),
+    )
+    second = (await coach.get(f"{base}/{vera}/line")).json()
+    assert not second["matches"][0]["appeared"]  # nothing cached yet
+    await owner_conn.execute(
+        "INSERT INTO official_cache (key, provider, operation, variables, data) "
+        "VALUES ($1, 'handball_ch', 'getReport', '{}'::jsonb, $2::jsonb)",
+        ch.cache_key(ch.Q_REPORT, {"gameId": 484345, "isLive": False}),
+        json.dumps({"gamePlayerStats": ch_data()["gamePlayerStats"]}),
+    )
+    second = (await coach.get(f"{base}/{vera}/line")).json()
+    assert second["matches"][0]["appeared"]

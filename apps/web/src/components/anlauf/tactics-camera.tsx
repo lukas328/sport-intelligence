@@ -238,13 +238,14 @@ export function TacticsCamera({
 
   const V = VIEWS[sceneView(scene, view)];
   return (
-    <figure className="m-0">
+    <figure className="court-frame m-0">
       <div className="relative bg-court">
         <svg viewBox={V.box.join(" ")} role="img" aria-label={text.label} className="block w-full">
           <CameraFrame scene={scene} view={view} width={width} dot={dot} t={t} labels={showLabels} />
         </svg>
         {text.caption && (
-          <figcaption className="max-sm:static max-sm:max-w-none max-sm:border-t max-sm:border-[#2a3440] absolute top-4 right-4 max-w-[70%] bg-[rgb(10_13_17/0.9)] px-3 py-2 text-[15px] font-bold text-[#eef2f5]">
+          // over the half the attack does not go to, so it never covers the goal of the scene
+          <figcaption className={`${sceneView(scene, view) === "camR" ? "left-4" : "right-4"} max-sm:static max-sm:max-w-none max-sm:border-t max-sm:border-[#2a3440] absolute top-4 max-w-[45%] bg-[rgb(10_13_17/0.9)] px-3 py-2 text-[15px] font-bold text-[#eef2f5]`}>
             {text.caption}
             {text.captionSmall && <small className="mt-0.5 block font-mono text-xs font-medium text-[#a5b0bb]">{text.captionSmall}</small>}
           </figcaption>

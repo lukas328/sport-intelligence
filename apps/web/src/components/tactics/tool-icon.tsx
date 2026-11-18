@@ -1,15 +1,17 @@
 import type { Side } from "@handball/tactics";
 import type { Tool } from "./board";
 import { BOARD_THEME } from "./board-theme";
+import { useBoardColours } from "./use-board-colours";
 
 /** The board's marks as small icons: the toolbar and the legend show what each line looks like. */
 export function ToolIcon({ tool, className }: { tool: Tool; className?: string }) {
+  const colours = useBoardColours();
   const common = { fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
   return (
     <svg aria-hidden viewBox="0 0 24 24" className={className ?? "size-5 shrink-0"}>
       {tool === "move" && (
         <>
-          <circle cx={12} cy={12} r={5.5} fill={BOARD_THEME.own} stroke={BOARD_THEME.rim} strokeWidth={1.5} />
+          <circle cx={12} cy={12} r={5.5} fill={colours.own} stroke={BOARD_THEME.rim} strokeWidth={1.5} />
           <path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3" {...common} />
         </>
       )}
@@ -29,9 +31,10 @@ export function ToolIcon({ tool, className }: { tool: Tool; className?: string }
 
 /** A player mark in the board's colours (legend). */
 export function TokenDot({ side }: { side: Side }) {
+  const colours = useBoardColours();
   return (
     <svg aria-hidden viewBox="0 0 24 24" className="size-5 shrink-0">
-      <circle cx={12} cy={12} r={8} fill={side === "own" ? BOARD_THEME.own : BOARD_THEME.opp} stroke={BOARD_THEME.rim} strokeWidth={1.5} />
+      <circle cx={12} cy={12} r={8} fill={side === "own" ? colours.own : colours.opp} stroke={BOARD_THEME.rim} strokeWidth={1.5} />
     </svg>
   );
 }

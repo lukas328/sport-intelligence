@@ -31,7 +31,7 @@ from handball_api.models.enums import ClipSource, SlideType
 from handball_api.services import audit
 from handball_api.services.context import Ctx
 from handball_api.services.insights import insights
-from handball_api.services.matches import scene_window
+from handball_api.services.matches import DEMO_SOURCE, scene_window
 from handball_api.services.orgs import get_team
 from handball_api.services.policies import Action, is_coach
 
@@ -432,31 +432,45 @@ async def from_match(
     match = await ctx.db.get(Match, match_id)
     if match is None or match.team_id != team_id:
         raise ProblemError(404, "not-found", "Match not found")
+    if match.source == DEMO_SOURCE:
+        # the example's scenes are drawn, not filmed: nothing to show the team (A5)
+        raise ProblemError(409, "example-match", "The example match has no scenes for the team")
+    items: list[dict[str, Any]] = []
     if given is not None:
         seen: set[Any] = set()
-        kept: list[dict[str, Any]] = []
         for item in given:
             key = item.get("event_id") or item.get("clip_id")
             if item.get("kind") == "scene" and key is not None:
-                if key in seen:
+                if key in seen or not await _in_video(ctx, item):
                     continue
                 seen.add(key)
-            kept.append(item)
-        return await create(ctx, team_id, title, kept, draft=True, match_id=match_id)
-    things = (await insights(ctx, match_id))["insights"][:3]
-    items: list[dict[str, Any]] = []
-    for thing in things:
-        ev = thing.get("evidence") or {}
-        q = select(Event).where(Event.match_id == match_id, Event.t_ms.is_not(None))
-        for key, col in (
-            ("side", Event.side),
-            ("type", Event.type),
-            ("outcome", Event.outcome),
-            ("zone", Event.shot_zone),
-            ("goal_zone", Event.goal_zone),
-        ):
-            if ev.get(key) is not None:
-                q = q.where(col == ev[key])
-        for e in (await ctx.db.scalars(q.order_by(Event.t_ms).limit(4))).all():
-            items.append({"kind": "scene", "event_id": e.id})
+            items.append(item)
+    else:
+        things = (await insights(ctx, match_id))["insights"][:3]
+        for thing in things:
+            ev = thing.get("evidence") or {}
+            q = select(Event).where(Event.match_id == match_id, Event.t_ms.is_not(None))
+            for key, col in (
+                ("side", Event.side),
+                ("type", Event.type),
+                ("outcome", Event.outcome),
+                ("zone", Event.shot_zone),
+                ("goal_zone", Event.goal_zone),
+            ):
+                if ev.get(key) is not None:
+                    q = q.where(col == ev[key])
+            for e in (await ctx.db.scalars(q.order_by(Event.t_ms).limit(4))).all():
+                items.append({"kind": "scene", "event_id": e.id})
+    # a draft without a single scene is no collection: say so instead of an empty draft (A5)
+    if not any(i.get("kind") == "scene" for i in items):
+        raise ProblemError(422, "no-scenes", "No scene of these points has a place in the video")
     return await create(ctx, team_id, title, items, draft=True, match_id=match_id)
+
+
+async def _in_video(ctx: Ctx, item: dict[str, Any]) -> bool:
+    """A scene of the three things that can be shown: a clip, a window, or an event with its
+    moment in the video (a goal only from the report or tapped without video has none)."""
+    if not item.get("event_id"):
+        return True
+    event = await ctx.db.get(Event, item["event_id"])
+    return event is None or event.t_ms is not None

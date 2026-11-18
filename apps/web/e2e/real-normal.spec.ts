@@ -111,7 +111,7 @@ test("no goal found by the analysis: after Prüfen the result, course, goals and
   await expect(page.locator("[data-zone=wurf]")).toContainText("2:1");
   await expect(page.getByTestId("game-next-step")).toHaveCount(0);
   // no match report: «So rechnen wir» says the goals come from the video (E08, G9)
-  await page.getByTestId("source-line").getByText("So rechnen wir").click();
+  await page.getByTestId("source-line").getByRole("button", { name: "So rechnen wir" }).click();
   await expect(page.getByTestId("how-counted")).toContainText("Die Tore kommen aus dem Video");
   await expect(page.getByTestId("how-counted")).not.toContainText("Spielbericht");
   // «Mehr zum Spiel» > Spielverlauf over the minutes of the video, not 0 to 60 (E10, G9)

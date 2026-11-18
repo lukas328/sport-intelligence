@@ -32,8 +32,8 @@ export function TeamSwitcher({ compact }: { compact?: boolean }) {
     <MenuRoot>
       <MenuTrigger
         className={cn(
-          "flex min-h-11 w-full min-w-0 items-center gap-2 text-left hover:bg-surface",
-          compact ? "px-1 py-1" : "px-2 py-1.5 border border-border",
+          "group flex min-h-11 w-full min-w-0 cursor-pointer items-center gap-2 text-left data-[state=open]:bg-ink data-[state=open]:text-ground",
+          compact ? "px-1 py-1 hover:bg-ink/5" : "border-2 border-ink px-2 py-1.5 hover:bg-ink/5",
         )}
         aria-label={`${t("shell.switchTeam")}: ${label}`}
         data-testid="team-switcher"
@@ -41,16 +41,16 @@ export function TeamSwitcher({ compact }: { compact?: boolean }) {
         <span className="min-w-0 flex-1">
           {/* on the phone two lines rather than «H…» (UX test H09) */}
           <span className={cn("block font-semibold", compact ? "line-clamp-2 text-[15px] leading-tight" : "truncate text-sm")}>{short}</span>
-          {sub && !compact && <span className="block truncate text-xs text-muted">{sub}</span>}
+          {sub && !compact && <span className="block truncate text-xs text-muted group-data-[state=open]:text-ground/80">{sub}</span>}
         </span>
-        <ChevronsUpDown aria-hidden className="size-4 shrink-0 text-muted" />
+        <ChevronsUpDown aria-hidden className="size-4 shrink-0" />
       </MenuTrigger>
       <MenuContent align="start" className="w-72">
         <MenuLabel>{t("palette.teams")}</MenuLabel>
         {teams.map((x) => (
           <MenuItem
             key={x.id}
-            icon={x.id === team?.id ? <Check className="!text-accent" /> : <span className="size-4" />}
+            icon={x.id === team?.id ? <Check strokeWidth={2.5} /> : <span className="size-[18px]" />}
             onSelect={() => {
               setTeam(x.id);
               // stay on the same kind of page for the new team
@@ -72,7 +72,7 @@ export function TeamSwitcher({ compact }: { compact?: boolean }) {
             {orgs
               .filter((o) => o.id !== org.id)
               .map((o) => (
-                <MenuItem key={o.id} href={`/app/${o.id}`} icon={<span className="size-4" />}>
+                <MenuItem key={o.id} href={`/app/${o.id}`} icon={<span className="size-[18px]" />}>
                   {o.name}
                 </MenuItem>
               ))}

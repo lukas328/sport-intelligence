@@ -18,6 +18,7 @@ import { coachRights } from "@/lib/roles";
 import { ConsentCopy } from "./consent-copy";
 import { TwoFactorTask } from "./two-factor-task";
 import { MarkKeepers } from "@/components/roster/mark-keepers";
+import { MarkPositions } from "@/components/roster/mark-positions";
 
 type Entry = Schemas["RosterEntryOut"];
 
@@ -145,10 +146,11 @@ export default async function TeamPage({ params, searchParams }: { params: Promi
         }
       />
       <div className={cn("grid gap-x-8 gap-y-12", staff ? "lg:grid-cols-[minmax(0,1fr)_300px] xl:grid-cols-[minmax(0,1fr)_340px]" : "")}>
-        <div className="grid gap-x-8 gap-y-8 md:grid-cols-3">
+        {/* three position groups side by side; beside the staff column at 1024 px two, so names keep one line (A18) */}
+        <div className={cn("grid gap-x-8 gap-y-8 md:grid-cols-3", staff && "lg:grid-cols-2 xl:grid-cols-3")}>
           {/* an empty squad: what it is for and the one way to fill it (K8) */}
           {entries.length === 0 && (
-            <section className="max-w-[60ch] space-y-4 md:col-span-3" data-testid="roster-empty">
+            <section className="max-w-[60ch] space-y-4 md:col-span-full" data-testid="roster-empty">
               <p className="m-0 text-[17px]">{canEdit ? t("emptyText") : t("emptyTextPlayer")}</p>
               {canEdit && (
                 <Link href={`${base}?edit=1`} className={buttonClass("primary")}>
@@ -159,7 +161,7 @@ export default async function TeamPage({ params, searchParams }: { params: Promi
           )}
           {/* what the squad is for, said once (review R37) */}
           {canEdit && entries.length > 0 && (
-            <p className="m-0 max-w-[70ch] text-[15px] text-ink-2 md:col-span-3" data-testid="roster-why">
+            <p className="m-0 max-w-[70ch] text-[15px] text-ink-2 md:col-span-full" data-testid="roster-why">
               {t("why")}
             </p>
           )}
@@ -167,8 +169,10 @@ export default async function TeamPage({ params, searchParams }: { params: Promi
           {canEdit && entries.length > 0 && (
             <MarkKeepers orgId={orgId} teamId={teamId} players={[...entries].sort((a, b) => (a.jersey_number ?? 100) - (b.jersey_number ?? 100))} />
           )}
+          {/* the court positions the same way: a position, then the players (A14) */}
+          {canEdit && entries.length > 0 && <MarkPositions orgId={orgId} teamId={teamId} players={entries} />}
           {groups.map((g) => (
-            <section key={g.key} aria-labelledby={`group-${g.key}`} className={cn(g.key === "other" && "md:col-span-3")}>
+            <section key={g.key} aria-labelledby={`group-${g.key}`} className={cn(g.key === "other" && "md:col-span-full")}>
               <h2 id={`group-${g.key}`} className="font-slant mb-3 flex items-baseline gap-2.5 border-b border-rule pb-3 text-xl">
                 {onlyOther ? t("group_all") : t(`group_${g.key}`)}
                 <span className="font-sans text-[15px] font-medium text-ink-2 tabular-nums">{g.rows.length}</span>
@@ -178,15 +182,17 @@ export default async function TeamPage({ params, searchParams }: { params: Promi
                   const name = `${p.first_name} ${p.last_name}`;
                   const fig = figure(p);
                   return (
-                    <li key={p.id} className="grid min-h-[76px] grid-cols-[64px_minmax(0,1fr)_auto] items-center gap-x-3 border-b border-rule py-3" data-testid="team-row">
+                    // on a phone a compact row (finding A14: one column of tall rows): number, name,
+                    // and position with the figure on the right; from md three columns of full rows
+                    <li key={p.id} className="grid min-h-14 grid-cols-[44px_minmax(0,1fr)_auto] items-center gap-x-3 border-b border-rule py-1.5 md:min-h-[76px] md:grid-cols-[64px_minmax(0,1fr)_auto] md:py-3" data-testid="team-row">
                       <span
-                        className={cn("font-num text-right text-[44px] leading-[.8]", p.jersey_number == null || p.status ? "text-ink-2" : "text-club-text")}
+                        className={cn("font-num text-right text-[32px] leading-[.8] md:text-[44px]", p.jersey_number == null || p.status ? "text-ink-2" : "text-club-text")}
                         aria-label={p.jersey_number == null ? t("noNumber") : `${tr("roster.number")} ${p.jersey_number}`}
                       >
                         {p.jersey_number ?? "?"}
                       </span>
                       <span className="min-w-0">
-                        <span className="font-slant block text-[19px] leading-tight">
+                        <span className="font-slant block text-[17px] leading-tight md:text-[19px]">
                           {staff ? (
                             <Link href={`${base}/players/${p.player_id}`} className="inline-flex min-h-11 items-center hover:underline hover:underline-offset-4">
                               {name}
@@ -195,14 +201,20 @@ export default async function TeamPage({ params, searchParams }: { params: Promi
                             name
                           )}
                         </span>
-                        <span className="mt-1 flex flex-wrap items-center gap-1.5 text-[15px] text-ink-2">
+                        <span className="mt-1 flex flex-wrap items-center gap-1.5 text-[15px] text-ink-2 max-md:hidden">
                           {firstVideo && p.jersey_number == null ? <AttnTag>{t("numberMissing")}</AttnTag> : fig}
                           {p.status && <span>{t("out")}</span>}
                         </span>
                       </span>
-                      <abbr title={p.main_position ? tr(`positions.${p.main_position}`) : undefined} className="text-[15px] font-bold text-ink-2 no-underline">
-                        {p.main_position}
-                      </abbr>
+                      <span className="flex flex-col items-end text-right">
+                        <abbr title={p.main_position ? tr(`positions.${p.main_position}`) : undefined} className="text-[15px] font-bold text-ink-2 no-underline">
+                          {p.main_position}
+                        </abbr>
+                        <span className="flex flex-wrap justify-end gap-1.5 text-[15px] leading-tight text-ink-2 md:hidden">
+                          {firstVideo && p.jersey_number == null ? <AttnTag>{t("numberMissing")}</AttnTag> : fig}
+                          {p.status && <span>{t("out")}</span>}
+                        </span>
+                      </span>
                     </li>
                   );
                 })}

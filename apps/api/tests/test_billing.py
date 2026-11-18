@@ -47,6 +47,9 @@ class FakeGateway:
         self.calls.append(("portal", (customer, return_url)))
         return "https://billing.stripe.test/p/1"
 
+    async def remove_item(self, item_id: str) -> None:
+        self.calls.append(("remove_item", (item_id,)))
+
 
 @pytest.fixture
 def billing_on(db_app: FastAPI) -> Iterator[FakeGateway]:
@@ -206,12 +209,11 @@ async def test_checkout_webhooks_and_portal(
     assert (
         await api.post(f"/v1/orgs/{org}/billing/checkout", json={"plan": "free"})
     ).status_code == 422
-    r = await api.post(
-        f"/v1/orgs/{org}/billing/checkout", json={"plan": "team", "goalkeeper_seats": 2}
-    )
+    r = await api.post(f"/v1/orgs/{org}/billing/checkout", json={"plan": "team"})
     assert r.json() == {"url": "https://checkout.stripe.test/c/1"}
     _kind, (customer, items, trial, success) = billing_on.calls[-1]
-    assert (customer, items, trial) == ("cus_123", [("price_team", 1), ("price_gk", 2)], 30)
+    # the goalkeeper functions are part of the plan: one item, no add-on (A9)
+    assert (customer, items, trial) == ("cus_123", [("price_team", 1)], 30)
     assert success.endswith("?billing=success#billing")
 
     hook = "/v1/stripe/webhook"
@@ -237,26 +239,27 @@ async def test_checkout_webhooks_and_portal(
         "items": {
             "data": [
                 {"price": {"id": "price_team"}, "quantity": 1, "current_period_end": trial_end},
-                {"price": {"id": "price_gk"}, "quantity": 2},
+                {"id": "si_gk", "price": {"id": "price_gk"}, "quantity": 2},
             ]
         },
     }
     payload, headers = signed(event("evt_2", "customer.subscription.updated", sub))
     assert (await api.http.post(hook, content=payload, headers=headers)).status_code == 200
     b = (await api.get(f"/v1/orgs/{org}/billing")).json()
-    assert (b["plan"], b["effective_plan"], b["status"], b["goalkeeper_seats"]) == (
-        "team",
-        "team",
-        "trialing",
-        2,
-    )
+    assert (b["plan"], b["effective_plan"], b["status"]) == ("team", "team", "trialing")
+    assert "goalkeeper_seats" not in b and "goalkeeper_addon_chf" not in b
+    # a subscription booked with the former goalkeeper add-on runs on without it (A9)
+    assert billing_on.calls[-1] == ("remove_item", ("si_gk",))
     assert "tracking" in b["features"]
     # paid features unlocked
     m = await new_match(api, ids)
     assert (await api.get(f"/v1/orgs/{org}/matches/{m['id']}/insights")).status_code == 200
     # a second checkout no longer gets a trial
     await api.post(f"/v1/orgs/{org}/billing/checkout", json={"plan": "club"})
-    assert billing_on.calls[-1][1][2] == 0
+    # typed as the list's element: the remove_item assert above narrowed calls[-1]
+    call: tuple[str, Any] = billing_on.calls[-1]
+    kind, (_customer, _items, trial, _success) = call
+    assert (kind, trial) == ("checkout", 0)
     assert (
         (await api.post(f"/v1/orgs/{org}/billing/portal"))
         .json()["url"]
@@ -272,7 +275,7 @@ async def test_checkout_webhooks_and_portal(
     payload, headers = signed(event("evt_4", "customer.subscription.deleted", sub))
     await api.http.post(hook, content=payload, headers=headers)
     b = (await api.get(f"/v1/orgs/{org}/billing")).json()
-    assert (b["plan"], b["effective_plan"], b["goalkeeper_seats"]) == ("free", "free", 0)
+    assert (b["plan"], b["effective_plan"]) == ("free", "free")
 
     # signature and payload checks
     bad = dict(headers, **{"stripe-signature": "t=1,v1=deadbeef"})

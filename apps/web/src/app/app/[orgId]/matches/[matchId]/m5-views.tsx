@@ -27,7 +27,8 @@ export function KeepersView({ orgId, match, teamName, stats, names, onPlay }: Vi
   // only the own goalkeepers, by the roster's goalkeepers (app review R4: the table mixed both
   // teams, a field player and a number without a name); hooks before any early return
   const roster = useRosterNames(orgId, match.team_id, match.season_id);
-  const rows = ownKeepers(Object.values(stats.goalkeepers ?? {}), roster.data ?? []);
+  // the example match's keepers are invented numbers, never the roster's goalkeepers (A4)
+  const rows = ownKeepers(Object.values(stats.goalkeepers ?? {}), match.source === "demo" ? [] : (roster.data ?? []));
   if (rows.length === 0) return <EmptyState title={t("none")}>{t("assignHint")}</EmptyState>;
   const nameOf = (k: KeeperRow) =>
     (k.player_id && names[k.player_id]) ||

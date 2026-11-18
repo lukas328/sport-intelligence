@@ -37,3 +37,16 @@ export function clubNameShown(club: string, team: string | null | undefined): st
   if (!t || !c) return club;
   return ` ${t} `.includes(` ${c} `) ? null : club;
 }
+
+/**
+ * Club and team in one line, each name once (A5): «TV Farnwil Herren 1», but «TV Farnwil» for the
+ * team «TV Farnwil» and «TV Farnwil 2» for the team «TV Farnwil 2».
+ */
+export function clubTeam(club: string | null | undefined, team: string | null | undefined): string {
+  const t = team?.trim() ?? "";
+  const c = club?.trim() ?? "";
+  if (!c) return t;
+  if (!t) return c;
+  const shown = clubNameShown(c, t);
+  return shown ? `${shown} ${t}` : t;
+}

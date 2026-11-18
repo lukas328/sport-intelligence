@@ -67,7 +67,7 @@ export function TrainingTips({
             {t("tipsTitle")}
           </h2>
         )}
-        {data && data.matches_analysed > 0 && <p className="text-[15px] text-muted">{t("tipsFrom", { n: data.matches_analysed })}</p>}
+        {data && data.matches_analysed > 0 && <p className="text-[15px] text-muted">{tipsSource(t, data)}</p>}
       </div>
       {q.isPending ? (
         <Skeleton className="h-40" />
@@ -362,4 +362,13 @@ function PlanForm({
       </div>
     </form>
   );
+}
+
+/** Where the tips come from, as it is (A8): the analysed matches, the official reports, or both. */
+function tipsSource(t: ReturnType<typeof useTranslations<"training">>, d: { matches_analysed: number; matches_with_analysis?: number; matches_from_report?: number }): string {
+  const analysed = d.matches_with_analysis ?? d.matches_analysed;
+  const reports = d.matches_from_report ?? 0;
+  if (reports === 0) return t("tipsFrom", { n: analysed });
+  if (analysed === 0) return t("tipsFromReports", { n: reports });
+  return t("tipsFromBoth", { k: analysed, m: reports });
 }

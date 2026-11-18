@@ -31,7 +31,7 @@ from handball_api.models import (
 from handball_api.models.enums import JobStatus, OrgRole, Plan
 from handball_api.services import audit
 from handball_api.services.context import Ctx
-from handball_api.services.plans import FEATURES, GOALKEEPER_ADDON_CHF, PLANS, PlanSpec
+from handball_api.services.plans import FEATURES, PLANS, PlanSpec
 from handball_api.services.policies import Action, authorize
 
 log = get_logger("handball_api.billing")
@@ -206,7 +206,6 @@ async def overview(ctx: Ctx) -> dict[str, Any]:
         "trial_ends_at": org.trial_ends_at,
         "current_period_end": org.current_period_end,
         "paid_until": org.paid_until,
-        "goalkeeper_seats": org.goalkeeper_seats,
         "enforced": ctx.settings.billing_enforce,
         "checkout_available": ctx.settings.stripe_secret_key is not None,
         "limits": {
@@ -230,7 +229,6 @@ async def overview(ctx: Ctx) -> dict[str, Any]:
             }
             for p in PLANS.values()
         ],
-        "goalkeeper_addon_chf": GOALKEEPER_ADDON_CHF,
     }
 
 
@@ -251,6 +249,8 @@ class BillingGateway(Protocol):
     ) -> str: ...
 
     async def portal_url(self, customer: str, return_url: str) -> str: ...
+
+    async def remove_item(self, item_id: str) -> None: ...
 
 
 class StripeGateway:
@@ -293,6 +293,12 @@ class StripeGateway:
         )
         return str(session.url)
 
+    async def remove_item(self, item_id: str) -> None:
+        # the item ends now, nothing is credited or charged for the rest of the period
+        await self.client.v1.subscription_items.delete_async(
+            item_id, params={"proration_behavior": "none"}
+        )
+
 
 def _price(settings: Settings, plan: Plan) -> str:
     price = {Plan.TEAM: settings.stripe_price_team, Plan.CLUB: settings.stripe_price_club}.get(plan)
@@ -301,7 +307,7 @@ def _price(settings: Settings, plan: Plan) -> str:
     return price
 
 
-async def checkout(ctx: Ctx, gateway: BillingGateway | None, plan: Plan, goalkeepers: int) -> str:
+async def checkout(ctx: Ctx, gateway: BillingGateway | None, plan: Plan) -> str:
     actor = ctx.require_actor()
     authorize(actor, Action.ORG_UPDATE, two_factor=ctx.two_factor)
     if gateway is None:
@@ -309,13 +315,8 @@ async def checkout(ctx: Ctx, gateway: BillingGateway | None, plan: Plan, goalkee
     if plan == Plan.FREE:
         raise ProblemError(422, "validation", "Choose a paid plan")
     org = await _org(ctx)
+    # the goalkeeper functions are part of the plan, no add-on any more (A9)
     items = [(_price(ctx.settings, plan), 1)]
-    if goalkeepers:
-        if not ctx.settings.stripe_price_goalkeeper:
-            raise ProblemError(
-                503, "billing-unavailable", "The goalkeeper add-on is not configured"
-            )
-        items.append((ctx.settings.stripe_price_goalkeeper, goalkeepers))
     if not org.stripe_customer_id:
         user = await ctx.db.get(User, ctx.user_id)
         org.stripe_customer_id = await gateway.create_customer(
@@ -356,7 +357,9 @@ def _ts(v: Any) -> datetime | None:
     return datetime.fromtimestamp(int(v), UTC) if v else None
 
 
-async def handle_webhook(ctx: Ctx, payload: bytes, signature: str | None) -> dict[str, str]:
+async def handle_webhook(
+    ctx: Ctx, payload: bytes, signature: str | None, gateway: BillingGateway | None = None
+) -> dict[str, str]:
     """Verified, idempotent processing of Stripe events (each event id once)."""
     secret = ctx.settings.stripe_webhook_secret
     if secret is None:
@@ -379,7 +382,9 @@ async def handle_webhook(ctx: Ctx, payload: bytes, signature: str | None) -> dic
             "customer.subscription.updated",
             "customer.subscription.deleted",
         ):
-            await _on_subscription(ctx, obj, deleted=event.type.endswith("deleted"))
+            await _on_subscription(
+                ctx, obj, deleted=event.type.endswith("deleted"), gateway=gateway
+            )
         elif event.type == "invoice.payment_failed":
             org = await _by_customer(ctx, obj.get("customer"))
             if org is not None:
@@ -413,7 +418,9 @@ async def _on_checkout(ctx: Ctx, obj: Any) -> None:
         org.stripe_subscription_id = str(obj.get("subscription"))
 
 
-async def _on_subscription(ctx: Ctx, sub: Any, deleted: bool) -> None:
+async def _on_subscription(
+    ctx: Ctx, sub: Any, deleted: bool, gateway: BillingGateway | None = None
+) -> None:
     org = await _by_customer(ctx, sub.get("customer"))
     if org is None:
         return
@@ -437,10 +444,26 @@ async def _on_subscription(ctx: Ctx, sub: Any, deleted: bool) -> None:
         items[0].get("current_period_end") if items else None
     )
     org.current_period_end = _ts(period)
+    org.goalkeeper_seats = 0
+    await _drop_goalkeeper_addon(ctx, gateway, items)
+
+
+async def _drop_goalkeeper_addon(
+    ctx: Ctx, gateway: BillingGateway | None, items: list[dict[str, Any]]
+) -> None:
+    """A subscription booked with the former goalkeeper add-on keeps running without it (A9):
+    the item is removed without proration, so no further invoice carries it. A failure is logged
+    and tried again at the subscription's next update."""
     gk = ctx.settings.stripe_price_goalkeeper
-    org.goalkeeper_seats = sum(
-        int(i.get("quantity") or 0) for i in items if gk and (i.get("price") or {}).get("id") == gk
-    )
+    if not gk or gateway is None:
+        return
+    for item in items:
+        if (item.get("price") or {}).get("id") == gk and item.get("id"):
+            try:
+                await gateway.remove_item(str(item["id"]))
+                log.info("goalkeeper_addon_removed", item=str(item["id"]))
+            except Exception as exc:  # Stripe down: the next update tries again
+                log.warning("goalkeeper_addon_not_removed", item=str(item["id"]), error=str(exc))
 
 
 async def _notify_admins(ctx: Ctx, org: Organization, kind: str) -> None:

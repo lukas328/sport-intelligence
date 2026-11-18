@@ -13,7 +13,7 @@ import hashlib
 import hmac
 import random
 import uuid
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, time, timedelta
 from typing import Any
 
 from sqlalchemy import func, select
@@ -24,9 +24,9 @@ from handball_api.integrations.support import CrispChat, NoSupportChat
 from handball_api.models import (
     Event,
     Match,
+    Opponent,
     Organization,
     OrgMembership,
-    Player,
     Presentation,
     RosterEntry,
     Team,
@@ -39,6 +39,8 @@ from handball_api.services import audit
 from handball_api.services.context import Ctx
 from handball_api.services.mail_templates import render
 from handball_api.services.matches import DEMO_SOURCE, create_match
+from handball_api.services.orgs import current_seasons, get_team
+from handball_api.services.policies import Action
 
 SERIES_DAYS = (0, 1, 3, 7, 14)
 SERIES_LINKS = {0: "/app", 1: "/hilfe/aufnahme", 3: "/hilfe/videositzung", 7: "/app", 14: "/app"}
@@ -212,14 +214,34 @@ DEMO_OTHER = {
 }
 DEMO_TURNOVERS = {"own": 9, "opponent": 11}
 DEMO_SUSPENSIONS = {"own": 2, "opponent": 3}
-DEMO_OPPONENT = "Demo HC Beispiel"
+# The example's opponent: an invented club of the demo story (the website's demo match). Until
+# 18.11.2026 it was «Demo HC Beispiel» (migration 0051 renamed it). An example match is told by
+# its `source` (DEMO_SOURCE), never by this name.
+DEMO_OPPONENT = "TSV Nachtwind"
+# The example names nobody of the team (A4): our players are shirt numbers only, invented ones,
+# never linked to the roster; our goalkeeper wears the 12, theirs the 1
+DEMO_NUMBERS = [2, 4, 5, 8, 13, 15, 17, 19, 22, 24]
+DEMO_KEEPER = 12
+DEMO_KEEPER_OPPONENT = 1
+
+
+def demo_kickoff(season_start: date, today: date) -> datetime:
+    """The example's date, far from any real fixture (A4): the first day of the season, in the
+    summer break before the championship starts (18:00 Swiss time); a season that has not
+    started yet takes the same day one year earlier."""
+    day = (
+        season_start if season_start <= today else season_start.replace(year=season_start.year - 1)
+    )
+    return datetime.combine(day, time(16, 0), tzinfo=UTC)
 
 
 def demo_events(
-    period_s: int, field: list[tuple[uuid.UUID, int | None]], keeper: uuid.UUID | None
+    period_s: int, numbers: list[int] | None = None, keeper: int = DEMO_KEEPER
 ) -> list[dict[str, Any]]:
-    """The example match's events in match order (fixed seed): own field players from `field`
-    (player, number), the own goalkeeper's saves credited to `keeper`."""
+    """The example match's events in match order (fixed seed): our field players by the shirt
+    numbers `numbers` (no player of the roster), our goalkeeper's saves credited to the number
+    `keeper`."""
+    field = numbers if numbers is not None else DEMO_NUMBERS
     rng = random.Random(7)  # noqa: S311 (example data, not security relevant)
     shots: list[dict[str, Any]] = []
     for side in ("own", "opponent"):
@@ -275,16 +297,11 @@ def demo_events(
                 if item["outcome"] in ("goal", "save")
                 else None,
             )
-            if item["outcome"] == "save":
-                # our saves to our goalkeeper, theirs to a numbered keeper of the opponent
-                e["attributes"] = (
-                    {"goalkeeper_number": 1}
-                    if own
-                    else ({"goalkeeper_id": str(keeper)} if keeper else {})
-                )
+            if item["outcome"] in ("save", "goal"):
+                # saves and goals against to the numbered goalkeeper in goal: ours, theirs
+                e["attributes"] = {"goalkeeper_number": DEMO_KEEPER_OPPONENT if own else keeper}
         if own:
-            e["player_id"] = shooter[0] if shooter else None
-            e["number"] = shooter[1] if shooter else None
+            e["number"] = shooter
         else:
             e["number"] = rng.choice(opp_numbers)
         out.append(e)
@@ -294,35 +311,34 @@ def demo_events(
 async def demo_match(ctx: Ctx, team_id: uuid.UUID) -> Match:
     """The example match of «Demo-Spiel ansehen»: one per team, with realistic events, marked as
     an example (`source` demo). It is no match of the team: lists, figures, statistics and pick
-    lists leave it out (services/matches.counted, app review R1)."""
+    lists leave it out (services/matches.counted, app review R1).
+
+    It mixes with nothing real (A4): our players are invented shirt numbers, never the roster's
+    names; the date is the first day of the season, far from the fixtures; the opponent is an
+    invented club of the demo story with an opponent entry of its own (not a real opponent of the
+    club that happens to carry the name)."""
     existing = await ctx.db.scalar(
         select(Match).where(Match.team_id == team_id, Match.source == DEMO_SOURCE)
     )
     if existing:
         return existing
+    team = await get_team(ctx, team_id, Action.MATCH_WRITE)
+    season = (await current_seasons(ctx, [team.id])).get(team.id)
+    if season is None:
+        raise ProblemError(409, "no-season", "The team has no season")
     m = await create_match(
         ctx,
         team_id,
         MatchCreate(
-            opponent_name=DEMO_OPPONENT,
-            kickoff_at=datetime.now(UTC) - timedelta(days=2),
+            opponent_id=(await _demo_opponent(ctx)).id,
+            kickoff_at=demo_kickoff(season.starts_on, datetime.now(UTC).date()),
             is_demo=True,
         ),
     )
     m.source = DEMO_SOURCE
     m.halftime_own = m.halftime_opponent = 0
-    roster = (
-        await ctx.db.execute(
-            select(RosterEntry.player_id, RosterEntry.jersey_number, Player.main_position)
-            .join(Player, Player.id == RosterEntry.player_id)
-            .where(RosterEntry.season_id == m.season_id, RosterEntry.team_id == team_id)
-            .order_by(RosterEntry.jersey_number.nulls_last())
-        )
-    ).all()
-    keeper = next((pid for pid, _, pos in roster if pos == "TW"), None)
-    field = [(pid, n) for pid, n, pos in roster if pos != "TW"]
     own = opp = 0
-    for e in demo_events(m.period_s, field, keeper):
+    for e in demo_events(m.period_s):
         if e.get("outcome") == "goal":
             own, opp = (own + 1, opp) if e["side"] == "own" else (own, opp + 1)
             if e["period"] == 1:
@@ -340,6 +356,29 @@ async def demo_match(ctx: Ctx, team_id: uuid.UUID) -> Match:
     await ctx.db.flush()
     await audit.record(ctx, "match.demo_created", target_type="match", target_id=m.id)
     return m
+
+
+async def _demo_opponent(ctx: Ctx) -> Opponent:
+    """The opponent entry of the club's example matches: the one an example already plays,
+    else a new one (a real opponent of the same name stays the club's own)."""
+    org_id = ctx.require_actor().organization_id
+    known = await ctx.db.scalar(
+        select(Opponent)
+        .join(Match, Match.opponent_id == Opponent.id)
+        .where(
+            Opponent.organization_id == org_id,
+            Match.source == DEMO_SOURCE,
+            Opponent.name == DEMO_OPPONENT,
+        )
+        .order_by(Opponent.created_at)
+        .limit(1)
+    )
+    if known is not None:
+        return known
+    opp = Opponent(organization_id=org_id, name=DEMO_OPPONENT)
+    ctx.db.add(opp)
+    await ctx.db.flush()
+    return opp
 
 
 # ---- onboarding e-mail series ------------------------------------------------------------------

@@ -2,8 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { api } from "@/lib/client";
+import { useEscape } from "@/lib/use-escape";
 import { cn } from "@/lib/utils";
 
 interface Player {
@@ -28,6 +29,15 @@ export function MarkKeepers({ orgId, teamId, players }: { orgId: string; teamId:
   const [open, setOpen] = useState(keepers.length === 0);
   const [busy, setBusy] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
+  // Escape folds it like «Fertig» once a keeper is marked (A15)
+  const panel = useRef<HTMLElement>(null);
+  const opener = useRef<HTMLButtonElement>(null);
+  // folded: the focus on the line that opens it again, not lost on the page
+  const fold = () => {
+    setOpen(false);
+    requestAnimationFrame(() => opener.current?.focus());
+  };
+  useEscape(open && keepers.length > 0, fold, panel);
   async function toggle(p: Player) {
     setBusy(p.id);
     setFailed(false);
@@ -41,16 +51,16 @@ export function MarkKeepers({ orgId, teamId, players }: { orgId: string; teamId:
   }
   if (!open) {
     return (
-      <p className="m-0 flex flex-wrap items-baseline gap-x-3 gap-y-1 text-[15px] md:col-span-3" data-testid="mark-keepers">
+      <p className="m-0 flex flex-wrap items-baseline gap-x-3 gap-y-1 text-[15px] md:col-span-full" data-testid="mark-keepers">
         <span>{t("keepersSome", { n: keepers.length })}</span>
-        <button type="button" onClick={() => setOpen(true)} className="cursor-pointer font-semibold underline underline-offset-4" data-testid="keepers-open">
+        <button ref={opener} type="button" onClick={() => setOpen(true)} className="cursor-pointer font-semibold underline underline-offset-4" data-testid="keepers-open">
           {t("keepersChange")}
         </button>
       </p>
     );
   }
   return (
-    <section className="max-w-[70ch] space-y-3 border-l-4 border-attn pl-4 md:col-span-3" data-testid="mark-keepers" aria-labelledby="mark-keepers-title">
+    <section ref={panel} className="max-w-[70ch] space-y-3 border-l-4 border-attn pl-4 md:col-span-full" data-testid="mark-keepers" aria-labelledby="mark-keepers-title">
       <h2 id="mark-keepers-title" className="font-slant m-0 text-xl">
         {t("keepersTitle")}
       </h2>
@@ -80,7 +90,7 @@ export function MarkKeepers({ orgId, teamId, players }: { orgId: string; teamId:
         })}
       </ul>
       {keepers.length > 0 && (
-        <button type="button" onClick={() => setOpen(false)} className="min-h-11 cursor-pointer border-2 border-ink bg-ink px-4 text-[15px] font-semibold text-ground" data-testid="keepers-done">
+        <button type="button" onClick={fold} className="min-h-11 cursor-pointer border-2 border-ink bg-ink px-4 text-[15px] font-semibold text-ground" data-testid="keepers-done">
           {t("keepersDone")}
         </button>
       )}

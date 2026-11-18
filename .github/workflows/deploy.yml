@@ -201,6 +201,18 @@ jobs:
               if live.get(key) not in (None, default) and key not in extra:
                   extra[key] = live[key]
                   print(f"keep {key}={live[key]} from the running app")
+          # non-secret settings kept in the repository (infra/azure/staging-env.json) win over the
+          # stored file; null removes a key. The model keys of the analysis live here.
+          try:
+              wanted = json.load(open("../../azure/staging-env.json"))
+          except FileNotFoundError:
+              wanted = {}
+          for key, value in wanted.items():
+              if value is None:
+                  extra.pop(key, None)
+              else:
+                  extra[key] = value
+              print(f"setting {key}={value!r} from staging-env.json")
           line = "extra_env        = " + json.dumps(extra)
           text = re.sub(r"^extra_env\s*=.*$", line, text, flags=re.M) if m else text + line + "\n"
           open("staging.tfvars", "w").write(text)

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { clubNameShown, headName, ownName } from "./own-name";
+import { clubNameShown, clubTeam, headName, ownName } from "./own-name";
 
 describe("ownName", () => {
   it("takes the team's own name, the club's for a generic team name", () => {
@@ -27,5 +27,15 @@ describe("clubNameShown (K7)", () => {
     expect(clubNameShown("HC Tannengrün", "Herren 1")).toBe("HC Tannengrün");
     expect(clubNameShown("TV Farnwil", null)).toBe("TV Farnwil");
     expect(clubNameShown("TV Farn", "TV Farnwil")).toBe("TV Farn");
+  });
+});
+
+describe("clubTeam (A5)", () => {
+  it("names club and team once each", () => {
+    expect(clubTeam("TV Farnwil", "Herren 1")).toBe("TV Farnwil Herren 1");
+    expect(clubTeam("TV Farnwil", "TV Farnwil")).toBe("TV Farnwil");
+    expect(clubTeam("TV Farnwil", "TV Farnwil 2")).toBe("TV Farnwil 2");
+    expect(clubTeam(undefined, "Herren 1")).toBe("Herren 1");
+    expect(clubTeam("TV Farnwil", null)).toBe("TV Farnwil");
   });
 });

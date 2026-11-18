@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import Any
 
+import asyncpg
 import pytest
 
 from handball_api.services.drills import library
@@ -59,13 +60,20 @@ def test_drills_for_a_topic_start_with_basic_ones() -> None:
     assert drills_for(["unknown"]) == []
 
 
-async def test_training_tips(make_api: Callable[[], Api]) -> None:
+async def test_training_tips(make_api: Callable[[], Api], owner_conn: asyncpg.Connection) -> None:
     api = make_api()
     ids = await setup_club(api)
     url = f"/v1/orgs/{ids['org']}/teams/{ids['team']}/training-tips"
     # nothing analysed yet: an honest empty answer
     empty = (await api.get(url)).json()
-    assert empty == {"matches_analysed": 0, "plan_required": False, "matches": [], "tips": []}
+    assert empty == {
+        "matches_analysed": 0,
+        "matches_with_analysis": 0,
+        "matches_from_report": 0,
+        "plan_required": False,
+        "matches": [],
+        "tips": [],
+    }
 
     await tagged_match(api, ids, 15, 10, kickoff_at="2026-09-05T18:00:00+02:00")
     await tagged_match(api, ids, 16, 9, kickoff_at="2026-09-12T18:00:00+02:00")
@@ -79,3 +87,13 @@ async def test_training_tips(make_api: Callable[[], Api]) -> None:
     assert shooting["params"]["value"] == 29
     assert len(shooting["drills"]) == 3
     assert len(data["tips"]) <= 3
+    assert (data["matches_with_analysis"], data["matches_from_report"]) == (3, 0)
+
+    # A8: a match known only from the official report is counted as such, not as analysed
+    first = data["matches"][-1]["match_id"]
+    await owner_conn.execute(
+        "UPDATE events SET source = 'official_report' WHERE match_id = $1::uuid", first
+    )
+    data = (await api.get(url)).json()
+    assert data["matches_analysed"] == 3
+    assert (data["matches_with_analysis"], data["matches_from_report"]) == (2, 1)

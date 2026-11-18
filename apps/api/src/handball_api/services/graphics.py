@@ -246,13 +246,15 @@ def demo_scene(e: Event) -> list[dict[str, Any]]:
         return [(round(x + dx * i / (n - 1), 2), round(y + dy * i / (n - 1), 2)) for i in range(n)]
 
     tracks: list[dict[str, Any]] = [{"team": attack, "number": e.number, "xy": scorer}]
-    # attackers: backs and wings, the circle runner between the defenders
-    for x, y in [(10.5, 4.5), (11.5, 10.0), (10.5, 15.5), (1.5, 1.2), (1.5, 18.8), (6.4, 10.0)][:5]:
+    # attackers: backs and wings, the circle runner between the defenders; only the scorer's
+    # number is known (UX test B39), and the centre back's, who plays the last pass (demo_ball)
+    spots = [(10.5, 4.5), (11.5, 10.0), (10.5, 15.5), (1.5, 1.2), (1.5, 18.8), (6.4, 10.0)][:5]
+    for i, (x, y) in enumerate(spots):
         dx, dy = (r.random() - 0.5) * 1.6, (r.random() - 0.5) * 1.6
         tracks.append(
             {
                 "team": attack,
-                "number": None,  # only the scorer's number is known (UX test B39)
+                "number": demo_passer(e) if i == 1 and e.number is not None else None,
                 "xy": drift(x, y, dx, dy),
             }
         )
@@ -276,6 +278,26 @@ def demo_scene(e: Event) -> list[dict[str, Any]]:
     )
     tracks.append({"team": "ref", "number": None, "xy": drift(12.0, 1.6, -2.4, -0.1, 3)})
     return tracks
+
+
+def demo_passer(e: Event) -> int:
+    """The shirt number of the team mate who plays the last pass in a demo scene (never the
+    scorer's)."""
+    return 10 if e.number != 10 else 6
+
+
+def demo_ball(e: Event, duration_s: float) -> list[dict[str, Any]]:
+    """Who holds the ball in a demo scene, as the ball net would say it: the centre back until
+    the pass, a short moment in the air, then the scorer until the shot (A4: the example shows
+    the ball line as it looks with a found ball). Empty without the scorer's number."""
+    if e.number is None:
+        return []
+    team = _team(e.side)
+    passed, caught = round(duration_s * 0.42, 2), round(duration_s * 0.55, 2)
+    return [
+        {"from_s": 0.0, "to_s": passed, "team": team, "number": demo_passer(e)},
+        {"from_s": caught, "to_s": round(duration_s, 2), "team": team, "number": e.number},
+    ]
 
 
 def unique_numbers(tracks: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -984,6 +1006,7 @@ async def camera_of(ctx: Ctx, match: Match, e: Event) -> dict[str, Any]:
     if demo and field:
         tracks = unique_numbers(demo_scene(e))
         base["tracks"] = tracks
+        base["ball"] = demo_ball(e, base["duration_s"])
         base["shot"] = list(tracks[0]["xy"][-1])
         return base
     if demo or not field or not tracking or asset is None or local is None:
