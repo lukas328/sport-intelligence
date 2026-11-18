@@ -30,7 +30,11 @@ export const signed = (v: number) => `${v > 0 ? "+" : ""}${v}`;
 export function scoreAt(goals: readonly ReportGoal[], m: number): string {
   let own = 0;
   let opp = 0;
-  for (const g of goals) if (g.minute <= m) g.team === "own" ? own++ : opp++;
+  for (const g of goals) {
+    if (g.minute > m) continue;
+    if (g.team === "own") own++;
+    else opp++;
+  }
   return `${own}:${opp}`;
 }
 
