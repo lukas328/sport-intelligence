@@ -62,6 +62,11 @@ class OrgOut(ApiModel):
     # a video uploaded or a second person in the club: from then on the two-factor reminder
     # shows (UX test H13; the obligation itself is unchanged)
     something_to_protect: bool = False
+    features: list[str] = Field(
+        default_factory=list,
+        description="the plan features the club can use now (every feature where plans are not "
+        "enforced), e.g. `goalkeepers` for the goalkeeper figures",
+    )
 
 
 class SeasonCreate(ApiModel):

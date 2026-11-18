@@ -473,7 +473,7 @@ const de = {
     analysis: "Automatische Analyse",
     analysisSub: "Findet Spielfeld, Spieler, Ball und Tore im Video. Jedes Tor wird eine Szene.",
     goalkeepers: "Torhüter",
-    goalkeepersSub: "Paraden und gehaltene Würfe pro Torhüter, nach Wurf- und Torzone. Ohne Aufpreis.",
+    goalkeepersSub: "Paraden, Gegentore und Fangquote pro Torhüter, nach Wurf- und Torzone. Im Team und im Verein ohne Aufpreis.",
     featureNames: {
       events: "Spielbericht und Spieltag erfassen",
       insights: "Drei Dinge und Trainingstipps",

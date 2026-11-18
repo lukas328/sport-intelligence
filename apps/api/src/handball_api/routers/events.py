@@ -84,7 +84,8 @@ async def delete_event(event_id: uuid.UUID, scope: OrgDep) -> None:
 
 @router.get("/matches/{match_id}/exports/shots", response_model=dict[str, Any], tags=["exports"])
 async def shot_export(match_id: uuid.UUID, scope: OrgDep) -> dict[str, Any]:
-    """Shots with metadata and goal-camera times (export API for the goalkeeper trainer, P2)."""
+    """Shots with metadata and goal-camera times (export API for the goalkeeper trainer, P2).
+    Part of the goalkeeper module (plan feature `goalkeepers`): 402 plan-required without it."""
     return await service.shot_export(scope.ctx, match_id)
 
 
@@ -97,7 +98,8 @@ async def match_stats(match_id: uuid.UUID, scope: OrgDep) -> dict[str, Any]:
     (null without shots); players have `xg_shots`, goalkeepers `xg_shots`, `xg_coverage` and
     `gsax` (null unless at least 70 % of the saves and of the goals have xG). Shot zones include
     `empty_goal` (shots on the empty goal, from any distance) apart from `long_range` (over
-    15 m)."""
+    15 m). `goalkeepers` (the figures per goalkeeper) is empty without the goalkeeper module of
+    the plan (feature `goalkeepers`); the team's saves stay."""
     return await service.match_stats(scope.ctx, match_id)
 
 
@@ -256,7 +258,8 @@ async def season_stats(team_id: uuid.UUID, season_id: uuid.UUID, scope: OrgDep) 
     against `xg`) and the same for the opponent (`xg_against`, `xg_against_coverage`,
     `xg_goals_against`); totals have `matches`, `tagged_matches`, `xg`, `xg_shots`, `xg_goals`
     and `xg_coverage` = shots with xG / shots on target (null without shots), and
-    shooting/save percentages only from matches with recorded misses or saves."""
+    shooting/save percentages only from matches with recorded misses or saves. A player's `saves`
+    (credited to the goalkeeper) are null without the goalkeeper module of the plan."""
     return await insights_service.season_stats(scope.ctx, team_id, season_id)
 
 
@@ -281,7 +284,8 @@ async def season_line(
     """A player's season line: per played match (as in the season statistics) date, opponent,
     result and the player's figures as the match statistics count them (one source per goal),
     each with the ids of its events in `events` (same keys) to open the clips, and season
-    `totals`. Goalkeepers: `faced`, `saves`, `goals_against`, credited by the keeper on the shot.
+    `totals`. Goalkeepers: `faced`, `saves`, `goals_against`, credited by the keeper on the shot
+    (0, without events and save rate, without the goalkeeper module of the plan).
     `attendance` is the recorded presence; playing minutes are not recorded. The staff read
     every player of the team, players only their own line."""
     return await season_line_service.season_line(scope.ctx, team_id, season_id, player_id)

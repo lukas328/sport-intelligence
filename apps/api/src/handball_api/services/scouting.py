@@ -18,7 +18,7 @@ from handball_api.core.db import disable_system_access, enable_system_access, se
 from handball_api.core.errors import ProblemError
 from handball_api.models import Event, Match, Opponent, ScoutingReport, Team
 from handball_api.models.enums import TeamRole
-from handball_api.services import audit, scouting_pdf, training
+from handball_api.services import audit, billing, scouting_pdf, training
 from handball_api.services.context import Ctx
 from handball_api.services.matches import (
     counted,
@@ -394,7 +394,8 @@ async def run_due(ctx: Ctx, now: datetime | None = None) -> int:
 
 
 async def pdf(ctx: Ctx, report_id: uuid.UUID, lang: str, card: bool) -> tuple[bytes, str]:
-    """Report PDF for staff; the A6 shooter card also for the team's goalkeepers."""
+    """Report PDF for staff; the A6 shooter card also for the team's goalkeepers (goalkeeper
+    module of the plan)."""
     report = await ctx.db.get(ScoutingReport, report_id)
     if report is None:
         raise ProblemError(404, "not-found", "Report not found")
@@ -405,6 +406,8 @@ async def pdf(ctx: Ctx, report_id: uuid.UUID, lang: str, card: bool) -> tuple[by
     if not (staff or (card and keeper)):
         raise ProblemError(403, "forbidden", "Only staff and goalkeepers")
     if card:
+        # the keeper card is part of the goalkeeper module of the plan
+        await billing.require_feature(ctx, "goalkeepers", team.organization_id)
         return scouting_pdf.render_goalkeeper_card(lang, report.facts), "werferkarte.pdf"
     match = await ctx.db.get(Match, report.match_id) if report.match_id else None
     kickoff = match.kickoff_at if match else report.generated_at

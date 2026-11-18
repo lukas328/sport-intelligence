@@ -47,7 +47,8 @@ async def report_pdf(report_id: uuid.UUID, scope: OrgDep, lang: Lang = "de-CH") 
     responses={200: {"content": {"application/pdf": {}}}},
 )
 async def goalkeeper_card(report_id: uuid.UUID, scope: OrgDep, lang: Lang = "de-CH") -> Response:
-    """A6 shooter card for goalkeepers (number, position, preferred goal zones)."""
+    """A6 shooter card for goalkeepers (number, position, preferred goal zones). Part of the
+    goalkeeper module (plan feature `goalkeepers`): 402 plan-required without it."""
     data, name = await service.pdf(scope.ctx, report_id, lang, card=True)
     return Response(
         data,

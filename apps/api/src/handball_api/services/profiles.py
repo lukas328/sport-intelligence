@@ -32,7 +32,7 @@ from handball_api.models import (
 )
 from handball_api.models.enums import ConsentKind, ReelStatus
 from handball_api.schemas.profiles import ProfileIn
-from handball_api.services import audit, org_verification
+from handball_api.services import audit, billing, org_verification
 from handball_api.services.context import Ctx
 from handball_api.services.matches import counted
 from handball_api.services.orgs import current_seasons
@@ -259,6 +259,9 @@ async def public(ctx: Ctx, slug: str) -> dict[str, Any]:
     c = profile.content
     stats = await _season_stats(ctx, player, team)
     org = await ctx.db.get(Organization, team.organization_id)
+    if "saves" in stats and org and not billing.has_feature(ctx.settings, org, "goalkeepers"):
+        # a goalkeeper's saves are part of the goalkeeper module of the plan
+        stats["saves"] = None
     return {
         "name": f"{player.first_name} {player.last_name}",
         "club": org.name if org else "",

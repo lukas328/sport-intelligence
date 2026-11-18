@@ -20,6 +20,7 @@ from handball_api.schemas.orgs import (
     OrgRoleIn,
     OrgUpdate,
 )
+from handball_api.services import billing
 from handball_api.services import invitations as invitation_service
 from handball_api.services import orgs as service
 from handball_api.services.policies import two_factor_missing
@@ -50,6 +51,7 @@ def org_out(scope: OrgScope, org: Organization | None = None) -> OrgOut:
         created_at=org.created_at,
         verification=org.verification,
         official_club_id=org.official_club_id,
+        features=billing.features(scope.ctx.settings, org),
     )
 
 

@@ -30,7 +30,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
  * Prices and limits from packages/plans/plans.json (generated from the API's plan table). The free
  * start comes first (BEFUNDE-2 L10): 30 days with everything, then Team or the free plan; then the
  * plans side by side in one table with ticks (BEFUNDE-3 U23), in the app's words. The goalkeeper
- * figures are part of every plan without extra charge (A9), so no add-on price appears here.
+ * figures are part of Team and Verein without extra charge (A9), not of the free plan (Lukas,
+ * 18.11.2026), so no add-on price appears here.
  */
 export default async function Pricing({ params }: Props) {
   const { locale } = await params;
@@ -55,8 +56,8 @@ export default async function Pricing({ params }: Props) {
     { key: "storage", name: t.rowStorage, value: (p) => fmt(t.storage, { gb: p.storage_gb }) },
     { key: "events", name: names.events!, value: has("events") },
     { key: "analysis", name: t.analysis, sub: t.analysisSub, value: (p) => p.analysis },
-    // the goalkeeper figures come from what is recorded and analysed, in every plan, no add-on (A9)
-    { key: "goalkeepers", name: t.goalkeepers, sub: t.goalkeepersSub, value: () => true },
+    // the goalkeeper module: Team and Verein without an add-on (A9), not Gratis (Lukas, 18.11.2026)
+    { key: "goalkeepers", name: t.goalkeepers, sub: t.goalkeepersSub, value: has("goalkeepers") },
     ...FEATURE_ROWS.map((f) => ({ key: f, name: names[f]!, sub: subs[f], value: has(f) })),
   ];
   return (

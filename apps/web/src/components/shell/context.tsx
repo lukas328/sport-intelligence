@@ -22,6 +22,8 @@ export interface ShellOrg {
   /** the club's second colour (lib/color.ts kit) */
   secondary_color?: string | null;
   my_role: string;
+  /** the plan features the club can use now (OrgOut.features), e.g. `goalkeepers` */
+  features?: string[];
 }
 
 export interface ShellMe {

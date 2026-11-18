@@ -89,8 +89,8 @@ describe("site messages", () => {
     for (const [k, v] of ref) expect(v, k).not.toContain("ß");
   });
 
-  // U23, A9: the prices compare the plans feature by feature; the goalkeeper figures are in the
-  // plans without an add-on, so no add-on price appears anywhere on the site
+  // U23, A9: the prices compare the plans feature by feature; the goalkeeper figures are in Team
+  // and Verein without an add-on (not in Gratis, 18.11.2026), so no add-on price appears anywhere
   it("names every plan feature on the prices page and never prices a goalkeeper add-on", () => {
     const features = new Set(plans.plans.flatMap((p) => p.features as string[]));
     features.delete("tracking"); // the row «Automatische Analyse»
@@ -101,5 +101,12 @@ describe("site messages", () => {
       for (const [k, v] of leaves(msgs)) expect(v, k).not.toMatch(/Torhüter-Modul|module gardien|goalkeeper add-on|CHF 7\b/i);
     }
     expect(de.pricing.perYear).toContain("{gift} Monate geschenkt");
+  });
+
+  // Lukas, 18.11.2026: the goalkeeper module only from Team on, the row «Torhüter» says so
+  it("ticks the goalkeepers for Team and Verein only and promises them to no free plan", () => {
+    const has = (plan: string) => (plans.plans.find((p) => p.plan === plan)!.features as string[]).includes("goalkeepers");
+    expect([has("free"), has("team"), has("club")]).toEqual([false, true, true]);
+    for (const msgs of [de, fr, en]) expect(msgs.pricing.goalkeepersSub).not.toMatch(/jedem Plan|für alle|every plan|for everyone|chaque|tous les/i);
   });
 });

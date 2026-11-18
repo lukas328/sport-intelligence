@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/card";
+import { KeeperLock, useKeeperModule } from "@/components/billing/keeper-lock";
 import { api } from "@/lib/client";
 
 type Ref = { event_id: string; match_id: string; video_id: string | null; t_ms: number | null };
@@ -27,6 +28,7 @@ const pct = (v: number | null | undefined) => (v == null ? "-" : `${Math.round(v
 /** Automatic preparation report (addendum 01, 4.6): every statement with sample size and clips. */
 export function ScoutingView({ orgId, matchId }: { orgId: string; matchId: string }) {
   const t = useTranslations("scouting");
+  const keeperModule = useKeeperModule();
   const tz = useTranslations("zones");
   const locale = useLocale();
   const format = useFormatter();
@@ -90,9 +92,12 @@ export function ScoutingView({ orgId, matchId }: { orgId: string; matchId: strin
               <a className="inline-flex min-h-9 items-center gap-1.5 bg-raised px-4 text-[0.9375rem] font-medium ring-1 ring-inset ring-border hover:bg-surface" href={`/v1/orgs/${orgId}/scouting/${rep.id}/pdf?lang=${locale}`}>
                 {t("pdf")}
               </a>
-              <a className="inline-flex min-h-9 items-center gap-1.5 bg-raised px-4 text-[0.9375rem] font-medium ring-1 ring-inset ring-border hover:bg-surface" href={`/v1/orgs/${orgId}/scouting/${rep.id}/goalkeeper-card?lang=${locale}`}>
-                {t("gkCard")}
-              </a>
+              {/* the keeper card belongs to the goalkeeper module (Team and Verein) */}
+              {keeperModule && (
+                <a className="inline-flex min-h-9 items-center gap-1.5 bg-raised px-4 text-[0.9375rem] font-medium ring-1 ring-inset ring-border hover:bg-surface" href={`/v1/orgs/${orgId}/scouting/${rep.id}/goalkeeper-card?lang=${locale}`} data-testid="scouting-gk-card">
+                  {t("gkCard")}
+                </a>
+              )}
               <Button variant="secondary" loading={asPresentation.isPending} onClick={() => asPresentation.mutate(rep.id)}>
                 {t("asPresentation")}
               </Button>
@@ -164,6 +169,8 @@ export function ScoutingView({ orgId, matchId }: { orgId: string; matchId: strin
                 </li>
               ))}
             </ul>
+            {/* the shooter card for the keeper: goalkeeper module (Team and Verein) */}
+            {!keeperModule && <KeeperLock orgId={orgId} className="pt-2" />}
           </section>
 
           <section className="space-y-1 border-t-2 border-foreground pt-3">

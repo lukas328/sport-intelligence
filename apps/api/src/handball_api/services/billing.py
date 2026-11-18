@@ -71,6 +71,11 @@ def has_feature(settings: Settings, org: Organization, feature: str) -> bool:
     return not settings.billing_enforce or feature in spec(org).features
 
 
+def features(settings: Settings, org: Organization) -> list[str]:
+    """The features the organisation can use now (every feature without enforcement)."""
+    return sorted(spec(org).features) if settings.billing_enforce else list(FEATURES)
+
+
 async def _org(ctx: Ctx, org_id: uuid.UUID | None = None) -> Organization:
     oid = org_id or ctx.require_actor().organization_id
     org = await ctx.db.get(Organization, oid)
@@ -85,6 +90,13 @@ async def require_feature(ctx: Ctx, feature: str, org_id: uuid.UUID | None = Non
         raise ProblemError(
             402, "plan-required", f"The feature '{feature}' is not part of the current plan"
         )
+
+
+async def allows(ctx: Ctx, feature: str, org_id: uuid.UUID | None = None) -> bool:
+    """Whether the organisation's plan includes the feature: for a part of a larger answer that
+    stays in its shape but comes back empty without it (the goalkeeper figures of the match
+    statistics)."""
+    return has_feature(ctx.settings, await _org(ctx, org_id), feature)
 
 
 # ---- usage and limits -----------------------------------------------------------------------
@@ -214,7 +226,7 @@ async def overview(ctx: Ctx) -> dict[str, Any]:
             "storage_gb": s.storage_gb,
             "gpu_minutes_month": s.gpu_minutes_month,
         },
-        "features": sorted(s.features) if ctx.settings.billing_enforce else list(FEATURES),
+        "features": features(ctx.settings, org),
         "usage": await usage(ctx, org),
         "plans": [
             {

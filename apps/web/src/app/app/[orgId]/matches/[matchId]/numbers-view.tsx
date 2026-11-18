@@ -5,6 +5,8 @@ import { useTranslations } from "next-intl";
 import { Check } from "lucide-react";
 import { useState } from "react";
 import { SectionHead } from "@/components/anlauf/blocks";
+import { KeeperLock, useKeeperModule } from "@/components/billing/keeper-lock";
+import { useOptionalShell } from "@/components/shell/context";
 import type { MatchGraphics } from "@/lib/graphics";
 import { againstCovered, ownKeepers } from "@/lib/keepers";
 import { mainSource } from "@/lib/telegram";
@@ -68,6 +70,12 @@ export function NumbersView({
   // only the own goalkeepers, by the roster's goalkeepers (R4); the saves without a named keeper
   // are in the team's figure, not a row of their own
   const keepers = ownKeepers(Object.values(stats?.goalkeepers ?? {}).filter((k) => k.faced > 0), roster);
+  // the goalkeeper table is part of the goalkeeper module (Team and Verein): without it, where the
+  // match has saves or goals against, the block says where the figures are (Lukas, 18.11.2026)
+  const keeperModule = useKeeperModule();
+  const shellOrg = useOptionalShell()?.org.id;
+  const lockOrg = orgId ?? shellOrg;
+  const keeperLocked = !keeperModule && lockOrg != null && (stats?.own.saves ?? 0) + (stats?.own.goals_against ?? 0) > 0;
   const keeperIds = new Set(keepers.map((k) => k.player_id).filter((id): id is string => id != null));
   const ownRows = Object.values(stats?.players ?? {}).filter((p) => p.side === "own");
   const field = ownRows
@@ -164,7 +172,13 @@ export function NumbersView({
               )}
             </section>
           )}
-          {keepers.length > 0 && (
+          {keeperLocked && lockOrg && (
+            <section data-testid="numbers-keepers-locked">
+              <SectionHead title={t("keeper")} />
+              <KeeperLock orgId={lockOrg} />
+            </section>
+          )}
+          {keeperModule && keepers.length > 0 && (
             <section data-testid="numbers-keepers">
               <SectionHead title={t("keeper")} />
               <table className="w-full border-collapse text-[15px]">
