@@ -25,7 +25,7 @@ type Frame = {
   expected_court_to_image?: number[][];
   expected_median_px?: number;
 };
-const FRAMES = (data as { frames: Frame[] }).frames;
+const FRAMES = (data as unknown as { frames: Frame[] }).frames;
 const SIZE: [number, number] = [1280, 720];
 
 /** Court -> image of a camera beside the near sideline looking at the left goal area. */
