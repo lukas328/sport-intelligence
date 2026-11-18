@@ -1,6 +1,7 @@
 "use client";
 
 import { Check, ChevronsUpDown } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { MenuContent, MenuItem, MenuLabel, MenuRoot, MenuSeparator, MenuTrigger } from "@/components/ui/menu";
@@ -9,7 +10,7 @@ import { cn } from "@/lib/utils";
 import { useShell } from "./context";
 
 /** Active team (and club, for people in several clubs). Every team-scoped page follows it. */
-export function TeamSwitcher({ compact }: { compact?: boolean }) {
+export function TeamSwitcher({ compact, href }: { compact?: boolean; href?: string }) {
   const t = useTranslations();
   const { teams, team, org, orgs, setTeam } = useShell();
   const router = useRouter();
@@ -19,11 +20,21 @@ export function TeamSwitcher({ compact }: { compact?: boolean }) {
   const short = compact ? headName(label) : label;
   const sub = team?.season ?? null;
   if (teams.length <= 1 && orgs.length <= 1) {
+    // nothing to switch: the name leads to the team's start, like the crest (finding A20)
+    const name = (
+      <p className={cn("font-semibold", compact ? "line-clamp-2 text-[15px] leading-tight" : "truncate text-sm")} title={label}>
+        {short}
+      </p>
+    );
     return (
       <div className={cn("min-w-0", compact ? "px-1" : "px-2")}>
-        <p className={cn("font-semibold", compact ? "line-clamp-2 text-[15px] leading-tight" : "truncate text-sm")} title={label}>
-          {short}
-        </p>
+        {href ? (
+          <Link href={href} className="block text-ink no-underline hover:underline">
+            {name}
+          </Link>
+        ) : (
+          name
+        )}
         {sub && !compact && <p className="truncate text-xs text-muted">{sub}</p>}
       </div>
     );

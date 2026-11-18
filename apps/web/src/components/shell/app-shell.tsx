@@ -94,6 +94,10 @@ export function AppShell({
   const headSearch = searchHref && (teamMatches.data ?? []).some((m) => m.has_video) ? searchHref : null;
   // the club's name only when it says more than the team's (K7: «TV Farnwil» once, not twice)
   const clubName = clubNameShown(org.name, team?.name ?? null);
+  // one team whose name holds the club's («TV Thalwil»): that name stands in the crest, in the
+  // club's lettering and as the link to the start; no second, plain copy beside it (finding A20)
+  const single = teams.length <= 1 && orgs.length <= 1;
+  const crestName = clubName ?? (single ? (team?.name ?? null) : null);
 
   // menus and dialogs render at the end of <body>: give the document the club's colours too
   useEffect(() => {
@@ -171,11 +175,13 @@ export function AppShell({
                 {/* the product in ink, then the club: the colours belong to the club */}
                 <AppMark size={32} />
                 <ClubMark org={org} />
-                {clubName ?? <span className="sr-only">{org.name}</span>}
+                {crestName ?? <span className="sr-only">{org.name}</span>}
               </Link>
-              <div className="max-w-40 min-w-0 shrink">
-                <TeamSwitcher compact />
-              </div>
+              {!(single && !clubName) && (
+                <div className="max-w-40 min-w-0 shrink">
+                  <TeamSwitcher compact href={home} />
+                </div>
+              )}
               <nav aria-label={t("mainNav")} className="flex self-stretch">
                 {items.map((it) => {
                   const on = active === it.key;
@@ -238,7 +244,7 @@ export function AppShell({
               </Link>
               {/* the name keeps room for two lines; the rest of the bar gives way first (UX test A01) */}
               <div className="min-w-[6.5rem] flex-1">
-                <TeamSwitcher compact />
+                <TeamSwitcher compact href={home} />
               </div>
               <NotificationBell orgId={org.id} />
               {/* «Suchen» with its word on the phone too (SPEC 6, UX test B18/N08) */}

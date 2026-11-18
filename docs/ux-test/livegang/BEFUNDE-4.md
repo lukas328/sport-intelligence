@@ -29,6 +29,7 @@ wird erst auf sein Zeichen. Prio P1 (vor dem nächsten Test), P2 (bald), P3 (sp�
 | # | Befund | Wo | Prio | Einschätzung und Massnahme | Stand |
 |---|---|---|---|---|---|
 | A19 | Spieltag (Schnell-Tasten): man hängt fest, kommt nicht mehr hoch und nicht zurück | App, Spiel › Spieltag | P1 | stimmt, Fehler: die eigene Kopfzeile mit «Beenden» hatte einen negativen oberen Rand (-mt-6 / lg:-mt-8) wie Seiten mit App-Rahmen; im Vollbild-Werkzeug fehlt dieser Rand, die Zeile lag 24 bis 32 px über dem Seitenanfang und war nicht erreichbar. Massnahme: wie bei Prüfen nur -mt-px; ein E2E-Test prüft, dass «Beenden» ganz im Fenster steht. | erledigt (wirkt nach dem nächsten App-Deploy) |
+| A20 | Kopf der App: «TV Thalwil» lässt sich nicht anklicken (soll zur Startseite) und steht in einer anderen Schrift als der Vereinsname | App, Kopfleiste | P1 | stimmt: heisst das Team wie der Verein, blendet der Kopf den Vereinsnamen aus (K7) und zeigt den Teamnamen im Teamwechsler; bei nur einem Team ist das blosser Text in der Grundschrift. Massnahme: bei einem Team steht der Name im Wappen-Link, in der Vereinsschrift und führt zur Startseite, ohne zweite Kopie daneben; der Teamname ohne Wechselmöglichkeit ist auch sonst ein Link zur Startseite (auch in der Handy-Leiste). | erledigt (wirkt nach dem nächsten App-Deploy) |
 
 ## Erledigt aus Runde 3 (Antworten Lukas, 18.11.)
 
