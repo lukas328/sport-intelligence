@@ -9,7 +9,7 @@
  */
 import type { GoalRun } from "@/components/anlauf/bundle";
 import type { ReportGoal } from "@/components/anlauf/flight-layout";
-import type { Pt } from "@/components/anlauf/geometry";
+import { sampleAt, smooth, type Pt } from "@/components/anlauf/geometry";
 import type { BallStretch, CameraScene, SceneTrack } from "@/components/anlauf/tactics-camera";
 import { COURT } from "@handball/court";
 
@@ -226,25 +226,47 @@ const PLAYS: Record<Slot, Slot[]> = {
 const lerp = (a: Pt, b: Pt, f: number): Pt => [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f];
 const ease = (f: number) => (f <= 0 ? 0 : f >= 1 ? 1 : f * f * (3 - 2 * f));
 
+/** Our squad by position (scripts/seed.py): who stands where when we attack. */
+const OWN_AT: Record<Slot, number> = { la: 3, rl: 7, rm: 9, rr: 10, ra: 5, kr: 11 };
+/**
+ * Our 6:0, left to right as the attacker sees it: right wing, right half, two in the middle, left
+ * half, left wing. Number 3 (our left wing) stands against their right wing, the first thing.
+ */
+const OWN_DEFENCE = [5, null, 11, 9, null, 3];
+const OPP_DEFENCE = [4, null, 8, 15, null, 2];
+
+/**
+ * One goal of the demo match on the tactics camera. The attack plays towards the goal at x = 0,
+ * whoever attacks: their goals against our 6:0, ours against theirs, and a goal after a fast break
+ * as a sprint from the middle line with nobody back in time.
+ */
 export function demoScene(goal: DemoGoal, label: string): CameraScene {
+  if (goal.zone === "gs") return fastBreakScene(goal, label);
+  const att = goal.team;
+  const def: "own" | "opp" = att === "opp" ? "own" : "opp";
   const R = rng(seedOf(`${goal.id}-scene`));
   const scorerSlot: Slot = goal.zone in SLOTS ? (goal.zone as Slot) : "rm";
   const play = PLAYS[scorerSlot];
   const scorerNumber = goal.number ?? 5;
-  // numbers for the ball carriers, never the scorer's number twice
-  const pool = [9, 14, 22, 3, 11, 18, 7, 20].filter((n) => n !== scorerNumber);
   const numberOf = new Map<Slot, number | null>();
   for (const s of Object.keys(SLOTS) as Slot[]) numberOf.set(s, null);
-  numberOf.set(scorerSlot, scorerNumber);
-  play.slice(0, -1).forEach((s, i) => numberOf.set(s, pool[i]!));
   const extra = (["kr", "la", "ra"] as Slot[]).find((s) => !play.includes(s));
-  if (extra) numberOf.set(extra, pool[3]!);
+  if (att === "own") {
+    // our players at their positions, the scorer with his own number
+    for (const s of [...play.slice(0, -1), ...(extra ? [extra] : [])]) if (OWN_AT[s] !== scorerNumber) numberOf.set(s, OWN_AT[s]);
+  } else {
+    // numbers for the ball carriers, never the scorer's number twice
+    const pool = [9, 14, 22, 18, 11, 3, 7, 20].filter((n) => n !== scorerNumber);
+    play.slice(0, -1).forEach((s, i) => numberOf.set(s, pool[i]!));
+    if (extra) numberOf.set(extra, pool[3]!);
+  }
+  numberOf.set(scorerSlot, scorerNumber);
 
   // ball schedule: the holders one after the other, a short flight in between
   const hold = (SCENE_SECONDS - PASS_SECONDS * (play.length - 1)) / play.length;
   const ball: BallStretch[] = play.map((s, i) => {
     const from = i * (hold + PASS_SECONDS);
-    return { from: round2(from), to: round2(i === play.length - 1 ? SCENE_SECONDS : from + hold), team: "opp", number: numberOf.get(s)! };
+    return { from: round2(from), to: round2(i === play.length - 1 ? SCENE_SECONDS : from + hold), team: att, number: numberOf.get(s)! };
   });
   const holderAt = (sec: number): Slot | null => {
     const i = ball.findIndex((b) => sec >= b.from && sec <= b.to);
@@ -307,15 +329,15 @@ export function demoScene(goal: DemoGoal, label: string): CameraScene {
       return outsideArea([p[0] + wobble() * 0.5, p[1] + wobble() * 0.5], DEFENCE_MIN);
     }),
   );
-  const ownNumbers = [7, null, 13, 4, null, 10];
+  const defNumbers = def === "own" ? OWN_DEFENCE : OPP_DEFENCE;
 
   const tracks: SceneTrack[] = [];
-  for (const s of Object.keys(SLOTS) as Slot[]) tracks.push({ team: "opp", number: numberOf.get(s) ?? null, xy: attack.get(s)!.map(toCourt) });
-  defence.forEach((pts, i) => tracks.push({ team: "own", number: ownNumbers[i], xy: smoothSteps(pts).map(toCourt) }));
+  for (const s of Object.keys(SLOTS) as Slot[]) tracks.push({ team: att, number: numberOf.get(s) ?? null, xy: attack.get(s)!.map(toCourt) });
+  defence.forEach((pts, i) => tracks.push({ team: def, number: defNumbers[i], xy: smoothSteps(pts).map(toCourt) }));
   // the goalkeeper, the only one in the goal area: moves with the ball between the posts
   tracks.push({
-    team: "own",
-    number: 1,
+    team: def,
+    number: def === "own" ? 1 : 16,
     keeper: true,
     xy: times.map((sec) => toCourt([Math.max(8.9, Math.min(11.1, 10 + (ballSpot(sec)[0] - 10) * 0.18)), 0.9])),
   });
@@ -326,12 +348,96 @@ export function demoScene(goal: DemoGoal, label: string): CameraScene {
     duration: SCENE_SECONDS,
     tracks,
     ball,
-    scorer: { team: "opp", number: scorerNumber },
+    scorer: { team: att, number: scorerNumber },
     shot: toCourt(shot),
     aim: toCourt(goal.aim ?? [10, 0]),
     confirmed: goal.confirmed,
     label,
   };
+}
+
+/**
+ * A goal after a fast break: the ball is lost in the other half, the scorer sprints from about the
+ * middle line along his own run (the same run the bundle draws), a team-mate runs with him on the
+ * other side, two of the side that lost the ball chase and stay behind, the goalkeeper waits alone.
+ */
+function fastBreakScene(goal: DemoGoal, label: string): CameraScene {
+  const att = goal.team;
+  const def: "own" | "opp" = att === "opp" ? "own" : "opp";
+  const R = rng(seedOf(`${goal.id}-scene`));
+  const times = Array.from({ length: SAMPLES }, (_, i) => (i / (SAMPLES - 1)) * SCENE_SECONDS);
+  const shot = outsideArea(goal.shot, SHOT_MIN);
+  const scorerNumber = goal.number ?? (att === "own" ? 5 : 7);
+  // the scorer: his run from the bundle, the last metres a little slower (he takes off)
+  const run = smooth(goal.run, 10);
+  const along = (f: number): Pt => {
+    const k = Math.max(0, Math.min(1, f)) * (run.length - 1);
+    const i = Math.floor(k);
+    return i >= run.length - 1 ? run[run.length - 1]! : lerp(run[i]!, run[i + 1]!, k - i);
+  };
+  const scorer = times.map((sec, i) => (i === times.length - 1 ? shot : outsideArea(along(1 - (1 - sec / SCENE_SECONDS) ** 1.25), FIELD_MIN)));
+  const start = scorer[0]!;
+  const side = start[0] < 10 ? 1 : -1;
+  // the team-mate on the other side, a few metres behind; he does not get the ball
+  const mateFrom: Pt = [Math.max(1.5, Math.min(18.5, start[0] + side * (6 + R() * 2))), Math.min(19.6, start[1] + 1.5)];
+  const mateTo: Pt = [Math.max(2, Math.min(18, shot[0] + side * (5 + R() * 2))), 8.5 + R() * 1.5];
+  const mate = times.map((sec) => outsideArea(lerp(mateFrom, mateTo, ease(sec / SCENE_SECONDS)), FIELD_MIN));
+  // two chasers who lost the ball: behind the scorer all the way, never in time
+  const chasers = [-1.8, 2.4].map((du, j) => {
+    const from: Pt = [Math.max(1, Math.min(19, start[0] + du)), Math.min(19.8, start[1] + 2.2 + j)];
+    return times.map((sec) => {
+      const f = sec / SCENE_SECONDS;
+      const at = scorer[Math.min(times.length - 1, Math.round(f * (times.length - 1)))]!;
+      const p: Pt = [from[0] + (at[0] + du * 0.6 - from[0]) * ease(f), from[1] + (at[1] + 3.2 + j - from[1]) * f];
+      return outsideArea(p, DEFENCE_MIN);
+    });
+  });
+  const mateNumber = att === "own" ? OWN_AT.ra : 14;
+  const tracks: SceneTrack[] = [
+    { team: att, number: scorerNumber, xy: scorer.map(toCourt) },
+    { team: att, number: mateNumber === scorerNumber ? null : mateNumber, xy: smoothSteps(mate).map(toCourt) },
+    ...chasers.map((pts, j) => ({ team: def, number: j === 0 ? (def === "own" ? 9 : 8) : null, xy: smoothSteps(pts).map(toCourt) })),
+    {
+      team: def,
+      number: def === "own" ? 1 : 16,
+      keeper: true,
+      xy: times.map((sec) => {
+        const b = scorer[Math.round((sec / SCENE_SECONDS) * (SAMPLES - 1))]!;
+        return toCourt([Math.max(8.9, Math.min(11.1, 10 + (b[0] - 10) * 0.18)), 0.9]);
+      }),
+    },
+    { team: "ref", xy: times.map((sec) => [17 - sec * 1.3, 19.2] as Pt) },
+  ];
+  return {
+    clock: Math.max(0, Math.round(goal.minute * 60) - SCENE_SECONDS),
+    duration: SCENE_SECONDS,
+    tracks,
+    // he took the ball himself: it is with him the whole way
+    ball: [{ from: 0, to: SCENE_SECONDS, team: att, number: scorerNumber }],
+    scorer: { team: att, number: scorerNumber },
+    shot: toCourt(shot),
+    aim: toCourt(goal.aim ?? [10, 0]),
+    confirmed: goal.confirmed,
+    label,
+  };
+}
+
+/**
+ * Where to look in a scene (the website marks it in yellow, with a word): the scorer at the moment
+ * he gets the ball, and the nearest player of the other side then. In the half court with the goal
+ * at the top (the camera's `halfB` view), metres.
+ */
+export function sceneGap(scene: CameraScene): { at: Pt; near: Pt | null } | null {
+  if (!scene.scorer) return null;
+  const sc = scene.tracks.find((x) => x.team === scene.scorer!.team && x.number === scene.scorer!.number);
+  if (!sc) return null;
+  const last = scene.ball.at(-1);
+  const t = last ? Math.min(0.92, Math.max(0.45, last.from / scene.duration + 0.06)) : 0.8;
+  const half = (p: Pt): Pt => [p[1], p[0]];
+  const at = half(sampleAt(sc.xy, t));
+  const others = scene.tracks.filter((x) => x.team !== "ref" && x.team !== scene.scorer!.team && !x.keeper).map((x) => half(sampleAt(x.xy, t)));
+  const near = others.reduce<Pt | null>((best, p) => (best == null || Math.hypot(p[0] - at[0], p[1] - at[1]) < Math.hypot(best[0] - at[0], best[1] - at[1]) ? p : best), null);
+  return { at, near };
 }
 
 const round2 = (v: number) => Math.round(v * 100) / 100;

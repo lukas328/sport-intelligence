@@ -37,26 +37,46 @@ export function saturday(): StoryCourt & { score: string; zone: string } {
   };
 }
 
-/** Where goals come from, in half-court metres (goal at the top), and how many three matches later. */
-const LATER: [Zone, Pt, number][] = [
-  ["ra", [18.6, 2.6], 3],
-  ["la", [1.4, 2.6], 4],
-  ["rl", [4.8, 9.4], 4],
-  ["rm", [10, 10.4], 4],
-  ["rr", [15.2, 9.4], 4],
-  ["kr", [10, 6.9], 4],
-  ["rm", [10, 7.3], 3],
+/** Where goals come from, in half-court metres (goal at the top), in the order of `LATER`. */
+const SPOTS: [Zone, Pt][] = [
+  ["ra", [18.6, 2.6]],
+  ["la", [1.4, 2.6]],
+  ["rl", [4.8, 9.4]],
+  ["rm", [10, 10.4]],
+  ["rr", [15.2, 9.4]],
+  ["kr", [10, 6.9]],
+  ["rm", [10, 7.3]],
+];
+
+/** How many goals came from each spot three matches later. */
+const LATER: [string, number][] = [
+  ["ra", 3],
+  ["la", 4],
+  ["rl", 4],
+  ["rm", 4],
+  ["rr", 4],
+  ["kr", 4],
+  ["rm", 3],
 ];
 
 /** Three matches later: 3 of 26 over the right wing (invented, seeded, the same on every build). */
 export function threeMatchesLater(): StoryCourt {
-  let s = 20261117;
+  return laterCourt(20261117, LATER);
+}
+
+/**
+ * An invented match after the demo match: per spot of `SPOTS` (in that order) a number of goals
+ * conceded, scattered around the spot with a seeded generator and kept outside the goal area.
+ */
+export function laterCourt(seed: number, counts: readonly (readonly [string, number])[]): StoryCourt {
+  let s = seed;
   const r = () => {
     s = (Math.imul(s, 1664525) + 1013904223) >>> 0;
     return s / 4294967296 - 0.5;
   };
   const dots: StoryDot[] = [];
-  for (const [zone, [u, v], n] of LATER) {
+  for (const [k, [zone, [u, v]]] of SPOTS.entries()) {
+    const n = counts[k]?.[0] === zone ? counts[k]![1] : 0;
     for (let i = 0; i < n; i++) {
       const wing = zone === "la" || zone === "ra";
       const p: Pt = [u + r() * (wing ? 1.4 : 3), v + r() * (wing ? 2.2 : 1.6)];

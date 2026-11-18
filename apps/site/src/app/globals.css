@@ -678,6 +678,53 @@
   }
 }
 
+/* the demo week (components/week): the spot to watch breathes, the player's scene runs, the season
+   bars rise once when seen, a new answer slides in; with reduced motion all of it stands still */
+.scene-progress {
+  transform: scaleX(0.42);
+}
+.bar-grow {
+  transform-origin: bottom;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .gap-pulse {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: gap-pulse 1.6s ease-in-out infinite alternate;
+  }
+  .scene-progress {
+    animation: scene-run 6s linear infinite;
+  }
+  .bar-grow {
+    animation: bar-grow 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    animation-delay: calc(var(--i, 0) * 160ms + 0.15s);
+  }
+  .wait .bar-grow {
+    animation-play-state: paused;
+  }
+  .ask-in {
+    animation: film-up 0.4s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+}
+@keyframes gap-pulse {
+  to {
+    transform: scale(1.18);
+  }
+}
+@keyframes scene-run {
+  from {
+    transform: scaleX(0.02);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes bar-grow {
+  from {
+    transform: scaleY(0);
+  }
+}
+
 @keyframes reveal-in {
   from {
     opacity: 0;

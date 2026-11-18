@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { Messages } from "@/messages/de";
 
 /** a made-up share token: the link looks like a real one, it is not one */
@@ -17,7 +18,16 @@ const CLOTH = "#e9e3d8";
  */
 export function PhoneChat({ t, locale }: { t: Messages["home"]["chat"]; locale: string }) {
   return (
-    <div role="img" aria-label={t.label} className="mx-auto w-[18.5rem] sm:w-[20.5rem]">
+    <PhoneFrame label={t.label} clock={t.clock}>
+      <ChatInside t={t} locale={locale} />
+    </PhoneFrame>
+  );
+}
+
+/** A neutral phone (no maker's mark) with its status bar; everything inside is one picture. */
+export function PhoneFrame({ label, clock, children }: { label: string; clock: string; children: ReactNode }) {
+  return (
+    <div role="img" aria-label={label} className="mx-auto w-[18.5rem] sm:w-[20.5rem]">
       <div aria-hidden className="relative rounded-[3rem] bg-[#121315] p-[0.6rem] shadow-[0_2px_0_1px_#2b2d31_inset,0_30px_60px_-20px_rgb(22_23_26/.55)]">
         {/* the side buttons, quiet */}
         <i className="absolute top-28 -left-[3px] h-10 w-[3px] rounded-l-[2px] bg-[#2b2d31]" />
@@ -26,7 +36,7 @@ export function PhoneChat({ t, locale }: { t: Messages["home"]["chat"]; locale: 
         <div className="relative flex aspect-[9/19.5] flex-col overflow-hidden rounded-[2.45rem] bg-[#f7f6f2] text-[#16171a]">
           {/* status bar with a neutral camera notch */}
           <div className="relative flex h-10 shrink-0 items-center justify-between px-7 pt-1 text-[0.8125rem] font-semibold">
-            <span>{t.clock}</span>
+            <span>{clock}</span>
             <i className="absolute top-2.5 left-1/2 h-[1.4rem] w-[5.5rem] -translate-x-1/2 rounded-[999px] bg-[#0b0c0d]" />
             <span className="flex items-center gap-1.5">
               <svg viewBox="0 0 18 12" className="h-2.5 w-4">
@@ -42,7 +52,17 @@ export function PhoneChat({ t, locale }: { t: Messages["home"]["chat"]; locale: 
               </svg>
             </span>
           </div>
+          {children}
+          <i className="absolute bottom-1.5 left-1/2 h-1 w-28 -translate-x-1/2 rounded-[999px] bg-black/80" />
+        </div>
+      </div>
+    </div>
+  );
+}
 
+function ChatInside({ t, locale }: { t: Messages["home"]["chat"]; locale: string }) {
+  return (
+    <>
           {/* the group */}
           <div className="flex shrink-0 items-center gap-2.5 border-b border-black/10 px-3 pb-2.5">
             <svg viewBox="0 0 12 20" className="h-4 w-2.5 text-[#10684a]">
@@ -105,9 +125,6 @@ export function PhoneChat({ t, locale }: { t: Messages["home"]["chat"]; locale: 
               </svg>
             </span>
           </div>
-          <i className="absolute bottom-1.5 left-1/2 h-1 w-28 -translate-x-1/2 rounded-[999px] bg-black/80" />
-        </div>
-      </div>
-    </div>
+    </>
   );
 }
