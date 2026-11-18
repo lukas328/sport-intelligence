@@ -243,12 +243,12 @@ const de = {
       {
         title: "Prüfen",
         text: "Wo die Analyse unsicher ist, fragt sie dich, mit der kurzen Szene dazu: Passt das Spielfeld? Tor oder nicht, für wen? Höchstens zehn Fragen pro Spiel, meist in ein paar Minuten, und alle überspringen geht auch. Von wo geworfen wurde, tippst du an, wenn du magst.",
-        alt: "Gezeichnet nach der App: die Halle mit dem vorgeschlagenen Spielfeld in Gelb, vier gelbe Punkte an den Ecken. Darüber die Frage: Frage 1 von 1, Passt das Spielfeld?, mit den Knöpfen Passt und Weiss nicht, daneben ein Tipp. Darunter steht: Höchstens zehn Fragen pro Spiel.",
+        alt: "Gezeichnet nach der App: das Spielfeld von der Tribüne aus, das vorgeschlagene Feld in Gelb, vier gelbe Punkte an den Ecken. Darunter die Frage: Frage 1 von 1, Passt das Spielfeld?, mit den Knöpfen Passt und Weiss nicht, daneben ein Tipp. Darunter steht: Höchstens zehn Fragen pro Spiel.",
       },
       {
         title: "Anschauen und teilen",
         text: "Resultat, Spielverlauf, jedes Tor als Szene und die Positionen von oben. Hast du bei den Toren angetippt, von wo geworfen wurde (der Wurfort), kommen die drei Dinge dazu: die drei grössten Muster fürs Training, ab drei Toren aus derselben Zone. Die wichtigsten Szenen schickst du als Sammlung in den Teamchat, eine Auswahl hinter einem Link.",
-        alt: "Gross: 11 von 29 Gegentoren über aussen rechts, darunter das halbe Feld mit den Wurforten, alle aussen rechts. Darüber die Sammlung für den Teamchat: Aussen rechts zumachen, 4 Szenen, HC Tannengrün Herren 1, und der Knopf Link teilen.",
+        alt: "Gross: 11 von 29 Gegentoren über aussen rechts, daneben das halbe Feld mit den Wurforten der 29 Gegentore, die 11 aussen rechts in Gelb. Darunter die Sammlung für den Teamchat: Aussen rechts zumachen, 4 Szenen, HC Tannengrün Herren 1, und der Knopf Link teilen.",
       },
     ],
     honestAll: "Die ganze Liste, Punkt für Punkt",
@@ -259,6 +259,13 @@ const de = {
     tourPlayers: ["Spiele", "Szenen", "Saison", "Team"],
     tourHint: "Tippe auf eine Nummer, und der Ball springt zu ihrem Bild.",
     stepsLabel: "Die vier Schritte",
+    // the words in the drawings of the four steps (components/step-art.tsx), the app's own words
+    art: {
+      film: { say: "Hoch an die Mittellinie. Beide Tore im Bild." },
+      upload: { title: "Video hochladen", ask: "Zu welchem Spiel gehört das Video?", a: ["TSV Nachtwind", "14. Nov."], b: ["SG Blitzfang", "29. Okt."], pct: "12 %", size: "420 MB von 3.4 GB", say: "Handy weglegen. Die Glocke meldet sich." },
+      check: { count: "Frage 1 von 1", q: "Passt das Spielfeld?", yes: "Passt", no: "Weiss nicht", tip: "ein Tipp", say: "Höchstens zehn Fragen pro Spiel." },
+      result: { of: "von {n}", what: "Gegentore über aussen rechts", title: "Aussen rechts zumachen", scenes: "4 Szenen", team: "HC Tannengrün Herren 1", share: "Link teilen" },
+    },
   },
   filming: {
     title: "Filmen",

@@ -245,12 +245,12 @@ const fr: Messages = {
       {
         title: "Vérifier",
         text: "Là où l'analyse hésite, elle te demande, avec la courte scène : le terrain est-il juste ? But ou pas, pour qui ? Dix questions au plus par match, en général en quelques minutes, et tout passer est possible aussi. D'où le tir est parti, tu le touches si tu veux.",
-        alt: "Dessin d'après l'app : la salle avec le terrain proposé en jaune, quatre points jaunes aux coins. Par-dessus, la question : Question 1 sur 1, le terrain est-il juste ?, avec les boutons C'est bon et Je ne sais pas, à côté un geste. En dessous : Dix questions au plus par match.",
+        alt: "Dessin d'après l'app : le terrain vu de la tribune, le terrain proposé en jaune, quatre points jaunes aux coins. En dessous, la question : Question 1 sur 1, le terrain est-il juste ?, avec les boutons C'est bon et Je ne sais pas, à côté un geste. En dessous : Dix questions au plus par match.",
       },
       {
         title: "Regarder et partager",
         text: "Résultat, déroulement, chaque but comme scène et les positions vues d'en haut. Si tu as touché pour les buts l'endroit d'où le tir est parti (le lieu de tir), les trois points s'ajoutent : les trois plus grands schémas pour l'entraînement, dès trois buts de la même zone. Les scènes importantes, tu les envoies en sélection dans le chat de l'équipe, un choix de scènes derrière un lien.",
-        alt: "En grand : 11 buts encaissés sur 29 par l'aile droite, en dessous le demi-terrain avec les lieux de tir, tous à l'aile droite. Par-dessus, la sélection pour le chat de l'équipe : Fermer l'aile droite, 4 scènes, HC Tannengrün Hommes 1, et le bouton Partager le lien.",
+        alt: "En grand : 11 buts encaissés sur 29 par l'aile droite, à côté le demi-terrain avec les lieux de tir des 29 buts encaissés, les 11 de l'aile droite en jaune. En dessous, la sélection pour le chat de l'équipe : Fermer l'aile droite, 4 scènes, HC Tannengrün Hommes 1, et le bouton Partager le lien.",
       },
     ],
     honestAll: "La liste complète, point par point",
@@ -261,6 +261,12 @@ const fr: Messages = {
     tourPlayers: ["Matchs", "Scènes", "Saison", "Équipe"],
     tourHint: "Touche un numéro, et le ballon saute à son image.",
     stepsLabel: "Les quatre étapes",
+    art: {
+      film: { say: "En hauteur, à la ligne médiane. Les deux buts dans l'image." },
+      upload: { title: "Téléverser la vidéo", ask: "De quel match vient la vidéo ?", a: ["TSV Nachtwind", "14 nov."], b: ["SG Blitzfang", "29 oct."], pct: "12 %", size: "420 Mo sur 3,4 Go", say: "Pose le téléphone. La cloche te prévient." },
+      check: { count: "Question 1 sur 1", q: "Le terrain est-il juste ?", yes: "C'est bon", no: "Je ne sais pas", tip: "un geste", say: "Dix questions au plus par match." },
+      result: { of: "sur {n}", what: "buts encaissés par l'aile droite", title: "Fermer l'aile droite", scenes: "4 scènes", team: "HC Tannengrün Hommes 1", share: "Partager le lien" },
+    },
   },
   filming: {
     title: "Filmer",

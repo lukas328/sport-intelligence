@@ -52,8 +52,6 @@
     if (opts.paper) el.classList.add("paper");
     // or on the app's cloth, for pieces of a page (not a sheet)
     if (opts.cloth) el.classList.add("cloth");
-    // or the dark court ground of the four steps (stage.css «#stage.steps», steps.js)
-    if (opts.steps) el.classList.add("steps");
     shot.width = width;
     shot.height = height;
     // another weight than compose.mjs's default (bytes of the 1x and the 2x file): lower for a

@@ -245,12 +245,12 @@ const en: Messages = {
       {
         title: "Check",
         text: "Where the analysis is unsure, it asks you, with the short scene: is the court right? Goal or not, for whom? At most ten questions per match, usually in a few minutes, and skipping them all works too. Where the shot came from, you tap if you like.",
-        alt: "Drawn after the app: the hall with the suggested court in yellow, four yellow points on the corners. Over it the question: Question 1 of 1, Is the court right?, with the buttons Looks right and Don't know, beside it one tap. Below: At most ten questions per match.",
+        alt: "Drawn after the app: the court seen from the stand, the suggested court in yellow, four yellow points on the corners. Below it the question: Question 1 of 1, Is the court right?, with the buttons Looks right and Don't know, beside it one tap. Below: At most ten questions per match.",
       },
       {
         title: "Watch and share",
         text: "Score, run of the match, every goal as a scene and the positions from above. If you tapped where each goal was thrown from (the shot spot), the three things come on top: the three biggest patterns for training, from three goals out of the same zone. The scenes that matter go to the team chat as a collection, a choice of scenes behind one link.",
-        alt: "Large: 11 of 29 goals conceded on the right wing, below it the half court with the shot spots, all on the right wing. Over it the collection for the team chat: Close the right wing, 4 scenes, HC Tannengrün Men 1, and the button Share link.",
+        alt: "Large: 11 of 29 goals conceded on the right wing, beside it the half court with the shot spots of the 29 goals conceded, the 11 on the right wing in yellow. Below it the collection for the team chat: Close the right wing, 4 scenes, HC Tannengrün Men 1, and the button Share link.",
       },
     ],
     honestAll: "The full list, point by point",
@@ -261,6 +261,12 @@ const en: Messages = {
     tourPlayers: ["Matches", "Scenes", "Season", "Team"],
     tourHint: "Tap a number and the ball jumps to its picture.",
     stepsLabel: "The four steps",
+    art: {
+      film: { say: "High up at the halfway line. Both goals in view." },
+      upload: { title: "Upload video", ask: "Which match is the video from?", a: ["TSV Nachtwind", "14 Nov"], b: ["SG Blitzfang", "29 Oct"], pct: "12 %", size: "420 MB of 3.4 GB", say: "Put the phone away. The bell tells you." },
+      check: { count: "Question 1 of 1", q: "Is the court right?", yes: "Looks right", no: "Don't know", tip: "one tap", say: "At most ten questions per match." },
+      result: { of: "of {n}", what: "goals conceded on the right wing", title: "Close the right wing", scenes: "4 scenes", team: "HC Tannengrün Men 1", share: "Share link" },
+    },
   },
   filming: {
     title: "Filming",

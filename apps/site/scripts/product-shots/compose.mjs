@@ -8,10 +8,10 @@
  * visitor's language (src/components/product-shot.tsx, texts in src/messages/*.ts, `product`).
  *
  *   node apps/site/scripts/product-shots/compose.mjs             # all pictures
- *   node apps/site/scripts/product-shots/compose.mjs step-check  # only the named ones
+ *   node apps/site/scripts/product-shots/compose.mjs app-result  # only the named ones
  *   node apps/site/scripts/product-shots/compose.mjs --preview /tmp/shots   # plus PNGs with arrows
  *
- * A template with words in the picture (the steps) names its languages (`S.stage(…, { langs })`);
+ * A template with words in the picture names its languages (`S.stage(…, { langs })`);
  * it is then made once per language: <name>-de.webp, <name>-fr.webp, <name>-en.webp.
  *
  * Needs no app and no network: only Chromium (Playwright) and the committed captures.
