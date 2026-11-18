@@ -413,7 +413,7 @@
     "twoFactorAdmins": "Für Vereinsadmins ist sie nach 14 Tagen Pflicht.",
     "teamFeatures": "Teamfunktionen",
     "teamFeaturesHint": "Training, Termine, Zusagen, Aufgaben und eigene Bereiche für Spieler und Eltern. Ausgeschaltet bleibt alles gespeichert und kommt beim Einschalten zurück.",
-    "me": "Ich",
+    "me": "Mein Konto",
     "tab_profile": "Profil",
     "tab_security": "Sicherheit",
     "tab_data": "Meine Daten",
@@ -2891,7 +2891,7 @@
     "collections": "Sammlungen",
     "matrix": "Tabelle",
     "scenesSections": "Bereiche der Szenen",
-    "me": "Ich",
+    "me": "Mein Konto",
     "club": "Verein",
     "twoFactorDue": "Zwei-Faktor-Anmeldung einrichten",
     "uploadShort": "Video",
@@ -3264,7 +3264,7 @@
     "accessExplain": "Diese Personen haben euer Team auf handball.ch gewählt. Das Team gibt es nur einmal: Nimm sie auf, dann arbeiten sie im selben Team."
   },
   "verification": {
-    "section": "Offizielle Daten",
+    "section": "Verband",
     "title": "Verein noch nicht bestätigt",
     "why": "Bis der Verein bestätigt ist, bleiben Teilen per Link und öffentliche Profile aus, und Gegner stehen in den Spielberichten nur mit Nummer.",
     "way_mail_domain": "Mit einer E-Mail-Adresse des Vereins anmelden.",
@@ -4070,7 +4070,8 @@
     "shotsPlain": "Würfe",
     "savesPlain": "Paraden",
     "againstNone": "{n, plural, one {Das Gegentor ist} other {Die # Gegentore sind}} keinem Torhüter zugeordnet.",
-    "savesNone": "{n, plural, one {Eine Parade ist} other {# Paraden sind}} keinem Torhüter aus dem Kader zugeordnet."
+    "savesNone": "{n, plural, one {Eine Parade ist} other {# Paraden sind}} keinem Torhüter aus dem Kader zugeordnet.",
+    "againstNoMinutes": "Ohne Spielminuten im Spielbericht lassen sich Gegentore keinem Torhüter zuordnen."
   },
   "entry": {
     "ask": "Wie heisst dein Team?",

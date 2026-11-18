@@ -413,7 +413,7 @@
     "twoFactorAdmins": "For club admins it is required after 14 days.",
     "teamFeatures": "Team features",
     "teamFeaturesHint": "Training, dates, RSVP, tasks and own areas for players and parents. Switched off, everything stays stored and comes back when you switch it on.",
-    "me": "Me",
+    "me": "My account",
     "tab_profile": "Profile",
     "tab_security": "Security",
     "tab_data": "My data",
@@ -2891,7 +2891,7 @@
     "collections": "Collections",
     "matrix": "Table",
     "scenesSections": "Scene sections",
-    "me": "Me",
+    "me": "My account",
     "club": "Club",
     "twoFactorDue": "Set up two-factor sign-in",
     "uploadShort": "Video",
@@ -3264,7 +3264,7 @@
     "accessExplain": "These people chose your team on handball.ch. The team exists only once: admit them and they work in the same team."
   },
   "verification": {
-    "section": "Official data",
+    "section": "Federation",
     "title": "Club not confirmed yet",
     "why": "Until the club is confirmed, sharing by link and public profiles stay off, and opponents appear in match reports with numbers only.",
     "way_mail_domain": "Sign in with an e-mail address of the club.",
@@ -4070,7 +4070,8 @@
     "shotsPlain": "Shots",
     "savesPlain": "Saves",
     "againstNone": "{n, plural, one {The goal against is} other {The # goals against are}} not credited to a goalkeeper.",
-    "savesNone": "{n, plural, one {One save is} other {# saves are}} not credited to a goalkeeper of the squad."
+    "savesNone": "{n, plural, one {One save is} other {# saves are}} not credited to a goalkeeper of the squad.",
+    "againstNoMinutes": "Without playing minutes in the match report, goals against cannot be credited to a goalkeeper."
   },
   "entry": {
     "ask": "What is your team called?",

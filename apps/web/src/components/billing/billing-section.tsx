@@ -82,6 +82,7 @@ export function BillingSection({ orgId }: { orgId: string }) {
     if (res.error || !res.data) return setProblem(problemCode(res.error) ?? "generic");
     window.location.assign(res.data.url);
   }
+  const trialOn = Boolean(b.trial_ends_at && new Date(b.trial_ends_at).getTime() > Date.now());
   const gb = (bytes: number) => Math.round((bytes / 1024 ** 3) * 10) / 10;
   return (
     <section id="billing" aria-labelledby="billing-title" className="space-y-3">
@@ -92,10 +93,11 @@ export function BillingSection({ orgId }: { orgId: string }) {
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <p>
             <span className="font-semibold">{t(`plan_${b.plan as "free"}`)}</span>
-            {b.status && <span className="ml-2 text-sm text-muted">{t(`status_${b.status as "active"}`)}</span>}
+            {/* «Team · Testphase»: the parts as text with their separator, not glued by margins (A12) */}
+            {b.status && !(b.status === "trialing" && trialOn) && <span className="text-sm text-muted">{` · ${t(`status_${b.status as "active"}`)}`}</span>}
             {/* the trial at sign-up has no Stripe status: shown by its end (UX test Z8) */}
-            {b.trial_ends_at && new Date(b.trial_ends_at).getTime() > Date.now() && (
-              <span className="ml-2 text-sm">{t("trialUntil", { date: format.dateTime(new Date(b.trial_ends_at), { dateStyle: "medium" }) })}</span>
+            {trialOn && (
+              <span className="text-sm">{` · ${t("trialUntil", { date: format.dateTime(new Date(b.trial_ends_at!), { dateStyle: "medium" }) })}`}</span>
             )}
           </p>
           {b.trial_ends_at && new Date(b.trial_ends_at).getTime() > Date.now() && !b.status && (
