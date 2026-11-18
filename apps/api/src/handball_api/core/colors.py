@@ -84,7 +84,16 @@ def analysis_kits(kits: dict[str, str | None]) -> dict[str, str]:
     """Kit colours for the analysis job (match field names as in `KIT_PAIRS`). The referee kit is
     sent only when it is known and differs from both teams' field kits: a referee colour equal to
     a team's (black referees, black opponents) makes the analysis call that team's players
-    referees; without it the analysis finds referees by appearance (handball_vision.roles)."""
+    referees; without it the analysis finds referees by appearance (handball_vision.roles).
+
+    An own kit nobody chose (the old preselected blues, the neutral fallback) is no knowledge
+    and is left out: the analysis then tells the teams apart by their shirt colours alone
+    (staging 2026-11-17: the old blue #1f4fd6 went out as the own kit while the team wore
+    yellow, and all players took the keeper's yellow label)."""
+    kits = dict(kits)
+    own = kits.get("own")
+    if own and (not club_colour_chosen(own) or str(own).lower() == FALLBACK_CLUB_COLOUR):
+        kits["own"] = None
     out = {label: str(kits[field]) for label, field in ANALYSIS_KITS if kits.get(field)}
     referee = kits.get("referee")
     if referee and all(
