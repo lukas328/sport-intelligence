@@ -79,20 +79,20 @@ export function ShirtPicker({ question, hint, names }: { question: string; hint:
     <fieldset className="min-w-0">
       <legend className="text-[1.375rem] leading-tight font-bold md:text-[1.5rem]">{question}</legend>
       <p className="mt-1 text-[1.0625rem] text-ink-2">{hint}</p>
-      <div className="mt-4 grid grid-cols-2 gap-2 min-[480px]:grid-cols-4">
+      <div className="mt-4 grid grid-cols-[repeat(auto-fill,minmax(min(100%,9.75rem),1fr))] gap-2">
         {SHIRTS.map(([key, hex]) => {
           const on = key === shirt;
           return (
             <label
               key={key}
               className={cn(
-                "flex min-h-14 cursor-pointer items-center gap-3 border-2 px-3 py-2 text-[1.0625rem] font-semibold has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-offset-3 has-[:focus-visible]:outline-ink",
+                "flex min-h-14 min-w-0 cursor-pointer items-center gap-2.5 border-2 px-3 py-2 text-[1.0625rem] font-semibold has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-offset-3 has-[:focus-visible]:outline-ink",
                 on ? "border-ink bg-ink text-ground" : "border-ink/30 bg-paper/60 hover:border-ink",
               )}
             >
               <input type="radio" name="shirt" value={key} checked={on} onChange={() => setShirt(key)} className="sr-only" />
               <Shirt hex={hex} on={on} />
-              <span>{names[key]}</span>
+              <span className="min-w-0 break-words">{names[key]}</span>
             </label>
           );
         })}
