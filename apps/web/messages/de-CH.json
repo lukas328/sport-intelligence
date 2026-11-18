@@ -1330,7 +1330,7 @@
     "viewIntro": "Drück «Abspielen», um den Spielzug Phase für Phase zu sehen.",
     "hint_move": "Zieh Spieler und Ball wie auf einer Magnettafel. Tippe einen Pfeil an, um ihn zu löschen.",
     "hint_run": "Zieh vom Spieler aus, wohin er läuft. Kurven gehen auch.",
-    "hint_pass": "Zieh vom Spieler mit Ball zum Mitspieler.",
+    "hint_pass": "Zieh vom Spieler mit Ball zum Mitspieler. Der Pass rastet beim Mitspieler ein, der am nächsten liegt.",
     "hint_dribble": "Zieh vom Spieler aus, wohin er mit Ball prellt.",
     "hint_screen": "Zieh vom Spieler zur Stelle, wo er die Sperre stellt.",
     "hint_ball": "Tippe auf einen Spieler oder eine Stelle: dort ist der Ball.",

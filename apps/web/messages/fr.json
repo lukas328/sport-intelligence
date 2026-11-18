@@ -1330,7 +1330,7 @@
     "viewIntro": "Appuie sur « Lancer » pour voir la combinaison phase par phase.",
     "hint_move": "Déplace joueurs et ballon comme sur un tableau magnétique. Touche une flèche pour la supprimer.",
     "hint_run": "Glisse depuis le joueur jusqu'où il court. Les courbes fonctionnent aussi.",
-    "hint_pass": "Glisse du porteur du ballon vers le partenaire.",
+    "hint_pass": "Glisse du porteur du ballon vers le partenaire. La passe s'accroche au partenaire le plus proche.",
     "hint_dribble": "Glisse depuis le joueur jusqu'où il dribble.",
     "hint_screen": "Glisse du joueur jusqu'à l'endroit où il pose l'écran.",
     "hint_ball": "Touche un joueur ou un endroit : le ballon y est placé.",

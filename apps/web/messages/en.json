@@ -1330,7 +1330,7 @@
     "viewIntro": "Press Play to see the play phase by phase.",
     "hint_move": "Drag players and the ball like on a magnetic board. Tap an arrow to delete it.",
     "hint_run": "Drag from the player to where he runs. Curves work too.",
-    "hint_pass": "Drag from the player with the ball to the team-mate.",
+    "hint_pass": "Drag from the player with the ball to the team-mate. The pass snaps to the nearest team-mate.",
     "hint_dribble": "Drag from the player to where he dribbles.",
     "hint_screen": "Drag from the player to where he sets the screen.",
     "hint_ball": "Tap a player or a spot: the ball goes there.",
