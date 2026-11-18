@@ -75,7 +75,7 @@ def test_owner_clicks_give_the_same_court_as_the_test_set_truth(frame: dict[str,
     back_fit = fit.calibration.to_court(clicks)
     back_exp = Calibration(expected, 1.0, 0.0, "user_correction", SIZE).to_court(clicks)
     assert np.abs(back_fit - back_exp).max() < 0.3  # the truth itself holds to 0.3 m
-    assert abs(fit.calibration.reprojection_px - frame["expected_median_px"]) < 0.3
+    assert fit.calibration.reprojection_px <= frame["expected_median_px"] + 0.3
 
 
 def test_one_click_on_a_neighbouring_line_is_dropped() -> None:

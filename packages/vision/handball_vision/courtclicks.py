@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import itertools
 import math
+from collections.abc import Callable
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -89,8 +90,8 @@ def _dense(curve: F64, step: float = 0.05) -> F64:
     return np.asarray(np.vstack(out), np.float64)
 
 
-_DENSE = {k: _dense(v) for k, v in LINES.items()}
-_COARSE = {k: v[::4] for k, v in _DENSE.items()}  # 20 cm: enough to rank starts
+_DENSE = {k: _dense(v, 0.1) for k, v in LINES.items()}
+_COARSE = {k: v[::3] for k, v in _DENSE.items()}  # 30 cm: enough to rank starts
 
 MIN_EQUATIONS = 10  # 8 unknowns and a check
 MAX_MEDIAN_PX = 5.0
@@ -114,16 +115,28 @@ def _project(h: F64, pts: F64) -> F64:
 
 
 def _residuals(
-    h: F64, points: dict[str, Px], lines: dict[str, list[Px]], dense: dict[str, F64] = _DENSE
+    h: F64, points: dict[str, Px], lines: dict[str, list[Px]], dense: dict[str, F64] | None = None
 ) -> F64:
+    """Distance of every click to the projected court (points first). A straight court line stays
+    straight in the image: exact point-to-line distance; arcs: nearest projected sample."""
     out: list[float] = []
     if points:
         src = np.array([KEYPOINTS[n] for n in points], np.float64)
         dst = np.array(list(points.values()), np.float64)
         out.extend(np.linalg.norm(_project(h, src) - dst, axis=1).tolist())
+    curves = dense if dense is not None else _DENSE
     for name, clicks in lines.items():
-        curve = _project(h, dense[name])
         c = np.array(clicks, np.float64)
+        if len(LINES[name]) == 2:
+            a, b = _project(h, LINES[name])
+            d = b - a
+            n = float(np.hypot(d[0], d[1]))
+            if not np.isfinite(n) or n < 1e-9:
+                out.extend([1e6] * len(c))
+                continue
+            out.extend((np.abs(d[0] * (c[:, 1] - a[1]) - d[1] * (c[:, 0] - a[0])) / n).tolist())
+            continue
+        curve = _project(h, curves[name])
         out.extend(np.sqrt(((c[:, None] - curve[None]) ** 2).sum(-1)).min(1).tolist())
     r = np.array(out, np.float64)
     r[~np.isfinite(r)] = 1e6
@@ -191,12 +204,12 @@ def _starts(
             return 1e9 if h is None else _cost(h, points, lines)
 
         if dim == 2:
-            grid = [np.array([a]) for a in np.linspace(0, np.pi, 180, endpoint=False)]
+            grid = [np.array([a]) for a in np.linspace(0, np.pi, 120, endpoint=False)]
         else:
             grid = [
                 np.array([a, b])
-                for a in np.linspace(0, np.pi, 45, endpoint=False)
-                for b in np.linspace(0, 2 * np.pi, 90, endpoint=False)
+                for a in np.linspace(0, np.pi, 30, endpoint=False)
+                for b in np.linspace(0, 2 * np.pi, 60, endpoint=False)
             ]
         scored = sorted(((cost(a), a) for a in grid), key=lambda t: t[0])[: 2 * keep]
         for _, a0 in scored:
@@ -219,26 +232,32 @@ def _starts(
     return out
 
 
-def _fit(points: dict[str, Px], lines: dict[str, list[Px]], starts: list[F64]) -> tuple[F64, F64]:
-    def resid(v: F64) -> F64:
-        return _residuals(np.append(v, 1.0).reshape(3, 3), points, lines)
+# court metres to roughly [-1, 1]: the solver then sees well scaled parameters
+_NORM = np.array([[1 / 20, 0, -1], [0, 1 / 10, -1], [0, 0, 1]])
+_NORM_INV = np.linalg.inv(_NORM)
 
-    best = None
-    for h0 in starts:
+
+def _fit(points: dict[str, Px], lines: dict[str, list[Px]], starts: list[F64]) -> tuple[F64, F64]:
+    best: tuple[float, F64, F64] | None = None
+    for h0 in starts[:2]:
+        # H = A (I + D) N with A the start in normalised court units: D starts at zero
+        a = h0 @ _NORM_INV
+        a = a / np.abs(a).max()
+
+        def hom(d: F64, a: F64 = a) -> F64:
+            return a @ (np.eye(3) + np.append(d, 0.0).reshape(3, 3)) @ _NORM
+
+        def resid(d: F64, hom: Callable[[F64], F64] = hom) -> F64:
+            return _residuals(hom(d), points, lines)
+
         sol = least_squares(
-            resid,
-            (h0 / h0[2, 2]).ravel()[:8],
-            method="trf",
-            loss="soft_l1",
-            f_scale=5.0,
-            x_scale="jac",
-            max_nfev=2000,
+            resid, np.zeros(8), method="trf", loss="soft_l1", f_scale=5.0, max_nfev=400
         )
-        if best is None or sol.cost < best.cost:
-            best = sol
+        if best is None or sol.cost < best[0]:
+            h = hom(sol.x)
+            best = (float(sol.cost), h / h[2, 2], resid(sol.x))
     assert best is not None
-    h = np.append(best.x, 1.0).reshape(3, 3)
-    return h, resid(best.x)
+    return best[1], best[2]
 
 
 def calibrate_clicks(
@@ -268,21 +287,33 @@ def calibrate_clicks(
         raise CalibrationError("the clicks give no court")
     h, res = _fit(points, lines, starts)
     dropped = 0
-    if not (np.median(res) <= MAX_MEDIAN_PX and res.max() <= MAX_CLICK_PX):
-        bad = set(np.where(res > DROP_PX)[0].tolist())
-        if 0 < len(bad) <= max(1, len(res) // 5):
-            keys = [("p", n, -1) for n in points] + [
-                ("l", n, j) for n, c in lines.items() for j in range(len(c))
-            ]
-            drop = {keys[i] for i in bad}
-            points = {n: p for n, p in points.items() if ("p", n, -1) not in drop}
-            lines = {
-                n: [p for j, p in enumerate(c) if ("l", n, j) not in drop] for n, c in lines.items()
+    max_drop = max(1, len(res) // 5)
+
+    def bad_fit(r: F64) -> bool:
+        return bool(np.median(r) > MAX_MEDIAN_PX or r.max() > MAX_CLICK_PX)
+
+    # a click that snapped to a neighbouring line: drop the worst click beyond 15 px and fit
+    # again, one at a time, at most a fifth of the clicks
+    while bad_fit(res) and dropped < max_drop and res.max() > DROP_PX:
+        worst = int(np.argmax(res))
+        keys = [("p", n, -1) for n in points] + [
+            ("l", n, j) for n, c in lines.items() for j in range(len(c))
+        ]
+        kind, name, j = keys[worst]
+        if kind == "p":
+            trial_points, trial_lines = {n: p for n, p in points.items() if n != name}, lines
+        else:
+            trial_points = points
+            trial_lines = {
+                n: [p for k, p in enumerate(c) if not (n == name and k == j)]
+                for n, c in lines.items()
             }
-            lines = {n: c for n, c in lines.items() if c}
-            if n_eq() >= MIN_EQUATIONS:
-                h, res = _fit(points, lines, [h])
-                dropped = len(bad)
+            trial_lines = {n: c for n, c in trial_lines.items() if c}
+        if 2 * len(trial_points) + sum(len(c) for c in trial_lines.values()) < MIN_EQUATIONS:
+            break
+        points, lines = trial_points, trial_lines
+        h, res = _fit(points, lines, [h])
+        dropped += 1
     med, mx = float(np.median(res)), float(res.max())
     if med > MAX_MEDIAN_PX or mx > MAX_CLICK_PX:
         raise CalibrationError(
