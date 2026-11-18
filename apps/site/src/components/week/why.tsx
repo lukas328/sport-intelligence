@@ -110,7 +110,7 @@ export function Why({ goals, things, own, opp, text }: { goals: DemoGoal[]; thin
                   <span className="mt-1 block text-base text-ink-2">{t.sub}</span>
                 </span>
                 <span className="block md:mt-3">
-                  <Bundle goals={t.runs} rest={t.rest} width={150} clean label={t.label} />
+                  <Bundle goals={t.runs} rest={t.rest} width={150} clean label={t.label} box="-0.6 -1.2 21.2 12.6" />
                 </span>
               </button>
             </li>
@@ -132,7 +132,7 @@ export function Why({ goals, things, own, opp, text }: { goals: DemoGoal[]; thin
           {gap && gapWord && (
             <svg aria-hidden viewBox={box.join(" ")} className="pointer-events-none absolute top-0 left-0 block w-full">
               {gap.near && <line x1={gap.near[0]} y1={gap.near[1]} x2={gap.at[0]} y2={gap.at[1]} stroke="var(--attn)" strokeWidth={2} strokeDasharray="4 4" vectorEffect="non-scaling-stroke" />}
-              <circle className="gap-pulse" cx={gap.at[0]} cy={gap.at[1]} r={1.7} fill="var(--attn)" fillOpacity={0.28} stroke="var(--attn)" strokeWidth={2.5} vectorEffect="non-scaling-stroke" />
+              <circle className="gap-pulse" cx={gap.at[0]} cy={gap.at[1]} r={1.4} fill="var(--attn)" fillOpacity={0.28} stroke="var(--attn)" strokeWidth={2.5} vectorEffect="non-scaling-stroke" />
               <GapWord at={gap.at} word={gapWord} />
             </svg>
           )}

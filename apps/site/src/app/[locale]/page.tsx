@@ -18,6 +18,9 @@ import { graph, organization, softwareApplication, webPage, website } from "@/li
 import { SITE_UPDATED } from "@/lib/site";
 import { saturday, sundayAnswer, threeMatchesLater } from "@/lib/story";
 import { demoView } from "@/lib/things";
+import { DRILL_LANG, DRILLS } from "@/lib/drills";
+import { seasonRightWing } from "@/lib/week";
+import { LoopTile } from "@/components/week/loop-tile";
 
 type Props = { params: Promise<{ locale: Locale }> };
 
@@ -200,6 +203,27 @@ export default async function Home({ params }: Props) {
               />
             </div>
           </div>
+        </section>
+
+        {/* 4b · what it means for training (U30): the loop pattern, why, drill, effect, as on the demo page */}
+        <section aria-labelledby="loop" data-reveal className="mt-20 md:mt-28">
+          <LoopTile
+            kick={t.loopKick}
+            title={t.loopTitle}
+            steps={t.loop.map((s, i) => ({
+              title: s.title,
+              text: fmt(s.text, { n: sat.n, of: sat.of, drill: DRILLS.defence_6_0_shift.name[DRILL_LANG[locale]] }),
+              href: `/${locale}/demo/${["#warum", "#warum", "#einsicht", "#naechstes"][i]}`,
+            }))}
+            link={t.loopLink}
+            demoHref={`/${locale}/demo/`}
+            numeral={sat.n}
+            unit={fmt(m.things.ofUnit, { total: sat.of })}
+            scene={v.scene}
+            drill={DRILLS.defence_6_0_shift}
+            drillLabel={fmt(m.demo.sketchLabel, { name: DRILLS.defence_6_0_shift.name[DRILL_LANG[locale]] })}
+            bars={seasonRightWing().map((s) => s.n)}
+          />
         </section>
 
         {/* 5 · how you get there: three short lines, the pictures live on «So funktioniert es» (U18) */}

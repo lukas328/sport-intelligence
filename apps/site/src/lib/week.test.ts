@@ -32,7 +32,7 @@ describe("the demo week (U32)", () => {
     expect(a.when).toMatchObject({ from: "15:28", to: "19:07", before: "9:9", after: "9:13", run: "0:4", rest: "18:16", n: 4 });
     expect(a.works.n).toBe(9);
     expect(a.works.of).toBe(27);
-    expect(a.works.shots).toBe(MATCH.stats.own.zones.circle_centre.shots);
+    expect(a.works.shots).toBe((MATCH.stats.own as unknown as { zones: Record<string, { shots: number }> }).zones.circle_centre!.shots);
     expect(a.works.shooters.reduce((n, s) => n + s.n, 0)).toBeLessThanOrEqual(9);
   });
 

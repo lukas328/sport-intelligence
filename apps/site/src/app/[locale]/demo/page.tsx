@@ -330,7 +330,7 @@ export default async function Demo({ params }: Props) {
         </section>
 
         {/* 4 · Tuesday: the collection in the team chat, the player's view without an account */}
-        <section aria-labelledby="dienstag" className="mt-20 grid grid-cols-1 items-center gap-10 md:mt-28 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-14">
+        <section aria-labelledby="dienstag" className="mt-20 grid grid-cols-1 items-center gap-10 md:mt-28 lg:grid-cols-[minmax(0,0.75fr)_minmax(0,1.25fr)] lg:gap-10">
           <div data-reveal className="min-w-0">
             <When>{t.tueWhen}</When>
             <h2 id="dienstag" className="mt-4 scroll-mt-24 text-[2.25rem] md:text-[3.25rem]">

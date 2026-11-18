@@ -195,7 +195,7 @@ export function MatchRun({ score, phases, own, opp, text }: { score: ScorePoint[
 
 function Chart({ width, height, score, t, band, text, small = false }: { width: number; height: number; score: readonly ScorePoint[]; t: number; band: Phase; text: MatchRunText; small?: boolean }) {
   const padL = small ? 8 : 16;
-  const padR = small ? 44 : 70;
+  const padR = small ? 70 : 104;
   const top = small ? 30 : 40;
   const bottom = small ? 28 : 36;
   const diffs = score.map((p) => p.own - p.opp);
@@ -228,10 +228,10 @@ function Chart({ width, height, score, t, band, text, small = false }: { width: 
       <text x={x(LEN / 2) + 6} y={height - bottom + (small ? 18 : 24)} style={{ ...label, fill: "var(--ink-2)", font: `600 ${font}px var(--font-sans)` }}>
         {text.halfMark}
       </text>
-      <text x={padL} y={y(hi) + 4} style={{ ...label, fill: "var(--ink-2)", font: `600 ${font}px var(--font-sans)` }}>
+      <text x={x(LEN) + (small ? 6 : 10)} y={y(hi) + 4} style={{ ...label, fill: "var(--ink-2)", font: `600 ${font}px var(--font-sans)` }}>
         {`+${hi} ${text.ahead}`}
       </text>
-      <text x={padL} y={y(lo) + 4} style={{ ...label, fill: "var(--ink-2)", font: `600 ${font}px var(--font-sans)` }}>
+      <text x={x(LEN) + (small ? 6 : 10)} y={y(lo) + 4} style={{ ...label, fill: "var(--ink-2)", font: `600 ${font}px var(--font-sans)` }}>
         {`${lo} ${text.behind}`}
       </text>
       <g clipPath={`url(#${clip})`}>
