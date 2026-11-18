@@ -30,6 +30,10 @@ test("live tagging courtside: clock, buttons, offline queue, sync", async ({ pag
   // Spieltag opens on the six big keys; the capture per player sits behind «Pro Spielerin erfassen»
   await page.getByTestId("live-link").click();
   await expect(page.getByTestId("marks")).toBeVisible();
+  // its own top line stands fully in the window: «Beenden» is the way back (no bar pushed above the page)
+  await page.evaluate(() => window.scrollTo(0, 0));
+  const end = await page.getByRole("link", { name: "Beenden" }).boundingBox();
+  expect(end && end.y).toBeGreaterThanOrEqual(0);
   await page.getByTestId("per-player").click();
   await expect(page.getByTestId("live")).toBeVisible();
   await expect(page.getByTestId("live-score")).toHaveText("0:0");
