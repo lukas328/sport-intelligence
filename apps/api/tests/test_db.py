@@ -38,6 +38,21 @@ async def test_engine_lifecycle() -> None:
         await anext(db.get_session())
 
 
+async def test_connections_carry_the_process_name(db_settings: Any) -> None:
+    """pg_stat_activity tells whose connections fill the server's slots (staging 17.11.)."""
+    name = db.application_name()
+    assert name.startswith("hb-api ") and len(name) <= 63
+    engine = db.init_engine(db_settings.database_url)
+    try:
+        async with engine.connect() as conn:
+            shown = (
+                await conn.exec_driver_sql("SELECT current_setting('application_name')")
+            ).scalar()
+        assert shown == name
+    finally:
+        await db.dispose_engine()
+
+
 # foreign keys whose referenced row is deleted (ON DELETE) or that are looked up: each needs an
 # index starting with the column, or the delete and the lookup read the whole table
 _UNINDEXED_FKS = """

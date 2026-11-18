@@ -62,6 +62,10 @@ QUEUE_LONG_S = 15 * 60  # waiting for a worker this long is said with the minute
 RECENT_S = 20 * 60  # a match whose processing ended this recently still shows («fertig»)
 UPLOAD_LOOK_S = 3 * 86400  # uploads older than this are abandoned (monitoring.abandoned_uploads)
 STALLED_ERROR = "stalled: no report from the worker"
+# a job still waiting after this long is looked up in the queue; gone from it (Redis restarted
+# without persistence, on staging with every deploy), it is enqueued again
+QUEUED_CHECK_S = 5 * 60
+LOST_ERROR = "lost from the queue"
 
 # measured: only once the step has gone this far and run this long (an early pace misleads)
 MEASURED_MIN = {"ingest": (0.05, 60.0), "analysis": (0.1, 120.0)}
@@ -651,8 +655,58 @@ async def watchdog(ctx: Ctx, now: datetime | None = None) -> dict[str, int]:
             log.warning("job_failed_silent", job=str(job.id), kind=job.kind)
             failed += 1
     await ctx.db.flush()
+    requeued = await requeue_lost(ctx, now)
     abandoned = await abandon_uploads(ctx, now)
-    return {"restarted": restarted, "failed": failed, "abandoned": abandoned}
+    return {"restarted": restarted, "failed": failed, "requeued": requeued, "abandoned": abandoned}
+
+
+async def requeue_lost(ctx: Ctx, now: datetime | None = None) -> int:
+    """Jobs that wait for a worker but are no longer in the queue: Redis runs without
+    persistence, and a restart (on staging with every deploy, 17.11.) wipes out what was only
+    waiting; the job would show "in der Warteschlange" forever. Such a job is ended and the step
+    started again (a new job, as the restart of a silent job does). Each club on its own (RLS)."""
+    import asyncio
+
+    from handball_api.services import videos  # imports this module
+
+    if ctx.jobs is None:
+        return 0
+    now = now or datetime.now(UTC)
+    await enable_system_access(ctx.db, reason="job watchdog: waiting jobs of all clubs")
+    found = (
+        await ctx.db.execute(
+            select(ProcessingJob.id, ProcessingJob.organization_id).where(
+                ProcessingJob.status == JobStatus.QUEUED,
+                ProcessingJob.kind.in_(("ingest", "analysis")),
+                ProcessingJob.created_at <= now - timedelta(seconds=QUEUED_CHECK_S),
+            )
+        )
+    ).all()
+    await disable_system_access(ctx.db)
+    requeued = 0
+    for job_id, org_id in found:
+        if await asyncio.to_thread(ctx.jobs.exists, str(job_id)) is not False:
+            continue  # still waiting in the queue, or the queue cannot be asked
+        await set_tenant(ctx.db, org_id)
+        job = await ctx.db.get(ProcessingJob, job_id)
+        if job is None or job.status != JobStatus.QUEUED or job.video_asset_id is None:
+            continue
+        asset = await ctx.db.get(VideoAsset, job.video_asset_id)
+        match = await ctx.db.get(Match, job.match_id)
+        if asset is None or match is None:
+            continue
+        job.status = JobStatus.CANCELLED
+        job.finished_at = now
+        job.error = LOST_ERROR
+        await ctx.db.flush()
+        if job.kind == "ingest":
+            await videos.start_ingest(ctx, asset)
+        else:
+            await videos.start_analysis(ctx, asset, match)
+        log.warning("job_requeued", job=str(job.id), kind=job.kind)
+        requeued += 1
+    await ctx.db.flush()
+    return requeued
 
 
 async def abandon_uploads(ctx: Ctx, now: datetime | None = None) -> int:
