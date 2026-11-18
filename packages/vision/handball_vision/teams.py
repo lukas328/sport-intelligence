@@ -91,6 +91,10 @@ class TeamAssigner:
             self.samples[track_id].append(c)
 
     def classify(self, colour: NDArray[np.float64]) -> tuple[str, float]:
+        """Nearest kit and how clearly; without any kit "home" with confidence 0 (the clusters
+        of `relabel_by_clusters` then tell the teams apart), with one kit that one."""
+        if len(self.kits) < 2:
+            return next(iter(self.kits), "home"), 0.0
         dists = {k: colour_distance(colour, v) for k, v in self.kits.items()}
         ranked = sorted(dists.items(), key=lambda kv: kv[1])
         best, second = ranked[0], ranked[1]
@@ -149,11 +153,14 @@ def relabel_by_clusters(
     out), so absolute matching fails while the order survives. The tracks' median torso colours are
     clustered (two big clusters: the teams; a small third: referees and others); the two team
     clusters are matched to the home and away kits by hue when the kits are coloured, else by
-    lightness order. `colours`: track -> (median Lab, samples); `kits`: label -> Lab. Returns labels
-    for the tracks with enough samples.
+    lightness order. With one team kit only, the cluster nearer to it wears it and the other is
+    the other team; with none, the lighter cluster is called home (a guess: which team is which
+    is unknown, but the two teams are told apart, staging 2026-11-17: without an away kit all
+    players got the home or the keeper label). `colours`: track -> (median Lab, samples); `kits`:
+    label -> Lab. Returns labels for the tracks with enough samples.
     """
     tids = [t for t, (_, n) in colours.items() if n >= min_samples]
-    if len(tids) < 6 or "home" not in kits or "away" not in kits:
+    if len(tids) < 6:
         return {}
     x = np.array([colours[t][0] for t in tids], dtype=np.float64)
     w = np.array([colours[t][1] for t in tids], dtype=np.float64)
@@ -185,13 +192,20 @@ def relabel_by_clusters(
         for j in range(len(centres))
         if (labels == j).any()
     }
-    home, away = kits["home"], kits["away"]
     a, b = real[ci], real[cj]
 
     def chroma(c: NDArray[np.float64]) -> float:
         return float(np.hypot(c[1] - 128, c[2] - 128))
 
-    if max(chroma(home), chroma(away)) >= 15:
+    home, away = kits.get("home"), kits.get("away")
+    if home is None or away is None:
+        known = home if home is not None else away
+        if known is None:
+            first_home = bool(a[0] >= b[0])  # no team kit at all: the lighter cluster is "home"
+        else:
+            near_a = colour_distance(a, known) <= colour_distance(b, known)
+            first_home = near_a == (home is not None)
+    elif max(chroma(home), chroma(away)) >= 15:
         straight = colour_distance(a, home) + colour_distance(b, away)
         swapped = colour_distance(a, away) + colour_distance(b, home)
         first_home = straight <= swapped
