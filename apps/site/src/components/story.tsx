@@ -5,7 +5,6 @@
 import type { ReactNode } from "react";
 import { HalfCourtLines } from "@/components/anlauf/court";
 import { HALF_BOX } from "@/components/anlauf/geometry";
-import { CountUp } from "@/components/count-up";
 import { cn } from "@/lib/cn";
 import { fmt } from "@/lib/i18n";
 import type { StoryCourt } from "@/lib/story";
@@ -59,7 +58,7 @@ export function Evening({ t, score }: { t: Messages["home"]["problemCard"]; scor
 }
 
 /** One half court with the goals conceded as dots: the right wing in ink, the rest faint. */
-function Court({ court, label }: { court: StoryCourt; label: string }) {
+export function Court({ court, label }: { court: StoryCourt; label: string }) {
   const k = 300 / HALF_BOX[2];
   return (
     <svg viewBox={HALF_BOX.join(" ")} role="img" aria-label={label} className="block w-full">
@@ -82,7 +81,7 @@ function Court({ court, label }: { court: StoryCourt; label: string }) {
 
 /**
  * Three matches later: the right wing before and after, as the season would show it (W27), big
- * and side by side on the club colour (S12). The numbers count up when the block comes in.
+ * and side by side on the club colour (S12). The numbers stand as they are at once, no counting (BEFUNDE-3 U20).
  */
 export function BeforeAfter({ t, before, after, zone }: { t: Messages["home"]; before: StoryCourt; after: StoryCourt; zone: string }) {
   const side = (c: StoryCourt, when: string, strong: boolean) => (
@@ -91,7 +90,7 @@ export function BeforeAfter({ t, before, after, zone }: { t: Messages["home"]; b
         <span className="block font-mono text-base font-semibold tracking-wide uppercase max-lg:min-h-[2lh] md:text-[1.0625rem]">{when}</span>
         <span className="mt-2 flex flex-wrap items-baseline gap-x-3">
           <b className={cn("font-num leading-[.85]", strong ? "text-[5.5rem] md:text-[8.5rem]" : "text-[5.5rem] opacity-80 md:text-[8.5rem]")}>
-            <CountUp value={c.n} minDigits={String(c.n).length} />
+            {c.n}
           </b>
           <span className="font-num text-[1.5rem] md:text-[2.25rem]">{fmt(t.afterOf, { of: c.of })}</span>
         </span>

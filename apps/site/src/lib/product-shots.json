@@ -90,22 +90,28 @@
   },
   "step-check": {
     "width": 640,
-    "height": 760,
+    "height": 640,
     "callouts": []
   },
   "step-film": {
     "width": 640,
-    "height": 760,
+    "height": 640,
     "callouts": []
   },
   "step-result": {
     "width": 640,
-    "height": 760,
+    "height": 640,
     "callouts": []
   },
   "step-upload": {
     "width": 640,
-    "height": 760,
+    "height": 640,
     "callouts": []
+  },
+  "video-phone": {
+    "width": 640,
+    "height": 853,
+    "callouts": [],
+    "lettering": [2.62, 0.67, 94.75, 40.03]
   }
 }

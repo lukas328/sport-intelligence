@@ -2,7 +2,7 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { HELP } from "../../content/help";
-import { BLOG } from "../../content/blog";
+import { BLOG, blogInFooter } from "../../content/blog";
 import { GUIDES } from "../../content/ratgeber";
 import { LOCALES } from "./i18n";
 
@@ -56,5 +56,12 @@ describe("content", () => {
       }
       for (const r of g.related) expect(GUIDES.map((x) => x.slug)).toContain(r);
     }
+  });
+
+  it("links the blog from the footer only from three posts of its own (U28)", () => {
+    const post = (slug: string, movedTo?: string) => ({ slug, date: "2026-11-01", movedTo, title: { de: slug, fr: slug, en: slug }, summary: { de: "", fr: "", en: "" } });
+    expect(blogInFooter([post("a"), post("b", "ratgeber/x"), post("c")])).toBe(false);
+    expect(blogInFooter([post("a"), post("b"), post("c")])).toBe(true);
+    expect(blogInFooter()).toBe(BLOG.filter((p) => !p.movedTo).length >= 3);
   });
 });

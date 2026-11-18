@@ -413,7 +413,7 @@
     "twoFactorAdmins": "Pour les admins du club, elle est obligatoire après 14 jours.",
     "teamFeatures": "Fonctions d'équipe",
     "teamFeaturesHint": "Entraînement, dates, réponses, tâches et espaces pour joueurs et parents. Désactivé, tout reste enregistré et revient à la réactivation.",
-    "me": "Moi",
+    "me": "Mon compte",
     "tab_profile": "Profil",
     "tab_security": "Sécurité",
     "tab_data": "Mes données",
@@ -439,7 +439,7 @@
     "youthBadge": "Juniors"
   },
   "account": {
-    "title": "Compte",
+    "title": "Mot de passe et appareils",
     "emailUnverified": "Votre adresse e-mail n'est pas encore confirmée.",
     "resend": "Renvoyer l'e-mail de confirmation",
     "resent": "E-mail de confirmation envoyé.",
@@ -461,7 +461,13 @@
     "method_google": "Google",
     "method_apple": "Apple",
     "method_password_reset": "Mot de passe réinitialisé",
-    "sessionsAll": "Afficher les {n} appareils"
+    "sessionsAll": "Afficher les {n} appareils",
+    "nameLabel": "Nom",
+    "saveName": "Enregistrer le nom",
+    "nameSaved": "Enregistré.",
+    "emailLabel": "E-mail",
+    "emailHint": "Tu te connectes avec cette adresse, les notifications par e-mail y sont envoyées.",
+    "languageLabel": "Langue"
   },
   "team": {
     "roster": "Équipe",
@@ -547,7 +553,9 @@
     "kitHome": "Maillot domicile",
     "kitAway": "Maillot extérieur",
     "otherWaysFile": "Sans vidéo ? Crée le match et saisis le résultat. Le rapport papier se joint au match en photo ou PDF; le rapport officiel de handball.ch arrive tout seul.",
-    "uploadBackToList": "Retour à la liste des matchs"
+    "uploadBackToList": "Retour à la liste des matchs",
+    "newHint": "Match amical ou vidéo de l'adversaire",
+    "newOwnMatch": "Créer un match de ton équipe"
   },
   "upload": {
     "title": "Téléverser la vidéo",
@@ -585,7 +593,6 @@
     "tip3": "Idéalement tout le match dans un seul fichier. Tu as arrêté à la pause ou le téléphone ou la caméra a coupé l'enregistrement ? Choisis simplement tous les fichiers du match ensemble. Ils sont analysés comme un seul match.",
     "guide": "Guide de tournage complet",
     "chooseVideo": "Choisir la vidéo",
-    "more": "Plus : autre caméra, lien, technique",
     "mayClose": "Tu peux fermer la page. Quand l'analyse est terminée, la cloche en haut te le signale.",
     "notVideo": "Ce fichier n'est pas une vidéo (MP4, MOV ou MKV). Choisis le fichier de la caméra ou du téléphone.",
     "secondFile": "Ce match a déjà une vidéo. Si tu choisis ici la 2e mi-temps ou un autre morceau, il s'ajoute à la suite et il est analysé avec.",
@@ -616,7 +623,8 @@
     "failedAgain": "Si cela échoue encore, c'est souvent la connexion. Réessaie plus tard en Wi-Fi ou recommence.",
     "ownKit": "Quel maillot portez-vous dans ce match ?",
     "ownKitSaved": "Enregistré.",
-    "otherGame": "« {name} » porte un nom très différent de « {first} », déjà dans ce match. Le fichier appartient-il vraiment ici ? Un autre match se crée comme match à part. L'envoi continue."
+    "otherGame": "« {name} » porte un nom très différent de « {first} », déjà dans ce match. Le fichier appartient-il vraiment ici ? Un autre match se crée comme match à part. L'envoi continue.",
+    "moreAll": "Plus : comment filmer, fichiers et taille, autre caméra, lien"
   },
   "processing": {
     "title": "Traitement",
@@ -1045,7 +1053,9 @@
     "edgeScenes_turnovers": "Voir les pertes de balle adverses",
     "edgeScenes_fastBreaks": "Voir les buts en contre-attaque",
     "concededByPosition": "Buts encaissés par poste",
-    "ofShots": "{n, plural, one {sur # tir} other {sur # tirs}}"
+    "ofShots": "{n, plural, one {sur # tir} other {sur # tirs}}",
+    "flowAbove": "En haut : {team} devant",
+    "flowBelow": "En bas : {team} devant"
   },
   "shotsView": {
     "title": "Tirs",
@@ -1326,7 +1336,7 @@
     "viewIntro": "Appuie sur « Lancer » pour voir la combinaison phase par phase.",
     "hint_move": "Déplace joueurs et ballon comme sur un tableau magnétique. Touche une flèche pour la supprimer.",
     "hint_run": "Glisse depuis le joueur jusqu'où il court. Les courbes fonctionnent aussi.",
-    "hint_pass": "Glisse du porteur du ballon vers le partenaire.",
+    "hint_pass": "Glisse du porteur du ballon vers le partenaire. La passe s'accroche au partenaire le plus proche.",
     "hint_dribble": "Glisse depuis le joueur jusqu'où il dribble.",
     "hint_screen": "Glisse du joueur jusqu'à l'endroit où il pose l'écran.",
     "hint_ball": "Touche un joueur ou un endroit : le ballon y est placé.",
@@ -1494,7 +1504,11 @@
     "access_request_team": "{name} veut rejoindre {team} et t'attend.",
     "access_request_named": "{name} veut rejoindre votre club et t'attend.",
     "analysis_checked": "Tout est vérifié. L'analyse calcule avec tes réponses.",
-    "analysis_checked_match": "Tout est vérifié contre {opponent}. L'analyse calcule avec tes réponses."
+    "analysis_checked_match": "Tout est vérifié contre {opponent}. L'analyse calcule avec tes réponses.",
+    "official_report_match": "La feuille de match officielle contre {opponent} est disponible.",
+    "feed_ready_match": "Tes scènes du match contre {opponent} sont prêtes.",
+    "scouting_ready_match": "Le rapport de préparation sur {opponent} est prêt.",
+    "matchOn": "Match du {date}"
   },
   "assignments": {
     "title": "Tâches",
@@ -1649,14 +1663,15 @@
     "withoutAnalysis": "Feuille de match et scènes",
     "trial": "{days} jours d'essai gratuit",
     "choose": "Choisir {plan}",
-    "goalkeepers": "Module gardien (CHF {price} par gardien et mois), nombre :",
     "unavailable": "Le paiement en ligne n'est pas encore configuré.",
     "needs2fa": "Les paiements nécessitent la connexion à deux facteurs.",
     "failed": "Cela n'a pas fonctionné. Réessaie.",
     "status_invoice_open": "facture ouverte",
     "status_invoice_paid": "payé sur facture",
     "current": "Offre actuelle",
-    "trialAfter": "Ensuite le plan gratuit s'applique jusqu'à ta décision. Rien n'est supprimé."
+    "trialAfter": "Ensuite le plan gratuit s'applique jusqu'à ta décision. Rien n'est supprimé.",
+    "gpuTerm": "<term>Minutes d'analyse</term> ce mois",
+    "withKeepers": "Analyse des gardiens incluse"
   },
   "share": {
     "button": "Partager",
@@ -1716,7 +1731,8 @@
       "save": "Enregistrer l'image",
       "alt": "Carte de match {team} contre {opponent}, {score}",
       "file": "carte-de-match",
-      "noScore": "La carte de match est disponible dès que le résultat est saisi."
+      "noScore": "La carte de match est disponible dès que le résultat est saisi.",
+      "making": "En création …"
     },
     "player": {
       "button": "Partager les scènes",
@@ -2564,7 +2580,7 @@
     "empty": "encore vide",
     "hintTips": "Ce que vous devriez travailler ensuite, tiré de vos matchs. En un clic, cela devient une séance avec exercices et les scènes correspondantes.",
     "library": "Tous les exercices",
-    "tipsTitle": "Conseils d'entraînement tirés de l'analyse",
+    "tipsTitle": "Conseils d'entraînement tirés de vos matchs",
     "tipsFrom": "Tirés de {n, plural, one {votre dernier match analysé} other {vos # derniers matchs analysés}}.",
     "tipsError": "Les conseils ne peuvent pas être chargés pour l'instant. Réessaie dans un moment.",
     "tipsPlan": "Les conseils d'entraînement font partie de l'analyse de match, absente de votre abonnement.",
@@ -2610,7 +2626,9 @@
     "why_transition_defence": "Ils travaillent le repli : revenir vite après la perte de balle et fermer l’axe.",
     "why_fast_break": "Ils travaillent la contre-attaque : première et deuxième vague, la passe rapide vers l’avant.",
     "why_defence": "Ils travaillent la défense : glisser, sortir et aider.",
-    "why_powerplay": "Ils travaillent la supériorité et l’infériorité numérique : utiliser les espaces et les fermer."
+    "why_powerplay": "Ils travaillent la supériorité et l’infériorité numérique : utiliser les espaces et les fermer.",
+    "tipsFromReports": "Tirés {n, plural, one {de la feuille de match du dernier match} other {des feuilles de match des # derniers matchs}}.",
+    "tipsFromBoth": "Tirés de {k, plural, one {1 match analysé} other {# matchs analysés}} et de {m, plural, one {1 feuille de match} other {# feuilles de match}}."
   },
   "schedule": {
     "nav": "Mes rendez-vous",
@@ -2628,7 +2646,14 @@
     "answered_no": "Annulé",
     "hintStaff": "Entraînements et matchs des 30 prochains jours avec les réponses.",
     "planTraining": "Planifier un entraînement",
-    "scheduleMatch": "Programmer un match"
+    "scheduleMatch": "Programmer un match",
+    "titleStaff": "Rendez-vous",
+    "official": "Calendrier",
+    "officialHint": "Les matchs du calendrier officiel apparaissent ici d’eux-mêmes.",
+    "scheduleOther": "Programmer un match hors calendrier",
+    "noneStaff": "Aucun rendez-vous dans les 30 prochains jours.",
+    "replies": "{yes, plural, one {# vient} other {# viennent}}, {no, plural, one {# ne vient pas} other {# ne viennent pas}}",
+    "noReplies": "pas encore de réponses"
   },
   "marks": {
     "title": "Jour de match : retenir des scènes",
@@ -2878,7 +2903,7 @@
     "collections": "Sélections",
     "matrix": "Tableau",
     "scenesSections": "Rubriques des scènes",
-    "me": "Moi",
+    "me": "Mon compte",
     "club": "Club",
     "twoFactorDue": "Activer la double authentification",
     "uploadShort": "Vidéo",
@@ -3251,7 +3276,7 @@
     "accessExplain": "Ces personnes ont choisi votre équipe sur handball.ch. L'équipe n'existe qu'une fois : accueille-les, elles travaillent alors dans la même équipe."
   },
   "verification": {
-    "section": "Données officielles",
+    "section": "Fédération",
     "title": "Club pas encore confirmé",
     "why": "Tant que le club n'est pas confirmé, le partage par lien et les profils publics restent désactivés et les adversaires n'apparaissent qu'avec leur numéro dans les feuilles de match.",
     "way_mail_domain": "Se connecter avec une adresse e-mail du club.",
@@ -3321,11 +3346,17 @@
     "home": "contre {opponent}",
     "away": "à l'extérieur chez {opponent}",
     "noMatches": "Pas encore de match cette saison.",
-    "source": "Selon les feuilles de match et la saisie, comme sur les pages de match. Les minutes de jeu ne sont pas saisies. Tirs sans les tirs contrés.",
+    "source": "Selon les feuilles de match et la saisie, comme sur les pages de match. Une présence compte pour qui figure sur la feuille de match ou a un chiffre. Les minutes de jeu ne sont pas saisies. Tirs sans les tirs contrés.",
     "noMatchesYet": "Pas encore de match joué cette saison. Les chiffres apparaissent après le premier match avec feuille de match ou saisie.",
-    "summaryPlayed": "{matches, plural, one {1 match} other {# matchs}}, impliqué dans {involved}",
+    "summaryPlayed": "{matches, plural, one {1 match} other {# matchs}}, {involved, plural, one {1 présence} other {# présences}}",
     "number": "Numéro",
-    "analysedBasis": "Buts et pénalités sur tous les matchs, le reste seulement sur {k} de {n, plural, one {# match} other {# matchs}} analysés."
+    "analysedBasis": "Buts, 7 m, pénalités et arrêts sur tous les matchs, le reste seulement sur {k} de {n, plural, one {# match} other {# matchs}} analysés.",
+    "sevenMSaves": "7 m arrêtés",
+    "sourceCol": "Source",
+    "fromAnalysis": "Analyse",
+    "fromReport": "Feuille de match",
+    "reportBasis": "Tous les chiffres viennent des feuilles de match. Tirs, réussite et pertes de balle s'ajoutent avec la première vidéo analysée.",
+    "reportBasisKeeper": "Tous les chiffres viennent des feuilles de match. Tirs cadrés et taux d'arrêts s'ajoutent avec la première vidéo analysée."
   },
   "slots": {
     "title": "Horaires d'entraînement {season}",
@@ -3434,7 +3465,8 @@
       "kr": "du pivot",
       "gs": "en contre-attaque",
       "m7": "sur jet de 7 m"
-    }
+    },
+    "fromMatchFailed": "La sélection n’a pas pu être créée. Réessaie."
   },
   "consentLink": {
     "invalid": "Ce lien n’est plus valable. Demande le nouveau dans l’équipe.",
@@ -3588,7 +3620,10 @@
       "blue": "Bleu",
       "black": "Noir",
       "white": "Blanc",
-      "yellow": "Jaune"
+      "yellow": "Jaune",
+      "green": "Vert",
+      "orange": "Orange",
+      "purple": "Violet"
     },
     "scenesTitle": "{count, plural, one {1 scène} other {# scènes}} de {matches, plural, one {un match} other {# matchs}}.",
     "scenesKick": "Scènes · {matches, plural, one {1 match} other {# matchs}} avec vidéo",
@@ -3601,8 +3636,6 @@
     "matrix": "Tableau",
     "open": "Ouvrir",
     "allCollections": "Toutes les sélections",
-    "halftimeLevel": "Mi-temps, égalité",
-    "endLevel": "Fin, égalité",
     "stageMode": "Scène",
     "modeVideo": "Vidéo",
     "modeTaktik": "Tactique",
@@ -3720,7 +3753,12 @@
     "todayTitle": "Ce que tu peux faire dès aujourd’hui",
     "todayNote": "d’après la feuille de match",
     "todayText": "La carte du match en image pour le chat de l’équipe et le résumé à copier, déjà sans vidéo.",
-    "todayCard": "Carte du match pour le chat"
+    "todayCard": "Carte du match pour le chat",
+    "pictureBusy": "La carte du match se crée …",
+    "pictureSaved": "Image enregistrée, tu la trouves dans tes téléchargements.",
+    "pictureFailed": "L'image n'a pas pu être créée pour l'instant. Réessaie.",
+    "scenesKickTerm": "<term>Scènes</term> · {matches, plural, one {1 match} other {# matchs}} avec vidéo",
+    "exampleBand": "Exemple · chiffres inventés"
   },
   "check": {
     "top": "Vérifier · {opponent}",
@@ -3875,7 +3913,11 @@
     "emptyTitle": "Télécharge une vidéo, tu verras ensuite tes scènes ici.",
     "emptyText": "Après l'analyse, chaque but, chaque tir et chaque perte de balle est une scène. Tu les cherches avec une phrase et tu les réunis en sélections.",
     "emptyPlays": "Dessiner des systèmes de jeu, c'est déjà possible :",
-    "emptySearch": "La recherche trouve des scènes dès la première vidéo."
+    "emptySearch": "La recherche trouve des scènes dès la première vidéo.",
+    "emptyAnswer": "Pas encore de scènes. Télécharge une vidéo, tu trouveras ensuite ici chaque but.",
+    "emptyAnswerRead": "Pas encore de scènes. Dès qu'une vidéo de votre équipe est téléchargée, tu trouveras ici chaque but.",
+    "backToCollection": "Retour à la sélection «{title}»",
+    "addToCollection": "{n, plural, one {1 scène} other {# scènes}} dans la sélection"
   },
   "teamPage": {
     "kick": "{team} · {source}",
@@ -3923,7 +3965,16 @@
     "keepersSome": "{n, plural, one {1 gardien inscrit.} other {# gardiens inscrits.}}",
     "keepersChange": "Modifier les gardiens",
     "keepersDone": "Terminé",
-    "keepersFailed": "Cela n’a pas marché. Réessaie ou saisis la position sous «Modifier l'effectif»."
+    "keepersFailed": "Cela n’a pas marché. Réessaie ou saisis la position sous «Modifier l'effectif».",
+    "positionsTitle": "Qui joue où ?",
+    "positionsText": "Choisis un poste et touche tous ceux qui le jouent. Toucher encore le retire. Avec les postes, l'effectif classe les joueurs et les chiffres par poste trouvent leurs joueurs.",
+    "positionsPick": "Poste",
+    "positionsTap": "Qui joue {position} ?",
+    "positionsMark": "{name} joue {position}",
+    "positionsMissing": "{n, plural, one {1 joueur de champ sans poste.} other {# joueurs de champ sans poste.}}",
+    "positionsAll": "Tous les joueurs de champ ont un poste.",
+    "positionsChange": "Modifier les postes",
+    "positionsFailed": "Cela n'a pas marché. Réessaie ou saisis le poste sous «Modifier l'effectif»."
   },
   "seasonPage": {
     "kick": "{season} · {league} · après {n, plural, one {# match} other {# matchs}}",
@@ -4047,18 +4098,19 @@
     "shotsPlain": "Tirs",
     "savesPlain": "Arrêts",
     "againstNone": "{n, plural, one {Le but encaissé n'est attribué} other {Les # buts encaissés ne sont attribués}} à aucun gardien.",
-    "savesNone": "{n, plural, one {Un arrêt n'est attribué} other {# arrêts ne sont attribués}} à aucun gardien de l'effectif."
+    "savesNone": "{n, plural, one {Un arrêt n'est attribué} other {# arrêts ne sont attribués}} à aucun gardien de l'effectif.",
+    "againstNoMinutes": "Sans les minutes de jeu dans la feuille de match, les buts encaissés ne peuvent être attribués à aucun gardien."
   },
   "entry": {
     "ask": "Comment s'appelle ton équipe ?",
     "label": "Équipe ou lieu",
     "placeholder": "Nom du club ou localité",
-    "search": "Chercher",
-    "short": "Au moins trois lettres.",
+    "search": "Chercher l'équipe",
+    "short": "Nom du club ou localité, au moins trois lettres.",
     "none": "Aucune équipe trouvée pour «{q}».",
     "noneWay": "Ton équipe n'y est pas ?",
     "byName": "Créer ton équipe à la main",
-    "scope": "Pour les équipes de Suisse, nous reprenons automatiquement le calendrier et les résultats. Toutes les autres créent leur équipe à la main en une minute.",
+    "scope": "Les équipes de Suisse arrivent avec leur calendrier, toutes les autres se créent en une minute.",
     "teamName": "Nom de l'équipe",
     "next": "Continuer",
     "unavailable": "handball.ch ne répond pas pour l'instant. Réessaie bientôt ou crée ton équipe à la main.",
@@ -4199,7 +4251,9 @@
     "sideVideoLeft": "Comme dans la vidéo : le but à gauche.",
     "sideVideoRight": "Comme dans la vidéo : le but à droite.",
     "pause": "Pause",
-    "play": "Lecture"
+    "play": "Lecture",
+    "ofTerm": "<term>Lieu du tir</term> : {zone}",
+    "ofEstimatedTerm": "<term>Lieu du tir</term> : {zone}, estimé"
   },
   "personRoles": {
     "trainer": "Entraîneur",
@@ -4411,5 +4465,11 @@
     "phone": "Le téléchargement se fait dans cette page. Si l’écran s’éteint ou si tu la fermes, il s’arrête : rouvre le match et choisis le même fichier, il reprend là où il s’était arrêté.",
     "analysis": "Elle démarre d’elle-même dès que la vidéo est là et tourne sur nos serveurs : tu peux poser ton téléphone, la cloche te prévient. Elle compte dans les minutes d’analyse de ton abonnement.",
     "billing": "Voir l’abonnement"
+  },
+  "glossary": {
+    "scene": "Une scène est un moment de la vidéo, le plus souvent un but ou un tir, avec les secondes qui précèdent. Tu les trouves ici pour tous les matchs avec vidéo.",
+    "spot": "Le lieu du tir est l'endroit d'où le tir est parti, par exemple ailier droit ou pivot. Les images par poste en sont tirées.",
+    "collection": "Une sélection, ce sont des scènes que tu rassembles, pour la séance vidéo ou un entraînement. Tu peux la partager avec l'équipe.",
+    "analysisMinutes": "Le nombre de minutes que l'analyse vidéo a calculé sur vos vidéos ce mois. Plus une vidéo est longue, plus il en faut."
   }
 }

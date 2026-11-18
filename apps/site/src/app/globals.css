@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* the app tour's stage (components/app-tour.tsx, U31): a wide and tall enough screen */
+@custom-variant stage (@media (min-width: 80rem) and (min-height: 40rem));
+
 /*
  * The website in the app's look «Anlauf» (docs/design/ux-reset/ANLAUF.md), set larger for older
  * eyes (docs/site/KONZEPT.md): body text 19 px, nothing important under 16 px, targets 48 px.
@@ -45,6 +48,12 @@
   --opp-cam-edge: #e9eef2;
   --opp-cam-trail: #ffffff;
   color-scheme: light;
+  --wrap: 76rem;
+}
+@media (min-width: 100rem) {
+  :root {
+    --wrap: 90rem;
+  }
 }
 
 @theme inline {
@@ -91,6 +100,23 @@
     opacity: 1;
   }
 }
+/* a player of the app tour's play gets the ball: he waits for it, lights up as it arrives and
+   one ring goes out from him */
+@keyframes catch {
+  0%,
+  50% {
+    background-color: var(--court);
+    color: var(--court-text);
+    scale: 1;
+    box-shadow: 0 0 0 0 rgb(255 210 60 / 0.75);
+  }
+  56% {
+    box-shadow: 0 0 0 0 rgb(255 210 60 / 0.75);
+  }
+  100% {
+    box-shadow: 0 0 0 0.9rem rgb(255 210 60 / 0);
+  }
+}
 @keyframes nudge {
   50% {
     transform: translateX(5px);
@@ -100,15 +126,24 @@
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;
-    scroll-padding-top: 1rem;
+    /* the pinned bar on the phone and the tablet (components/header-shell.tsx) covers 4 rem */
+    scroll-padding-top: 5rem;
   }
-  body {
-    color: var(--ink);
-    font-family: var(--font-sans);
-    font-size: 1.125rem;
-    line-height: 1.5;
-    /* long German words must not push the page wide with large system text */
-    overflow-wrap: break-word;
+  @media (min-width: 1024px) {
+    html {
+      scroll-padding-top: 1rem;
+    }
+  }
+  /* very wide screens (BEFUNDE-3 U4): from 1920 px everything grows a little with the screen,
+     up to 18 px at 2560 px, so the 90rem stage and the type fill the room in the same proportions;
+     the user's own font setting stays the base (percent, not pixels) */
+  @media (min-width: 120rem) {
+    html {
+      font-size: clamp(100%, calc(100% + (100vw - 120rem) / 320), 112.5%);
+    }
+  }
+  body,
+  .cloth {
     background-color: var(--ground);
     background-image:
       radial-gradient(rgb(22 23 26 / 0.07) 0.7px, transparent 0.9px),
@@ -119,6 +154,14 @@
     background-position:
       0 0,
       3px 3px;
+  }
+  body {
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 1.125rem;
+    line-height: 1.5;
+    /* long German words must not push the page wide with large system text */
+    overflow-wrap: break-word;
   }
   @media (min-width: 768px) {
     body {
@@ -240,9 +283,14 @@
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.02em;
   }
-  .score-echo {
-    color: transparent;
-    -webkit-text-stroke: 1.5px var(--club-ink);
+  /* the numbers and short labels in small sizes (BEFUNDE-3 U27): the slanted display face gets
+     restless below about 2 rem, so they stand upright in the text face, heavy and tabular */
+  .upright {
+    font-family: var(--font-sans);
+    font-style: normal;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
   }
   .mark-band {
     background: var(--club);
@@ -366,9 +414,11 @@
       line-height: 1.3;
     }
   }
+  /* the stage: 76rem, from 1600 px a wider 90rem for pictures and sections (BEFUNDE-3 U4); text
+     columns keep their own measure (40rem and the like) inside it */
   .wrap {
     width: 100%;
-    max-width: 76rem;
+    max-width: var(--wrap);
     margin-inline: auto;
     padding-inline: 1rem;
   }
@@ -398,12 +448,12 @@
       animation: appear 0.25s ease-out forwards;
       animation-delay: calc(var(--i, 0) * 140ms + 0.75s);
     }
-    /* below the first screen the lines wait until their block glides in (components/reveal.tsx) */
-    .pre .play .ln,
-    .pre .play .ln-e,
-    .pre .play .ln-dot,
-    .pre .late,
-    .pre .nudge {
+    /* below the first screen the lines wait until their block comes into view (components/reveal.tsx) */
+    .wait .play .ln,
+    .wait .play .ln-e,
+    .wait .play .ln-dot,
+    .wait .late,
+    .wait .nudge {
       animation-play-state: paused;
     }
     /* the playhead twitches twice as if the video would start, and stays at 0:00 */
@@ -416,16 +466,11 @@
       animation: appear 0.6s ease-out forwards;
       animation-delay: calc(var(--late, 1.6s));
     }
-    /* start page: blocks glide in once (components/reveal.tsx), the hero pictures rise on load */
-    [data-reveal] {
-      transition:
-        opacity 0.7s cubic-bezier(0.2, 0.7, 0.2, 1),
-        transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
-      transition-delay: calc(var(--d, 0) * 110ms);
-    }
-    [data-reveal].pre {
-      opacity: 0;
-      transform: translateY(2rem);
+    /* blocks glide in once as they come into view (components/reveal.tsx, U19): visible as
+       rendered, the animation only plays from `in` on; the hero pictures rise on load */
+    [data-reveal].in {
+      animation: reveal-in 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+      animation-delay: calc(var(--d, 0) * 90ms);
     }
     .rise {
       animation: rise 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
@@ -444,18 +489,19 @@
     .shot-label {
       transition: opacity 0.4s ease-out 0.3s;
     }
-    .pre .shot-arrows path {
+    /* only the arrows wait; the labels are words and always stand */
+    .wait .shot-arrows path {
       stroke-dashoffset: 1;
     }
-    .pre .shot-arrows .shot-head,
-    .pre .shot-label {
+    .wait .shot-arrows .shot-head {
       opacity: 0;
     }
   }
 }
 
 /* the start page's hero film (components/hero-film.tsx, BEFUNDE-2 L4): the markup is the resting
-   end state; the animations play it from the video to the three things once, about eight seconds */
+   end state; the animations play it once, about seven seconds: the court from the first frame, the
+   video coming in over it while the goals land, then the three things (BEFUNDE-3 U22) */
 .film-video,
 .film-scan,
 .film-ghost,
@@ -474,83 +520,86 @@
   transform-origin: center;
 }
 @media (prefers-reduced-motion: no-preference) {
-  /* the video fades before the goals come; its word goes first, so it never lies over the court */
+  /* the court is there from the first frame; the video comes in over it, plays while the goals
+     land and goes before the count drops in */
   .film-video {
-    animation: film-out 3.4s ease-in both;
-  }
-  .film-word {
-    animation: film-out 2.9s ease-in both;
+    animation: film-window 4.1s ease-in-out both;
   }
   .film-pan {
-    animation: film-pan 3.9s cubic-bezier(0.3, 0.1, 0.3, 1) both;
+    animation: film-pan 4.1s cubic-bezier(0.3, 0.1, 0.3, 1) both;
   }
   .film-progress {
-    animation: film-progress 3.2s linear both;
+    animation: film-progress 3.6s linear 0.4s both;
   }
   .film-scan {
-    animation: film-scan 1.5s cubic-bezier(0.5, 0, 0.5, 1) 1.9s both;
+    animation: film-scan 1.4s cubic-bezier(0.5, 0, 0.5, 1) 1.2s both;
   }
   .film-rec {
     animation: film-blink 1s steps(2, jump-none) 3;
   }
-  .film-lines {
-    animation: film-in 0.7s ease-out 3.2s both;
-  }
   .film-dot {
     animation: film-pop 0.36s cubic-bezier(0.3, 1.6, 0.5, 1) both;
-    animation-delay: calc(3.6s + var(--i, 0) * 60ms);
+    animation-delay: calc(1.6s + var(--i, 0) * 70ms);
   }
   .film-rest {
-    animation: film-rest 0.6s ease-out 5.6s both;
+    animation: film-rest 0.6s ease-out 4.4s both;
   }
   .film-zone {
-    animation: film-in 0.6s ease-out 5.6s both;
+    animation: film-in 0.6s ease-out 4.4s both;
   }
   .film-count {
-    animation: film-drop 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) 5.9s both;
+    animation: film-drop 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) 4.7s both;
   }
   .film-row {
     animation: film-up 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) both;
-    animation-delay: calc(6.4s + var(--i, 0) * 350ms);
+    animation-delay: calc(5.2s + var(--i, 0) * 350ms);
   }
   .film-ghost {
-    animation: film-s0 calc(6.6s + var(--i, 0) * 350ms) linear both;
+    animation: film-s0 calc(5.4s + var(--i, 0) * 350ms) linear both;
   }
   .film-shimmer {
     animation: film-breathe 1.6s ease-in-out infinite alternate;
   }
   .film-wait-0 {
-    animation: film-s0 2.6s linear both;
+    animation: film-s0 1.8s linear both;
   }
   .film-wait-1 {
-    animation: film-s1 4.2s linear 2.4s both;
+    animation: film-s1 3.8s linear 1.6s both;
   }
   .film-status-0 {
-    animation: film-s0 2.6s linear both;
+    animation: film-s0 1.8s linear both;
   }
   .film-status-1 {
-    animation: film-s1 4s linear 2.4s both;
+    animation: film-s1 3.6s linear 1.6s both;
   }
   .film-status-2 {
-    animation: film-in 0.4s ease-out 6.45s both;
+    animation: film-in 0.4s ease-out 5.25s both;
   }
   .film-replay {
-    animation: film-in 0.5s ease-out 7.8s both;
+    animation: film-in 0.5s ease-out 6.6s both;
   }
   /* below the first screen the film waits until it is seen (components/hero-film.tsx) */
-  .film-hold :is(.film-video, .film-word, .film-pan, .film-progress, .film-scan, .film-rec, .film-ghost, .film-wait, .film-lines, .film-dot, .film-rest, .film-zone, .film-count, .film-row, .film-status, .film-replay) {
+  .film-hold :is(.film-video, .film-pan, .film-progress, .film-scan, .film-rec, .film-ghost, .film-wait, .film-dot, .film-rest, .film-zone, .film-count, .film-row, .film-status, .film-replay) {
     animation-play-state: paused;
   }
 }
-@keyframes film-out {
+@keyframes film-window {
   0%,
-  82% {
+  10% {
+    opacity: 0;
+    visibility: visible;
+    transform: translateY(0.75rem) scale(0.96);
+  }
+  20%,
+  86% {
     opacity: 1;
     visibility: visible;
+    transform: none;
   }
   100% {
     opacity: 0;
     visibility: hidden;
+    transform: scale(0.96);
   }
 }
 @keyframes film-pan {
@@ -649,6 +698,59 @@
   }
 }
 
+/* the demo week (components/week): the spot to watch breathes, the player's scene runs, the season
+   bars rise once when seen, a new answer slides in; with reduced motion all of it stands still */
+.scene-progress {
+  transform: scaleX(0.42);
+}
+.bar-grow {
+  transform-origin: bottom;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .gap-pulse {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: gap-pulse 1.6s ease-in-out infinite alternate;
+  }
+  .scene-progress {
+    animation: scene-run 6s linear infinite;
+  }
+  .bar-grow {
+    animation: bar-grow 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    animation-delay: calc(var(--i, 0) * 160ms + 0.15s);
+  }
+  .wait .bar-grow {
+    animation-play-state: paused;
+  }
+  .ask-in {
+    animation: film-up 0.4s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+}
+@keyframes gap-pulse {
+  to {
+    transform: scale(1.18);
+  }
+}
+@keyframes scene-run {
+  from {
+    transform: scaleX(0.02);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes bar-grow {
+  from {
+    transform: scaleY(0);
+  }
+}
+
+@keyframes reveal-in {
+  from {
+    opacity: 0;
+    transform: translateY(1rem);
+  }
+}
 @keyframes rise {
   from {
     opacity: 0;

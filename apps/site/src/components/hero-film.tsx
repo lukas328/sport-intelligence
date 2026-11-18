@@ -29,10 +29,11 @@ export interface HeroFilmText {
 }
 
 /**
- * The hero (BEFUNDE-2 L4): in about eight seconds what the product does. A match video plays (a
- * real hall recording, blurred until nothing but «a hall, a match» is left), the analysis lays the
- * goals conceded on the half court one after the other, the eleven over the right wing stay, and
- * the three things come in below. Then it rests on that picture; the three things can be picked
+ * The hero (BEFUNDE-2 L4, BEFUNDE-3 U22): in about seven seconds what the product does. It opens
+ * on the half court, sharp from the first frame; the match video comes in as a window over it (a
+ * real hall recording, blurred until nothing but «a hall, a match» is left), and while it plays
+ * the analysis lays the goals conceded on the court one after the other. The video goes, the
+ * eleven over the right wing stay, and the three things come in below. Then it rests on that picture; the three things can be picked
  * (the court draws that thing's runs), and «Nochmals abspielen» starts it again.
  *
  * Everything is CSS on server-rendered markup, so the headline and this card are there with the
@@ -111,7 +112,7 @@ export function HeroFilm({
           </span>
         </div>
 
-        {/* the stage: 16:10, video first, then the court */}
+        {/* the stage: 16:10, the court from the first frame, the video comes in over it (U22) */}
         <div
           key={`f${round}`}
           role="img"
@@ -159,13 +160,14 @@ export function HeroFilm({
                   className="h-full"
                 />
               )}
-              <p className="film-count absolute top-3 left-3 border-2 border-ink bg-paper px-2.5 py-1 font-slant text-[1.0625rem] leading-tight md:top-4 md:left-4 md:text-[1.25rem]">
+              <p className="film-count absolute top-3 left-3 border-2 border-ink bg-paper px-2.5 py-1 upright text-[1.0625rem] leading-tight md:top-4 md:left-4 md:text-[1.25rem]">
                 {picked === null || picked === 0 ? text.count : things[picked]!.text}
               </p>
             </div>
 
-            {/* the video: a real recording, blurred past recognition (no person, number, text or logo) */}
-            <div className="film-video absolute inset-0 bg-[#7d7f80]">
+            {/* the video, as a window over the court: a real recording, blurred past recognition (no
+                person, number, text or logo); it plays while the goals land on the court, then goes */}
+            <div className="film-video absolute bottom-[5%] left-[3%] w-[46%] aspect-[16/10] overflow-hidden border-2 border-ink bg-[#7d7f80] shadow-[4px_4px_0_var(--ink)]">
               <img
                 src="/media/halle.webp"
                 alt=""
@@ -176,18 +178,18 @@ export function HeroFilm({
                 className="film-pan absolute inset-0 h-full w-full object-cover"
               />
               <div className="absolute inset-0 bg-[linear-gradient(180deg,rgb(22_23_26/.05)_40%,rgb(22_23_26/.55))]" />
-              <p className="film-word absolute inset-x-0 top-[38%] text-center font-slant text-[2.75rem] leading-none text-white [text-shadow:0_3px_18px_rgb(0_0_0/.45)] md:text-[3.75rem]">
+              <p className="film-word absolute inset-x-0 top-[30%] text-center font-slant text-[1.375rem] leading-none text-white [text-shadow:0_2px_12px_rgb(0_0_0/.5)] sm:text-[1.75rem] md:text-[2.25rem]">
                 {text.video}
               </p>
               <div className="film-scan absolute inset-y-0 w-1/3 bg-[linear-gradient(90deg,transparent,rgb(255_210_60/.55),transparent)]" />
-              <div className="absolute inset-x-3 bottom-3 flex items-center gap-3 font-mono text-[0.875rem] font-semibold text-white md:inset-x-4">
-                <svg viewBox="0 0 20 20" className="size-4 shrink-0">
+              <div className="absolute inset-x-2 bottom-2 flex items-center gap-2 font-mono text-[0.75rem] font-semibold text-white md:inset-x-3 md:bottom-2.5 md:text-[0.8125rem]">
+                <svg viewBox="0 0 20 20" className="size-3 shrink-0 md:size-3.5">
                   <path d="M5 3l12 7-12 7z" fill="currentColor" />
                 </svg>
-                <span className="relative h-1.5 flex-1 bg-white/35">
+                <span className="relative h-1 flex-1 bg-white/35">
                   <i className="film-progress absolute inset-y-0 left-0 w-full origin-left bg-white" />
                 </span>
-                <span>60:00</span>
+                <span className="max-sm:hidden">60:00</span>
               </div>
             </div>
           </div>

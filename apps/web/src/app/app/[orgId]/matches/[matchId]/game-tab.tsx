@@ -12,6 +12,7 @@ import { usePhone } from "@/lib/use-phone";
 import { ownKeepers, withRosterIds, type RosterLike } from "@/lib/keepers";
 import { halfScore, keeperSaves, mainSource, scoreSequence, topScorers } from "@/lib/telegram";
 import type { Stats } from "./analysis-views";
+import { PictureStatus, usePictureAction, type PictureResult } from "./picture-action";
 
 /**
  * Tab Spiel below the three things (SPEC 7.2, UX test B08): the actions, Punkt 1 opened on the
@@ -20,8 +21,9 @@ import type { Stats } from "./analysis-views";
  */
 
 /** The actions under the three things: the team collection, the highlights, a picture. */
-export function GameActions({ collect, onHighlights, onPicture }: { collect: ReactNode; onHighlights?: () => void; onPicture?: () => void }) {
+export function GameActions({ collect, onHighlights, onPicture }: { collect: ReactNode; onHighlights?: () => void; onPicture?: () => Promise<PictureResult> }) {
   const t = useTranslations("anlauf");
+  const picture = usePictureAction(onPicture);
   // nothing to do: no empty row that leaves a gap
   if (!collect && !onHighlights && !onPicture) return null;
   return (
@@ -32,10 +34,21 @@ export function GameActions({ collect, onHighlights, onPicture }: { collect: Rea
           {t("shareHighlights")}
         </button>
       )}
-      {onPicture && (
-        <button type="button" onClick={onPicture} className="min-h-11 cursor-pointer border-0 bg-transparent p-0 text-[15px] font-bold text-ink underline decoration-2 underline-offset-4" data-testid="chat-picture">
-          {t("chatPicture")}
-        </button>
+      {picture.run && (
+        <span className="inline-flex flex-wrap items-center gap-x-3">
+          <button
+            type="button"
+            onClick={() => void picture.run?.()}
+            aria-busy={picture.busy || undefined}
+            disabled={picture.busy}
+            className="inline-flex min-h-11 cursor-pointer items-center gap-2 border-0 bg-transparent p-0 text-[15px] font-bold text-ink underline decoration-2 underline-offset-4 disabled:cursor-wait"
+            data-testid="chat-picture"
+          >
+            {picture.busy && <span aria-hidden className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />}
+            {t("chatPicture")}
+          </button>
+          <PictureStatus busy={picture.busy} result={picture.result} />
+        </span>
       )}
     </div>
   );

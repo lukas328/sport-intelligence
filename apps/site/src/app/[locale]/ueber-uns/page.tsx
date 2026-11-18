@@ -4,7 +4,8 @@ import { ProductShot } from "@/components/product-shot";
 import { JsonLd } from "@/components/json-ld";
 import { KitScope, StartLink } from "@/components/kit";
 import { MailLine } from "@/components/mail-line";
-import { PageHead, SectionHead, Updated } from "@/components/wurf-head";
+import { PullLine } from "@/components/head-art";
+import { PageHead, SectionHead } from "@/components/wurf-head";
 import { APP_LOCALE, messages, type Locale } from "@/lib/i18n";
 import { ORG_ID, graph, organization, webPage } from "@/lib/schema";
 import { pageMeta } from "@/lib/seo";
@@ -28,9 +29,7 @@ export default async function AboutUs({ params }: Props) {
   return (
     <KitScope>
       <JsonLd data={graph(organization(), { ...webPage(locale, "ueber-uns", t.metaTitle, t.description, undefined, "AboutPage"), about: { "@id": ORG_ID } })} />
-      <PageHead kick={t.title} title={t.head} lead={t.lead}>
-        <Updated locale={locale} />
-      </PageHead>
+      <PageHead kick={t.title} title={t.head} lead={t.lead} aside={<PullLine>{m.home.problemBuild}</PullLine>} />
       <div className="wrap">
         <div className="mt-12 grid grid-cols-1 gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)]">
           <div className="min-w-0">

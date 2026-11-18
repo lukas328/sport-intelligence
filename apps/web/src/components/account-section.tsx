@@ -9,7 +9,6 @@ import { Alert } from "@/components/ui/card";
 import { Input } from "@/components/ui/field";
 import { api } from "@/lib/client";
 import { errorKey, type ErrorKey } from "@/lib/errors";
-import { useMailEnabled } from "@/lib/site-config";
 
 type Me = Schemas["MeOut"];
 
@@ -22,14 +21,10 @@ function deviceName(ua: string | null | undefined, fallback: string): string {
 
 export function AccountSection({ me }: { me: Me }) {
   const t = useTranslations();
-  // confirming the address needs mail delivery (L2, L14)
-  const mail = useMailEnabled();
   const format = useFormatter();
   const qc = useQueryClient();
   const [pwError, setPwError] = useState<ErrorKey | null>(null);
   const [pwDone, setPwDone] = useState(false);
-  const [resent, setResent] = useState(false);
-  const [resendError, setResendError] = useState<ErrorKey | null>(null);
   const [hasPassword, setHasPassword] = useState(me.has_password);
   // a long list of old sign-ins made the page thousands of pixels long: this device and the latest few
   const [allSessions, setAllSessions] = useState(false);
@@ -73,28 +68,6 @@ export function AccountSection({ me }: { me: Me }) {
       <h2 id="account-title" className="text-lg font-semibold">
         {t("account.title")}
       </h2>
-      {!me.email_verified && mail && (
-        <Alert kind="info">
-          {t("account.emailUnverified")}{" "}
-          {resent ? (
-            t("account.resent")
-          ) : (
-            <button
-              type="button"
-              className="underline underline-offset-4"
-              onClick={async () => {
-                const { error } = await api.POST("/v1/me/email/verify");
-                if (error) return setResendError(errorKey(error));
-                setResendError(null);
-                setResent(true);
-              }}
-            >
-              {t("account.resend")}
-            </button>
-          )}
-          {resendError && <span className="block mt-1">{t(`errors.${resendError}`)}</span>}
-        </Alert>
-      )}
       <div className="border-t border-foreground/15 pt-5 space-y-3">
         <h3 className="font-semibold">{t("account.passwordTitle")}</h3>
         {me.linked_providers.length > 0 && (

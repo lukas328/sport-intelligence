@@ -68,7 +68,7 @@ test("entry: says what the search covers, the way by hand without a search first
   test.skip(info.project.name !== "mobile", "the entry is for the phone");
   await federation(page);
   await page.goto("/einstieg");
-  await expect(page.getByTestId("entry-by-hand")).toContainText("Für Teams aus der Schweiz übernehmen wir Spielplan und Resultate automatisch.");
+  await expect(page.getByTestId("entry-by-hand")).toContainText("Teams aus der Schweiz kommen mit Spielplan, alle anderen legst du in einer Minute an.");
   await page.getByTestId("entry-by-name").click();
   await expect(page.getByLabel("Teamname")).toBeFocused();
 

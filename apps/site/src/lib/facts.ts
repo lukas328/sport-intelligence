@@ -4,10 +4,13 @@ import { fmt, messages, type Locale } from "@/lib/i18n";
 import { fileVars } from "@/lib/files";
 import { SUPPORT_EMAIL } from "@/lib/site";
 
-export function factRows(locale: Locale): { k: string; v: string }[] {
+/** One row: the fact, and where applicable the page that says more (a path after the language). */
+export type FactRow = { k: string; v: string; to?: string };
+
+export function factRows(locale: Locale): FactRow[] {
   const team = plans.plans.find((p) => p.plan === "team")!;
   const club = plans.plans.find((p) => p.plan === "club")!;
   const m = messages(locale);
   const vars = { team: team.price_chf_month, club: club.price_chf_month, clubTeams: club.teams, email: SUPPORT_EMAIL, ...fileVars(m) };
-  return m.facts.rows.map((r) => ({ k: r.k, v: fmt(r.v, vars) }));
+  return m.facts.rows.map((r) => ({ k: r.k, v: fmt(r.v, vars), ...("to" in r && r.to ? { to: r.to } : {}) }));
 }

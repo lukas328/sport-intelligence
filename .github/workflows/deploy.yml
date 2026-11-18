@@ -23,6 +23,18 @@ on:
         type: choice
         options: [keep, resume, pause]
         default: keep
+      diag:
+        description: "with status: read the newest finished analysis (log, result, artefacts) into a run artefact"
+        type: boolean
+        default: false
+      oneoff:
+        description: "with diag: also run the data fixes in infra/azure/oneoff/*.sql (one transaction each)"
+        type: boolean
+        default: false
+      diag_asset:
+        description: "with diag: this video asset id instead of the newest"
+        type: string
+        default: ""
   push:
     branches: [claude/compassionate-pascal-n3gl03]
 
@@ -133,6 +145,30 @@ jobs:
           echo "== migration job runs"
           az containerapp job execution list -g "$rg" -n "$(terraform output -raw migrate_job)" --query "[0:3].{name:name, status:properties.status, start:properties.startTime}" -o table || true
 
+      - name: Analysis diagnosis (read only)
+        if: steps.mode.outputs.mode == 'status' && inputs.diag
+        env:
+          OUT: ${{ runner.temp }}/diag
+          DIAG_ASSET: ${{ inputs.diag_asset }}
+          ONEOFF: ${{ inputs.oneoff }}
+          FW_RULE: gh-diag-${{ github.run_id }}
+        run: bash ../../azure/staging-diag.sh
+
+      - name: Remove the diagnosis firewall rule
+        if: always() && steps.mode.outputs.mode == 'status' && inputs.diag
+        run: |
+          az postgres flexible-server firewall-rule delete -g "$rg" --server-name "$(terraform output -raw postgres_server)" \
+            --name "gh-diag-${{ github.run_id }}" --yes -o none || true
+
+      - name: Diagnosis artefact
+        if: always() && steps.mode.outputs.mode == 'status' && inputs.diag
+        uses: actions/upload-artifact@v4
+        with:
+          name: analysis-diag-${{ github.run_id }}
+          path: ${{ runner.temp }}/diag
+          retention-days: 5
+          if-no-files-found: warn
+
       - name: Paused or running
         if: steps.mode.outputs.mode != 'status'
         id: state
@@ -170,6 +206,18 @@ jobs:
               if live.get(key) not in (None, default) and key not in extra:
                   extra[key] = live[key]
                   print(f"keep {key}={live[key]} from the running app")
+          # non-secret settings kept in the repository (infra/azure/staging-env.json) win over the
+          # stored file; null removes a key. The model keys of the analysis live here.
+          try:
+              wanted = json.load(open("../../azure/staging-env.json"))
+          except FileNotFoundError:
+              wanted = {}
+          for key, value in wanted.items():
+              if value is None:
+                  extra.pop(key, None)
+              else:
+                  extra[key] = value
+              print(f"setting {key}={value!r} from staging-env.json")
           line = "extra_env        = " + json.dumps(extra)
           text = re.sub(r"^extra_env\s*=.*$", line, text, flags=re.M) if m else text + line + "\n"
           open("staging.tfvars", "w").write(text)

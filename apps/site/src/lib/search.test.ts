@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { HELP } from "../../content/help";
-import { normalise, searchHelp } from "./search";
+import { matchesAll, normalise, searchHelp } from "./search";
 
 describe("help search", () => {
   it("normalises umlauts and accents", () => {
@@ -15,5 +15,13 @@ describe("help search", () => {
     expect(searchHelp(HELP, "en", "tripod")[0]?.slug).toBe("aufnahme");
     expect(searchHelp(HELP, "en", "")).toHaveLength(HELP.length);
     expect(searchHelp(HELP, "en", "zzz")).toHaveLength(0);
+  });
+
+  it("filters the questions on «Fragen» by every word, without accents and umlauts", () => {
+    expect(matchesAll("Wo stelle ich die Kamera hin?", "kamera")).toBe(true);
+    expect(matchesAll("Müssen die Spieler einverstanden sein?", "muessen spieler")).toBe(true);
+    expect(matchesAll("Que devient la vidéo ?", "video")).toBe(true);
+    expect(matchesAll("Was kostet es?", "kamera")).toBe(false);
+    expect(matchesAll("Was kostet es?", "  ")).toBe(true);
   });
 });

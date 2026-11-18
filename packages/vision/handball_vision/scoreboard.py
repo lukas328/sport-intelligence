@@ -538,11 +538,12 @@ def read_overlay_summary(reader: Reader) -> dict[str, Any]:
 
 
 def _clock_runs(
-    reads: list[tuple[int, int]], tol_s: float, drift: float
+    reads: list[tuple[int, int]], tol_s: float, drift: float, skip: int = 4
 ) -> tuple[list[tuple[int, list[int]]], set[int]]:
     """Runs of readings that follow the video clock (up or down) since the run's last reading
-    and its first one, as (direction, reading indices), and the indices dropped as single
-    misreadings."""
+    and its first one, as (direction, reading indices), and the indices dropped as misreadings:
+    up to `skip` readings in a row that fit nothing, between two that fit the run (a hall
+    scoreboard read by OCR: a 5 read as 9, a penalty timer or a second display read in between)."""
     runs: list[tuple[int, list[int]]] = []
     outliers: set[int] = set()
 
@@ -550,10 +551,18 @@ def _clock_runs(
         dt = (reads[k][0] - reads[a][0]) / 1000
         return abs(way * (reads[k][1] - reads[a][1]) - dt) <= tol + drift * dt
 
+    def anchor(run: list[int]) -> int:
+        """The run's first reading after the clock last stood at its start value: a run may
+        begin with a standing clock (read often before a restart) and go on running."""
+        i = 0
+        while i + 1 < len(run) and reads[run[i + 1]][1] == reads[run[0]][1]:
+            i += 1
+        return run[i]
+
     def fits(run: list[int], k: int, d: int) -> int:
         """Direction the reading k continues `run` in (0: it does not; d=0: either way)."""
         for way in (1, -1) if d == 0 else (d,):
-            if follows(run[-1], k, way, tol_s) and follows(run[0], k, way, tol_s):
+            if follows(run[-1], k, way, tol_s) and follows(anchor(run), k, way, tol_s):
                 return way
         return 0
 
@@ -567,9 +576,13 @@ def _clock_runs(
                 d = way  # the clock has moved: now we know which way it counts
             k += 1
             continue
-        if run and k + 1 < len(reads) and fits(run, k + 1, d):
-            outliers.add(k)  # one reading that fits nothing between two that fit: misread
-            k += 1
+        nxt = next(
+            (j for j in range(k + 1, min(len(reads), k + 1 + skip)) if run and fits(run, j, d)),
+            None,
+        )
+        if nxt is not None:
+            outliers.update(range(k, nxt))  # readings that fit nothing between two that fit
+            k = nxt
             continue
         if run:
             runs.append((d, run))
@@ -590,24 +603,51 @@ def _clock_runs(
 
 
 def play_intervals(
-    clocks: list[tuple[int, int]], tol_s: float = 2.5, edge_s: float = 7.5, drift: float = 0.003
+    clocks: list[tuple[int, int]],
+    tol_s: float = 2.5,
+    edge_s: float = 7.5,
+    drift: float = 0.003,
+    fill_gap_s: float = 30.0,
+    fill_share: float = 0.5,
+    end_ms: int | None = None,
 ) -> list[tuple[int, int]]:
     """Video stretches (start_ms, end_ms) in which the match clock runs, from (t_ms, clock_s)
     readings of an overlay or a hall scoreboard.
 
     The clock runs where it follows the video clock: up (0:00 -> 30:00) or down (a countdown),
     within `tol_s` seconds plus `drift` of the elapsed time (a video whose frame rate is a little
-    off). A standing clock (timeout, break, before and after the game) never forms a run. A single
-    reading that fits nothing between two that fit is a misreading and skipped; a run broken by a
-    clock reset (a new half from 0:00 or 30:00) ends there and the next one starts.
+    off). A standing clock (timeout, break, before and after the game) never forms a run. Up to
+    four readings in a row that fit nothing between two that fit are misreadings and skipped (a
+    hall scoreboard read by OCR: a 5 read as 9, a penalty timer or a second display in between);
+    when one counting direction clearly dominates, the runs of the other (penalty timers counting
+    down beside a match clock counting up) are left out. A run broken by a clock reset (a new half
+    from 0:00 or 30:00) ends there and the next one starts.
 
     The edges between readings: next to a standing clock the time of the stop or restart follows
     from the clock values (frozen at 12:30, read 12:41 eleven seconds after it restarted).
     Between two runs (the clock hidden while it stood, or a short stop between two readings) the
-    clock's run time in the gap is split between both sides. Otherwise a run reaches at most
-    `edge_s` beyond its outer readings. Empty: no running clock found."""
+    clock's run time in the gap is split between both sides; a gap of at least `fill_gap_s` in
+    which the clock ran at least `fill_share` of the time counts as play as a whole (the board out
+    of view while play went on; where the short stops were is unknown, and the ball gate should
+    rather keep a loose ball than drop real play). Otherwise a run reaches at most `edge_s` beyond
+    its outer readings, except after the last reading of all when `end_ms` (the video's length)
+    is given and the clock was still running there: then play lasts to the end of the video (the
+    board goes out of view while play goes on; a stop would have shown as a standing clock).
+    Empty: no running clock found."""
     reads = sorted({t: c for t, c in clocks}.items())
     runs, outliers = _clock_runs(reads, tol_s, drift)
+    # a hall scoreboard also shows penalty timers counting down beside a match clock counting up
+    # (or the other way): when one direction clearly dominates, the readings of the other's runs
+    # and the misreadings are left out and the runs found again, so the timers neither break the
+    # match clock's runs nor stand in for it at their edges
+    moved = {1: 0, -1: 0}
+    for d, r in runs:
+        moved[d] += abs(reads[r[-1]][1] - reads[r[0]][1])
+    main = max(moved, key=lambda d: moved[d])
+    if moved[-main] and moved[main] >= 3 * moved[-main]:
+        drop = outliers | {k for d, r in runs if d != main for k in r}
+        reads = [x for k, x in enumerate(reads) if k not in drop]
+        runs, outliers = _clock_runs(reads, tol_s, drift)
     kept = [k for k in range(len(reads)) if k not in outliers]
     at = {k: i for i, k in enumerate(kept)}
     in_run = {k for _, r in runs for k in r}
@@ -618,6 +658,10 @@ def play_intervals(
         t, c = reads[k]
         i = at[k] + side
         if not 0 <= i < len(kept):
+            if side > 0 and end_ms is not None and end_ms > t:
+                # the clock was running at its last reading and nothing says it stopped: the board
+                # went out of view while play went on, so play lasts to the end of the video
+                return float(end_ms)
             return max(0.0, t - edge) if side < 0 else t + edge
         tn, cn = reads[kept[i]]
         gap = abs(tn - t)
@@ -625,6 +669,10 @@ def play_intervals(
         if not 0 <= ran <= gap + tol_s * 1000:
             limit = gap / 2 if kept[i] in in_run else gap
             return t + side * min(edge, limit)
+        if gap >= fill_gap_s * 1000 and ran >= fill_share * gap:
+            # the board out of view for a while, the clock ran most of that time: no break in
+            # there worth the name, the whole gap is play (where the short stops were is unknown)
+            return t + side * (gap / 2 if kept[i] in in_run else gap)
         if kept[i] in in_run:
             ran /= 2
         return t + side * min(ran, gap)

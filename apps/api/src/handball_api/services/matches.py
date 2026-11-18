@@ -122,7 +122,7 @@ def _require_staff(ctx: Ctx) -> None:
 async def list_opponents(ctx: Ctx) -> list[Opponent]:
     if visible_team_ids(ctx.require_actor()) == set():
         raise ProblemError(403, "forbidden", "No team access")
-    # the example match's opponent («Demo HC Beispiel») is no opponent of the club (R1)
+    # the example match's opponent is no opponent of the club (R1)
     example_only = (
         select(Match.id)
         .where(Match.opponent_id == Opponent.id, Match.source == DEMO_SOURCE)

@@ -65,7 +65,7 @@ function combine(chips: Chip[], ctx: { lastMatch: string | null; last3: string[]
  * figure with its base, the actions, the scenes as tiles. A scene is a stretch with a video
  * time: events without one are figures, not scenes, and are neither shown nor counted.
  */
-export function ScenesView({ orgId, teamId, matches, side }: { orgId: string; teamId: string; matches: Match[]; side: React.ReactNode }) {
+export function ScenesView({ orgId, teamId, matches, side, into = null }: { orgId: string; teamId: string; matches: Match[]; side: React.ReactNode; into?: Schemas["CollectionOut"] | null }) {
   const t = useTranslations("scenesPage");
   const router = useRouter();
   // ?chips=conceded,wing_right opens a search from elsewhere (the season, a thing)
@@ -154,11 +154,22 @@ export function ScenesView({ orgId, teamId, matches, side }: { orgId: string; te
 
   const collect = useMutation({
     mutationFn: async () => {
+      const found = scenes.slice(0, 40).map((h) => ({ kind: "scene" as const, match_id: h.match_id, event_id: h.kind === "event" ? h.id : null, start_ms: h.start_ms, end_ms: h.end_ms, title: h.title }));
+      if (into) {
+        // «Szene dazu» (A5): the found scenes after the collection's entries, each scene once
+        const have = new Set(into.items.map((i) => i.scene?.event_id).filter(Boolean));
+        const r = await api.PATCH("/v1/orgs/{org_id}/collections/{collection_id}", {
+          params: { path: { org_id: orgId, collection_id: into.id } },
+          body: { items: [...into.items.map(itemIn), ...found.filter((f) => !f.event_id || !have.has(f.event_id))] },
+        });
+        if (r.error || !r.data) throw r.error;
+        return r.data;
+      }
       const r = await api.POST("/v1/orgs/{org_id}/teams/{team_id}/collections", {
         params: { path },
         body: {
           title: [event, position].filter(Boolean).map((c) => label(c!)).join(", ") || t("defaultTitle"),
-          items: scenes.slice(0, 40).map((h) => ({ kind: "scene" as const, match_id: h.match_id, event_id: h.kind === "event" ? h.id : null, start_ms: h.start_ms, end_ms: h.end_ms, title: h.title })),
+          items: found,
         },
       });
       if (r.error || !r.data) throw r.error;
@@ -244,7 +255,7 @@ export function ScenesView({ orgId, teamId, matches, side }: { orgId: string; te
           )}
           {scenes.length > 0 && (
             <button type="button" className={buttonClass("secondary")} onClick={() => collect.mutate()} disabled={collect.isPending}>
-              {t("toCollection")}
+              {into ? t("addToCollection", { n: Math.min(scenes.length, 40) }) : t("toCollection")}
             </button>
           )}
           {/* the same answer as a table, in the same screen */}
@@ -284,6 +295,13 @@ export function ScenesView({ orgId, teamId, matches, side }: { orgId: string; te
       )}
     </div>
   );
+}
+
+/** An entry of a collection as it goes back to the API (the scene keeps its clip). */
+function itemIn(i: Schemas["ItemOut"]): Schemas["ItemIn"] {
+  if (i.scene) return { kind: "scene", clip_id: i.scene.clip_id, text: i.text ?? null };
+  if (i.play) return { kind: "play", play_id: i.play.id, text: i.text ?? null };
+  return { kind: "note", text: i.text ?? "" };
 }
 
 /** The search's scenes as a collection for the big screen: each the 8 s before and 3 s after. */

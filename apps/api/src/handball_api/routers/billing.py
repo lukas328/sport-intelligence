@@ -18,7 +18,6 @@ router = APIRouter(tags=["billing"])
 
 class CheckoutIn(ApiModel):
     plan: Plan
-    goalkeeper_seats: int = Field(default=0, ge=0, le=20)
 
 
 class UrlOut(ApiModel):
@@ -34,9 +33,7 @@ async def overview(scope: OrgDep) -> dict[str, Any]:
 @router.post("/v1/orgs/{org_id}/billing/checkout", response_model=UrlOut)
 async def checkout(data: CheckoutIn, scope: OrgDep, request: Request) -> UrlOut:
     """Stripe Checkout for a paid plan (30-day trial on the first subscription)."""
-    url = await service.checkout(
-        scope.ctx, request.app.state.billing, data.plan, data.goalkeeper_seats
-    )
+    url = await service.checkout(scope.ctx, request.app.state.billing, data.plan)
     return UrlOut(url=url)
 
 
@@ -49,7 +46,9 @@ async def portal(scope: OrgDep, request: Request) -> UrlOut:
 @router.post("/v1/stripe/webhook", response_model=dict[str, str], include_in_schema=False)
 async def webhook(request: Request, ctx: CtxDep) -> dict[str, str]:
     payload = await request.body()
-    return await service.handle_webhook(ctx, payload, request.headers.get("stripe-signature"))
+    return await service.handle_webhook(
+        ctx, payload, request.headers.get("stripe-signature"), request.app.state.billing
+    )
 
 
 # ---- annual subscription by invoice (addendum 01, 4.10) ----------------------------------------
@@ -68,7 +67,6 @@ class BillingContact(ApiModel):
 
 class InvoiceOrder(ApiModel):
     plan: Plan
-    goalkeeper_seats: int = Field(default=0, ge=0, le=20)
     voucher: str | None = Field(default=None, max_length=40)
     contact: BillingContact
 
@@ -99,13 +97,11 @@ class AnnualPrice(ApiModel):
 
 
 @router.get("/v1/orgs/{org_id}/billing/annual", response_model=AnnualPrice)
-async def annual_price(scope: OrgDep, plan: Plan, goalkeeper_seats: int = 0) -> AnnualPrice:
+async def annual_price(scope: OrgDep, plan: Plan) -> AnnualPrice:
     """Price of the annual subscription by invoice and the stored billing contact."""
     s = scope.ctx.settings
     return AnnualPrice(
-        net_cents=invoices.price_cents(scope.ctx, plan, max(0, min(goalkeeper_seats, 20)))
-        if plan != Plan.FREE
-        else 0,
+        net_cents=invoices.price_cents(scope.ctx, plan) if plan != Plan.FREE else 0,
         months=s.invoice_annual_months,
         vat_rate_percent=s.invoice_vat_rate_percent if s.invoice_vat_registered else None,
         payment_days=s.invoice_payment_days,
@@ -119,7 +115,6 @@ async def order_invoice(data: InvoiceOrder, scope: OrgDep) -> object:
     return await invoices.order(
         scope.ctx,
         data.plan,
-        data.goalkeeper_seats,
         data.voucher,
         data.contact.model_dump(exclude_none=True),
     )

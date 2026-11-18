@@ -225,6 +225,67 @@ def test_play_intervals_countdown_and_unknown_edges() -> None:
     assert sb.play_intervals(reads) == [(92_500, 1_302_500)]
 
 
+def test_play_intervals_hall_board_misreads_and_penalty_timers() -> None:
+    """A hall scoreboard read by OCR once a second (H1 of Lukas' video, 2026-11-17): the seconds
+    digit misread in short bursts, a penalty timer counting down read in between, a second display
+    running beside the clock. The match clock's run must hold through all of it."""
+    reads = [(t * 1000, 1200 + t) for t in range(0, 300)]  # clock runs 20:00 -> 25:00
+    for t in (40, 41, 42):  # three misreads in a row (5 read as 9)
+        reads[t] = (t * 1000, 1200 + t + 4)
+    for t in range(100, 106):  # a 2-minute penalty timer read six times between clock readings
+        reads[t] = (t * 1000, 119 - (t - 100))
+    for t in range(200, 240, 3):  # a second display running about six minutes behind
+        reads[t] = (t * 1000, 840 + t)
+    assert sb.play_intervals(reads) == [(0, 299_000 + 7_500)]
+
+
+def test_play_intervals_standing_clock_then_restart_with_noise() -> None:
+    # stands at 8:56 (a timeout), restarts at 40 s; another field read now and then
+    def clock(t: int) -> int | None:
+        if t % 7 == 3:
+            return 120  # a penalty timer standing at 2:00
+        return 536 if t < 40 else 536 + t - 40
+
+    iv = sb.play_intervals(_readings(clock, 120, 1))
+    assert len(iv) == 1 and abs(iv[0][0] - 40_000) <= 1_000
+
+
+def test_play_intervals_board_out_of_view_while_play_goes_on() -> None:
+    """The camera follows play and leaves the board out of view for minutes: a gap in which the
+    clock ran most of the time counts as play as a whole, a gap with a long stop does not."""
+
+    def clock(t: int) -> int:
+        if t < 150:
+            return 600 + t
+        if t < 220:
+            return 750  # a 70 s stop inside the first gap
+        if t < 430:
+            return 750 + t - 220
+        if t < 700:
+            return 960  # a 270 s stop inside the second gap
+        return 960 + t - 700
+
+    seen = [*range(0, 30), *range(400, 430), *range(800, 830)]
+    reads = [(t * 1000, clock(t)) for t in seen]
+    iv = sb.play_intervals(reads)
+    # first gap: 300 of 370 s ran, filled as a whole; second: 100 of 370 s, split between both
+    # sides (where the stop was is unknown), so the 270 s stop is left out
+    assert iv == [(0, 479_500), (749_500, 829_000 + 7_500)]
+    split = sb.play_intervals(reads, fill_share=1.1)  # without filling the run time is split
+    assert sb.in_play_ms(split) < sb.in_play_ms(iv)
+    assert split[0] == (0, 179_500)  # half of the 301 s run time on each side of the first gap
+
+
+def test_play_intervals_last_run_lasts_to_the_end_of_the_video() -> None:
+    """The board goes out of view for good while the clock runs (h1-5min on staging, 17.11.):
+    with the video's length, play lasts to its end; a standing clock read last does not."""
+    running = [(t * 1000, 1200 + t) for t in range(0, 120)]
+    assert sb.play_intervals(running) == [(0, 119_000 + 7_500)]
+    assert sb.play_intervals(running, end_ms=300_000) == [(0, 300_000)]
+    stopped = running + [(t * 1000, 1319) for t in range(125, 140)]  # the final whistle
+    assert sb.play_intervals(stopped, end_ms=300_000) == [(0, 119_000)]
+
+
 def test_play_intervals_without_a_running_clock() -> None:
     assert sb.play_intervals([]) == []
     assert sb.play_intervals([(t * 1000, 175) for t in range(0, 300, 5)]) == []

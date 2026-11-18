@@ -449,6 +449,48 @@ def test_teams_are_labelled_relative_to_the_match_colours() -> None:
     assert labels[16] == labels[17] == "referee"
 
 
+def test_teams_told_apart_with_one_team_kit_or_none() -> None:
+    """Without an away kit (or without any team kit) the two big colour groups are still two
+    teams: the one nearer the known kit wears it (staging 2026-11-17: a wrong own kit and the
+    keeper colour of the yellow team, no away kit; all players became one team)."""
+    from handball_vision.teams import TeamAssigner, bgr_to_lab, relabel_by_clusters
+
+    rng = np.random.default_rng(6)
+    colours: dict[int, tuple[np.ndarray, int]] = {}
+    yellow, red = bgr_to_lab((0, 200, 230)), bgr_to_lab((40, 30, 200))
+    for tid in range(8):
+        colours[tid] = (yellow + rng.normal(0, 3, 3), 200)
+    for tid in range(8, 16):
+        colours[tid] = (red + rng.normal(0, 3, 3), 200)
+    only_home = relabel_by_clusters(colours, {"home": bgr_to_lab((40, 40, 210))})  # reddish
+    assert all(only_home[t] == "away" for t in range(8))
+    assert all(only_home[t] == "home" for t in range(8, 16))
+    only_away = relabel_by_clusters(colours, {"away": bgr_to_lab((40, 40, 210))})
+    assert all(only_away[t] == "home" for t in range(8))
+    none = relabel_by_clusters(colours, {"home_gk": bgr_to_lab((10, 160, 245))})
+    assert {none[t] for t in range(8)} != {none[t] for t in range(8, 16)}  # two teams, a guess
+    assert len({none[t] for t in range(16)}) == 2
+    # the per-track colour vote copes with fewer than two kits
+    assert TeamAssigner({}).classify(yellow) == ("home", 0.0)
+    assert TeamAssigner({"home_gk": (10, 160, 245)}).classify(red) == ("home_gk", 0.0)
+
+
+def test_a_keeper_kit_worn_by_a_whole_team_is_a_field_kit() -> None:
+    from handball_vision.pipeline import crowded_keepers
+    from handball_vision.tracking import TrackPoint
+
+    pts = []
+    for f in range(100):
+        for tid in range(1, 6):  # five "home_gk" players on court at once: a field kit
+            pts.append(TrackPoint(tid, f, 10.0 + tid, 5.0, 0.0, 0.0, True, None))
+        pts.append(TrackPoint(9, f, 1.0, 10.0, 0.0, 0.0, True, None))  # the away keeper
+    labels = {**{t: "home_gk" for t in range(1, 6)}, 9: "away_gk"}
+    assert crowded_keepers(pts, labels) == [1, 2, 3, 4, 5]
+    # a keeper change (two at once for a moment) is no crowd
+    labels2 = {1: "home_gk", 2: "home_gk"}
+    assert crowded_keepers([p for p in pts if p.track_id in (1, 2)], labels2) == []
+
+
 def test_goalkeepers_by_position_and_defending_team() -> None:
     from handball_vision.events import assign_goalkeepers
 

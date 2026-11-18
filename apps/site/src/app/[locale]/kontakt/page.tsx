@@ -23,8 +23,10 @@ export default async function About({ params }: Props) {
         <section aria-labelledby="contact" className="mt-12">
           <SectionHead id="contact" title={t.contactTitle} />
           <p className="mt-6 text-ink-2">{t.email}</p>
-          <a href={`mailto:${SUPPORT_EMAIL}`} className="font-bold inline-flex min-h-12 items-center text-[1.75rem] break-all underline decoration-2 underline-offset-[6px] md:text-[2.5rem]">
-            {SUPPORT_EMAIL}
+          <a href={`mailto:${SUPPORT_EMAIL}`} className="font-bold inline-block min-h-12 py-1 text-[1.75rem] underline decoration-2 underline-offset-[6px] md:text-[2.5rem]">
+            {/* on the phone the address breaks after the @, not inside a word */}
+            {SUPPORT_EMAIL.split("@")[0]}@<wbr />
+            {SUPPORT_EMAIL.split("@")[1]}
           </a>
           <p className="measure mt-4">{t.reply}</p>
           <p className="measure mt-2 text-ink-2">{t.inApp}</p>

@@ -20,6 +20,7 @@ import { Dialog } from "@/components/ui/dialog";
 import { Input, Select } from "@/components/ui/field";
 import { api } from "@/lib/client";
 import { errorKey, type ErrorKey } from "@/lib/errors";
+import { useEscape } from "@/lib/use-escape";
 
 type Entry = Schemas["RosterEntryOut"];
 type ImportResult = Schemas["ImportResult"];
@@ -67,6 +68,9 @@ export function RosterEditor({ orgId, teamId, seasonId, canEdit, layout = "page"
   const [editing, setEditing] = useState(false);
   // the player whose status (injured, absent) is being set
   const [statusFor, setStatusFor] = useState<string | null>(null);
+  // Escape closes a player's open status panel, then leaves the edit mode (A15)
+  useEscape(statusFor != null, () => setStatusFor(null));
+  useEscape(editing && statusFor == null, () => setEditing(false));
   const teamMembers = useTeamMembers(orgId, teamId, canEdit);
   // the onboarding renders the squad outside the app shell: the editing coach is staff there
   const shell = useOptionalShell();

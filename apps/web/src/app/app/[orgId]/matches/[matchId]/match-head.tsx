@@ -45,6 +45,12 @@ export function MatchHead({ match, ownName, oppName, view, graphics, children }:
   const colourOpen = !match.opponent_colors?.color && match.opponent && match.source !== "demo" ? <AttnTag className="ml-2">{t("colourOpen")}</AttnTag> : null;
   return (
     <div className="bleed-x -mt-6 lg:-mt-8">
+      {/* the example match wears «Beispiel» on every tab, so it never reads as a real match (A4) */}
+      {match.source === "demo" && (
+        <p className="m-0 bg-attn px-4 py-1.5 text-[15px] font-bold text-attn-ink" data-testid="example-band">
+          {t("exampleBand")}
+        </p>
+      )}
       {scoreText && (
         <span className="sr-only" data-testid="score">
           {`${match.score_own}:${match.score_opponent}`}
@@ -66,7 +72,7 @@ export function MatchHead({ match, ownName, oppName, view, graphics, children }:
           scoreless={graphics != null}
           goals={graphics ? reportGoals(graphics) : null}
           goalsUntil={graphics ? reportCut(graphics, match.score_own, match.score_opponent, (match.period_s * match.periods) / 60) : null}
-          flightLabels={{ half: t("halftime", { v: "{v}" }), end: t("end", { v: "{v}" }), halfLevel: t("halftimeLevel"), endLevel: t("endLevel"), cut: t("flightCut", { m: "{m}" }) }}
+          flightLabels={{ half: t("halftime", { v: "{v}" }), end: t("end", { v: "{v}" }), cut: t("flightCut", { m: "{m}" }) }}
           meta={
             <>
               {half}

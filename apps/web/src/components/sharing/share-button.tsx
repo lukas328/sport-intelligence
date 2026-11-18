@@ -363,8 +363,18 @@ export function MatchCardShare({ orgId, matchId }: { orgId: string; matchId: str
         {t("card.title")}
       </h3>
       <div className="mt-2 flex flex-wrap items-start gap-4">
-        {/* eslint-disable-next-line @next/next/no-img-element -- a picture made on the server for this match */}
-        <img src={src} alt={t("card.title")} width={128} height={128} className={cn("size-32 border border-rule bg-surface", state === "loading" && "animate-pulse")} onLoad={() => setState("ok")} onError={() => setState("none")} />
+        {/* the picture is drawn on the server and takes a few seconds: a word over the place it
+            takes instead of a grey box (finding A15) */}
+        <span className="relative block size-32 shrink-0" aria-busy={state === "loading" || undefined}>
+          {/* eslint-disable-next-line @next/next/no-img-element -- a picture made on the server for this match */}
+          <img src={src} alt={t("card.title")} width={128} height={128} className={cn("size-32 border border-rule bg-surface", state === "loading" && "opacity-0")} onLoad={() => setState("ok")} onError={() => setState("none")} />
+          {state === "loading" && (
+            <span role="status" className="absolute inset-0 grid place-items-center border border-rule px-2 text-center text-xs font-semibold text-ink-2" data-testid="card-making">
+              <span aria-hidden className="absolute inset-0 bg-surface motion-safe:animate-pulse" />
+              <span className="relative">{t("card.making")}</span>
+            </span>
+          )}
+        </span>
         <div className="min-w-0 flex-1 space-y-2">
           <p className="text-[15px] text-ink-2">{t("card.hint")}</p>
           <div className="flex flex-wrap gap-2">

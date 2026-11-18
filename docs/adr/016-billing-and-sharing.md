@@ -26,3 +26,10 @@ or players without an account watch content without leaking personal data.
 ## Consequences
 - Plan changes are a code change plus Stripe prices, reviewed like any other change.
 - Webhook delivery order does not matter (each event sets absolute state).
+
+## Update 18.11.2026: no goalkeeper add-on
+The goalkeeper add-on (CHF 7 per goalkeeper and month) is gone: the goalkeeper functions are part
+of every plan with analysis, without a surcharge. Checkout and annual invoices carry the plan only.
+A Stripe subscription booked with the add-on keeps running: at its next update the webhook removes
+the add-on item without proration (`HB_STRIPE_PRICE_GOALKEEPER` names the old price for that). The
+column `organizations.goalkeeper_seats` stays (0), no migration.

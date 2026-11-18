@@ -16,6 +16,7 @@ from typing import Any, Protocol
 from redis.exceptions import ConnectionError as RedisConnectionError
 from redis.exceptions import RedisError
 from rq import Queue
+from rq.job import Job
 
 from handball_api.core.logging import get_logger
 from handball_jobkit.redisconn import async_redis, sync_redis
@@ -45,11 +46,16 @@ class JobQueue(Protocol):
 
     def depths(self) -> dict[str, int]: ...
 
+    def exists(self, job_id: str) -> bool | None:
+        """Whether the queue still knows the job (None: the queue cannot be asked)."""
+        ...
+
 
 @dataclass
 class MemoryJobQueue:
     jobs: list[tuple[str, str, str, dict[str, Any]]] = field(default_factory=list)
     timeouts: dict[str, int] = field(default_factory=dict)  # job id -> seconds
+    lost: set[str] = field(default_factory=set)  # tests: jobs a Redis restart has wiped out
 
     def enqueue(
         self,
@@ -64,6 +70,9 @@ class MemoryJobQueue:
 
     def depths(self) -> dict[str, int]:
         return {q: 0 for q in QUEUES}
+
+    def exists(self, job_id: str) -> bool | None:
+        return job_id not in self.lost and any(j[2] == job_id for j in self.jobs)
 
 
 class RqJobQueue:
@@ -95,6 +104,16 @@ class RqJobQueue:
     def depths(self) -> dict[str, int]:
         """Waiting jobs per queue (alerting: a growing GPU queue means missing capacity)."""
         return {q: len(Queue(q, connection=self._conn)) for q in QUEUES}
+
+    def exists(self, job_id: str) -> bool | None:
+        """Whether Redis still holds the job: Redis runs without persistence, so a restart (on
+        staging with every deploy) wipes out the jobs that were only waiting. None when Redis
+        cannot be asked (then nothing is concluded)."""
+        try:
+            return bool(Job.exists(job_id, connection=self._conn))
+        except RedisError as exc:
+            log.warning("job_exists_failed", job=job_id, error=str(exc))
+            return None
 
 
 class EventBus(Protocol):

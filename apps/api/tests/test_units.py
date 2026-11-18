@@ -339,6 +339,9 @@ async def test_ctx_enqueue_runs_off_the_event_loop() -> None:
         def depths(self) -> dict[str, int]:
             return {}
 
+        def exists(self, job_id: str) -> bool | None:
+            return None
+
     none = cast(Any, None)
     ctx = Ctx(db=none, settings=none, email=none, storage=none, jobs=Queue())
     await ctx.enqueue("gpu", "a.b", "j1", {"x": 1}, 60)

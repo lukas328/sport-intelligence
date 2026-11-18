@@ -3828,6 +3828,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/teams/{team_id}/dates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Team Dates
+         * @description The team's trainings and matches of the next 30 days for its staff, the matches of the
+         *     official schedule among them (A7).
+         */
+        get: operations["team_dates_v1_orgs__org_id__teams__team_id__dates_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/orgs/{org_id}/teams/{team_id}/demo-match": {
         parameters: {
             query?: never;
@@ -6000,11 +6021,6 @@ export interface components {
         };
         /** CheckoutIn */
         CheckoutIn: {
-            /**
-             * Goalkeeper Seats
-             * @default 0
-             */
-            goalkeeper_seats?: number;
             plan: components["schemas"]["Plan"];
         };
         /** ClaimIn */
@@ -7682,11 +7698,6 @@ export interface components {
         /** InvoiceOrder */
         InvoiceOrder: {
             contact: components["schemas"]["BillingContact"];
-            /**
-             * Goalkeeper Seats
-             * @default 0
-             */
-            goalkeeper_seats?: number;
             plan: components["schemas"]["Plan"];
             /** Voucher */
             voucher?: string | null;
@@ -10810,6 +10821,11 @@ export interface components {
              * @default false
              */
             analysed?: boolean;
+            /**
+             * Appeared
+             * @default false
+             */
+            appeared?: boolean;
             attendance: components["schemas"]["AttendanceStatus"] | null;
             /** Competition */
             competition: string | null;
@@ -10843,10 +10859,16 @@ export interface components {
             score_own: number | null;
             /** Shooting Pct */
             shooting_pct: number | null;
+            /** Source */
+            source?: ("analysis" | "report") | null;
             /** Tagged */
             tagged: boolean;
         };
-        /** SeasonLineTotals */
+        /**
+         * SeasonLineTotals
+         * @description Goals, 7 m goals, suspensions, cards and saves over every match (the official report has
+         *     them); every other figure over the analysed matches only.
+         */
         SeasonLineTotals: {
             /**
              * Analysed Matches
@@ -10875,6 +10897,11 @@ export interface components {
             posts: number;
             /** Red Cards */
             red_cards: number;
+            /**
+             * Report Matches
+             * @default 0
+             */
+            report_matches?: number;
             /** Save Pct */
             save_pct: number | null;
             /** Saved */
@@ -11468,6 +11495,49 @@ export interface components {
             name: string;
         };
         /**
+         * TeamDate
+         * @description A date of the team for its staff (Teamleben, Termine, A7): a training or a match, the
+         *     matches of the official schedule marked as such, with the replies so far.
+         */
+        TeamDate: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "session" | "match";
+            /**
+             * No
+             * @default 0
+             */
+            no?: number;
+            /**
+             * Official
+             * @default false
+             */
+            official?: boolean;
+            /**
+             * On Date
+             * Format: date
+             */
+            on_date: string;
+            /** Starts At */
+            starts_at: string | null;
+            /** Title */
+            title: string | null;
+            /** Venue */
+            venue?: string | null;
+            /**
+             * Yes
+             * @default 0
+             */
+            yes?: number;
+        };
+        /**
          * TeamGender
          * @enum {string}
          */
@@ -11850,8 +11920,23 @@ export interface components {
         TrainingTipsOut: {
             /** Matches */
             matches: components["schemas"]["TipMatch"][];
-            /** Matches Analysed */
+            /**
+             * Matches Analysed
+             * @description Matches the tips are drawn from (with events)
+             */
             matches_analysed: number;
+            /**
+             * Matches From Report
+             * @description Of these, matches known only from the official report
+             * @default 0
+             */
+            matches_from_report?: number;
+            /**
+             * Matches With Analysis
+             * @description Of these, matches with data beyond the official report
+             * @default 0
+             */
+            matches_with_analysis?: number;
             /** Plan Required */
             plan_required: boolean;
             /** Tips */
@@ -14619,7 +14704,6 @@ export interface operations {
         parameters: {
             query: {
                 plan: components["schemas"]["Plan"];
-                goalkeeper_seats?: number;
             };
             header?: never;
             path: {
@@ -20403,6 +20487,38 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    team_dates_v1_orgs__org_id__teams__team_id__dates_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamDate"][];
+                };
             };
             /** @description Validation Error */
             422: {

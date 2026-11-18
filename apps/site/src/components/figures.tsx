@@ -55,10 +55,11 @@ export function HallCamera({
   const cut = Math.ceil(words.length / 2);
   const lines = words.length > 2 ? [words.slice(0, cut).join(" "), words.slice(cut).join(" ")] : [corner ?? ""];
   const cornerText = (x: number, anchor: "start" | "end") => (
-    <text x={x} y={23.4} textAnchor={anchor} fill="var(--ink)" style={SMALL}>
+    <text x={x} y={23.4} textAnchor={anchor} fill="var(--ink)" style={SMALL} aria-hidden>
+      {/* the space between the lines stays in the text, so a copy or a reader gets «Ecke nicht im Bild» */}
       {lines.map((l, i) => (
         <tspan key={i} x={x} dy={i ? 1.9 : 0}>
-          {l}
+          {i ? ` ${l}` : l}
         </tspan>
       ))}
     </text>

@@ -51,10 +51,6 @@ export function OnboardingAccount() {
           <MenuItem href={sitePage(site?.site_url, locale, "datenschutz")} external icon={<ShieldCheck />}>
             {t("privacy")}
           </MenuItem>
-          <MenuItem onSelect={() => setDel(true)} icon={<Trash2 />} danger testId="onboarding-delete">
-            {t("delete")}
-          </MenuItem>
-          <MenuSeparator />
           <MenuItem
             icon={<LogOut />}
             testId="onboarding-logout"
@@ -64,6 +60,11 @@ export function OnboardingAccount() {
             }}
           >
             {tc("logout")}
+          </MenuItem>
+          {/* the destructive entry last, red, with room above it (A1) */}
+          <MenuSeparator />
+          <MenuItem onSelect={() => setDel(true)} icon={<Trash2 />} danger testId="onboarding-delete">
+            {t("delete")}
           </MenuItem>
         </MenuContent>
       </MenuRoot>
