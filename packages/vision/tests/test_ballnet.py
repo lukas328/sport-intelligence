@@ -7,6 +7,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 import onnx
+import pytest
 from onnx import TensorProto, helper
 
 from handball_vision import ballnet
@@ -180,3 +181,17 @@ def test_worker_errors_reach_the_caller() -> None:
     with pytest.raises(RuntimeError, match="net failed"):
         bc.finish()
     assert bc.pool is None
+
+
+def test_fixed_mmap_threshold_respects_the_environment(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("MALLOC_MMAP_THRESHOLD_", "4194304")
+    assert ballnet.fixed_mmap_threshold() is False
+
+
+def test_fixed_mmap_threshold_sets_it_on_glibc(monkeypatch: pytest.MonkeyPatch) -> None:
+    import platform
+
+    if platform.system() != "Linux" or platform.libc_ver()[0] != "glibc":
+        return
+    monkeypatch.delenv("MALLOC_MMAP_THRESHOLD_", raising=False)
+    assert ballnet.fixed_mmap_threshold() is True
