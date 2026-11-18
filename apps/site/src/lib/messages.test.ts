@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import de from "@/messages/de";
 import en from "@/messages/en";
 import fr from "@/messages/fr";
+import plans from "@handball/plans";
 
 function leaves(value: unknown, path = ""): [string, string][] {
   if (typeof value === "string") return [[path, value]];
@@ -72,5 +73,19 @@ describe("site messages", () => {
   it("uses no long dashes and no sharp s", () => {
     for (const msgs of [de, fr, en]) for (const [k, v] of leaves(msgs)) expect(v, k).not.toMatch(/[–—]/);
     for (const [k, v] of ref) expect(v, k).not.toContain("ß");
+  });
+
+  // U23, A9: the prices compare the plans feature by feature; the goalkeeper figures are in the
+  // plans without an add-on, so no add-on price appears anywhere on the site
+  it("names every plan feature on the prices page and never prices a goalkeeper add-on", () => {
+    const features = new Set(plans.plans.flatMap((p) => p.features as string[]));
+    features.delete("tracking"); // the row «Automatische Analyse»
+    for (const f of features) if (f.startsWith("goalkeeper")) features.delete(f); // the row «Torhüter»
+    for (const msgs of [de, fr, en]) {
+      expect(Object.keys(msgs.pricing.featureNames).sort()).toEqual([...features].sort());
+      expect(msgs.pricing.featureNames.priority).toMatch(/Support|support/);
+      for (const [k, v] of leaves(msgs)) expect(v, k).not.toMatch(/Torhüter-Modul|module gardien|goalkeeper add-on|CHF 7\b/i);
+    }
+    expect(de.pricing.perYear).toContain("{gift} Monate geschenkt");
   });
 });
