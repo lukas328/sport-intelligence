@@ -50,30 +50,37 @@ export function SeasonLineView({ orgId, teamId, playerId }: { orgId: string; tea
     </div>
   );
   const keeper = l.main_position === "TW";
+  // without a single match with an analysis only the report's figures exist: the columns the
+  // report cannot fill (shots, rates, turnovers, shots faced) stay away until a video (A3)
+  const video = (l.totals.analysed_matches ?? 0) > 0;
   // the figures of one line, in match-sheet order; each one with the search filter behind it
-  const cols: { key: string; label: string; value: (f: Figures, m?: Schemas["SeasonLineMatch"]) => string; filter?: string }[] = keeper
+  const all: { key: string; label: string; value: (f: Figures, m?: Schemas["SeasonLineMatch"]) => string; filter?: string; report?: boolean; videoOnly?: boolean }[] = keeper
     ? [
-        { key: "saves", label: t("saves"), value: (f) => String(f.saves), filter: "type=shot&outcome=save" },
-        { key: "faced", label: t("faced"), value: (f) => String(f.faced) },
-        { key: "save_pct", label: t("savePct"), value: (_f, m) => pct(m ? m.save_pct : l.totals.save_pct) },
-        { key: "seven", label: t("sevenM"), value: (f) => `${f.seven_m_saves}/${f.seven_m_faced}` },
+        { key: "saves", label: t("saves"), value: (f) => String(f.saves), filter: "type=shot&outcome=save", report: true },
+        { key: "faced", label: t("faced"), value: (f) => String(f.faced), videoOnly: true },
+        { key: "save_pct", label: t("savePct"), value: (_f, m) => pct(m ? m.save_pct : l.totals.save_pct), videoOnly: true },
+        { key: "seven", label: t("sevenM"), value: (f) => `${f.seven_m_saves}/${f.seven_m_faced}`, videoOnly: true },
+        // 7 m saved: the report names the goalkeeper of every saved penalty
+        { key: "seven_saves", label: t("sevenMSaves"), value: (f) => String(f.seven_m_saves), report: true },
       ]
     : [
-        { key: "goals", label: t("goals"), value: (f) => String(f.goals), filter: "type=shot&outcome=goal" },
+        { key: "goals", label: t("goals"), value: (f) => String(f.goals), filter: "type=shot&outcome=goal", report: true },
         // one count for shots and rate: the attempts without blocked ones (UX test N12)
-        { key: "shots", label: t("shots"), value: (f) => String(lineShots(f)), filter: "type=shot" },
+        { key: "shots", label: t("shots"), value: (f) => String(lineShots(f)), filter: "type=shot", videoOnly: true },
         // the season's rate from the analysed matches only (the report's goals are no shots)
-        { key: "pct", label: t("shootingPct"), value: (f, m) => (m ? lineRate(f) : pct(l.totals.shooting_pct)) },
-        { key: "seven", label: t("sevenM"), value: (f) => lineSevenM(f) },
+        { key: "pct", label: t("shootingPct"), value: (f, m) => (m ? lineRate(f) : pct(l.totals.shooting_pct)), videoOnly: true },
+        { key: "seven", label: t("sevenM"), value: (f) => lineSevenM(f), report: true },
         // no «Torvorlagen»: passes are not measured (UX test B34, Z5)
-        { key: "turnovers", label: t("turnovers"), value: (f) => String(f.turnovers), filter: "type=turnover" },
-        { key: "suspensions", label: t("suspensions"), value: (f) => String(f.suspensions), filter: "type=suspension_2min" },
+        { key: "turnovers", label: t("turnovers"), value: (f) => String(f.turnovers), filter: "type=turnover", videoOnly: true },
+        { key: "suspensions", label: t("suspensions"), value: (f) => String(f.suspensions), filter: "type=suspension_2min", report: true },
       ];
+  // with a video the keeper's 7 m column says saves of faced; without, the saves alone
+  const cols = all.filter((c) => (video ? c.key !== "seven_saves" : !c.videoOnly));
   const search = (filter: string, matchId?: string) => `/app/${orgId}/teams/${teamId}/scenes?player=${playerId}${matchId ? `&match=${matchId}` : ""}&${filter}`;
-  // what the official report knows of a match without analysis: goals and suspensions (K15)
-  const REPORT = new Set(["goals", "suspensions"]);
+  // what the official report knows of a match without analysis: goals, 7 m, suspensions and the
+  // goalkeeper's saves (K15, A3)
   const cell = (c: (typeof cols)[number], f: Figures, m?: Schemas["SeasonLineMatch"]) => {
-    if (m && !m.analysed && !REPORT.has(c.key)) return "-";
+    if (m && !m.analysed && !c.report) return "-";
     const v = c.value(f, m);
     // a count leads to its scenes; zeros and rates do not
     return staff && c.filter && v !== "0" ? (
@@ -114,7 +121,7 @@ export function SeasonLineView({ orgId, teamId, playerId }: { orgId: string; tea
       )}
       {l.totals.matches > 0 && (l.totals.analysed_matches ?? 0) < l.totals.matches && (
         <p className="text-[15px] text-ink-2" data-testid="season-line-basis">
-          {t("analysedBasis", { k: l.totals.analysed_matches ?? 0, n: l.totals.matches })}
+          {video ? t("analysedBasis", { k: l.totals.analysed_matches ?? 0, n: l.totals.matches }) : t(keeper ? "reportBasisKeeper" : "reportBasis")}
         </p>
       )}
       {l.matches.length === 0 ? null : (
@@ -128,6 +135,7 @@ export function SeasonLineView({ orgId, teamId, playerId }: { orgId: string; tea
                 {cols.map((c) => (
                   <th key={c.key} scope="col" className="px-2 py-1.5 text-right font-semibold text-ink-2">{c.label}</th>
                 ))}
+                <th scope="col" className="py-1.5 pl-2 text-left font-semibold text-ink-2">{t("sourceCol")}</th>
               </tr>
             </thead>
             <tbody>
@@ -147,6 +155,10 @@ export function SeasonLineView({ orgId, teamId, playerId }: { orgId: string; tea
                       {m.involved ? cell(c, m.figures, m) : "-"}
                     </td>
                   ))}
+                  {/* where the figures of the match come from: the analysis or the official report */}
+                  <td className="py-2 pl-2 text-ink-2" data-testid="season-line-source">
+                    {m.source === "analysis" ? t("fromAnalysis") : m.source === "report" ? t("fromReport") : "-"}
+                  </td>
                 </tr>
               ))}
             </tbody>

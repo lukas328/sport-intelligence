@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import socket
 import uuid
 from collections.abc import AsyncIterator
@@ -63,6 +64,13 @@ _engine: AsyncEngine | None = None
 _sessionmaker: async_sessionmaker[AsyncSession] | None = None
 
 
+def application_name() -> str:
+    """Who holds a connection, as Postgres shows it (pg_stat_activity.application_name): the API
+    process by replica and pid. Staging 17.11.: too many connections while the API ran on two
+    replicas, and nothing told whose connections filled the slots."""
+    return f"hb-api {socket.gethostname()} {os.getpid()}"[:63]
+
+
 def init_engine(
     database_url: str, pool_size: int = 5, max_overflow: int = 5, pool_timeout_s: float = 10.0
 ) -> AsyncEngine:
@@ -73,6 +81,7 @@ def init_engine(
         pool_size=pool_size,
         max_overflow=max_overflow,
         pool_timeout=pool_timeout_s,
+        connect_args={"server_settings": {"application_name": application_name()}},
     )
     _sessionmaker = async_sessionmaker(_engine, expire_on_commit=False)
     return _engine

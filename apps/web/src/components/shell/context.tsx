@@ -44,6 +44,9 @@ export interface ShellValue {
   /** a page that is not there (the 404) asks for the whole app frame, also on a full-screen tool
    * route such as Prüfen (app review R5: a deleted match's «Fragen» link ended without a header) */
   showFrame?: (on: boolean) => void;
+  /** a page with its own upload field (a match without video) points the frame's «Video
+   * hochladen» there, so the page has one way to upload, not two (finding A11) */
+  setPageUpload?: (href: string | null) => void;
 }
 
 export const ShellContext = createContext<ShellValue | null>(null);

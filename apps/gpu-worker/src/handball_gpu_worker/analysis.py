@@ -666,7 +666,9 @@ def _overlay_summary(reader: scoreboard.Reader | None) -> dict[str, Any] | None:
 
 
 def clock_play(
-    reader: scoreboard.Reader | None, board: HallBoardReader | None
+    reader: scoreboard.Reader | None,
+    board: HallBoardReader | None,
+    duration_ms: int | None = None,
 ) -> dict[str, Any] | None:
     """Where the match clock runs, from the overlay clock or else the hall scoreboard's: the ball
     analysis counts only there (warm-up balls, ball racks and loose balls in breaks and timeouts
@@ -680,7 +682,7 @@ def clock_play(
         return None
     if not clocks:
         return None
-    intervals = scoreboard.play_intervals(clocks)
+    intervals = scoreboard.play_intervals(clocks, end_ms=duration_ms)
     log.info(
         "clock_play",
         source=source,
@@ -789,7 +791,7 @@ def _run_learned(
                 ball_batch=max(1, settings.ball_batch),
             )
             overlay = _overlay_summary(reader)
-            play = clock_play(reader, board)
+            play = clock_play(reader, board, round(1000 * total / fps) if fps and total else None)
             if overlay is None and board is not None:
                 board_summary = board.summary()
                 overlay = board_summary if board_summary["goals"] else None

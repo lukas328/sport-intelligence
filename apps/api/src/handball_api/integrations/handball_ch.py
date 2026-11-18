@@ -559,6 +559,18 @@ def _appearances(rows: list[dict[str, Any]]) -> list[GameAppearance]:
     ]
 
 
+async def cached_sheet(db: AsyncSession, game_id: int) -> list[dict[str, Any]] | None:
+    """The players of a game as handball.ch listed them, from the cache only (never asks
+    handball.ch): the game's player statistics or the report read for it. None when neither
+    is cached. Read for the appearances of a season line (A3), so no request is made there."""
+    for q in (Q_GAME_PLAYERS, Q_REPORT):
+        hit = await db.get(OfficialCache, cache_key(q, _gp_vars(game_id)))
+        rows = (dict(hit.data).get("gamePlayerStats") if hit is not None else None) or []
+        if rows:
+            return list(rows)
+    return None
+
+
 async def report(game_id: int, db: AsyncSession | None = None) -> dict[str, Any]:
     """Game, game log and keepers of a game (parsed by official_reports/handball_ch.py). Not
     cached without `db`; with `db` for an hour (a fresh game may still get corrections)."""

@@ -306,4 +306,9 @@ async def test_the_bell_has_one_note_per_thing_and_none_for_deleted_matches(
     reports = await owner_conn.fetch(
         "SELECT params FROM notifications WHERE kind = 'official_report'"
     )
-    assert len(reports) == 1 and json.loads(reports[0]["params"]) == {"match_id": kept["id"]}
+    # the note names the match: opponent and the day it was played (A12)
+    assert len(reports) == 1 and json.loads(reports[0]["params"]) == {
+        "match_id": kept["id"],
+        "opponent": "TV Gegner",
+        "date": "2026-11-07",
+    }

@@ -75,7 +75,13 @@ class SeasonLineMatch(ApiModel):
     # data beyond the official report (video, tagging, a filled-in report): without, only
     # the goals and suspensions of the report are known, every other figure is missing
     analysed: bool = False
-    # at least one event of the player (or credited to them as goalkeeper)
+    # where the figures come from: "analysis" (video, tagging, a filled-in report), "report"
+    # (the official report alone: goals, 7 m, suspensions, cards, saves), None (no events)
+    source: Literal["analysis", "report"] | None = None
+    # the player's shirt number is on the official match sheet (played, with or without a figure)
+    appeared: bool = False
+    # played: on the official match sheet, or at least one event of the player (or credited to
+    # them as goalkeeper)
     involved: bool
     # attendance recorded by the staff (present, absent, ...) and the player's reply (yes/no);
     # no playing minutes are recorded
@@ -88,11 +94,16 @@ class SeasonLineMatch(ApiModel):
 
 
 class SeasonLineTotals(LineFigures):
+    """Goals, 7 m goals, suspensions, cards and saves over every match (the official report has
+    them); every other figure over the analysed matches only."""
+
     matches: int
     tagged_matches: int
     # matches with an analysis: every figure except goals, suspensions and cards is summed
     # over these only, the official report knows nothing else (livegang K15)
     analysed_matches: int = 0
+    # matches whose figures come from the official report alone (source "report")
+    report_matches: int = 0
     matches_involved: int
     matches_present: int
     shooting_pct: float | None

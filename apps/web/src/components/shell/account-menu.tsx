@@ -96,7 +96,7 @@ export function AccountMenu({ compact }: { compact?: boolean }) {
                 {!reminder.overdue && (
                   <M.Item
                     onSelect={reminder.later}
-                    className="inline-flex min-h-9 cursor-pointer items-center border-2 border-ink px-3 text-[14px] font-bold outline-none select-none data-[highlighted]:bg-raised"
+                    className="inline-flex min-h-9 cursor-pointer items-center border-2 border-ink px-3 text-[14px] font-bold outline-none select-none data-[highlighted]:bg-ink data-[highlighted]:text-ground"
                     data-testid="menu-two-factor-later"
                   >
                     {t("twoFactorLaterShort")}
@@ -121,7 +121,7 @@ export function AccountMenu({ compact }: { compact?: boolean }) {
                 }}
                 data-testid={`lang-${l}`}
                 className={cn(
-                  "min-h-9 flex-1 cursor-pointer px-1.5 text-center text-[14px] leading-9 outline-none select-none data-[highlighted]:bg-surface",
+                  "min-h-9 flex-1 cursor-pointer px-1.5 text-center text-[14px] font-semibold leading-9 outline-none select-none data-[highlighted]:bg-ink data-[highlighted]:text-ground",
                   l === locale && "font-bold underline decoration-[1.5px] underline-offset-4",
                 )}
               >

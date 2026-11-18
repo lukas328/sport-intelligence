@@ -2,6 +2,7 @@
 
 import type { Schemas } from "@handball/api-client";
 import { useMutation, useQueries, useQuery } from "@tanstack/react-query";
+import { FileText, VideoOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useFormatter, useTranslations } from "next-intl";
@@ -61,9 +62,15 @@ export function StartView({
   const last = ours.find((m) => m.id === fresh) ?? ours.find((m) => m.kind !== "training" && (m.score_own != null || m.has_video)) ?? ours[0] ?? null;
   const next = upcoming.find((m) => m.kind === "match") ?? null;
   const withoutVideo = ours.filter((m) => !m.has_video).length;
+  const anyVideo = ours.some((m) => m.has_video);
+  // the head of a match without video shows the federation's table (FromReport): below, the next
+  // opponent keeps only its own row, the table stands once (finding A10)
+  const tableAbove = Boolean(last && !last.has_video);
   return (
     <div className="space-y-8">
       <LastMatch orgId={orgId} m={last} next={next} teamName={ownName(team?.name, org.name)} canWrite={canWrite} club={[org.primary_color, org.secondary_color ?? null]} />
+      {/* before the first video the next steps come before the list, not after ten rows (A10) */}
+      {!anyVideo && <NextSteps hasVideo={false} row />}
       <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_340px]">
         <section aria-labelledby="all-matches">
           <SectionHead
@@ -75,15 +82,15 @@ export function StartView({
           <ul className="m-0 list-none p-0" data-testid="match-list">
             {played.map((m) => (
               <li key={m.id}>
-                <GameRow orgId={orgId} m={m} canWrite={canWrite} inHero={m.id === last?.id} />
+                <GameRow orgId={orgId} m={m} mini={played.some((x) => x.has_video)} />
               </li>
             ))}
           </ul>
         </section>
         <aside className="flex min-w-0 flex-col gap-8">
           {/* after taking over the team: the coach's next steps (K17) */}
-          <NextSteps hasVideo={ours.some((m) => m.has_video)} />
-          {next && <NextOpponent orgId={orgId} teamId={team?.id} next={next} played={ours} />}
+          {anyVideo && <NextSteps hasVideo />}
+          {next && <NextOpponent orgId={orgId} teamId={team?.id} next={next} played={ours} rowOnly={tableAbove} />}
         </aside>
       </div>
     </div>
@@ -291,7 +298,7 @@ function useHeadProps(m: Match | null, next: Match | null, g: MatchGraphics | nu
     // without a result (and once the data is there) no large empty place for one: the head stays
     // short and what matters comes up (second round A10)
     scoreless: g != null || !m.has_video,
-    flightLabels: { half: t("halftime", { v: "{v}" }), end: t("end", { v: "{v}" }), halfLevel: t("halftimeLevel"), endLevel: t("endLevel"), cut: t("flightCut", { m: "{m}" }) },
+    flightLabels: { half: t("halftime", { v: "{v}" }), end: t("end", { v: "{v}" }), cut: t("flightCut", { m: "{m}" }) },
   };
 }
 
@@ -352,7 +359,17 @@ function RowSummary({ orgId, m }: { orgId: string; m: Match }) {
   return <>{t("rowSummary", { things: things.length, scenes, first: things[0] ? text(things[0]) : "none" })}</>;
 }
 
-function GameRow({ orgId, m, canWrite, inHero = false }: { orgId: string; m: Match; canWrite: boolean; inHero?: boolean }) {
+/** A small mark for a row without video (A10): a report sheet, or no video at all; the row's
+ * words say the same for screen readers. */
+function NoVideoMark({ m }: { m: Match }) {
+  const Icon = m.score_own != null && m.kind !== "scouting" ? FileText : VideoOff;
+  return <Icon aria-hidden className="size-6 text-ink-2" strokeWidth={1.8} data-testid="row-no-video" />;
+}
+
+/** One match of the list: when, the Minifeld of its first thing (or a small mark without video),
+ * against whom, its state in words and the result. The upload is not repeated per row: it is the
+ * head's action and the frame's (A10). With no video in the whole list the Minifeld column goes. */
+function GameRow({ orgId, m, mini }: { orgId: string; m: Match; mini: boolean }) {
   const t = useTranslations("anlauf");
   const tm = useTranslations("matches");
   const format = useFormatter();
@@ -362,15 +379,26 @@ function GameRow({ orgId, m, canWrite, inHero = false }: { orgId: string; m: Mat
   const state = matchState(m);
   const base = `/app/${orgId}/matches/${m.id}`;
   return (
-    <div className="grid grid-cols-[84px_minmax(0,1fr)_auto] items-center gap-3 border-b border-rule py-3 md:grid-cols-[64px_128px_minmax(0,1fr)_auto] md:gap-5">
+    <div
+      className={cn(
+        "grid items-center gap-3 border-b border-rule py-3 md:gap-5",
+        mini ? "grid-cols-[84px_minmax(0,1fr)_auto] md:grid-cols-[64px_128px_minmax(0,1fr)_auto]" : "grid-cols-[28px_minmax(0,1fr)_auto] md:grid-cols-[64px_28px_minmax(0,1fr)_auto]",
+      )}
+    >
       <p className="m-0 text-[15px] leading-tight text-ink-2 max-md:hidden">
         {format.dateTime(date, { weekday: "short" })}
         <b className="font-num block text-xl text-ink">{format.dateTime(date, { day: "2-digit", month: "2-digit" })}</b>
         {m.is_home ? t("home") : t("away")}
       </p>
-      <Link href={base} aria-hidden tabIndex={-1} className="block w-[84px] md:w-32">
-        <MiniField orgId={orgId} m={m} width={128} />
-      </Link>
+      {m.has_video ? (
+        <Link href={base} aria-hidden tabIndex={-1} className="block w-[84px] md:w-32">
+          <MiniField orgId={orgId} m={m} width={128} />
+        </Link>
+      ) : (
+        <span className={cn("grid", mini && "w-[84px] place-items-center md:w-32")}>
+          <NoVideoMark m={m} />
+        </span>
+      )}
       <div className="min-w-0">
         <h3 className="m-0">
           <Link href={base} className="font-slant text-[17px] leading-tight text-ink no-underline hover:underline md:text-[22px]">
@@ -382,26 +410,9 @@ function GameRow({ orgId, m, canWrite, inHero = false }: { orgId: string; m: Mat
           <span className="md:hidden">{format.dateTime(date, { day: "2-digit", month: "2-digit" })} · </span>
           {["matches.status_processing", "matches.status_uploading", "matches.status_failed"].includes(state.label) ? (
             <ProgressLine orgId={orgId} matchId={m.id} className="max-md:inline" fallback={tm(state.label.replace("matches.", "") as "status_processing")} />
-          ) : !m.has_video && m.kind === "scouting" ? (
-            // a scouting match is nothing without its video
-            canWrite ? (
-              <Link href={`${base}?tab=video`} className={cn(linkClass, "inline-flex min-h-11 items-center")}>
-                {t("uploadVideo")}
-              </Link>
-            ) : null
           ) : !m.has_video ? (
-            <>
-              {t("reportOnly")}
-              {/* the match of the head has its upload there as the one main action (review R32) */}
-              {canWrite && m.score_own != null && !inHero && (
-                <>
-                  {" · "}
-                  <Link href={`${base}?tab=video`} className={cn(linkClass, "inline-flex min-h-11 items-center")}>
-                    {t("uploadVideo")}
-                  </Link>
-                </>
-              )}
-            </>
+            // per row only the state; the upload is once at the top (A10)
+            m.kind === "scouting" || m.score_own == null ? tm("noVideoYet") : t("reportOnly")
           ) : (
             <RowSummary orgId={orgId} m={m} />
           )}
@@ -432,7 +443,7 @@ type Row = { teamId?: number; name?: string; rank?: number; games?: number; won?
  * last duel, the table underneath. Without a table and without a duel there is nothing to say:
  * then only the name and the date, no empty field.
  */
-export function NextOpponent({ orgId, teamId, next, played }: { orgId: string; teamId?: string; next: Match; played: Match[] }) {
+export function NextOpponent({ orgId, teamId, next, played, rowOnly = false }: { orgId: string; teamId?: string; next: Match; played: Match[]; rowOnly?: boolean }) {
   const t = useTranslations("anlauf");
   const format = useFormatter();
   const date = new Date(next.kickoff_at);
@@ -457,7 +468,9 @@ export function NextOpponent({ orgId, teamId, next, played }: { orgId: string; t
   if (row?.goalsFor != null && row.goalsAgainst != null && row.games) facts.push(t("oppGoals", { scored: Math.round(row.goalsFor / row.games), conceded: Math.round(row.goalsAgainst / row.games) }));
   if (duel) facts.push(t("lastMeeting", { score: `${duel.score_own}:${duel.score_opponent}` }) + (met && first ? `, ${text(first)}` : ""));
   // the table around both teams, own and opponent marked; the whole table a tap away (K1)
-  const rows = table.map((r) => ({ key: `${r.rank}-${r.name}`, rank: r.rank ?? null, name: r.name ?? "", games: r.games ?? null, diff: r.goalDifference ?? null, points: r.points ?? null, own: ownId != null && r.teamId === ownId, marked: r === row }));
+  const all = table.map((r) => ({ key: `${r.rank}-${r.name}`, rank: r.rank ?? null, name: r.name ?? "", games: r.games ?? null, diff: r.goalDifference ?? null, points: r.points ?? null, own: ownId != null && r.teamId === ownId, marked: r === row }));
+  // the whole table stands above (the head of a match without video): here only the opponent's row
+  const rows = rowOnly ? all.filter((r) => r.marked) : all;
   return (
     <section data-testid="next-opponent">
       <p className="m-0 text-[15px] font-semibold text-ink-2">

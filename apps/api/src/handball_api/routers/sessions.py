@@ -18,6 +18,7 @@ from handball_api.schemas.sessions import (
     ScheduleItem,
     SlotGenerateIn,
     SlotGenerateOut,
+    TeamDate,
     TrainingSessionIn,
     TrainingSessionOut,
     TrainingSlotIn,
@@ -183,6 +184,13 @@ async def record(
 async def schedule(scope: OrgDep) -> list[dict[str, Any]]:
     """Upcoming sessions and matches of me and my children, with my replies."""
     return await service.my_schedule(scope.ctx)
+
+
+@router.get("/teams/{team_id}/dates", response_model=list[TeamDate])
+async def team_dates(team_id: uuid.UUID, scope: OrgDep) -> list[dict[str, Any]]:
+    """The team's trainings and matches of the next 30 days for its staff, the matches of the
+    official schedule among them (A7)."""
+    return await service.team_dates(scope.ctx, team_id)
 
 
 @router.put("/me/attendance")

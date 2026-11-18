@@ -4,7 +4,8 @@ import { COURT, type Point } from "@handball/court";
 import { TOKEN_RADIUS, clampToCourt, type Arrow, type ArrowKind, type Frame, type Token } from "@handball/tactics";
 import { useTranslations } from "next-intl";
 import { useEffect, useId, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
-import { BOARD_THEME, distToSegment, simplify } from "./board-theme";
+import { BOARD_THEME, distToSegment, passReceiver, simplify } from "./board-theme";
+import { useBoardColours } from "./use-board-colours";
 
 export { BOARD_THEME, simplify };
 
@@ -47,6 +48,12 @@ function viewOf(court: "half" | "full", portrait: boolean, from?: number): View 
   return portrait ? { portrait, x0, x1, w: COURT.width + 2 * PAD, h: span + 2 * PAD } : { portrait, x0, x1, w: span + 2 * PAD, h: COURT.width + 2 * PAD };
 }
 
+/** Width over height of the board: half court upright, full court across (`wide`) or upright. */
+export function boardRatio(court: "half" | "full", wide: boolean): number {
+  const v = viewOf(court, court === "half" || !wide);
+  return v.w / v.h;
+}
+
 /** court metres to board coordinates and back */
 function project(v: View) {
   const S = (x: number, y: number): [number, number] => (v.portrait ? [COURT.width - y + PAD, v.x1 - x + PAD] : [x - v.x0 + PAD, COURT.width - y + PAD]);
@@ -82,6 +89,7 @@ export function Board({
   const drag = useRef<{ id: string; dx: number; dy: number } | null>(null);
   const [draft, setDraft] = useState<Arrow | null>(null);
   const [box, setBox] = useState<{ w: number; h: number } | null>(null);
+  const colours = useBoardColours();
 
   useEffect(() => {
     const el = svg.current;
@@ -194,9 +202,13 @@ export function Board({
     const pts = draft.points;
     const a = pts[0]!;
     let b = pts[pts.length - 1]!;
+    // a pass always reaches a teammate: it snaps to the one nearest to where it was let go (A16)
+    const receiver = draft.kind === "pass" ? passReceiver(a, b, frame.tokens, hitR) : null;
+    if (draft.kind === "pass" && !receiver) return setDraft(null);
+    if (receiver) b = [receiver.x, receiver.y];
     if (Math.hypot(b[0] - a[0], b[1] - a[1]) > 0.8) {
-      // a pass or run that ends on a player ends at the player
-      const end = nearestToken(b[0], b[1]);
+      // a run that ends on a player ends at the player
+      const end = receiver ?? nearestToken(b[0], b[1]);
       if (end && Math.hypot(end.x - a[0], end.y - a[1]) > 0.5) b = [end.x, end.y];
       const points = simplify([...pts.slice(0, -1), b].map(([x, y]) => [Math.round(x * 100) / 100, Math.round(y * 100) / 100] as [number, number]));
       onGestureStart?.();
@@ -227,7 +239,10 @@ export function Board({
       onGestureStart?.();
       update({ tokens: frame.tokens.filter((x) => x.id !== k.id) });
       onSelect?.(null);
-    } else if (e.key === "Escape") onSelect?.(null);
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      onSelect?.(null);
+    }
   }
 
   function onBallKey(e: KeyboardEvent) {
@@ -258,6 +273,7 @@ export function Board({
   const ballAt = ball ? (holder ? ((([sx, sy]) => [sx + R * 0.72, sy + R * 0.72])(S(holder.x, holder.y)) as [number, number]) : S(ball.x, ball.y)) : null;
 
   const shownArrows = live ? frame.arrows : [...frame.arrows, ...(draft ? [draft] : [])];
+  const passTarget = draft?.kind === "pass" && draft.points.length > 1 ? passReceiver(draft.points[0]!, draft.points[draft.points.length - 1]!, frame.tokens, hitR) : null;
 
   return (
     <svg
@@ -324,7 +340,8 @@ export function Board({
       </g>
 
       {tokens.map((k) => {
-        const isSel = editable && selected === k.id;
+        // while a pass is drawn, the teammate it will reach is marked like a selection
+        const isSel = (editable && selected === k.id) || passTarget?.id === k.id;
         const [sx, sy] = S(k.x, k.y);
         const own = k.side === "own";
         const size = k.label.length >= 3 ? 0.66 : k.label.length === 2 ? 0.8 : 0.95;
@@ -343,9 +360,9 @@ export function Board({
           >
             {editable && <circle r={hitR} fill="transparent" />}
             <circle className="ring" r={R + 0.32} fill="none" stroke={BOARD_THEME.select} strokeWidth={0.26} opacity={isSel ? 1 : 0} />
-            <circle r={R} fill={own ? BOARD_THEME.own : BOARD_THEME.opp} stroke={BOARD_THEME.rim} strokeWidth={0.1} />
+            <circle r={R} fill={own ? colours.own : colours.opp} stroke={BOARD_THEME.rim} strokeWidth={0.1} />
             {showLabels && (
-              <text y={size * 0.36} textAnchor="middle" fontSize={size} fontWeight={800} fill={own ? BOARD_THEME.ownText : BOARD_THEME.oppText} style={{ pointerEvents: "none" }}>
+              <text y={size * 0.36} textAnchor="middle" fontSize={size} fontWeight={800} fill={own ? colours.ownText : colours.oppText} style={{ pointerEvents: "none" }}>
                 {k.label}
               </text>
             )}

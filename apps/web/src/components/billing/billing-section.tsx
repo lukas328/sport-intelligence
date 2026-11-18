@@ -3,10 +3,11 @@
 import { problemCode } from "@handball/api-client";
 import { useQuery } from "@tanstack/react-query";
 import { useFormatter, useTranslations } from "next-intl";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { InvoiceOrder } from "./invoice-order";
 import { Button } from "@/components/ui/button";
-import { Alert } from "@/components/ui/card";
+import { Alert, Skeleton } from "@/components/ui/card";
+import { Term } from "@/components/ui/term";
 import { api } from "@/lib/client";
 import { cn } from "@/lib/utils";
 
@@ -26,23 +27,21 @@ interface Billing {
   status: string | null;
   trial_ends_at: string | null;
   current_period_end: string | null;
-  goalkeeper_seats: number;
   enforced: boolean;
   checkout_available: boolean;
   limits: { teams: number; matches_per_season: number | null; storage_gb: number; gpu_minutes_month: number };
   usage: { teams: number; storage_bytes: number; gpu_minutes: number; max_matches_per_season: number };
   plans: PlanRow[];
-  goalkeeper_addon_chf: number;
 }
 
 /** Usage against the plan; red only when a limit is enforced and reached (limits off: ink). */
-function Meter({ label, used, limit, unit = "", enforced }: { label: string; used: number; limit: number | null; unit?: string; enforced: boolean }) {
+function Meter({ label, shown, used, limit, unit = "", enforced }: { label: string; /** the label as shown, e.g. with an explained word (A17) */ shown?: ReactNode; used: number; limit: number | null; unit?: string; enforced: boolean }) {
   const share = limit ? Math.min(1, used / limit) : 0;
   // limits off: the usage as text, no bar that reads full or over
   if (!enforced)
     return (
       <div className="flex justify-between gap-2 border-b border-foreground/10 py-1.5 text-sm">
-        <span>{label}</span>
+        <span>{shown ?? label}</span>
         <span className="tabular-nums">
           {used}
           {unit}
@@ -52,7 +51,7 @@ function Meter({ label, used, limit, unit = "", enforced }: { label: string; use
   return (
     <div className="space-y-1 text-sm">
       <div className="flex justify-between gap-2">
-        <span>{label}</span>
+        <span>{shown ?? label}</span>
         <span className="tabular-nums">
           {used}
           {unit} / {limit == null ? "∞" : `${limit}${unit}`}
@@ -68,23 +67,56 @@ function Meter({ label, used, limit, unit = "", enforced }: { label: string; use
 /** Plan, usage and Stripe checkout/portal for org admins (BRIEF 13). */
 export function BillingSection({ orgId }: { orgId: string }) {
   const t = useTranslations("billing");
+  const tc = useTranslations("common");
+  const te = useTranslations("errors");
+  const tg = useTranslations("glossary");
   const format = useFormatter();
   const [problem, setProblem] = useState<string | null>(null);
-  const [goalkeepers, setGoalkeepers] = useState(0);
   const q = useQuery({
     queryKey: ["billing", orgId],
     queryFn: async () => ((await api.GET("/v1/orgs/{org_id}/billing", { params: { path: { org_id: orgId } } })).data ?? null) as Billing | null,
   });
   const b = q.data;
-  if (!b) return null;
+  // while the plan loads: the shape of the section, not a blank second (finding A15)
+  if (!b)
+    return (
+      <section id="billing" aria-labelledby="billing-title" aria-busy={q.isPending || undefined} className="space-y-3" data-testid="billing-loading">
+        <h2 id="billing-title" className="text-lg font-semibold">
+          {t("title")}
+        </h2>
+        {q.isPending ? (
+          <div className="space-y-4 border-t border-foreground/15 pt-5">
+            <p role="status" className="sr-only">
+              {tc("loading")}
+            </p>
+            <Skeleton className="h-6 w-56 max-w-full" />
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Skeleton className="h-8" />
+              <Skeleton className="h-8" />
+              <Skeleton className="h-8" />
+              <Skeleton className="h-8" />
+            </div>
+            <Skeleton className="h-36" />
+          </div>
+        ) : (
+          <Alert kind="error">
+            {te("generic")}{" "}
+            <button type="button" onClick={() => void q.refetch()} className="cursor-pointer font-bold underline underline-offset-4">
+              {tc("retry")}
+            </button>
+          </Alert>
+        )}
+      </section>
+    );
   async function go(path: "/v1/orgs/{org_id}/billing/checkout" | "/v1/orgs/{org_id}/billing/portal", plan?: string) {
     const res =
       path === "/v1/orgs/{org_id}/billing/checkout"
-        ? await api.POST(path, { params: { path: { org_id: orgId } }, body: { plan: plan as "team", goalkeeper_seats: goalkeepers } })
+        ? await api.POST(path, { params: { path: { org_id: orgId } }, body: { plan: plan as "team" } })
         : await api.POST(path, { params: { path: { org_id: orgId } } });
     if (res.error || !res.data) return setProblem(problemCode(res.error) ?? "generic");
     window.location.assign(res.data.url);
   }
+  const trialOn = Boolean(b.trial_ends_at && new Date(b.trial_ends_at).getTime() > Date.now());
   const gb = (bytes: number) => Math.round((bytes / 1024 ** 3) * 10) / 10;
   return (
     <section id="billing" aria-labelledby="billing-title" className="space-y-3">
@@ -95,10 +127,11 @@ export function BillingSection({ orgId }: { orgId: string }) {
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <p>
             <span className="font-semibold">{t(`plan_${b.plan as "free"}`)}</span>
-            {b.status && <span className="ml-2 text-sm text-muted">{t(`status_${b.status as "active"}`)}</span>}
+            {/* «Team · Testphase»: the parts as text with their separator, not glued by margins (A12) */}
+            {b.status && !(b.status === "trialing" && trialOn) && <span className="text-sm text-muted">{` · ${t(`status_${b.status as "active"}`)}`}</span>}
             {/* the trial at sign-up has no Stripe status: shown by its end (UX test Z8) */}
-            {b.trial_ends_at && new Date(b.trial_ends_at).getTime() > Date.now() && (
-              <span className="ml-2 text-sm">{t("trialUntil", { date: format.dateTime(new Date(b.trial_ends_at), { dateStyle: "medium" }) })}</span>
+            {trialOn && (
+              <span className="text-sm">{` · ${t("trialUntil", { date: format.dateTime(new Date(b.trial_ends_at!), { dateStyle: "medium" }) })}`}</span>
             )}
           </p>
           {b.trial_ends_at && new Date(b.trial_ends_at).getTime() > Date.now() && !b.status && (
@@ -117,7 +150,7 @@ export function BillingSection({ orgId }: { orgId: string }) {
           <Meter enforced={b.enforced} label={t("teams")} used={b.usage.teams} limit={b.limits.teams} />
           <Meter enforced={b.enforced} label={t("matches")} used={b.usage.max_matches_per_season} limit={b.limits.matches_per_season} />
           <Meter enforced={b.enforced} label={t("storage")} used={gb(b.usage.storage_bytes)} limit={b.limits.storage_gb} unit=" GB" />
-          <Meter enforced={b.enforced} label={t("gpu")} used={b.usage.gpu_minutes} limit={b.limits.gpu_minutes_month} unit=" min" />
+          <Meter enforced={b.enforced} label={t("gpu")} shown={t.rich("gpuTerm", { term: (w) => <Term explain={tg("analysisMinutes")}>{w}</Term> })} used={b.usage.gpu_minutes} limit={b.limits.gpu_minutes_month} unit=" min" />
         </div>
         {/* the plans as rows of one sheet, not cards inside the card */}
         <ul className="divide-y divide-foreground/10 border-t-2 border-foreground" data-testid="plans">
@@ -134,6 +167,8 @@ export function BillingSection({ orgId }: { orgId: string }) {
                   p.matches_per_season == null ? t("matchesUnlimited") : t("matchesN", { count: p.matches_per_season }),
                   t("storageN", { gb: p.storage_gb }),
                   p.features.includes("tracking") ? t("withAnalysis") : t("withoutAnalysis"),
+                  // the goalkeeper functions are part of the plan, no add-on (A9)
+                  p.features.includes("tracking") ? t("withKeepers") : null,
                   p.trial_days > 0 ? t("trial", { days: p.trial_days }) : null,
                 ]
                   .filter(Boolean)
@@ -147,21 +182,10 @@ export function BillingSection({ orgId }: { orgId: string }) {
             </li>
           ))}
         </ul>
-        <label className="flex flex-wrap items-center gap-2 text-sm">
-          {t("goalkeepers", { price: b.goalkeeper_addon_chf })}
-          <input
-            type="number"
-            min={0}
-            max={20}
-            value={goalkeepers}
-            onChange={(e) => setGoalkeepers(Math.max(0, Math.min(20, Number(e.target.value) || 0)))}
-            className="min-h-9 w-20 bg-raised ring-1 ring-inset ring-border px-2"
-          />
-        </label>
         {!b.checkout_available && <p className="text-xs text-muted">{t("unavailable")}</p>}
         {problem && <Alert>{problem === "two-factor-required" ? t("needs2fa") : t("failed")}</Alert>}
       </div>
-      <InvoiceOrder orgId={orgId} goalkeepers={goalkeepers} />
+      <InvoiceOrder orgId={orgId} />
     </section>
   );
 }

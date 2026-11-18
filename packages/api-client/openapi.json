@@ -1966,13 +1966,6 @@
       },
       "CheckoutIn": {
         "properties": {
-          "goalkeeper_seats": {
-            "default": 0,
-            "maximum": 20.0,
-            "minimum": 0.0,
-            "title": "Goalkeeper Seats",
-            "type": "integer"
-          },
           "plan": {
             "$ref": "#/components/schemas/Plan"
           }
@@ -6919,13 +6912,6 @@
         "properties": {
           "contact": {
             "$ref": "#/components/schemas/BillingContact"
-          },
-          "goalkeeper_seats": {
-            "default": 0,
-            "maximum": 20.0,
-            "minimum": 0.0,
-            "title": "Goalkeeper Seats",
-            "type": "integer"
           },
           "plan": {
             "$ref": "#/components/schemas/Plan"
@@ -15803,6 +15789,11 @@
             "title": "Analysed",
             "type": "boolean"
           },
+          "appeared": {
+            "default": false,
+            "title": "Appeared",
+            "type": "boolean"
+          },
           "attendance": {
             "anyOf": [
               {
@@ -15923,6 +15914,21 @@
             ],
             "title": "Shooting Pct"
           },
+          "source": {
+            "anyOf": [
+              {
+                "enum": [
+                  "analysis",
+                  "report"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source"
+          },
           "tagged": {
             "title": "Tagged",
             "type": "boolean"
@@ -15950,6 +15956,7 @@
         "type": "object"
       },
       "SeasonLineTotals": {
+        "description": "Goals, 7 m goals, suspensions, cards and saves over every match (the official report has\nthem); every other figure over the analysed matches only.",
         "properties": {
           "analysed_matches": {
             "default": 0,
@@ -15998,6 +16005,11 @@
           },
           "red_cards": {
             "title": "Red Cards",
+            "type": "integer"
+          },
+          "report_matches": {
+            "default": 0,
+            "title": "Report Matches",
             "type": "integer"
           },
           "save_pct": {
@@ -17631,6 +17643,87 @@
         "title": "TeamCreate",
         "type": "object"
       },
+      "TeamDate": {
+        "description": "A date of the team for its staff (Teamleben, Termine, A7): a training or a match, the\nmatches of the official schedule marked as such, with the replies so far.",
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "session",
+              "match"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "no": {
+            "default": 0,
+            "title": "No",
+            "type": "integer"
+          },
+          "official": {
+            "default": false,
+            "title": "Official",
+            "type": "boolean"
+          },
+          "on_date": {
+            "format": "date",
+            "title": "On Date",
+            "type": "string"
+          },
+          "starts_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Starts At"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "venue": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Venue"
+          },
+          "yes": {
+            "default": 0,
+            "title": "Yes",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "kind",
+          "id",
+          "title",
+          "on_date",
+          "starts_at"
+        ],
+        "title": "TeamDate",
+        "type": "object"
+      },
       "TeamGender": {
         "enum": [
           "men",
@@ -18793,7 +18886,20 @@
             "type": "array"
           },
           "matches_analysed": {
+            "description": "Matches the tips are drawn from (with events)",
             "title": "Matches Analysed",
+            "type": "integer"
+          },
+          "matches_from_report": {
+            "default": 0,
+            "description": "Of these, matches known only from the official report",
+            "title": "Matches From Report",
+            "type": "integer"
+          },
+          "matches_with_analysis": {
+            "default": 0,
+            "description": "Of these, matches with data beyond the official report",
+            "title": "Matches With Analysis",
             "type": "integer"
           },
           "plan_required": {
@@ -23225,16 +23331,6 @@
             "required": true,
             "schema": {
               "$ref": "#/components/schemas/Plan"
-            }
-          },
-          {
-            "in": "query",
-            "name": "goalkeeper_seats",
-            "required": false,
-            "schema": {
-              "default": 0,
-              "title": "Goalkeeper Seats",
-              "type": "integer"
             }
           }
         ],
@@ -33045,6 +33141,64 @@
         "summary": "Create Link",
         "tags": [
           "consents"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/teams/{team_id}/dates": {
+      "get": {
+        "description": "The team's trainings and matches of the next 30 days for its staff, the matches of the\nofficial schedule among them (A7).",
+        "operationId": "team_dates_v1_orgs__org_id__teams__team_id__dates_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Team Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TeamDate"
+                  },
+                  "title": "Response Team Dates V1 Orgs  Org Id  Teams  Team Id  Dates Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Team Dates",
+        "tags": [
+          "training"
         ]
       }
     },

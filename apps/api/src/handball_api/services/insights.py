@@ -335,11 +335,12 @@ async def _season_stats(ctx: Ctx, team: Team, season_id: uuid.UUID) -> dict[str,
                 },
             )
             row["matches"] += 1
-            for k in ("goals", "suspensions"):
+            # the official report has goals, suspensions and the goalkeeper's saves (A3)
+            for k in ("goals", "suspensions", "saves"):
                 row[k] += p.get(k, 0)
             if analysed:
                 row["shot_goals"] += p.get("goals", 0)
-                for k in ("shots", "turnovers", "saves", "assists"):
+                for k in ("shots", "turnovers", "assists"):
                     row[k] += p.get(k, 0)
                 row["xg"] = round(row["xg"] + p.get("xg", 0.0), 2)
             if shooting_known:

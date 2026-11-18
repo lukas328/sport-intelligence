@@ -87,6 +87,8 @@ class Settings(BaseSettings):
     stripe_webhook_secret: SecretStr | None = None
     stripe_price_team: str | None = None
     stripe_price_club: str | None = None
+    # the former goalkeeper add-on's price (A9): no longer sold; a subscription still carrying it
+    # loses the item, without proration, at its next update (services/billing._on_subscription)
     stripe_price_goalkeeper: str | None = None
     # optional: natural-language match summaries via the Claude API (templates are used without it)
     anthropic_api_key: SecretStr | None = None

@@ -60,8 +60,9 @@ async def test_order_to_payment(
     ids = await setup_club(api)
     org = ids["org"]
     base = f"/v1/orgs/{org}/billing"
-    price = (await api.get(f"{base}/annual", params={"plan": "team", "goalkeeper_seats": 1})).json()
-    assert price["net_cents"] == (39 + 7) * 10 * 100 and price["months"] == 10
+    price = (await api.get(f"{base}/annual", params={"plan": "team"})).json()
+    # the goalkeeper functions are part of the plan, no add-on (A9)
+    assert price["net_cents"] == 39 * 10 * 100 and price["months"] == 10
     assert price["contact"]["email"] == "coach@hc-test.ch"
 
     ops = make_api()
@@ -77,15 +78,15 @@ async def test_order_to_payment(
     assert bad.status_code == 422
     r = await api.post(
         f"{base}/invoices",
-        json={"plan": "team", "goalkeeper_seats": 1, "voucher": "VERBAND-BE", "contact": CONTACT},
+        json={"plan": "team", "voucher": "VERBAND-BE", "contact": CONTACT},
     )
     assert r.status_code == 201, r.text
     inv = r.json()
     assert (inv["net_cents"], inv["discount_cents"], inv["vat_cents"], inv["amount_cents"]) == (
-        46000,
-        9200,
+        39000,
+        7800,
         0,
-        36800,
+        31200,
     )
     assert inv["number"].startswith(f"HB-{date.today().year}-") and iso11649.is_valid(
         inv["reference"]
@@ -133,7 +134,7 @@ async def test_order_to_payment(
     res = (
         await ops.post(
             "/v1/ops/invoices/camt054",
-            files={"file": ("camt.xml", camt(inv["reference"], "368.00"), "application/xml")},
+            files={"file": ("camt.xml", camt(inv["reference"], "312.00"), "application/xml")},
         )
     ).json()
     assert [m["number"] for m in res["matched"]] == [inv["number"]]

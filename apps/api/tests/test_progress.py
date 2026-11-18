@@ -231,7 +231,8 @@ async def test_watchdog_restarts_a_silent_job_once_then_ends_it(
 
     await silence(first)
     r = await api.http.post("/internal/watchdog", headers=_token(api))
-    assert r.status_code == 200 and r.json() == {"restarted": 1, "failed": 0, "abandoned": 0}
+    assert r.status_code == 200
+    assert r.json() == {"restarted": 1, "failed": 0, "requeued": 0, "abandoned": 0}
     second = [j for j in _jobs(api).jobs if j[3].get("asset_id") == video["id"]][-1][2]
     assert second != first
     status = await owner_conn.fetchval(
@@ -249,10 +250,42 @@ async def test_watchdog_restarts_a_silent_job_once_then_ends_it(
     )
     await silence(second)
     r = await api.http.post("/internal/watchdog", headers=_token(api))
-    assert r.json() == {"restarted": 0, "failed": 1, "abandoned": 0}
+    assert r.json() == {"restarted": 0, "failed": 1, "requeued": 0, "abandoned": 0}
     detail = (await api.get(f"/v1/orgs/{ids['org']}/matches/{m['id']}")).json()
     assert detail["progress"]["state"] == "failed"
     assert (await api.http.post("/internal/watchdog")).status_code in (403, 422)
+
+
+async def test_watchdog_enqueues_again_a_job_redis_lost(
+    make_api: Callable[[], Api], owner_conn: asyncpg.Connection
+) -> None:
+    """Redis runs without persistence: a restart (with every deploy on staging, 17.11.) wipes out
+    the jobs that were only waiting. The watchdog finds them missing from the queue and starts
+    the step again; a job still in the queue, or a fresh one, is left alone."""
+    api = make_api()
+    ids = await setup_club(api)
+    m = await new_match(api, ids)
+    video = await upload(api, ids, m["id"], b"v" * 100)
+    first = [j for j in _jobs(api).jobs if j[3].get("asset_id") == video["id"]][-1][2]
+    r = await api.http.post("/internal/watchdog", headers=_token(api))
+    assert r.json()["requeued"] == 0  # fresh and still in the queue
+    await owner_conn.execute(
+        "UPDATE processing_jobs SET created_at = now() - interval '20 minutes' WHERE id = $1",
+        uuid.UUID(first),
+    )
+    r = await api.http.post("/internal/watchdog", headers=_token(api))
+    assert r.json()["requeued"] == 0  # waiting long, but the queue still has it
+    _jobs(api).lost.add(first)
+    r = await api.http.post("/internal/watchdog", headers=_token(api))
+    assert r.json() == {"restarted": 0, "failed": 0, "requeued": 1, "abandoned": 0}
+    second = [j for j in _jobs(api).jobs if j[3].get("asset_id") == video["id"]][-1][2]
+    assert second != first
+    row = await owner_conn.fetchrow(
+        "SELECT status, error FROM processing_jobs WHERE id = $1", uuid.UUID(first)
+    )
+    assert (row["status"], row["error"]) == ("cancelled", "lost from the queue")
+    detail = (await api.get(f"/v1/orgs/{ids['org']}/matches/{m['id']}")).json()
+    assert detail["progress"]["files"][0]["state"] == "queued"
 
 
 async def test_progress_needs_access_to_the_team(make_api: Callable[[], Api]) -> None:

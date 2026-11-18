@@ -1,16 +1,18 @@
 import type { Metadata } from "next";
-import { Search } from "lucide-react";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { linkClass, SectionHead } from "@/components/anlauf/blocks";
 import { CollectionList } from "@/components/collections/collection-list";
 import { buttonClass } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
+import { Term } from "@/components/ui/term";
 import { serverApi } from "@/lib/api";
 import { worksWithVideo } from "@/lib/roles";
 import { SearchView } from "../search/search-view";
+import { EmptySceneSearch } from "./empty-search";
 import { ScenesHead } from "./scenes-head";
 import { ScenesView } from "./scenes-view";
+import { CollectionBack } from "./collection-back";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getTranslations("shell"))("scenes") };
@@ -28,17 +30,21 @@ export default async function ScenesPage({
 }) {
   const { orgId, teamId } = await params;
   // a question asked from elsewhere (?q, ?chips, ?view) is read by the search itself; without a
-  // video there is nothing to answer it with
-  await searchParams;
+  // video there is nothing to answer it with. ?collection= opens the scenes for a collection
+  // («Szene dazu»): found scenes go into it, a link leads back (A5)
+  const { collection: intoId, focus } = await searchParams;
   const t = await getTranslations("scenesPage");
   const ta = await getTranslations("anlauf");
   const client = await serverApi();
   const path = { params: { path: { org_id: orgId, team_id: teamId } } };
-  const [{ data: team }, { data: matches = [] }, { data: collections = [] }] = await Promise.all([
+  const [{ data: team }, { data: matches = [] }, { data: collections = [] }, { data: into }] = await Promise.all([
     client.GET("/v1/orgs/{org_id}/teams/{team_id}", path),
     client.GET("/v1/orgs/{org_id}/teams/{team_id}/matches", path),
     client.GET("/v1/orgs/{org_id}/teams/{team_id}/collections", path),
+    intoId ? client.GET("/v1/orgs/{org_id}/collections/{collection_id}", { params: { path: { org_id: orgId, collection_id: intoId } } }) : Promise.resolve({ data: undefined }),
   ]);
+  const target = into && into.editable && into.team_id === teamId ? into : null;
+  const back = target ? <CollectionBack href={`/app/${orgId}/collections/${target.id}`} label={t("backToCollection", { title: target.title })} /> : null;
   const withVideo = matches
     .filter((m) => m.has_video)
     .sort((a, b) => b.kickoff_at.localeCompare(a.kickoff_at));
@@ -53,7 +59,7 @@ export default async function ScenesPage({
     <>
       <div>
         <SectionHead
-          title={<span id="all-collections">{t("collections")}</span>}
+          title={<span id="all-collections"><Term explain={(await getTranslations("glossary"))("collection")}>{t("collections")}</Term></span>}
           action={
             <Link href={`${base}/collections`} className={linkClass}>
               {t("newCollection")}
@@ -135,23 +141,11 @@ export default async function ScenesPage({
     const canWrite = worksWithVideo(org?.my_role, team?.my_role);
     return (
       <div>
+        {back}
         <PageHeader title={(await getTranslations("shell"))("scenes")} />
-        {/* «Suchen» leads here: the field is there, it says from when it finds something (review R6) */}
-        <label className="mb-10 flex min-h-16 max-w-3xl items-center gap-3 border-2 border-rule bg-paper px-[18px] text-xl font-semibold text-ink-2">
-          <Search aria-hidden className="size-[22px] shrink-0" strokeWidth={2.2} />
-          <span className="sr-only">{t("searchLabel")}</span>
-          <input
-            disabled
-            aria-describedby="scenes-empty-search"
-            placeholder={t("placeholder")}
-            className="min-w-0 flex-1 cursor-not-allowed bg-transparent font-semibold text-ink-2 outline-none placeholder:text-ink-2"
-            data-testid="scene-search"
-          />
-        </label>
+        {/* «Suchen» leads here: the field takes the question and answers it (review R6, A6) */}
+        <EmptySceneSearch uploadHref={canWrite ? `${base}/matches?upload=1` : null} focus={focus === "1"} />
         <section className="max-w-[60ch] space-y-4" data-testid="scenes-empty">
-          <p id="scenes-empty-search" className="m-0 text-[15px] font-semibold text-ink-2">
-            {t("emptySearch")}
-          </p>
           <p className="font-slant m-0 text-[28px] leading-tight md:text-[34px]">{t("emptyTitle")}</p>
           <p className="m-0 text-[17px]">{t("emptyText")}</p>
           {canWrite && (
@@ -166,13 +160,21 @@ export default async function ScenesPage({
             </Link>
           </p>
         </section>
+        {/* the team's collections stay findable here before the first video (A5) */}
+        {collections.length > 0 && (
+          <section className="mt-12 max-w-3xl" aria-labelledby="all-collections">
+            <SectionHead title={<span id="all-collections">{t("collections")}</span>} />
+            <CollectionList orgId={orgId} items={collections} heading={false} />
+          </section>
+        )}
       </div>
     );
   }
   return (
     <div>
+      {back}
       <ScenesHead orgId={orgId} teamId={teamId} matches={withVideo.length} />
-      <ScenesView orgId={orgId} teamId={teamId} matches={matches} side={side} />
+      <ScenesView orgId={orgId} teamId={teamId} matches={matches} side={side} into={target} />
       {more}
     </div>
   );

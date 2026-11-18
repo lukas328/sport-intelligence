@@ -50,7 +50,7 @@ export function Bundle({
   const kk = width / HALF_BOX[2];
   const small = width < 160;
   return (
-    <svg viewBox={BOX} role="img" aria-label={label} className={[play ? "play" : "", "block w-full", className].filter(Boolean).join(" ")}>
+    <svg viewBox={BOX} role="img" aria-label={label} className={[play ? "play" : "", "block court-frame", className].filter(Boolean).join(" ")}>
       <HalfCourtLines />
       {rest.map((g, i) =>
         g.run.length > 1 ? <path key={`r${i}`} d={pathOf(smooth(g.run, 6))} fill="none" stroke="var(--ink)" strokeOpacity={0.13} strokeWidth={1} {...NS} /> : null,
@@ -101,7 +101,7 @@ export function Bundle({
 /** The empty field: no video, analysis running, or nothing found yet. */
 export function EmptyField({ label, className }: { label?: string; className?: string }) {
   return (
-    <svg viewBox={BOX} role={label ? "img" : undefined} aria-label={label} aria-hidden={label ? undefined : true} className={["block w-full", className].filter(Boolean).join(" ")}>
+    <svg viewBox={BOX} role={label ? "img" : undefined} aria-label={label} aria-hidden={label ? undefined : true} className={["block court-frame", className].filter(Boolean).join(" ")}>
       <HalfCourtLines opacity={0.3} />
     </svg>
   );
@@ -139,7 +139,7 @@ export function Zones({
   for (const g of goals) if (g.zone) count[g.zone] = (count[g.zone] ?? 0) + 1;
   const max = Math.max(0, ...Object.values(count));
   return (
-    <svg viewBox={BOX} role="img" aria-label={label} className="block w-full">
+    <svg viewBox={BOX} role="img" aria-label={label} className="block court-frame">
       <HalfCourtLines />
       {goals.map((g, i) => (
         <circle key={i} cx={g.shot[0]} cy={g.shot[1]} r={3 / kk} fill={g.confirmed ? c.line : "var(--ground)"} stroke={c.dot} strokeWidth={1.2} {...NS} />

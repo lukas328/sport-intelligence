@@ -694,19 +694,20 @@ Budget 0.3 auf der T4 entspricht also 0.5 auf der CPU, 1.0 entspricht 1.7.
 |---|---|---|---|
 | YOLOX | jedes Bild | jedes 3. Bild | jedes 3. Bild |
 | Rückennummern | jedes 3. Bild, ohne Gate und Budget | Gate, Budget 0.3 (T4) | Gate, Budget 1.0 (T4) |
-| gelesene Torsos pro Videosekunde (Clip A) | 161 | 14 | Messung läuft |
-| Spuren gesamt / ab 10 s (Clip A) | 407 / 242 | 319 / 209 | Messung läuft |
-| Spuren ab 10 s mit Nummer (Clip A) | 7.9 % (19) | 3.3 % (7) | Messung läuft |
-| verschiedene Nummern ab 10 s (Clip A) | 16 | 7 | Messung läuft |
-| USD pro Spiel Modal / Azure, mit Ballnetz 960 | etwa 2.9 / 3.9 | 0.87 / 1.18 | etwa 1.27 / 1.74 |
+| gelesene Torsos pro Videosekunde A / B | 159 / 191 | 14 / 16 | 51 / 52 |
+| Spuren ab 10 s A / B | 242 / 224 | 209 / 193 | 206 / 202 |
+| davon mit Nummer, Clip A | 19 (7.9 %) | 7 (3.3 %) | 12 (5.8 %) |
+| davon mit Nummer, Clip B | 24 (10.7 %) | 9 (4.7 %) | 18 (8.9 %) |
+| verschiedene Nummern ab 10 s A / B | 16 / 19 | 7 / 8 | 11 / 15 |
+| USD pro Spiel Modal / Azure, mit Ballnetz 960 | etwa 2.9–3.3 / 3.9–4.5 | 0.87 / 1.18 | etwa 1.22 / 1.67 |
 
 - Kosten:
   - GPU-Image bisher: Auftrag 13 ohne Nummern ergibt 0.93 x Videolänge. Dazu kommen die Nummern
     mit 161 Torsos/s x 21.4 ms = 3.45 x. Zusammen etwa 4.4 x. Das Ballnetz ist im Thread ganz
     verdeckt.
   - schlank: gemessen in Auftrag 15.
-  - Mittelweg: geschätzt aus `cuda_lean` (1.06 x) plus 0.7 x mehr Nummern-Budget, also etwa
-    1.9 x. Das Ballnetz (1.06 x) bleibt verdeckt.
+  - Mittelweg: `cuda_lean` (1.06 x) ohne dessen Nummern (0.30 x) plus die gemessenen 51
+    Torsos/s x 21.4 ms = 1.09 x, zusammen etwa 1.85 x. Das Ballnetz (1.06 x) bleibt verdeckt.
 - Auf diesem Video lesen beide Varianten wenige Nummern (Halle, Abstand). Das volle Lesen findet
   aber mehr als doppelt so viele. Fast alle Mehrkosten gehen ins Nummern-Lesen, nicht in YOLOX.
 - **Entscheid Lukas (2026-11-17), GPU-Standard für die Testphase:**
@@ -716,7 +717,9 @@ Budget 0.3 auf der T4 entspricht also 0.5 auf der CPU, 1.0 entspricht 1.7.
   - geschätzt 1.27 USD pro Spiel auf Modal.
 
   Umgesetzt in `apps/gpu-worker/Dockerfile.cuda`. Staging (CPU) bleibt unverändert.
-- Nachtrag folgt: Mittelweg auf Clip A, alle drei Varianten auf Clip B.
+- Der Mittelweg holt 60 % (A) bzw. 75 % (B) der Spuren mit Nummer des vollen Lesens und gut
+  70 % der verschiedenen Nummern, für rund 40 % der Kosten. Die Erkennung auf jedem Bild gibt etwa
+  10 % mehr lange Spuren.
 
 ### Pausenerkennung über die Hallentafel verbessert (2026-11-18)
 
@@ -763,3 +766,42 @@ dieser Spanne als Spiel gilt:
 - Rückfall, falls die Tafel ganz fehlt: Er ist schon da (`clock_too_sparse` sperrt dann nicht).
   Für eine eigene Pausenerkennung ohne Tafel bietet sich die `no_play`-Regel der Tor-Kandidaten
   an (Kamera geparkt, Spieler zusammengedrängt). Das ist ein eigener Schritt.
+
+**Nachtrag: Lukas' ganzes 99-min-Video.** Die Tafel ohne Zeitbudget gelesen, 906 Lesungen. Ein
+erster Lauf mit dem Budget von 10 % übersprang auf der ausgelasteten Maschine 678 Lesungen und fand
+nach Minute 60 nichts mehr; das Budget hängt von der echten Uhr ab.
+- Lesungen pro 10 min: keine bis Minute 10, dann 30 / 3 / 97 / 568 / 73 (Pause, Uhr bei 0:00) /
+  25 / keine (Minute 70 bis 80) / 61 / 49.
+- Erste Halbzeit läuft ab 12:48 Video, zweite ab etwa 64 min; nach 92.3 min keine Lesung mehr.
+- Spiel laut `play_intervals`: vorher 21.1 min, nachher 48.2 min (ohne Füllen 44.0). In den
+  gelesenen Spannen lief die Uhr etwa 54 min (erste Halbzeit 0:39 bis 30:00, zweite 1:55 bis
+  26:29).
+- Offen: das Spielende. Nach dem letzten Uhrlauf ohne weitere Lesung endet das Spiel heute 7.5 s
+  danach. Vorschlag: bis zum Videoende weiterzählen, wenn die Uhr zuletzt lief und keine stehende
+  Uhr gelesen wurde.
+
+### Teamzuordnung: Torhüterfarbe als Feldfarbe (Staging 2026-11-17, #82, #83)
+
+- Befund: In `stats.ball.possessions` war das Team fast immer `home_gk`. Gesendet wurden `home`
+  #1f4fd6 (die alte, nicht gewählte Vereinsfarbe) und `home_gk` #f59e0b, kein Away-Kit. Die Teams
+  spielten in Gelb/Schwarz und Rot/Weiss; das Torhüter-Gelb passte auf alle gelben Feldspieler.
+- #82: Ein `_gk`-Label, das meist mehr als zwei Spuren gleichzeitig tragen, ist eine Feldfarbe.
+- #83: Eine nicht gewählte eigene Farbe wird nicht gesendet, und die Farbgruppen trennen die
+  Teams auch mit einem oder ohne Team-Kit.
+- Clip A mit den Staging-Kits, Besitzphasen: vorher home_gk 177 / home 10; mit #82 home 187; mit
+  #82 und #83 home 86 / away 79, dazu Torhüter 19 und Schiri 3. Referenz mit passenden Kits:
+  home 61 / away 92, dazu Torhüter 15 und Schiri 6.
+
+### Staging-Befunde aus den Logs (UX-Diagnose 2026-11-18)
+
+- DB-Spitze am 17.11. 08:53 bis 08:58: Die API wurde vom HTTP-Scaler auf 2 Replikas gehoben, alle
+  11 TooManyConnections fallen in dieses Fenster. Kein Deploy, kein Job. Rechnerisch sind das nur
+  2 x 2 x (4+1) = 20 Verbindungen. Ob das Limit des B1ms-Servers tiefer liegt oder andere
+  Verbindungen mitzählen, ist offen, weil die Postgres-Logs nicht in Log Analytics landen.
+  Nächste Schritte: application_name pro API-Prozess (Produkt); Postgres-Diagnose nach Log
+  Analytics, Pool bzw. Replikas an die Slots koppeln (Terraform, UX).
+- Die "stündlichen Neustarts" der Worker sind Deploys (7 Revisionen am Nachmittag und Abend). Redis
+  wird dabei ersetzt und hat keine Persistenz; ein Job, der nur in der Warteschlange stand, geht
+  verloren, und der Watchdog nimmt nur laufende Jobs wieder auf. Nächste Schritte: Watchdog auch
+  für wartende Jobs ohne RQ-Job (Produkt); Redis nicht bei jedem Deploy ersetzen oder AOF
+  (Terraform, UX).

@@ -94,7 +94,13 @@ class TrainingTip(ApiModel):
 
 
 class TrainingTipsOut(ApiModel):
-    matches_analysed: int
+    matches_analysed: int = Field(description="Matches the tips are drawn from (with events)")
+    matches_with_analysis: int = Field(
+        default=0, description="Of these, matches with data beyond the official report"
+    )
+    matches_from_report: int = Field(
+        default=0, description="Of these, matches known only from the official report"
+    )
     plan_required: bool
     matches: list[TipMatch]
     tips: list[TrainingTip]

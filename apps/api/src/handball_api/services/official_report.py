@@ -530,6 +530,8 @@ async def _write_result(
             "url": report.source_url,
             "home": report.home,
             "away": report.away,
+            # our players on the match sheet: appearances in the season line (A3)
+            **({"lineup": report.lineup[own_team]} if report.lineup.get(own_team) else {}),
         },
     }
     await ctx.db.flush()

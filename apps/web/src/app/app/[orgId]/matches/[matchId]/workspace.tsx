@@ -127,7 +127,7 @@ export function Workspace({
   const [activeShot, setActiveShot] = useState<string | null>(null);
   useEffect(() => {
     if (!reviewing) return;
-    const onEsc = (e: KeyboardEvent) => e.key === "Escape" && setReviewing(false);
+    const onEsc = (e: KeyboardEvent) => e.key === "Escape" && (e.preventDefault(), setReviewing(false));
     window.addEventListener("keydown", onEsc);
     const before = document.body.style.overflow;
     document.body.style.overflow = "hidden";

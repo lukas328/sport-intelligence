@@ -10,6 +10,7 @@ import { CollectionEditor, CollectionTitle } from "./collection-editor";
 import { ShareBox } from "./share-box";
 import { OG_VERSION } from "@/lib/share/meta";
 import { blockedReason } from "@/lib/share/policy";
+import { clubTeam } from "@/lib/own-name";
 
 type Params = { params: Promise<{ orgId: string; collectionId: string }> };
 
@@ -70,14 +71,17 @@ export default async function CollectionPage({ params }: Params) {
         <section aria-labelledby="run" className="min-w-0">
           <SectionHead title={<span id="run">{t("run")}</span>} note={summary} />
           <CollectionEditor orgId={orgId} collection={c} />
-          <div className="mt-4 flex flex-wrap gap-2.5">
-            <Link href={`${base}/teams/${c.team_id}/scenes`} className={buttonClass("secondary", "sm")}>
-              {t("addScene")}
-            </Link>
-            <Link href={`${base}/teams/${c.team_id}/plays`} className={buttonClass("secondary", "sm")}>
-              {t("addPlay")}
-            </Link>
-          </div>
+          {c.editable && (
+            <div className="mt-4 flex flex-wrap gap-2.5">
+              {/* the scenes open for this collection: found scenes go into it, a link leads back (A5) */}
+              <Link href={`${base}/teams/${c.team_id}/scenes?collection=${c.id}`} className={buttonClass("secondary", "sm")} data-testid="add-scene">
+                {t("addScene")}
+              </Link>
+              <Link href={`${base}/teams/${c.team_id}/plays`} className={buttonClass("secondary", "sm")}>
+                {t("addPlay")}
+              </Link>
+            </div>
+          )}
         </section>
         <aside className="flex min-w-0 flex-col gap-8">
           <div>
@@ -90,7 +94,7 @@ export default async function CollectionPage({ params }: Params) {
                   <img src={`/s/${link.token}/og?v=${OG_VERSION}`} alt="" width={1200} height={630} className="block h-auto w-full" />
                   <p className="m-0 px-1.5 pt-2 text-[15px]">
                     <b className="block text-[15px]">{c.title}</b>
-                    {[org?.name, team?.name].filter(Boolean).join(" ")} · {summary}
+                    {clubTeam(org?.name, team?.name)} · {summary}
                   </p>
                 </div>
               ) : (
@@ -100,7 +104,7 @@ export default async function CollectionPage({ params }: Params) {
                   </div>
                   <p className="m-0 px-1.5 pt-2 text-[15px]">
                     <b className="block text-[15px]">{c.title}</b>
-                    {[org?.name, team?.name].filter(Boolean).join(" ")} · {summary}
+                    {clubTeam(org?.name, team?.name)} · {summary}
                   </p>
                 </div>
               )}
