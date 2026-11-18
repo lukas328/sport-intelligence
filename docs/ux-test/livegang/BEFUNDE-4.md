@@ -16,4 +16,4 @@ wird erst auf sein Zeichen. Prio P1 (vor dem nächsten Test), P2 (bald), P3 (sp�
 - Torhüter im Gratis-Plan angehakt: bleibt so, Torhüter wird ein Standard-Feature.
 - Stripe und der frühere Torhüter-Zuschlag: Auf Staging ist Stripe nicht eingerichtet (`checkout_available` false), niemand konnte den Zuschlag über Stripe buchen. Nichts zu tun.
 - Lizenz Wiedererkennungsmodell (MSMT17): zur Kenntnis genommen, vor dem Verkauf klären.
-- Testspuren im Konto TV Thalwil: dürfen entfernt werden.
+- Testspuren im Konto TV Thalwil: entfernt am 18.11. (Run 44261823276): Spielzug «Test Claude Review», Entwurfs-Sammlung «Gegen Demo HC Beispiel» mit 2 Szenen, Teamleben wieder aus (hielt keine Termine, Zusagen oder Trainings). Nachkontrolle: nichts übrig.
