@@ -56,7 +56,7 @@ export default async function Help({ params }: Props) {
         lead={t.lead}
         aside={<FindField label={t.search} hint={t.searchHint} texts={texts} hits={t.hits} hitsOne={t.hitsOne} />}
       />
-      <div className="wrap grid grid-cols-1 gap-x-14 lg:grid-cols-[minmax(0,52rem)_minmax(0,1fr)]">
+      <div className="wrap grid grid-cols-1 gap-x-14 lg:grid-cols-[minmax(0,1fr)_16rem] xl:grid-cols-[minmax(0,52rem)_minmax(0,1fr)]">
         <div className="min-w-0">
           {THEMES.map((g) => {
             const list = questions.filter((q) => q.g === g);
@@ -135,7 +135,7 @@ export default async function Help({ params }: Props) {
             <h2 id="not-found" className="text-[1.75rem]">
               {t.asideTitle}
             </h2>
-            <p className="mt-3">
+            <p className="mt-3 [overflow-wrap:anywhere]">
               <MailLine template={m.help.contact} />
             </p>
             <ul className="mt-3">
