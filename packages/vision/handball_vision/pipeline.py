@@ -413,6 +413,11 @@ def _finish(
         if team_out[tid]["label"] != label:
             team_out[tid]["label"] = label
             team_out[tid]["label_source"] = "cluster"
+    # a goalkeeper kit that fits a whole team (the keeper colour entered equals a team's field
+    # shirts): those players are field players; the position rule below finds the real keepers
+    for tid in crowded_keepers(points, {t: str(v["label"]) for t, v in team_out.items()}):
+        team_out[tid]["label"] = str(team_out[tid]["label"]).removesuffix("_gk")
+        team_out[tid]["label_source"] = "keeper_crowd"
     # goalkeepers by position and by which team defends their goal (kit colours often missing)
     pts = [(round(p.frame * 1000 / fps), p.track_id, p.x, p.y) for p in points]
     observed = [(round(p.frame * 1000 / fps), p.track_id, p.x, p.y) for p in points if p.observed]
@@ -470,6 +475,29 @@ def _finish(
         detections_per_frame=n_dets / max(1, n),
         extra={"raw_tracks": raw_tracks, "tracks": len(team_out), **extra},
     )
+
+
+MAX_KEEPERS_AT_ONCE = 2  # one keeper per team on court, plus a moment of overlap at a change
+CROWD_SHARE = 0.5  # share of the keeper label's frames with more tracks at once than that
+
+
+def crowded_keepers(points: list[TrackPoint], labels: dict[int, str]) -> list[int]:
+    """Tracks with a goalkeeper label ("home_gk", "away_gk") from a label that is worn by more
+    than `MAX_KEEPERS_AT_ONCE` tracks at once in at least `CROWD_SHARE` of the frames it is seen
+    in: a team has one keeper on court, so such a label is really a field kit (staging
+    2026-11-17: the keeper colour entered was the opponents' yellow, all their players became
+    "home_gk" and the ball possession statistics showed one team only)."""
+    at: dict[str, dict[int, set[int]]] = defaultdict(lambda: defaultdict(set))
+    for p in points:
+        label = labels.get(p.track_id, "")
+        if label.endswith("_gk") and p.observed:
+            at[label][p.frame].add(p.track_id)
+    out: list[int] = []
+    for frames in at.values():
+        crowded = sum(len(v) > MAX_KEEPERS_AT_ONCE for v in frames.values())
+        if crowded >= CROWD_SHARE * len(frames):
+            out.extend(sorted({t for v in frames.values() for t in v}))
+    return out
 
 
 def _drop_bench(

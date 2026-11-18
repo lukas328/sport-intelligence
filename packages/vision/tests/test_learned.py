@@ -449,6 +449,22 @@ def test_teams_are_labelled_relative_to_the_match_colours() -> None:
     assert labels[16] == labels[17] == "referee"
 
 
+def test_a_keeper_kit_worn_by_a_whole_team_is_a_field_kit() -> None:
+    from handball_vision.pipeline import crowded_keepers
+    from handball_vision.tracking import TrackPoint
+
+    pts = []
+    for f in range(100):
+        for tid in range(1, 6):  # five "home_gk" players on court at once: a field kit
+            pts.append(TrackPoint(tid, f, 10.0 + tid, 5.0, 0.0, 0.0, True, None))
+        pts.append(TrackPoint(9, f, 1.0, 10.0, 0.0, 0.0, True, None))  # the away keeper
+    labels = {**{t: "home_gk" for t in range(1, 6)}, 9: "away_gk"}
+    assert crowded_keepers(pts, labels) == [1, 2, 3, 4, 5]
+    # a keeper change (two at once for a moment) is no crowd
+    labels2 = {1: "home_gk", 2: "home_gk"}
+    assert crowded_keepers([p for p in pts if p.track_id in (1, 2)], labels2) == []
+
+
 def test_goalkeepers_by_position_and_defending_team() -> None:
     from handball_vision.events import assign_goalkeepers
 
