@@ -55,3 +55,7 @@ backend.hcl
 
 # raw captures of apps/web/screens, turned into JPEGs by docs/screens/build.py
 docs/screens/png/
+
+# the app pictures' captures in each club colour (apps/site/scripts/product-shots, U45): large and
+# made again with capture.mjs --colours, so only the pictures made from them are in the repository
+apps/site/scripts/product-shots/captures/colours/
