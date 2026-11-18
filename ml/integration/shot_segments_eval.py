@@ -49,6 +49,9 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
 TOL_S = 2.0
+# the rule the shot candidates were built for (ml/goals/shot_eval.py): the candidate's peak from 3 s
+# before to 8 s after the marked moment; reported next to the strict +-2 s of the estimated time
+DESIGN_WINDOW_S = (3.0, 8.0)
 BALL_WINDOW_S = 1.5
 OWNER = "lukasde1000"
 DENSE_S = 8.0
@@ -200,12 +203,10 @@ def _segment_results(d: Path) -> dict:
 
     obs = learned.load_observations(d / "observations.npz", CameraMotion.load(d / "motion.npz"))
     found = gc.from_observations(obs) or {"candidates": [], "shots": {"candidates": []}}
-    goals = [c["goal_ms"] / 1000 for c in found["candidates"] if c["rate"] <= gc.DEFAULT_RATE]
-    shots = [
-        c["goal_ms"] / 1000
-        for c in found["shots"]["candidates"]
-        if c["rate"] <= gc.SHOT_DEFAULT_RATE
-    ]
+    g_c = [c for c in found["candidates"] if c["rate"] <= gc.DEFAULT_RATE]
+    s_c = [c for c in found["shots"]["candidates"] if c["rate"] <= gc.SHOT_DEFAULT_RATE]
+    goals = [c["goal_ms"] / 1000 for c in g_c]
+    shots = [c["goal_ms"] / 1000 for c in s_c]
     points: list[int] = []
     if obs.ball_cands:
         first, path, _ = ball_path_v2(obs, obs.ball_cands)
@@ -215,20 +216,26 @@ def _segment_results(d: Path) -> dict:
         "frames": obs.total,
         "goal_cands": goals,
         "shot_cands": shots,
+        "goal_peaks": [c["t_ms"] / 1000 for c in g_c],
+        "shot_peaks": [c["t_ms"] / 1000 for c in s_c],
         "ball_frames": points,
     }
     cached.write_text(json.dumps(res))
     return res
 
 
-def _match(marks: list[float], cands: list[float], tol: float) -> tuple[list[bool], int]:
-    """Per mark whether a candidate lies within tol (each candidate used once, nearest pairs
-    first); and the number of candidates that found a mark."""
+def _match(
+    marks: list[float], cands: list[float], tol: float | tuple[float, float]
+) -> tuple[list[bool], int]:
+    """Per mark whether a candidate lies within tol (a pair (before, after): from `before` s
+    before to `after` s after the mark); each candidate used once, nearest pairs first; and the
+    number of candidates that found a mark."""
+    before, after = (tol, tol) if isinstance(tol, float) else tol
     pairs = sorted(
         (abs(c - m), i, j)
         for i, m in enumerate(marks)
         for j, c in enumerate(cands)
-        if abs(c - m) <= tol
+        if -before <= c - m <= after
     )
     hit, used = [False] * len(marks), set()
     for _, i, j in pairs:
@@ -250,6 +257,8 @@ def _per_segment(marks: dict[str, list], out: Path) -> dict[str, dict]:
         all_t = [t for t, _ in shots]
         g_hit, g_used = _match(goals, r["goal_cands"], TOL_S)
         s_hit, s_used = _match(all_t, r["shot_cands"], TOL_S)
+        gd_hit, gd_used = _match(goals, r["goal_peaks"], DESIGN_WINDOW_S)
+        sd_hit, sd_used = _match(all_t, r["shot_peaks"], DESIGN_WINDOW_S)
         frames = set(r["ball_frames"])
         cover = []
         for t, _ in shots:
@@ -261,6 +270,10 @@ def _per_segment(marks: dict[str, list], out: Path) -> dict[str, dict]:
             "dense": dense_cover,
             "game": _game(seg),
             "shots": [(o, s_hit[k], cover[k]) for k, (_, o) in enumerate(shots)],
+            "design_shots": [(o, sd_hit[k]) for k, (_, o) in enumerate(shots)],
+            "goals_found_design": sum(gd_hit),
+            "goal_cands_hit_design": gd_used,
+            "shot_cands_hit_design": sd_used,
             "goals_found": sum(g_hit),
             "goals": len(goals),
             "goal_cands": len(r["goal_cands"]),
@@ -293,6 +306,20 @@ def _stats(per: dict[str, dict]) -> dict[str, float]:
     sc_n = sum(p["shot_cands"] for p in per.values())
     out["shot cand. precision"] = (
         sum(p["shot_cands_hit"] for p in per.values()) / sc_n if sc_n else float("nan")
+    )
+    goals_n = sum(p["goals"] for p in per.values())
+    out["-3/+8 s: goal recall"] = (
+        sum(p["goals_found_design"] for p in per.values()) / goals_n if goals_n else float("nan")
+    )
+    out["-3/+8 s: goal cand. precision"] = (
+        sum(p["goal_cands_hit_design"] for p in per.values()) / gc_n if gc_n else float("nan")
+    )
+    ds = [s for p in per.values() for s in p["design_shots"]]
+    out["-3/+8 s: shot recall"] = share([h for _, h in ds])
+    for o in ("goal", "save", "miss"):
+        out[f"  -3/+8 s: {o}"] = share([h for oo, h in ds if oo == o])
+    out["-3/+8 s: shot cand. precision"] = (
+        sum(p["shot_cands_hit_design"] for p in per.values()) / sc_n if sc_n else float("nan")
     )
     out["ball coverage +-1.5 s"] = share([c for _, _, c in shots])
     out["shots with ball >= 50 %"] = share([c >= 0.5 for _, _, c in shots])

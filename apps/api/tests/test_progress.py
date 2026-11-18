@@ -256,6 +256,47 @@ async def test_watchdog_restarts_a_silent_job_once_then_ends_it(
     assert (await api.http.post("/internal/watchdog")).status_code in (403, 422)
 
 
+async def test_a_killed_work_horse_is_restarted_at_once_then_ended(
+    make_api: Callable[[], Api], owner_conn: asyncpg.Connection
+) -> None:
+    """Staging 18.11.: the analysis was killed (out of memory, «waitpid returned 9») and the app
+    showed «Analyse läuft» on. The worker reports the killed work horse (handball_jobkit
+    rqworker.WORKER_LOST): restarted at once, the second time ended as failed («stalled»)."""
+    api = make_api()
+    ids = await setup_club(api)
+    m = await new_match(api, ids)
+    video = await upload(api, ids, m["id"], b"v" * 100)
+    first = [j for j in _jobs(api).jobs if j[3].get("asset_id") == video["id"]][-1][2]
+    lost = {
+        "status": "failed",
+        "progress": 0.0,
+        "error": "worker lost: work horse killed by signal 9 (likely out of memory)",
+    }
+    await api.http.post(
+        f"/internal/jobs/{first}", headers=_token(api), json={"status": "running", "progress": 0.3}
+    )
+    r = await api.http.post(f"/internal/jobs/{first}", headers=_token(api), json=lost)
+    assert r.status_code == 200, r.text
+    second = [j for j in _jobs(api).jobs if j[3].get("asset_id") == video["id"]][-1][2]
+    assert second != first
+    row = await owner_conn.fetchrow(
+        "SELECT status, error FROM processing_jobs WHERE id = $1", uuid.UUID(first)
+    )
+    assert row["status"] == "cancelled" and row["error"].startswith(progress.STALLED_ERROR)
+    detail = (await api.get(f"/v1/orgs/{ids['org']}/matches/{m['id']}")).json()
+    f = detail["progress"]["files"][0]
+    assert (f["state"], f["restarted"]) == ("queued", True)
+
+    await api.http.post(
+        f"/internal/jobs/{second}", headers=_token(api), json={"status": "running", "progress": 0.1}
+    )
+    await api.http.post(f"/internal/jobs/{second}", headers=_token(api), json=lost)
+    assert [j for j in _jobs(api).jobs if j[3].get("asset_id") == video["id"]][-1][2] == second
+    detail = (await api.get(f"/v1/orgs/{ids['org']}/matches/{m['id']}")).json()
+    f = detail["progress"]["files"][0]
+    assert (detail["progress"]["state"], f["error"], f["retry"]) == ("failed", "stalled", True)
+
+
 async def test_watchdog_enqueues_again_a_job_redis_lost(
     make_api: Callable[[], Api], owner_conn: asyncpg.Connection
 ) -> None:
