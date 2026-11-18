@@ -6,6 +6,8 @@ import { KitScope } from "@/components/kit";
 import { PageHead, SectionHead, Updated } from "@/components/wurf-head";
 import { factRows } from "@/lib/facts";
 import { messages, type Locale } from "@/lib/i18n";
+import type { Messages } from "@/messages/de";
+import { GUIDES } from "../../../../content/ratgeber";
 import { APP_ID, graph, organization, softwareApplication, webPage, website } from "@/lib/schema";
 import { pageMeta } from "@/lib/seo";
 import { PAGE_UPDATED, SITE_UPDATED, pageUrl } from "@/lib/site";
@@ -22,6 +24,33 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
  * «Fakten auf einen Blick»: the same statements as the rest of the site, as text and as a table,
  * short enough to be quoted word for word (by people and by AI assistants). Same source as llms.txt.
  */
+/**
+ * The link after a fact (U28: two or three sentences in the cell, the rest one click away). A
+ * guide that is not in this language opens in German, marked as such.
+ */
+function MoreLink({ locale, to, m }: { locale: Locale; to: string; m: Messages }) {
+  const labels: Record<string, string> = {
+    aufnahme: m.cta.filming,
+    "so-funktioniert-es": m.cta.how,
+    demo: m.cta.demo,
+    preise: m.cta.pricing,
+    datenschutz: m.data.privacyLink,
+    daten: m.cta.data,
+  };
+  const guide = to.startsWith("ratgeber/") ? GUIDES.find((g) => `ratgeber/${g.slug}` === to) : undefined;
+  const own = !guide || guide.locales.includes(locale);
+  const l: Locale = own ? locale : "de";
+  const label = guide ? guide.title[l]! : labels[to];
+  if (!label) return null;
+  return (
+    <span className="block">
+      <Link href={`/${l}/${to}/`} className="link" hrefLang={own ? undefined : l} lang={own ? undefined : l}>
+        {label}
+      </Link>
+    </span>
+  );
+}
+
 export default async function Facts({ params }: Props) {
   const { locale } = await params;
   const m = messages(locale);
@@ -35,6 +64,8 @@ export default async function Facts({ params }: Props) {
     ["ratgeber", m.nav.guides],
     ["ueber-uns", m.nav.us],
     ["hilfe", m.nav.faq],
+    // the blog stays reachable here while it is too small for the footer (U28)
+    ["blog", m.nav.blog],
   ];
   return (
     <KitScope>
@@ -58,7 +89,10 @@ export default async function Facts({ params }: Props) {
                   <th scope="row" className="block pt-4 text-left font-bold md:table-cell md:w-[14rem] md:py-4 md:pr-4">
                     {r.k}
                   </th>
-                  <td className="block pb-4 leading-[1.55] [overflow-wrap:anywhere] md:table-cell md:pt-4">{r.v.includes("@") ? <a href={`mailto:${r.v}`} className="link">{r.v}</a> : r.v}</td>
+                  <td className="block pb-4 leading-[1.55] [overflow-wrap:anywhere] md:table-cell md:pt-4">
+                    {r.v.includes("@") ? <a href={`mailto:${r.v}`} className="link">{r.v}</a> : r.v}
+                    {r.to && <MoreLink locale={locale} to={r.to} m={m} />}
+                  </td>
                 </tr>
               ))}
             </tbody>
