@@ -264,9 +264,9 @@ body {
 
 #stage.steps {
   /* the site's ink, a step softer, and the club's green */
-  --night: #25292d;
-  --night-2: #2f3439;
-  --night-3: #3a4046;
+  --night: #2d3237;
+  --night-2: #383e44;
+  --night-3: #454c53;
   --pitch: #10684a;
   --pitch-2: #0d5a40;
   --pitch-3: #1b7d5a;

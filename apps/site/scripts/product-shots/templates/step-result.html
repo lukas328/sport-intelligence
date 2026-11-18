@@ -3,7 +3,7 @@
      website's match, large: a huge yellow «11», «von 29», «Gegentore über aussen rechts»; under
      it the half court with the goal at the top, the green goal area, and the 11 shot spots of the
      demo match (src/lib/story.ts, saturday(): all at the right wing) as yellow dots with their way
-     into the goal, in a soft yellow light. Over it the collection the
+     into the goal. Over it the collection the
      coach sends to the team chat, as the app shows it: «Aussen rechts zumachen» on the club's
      green, «4 Szenen», «HC Tannengrün Herren 1» and «Link teilen». In de, fr and en. -->
 <meta charset="utf-8" />
@@ -120,16 +120,14 @@
   g.push(`<path d="M${P([[9.5, 7], [10.5, 7]])}" ${L}/>`);
   g.push(`<path d="M${P([[0, 0], [20, 0], [20, 22], [0, 22]])}Z" ${L}/>`);
   g.push(`<path d="M${P([[8.5, 0], [8.5, -1], [11.5, -1], [11.5, 0]])}" fill="${K.night}" stroke="${K.attn}" stroke-width="4"/>`);
-  // the 11 over the right wing: a light on the place, each shot's way into the goal, the spot
-  const [hx, hy] = M([18.5, 1.6]);
-  g.push(`<circle cx="${hx.toFixed(1)}" cy="${hy.toFixed(1)}" r="54" fill="${K.attn}" fill-opacity=".16"/>`);
+  // the 11 over the right wing: each shot's way into the goal, then the spot
   RA.forEach((p, i) => {
     const aim = [8.8 + (2.4 * i) / (RA.length - 1), 0];
-    g.push(`<path d="M${P([p, aim])}" stroke="${K.attn}" stroke-opacity=".55" stroke-width="2"/>`);
+    g.push(`<path d="M${P([p, aim])}" stroke="${K.attn}" stroke-opacity=".6" stroke-width="2.2"/>`);
   });
   for (const p of RA) {
     const [x, y] = M(p);
-    g.push(`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="9" fill="${K.attn}" stroke="${K.ink}" stroke-width="2.6"/>`);
+    g.push(`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="11" fill="${K.attn}" stroke="${K.ink}" stroke-width="2.8"/>`);
   }
   ground(g.join(""));
 
