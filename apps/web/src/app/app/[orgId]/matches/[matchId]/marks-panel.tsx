@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ChevronDown, Hand, Play } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { api } from "@/lib/client";
+import { MATCHDAY_OFFERED } from "@/lib/features";
 
 /** "Marked during the match" (addendum 01, 5.3): the coach track after the automatic sync. */
 export function MarksPanel({ orgId, matchId, onPlay }: { orgId: string; matchId: string; onPlay?: (ms: number) => void }) {
@@ -34,9 +35,11 @@ export function MarksPanel({ orgId, matchId, onPlay }: { orgId: string; matchId:
         <ChevronDown aria-hidden className="ml-auto size-4 text-muted transition-transform group-open:rotate-180" />
       </summary>
       <div className="mt-3 space-y-3 text-sm">
-        <Link href={`/app/${orgId}/matches/${matchId}/marks`} className="font-medium text-accent underline decoration-[1.5px] underline-offset-4">
-          {t("open")}
-        </Link>
+        {MATCHDAY_OFFERED && (
+          <Link href={`/app/${orgId}/matches/${matchId}/marks`} className="font-medium text-accent underline decoration-[1.5px] underline-offset-4">
+            {t("open")}
+          </Link>
+        )}
         {(d?.sessions ?? []).map((s) => (
           <div key={s.id} className="flex flex-wrap items-center gap-2 text-muted">
             <span>

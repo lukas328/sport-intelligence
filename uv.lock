@@ -670,7 +670,7 @@ dependencies = [
     { name = "defusedxml" },
     { name = "email-validator" },
     { name = "fastapi" },
-    { name = "handball-court" },
+    { name = "handball-court", extra = ["clicks"] },
     { name = "handball-jobkit" },
     { name = "handball-metrics" },
     { name = "httpx" },
@@ -710,7 +710,7 @@ requires-dist = [
     { name = "defusedxml", specifier = ">=0.7" },
     { name = "email-validator", specifier = ">=2.2" },
     { name = "fastapi", specifier = ">=0.115" },
-    { name = "handball-court", editable = "packages/court" },
+    { name = "handball-court", extras = ["clicks"], editable = "packages/court" },
     { name = "handball-jobkit", editable = "packages/jobkit" },
     { name = "handball-metrics", editable = "packages/metrics" },
     { name = "httpx", specifier = ">=0.28" },
@@ -742,6 +742,19 @@ requires-dist = [
 name = "handball-court"
 version = "0.1.0"
 source = { editable = "packages/court" }
+
+[package.optional-dependencies]
+clicks = [
+    { name = "numpy" },
+    { name = "scipy" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "numpy", marker = "extra == 'clicks'", specifier = ">=1.26" },
+    { name = "scipy", marker = "extra == 'clicks'", specifier = ">=1.14" },
+]
+provides-extras = ["clicks"]
 
 [[package]]
 name = "handball-gpu-worker"
@@ -819,7 +832,7 @@ version = "0.1.0"
 source = { editable = "packages/vision" }
 dependencies = [
     { name = "av" },
-    { name = "handball-court" },
+    { name = "handball-court", extra = ["clicks"] },
     { name = "numpy" },
     { name = "onnxruntime" },
     { name = "opencv-python-headless" },
@@ -830,7 +843,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "av", specifier = ">=14" },
-    { name = "handball-court", editable = "packages/court" },
+    { name = "handball-court", extras = ["clicks"], editable = "packages/court" },
     { name = "numpy", specifier = ">=2.1" },
     { name = "onnxruntime", specifier = ">=1.20" },
     { name = "opencv-python-headless", specifier = ">=4.10,<5" },

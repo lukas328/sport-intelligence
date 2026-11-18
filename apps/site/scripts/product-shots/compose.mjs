@@ -11,6 +11,9 @@
  *   node apps/site/scripts/product-shots/compose.mjs step-check  # only the named ones
  *   node apps/site/scripts/product-shots/compose.mjs --preview /tmp/shots   # plus PNGs with arrows
  *
+ * A template with words in the picture (the steps) names its languages (`S.stage(…, { langs })`);
+ * it is then made once per language: <name>-de.webp, <name>-fr.webp, <name>-en.webp.
+ *
  * Needs no app and no network: only Chromium (Playwright) and the committed captures.
  */
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
@@ -107,7 +110,9 @@ async function main() {
     .filter((n) => !only.length || only.includes(n));
   const encoder = await browser.newPage();
   let failed = 0;
-  for (const name of names) {
+  /** one picture: the template in `lang` (or without one), photographed and written */
+  async function render(name, lang) {
+    const file = lang ? `${name}-${lang}` : name;
     const ctx = await browser.newContext({
       viewport: { width: 1600, height: 1200 },
       deviceScaleFactor: 2,
@@ -119,13 +124,17 @@ async function main() {
     const errors = [];
     page.on("pageerror", (e) => errors.push(e.message));
     try {
-      await page.goto(pathToFileURL(join(TEMPLATES, `${name}.html`)).href);
+      const url = pathToFileURL(join(TEMPLATES, `${name}.html`));
+      if (lang) url.search = `?lang=${lang}`;
+      await page.goto(url.href);
       await page
         .waitForFunction(() => window.READY || window.SHOT?.error, null, { timeout: 20000 })
         .catch(() => {});
       if (errors.length) throw new Error(errors.join("; "));
       const shot = await page.evaluate(() => window.READY);
       if (!shot) throw new Error("the template did not finish (no done())");
+      // a picture with words: once per language, <name>-<lang>.webp
+      if (!lang && shot.langs) return shot.langs;
       const stage = page.locator("#stage");
       const png = await stage.screenshot({
         omitBackground: shot.transparent,
@@ -133,13 +142,13 @@ async function main() {
       });
       const one = await encode(encoder, png, shot.width, shot.budget1x ?? BUDGET["1x"]);
       const two = await encode(encoder, png, shot.width * 2, shot.budget2x ?? BUDGET["2x"]);
-      writeFileSync(join(OUT, `${name}.webp`), Buffer.from(one.b64, "base64"));
-      writeFileSync(join(OUT, `${name}-2x.webp`), Buffer.from(two.b64, "base64"));
+      writeFileSync(join(OUT, `${file}.webp`), Buffer.from(one.b64, "base64"));
+      writeFileSync(join(OUT, `${file}-2x.webp`), Buffer.from(two.b64, "base64"));
       const pct = ([x, y]) => [
         +((x / shot.width) * 100).toFixed(2),
         +((y / shot.height) * 100).toFixed(2),
       ];
-      manifest[name] = {
+      manifest[file] = {
         width: one.width,
         height: one.height,
         callouts: shot.callouts.map((c) => ({
@@ -161,7 +170,7 @@ async function main() {
       };
       const kb = (b) => ((b.length * 3) / 4 / 1024).toFixed(0);
       console.log(
-        `${name}  ${one.width} x ${one.height}  1x ${kb(one.b64)} KB (q ${one.q})  2x ${kb(two.b64)} KB (q ${two.q})`,
+        `${file}  ${one.width} x ${one.height}  1x ${kb(one.b64)} KB (q ${one.q})  2x ${kb(two.b64)} KB (q ${two.q})`,
       );
       for (const w of shot.warnings) console.warn(`  ! ${w}`);
       if (PREVIEW) {
@@ -169,14 +178,19 @@ async function main() {
           (html) => document.getElementById("stage").insertAdjacentHTML("beforeend", html),
           previewOverlay(shot),
         );
-        await stage.screenshot({ path: join(PREVIEW, `${name}.png`), omitBackground: false });
+        await stage.screenshot({ path: join(PREVIEW, `${file}.png`), omitBackground: false });
       }
     } catch (e) {
       failed++;
-      console.error(`${name}: ${e instanceof Error ? e.message.split("\n")[0] : e}`);
+      console.error(`${file}: ${e instanceof Error ? e.message.split("\n")[0] : e}`);
     } finally {
       await ctx.close();
     }
+    return null;
+  }
+  for (const name of names) {
+    const langs = await render(name, null);
+    for (const lang of langs ?? []) await render(name, lang);
   }
   await browser.close();
   const sorted = Object.fromEntries(

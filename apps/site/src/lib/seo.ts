@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { HTML_LANG, LOCALES, type Locale } from "@/lib/i18n";
+import { HTML_LANG, LOCALES, messages, type Locale } from "@/lib/i18n";
 import { SITE_NAME, pageUrl } from "@/lib/site";
 
 /** hreflang value of a locale: the Swiss variants for German and French, plain English. */
@@ -13,6 +13,14 @@ export function alternates(path: string, available: readonly Locale[] = LOCALES)
   const out: Record<string, string> = Object.fromEntries(available.map((l) => [HREFLANG[l], pageUrl(l, path)]));
   out["x-default"] = pageUrl(available.includes("de") ? "de" : (available[0] ?? "de"), path);
   return out;
+}
+
+/**
+ * The link preview picture of a locale (public/og-{locale}.png, made by
+ * docs/design/brand2/taktik/build.js with the start page's tagline) and its alt text.
+ */
+export function ogImage(locale: Locale) {
+  return { url: `/og-${locale}.png`, width: 1200, height: 630, alt: `${SITE_NAME}: ${messages(locale).home.kick}` };
 }
 
 export interface PageMetaOptions {
@@ -31,7 +39,7 @@ export function pageMeta(locale: Locale, path: string, title: string | undefined
   const available = opts.available ?? LOCALES;
   const url = pageUrl(locale, path);
   const others = available.filter((l) => l !== locale).map((l) => HTML_LANG[l].replace("-", "_"));
-  const image = { url: "/og.png", width: 1200, height: 630, alt: SITE_NAME };
+  const image = ogImage(locale);
   return {
     // the layout adds « | Handball Intelligence»; a title that would pass 60 characters stands alone
     ...(title ? { title: `${title} | ${SITE_NAME}`.length > 60 ? { absolute: title } : title } : {}),
@@ -49,7 +57,7 @@ export function pageMeta(locale: Locale, path: string, title: string | undefined
         ? { type: "article", publishedTime: opts.article.published, modifiedTime: opts.article.modified ?? opts.article.published }
         : { type: "website" }),
     },
-    twitter: { card: "summary_large_image" },
+    twitter: { card: "summary_large_image", images: [image] },
     ...(opts.noindex ? { robots: { index: false, follow: true } } : {}),
   };
 }

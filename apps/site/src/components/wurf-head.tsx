@@ -53,7 +53,7 @@ export function WurfHead({
   return (
     <header
       data-zone="wurf"
-      className="on-club relative grid grid-cols-1 bg-club px-4 pt-6 pb-[4.5rem] text-club-ink shadow-[inset_0_0_0_2px_var(--club-edge)] [clip-path:polygon(0_0,100%_0,100%_93%,0_100%)] md:grid-cols-[minmax(0,1fr)_minmax(0,34rem)] md:gap-8 md:px-8 md:pt-10 md:pb-[11rem] md:[clip-path:polygon(0_0,100%_0,100%_calc(100%-6rem),0_100%)] lg:px-[max(2rem,calc((100vw-var(--wrap))/2+2rem))]"
+      className="on-club relative grid grid-cols-1 bg-club px-4 pt-6 pb-[4.5rem] text-club-ink shadow-[inset_0_0_0_2px_var(--club-edge)] [clip-path:polygon(0_0,100%_0,100%_93%,0_100%)] md:grid-cols-[minmax(0,1fr)_minmax(0,34rem)] md:gap-8 md:px-8 md:pt-10 md:pb-[6.5rem] md:[clip-path:polygon(0_0,100%_0,100%_calc(100%-6rem),0_100%)] lg:px-[max(2rem,calc((100vw-var(--wrap))/2+2rem))]"
     >
       <div className="min-w-0">
         {kick && <p className="mb-3 text-base font-semibold md:mb-4 md:text-[1.0625rem]">{kick}</p>}
@@ -73,7 +73,9 @@ export function WurfHead({
         <Score own={own} opp={opp} label={scoreLabel} className="mt-3 text-[min(6.5rem,25vw)] md:text-right md:text-[min(12rem,16vw)]" />
         <Flight goals={goals} width={390} height={90} className="-mx-4 mt-6 w-[calc(100%+2rem)] md:hidden" />
       </div>
-      <Flight goals={goals} width={1000} height={120} labels={flightLabels} slant={48} className="absolute right-0 bottom-[2.5rem] left-0 hidden w-full md:block" />
+      {/* the run of the match under the text, in the flow with its own row, so it never runs
+          through the lead at any width (BEFUNDE-4 U43) */}
+      <Flight goals={goals} width={1000} height={120} labels={flightLabels} slant={48} className="mt-10 hidden w-full md:col-span-2 md:block" />
     </header>
   );
 }

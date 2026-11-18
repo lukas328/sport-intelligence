@@ -1,16 +1,15 @@
 /*
- * The hall as a drawing (steps «Filmen» and «Prüfen», U1 and U3): a handball court of 40 x 20 m
- * with its goal areas, 9 m lines and goals, in a hall, seen through a camera in true perspective.
- * Calm and sharp in the site's colours (cream, the club's green, ink), no people, no words.
- * step-film looks at it from behind and above the filming phone; step-check from the phone
- * itself, as the picture the app asks about.
+ * The hall as a drawing (step «Prüfen», U33): a handball court of 40 x 20 m with its goal areas,
+ * 9 m lines and goals, in a hall, seen through a camera in true perspective. Calm and sharp in
+ * the site's colours (cream, the club's green, ink; `colors` for another palette), no people,
+ * no words. step-check shows it from the stand as the picture the app asks about.
  *
  * Metres: x along the court (0 to 40), y across it from the far sideline (0) to the near one
- * (20), z up. `HALL.view({ eye, look, focal, cx, cy })` returns the projection and the drawing
+ * (20), z up. `HALL.view({ eye, look, focal, cx, cy, colors })` returns the projection and the drawing
  * helpers; everything it draws is an SVG string in pixels.
  */
 (function () {
-  const C = {
+  const C0 = {
     paper: "#f7f6f2",
     ground: "#eceae5",
     wall: "#e3dfd6",
@@ -31,7 +30,9 @@
   /** a curve: points of f(t) for t from a to b */
   const curve = (f, a, b, n = 40) => Array.from({ length: n + 1 }, (_, i) => f(a + ((b - a) * i) / n));
 
-  function view({ eye, look, focal, cx, cy, line = 1 }) {
+  function view({ eye, look, focal, cx, cy, line = 1, colors }) {
+    // `colors` overrides the palette (the steps draw the hall on their dark ground)
+    const C = { ...C0, ...colors };
     const fwd = norm(sub(look, eye));
     const right = norm(cross(fwd, [0, 0, 1]));
     const up = cross(right, fwd);
@@ -63,7 +64,7 @@
     function nine(side) {
       const gx = side < 0 ? 0 : 40;
       const s = side < 0 ? 1 : -1;
-      const a = Math.acos(Math.min(1, 8.5 / 9));
+      const a = Math.asin(Math.min(1, 8.5 / 9));
       return [
         ...curve((t) => [gx + s * 9 * Math.cos(t), 8.5 - 9 * Math.sin(t), 0], a, 0),
         ...curve((t) => [gx + s * 9 * Math.cos(t), 11.5 + 9 * Math.sin(t), 0], 0, a),
@@ -113,5 +114,5 @@
     return { P, px, poly, path, curve, zone, nine, goal, hall, C };
   }
 
-  window.HALL = { view, C, curve };
+  window.HALL = { view, C: C0, curve };
 })();

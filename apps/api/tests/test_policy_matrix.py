@@ -19,6 +19,7 @@ from handball_api.core.email import MemoryEmailSender
 from handball_api.core.ratelimit import MemoryRateLimiter
 
 from .conftest import Api
+from .test_court_clicks import _lines as court_lines
 from .test_official_report import recorded  # noqa: F401
 
 pytestmark = pytest.mark.usefixtures("clean_db")
@@ -653,7 +654,12 @@ async def test_analysis_review_endpoints(
     await _finish(
         admin,
         jobs.jobs[-1][2],
-        {"calibration": court, "tracks": _tracks(), "goal_candidates": FOUND},
+        {
+            "calibration": court,
+            "tracks": _tracks(),
+            "goal_candidates": FOUND,
+            "panorama": {"width": 3600, "height": 1100},
+        },
     )
     goal = next(g for g in (await admin.get(f"{m}/official-report/comparison")).json()["goals"])
     cand = (await admin.get(f"{m}/goal-candidates")).json()["candidates"][0]
@@ -681,6 +687,11 @@ async def test_analysis_review_endpoints(
         ),
         ("GET analysis", READERS, lambda a, w: a.get(f"{v}/analysis")),
         ("POST court confirm", MATCH_WRITE, lambda a, w: a.post(f"{v}/calibration/confirm")),
+        (
+            "POST court clicks check",
+            MATCH_WRITE,
+            lambda a, w: a.post(f"{v}/calibration/clicks/check", json={"lines": court_lines()}),
+        ),
         (
             "PUT track identity",
             READERS,

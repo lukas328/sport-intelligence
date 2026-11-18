@@ -660,7 +660,12 @@ async def _rounds(
 
     skipped = checks.skipped_keys(match)
     fields = (
-        [_field_check(asset)] if asset is not None and tracking and confirmed_field is False else []
+        [_field_check(asset)]
+        if asset is not None
+        and tracking
+        and confirmed_field is False
+        and not checks.court_undeterminable(asset)
+        else []
     )
     files = await Files.of(ctx, match.id)
     first_ok = confirmed_field is True
@@ -668,7 +673,11 @@ async def _rounds(
         # a further part (the second half): asked only when its court was not carried over from
         # the other part (the camera rarely stands exactly where it stood); the first part's
         # court is offered
-        if not _has_tracking(a) or await _court_ok(ctx, a, files) is not False:
+        if (
+            not _has_tracking(a)
+            or checks.court_undeterminable(a)
+            or await _court_ok(ctx, a, files) is not False
+        ):
             continue
         check = _field_check(a)
         check["copy_from"] = asset.id if asset is not None and first_ok else None

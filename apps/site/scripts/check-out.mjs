@@ -64,6 +64,14 @@ export function checkOut(dir = out) {
     for (const tag of head.match(/<link rel="alternate" hrefLang="[^"]+"[^>]*>/g) ?? []) alts[attr(tag, "hrefLang")] = attr(tag, "href");
     const h1 = (html.match(/<h1[\s>]/g) ?? []).length;
     if (h1 !== 1) problems.push(`${path}: ${h1} h1`);
+    // the link preview in the page's language, for Open Graph and X alike, with an alt text
+    const pl = path.slice(1, 3);
+    for (const [key, name] of [["property", "og:image"], ["name", "twitter:image"]]) {
+      const img = attr((head.match(new RegExp(`<meta ${key}="${name}" [^>]*>`)) ?? [""])[0], "content");
+      const alt = attr((head.match(new RegExp(`<meta ${key}="${name}:alt" [^>]*>`)) ?? [""])[0], "content");
+      if (img !== `${SITE}/og-${pl}.png`) problems.push(`${path}: ${name} «${img}»`);
+      if (!alt) problems.push(`${path}: ${name} without alt text`);
+    }
     const body = html.slice(html.indexOf("<body"));
     const links = new Set(
       [...body.matchAll(/<a [^>]*href="(\/(?:de|fr|en)\/[^"#?]*)/g)].map((m) => m[1]).filter((h) => h !== path),

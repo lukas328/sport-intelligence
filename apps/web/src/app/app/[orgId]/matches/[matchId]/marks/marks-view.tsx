@@ -226,7 +226,7 @@ export function MarksView({
   return (
     <div style={style as CSSProperties} data-testid="marks">
       {/* full screen: its own narrow top bar, the head of the match, the keys, what was marked */}
-      <div className="bleed-x -mt-6 flex h-[60px] items-center justify-between gap-3 border-b-2 border-ink px-4 md:px-8 lg:-mt-8">
+      <div className="bleed-x -mt-px flex h-[60px] items-center justify-between gap-3 border-b-2 border-ink px-4 md:px-8">
         <span className="text-[15px] font-bold">{t("top")}</span>
         <button type="button" onClick={() => void share()} className="ml-auto min-h-11 cursor-pointer border-0 bg-transparent px-2 text-[15px] font-bold text-ink underline decoration-[1.5px] underline-offset-4" data-testid="share-matchday">
           {copied ? t("copied") : t("shareLink")}

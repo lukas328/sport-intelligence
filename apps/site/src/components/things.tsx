@@ -56,7 +56,7 @@ export function Things({
   scenesOf?: string;
   timesOf?: string;
   noVideo?: string;
-  /** on the start page each thing leads to its scenes in the demo (`?ding=` and the list) */
+  /** on the start page each thing leads to the demo's «Drei Dinge» with it chosen (`?ding=`), landing on the section heading so you see where you are (U38) */
   scenesHref?: string;
   /** the quiet drawing (start page): thin runs, clear dots, nothing else */
   clean?: boolean;
@@ -98,7 +98,7 @@ export function Things({
                 {t.note && <span className="mt-2 block text-base text-ink-2">{t.note}</span>}
                 {t.scenesLabel &&
                   (scenesHref ? (
-                    <DemoLink href={`${scenesHref}?ding=${i + 1}#szenen`} className="link mt-2 md:mt-3">
+                    <DemoLink href={`${scenesHref}?ding=${i + 1}#things`} className="link mt-2 md:mt-3">
                       {t.scenesLabel}
                     </DemoLink>
                   ) : (

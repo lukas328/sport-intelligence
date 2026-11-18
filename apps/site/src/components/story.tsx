@@ -3,6 +3,7 @@
  * after the defeat and the right wing before and after (the team chat: components/phone-chat.tsx).
  */
 import type { ReactNode } from "react";
+import Link from "next/link";
 import { HalfCourtLines } from "@/components/anlauf/court";
 import { HALF_BOX } from "@/components/anlauf/geometry";
 import { cn } from "@/lib/cn";
@@ -16,41 +17,63 @@ import type { Messages } from "@/messages/de";
  */
 export function When({ children, dark = false, onClub = false }: { children: ReactNode; dark?: boolean; onClub?: boolean }) {
   return (
-    <p className={cn("flex items-center gap-3 font-mono text-base font-semibold tracking-wide uppercase md:text-[1.0625rem]", onClub ? "text-club-ink" : dark ? "text-[#dcdfe2]" : "text-ink")}>
+    <p className={cn("flex items-center gap-3 font-mono text-base font-semibold tracking-wide uppercase md:text-[1.0625rem] print:break-after-avoid", onClub ? "text-club-ink" : dark ? "text-[#dcdfe2] print:text-ink" : "text-ink")}>
       <i aria-hidden className={cn("inline-block h-2 w-10 shrink-0", onClub ? "-skew-x-[14deg] bg-club-ink" : "mark-band")} />
       {children}
     </p>
   );
 }
 
-/** Saturday, 7 pm: the score, the feeling and the video nobody watches (W25). */
-export function Evening({ t, score }: { t: Messages["home"]["problemCard"]; score: string }) {
+/**
+ * Saturday, 7 pm: the score, the feeling and the video nobody watches (W25). Over the video row a
+ * yellow sticker says the turn (BEFUNDE-4 U39): the video is all it takes, the app does the
+ * analysis, with the way to «So funktioniert es». It sits in the flow under the card, pulled up
+ * over its lower edge, so it never covers the words at any width; it slaps on once after «nie
+ * angeschaut», and simply stands there without JavaScript or with reduced motion.
+ */
+export function Evening({ t, score, how }: { t: Messages["home"]["problemCard"]; score: string; how?: { text: string; href: string } }) {
   return (
-    <div role="img" aria-label={fmt(t.label, { score })} className="border-2 border-[#3a3d42] bg-[#1f2125] p-6 md:p-8">
+    <div className="pb-2">
+      <EveningCard t={t} score={score} />
+      {how && (
+        <div className="stick relative z-[1] mr-2 -mt-5 ml-auto w-fit max-w-[22rem] -rotate-2 border-2 border-ink bg-attn px-4 pt-3 pb-1.5 text-ink shadow-[6px_6px_0_#000] md:-mt-7 md:mr-6">
+          <p className="text-[1.1875rem] leading-snug font-bold">{t.sticker}</p>
+          <Link href={how.href} className="link text-[1.0625rem]">
+            {how.text}
+          </Link>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function EveningCard({ t, score }: { t: Messages["home"]["problemCard"]; score: string }) {
+  return (
+    <div role="img" aria-label={fmt(t.label, { score })} className="border-2 border-[#3a3d42] bg-[#1f2125] p-6 md:p-8 print:border-ink print:bg-transparent">
       <div aria-hidden>
         <p className="flex flex-wrap items-baseline gap-x-4">
-          <b className="font-num text-[4.5rem] leading-[.85] text-ground md:text-[6rem]">{score}</b>
-          <span className="text-[1.125rem] font-semibold text-[#dcdfe2]">{t.result}</span>
+          <b className="font-num text-[4.5rem] leading-[.85] text-ground md:text-[6rem] print:text-ink">{score}</b>
+          <span className="text-[1.125rem] font-semibold text-[#dcdfe2] print:text-ink">{t.result}</span>
         </p>
-        <div className="mt-7 border-t border-[#3a3d42] pt-5">
-          <p className="text-base font-semibold text-[#b9bec4]">{t.feelingTitle}</p>
-          <p className="mt-1 text-[1.375rem] leading-snug font-semibold text-ground md:text-[1.5rem]">{t.feeling}</p>
+        <div className="mt-7 border-t border-[#3a3d42] pt-5 print:border-rule">
+          <p className="text-base font-semibold text-[#b9bec4] print:text-ink-2">{t.feelingTitle}</p>
+          <p className="mt-1 text-[1.375rem] leading-snug font-semibold text-ground md:text-[1.5rem] print:text-ink">{t.feeling}</p>
         </div>
-        <div className="mt-6 border-t border-[#3a3d42] pt-5">
-          <p className="text-base font-semibold text-[#b9bec4]">{t.videoTitle}</p>
+        <div className="mt-6 border-t border-[#3a3d42] pt-5 print:border-rule">
+          <p className="text-base font-semibold text-[#b9bec4] print:text-ink-2">{t.videoTitle}</p>
           {/* a player bar that never moved: the playhead at 0:00 of 60:00. When the card comes in,
               the playhead twitches as if it would start, stays, and then «nie angeschaut» (S8) */}
-          <div className="mt-3 flex items-center gap-3 font-mono text-base text-[#dcdfe2]">
+          <div className="mt-3 flex items-center gap-3 font-mono text-base text-[#dcdfe2] print:text-ink">
             <svg viewBox="0 0 20 20" className="size-6 shrink-0">
               <path d="M5 3l12 7-12 7z" fill="currentColor" />
             </svg>
             <span>0:00</span>
-            <span className="relative h-1.5 flex-1 bg-[#3a3d42]">
-              <i className="nudge absolute -top-[5px] left-0 size-4 bg-ground" style={{ borderRadius: "50%" }} />
+            <span className="relative h-1.5 flex-1 bg-[#3a3d42] print:bg-rule">
+              <i className="nudge absolute -top-[5px] left-0 size-4 bg-ground print:bg-ink" style={{ borderRadius: "50%" }} />
             </span>
             <span>60:00</span>
           </div>
-          <p className="late mt-2 text-[1.0625rem] text-[#dcdfe2]">{t.video}</p>
+          <p className="late mt-2 text-[1.0625rem] text-[#dcdfe2] print:text-ink">{t.video}</p>
         </div>
       </div>
     </div>

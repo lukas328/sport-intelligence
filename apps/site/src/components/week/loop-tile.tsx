@@ -8,14 +8,14 @@ import { DrillSketch } from "./training-tip";
 export interface LoopStep {
   title: string;
   text: string;
-  href: string;
 }
 
 /**
  * «Was heisst das fürs Training?» on the start page (BEFUNDE-4 U30): the loop from a pattern to
- * training in four short steps, each with a small picture and a jump to its part of the demo
- * week: the pattern (11 of 29), why (one frame of a scene from above), the drill from the library,
- * the effect (the season bar, invented follow-up matches like on the demo page).
+ * training in four short steps, each with a small picture: the pattern (11 of 29), why (one frame
+ * of a scene from above), the drill from the library, the effect (the season bar, invented
+ * follow-up matches like on the demo page). The steps are plain titles (U38: a jump into the middle
+ * of the demo page left you not knowing where you were); one link opens the demo week at its top.
  */
 export function LoopTile({
   kick,
@@ -71,8 +71,8 @@ export function LoopTile({
       <ol className="mt-6 grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2 lg:grid-cols-4">
         {steps.map((s, i) => (
           <li key={s.title} className="min-w-0">
-            <DemoLink href={s.href} className="group grid grid-cols-[7rem_minmax(0,1fr)] items-start gap-x-4 sm:grid-cols-1">
-              <span aria-hidden className="block aspect-[4/3] overflow-hidden border-2 border-ink transition-transform duration-200 group-hover:-translate-y-0.5 motion-reduce:transition-none sm:aspect-[16/10]">
+            <div className="grid grid-cols-[7rem_minmax(0,1fr)] items-start gap-x-4 sm:grid-cols-1">
+              <span aria-hidden className="block aspect-[4/3] overflow-hidden border-2 border-ink sm:aspect-[16/10]">
                 {pictures[i]}
               </span>
               <span className="block min-w-0 sm:mt-3">
@@ -80,15 +80,15 @@ export function LoopTile({
                   <span aria-hidden className="upright text-[1.375rem] leading-none text-club-text">
                     {i + 1}
                   </span>
-                  <b className="text-[1.1875rem] leading-tight underline decoration-2 underline-offset-4 group-hover:decoration-[3px]">{s.title}</b>
+                  <b className="text-[1.1875rem] leading-tight">{s.title}</b>
                 </span>
                 <span className="mt-1 block text-[1.0625rem] text-ink-2">{s.text}</span>
               </span>
-            </DemoLink>
+            </div>
           </li>
         ))}
       </ol>
-      <DemoLink href={demoHref} className="link mt-4">
+      <DemoLink href={demoHref} className="link mt-6 text-[1.125rem]">
         {link}
       </DemoLink>
     </div>
