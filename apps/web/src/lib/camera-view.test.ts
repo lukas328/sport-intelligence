@@ -11,6 +11,13 @@ describe("tactics camera on the side of the video (real-video test G3)", () => {
     expect(inView("camR", [40, 10])).toEqual([40, 10]);
     expect(x < 40 && x + w > 40 && y < 0).toBe(true);
   });
+  it("shows both goals on the wide views, nothing cut off at the right (A14)", () => {
+    for (const v of ["camL", "camR"] as const) {
+      const [x, , w] = VIEWS[v].box;
+      expect(x).toBeLessThan(0);
+      expect(x + w).toBeGreaterThan(40);
+    }
+  });
   it("turns the right half with its goal at the top, a rotation, not a mirror", () => {
     // the goal at the top, as on the left half
     expect(inView("halfBR", [40, 10])[1]).toBe(0);

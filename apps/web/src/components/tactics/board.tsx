@@ -47,6 +47,12 @@ function viewOf(court: "half" | "full", portrait: boolean, from?: number): View 
   return portrait ? { portrait, x0, x1, w: COURT.width + 2 * PAD, h: span + 2 * PAD } : { portrait, x0, x1, w: span + 2 * PAD, h: COURT.width + 2 * PAD };
 }
 
+/** Width over height of the board: half court upright, full court across (`wide`) or upright. */
+export function boardRatio(court: "half" | "full", wide: boolean): number {
+  const v = viewOf(court, court === "half" || !wide);
+  return v.w / v.h;
+}
+
 /** court metres to board coordinates and back */
 function project(v: View) {
   const S = (x: number, y: number): [number, number] => (v.portrait ? [COURT.width - y + PAD, v.x1 - x + PAD] : [x - v.x0 + PAD, COURT.width - y + PAD]);

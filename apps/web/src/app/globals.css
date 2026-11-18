@@ -11,6 +11,8 @@
  * the product colour for pages outside a club.
  */
 :root {
+  /* the largest width of a court graphic (.court-frame) */
+  --court-max: 760px;
   --ground: #eceae5;
   --paper: #f7f6f2;
   --ink: #16171a;
@@ -344,6 +346,12 @@
   }
   .sheet tbody tr:last-child > * {
     border-bottom: 0;
+  }
+  /* every court graphic (half court, tactics camera, play editor, shot maps) has one largest
+     width, so a court is not 410 px on one page and the whole screen on the next (finding A14) */
+  .court-frame {
+    width: 100%;
+    max-width: var(--court-max);
   }
   /* zones that reach the edges of the content column (Wurf head, Streifen, Seitenkopf) */
   .bleed-x {
