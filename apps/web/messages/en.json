@@ -3440,7 +3440,8 @@
       "kr": "from the circle",
       "gs": "on a fast break",
       "m7": "from the 7 m line"
-    }
+    },
+    "fromMatchFailed": "The collection could not be created. Please try again."
   },
   "consentLink": {
     "invalid": "This link is no longer valid. Ask the team for the new one.",
@@ -3882,7 +3883,9 @@
     "emptyTitle": "Upload a video, then you see your scenes here.",
     "emptyText": "After the analysis every goal, every shot and every turnover is a scene. You search them with a sentence and put them together into collections.",
     "emptyPlays": "Drawing plays works already:",
-    "emptySearch": "Search finds scenes from your first video on."
+    "emptySearch": "Search finds scenes from your first video on.",
+    "backToCollection": "Back to the collection “{title}”",
+    "addToCollection": "{n, plural, one {1 scene} other {# scenes}} to the collection"
   },
   "teamPage": {
     "kick": "{team} · {source}",

@@ -11,6 +11,7 @@ import { worksWithVideo } from "@/lib/roles";
 import { SearchView } from "../search/search-view";
 import { ScenesHead } from "./scenes-head";
 import { ScenesView } from "./scenes-view";
+import { CollectionBack } from "./collection-back";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getTranslations("shell"))("scenes") };
@@ -28,17 +29,21 @@ export default async function ScenesPage({
 }) {
   const { orgId, teamId } = await params;
   // a question asked from elsewhere (?q, ?chips, ?view) is read by the search itself; without a
-  // video there is nothing to answer it with
-  await searchParams;
+  // video there is nothing to answer it with. ?collection= opens the scenes for a collection
+  // («Szene dazu»): found scenes go into it, a link leads back (A5)
+  const { collection: intoId } = await searchParams;
   const t = await getTranslations("scenesPage");
   const ta = await getTranslations("anlauf");
   const client = await serverApi();
   const path = { params: { path: { org_id: orgId, team_id: teamId } } };
-  const [{ data: team }, { data: matches = [] }, { data: collections = [] }] = await Promise.all([
+  const [{ data: team }, { data: matches = [] }, { data: collections = [] }, { data: into }] = await Promise.all([
     client.GET("/v1/orgs/{org_id}/teams/{team_id}", path),
     client.GET("/v1/orgs/{org_id}/teams/{team_id}/matches", path),
     client.GET("/v1/orgs/{org_id}/teams/{team_id}/collections", path),
+    intoId ? client.GET("/v1/orgs/{org_id}/collections/{collection_id}", { params: { path: { org_id: orgId, collection_id: intoId } } }) : Promise.resolve({ data: undefined }),
   ]);
+  const target = into && into.editable && into.team_id === teamId ? into : null;
+  const back = target ? <CollectionBack href={`/app/${orgId}/collections/${target.id}`} label={t("backToCollection", { title: target.title })} /> : null;
   const withVideo = matches
     .filter((m) => m.has_video)
     .sort((a, b) => b.kickoff_at.localeCompare(a.kickoff_at));
@@ -135,6 +140,7 @@ export default async function ScenesPage({
     const canWrite = worksWithVideo(org?.my_role, team?.my_role);
     return (
       <div>
+        {back}
         <PageHeader title={(await getTranslations("shell"))("scenes")} />
         {/* «Suchen» leads here: the field is there, it says from when it finds something (review R6) */}
         <label className="mb-10 flex min-h-16 max-w-3xl items-center gap-3 border-2 border-rule bg-paper px-[18px] text-xl font-semibold text-ink-2">
@@ -166,13 +172,21 @@ export default async function ScenesPage({
             </Link>
           </p>
         </section>
+        {/* the team's collections stay findable here before the first video (A5) */}
+        {collections.length > 0 && (
+          <section className="mt-12 max-w-3xl" aria-labelledby="all-collections">
+            <SectionHead title={<span id="all-collections">{t("collections")}</span>} />
+            <CollectionList orgId={orgId} items={collections} heading={false} />
+          </section>
+        )}
       </div>
     );
   }
   return (
     <div>
+      {back}
       <ScenesHead orgId={orgId} teamId={teamId} matches={withVideo.length} />
-      <ScenesView orgId={orgId} teamId={teamId} matches={matches} side={side} />
+      <ScenesView orgId={orgId} teamId={teamId} matches={matches} side={side} into={target} />
       {more}
     </div>
   );

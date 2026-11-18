@@ -3440,7 +3440,8 @@
       "kr": "vom Kreis",
       "gs": "nach Gegenstoss",
       "m7": "per 7-Meter"
-    }
+    },
+    "fromMatchFailed": "Die Sammlung liess sich nicht erstellen. Bitte nochmals versuchen."
   },
   "consentLink": {
     "invalid": "Dieser Link gilt nicht mehr. Frag im Team nach dem neuen.",
@@ -3882,7 +3883,9 @@
     "emptyTitle": "Lade ein Video hoch, dann siehst du hier deine Szenen.",
     "emptyText": "Nach der Analyse ist jedes Tor, jeder Wurf und jeder Ballverlust eine Szene. Du suchst sie mit einem Satz und stellst sie zu Sammlungen zusammen.",
     "emptyPlays": "Spielzüge zeichnen geht schon jetzt:",
-    "emptySearch": "Die Suche findet Szenen ab dem ersten Video."
+    "emptySearch": "Die Suche findet Szenen ab dem ersten Video.",
+    "backToCollection": "Zurück zur Sammlung «{title}»",
+    "addToCollection": "{n, plural, one {1 Szene} other {# Szenen}} zur Sammlung"
   },
   "teamPage": {
     "kick": "{team} · {source}",

@@ -157,3 +157,43 @@ async def test_draft_from_the_three_things(make_api: Callable[[], Api]) -> None:
     assert draft["draft"] is True and draft["match_id"] == m["id"]
     assert draft["items"] and all(i["kind"] == "scene" for i in draft["items"])
     assert len(draft["items"]) <= 12
+
+
+async def test_draft_takes_the_scenes_of_the_points(make_api: Callable[[], Api]) -> None:
+    """A5: the draft takes the points' scenes with a place in the video; a goal without one (from
+    the report, tapped without video) is left out; no draft without a scene, none of the example."""
+    api = make_api()
+    ids = await setup_club(api)
+    org, team = ids["org"], ids["team"]
+    o = f"/v1/orgs/{org}"
+    m = await new_match(api, ids)
+
+    async def goal(t_ms: int | None) -> str:
+        body = {"type": "shot", "side": "opponent", "outcome": "goal", "t_ms": t_ms}
+        r = await api.post(f"{o}/matches/{m['id']}/events", json=body)
+        return str(r.json()["id"])
+
+    filmed, also, unfilmed = await goal(20_000), await goal(40_000), await goal(None)
+    url = f"{o}/teams/{team}/collections/from-match"
+    items = [
+        {"kind": "note", "text": "1. Gegentore aussen rechts"},
+        {"kind": "scene", "event_id": filmed},
+        {"kind": "scene", "event_id": unfilmed},
+        {"kind": "scene", "event_id": also},
+        {"kind": "scene", "event_id": filmed},
+    ]
+    r = await api.post(url, json={"match_id": m["id"], "title": "Gegen TV Gegner", "items": items})
+    assert r.status_code == 201, r.text
+    draft = r.json()
+    assert [i["kind"] for i in draft["items"]] == ["note", "scene", "scene"]
+    assert [i["scene"]["event_id"] for i in draft["items"][1:]] == [filmed, also]
+
+    only_note = [items[0], {"kind": "scene", "event_id": unfilmed}]
+    r = await api.post(url, json={"match_id": m["id"], "title": "Leer", "items": only_note})
+    assert r.status_code == 422 and r.json()["type"].endswith(":no-scenes")
+
+    demo = (await api.post(f"{o}/teams/{team}/demo-match")).json()
+    r = await api.post(url, json={"match_id": demo["id"], "title": "Gegen TSV Nachtwind"})
+    assert r.status_code == 409 and r.json()["type"].endswith(":example-match")
+    titles = [c["title"] for c in (await api.get(f"{o}/teams/{team}/collections")).json()]
+    assert titles == ["Gegen TV Gegner"]

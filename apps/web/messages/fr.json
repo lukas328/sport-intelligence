@@ -3440,7 +3440,8 @@
       "kr": "du pivot",
       "gs": "en contre-attaque",
       "m7": "sur jet de 7 m"
-    }
+    },
+    "fromMatchFailed": "La sélection n’a pas pu être créée. Réessaie."
   },
   "consentLink": {
     "invalid": "Ce lien n’est plus valable. Demande le nouveau dans l’équipe.",
@@ -3882,7 +3883,9 @@
     "emptyTitle": "Télécharge une vidéo, tu verras ensuite tes scènes ici.",
     "emptyText": "Après l'analyse, chaque but, chaque tir et chaque perte de balle est une scène. Tu les cherches avec une phrase et tu les réunis en sélections.",
     "emptyPlays": "Dessiner des systèmes de jeu, c'est déjà possible :",
-    "emptySearch": "La recherche trouve des scènes dès la première vidéo."
+    "emptySearch": "La recherche trouve des scènes dès la première vidéo.",
+    "backToCollection": "Retour à la sélection «{title}»",
+    "addToCollection": "{n, plural, one {1 scène} other {# scènes}} dans la sélection"
   },
   "teamPage": {
     "kick": "{team} · {source}",
