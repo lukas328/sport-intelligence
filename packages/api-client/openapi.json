@@ -196,6 +196,29 @@
             "description": "automatic calibration: goal fit, players on the court, camera position; method 'hall' when the court was carried over from an earlier video of the hall (reference_video_id; sure when the hall images matched well enough not to ask); hall_tried lists earlier videos that did not fit",
             "title": "Calibration Info"
           },
+          "calibration_state": {
+            "default": "missing",
+            "description": "confirmed: set or confirmed by a person (or carried over from such a court with a sure hall match); suggested: the automatic court, a proposal to confirm or to click anew (calibration_suggestion); missing: no court; updating: a clicked court is being applied; undeterminable: the coach said it cannot be set on this video",
+            "enum": [
+              "confirmed",
+              "suggested",
+              "missing",
+              "updating",
+              "undeterminable"
+            ],
+            "title": "Calibration State",
+            "type": "string"
+          },
+          "calibration_suggestion": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CalibrationSuggestionOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "camera": {
             "anyOf": [
               {
@@ -1665,6 +1688,83 @@
           "court"
         ],
         "title": "CalibrationPoint",
+        "type": "object"
+      },
+      "CalibrationSuggestionOut": {
+        "description": "The court proposed while calibration_state is \"suggested\"; confirming it is\nPOST .../calibration/confirm.",
+        "properties": {
+          "from_kickoff_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "kickoff of the match of from_video_id, for the label",
+            "title": "From Kickoff At"
+          },
+          "from_video_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "From Video Id"
+          },
+          "homography": {
+            "description": "court metres -> image px (3x3)",
+            "items": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "title": "Homography",
+            "type": "array"
+          },
+          "image_size": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "title": "Image Size",
+            "type": "array"
+          },
+          "source": {
+            "description": "hall: carried over from an earlier video of the same hall; auto: found automatically",
+            "enum": [
+              "hall",
+              "auto"
+            ],
+            "title": "Source",
+            "type": "string"
+          },
+          "space": {
+            "const": "panorama",
+            "default": "panorama",
+            "title": "Space",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "homography",
+          "image_size"
+        ],
+        "title": "CalibrationSuggestionOut",
         "type": "object"
       },
       "CandidateGoal": {
@@ -3377,6 +3477,9 @@
             "title": "Job Id",
             "type": "string"
           },
+          "per_click_px": {
+            "$ref": "#/components/schemas/PerClickOut"
+          },
           "residual_px": {
             "$ref": "#/components/schemas/ClickResidualOut",
             "description": "distance of the clicks to the court"
@@ -3386,6 +3489,7 @@
           "homography",
           "image_size",
           "residual_px",
+          "per_click_px",
           "job_id"
         ],
         "title": "CourtClicksJobOut",
@@ -3426,6 +3530,9 @@
             "title": "Image Size",
             "type": "array"
           },
+          "per_click_px": {
+            "$ref": "#/components/schemas/PerClickOut"
+          },
           "residual_px": {
             "$ref": "#/components/schemas/ClickResidualOut",
             "description": "distance of the clicks to the court"
@@ -3434,7 +3541,8 @@
         "required": [
           "homography",
           "image_size",
-          "residual_px"
+          "residual_px",
+          "per_click_px"
         ],
         "title": "CourtClicksOut",
         "type": "object"
@@ -3508,6 +3616,28 @@
           "points"
         ],
         "title": "CourtModelOut",
+        "type": "object"
+      },
+      "CourtUndeterminableIn": {
+        "properties": {
+          "reason": {
+            "anyOf": [
+              {
+                "enum": [
+                  "too_far",
+                  "cut",
+                  "other"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "title": "CourtUndeterminableIn",
         "type": "object"
       },
       "DataRegion": {
@@ -12432,6 +12562,41 @@
           "password"
         ],
         "title": "PasswordResetIn",
+        "type": "object"
+      },
+      "PerClickOut": {
+        "properties": {
+          "lines": {
+            "additionalProperties": {
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "type": "array"
+            },
+            "description": "px per click, as the request listed them; null for a dropped click",
+            "title": "Lines",
+            "type": "object"
+          },
+          "points": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Points",
+            "type": "object"
+          }
+        },
+        "required": [
+          "lines",
+          "points"
+        ],
+        "title": "PerClickOut",
         "type": "object"
       },
       "PersonRole": {
@@ -38748,6 +38913,64 @@
           }
         },
         "summary": "Court From Part",
+        "tags": [
+          "matches",
+          "analysis"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/videos/{video_id}/calibration/undeterminable": {
+      "post": {
+        "description": "\u00abNicht bestimmbar\u00bb: the court cannot be set on this video. Its court question is closed\nfor good, no positions are drawn; clicking the court later undoes it.",
+        "operationId": "court_undeterminable_v1_orgs__org_id__videos__video_id__calibration_undeterminable_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "video_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Video Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CourtUndeterminableIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Court Undeterminable",
         "tags": [
           "matches",
           "analysis"

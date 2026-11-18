@@ -57,6 +57,7 @@ PIPELINE_VERSION = "0.2.0"
 # keys of VideoAsset.analysis: the court points the coach clicked (of the last run that succeeded
 # with them, reused by every later run) and those of a run still going
 CLICKED, PENDING = "court_points", "court_points_pending"
+UNDETERMINABLE = checks.UNDETERMINABLE  # the coach said the court cannot be set on this video
 LINE_CLICKS = (
     "court_clicks"  # the coach's latest line clicks (services/court_clicks), to edit again
 )
@@ -839,6 +840,9 @@ async def start_analysis(
 ) -> ProcessingJob:
     job = await _new_job(ctx, asset, "analysis")
     meta = dict(asset.analysis or {})
+    if points is not None or references is not None:
+        meta.pop(UNDETERMINABLE, None)  # a court is set after all
+        asset.analysis = meta
     if points is not None:
         # remembered with the job: stored as the video's court points once the run succeeds
         meta[PENDING] = {
@@ -1112,8 +1116,9 @@ async def _apply_analysis_result(
     asset.analysis["signals"] = checks.signals(r)
     if clicked is not None:
         asset.analysis[CLICKED] = clicked
-    if isinstance(before.get(LINE_CLICKS), dict):
-        asset.analysis[LINE_CLICKS] = before[LINE_CLICKS]
+    for key in (LINE_CLICKS, UNDETERMINABLE):
+        if isinstance(before.get(key), dict):
+            asset.analysis[key] = before[key]
     if pending is not None:  # a newer run with clicked points is still running
         asset.analysis[PENDING] = pending
     auto = r.get("events")
@@ -1194,6 +1199,77 @@ def _with_sure(asset: VideoAsset, info: Any) -> Any:
     return {**info, "sure": checks.hall_court_sure(asset)}
 
 
+async def calibration_state(
+    ctx: Ctx, asset: VideoAsset, cal: CameraCalibration | None, job: ProcessingJob | None
+) -> str:
+    """Where the court of this file stands, for the calibration dialog:
+
+    - "updating": a court the coach clicked is being applied (its analysis runs);
+    - "confirmed": a person set or confirmed it, or it was carried over from a court a person set
+      with a sure hall match (same rule as graphics._court_ok: positions are drawn);
+    - "suggested": the automatic court, or one carried over without a sure match: shown as a
+      proposal to confirm (POST .../calibration/confirm) or to click anew;
+    - "missing": no court (needs_calibration);
+    - "undeterminable": the coach said the court cannot be set on this video."""
+    meta = asset.analysis or {}
+    pending = meta.get(PENDING)
+    if (
+        isinstance(pending, dict)
+        and job is not None
+        and pending.get("job_id") == str(job.id)
+        and job.status in (JobStatus.QUEUED, JobStatus.RUNNING)
+    ):
+        return "updating"
+    if (
+        cal is not None
+        and not meta.get("needs_calibration")
+        and (cal.source == "user_correction" or checks.hall_court_sure(asset))
+    ):
+        return "confirmed"
+    if checks.court_undeterminable(asset):
+        return "undeterminable"
+    if cal is None or meta.get("needs_calibration"):
+        return "missing"
+    info = meta.get("calibration_info")
+    if isinstance(info, dict) and info.get("method") == "hall":
+        ref = str(info.get("reference_video_id") or "")
+        siblings = {str(p.video_id) for p in await parts_of(ctx, asset.match_id)}
+        if ref and ref in siblings - {str(asset.id)}:
+            return "confirmed"  # the court a person set on another part of this match
+    return "suggested"
+
+
+async def calibration_suggestion(
+    ctx: Ctx, asset: VideoAsset, cal: CameraCalibration | None, state: str
+) -> dict[str, Any] | None:
+    """The court shown as a proposal while the state is "suggested": carried over from an
+    earlier video of the hall (source "hall", with that video and its match's kickoff for the
+    label) or the automatic court. On the hall image (the analysis' image size)."""
+    if state != "suggested" or cal is None:
+        return None
+    info = (asset.analysis or {}).get("calibration_info")
+    out: dict[str, Any] = {
+        "source": "auto",
+        "homography": cal.homography,
+        "image_size": cal.image_size,
+        "space": "panorama",
+        "from_video_id": None,
+        "from_kickoff_at": None,
+    }
+    if isinstance(info, dict) and info.get("method") == "hall":
+        out["source"] = "hall"
+        try:
+            ref_id = uuid.UUID(str(info.get("reference_video_id")))
+        except ValueError:
+            return out
+        ref = await ctx.db.get(VideoAsset, ref_id)
+        if ref is not None and ref.organization_id == asset.organization_id:
+            out["from_video_id"] = ref.id
+            ref_match = await ctx.db.get(Match, ref.match_id)
+            out["from_kickoff_at"] = ref_match.kickoff_at if ref_match is not None else None
+    return out
+
+
 async def analysis(ctx: Ctx, asset_id: uuid.UUID) -> dict[str, object]:
     asset = await get_asset(ctx, asset_id)
     cal = await ctx.db.scalar(
@@ -1242,6 +1318,8 @@ async def analysis(ctx: Ctx, asset_id: uuid.UUID) -> dict[str, object]:
         "calibration_info": _with_sure(asset, meta.get("calibration_info")),
         "hall": await halls.summary(ctx, asset, match) if match is not None else None,
         "court_clicks": meta.get(LINE_CLICKS) if isinstance(meta.get(LINE_CLICKS), dict) else None,
+        "calibration_state": (state := await calibration_state(ctx, asset, cal, job)),
+        "calibration_suggestion": await calibration_suggestion(ctx, asset, cal, state),
         "error_code": failure_code(job.error)
         if job is not None and job.status == "failed"
         else None,

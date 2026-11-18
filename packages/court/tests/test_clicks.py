@@ -88,6 +88,8 @@ def test_one_click_on_a_neighbouring_line_is_dropped() -> None:
     points = {k: tuple(v) for k, v in frame["points"].items()}
     fit = courtclicks.fit_clicks(points, lines, SIZE)
     assert len(fit.dropped) >= 1
+    assert len(fit.clicks) == len(fit.residual_px)
+    assert not set(fit.dropped) & set(fit.clicks)
     assert all(d.kind in ("point", "line") for d in fit.dropped)
     assert fit.median_px <= courtclicks.MAX_MEDIAN_PX
 
@@ -113,8 +115,11 @@ def test_clicks_that_disagree_are_refused() -> None:
         "nine_left": _on(h, "six_left", [0.2, 0.4, 0.6, 0.8]),
         "six_left": _on(h, "nine_left", [0.2, 0.4, 0.6, 0.8]),
     }
-    with pytest.raises(ClicksError, match="do not agree"):
+    with pytest.raises(ClicksError, match="do not agree") as exc:
         courtclicks.fit_clicks({}, lines, SIZE)
+    assert exc.value.code == "disagree" and exc.value.worst is not None
+    assert exc.value.worst.kind == "line" and exc.value.worst.name in lines
+    assert exc.value.worst_px is not None and exc.value.worst_px > courtclicks.MAX_CLICK_PX
 
 
 def test_unknown_names_are_refused() -> None:

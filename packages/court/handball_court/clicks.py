@@ -101,16 +101,6 @@ MAX_CLICK_PX = 20.0
 DROP_PX = 15.0
 
 
-class ClicksError(ValueError):
-    """The clicks give no court. `code`: "unknown" (a name not in KEYPOINTS or LINES),
-    "too_few" (too few clicks to check them against each other), "disagree" (no court explains
-    all clicks)."""
-
-    def __init__(self, code: str, message: str) -> None:
-        super().__init__(message)
-        self.code = code
-
-
 @dataclass(frozen=True)
 class Click:
     """One click: a named point (index -1) or the index-th click on a line."""
@@ -120,6 +110,26 @@ class Click:
     index: int = -1
 
 
+class ClicksError(ValueError):
+    """The clicks give no court. `code`: "unknown" (a name not in KEYPOINTS or LINES),
+    "too_few" (too few clicks to check them against each other), "disagree" (no court explains
+    all clicks)."""
+
+    def __init__(
+        self,
+        code: str,
+        message: str,
+        worst: Click | None = None,
+        worst_px: float | None = None,
+        median_px: float | None = None,
+    ) -> None:
+        super().__init__(message)
+        self.code = code
+        self.worst = worst  # "disagree": the click farthest from the best court
+        self.worst_px = worst_px
+        self.median_px = median_px
+
+
 @dataclass
 class ClicksFit:
     """The court through the clicks (court metres -> image px) and how well the clicks agree."""
@@ -127,6 +137,7 @@ class ClicksFit:
     homography: F64
     residual_px: list[float] = field(default_factory=list)  # per used click, points first
     dropped: list[Click] = field(default_factory=list)  # clicks left out as off-line
+    clicks: list[Click] = field(default_factory=list)  # the used clicks, as residual_px
 
     @property
     def median_px(self) -> float:
@@ -351,15 +362,21 @@ def fit_clicks(
         pts, lns = trial_pts, trial_lns
         h, res = _fit(pts, plain(lns), [h])
         dropped.append(worst)
+    used = [Click("point", n) for n in pts] + [
+        Click("line", n, j) for n, c in lns.items() for j, _ in c
+    ]
     med, mx = float(np.median(res)), float(res.max())
     if med > MAX_MEDIAN_PX or mx > MAX_CLICK_PX:
         raise ClicksError(
             "disagree",
             f"the clicks do not agree with one court (median {med:.1f} px, worst {mx:.1f} px): "
             "check that every click sits on the chosen handball line",
+            worst=used[int(np.argmax(res))],
+            worst_px=round(mx, 2),
+            median_px=round(med, 2),
         )
     return ClicksFit(
-        np.asarray(h / h[2, 2], np.float64), [round(float(x), 2) for x in res], dropped
+        np.asarray(h / h[2, 2], np.float64), [round(float(x), 2) for x in res], dropped, used
     )
 
 
