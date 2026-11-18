@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 import sitemap from "../app/sitemap";
 import robots from "../app/robots";
 import { GUIDES } from "../../content/ratgeber";
-import { alternates } from "./seo";
+import { existsSync } from "node:fs";
+import { join } from "node:path";
+import { alternates, ogImage, pageMeta } from "./seo";
 import { llmsFullTxt, llmsTxt } from "./llms";
 
 describe("search engines", () => {
@@ -24,6 +26,19 @@ describe("search engines", () => {
 
   it("gives German-only pages only de-CH and x-default", () => {
     expect(alternates("ratgeber/x", ["de"])).toEqual({ "de-CH": "https://handball-intelligence.com/de/ratgeber/x/", "x-default": "https://handball-intelligence.com/de/ratgeber/x/" });
+  });
+
+  it("gives every language its own link preview with the start page's tagline as alt text", () => {
+    expect(ogImage("de")).toEqual({ url: "/og-de.png", width: 1200, height: 630, alt: "Handball Intelligence: Spielanalyse mit KI für Handballtrainerinnen und -trainer" });
+    expect(ogImage("fr").alt).toBe("Handball Intelligence: Analyse de match avec IA pour les entraîneuses et entraîneurs de handball");
+    expect(ogImage("en").alt).toBe("Handball Intelligence: Match analysis with AI for handball coaches");
+    for (const l of ["de", "fr", "en"] as const) {
+      expect(existsSync(join(__dirname, "../../public", `og-${l}.png`))).toBe(true);
+      const m = pageMeta(l, "preise", "x", "y");
+      expect(m.openGraph?.images).toEqual([ogImage(l)]);
+      expect(m.twitter?.images).toEqual([ogImage(l)]);
+    }
+    expect(existsSync(join(__dirname, "../../public/og.png"))).toBe(true);
   });
 
   it("lets everyone crawl and names the sitemap", () => {

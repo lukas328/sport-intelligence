@@ -31,6 +31,9 @@ const COPIES = {
   "apps/site/public/icon.png": "app-icon-512.png",
   "apps/site/public/apple-icon.png": "app-icon-180.png",
   "apps/site/public/og.png": "open-graph.png",
+  "apps/site/public/og-de.png": "open-graph-de.png",
+  "apps/site/public/og-fr.png": "open-graph-fr.png",
+  "apps/site/public/og-en.png": "open-graph-en.png",
   // the mobile app
   "apps/mobile/assets/icon.png": "app-icon-1024.png",
   "apps/mobile/assets/adaptive-icon.png": "app-icon-maske-1024.png",
