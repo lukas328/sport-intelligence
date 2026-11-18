@@ -23,7 +23,7 @@ from handball_api.models import Invoice, Organization, OrgMembership, User, Vouc
 from handball_api.models.enums import OrgRole, PaymentMethod, Plan
 from handball_api.services import audit, invoice_pdf
 from handball_api.services.context import Ctx
-from handball_api.services.plans import GOALKEEPER_ADDON_CHF, PLANS
+from handball_api.services.plans import PLANS
 from handball_api.services.policies import Action, authorize
 
 REMINDER_DAYS = 3
@@ -98,9 +98,11 @@ def one_year_after(start: date) -> date:
         return date(start.year + 1, 2, 27)
 
 
-def price_cents(ctx: Ctx, plan: Plan, goalkeepers: int) -> int:
+def price_cents(ctx: Ctx, plan: Plan) -> int:
+    """The annual price: the plan's monthly price times the annual months (the goalkeeper
+    functions are part of the plan, A9)."""
     months = ctx.settings.invoice_annual_months
-    return (PLANS[plan].price_chf_month + goalkeepers * GOALKEEPER_ADDON_CHF) * months * 100
+    return PLANS[plan].price_chf_month * months * 100
 
 
 def creditor(ctx: Ctx) -> dict[str, str]:
@@ -195,9 +197,7 @@ async def _next_number(ctx: Ctx, year: int) -> str:
     return f"HB-{year}-{(n or 0) + 1:05d}"
 
 
-async def order(
-    ctx: Ctx, plan: Plan, goalkeepers: int, voucher_code: str | None, contact: dict[str, str]
-) -> Invoice:
+async def order(ctx: Ctx, plan: Plan, voucher_code: str | None, contact: dict[str, str]) -> Invoice:
     actor = ctx.require_actor()
     authorize(actor, Action.ORG_UPDATE, two_factor=ctx.two_factor)
     if plan == Plan.FREE:
@@ -215,7 +215,7 @@ async def order(
         raise ProblemError(409, "invoice-open", "There is an open invoice already")
     voucher = await _voucher(ctx, voucher_code)
     s = ctx.settings
-    net = price_cents(ctx, plan, goalkeepers)
+    net = price_cents(ctx, plan)
     discount = net * (voucher.percent_off if voucher else 0) // 100
     vat_bp = round(s.invoice_vat_rate_percent * 100) if s.invoice_vat_registered else 0
     vat = round((net - discount) * vat_bp / 10_000)
@@ -229,13 +229,6 @@ async def order(
             "cents": PLANS[plan].price_chf_month * s.invoice_annual_months * 100,
         }
     ]
-    if goalkeepers:
-        lines.append(
-            {
-                "text": f"Torhüter-Modul x {goalkeepers}",
-                "cents": goalkeepers * GOALKEEPER_ADDON_CHF * s.invoice_annual_months * 100,
-            }
-        )
     org.billing_contact = contact
     inv = Invoice(
         organization_id=org.id,

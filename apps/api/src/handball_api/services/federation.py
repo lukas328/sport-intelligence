@@ -104,7 +104,7 @@ async def invoice(ctx: Ctx, federation_id: uuid.UUID, lang: str) -> tuple[bytes,
     members = await _members(ctx, f.id)
     if not members:
         raise ProblemError(409, "no-members", "The federation has no member clubs yet")
-    unit = price_cents(ctx, Plan(f.plan), 0)
+    unit = price_cents(ctx, Plan(f.plan))
     issued = _now().date()
     number = f"F-{issued.year}-{str(f.id)[:8].upper()}"
     total = unit * len(members)

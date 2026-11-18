@@ -23,8 +23,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 /**
  * Prices and limits from packages/plans/plans.json (generated from the API's plan table). The free
  * start comes first (BEFUNDE-2 L10): 30 days with everything, then Team or the free plan; the plans
- * follow. Only the features of the core are named, in the app's words; the goalkeeper add-on is
- * left out (not in the core).
+ * follow. Only the features of the core are named, in the app's words; the goalkeeper functions
+ * are part of every plan with analysis, without a surcharge (A9, the add-on is gone).
  */
 export default async function Pricing({ params }: Props) {
   const { locale } = await params;
@@ -100,6 +100,7 @@ export default async function Pricing({ params }: Props) {
                 ? fmt(t.matchesN, { count: p.matches_per_season })
                 : t.matchesUnlimited,
               p.analysis ? t.withAnalysis : t.withoutAnalysis,
+              ...(p.analysis ? [t.keepers] : []),
               ...p.features.filter((f) => f in names).map((f) => names[f]!),
               fmt(t.storage, { gb: p.storage_gb }),
             ];

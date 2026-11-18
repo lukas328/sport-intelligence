@@ -363,6 +363,7 @@ const de = {
     storage: "{gb} GB für Videos",
     withAnalysis: "Automatische Analyse: Resultat, Verlauf, jedes Tor als Szene, Taktikkamera, bei genug Toren mit Wurfort drei Dinge",
     withoutAnalysis: "Ohne automatische Analyse",
+    keepers: "Torhüter: Paraden, Quote und Gegentore je Torhüter, ohne Aufpreis",
     featureNames: {
       events: "Spielbericht und Spieltag erfassen",
       season: "Saison: was sich wiederholt",

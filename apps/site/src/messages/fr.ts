@@ -365,6 +365,7 @@ const fr: Messages = {
     storage: "{gb} Go pour les vidéos",
     withAnalysis: "Analyse automatique : résultat, évolution du score, chaque but comme scène vidéo, caméra tactique, avec assez de buts avec lieu de tir trois points",
     withoutAnalysis: "Sans analyse automatique",
+    keepers: "Gardiens : arrêts, pourcentage et buts encaissés par gardien, sans supplément",
     featureNames: {
       events: "Saisir la feuille de match et le jour de match",
       season: "Saison : ce qui se répète",

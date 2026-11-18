@@ -1,7 +1,6 @@
 {
   "currency": "CHF",
   "annual_months": 10,
-  "goalkeeper_addon_chf_month": 7,
   "plans": [
     {
       "plan": "free",

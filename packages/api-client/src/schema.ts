@@ -6021,11 +6021,6 @@ export interface components {
         };
         /** CheckoutIn */
         CheckoutIn: {
-            /**
-             * Goalkeeper Seats
-             * @default 0
-             */
-            goalkeeper_seats?: number;
             plan: components["schemas"]["Plan"];
         };
         /** ClaimIn */
@@ -7703,11 +7698,6 @@ export interface components {
         /** InvoiceOrder */
         InvoiceOrder: {
             contact: components["schemas"]["BillingContact"];
-            /**
-             * Goalkeeper Seats
-             * @default 0
-             */
-            goalkeeper_seats?: number;
             plan: components["schemas"]["Plan"];
             /** Voucher */
             voucher?: string | null;
@@ -14714,7 +14704,6 @@ export interface operations {
         parameters: {
             query: {
                 plan: components["schemas"]["Plan"];
-                goalkeeper_seats?: number;
             };
             header?: never;
             path: {

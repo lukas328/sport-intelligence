@@ -365,6 +365,7 @@ const en: Messages = {
     storage: "{gb} GB for videos",
     withAnalysis: "Automatic analysis: result, run of play, every goal as a scene, tactics camera, with enough goals with a shot spot three things",
     withoutAnalysis: "No automatic analysis",
+    keepers: "Goalkeepers: saves, save rate and goals conceded per goalkeeper, at no extra cost",
     featureNames: {
       events: "Record the match report and matchday",
       season: "Season: what repeats",

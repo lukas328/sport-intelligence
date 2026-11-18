@@ -1966,13 +1966,6 @@
       },
       "CheckoutIn": {
         "properties": {
-          "goalkeeper_seats": {
-            "default": 0,
-            "maximum": 20.0,
-            "minimum": 0.0,
-            "title": "Goalkeeper Seats",
-            "type": "integer"
-          },
           "plan": {
             "$ref": "#/components/schemas/Plan"
           }
@@ -6919,13 +6912,6 @@
         "properties": {
           "contact": {
             "$ref": "#/components/schemas/BillingContact"
-          },
-          "goalkeeper_seats": {
-            "default": 0,
-            "maximum": 20.0,
-            "minimum": 0.0,
-            "title": "Goalkeeper Seats",
-            "type": "integer"
           },
           "plan": {
             "$ref": "#/components/schemas/Plan"
@@ -23345,16 +23331,6 @@
             "required": true,
             "schema": {
               "$ref": "#/components/schemas/Plan"
-            }
-          },
-          {
-            "in": "query",
-            "name": "goalkeeper_seats",
-            "required": false,
-            "schema": {
-              "default": 0,
-              "title": "Goalkeeper Seats",
-              "type": "integer"
             }
           }
         ],

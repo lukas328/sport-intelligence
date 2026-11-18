@@ -1649,14 +1649,14 @@
     "withoutAnalysis": "Feuille de match et scènes",
     "trial": "{days} jours d'essai gratuit",
     "choose": "Choisir {plan}",
-    "goalkeepers": "Module gardien (CHF {price} par gardien et mois), nombre :",
     "unavailable": "Le paiement en ligne n'est pas encore configuré.",
     "needs2fa": "Les paiements nécessitent la connexion à deux facteurs.",
     "failed": "Cela n'a pas fonctionné. Réessaie.",
     "status_invoice_open": "facture ouverte",
     "status_invoice_paid": "payé sur facture",
     "current": "Offre actuelle",
-    "trialAfter": "Ensuite le plan gratuit s'applique jusqu'à ta décision. Rien n'est supprimé."
+    "trialAfter": "Ensuite le plan gratuit s'applique jusqu'à ta décision. Rien n'est supprimé.",
+    "withKeepers": "Analyse des gardiens incluse"
   },
   "share": {
     "button": "Partager",

@@ -1649,14 +1649,14 @@
     "withoutAnalysis": "Spielbericht und Szenen",
     "trial": "{days} Tage gratis testen",
     "choose": "{plan} wählen",
-    "goalkeepers": "Torhüter-Modul (CHF {price} pro Torhüter und Monat), Anzahl:",
     "unavailable": "Online-Zahlung ist noch nicht eingerichtet.",
     "needs2fa": "Für Zahlungen braucht es die Zwei-Faktor-Anmeldung.",
     "failed": "Das hat nicht geklappt. Bitte erneut versuchen.",
     "status_invoice_open": "Rechnung offen",
     "status_invoice_paid": "per Rechnung bezahlt",
     "current": "Aktueller Plan",
-    "trialAfter": "Danach gilt der Gratis-Plan, bis du dich entscheidest. Nichts wird gelöscht."
+    "trialAfter": "Danach gilt der Gratis-Plan, bis du dich entscheidest. Nichts wird gelöscht.",
+    "withKeepers": "Torhüter-Auswertung inbegriffen"
   },
   "share": {
     "button": "Teilen",
