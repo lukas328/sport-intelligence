@@ -23,6 +23,7 @@ import { demoView } from "@/lib/things";
 import { DRILL_LANG, DRILLS } from "@/lib/drills";
 import { seasonRightWing } from "@/lib/week";
 import { LoopTile } from "@/components/week/loop-tile";
+import { HallPhoto } from "@/components/hall-photo";
 
 type Props = { params: Promise<{ locale: Locale }> };
 
@@ -153,6 +154,13 @@ export default async function Home({ params }: Props) {
             <Evening t={t.problemCard} score={sat.score} how={{ text: m.cta.how, href: `/${locale}/so-funktioniert-es/` }} />
           </div>
         </div>
+        {/* the hall after the match: the ball in front of the empty goal, out of the dark (U48) */}
+        <HallPhoto
+          name="tor-ball"
+          sizes="100vw"
+          className="h-52 [mask-image:linear-gradient(to_bottom,transparent,#000_45%)] sm:h-64 md:h-[22rem]"
+          imgClassName="object-[50%_86%] brightness-[0.78] saturate-[0.8]"
+        />
       </section>
 
       <div className="wrap">
@@ -353,23 +361,36 @@ export default async function Home({ params }: Props) {
         </section>
 
         {/* 10 · start */}
-        <section aria-labelledby="final" className="mt-20 border-t-2 border-ink pt-10 md:mt-28">
-          <h2 id="final" className="text-[2.5rem] md:text-[3.75rem]">
-            {t.finalTitle}
-          </h2>
-          {/* as in the head: the team search, the demo as a text link under it */}
-          <div className="mt-8">
-            <TeamField
-              id="team-end"
-              label={t.teamLabel}
-              button={t.teamButton}
-              hint={t.teamHint}
-              appLocale={app}
-            />
-            <DemoLink href={`/${locale}/demo/`} className="link mt-4">
-              {m.cta.demo}
-            </DemoLink>
+        <section
+          aria-labelledby="final"
+          className="mt-20 grid grid-cols-1 items-center gap-8 border-t-2 border-ink pt-10 md:mt-28 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] lg:gap-12"
+        >
+          <div className="min-w-0">
+            <h2 id="final" className="text-[2.5rem] md:text-[3.75rem]">
+              {t.finalTitle}
+            </h2>
+            {/* as in the head: the team search, the demo as a text link under it */}
+            <div className="mt-8">
+              <TeamField
+                id="team-end"
+                label={t.teamLabel}
+                button={t.teamButton}
+                hint={t.teamHint}
+                appLocale={app}
+              />
+              <DemoLink href={`/${locale}/demo/`} className="link mt-4">
+                {m.cta.demo}
+              </DemoLink>
+            </div>
           </div>
+          {/* the next match, in the visitor's shirt colour (U48) */}
+          <HallPhoto
+            name="sprungwurf"
+            tint
+            sizes="(min-width: 1024px) 34rem, 100vw"
+            className="aspect-[13/11] border-2 border-ink max-lg:-order-1 max-lg:aspect-[16/10]"
+            imgClassName="object-top"
+          />
         </section>
       </div>
     </KitScope>
