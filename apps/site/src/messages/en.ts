@@ -261,6 +261,12 @@ const en: Messages = {
     tourPlayers: ["Matches", "Scenes", "Season", "Team"],
     tourHint: "Tap a number and the ball jumps to its picture.",
     stepsLabel: "The four steps",
+    art: {
+      film: { say: "High up at the halfway line. Both goals in view." },
+      upload: { title: "Upload video", ask: "Which match is the video from?", a: ["TSV Nachtwind", "14 Nov"], b: ["SG Blitzfang", "29 Oct"], pct: "12 %", size: "420 MB of 3.4 GB", say: "Put the phone away. The bell tells you." },
+      check: { count: "Question 1 of 1", q: "Is the court right?", yes: "Looks right", no: "Don't know", tip: "one tap", say: "At most ten questions per match." },
+      result: { of: "of {n}", what: "goals conceded on the right wing", title: "Close the right wing", scenes: "4 scenes", team: "HC Tannengrün Men 1", share: "Share link" },
+    },
   },
   filming: {
     title: "Filming",

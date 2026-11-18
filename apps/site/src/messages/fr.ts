@@ -261,6 +261,12 @@ const fr: Messages = {
     tourPlayers: ["Matchs", "Scènes", "Saison", "Équipe"],
     tourHint: "Touche un numéro, et le ballon saute à son image.",
     stepsLabel: "Les quatre étapes",
+    art: {
+      film: { say: "En hauteur, à la ligne médiane. Les deux buts dans l'image." },
+      upload: { title: "Téléverser la vidéo", ask: "De quel match vient la vidéo ?", a: ["TSV Nachtwind", "14 nov."], b: ["SG Blitzfang", "29 oct."], pct: "12 %", size: "420 Mo sur 3,4 Go", say: "Pose le téléphone. La cloche te prévient." },
+      check: { count: "Question 1 sur 1", q: "Le terrain est-il juste ?", yes: "C'est bon", no: "Je ne sais pas", tip: "un geste", say: "Dix questions au plus par match." },
+      result: { of: "sur {n}", what: "buts encaissés par l'aile droite", title: "Fermer l'aile droite", scenes: "4 scènes", team: "HC Tannengrün Hommes 1", share: "Partager le lien" },
+    },
   },
   filming: {
     title: "Filmer",

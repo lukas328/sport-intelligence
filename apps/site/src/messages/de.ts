@@ -259,6 +259,13 @@ const de = {
     tourPlayers: ["Spiele", "Szenen", "Saison", "Team"],
     tourHint: "Tippe auf eine Nummer, und der Ball springt zu ihrem Bild.",
     stepsLabel: "Die vier Schritte",
+    // the words in the drawings of the four steps (components/step-art.tsx), the app's own words
+    art: {
+      film: { say: "Hoch an die Mittellinie. Beide Tore im Bild." },
+      upload: { title: "Video hochladen", ask: "Zu welchem Spiel gehört das Video?", a: ["TSV Nachtwind", "14. Nov."], b: ["SG Blitzfang", "29. Okt."], pct: "12 %", size: "420 MB von 3.4 GB", say: "Handy weglegen. Die Glocke meldet sich." },
+      check: { count: "Frage 1 von 1", q: "Passt das Spielfeld?", yes: "Passt", no: "Weiss nicht", tip: "ein Tipp", say: "Höchstens zehn Fragen pro Spiel." },
+      result: { of: "von {n}", what: "Gegentore über aussen rechts", title: "Aussen rechts zumachen", scenes: "4 Szenen", team: "HC Tannengrün Herren 1", share: "Link teilen" },
+    },
   },
   filming: {
     title: "Filmen",
