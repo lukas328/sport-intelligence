@@ -1047,7 +1047,9 @@
     "edgeScenes_turnovers": "Voir les pertes de balle adverses",
     "edgeScenes_fastBreaks": "Voir les buts en contre-attaque",
     "concededByPosition": "Buts encaissés par poste",
-    "ofShots": "{n, plural, one {sur # tir} other {sur # tirs}}"
+    "ofShots": "{n, plural, one {sur # tir} other {sur # tirs}}",
+    "flowAbove": "En haut : {team} devant",
+    "flowBelow": "En bas : {team} devant"
   },
   "shotsView": {
     "title": "Tirs",

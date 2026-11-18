@@ -1047,7 +1047,9 @@
     "edgeScenes_turnovers": "Watch the opponent's turnovers",
     "edgeScenes_fastBreaks": "Watch the fast-break goals",
     "concededByPosition": "Goals conceded by position",
-    "ofShots": "{n, plural, one {from # shot} other {from # shots}}"
+    "ofShots": "{n, plural, one {from # shot} other {from # shots}}",
+    "flowAbove": "Above: {team} ahead",
+    "flowBelow": "Below: {team} ahead"
   },
   "shotsView": {
     "title": "Shots",

@@ -1047,7 +1047,9 @@
     "edgeScenes_turnovers": "Ballverluste des Gegners ansehen",
     "edgeScenes_fastBreaks": "Gegenstosstore ansehen",
     "concededByPosition": "Gegentore nach Position",
-    "ofShots": "{n, plural, one {aus # Wurf} other {aus # Würfen}}"
+    "ofShots": "{n, plural, one {aus # Wurf} other {aus # Würfen}}",
+    "flowAbove": "Oben: {team} vorne",
+    "flowBelow": "Unten: {team} vorne"
   },
   "shotsView": {
     "title": "Würfe",
