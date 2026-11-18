@@ -290,7 +290,7 @@ Bewegungen gerechnet, sie betrifft das nicht.
 
 ### 4.8 Endtest (Runde 2) und nächster Schritt (2026-11-18, Nachtauftrag)
 
-**Endtest nicht gemessen:** In der Datenbank von Runde 2 ist nur 1 der 69 Bilder gespeichert
+**Endtest nicht gemessen** (Nachtrag: inzwischen gelabelt und gemessen, siehe 4.10): In der Datenbank von Runde 2 ist nur 1 der 69 Bilder gespeichert
 (c002, 22:50 UTC; weder in `lines` noch in der alten Sammlung `truth` mehr). Entweder ist nur ein
 Bild gemacht, oder weitere Speicherungen kamen nicht an (die Seite meldet einen Fehler als
 "Nicht gespeichert"). Zu klären mit Lukas; die Auswertung läuft danach in Minuten. Bis dahin gilt
@@ -339,6 +339,45 @@ mehr Wahrheit (grob 300 Bilder) und ohne Erfolgsgarantie. Der verlässliche Weg 
 die Hand-Kalibrierung, schnell gemacht: der Linien-Modus der Klickseite (unter 1 Minute pro Bild,
 gemessen in Runde 1b) in den Kalibrier-Dialog übernehmen, und das Feld pro Halle wiederverwenden
 (`hallmatch`, ADR 025 Nachtrag 2), damit ein Verein pro Halle einmal klickt.
+
+### 4.10 Endtest Runde 2 (2026-11-18)
+
+Klicks Runde 2: 101 Bilder aus den 37 Endtest-Stücken, 64 gespeichert, 37 "nicht bestimmbar".
+Prüfung wie in Runde 1b (`clicks.py pull`): 61 stimmig, 3 ohne Feld durch die Klicks (c019_00755,
+c050_01710, c053_00900). Wahrheit für **28 der 37 Stücke** (61 Bilder, 26 Hallen), eingefroren in
+`ml/calib/truth_test.json`; Antworten in `ml/calib/data/round2_answers.json`. Ohne Wahrheit, weil
+alle Bilder "nicht bestimmbar" waren: c004, c024, c026, c027, c032, c041, c047, c060, c069.
+Sichtprüfung bei c003 und c030: Das Wahrheitsfeld liegt auf den Hallenlinien, das Produktfeld bei
+c030 sichtbar daneben, bei c003 knapp.
+
+Produkt auf dem Endtest (dieselben Läufe wie in 4.7, nichts auf dem Endtest eingestellt):
+
+| Endtest, 28 Stücke in 26 Hallen | richtig (<= 1 m) | falsch akzeptiert | abgelehnt |
+|---|---|---|---|
+| vor #72 (`results_base.json`) | 1 (4 % [0, 12]) | 7 (25 % [11, 40]) | 20 (71 % [54, 87]) |
+| mit #72 (`results_strict.json`) | 0 (0 % [0, 0]) | **2 (7 % [0, 18])** | 26 (93 % [82, 100]) |
+
+95 %-Intervalle aus dem Bootstrap über Hallen.
+
+- Vor #72: richtig nur c005 (0.57 m). Falsch akzeptiert c016 (5.9 m), c020 (4.7 m), c030 (2.2 m),
+  c057 (1.9 m), c022 (1.8 m), c056 (1.6 m), c003 (1.4 m). Abgelehnt: 10 `no_floor`, 7
+  `flat_view`, 2 `court`, 1 `camera_motion`.
+- #72 lehnt 6 der 8 akzeptierten Felder ab: alle groben (c016, c020), drei mit 1.6 bis 1.9 m, und
+  leider auch das einzige richtige (c005: Torpfosten 0.28 unter der Schwelle 0.45, Linien 0.79
+  unter 1.0). Akzeptiert bleiben c003 (1.4 m) und c030 (2.2 m, auf einem Bild 4.4 m).
+- Die Fehler schwanken von Bild zu Bild desselben Stücks (c030: 1.7, 4.4 und 2.3 m), das Feld
+  wandert also mit der Kamerabewegung weg.
+- Empfindlichkeit der 1-m-Grenze: mit 2 m wären es vor #72 5 richtige und 3 falsche, mit #72 1 und
+  1; mit 3 m vor #72 6 und 2, mit #72 2 und 0. Viele der falsch akzeptierten liegen also nahe bei
+  der Grenze, für Taktiktafel und Wurfzonen ist 1.5 bis 2 m aber zu ungenau.
+
+**Lesart.** Der Endtest bestätigt die Entwicklung: Die automatische Kalibrierung liefert auf
+Vereinsmaterial praktisch kein Feld auf 1 m genau (1 von 28 vor #72, 0 mit #72). Die Prüfung aus
+#72 senkt die falsch akzeptierten von 25 % auf 7 %, aber nicht auf 0 wie auf der Entwicklung, und
+sie kostet das einzige richtige Feld. Die Schwellen werden nicht auf dem Endtest nachgestellt (er
+ist damit verbraucht). Folgerung wie in 4.9: Kalibrierung über Linien-Klicks (Draft-PR #81) und
+Wiederverwendung pro Halle; die automatische Kalibrierung höchstens als Vorschlag, den der Nutzer
+bestätigt, und mit `court_doubt` als Mindestprüfung.
 
 ## 5. Was nicht geholfen hat
 

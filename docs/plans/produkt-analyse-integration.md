@@ -102,7 +102,9 @@ Deploy vorher über die Hauptsitzung abstimmen.
    - Kalibrierung (grösster Blocker für Taktiktafel und Wurfzonen); Kalibrierungs-Sitzung, Stand
      2026-11-17 (`docs/plans/kalibrierung.md`): Testsatz 70 Stücke in 67 Hallen mit Klick-Wahrheit;
      heute auf der Entwicklung 1 von 30 Feldern richtig, 5 falsch akzeptiert; strengere Feldprüfung
-     senkt die falsch akzeptierten auf 0 von 30 (richtig bleibt 1);
+     senkt die falsch akzeptierten auf 0 von 30 (richtig bleibt 1); Endtest 2026-11-18 (28 Stücke in
+     26 Hallen): vor der Prüfung 1 richtig, 7 falsch akzeptiert, mit Prüfung 0 richtig, 2 falsch
+     akzeptiert (7 %); Empfehlung Linien-Klicks pro Halle (Draft-PR #81);
    - Ereignisse mit Ball (Würfe, Paraden, Ballverluste aus Ballpfad plus Wurf-Kandidaten);
    - Spieler-Tracking auf echten Spielen messen;
    - Rückennummern und ReID ins Image.
