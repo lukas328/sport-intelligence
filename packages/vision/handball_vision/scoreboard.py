@@ -609,6 +609,7 @@ def play_intervals(
     drift: float = 0.003,
     fill_gap_s: float = 30.0,
     fill_share: float = 0.5,
+    end_ms: int | None = None,
 ) -> list[tuple[int, int]]:
     """Video stretches (start_ms, end_ms) in which the match clock runs, from (t_ms, clock_s)
     readings of an overlay or a hall scoreboard.
@@ -629,7 +630,10 @@ def play_intervals(
     which the clock ran at least `fill_share` of the time counts as play as a whole (the board out
     of view while play went on; where the short stops were is unknown, and the ball gate should
     rather keep a loose ball than drop real play). Otherwise a run reaches at most `edge_s` beyond
-    its outer readings. Empty: no running clock found."""
+    its outer readings, except after the last reading of all when `end_ms` (the video's length)
+    is given and the clock was still running there: then play lasts to the end of the video (the
+    board goes out of view while play goes on; a stop would have shown as a standing clock).
+    Empty: no running clock found."""
     reads = sorted({t: c for t, c in clocks}.items())
     runs, outliers = _clock_runs(reads, tol_s, drift)
     # a hall scoreboard also shows penalty timers counting down beside a match clock counting up
@@ -654,6 +658,10 @@ def play_intervals(
         t, c = reads[k]
         i = at[k] + side
         if not 0 <= i < len(kept):
+            if side > 0 and end_ms is not None and end_ms > t:
+                # the clock was running at its last reading and nothing says it stopped: the board
+                # went out of view while play went on, so play lasts to the end of the video
+                return float(end_ms)
             return max(0.0, t - edge) if side < 0 else t + edge
         tn, cn = reads[kept[i]]
         gap = abs(tn - t)

@@ -276,6 +276,16 @@ def test_play_intervals_board_out_of_view_while_play_goes_on() -> None:
     assert split[0] == (0, 179_500)  # half of the 301 s run time on each side of the first gap
 
 
+def test_play_intervals_last_run_lasts_to_the_end_of_the_video() -> None:
+    """The board goes out of view for good while the clock runs (h1-5min on staging, 17.11.):
+    with the video's length, play lasts to its end; a standing clock read last does not."""
+    running = [(t * 1000, 1200 + t) for t in range(0, 120)]
+    assert sb.play_intervals(running) == [(0, 119_000 + 7_500)]
+    assert sb.play_intervals(running, end_ms=300_000) == [(0, 300_000)]
+    stopped = running + [(t * 1000, 1319) for t in range(125, 140)]  # the final whistle
+    assert sb.play_intervals(stopped, end_ms=300_000) == [(0, 119_000)]
+
+
 def test_play_intervals_without_a_running_clock() -> None:
     assert sb.play_intervals([]) == []
     assert sb.play_intervals([(t * 1000, 175) for t in range(0, 300, 5)]) == []
