@@ -414,7 +414,7 @@ const fr: Messages = {
     nextText: "La saison montre une barre par match. Tu vois ainsi si un thème reste ou disparaît. Touche un match.",
     nextExample: "Exemple : les matchs après le match de démo sont inventés.",
     nextOf: "{n} sur {of}",
-    nextBar: "{opp} : {n} buts encaissés sur {of} par l'aile droite",
+    nextBar: "{opp} : {n} sur {of} buts encaissés par l'aile droite",
     nextLabel: "Buts encaissés par l'aile droite, une barre par match",
     nextCourt: "Buts encaissés sur le demi-terrain, but en haut. Contre {opp} : {n} sur {of} par l'aile droite.",
     nextDemo: "Match de démo",

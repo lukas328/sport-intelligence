@@ -35,7 +35,7 @@ export function SeasonBars({ matches, text }: { matches: SeasonMatch[]; text: Se
           return (
             <button key={x.opp} type="button" aria-pressed={on} aria-label={text.bars[i]} onClick={() => setPick(i)} className="group flex min-w-0 cursor-pointer flex-col text-left">
               <span className="flex h-[15rem] flex-col justify-end md:h-[19rem]">
-                <span className={cn("font-num text-[2.25rem] leading-none md:text-[3.25rem]", !on && "opacity-80")}>{x.n}</span>
+                <span aria-hidden className={cn("font-num text-[2.25rem] leading-none md:text-[3.25rem]", !on && "opacity-80")}>{x.n}</span>
                 <span className="upright mb-2 text-base">{text.of[i]}</span>
                 <span
                   aria-hidden

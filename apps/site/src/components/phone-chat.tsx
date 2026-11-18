@@ -71,7 +71,7 @@ function ChatInside({ t, locale }: { t: Messages["home"]["chat"]; locale: string
             <span className="grid size-9 shrink-0 place-items-center rounded-[999px] bg-[#10684a] font-slant text-[0.9375rem] text-white">H1</span>
             <span className="min-w-0 leading-tight">
               <b className="block truncate text-[0.9375rem]">{t.group}</b>
-              <span className="block text-[0.75rem] text-[#5f6368]">{t.members}</span>
+              <span className="block text-[0.75rem] text-ink-2">{t.members}</span>
             </span>
           </div>
 
@@ -88,9 +88,9 @@ function ChatInside({ t, locale }: { t: Messages["home"]["chat"]; locale: string
             <div className="max-w-[78%] rounded-[0.9rem] rounded-tl-[0.3rem] bg-white px-2.5 py-1.5 shadow-[0_1px_0_rgb(0_0_0/.08)]">
               <b className="block text-[0.75rem] text-[#9a4b1d]">{t.earlier.from}</b>
               <span className="block text-[0.8125rem] leading-snug">{t.earlier.text}</span>
-              <span className="block text-right text-[0.6875rem] text-[#5f6368]">{t.earlier.time}</span>
+              <span className="block text-right text-[0.6875rem] text-ink-2">{t.earlier.time}</span>
             </div>
-            <span className="mx-auto my-1 rounded-[999px] bg-white/85 px-3 py-0.5 text-[0.75rem] font-semibold text-[#5f6368] shadow-[0_1px_0_rgb(0_0_0/.06)]">{t.day}</span>
+            <span className="mx-auto my-1 rounded-[999px] bg-white/85 px-3 py-0.5 text-[0.75rem] font-semibold text-ink-2 shadow-[0_1px_0_rgb(0_0_0/.06)]">{t.day}</span>
 
             {/* the coach's message with the preview of the link */}
             <div className="ml-auto w-[88%] rounded-[0.9rem] rounded-tr-[0.3rem] p-1 shadow-[0_1px_0_rgb(0_0_0/.08)]" style={{ backgroundColor: OWN }}>
@@ -98,27 +98,27 @@ function ChatInside({ t, locale }: { t: Messages["home"]["chat"]; locale: string
                 <img src={`/media/teilen-vorschau-${locale}.webp`} alt="" width={640} height={336} loading="lazy" decoding="async" className="block aspect-[1200/630] w-full object-cover" />
                 <div className="px-2.5 pt-1.5 pb-2 leading-snug">
                   <b className="block text-[0.8125rem]">{t.previewTitle}</b>
-                  <span className="block text-[0.75rem] text-[#5f6368]">{t.previewText}</span>
-                  <span className="block text-[0.6875rem] text-[#5f6368]">app.handball-intelligence.com</span>
+                  <span className="block text-[0.75rem] text-ink-2">{t.previewText}</span>
+                  <span className="block text-[0.6875rem] text-ink-2">app.handball-intelligence.com</span>
                 </div>
               </div>
               <p className="px-1.5 pt-1.5 text-[0.875rem] leading-snug">
                 {t.message} <span className="break-all text-[#0e6a8a] underline">{LINK}</span>
               </p>
-              <p className="px-1.5 text-right text-[0.6875rem] text-[#5f6368]">{t.time}</p>
+              <p className="px-1.5 text-right text-[0.6875rem] text-ink-2">{t.time}</p>
             </div>
 
             {/* a player who saw it himself */}
             <div className="max-w-[80%] rounded-[0.9rem] rounded-tl-[0.3rem] bg-white px-2.5 py-1.5 shadow-[0_1px_0_rgb(0_0_0/.08)]">
               <b className="block text-[0.75rem] text-[#9a4b1d]">{t.replyFrom}</b>
               <span className="block text-[0.875rem] leading-snug">{t.reply}</span>
-              <span className="block text-right text-[0.6875rem] text-[#5f6368]">{t.replyTime}</span>
+              <span className="block text-right text-[0.6875rem] text-ink-2">{t.replyTime}</span>
             </div>
           </div>
 
           {/* the field to write in */}
           <div className="flex shrink-0 items-center gap-2 bg-[#f7f6f2] px-2.5 pt-2 pb-5">
-            <span className="flex-1 rounded-[999px] border border-black/10 bg-white px-3.5 py-1.5 text-[0.8125rem] text-[#8a8d92]">{t.input}</span>
+            <span className="flex-1 rounded-[999px] border border-black/10 bg-white px-3.5 py-1.5 text-[0.8125rem] text-[#6b6e73]">{t.input}</span>
             <span className="grid size-8 shrink-0 place-items-center rounded-[999px] bg-[#10684a] text-white">
               <svg viewBox="0 0 16 16" className="size-3.5">
                 <path d="M2 8h11M9 4l4 4-4 4" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
