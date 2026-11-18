@@ -3931,7 +3931,16 @@
     "keepersSome": "{n, plural, one {1 Torhüter eingetragen.} other {# Torhüter eingetragen.}}",
     "keepersChange": "Torhüter ändern",
     "keepersDone": "Fertig",
-    "keepersFailed": "Das hat nicht geklappt. Versuch es nochmals oder trag die Position unter «Kader bearbeiten» ein."
+    "keepersFailed": "Das hat nicht geklappt. Versuch es nochmals oder trag die Position unter «Kader bearbeiten» ein.",
+    "positionsTitle": "Wer spielt wo?",
+    "positionsText": "Wähl eine Position und tippe alle an, die sie spielen. Nochmals tippen nimmt sie wieder weg. Mit den Positionen ordnet der Kader die Spieler, und Zahlen nach Position bekommen ihre Leute.",
+    "positionsPick": "Position",
+    "positionsTap": "Wer spielt {position}?",
+    "positionsMark": "{name} spielt {position}",
+    "positionsMissing": "{n, plural, one {1 Feldspieler ohne Position.} other {# Feldspieler ohne Position.}}",
+    "positionsAll": "Alle Feldspieler haben eine Position.",
+    "positionsChange": "Positionen ändern",
+    "positionsFailed": "Das hat nicht geklappt. Versuch es nochmals oder trag die Position unter «Kader bearbeiten» ein."
   },
   "seasonPage": {
     "kick": "{season} · {league} · nach {n, plural, =1 {einem Spiel} =2 {zwei Spielen} =3 {drei Spielen} =4 {vier Spielen} =5 {fünf Spielen} =6 {sechs Spielen} =7 {sieben Spielen} =8 {acht Spielen} =9 {neun Spielen} =10 {zehn Spielen} other {# Spielen}}",

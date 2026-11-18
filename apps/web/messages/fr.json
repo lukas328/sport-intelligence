@@ -3931,7 +3931,16 @@
     "keepersSome": "{n, plural, one {1 gardien inscrit.} other {# gardiens inscrits.}}",
     "keepersChange": "Modifier les gardiens",
     "keepersDone": "Terminé",
-    "keepersFailed": "Cela n’a pas marché. Réessaie ou saisis la position sous «Modifier l'effectif»."
+    "keepersFailed": "Cela n’a pas marché. Réessaie ou saisis la position sous «Modifier l'effectif».",
+    "positionsTitle": "Qui joue où ?",
+    "positionsText": "Choisis un poste et touche tous ceux qui le jouent. Toucher encore le retire. Avec les postes, l'effectif classe les joueurs et les chiffres par poste trouvent leurs joueurs.",
+    "positionsPick": "Poste",
+    "positionsTap": "Qui joue {position} ?",
+    "positionsMark": "{name} joue {position}",
+    "positionsMissing": "{n, plural, one {1 joueur de champ sans poste.} other {# joueurs de champ sans poste.}}",
+    "positionsAll": "Tous les joueurs de champ ont un poste.",
+    "positionsChange": "Modifier les postes",
+    "positionsFailed": "Cela n'a pas marché. Réessaie ou saisis le poste sous «Modifier l'effectif»."
   },
   "seasonPage": {
     "kick": "{season} · {league} · après {n, plural, one {# match} other {# matchs}}",

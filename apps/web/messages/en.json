@@ -3931,7 +3931,16 @@
     "keepersSome": "{n, plural, one {1 goalkeeper entered.} other {# goalkeepers entered.}}",
     "keepersChange": "Change goalkeepers",
     "keepersDone": "Done",
-    "keepersFailed": "That did not work. Try again or enter the position under «Edit squad»."
+    "keepersFailed": "That did not work. Try again or enter the position under «Edit squad».",
+    "positionsTitle": "Who plays where?",
+    "positionsText": "Choose a position and tap everyone who plays it. Tapping again takes it away. With positions the squad sorts the players, and figures by position get their people.",
+    "positionsPick": "Position",
+    "positionsTap": "Who plays {position}?",
+    "positionsMark": "{name} plays {position}",
+    "positionsMissing": "{n, plural, one {1 court player without a position.} other {# court players without a position.}}",
+    "positionsAll": "All court players have a position.",
+    "positionsChange": "Change positions",
+    "positionsFailed": "That did not work. Try again or enter the position under «Edit squad»."
   },
   "seasonPage": {
     "kick": "{season} · {league} · after {n, plural, one {# match} other {# matches}}",
