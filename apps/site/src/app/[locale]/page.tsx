@@ -18,6 +18,9 @@ import { graph, organization, softwareApplication, webPage, website } from "@/li
 import { SITE_UPDATED } from "@/lib/site";
 import { saturday, sundayAnswer, threeMatchesLater } from "@/lib/story";
 import { demoView } from "@/lib/things";
+import { DRILL_LANG, DRILLS } from "@/lib/drills";
+import { seasonRightWing } from "@/lib/week";
+import { LoopTile } from "@/components/week/loop-tile";
 
 type Props = { params: Promise<{ locale: Locale }> };
 
@@ -32,7 +35,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
  * the assistant, a training tip and the scenes for the team, checked three matches later. The
  * promise with the three things turning in a card; Saturday 7 pm, lost with only a feeling;
  * Saturday 10 pm, the three things and the real app on a computer; Sunday, the question to the
- * assistant; how you get there in three lines; Tuesday, the training tip and four scenes in the
+ * assistant, then what it means for training (BEFUNDE-4 U30: pattern, why, drill, effect, the loop
+ * of the demo week); how you get there in three lines; Tuesday, the training tip and four scenes in the
  * team chat; three matches later the right wing is closed, as a green block across the page.
  * Then the video in the club, the price and the team field. About 600 words (U18); the tactics
  * camera lives on the demo page, the step pictures on «So funktioniert es». The match is the demo
@@ -200,6 +204,27 @@ export default async function Home({ params }: Props) {
               />
             </div>
           </div>
+        </section>
+
+        {/* 4b · what it means for training (U30): the loop pattern, why, drill, effect, as on the demo page */}
+        <section aria-labelledby="loop" data-reveal className="mt-20 md:mt-28">
+          <LoopTile
+            kick={t.loopKick}
+            title={t.loopTitle}
+            steps={t.loop.map((s, i) => ({
+              title: s.title,
+              text: fmt(s.text, { n: sat.n, of: sat.of, drill: DRILLS.defence_6_0_shift.name[DRILL_LANG[locale]] }),
+              href: `/${locale}/demo/${["#warum", "#warum", "#einsicht", "#naechstes"][i]}`,
+            }))}
+            link={t.loopLink}
+            demoHref={`/${locale}/demo/`}
+            numeral={sat.n}
+            unit={String(sat.of)}
+            scene={v.scene}
+            drill={DRILLS.defence_6_0_shift}
+            drillLabel={fmt(m.demo.sketchLabel, { name: DRILLS.defence_6_0_shift.name[DRILL_LANG[locale]] })}
+            bars={seasonRightWing().map((s) => s.n)}
+          />
         </section>
 
         {/* 5 · how you get there: three short lines, the pictures live on «So funktioniert es» (U18) */}

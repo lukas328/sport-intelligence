@@ -27,6 +27,10 @@ on:
         description: "with status: read the newest finished analysis (log, result, artefacts) into a run artefact"
         type: boolean
         default: false
+      oneoff:
+        description: "with diag: also run the data fixes in infra/azure/oneoff/*.sql (one transaction each)"
+        type: boolean
+        default: false
       diag_asset:
         description: "with diag: this video asset id instead of the newest"
         type: string
@@ -146,6 +150,7 @@ jobs:
         env:
           OUT: ${{ runner.temp }}/diag
           DIAG_ASSET: ${{ inputs.diag_asset }}
+          ONEOFF: ${{ inputs.oneoff }}
           FW_RULE: gh-diag-${{ github.run_id }}
         run: bash ../../azure/staging-diag.sh
 

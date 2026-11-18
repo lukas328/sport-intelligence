@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* the app tour's stage (components/app-tour.tsx, U31): a wide and tall enough screen */
+@custom-variant stage (@media (min-width: 80rem) and (min-height: 40rem));
+
 /*
  * The website in the app's look «Anlauf» (docs/design/ux-reset/ANLAUF.md), set larger for older
  * eyes (docs/site/KONZEPT.md): body text 19 px, nothing important under 16 px, targets 48 px.
@@ -95,6 +98,23 @@
 @keyframes appear {
   to {
     opacity: 1;
+  }
+}
+/* a player of the app tour's play gets the ball: he waits for it, lights up as it arrives and
+   one ring goes out from him */
+@keyframes catch {
+  0%,
+  50% {
+    background-color: var(--court);
+    color: var(--court-text);
+    scale: 1;
+    box-shadow: 0 0 0 0 rgb(255 210 60 / 0.75);
+  }
+  56% {
+    box-shadow: 0 0 0 0 rgb(255 210 60 / 0.75);
+  }
+  100% {
+    box-shadow: 0 0 0 0.9rem rgb(255 210 60 / 0);
   }
 }
 @keyframes nudge {
@@ -675,6 +695,53 @@
   100% {
     opacity: 0;
     visibility: hidden;
+  }
+}
+
+/* the demo week (components/week): the spot to watch breathes, the player's scene runs, the season
+   bars rise once when seen, a new answer slides in; with reduced motion all of it stands still */
+.scene-progress {
+  transform: scaleX(0.42);
+}
+.bar-grow {
+  transform-origin: bottom;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .gap-pulse {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: gap-pulse 1.6s ease-in-out infinite alternate;
+  }
+  .scene-progress {
+    animation: scene-run 6s linear infinite;
+  }
+  .bar-grow {
+    animation: bar-grow 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    animation-delay: calc(var(--i, 0) * 160ms + 0.15s);
+  }
+  .wait .bar-grow {
+    animation-play-state: paused;
+  }
+  .ask-in {
+    animation: film-up 0.4s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+}
+@keyframes gap-pulse {
+  to {
+    transform: scale(1.18);
+  }
+}
+@keyframes scene-run {
+  from {
+    transform: scaleX(0.02);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes bar-grow {
+  from {
+    transform: scaleY(0);
   }
 }
 
