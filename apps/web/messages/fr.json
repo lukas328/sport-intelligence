@@ -1494,7 +1494,11 @@
     "access_request_team": "{name} veut rejoindre {team} et t'attend.",
     "access_request_named": "{name} veut rejoindre votre club et t'attend.",
     "analysis_checked": "Tout est vérifié. L'analyse calcule avec tes réponses.",
-    "analysis_checked_match": "Tout est vérifié contre {opponent}. L'analyse calcule avec tes réponses."
+    "analysis_checked_match": "Tout est vérifié contre {opponent}. L'analyse calcule avec tes réponses.",
+    "official_report_match": "La feuille de match officielle contre {opponent} est disponible.",
+    "feed_ready_match": "Tes scènes du match contre {opponent} sont prêtes.",
+    "scouting_ready_match": "Le rapport de préparation sur {opponent} est prêt.",
+    "matchOn": "Match du {date}"
   },
   "assignments": {
     "title": "Tâches",

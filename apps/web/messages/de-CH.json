@@ -1494,7 +1494,11 @@
     "access_request_team": "{name} möchte zu {team} und wartet auf dich.",
     "access_request_named": "{name} möchte in euren Verein und wartet auf dich.",
     "analysis_checked": "Alles geprüft. Die Analyse rechnet mit deinen Antworten.",
-    "analysis_checked_match": "Alles geprüft gegen {opponent}. Die Analyse rechnet mit deinen Antworten."
+    "analysis_checked_match": "Alles geprüft gegen {opponent}. Die Analyse rechnet mit deinen Antworten.",
+    "official_report_match": "Der offizielle Spielbericht gegen {opponent} ist da.",
+    "feed_ready_match": "Deine Szenen aus dem Spiel gegen {opponent} sind da.",
+    "scouting_ready_match": "Der Vorbereitungsbericht zu {opponent} ist da.",
+    "matchOn": "Spiel vom {date}"
   },
   "assignments": {
     "title": "Aufgaben",

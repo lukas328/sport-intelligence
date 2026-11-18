@@ -46,6 +46,11 @@ export function NotificationBell({ orgId }: { orgId: string }) {
     if ((n.params as { name?: string } | null)?.name && t.has(person as "assignment")) return t(person as "assignment", n.params as never);
     return t.has(n.kind as "assignment") ? t(n.kind as "assignment", n.params as never) : t("other");
   };
+  // which match: its day beside the time of the note (A12)
+  const matchDay = (n: Note) => {
+    const day = (n.params as { date?: string } | null)?.date;
+    return day && /^\d{4}-\d{2}-\d{2}$/.test(day) ? t("matchOn", { date: format.dateTime(new Date(`${day}T12:00:00`), { day: "numeric", month: "short", year: "numeric" }) }) : null;
+  };
   return (
     <M.Root>
       <M.Trigger
@@ -98,7 +103,7 @@ export function NotificationBell({ orgId }: { orgId: string }) {
                   <span aria-hidden className={cn("mt-1.5 size-2 shrink-0 rounded-full", n.read_at ? "bg-transparent" : "bg-accent")} />
                   <span className="min-w-0">
                     {text(n)}
-                    <span className="block text-xs font-normal text-muted">{format.relativeTime(new Date(n.created_at), now)}</span>
+                    <span className="block text-xs font-normal text-muted">{[matchDay(n), format.relativeTime(new Date(n.created_at), now)].filter(Boolean).join(" · ")}</span>
                   </span>
                 </Link>
               </M.Item>

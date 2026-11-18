@@ -1494,7 +1494,11 @@
     "access_request_team": "{name} wants to join {team} and is waiting for you.",
     "access_request_named": "{name} wants to join your club and is waiting for you.",
     "analysis_checked": "All checked. The analysis works with your answers.",
-    "analysis_checked_match": "All checked against {opponent}. The analysis works with your answers."
+    "analysis_checked_match": "All checked against {opponent}. The analysis works with your answers.",
+    "official_report_match": "The official match report against {opponent} is in.",
+    "feed_ready_match": "Your scenes from the match against {opponent} are ready.",
+    "scouting_ready_match": "The preparation report on {opponent} is ready.",
+    "matchOn": "Match on {date}"
   },
   "assignments": {
     "title": "Assignments",
