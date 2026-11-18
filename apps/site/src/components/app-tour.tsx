@@ -82,7 +82,7 @@ export function AppTour({ items, label, hint }: { items: TourItem[]; label: stri
       {/* the calm version: step under step, the picture right under its text */}
       <ol aria-label={label} className="grid gap-16 md:gap-20 stage:hidden">
         {items.map((s, i) => (
-          <li key={s.name} className="min-w-0">
+          <li key={s.name} className="min-w-0 print:break-inside-avoid">
             <div className="max-w-[34rem]">
               <p className="flex items-baseline gap-4">
                 <span aria-hidden className="font-num text-[3rem] leading-[.8] text-club-text">
@@ -232,7 +232,15 @@ function Play({ items, at, go, label, hint }: { items: TourItem[]; at: number; g
               className="group absolute z-[1] flex -translate-x-1/2 -translate-y-6 cursor-pointer flex-col items-center px-1 pb-1 outline-offset-0"
               style={percent(PLAYERS[i]!)}
             >
-              <span className="grid size-12 place-items-center">
+              <span className="relative grid size-12 place-items-center">
+                {/* the next pass: a soft yellow pulse says «tap me» (still with reduced motion) */}
+                {i === at + 1 && (
+                  <span
+                    aria-hidden
+                    style={{ borderRadius: "50%" }}
+                    className="pointer-events-none absolute size-[2.125rem] border-2 border-attn opacity-70 motion-safe:animate-ping"
+                  />
+                )}
                 <span
                   aria-hidden
                   key={on ? "on" : "off"}
@@ -241,7 +249,7 @@ function Play({ items, at, go, label, hint }: { items: TourItem[]; at: number; g
                     "upright grid size-[2.125rem] place-items-center border-2 text-[1.0625rem] leading-none transition-[background-color,scale] duration-300 motion-reduce:transition-none",
                     on
                       ? "scale-110 border-court-text bg-club text-club-ink motion-safe:animate-[catch_1.1s_ease-out_both]"
-                      : "border-court-text bg-court text-court-text group-hover:bg-[#34363a]",
+                      : "border-attn bg-court text-court-text group-hover:scale-110 group-hover:bg-attn group-hover:text-ink group-focus-visible:bg-attn group-focus-visible:text-ink",
                   )}
                 >
                   {i + 1}
@@ -250,7 +258,9 @@ function Play({ items, at, go, label, hint }: { items: TourItem[]; at: number; g
               <span
                 className={cn(
                   "upright -mt-1 bg-court/85 px-1 text-[1rem] leading-tight whitespace-nowrap transition-colors duration-300 motion-reduce:transition-none",
-                  on ? "text-attn motion-safe:delay-500" : "text-court-text group-hover:underline",
+                  on
+                    ? "text-attn motion-safe:delay-500"
+                    : "text-court-text underline decoration-attn/70 decoration-2 underline-offset-4 group-hover:text-attn",
                 )}
               >
                 {s.player}
@@ -267,7 +277,16 @@ function Play({ items, at, go, label, hint }: { items: TourItem[]; at: number; g
           />
         </span>
       </div>
-      <p className="border-t-2 border-court-bar bg-court-bar px-4 py-2 text-[1rem] text-court-text">{hint}</p>
+      <p className="flex items-center gap-2.5 border-t-2 border-court-bar bg-court-bar px-4 py-2 text-[1rem] text-court-text">
+        {/* a tapping hand: the numbers are buttons */}
+        <svg aria-hidden viewBox="0 0 24 24" className="size-5 shrink-0 text-attn" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+          <path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V11" />
+          <path d="M12 10.5V9a1.5 1.5 0 0 1 3 0v2" />
+          <path d="M15 10.5a1.5 1.5 0 0 1 3 0V15a6 6 0 0 1-6 6h-.5a6 6 0 0 1-4.6-2.2L4.6 16a1.5 1.5 0 0 1 2.3-1.9L9 16" />
+          <path d="M5 4.5 3.5 3M9 2V1M13 4.5 14.5 3" />
+        </svg>
+        <span>{hint}</span>
+      </p>
     </div>
   );
 }

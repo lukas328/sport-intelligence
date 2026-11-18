@@ -24,21 +24,33 @@ class Problem(BaseModel):
     errors: list[dict[str, Any]] | None = None
     # extension member on 500s: the id in our logs, so a report can be matched to its error
     request_id: str | None = None
+    # further extension members of one problem type (e.g. the worst click of clicks-disagree)
+    extensions: dict[str, Any] | None = None
 
 
 class ProblemError(Exception):
     """Raise from domain or service code to return a typed problem response."""
 
-    def __init__(self, status: int, code: str, detail: str | None = None) -> None:
+    def __init__(
+        self,
+        status: int,
+        code: str,
+        detail: str | None = None,
+        extensions: dict[str, Any] | None = None,
+    ) -> None:
         super().__init__(detail or code)
         self.status = status
         self.code = code
         self.detail = detail
+        self.extensions = extensions
 
 
 def _response(problem: Problem) -> JSONResponse:
+    body = problem.model_dump(exclude_none=True, exclude={"extensions"})
+    # extension members sit beside the standard ones (RFC 9457, section 3.2), never over them
+    body.update({k: v for k, v in (problem.extensions or {}).items() if k not in body})
     return JSONResponse(
-        problem.model_dump(exclude_none=True),
+        body,
         status_code=problem.status,
         media_type=PROBLEM_MEDIA_TYPE,
     )
@@ -97,6 +109,7 @@ def install_error_handlers(app: FastAPI) -> None:
                 status=exc.status,
                 detail=exc.detail,
                 instance=request.url.path,
+                extensions=exc.extensions,
             )
         )
 

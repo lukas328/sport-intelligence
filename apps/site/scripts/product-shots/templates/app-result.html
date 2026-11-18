@@ -1,0 +1,24 @@
+<!doctype html>
+<!-- The app after the match («Über uns»; until U33 the picture of step 4): the first of the three
+     things of the website's match, large: «1 von 3», «11 von 29», «Gegentore über aussen rechts»,
+     and the shots on the court, all on the right wing, ringed. One cut-out of the real app
+     (capture step-dinge), flat on the app's cloth with its ink edge, square. -->
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../stage.css" />
+<div id="stage"></div>
+<script src="../stage.js"></script>
+<script>
+  S.stage(640, 640, { cloth: true });
+  const NAME = "step-dinge";
+  const kicker = S.rect(NAME, "kicker", [16, 95.7, 328, 19]);
+  const court = S.rect(NAME, "court", [16, 263, 328, 266]);
+  const dots = S.rect(NAME, "dots", [292.7, 289.3, 37.7, 40.7]);
+  // from above «1 von 3» to the court's goal area and 9 m line, where the shots are
+  const y0 = kicker[1] - 16;
+  const crop = [8, y0, 344, court[1] + 152 - y0];
+  const W = 584;
+  const h = (crop[3] * W) / crop[2] + 4;
+  const s = S.cut(NAME, crop, { left: 28, top: Math.round((640 - h) / 2), width: W });
+  S.ring(s, dots, 10, true);
+  S.done();
+</script>

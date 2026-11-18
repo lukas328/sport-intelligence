@@ -8,7 +8,7 @@ import { ProductShot } from "@/components/product-shot";
 import { JsonLd } from "@/components/json-ld";
 import { DemoLink, KitScope, StartLink } from "@/components/kit";
 import { Reveal } from "@/components/reveal";
-import { BeforeAfter, Evening, When } from "@/components/story";
+import { Evening, When } from "@/components/story";
 import { PhoneChat } from "@/components/phone-chat";
 import { TeamField } from "@/components/team-field";
 import { Things } from "@/components/things";
@@ -17,6 +17,7 @@ import { pageMeta } from "@/lib/seo";
 import { graph, organization, softwareApplication, webPage, website } from "@/lib/schema";
 import { SITE_UPDATED } from "@/lib/site";
 import { saturday, sundayAnswer, threeMatchesLater } from "@/lib/story";
+import { SeasonBars } from "@/components/week/season-bars";
 import { demoView } from "@/lib/things";
 import { DRILL_LANG, DRILLS } from "@/lib/drills";
 import { seasonRightWing } from "@/lib/week";
@@ -33,10 +34,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
  * The start page as one week of an invented team (BEFUNDE-2 W5, W22; BEFUNDE-3 U6, U18): not a
  * video platform but what to change in training, as one thread: a pattern found, a question to
  * the assistant, a training tip and the scenes for the team, checked three matches later. The
- * promise with the three things turning in a card; Saturday 7 pm, lost with only a feeling;
+ * promise with the three things turning in a card; Saturday 7 pm, lost with only a feeling and a video (BEFUNDE-4 U39: a sticker says the video is enough and leads to «So funktioniert es»);
  * Saturday 10 pm, the three things and the real app on a computer; Sunday, the question to the
  * assistant, then what it means for training (BEFUNDE-4 U30: pattern, why, drill, effect, the loop
- * of the demo week); how you get there in three lines; Tuesday, the training tip and four scenes in the
+ * of the demo week); Tuesday, the training tip and four scenes in the
  * team chat; three matches later the right wing is closed, as a green block across the page.
  * Then the video in the club, the price and the team field. About 600 words (U18); the tactics
  * camera lives on the demo page, the step pictures on «So funktioniert es». The match is the demo
@@ -50,12 +51,11 @@ export default async function Home({ params }: Props) {
   const v = demoView(m);
   const sat = saturday();
   const later = threeMatchesLater();
+  const season = seasonRightWing();
+  const d = m.demo;
   const answer = sundayAnswer();
   const team = plans.plans.find((p) => p.plan === "team")!;
   const app = APP_LOCALE[locale];
-  const wing = fmt(m.things.concededText, {
-    zone: m.things.zones[sat.zone as keyof typeof m.things.zones],
-  });
   // on the start page each thing leads to its scenes in the demo; the halves stand in the hero (U18)
   const things = v.things.map((x) => ({
     ...x,
@@ -132,7 +132,7 @@ export default async function Home({ params }: Props) {
       {/* 2 · Saturday, 7 pm: the problem (W6, W23, W25), the evening after the defeat */}
       <section
         aria-labelledby="problem"
-        className="-mt-10 bg-ink pt-10 text-ground md:-mt-16 md:pt-16"
+        className="-mt-10 bg-ink pt-10 text-ground md:-mt-16 md:pt-16 print:mt-0 print:bg-transparent print:pt-0 print:text-ink"
       >
         <div className="wrap grid grid-cols-1 items-center gap-10 py-14 md:py-20 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-16">
           <div data-reveal className="min-w-0">
@@ -140,16 +140,16 @@ export default async function Home({ params }: Props) {
             <h2 id="problem" className="mt-4 text-[2.5rem] md:text-[4rem]">
               {t.problemTitle}
             </h2>
-            <p className="mt-6 max-w-[36rem] text-[1.1875rem] text-[#dcdfe2] md:text-[1.3125rem]">
+            <p className="mt-6 max-w-[36rem] text-[1.1875rem] text-[#dcdfe2] md:text-[1.3125rem] print:text-ink">
               {t.problemText}
             </p>
-            <p className="mt-3 max-w-[36rem] text-[1.1875rem] text-[#dcdfe2] md:text-[1.3125rem]">
+            <p className="mt-3 max-w-[36rem] text-[1.1875rem] text-[#dcdfe2] md:text-[1.3125rem] print:text-ink">
               {t.problemRest}
             </p>
             <p className="mt-6 text-[1.25rem] font-bold md:text-[1.4375rem]">{t.problemBuild}</p>
           </div>
           <div data-reveal style={{ "--d": 1 } as CSSProperties} className="min-w-0">
-            <Evening t={t.problemCard} score={sat.score} />
+            <Evening t={t.problemCard} score={sat.score} how={{ text: m.cta.how, href: `/${locale}/so-funktioniert-es/` }} />
           </div>
         </div>
       </section>
@@ -211,10 +211,9 @@ export default async function Home({ params }: Props) {
           <LoopTile
             kick={t.loopKick}
             title={t.loopTitle}
-            steps={t.loop.map((s, i) => ({
+            steps={t.loop.map((s) => ({
               title: s.title,
               text: fmt(s.text, { n: sat.n, of: sat.of, drill: DRILLS.defence_6_0_shift.name[DRILL_LANG[locale]] }),
-              href: `/${locale}/demo/${["#warum", "#warum", "#einsicht", "#naechstes"][i]}`,
             }))}
             link={t.loopLink}
             demoHref={`/${locale}/demo/`}
@@ -225,32 +224,6 @@ export default async function Home({ params }: Props) {
             drillLabel={fmt(m.demo.sketchLabel, { name: DRILLS.defence_6_0_shift.name[DRILL_LANG[locale]] })}
             bars={seasonRightWing().map((s) => s.n)}
           />
-        </section>
-
-        {/* 5 · how you get there: three short lines, the pictures live on «So funktioniert es» (U18) */}
-        <section aria-labelledby="steps" className="mt-20 md:mt-28">
-          <p className="text-[1.0625rem] font-semibold text-ink-2">{t.stepsKick}</p>
-          <h2 id="steps" className="mt-2 text-[2.25rem] md:text-[3rem]">
-            {t.stepsTitle}
-          </h2>
-          <ol className="mt-6 grid grid-cols-1 border-t-2 border-ink md:grid-cols-3 md:gap-x-8">
-            {t.steps.map((x, i) => (
-              <li
-                key={x.title}
-                className="flex items-baseline gap-4 border-b border-rule py-4 md:border-b-0 md:py-5"
-              >
-                <span aria-hidden className="font-num text-[2.5rem] leading-[.8] text-club-text">
-                  {i + 1}
-                </span>
-                <p>
-                  <b>{x.title}:</b> {x.text}
-                </p>
-              </li>
-            ))}
-          </ol>
-          <Link href={`/${locale}/so-funktioniert-es/`} className="link mt-2">
-            {m.cta.how}
-          </Link>
         </section>
 
         {/* 6 · Tuesday: four scenes in the team chat (W26, W28) */}
@@ -299,8 +272,20 @@ export default async function Home({ params }: Props) {
               })}
             </p>
           </div>
+          {/* the same season bars as the demo match (U46): one bar per match, tap one for its goals */}
           <div data-reveal style={{ "--d": 1 } as CSSProperties} className="mt-12 md:mt-16">
-            <BeforeAfter t={t} before={sat} after={later} zone={wing} />
+            <SeasonBars
+              matches={season}
+              text={{
+                label: d.nextLabel,
+                of: season.map((x) => fmt(d.nextOf, { n: x.n, of: x.of })),
+                bars: season.map((x) => fmt(d.nextBar, { opp: x.opp, n: x.n, of: x.of })),
+                courts: season.map((x) => fmt(d.nextCourt, { opp: x.opp, n: x.n, of: x.of })),
+                demo: d.nextDemo,
+                example: d.nextTag,
+              }}
+            />
+            <p className="mt-6 inline-block border-2 border-dashed border-club-ink px-3 py-1 text-[1.0625rem] font-semibold">{d.nextExample}</p>
           </div>
         </div>
       </section>

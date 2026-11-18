@@ -5,6 +5,7 @@ import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { KitScope } from "@/components/kit";
 import { HTML_LANG, isLocale, localeParams, messages } from "@/lib/i18n";
+import { ogImage } from "@/lib/seo";
 import { SITE_URL } from "@/lib/site";
 import localFont from "next/font/local";
 import "../globals.css";
@@ -41,6 +42,7 @@ export const generateStaticParams = localeParams;
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
   const t = messages(locale).meta;
+  const image = ogImage(isLocale(locale) ? locale : "de");
   return {
     metadataBase: new URL(SITE_URL),
     title: { default: t.title, template: `%s | Handball Intelligence` },
@@ -49,9 +51,10 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     openGraph: {
       siteName: "Handball Intelligence",
       type: "website",
-      locale: HTML_LANG[isLocale(locale) ? locale : "de"],
-      images: [{ url: "/og.png", width: 1200, height: 630, alt: "Handball Intelligence" }],
+      locale: HTML_LANG[isLocale(locale) ? locale : "de"].replace("-", "_"),
+      images: [image],
     },
+    twitter: { card: "summary_large_image", images: [image] },
   };
 }
 

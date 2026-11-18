@@ -196,6 +196,29 @@
             "description": "automatic calibration: goal fit, players on the court, camera position; method 'hall' when the court was carried over from an earlier video of the hall (reference_video_id; sure when the hall images matched well enough not to ask); hall_tried lists earlier videos that did not fit",
             "title": "Calibration Info"
           },
+          "calibration_state": {
+            "default": "missing",
+            "description": "confirmed: set or confirmed by a person (or carried over from such a court with a sure hall match); suggested: the automatic court, a proposal to confirm or to click anew (calibration_suggestion); missing: no court; updating: a clicked court is being applied; undeterminable: the coach said it cannot be set on this video",
+            "enum": [
+              "confirmed",
+              "suggested",
+              "missing",
+              "updating",
+              "undeterminable"
+            ],
+            "title": "Calibration State",
+            "type": "string"
+          },
+          "calibration_suggestion": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CalibrationSuggestionOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "camera": {
             "anyOf": [
               {
@@ -232,6 +255,17 @@
               }
             ],
             "title": "Chunks"
+          },
+          "court_clicks": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CourtClicksIn"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "the coach's latest line clicks, to edit them again"
           },
           "detector": {
             "anyOf": [
@@ -1656,6 +1690,83 @@
         "title": "CalibrationPoint",
         "type": "object"
       },
+      "CalibrationSuggestionOut": {
+        "description": "The court proposed while calibration_state is \"suggested\"; confirming it is\nPOST .../calibration/confirm.",
+        "properties": {
+          "from_kickoff_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "kickoff of the match of from_video_id, for the label",
+            "title": "From Kickoff At"
+          },
+          "from_video_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "From Video Id"
+          },
+          "homography": {
+            "description": "court metres -> image px (3x3)",
+            "items": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "title": "Homography",
+            "type": "array"
+          },
+          "image_size": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "title": "Image Size",
+            "type": "array"
+          },
+          "source": {
+            "description": "hall: carried over from an earlier video of the same hall; auto: found automatically",
+            "enum": [
+              "hall",
+              "auto"
+            ],
+            "title": "Source",
+            "type": "string"
+          },
+          "space": {
+            "const": "panorama",
+            "default": "panorama",
+            "title": "Space",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "homography",
+          "image_size"
+        ],
+        "title": "CalibrationSuggestionOut",
+        "type": "object"
+      },
       "CandidateGoal": {
         "description": "A shot already stored that covers a candidate (same moment).",
         "properties": {
@@ -2107,6 +2218,24 @@
           "status"
         ],
         "title": "ClaimOut",
+        "type": "object"
+      },
+      "ClickResidualOut": {
+        "properties": {
+          "max": {
+            "title": "Max",
+            "type": "number"
+          },
+          "median": {
+            "title": "Median",
+            "type": "number"
+          }
+        },
+        "required": [
+          "median",
+          "max"
+        ],
+        "title": "ClickResidualOut",
         "type": "object"
       },
       "Clip": {
@@ -3245,6 +3374,272 @@
         "title": "ConversationOut",
         "type": "object"
       },
+      "CourtClicksIn": {
+        "description": "Clicks on court lines and named court points (handball_court.clicks: LINES, KEYPOINTS).",
+        "properties": {
+          "frame_ms": {
+            "default": 0,
+            "minimum": 0.0,
+            "title": "Frame Ms",
+            "type": "integer"
+          },
+          "lines": {
+            "additionalProperties": {
+              "items": {
+                "maxItems": 2,
+                "minItems": 2,
+                "prefixItems": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ],
+                "type": "array"
+              },
+              "type": "array"
+            },
+            "description": "line name (side_near, side_far, goal_left, goal_right, centre, six_left, six_right, nine_left, nine_right) -> two or more clicks on it",
+            "maxProperties": 12,
+            "title": "Lines",
+            "type": "object"
+          },
+          "points": {
+            "additionalProperties": {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            "description": "named court point -> its click",
+            "maxProperties": 40,
+            "title": "Points",
+            "type": "object"
+          },
+          "space": {
+            "default": "panorama",
+            "enum": [
+              "frame",
+              "panorama"
+            ],
+            "title": "Space",
+            "type": "string"
+          }
+        },
+        "title": "CourtClicksIn",
+        "type": "object"
+      },
+      "CourtClicksJobOut": {
+        "properties": {
+          "dropped": {
+            "description": "clicks left out as off the line (a neighbouring line)",
+            "items": {
+              "$ref": "#/components/schemas/DroppedClickOut"
+            },
+            "title": "Dropped",
+            "type": "array"
+          },
+          "homography": {
+            "description": "court metres -> image px (3x3)",
+            "items": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "title": "Homography",
+            "type": "array"
+          },
+          "image_size": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "title": "Image Size",
+            "type": "array"
+          },
+          "job_id": {
+            "format": "uuid",
+            "title": "Job Id",
+            "type": "string"
+          },
+          "per_click_px": {
+            "$ref": "#/components/schemas/PerClickOut"
+          },
+          "residual_px": {
+            "$ref": "#/components/schemas/ClickResidualOut",
+            "description": "distance of the clicks to the court"
+          }
+        },
+        "required": [
+          "homography",
+          "image_size",
+          "residual_px",
+          "per_click_px",
+          "job_id"
+        ],
+        "title": "CourtClicksJobOut",
+        "type": "object"
+      },
+      "CourtClicksOut": {
+        "properties": {
+          "dropped": {
+            "description": "clicks left out as off the line (a neighbouring line)",
+            "items": {
+              "$ref": "#/components/schemas/DroppedClickOut"
+            },
+            "title": "Dropped",
+            "type": "array"
+          },
+          "homography": {
+            "description": "court metres -> image px (3x3)",
+            "items": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "title": "Homography",
+            "type": "array"
+          },
+          "image_size": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "title": "Image Size",
+            "type": "array"
+          },
+          "per_click_px": {
+            "$ref": "#/components/schemas/PerClickOut"
+          },
+          "residual_px": {
+            "$ref": "#/components/schemas/ClickResidualOut",
+            "description": "distance of the clicks to the court"
+          }
+        },
+        "required": [
+          "homography",
+          "image_size",
+          "residual_px",
+          "per_click_px"
+        ],
+        "title": "CourtClicksOut",
+        "type": "object"
+      },
+      "CourtLineOut": {
+        "properties": {
+          "court": {
+            "description": "polyline in court metres",
+            "items": {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            "title": "Court",
+            "type": "array"
+          },
+          "kind": {
+            "enum": [
+              "line",
+              "arc"
+            ],
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "court"
+        ],
+        "title": "CourtLineOut",
+        "type": "object"
+      },
+      "CourtModelOut": {
+        "description": "The clickable court: x 0..40 m from the left goal line, y 0..20 m from the bottom side.",
+        "properties": {
+          "lines": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/CourtLineOut"
+            },
+            "title": "Lines",
+            "type": "object"
+          },
+          "points": {
+            "additionalProperties": {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            "title": "Points",
+            "type": "object"
+          }
+        },
+        "required": [
+          "lines",
+          "points"
+        ],
+        "title": "CourtModelOut",
+        "type": "object"
+      },
+      "CourtUndeterminableIn": {
+        "properties": {
+          "reason": {
+            "anyOf": [
+              {
+                "enum": [
+                  "too_far",
+                  "cut",
+                  "other"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "title": "CourtUndeterminableIn",
+        "type": "object"
+      },
       "DataRegion": {
         "enum": [
           "ch",
@@ -3592,6 +3987,41 @@
           "updated_at"
         ],
         "title": "DrillOut",
+        "type": "object"
+      },
+      "DroppedClickOut": {
+        "properties": {
+          "index": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "the click's index on its line; null for a point",
+            "title": "Index"
+          },
+          "kind": {
+            "enum": [
+              "point",
+              "line"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "name",
+          "index"
+        ],
+        "title": "DroppedClickOut",
         "type": "object"
       },
       "EventIn": {
@@ -12132,6 +12562,41 @@
           "password"
         ],
         "title": "PasswordResetIn",
+        "type": "object"
+      },
+      "PerClickOut": {
+        "properties": {
+          "lines": {
+            "additionalProperties": {
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "type": "array"
+            },
+            "description": "px per click, as the request listed them; null for a dropped click",
+            "title": "Lines",
+            "type": "object"
+          },
+          "points": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Points",
+            "type": "object"
+          }
+        },
+        "required": [
+          "lines",
+          "points"
+        ],
+        "title": "PerClickOut",
         "type": "object"
       },
       "PersonRole": {
@@ -23605,6 +24070,51 @@
         "summary": "Portal",
         "tags": [
           "billing"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/calibration/court-model": {
+      "get": {
+        "description": "The clickable court lines and points for the calibration dialog (court metres).",
+        "operationId": "court_model_v1_orgs__org_id__calibration_court_model_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CourtModelOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Court Model",
+        "tags": [
+          "matches",
+          "analysis"
         ]
       }
     },
@@ -38151,6 +38661,136 @@
         ]
       }
     },
+    "/v1/orgs/{org_id}/videos/{video_id}/calibration/clicks": {
+      "post": {
+        "description": "The court through the clicked lines: stored as the coach's court (user correction, also\noffered to later videos of the hall), and the analysis runs again with it.",
+        "operationId": "submit_court_clicks_v1_orgs__org_id__videos__video_id__calibration_clicks_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "video_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Video Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CourtClicksIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CourtClicksJobOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Submit Court Clicks",
+        "tags": [
+          "matches",
+          "analysis"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/videos/{video_id}/calibration/clicks/check": {
+      "post": {
+        "description": "The court through the clicked lines and points, nothing stored (for the live overlay).\n422 clicks-too-few, clicks-disagree or clicks-unknown when they give no court.",
+        "operationId": "check_court_clicks_v1_orgs__org_id__videos__video_id__calibration_clicks_check_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "video_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Video Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CourtClicksIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CourtClicksOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Check Court Clicks",
+        "tags": [
+          "matches",
+          "analysis"
+        ]
+      }
+    },
     "/v1/orgs/{org_id}/videos/{video_id}/calibration/confirm": {
       "post": {
         "description": "The automatic court fits: keep it as confirmed (no re-run).",
@@ -38273,6 +38913,64 @@
           }
         },
         "summary": "Court From Part",
+        "tags": [
+          "matches",
+          "analysis"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/videos/{video_id}/calibration/undeterminable": {
+      "post": {
+        "description": "\u00abNicht bestimmbar\u00bb: the court cannot be set on this video. Its court question is closed\nfor good, no positions are drawn; clicking the court later undoes it.",
+        "operationId": "court_undeterminable_v1_orgs__org_id__videos__video_id__calibration_undeterminable_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "video_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Video Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CourtUndeterminableIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Court Undeterminable",
         "tags": [
           "matches",
           "analysis"

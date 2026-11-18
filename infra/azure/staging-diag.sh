@@ -50,6 +50,13 @@ az postgres flexible-server firewall-rule create -g "$rg" --server-name "$(terra
   --name "$FW_RULE" --start-ip-address "$ip" --end-ip-address "$ip" -o none
 
 q() { PGCONNECT_TIMEOUT=20 psql "$dsn" -v ON_ERROR_STOP=1 -At -c "SET app.bypass_rls = 'on'; $1"; }
+echo "== postgres connection slots and who holds them now (staging 17.11.: TooManyConnections)"
+q "SELECT 'max_connections=' || current_setting('max_connections')
+   || ' superuser_reserved=' || current_setting('superuser_reserved_connections')
+   || ' reserved=' || coalesce(current_setting('reserved_connections', true), '-')" || true
+q "SELECT u || ' | ' || a || ' | ' || s || ' | ' || count(*) FROM (SELECT coalesce(usename, '-') AS u,
+   coalesce(nullif(regexp_replace(application_name, ' [0-9]+$', ''), ''), '-') AS a, coalesce(state, '-') AS s
+   FROM pg_stat_activity WHERE backend_type = 'client backend') c GROUP BY u, a, s ORDER BY 1" || true
 if [ -n "${DIAG_ASSET:-}" ]; then
   where="id = '${DIAG_ASSET//[^0-9a-f-]/}'"
 else

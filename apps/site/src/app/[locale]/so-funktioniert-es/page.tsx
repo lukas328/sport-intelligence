@@ -52,7 +52,7 @@ export default async function How({ params }: Props) {
             <li
               key={s.title}
               id={`schritt-${i + 1}`}
-              className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-5 border-t-2 border-ink py-10 md:grid-cols-[6rem_minmax(0,1fr)_minmax(0,26rem)] md:gap-x-10"
+              className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-5 border-t-2 border-ink py-10 md:grid-cols-[6rem_minmax(0,1fr)_minmax(0,26rem)] md:gap-x-10 print:grid-cols-[4.5rem_minmax(0,1fr)_minmax(0,15rem)] print:gap-x-6 print:py-6"
             >
               <span aria-hidden className="font-num text-[4.5rem] leading-[.85] text-club-text md:text-[6.5rem]">
                 {i + 1}
@@ -66,8 +66,8 @@ export default async function How({ params }: Props) {
                   </Link>
                 )}
               </div>
-              <div data-reveal style={{ "--d": 1 } as CSSProperties} className="col-span-2 mt-6 md:col-span-1 md:mt-0">
-                <StepPicture step={i} alt={s.alt} />
+              <div data-reveal style={{ "--d": 1 } as CSSProperties} className="col-span-2 mt-6 md:col-span-1 md:mt-0 print:col-span-1 print:mt-0">
+                <StepPicture step={i} locale={locale} alt={s.alt} />
               </div>
             </li>
           ))}
