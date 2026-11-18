@@ -23,6 +23,7 @@ const { chromium } = require('playwright'); const path = require('path'); const 
   await png('app-icon-maske.svg', 'app-icon-maske-1024.png', 1024, 1024);
   await png('app-icon-maske.svg', 'app-icon-maske-512.png', 512, 512);
   await png('open-graph.svg', 'open-graph.png', 1200, 630);
+  for (const l of ['de', 'fr', 'en']) await png(`open-graph-${l}.svg`, `open-graph-${l}.png`, 1200, 630);
   await png('zeichen.svg', 'zeichen-1024.png', 1024, 1024);
   /* the mobile app's sign-in mark, light and dark */
   await png('zeichen-tinte.svg', 'zeichen-tinte-288.png', 288, 288);

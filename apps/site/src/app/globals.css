@@ -955,3 +955,101 @@
     background: #fff;
   }
 }
+
+/*
+ * Printing any page (U29): ink on white paper, at its end state, nothing that only works on a
+ * screen. The templates and the hall notice above keep their own sizes in mm and pt.
+ */
+@media print {
+  /* what the page draws is what prints, also with «background graphics» off: bars, dots and
+     court pictures carry meaning; the big dark grounds are made light below instead */
+  html {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+    /* the type set for older eyes on a screen is large on paper; about 11.5 pt for body text */
+    font-size: 85%;
+  }
+  /* the templates are measured for one sheet at their own sizes */
+  html:has(.print-sheet) {
+    font-size: 100%;
+  }
+  body,
+  .cloth {
+    background: #fff !important;
+  }
+  /* every animation and transition at its last frame, also blocks that wait for the scroll */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+    animation-play-state: running !important;
+    transition: none !important;
+  }
+  .wait .shot-arrows path {
+    stroke-dashoffset: 0 !important;
+  }
+  .wait .shot-arrows .shot-head {
+    opacity: 1 !important;
+  }
+  /* the club-green blocks: white paper, ink type, the club's white lines and bars in ink */
+  .on-club {
+    background: #fff !important;
+    color: var(--ink) !important;
+    clip-path: none !important;
+    box-shadow: none !important;
+    --club-ink: var(--ink);
+    --club-edge: var(--ink);
+  }
+  /* closed questions print with their answer */
+  details::details-content {
+    content-visibility: visible;
+    display: block;
+    height: auto;
+  }
+  summary svg {
+    display: none;
+  }
+  /* a search field does nothing on paper */
+  form,
+  .film-replay {
+    display: none !important;
+  }
+  /* where a link leads, in running text */
+  .prose a[href^="http"]::after,
+  .print-url[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-weight: 400;
+    overflow-wrap: anywhere;
+  }
+  .prose a[href^="/"]::after,
+  .print-url[href^="/"]::after {
+    content: " (handball-intelligence.com" attr(href) ")";
+    font-weight: 400;
+    overflow-wrap: anywhere;
+  }
+  /* nothing cut in half by the sheet's edge */
+  h1,
+  h2,
+  h3 {
+    break-after: avoid;
+  }
+  p,
+  li {
+    orphans: 3;
+    widows: 3;
+  }
+  figure,
+  img,
+  svg,
+  picture,
+  video,
+  tr,
+  blockquote,
+  [role="img"],
+  .shot,
+  .on-court {
+    break-inside: avoid;
+  }
+}

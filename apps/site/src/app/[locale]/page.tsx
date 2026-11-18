@@ -132,7 +132,7 @@ export default async function Home({ params }: Props) {
       {/* 2 · Saturday, 7 pm: the problem (W6, W23, W25), the evening after the defeat */}
       <section
         aria-labelledby="problem"
-        className="-mt-10 bg-ink pt-10 text-ground md:-mt-16 md:pt-16"
+        className="-mt-10 bg-ink pt-10 text-ground md:-mt-16 md:pt-16 print:mt-0 print:bg-transparent print:pt-0 print:text-ink"
       >
         <div className="wrap grid grid-cols-1 items-center gap-10 py-14 md:py-20 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-16">
           <div data-reveal className="min-w-0">
@@ -140,10 +140,10 @@ export default async function Home({ params }: Props) {
             <h2 id="problem" className="mt-4 text-[2.5rem] md:text-[4rem]">
               {t.problemTitle}
             </h2>
-            <p className="mt-6 max-w-[36rem] text-[1.1875rem] text-[#dcdfe2] md:text-[1.3125rem]">
+            <p className="mt-6 max-w-[36rem] text-[1.1875rem] text-[#dcdfe2] md:text-[1.3125rem] print:text-ink">
               {t.problemText}
             </p>
-            <p className="mt-3 max-w-[36rem] text-[1.1875rem] text-[#dcdfe2] md:text-[1.3125rem]">
+            <p className="mt-3 max-w-[36rem] text-[1.1875rem] text-[#dcdfe2] md:text-[1.3125rem] print:text-ink">
               {t.problemRest}
             </p>
             <p className="mt-6 text-[1.25rem] font-bold md:text-[1.4375rem]">{t.problemBuild}</p>
