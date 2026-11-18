@@ -439,7 +439,7 @@
     "youthBadge": "Youth"
   },
   "account": {
-    "title": "Account",
+    "title": "Password and devices",
     "emailUnverified": "Your e-mail address is not confirmed yet.",
     "resend": "Send confirmation e-mail again",
     "resent": "Confirmation e-mail sent.",
@@ -461,7 +461,13 @@
     "method_google": "Google",
     "method_apple": "Apple",
     "method_password_reset": "Password reset",
-    "sessionsAll": "Show all {n} devices"
+    "sessionsAll": "Show all {n} devices",
+    "nameLabel": "Name",
+    "saveName": "Save name",
+    "nameSaved": "Saved.",
+    "emailLabel": "Email",
+    "emailHint": "You sign in with this address, and email notifications go to it.",
+    "languageLabel": "Language"
   },
   "team": {
     "roster": "Team",

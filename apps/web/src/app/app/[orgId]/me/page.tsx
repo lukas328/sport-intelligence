@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { AccountSection } from "@/components/account-section";
+import { ProfileBasics } from "@/components/profile-basics";
 import { ProfileEditor } from "../profile/profile-editor";
 import { loadSettings } from "../settings/load";
 
@@ -13,7 +13,8 @@ export default async function MePage({ params }: { params: Promise<{ orgId: stri
   const { me } = await loadSettings(orgId);
   return (
     <>
-      <AccountSection me={me} />
+      {/* name, e-mail, language first; password and devices are under «Sicherheit» (A13) */}
+      <ProfileBasics me={me} />
       <ProfileEditor orgId={orgId} />
     </>
   );

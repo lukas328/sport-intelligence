@@ -439,7 +439,7 @@
     "youthBadge": "Juniors"
   },
   "account": {
-    "title": "Compte",
+    "title": "Mot de passe et appareils",
     "emailUnverified": "Votre adresse e-mail n'est pas encore confirmée.",
     "resend": "Renvoyer l'e-mail de confirmation",
     "resent": "E-mail de confirmation envoyé.",
@@ -461,7 +461,13 @@
     "method_google": "Google",
     "method_apple": "Apple",
     "method_password_reset": "Mot de passe réinitialisé",
-    "sessionsAll": "Afficher les {n} appareils"
+    "sessionsAll": "Afficher les {n} appareils",
+    "nameLabel": "Nom",
+    "saveName": "Enregistrer le nom",
+    "nameSaved": "Enregistré.",
+    "emailLabel": "E-mail",
+    "emailHint": "Tu te connectes avec cette adresse, les notifications par e-mail y sont envoyées.",
+    "languageLabel": "Langue"
   },
   "team": {
     "roster": "Équipe",
