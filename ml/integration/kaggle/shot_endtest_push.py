@@ -39,8 +39,9 @@ else:
     code = next(inp.rglob("shot_segments_eval.py")).parents[1]
 models = next(inp.rglob("ball_hrp1.onnx")).parent
 pip = ("pip install -q uv && uv python install 3.12 && uv venv -q -p 3.12 /tmp/v && "
-       "VIRTUAL_ENV=/tmp/v uv pip install -q 'numpy>=2.1' 'opencv-python-headless>=4.10,<5' "
-       "'scipy>=1.14' 'pyarrow>=18' 'av>=14' 'onnxruntime>=1.20' imageio-ffmpeg")
+       "uv pip install -q --python /tmp/v/bin/python 'numpy>=2.1' 'opencv-python-headless>=4.10,<5' "
+       "'scipy>=1.14' 'pyarrow>=18' 'av>=14' 'onnxruntime>=1.20' imageio-ffmpeg && "
+       "/tmp/v/bin/python -c 'import cv2, av, onnxruntime, scipy; print(\"deps ok\")'")
 subprocess.run(pip, shell=True, check=True)
 if shutil.which("ffmpeg") is None:
     exe = subprocess.check_output(["/tmp/v/bin/python", "-c",
