@@ -15,7 +15,7 @@ Gegner-Scouting ein Kernweg ist.
 Nicht oder anders übernommen:
 | Ticket | Entscheid | Begründung |
 |---|---|---|
-| TXT-01 «die drei Dinge» in «Muster» umbenennen | **ja (Lukas, 19.11.), ganz am Schluss** | Neu: «die drei Muster» (en «the three patterns», fr «les trois tendances») in App, Website, Demo und Hilfe; nur sichtbare Texte, URLs wie `?ding=1` bleiben. Als letzter Schritt, weil es fast jede Datei berührt. Ursprüngliche Einschätzung der Hauptsitzung:  «Die drei Dinge» ist das Kernversprechen auf Website, Demo und App (Lukas' Konzept). Ein Umbenennen müsste Lukas entscheiden. Stattdessen beim ersten Auftreten konkret sagen, was ein Ding ist («ein Muster, das sich wiederholt, z. B. drei Gegentore aus derselben Ecke»), den Satz «Ein Ding entsteht, sobald …» verständlich machen. |
+| TXT-01 «die drei Dinge» in «Muster» umbenennen | **erledigt (19.11.): Muster (ohne Zahl)** | Lukas, 19.11. spät: nur «Muster», ohne die Zahl drei, weil es beliebig viele sein können: «die Muster», «ein Muster» (en «the patterns», «a pattern», fr «les tendances», «une tendance»); eine Zahl nur, wo sie die echte Anzahl ist. Umgesetzt in App, Website, Demo, Hilfe, Ratgeber, Blog, Mails, PDF; Begriff in `docs/design/ux-reset/SPEC.md` Abschnitt 9. Erster Entscheid war «die drei Muster»; nur sichtbare Texte, URLs wie `?ding=1` bleiben. Als letzter Schritt, weil es fast jede Datei berührt. Ursprüngliche Einschätzung der Hauptsitzung:  «Die drei Dinge» ist das Kernversprechen auf Website, Demo und App (Lukas' Konzept). Ein Umbenennen müsste Lukas entscheiden. Stattdessen beim ersten Auftreten konkret sagen, was ein Ding ist («ein Muster, das sich wiederholt, z. B. drei Gegentore aus derselben Ecke»), den Satz «Ein Ding entsteht, sobald …» verständlich machen. |
 | TXT-08 Saison-Headline | **Fakten zuerst** | «4 Siege, 5 Niederlagen.» als Titel, darunter der Link zu den Trainingstipps; kein belehrender Ton. Zeitstempel einheitlich («abgeglichen vor 9 Stunden»). |
 | UX-07 Konzept beobachtete Spiele | **entschieden, siehe unten** | |
 | BUG-12 Szenen leer | **mit UX-07** | Der heutige Leertext ist falsch, egal wie entschieden wird. |
@@ -46,7 +46,7 @@ Nicht oder anders übernommen:
    TXT-02, TXT-04, TXT-05, TXT-08, LEGAL-01. Dazu aus dem Website-Review: Herkunft `?src=` bei der
    Registrierung speichern (ohne Cookies), «Gemacht mit Handball Intelligence» dezent auf geteilten
    Szenen-Links, «Nutzungsbedingungen» in der App durch «AGB» ersetzen.
-4. Zum Schluss: «drei Dinge» wird «drei Muster» (TXT-01), auch auf der Website.
+4. Zum Schluss: «drei Dinge» wird «Muster», ohne Zahl (TXT-01), auch auf der Website. Erledigt.
 
 ## Ergänzungen aus Lukas' Notizen beim Testen (19.11.)
 Doppelt mit dem Review (nicht neu): Szenen nur bei eigenen Spielen (UX-07, BUG-12), Unterteilung
