@@ -24,6 +24,8 @@ import { DRILL_LANG, DRILLS } from "@/lib/drills";
 import { seasonRightWing } from "@/lib/week";
 import { LoopTile } from "@/components/week/loop-tile";
 import { HallPhoto } from "@/components/hall-photo";
+import { Cur } from "@/components/currency";
+import { perTeam } from "@/lib/currency";
 
 type Props = { params: Promise<{ locale: Locale }> };
 
@@ -57,6 +59,7 @@ export default async function Home({ params }: Props) {
   const d = m.demo;
   const answer = sundayAnswer();
   const team = plans.plans.find((p) => p.plan === "team")!;
+  const club = plans.plans.find((p) => p.plan === "club")!;
   const app = APP_LOCALE[locale];
   // on the start page each thing leads to its scenes in the demo; the halves stand in the hero (U18)
   const things = v.things.map((x) => ({
@@ -358,10 +361,18 @@ export default async function Home({ params }: Props) {
             </p>
             <div>
               <h2 id="price" className="text-[2rem] md:text-[2.5rem]">
-                {fmt(t.priceTitle, { price: team.price_chf_month })}
+                <Cur text={fmt(t.priceTitle, { price: team.price_chf_month })} />
               </h2>
               <p className="mt-2">
-                {fmt(t.priceText, { days: team.trial_days, price: team.price_chf_month })}
+                <Cur
+                  text={fmt(t.priceText, {
+                    days: team.trial_days,
+                    price: team.price_chf_month,
+                    club: club.price_chf_month,
+                    clubTeams: club.teams,
+                    perTeam: perTeam(club),
+                  })}
+                />
               </p>
             </div>
             <div className="flex flex-col gap-2">

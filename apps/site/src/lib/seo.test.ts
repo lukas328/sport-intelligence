@@ -57,7 +57,7 @@ describe("search engines", () => {
     expect(txt).toContain("pro Halle und Kameraplatz nur einmal");
     expect(txt).toContain("Wenn du magst, nach einem Tor den vorgeschlagenen Wurfort mit einem Tipp bestätigen.");
     expect(txt).not.toMatch(/Tor für Tor|bei jedem Tor|freiwilligen Fragen/);
-    expect(txt).toMatch(/Team: CHF \d+ im Monat/);
+    expect(txt).toMatch(/Team: CHF oder EUR \d+ im Monat/);
     // for clubs across Europe, and honest about what the team search covers (L14)
     expect(txt).toContain("für Vereine in ganz Europa");
     expect(txt).toContain("Team und Spielplan: Für Teams aus der Schweiz");

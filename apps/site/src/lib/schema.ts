@@ -5,6 +5,7 @@
  */
 import plans from "@handball/plans";
 import { HTML_LANG, type Locale } from "@/lib/i18n";
+import { CURRENCIES } from "@/lib/currency";
 import { PRICES_FINAL, SITE_NAME, SITE_URL, SUPPORT_EMAIL, pageUrl } from "@/lib/site";
 
 type Node = Record<string, unknown>;
@@ -53,13 +54,16 @@ export function softwareApplication(locale: Locale, description: string, planTex
     url: pageUrl(locale),
     inLanguage: ["de-CH", "fr-CH", "en"],
     publisher: { "@id": ORG_ID },
-    offers: plans.plans.map((p) => ({
-      "@type": "Offer",
-      name: planText[p.plan]?.name ?? p.plan,
-      description: planText[p.plan]?.text,
-      url: pageUrl(locale, "preise"),
-      ...(PRICES_FINAL ? { price: p.price_chf_month, priceCurrency: plans.currency } : {}),
-    })),
+    // one offer per plan and currency: EUR and CHF with the same amount (europa.md EU3)
+    offers: plans.plans.flatMap((p) =>
+      (PRICES_FINAL ? CURRENCIES : [null]).map((cur) => ({
+        "@type": "Offer",
+        name: planText[p.plan]?.name ?? p.plan,
+        description: planText[p.plan]?.text,
+        url: pageUrl(locale, "preise"),
+        ...(cur ? { price: p.price_chf_month, priceCurrency: cur } : {}),
+      })),
+    ),
   };
 }
 

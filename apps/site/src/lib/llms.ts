@@ -6,6 +6,7 @@
  */
 import plans from "@handball/plans";
 import { factRows } from "@/lib/facts";
+import { BOTH } from "@/lib/currency";
 import { fileVars, notList } from "@/lib/files";
 import { fmt, messages, type Locale } from "@/lib/i18n";
 import { SITE_NAME, SITE_UPDATED, pageUrl } from "@/lib/site";
@@ -113,7 +114,7 @@ function section(locale: Locale): string[] {
     "",
     `### ${m.faq.head}`,
     "",
-    ...m.faq.items.flatMap((f) => [`**${f.q}** ${fmt(f.a, { month: team.price_chf_month, year: team.price_chf_year, ...fileVars(m) })}${f.hi ? ` ${f.hi}` : ""}`, ""]),
+    ...m.faq.items.flatMap((f) => [`**${f.q}** ${fmt(f.a, { month: team.price_chf_month, year: team.price_chf_year, cur: BOTH, ...fileVars(m) })}${f.hi ? ` ${f.hi}` : ""}`, ""]),
     `### ${m.guides.title}`,
     "",
     ...guides(locale),
