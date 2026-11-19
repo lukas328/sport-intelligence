@@ -64,3 +64,26 @@ Neu:
 | L5 | UI/UX allgemein verwirrend: was ist wo, was muss man machen; wozu die Werkbank | Werkbank nur hinter «Einrichten von Hand» (wie B10), sonst nirgends; auf jeder Spielseite oben eine klare nächste Aufgabe («2 Fragen offen», «Wurforte nachtragen»). Danach ein UI-Check der ganzen Spielanalyse. | 3 |
 
 Stand pro Ticket wird hier nachgetragen.
+
+## Stand Block 3 (19.11.2026)
+| Ticket | Stand | Was |
+|---|---|---|
+| UX-05 | erledigt | «Nächster Gegner» steht auf der Startseite direkt unter dem Kopf (breit: rechts neben der Liste), mit Link «Auf den Gegner vorbereiten» (über `/scouting` zum Gegner-Profil); die Ein-Zeilen-Tabelle ist weg, der Rang steht in den Fakten. |
+| UX-06 | erledigt | Ist der Verein nicht bestätigt, ist «Teilen» sichtbar aus, daneben «Erst nach Vereinsbestätigung. So geht es» (Link auf Verein › Verband). «Highlights teilen» erscheint erst, wenn ein Highlight fertig ist. Die übrigen Gründe (Jugendschutz, Einwilligung, Rolle) erklärt weiter der Dialog. |
+| UX-08 | erledigt | Zahlen: «Alle Zahlen» ist offen, nichts mehr aufzuklappen; die Tore nach Position stehen nur noch einmal (Zahlen, Seitenspalte, beide Teams). Im Tab Spiel sind die Torkarten weg; oben die nächste Aufgabe (L5). |
+| UX-09 | erledigt wie entschieden | Abschnitt «Konto schützen» auf der Teamseite und das (ungenutzte) Banner entfernt; Punkt und Karte im Konto-Menü bleiben. Positionen sind ein eigener Modus: zu bei Ankunft, eine Zeile «Positionen festlegen». |
+| UX-10 | erledigt | Spielbericht-Mitteilungen nannten das Spiel schon (Gegner, Datum, eine pro Spiel); neu nennt «Vorschläge aus den offiziellen Daten» das Team. Ungelesen-Zähler und «Alle als gelesen markieren» gab es schon. |
+| UX-11 | erledigt | Gegner-Profil markiert keinen Tab mehr. Menüs (auch Konto-Menü) sind nie abgeschnitten: höchstens so hoch wie Platz ist, der Rest scrollt. «Später weiter» im Prüfen führt im Code schon zur Spielseite zurück (nicht geändert, Block 2). |
+| UI-01 | erledigt | Das Wurfbild (Zahlen › Würfe, auch im Erfassen) zeigt das Tor oben wie alle anderen Felder. Der Wurfort-Dialog folgt bewusst dem Video und sagt es: «So wie im Video: das Tor links. In den Grafiken steht es oben.» Verhalten von A22 (Vorschlag vorgewählt) unverändert. |
+| UI-03 | erledigt | Wurfbild und Laufwege-Heatmap auf hellem Papier statt dunklem Block. |
+| UI-04 | erledigt | Ein Aufklapp-Stil (`.fold`, Chevron rechts) für «Neue Highlights erstellen», «Tore im Spiel», «Alle Tore», «Mehr zum Spiel», Saison «Mehr»; «Video 0:45» und der Mitteilungszähler in der App-Schrift; das alleinstehende «Mehr» unter dem Video heisst «Einrichten von Hand»; «Datei entfernen» rot (Bestätigung gab es schon). |
+| BUG-22 | erledigt | In den Torkarten nach Position steht die Zahl über und der Name unter den Punkten der Zone; das Bild ist unten etwas höher, «Gegenstoss» bleibt im Feld. |
+| TXT-02 | erledigt als Übergang | Datenmodell bleibt (Gegenstoss und 7 m sind Zonen). Anzeige «Situation: Gegenstoss» statt «Wurfort: Gegenstoss»; im Dialog stehen die beiden Tasten unter «Oder die Situation:». Offen: der Antworten-Rückblick im Prüfen (Block 2) sagt noch «Wurfort: …». |
+| TXT-04 | erledigt | Ohne zugeordnete Spieler keine «Spur 306»-Zeilen und kein «kurze Spuren zeigen», sondern ein Satz mit dem Weg («im Tab Video unter «Einrichten von Hand»»); «(am Handy 6)» weg; «Angriffe … geschätzt» als Erklärung am Wert «Effizienz». |
+| TXT-05 | erledigt | Unter dem konkreten Befund nur noch, was die Übungen trainieren («Diese Übungen trainieren Ablauf, Täuschung und Ruhe am Siebenmeterpunkt.»), kein «Der Befund oben betrifft «7 m»». |
+| TXT-08 | erledigt wie entschieden | Saisontitel ohne Urteil: «4 Siege, 5 Niederlagen.» (Unentschieden nur, wenn es welche gibt); Trainingstipps stehen daneben im Kopf. handball.ch-Daten überall «abgeglichen vor …» (Startseite, Saison-Tabelle, Teamseite). |
+| LEGAL-01 | erledigt | Schmaler Footer in der App mit Impressum, Datenschutz, AGB, Kontakt als Links auf die Website (Sprache des Nutzers), keine Inhalte. |
+| L5 | erledigt (Teil Block 3) | Unter dem Kopf jeder Spielseite eine nächste Aufgabe mit Knopf: «2 Fragen offen» › Fragen beantworten, «Bei 3 Toren fehlt der Wurfort» › Wurforte nachtragen, «Noch kein Video» › Video hochladen, vor dem Spiel › Auf den Gegner vorbereiten; nichts, solange die Analyse läuft. Die Werkbank heisst überall «Einrichten von Hand». Offen: der UI-Check der ganzen Spielanalyse nach Block 1 bis 3; der Zähler «Prüfen» oben in der Tab-Zeile bleibt neben der Aufgabe stehen. |
+| Website: `?src=` | erledigt | Die App merkt sich `?src=<Ort>` im sessionStorage des Tabs (kein Cookie) und schickt es bei der Registrierung und beim Anlegen des Vereins mit; die API speichert es an Konto und Verein (Migration 0052, unbrauchbare Werte werden verworfen, nie abgelehnt), sichtbar in /ops als Spalte «Herkunft». Bei Anmeldung über Google/Apple kommt es über das Anlegen des Vereins an. |
+| Website: «Gemacht mit» | erledigt | Geteilte Seiten zeigen unten dezent «Gemacht mit Handball Intelligence», Link auf die Website in der Sprache des Betrachters mit `?src=shared`. |
+| Website: «AGB» | erledigt | App sagt «AGB» (en «terms», fr «CG») statt «Nutzungsbedingungen»; e2e angepasst. |
