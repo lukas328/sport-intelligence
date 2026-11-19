@@ -146,7 +146,9 @@ export function destOf(path: string, mode: Mode): Dest | null {
   if (first === "consents") return mode === "staff" ? "team" : "life";
   if (family) return ["official", "join-requests", "players", "drills"].includes(first) ? null : "life";
   if (["matches", "paper", "upload"].includes(first)) return "matches";
-  if (["season", "opponents"].includes(first)) return team ? "season" : "team";
+  // an opponent is reached from a match, the season or a message: no tab claims it (UX-11)
+  if (first === "opponents") return null;
+  if (first === "season") return team ? "season" : "team";
   if (["scenes", "search", "assistant", "library", "collections", "playlists", "presentations", "plays", "matrix"].includes(first))
     return team ? "scenes" : "team";
   // drills are opened from «Dazu üben» (SPEC section 1, "Next"); they sit under Team
