@@ -57,6 +57,7 @@ export function Workspace({
   names,
   setup,
   requestPane = null,
+  requestDraw = null,
   handle,
   checkSteps = true,
 }: {
@@ -71,6 +72,8 @@ export function Workspace({
   setup?: React.ReactNode;
   /** a pane to open from outside; a new object each time */
   requestPane?: { pane: Pane } | null;
+  /** drawing asked for from outside (the stage's «Zeichnen»): at this moment; a new object each time */
+  requestDraw?: { t_ms: number } | null;
   handle?: Ref<PlayerHandle | null>;
   /** the work steps (court, throw-off, goals, persons) in the rail; off where Prüfen asks them */
   checkSteps?: boolean;
@@ -329,6 +332,23 @@ export function Workspace({
   useEffect(() => {
     if (requestPane) setPane(requestPane.pane);
   }, [requestPane]);
+  // «Zeichnen» on the stage (app review BUG-13): the moment of the stage, paused, the drawing tools
+  // open beside it, the player in view; once its picture can be sought
+  const drawBox = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!requestDraw || !staff) return;
+    const id = window.setInterval(() => {
+      const v = player.current.video();
+      if (!v || v.readyState < 1) return;
+      window.clearInterval(id);
+      player.current.seek(requestDraw.t_ms);
+      startDrawing();
+      const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      drawBox.current?.scrollIntoView({ block: "start", behavior: still ? "auto" : "smooth" });
+    }, 200);
+    const stop = window.setTimeout(() => window.clearInterval(id), 30_000);
+    return () => (window.clearInterval(id), window.clearTimeout(stop));
+  }, [requestDraw, staff, startDrawing]);
   const [setupOpen, setSetupOpen] = useState(false);
   const chosen: Pane = pane ?? (staff && (checkSteps || setupOpen) ? (firstOpen(stepList) ?? "notes") : staff ? "events" : "notes");
   // the first open step is shown once the lists are in; from then on the coach decides
@@ -438,7 +458,7 @@ export function Workspace({
           )}
         </div>
       ) : null}
-      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_24rem] xl:grid-cols-[minmax(0,1fr)_27rem]">
+      <div ref={drawBox} className="scroll-mt-20 grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_24rem] xl:grid-cols-[minmax(0,1fr)_27rem]">
       {/* the player stays in view while the coach works through a list beside it */}
       {/* phones: the column dissolves into the grid, so the player can stay at the top while the
           list below it scrolls */}

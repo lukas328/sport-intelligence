@@ -194,6 +194,43 @@ async def test_weiss_nicht_is_kept_and_does_not_pull_the_next(
     assert f"field:{vid}" in match["report_extra"]["checks_skipped"]
 
 
+async def test_the_moments_behind_more_stay_until_answered(make_api: Callable[[], Api]) -> None:
+    """Livegang L3: the main round answered, Prüfen said «24 weitere»; after leaving, the bell
+    said «Alles geprüft» and led to the match, so the open moments were nowhere to be found.
+    They stay in «Mehr prüfen» until answered, and the note names and links them."""
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    match_id, _, _ = await _analysed(api, ids)
+    base = f"/v1/orgs/{org}/matches/{match_id}"
+    r = await api.put(f"{base}/kickoff", json={"period": 1, "t_ms": 0})
+    assert r.status_code < 300, r.text
+    g = await _graphics(api, org, match_id)
+    assert [c["kind"] for c in g["checks"]] == ["goal"] * 10
+    for c in g["checks"]:
+        if c["kind"] == "goal":
+            r = await api.put(
+                f"{base}/goal-candidates/{c['id']}/review", json={"status": "rejected"}
+            )
+            assert r.status_code == 200, r.text
+    # the main round is done; the 20 other moments wait, also when the page is opened again
+    for _ in range(2):
+        g = await _graphics(api, org, match_id)
+        assert g["checks"] == []
+        assert len([c for c in g["more_checks"] if c["kind"] == "goal"]) == 20
+    note = await _note(api, org)
+    assert note["kind"] == "analysis_checked" and note["read_at"] is not None
+    assert note["params"]["further"] == 20
+    assert note["link"] == f"/app/{org}/matches/{match_id}/check"
+    # one of them answered from «Mehr prüfen»: the count follows
+    first = g["more_checks"][0]
+    r = await api.put(f"{base}/goal-candidates/{first['id']}/review", json={"status": "rejected"})
+    assert r.status_code == 200, r.text
+    note = await _note(api, org)
+    assert note["params"]["further"] == 19
+    assert (await api.get(f"/v1/orgs/{org}/me/notifications")).json()["unread"] == 0
+
+
 async def test_skip_all_clears_the_bell(make_api: Callable[[], Api]) -> None:
     api = make_api()
     ids = await setup_club(api)

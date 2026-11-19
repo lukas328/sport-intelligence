@@ -37,7 +37,9 @@ export function NotificationBell({ orgId }: { orgId: string }) {
   // a kind the web has no text for yet still shows as a notification, not as a raw key
   // with the match's name where the note carries it (UX test H06, B29)
   const text = (n: Note) => {
-    const named = `${n.kind}_match`;
+    // the main round answered while moments still wait behind «Mehr prüfen»: never «Alles geprüft» (livegang L3)
+    const further = Number((n.params as { further?: number } | null)?.further ?? 0);
+    const named = n.kind === "analysis_checked" && further > 0 ? "analysis_checked_more_match" : `${n.kind}_match`;
     // the questions with about how long they take: «3 Fragen, etwa 1 Minute» (second round A6)
     const questions = Number((n.params as { questions?: number } | null)?.questions ?? 0);
     const params = { ...(n.params as object), minutes: checkMinutes(questions, 0) };

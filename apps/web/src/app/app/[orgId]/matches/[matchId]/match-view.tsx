@@ -13,7 +13,7 @@ import { ArrowLeftRight, Check, ChevronDown, ChartNoAxesColumn, Clapperboard, Fi
 import { useRosterNames } from "@/components/analysis/tagger";
 import { DEFAULT_CLUB, matchStyle } from "@/lib/color";
 import { markOpened } from "@/lib/fresh-match";
-import { checkCount, goalRuns, useMatchGraphics } from "@/lib/graphics";
+import { checkCount, furtherMoments, goalRuns, useMatchGraphics } from "@/lib/graphics";
 import { ownName } from "@/lib/own-name";
 import { ThreeThingsView } from "@/components/anlauf/three-things-view";
 import { ExampleBanner } from "@/components/anlauf/example-banner";
@@ -190,6 +190,11 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
   const stats = useStats(orgId, initial.id);
   const graphics = useMatchGraphics(orgId, initial.id);
   const [bench, setBench] = useState(false);
+  // «Zeichnen» on the stage: the workbench opens drawing on the stage's moment (app review BUG-13)
+  const [drawAt, setDrawAt] = useState<{ t_ms: number } | null>(null);
+  useEffect(() => {
+    if (!bench) setDrawAt(null);
+  }, [bench]);
   // Escape closes the Werkbank like its «Schliessen» (A15)
   const benchRef = useRef<HTMLElement>(null);
   useEscape(bench, () => setBench(false), benchRef);
@@ -200,13 +205,16 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
   // deep links (?t=ms), e.g. a scene from Szenen or a play drawn on a video moment: the moment
   // plays in the full player, so it opens (behind the stage it would seek out of sight)
   // a moment in the full player: it opens, and the moment is sought once the video can
-  const benchAt = useCallback((t0: number, play = false) => {
+  // the workbench and its player are mounted only while open: one video on the page, not a second
+  // one loading hidden behind the stage (app review BUG-19); so a jump waits for its player
+  const benchAt = useCallback((t0: number, play = false, show = false) => {
     setBench(true);
     const id = window.setInterval(() => {
       const v = player.current?.video();
       if (v && v.readyState >= 1) {
         player.current?.seek(t0);
         if (play) player.current?.play();
+        if (show) reveal();
         window.clearInterval(id);
       }
     }, 300);
@@ -352,13 +360,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
 
   function onPlay(ms: number) {
     setView("video");
-    setBench(true);
-    // the player is kept mounted, so the seek works right after the switch
-    requestAnimationFrame(() => {
-      player.current?.seek(ms);
-      player.current?.play();
-      reveal();
-    });
+    benchAt(ms, true, true);
   }
 
   const base = `/app/${orgId}/matches/${match.id}`;
@@ -377,6 +379,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
   const club: [string, string | null] = [shell?.org.primary_color ?? DEFAULT_CLUB, shell?.org.secondary_color ?? null];
   const oppKit = match.opponent_colors ? [match.opponent_colors.color, match.opponent_colors.second ?? null] : null;
   const checks = graphics.data ? checkCount(graphics.data) : 0;
+  const further = graphics.data ? furtherMoments(graphics.data) : 0;
   // the stage of the tab Video (SPEC 7.3) once there are goals to show on it
   const stage = Boolean(main && graphics.data && graphics.data.goals.some((g) => g.has_video || g.source === "demo"));
   // «von dir bestätigt»: the goals a person confirmed (Prüfen, by hand), and of those how many have
@@ -443,6 +446,14 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
               <Link href={`${base}/check`} className="font-slant flex min-h-11 items-center gap-2 px-2 text-xl text-ink no-underline" data-testid="check-link">
                 {ta("check")}
                 <em className="grid h-[30px] min-w-[30px] place-items-center bg-attn px-1 font-sans text-base font-extrabold text-attn-ink not-italic">{checks}</em>
+              </Link>
+            )}
+            {/* the main round answered, moments still wait behind «Mehr prüfen»: not rung, but
+                reachable until answered (livegang L3: after leaving Prüfen they were gone) */}
+            {staff && checks === 0 && further > 0 && (
+              <Link href={`${base}/check`} aria-label={ta("checkFurtherLabel", { n: further })} className="font-slant flex min-h-11 items-center gap-2 px-2 text-xl text-ink no-underline" data-testid="check-further">
+                {ta("check")}
+                <span className="font-sans text-[15px] font-bold not-italic text-ink-2">{ta("checkFurther", { n: further })}</span>
               </Link>
             )}
             {MATCHDAY_OFFERED && liveFirst && (
@@ -594,6 +605,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
             scene={scene}
             onThing={(n) => setView("video", n)}
             onBench={() => setBench(true)}
+            onDraw={(ms) => (setDrawAt({ t_ms: ms }), setBench(true))}
           />
         )}
         {/* the jump to the second half also with goals on the stage: it plays in the full player
@@ -644,7 +656,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
             <div className="mb-3">
               <PartsLine videos={match.videos} onJump={(ms) => benchAt(ms, true)} />
             </div>
-            <Workspace orgId={orgId} match={match} video={main} staff={staff} teamName={teamName} oppName={oppName(match)} names={names} handle={player} setup={setup} requestPane={askPane} checkSteps={false} />
+            {bench && <Workspace orgId={orgId} match={match} video={main} staff={staff} teamName={teamName} oppName={oppName(match)} names={names} handle={player} setup={setup} requestPane={askPane} requestDraw={drawAt} checkSteps={false} />}
           </section>
         ) : !staff ? (
           <EmptyState icon={<Clapperboard />} title={match.source === "paper_report" ? t("stats.noVideo") : t("player.notReady")} />

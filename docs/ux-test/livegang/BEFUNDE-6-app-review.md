@@ -64,3 +64,21 @@ Neu:
 | L5 | UI/UX allgemein verwirrend: was ist wo, was muss man machen; wozu die Werkbank | Werkbank nur hinter «Einrichten von Hand» (wie B10), sonst nirgends; auf jeder Spielseite oben eine klare nächste Aufgabe («2 Fragen offen», «Wurforte nachtragen»). Danach ein UI-Check der ganzen Spielanalyse. | 3 |
 
 Stand pro Ticket wird hier nachgetragen.
+
+## Stand Block 2 (Video-Tab und Prüfen, 19.11.)
+| Ticket | Stand |
+|---|---|
+| UX-01 | erledigt: Video ist Standard, Umschalter über dem Bild, Wahl pro Gerät gemerkt (localStorage, ohne Speicher wieder Video). «Feld von oben» ist ausgegraut, wenn die Szene keine Positionen hat; darunter der Grund («keine Positionen» oder «Feld noch nicht bestätigt» mit Link «Feld prüfen»). |
+| UX-02 | erledigt: ab Laptop zwei Spalten, Player bleibt oben stehen (sticky), Liste rechts; am Handy Player sticky unter der Kopfzeile, Liste darunter. Klick auf eine Szene weiter unten holt den Player ins Bild. Wurfort bleibt rechts unter der Liste (sonst wird die sticky Spalte zu hoch). |
+| UX-03 | erledigt: «Vorherige Szene» und «Nächste Szene» immer, nicht nur bei einem Ding; Tasten N und P im Player, Hinweiszeile darunter. Einzelbild-Knöpfe zeigen jetzt Pfeilspitzen statt Sprung-Symbol, mit Tooltip. |
+| UX-04 | erledigt: aktive Szene mit Hintergrund und Balken, der Wurfort bleibt stehen; Teamfarben-Punkt pro Zeile; Zeit nur einmal. Am Clip-Ende «Szene zu Ende.» mit «Nächste Szene» und «Weiterlaufen lassen». |
+| BUG-13 | Zeichnen gibt es, aber nur in der Werkbank. Der Knopf auf der Bühne öffnete bisher nur die Werkbank unten, ohne Werkzeug. Jetzt: Video pausiert, Werkbank öffnet mit den Zeichenwerkzeugen (aria-pressed) auf genau diesem Moment und scrollt hin. Im Modus «Feld von oben» ist der Knopf weg. Kein neues Werkzeug gebaut. |
+| BUG-19 | erledigt: die Werkbank (mit eigenem Player) wird nur gemountet, wenn sie offen ist; Sprünge aus anderen Tabs warten auf ihren Player. Bei geschlossener Werkbank ein `<video>`. Mit offener Werkbank sind es bewusst zwei (Bühne und Werkbank sichtbar). |
+| BUG-14, L2 | erledigt: im Prüfen liegt die Steuerung unter dem Bild statt darüber (sie deckte bei schmalem Video fast alles zu), `object-fit: contain`, Breite nach Bildschirmhöhe begrenzt, Antwortspalte auf Laptops schmaler. Der Clip um den Torabschluss läuft in Schleife. |
+| L3 | Ursache: das Budget von Prüfen (A6). Nach der Hauptrunde ist `checks` leer, die übrigen Momente stehen nur in `more_checks`. Alles ausserhalb von Prüfen zählte nur `checks`: der Link «Prüfen» auf der Spielseite verschwand, die Glocke sprang auf «Alles geprüft» und führte zur Spielseite. Die Momente waren in der Datenbank nie weg, nur nicht mehr erreichbar. Jetzt: Spielseite zeigt «Prüfen · n weitere», die Glocke bleibt ruhig, sagt aber «n weitere Momente warten unter «Mehr prüfen»» und führt zu Prüfen; der Zähler folgt jeder Antwort. Regressionstest API (`test_the_moments_behind_more_stay_until_answered`) und Web (`graphics.test.ts`). Nebenbei gesehen, nicht geändert: ein beantworteter Anwurf gibt seinen Platz im Budget frei, dann rückt ein weiterer Moment in die Hauptrunde nach. |
+| UI-05 | erledigt: Bild 16:9, Breite so begrenzt, dass Bild und Steuerung in die Fensterhöhe passen. |
+| UI-06 | erledigt: Legende nur bei «Feld von oben». |
+| A11Y-01 | erledigt für den Video-Tab: Umschalter mit aria-pressed und Grund bei deaktiviert; «Szene merken» ist ein Umschalter (aria-pressed, Häkchen, wieder lösbar statt grau). Teamfarben in der Szenenliste zusätzlich mit Namen; die Rail trennt die Teams schon über oben/unten. Überschneidet sich mit BUG-21 (Block 1, wo gemerkte Szenen erscheinen). |
+| UX-12 | erledigt: der Wurfort-Dialog aus dem Video-Tab zeigt die Szene klein, stumm und in Schleife über dem Feld. Die Logik von A22 (Schätzung vorausgewählt, ein Tippen bestätigt) ist unverändert. |
+
+Geprüft mit Unit-Tests, Typecheck, Lint und pytest. Kein Browser-Smoke-Test: die Spielseite braucht das Backend; die e2e-Specs sind an die geänderten Texte angepasst, aber nicht gelaufen.
