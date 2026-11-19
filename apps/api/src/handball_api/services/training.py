@@ -455,13 +455,16 @@ LIVE_MATCHES = 10  # matches whose questions are counted afresh per call (the ne
 async def _questions_now(ctx: Ctx, items: list[Notification]) -> None:
     """«n Fragen an dich» counts the questions as they are now, from the one source Prüfen, the
     start and the mail use (graphics.open_checks), not as they were when the analysis ended
-    (livegang L13). Once none is left the note says so, counts as read and leads to the match."""
-    from handball_api.services.graphics import open_checks
+    (livegang L13). Once none is left the note says so, counts as read and leads to the match.
+    The goal moments still waiting behind «Mehr prüfen» are named in that note (`further`) and
+    lead to Prüfen, never rung: «Alles geprüft» only once none waits (livegang L3: after the main
+    round the note said «Alles geprüft» while 24 moments were still open)."""
+    from handball_api.services.graphics import rounds_of
 
     live: dict[str, tuple[int, int] | None] = {}
     for n in items:
         mid = (n.params or {}).get("match_id")
-        if n.kind != QUESTIONS or not isinstance(mid, str):
+        if n.kind not in (QUESTIONS, CHECKED) or not isinstance(mid, str):
             continue
         if mid not in live:
             if len(live) >= LIVE_MATCHES:
@@ -475,21 +478,30 @@ async def _questions_now(ctx: Ctx, items: list[Notification]) -> None:
                 continue
             # only the budget of the main round counts (second round A6): what waits behind
             # «Mehr prüfen» is offered in Prüfen, never rung in the bell
-            questions = len(await open_checks(ctx, match))
-            more = 0
-            live[mid] = (questions, more)
+            rounds = await rounds_of(ctx, match)
+            live[mid] = (len(rounds.checks), sum(1 for c in rounds.more if c["kind"] == "goal"))
         now = live[mid]
         if now is None:
             continue
-        questions, more = now
-        if questions == 0:
+        questions, further = now
+        if n.kind == QUESTIONS and questions > 0:
+            if (n.params.get("questions"), n.params.get("more_moments")) != (questions, 0):
+                n.params = {**n.params, "questions": questions, "more_moments": 0}
+            continue
+        if n.kind == QUESTIONS:
             n.kind = CHECKED
             n.params = {k: v for k, v in n.params.items() if k not in ("questions", "more_moments")}
-            n.link = f"/app/{n.organization_id}/matches/{mid}"
             if n.read_at is None:
                 n.read_at = _now()
-        elif (n.params.get("questions"), n.params.get("more_moments")) != (questions, more):
-            n.params = {**n.params, "questions": questions, "more_moments": more}
+        # the main round answered: the match, or Prüfen while moments wait behind «Mehr prüfen»
+        params = {k: v for k, v in n.params.items() if k != "further"}
+        if further:
+            params["further"] = further
+        if params != n.params:
+            n.params = params
+        link = f"/app/{n.organization_id}/matches/{mid}" + ("/check" if further else "")
+        if n.link != link:
+            n.link = link
     await ctx.db.flush()
 
 
