@@ -91,7 +91,7 @@ export default async function How({ params }: Props) {
       <PageHead kick={t.title} title={t.head} lead={t.lead} aside={<StepsArt steps={t.steps} label={t.stepsLabel} />} />
       <div className="wrap">
         {/* step 0 (BEFUNDE-5 point 8): once a season, the team says yes or no by link */}
-        <section id="schritt-0" aria-labelledby="zero" data-reveal className="mt-14 grid grid-cols-[auto_minmax(0,1fr)] items-start gap-x-6 border-2 border-ink bg-paper p-6 md:mt-20 md:gap-x-10 md:p-10">
+        <section id="schritt-0" aria-labelledby="zero" data-reveal className="mt-14 grid grid-cols-1 items-start gap-x-6 gap-y-3 border-2 border-ink bg-paper p-6 sm:grid-cols-[auto_minmax(0,1fr)] md:mt-20 md:gap-x-10 md:p-10">
           <p aria-hidden className="font-num text-[4.5rem] leading-[.8] text-club-text md:text-[6rem]">
             0
           </p>

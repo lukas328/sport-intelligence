@@ -502,7 +502,7 @@ const fr: Messages = {
     currency: "Prix en euros ou en francs suisses, le même montant dans chaque monnaie.",
     currencyLabel: "Monnaie",
     freeAfter: "Après l'essai, tout ce que tu as reste dans la formule gratuite. S'y ajoutent des matchs jusqu'à {matches} par saison, ceux de l'essai compris, et des vidéos jusqu'à {gb} Go, sans analyse automatique.",
-    perTeam: "Dans un club dès {cur} {price} par équipe",
+    perTeam: "soit {cur} {price} par équipe",
     faqTitle: "Questions sur le prix et l'abonnement",
     faq: [
       { q: "Que se passe-t-il après les 30 jours ?", a: "Tu décides. Sans abonnement, ton équipe passe à la formule gratuite. Tes matchs et tes scènes restent." },

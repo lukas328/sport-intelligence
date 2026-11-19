@@ -501,7 +501,7 @@ const de = {
     currency: "Preise in Euro oder Schweizer Franken, je derselbe Betrag.",
     currencyLabel: "Währung",
     freeAfter: "Nach dem Test bleibt im Gratis-Plan alles, was du hast. Neu dazu kommen Spiele bis {matches} pro Saison, die aus dem Test zählen mit, und Videos bis {gb} GB, ohne automatische Analyse.",
-    perTeam: "Im Verein ab {cur} {price} pro Team",
+    perTeam: "also {cur} {price} pro Team",
     faqTitle: "Fragen zu Preis und Abo",
     faq: [
       { q: "Was passiert nach den 30 Tagen?", a: "Du entscheidest. Ohne Abo wechselt dein Team in den Gratis-Plan. Deine Spiele und Szenen bleiben erhalten." },

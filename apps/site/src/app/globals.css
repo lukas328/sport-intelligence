@@ -200,8 +200,11 @@
     outline: 3px solid var(--ink);
     outline-offset: 3px;
   }
+  /* on the club colour, the court and every ink ground the ring turns white with an ink edge, so
+     keyboard focus always shows (WCAG 2.4.7, checked by tabbing through the pages) */
   .on-club :focus-visible,
-  .on-court :focus-visible {
+  .on-court :focus-visible,
+  .bg-ink :focus-visible {
     outline-color: #ffffff;
     box-shadow: 0 0 0 6px var(--ink);
   }

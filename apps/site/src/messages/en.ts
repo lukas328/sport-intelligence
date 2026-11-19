@@ -502,7 +502,7 @@ const en: Messages = {
     currency: "Prices in euros or Swiss francs, the same amount in each.",
     currencyLabel: "Currency",
     freeAfter: "After the trial, everything you have stays in the free plan. New are matches up to {matches} per season, the ones from the trial included, and videos up to {gb} GB, without automatic analysis.",
-    perTeam: "In a club from {cur} {price} per team",
+    perTeam: "so {cur} {price} per team",
     faqTitle: "Questions about price and subscription",
     faq: [
       { q: "What happens after the 30 days?", a: "You decide. Without a subscription your team moves to the free plan. Your matches and scenes stay." },
