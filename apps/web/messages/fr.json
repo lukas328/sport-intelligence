@@ -1790,8 +1790,7 @@
     },
     "prevScene": "Scène précédente",
     "sceneOf": "Scène {k} sur {n}",
-    "madeWith": "Créé avec Handball Intelligence",
-    "madeWithHint": "Analyse vidéo pour entraîneurs de handball",
+    "madeWith": "Fait avec Handball Intelligence",
     "highlightKick": "Temps forts · {n, plural, one {# scène} other {# scènes}}",
     "playKick": "Combinaison · {n, plural, one {# phase} other {# phases}}",
     "matchKick": "Rapport de match",
@@ -4552,5 +4551,12 @@
     "spot": "Le lieu du tir est l'endroit d'où le tir est parti, par exemple ailier droit ou pivot. Les images par poste en sont tirées.",
     "collection": "Une sélection, ce sont des scènes que tu rassembles, pour la séance vidéo ou un entraînement. Tu peux la partager avec l'équipe.",
     "analysisMinutes": "Le nombre de minutes que l'analyse vidéo a calculé sur vos vidéos ce mois. Plus une vidéo est longue, plus il en faut."
+  },
+  "legalFooter": {
+    "label": "Mentions légales",
+    "impressum": "Mentions légales",
+    "datenschutz": "Confidentialité",
+    "agb": "CG",
+    "kontakt": "Contact"
   }
 }

@@ -74,7 +74,7 @@ test("share: dialog with chat text and WhatsApp, link preview tags, public page 
   await expect(guest.getByRole("heading", { level: 1, name: "Kreuzen Rückraum" })).toBeVisible();
   await expect(guest.getByText("Spielzug · 1 Phase")).toBeVisible();
   await expect(guest.getByText("Anmelden")).toHaveCount(0);
-  await expect(guest.getByRole("link", { name: "Erstellt mit Handball Intelligence" })).toHaveAttribute("href", /utm_source=share/);
+  await expect(guest.getByRole("link", { name: "Gemacht mit Handball Intelligence" })).toHaveAttribute("href", /\/de\/\?src=shared$/);
   expect(await guest.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
   await expectAccessible(guest);
   await phone.close();

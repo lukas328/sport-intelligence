@@ -1791,7 +1791,6 @@
     "prevScene": "Previous scene",
     "sceneOf": "Scene {k} of {n}",
     "madeWith": "Made with Handball Intelligence",
-    "madeWithHint": "Video analysis for handball coaches",
     "highlightKick": "Highlights · {n, plural, one {# scene} other {# scenes}}",
     "playKick": "Play · {n, plural, one {# phase} other {# phases}}",
     "matchKick": "Match report",
@@ -4552,5 +4551,12 @@
     "spot": "Where the shot was taken from, such as right wing or pivot. The pictures by position are made from it.",
     "collection": "A collection is scenes you put together, for the video session or a training. You can share it with the team.",
     "analysisMinutes": "How many minutes the video analysis worked on your videos this month. The longer a video, the more minutes it takes."
+  },
+  "legalFooter": {
+    "label": "Legal",
+    "impressum": "Imprint",
+    "datenschutz": "Privacy",
+    "agb": "Terms",
+    "kontakt": "Contact"
   }
 }

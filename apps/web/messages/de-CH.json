@@ -1790,8 +1790,7 @@
     },
     "prevScene": "Vorherige Szene",
     "sceneOf": "Szene {k} von {n}",
-    "madeWith": "Erstellt mit Handball Intelligence",
-    "madeWithHint": "Videoanalyse für Handballtrainer",
+    "madeWith": "Gemacht mit Handball Intelligence",
     "highlightKick": "Highlights · {n, plural, one {# Szene} other {# Szenen}}",
     "playKick": "Spielzug · {n, plural, one {# Phase} other {# Phasen}}",
     "matchKick": "Spielbericht",
@@ -4552,5 +4551,12 @@
     "spot": "Der Wurfort ist die Stelle, von der aus geworfen wurde, etwa Aussen rechts oder Kreis. Daraus entstehen die Bilder nach Position.",
     "collection": "Eine Sammlung sind Szenen, die du zusammenstellst, etwa für die Videositzung oder ein Training. Du kannst sie mit dem Team teilen.",
     "analysisMinutes": "So viele Minuten hat die Videoanalyse diesen Monat an euren Videos gerechnet. Je länger ein Video, desto mehr Minuten braucht es."
+  },
+  "legalFooter": {
+    "label": "Rechtliches",
+    "impressum": "Impressum",
+    "datenschutz": "Datenschutz",
+    "agb": "AGB",
+    "kontakt": "Kontakt"
   }
 }

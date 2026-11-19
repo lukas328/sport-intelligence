@@ -16,6 +16,7 @@ import { AppMark } from "@/components/brand";
 import { ProgressStrip } from "@/components/progress/progress-strip";
 import { AccountMenu } from "./account-menu";
 import { ClubMark } from "./club-mark";
+import { LegalFooter } from "./legal-footer";
 import { CommandPalette } from "./command-palette";
 import {
   ShellContext,
@@ -280,13 +281,15 @@ export function AppShell({
           <main
             id="main"
             tabIndex={-1}
-            className="mx-auto w-full max-w-[1440px] flex-1 px-4 pt-6 pb-28 outline-none md:px-8 lg:pt-8 lg:pb-16"
+            className="mx-auto w-full max-w-[1440px] flex-1 px-4 pt-6 pb-10 outline-none md:px-8 lg:pt-8 lg:pb-16"
           >
             {/* a short rise on every page change: the new content is clearly new */}
             <div key={path} className="animate-rise">
               {children}
             </div>
           </main>
+          {/* the legal pages, slim, above the phone tab bar (LEGAL-01) */}
+          <LegalFooter className="mx-auto w-full max-w-[1440px] border-t border-rule px-4 pt-3 pb-28 md:px-8 lg:pb-6" />
         </div>
 
         {/* phone tab bar: the four destinations, the active one with the club band on top */}
