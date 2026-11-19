@@ -68,7 +68,7 @@ centre lives at `{site}/{de|fr|en}/hilfe/{slug}/`; the app links there with `HB_
   `src/lib/story.ts`), the video in the club, price (the free start first), start. The pieces are
   in `src/components/story.tsx`. Blocks marked `data-reveal` glide in once
   (`src/components/reveal.tsx`); with `prefers-reduced-motion` nothing moves.
-- The top bar: «Start», five destinations, from 1024 px a slim strip with DE · FR · EN and
+- The top bar: «Start», five destinations, from 1024 px a slim strip with DE · EN · FR (the app's order) and
   «Anmelden»; on the phone the language first in the menu (L2, L3).
 - Help guides outside the core have `listed: false` in `content/help/index.ts`: reachable for the app's
   links, not listed, not in the sitemap, `noindex`.

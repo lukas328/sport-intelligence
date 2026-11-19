@@ -226,7 +226,7 @@ export default async function Home({ params }: Props) {
                 a={answer}
                 team={`${v.own} ${t.chat.group}`}
                 opp={v.opp}
-                scenesHref={`/${locale}/demo/#things`}
+                scenesHref={`/${locale}/demo/?ding=1#things`}
               />
             </div>
           </div>
