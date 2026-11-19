@@ -44,8 +44,11 @@ export const BLOG: BlogPost[] = [
   },
 ];
 
-/** The blog appears in the footer only once it holds this many posts (BEFUNDE-3 U28). */
-export const BLOG_FOOTER_FROM = 3;
+/**
+ * The blog appears in the footer once it holds this many posts of its own: one since BEFUNDE-5
+ * point 19 (Lukas, 19.11.), before only from three (BEFUNDE-3 U28).
+ */
+export const BLOG_FOOTER_FROM = 1;
 
 /** Whether the footer links the blog: enough posts of its own (moved posts do not count). */
 export function blogInFooter(posts: BlogPost[] = BLOG): boolean {
