@@ -7695,7 +7695,7 @@ export interface components {
             source: ("tracking" | "marked" | "demo") | null;
             /**
              * Spot By Coach
-             * @description the zone was given by a person; only these make the three things and count as «mit Wurfort» (an estimate does not)
+             * @description the zone was given by a person (tapped, or the estimate confirmed with one tap); only these make the three things and count as «mit Wurfort» (an estimate nobody confirmed does not)
              * @default false
              */
             spot_by_coach?: boolean;

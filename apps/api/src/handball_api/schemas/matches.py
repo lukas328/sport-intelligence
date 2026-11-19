@@ -809,8 +809,9 @@ class GoalRunOut(ApiModel):
     )
     spot_by_coach: bool = Field(
         default=False,
-        description="the zone was given by a person; only these make the three things and count "
-        "as «mit Wurfort» (an estimate does not)",
+        description="the zone was given by a person (tapped, or the estimate confirmed with one "
+        "tap); only these make the three things and count as «mit Wurfort» (an estimate nobody "
+        "confirmed does not)",
     )
     spot_missing: bool = Field(
         default=False,

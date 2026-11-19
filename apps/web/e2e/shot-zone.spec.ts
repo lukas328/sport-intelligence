@@ -56,7 +56,7 @@ test("a confirmed goal asks «Von wo?»; three from one place make a thing; the 
     const at = () => page.getByTestId("video").evaluate((v: HTMLVideoElement) => v.currentTime);
     const t0 = await at();
     await expect.poll(at, { timeout: 15_000 }).toBeGreaterThan(t0 + 0.5);
-    // no estimate is offered as a suggestion (V2)
+    // without tracks there is no estimate: nothing is preselected (with one it is a «Vorschlag», A22)
     await expect(page.getByTestId("spot-picker")).not.toContainText("Vorschlag");
     if (n === 0) {
       // one screen on a phone: the bottom of the video and «Überspringen» are in view together, no scrolling

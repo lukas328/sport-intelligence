@@ -55,7 +55,7 @@ describe("search engines", () => {
     // the effort as it is (W33): a few questions, the court once per hall, the throw spot if you like
     expect(txt).toContain("Ein paar Fragen beantworten, wo die Analyse unsicher ist: höchstens zehn pro Spiel");
     expect(txt).toContain("pro Halle und Kameraplatz nur einmal");
-    expect(txt).toContain("Wenn du magst, nach einem Tor antippen, von wo geworfen wurde.");
+    expect(txt).toContain("Wenn du magst, nach einem Tor den vorgeschlagenen Wurfort mit einem Tipp bestätigen.");
     expect(txt).not.toMatch(/Tor für Tor|bei jedem Tor|freiwilligen Fragen/);
     expect(txt).toMatch(/Team: CHF \d+ im Monat/);
     // for clubs across Europe, and honest about what the team search covers (L14)

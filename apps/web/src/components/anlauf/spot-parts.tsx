@@ -8,7 +8,7 @@ import { DialogContent, DialogRoot, DialogTrigger } from "@/components/ui/dialog
 import { buttonClass } from "@/components/ui/button";
 import { api } from "@/lib/client";
 import type { MatchGraphics } from "@/lib/graphics";
-import { checkMinutes, goalsWithoutSpot, type SpotAnswer, type SpotOrientation, type SpotZone, spotCounts } from "@/lib/shot-spot";
+import { checkMinutes, goalsWithoutSpot, type SpotAnswer, type SpotOrientation, type SpotZone, spotCounts, spotSuggestion } from "@/lib/shot-spot";
 import type { Pt } from "./geometry";
 import { ShotSpotPicker } from "./shot-spot-picker";
 import { Term } from "@/components/ui/term";
@@ -76,8 +76,9 @@ export function SpotChange({ orgId, matchId, goal, label }: { orgId: string; mat
         <ShotSpotPicker
           disabled={busy || !view.ready}
           orientation={view.orientation}
-          // an estimate is never marked (V2); the coach's own earlier answer reads «Bisher»
+          // the coach's own earlier answer reads «Bisher»; an estimate is a suggestion to confirm (A22)
           current={zone && goal.spot_by_coach ? zone : null}
+          suggested={spotSuggestion(goal)}
           onPick={(answer, point) => {
             setBusy(true);
             setFailed(null);

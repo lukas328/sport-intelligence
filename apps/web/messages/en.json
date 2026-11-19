@@ -4300,6 +4300,8 @@
       "kr": "Pivot"
     },
     "current": "So far",
+    "suggested": "Suggestion",
+    "suggestedNote": "The app suggests: {zone}. Tap it to confirm, or tap where else the shot came from.",
     "unknown": "Don't know",
     "replay": "Watch again",
     "saved": "{goal} is saved.",

@@ -11,8 +11,31 @@ import type { MatchGraphics } from "@/lib/graphics";
 export const COURT_ZONES = ["la", "kr", "ra", "rl", "rm", "rr"] as const;
 /** the two kinds that replace the place: Siebenmeter and Gegenstoss */
 export const KIND_ZONES = ["m7", "gs"] as const;
-export type SpotZone = (typeof COURT_ZONES)[number] | (typeof KIND_ZONES)[number];
+export type CourtZone = (typeof COURT_ZONES)[number];
+export type SpotZone = CourtZone | (typeof KIND_ZONES)[number];
 export type SpotAnswer = SpotZone | "unknown";
+
+/**
+ * The estimate from the tracks, offered in «Von wo?» as a suggestion (A22): a place on the court
+ * that no person gave. A goal of the graphics says it with `spot_by_coach`, a reviewed candidate
+ * only with `zone_source`. Null when the coach gave the place (that one reads «Bisher») or there
+ * is no estimate.
+ */
+export function spotSuggestion(g: { zone?: string | null; zone_source?: string | null; spot_by_coach?: boolean }): CourtZone | null {
+  if (!g.zone || !(COURT_ZONES as readonly string[]).includes(g.zone)) return null;
+  const byCoach = g.spot_by_coach ?? g.zone_source === "coach";
+  return byCoach ? null : (g.zone as CourtZone);
+}
+
+/**
+ * What a tap on a place of the small court saves (A22): on the suggested place the zone alone,
+ * which confirms the estimate with its point (the API takes it over as the coach's); anywhere
+ * else the zone and the tapped point, as before.
+ */
+export function tapAnswer(zone: CourtZone, suggested: CourtZone | null | undefined, point?: Pt): { answer: CourtZone; point?: Pt } {
+  if (zone === suggested || !point) return { answer: zone };
+  return { answer: zone, point };
+}
 
 /** half court (u across from the attacker's left, v from the goal line) to court metres with the attacked goal at x = 40 */
 export function halfToCourt(p: Pt): Pt {

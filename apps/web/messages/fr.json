@@ -4300,6 +4300,8 @@
       "kr": "Pivot"
     },
     "current": "Jusqu'ici",
+    "suggested": "Proposition",
+    "suggestedNote": "L'app propose : {zone}. Touche cette zone pour confirmer, ou touche l'endroit d'où le tir est vraiment parti.",
     "unknown": "Je ne sais pas",
     "replay": "Revoir",
     "saved": "{goal} est enregistré.",
