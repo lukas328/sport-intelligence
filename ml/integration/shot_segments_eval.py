@@ -61,11 +61,15 @@ def _game(seg: str) -> str:
     return re.sub(r"_s\d+$", "", seg)
 
 
-def _fetch_proxy(item: dict, d: Path) -> Path:
-    """The segment from Kaggle as the product proxy (1280 px, 25 fps) in d."""
+def _fetch_proxy(item: dict, d: Path, input_root: Path | None = None) -> Path:
+    """The segment as the product proxy (1280 px, 25 fps) in d: from INPUT_ROOT/<dataset>/<file>
+    (the datasets attached to a Kaggle kernel), else downloaded from Kaggle."""
     from profile_analysis import _proxy_cmd
 
     raw, proxy = d / "raw.mp4", d / "proxy.mp4"
+    local = input_root / item["dataset"] / item["file"] if input_root else None
+    if not proxy.exists() and local is not None:
+        subprocess.run(_proxy_cmd(local, proxy), check=True)
     if not proxy.exists():
         url = f"https://www.kaggle.com/api/v1/datasets/download/{OWNER}/{item['dataset']}/{item['file']}"
         curl = shutil.which("curl") or "curl"
@@ -156,7 +160,15 @@ def _dense_cover(d: Path, shots: list[tuple[float, str]]) -> list[float] | None:
     return out
 
 
-def observe(segments: Path, out: Path, models: Path, ball: Path, width: int, every: int) -> None:
+def observe(
+    segments: Path,
+    out: Path,
+    models: Path,
+    ball: Path,
+    width: int,
+    every: int,
+    input_root: Path | None = None,
+) -> None:
     from handball_vision import observe as learned
     from handball_vision.ballnet import BallNet
     from handball_vision.detection import YoloxDetector
@@ -169,7 +181,7 @@ def observe(segments: Path, out: Path, models: Path, ball: Path, width: int, eve
         if (d / "observations.npz").exists():
             continue
         d.mkdir(parents=True, exist_ok=True)
-        proxy = _fetch_proxy(item, d)
+        proxy = _fetch_proxy(item, d, input_root)
         t0 = time.perf_counter()
         obs = learned.observe(proxy, det, detect_every=3, ball_net=net, ball_every=every)
         obs.motion.save(d / "motion.npz")
@@ -402,6 +414,7 @@ def main() -> None:
     o.add_argument("--ball", type=Path, required=True)
     o.add_argument("--width", type=int, default=960)
     o.add_argument("--every", type=int, default=3)
+    o.add_argument("--input-root", type=Path, help="segments under DIR/<dataset>/<file>")
     dn = sub.add_parser("dense")
     dn.add_argument("segments", type=Path)
     dn.add_argument("marks", type=Path)
@@ -414,7 +427,7 @@ def main() -> None:
     s.add_argument("out", type=Path)
     a = ap.parse_args()
     if a.cmd == "observe":
-        observe(a.segments, a.out, a.models, a.ball, a.width, a.every)
+        observe(a.segments, a.out, a.models, a.ball, a.width, a.every, a.input_root)
     elif a.cmd == "dense":
         dense(a.segments, a.marks, a.out, a.ball, a.width)
     else:
