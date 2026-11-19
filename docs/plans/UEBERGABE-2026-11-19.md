@@ -31,6 +31,7 @@ Einstieg danach wie immer: `docs/plans/HANDOVER.md`.
 | Spielende in `scoreboard.play_intervals` | Helfer | läuft |
 | Code health 2, 3, 9 (totes Gerüst, `system_access` als Kontextmanager, PDF im Thread) | Helfer | läuft |
 | A22 Wurfort vorausgewählt, Website-Text | Helfer | läuft |
+| Wurfzeit der Kandidaten (Versatz 2.8 s), nur auf Entwicklungsdaten gemessen, Endtest nicht zum Einstellen | Helfer | läuft |
 
 ## Was Lukas tun muss
 - Den Branch `claude/affectionate-edison-lkw4r3` als PR nach main mergen, wenn die CI grün ist
