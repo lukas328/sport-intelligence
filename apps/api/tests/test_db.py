@@ -5,7 +5,10 @@ from typing import Any
 
 import pytest
 from fastapi import FastAPI
+from sqlalchemy import text
+from sqlalchemy.exc import DBAPIError
 from sqlalchemy.orm import Mapped, mapped_column
+from structlog.testing import capture_logs
 
 from handball_api.core import db
 from handball_api.routers.deps import DbDep
@@ -151,3 +154,48 @@ async def test_request_transaction_commits_before_the_response_is_sent() -> None
     }
     await app(scope, receive, send)
     assert order == ["endpoint", "commit", "response"]
+
+
+async def _bypass(session: Any) -> str | None:
+    value: str | None = await session.scalar(text("SELECT current_setting('app.bypass_rls', true)"))
+    return value
+
+
+async def test_system_access_ends_with_the_block(db_settings: Any) -> None:
+    """The RLS bypass is switched off on leaving the block, also on an exception, and the
+    reason is logged."""
+    db.init_engine(db_settings.database_url)
+    try:
+        async with db.open_session() as session:
+            with capture_logs() as logs:
+                async with db.system_access(session, reason="test lookup"):
+                    assert await _bypass(session) == "on"
+            assert await _bypass(session) == "off"
+            assert {"event": "system_access", "reason": "test lookup", "log_level": "info"} in logs
+
+            with pytest.raises(LookupError):
+                async with db.system_access(session, reason="test failure"):
+                    assert await _bypass(session) == "on"
+                    raise LookupError("inside the block")
+            assert await _bypass(session) == "off"
+
+            with pytest.raises(ValueError, match="reason"):
+                async with db.system_access(session, reason=""):
+                    pass
+    finally:
+        await db.dispose_engine()
+
+
+async def test_system_access_keeps_the_database_error(db_settings: Any) -> None:
+    """A failed statement aborts the transaction: its error comes through, not the one of
+    switching the bypass off."""
+    db.init_engine(db_settings.database_url)
+    try:
+        with pytest.raises(DBAPIError, match="division by zero"):
+            async with (
+                db.open_session() as session,
+                db.system_access(session, reason="test failure"),
+            ):
+                await session.execute(text("SELECT 1 / 0"))
+    finally:
+        await db.dispose_engine()

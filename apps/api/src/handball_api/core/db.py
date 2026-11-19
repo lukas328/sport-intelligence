@@ -4,7 +4,7 @@ import os
 import socket
 import uuid
 from collections.abc import AsyncIterator
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, suppress
 from datetime import datetime
 
 import asyncpg
@@ -18,6 +18,10 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 from sqlalchemy.orm import DeclarativeBase, Mapped, declared_attr, mapped_column
+
+from handball_api.core.logging import get_logger
+
+log = get_logger("handball_api.db")
 
 NAMING_CONVENTION = {
     "ix": "ix_%(column_0_label)s",
@@ -200,12 +204,28 @@ async def set_current_user(session: AsyncSession, user_id: uuid.UUID) -> None:
 async def enable_system_access(session: AsyncSession, reason: str) -> None:
     """Explicit RLS bypass for system paths (org creation, invitation lookup by token).
 
-    Every call site names a reason; it is logged by the caller via the audit log where relevant.
+    Every call site names a reason, which is logged here. For a bypass that ends within the
+    function, use `system_access`; this one stays on until the transaction ends.
     """
     if not reason:
         raise ValueError("system access requires a reason")
     await session.execute(text("SELECT set_config('app.bypass_rls', 'on', true)"))
+    log.info("system_access", reason=reason)
 
 
 async def disable_system_access(session: AsyncSession) -> None:
     await session.execute(text("SELECT set_config('app.bypass_rls', 'off', true)"))
+
+
+@asynccontextmanager
+async def system_access(session: AsyncSession, reason: str) -> AsyncIterator[None]:
+    """RLS bypass for the block only: switched off again on leaving it, also on an exception."""
+    await enable_system_access(session, reason)
+    try:
+        yield
+    except BaseException:
+        # after a failed statement the transaction is aborted and takes the setting with it
+        with suppress(sa_exc.DBAPIError, sa_exc.PendingRollbackError):
+            await disable_system_access(session)
+        raise
+    await disable_system_access(session)

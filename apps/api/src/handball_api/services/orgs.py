@@ -9,7 +9,7 @@ from datetime import UTC, date, datetime, timedelta
 from sqlalchemy import func, select, update
 
 from handball_api.core.colors import FALLBACK_CLUB_COLOUR, LEGACY_UNCHOSEN_CLUB_COLOURS
-from handball_api.core.db import disable_system_access, enable_system_access, set_tenant
+from handball_api.core.db import set_tenant, system_access
 from handball_api.core.errors import ProblemError
 from handball_api.core.storage import ObjectNotFoundError
 from handball_api.models import (
@@ -59,28 +59,27 @@ def current_season_bounds(today: date) -> tuple[str, date, date]:
 
 async def create_org(ctx: Ctx, user: User, data: OrgCreate) -> Organization:
     # System path: the organisation does not exist yet, so no tenant context can be set.
-    await enable_system_access(ctx.db, reason="organisation creation")
-    org = Organization(
-        name=data.name,
-        country=data.country,
-        primary_color=data.primary_color,
-        secondary_color=data.secondary_color,
-    )
-    if ctx.settings.trial_on_signup:
-        # the Team plan's trial from packages/plans; effective_plan falls back to Free after it
-        days = PLANS[Plan.TEAM].trial_days
-        if days:
-            org.plan = Plan.TEAM
-            org.trial_ends_at = datetime.now(UTC) + timedelta(days=days)
-            org.trial_used = True
-    ctx.db.add(org)
-    await ctx.db.flush()
-    ctx.db.add(OrgMembership(organization_id=org.id, user_id=user.id, role=OrgRole.ORG_ADMIN))
-    await audit.record(
-        ctx, "org.created", org_id=org.id, target_type="organization", target_id=org.id
-    )
-    await ctx.db.flush()
-    await disable_system_access(ctx.db)
+    async with system_access(ctx.db, reason="organisation creation"):
+        org = Organization(
+            name=data.name,
+            country=data.country,
+            primary_color=data.primary_color,
+            secondary_color=data.secondary_color,
+        )
+        if ctx.settings.trial_on_signup:
+            # the Team plan's trial from packages/plans; effective_plan falls back to Free after
+            days = PLANS[Plan.TEAM].trial_days
+            if days:
+                org.plan = Plan.TEAM
+                org.trial_ends_at = datetime.now(UTC) + timedelta(days=days)
+                org.trial_used = True
+        ctx.db.add(org)
+        await ctx.db.flush()
+        ctx.db.add(OrgMembership(organization_id=org.id, user_id=user.id, role=OrgRole.ORG_ADMIN))
+        await audit.record(
+            ctx, "org.created", org_id=org.id, target_type="organization", target_id=org.id
+        )
+        await ctx.db.flush()
     await set_tenant(ctx.db, org.id)
     return org
 

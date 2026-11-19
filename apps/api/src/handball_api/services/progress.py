@@ -33,7 +33,12 @@ from typing import Any
 
 from sqlalchemy import or_, select
 
-from handball_api.core.db import disable_system_access, enable_system_access, set_tenant
+from handball_api.core.db import (
+    disable_system_access,
+    enable_system_access,
+    set_tenant,
+    system_access,
+)
 from handball_api.core.logging import get_logger
 from handball_api.models import Match, Opponent, ProcessingJob, VideoAsset
 from handball_api.models.enums import JobStatus, VideoRole, VideoStatus
@@ -597,16 +602,15 @@ async def watchdog(ctx: Ctx, now: datetime | None = None) -> dict[str, int]:
     the second time ended as failed so the coach sees it and can try again. The worker ticks it
     every few minutes; each job is handled within its own club (RLS)."""
     now = now or datetime.now(UTC)
-    await enable_system_access(ctx.db, reason="job watchdog: running jobs of all clubs")
-    found = (
-        await ctx.db.execute(
-            select(ProcessingJob.id, ProcessingJob.organization_id).where(
-                ProcessingJob.status == JobStatus.RUNNING,
-                ProcessingJob.kind.in_(("ingest", "analysis", "import")),
+    async with system_access(ctx.db, reason="job watchdog: running jobs of all clubs"):
+        found = (
+            await ctx.db.execute(
+                select(ProcessingJob.id, ProcessingJob.organization_id).where(
+                    ProcessingJob.status == JobStatus.RUNNING,
+                    ProcessingJob.kind.in_(("ingest", "analysis", "import")),
+                )
             )
-        )
-    ).all()
-    await disable_system_access(ctx.db)
+        ).all()
     restarted = failed = 0
     for job_id, org_id in found:
         await disable_system_access(ctx.db)
@@ -685,17 +689,16 @@ async def requeue_lost(ctx: Ctx, now: datetime | None = None) -> int:
     if ctx.jobs is None:
         return 0
     now = now or datetime.now(UTC)
-    await enable_system_access(ctx.db, reason="job watchdog: waiting jobs of all clubs")
-    found = (
-        await ctx.db.execute(
-            select(ProcessingJob.id, ProcessingJob.organization_id).where(
-                ProcessingJob.status == JobStatus.QUEUED,
-                ProcessingJob.kind.in_(("ingest", "analysis")),
-                ProcessingJob.created_at <= now - timedelta(seconds=QUEUED_CHECK_S),
+    async with system_access(ctx.db, reason="job watchdog: waiting jobs of all clubs"):
+        found = (
+            await ctx.db.execute(
+                select(ProcessingJob.id, ProcessingJob.organization_id).where(
+                    ProcessingJob.status == JobStatus.QUEUED,
+                    ProcessingJob.kind.in_(("ingest", "analysis")),
+                    ProcessingJob.created_at <= now - timedelta(seconds=QUEUED_CHECK_S),
+                )
             )
-        )
-    ).all()
-    await disable_system_access(ctx.db)
+        ).all()
     requeued = 0
     for job_id, org_id in found:
         if await asyncio.to_thread(ctx.jobs.exists, str(job_id)) is not False:
@@ -730,17 +733,16 @@ async def abandon_uploads(ctx: Ctx, now: datetime | None = None) -> int:
     from handball_api.services import videos  # imports this module
 
     now = now or datetime.now(UTC)
-    await enable_system_access(ctx.db, reason="watchdog: uploads nobody continues")
-    found = (
-        await ctx.db.execute(
-            select(VideoAsset.id, VideoAsset.organization_id).where(
-                VideoAsset.status == VideoStatus.UPLOADING,
-                VideoAsset.source_url.is_(None),
-                VideoAsset.created_at <= now - timedelta(seconds=ABANDON_UPLOAD_S),
+    async with system_access(ctx.db, reason="watchdog: uploads nobody continues"):
+        found = (
+            await ctx.db.execute(
+                select(VideoAsset.id, VideoAsset.organization_id).where(
+                    VideoAsset.status == VideoStatus.UPLOADING,
+                    VideoAsset.source_url.is_(None),
+                    VideoAsset.created_at <= now - timedelta(seconds=ABANDON_UPLOAD_S),
+                )
             )
-        )
-    ).all()
-    await disable_system_access(ctx.db)
+        ).all()
     gone = 0
     for asset_id, org_id in found:
         await disable_system_access(ctx.db)
