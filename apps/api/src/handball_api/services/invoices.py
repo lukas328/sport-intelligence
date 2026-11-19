@@ -7,6 +7,7 @@ the backoffice or matched from a camt.054 bank file (QR reference and amount).
 
 from __future__ import annotations
 
+import asyncio
 import uuid
 import xml.etree.ElementTree as ET
 from datetime import UTC, date, datetime, timedelta
@@ -16,7 +17,12 @@ from typing import Any
 from sqlalchemy import func, select, update
 from stdnum import iso11649
 
-from handball_api.core.db import disable_system_access, enable_system_access, set_tenant
+from handball_api.core.db import (
+    disable_system_access,
+    enable_system_access,
+    set_tenant,
+    system_access,
+)
 from handball_api.core.email import Email, try_send
 from handball_api.core.errors import ProblemError
 from handball_api.models import Invoice, Organization, OrgMembership, User, Voucher
@@ -135,9 +141,10 @@ def _inv_dict(inv: Invoice) -> dict[str, Any]:
     }
 
 
-def render_pdf(ctx: Ctx, inv: Invoice, kind: str = "invoice") -> bytes:
+async def render_pdf(ctx: Ctx, inv: Invoice, kind: str = "invoice") -> bytes:
     s = ctx.settings
-    return invoice_pdf.render(
+    return await asyncio.to_thread(
+        invoice_pdf.render,
         str(inv.recipient.get("locale") or "de-CH"),
         creditor(ctx),
         s.invoice_iban,
@@ -159,13 +166,14 @@ async def _send(ctx: Ctx, inv: Invoice, kind: str) -> bool:
         "total": f"CHF {invoice_pdf.chf(inv.amount_cents)}",
         "due": inv.due_date.strftime("%d.%m.%Y"),
     }
+    pdf = await render_pdf(ctx, inv, kind)
     return await try_send(
         ctx.email,
         Email(
             to=str(inv.recipient["email"]),
             subject=subject.format(**params),
             text=body.format(**params),
-            attachments=((f"{inv.number}.pdf", "application/pdf", render_pdf(ctx, inv, kind)),),
+            attachments=((f"{inv.number}.pdf", "application/pdf", pdf),),
         ),
         f"invoice_{kind}",
         invoice_id=str(inv.id),
@@ -267,7 +275,7 @@ async def order(ctx: Ctx, plan: Plan, voucher_code: str | None, contact: dict[st
         inv.due_date + timedelta(days=CUTOFF_DAYS), datetime.min.time(), UTC
     )
     await ctx.db.flush()
-    pdf = render_pdf(ctx, inv)
+    pdf = await render_pdf(ctx, inv)
     key = f"{org.id}/invoices/{inv.number}.pdf"
     await ctx.storage.put(ctx.settings.s3_bucket_artifacts, key, pdf, "application/pdf")
     inv.pdf_key = key
@@ -395,40 +403,45 @@ async def match_camt054(ctx: Ctx, xml: bytes) -> dict[str, list[dict[str, Any]]]
 
 
 async def run_dunning(ctx: Ctx, today: date | None = None) -> dict[str, int]:
-    """Daily: reminder after 3 days overdue, final notice after 17, plan falls back after 30."""
+    """Daily: reminder after 3 days overdue, final notice after 17, plan falls back after 30.
+
+    It goes through the open invoices of all clubs, so it runs with system access throughout.
+    """
     today = today or _today()
     counts = {"reminders": 0, "dunning": 0, "lapsed": 0}
-    rows = list(
-        (
-            await ctx.db.scalars(
-                select(Invoice).where(
-                    Invoice.paid_at.is_(None),
-                    Invoice.cancelled_at.is_(None),
-                    Invoice.payment_method == PaymentMethod.INVOICE_QR,
+    async with system_access(ctx.db, reason="dunning run"):
+        rows = list(
+            (
+                await ctx.db.scalars(
+                    select(Invoice).where(
+                        Invoice.paid_at.is_(None),
+                        Invoice.cancelled_at.is_(None),
+                        Invoice.payment_method == PaymentMethod.INVOICE_QR,
+                    )
                 )
-            )
-        ).all()
-    )
-    for inv in rows:
-        overdue = (today - inv.due_date).days
-        await set_tenant(ctx.db, inv.organization_id)
-        await enable_system_access(ctx.db, reason="dunning run")
-        # a level only counts once its mail went out, so a failed mail is retried next run
-        if overdue >= DUNNING_DAYS and inv.dunning_level < 2:
-            if await _send(ctx, inv, "dunning"):
-                inv.dunning_level = 2
+            ).all()
+        )
+        for inv in rows:
+            overdue = (today - inv.due_date).days
+            await set_tenant(ctx.db, inv.organization_id)
+            # a level only counts once its mail went out, so a failed mail is retried next run
+            if overdue >= DUNNING_DAYS and inv.dunning_level < 2:
+                if await _send(ctx, inv, "dunning"):
+                    inv.dunning_level = 2
+                    inv.reminded_at = datetime.now(UTC)
+                    counts["dunning"] += 1
+            elif (
+                overdue >= REMINDER_DAYS
+                and inv.dunning_level < 1
+                and await _send(ctx, inv, "reminder")
+            ):
+                inv.dunning_level = 1
                 inv.reminded_at = datetime.now(UTC)
-                counts["dunning"] += 1
-        elif (
-            overdue >= REMINDER_DAYS and inv.dunning_level < 1 and await _send(ctx, inv, "reminder")
-        ):
-            inv.dunning_level = 1
-            inv.reminded_at = datetime.now(UTC)
-            counts["reminders"] += 1
-        if overdue >= CUTOFF_DAYS and inv.dunning_level < 3:
-            inv.dunning_level = 3
-            counts["lapsed"] += 1
-    await ctx.db.flush()
+                counts["reminders"] += 1
+            if overdue >= CUTOFF_DAYS and inv.dunning_level < 3:
+                inv.dunning_level = 3
+                counts["lapsed"] += 1
+        await ctx.db.flush()
     return counts
 
 

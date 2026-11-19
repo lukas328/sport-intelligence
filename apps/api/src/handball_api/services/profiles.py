@@ -17,7 +17,7 @@ from typing import Any
 
 from sqlalchemy import func, select
 
-from handball_api.core.db import disable_system_access, enable_system_access, set_tenant
+from handball_api.core.db import set_tenant, system_access
 from handball_api.core.errors import ProblemError
 from handball_api.models import (
     Event,
@@ -239,9 +239,8 @@ async def _season_stats(ctx: Ctx, player: Player, team: Team) -> dict[str, float
 
 
 async def _public(ctx: Ctx, slug: str) -> tuple[PublicProfile, Player, Team]:
-    await enable_system_access(ctx.db, reason="public profile lookup")
-    profile = await ctx.db.scalar(select(PublicProfile).where(PublicProfile.slug == slug))
-    await disable_system_access(ctx.db)
+    async with system_access(ctx.db, reason="public profile lookup"):
+        profile = await ctx.db.scalar(select(PublicProfile).where(PublicProfile.slug == slug))
     if profile is None or not profile.active:
         raise ProblemError(404, "not-found", "This profile is not public")
     await set_tenant(ctx.db, profile.organization_id)

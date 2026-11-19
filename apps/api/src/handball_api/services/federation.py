@@ -10,13 +10,14 @@ club content; clubs can leave at any time.
 
 from __future__ import annotations
 
+import asyncio
 import uuid
 from datetime import UTC, datetime, time, timedelta
 from typing import Any
 
 from sqlalchemy import func, select
 
-from handball_api.core.db import disable_system_access, enable_system_access
+from handball_api.core.db import system_access
 from handball_api.core.email import Email, try_send
 from handball_api.core.errors import ProblemError
 from handball_api.core.security import hash_token, new_token
@@ -57,18 +58,17 @@ def _until(f: Federation) -> datetime:
 
 
 async def create(ctx: Ctx, data: FederationIn) -> Federation:
-    await enable_system_access(ctx.db, reason="federation create")
-    f = Federation(
-        name=data.name,
-        contract_ref=data.contract_ref,
-        contract_until=data.contract_until,
-        seat_quota=data.seat_quota,
-        plan=data.plan,
-        billing_address=data.billing_address,
-    )
-    ctx.db.add(f)
-    await ctx.db.flush()
-    await disable_system_access(ctx.db)
+    async with system_access(ctx.db, reason="federation create"):
+        f = Federation(
+            name=data.name,
+            contract_ref=data.contract_ref,
+            contract_until=data.contract_until,
+            seat_quota=data.seat_quota,
+            plan=data.plan,
+            billing_address=data.billing_address,
+        )
+        ctx.db.add(f)
+        await ctx.db.flush()
     await audit.record(ctx, "federation.created", target_type="federation", target_id=f.id)
     return f
 
@@ -84,16 +84,15 @@ async def add_admin(ctx: Ctx, federation_id: uuid.UUID, email: str) -> None:
     user = await ctx.db.scalar(select(User).where(func.lower(User.email) == email.lower()))
     if user is None:
         raise ProblemError(404, "not-found", "No account with this e-mail; register first")
-    await enable_system_access(ctx.db, reason="federation admin")
-    exists = await ctx.db.scalar(
-        select(FederationAdmin.id).where(
-            FederationAdmin.federation_id == f.id, FederationAdmin.user_id == user.id
+    async with system_access(ctx.db, reason="federation admin"):
+        exists = await ctx.db.scalar(
+            select(FederationAdmin.id).where(
+                FederationAdmin.federation_id == f.id, FederationAdmin.user_id == user.id
+            )
         )
-    )
-    if not exists:
-        ctx.db.add(FederationAdmin(federation_id=f.id, user_id=user.id))
-        await ctx.db.flush()
-    await disable_system_access(ctx.db)
+        if not exists:
+            ctx.db.add(FederationAdmin(federation_id=f.id, user_id=user.id))
+            await ctx.db.flush()
 
 
 async def invoice(ctx: Ctx, federation_id: uuid.UUID, lang: str) -> tuple[bytes, str]:
@@ -127,7 +126,8 @@ async def invoice(ctx: Ctx, federation_id: uuid.UUID, lang: str) -> tuple[bytes,
         "voucher_code": None,
     }
     s = ctx.settings
-    pdf = invoice_pdf.render(
+    pdf = await asyncio.to_thread(
+        invoice_pdf.render,
         lang,
         creditor(ctx),
         s.invoice_iban,
@@ -171,31 +171,29 @@ async def mine(ctx: Ctx) -> list[Federation]:
 async def _members(
     ctx: Ctx, federation_id: uuid.UUID
 ) -> list[tuple[Organization, FederationMembership]]:
-    await enable_system_access(ctx.db, reason="federation members")
-    rows = (
-        await ctx.db.execute(
-            select(Organization, FederationMembership)
-            .join(FederationMembership, FederationMembership.organization_id == Organization.id)
-            .where(FederationMembership.federation_id == federation_id)
-            .order_by(Organization.name)
-        )
-    ).all()
-    await disable_system_access(ctx.db)
+    async with system_access(ctx.db, reason="federation members"):
+        rows = (
+            await ctx.db.execute(
+                select(Organization, FederationMembership)
+                .join(FederationMembership, FederationMembership.organization_id == Organization.id)
+                .where(FederationMembership.federation_id == federation_id)
+                .order_by(Organization.name)
+            )
+        ).all()
     return [(o, m) for o, m in rows]
 
 
 async def _open_invites(ctx: Ctx, federation_id: uuid.UUID) -> list[FederationInvite]:
-    await enable_system_access(ctx.db, reason="federation invites")
-    rows = (
-        await ctx.db.scalars(
-            select(FederationInvite).where(
-                FederationInvite.federation_id == federation_id,
-                FederationInvite.accepted_at.is_(None),
-                FederationInvite.expires_at > _now(),
+    async with system_access(ctx.db, reason="federation invites"):
+        rows = (
+            await ctx.db.scalars(
+                select(FederationInvite).where(
+                    FederationInvite.federation_id == federation_id,
+                    FederationInvite.accepted_at.is_(None),
+                    FederationInvite.expires_at > _now(),
+                )
             )
-        )
-    ).all()
-    await disable_system_access(ctx.db)
+        ).all()
     return list(rows)
 
 
@@ -205,16 +203,15 @@ async def invite(ctx: Ctx, federation_id: uuid.UUID, email: str) -> dict[str, An
     if used >= f.seat_quota:
         raise ProblemError(409, "quota-reached", "All licences of the quota are used or invited")
     token = new_token(24)
-    await enable_system_access(ctx.db, reason="federation invite")
-    inv = FederationInvite(
-        federation_id=f.id,
-        email=email.lower(),
-        token_hash=hash_token(token),
-        expires_at=_now() + timedelta(days=INVITE_DAYS),
-    )
-    ctx.db.add(inv)
-    await ctx.db.flush()
-    await disable_system_access(ctx.db)
+    async with system_access(ctx.db, reason="federation invite"):
+        inv = FederationInvite(
+            federation_id=f.id,
+            email=email.lower(),
+            token_hash=hash_token(token),
+            expires_at=_now() + timedelta(days=INVITE_DAYS),
+        )
+        ctx.db.add(inv)
+        await ctx.db.flush()
     link = f"{ctx.settings.web_base_url.rstrip('/')}/federation/join?token={token}"
     # the invite stays valid when the mail fails (logged); without mail delivery the federation
     # gets the link to pass on itself (L2)
@@ -248,22 +245,20 @@ async def remove_member(ctx: Ctx, federation_id: uuid.UUID, org_id: uuid.UUID) -
 
 
 async def _end(ctx: Ctx, federation_id: uuid.UUID, org_id: uuid.UUID) -> None:
-    await enable_system_access(ctx.db, reason="federation membership end")
-    m = await ctx.db.scalar(
-        select(FederationMembership).where(
-            FederationMembership.federation_id == federation_id,
-            FederationMembership.organization_id == org_id,
+    async with system_access(ctx.db, reason="federation membership end"):
+        m = await ctx.db.scalar(
+            select(FederationMembership).where(
+                FederationMembership.federation_id == federation_id,
+                FederationMembership.organization_id == org_id,
+            )
         )
-    )
-    if m is None:
-        await disable_system_access(ctx.db)
-        raise ProblemError(404, "not-found", "Not a member")
-    await ctx.db.delete(m)
-    org = await ctx.db.get(Organization, org_id)
-    if org is not None and org.subscription_status == "federation":
-        org.plan, org.subscription_status, org.paid_until = Plan.FREE, None, None
-    await ctx.db.flush()
-    await disable_system_access(ctx.db)
+        if m is None:
+            raise ProblemError(404, "not-found", "Not a member")
+        await ctx.db.delete(m)
+        org = await ctx.db.get(Organization, org_id)
+        if org is not None and org.subscription_status == "federation":
+            org.plan, org.subscription_status, org.paid_until = Plan.FREE, None, None
+        await ctx.db.flush()
 
 
 def _month_ago() -> datetime:
@@ -275,63 +270,62 @@ async def overview(ctx: Ctx, federation_id: uuid.UUID) -> dict[str, Any]:
     f = await _admin_of(ctx, federation_id)
     members = await _members(ctx, f.id)
     org_ids = [o.id for o, _ in members]
-    await enable_system_access(ctx.db, reason="federation overview (counts only)")
-    teams = dict(
-        (
-            await ctx.db.execute(
-                select(Team.organization_id, func.count(Team.id))
-                .where(Team.organization_id.in_(org_ids))
-                .group_by(Team.organization_id)
-            )
-        ).all()
-    )
-    matches = dict(
-        (
-            await ctx.db.execute(
-                select(Match.organization_id, func.count(Match.id))
-                .where(Match.organization_id.in_(org_ids), Match.kind == "match")
-                .group_by(Match.organization_id)
-            )
-        ).all()
-    )
-    users = dict(
-        (
-            await ctx.db.execute(
-                select(OrgMembership.organization_id, func.count(OrgMembership.id))
-                .where(OrgMembership.organization_id.in_(org_ids))
-                .group_by(OrgMembership.organization_id)
-            )
-        ).all()
-    )
-    analyses = dict(
-        (
-            await ctx.db.execute(
-                select(ProcessingJob.organization_id, func.count(ProcessingJob.id))
-                .where(
-                    ProcessingJob.organization_id.in_(org_ids),
-                    ProcessingJob.kind == "analysis",
-                    ProcessingJob.status == "succeeded",
-                    ProcessingJob.created_at >= _month_ago(),
+    async with system_access(ctx.db, reason="federation overview (counts only)"):
+        teams = dict(
+            (
+                await ctx.db.execute(
+                    select(Team.organization_id, func.count(Team.id))
+                    .where(Team.organization_id.in_(org_ids))
+                    .group_by(Team.organization_id)
                 )
-                .group_by(ProcessingJob.organization_id)
+            ).all()
+        )
+        matches = dict(
+            (
+                await ctx.db.execute(
+                    select(Match.organization_id, func.count(Match.id))
+                    .where(Match.organization_id.in_(org_ids), Match.kind == "match")
+                    .group_by(Match.organization_id)
+                )
+            ).all()
+        )
+        users = dict(
+            (
+                await ctx.db.execute(
+                    select(OrgMembership.organization_id, func.count(OrgMembership.id))
+                    .where(OrgMembership.organization_id.in_(org_ids))
+                    .group_by(OrgMembership.organization_id)
+                )
+            ).all()
+        )
+        analyses = dict(
+            (
+                await ctx.db.execute(
+                    select(ProcessingJob.organization_id, func.count(ProcessingJob.id))
+                    .where(
+                        ProcessingJob.organization_id.in_(org_ids),
+                        ProcessingJob.kind == "analysis",
+                        ProcessingJob.status == "succeeded",
+                        ProcessingJob.created_at >= _month_ago(),
+                    )
+                    .group_by(ProcessingJob.organization_id)
+                )
+            ).all()
+        )
+        per_club = (
+            await ctx.db.execute(
+                select(
+                    Event.organization_id,
+                    func.count(func.distinct(Event.match_id)),
+                    func.count(Event.id).filter(Event.type == "shot", Event.side == "own"),
+                    func.count(Event.id).filter(
+                        Event.type == "shot", Event.side == "own", Event.outcome == "goal"
+                    ),
+                )
+                .where(Event.organization_id.in_(org_ids))
+                .group_by(Event.organization_id)
             )
         ).all()
-    )
-    per_club = (
-        await ctx.db.execute(
-            select(
-                Event.organization_id,
-                func.count(func.distinct(Event.match_id)),
-                func.count(Event.id).filter(Event.type == "shot", Event.side == "own"),
-                func.count(Event.id).filter(
-                    Event.type == "shot", Event.side == "own", Event.outcome == "goal"
-                ),
-            )
-            .where(Event.organization_id.in_(org_ids))
-            .group_by(Event.organization_id)
-        )
-    ).all()
-    await disable_system_access(ctx.db)
     with_data = [(m, s, g) for _, m, s, g in per_club if m > 0]
     aggregate: dict[str, Any] = {"clubs_with_data": len(with_data), "min_clubs": MIN_CLUBS}
     if len(with_data) >= MIN_CLUBS:
@@ -374,40 +368,38 @@ async def overview(ctx: Ctx, federation_id: uuid.UUID) -> dict[str, Any]:
 
 async def accept(ctx: Ctx, org_id: uuid.UUID, token: str) -> dict[str, Any]:
     authorize(ctx.require_actor(), Action.ORG_UPDATE, two_factor=ctx.two_factor)
-    await enable_system_access(ctx.db, reason="federation accept")
-    inv = await ctx.db.scalar(
-        select(FederationInvite).where(FederationInvite.token_hash == hash_token(token))
-    )
-    if inv is None or inv.accepted_at is not None or inv.expires_at <= _now():
-        await disable_system_access(ctx.db)
-        raise ProblemError(404, "not-found", "This invitation is no longer valid")
-    f = await ctx.db.get(Federation, inv.federation_id)
-    assert f is not None
-    members = await ctx.db.scalar(
-        select(func.count(FederationMembership.id)).where(
-            FederationMembership.federation_id == f.id
+    async with system_access(ctx.db, reason="federation accept"):
+        inv = await ctx.db.scalar(
+            select(FederationInvite).where(FederationInvite.token_hash == hash_token(token))
         )
-    )
-    already = await ctx.db.scalar(
-        select(FederationMembership.id).where(FederationMembership.organization_id == org_id)
-    )
-    if already:
-        await disable_system_access(ctx.db)
-        raise ProblemError(409, "already-member", "The club already belongs to a federation")
-    if (members or 0) >= f.seat_quota:
-        await disable_system_access(ctx.db)
-        raise ProblemError(409, "quota-reached", "The federation's quota is used up")
-    ctx.db.add(
-        FederationMembership(organization_id=org_id, federation_id=f.id, seats=1, joined_at=_now())
-    )
-    inv.accepted_at, inv.organization_id = _now(), org_id
-    org = await ctx.db.get(Organization, org_id)
-    assert org is not None
-    org.plan = Plan(f.plan)
-    org.subscription_status = "federation"
-    org.paid_until = _until(f)
-    await ctx.db.flush()
-    await disable_system_access(ctx.db)
+        if inv is None or inv.accepted_at is not None or inv.expires_at <= _now():
+            raise ProblemError(404, "not-found", "This invitation is no longer valid")
+        f = await ctx.db.get(Federation, inv.federation_id)
+        assert f is not None
+        members = await ctx.db.scalar(
+            select(func.count(FederationMembership.id)).where(
+                FederationMembership.federation_id == f.id
+            )
+        )
+        already = await ctx.db.scalar(
+            select(FederationMembership.id).where(FederationMembership.organization_id == org_id)
+        )
+        if already:
+            raise ProblemError(409, "already-member", "The club already belongs to a federation")
+        if (members or 0) >= f.seat_quota:
+            raise ProblemError(409, "quota-reached", "The federation's quota is used up")
+        ctx.db.add(
+            FederationMembership(
+                organization_id=org_id, federation_id=f.id, seats=1, joined_at=_now()
+            )
+        )
+        inv.accepted_at, inv.organization_id = _now(), org_id
+        org = await ctx.db.get(Organization, org_id)
+        assert org is not None
+        org.plan = Plan(f.plan)
+        org.subscription_status = "federation"
+        org.paid_until = _until(f)
+        await ctx.db.flush()
     await audit.record(ctx, "federation.joined", target_type="federation", target_id=f.id)
     return {"federation": f.name, "plan": f.plan, "until": org.paid_until}
 

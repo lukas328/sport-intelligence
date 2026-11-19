@@ -7,6 +7,7 @@ commands that the presenter receives over Server-Sent Events (same event bus as 
 
 from __future__ import annotations
 
+import asyncio
 import io
 import secrets
 import uuid
@@ -560,5 +561,5 @@ async def pdf(ctx: Ctx, pres_id: uuid.UUID, lang: str) -> bytes:
             )
         if c.get("notes"):
             story.append(Paragraph(_esc(str(c["notes"])), s["muted"]))
-    doc.build(story)
+    await asyncio.to_thread(doc.build, story)  # layout is CPU work: off the event loop
     return buf.getvalue()

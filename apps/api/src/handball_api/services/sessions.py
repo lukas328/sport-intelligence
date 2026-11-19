@@ -4,6 +4,7 @@ import of sessions. Spond and ClubCorner sit behind the TeamOpsAdapter (ADR 018)
 
 from __future__ import annotations
 
+import asyncio
 import io
 import uuid
 from datetime import UTC, date, datetime, time, timedelta
@@ -14,7 +15,7 @@ from reportlab.lib.units import mm
 from reportlab.platypus import KeepTogether, Paragraph, SimpleDocTemplate, Spacer
 from sqlalchemy import select
 
-from handball_api.core.db import disable_system_access, enable_system_access, set_tenant
+from handball_api.core.db import set_tenant, system_access
 from handball_api.core.errors import ProblemError
 from handball_api.core.security import hash_token, new_token
 from handball_api.integrations.team_ops import CalendarEntry, IcsTeamOps
@@ -153,7 +154,7 @@ async def session_pdf(ctx: Ctx, session_id: uuid.UUID, lang: str) -> tuple[bytes
     if s.notes:
         story += [Paragraph(_esc(t["notes"]), st["h2"]), Paragraph(_esc(s.notes), st["base"])]
     buf = io.BytesIO()
-    SimpleDocTemplate(
+    doc = SimpleDocTemplate(
         buf,
         pagesize=A4,
         leftMargin=16 * mm,
@@ -161,7 +162,8 @@ async def session_pdf(ctx: Ctx, session_id: uuid.UUID, lang: str) -> tuple[bytes
         topMargin=14 * mm,
         bottomMargin=14 * mm,
         title=s.title or t["title"],
-    ).build(story)
+    )
+    await asyncio.to_thread(doc.build, story)  # layout is CPU work: off the event loop
     return buf.getvalue(), f"training-{s.on_date.isoformat()}.pdf"
 
 
@@ -707,9 +709,10 @@ async def revoke_calendar(ctx: Ctx, team_id: uuid.UUID) -> None:
 
 async def calendar_ics(ctx: Ctx, token: str) -> str:
     """Public feed for calendar apps (no session): matches and sessions of one team."""
-    await enable_system_access(ctx.db, reason="calendar feed lookup")
-    team = await ctx.db.scalar(select(Team).where(Team.calendar_token_hash == hash_token(token)))
-    await disable_system_access(ctx.db)
+    async with system_access(ctx.db, reason="calendar feed lookup"):
+        team = await ctx.db.scalar(
+            select(Team).where(Team.calendar_token_hash == hash_token(token))
+        )
     if team is None:
         raise ProblemError(404, "not-found", "This calendar link is no longer valid")
     await set_tenant(ctx.db, team.organization_id)

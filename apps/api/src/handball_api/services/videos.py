@@ -15,7 +15,7 @@ from typing import Any
 from sqlalchemy import delete, func, select
 
 from handball_api.core.colors import analysis_kits
-from handball_api.core.db import disable_system_access, enable_system_access, set_tenant
+from handball_api.core.db import set_tenant, system_access
 from handball_api.core.email import try_send
 from handball_api.core.errors import ProblemError
 from handball_api.core.net import UnsafeUrlError, check_public_https_url
@@ -634,13 +634,11 @@ async def read_signed_media(
         raise ProblemError(404, "not-found", "Not found")
     if not hmac.compare_digest(sig, _media_sig(ctx, asset_id, int(exp_s))):
         raise ProblemError(404, "not-found", "Not found")
-    await enable_system_access(ctx.db, reason="signed media")
-    asset = await ctx.db.get(VideoAsset, asset_id)
-    if asset is None:
-        await disable_system_access(ctx.db)
-        raise ProblemError(404, "not-found", "Not found")
-    await set_tenant(ctx.db, asset.organization_id)
-    await disable_system_access(ctx.db)
+    async with system_access(ctx.db, reason="signed media"):
+        asset = await ctx.db.get(VideoAsset, asset_id)
+        if asset is None:
+            raise ProblemError(404, "not-found", "Not found")
+        await set_tenant(ctx.db, asset.organization_id)
 
     def signed(other: VideoAsset) -> str:
         # each part has its own token; same expiry as the playlist's
@@ -674,9 +672,8 @@ def _elapsed_seconds(result: dict[str, Any]) -> float:
 
 
 async def apply_job_update(ctx: Ctx, job_id: uuid.UUID, data: JobUpdate) -> ProcessingJob:
-    await enable_system_access(ctx.db, reason="worker job callback")
-    job = await ctx.db.get(ProcessingJob, job_id)
-    await disable_system_access(ctx.db)
+    async with system_access(ctx.db, reason="worker job callback"):
+        job = await ctx.db.get(ProcessingJob, job_id)
     if job is None:
         raise ProblemError(404, "not-found", "Job not found")
     await set_tenant(ctx.db, job.organization_id)

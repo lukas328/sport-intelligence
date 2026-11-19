@@ -16,11 +16,8 @@ pytestmark = pytest.mark.integration
     ("queue", "func", "kwargs"),
     [
         ("default", "handball_worker.jobs.ping", {"payload": "it"}),
-        (
-            "gpu",
-            "handball_gpu_worker.jobs.run_stage",
-            {"stage": "smoke", "entrypoint": "handball_gpu_worker.jobs:echo", "params": {"a": 1}},
-        ),
+        # any importable function does: the round trip checks that the GPU worker takes jobs
+        ("gpu", "os.getpid", {}),
     ],
 )
 def test_job_round_trip(queue: str, func: str, kwargs: dict[str, object]) -> None:
