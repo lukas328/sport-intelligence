@@ -63,6 +63,10 @@ was der Code heute tut.
     und eine GPU dazu? Empfehlung: zum Pilot keiner; Stripe, bevor du Geld verlangst; GPU, wenn ein
     ganzes Spiel auf CPU zu lange dauert (ein Ausschnitt von 5 Minuten braucht heute rund 20
     Minuten). Ohne Entscheid: alles aus, Analyse auf CPU.
+    **GPU teilweise entschieden (Lukas, 2026-11-19):** GPU kommt von Azure, nicht von Modal.
+    Weil Switzerland North keine passende GPU hat, zieht dafür wahrscheinlich die ganze Umgebung
+    in eine andere Azure-Region um. Das macht Lukas später selbst; bis dahin bleibt alles in der
+    Schweiz und die Analyse auf Staging auf der CPU. Kein Modal-Backend bauen.
 
 Nicht entschieden werden muss, aber nur mit dir geht: echte Trainer für den Usability-Test
 (Q-UX-1), ein iPhone für den Safari-Test (Q-QA-1), ein ganzes Spiel als Video für die Messung von

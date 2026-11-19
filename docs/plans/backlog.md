@@ -5,7 +5,12 @@ Stand 2026-11-09. Ziel des Produkts: Video hochladen, automatisch die Schlüssel
 macht eine eigene Sitzung (`docs/plans/ui-match-workspace.md`).
 
 ## Läuft gerade
-Stand und Prioritäten der Woche: `docs/plans/HANDOVER.md` (2026-11-09). Fertig seit dem 5.11.:
+Stand 2026-11-19: Prioritäten in `docs/plans/HANDOVER.md`, Entscheide und Änderungen vom 19.11. in
+`docs/plans/UEBERGABE-2026-11-19.md`. Die Liste "Als Nächstes" unten ist vom 9.11.; Punkt 1
+(Kalibrierung) ist jetzt die Klick-Kalibrierung pro Halle, Punkt 2 (ganzes Spiel) ist auf Staging
+gelaufen (99 min), die GPU-Frage ist entschieden (später Azure).
+
+Stand 2026-11-09: `docs/plans/HANDOVER.md` (Verlauf). Fertig seit dem 5.11.:
 Würfe als Vorschläge, Mannschaft aus handball.ch (Phase 1 bis 3), Spielberichte per Link (nuLiga,
 HLA), Kalibrierung mit Gründen und Hallen-Wiederverwendung, Rückennummern breit gemessen,
 Code-Prüfung vor der Übergabe. Ball Runde 6: gleichauf mit Runde 3, nicht übernommen.
