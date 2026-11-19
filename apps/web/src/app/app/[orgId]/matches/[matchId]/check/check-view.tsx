@@ -30,7 +30,7 @@ import { useRouter } from "next/navigation";
 import { partName, partsOf, partStarts, timelineVideo } from "@/lib/video-parts";
 import { ShotSpotPicker } from "@/components/anlauf/shot-spot-picker";
 import { useGoalView, useSaveSpot } from "@/components/anlauf/spot-parts";
-import { afterSpot, checkMinutes, type SpotAnswer, type SpotZone } from "@/lib/shot-spot";
+import { afterSpot, checkMinutes, type CourtZone, type SpotAnswer, type SpotZone, spotSuggestion } from "@/lib/shot-spot";
 import type { Pt as HalfPt } from "@/components/anlauf/geometry";
 
 type Match = Schemas["MatchOut"];
@@ -52,8 +52,16 @@ const MORE_BATCH = 10;
 /** `summary`: how the answer reads in «Beantwortet» when the button's words say too little
  * («Jetzt ist Anwurf» becomes «Video 0:42»), taken at the moment of the tap */
 type Answer = { key: string; label: string; first?: boolean; numeral?: string; summary?: () => string; run: () => Promise<void> };
-/** «Von wo?» after a confirmed goal (fourth real-video test H7): the goal's event, the place to mark */
-type SpotStep = { q: Question; eventId: string; goal: string; suggestion: { zone: SpotZone; kind: "current" } | null; index: number; fromList?: boolean };
+/** «Von wo?» after a confirmed goal (fourth real-video test H7): the goal's event, the place to mark;
+ * `suggestion` is the coach's earlier answer («Bisher») or the estimate to confirm («Vorschlag», A22) */
+type SpotStep = { q: Question; eventId: string; goal: string; suggestion: { zone: SpotZone; kind: "current" } | { zone: CourtZone; kind: "suggested" } | null; index: number; fromList?: boolean };
+
+/** What «Von wo?» marks for a goal: the coach's place as «Bisher», else the estimate as «Vorschlag» (A22). */
+function spotMark(coach: SpotZone | null | undefined, estimate: { zone?: string | null; zone_source?: string | null; spot_by_coach?: boolean } | undefined): SpotStep["suggestion"] {
+  if (coach) return { zone: coach, kind: "current" };
+  const zone = estimate ? spotSuggestion(estimate) : null;
+  return zone ? { zone, kind: "suggested" } : null;
+}
 type Answered = { q: Question; label: string; eventId?: string; spot?: SpotAnswer };
 
 // one rounding on every screen: full seconds, as the scoreboard (fourth real-video test H8)
@@ -427,7 +435,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
     setAnswered((list) => (revisit != null ? list.map((x, i) => (i === revisit ? entry : x)) : [...list, entry]));
     if (goal && row) {
       const zone = row.shot_zone as SpotZone | null | undefined;
-      setSpotStep({ q: current, eventId: goal, goal: a.label, index, suggestion: zone && row.zone_source === "coach" ? { zone, kind: "current" } : null });
+      setSpotStep({ q: current, eventId: goal, goal: a.label, index, suggestion: spotMark(zone && row.zone_source === "coach" ? zone : null, { zone, zone_source: row.zone_source }) });
       return;
     }
     if (revisit != null) {
@@ -676,7 +684,9 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
                       {x.eventId && (
                         <button
                           type="button"
-                          onClick={() => setSpotStep({ q: x.q, eventId: x.eventId!, goal: x.label, index: i, fromList: true, suggestion: x.spot && x.spot !== "unknown" ? { zone: x.spot, kind: "current" } : null })}
+                          onClick={() =>
+                            setSpotStep({ q: x.q, eventId: x.eventId!, goal: x.label, index: i, fromList: true, suggestion: spotMark(x.spot && x.spot !== "unknown" ? x.spot : null, graphics.data?.goals.find((g) => g.event_id === x.eventId)) })
+                          }
                           className="min-h-11 cursor-pointer border-0 bg-transparent p-0 font-bold underline underline-offset-4"
                           data-testid="check-spot-change"
                         >
@@ -835,7 +845,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
                   </p>
                 )}
                 <div className="mt-2 md:mt-4">
-                  <ShotSpotPicker key={`${spotStep.eventId}-${spotStep.index}`} current={spotStep.suggestion?.zone ?? null} orientation={spotView.orientation} disabled={!spotView.ready} onPick={(spot, point) => void pickSpot(spotStep, spot, point)} onSkip={spotStep.fromList ? undefined : () => leaveSpot(spotStep)} />
+                  <ShotSpotPicker key={`${spotStep.eventId}-${spotStep.index}`} current={spotStep.suggestion?.kind === "current" ? spotStep.suggestion.zone : null} suggested={spotStep.suggestion?.kind === "suggested" ? spotStep.suggestion.zone : null} orientation={spotView.orientation} disabled={!spotView.ready} onPick={(spot, point) => void pickSpot(spotStep, spot, point)} onSkip={spotStep.fromList ? undefined : () => leaveSpot(spotStep)} />
                 </div>
               </section>
             ) : (

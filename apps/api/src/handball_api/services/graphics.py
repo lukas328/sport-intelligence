@@ -104,7 +104,8 @@ def scene_window_of(e: Event, length: int | None) -> tuple[int, int]:
 def spot_by_coach(e: Event) -> bool:
     """The place of the shot comes from a person (tapped in Prüfen, marked by hand, a penalty of
     the report). Only these make the three things and count as «mit Wurfort» (real-clip test of
-    «Von wo?», V1): an estimate is shown as estimated and counts nowhere."""
+    «Von wo?», V1): an estimate is shown as estimated and counts nowhere until the coach confirms
+    it with one tap (A22, shot_positions.set_spot)."""
     return zone_said(e) == COACH
 
 

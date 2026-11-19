@@ -14,6 +14,12 @@ reads them) and x/y, with `zone_source` "coach". Without an answer the estimate 
 (`fill_one`) is the fallback: x/y and the zone from that point, `zone_source` "estimated".
 "Weiss nicht" keeps the estimate and is not asked again (`zone_source` "unknown" without one).
 
+The estimate is offered (A22): «Von wo?» preselects its zone as a suggestion, and one tap on it
+confirms it. A confirmation is the zone alone; it takes the estimated point over as the coach's
+(`position_source` "coach", the method kept as `confirmed_estimate`), so a confirmed estimate
+counts for the three things exactly like a tapped place. An estimate nobody confirmed counts
+nowhere (V2).
+
 Gegenstoss replaces the place in the question: for the three things a fast break is its own
 pattern (zone gs, read from shot_type before shot_zone), and a second tap would double the
 question. The goal keeps an estimated place from the tracks where there is one.
@@ -318,10 +324,15 @@ async def set_spot(
         g.x, g.y = round(x, 2), round(y, 2)
         attrs["position_source"] = COACH
     elif g.x is not None and g.y is not None and zone not in ("m7", "gs"):
-        # an estimated point in another zone than the coach's is not drawn there
         if attrs.get("position_source") == COACH or zone_at(g.x, g.y) != zone:
+            # an estimated point in another zone than the coach's is not drawn there
             g.x = g.y = None
             attrs.pop("position_source", None)
+        else:
+            # the coach confirmed the suggested place (A22): the estimated point is now the
+            # coach's, as if tapped; the method it was estimated with stays for the hit rate
+            attrs["confirmed_estimate"] = attrs.get("position_source")
+            attrs["position_source"] = COACH
     elif g.x is None and zone == "gs":
         await fill_one(ctx, g)  # a fast break keeps an estimated place where the tracks have one
         attrs = dict(g.attributes or {})

@@ -16,7 +16,7 @@ import { goalWindow } from "@/lib/goal-window";
 import { type MatchGraphics, useMatchGraphics } from "@/lib/graphics";
 import { useOpponentName } from "@/lib/opponent";
 import { ownName } from "@/lib/own-name";
-import { goalsWithoutSpot, type SpotZone } from "@/lib/shot-spot";
+import { goalsWithoutSpot, type SpotZone, spotSuggestion } from "@/lib/shot-spot";
 import { cn } from "@/lib/utils";
 import { timelineVideo } from "@/lib/video-parts";
 
@@ -150,8 +150,9 @@ export function SpotFill({ orgId, match, goalId }: { orgId: string; match: Match
                 key={goal.event_id}
                 disabled={busy || !view.ready}
                 orientation={view.orientation}
-                // the estimate from the tracks is no suggestion (real-clip test V2); only what the coach said before
+                // what the coach said before reads «Bisher»; the estimate from the tracks is preselected as a suggestion, one tap confirms it (A22)
                 current={goal.zone && goal.spot_by_coach ? (goal.zone as SpotZone) : null}
+                suggested={spotSuggestion(goal)}
                 onPick={(spot, point) => {
                   setBusy(true);
                   setFailed(null);

@@ -4300,6 +4300,8 @@
       "kr": "Kreis"
     },
     "current": "Bisher",
+    "suggested": "Vorschlag",
+    "suggestedNote": "Die App schlägt vor: {zone}. Tippe darauf, um zu bestätigen, oder tippe an, von wo sonst geworfen wurde.",
     "unknown": "Weiss nicht",
     "replay": "Nochmal ansehen",
     "saved": "{goal} ist gespeichert.",

@@ -6552,7 +6552,7 @@
           },
           "spot_by_coach": {
             "default": false,
-            "description": "the zone was given by a person; only these make the three things and count as \u00abmit Wurfort\u00bb (an estimate does not)",
+            "description": "the zone was given by a person (tapped, or the estimate confirmed with one tap); only these make the three things and count as \u00abmit Wurfort\u00bb (an estimate nobody confirmed does not)",
             "title": "Spot By Coach",
             "type": "boolean"
           },
