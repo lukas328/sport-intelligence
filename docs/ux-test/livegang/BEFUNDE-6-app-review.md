@@ -43,7 +43,9 @@ Nicht oder anders übernommen:
 1. Beobachtete Spiele und Zahlen: BUG-01 bis 12, 15 bis 18, 20, 21, UX-07, TXT-03, TXT-06, UI-02.
 2. Video-Tab: UX-01 bis 04, BUG-13, 14, 19, UI-05, UI-06, A11Y-01, UX-12 nach A22.
 3. Rest P1/P2: UX-05, UX-06, UX-08, UX-09, UX-10, UX-11, UI-01, UI-03, UI-04, BUG-22, TXT-01,
-   TXT-02, TXT-04, TXT-05, TXT-08, LEGAL-01.
+   TXT-02, TXT-04, TXT-05, TXT-08, LEGAL-01. Dazu aus dem Website-Review: Herkunft `?src=` bei der
+   Registrierung speichern (ohne Cookies), «Gemacht mit Handball Intelligence» dezent auf geteilten
+   Szenen-Links, «Nutzungsbedingungen» in der App durch «AGB» ersetzen.
 4. Zum Schluss: «drei Dinge» wird «drei Muster» (TXT-01), auch auf der Website.
 
 ## Ergänzungen aus Lukas' Notizen beim Testen (19.11.)
