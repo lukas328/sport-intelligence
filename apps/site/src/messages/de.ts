@@ -200,7 +200,7 @@ const de = {
     teamLabel: "Wie heisst dein Team?",
     teamButton: "Team suchen",
     teamHint: "Vereinsname oder Ort, mindestens drei Buchstaben.",
-    teamAfter: "Ohne Konto. Teams aus der Schweiz kommen mit Spielplan, alle anderen legst du in einer Minute an.",
+    teamAfter: "Ohne Konto. Bei Teams aus der Schweiz siehst du sofort Resultat, Tabelle, Torschützen und den nächsten Gegner; aus Deutschland und Österreich holst du Spielberichte per Link (DHB, nuLiga, HLA). Teams aus der Schweiz kommen mit Spielplan, alle anderen legst du in einer Minute an.",
     finalTitle: "Probier es mit deinem nächsten Spiel.",
     film: { label: "Kurzer Film zum Beispielspiel: Ein Spielvideo läuft, die Analyse setzt die {of} Gegentore aufs halbe Feld, {n} davon kamen über aussen rechts. Daraus werden drei Dinge fürs nächste Training.", video: "Dein Spiel", status: ["Video", "Analyse", "Drei Dinge"], replay: "Nochmals abspielen", count: "{n} von {of} über aussen rechts", wait: ["Video wird angeschaut", "Analyse läuft"] },
   },

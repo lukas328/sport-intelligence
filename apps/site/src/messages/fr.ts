@@ -202,7 +202,7 @@ const fr: Messages = {
     teamLabel: "Comment s'appelle ton équipe ?",
     teamButton: "Chercher l'équipe",
     teamHint: "Nom du club ou localité, au moins trois lettres.",
-    teamAfter: "Sans compte. Les équipes de Suisse arrivent avec leur calendrier, toutes les autres se créent en une minute.",
+    teamAfter: "Sans compte. Pour les équipes de Suisse, tu vois tout de suite le résultat, le classement, les buteurs et le prochain adversaire ; d'Allemagne et d'Autriche, tu importes les feuilles de match par lien (DHB, nuLiga, HLA). Les équipes de Suisse arrivent avec leur calendrier, toutes les autres se créent en une minute.",
     finalTitle: "Essaie avec ton prochain match.",
     film: { label: "Court film du match d'exemple : une vidéo de match défile, l'analyse place les {of} buts encaissés sur le demi-terrain, dont {n} venus de l'aile droite. Il en sort trois choses pour le prochain entraînement.", video: "Ton match", status: ["Vidéo", "Analyse", "Trois points"], replay: "Revoir", count: "{n} sur {of} par l'aile droite", wait: ["Lecture de la vidéo", "Analyse en cours"] },
   },

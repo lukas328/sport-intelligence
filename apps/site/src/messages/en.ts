@@ -202,7 +202,7 @@ const en: Messages = {
     teamLabel: "What is your team called?",
     teamButton: "Find team",
     teamHint: "Club name or town, at least three letters.",
-    teamAfter: "No account needed. Teams in Switzerland come with their fixtures, any other team takes a minute to set up.",
+    teamAfter: "No account needed. For teams in Switzerland you see the result, the table, the scorers and the next opponent right away; from Germany and Austria you bring in match reports by link (DHB, nuLiga, HLA). Teams in Switzerland come with their fixtures, any other team takes a minute to set up.",
     finalTitle: "Try it with your next match.",
     film: { label: "A short film of the example match: a match video plays, the analysis puts the {of} goals conceded on the half court, {n} of them came on the right wing. That gives three things for your next training.", video: "Your match", status: ["Video", "Analysis", "Three things"], replay: "Play again", count: "{n} of {of} on the right wing", wait: ["Watching the video", "Analysis running"] },
   },
