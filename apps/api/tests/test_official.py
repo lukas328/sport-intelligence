@@ -293,6 +293,9 @@ async def test_claim_creates_club_and_team_and_prefills(
         "official_game_id": 509192,
         "source": "official",
     }
+    # the match page says the official report comes only for a game of the schedule (TXT-06)
+    match_url = f"/v1/orgs/{c['organization_id']}/matches/{m['id']}"
+    assert (await api.get(match_url)).json()["official_game"] is True
 
     link = (await api.get(base(c) + "/official")).json()
     assert link["linked"] is True and link["official_group_id"] == GROUP

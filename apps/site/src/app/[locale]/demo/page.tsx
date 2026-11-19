@@ -383,7 +383,7 @@ export default async function Demo({ params }: Props) {
               {t.endTitle}
             </h2>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-              <StartLink appLocale={APP_LOCALE[locale]} className="btn btn-ink">
+              <StartLink appLocale={APP_LOCALE[locale]} src="demo" className="btn btn-ink">
                 {m.cta.start}
               </StartLink>
               <Link href={`/${locale}/so-funktioniert-es/`} className="btn btn-line">

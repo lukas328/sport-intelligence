@@ -3147,8 +3147,8 @@
     "level": "basic",
     "name": {
       "de-CH": "Rückzug 3 gegen 2 nach Ballverlust",
-      "fr": "Repli à 2 contre 3 après la perte",
-      "en": "Getting back 2 against 3 after a turnover"
+      "fr": "Repli à 3 contre 2 après la perte",
+      "en": "Getting back 3 against 2 after a turnover"
     },
     "setup": {
       "de-CH": "Ganzes Feld. Drei Angreifer an der Mittellinie mit Ball, zwei Verteidiger einen Schritt weiter vorne, Torhüter.",

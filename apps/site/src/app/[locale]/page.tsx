@@ -24,6 +24,8 @@ import { DRILL_LANG, DRILLS } from "@/lib/drills";
 import { seasonRightWing } from "@/lib/week";
 import { LoopTile } from "@/components/week/loop-tile";
 import { HallPhoto } from "@/components/hall-photo";
+import { Cur } from "@/components/currency";
+import { perTeam } from "@/lib/currency";
 
 type Props = { params: Promise<{ locale: Locale }> };
 
@@ -57,6 +59,7 @@ export default async function Home({ params }: Props) {
   const d = m.demo;
   const answer = sundayAnswer();
   const team = plans.plans.find((p) => p.plan === "team")!;
+  const club = plans.plans.find((p) => p.plan === "club")!;
   const app = APP_LOCALE[locale];
   // on the start page each thing leads to its scenes in the demo; the halves stand in the hero (U18)
   const things = v.things.map((x) => ({
@@ -129,6 +132,7 @@ export default async function Home({ params }: Props) {
             <div className="mt-8">
               <TeamField
                 id="team"
+                src="team-search"
                 label={t.teamLabel}
                 button={t.teamButton}
                 hint={t.teamHint}
@@ -149,7 +153,7 @@ export default async function Home({ params }: Props) {
         aria-labelledby="problem"
         className="-mt-10 bg-ink pt-10 text-ground md:-mt-16 md:pt-16 print:mt-0 print:bg-transparent print:pt-0 print:text-ink"
       >
-        <div className="wrap grid grid-cols-1 items-center gap-10 py-14 md:py-20 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-16">
+        <div className="wrap grid grid-cols-1 items-center gap-10 pt-14 pb-2 md:pt-20 md:pb-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-16">
           <div data-reveal className="min-w-0">
             <When dark>{t.problemWhen}</When>
             <h2 id="problem" className="mt-4 text-[2.5rem] md:text-[4rem]">
@@ -171,14 +175,14 @@ export default async function Home({ params }: Props) {
         <HallPhoto
           name="tor-ball"
           sizes="100vw"
-          className="h-52 [mask-image:linear-gradient(to_bottom,transparent,#000_45%)] sm:h-64 md:h-[22rem]"
+          className="h-44 [mask-image:linear-gradient(to_bottom,transparent,#000_35%)] sm:h-56 md:h-72"
           imgClassName="object-[50%_86%] brightness-[0.78] saturate-[0.8]"
         />
       </section>
 
       <div className="wrap">
         {/* 3 · Saturday, 10 pm: what you get, the three things (W7) */}
-        <section aria-labelledby="get" className="mt-20 md:mt-28">
+        <section aria-labelledby="get" className="mt-12 md:mt-16">
           <div data-reveal className="max-w-[44rem]">
             <When>{t.getWhen}</When>
             <h2 id="get" className="mt-4 text-[2.25rem] md:text-[3.5rem]">
@@ -222,7 +226,7 @@ export default async function Home({ params }: Props) {
                 a={answer}
                 team={`${v.own} ${t.chat.group}`}
                 opp={v.opp}
-                scenesHref={`/${locale}/demo/#things`}
+                scenesHref={`/${locale}/demo/?ding=1#things`}
               />
             </div>
           </div>
@@ -308,6 +312,8 @@ export default async function Home({ params }: Props) {
               }}
             />
             <p className="mt-6 inline-block border-2 border-dashed border-club-ink px-3 py-1 text-[1.0625rem] font-semibold">{d.nextExample}</p>
+            {/* as on the demo page (BEFUNDE-5 point 11): a pattern that went away is no proof */}
+            <p className="mt-4 max-w-[46rem] text-[1.0625rem]">{d.nextNote}</p>
           </div>
         </div>
       </section>
@@ -356,14 +362,22 @@ export default async function Home({ params }: Props) {
             </p>
             <div>
               <h2 id="price" className="text-[2rem] md:text-[2.5rem]">
-                {fmt(t.priceTitle, { price: team.price_chf_month })}
+                <Cur text={fmt(t.priceTitle, { price: team.price_chf_month })} />
               </h2>
               <p className="mt-2">
-                {fmt(t.priceText, { days: team.trial_days, price: team.price_chf_month })}
+                <Cur
+                  text={fmt(t.priceText, {
+                    days: team.trial_days,
+                    price: team.price_chf_month,
+                    club: club.price_chf_month,
+                    clubTeams: club.teams,
+                    perTeam: perTeam(club),
+                  })}
+                />
               </p>
             </div>
             <div className="flex flex-col gap-2">
-              <StartLink appLocale={app} className="btn btn-ink">
+              <StartLink appLocale={app} src="home-price" className="btn btn-ink">
                 {m.cta.start}
               </StartLink>
               <Link href={`/${locale}/preise/`} className="link justify-center">
@@ -386,6 +400,7 @@ export default async function Home({ params }: Props) {
             <div className="mt-8">
               <TeamField
                 id="team-end"
+                src="team-search-end"
                 label={t.teamLabel}
                 button={t.teamButton}
                 hint={t.teamHint}

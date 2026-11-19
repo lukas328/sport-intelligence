@@ -47,6 +47,11 @@ wird trotzdem nichts, was kein Produkt-Versprechen ist (z. B. Zitate von Pilotte
 | 19 | Blog im Footer | **umsetzen** | Ein Link. |
 | 20 | Kleinigkeiten (Link `?ding=1`, Sprachreihenfolge, 8 px Querscroll, 12/13 Spiele) | **umsetzen** | Echte Fehler. 12/13: prüfen, ob ein Spielbericht fehlt, oder ob der Satz «aus 12 Spielberichten» nur stimmt. |
 | 21 | Einschübe kürzen; FR/EN gegenlesen | **teilweise** | Doppelte Erklärungen pro Seite kürzen; FR «2 contre 3» vs. DE «3 gegen 2» prüfen und angleichen. Muttersprachliches Gegenlesen bleibt bei Lukas. |
+| 22 | Europa im Fokus (Lukas, 19.11.): Schritt 1 von `docs/plans/europa.md` fertig, Preise in EUR und CHF, ehrliche Teamsuche ohne Treffer | **umsetzen** | Preise EUR 39 / CHF 39 (EU3), umschaltbar auf «Preise», Vorgabe aus der Browsersprache. Keine `de-DE`-Variante jetzt (EU2). |
+| 23 | Messen ohne Cookies: jeder Link in die App trägt `?src=<Ort>` | **umsetzen** | Das Versprechen «keine Cookies» bleibt; die App speichert `src` bei der Anmeldung (anderer Helfer). |
+| 24 | Neue Seite «Für Vereine» für den Vorstand | **umsetzen** | Nur echte Produktfakten aus `packages/plans`, keine Stimmen. Verlinkt von «Preise» und im Footer. |
+| 25 | «AGB» statt «Nutzungsbedingungen» | **umsetzen (Website), App: Helfer** | Die Website sagt durchgehend «AGB»; die App sagt «Nutzungsbedingungen» (`apps/web/messages/*.json`, `entry.terms` und weitere). Für den App-Helfer. |
+| 26 | Sichtbarer Tastatur-Fokus (WCAG 2.4.7) | **umsetzen** | Mit Playwright per Tab geprüft. |
 
 ## Für Lukas (nicht von der Sitzung lösbar)
 - Über uns mit Namen und Fotos, Kontakt mit Adresse (nach der Firmengründung).
@@ -62,3 +67,32 @@ wird trotzdem nichts, was kein Produkt-Versprechen ist (z. B. Zitate von Pilotte
 ## Umsetzung
 Ein Helfer setzt die Punkte «umsetzen» nach A22 um (die Wurfort-Sätze hat A22 schon angepasst).
 Stand pro Punkt wird hier nachgetragen.
+
+## Stand Umsetzung (19.11.)
+| Nr. | Stand | Was gemacht ist, oder warum nicht |
+|---|---|---|
+| 1, 2 | nein (Lukas) | Nicht angefasst: Aufwand und Analysedauer bleiben die Vision. |
+| 3 | erledigt | Ein Beispieluniversum: Die Saison vor dem Demo-Spiel (So funktioniert es: Rotdorn 6, Wirbelstern 9, Nachtwind 11, zusammen 26 von 77) und die Spiele danach (Start und Demo) haben jetzt verschiedene Gegner: SG Blitzfang 4, HSG Funkenflug 4, TV Silberpfeil 3 (`apps/site/src/lib/week.ts`, ein Test hält beide zusammen). Das Beispiel auf der Teamseite der App ist jetzt das Demo-Spiel der Website, 11 von 29 statt 6 von 22 (`apps/web/public/example/graphics.json` aus `demoGoals`, mit Test). |
+| 4 | erledigt | Menü «Hilfe» (fr «Aide», en «Help»), en «Pricing». Die Funktion heisst überall «Frag deine Spiele»; die Szenensuche ist «Frag deine Spiele: Szenen suchen» (Bild auf So funktioniert es, Anleitung), das Mockup auf der Startseite heisst «Frag deine Spiele». Die App selbst sagt noch «Fragen»/«Suchen»/«Szenen suchen»: für den App-Helfer. |
+| 5 | Lukas | offen |
+| 6 | erledigt (Playwright), Gerätetest bei Lukas | Alle 155 Seiten (de, fr, en) bei 375 und 768 px: kein horizontales Scrollen. Angeschaut: Preistabelle (Handy: eine Zeile pro Merkmal über drei Spalten; 768 px: Tabelle lesbar), «Für Vereine», So funktioniert es (Schritt 0 stapelt jetzt auf dem Handy), Startseite (Loch nach «Verloren» zu). Saisonkarte im App-Rundgang am Handy eng, aber lesbar; nicht geändert, weil das Layout auf dem Desktop abgenommen ist. |
+| 7 | Lukas und Fachperson | offen; Prüfliste oben. |
+| 8 | erledigt | Schritt 0 «Vorher: das Team fragen» auf So funktioniert es, mit Links zu Daten und zur Anleitung. Daten-Seite: was ein Nein im Code bewirkt (keine eigene Szenenliste, «Einwilligung fehlt» im Kader, Szenen fehlen in Highlights, öffentliches Teilen gesperrt; niemand wird unkenntlich gemacht), Namen aus dem offiziellen Kader nur fürs Trainerteam bis zur Einwilligung (`roster._without_official_only`), und ein Satz zum Gegnerteam ohne rechtliche Wertung. |
+| 9 | später | offen |
+| 10 | erledigt | Auslösen bei etwa 15 % sichtbar (oder 15 % des Bildschirms bei hohen Blöcken), 0.35 s, Staffel 50 ms; bei `prefers-reduced-motion` nichts. |
+| 11 | erledigt | «Eine Beobachtung, kein Beweis …» steht auf der Startseite unter «Aussen rechts ist zu». |
+| 12 | erledigt | «Was heisst das fürs Training?» hat «Sonntag, 10 Uhr»; die Einsicht in der Demo auch. |
+| 13 | erledigt (teilweise) | «Gratis starten, dann CHF/EUR 39 pro Team», darunter «Im Verein … also ab 19.90 pro Team»; Zeile zum Gratis-Plan nach dem Test aus `packages/plans` und `billing.py` (2 Spiele pro Saison, die aus dem Test zählen mit; 10 GB; ohne Analyse). Keine Karte mehr in «Wie bezahle ich?». Die AGB nennen die Karte noch (Prüfliste). «Noch nicht endgültig» steht nicht auf der Website: Lukas hat am 17.11. entschieden, dass die Website ohne «noch nicht» auskommt (BEFUNDE-2 W32, `PRICES_FINAL`); die Preise bleiben in OPEN_QUESTIONS Punkt 7 offen. |
+| 14 | erledigt | Unter der Teamsuche: was man bei Schweizer Teams sofort sieht, und Spielberichte per Link von DHB, nuLiga, HLA. |
+| 15 | später | offen |
+| 16 | erledigt | Teamchat-Bild auf «Daten» und «Über uns» klein (16rem, ohne Pfeile); gross nur auf Start und Demo. So funktioniert es behält es als Teil des Rundgangs. |
+| 17 | geprüft | Offline gegen `ml/data/official` (153 Spiele), die handball.ch-Fixtures und alle Teamlisten im Repo: kein Treffer für Tannengrün, Nachtwind, Wirbelstern, Rotdorn, Silberpfeil, Blitzfang, Funkenflug. Online nicht geprüft. Bildrechte und UWG bleiben auf der Prüfliste. |
+| 18 | erledigt | Weniger Abstand und ein niedrigerer Fotostreifen; das Foto aus U48 bleibt. |
+| 19 | erledigt | Blog im Footer ab dem ersten eigenen Beitrag. |
+| 20 | erledigt | Link mit `?ding=1`; Sprachen DE · EN · FR wie in der App; 8 px Querscroll: das Einstiegslayout der App hatte ab 768 px 24 px Rand, `.bleed-x` zieht 32 px heraus, jetzt `md:px-8`. 12 vs. 13: kein fehlender Bericht, die API holt höchstens die letzten 12 Berichte (`SCORER_GAMES`); der Satz sagt jetzt «aus den letzten 12 Spielberichten». |
+| 21 | erledigt (teilweise) | Übung heisst in allen Sprachen 3 gegen 2 (Website, App-Bibliothek, `packages/tactics`). Doppelte Erklärungen gekürzt (So funktioniert es Schritt 4, «Für diesen Abend bauen wir» nur noch einmal auf Über uns). Gegenlesen durch Muttersprachler bleibt bei Lukas. |
+| 22 | erledigt | Preise in EUR und CHF, Umschalter auf «Preise» und «Für Vereine» (`?cur=`, Vorgabe CHF bei Schweizer Browsersprache, sonst EUR; nichts gespeichert), JSON-LD mit beiden Währungen. Teamsuche ohne Treffer (App): sagt, dass Spielplan und Resultate heute nur für Schweizer Teams kommen und andere ihr Team von Hand anlegen und Berichte per Link holen (DHB, nuLiga, HLA). Schritt 1 von europa.md war sonst schon umgesetzt. |
+| 23 | erledigt | `?src=` an allen Links und Formularen in die App: header, menu, login, team-search, team-search-end, home-price, pricing, pricing-table, how, demo, about, clubs, guide (Liste in `apps/site/README.md`, Test). |
+| 24 | erledigt | `/vereine/` in de, fr, en: was der Verein bekommt, Team und Verein nebeneinander aus `packages/plans`, Daten und Einwilligung, Kontakt. Im Footer und von «Preise» verlinkt, in Sitemap und llms.txt. |
+| 25 | erledigt (Website) | Website sagt «AGB»; «Free-Plan» in den AGB heisst jetzt «Gratis-Plan». Für den App-Helfer: die App sagt «Nutzungsbedingungen». |
+| 26 | erledigt | Per Tab mit Playwright über 7 Seiten bei 1280 und 375 px (1647 Fokusse): überall ein Ring. Einzige Lücke war Tinte auf Tinte (Knopf «Nochmals abspielen» in der Demo); jetzt weisser Ring mit Tintenrand auf jedem dunklen Grund. |

@@ -7535,6 +7535,11 @@ export interface components {
          *     review.
          */
         GoalCandidateRow: {
+            /**
+             * Auto
+             * @default false
+             */
+            auto?: boolean;
             /** Clock S */
             clock_s: number | null;
             /** End Ms */
@@ -8678,6 +8683,12 @@ export interface components {
              * @description kit pairs with similar colours, e.g. own/opponent
              */
             kit_warnings: string[];
+            /**
+             * Official Game
+             * @description a game of the federation's schedule (handball.ch): its official report comes by itself; false for a match the source does not know (app review TXT-06)
+             * @default false
+             */
+            official_game?: boolean;
             /** @description null for trainings */
             opponent: components["schemas"]["OpponentOut"] | null;
             /** @description null for trainings */
@@ -10981,6 +10992,11 @@ export interface components {
             match_ids?: string[];
             /** Numbers */
             numbers?: number[];
+            /**
+             * Observed
+             * @description true: only observed matches (kind scouting); false: only the team's own matches; null: both (app review UX-07)
+             */
+            observed?: boolean | null;
             /** Opponent Id */
             opponent_id?: string | null;
             /** Outcomes */
@@ -11035,6 +11051,12 @@ export interface components {
             match_label: string;
             /** Number */
             number?: number | null;
+            /**
+             * Observed
+             * @description from an observed match: not a scene of the team's season
+             * @default false
+             */
+            observed?: boolean;
             /** Outcome */
             outcome?: string | null;
             /** Player Id */

@@ -12,7 +12,8 @@ import { cn } from "@/lib/utils";
 import { Drill, N, useDrill, type KeeperRow, type ViewProps } from "./analysis-views";
 import { useOpponentName } from "@/lib/opponent";
 import { ownKeepers } from "@/lib/keepers";
-import { useRosterNames } from "@/components/analysis/tagger";
+import { MIN_COVERED_S, teamCovered } from "@/lib/physical-cover";
+import { useMatchRoster, useMatchSides } from "@/components/domain/match-sides";
 
 const pct = (v: number | null | undefined) => (v == null ? "-" : `${Math.round(v * 100)} %`);
 
@@ -23,17 +24,33 @@ export function KeepersView({ orgId, match, teamName, stats, names, onPlay }: Vi
   const against = (k: KeeperRow) => (k.side === "own" ? "opponent" : "own") as "own" | "opponent";
   const t = useTranslations("keepers");
   const tz = useTranslations("zones");
+  const tv = useTranslations("shotsView");
   const oppName = useOpponentName();
   const sheet = ((match.report_extra as { names?: Record<string, string> } | null)?.names ?? {}) as Record<string, string>;
   // only the own goalkeepers, by the roster's goalkeepers (app review R4: the table mixed both
   // teams, a field player and a number without a name); hooks before any early return
-  const roster = useRosterNames(orgId, match.team_id, match.season_id);
+  const roster = useMatchRoster(orgId, match);
+  const neutral = useMatchSides()?.neutral ?? false;
   // the goalkeeper module is part of Team and Verein, not of Gratis (Lukas, 18.11.2026)
   const keeperModule = useKeeperModule();
   if (!keeperModule) return <KeeperLock orgId={orgId} />;
-  // the example match's keepers are invented numbers, never the roster's goalkeepers (A4)
-  const rows = ownKeepers(Object.values(stats.goalkeepers ?? {}), match.source === "demo" ? [] : (roster.data ?? []));
-  if (rows.length === 0) return <EmptyState title={t("none")}>{t("assignHint")}</EmptyState>;
+  // the example match's keepers are invented numbers, never the roster's goalkeepers (A4); an
+  // observed match shows the keepers of both teams by number, our roster plays no part (L4)
+  const all = Object.values(stats.goalkeepers ?? {});
+  const rows = neutral
+    ? all.filter((k) => k.faced > 0 && (k.player_id != null || k.number != null)).sort((a, b) => b.faced - a.faced)
+    : ownKeepers(all, match.source === "demo" ? [] : (roster.data ?? []));
+  if (rows.length === 0) {
+    // saves without a named keeper are still saves: said, not «keine Würfe» (BUG-09)
+    const saves = (neutral ? stats.own.saves + stats.opponent.saves : stats.own.saves) - rows.reduce((n, k) => n + k.saves, 0);
+    if (saves > 0)
+      return (
+        <EmptyState title={t("savesWithoutKeeper", { n: saves })}>
+          <span data-testid="keepers-unassigned">{t("assignHint")}</span>
+        </EmptyState>
+      );
+    return <EmptyState title={t("none")}>{t("assignHint")}</EmptyState>;
+  }
   const nameOf = (k: KeeperRow) =>
     (k.player_id && names[k.player_id]) ||
     (k.number != null && k.side === "own" && sheet[String(k.number)]) ||
@@ -87,11 +104,16 @@ export function KeepersView({ orgId, match, teamName, stats, names, onPlay }: Vi
             </h3>
             <div className="space-y-1">
               <p className="text-xs font-medium text-muted">{t("byGoalZone")}</p>
-              <GoalGrid
-                saves
-                data={Object.fromEntries(Object.entries(k.goal_zones).map(([z, v]) => [z, { shots: v.faced, goals: v.saves }]))}
-                onCell={(z) => open(`${t("byGoalZone")}: ${nameOf(k)}`, { side: against(k), type: "shot", goal_zone: z })}
-              />
+              {/* no corner recorded: a sentence, not a grid of zeros (BUG-10, UI-02) */}
+              {Object.values(k.goal_zones).some((v) => v.faced > 0) ? (
+                <GoalGrid
+                  saves
+                  data={Object.fromEntries(Object.entries(k.goal_zones).map(([z, v]) => [z, { shots: v.faced, goals: v.saves }]))}
+                  onCell={(z) => open(`${t("byGoalZone")}: ${nameOf(k)}`, { side: against(k), type: "shot", goal_zone: z })}
+                />
+              ) : (
+                <p className="m-0 text-sm text-muted">{tv("noGoalZones")}</p>
+              )}
             </div>
             <div className="space-y-1">
               <p className="text-xs font-medium text-muted">{t("byShotZone")}</p>
@@ -187,12 +209,16 @@ export function PhysicalView({
       band_distance_m: { run: ts.reduce((s, x) => s + (x.band_distance_m.run ?? 0) + (x.band_distance_m.sprint ?? 0), 0) },
       sprints: ts.reduce((s, x) => s + x.sprints, 0),
       max_speed_ms: Math.max(...ts.map((x) => x.max_speed_ms)),
-      duration_s: Math.max(...ts.map((x) => x.duration_s)),
+      // the stretch of video the team's distance covers, not its longest single track (BUG-11:
+      // «Erfasst 1 min · 2.29 km» summed eight minutes of tracks under one minute)
+      duration_s: teamCovered(data, pick),
       heatmap: grid,
     };
   };
-  const ownTeam = team(own);
-  const oppTeam = team(opp);
+  // too little of the match to say anything: no figure rather than one nobody can trust (BUG-11)
+  const keep = (row: Row | null) => (row && row.duration_s >= MIN_COVERED_S ? row : null);
+  const ownTeam = keep(team(own));
+  const oppTeam = keep(team(opp));
   const players: Row[] = data.players.filter((p) => own(p.team)).map((p) => ({ ...(p as unknown as Row), key: `p:${p.player_id}`, label: names[p.player_id] ?? (p.number != null ? `#${p.number}` : "?") }));
   const loose = data.tracks
     .filter((tr) => own(tr.team))
@@ -208,6 +234,7 @@ export function PhysicalView({
     oppTeam && { ...oppTeam, key: "team:opp", label: oppName },
   ].filter(Boolean) as Row[];
   const all = [...teamRows, ...rows];
+  if (all.length === 0) return <EmptyState title={t("thin")}>{t("thinHint")}</EmptyState>;
   const selected = all.find((r) => r.key === sel) ?? teamRows[0] ?? rows[0];
   const line = (r: Row, strong = false) => (
     <tr key={r.key} className={cn("border-t border-foreground/10", selected?.key === r.key && "bg-surface")}>

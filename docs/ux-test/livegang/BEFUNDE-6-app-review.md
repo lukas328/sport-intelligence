@@ -78,7 +78,7 @@ Stand pro Ticket wird hier nachgetragen.
 | UI-03 | erledigt | Wurfbild und Laufwege-Heatmap auf hellem Papier statt dunklem Block. |
 | UI-04 | erledigt | Ein Aufklapp-Stil (`.fold`, Chevron rechts) für «Neue Highlights erstellen», «Tore im Spiel», «Alle Tore», «Mehr zum Spiel», Saison «Mehr»; «Video 0:45» und der Mitteilungszähler in der App-Schrift; das alleinstehende «Mehr» unter dem Video heisst «Einrichten von Hand»; «Datei entfernen» rot (Bestätigung gab es schon). |
 | BUG-22 | erledigt | In den Torkarten nach Position steht die Zahl über und der Name unter den Punkten der Zone; das Bild ist unten etwas höher, «Gegenstoss» bleibt im Feld. |
-| TXT-02 | erledigt als Übergang | Datenmodell bleibt (Gegenstoss und 7 m sind Zonen). Anzeige «Situation: Gegenstoss» statt «Wurfort: Gegenstoss»; im Dialog stehen die beiden Tasten unter «Oder die Situation:». Offen: der Antworten-Rückblick im Prüfen (Block 2) sagt noch «Wurfort: …». |
+| TXT-02 | erledigt als Übergang | Datenmodell bleibt (Gegenstoss und 7 m sind Zonen). Anzeige «Situation: Gegenstoss» statt «Wurfort: Gegenstoss»; im Dialog stehen die beiden Tasten unter «Oder die Situation:». Auch der Antworten-Rückblick im Prüfen sagt «Situation: …». |
 | TXT-04 | erledigt | Ohne zugeordnete Spieler keine «Spur 306»-Zeilen und kein «kurze Spuren zeigen», sondern ein Satz mit dem Weg («im Tab Video unter «Einrichten von Hand»»); «(am Handy 6)» weg; «Angriffe … geschätzt» als Erklärung am Wert «Effizienz». |
 | TXT-05 | erledigt | Unter dem konkreten Befund nur noch, was die Übungen trainieren («Diese Übungen trainieren Ablauf, Täuschung und Ruhe am Siebenmeterpunkt.»), kein «Der Befund oben betrifft «7 m»». |
 | TXT-08 | erledigt wie entschieden | Saisontitel ohne Urteil: «4 Siege, 5 Niederlagen.» (Unentschieden nur, wenn es welche gibt); Trainingstipps stehen daneben im Kopf. handball.ch-Daten überall «abgeglichen vor …» (Startseite, Saison-Tabelle, Teamseite). |
@@ -87,3 +87,66 @@ Stand pro Ticket wird hier nachgetragen.
 | Website: `?src=` | erledigt | Die App merkt sich `?src=<Ort>` im sessionStorage des Tabs (kein Cookie) und schickt es bei der Registrierung und beim Anlegen des Vereins mit; die API speichert es an Konto und Verein (Migration 0052, unbrauchbare Werte werden verworfen, nie abgelehnt), sichtbar in /ops als Spalte «Herkunft». Bei Anmeldung über Google/Apple kommt es über das Anlegen des Vereins an. |
 | Website: «Gemacht mit» | erledigt | Geteilte Seiten zeigen unten dezent «Gemacht mit Handball Intelligence», Link auf die Website in der Sprache des Betrachters mit `?src=shared`. |
 | Website: «AGB» | erledigt | App sagt «AGB» (en «terms», fr «CG») statt «Nutzungsbedingungen»; e2e angepasst. |
+
+## Stand Block 2 (Video-Tab und Prüfen, 19.11.)
+| Ticket | Stand |
+|---|---|
+| UX-01 | erledigt: Video ist Standard, Umschalter über dem Bild, Wahl pro Gerät gemerkt (localStorage, ohne Speicher wieder Video). «Feld von oben» ist ausgegraut, wenn die Szene keine Positionen hat; darunter der Grund («keine Positionen» oder «Feld noch nicht bestätigt» mit Link «Feld prüfen»). |
+| UX-02 | erledigt: ab Laptop zwei Spalten, Player bleibt oben stehen (sticky), Liste rechts; am Handy Player sticky unter der Kopfzeile, Liste darunter. Klick auf eine Szene weiter unten holt den Player ins Bild. Wurfort bleibt rechts unter der Liste (sonst wird die sticky Spalte zu hoch). |
+| UX-03 | erledigt: «Vorherige Szene» und «Nächste Szene» immer, nicht nur bei einem Ding; Tasten N und P im Player, Hinweiszeile darunter. Einzelbild-Knöpfe zeigen jetzt Pfeilspitzen statt Sprung-Symbol, mit Tooltip. |
+| UX-04 | erledigt: aktive Szene mit Hintergrund und Balken, der Wurfort bleibt stehen; Teamfarben-Punkt pro Zeile; Zeit nur einmal. Am Clip-Ende «Szene zu Ende.» mit «Nächste Szene» und «Weiterlaufen lassen». |
+| BUG-13 | Zeichnen gibt es, aber nur in der Werkbank. Der Knopf auf der Bühne öffnete bisher nur die Werkbank unten, ohne Werkzeug. Jetzt: Video pausiert, Werkbank öffnet mit den Zeichenwerkzeugen (aria-pressed) auf genau diesem Moment und scrollt hin. Im Modus «Feld von oben» ist der Knopf weg. Kein neues Werkzeug gebaut. |
+| BUG-19 | erledigt: die Werkbank (mit eigenem Player) wird nur gemountet, wenn sie offen ist; Sprünge aus anderen Tabs warten auf ihren Player. Bei geschlossener Werkbank ein `<video>`. Mit offener Werkbank sind es bewusst zwei (Bühne und Werkbank sichtbar). |
+| BUG-14, L2 | erledigt: im Prüfen liegt die Steuerung unter dem Bild statt darüber (sie deckte bei schmalem Video fast alles zu), `object-fit: contain`, Breite nach Bildschirmhöhe begrenzt, Antwortspalte auf Laptops schmaler. Der Clip um den Torabschluss läuft in Schleife. |
+| L3 | Ursache: das Budget von Prüfen (A6). Nach der Hauptrunde ist `checks` leer, die übrigen Momente stehen nur in `more_checks`. Alles ausserhalb von Prüfen zählte nur `checks`: der Link «Prüfen» auf der Spielseite verschwand, die Glocke sprang auf «Alles geprüft» und führte zur Spielseite. Die Momente waren in der Datenbank nie weg, nur nicht mehr erreichbar. Jetzt: Spielseite zeigt «Prüfen · n weitere», die Glocke bleibt ruhig, sagt aber «n weitere Momente warten unter «Mehr prüfen»» und führt zu Prüfen; der Zähler folgt jeder Antwort. Regressionstest API (`test_the_moments_behind_more_stay_until_answered`) und Web (`graphics.test.ts`). Nebenbei gesehen, nicht geändert: ein beantworteter Anwurf gibt seinen Platz im Budget frei, dann rückt ein weiterer Moment in die Hauptrunde nach. |
+| UI-05 | erledigt: Bild 16:9, Breite so begrenzt, dass Bild und Steuerung in die Fensterhöhe passen. |
+| UI-06 | erledigt: Legende nur bei «Feld von oben». |
+| A11Y-01 | erledigt für den Video-Tab: Umschalter mit aria-pressed und Grund bei deaktiviert; «Szene merken» ist ein Umschalter (aria-pressed, Häkchen, wieder lösbar statt grau). Teamfarben in der Szenenliste zusätzlich mit Namen; die Rail trennt die Teams schon über oben/unten. Überschneidet sich mit BUG-21 (Block 1, wo gemerkte Szenen erscheinen). |
+| UX-12 | erledigt: der Wurfort-Dialog aus dem Video-Tab zeigt die Szene klein, stumm und in Schleife über dem Feld. Die Logik von A22 (Schätzung vorausgewählt, ein Tippen bestätigt) ist unverändert. |
+
+Geprüft mit Unit-Tests, Typecheck, Lint und pytest. Kein Browser-Smoke-Test: die Spielseite braucht das Backend; die e2e-Specs sind an die geänderten Texte angepasst, aber nicht gelaufen.
+
+## Stand Block 1 (Helfer, 19.11.)
+Gemeinsame Ursache BUG-01 bis 07, 17, 18: Es gab keinen zentralen Begriff der Perspektive. Die
+Spielseite setzte bei beobachteten Spielen den Namen der anderen Mannschaft nur in den Kopf; alle
+anderen Teile bekamen den Teamnamen des Kontos (`teamName`), sagten fest «Wir», «Gegentore»,
+«Eigene» und lasen den Kader des Kontos. Behoben an zwei Stellen: im Web `lib/match-sides.ts`
+(`matchSides`: eigene oder neutrale Perspektive, Namen beider Seiten, Heimteam zuerst) mit dem
+Kontext `components/domain/match-sides.tsx`, den die Spielseite einmal setzt; in der API
+`Match.observed`, das Spieler des Kontos in beobachteten Spielen abweist (Ereignisse, Spuren).
+
+| Ticket | Stand |
+|---|---|
+| BUG-01 | erledigt: Seitentitel aus `matchSides`, Heimteam zuerst, nie das Konto-Team |
+| BUG-02 | erledigt: «Tor {Team}» in Spiel, Szenenliste, Kamera, Punkt 1; «Wir» nur bei eigenen Spielen |
+| BUG-03 | erledigt: Legende mit Teamnamen (Teamfarben nicht umgesetzt, optional) |
+| BUG-04 | erledigt: Kennzahlen, Laufleistung, Aufenthaltsorte, Würfe-Filter mit Teamnamen; «Spuren von {Team}» |
+| BUG-05 | erledigt: Resultatfelder mit beiden Namen, Heimteam zuerst, Hinweis «Endresultat, nicht die Tore im Video»; Trikotfarben pro Team benannt |
+| BUG-06 | erledigt: Prüfen und «Wurfort nachtragen» mit beiden Teams, Heimteam zuerst |
+| BUG-07 | erledigt: «Tore {Team}» statt Gegentore/Eigene Tore, «Längste Phase ohne Tor ({Team})», keine «Der Gegner war besser»-Aussage; Profil für beide Teams, wenn die andere Mannschaft als Gegner bekannt ist |
+| BUG-08 | erledigt: «nicht erfasst» statt «-», unter den Kennzahlen pro Team «9 Würfe: 6 Tore, 2 gehalten, 1 daneben» aus derselben Statistik; «x von y Würfen ohne Wurfposition». Offen (TXT-02, Block 3): «Wurfort» zählt Gegenstoss mit, «Wurfposition» nur Feldpunkte |
+| BUG-09 | erledigt: «2 Paraden ohne Torhüter» mit Hinweis statt «keine Würfe»; beobachtete Spiele zeigen die Torhüter beider Teams nach Nummer |
+| BUG-10 | erledigt: Torbild ohne erfasste Ecke ist ein Satz, kein Null-Raster (Würfe und Torhüter) |
+| BUG-11 | erledigt: Ursache «Erfasst» war die längste Einzelspur, nicht die abgedeckte Videozeit. Jetzt Videozeit der Spuren; unter 2 Minuten wird ein Team nicht gezeigt, ohne Zeile «Zu wenig Laufdaten» |
+| BUG-12 | erledigt: Szenen beobachteter Spiele erscheinen, Filter «Alle / Eigene / Beobachtet», Kachel mit «Beobachtet» und Jahr; Leertext nicht mehr doppelt |
+| BUG-15 | erledigt: Mitteilung nur, wenn ein früheres Spiel gegen den Gegner analysiert ist (dieselbe Bedingung wie das Gegner-Profil); Test |
+| BUG-16 | erledigt: Spielseite zeigt dieselbe Gesamtzahl wie der Banner, Teilschritt als «28 % dieses Schritts»; Endzeit ab 10 Minuten auf 5 Minuten gerundet |
+| BUG-17 | erledigt: eigener Abschnitt «Beobachtete Spiele» mit Jahr statt Heim/auswärts; Zähler «x von y eigenen Spielen ohne Video» |
+| BUG-18 | erledigt: Heimteam zuerst in Liste, Banner, Kopf, Titel, Prüfen, Szenen. Hinweis: das Formular für beobachtete Spiele fragt nicht, wer Heimteam ist; heute gilt die andere Mannschaft als Heimteam |
+| BUG-20 | erledigt: Spielverlauf ohne Anpfiff über die Videominuten («Minuten im Video»), mit Anpfiff über die abgedeckten Spielminuten |
+| BUG-21 | erledigt: «Szene speichern» ist umschaltbar (`aria-pressed`), danach Link «In «Szenen» ansehen» (Szenen des Spiels) |
+| UX-07 | erledigt wie entschieden: Szenen (siehe BUG-12), Onboarding-Schritt «erstes Video» mit jedem Video, Abschnitt und Zähler (siehe BUG-17) |
+| TXT-03 | erledigt: «Notiz zu dieser Szene», «Szene speichern», «Marken vom Spieltag» |
+| TXT-06 | erledigt: Hinweis auf den handball.ch-Bericht nur bei Spielen aus dem Spielplan (`official_game`) |
+| UI-02 | erledigt: «keine Positionen» als eine Zeile statt leerem Feld, Spielbericht ohne Zeilen als Satz, Torbild siehe BUG-10 |
+| L4 | erledigt: in beobachteten Spielen kein Kader des Kontos (Erfassen, Spuren, Torhüter, Zahlen); beide Teams per Rückennummer, für den beobachteten Gegner die bekannten Nummern als Vorschlag; Personen-Fragen in Prüfen entfallen dort; API weist Spieler des Kontos ab |
+
+- L1 (19.11.): Kurzfristiger Teil umgesetzt. Ein Tor des Spielberichts wird ohne Frage auf seinen
+  Tor-Kandidaten gelegt, nur wenn die Uhr zu dieser Zeit im Video gelesen wurde, genau ein Kandidat
+  und genau ein Spielbericht-Tor beieinander liegen und das Team passt; in Prüfen und in der
+  Kandidatenliste «aus dem Spielbericht übernommen», mit «Rückgängig». Alles Unsichere bleibt eine
+  Frage. Befund dabei: Kandidaten an Spielbericht-Toren wurden schon vorher nicht gefragt («schon
+  erfasst»), aber an der aus dem Anwurf gerechneten Zeit, die nach einem Time-out danebenliegt.
+  Zahlen nur aus Tests, keine echten Spiele gemessen. Regel und Messung:
+  `docs/plans/produkt-analyse-integration.md`, Abschnitt «Tore aus dem Spielbericht ohne Frage».
+  Offen: bessere Tor-Kandidaten (mittelfristig).

@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import { Drill, N, type Stats, useDrill } from "./analysis-views";
 import type { EventFilter } from "@/components/analysis/event-list";
 import { MatchZones } from "./match-graphics";
+import { useMatchSides } from "@/components/domain/match-sides";
 
 type Entry = Schemas["RosterEntryOut"];
 
@@ -51,6 +52,9 @@ export function NumbersView({
   onPlay?: (t: number) => void;
 }) {
   const t = useTranslations("numbersTab");
+  // an observed match: the teams by name, no «Gegentore» and no roster of ours (BUG-07, L4)
+  const sides = useMatchSides();
+  const neutral = sides?.neutral ?? false;
   const [all, setAll] = useState(false);
   // every figure leads to its scenes (UX test B23): the events behind it open below the table
   const { drill, open, close } = useDrill();
@@ -65,6 +69,7 @@ export function NumbersView({
   // a number the roster does not know says so («#16, nicht im Kader»), no empty name (R4)
   const who = (id: string | null, number: number | null) => {
     const r = roster.find((x) => x.player_id === id) ?? (number != null ? roster.find((x) => x.jersey_number === number) : undefined);
+    if (neutral) return { number, name: number != null ? "" : t("unknown") };
     return { number: r?.jersey_number ?? number, name: r ? `${r.first_name} ${r.last_name}` : number != null ? t("notInRoster") : t("unknown") };
   };
   // only the own goalkeepers, by the roster's goalkeepers (R4); the saves without a named keeper
@@ -108,7 +113,7 @@ export function NumbersView({
         <div className="min-w-0 space-y-12">
           {field.length > 0 && (
             <section data-testid="numbers-field">
-              <SectionHead title={t("field")} note={t("byGoals")} />
+              <SectionHead title={neutral && sides ? t("fieldOf", { team: sides.own }) : t("field")} note={t("byGoals")} />
               <table className="w-full border-collapse text-[15px]">
                 <thead>
                   <tr className="border-b-2 border-ink">
@@ -180,12 +185,12 @@ export function NumbersView({
           )}
           {keeperModule && keepers.length > 0 && (
             <section data-testid="numbers-keepers">
-              <SectionHead title={t("keeper")} />
+              <SectionHead title={neutral && sides ? t("keeperOf", { team: sides.own }) : t("keeper")} />
               <table className="w-full border-collapse text-[15px]">
                 <thead>
                   <tr className="border-b-2 border-ink">
                     <th scope="col" className={cn(th, "text-left")}>{t("numberName")}</th>
-                    {againstKnown && <th scope="col" className={th}>{t("against")}</th>}
+                    {againstKnown && <th scope="col" className={th}>{neutral ? t("againstNeutral") : t("against")}</th>}
                     <th scope="col" className={th}>{fromReport ? t("savesPlain") : t("saves")}</th>
                     <th scope="col" className={th}>{t("sevenMSaved")}</th>
                   </tr>
@@ -219,7 +224,7 @@ export function NumbersView({
           {graphics && goalRuns(graphics).length > 0 && <MatchZones graphics={graphics} />}
           {marked > 0 && (
             <section>
-              <SectionHead as="h3" title={t("target")} note={t("targetNote")} />
+              <SectionHead as="h3" title={t("target")} note={neutral && sides ? t("targetNoteOf", { team: sides.opp }) : t("targetNote")} />
               {/* goals per corner from the shooter's view, a plain frame (UX test B23: no foreign colours) */}
               <table className="w-[220px] border-collapse border-x-[6px] border-t-[6px] border-ink" data-testid="target-grid">
                 <caption className="sr-only">{t("target")}</caption>
@@ -235,7 +240,9 @@ export function NumbersView({
                   ))}
                 </tbody>
               </table>
-              <p className="mt-2 text-[15px] text-ink-2">{t("targetMarked", { n: marked, of: stats?.own.goals_against ?? marked })}</p>
+              <p className="mt-2 text-[15px] text-ink-2">
+                {neutral && sides ? t("targetMarkedOf", { n: marked, of: stats?.own.goals_against ?? marked, team: sides.opp }) : t("targetMarked", { n: marked, of: stats?.own.goals_against ?? marked })}
+              </p>
             </section>
           )}
           {phases.length > 0 && (

@@ -31,6 +31,13 @@ which list (score, rate) proposed the moment.
   goal candidates), source "goal_candidate", at the estimated time; an automatic throw-off goal
   of that side close to it is superseded. Undo or reject removes the event or unpins the entry.
   Every review goes to the audit log.
+- `auto_accept` (after an analysis and after a report import, livegang L1): a report goal is
+  confirmed on its goal candidate without a question only when the overlay clock was read at the
+  report's time (match_clock.read_ms, not counted from a throw-off), no other report goal lies
+  within AUTO_APART_S on the clock, exactly one candidate lies near it (AUTO_HIT_MS widened by
+  AUTO_ALONE_MS), untouched and not suggested for the other side, and nothing else is known at
+  that moment. Stored like the coach's confirmation, marked attributes.video.auto = "report"
+  (the row's `auto`); the coach's review replaces it, and undone it is never taken over again.
 - where the shot of a confirmed goal came from (fourth real-video test H7): the coach's tap
   (`shot_zone`, optionally the point) is written on the goal's event; without it the estimate from
   the tracks is the fallback (shot_positions.fill_one), and a zone given before stays. `spot`
@@ -77,6 +84,12 @@ SIDES = ("own", "opponent")
 OUTCOMES = ("goal", "save", "miss", "post", "blocked")
 SUGGEST_MS = 8000  # report shot - estimated shot time, when the clock maps exactly
 SUGGEST_MAX_MS = 20_000  # ... and at most (the clock map's uncertainty added)
+# taken over from the report without a question (`auto_accept`)
+AUTO = "report"  # attributes.video.auto of a report goal pinned automatically
+DECLINED = "auto_declined"  # attributes of a report goal whose automatic pin the coach undid
+AUTO_HIT_MS = (-3000, 8000)  # candidate peak - report goal: «found» in the measurements (ml/goals)
+AUTO_ALONE_MS = 5000  # no other candidate this far beyond that window
+AUTO_APART_S = 20  # no other report goal this close on the match clock (either side)
 
 
 def _int(v: Any, default: int = 0) -> int:
@@ -331,6 +344,7 @@ def _row(
     # left with «Weiss nicht» in Prüfen: still open for every list, marked as such
     status = "open" if c.status in OPEN else c.status
     goal = ev if ev is not None and c.status == "confirmed" and ev.outcome == "goal" else None
+    auto = c.status == "confirmed" and ev is not None and _auto_of(ev, c)
     return {
         "id": c.id,
         "kind": c.kind,
@@ -344,6 +358,7 @@ def _row(
         "suggested_side": c.suggested_side,
         "status": status,
         "skipped": c.status == "skipped",
+        "auto": auto,
         "side": c.side,
         "outcome": c.outcome,
         "event_id": c.event_id,
@@ -485,6 +500,13 @@ async def _release(ctx: Ctx, match: Match, c: GoalCandidate) -> uuid.UUID | None
     return gone
 
 
+def _auto_of(e: Event, c: GoalCandidate) -> bool:
+    """The report goal `e` was pinned to candidate `c` automatically (`auto_accept`), not by the
+    coach."""
+    v = _pinned(e) if e.source == OFFICIAL else None
+    return v is not None and v.get("auto") == AUTO and v.get("candidate_id") == str(c.id)
+
+
 def _pin(e: Event, c: GoalCandidate) -> None:
     e.attributes = {
         **(e.attributes or {}),
@@ -537,6 +559,10 @@ async def review(
     if c is None or c.match_id != match.id:
         raise ProblemError(404, "not-found", "Candidate not found")
     before = (c.status, c.side, c.outcome)
+    # taken over from the report without a question: the coach's answer replaces it, and undone
+    # it is never taken over again
+    pinned_before = await ctx.db.get(Event, c.event_id) if c.event_id else None
+    was_auto = pinned_before is not None and _auto_of(pinned_before, c)
     shots = await _shots(ctx, match.id)
     superseded: list[str] = []
     removed = None
@@ -636,6 +662,12 @@ async def review(
             None,
             None,
         )
+    if was_auto and pinned_before is not None:
+        if c.event_id == pinned_before.id:  # confirmed by the coach: now the coach's
+            v = {k: x for k, x in (_pinned(pinned_before) or {}).items() if k != "auto"}
+            pinned_before.attributes = {**(pinned_before.attributes or {}), "video": v}
+        else:
+            pinned_before.attributes = {**(pinned_before.attributes or {}), DECLINED: True}
     c.reviewed_by_id = ctx.user_id if status is not None else None
     c.reviewed_at = datetime.now(UTC) if status is not None else None
     await ctx.db.flush()
@@ -659,6 +691,7 @@ async def review(
             "removed_event_id": str(removed) if removed else None,
             "superseded": superseded,
             "shot_zone": shot_zone,
+            "was_auto": was_auto,
         },
     )
     shots = await _shots(ctx, match.id)
@@ -668,6 +701,94 @@ async def review(
         sugg = rep.suggestion(c)
     ev = await ctx.db.get(Event, c.event_id) if c.event_id else None
     return _row(c, match, _covered(c, shots, await _lengths(ctx, [c])), sugg, ev)
+
+
+# ---- taken over from the report without a question ----------------------------------------
+
+
+def _alone(
+    g: Event, t: int, report: list[Event], live: list[GoalCandidate]
+) -> GoalCandidate | None:
+    """The one candidate that is report goal `g` (at video time `t`, read on the overlay clock),
+    or None when it is not unambiguous: no other report goal within AUTO_APART_S of the match
+    clock, exactly one goal candidate (not rejected, any rate) within the hit window widened by
+    AUTO_ALONE_MS, and that one untouched (open), inside the hit window and not suggested for the
+    other side."""
+    if g.clock_s is None or any(
+        o.id != g.id and o.clock_s is not None and abs(o.clock_s - g.clock_s) <= AUTO_APART_S
+        for o in report
+    ):
+        return None
+    lo, hi = AUTO_HIT_MS
+    near = [c for c in live if lo - AUTO_ALONE_MS <= c.t_ms - t <= hi + AUTO_ALONE_MS]
+    if len(near) != 1:
+        return None
+    c = near[0]
+    if c.status != "open" or not lo <= c.t_ms - t <= hi:
+        return None
+    if c.suggested_side is not None and c.suggested_side != g.side:
+        return None
+    return c
+
+
+async def auto_accept(ctx: Ctx, match: Match) -> int:
+    """Goals of the official report confirmed on their goal candidate without a question
+    (livegang L1), only where the pair is unambiguous (`_alone`) and the report goal's video time
+    was read on the overlay clock in the video (match_clock.read_ms), never counted from a
+    throw-off or estimated. Stored as the coach's confirmation would be (the report entry pinned to
+    the candidate's time), marked attributes.video.auto = "report", without a reviewer or review
+    time (it uses up no question of the round). Undone or answered otherwise by the coach (review),
+    the report goal is marked DECLINED and never taken over again. Everything else stays a
+    question. Returns how many were taken over."""
+    cands = await _candidates(ctx, match, "goal")
+    shots = await _shots(ctx, match.id)
+    report = [e for e in shots if e.source == OFFICIAL and e.outcome == "goal"]
+    free = [
+        e
+        for e in report
+        if _pinned(e) is None
+        and not (e.attributes or {}).get(DECLINED)
+        and e.period in (1, 2)
+        and e.clock_s is not None
+    ]
+    if not cands or not free:
+        return 0
+    cm = match_clock.build(match, await timeline.clock_analysis(ctx, match.id), [])
+    length = await timeline_duration_ms(ctx, match.id)
+    lengths: dict[uuid.UUID, int | None] = dict.fromkeys({c.video_asset_id for c in cands}, length)
+    live = [c for c in cands if c.status != "rejected"]
+    known = [e for e in shots if e.source != OFFICIAL or _pinned(e) is not None]
+    taken: list[tuple[GoalCandidate, Event]] = []
+    for g in sorted(free, key=lambda e: (e.period, e.clock_s or 0.0)):
+        t = cm.read_ms(int(g.period), float(g.clock_s or 0.0))
+        if t is None or t < 0 or (length is not None and t > length):
+            continue
+        c = _alone(g, t, report, live)
+        # nothing else known at this moment: a goal tagged or read from the overlay, a shot the
+        # coach confirmed, a report entry already on the video; the report goals still at their
+        # time counted from the clock are a guess (minutes off after a time-out) and were
+        # compared on the read clock above
+        if c is None or _covered(c, known, lengths) is not None:
+            continue
+        taken.append((c, g))
+    for c, g in taken:
+        _pin(g, c)
+        g.attributes = {**(g.attributes or {}), "video": {**(_pinned(g) or {}), "auto": AUTO}}
+        c.status, c.side, c.outcome, c.event_id = "confirmed", g.side, "goal", g.id
+        c.reviewed_by_id, c.reviewed_at = None, None
+        if shot_positions.zone_source(g) is None and g.x is None:
+            await shot_positions.fill_one(ctx, g)
+    if taken:
+        await ctx.db.flush()
+        await audit.record(
+            ctx,
+            "match.goal_candidates_auto_confirmed",
+            org_id=match.organization_id,
+            target_type="match",
+            target_id=match.id,
+            data={"pairs": [{"candidate_id": str(c.id), "event_id": str(g.id)} for c, g in taken]},
+        )
+    return len(taken)
 
 
 async def spot(

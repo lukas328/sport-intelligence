@@ -6,6 +6,7 @@
  */
 import plans from "@handball/plans";
 import { factRows } from "@/lib/facts";
+import { BOTH } from "@/lib/currency";
 import { fileVars, notList } from "@/lib/files";
 import { fmt, messages, type Locale } from "@/lib/i18n";
 import { SITE_NAME, SITE_UPDATED, pageUrl } from "@/lib/site";
@@ -22,6 +23,7 @@ function pages(locale: Locale): string[] {
     link(m.seo.how.title, pageUrl(locale, "so-funktioniert-es"), m.seo.how.description),
     link(m.seo.filming.title, pageUrl(locale, "aufnahme"), m.seo.filming.description),
     link(m.seo.pricing.title, pageUrl(locale, "preise"), m.seo.pricing.description),
+    link(m.seo.clubs.title, pageUrl(locale, "vereine"), m.seo.clubs.description),
     link(m.seo.data.title, pageUrl(locale, "daten"), m.seo.data.description),
     link(m.seo.faq.title, pageUrl(locale, "hilfe"), m.seo.faq.description),
     link(m.seo.demo.title, pageUrl(locale, "demo"), m.seo.demo.description),
@@ -113,7 +115,7 @@ function section(locale: Locale): string[] {
     "",
     `### ${m.faq.head}`,
     "",
-    ...m.faq.items.flatMap((f) => [`**${f.q}** ${fmt(f.a, { month: team.price_chf_month, year: team.price_chf_year, ...fileVars(m) })}${f.hi ? ` ${f.hi}` : ""}`, ""]),
+    ...m.faq.items.flatMap((f) => [`**${f.q}** ${fmt(f.a, { month: team.price_chf_month, year: team.price_chf_year, cur: BOTH, ...fileVars(m) })}${f.hi ? ` ${f.hi}` : ""}`, ""]),
     `### ${m.guides.title}`,
     "",
     ...guides(locale),

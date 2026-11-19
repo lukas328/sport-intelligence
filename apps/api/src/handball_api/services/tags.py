@@ -256,6 +256,8 @@ async def search(ctx: Ctx, team_id: uuid.UUID, f: SearchFilter) -> SearchResult:
         mq = mq.where(Match.opponent_id == f.opponent_id)
     if f.kind:
         mq = mq.where(Match.kind == f.kind)
+    if f.observed is not None:
+        mq = mq.where((Match.kind == "scouting") if f.observed else (Match.kind != "scouting"))
     match_ids = list((await ctx.db.scalars(mq)).all())
 
     eq = select(Event).where(Event.match_id.in_(match_ids))
@@ -324,6 +326,10 @@ async def search(ctx: Ctx, team_id: uuid.UUID, f: SearchFilter) -> SearchResult:
 
     def label(match_id: uuid.UUID) -> str:
         m, name = meta[match_id]
+        if m.observed and m.scouting_other:
+            # both teams, home team first, as on the match's page (BUG-18)
+            first, second = (m.scouting_other, name) if m.is_home else (name, m.scouting_other)
+            return f"{first} - {second}"
         return name or ("Training" if m.kind == "training" else "")
 
     hits: list[SearchHit] = []
@@ -351,6 +357,7 @@ async def search(ctx: Ctx, team_id: uuid.UUID, f: SearchFilter) -> SearchResult:
                 number=e.number,
                 player_id=e.player_id,
                 tag_ids=sorted(tags_of.get(e.id, [])),
+                observed=meta[e.match_id][0].observed,
             )
         )
     for c in clips:
@@ -367,6 +374,7 @@ async def search(ctx: Ctx, team_id: uuid.UUID, f: SearchFilter) -> SearchResult:
                 t_ms=c.start_ms,
                 title=c.title,
                 tag_ids=sorted(tags_of.get(c.id, [])),
+                observed=meta[c.match_id][0].observed,
             )
         )
     hits.sort(key=lambda h: (h.kickoff_at, h.t_ms if h.t_ms is not None else 1 << 40))

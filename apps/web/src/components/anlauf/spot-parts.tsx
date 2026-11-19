@@ -3,7 +3,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { DialogContent, DialogRoot, DialogTrigger } from "@/components/ui/dialog";
 import { buttonClass } from "@/components/ui/button";
 import { api } from "@/lib/client";
@@ -12,6 +12,7 @@ import { checkMinutes, goalsWithoutSpot, type SpotAnswer, type SpotOrientation, 
 import type { Pt } from "./geometry";
 import { ShotSpotPicker } from "./shot-spot-picker";
 import { Term } from "@/components/ui/term";
+import { VideoPlayer, type PlayerHandle } from "@/components/video/player";
 
 type Goal = MatchGraphics["goals"][number];
 
@@ -67,7 +68,36 @@ export const isSituation = (zone: string) => zone === "gs" || zone === "m7";
  * The place of one goal with «Wurfort ändern» (or «eintragen»): two taps, the button and the new
  * place, in the scene list and beside the tactics camera (fourth real-video test H7).
  */
-export function SpotChange({ orgId, matchId, goal, label }: { orgId: string; matchId: string; goal: Goal; label: string }) {
+/** The scene of the goal, small, muted and in a loop, in the dialog «Von wo?»: the coach sees the
+ * throw while choosing (app review UX-12). */
+function ClipPreview({ src, window: win }: { src: string; window: { start_ms: number; end_ms: number } }) {
+  const player = useRef<PlayerHandle>(null);
+  useEffect(() => {
+    // muted, so it may play by itself; restart waits until the picture can play
+    const id = window.setTimeout(() => player.current?.restart?.(), 0);
+    return () => window.clearTimeout(id);
+  }, []);
+  return (
+    <div className="mx-auto mb-3 w-full max-w-[22rem]" data-testid="spot-preview">
+      <VideoPlayer ref={player} src={src} window={win} loop bare />
+    </div>
+  );
+}
+
+export function SpotChange({
+  orgId,
+  matchId,
+  goal,
+  label,
+  clip,
+}: {
+  orgId: string;
+  matchId: string;
+  goal: Goal;
+  label: string;
+  /** the scene's clip: shown small above the court while choosing (UX-12) */
+  clip?: { src: string; window: { start_ms: number; end_ms: number } };
+}) {
   const t = useTranslations("spot");
   const save = useSaveSpot(orgId, matchId);
   const [open, setOpen] = useState(false);
@@ -81,6 +111,7 @@ export function SpotChange({ orgId, matchId, goal, label }: { orgId: string; mat
         {goal.zone ? t("change") : t("set")}
       </DialogTrigger>
       <DialogContent title={t("dialogTitle")} description={label}>
+        {clip && <ClipPreview src={clip.src} window={clip.window} />}
         <ShotSpotPicker
           disabled={busy || !view.ready}
           orientation={view.orientation}
