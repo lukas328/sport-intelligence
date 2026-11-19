@@ -1224,12 +1224,12 @@
     "showHeatmap": "Afficher la carte de chaleur",
     "teamOwn": "Propre équipe",
     "teamOpp": "Adversaire",
-    "tracksOwn": "Traces de l'équipe, dès 1 minute",
     "playersAndTracks": "Joueurs et traces",
     "showShort": "Afficher {n} traces courtes (moins d'1 minute)",
     "hideShort": "Masquer les traces courtes",
     "shortClip": "La vidéo montre moins d'une mi-temps : distances, sprints et vitesse ne valent que pour cet extrait, pas pour tout le match.",
-    "estimated": "Estimé à partir des positions dans la vidéo."
+    "estimated": "Estimé à partir des positions dans la vidéo.",
+    "tracksWithoutPlayers": "Les joueurs apparaissent ici une fois attribués dans la vidéo : dans l'onglet Vidéo, sous «Régler à la main»."
   },
   "identity": {
     "title": "Attribuer les joueurs",
@@ -4112,7 +4112,7 @@
     "moreNote": "Chiffres, records, tous les matchs en détail, séries et analyses",
     "rankKick": "Rang {rank}, {points} points",
     "kickLeague": "{n, plural, one {dont 1 en championnat} other {dont # en championnat}}",
-    "trendNoteLast": "Différence de buts par match, les {shown} derniers sur {n} (sur mobile {phone})",
+    "trendNoteLast": "Différence de buts par match, les {shown} derniers sur {n}",
     "basis": "sur {k} de {n, plural, one {# match} other {# matchs}}",
     "basisNone": "encore aucun match: vient avec l'analyse d'une vidéo",
     "basisAll": "sur {n, plural, one {le seul match} other {les # matchs}}",

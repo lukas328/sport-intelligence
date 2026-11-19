@@ -200,7 +200,9 @@ export function PhysicalView({
     .sort((x, y) => y.distance_m - x.distance_m);
   const long = loose.filter((r) => r.duration_s >= 60);
   const short = loose.length - long.length;
-  const rows = [...players, ...(showShort ? loose : long)];
+  // single tracks are only worth a row beside players they belong to; without any player
+  // assigned, «Spur 306» says nothing to a coach (app review TXT-04): one sentence instead
+  const rows = players.length > 0 ? [...players, ...(showShort ? loose : long)] : [];
   const teamRows = [
     ownTeam && { ...ownTeam, key: "team:own", label: teamName },
     oppTeam && { ...oppTeam, key: "team:opp", label: oppName },
@@ -251,7 +253,7 @@ export function PhysicalView({
                 {rows.length > 0 && (
                   <tr>
                     <th scope="colgroup" colSpan={6} className="pt-4 text-left text-xs font-semibold text-muted">
-                      {players.length > 0 ? t("playersAndTracks") : t("tracksOwn")}
+                      {t("playersAndTracks")}
                     </th>
                   </tr>
                 )}
@@ -259,7 +261,8 @@ export function PhysicalView({
               </tbody>
             </table>
           </div>
-          {short > 0 && (
+          {players.length === 0 && loose.length > 0 && <p className="text-sm text-muted">{t("tracksWithoutPlayers")}</p>}
+          {players.length > 0 && short > 0 && (
             <button type="button" className="text-sm font-medium text-accent underline decoration-[1.5px] underline-offset-4" onClick={() => setShowShort((v) => !v)}>
               {showShort ? t("hideShort") : t("showShort", { n: short })}
             </button>

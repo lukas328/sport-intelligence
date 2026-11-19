@@ -13,6 +13,7 @@ import { EventList, type EventFilter } from "@/components/analysis/event-list";
 import { GoalGrid } from "@/components/analysis/goal-grid";
 import { InsightsCard } from "@/components/analysis/insights";
 import { Sheet, EmptyState } from "@/components/ui/card";
+import { Term } from "@/components/ui/term";
 import { api } from "@/lib/client";
 import { decided } from "@/lib/match-decided";
 import { cn } from "@/lib/utils";
@@ -318,7 +319,12 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
                 .map((r) => (
                 <tr key={r.label} className="border-t border-border/70">
                   <th scope="row" className="py-1.5 text-left font-normal">
-                    <span className={cn(r.label === signalRow && "underline decoration-resin decoration-[5px] underline-offset-[5px]")}>{r.label}</span>
+                    {/* how the attacks were counted: at the figure, not as loose text (TXT-04) */}
+                    {r.label === t("efficiency") ? (
+                      <Term explain={t("possessionsTracked")}>{r.label}</Term>
+                    ) : (
+                      <span className={cn(r.label === signalRow && "underline decoration-resin decoration-[5px] underline-offset-[5px]")}>{r.label}</span>
+                    )}
                   </th>
                   <td className="text-right">
                     <N value={r.own} label={`${r.label} ${teamName}`} onClick={r.filter && (() => open(`${r.label}: ${teamName}`, r.filter!("own")))} />
@@ -330,7 +336,6 @@ export function OverviewView({ orgId, match, teamName, stats, onPlay, names, sta
               ))}
             </tbody>
           </table>
-          {stats.possessions_source === "tracking" && <p className="text-xs text-muted">{t("possessionsTracked")}</p>}
         </Sheet>}
       </div>
       {has("scorers") && scorers.length > 0 && (

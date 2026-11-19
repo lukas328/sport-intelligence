@@ -308,7 +308,7 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
 
           <section>
             {/* the course shows the last ten (six on a phone): said when there are more (H9) */}
-            <SectionHead title={ts("trend")} note={chrono.length > 6 ? ts("trendNoteLast", { shown: Math.min(10, chrono.length), phone: 6, n: chrono.length }) : ts("trendNote")} />
+            <SectionHead title={ts("trend")} note={chrono.length > 6 ? ts("trendNoteLast", { shown: Math.min(10, chrono.length), n: chrono.length }) : ts("trendNote")} />
             {/* phones: the last six matches at a readable size */}
             <div className="sm:hidden">
               <DiffBars matches={chrono.slice(-6).map(bar)} width={400} label={t("chartLabel")} />
