@@ -56,7 +56,7 @@ export default async function AnlaufPage({ searchParams }: { searchParams: Promi
           <section key={n} data-club={n} style={kitVars(k) as CSSProperties} className="border-t-2 border-ink pt-8 pb-14" aria-label={`Verein ${n}`}>
             <WurfHead
               kick="Samstag gegen TSV Nachtwind, Analyse fertig seit Sonntag, 9:40"
-              title="Gewonnen. Und drei Dinge zum Mitnehmen."
+              title="Gewonnen. Und drei Muster zum Mitnehmen."
               own={DEMO_RESULT.own}
               opp={DEMO_RESULT.opp}
               ownName="HC Tannengrün"

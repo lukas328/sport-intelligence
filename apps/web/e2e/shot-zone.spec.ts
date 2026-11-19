@@ -99,7 +99,7 @@ test("a confirmed goal asks «Von wo?»; three from one place make a thing; the 
   await expect(things).toBeVisible({ timeout: 30_000 });
   await expect(things).toContainText("Rückraum links");
   const status = page.getByTestId("spot-status");
-  await expect(status).toContainText("Ein Ding bisher.");
+  await expect(status).toContainText("Ein Muster bisher.");
   await expect(status).toContainText("Bei 1 Tor fehlt, von wo geworfen wurde.");
   // every goal stays reachable under the thing, folded (V4)
   await page.getByTestId("all-goals").locator("summary").click();
