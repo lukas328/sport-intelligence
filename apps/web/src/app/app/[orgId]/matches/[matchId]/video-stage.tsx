@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import type { Schemas } from "@handball/api-client";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
@@ -89,7 +90,8 @@ export function VideoStage({
   const phone = usePhone();
   const [all, setAll] = useState(false);
   const player = useRef<PlayerHandle>(null);
-  const [kept, setKept] = useState<string | null>(null);
+  // the scenes saved here, by goal: a second press takes the scene out again (BUG-21)
+  const [kept, setKept] = useState<Record<string, string>>({});
   const minute = goal?.minute ?? 0;
   // the minutes the video covers (span): a short video is one phase with all its goals, the Rail
   // runs over these minutes, not over 60 (real-video test, second round)
@@ -121,12 +123,19 @@ export function VideoStage({
 
   async function keep() {
     if (goal?.t_ms == null) return;
+    const id = kept[goal.event_id];
+    if (id) {
+      const r = await api.DELETE("/v1/orgs/{org_id}/clips/{clip_id}", { params: { path: { org_id: orgId, clip_id: id } } });
+      if (r.response.ok) setKept((k) => Object.fromEntries(Object.entries(k).filter(([e]) => e !== goal.event_id)));
+      return;
+    }
     const r = await api.POST("/v1/orgs/{org_id}/clips", {
       params: { path: { org_id: orgId } },
       body: { match_id: match.id, ...sceneOf(goal), title: label(goal) },
     });
-    if (r.response.ok) setKept(goal.event_id);
+    if (r.response.ok && r.data) setKept((k) => ({ ...k, [goal.event_id]: r.data.id }));
   }
+  const isKept = goal != null && kept[goal.event_id] != null;
 
   const toggle = (
     <span className="flex border-[1.5px] border-[#4a5058]" role="group" aria-label={t("stageMode")}>
@@ -235,9 +244,15 @@ export function VideoStage({
               </Button>
             </>
           )}
-          <Button variant={chosen ? "secondary" : "primary"} onClick={() => void keep()} disabled={goal?.t_ms == null || kept === goal?.event_id}>
-            {kept === goal?.event_id ? t("kept") : t("keepScene")}
+          <Button variant={chosen ? "secondary" : "primary"} onClick={() => void keep()} disabled={goal?.t_ms == null} aria-pressed={isKept} data-testid="keep-scene">
+            {isKept ? t("kept") : t("keepScene")}
           </Button>
+          {/* where the saved scene is: the scenes of this match (BUG-21) */}
+          {isKept && (
+            <Link href={`/app/${orgId}/teams/${match.team_id}/scenes?match=${match.id}`} className="inline-flex min-h-11 items-center text-[15px] font-bold text-ink underline decoration-[1.5px] underline-offset-4" data-testid="kept-where">
+              {t("keptWhere")}
+            </Link>
+          )}
           {staff && (
             <Button variant="secondary" onClick={onBench}>
               {t("draw")}

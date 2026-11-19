@@ -770,7 +770,8 @@
     "discard": "Dismiss",
     "discardTitle": "Cancel the upload as well?",
     "discardBody": "The notice is gone. The stopped upload for {name} is kept so you can go on with the same file. Cancelling deletes what has arrived. Otherwise it is given up by itself after 6 hours without new parts.",
-    "discardKeep": "No, just hide it"
+    "discardKeep": "No, just hide it",
+    "stepShare": "{n} % of this step"
   },
   "attachments": {
     "title": "Files of the match",
@@ -923,7 +924,7 @@
     "delete": "Delete collection",
     "note": "Note",
     "nowPlaying": "Scene {n} of {total}",
-    "noItems": "This collection has no scenes yet. Add them in the video with “Keep scene”."
+    "noItems": "This collection has no scenes yet. Add them in the video with “Save scene”."
   },
   "analysis": {
     "title": "Positions",
@@ -2701,7 +2702,7 @@
     "key_mistake": "Mistake",
     "key_defence": "Check defence",
     "key_review": "Review",
-    "panel": "Kept on matchday ({n})",
+    "panel": "Matchday marks ({n})",
     "open": "Open matchday",
     "device": "Device",
     "notSynced": "not yet aligned with the video",
@@ -3743,13 +3744,13 @@
     "throwOff": "Throw-off",
     "halfTimeWord": "Half time",
     "fullTime": "Full time",
-    "kept": "Kept",
-    "keepScene": "Keep scene",
+    "kept": "Saved",
+    "keepScene": "Save scene",
     "highlight": "Highlight a player",
     "phaseTitle": "Minute {from} to {to}",
     "running": "playing now",
     "notes": "Notes",
-    "noNotes": "No note on this phase yet.",
+    "noNotes": "No note on this scene yet.",
     "writeNote": "Write a note",
     "bench": "Workbench",
     "benchClose": "Close workbench",
@@ -3863,7 +3864,8 @@
     "thing_fast_breaks_of": "Goals {team} from fast breaks",
     "goalsOfTeam": "Goals {team}",
     "observedMatches": "Watched matches",
-    "observedNote": "not counted in your season"
+    "observedNote": "not counted in your season",
+    "keptWhere": "See it in “Scenes”"
   },
   "check": {
     "top": "Check · {opponent}",
@@ -4022,10 +4024,17 @@
     "emptyText": "After the analysis every goal, every shot and every turnover is a scene. You search them with a sentence and put them together into collections.",
     "emptyPlays": "Drawing plays works already:",
     "emptySearch": "Search finds scenes from your first video on.",
-    "emptyAnswer": "No scenes yet. Upload a video, then you find every goal here.",
+    "emptyAnswer": "No scene for that yet: no video has been analysed.",
     "emptyAnswerRead": "No scenes yet. As soon as a video of your team is uploaded, you find every goal here.",
     "backToCollection": "Back to the collection “{title}”",
-    "addToCollection": "{n, plural, one {1 scene} other {# scenes}} to the collection"
+    "addToCollection": "{n, plural, one {1 scene} other {# scenes}} to the collection",
+    "originLabel": "Matches",
+    "origin": {
+      "all": "All",
+      "own": "Ours",
+      "observed": "Watched"
+    },
+    "observedTag": "Watched"
   },
   "teamPage": {
     "kick": "{team} · {source}",

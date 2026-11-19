@@ -70,7 +70,8 @@ export function KnownFacts({
   const played = Date.parse(match.kickoff_at) < Date.now();
   const facts: { key: string; text: string }[] = [];
   if (hasReport) facts.push({ key: "report", text: t("factReport") });
-  else if (linked && played && !scouting) facts.push({ key: "report", text: t("factReportComes") });
+  // only a game the federation knows gets its report by itself (TXT-06: not a German match)
+  else if (linked && played && !scouting && match.official_game) facts.push({ key: "report", text: t("factReportComes") });
   if (scorers.length) facts.push({ key: "scorers", text: t("factScorers", { list: scorers.join(", ") }) });
   if (stats && (stats.own.suspensions || stats.opponent.suspensions)) {
     facts.push({ key: "pens", text: t("factPenalties", { own: stats.own.suspensions, opp: stats.opponent.suspensions, ownName, oppName }) });

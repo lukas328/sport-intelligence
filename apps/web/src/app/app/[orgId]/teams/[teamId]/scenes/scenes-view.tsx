@@ -73,7 +73,16 @@ export function ScenesView({ orgId, teamId, matches, side, into = null }: { orgI
   const asked = params.get("chips");
   // ?q=a sentence (from «Suchen» or the palette): its words become chips, the rest stays text
   const sentence = params.get("q");
-  const withVideo = useMemo(() => matches.filter((m) => m.has_video).sort((a, b) => b.kickoff_at.localeCompare(a.kickoff_at)), [matches]);
+  // the scenes of observed matches too, marked and filterable (UX-07): «Eigene», «Beobachtet»
+  const [origin, setOrigin] = useState<"all" | "own" | "observed">("all");
+  const anyObserved = matches.some((m) => m.kind === "scouting" && m.has_video);
+  const withVideo = useMemo(
+    () =>
+      matches
+        .filter((m) => m.has_video && (origin === "all" || (origin === "observed") === (m.kind === "scouting")))
+        .sort((a, b) => b.kickoff_at.localeCompare(a.kickoff_at)),
+    [matches, origin],
+  );
   const ctx = { lastMatch: withVideo[0]?.id ?? null, last3: withVideo.slice(0, 3).map((m) => m.id) };
   // the page opens on the first thing of the last match (as the start says it), over the last
   // three matches: an answer, not a list
@@ -88,7 +97,9 @@ export function ScenesView({ orgId, teamId, matches, side, into = null }: { orgI
   const start = firstThing
     ? [firstThing.team === "opp" ? "conceded" : "scored", ...(ZONE_CHIP[firstThing.zone ?? ""] ? [ZONE_CHIP[firstThing.zone ?? ""]!] : []), "last_3"]
     : [];
-  const active = picked ?? start;
+  // ?match=<id>: the scenes of one match, the kept ones among them («Szene speichern», BUG-21)
+  const onlyMatch = params.get("match");
+  const active = picked ?? (onlyMatch ? [] : start);
   // «Suchen» (?focus=1) and a sentence (?q=) put the cursor in the field, also when the page is open
   const field = useRef<HTMLInputElement>(null);
   const wantsFocus = params.get("focus") === "1" || sentence != null;
@@ -114,8 +125,10 @@ export function ScenesView({ orgId, teamId, matches, side, into = null }: { orgI
     ...f,
     ...(extra.opponent ? { match_ids: againstIds } : {}),
     ...(extra.number != null ? { numbers: [extra.number] } : {}),
+    ...(onlyMatch && picked == null ? { match_ids: [onlyMatch] } : {}),
   });
-  const filter = withExtra(combine(scope, ctx));
+  const observed = origin === "all" ? {} : { observed: origin === "observed" };
+  const filter = { ...withExtra(combine(scope, ctx)), ...observed };
   // the base of the answer: the same search without the position
   const baseChips = scope.filter((c) => c.group !== "position");
   const hasBase = baseChips.length !== scope.length;
@@ -125,9 +138,9 @@ export function ScenesView({ orgId, teamId, matches, side, into = null }: { orgI
     queryFn: async () => (await api.POST("/v1/orgs/{org_id}/teams/{team_id}/search", { params: { path }, body: { ...filter, limit: 500 } })).data ?? null,
   });
   const base = useQuery({
-    queryKey: ["scenes", teamId, withExtra(combine(baseChips, ctx))],
+    queryKey: ["scenes", teamId, withExtra(combine(baseChips, ctx)), origin],
     enabled: hasBase,
-    queryFn: async () => (await api.POST("/v1/orgs/{org_id}/teams/{team_id}/search", { params: { path }, body: { ...withExtra(combine(baseChips, ctx)), limit: 500 } })).data ?? null,
+    queryFn: async () => (await api.POST("/v1/orgs/{org_id}/teams/{team_id}/search", { params: { path }, body: { ...withExtra(combine(baseChips, ctx)), ...observed, limit: 500 } })).data ?? null,
   });
   // newest match first, within a match in the order of play; «Alle abspielen» plays exactly this
   // order (UX test N23)
@@ -205,6 +218,21 @@ export function ScenesView({ orgId, teamId, matches, side, into = null }: { orgI
             data-testid="scene-search"
           />
         </label>
+        {anyObserved && (
+          <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label={t("originLabel")} data-testid="scene-origin">
+            {(["all", "own", "observed"] as const).map((o) => (
+              <button
+                key={o}
+                type="button"
+                aria-pressed={origin === o}
+                onClick={() => (setOrigin(o), setShown(TILES))}
+                className={cn("inline-flex min-h-11 cursor-pointer items-center border-[1.5px] border-ink px-3.5 text-[15px] font-semibold", origin === o ? "bg-ink text-ground" : "bg-transparent text-ink")}
+              >
+                {t(`origin.${o}`)}
+              </button>
+            ))}
+          </div>
+        )}
         <div className="mt-3 flex flex-wrap gap-2" aria-label={t("filters")}>
           {extra.opponent && (
             <button type="button" aria-pressed onClick={() => setExtra((x) => ({ ...x, opponent: undefined }))} className="inline-flex min-h-11 cursor-pointer items-center border-[1.5px] border-ink bg-ink px-3.5 text-[15px] font-semibold text-ground">
@@ -383,7 +411,9 @@ function SceneTile({ orgId, hit, match }: { orgId: string; hit: Hit; match: Matc
   const goal = g.data && hit.kind === "event" ? goalRuns(g.data).find((x) => x.eventId === hit.id) : undefined;
   // the match clock of any goal, also one without a spot; the video time small beside it (H8)
   const minute = (g.data && hit.kind === "event" ? g.data.goals.find((x) => x.event_id === hit.id)?.minute : undefined) ?? (hit.clock_s != null ? hit.clock_s / 60 : undefined);
-  const opp = (match?.opponent_name ?? hit.match_label).split(/[\s-]/).find((w) => w.length > 3) ?? hit.match_label;
+  // an observed match: both teams as the API names them, home team first, and the mark (UX-07)
+  const observed = hit.observed || match?.kind === "scouting";
+  const opp = observed ? hit.match_label : ((match?.opponent_name ?? hit.match_label).split(/[\s-]/).find((w) => w.length > 3) ?? hit.match_label);
   const kind = hit.type === "shot" ? (hit.outcome === "goal" ? t("goal") : hit.outcome === "save" ? t("save") : t("shot")) : hit.type === "turnover" ? t("turnover") : (hit.title ?? (hit.type ? ts(`type_${hit.type}` as "type_shot") : ""));
   const what = `${kind}${hit.number != null ? `, ${t("numberRead", { n: hit.number })}` : ""}${goal && !goal.confirmed ? `, ${t("spotEstimated")}` : ""}`;
   return (
@@ -403,7 +433,8 @@ function SceneTile({ orgId, hit, match }: { orgId: string; hit: Hit; match: Matc
         <b className="text-[15px] font-bold">{t("videoAt", { time: ms(hit.t_ms ?? hit.start_ms ?? 0) })}</b>
       )}
       <span className="text-[15px] leading-snug text-ink-2 md:text-[15px]">
-        {format.dateTime(new Date(hit.kickoff_at), { day: "numeric", month: "numeric" })} {opp} · {what}
+        {format.dateTime(new Date(hit.kickoff_at), observed ? { day: "numeric", month: "numeric", year: "numeric" } : { day: "numeric", month: "numeric" })} {opp} · {what}
+        {observed && <b className="ml-1.5 text-[15px] font-bold text-ink" data-testid="scene-observed"> · {t("observedTag")}</b>}
       </span>
       <span className="font-mono text-[13px] font-semibold text-ink">{ms(Math.max(0, (hit.end_ms ?? 0) - (hit.start_ms ?? 0)))}</span>
     </Link>

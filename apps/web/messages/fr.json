@@ -770,7 +770,8 @@
     "discard": "Écarter",
     "discardTitle": "Annuler aussi l'envoi ?",
     "discardBody": "L'avis a disparu. L'envoi interrompu pour {name} reste prêt pour continuer avec le même fichier. Annuler supprime ce qui est déjà arrivé. Sinon il s'annule de lui-même après 6 heures sans nouvelle partie.",
-    "discardKeep": "Non, seulement masquer"
+    "discardKeep": "Non, seulement masquer",
+    "stepShare": "{n} % de cette étape"
   },
   "attachments": {
     "title": "Fichiers du match",
@@ -923,7 +924,7 @@
     "delete": "Supprimer la sélection",
     "note": "Note",
     "nowPlaying": "Scène {n} sur {total}",
-    "noItems": "Cette sélection n'a pas encore de scènes. Ajoutez-les dans la vidéo avec « Retenir la scène »."
+    "noItems": "Cette sélection n'a pas encore de scènes. Ajoutez-les dans la vidéo avec « Enregistrer la scène »."
   },
   "analysis": {
     "title": "Positions",
@@ -2701,7 +2702,7 @@
     "key_mistake": "Erreur",
     "key_defence": "Vérifier la défense",
     "key_review": "À revoir",
-    "panel": "Retenu le jour de match ({n})",
+    "panel": "Repères du jour de match ({n})",
     "open": "Ouvrir le jour de match",
     "device": "Appareil",
     "notSynced": "pas encore aligné sur la vidéo",
@@ -3743,13 +3744,13 @@
     "throwOff": "Engagement",
     "halfTimeWord": "Mi-temps",
     "fullTime": "Fin",
-    "kept": "Gardée",
-    "keepScene": "Garder la scène",
+    "kept": "Enregistrée",
+    "keepScene": "Enregistrer la scène",
     "highlight": "Mettre une joueuse en avant",
     "phaseTitle": "Minute {from} à {to}",
     "running": "en cours",
     "notes": "Notes",
-    "noNotes": "Pas encore de note sur cette phase.",
+    "noNotes": "Pas encore de note sur cette scène.",
     "writeNote": "Écrire une note",
     "bench": "Atelier",
     "benchClose": "Fermer l'atelier",
@@ -3863,7 +3864,8 @@
     "thing_fast_breaks_of": "Buts {team} sur contre-attaque",
     "goalsOfTeam": "Buts {team}",
     "observedMatches": "Matchs observés",
-    "observedNote": "ne comptent pas dans votre saison"
+    "observedNote": "ne comptent pas dans votre saison",
+    "keptWhere": "Voir dans « Scènes »"
   },
   "check": {
     "top": "Vérifier · {opponent}",
@@ -4022,10 +4024,17 @@
     "emptyText": "Après l'analyse, chaque but, chaque tir et chaque perte de balle est une scène. Tu les cherches avec une phrase et tu les réunis en sélections.",
     "emptyPlays": "Dessiner des systèmes de jeu, c'est déjà possible :",
     "emptySearch": "La recherche trouve des scènes dès la première vidéo.",
-    "emptyAnswer": "Pas encore de scènes. Télécharge une vidéo, tu trouveras ensuite ici chaque but.",
+    "emptyAnswer": "Pas encore de scène : aucune vidéo n'est analysée.",
     "emptyAnswerRead": "Pas encore de scènes. Dès qu'une vidéo de votre équipe est téléchargée, tu trouveras ici chaque but.",
     "backToCollection": "Retour à la sélection «{title}»",
-    "addToCollection": "{n, plural, one {1 scène} other {# scènes}} dans la sélection"
+    "addToCollection": "{n, plural, one {1 scène} other {# scènes}} dans la sélection",
+    "originLabel": "Matchs",
+    "origin": {
+      "all": "Tous",
+      "own": "Les nôtres",
+      "observed": "Observés"
+    },
+    "observedTag": "Observé"
   },
   "teamPage": {
     "kick": "{team} · {source}",

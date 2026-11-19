@@ -770,7 +770,8 @@
     "discard": "Verwerfen",
     "discardTitle": "Upload auch abbrechen?",
     "discardBody": "Der Hinweis ist weg. Der unterbrochene Upload zu {name} liegt noch bereit, damit du mit derselben Datei weitermachen kannst. Abbrechen löscht, was schon angekommen ist. Sonst bricht er nach 6 Stunden ohne neue Teile von selbst ab.",
-    "discardKeep": "Nein, nur ausblenden"
+    "discardKeep": "Nein, nur ausblenden",
+    "stepShare": "{n} % dieses Schritts"
   },
   "attachments": {
     "title": "Dateien zum Spiel",
@@ -923,7 +924,7 @@
     "delete": "Sammlung löschen",
     "note": "Notiz",
     "nowPlaying": "Szene {n} von {total}",
-    "noItems": "Diese Sammlung hat noch keine Szenen. Füge sie im Video mit «Szene merken» hinzu."
+    "noItems": "Diese Sammlung hat noch keine Szenen. Füge sie im Video mit «Szene speichern» hinzu."
   },
   "analysis": {
     "title": "Positionen",
@@ -2701,7 +2702,7 @@
     "key_mistake": "Fehler",
     "key_defence": "Abwehr anschauen",
     "key_review": "Später anschauen",
-    "panel": "Am Spieltag gemerkt ({n})",
+    "panel": "Marken vom Spieltag ({n})",
     "open": "Spieltag öffnen",
     "device": "Gerät",
     "notSynced": "noch nicht mit dem Video abgeglichen",
@@ -3743,13 +3744,13 @@
     "throwOff": "Anwurf",
     "halfTimeWord": "Halbzeit",
     "fullTime": "Schluss",
-    "kept": "Gemerkt",
-    "keepScene": "Szene merken",
+    "kept": "Gespeichert",
+    "keepScene": "Szene speichern",
     "highlight": "Person hervorheben",
     "phaseTitle": "Minute {from} bis {to}",
     "running": "läuft gerade",
     "notes": "Notizen",
-    "noNotes": "Noch keine Notiz zu dieser Phase.",
+    "noNotes": "Noch keine Notiz zu dieser Szene.",
     "writeNote": "Notiz schreiben",
     "bench": "Werkbank",
     "benchClose": "Werkbank schliessen",
@@ -3863,7 +3864,8 @@
     "thing_fast_breaks_of": "Tore {team} aus Gegenstössen",
     "goalsOfTeam": "Tore {team}",
     "observedMatches": "Beobachtete Spiele",
-    "observedNote": "zählen nicht in eurer Saison"
+    "observedNote": "zählen nicht in eurer Saison",
+    "keptWhere": "In «Szenen» ansehen"
   },
   "check": {
     "top": "Prüfen · {opponent}",
@@ -4022,10 +4024,17 @@
     "emptyText": "Nach der Analyse ist jedes Tor, jeder Wurf und jeder Ballverlust eine Szene. Du suchst sie mit einem Satz und stellst sie zu Sammlungen zusammen.",
     "emptyPlays": "Spielzüge zeichnen geht schon jetzt:",
     "emptySearch": "Die Suche findet Szenen ab dem ersten Video.",
-    "emptyAnswer": "Noch keine Szenen. Lade ein Video hoch, dann findest du hier jedes Tor.",
+    "emptyAnswer": "Dazu gibt es noch keine Szene: noch kein Video ist analysiert.",
     "emptyAnswerRead": "Noch keine Szenen. Sobald ein Video eures Teams hochgeladen ist, findest du hier jedes Tor.",
     "backToCollection": "Zurück zur Sammlung «{title}»",
-    "addToCollection": "{n, plural, one {1 Szene} other {# Szenen}} zur Sammlung"
+    "addToCollection": "{n, plural, one {1 Szene} other {# Szenen}} zur Sammlung",
+    "originLabel": "Spiele",
+    "origin": {
+      "all": "Alle",
+      "own": "Eigene",
+      "observed": "Beobachtet"
+    },
+    "observedTag": "Beobachtet"
   },
   "teamPage": {
     "kick": "{team} · {source}",

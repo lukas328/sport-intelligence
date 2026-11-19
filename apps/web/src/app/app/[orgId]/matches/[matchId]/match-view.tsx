@@ -832,7 +832,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
             </div>
           </details>
           )}
-          {!example && <AttachmentsPanel orgId={orgId} matchId={match.id} staff={staff} hasReport={graphics.data?.has_report ?? false} linked={Boolean(official.data?.official_team_id)} />}
+          {!example && <AttachmentsPanel orgId={orgId} matchId={match.id} staff={staff} hasReport={graphics.data?.has_report ?? false} linked={Boolean(official.data?.official_team_id) && Boolean(match.official_game) && !scouting} />}
         </div>
       )}
 

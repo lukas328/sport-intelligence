@@ -211,6 +211,14 @@ export function SceneCamera({
   if (!scene) {
     // the court not confirmed yet: no positions, the question instead, and the way to answer it
     const ask = q.data != null && q.data.field_confirmed === false;
+    // nothing measured and nothing to ask: one line, not a large empty court (UI-02)
+    if (!ask)
+      return (
+        <div className="my-1.5" data-testid="camera-empty">
+          <p className="m-0 border-l-4 border-rule py-1 pl-3 text-[15px] text-ink-2">{t("noCamera")}</p>
+          {barExtra && <div className="mt-1 flex items-center gap-2.5 bg-court-bar px-3 py-2">{barExtra}</div>}
+        </div>
+      );
     return (
       <div className="my-1.5" data-testid={ask ? "camera-field-question" : "camera-empty"}>
         <div className="relative">

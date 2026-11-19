@@ -65,7 +65,8 @@ export function StartView({
   // observed matches have a section of their own: our list and its count are our matches (UX-07)
   const observed = played.filter((m) => m.kind === "scouting");
   const withoutVideo = ours.filter((m) => !m.has_video).length;
-  const anyVideo = ours.some((m) => m.has_video);
+  // the first video is done with any video, an observed one too (UX-07)
+  const anyVideo = played.some((m) => m.has_video);
   // the head of a match without video shows the federation's table (FromReport): below, the next
   // opponent keeps only its own row, the table stands once (finding A10)
   const tableAbove = Boolean(last && !last.has_video);
