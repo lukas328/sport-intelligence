@@ -152,7 +152,7 @@ const en: Messages = {
       bar: "Ask your matches",
       queries: ["Goals conceded against {opp} by shot spot: {of}, {n} of them on the right wing", "Of those, by half: {first} in the first, {second} in the second", "Of those, by shirt number: number {a} {an}, number {b} {bn}"],
     },
-    loopKick: "And then?",
+    loopKick: "Sunday, 10 am",
     loopTitle: "What does it mean for training?",
     loop: [
       { title: "Pattern", text: "{n} of {of} goals conceded on the right wing." },
@@ -369,7 +369,7 @@ const en: Messages = {
     sceneChipNoNumber: "{clock}",
     askSet: "From your question",
     honest: "The app shows you the scenes and the positions from above. What causes it, you see for yourself, usually after two or three scenes.",
-    insightWhen: "Sunday",
+    insightWhen: "Sunday, 10 am",
     insightTitle: "The insight in one sentence.",
     insight: "\"When the ball comes through the back court, we pull in. Then the right wing is left alone.\"",
     insightBy: "Your sentence, after four scenes",

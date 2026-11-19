@@ -150,7 +150,7 @@ const de = {
       bar: "Frag deine Spiele",
       queries: ["Gegentore gegen {opp} nach Wurfort: {of}, davon {n} über aussen rechts", "Davon nach Halbzeit: {first} in der ersten, {second} in der zweiten", "Davon nach Rückennummer: Nummer {a} {an}, Nummer {b} {bn}"],
     },
-    loopKick: "Und dann?",
+    loopKick: "Sonntag, 10 Uhr",
     loopTitle: "Was heisst das fürs Training?",
     loop: [
       { title: "Muster", text: "{n} von {of} Gegentoren über aussen rechts." },
@@ -368,7 +368,7 @@ const de = {
     sceneChipNoNumber: "{clock}",
     askSet: "Aus deiner Frage",
     honest: "Die App zeigt dir Szenen und Positionen von oben. Woran es liegt, erkennst du selbst, meist nach zwei, drei Szenen.",
-    insightWhen: "Sonntag",
+    insightWhen: "Sonntag, 10 Uhr",
     insightTitle: "Die Einsicht in einem Satz.",
     insight: "«Kommt der Ball über den Rückraum, rücken wir ein. Aussen rechts steht dann allein.»",
     insightBy: "Dein Satz, nach vier Szenen",

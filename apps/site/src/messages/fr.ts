@@ -152,7 +152,7 @@ const fr: Messages = {
       bar: "Interroge tes matchs",
       queries: ["Buts encaissés contre {opp} par lieu de tir : {of}, dont {n} par l'aile droite", "Parmi eux, par mi-temps : {first} en première, {second} en seconde", "Parmi eux, par numéro : numéro {a} {an}, numéro {b} {bn}"],
     },
-    loopKick: "Et ensuite ?",
+    loopKick: "Dimanche, 10 h",
     loopTitle: "Qu'est-ce que ça change à l'entraînement ?",
     loop: [
       { title: "Tendance", text: "{n} des {of} buts encaissés par l'aile droite." },
@@ -369,7 +369,7 @@ const fr: Messages = {
     sceneChipNoNumber: "{clock}",
     askSet: "De ta question",
     honest: "L'app te montre les scènes et les positions vues d'en haut. La cause, tu la vois toi-même, souvent après deux ou trois scènes.",
-    insightWhen: "Dimanche",
+    insightWhen: "Dimanche, 10 h",
     insightTitle: "Le constat en une phrase.",
     insight: "« Quand le ballon vient de la base arrière, on se resserre. L'aile droite reste alors seule. »",
     insightBy: "Ta phrase, après quatre scènes",
