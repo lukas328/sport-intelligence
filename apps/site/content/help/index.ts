@@ -50,11 +50,11 @@ export const HELP: HelpEntry[] = [
     group: "video",
     title: { de: "Analyse lesen", fr: "Lire l'analyse", en: "Reading the analysis" },
     summary: {
-      de: "Drei Dinge, Taktikkamera, Zahlen und woher sie kommen.",
-      fr: "Trois points, caméra tactique, chiffres et leur source.",
-      en: "Three things, tactics camera, figures and where they come from.",
+      de: "Muster, Taktikkamera, Zahlen und woher sie kommen.",
+      fr: "Tendances, caméra tactique, chiffres et leur source.",
+      en: "Patterns, tactics camera, figures and where they come from.",
     },
-    keywords: { de: "drei dinge taktikkamera zahlen quelle geschätzt", fr: "trois points caméra tactique chiffres source estimé", en: "three things tactics camera figures source estimated" },
+    keywords: { de: "muster taktikkamera zahlen quelle geschätzt", fr: "tendances caméra tactique chiffres source estimé", en: "patterns tactics camera figures source estimated" },
   },
   {
     slug: "highlights",
