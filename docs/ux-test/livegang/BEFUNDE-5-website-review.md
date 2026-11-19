@@ -5,6 +5,11 @@ Quelle: Review «Website-Review Handball Intelligence» vom 19.11.2026 (an Lukas
 und warum. Grundsatz: nichts blind übernehmen, und nichts auf die Website schreiben, was das Produkt
 heute nicht hält.
 
+## Leitlinie (Lukas, 19.11.)
+Die Website beschreibt das Produkt so, wie es beim Release sein wird (Vision), nicht den Stand der
+Testphase. Darum werden Aufwand und Analysedauer nicht auf heutige Messwerte zurückgestuft. Erfunden
+wird trotzdem nichts, was kein Produkt-Versprechen ist (z. B. Zitate von Pilotteams).
+
 ## Fakten, an denen die Vorschläge gemessen werden
 - **Analysedauer:** Lukas' ganzer Lauf auf Staging (99 min Video, 2 vCPU) brauchte 3 h 33 min, also
   2.2 x Videolänge (`docs/plans/produkt-analyse-integration.md`). Ein Spiel mit etwa 70 min
@@ -21,8 +26,8 @@ heute nicht hält.
 ## Bewertung pro Punkt
 | Nr. | Vorschlag | Entscheid | Begründung |
 |---|---|---|---|
-| 1 | Aufwand einheitlich erzählen | **umsetzen, ohne Minutenzahl** | Die Widersprüche («Eintippen musst du nichts» vs. Wurfort antippen) sind echt. Formel: «Du filmst, die Analyse macht den Rest. Wo sie unsicher ist, fragt sie kurz nach, und das wird mit jedem Update weniger.» Eine Minutenzahl erst nach der Messung (Q-REC-SHOTZONE). |
-| 2 | Analysedauer als Zahl | **umsetzen** | «Meist zwei bis drei Stunden nach dem Upload» ist gemessen (2.2 x Videolänge). Auf Start, Hilfe und Fakten gleich. |
+| 1 | Aufwand einheitlich erzählen | **nein (Lukas, 19.11.)** | Die Website erzählt die Vision, so wie das Produkt beim Release sein wird («Du filmst, die Analyse macht den Rest»). Kein Zurückstufen auf den heutigen Stand der Testphase. Nur ein echter Widerspruch zwischen zwei Seiten wird angeglichen, und zwar in Richtung Vision. |
+| 2 | Analysedauer als Zahl | **nein (Lukas, 19.11.)** | Wie Punkt 1: «Samstag, 22 Uhr» bleibt als Vision; keine Zahl aus der CPU-Testphase. |
 | 3 | Ein Beispieluniversum | **umsetzen** | Widersprüchliche Zahlen (11 von 29 vs. 6 von 22, Saisonbalken 6/9/11) kosten Glaubwürdigkeit; kein Aufwand an Wahrheit. |
 | 4 | Menü «Hilfe», Funktion überall «Frag deine Spiele» | **umsetzen** | Die URL ist schon `/hilfe/`; «Fragen» ist doppelt belegt. EN «Pricing», «Help». |
 | 5 | Menschen zeigen | **Lukas** | Nur mit echten Namen und Fotos; hängt an der Firma (OPEN_QUESTIONS Punkt 1). |
