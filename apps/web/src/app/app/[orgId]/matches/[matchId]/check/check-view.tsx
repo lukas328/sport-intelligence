@@ -63,7 +63,8 @@ function spotMark(coach: SpotZone | null | undefined, estimate: { zone?: string 
   const zone = estimate ? spotSuggestion(estimate) : null;
   return zone ? { zone, kind: "suggested" } : null;
 }
-type Answered = { q: Question; label: string; eventId?: string; spot?: SpotAnswer };
+/** `auto`: a goal of the match report taken over without a question (livegang L1), undone with one tap */
+type Answered = { q: Question; label: string; eventId?: string; spot?: SpotAnswer; auto?: boolean };
 
 // one rounding on every screen: full seconds, as the scoreboard (fourth real-video test H8)
 const clock = (s: number | null | undefined) => (s == null ? "" : formatClock(s * 1000 + 1));
@@ -244,7 +245,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
         const goal = c.event_id ? graphics.data!.goals.find((x) => x.event_id === c.event_id) : undefined;
         const label = c.status === "rejected" ? t("noGoal") : t("goalOf", { team: c.side === "own" ? own : oppName });
         const spot: SpotAnswer | undefined = goal?.spot_by_coach && goal.zone ? (goal.zone as SpotZone) : goal?.zone_source === "unknown" ? "unknown" : undefined;
-        return { q: { kind: "goal", c }, label, ...(c.status === "confirmed" && c.outcome === "goal" && c.event_id ? { eventId: c.event_id } : {}), ...(spot ? { spot } : {}) };
+        return { q: { kind: "goal", c }, label, ...(c.status === "confirmed" && c.outcome === "goal" && c.event_id ? { eventId: c.event_id } : {}), ...(spot ? { spot } : {}), ...(c.auto ? { auto: true } : {}) };
       })
       .sort((a, b) => (a.q.kind === "goal" && b.q.kind === "goal" ? a.q.c.goal_ms - b.q.c.goal_ms : 0));
     const saved = [...court, ...throwOffs, ...goals];
@@ -448,6 +449,25 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
     }
     next(current);
   }
+
+  // a goal taken over from the match report, taken back: the report goal goes back to its time
+  // from the clock and is never taken over again (livegang L1)
+  const [undone, setUndone] = useState(false);
+  const [undoFailed, setUndoFailed] = useState<string | null>(null);
+  async function undoFromReport(c: Candidate) {
+    try {
+      setUndoFailed(null);
+      await review(c, { status: null });
+    } catch (e) {
+      setUndoFailed(e instanceof Error ? e.message : String(e));
+      return;
+    }
+    setAnswered((list) => list.filter((x) => id(x.q) !== c.id));
+    setUndone(true);
+    for (const key of ["goal-candidates", "events", "stats", "official-goals"]) void qc.invalidateQueries({ queryKey: [key, match.id] });
+    void qc.invalidateQueries({ queryKey: ["notifications", orgId] });
+  }
+  const fromReport = answered.filter((x) => x.auto).length;
 
   /** The place of the goal: saved at once, then the next question (no «Weiter»). */
   async function pickSpot(step: SpotStep, spot: SpotAnswer, point?: HalfPt) {
@@ -673,6 +693,19 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
           {answered.length > 0 && (
             <section aria-labelledby="answered" data-testid="check-answered">
               <h2 id="answered" className="text-[22px]">{t("answered")}</h2>
+              {fromReport > 0 && (
+                <p className="text-[17px] text-ink-2" data-testid="check-from-report-note">
+                  {t("fromReportNote", { n: fromReport })}
+                </p>
+              )}
+              <p aria-live="polite" className="m-0 text-[15px] text-ink-2 empty:hidden">
+                {undone ? t("fromReportUndone") : ""}
+              </p>
+              {undoFailed && (
+                <p role="alert" className="max-w-[54ch] border-l-4 border-loss pl-3 text-[17px] font-semibold" data-testid="check-failed">
+                  {t("saveFailed")} <span className="block text-[15px] font-normal text-ink-2">{undoFailed}</span>
+                </p>
+              )}
               <ul className="m-0 list-none border-t-2 border-ink p-0">
                 {answered.map((x, i) => (
                   <li key={id(x.q)} className="flex min-h-12 flex-wrap items-center justify-between gap-x-3 gap-y-1 border-b border-rule py-1.5 text-[17px]" data-testid="check-answered-row">
@@ -682,6 +715,11 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
                         <span className="mr-2 font-mono text-[15px] font-semibold text-ink-2">{x.q.c.clock_s != null ? `${clock(x.q.c.clock_s)} · ${t("videoAt", { video: clock(x.q.c.goal_ms / 1000) })}` : t("videoAt", { video: clock(x.q.c.goal_ms / 1000) })}</span>
                       )}
                       {x.q.kind === "field" ? t("fieldQuestion") : x.q.kind === "kickoff" ? t("kickoffQuestion", { n: x.q.period }) : x.q.kind === "person" ? t("personQuestion") : t("goalQuestion")} <b>{x.label}</b>
+                      {x.auto && (
+                        <span className="block text-[15px] text-ink-2" data-testid="check-from-report">
+                          {t("fromReport")}
+                        </span>
+                      )}
                       {x.eventId && <span className="block text-[15px] text-ink-2">{x.spot && x.spot !== "unknown" ? ts("of", { zone: ts(`zone.${x.spot}` as "zone.la") }) : ts("missing")}</span>}
                     </span>
                     <span className="flex flex-wrap gap-x-4">
@@ -695,6 +733,11 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
                           data-testid="check-spot-change"
                         >
                           {x.spot && x.spot !== "unknown" ? ts("change") : ts("set")}
+                        </button>
+                      )}
+                      {x.auto && x.q.kind === "goal" && (
+                        <button type="button" onClick={() => x.q.kind === "goal" && void undoFromReport(x.q.c)} className="min-h-11 cursor-pointer border-0 bg-transparent p-0 font-bold underline underline-offset-4" data-testid="check-from-report-undo">
+                          {t("fromReportUndo")}
                         </button>
                       )}
                       <button type="button" onClick={() => setRevisit(i)} className="min-h-11 cursor-pointer border-0 bg-transparent p-0 font-bold underline underline-offset-4">

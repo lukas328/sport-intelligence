@@ -7535,6 +7535,11 @@ export interface components {
          *     review.
          */
         GoalCandidateRow: {
+            /**
+             * Auto
+             * @default false
+             */
+            auto?: boolean;
             /** Clock S */
             clock_s: number | null;
             /** End Ms */

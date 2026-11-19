@@ -300,6 +300,9 @@ class GoalCandidateRow(ApiModel):
     suggested_side: Side | None  # whose attack ended just before it
     status: CandidateStatus
     skipped: bool = False  # open, left with «Weiss nicht» in Prüfen (waits behind «Mehr prüfen»)
+    # confirmed without a question: the report goal at this moment on the overlay clock (one tap
+    # undoes it, review with status null)
+    auto: bool = False
     side: Side | None  # confirmed: whose shot
     outcome: ShotOutcome | None  # confirmed: the shot's outcome
     event_id: uuid.UUID | None  # confirmed: the shot event (or the report entry it pinned)

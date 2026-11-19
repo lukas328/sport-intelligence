@@ -6023,6 +6023,11 @@
       "GoalCandidateRow": {
         "description": "A moment of the video that is probably a goal or a shot (analysis), with the coach's\nreview.",
         "properties": {
+          "auto": {
+            "default": false,
+            "title": "Auto",
+            "type": "boolean"
+          },
           "clock_s": {
             "anyOf": [
               {

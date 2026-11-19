@@ -1191,6 +1191,8 @@ async def _apply_analysis_result(
             counts = await goal_candidates.store(
                 ctx, owner, asset, found if isinstance(found, dict) else None, job.pipeline_version
             )
+            # report goals that match a candidate unambiguously on the overlay clock (L1)
+            counts["auto_confirmed"] = await goal_candidates.auto_accept(ctx, owner)
             asset.analysis = {**asset.analysis, "goal_candidates": counts}
     return on_timeline
 

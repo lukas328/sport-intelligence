@@ -117,3 +117,13 @@ Kontext `components/domain/match-sides.tsx`, den die Spielseite einmal setzt; in
 | TXT-06 | erledigt: Hinweis auf den handball.ch-Bericht nur bei Spielen aus dem Spielplan (`official_game`) |
 | UI-02 | erledigt: «keine Positionen» als eine Zeile statt leerem Feld, Spielbericht ohne Zeilen als Satz, Torbild siehe BUG-10 |
 | L4 | erledigt: in beobachteten Spielen kein Kader des Kontos (Erfassen, Spuren, Torhüter, Zahlen); beide Teams per Rückennummer, für den beobachteten Gegner die bekannten Nummern als Vorschlag; Personen-Fragen in Prüfen entfallen dort; API weist Spieler des Kontos ab |
+
+- L1 (19.11.): Kurzfristiger Teil umgesetzt. Ein Tor des Spielberichts wird ohne Frage auf seinen
+  Tor-Kandidaten gelegt, nur wenn die Uhr zu dieser Zeit im Video gelesen wurde, genau ein Kandidat
+  und genau ein Spielbericht-Tor beieinander liegen und das Team passt; in Prüfen und in der
+  Kandidatenliste «aus dem Spielbericht übernommen», mit «Rückgängig». Alles Unsichere bleibt eine
+  Frage. Befund dabei: Kandidaten an Spielbericht-Toren wurden schon vorher nicht gefragt («schon
+  erfasst»), aber an der aus dem Anwurf gerechneten Zeit, die nach einem Time-out danebenliegt.
+  Zahlen nur aus Tests, keine echten Spiele gemessen. Regel und Messung:
+  `docs/plans/produkt-analyse-integration.md`, Abschnitt «Tore aus dem Spielbericht ohne Frage».
+  Offen: bessere Tor-Kandidaten (mittelfristig).

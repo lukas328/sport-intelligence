@@ -236,6 +236,8 @@ class _Known:
 
     replaced: int  # official events of an earlier import, now deleted
     reviewed: dict[tuple[str, float | None], Any]  # the coach's check of an earlier official goal
+    # goals whose automatic pin to a candidate the coach undid (goal_candidates.DECLINED)
+    declined: set[tuple[str, float | None]]
     seen: list[Seen]  # goals and confirmed shots from video (automatic or an earlier import)
     manual: list[Seen]  # goals a person entered
     auto: list[Event]  # automatic goals
@@ -269,6 +271,7 @@ async def _known(ctx: Ctx, match: Match) -> _Known:
         for p in previous
         if p.outcome == "goal" and (r := (p.attributes or {}).get("review")) in REVIEW
     }
+    declined = {(p.side, p.clock_s) for p in previous if (p.attributes or {}).get("auto_declined")}
     for p in previous:  # video data an earlier import took over: matched again below
         v = (p.attributes or {}).get("video")
         if isinstance(v, dict) and v.get("clock_s") is not None:
@@ -283,6 +286,7 @@ async def _known(ctx: Ctx, match: Match) -> _Known:
                     confidence=float(v.get("confidence", 0.9)),
                     outcome=p.outcome or "goal",
                     candidate_id=_candidate_of(p),
+                    auto=str(v["auto"]) if v.get("auto") else None,
                 )
             )
     await ctx.db.execute(delete(Event).where(Event.match_id == match.id, Event.source == SOURCE))
@@ -344,6 +348,7 @@ async def _known(ctx: Ctx, match: Match) -> _Known:
     return _Known(
         replaced=len(previous),
         reviewed=reviewed,
+        declined=declined,
         seen=seen,
         manual=manual,
         auto=auto,
@@ -359,6 +364,7 @@ def _video_attrs(c: Seen) -> dict[str, Any]:
         "t_ms": c.t_ms,
         "confidence": round(c.confidence, 3),
         **({"candidate_id": c.candidate_id} if c.candidate_id else {}),
+        **({"auto": c.auto} if c.auto else {}),
     }
 
 
@@ -418,6 +424,8 @@ def _add_entries(
                 pinned = vid
             if (side, clock) in known.reviewed:
                 attrs["review"] = known.reviewed[(side, clock)]
+            if (side, clock) in known.declined:
+                attrs["auto_declined"] = True
         if spec.get("outcome") == "save" and e.goalkeeper_number is not None:
             # our goalkeeper by the roster's goalkeepers: a number the roster gives to a field
             # player stays a number (a report naming the wrong team must not turn a field
@@ -567,7 +575,12 @@ async def apply(ctx: Ctx, match: Match, report: OfficialReport) -> dict[str, Any
     keepers = await goalkeeper_numbers(ctx, match.season_id, match.team_id)
     added = _add_entries(ctx, match, report, known, clock_map, roster, keepers)
     unmatched_video = await _settle_video_goals(ctx, match, known, added)
-    return await _write_result(ctx, match, report, known, added, unmatched_video)
+    result = await _write_result(ctx, match, report, known, added, unmatched_video)
+    # goals that match a goal candidate unambiguously on the overlay clock: no question (L1)
+    from handball_api.services import goal_candidates
+
+    await goal_candidates.auto_accept(ctx, match)
+    return result
 
 
 async def import_report(
