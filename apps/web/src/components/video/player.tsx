@@ -1,6 +1,6 @@
 "use client";
 
-import { Maximize, Pause, Play, RotateCcw, RotateCw, StepBack, StepForward, Volume2, VolumeX } from "lucide-react";
+import { ChevronLeft, ChevronRight, Maximize, Pause, Play, RotateCcw, RotateCw, Volume2, VolumeX } from "lucide-react";
 import { useTranslations } from "next-intl";
 import {
   forwardRef,
@@ -423,10 +423,10 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
             <RotateCw className="size-4" />
           </CtlButton>
           <CtlButton label={t("frameBack")} onClick={() => step(-1)} className="hidden sm:inline-grid">
-            <StepBack className="size-4" />
+            <ChevronLeft className="size-4" />
           </CtlButton>
           <CtlButton label={t("frameFwd")} onClick={() => step(1)} className="hidden sm:inline-grid">
-            <StepForward className="size-4" />
+            <ChevronRight className="size-4" />
           </CtlButton>
           <span className="truncate px-1 tabular-nums sm:px-2" data-testid="clock">
             {clock ? clock(time) : `${formatClock(time)} / ${formatClock(duration * 1000)}`}

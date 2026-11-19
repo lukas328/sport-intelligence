@@ -190,6 +190,11 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
   const stats = useStats(orgId, initial.id);
   const graphics = useMatchGraphics(orgId, initial.id);
   const [bench, setBench] = useState(false);
+  // «Zeichnen» on the stage: the workbench opens drawing on the stage's moment (app review BUG-13)
+  const [drawAt, setDrawAt] = useState<{ t_ms: number } | null>(null);
+  useEffect(() => {
+    if (!bench) setDrawAt(null);
+  }, [bench]);
   // Escape closes the Werkbank like its «Schliessen» (A15)
   const benchRef = useRef<HTMLElement>(null);
   useEscape(bench, () => setBench(false), benchRef);
@@ -200,13 +205,16 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
   // deep links (?t=ms), e.g. a scene from Szenen or a play drawn on a video moment: the moment
   // plays in the full player, so it opens (behind the stage it would seek out of sight)
   // a moment in the full player: it opens, and the moment is sought once the video can
-  const benchAt = useCallback((t0: number, play = false) => {
+  // the workbench and its player are mounted only while open: one video on the page, not a second
+  // one loading hidden behind the stage (app review BUG-19); so a jump waits for its player
+  const benchAt = useCallback((t0: number, play = false, show = false) => {
     setBench(true);
     const id = window.setInterval(() => {
       const v = player.current?.video();
       if (v && v.readyState >= 1) {
         player.current?.seek(t0);
         if (play) player.current?.play();
+        if (show) reveal();
         window.clearInterval(id);
       }
     }, 300);
@@ -352,13 +360,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
 
   function onPlay(ms: number) {
     setView("video");
-    setBench(true);
-    // the player is kept mounted, so the seek works right after the switch
-    requestAnimationFrame(() => {
-      player.current?.seek(ms);
-      player.current?.play();
-      reveal();
-    });
+    benchAt(ms, true, true);
   }
 
   const base = `/app/${orgId}/matches/${match.id}`;
@@ -603,6 +605,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
             scene={scene}
             onThing={(n) => setView("video", n)}
             onBench={() => setBench(true)}
+            onDraw={(ms) => (setDrawAt({ t_ms: ms }), setBench(true))}
           />
         )}
         {/* the jump to the second half also with goals on the stage: it plays in the full player
@@ -653,7 +656,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
             <div className="mb-3">
               <PartsLine videos={match.videos} onJump={(ms) => benchAt(ms, true)} />
             </div>
-            <Workspace orgId={orgId} match={match} video={main} staff={staff} teamName={teamName} oppName={oppName(match)} names={names} handle={player} setup={setup} requestPane={askPane} checkSteps={false} />
+            {bench && <Workspace orgId={orgId} match={match} video={main} staff={staff} teamName={teamName} oppName={oppName(match)} names={names} handle={player} setup={setup} requestPane={askPane} requestDraw={drawAt} checkSteps={false} />}
           </section>
         ) : !staff ? (
           <EmptyState icon={<Clapperboard />} title={match.source === "paper_report" ? t("stats.noVideo") : t("player.notReady")} />
