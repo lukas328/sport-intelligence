@@ -16,7 +16,9 @@ Two steps, both resumable (one directory per segment under OUT):
   * ball path coverage: share of frames from 1.5 s before to 1.5 s after each shot with a ball
     point (`ballpossession.ball_path_v2`, no clock gate, no court needed); also the share of shots
     with a point on at least half of those frames;
-  * 95 % intervals by a bootstrap over games (segments of one game together).
+  * 95 % intervals by a bootstrap over games (segments of one game together);
+  * per shot (`per_shot` in score.json): the nearest shot candidate's peak minus the mark, to
+    score a fixed time estimate later without running the chain again.
 
     uv run python ml/integration/shot_segments_eval.py observe SEGMENTS.json OUT MODELS \
         --ball MODEL.onnx --width 960 --every 3
@@ -55,6 +57,7 @@ DESIGN_WINDOW_S = (3.0, 8.0)
 BALL_WINDOW_S = 1.5
 OWNER = "lukasde1000"
 DENSE_S = 8.0
+NEAR_S = (10.0, 15.0)  # per-shot output: candidate peaks from 10 s before to 15 s after a mark
 
 
 def _game(seg: str) -> str:
@@ -257,6 +260,12 @@ def _match(
     return hit, len(used)
 
 
+def _nearest(t: float, peaks: list[float]) -> float | None:
+    """The nearest peak - t within NEAR_S (s), or None."""
+    d = [p - t for p in peaks if -NEAR_S[0] <= p - t <= NEAR_S[1]]
+    return round(min(d, key=abs), 2) if d else None
+
+
 def _per_segment(marks: dict[str, list], out: Path) -> dict[str, dict]:
     per = {}
     for seg, shots in marks.items():
@@ -279,6 +288,9 @@ def _per_segment(marks: dict[str, list], out: Path) -> dict[str, dict]:
             cover.append(sum(f in frames for f in range(lo, hi + 1)) / n)
         dense_cover = _dense_cover(d, shots)
         per[seg] = {
+            # per mark: the nearest shot candidate's peak (rate <= 4) - mark, so that a later time
+            # estimate can be scored on these segments without running the chain again
+            "peak_minus_mark": [_nearest(t, r["shot_peaks"]) for t, _ in shots],
             "dense": dense_cover,
             "game": _game(seg),
             "shots": [(o, s_hit[k], cover[k]) for k, (_, o) in enumerate(shots)],
@@ -398,6 +410,11 @@ def score(marks_path: Path, out: Path, boot: int = 2000) -> None:
                 "shots": n_shots,
                 "by_outcome": counts,
                 "metrics": report,
+                "per_shot": [
+                    {"seg": seg, "t_s": t, "kind": o, "peak_minus_mark_s": d}
+                    for seg, p in per.items()
+                    for (t, o), d in zip(marks[seg], p["peak_minus_mark"], strict=True)
+                ],
             },
             indent=1,
         )

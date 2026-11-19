@@ -843,3 +843,64 @@ Lesart:
   90 % Abdeckung ist erreicht, über die Richtigkeit sagt es nichts.
 - Nicht gemacht: die GPU-Einstellung (jedes Bild), auch nicht genähert (Budget). Laufzeit auf Kaggle
   (4 Kerne, ein Prozess): im Mittel 1266 s pro 3-min-Segment, 7.0 x Videolänge.
+
+### Wurfzeit der Kandidaten (2026-11-19)
+
+Frage: Warum liegt die geschätzte Wurfzeit der Wurf-Kandidaten im Endtest im Median 2.8 s nach
+Lukas' Markierung, und lässt sie sich ohne Verlust an Recall genauer machen?
+
+Wie die Zeit entsteht (`goalcandidates.shot_candidates`):
+- Der Kandidat ist der Peak von `shot_score` = rz(Kosinus zur Wurf-Vorlage) + rz(Kosinus zur
+  Tor-Vorlage) + rz(Flaute danach), auf dem 10-Hz-Raster aus Kameraschwenk und Personen-Bewegung.
+  Beide Vorlagen (Fenster 2 s vor bis 3 s nach dem Peak) zeigen dasselbe: die Kamera schwenkt
+  anhaltend in eine Richtung, die Spieler laufen schnell und werden langsamer. Das ist das Kippen
+  des Spiels nach dem Angriff (Rücklauf, Abwurf des Torhüters, Anwurf), nicht der Abwurf selbst.
+- Die Wurfzeit ist Peak minus `shot_offset_s` = 1.5 s (`data/shot_template.json`). Diese 1.5 s sind
+  der Median von Peak minus **Protokollzeit** auf den Dev-Daten, nicht minus Abwurf.
+
+Diagnose (zwei Anteile):
+- **Systematisch: die Bezugszeit.** Dev (28 Segmente, 7 Spiele, 93 Würfe aus den offiziellen
+  Spielberichten, leave-one-game-out, gespeichert in `shot_template.json`): Peak minus Protokollzeit
+  im Median +1.5 s. Endtest (gespeicherter Bericht oben, Markierung = Abwurf auf etwa 1 s): Peak minus
+  Markierung im Median 1.5 + 2.8 = 4.3 s. Liegt der Peak in beiden Sätzen gleich zum Spiel, kommt der
+  Protokolleintrag rund 3 s nach dem Abwurf (Schluss aus zwei Datensätzen, nicht gemessen). Das passt
+  zu den Protokollen der 3. Liga, die 4 bis 6 s hinter der Anzeige liegen (`ml/goals/README.md`), und
+  zu `pick_shots.py` / `shot_check.py`, die den Wurf vor der Protokollzeit suchen.
+- **Veränderlich: das Kippen folgt dem Wurf nicht im festen Abstand.** Dev, Peak minus Protokollzeit
+  nach Ausgang: Tore +0.9 s, gehalten +1.8 s, daneben +2.6 s (IQR 2.6 bis 3.5 s). Endtest: Quartile
+  0.6 und 4.3 s, also 3.7 s Breite bei Markierungen auf etwa 1 s; die Streuung kommt vom Signal, nicht
+  von den Markierungen.
+
+Warum keine Korrektur eingebaut ist:
+- **Konstante Verschiebung:** Auf Dev gibt es keine Abwurfzeiten, nur Protokollzeiten; damit lernt
+  man wieder die 1.5 s von heute. Die Konstante aus dem Endtest zu nehmen hiesse, auf dem Endtest
+  einzustellen. Selbst die ideale Konstante brächte bei 3.7 s Quartilbreite nur etwa die Hälfte der
+  114 Würfe mit einem Kandidaten in ±2 s (grob, aus den gespeicherten Endtest-Quartilen gelesen,
+  nicht verwendet).
+- **Auf den Ballpfad setzen** (schnellste Ballbewegung zum Tor vor dem Peak): Für die Dev-Segmente
+  ist kein Ballnetz-Ergebnis gespeichert (`ml/goals/README.md`, Shots/Data), und die privaten
+  Kaggle-Daten waren aus dieser Sitzung nicht erreichbar (403, kein Schlüssel eingesetzt). Die einzige
+  Dev-Prüfung dazu (41 Dev-Wurfclips, oben «Wurf-Ereignisse: erster Befund») fand den Wurf über die
+  Ballgeschwindigkeit nicht besser als Zufall.
+- **Die API rechnet mit der Protokollzeit:** `goal_ms` dient auch zum Zuordnen der Spielbericht-Einträge
+  (`services/goal_candidates.py`, Fenster 8 bis 20 s). Eine auf den Abwurf verschobene Zeit müsste
+  dort die Protokoll-Verzögerung wieder dazurechnen.
+- Für die Clips reicht die heutige Zeit: der Abwurf liegt im Median 4.3 s und im oberen Quartil 5.8 s
+  vor dem Peak, der Clip beginnt 8 s davor.
+
+Geändert: nur Doku und Messung. In `goalcandidates.py` sagt der Kommentar zu `offset_s` jetzt, dass er
+auf die Protokollzeit bezogen ist. `ml/integration/shot_segments_eval.py score` schreibt pro Wurf den
+Abstand des nächsten Kandidaten-Peaks zur Markierung (`per_shot` in score.json), damit eine auf Dev
+festgelegte Methode später auf dem Endtest ohne neuen Lauf der Kette gemessen werden kann. Der
+gespeicherte `shot_endtest_result.json` hat keine Werte pro Wurf.
+
+Nächster Schritt:
+1. Abwurfzeiten auf Dev: Lukas markiert mit der Seite «Würfe markieren» die Abwürfe der 41
+   Dev-Wurfclips (`ml/gold/shot_clips.json`, split dev, ein Klick pro Clip) oder der 28
+   Protokoll-Segmente (93 Würfe). Damit: Konstante auf Dev, und der Ballpfad als Anker (letzte schnelle
+   Bewegung Richtung des Tors, auf das die Kamera schaut, im Fenster 6 s bis 0.5 s vor dem Peak, mit
+   Sicherheit aus Geschwindigkeit und Abdeckung), beides gegen ±2 s auf Dev.
+2. Dafür die Beobachtungen der Dev-Segmente mit Ballnetz (CPU-Testeinstellung wie im Endtest) als
+   Kaggle-CPU-Kernel rechnen; die Sitzung braucht dazu den Kaggle-Zugang.
+3. Erst danach: die festgelegte Methode einmal auf dem Endtest melden (aus `per_shot` und den
+   gespeicherten Kandidaten), und die API-Zuordnung zum Spielbericht auf die neue Zeit anpassen.
