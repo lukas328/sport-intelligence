@@ -710,8 +710,10 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
         // the court gets the whole width: the hall image as large as possible (E04)
         <>
         {notice && current.kind === "field" && !notice.failed && <AnalysisNotice notice={notice} className="mt-6" testId="check-field-notice" />}
-        <div className={cn("grid gap-5 py-6 md:gap-14 md:py-10", spotStep && "max-md:gap-2 max-md:py-2", current.kind === "field" ? "md:grid-cols-1 md:gap-6" : "md:grid-cols-[minmax(0,1fr)_420px]")}>
-          <figure className="relative m-0 self-start bg-[#1d2125]">
+        <div className={cn("grid gap-5 py-6 md:gap-14 md:py-10", spotStep && "max-md:gap-2 max-md:py-2", current.kind === "field" ? "md:grid-cols-1 md:gap-6" : "md:grid-cols-[minmax(0,1fr)_340px] md:gap-8 xl:grid-cols-[minmax(0,1fr)_420px] xl:gap-14")}>
+          {/* the clip whole, with its controls under it: on a laptop the answers sit beside a
+              picture that fits the screen (app review BUG-14, livegang L2: only a strip showed) */}
+          <figure className={cn("relative m-0 w-full self-start bg-[#1d2125]", current.kind !== "field" && "md:max-w-[calc((100svh-24rem)*16/9)]")}>
             {current.kind === "field" && main && panoSize && corners ? (
               <FieldCheck key={current.videoId} src={`/v1/orgs/${orgId}/videos/${current.videoId}/panorama`} alt={t("fieldAlt")} size={panoSize} corners={corners} onChange={setMoved} />
             ) : current.kind === "field" && main ? (
@@ -724,6 +726,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
                 src={`${media}/hls/master.m3u8`}
                 window={{ start_ms: Math.max(0, current.at - 1500), end_ms: current.at + 2500 }}
                 autoPlay
+                under
                 overlay={
                   <PersonCrop
                     getVideo={getVideo}
@@ -738,9 +741,9 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
               />
             ) : current.kind === "kickoff" && media ? (
               // the second half's throw-off: the player starts where the second half's file starts
-              <VideoPlayer ref={player} key={`kickoff-${current.period}`} src={`${media}/hls/master.m3u8`} window={kickoffFrom(current.period)} />
+              <VideoPlayer ref={player} key={`kickoff-${current.period}`} src={`${media}/hls/master.m3u8`} window={kickoffFrom(current.period)} under />
             ) : current.kind === "goal" && media ? (
-              <VideoPlayer ref={player} key={current.c.id} src={`${media}/hls/master.m3u8`} window={goalWindow(current.c)} autoPlay bare={spotStep != null} loop={spotStep != null} />
+              <VideoPlayer ref={player} key={current.c.id} src={`${media}/hls/master.m3u8`} window={goalWindow(current.c)} autoPlay bare={spotStep != null} loop under />
             ) : current.kind !== "field" ? (
               // the video is not playable yet (still uploaded or converted): said, never an empty
               // black area; the page looks again until it plays (livegang K5)
