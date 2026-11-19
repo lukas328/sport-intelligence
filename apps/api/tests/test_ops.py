@@ -76,6 +76,42 @@ async def test_backoffice(make_api: Callable[[], Api], operators: None) -> None:
     assert (await op.post(f"/v1/ops/jobs/{ok_job}/retry")).status_code == 409
 
 
+async def test_signup_source_reaches_the_operators(
+    make_api: Callable[[], Api], operators: None
+) -> None:
+    """Website review: the `?src=<place>` of the website is kept through the sign-up and stored
+    with the account and the club it creates; a malformed one is dropped, never refused."""
+
+    async def sign_up(email: str, source: str | None) -> Api:
+        api = make_api()
+        r = await api.post(
+            "/v1/auth/register",
+            json={
+                "email": email,
+                "name": "Lea",
+                "password": "correct-horse-1",
+                "accept_terms": True,
+                "source": source,
+            },
+        )
+        assert r.status_code == 201
+        return api
+
+    # the club takes the creator's source when the request names none
+    coach = await sign_up("lea@hc-quelle.ch", "Pricing")
+    assert (await coach.post("/v1/orgs", json={"name": "HC Quelle"})).status_code == 201
+    other = await sign_up("tom@hc-andere.ch", "<b>x</b>")
+    assert (await other.post("/v1/orgs", json={"name": "HC Andere"})).status_code == 201
+    third = await sign_up("max@hc-geteilt.ch", None)
+    body = {"name": "HC Geteilt", "source": "shared"}
+    assert (await third.post("/v1/orgs", json=body)).status_code == 201
+
+    op = make_api()
+    await op.register("ops@handball-ops.ch")
+    orgs = {o["name"]: o["source"] for o in (await op.get("/v1/ops/organizations")).json()}
+    assert orgs == {"HC Quelle": "pricing", "HC Andere": None, "HC Geteilt": "shared"}
+
+
 async def test_internal_stats(make_api: Callable[[], Api]) -> None:
     api = make_api()
     ids = await setup_club(api)

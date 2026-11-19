@@ -15,7 +15,7 @@ from handball_api.models.enums import (
     TeamGender,
     TeamRole,
 )
-from handball_api.schemas.common import ApiModel, HexColor, Name
+from handball_api.schemas.common import ApiModel, HexColor, Name, SignupSource
 
 Country = Annotated[str, StringConstraints(pattern=r"^[A-Z]{2}$")]
 InviteeName = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=80)]
@@ -27,6 +27,8 @@ class OrgCreate(ApiModel):
     # left out: the club has not chosen its colour yet and shows the neutral fallback (E8)
     primary_color: HexColor | None = None
     secondary_color: HexColor = "#ffffff"
+    # the website's `?src=<place>`; left out, the creator's own source from the sign-up is taken
+    source: SignupSource = None
 
 
 class OrgUpdate(ApiModel):

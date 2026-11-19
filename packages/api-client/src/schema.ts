@@ -9553,6 +9553,8 @@ export interface components {
              * @default #ffffff
              */
             secondary_color?: string;
+            /** Source */
+            source?: string | null;
         };
         /** OrgDelete */
         OrgDelete: {
@@ -10654,6 +10656,8 @@ export interface components {
             name: string;
             /** Password */
             password: string;
+            /** Source */
+            source?: string | null;
         };
         /** RemoteCommand */
         RemoteCommand: {

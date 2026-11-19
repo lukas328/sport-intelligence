@@ -53,6 +53,8 @@ class Organization(Base, EntityMixin):
     # end of the period paid by invoice; the plan stays active until then
     paid_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     trial_used: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    # where the club's first admin came from (the website's `?src=<place>`), for operators
+    signup_source: Mapped[str | None] = mapped_column(String(40))
     # official club (docs/plans/federation-onboarding.md): one organisation per provider + club id
     official_provider: Mapped[str | None] = mapped_column(String(20))
     official_club_id: Mapped[int | None] = mapped_column(Integer)

@@ -93,7 +93,7 @@ test("player: the match page leads to the own scenes, assessment first", async (
   await player.getByRole("link", { name: "Konto erstellen und annehmen" }).click();
   await player.getByLabel("Vor- und Nachname").fill("Mia Muster");
   await player.getByLabel("Passwort").fill("correct-horse-1");
-  await player.getByLabel(/Nutzungsbedingungen/).check();
+  await player.getByLabel(/AGB/).check();
   await player.getByRole("button", { name: "Konto erstellen" }).click();
   // the start is Spiele (K18); wait for the redirect to land before opening the match
   await player.waitForURL(/\/teams\/[^/]+\/matches/, { timeout: 30_000 });

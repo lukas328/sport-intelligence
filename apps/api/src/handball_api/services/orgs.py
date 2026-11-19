@@ -65,6 +65,7 @@ async def create_org(ctx: Ctx, user: User, data: OrgCreate) -> Organization:
             country=data.country,
             primary_color=data.primary_color,
             secondary_color=data.secondary_color,
+            signup_source=data.source or user.signup_source,
         )
         if ctx.settings.trial_on_signup:
             # the Team plan's trial from packages/plans; effective_plan falls back to Free after

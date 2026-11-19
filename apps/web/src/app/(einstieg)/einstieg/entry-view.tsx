@@ -18,6 +18,7 @@ import { goalRuns, type MatchGraphics } from "@/lib/graphics";
 import { threeThings } from "@/lib/three-things";
 import { cn } from "@/lib/utils";
 import { sitePage, useMailEnabled, useSiteConfig } from "@/lib/site-config";
+import { signupSource } from "@/lib/signup-source";
 import { enterApp } from "@/lib/nav";
 import { ENTRY_EMAIL, remember } from "@/lib/offline";
 
@@ -455,7 +456,7 @@ function SaveStep({ club, team, name, colour, onBack }: { club: number | null; t
     setBusy(true);
     remember(ENTRY_EMAIL, email);
     const r = await api.POST("/v1/auth/register", {
-      body: { name: String(f.get("name")).trim(), email, password: String(f.get("password")), accept_terms: true, locale: lang, invitation_token: null },
+      body: { name: String(f.get("name")).trim(), email, password: String(f.get("password")), accept_terms: true, locale: lang, invitation_token: null, source: signupSource() },
     });
     if (r.error) {
       setBusy(false);

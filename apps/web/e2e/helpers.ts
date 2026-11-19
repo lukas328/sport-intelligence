@@ -56,7 +56,7 @@ export async function register(page: Page, email: string, name = "Test Trainerin
   await page.getByLabel("Vor- und Nachname").fill(name);
   await page.getByLabel("E-Mail").fill(email);
   await page.getByLabel("Passwort").fill("correct-horse-1");
-  await page.getByLabel(/Nutzungsbedingungen/).check();
+  await page.getByLabel(/AGB/).check();
   await page.getByRole("button", { name: "Konto erstellen" }).click();
   // password hashing is deliberately slow; wait until the app has moved on
   await page.waitForURL((url) => !url.pathname.startsWith("/register"), { timeout: 30_000 });

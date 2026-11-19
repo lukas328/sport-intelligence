@@ -183,6 +183,7 @@ async def register(
         locale=data.locale,
         password_hash=await asyncio.to_thread(hash_password, data.password),
         terms_accepted_at=_now(),
+        signup_source=data.source,
     )
     ctx.db.add(user)
     await ctx.db.flush()
