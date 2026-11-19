@@ -720,6 +720,7 @@ async def match_out(ctx: Ctx, match: Match) -> MatchOut:
         videos=[video_out(v, parts.get(v.id), half.get(v.id)) for v in videos],
         jobs=[JobOut.model_validate(j) for j in jobs],
         scouting_other=match.scouting_other,
+        official_game=match.official_game_id is not None,
     )
 
 

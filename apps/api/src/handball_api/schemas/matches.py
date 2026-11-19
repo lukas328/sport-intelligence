@@ -326,6 +326,11 @@ class MatchOut(ApiModel):
     scouting_other: str | None = Field(
         default=None, description="scouting: the team the opponent plays against"
     )
+    official_game: bool = Field(
+        default=False,
+        description="a game of the federation's schedule (handball.ch): its official report comes "
+        "by itself; false for a match the source does not know (app review TXT-06)",
+    )
     progress: MatchProgressOut | None = Field(
         default=None,
         description="uploads and processing while they run and a while after (services/progress); "

@@ -59,6 +59,11 @@ class SearchFilter(ApiModel):
     match_ids: list[uuid.UUID] = Field(default_factory=list, max_length=200)
     opponent_id: uuid.UUID | None = None
     kind: Literal["match", "training"] | None = None
+    observed: bool | None = Field(
+        default=None,
+        description="true: only observed matches (kind scouting); false: only the team's own "
+        "matches; null: both (app review UX-07)",
+    )
     types: list[str] = Field(default_factory=list, max_length=20)
     sides: list[Literal["own", "opponent"]] = Field(default_factory=list)
     outcomes: list[str] = Field(default_factory=list, max_length=20)
@@ -93,6 +98,9 @@ class SearchHit(ApiModel):
     player_id: uuid.UUID | None = None
     title: str | None = None
     tag_ids: list[uuid.UUID]
+    observed: bool = Field(
+        default=False, description="from an observed match: not a scene of the team's season"
+    )
 
 
 class SearchResult(ApiModel):

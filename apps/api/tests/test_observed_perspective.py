@@ -42,6 +42,9 @@ async def test_observed_match_takes_shirt_numbers_not_our_players(
         scouting_other="TV Dritte",
     )
     ours = await new_match(coach, ids, opponent_name="HC Beobachtet")
+    # not a game of the federation's schedule: no «the official report comes» (TXT-06)
+    read = (await coach.get(f"/v1/orgs/{org}/matches/{observed['id']}")).json()
+    assert read["official_game"] is False
     shot = {"type": "shot", "side": "own", "outcome": "goal", "clock_s": 60}
 
     # our player cannot score in a match our team does not play
@@ -67,3 +70,14 @@ async def test_observed_match_takes_shirt_numbers_not_our_players(
         f"/v1/orgs/{org}/matches/{ours['id']}/events", json={**shot, "player_id": lena}
     )
     assert r.status_code == 201, r.text
+
+    # Szenen (UX-07, BUG-12): the observed match's scenes are found, marked and filterable
+    search = f"/v1/orgs/{org}/teams/{ids['team']}/search"
+    hits = (await coach.post(search, json={})).json()["hits"]
+    assert {h["observed"] for h in hits} == {True, False}
+    labels = {h["match_label"] for h in hits if h["observed"]}
+    assert labels == {"TV Dritte - HC Beobachtet"}  # home team first, no team of ours
+    only = (await coach.post(search, json={"observed": True})).json()["hits"]
+    assert only and all(h["observed"] for h in only)
+    own = (await coach.post(search, json={"observed": False})).json()["hits"]
+    assert own and not any(h["observed"] for h in own)
