@@ -143,7 +143,7 @@ test("match: create, upload with pause and resume, processing, player, comment, 
   const table = page.getByTestId("comparison");
   await expect(table.getByRole("row", { name: /^Tore(?! pro)/ })).toContainText("1");
   await expect(table.getByRole("row", { name: /^Würfe/ })).toContainText("2");
-  await table.getByRole("button", { name: "Tore Herren 1" }).click();
+  await table.getByRole("button", { name: "Tore HC Video" }).click();
   const list = page.getByTestId("event-list");
   await expect(list).toContainText("1. HZ 0:08");
   await list.getByRole("button", { name: /Abspielen/ }).click();
