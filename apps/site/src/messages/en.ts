@@ -254,6 +254,10 @@ const en: Messages = {
       },
     ],
     honestAll: "The full list, point by point",
+    zero: {
+      title: "Before: ask the team",
+      text: "Once a season you share a link in the team chat. Every player says yes or no there, for each purpose separately and without an account; under 16 the parents. In the app you see where consent is still missing.",
+    },
     shotsTitle: "What it looks like in the app",
     shotsNote: "Pictures from the app, with an invented example club.",
     shots: [{ alt: "A match in the app: the video with a timeline of all goals on the left, the list of scenes on the right, the current one in yellow.", caption: "Every goal as a scene: tap it, and the video jumps there.", text: "On the right the scenes of the phase, below all goals of the match on one line. You tap, the video plays right there." }, { alt: "Scenes in the app: search for goal conceded, right wing, last 3 with video, answer 26 of 77 goals conceded on the right wing and the button to play all 26.", caption: "Ask your matches: the number and its scenes.", text: "Searching scenes is part of it. Type what you are looking for, say goal conceded, right wing, last three matches. The number says what it is worked out from (26 of 77), and all scenes play in a row." }, { alt: "The season in the app: five matches, and the right wing stays open. Below, the topics that repeat, with one bar per match, on the right the half court with the shots.", caption: "The season: what repeats.", text: "One bar per match shows whether a topic stays or goes away. Next to it the shots of all matches on the half court." }, { alt: "How a collection arrives in the chat: a card in the club colour titled Close the right wing, below it the team and 4 scenes. Further down the button to share the link.", caption: "One link for the team, no account for the players.", text: "The key scenes go to the team chat as a collection by link. Opening it needs no account, and the link expires." }],
@@ -575,7 +579,15 @@ const en: Messages = {
       },
       {
         title: "Saying no",
-        text: "Whoever says no to highlights does not appear in highlights, and whoever says no to public content does not appear in public content. What happens with the video within the team is best discussed directly with the coaches.",
+        text: "Whoever says no to «video analysis in the team» gets no list of their own scenes in the app, and the coaches see «Consent missing» in the squad. Nobody is made unrecognisable: the person is in the video like everyone on the court, and only the coaches see the whole video. Whoever says no to highlights in the club, the app leaves their scenes out of highlights. And a highlight with someone who said no to public highlights cannot be shared publicly.",
+      },
+      {
+        title: "Names from the official squad",
+        text: "When the app takes over the squad from handball.ch, only the coaches see the names until the person is in the app or has given a consent.",
+      },
+      {
+        title: "The opposing team",
+        text: "The opposing team is in the video too. Nobody there can consent by link; that is why there is the notice for the hall, which tells everyone that the match is filmed.",
       },
       {
         title: "Where the data lives",

@@ -252,6 +252,10 @@ const de = {
       },
     ],
     honestAll: "Die ganze Liste, Punkt für Punkt",
+    zero: {
+      title: "Vorher: das Team fragen",
+      text: "Einmal pro Saison teilst du einen Link im Teamchat. Jede Spielerin und jeder Spieler sagt dort selbst ja oder nein, für jeden Zweck einzeln und ohne Konto, bis 16 die Eltern. In der App siehst du, wo die Einwilligung noch fehlt.",
+    },
     shotsTitle: "So sieht es in der App aus",
     shotsNote: "Bilder aus der App, mit einem erfundenen Beispielverein.",
     shots: [{ alt: "Ein Spiel in der App: links das Video mit der Zeitleiste aller Tore, rechts die Liste der Szenen, die laufende gelb markiert.", caption: "Jedes Tor als Szene: antippen, und das Video springt hin.", text: "Rechts die Szenen der Phase, unten alle Tore des Spiels auf einer Linie. Du tippst, das Video läuft genau dort." }, { alt: "Szenen in der App: Suche nach Gegentor, aussen rechts, letzte 3 mit Video, Antwort 26 von 77 Gegentoren über aussen rechts und der Knopf Alle 26 abspielen.", caption: "Frag deine Spiele: die Zahl und die Szenen dazu.", text: "Auch die Szenensuche gehört dazu. Schreib, was du suchst, zum Beispiel Gegentor, aussen rechts, letzte drei Spiele. Die Zahl sagt, woraus sie gerechnet ist (26 von 77), und alle Szenen laufen am Stück." }, { alt: "Saison in der App: Titel Fünf Spiele. Und aussen rechts bleibt offen. Darunter Themen, die sich wiederholen, mit einem Balken pro Spiel, rechts das halbe Feld mit den Würfen.", caption: "Die Saison: was sich wiederholt.", text: "Ein Balken pro Spiel zeigt, ob ein Thema bleibt oder weg ist. Daneben die Würfe aus allen Spielen auf dem halben Feld." }, { alt: "So kommt eine Sammlung im Chat an: eine Karte in der Vereinsfarbe mit dem Titel Aussen rechts zumachen, darunter das Team und 4 Szenen. Weiter unten der Knopf Link teilen.", caption: "Ein Link fürs Team, ohne Konto für die Spieler.", text: "Die wichtigsten Szenen kommen als Sammlung per Link in den Teamchat. Wer ihn öffnet, braucht kein Konto, und der Link läuft ab." }],
@@ -574,7 +578,15 @@ const de = {
       },
       {
         title: "Wer nein sagt",
-        text: "Wer bei Highlights nein sagt, erscheint nicht in Highlights, und wer bei öffentlichen Inhalten nein sagt, nicht in öffentlichen Inhalten. Was im Team mit dem Video passiert, besprichst du am besten direkt mit dem Trainerteam.",
+        text: "Wer bei «Videoanalyse im Team» nein sagt, bekommt in der App keine eigene Liste mit seinen Szenen, und das Trainerteam sieht im Kader «Einwilligung fehlt». Unkenntlich gemacht wird niemand: Im Video ist die Person zu sehen wie alle auf dem Feld, und das ganze Video sieht nur das Trainerteam. Wer bei Highlights im Verein nein sagt, dessen Szenen lässt die App in Highlights weg. Und ein Highlight mit jemandem, der bei öffentlichen Highlights nein gesagt hat, lässt sich nicht öffentlich teilen.",
+      },
+      {
+        title: "Namen aus dem offiziellen Kader",
+        text: "Übernimmt die App den Kader von handball.ch, sieht die Namen nur das Trainerteam, bis die Person selbst in der App ist oder eine Einwilligung gegeben hat.",
+      },
+      {
+        title: "Das Gegnerteam",
+        text: "Auch das Gegnerteam ist im Video. Per Link einwilligen kann dort niemand; darum gibt es den Aushang für die Halle, der allen sagt, dass gefilmt wird.",
       },
       {
         title: "Wo die Daten liegen",

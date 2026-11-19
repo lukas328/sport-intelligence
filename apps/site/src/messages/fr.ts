@@ -254,6 +254,10 @@ const fr: Messages = {
       },
     ],
     honestAll: "La liste complète, point par point",
+    zero: {
+      title: "Avant : demander à l'équipe",
+      text: "Une fois par saison, tu partages un lien dans le chat d'équipe. Chaque joueuse et chaque joueur y dit oui ou non, pour chaque usage séparément et sans compte ; avant 16 ans, les parents. Dans l'app, tu vois où le consentement manque encore.",
+    },
     shotsTitle: "Voici à quoi ça ressemble dans l'app",
     shotsNote: "Images de l'app, avec un club d'exemple inventé.",
     shots: [{ alt: "Un match dans l'app : à gauche la vidéo avec la frise de tous les buts, à droite la liste des scènes, celle en cours en jaune.", caption: "Chaque but comme scène : tu touches, et la vidéo saute au bon endroit.", text: "À droite les scènes de la phase, en bas tous les buts du match sur une ligne. Tu touches, la vidéo démarre exactement là." }, { alt: "Scènes dans l'app : recherche but encaissé, aile droite, 3 derniers avec vidéo, réponse 26 buts encaissés sur 77 par l'aile droite et le bouton pour les regarder tous.", caption: "Interroge tes matchs : le chiffre et ses scènes.", text: "La recherche de scènes en fait partie. Écris ce que tu cherches, par exemple but encaissé, aile droite, trois derniers matchs. Le chiffre dit de quoi il est calculé (26 sur 77), et toutes les scènes passent d'affilée." }, { alt: "La saison dans l'app : cinq matchs, et l'aile droite reste ouverte. En dessous, les thèmes qui se répètent, avec une barre par match, à droite le demi-terrain avec les tirs.", caption: "La saison : ce qui se répète.", text: "Une barre par match montre si un thème reste ou disparaît. À côté, les tirs de tous les matchs sur le demi-terrain." }, { alt: "Voici comment une sélection arrive dans le chat : une carte aux couleurs du club avec le titre Fermer l'aile droite, puis l'équipe et 4 scènes. Plus bas, le bouton pour partager le lien.", caption: "Un lien pour l'équipe, sans compte pour les joueurs.", text: "Les scènes importantes partent en sélection par lien dans le chat de l'équipe. Pour l'ouvrir, pas besoin de compte, et le lien expire." }],
@@ -575,7 +579,15 @@ const fr: Messages = {
       },
       {
         title: "Dire non",
-        text: "Qui dit non aux temps forts n'apparaît pas dans les temps forts, et qui dit non aux contenus publics n'apparaît pas dans les contenus publics. Ce qui se passe avec la vidéo dans l'équipe se discute au mieux directement avec le staff.",
+        text: "Qui dit non à « analyse vidéo dans l'équipe » n'a pas de liste de ses propres scènes dans l'app, et le staff voit « Consentement manquant » dans l'effectif. Personne n'est rendu méconnaissable : la personne est dans la vidéo comme tous sur le terrain, et seul le staff voit la vidéo entière. Qui dit non aux temps forts dans le club, l'app laisse ses scènes de côté dans les temps forts. Et un temps fort avec quelqu'un qui a dit non aux temps forts publics ne peut pas être partagé publiquement.",
+      },
+      {
+        title: "Les noms de l'effectif officiel",
+        text: "Quand l'app reprend l'effectif de handball.ch, seul le staff voit les noms, jusqu'à ce que la personne soit elle-même dans l'app ou ait donné un consentement.",
+      },
+      {
+        title: "L'équipe adverse",
+        text: "L'équipe adverse est aussi dans la vidéo. Personne ne peut y consentir par lien ; c'est pour cela qu'il y a l'affiche pour la salle, qui dit à tous que le match est filmé.",
       },
       {
         title: "Où sont les données",
