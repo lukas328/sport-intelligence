@@ -21,7 +21,7 @@ Einstieg danach wie immer: `docs/plans/HANDOVER.md`.
 | 2026-11-19 | Hauptsitzung | A22 Wurfort: Die Schätzung ist bei «Von wo?» vorausgewählt, ein Tipp bestätigt sie, nur bestätigte zählen für die drei Dinge. Website-Text entsprechend. Voll automatisch erst, wenn die Schätzung verlässlich ist. | Helfer A22 (siehe unten) |
 | 2026-11-19 | Hauptsitzung | Spielende in der Pausenerkennung: lief die Uhr zuletzt und wurde danach keine stehende Uhr gelesen, zählt das Spiel bis zum Videoende weiter (mit Obergrenze). | Helfer Spielende |
 | 2026-11-19 | Lukas | Die Website erzählt die Vision des fertigen Produkts (Aufwand, «Samstag, 22 Uhr»), nicht den Stand der Testphase. Keine Zahlen aus der CPU-Testphase auf die Website. | `BEFUNDE-5-website-review.md` |
-| 2026-11-19 | Hauptsitzung | App-Review: beobachtete Spiele neutral (kein «Wir»), Szenen beobachteter Spiele in «Szenen» mit Filter, eigener Abschnitt in der Spieleliste, Onboarding-Schritt 1 erledigt bei jedem analysierten Video; aus «die drei Dinge» wird «die drei Muster» (Lukas), als letzter Schritt in App und Website. | `BEFUNDE-6-app-review.md` |
+| 2026-11-19 | Hauptsitzung | App-Review: beobachtete Spiele neutral (kein «Wir»), Szenen beobachteter Spiele in «Szenen» mit Filter, eigener Abschnitt in der Spieleliste, Onboarding-Schritt 1 erledigt bei jedem analysierten Video; aus «die drei Dinge» wird nur «Muster», ohne Zahl (Lukas, 19.11. spät: es können beliebig viele Einsichten sein), en «patterns», fr «tendances»; als letzter Schritt in App und Website. | `BEFUNDE-6-app-review.md` |
 | 2026-11-19 | Lukas | Schwerpunkt Europa (wie `docs/plans/europa.md`): Website mit EUR und CHF, ehrliche Teamsuche ausserhalb der Schweiz. Wirkung der Website messen mit `?src=` an jedem App-Link; Lukas wäre auch mit Cookies einverstanden, die Hauptsitzung bleibt bei «keine Cookies» (Verkaufsargument), weil `?src=` dafür reicht. Seite «Für Vereine», «Gemacht mit Handball Intelligence» auf geteilten Szenen. Launch-Zeitpunkt Rückrunde Januar: Vorschlag des Reviews, Entscheid bei Lukas. | `BEFUNDE-5-website-review.md` |
 | 2026-11-19 | Hauptsitzung | Keine offenen GPU-Aufträge; 12 bis 15 erledigt, 11 und 3 zurückgestellt. | `ml/gpu/JOBS.md` |
 
@@ -70,7 +70,7 @@ Arbeit liegt nur in lokalen Worktrees und geht mit dem Container verloren, also 
 2. L1 «nicht jedes Tor markieren»: Tor-Kandidaten, die klar zu einem Tor im offiziellen Spielbericht
    passen, ohne Frage übernehmen (`apps/api/src/handball_api/services/goal_candidates.py`, heute nur
    Vorschlag); erst nach Block 2, weil derselbe Code die offenen Fragen zählt.
-3. «die drei Dinge» wird «die drei Muster» (en «the three patterns», fr «les trois tendances") in App,
+3. «die drei Dinge» wird «Muster» ohne Zahl (en «patterns», fr «tendances»; Lukas 19.11. spät) in App,
    Website, Demo und Hilfe; nur sichtbare Texte, URLs bleiben. Als letzter Schritt.
 4. UI-Check der ganzen Spielanalyse (L5) nach Block 1 bis 3.
 5. Danach aus `HANDOVER.md`: Kalibrierung per Klick auf Staging, Ball, übrige Code-Health-Punkte.
