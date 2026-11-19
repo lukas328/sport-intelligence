@@ -60,10 +60,10 @@ export default async function Data({ params }: Props) {
                 <ProductShot
                   name={appShot("share", locale)}
                   alt={m.home.shareAlt}
-                  labels={m.product.share}
+                  labels={{}}
                   caption={t.shareCaption}
-                  sizes={SHOT_SIZES.half(26)}
-                  className="mt-6 max-w-[26rem]"
+                  sizes={SHOT_SIZES.half(16)}
+                  className="mt-6 max-w-[16rem]"
                 />
               )}
             </section>
