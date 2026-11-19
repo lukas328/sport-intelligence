@@ -4213,7 +4213,7 @@
     "runD": "{n, plural, one {One draw.} other {# draws in a row.}}",
     "form": "The last matches",
     "scorers": "Top scorers",
-    "scorersBasis": "from {n, plural, one {one match report} other {# match reports}} of handball.ch",
+    "scorersBasis": "from {n, plural, one {the last match report} other {the last # match reports}} of handball.ch",
     "nextGame": "Next opponent",
     "home": "home",
     "away": "away",

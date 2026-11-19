@@ -4213,7 +4213,7 @@
     "runD": "{n, plural, one {Ein Unentschieden.} other {# Unentschieden in Folge.}}",
     "form": "Die letzten Spiele",
     "scorers": "Torschützen",
-    "scorersBasis": "aus {n, plural, one {einem Spielbericht} other {# Spielberichten}} von handball.ch",
+    "scorersBasis": "aus {n, plural, one {dem letzten Spielbericht} other {den letzten # Spielberichten}} von handball.ch",
     "nextGame": "Nächster Gegner",
     "home": "Heim",
     "away": "auswärts",

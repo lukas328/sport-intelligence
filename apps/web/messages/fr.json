@@ -4213,7 +4213,7 @@
     "runD": "{n, plural, one {Un match nul.} other {# nuls de suite.}}",
     "form": "Les derniers matchs",
     "scorers": "Buteurs",
-    "scorersBasis": "de {n, plural, one {une feuille de match} other {# feuilles de match}} de handball.ch",
+    "scorersBasis": "{n, plural, one {de la dernière feuille de match} other {des # dernières feuilles de match}} de handball.ch",
     "nextGame": "Prochain adversaire",
     "home": "à domicile",
     "away": "à l'extérieur",
