@@ -4186,6 +4186,7 @@
     "search": "Team suchen",
     "short": "Vereinsname oder Ort, mindestens drei Buchstaben.",
     "none": "Kein Team gefunden für «{q}».",
+    "noneAbroad": "Spielplan und Resultate kommen heute automatisch für Teams aus der Schweiz. Ist dein Team woanders, legst du es unten in einer Minute von Hand an und holst Spielberichte per Link, etwa von DHB, nuLiga oder HLA.",
     "noneWay": "Dein Team ist nicht dabei?",
     "byName": "Team von Hand anlegen",
     "scope": "Teams aus der Schweiz kommen mit Spielplan, alle anderen legst du in einer Minute an.",

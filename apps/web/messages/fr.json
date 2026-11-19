@@ -4186,6 +4186,7 @@
     "search": "Chercher l'équipe",
     "short": "Nom du club ou localité, au moins trois lettres.",
     "none": "Aucune équipe trouvée pour «{q}».",
+    "noneAbroad": "Le calendrier et les résultats arrivent aujourd'hui automatiquement pour les équipes de Suisse. Si ton équipe joue ailleurs, crée-la ci-dessous à la main en une minute et importe les feuilles de match par lien, par exemple de la DHB, de nuLiga ou de la HLA.",
     "noneWay": "Ton équipe n'y est pas ?",
     "byName": "Créer ton équipe à la main",
     "scope": "Les équipes de Suisse arrivent avec leur calendrier, toutes les autres se créent en une minute.",
