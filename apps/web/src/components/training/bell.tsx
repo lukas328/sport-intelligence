@@ -45,6 +45,9 @@ export function NotificationBell({ orgId }: { orgId: string }) {
     // who asks for which team (K17); older notes without a name keep the plain text
     const person = `${n.kind}_${(n.params as { team?: string } | null)?.team ? "team" : "named"}`;
     if ((n.params as { name?: string } | null)?.name && t.has(person as "assignment")) return t(person as "assignment", n.params as never);
+    // a note about a team names it: «… für die Herren 1» (app review UX-10)
+    const forTeam = `${n.kind}_forTeam`;
+    if ((n.params as { team?: string } | null)?.team && t.has(forTeam as "assignment")) return t(forTeam as "assignment", n.params as never);
     return t.has(n.kind as "assignment") ? t(n.kind as "assignment", n.params as never) : t("other");
   };
   // which match: its day beside the time of the note (A12)

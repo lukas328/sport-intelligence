@@ -1510,7 +1510,8 @@
     "official_report_match": "La feuille de match officielle contre {opponent} est disponible.",
     "feed_ready_match": "Tes scènes du match contre {opponent} sont prêtes.",
     "scouting_ready_match": "Le rapport de préparation sur {opponent} est prêt.",
-    "matchOn": "Match du {date}"
+    "matchOn": "Match du {date}",
+    "official_suggestions_forTeam": "{count, plural, one {# suggestion} other {# suggestions}} issues des données officielles pour {team}."
   },
   "assignments": {
     "title": "Tâches",

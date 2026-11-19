@@ -1264,7 +1264,8 @@ async def _sync_due_team(ctx: Ctx, team: Team) -> int:
             team.organization_id,
             await _organisers(ctx, team.id),
             "official_suggestions",
-            {"team_id": str(team.id), "count": new},
+            # the note names the team (app review UX-10): a club with several teams knows which
+            {"team_id": str(team.id), "team": team.name, "count": new},
             f"/app/{team.organization_id}/teams/{team.id}/official",
         )
     return new

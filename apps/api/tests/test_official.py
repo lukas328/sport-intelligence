@@ -1091,8 +1091,16 @@ async def test_daily_tick_syncs_and_imports_reports(
     assert count > 40
     reports = {s["payload"]["game_id"] for s in await suggestions(api, c, "report")}
     assert 509192 not in reports and len(reports) == PLAYED - 1
-    kinds = {r["kind"] for r in await owner_conn.fetch("SELECT kind FROM notifications")}
+    notes = await owner_conn.fetch("SELECT kind, params FROM notifications")
+    kinds = {r["kind"] for r in notes}
     assert {"official_suggestions", "official_report"} <= kinds
+    # each note says what it is about: the team, the match's opponent (app review UX-10)
+    for r in notes:
+        params = json.loads(r["params"])
+        if r["kind"] == "official_suggestions":
+            assert params["team"]
+        if r["kind"] == "official_report":
+            assert params["opponent"] and params["date"]
     r = await api.http.post("/internal/official/sync", headers=token)
     assert r.json() == {
         "teams": 0,

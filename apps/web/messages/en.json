@@ -1510,7 +1510,8 @@
     "official_report_match": "The official match report against {opponent} is in.",
     "feed_ready_match": "Your scenes from the match against {opponent} are ready.",
     "scouting_ready_match": "The preparation report on {opponent} is ready.",
-    "matchOn": "Match on {date}"
+    "matchOn": "Match on {date}",
+    "official_suggestions_forTeam": "{count, plural, one {# suggestion} other {# suggestions}} from the official data for {team}."
   },
   "assignments": {
     "title": "Assignments",
