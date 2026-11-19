@@ -399,7 +399,6 @@
     "twoFactorTitle": "Zwei-Faktor-Anmeldung",
     "twoFactorOn": "Aktiv. Bei der Anmeldung brauchst du zusätzlich einen Code aus deiner Authenticator-App.",
     "twoFactorOff": "Nicht aktiv.",
-    "twoFactorRequired": "Als Vereinsadmin musst du die Zwei-Faktor-Anmeldung aktivieren.",
     "twoFactorStart": "Einrichten",
     "twoFactorScan": "Scanne den QR-Code mit einer Authenticator-App (z. B. Google Authenticator, 1Password) oder gib den Schlüssel von Hand ein.",
     "twoFactorSecret": "Schlüssel",
@@ -2982,9 +2981,7 @@
     "club": "Verein",
     "twoFactorDue": "Zwei-Faktor-Anmeldung einrichten",
     "uploadShort": "Video",
-    "twoFactorLater": "In sieben Tagen wieder erinnern",
     "twoFactorTitle": "Konto schützen",
-    "twoFactorWhy": "Jetzt sind Videos und Personen im Verein. Mit einem zweiten Schritt beim Anmelden bleibt das Konto sicher.",
     "olderArea": "Ein Bereich aus der früheren Version der App. Alles bleibt hier erreichbar, Neues kommt unter Szenen und Spiele.",
     "scenesAndSearch": "Szenen und Suche",
     "life": "Teamleben",
@@ -4052,7 +4049,8 @@
     "positionsMissing": "{n, plural, one {1 Feldspieler ohne Position.} other {# Feldspieler ohne Position.}}",
     "positionsAll": "Alle Feldspieler haben eine Position.",
     "positionsChange": "Positionen ändern",
-    "positionsFailed": "Das hat nicht geklappt. Versuch es nochmals oder trag die Position unter «Kader bearbeiten» ein."
+    "positionsFailed": "Das hat nicht geklappt. Versuch es nochmals oder trag die Position unter «Kader bearbeiten» ein.",
+    "positionsSet": "Positionen festlegen"
   },
   "seasonPage": {
     "kick": "{season} · {league} · nach {n, plural, =1 {einem Spiel} =2 {zwei Spielen} =3 {drei Spielen} =4 {vier Spielen} =5 {fünf Spielen} =6 {sechs Spielen} =7 {sieben Spielen} =8 {acht Spielen} =9 {neun Spielen} =10 {zehn Spielen} other {# Spielen}}",

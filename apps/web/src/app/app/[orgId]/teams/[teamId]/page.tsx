@@ -16,7 +16,6 @@ import { InviteDialog } from "@/components/people/invite-dialog";
 import { TeamLifeCard } from "@/components/settings/team-life";
 import { coachRights } from "@/lib/roles";
 import { ConsentCopy } from "./consent-copy";
-import { TwoFactorTask } from "./two-factor-task";
 import { MarkKeepers } from "@/components/roster/mark-keepers";
 import { MarkPositions } from "@/components/roster/mark-positions";
 
@@ -224,7 +223,6 @@ export default async function TeamPage({ params, searchParams }: { params: Promi
         </div>
         {staff && (
           <aside className="space-y-12">
-            <TwoFactorTask orgId={orgId} />
             {/* a second coach who chose this team on handball.ch waits here for the admins (K17) */}
             {isAdmin && <AccessRequests orgId={orgId} teams={[{ id: teamId, name: team.data.name }]} teamId={teamId} />}
             <section aria-labelledby="consents">

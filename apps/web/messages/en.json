@@ -399,7 +399,6 @@
     "twoFactorTitle": "Two-factor sign-in",
     "twoFactorOn": "Active. Signing in also needs a code from your authenticator app.",
     "twoFactorOff": "Not active.",
-    "twoFactorRequired": "As a club admin you must enable two-factor sign-in.",
     "twoFactorStart": "Set up",
     "twoFactorScan": "Scan the QR code with an authenticator app (e.g. Google Authenticator, 1Password) or enter the key manually.",
     "twoFactorSecret": "Key",
@@ -2982,9 +2981,7 @@
     "club": "Club",
     "twoFactorDue": "Set up two-factor sign-in",
     "uploadShort": "Video",
-    "twoFactorLater": "Remind me in seven days",
     "twoFactorTitle": "Protect the account",
-    "twoFactorWhy": "Now there are videos and people in the club. A second step at sign-in keeps the account safe.",
     "olderArea": "An area from the earlier version of the app. Everything stays here; new things come under Scenes and Matches.",
     "scenesAndSearch": "Scenes and search",
     "life": "Team life",
@@ -4052,7 +4049,8 @@
     "positionsMissing": "{n, plural, one {1 court player without a position.} other {# court players without a position.}}",
     "positionsAll": "All court players have a position.",
     "positionsChange": "Change positions",
-    "positionsFailed": "That did not work. Try again or enter the position under «Edit squad»."
+    "positionsFailed": "That did not work. Try again or enter the position under «Edit squad».",
+    "positionsSet": "Set positions"
   },
   "seasonPage": {
     "kick": "{season} · {league} · after {n, plural, one {# match} other {# matches}}",
