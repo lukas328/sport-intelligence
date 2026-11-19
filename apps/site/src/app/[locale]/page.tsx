@@ -308,6 +308,8 @@ export default async function Home({ params }: Props) {
               }}
             />
             <p className="mt-6 inline-block border-2 border-dashed border-club-ink px-3 py-1 text-[1.0625rem] font-semibold">{d.nextExample}</p>
+            {/* as on the demo page (BEFUNDE-5 point 11): a pattern that went away is no proof */}
+            <p className="mt-4 max-w-[46rem] text-[1.0625rem]">{d.nextNote}</p>
           </div>
         </div>
       </section>
