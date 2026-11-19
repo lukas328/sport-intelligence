@@ -90,7 +90,7 @@ export function PartsPanel({ orgId, match, jobs, staff, canDelete = staff, onCha
         <p className="m-0 flex flex-wrap items-center gap-x-3 gap-y-1 text-[15px] text-ink-2" data-testid="single-file">
           <span className="min-w-0 truncate">{single.filename}</span>
           {single.duration_s != null && <span className="tabular-nums">{t("length", { time: formatClock(single.duration_s * 1000) })}</span>}
-          <button type="button" onClick={() => void remove(single)} className={cn(linkClass, "min-h-11 cursor-pointer border-0 bg-transparent p-0 text-[15px]")} data-testid="single-remove" aria-label={`${t("removeFile")}: ${single.filename}`}>
+          <button type="button" onClick={() => void remove(single)} className={cn(linkClass, "min-h-11 cursor-pointer border-0 bg-transparent p-0 text-[15px] text-error decoration-error")} data-testid="single-remove" aria-label={`${t("removeFile")}: ${single.filename}`}>
             {t("removeFile")}
           </button>
         </p>

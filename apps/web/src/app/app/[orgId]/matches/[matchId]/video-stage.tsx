@@ -167,7 +167,7 @@ export function VideoStage({
           <div className="flex flex-wrap items-center gap-2.5 bg-court-bar px-3 py-2 font-mono text-[13px] font-semibold text-court-text">
             {toggle}
             {chosen && at >= 0 && <span>{t("sceneOf", { n: at + 1, total: list.length })}</span>}
-            {goal && <span className="ml-auto font-mono text-xl text-white">{when(goal)}</span>}
+            {goal && <span className="ml-auto text-xl font-semibold tabular-nums text-white">{when(goal)}</span>}
           </div>
         </div>
         {mode === "taktik" && eventId && goal && (
@@ -324,11 +324,11 @@ export function VideoStage({
         </div>
         <p className="mt-8">
           <button type="button" onClick={onBench} className="min-h-11 cursor-pointer font-bold underline decoration-[1.5px] underline-offset-4" data-testid="bench-open">
-            {t("more")}
+            {staff ? t("plainBench") : t("plainComments")}
           </button>
         </p>
         <details className="mt-6">
-          <summary className="min-h-11 cursor-pointer content-center font-bold underline decoration-[1.5px] underline-offset-4">
+          <summary className="fold font-bold">
             {t("sceneList")} ({goals.length})
           </summary>
           <ul className="m-0 mt-2 max-h-[420px] list-none overflow-y-auto p-0">

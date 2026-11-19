@@ -107,7 +107,7 @@ export function ThreeThingsView({
       {/* every goal stays reachable, also while there are things (V4): folded under them */}
       {graphics.goals.some((x) => x.has_video) && (
         <details className="mt-4 border-t border-rule pt-2" data-testid="all-goals">
-          <summary className="min-h-11 cursor-pointer content-center font-bold underline decoration-[1.5px] underline-offset-4">{t("allGoals", { n: graphics.goals.filter((x) => x.has_video).length })}</summary>
+          <summary className="fold font-bold">{t("allGoals", { n: graphics.goals.filter((x) => x.has_video).length })}</summary>
           <VideoGoals orgId={orgId} matchId={matchId} graphics={graphics} oppName={oppName} onScene={onScene} folded />
         </details>
       )}

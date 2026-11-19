@@ -19,7 +19,6 @@ import { ThreeThingsView } from "@/components/anlauf/three-things-view";
 import { ExampleBanner } from "@/components/anlauf/example-banner";
 import { MatchHead } from "./match-head";
 import { AskColour } from "./ask-colour";
-import { MatchZones } from "./match-graphics";
 import { VideoStage } from "./video-stage";
 import type { Kits } from "@/lib/kit";
 import { playerLabel } from "@/lib/player-name";
@@ -641,9 +640,13 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
           <section ref={benchRef} hidden={!bench} aria-labelledby="bench-title" className="border-t-2 border-ink pt-6">
             {(
               <div className="mb-4 flex items-center justify-between gap-3">
-                <h2 id="bench-title" className="text-[26px]">
-                  {ta("bench")}
-                </h2>
+                {/* the workbench has one name, «Einrichten von Hand», and is reached only by it (L5) */}
+                <div>
+                  <h2 id="bench-title" className="text-[26px]">
+                    {ta("bench")}
+                  </h2>
+                  {staff && <p className="m-0 text-[15px] text-ink-2">{ta("plainBenchHint")}</p>}
+                </div>
                 <Button variant="secondary" size="sm" onClick={() => setBench(false)}>
                   {ta("benchClose")}
                 </Button>
@@ -790,8 +793,8 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
                 {telegram}
               </div>
             )}
+            {/* the goals by position stand once, in Zahlen (app review UX-08: no doubles) */}
             <div className="space-y-10">
-              {graphics.data && goalRuns(graphics.data).length > 0 && <MatchZones graphics={graphics.data} />}
               {stats.data && <ThreeFigures stats={stats.data} names={names} roster={rosterRows} />}
             </div>
           </div>
@@ -799,7 +802,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
               match, when there is nothing in it yet (UX test A05) */}
           {!upcoming && (
           <details ref={more} className="group border-t-2 border-ink pt-4" data-testid="game-more">
-            <summary className="flex min-h-11 cursor-pointer list-none items-baseline gap-3 [&::-webkit-details-marker]:hidden">
+            <summary className="fold items-baseline gap-3">
               <span className="font-slant text-[22px]">{ta("moreGame")}</span>
               <span className="text-[15px] text-ink-2 group-open:hidden">{ta("moreGameHint")}</span>
             </summary>
@@ -824,7 +827,6 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
       {view === "numbers" && (
         <div className="animate-fade">
           <NumbersView stats={stats.data ?? null} graphics={graphics.data ?? null} roster={rosterRows} orgId={orgId} match={match} names={names} onPlay={main ? onPlay : undefined}>
-          {graphics.data && goalRuns(graphics.data).length > 0 && <MatchZones graphics={graphics.data} row />}
           {stats.data && stats.data.quality.events > 0 && (
             <section id="numbers-overview" className="scroll-mt-24">
               <OverviewView orgId={orgId} match={match} teamName={teamName} stats={stats.data} names={names} staff={staff} onPlay={main ? onPlay : undefined} videoNote={videoNote} parts={["basis", "decided", "comparison"]} />

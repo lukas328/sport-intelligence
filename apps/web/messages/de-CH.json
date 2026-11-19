@@ -3720,8 +3720,8 @@
     "notes": "Notizen",
     "noNotes": "Noch keine Notiz zu dieser Phase.",
     "writeNote": "Notiz schreiben",
-    "bench": "Werkbank",
-    "benchClose": "Werkbank schliessen",
+    "bench": "Einrichten von Hand",
+    "benchClose": "Schliessen",
     "vsShort": "gegen",
     "noVideoAgainst": "Noch kein Spiel mit Video gegen {opponent}.",
     "rowSummary": "{things, plural, =0 {Kein Ding} one {1 Ding} other {# Dinge}} · {scenes, plural, one {1 Szene} other {# Szenen}}{first, select, none {} other { · Punkt 1: {first}}}",
@@ -3766,7 +3766,7 @@
     "plainChecks": "Die Analyse ist fertig. Noch keine Tore gefunden: {n, plural, one {eine Frage} other {# Fragen}} in Prüfen, dann zeigt sie mehr.",
     "plainNoGoals": "Die Analyse ist fertig. Sie hat in diesem Video keine Tore gefunden.",
     "plainToCheck": "Fragen beantworten",
-    "plainBench": "Ereignisse und Kommentare von Hand",
+    "plainBench": "Einrichten von Hand",
     "plainComments": "Kommentare zum Video",
     "nextStepTitle": "Die Analyse ist fertig, noch ohne drei Dinge.",
     "nextStepChecks": "Noch keine Tore bestätigt. {n, plural, one {1 gezielte Frage} other {# gezielte Fragen}}, etwa {minutes, plural, one {1 Minute} other {# Minuten}}, dann zeigt die Analyse mehr.",
@@ -3829,7 +3829,8 @@
     "pictureFailed": "Das Bild liess sich gerade nicht erstellen. Versuch es nochmals.",
     "scenesKickTerm": "<term>Szenen</term> · {matches, plural, one {1 Spiel} other {# Spiele}} mit Video",
     "exampleBand": "Beispiel · erfundene Zahlen",
-    "prepareOpponent": "Auf den Gegner vorbereiten"
+    "prepareOpponent": "Auf den Gegner vorbereiten",
+    "plainBenchHint": "Ereignisse, Spieler und Kommentare selbst erfassen."
   },
   "check": {
     "top": "Prüfen · {opponent}",
@@ -4164,7 +4165,6 @@
     "fromEvents": "aus den Ereignissen",
     "fromVideo": "aus dem Video geschätzt",
     "allNumbers": "Alle Zahlen",
-    "allNumbersNote": "Spielbericht, Würfe, Torhüter im Detail, Laufwerte",
     "unknown": "ohne Namen",
     "confirmed": "Bestätigt",
     "confirmedYes": "alle Tore bestätigt",

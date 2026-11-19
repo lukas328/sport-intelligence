@@ -3720,8 +3720,8 @@
     "notes": "Notes",
     "noNotes": "Pas encore de note sur cette phase.",
     "writeNote": "Écrire une note",
-    "bench": "Atelier",
-    "benchClose": "Fermer l'atelier",
+    "bench": "Régler à la main",
+    "benchClose": "Fermer",
     "vsShort": "contre",
     "noVideoAgainst": "Pas encore de match avec vidéo contre {opponent}.",
     "rowSummary": "{things, plural, =0 {Aucun point} one {1 point} other {# points}} · {scenes, plural, one {1 scène} other {# scènes}}{first, select, none {} other { · Point 1 : {first}}}",
@@ -3766,7 +3766,7 @@
     "plainChecks": "L'analyse est terminée. Pas encore de buts : {n, plural, one {une question} other {# questions}} dans Vérifier, puis elle en montre plus.",
     "plainNoGoals": "L'analyse est terminée. Elle n'a trouvé aucun but dans cette vidéo.",
     "plainToCheck": "Répondre aux questions",
-    "plainBench": "Événements et commentaires à la main",
+    "plainBench": "Régler à la main",
     "plainComments": "Commentaires sur la vidéo",
     "nextStepTitle": "L'analyse est terminée, pas encore de trois choses.",
     "nextStepChecks": "Aucun but confirmé pour l'instant. {n, plural, one {1 question ciblée} other {# questions ciblées}}, environ {minutes, plural, one {1 minute} other {# minutes}}, puis l'analyse en montre plus.",
@@ -3829,7 +3829,8 @@
     "pictureFailed": "L'image n'a pas pu être créée pour l'instant. Réessaie.",
     "scenesKickTerm": "<term>Scènes</term> · {matches, plural, one {1 match} other {# matchs}} avec vidéo",
     "exampleBand": "Exemple · chiffres inventés",
-    "prepareOpponent": "Préparer l'adversaire"
+    "prepareOpponent": "Préparer l'adversaire",
+    "plainBenchHint": "Saisir soi-même les événements, les joueurs et les commentaires."
   },
   "check": {
     "top": "Vérifier · {opponent}",
@@ -4164,7 +4165,6 @@
     "fromEvents": "des événements",
     "fromVideo": "estimé à partir de la vidéo",
     "allNumbers": "Tous les chiffres",
-    "allNumbersNote": "Feuille de match, tirs, gardiens en détail, courses",
     "unknown": "sans nom",
     "confirmed": "Confirmé",
     "confirmedYes": "tous les buts confirmés",

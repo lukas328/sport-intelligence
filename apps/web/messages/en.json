@@ -3720,8 +3720,8 @@
     "notes": "Notes",
     "noNotes": "No note on this phase yet.",
     "writeNote": "Write a note",
-    "bench": "Workbench",
-    "benchClose": "Close workbench",
+    "bench": "Set up by hand",
+    "benchClose": "Close",
     "vsShort": "against",
     "noVideoAgainst": "No match with video against {opponent} yet.",
     "rowSummary": "{things, plural, =0 {No thing} one {1 thing} other {# things}} · {scenes, plural, one {1 scene} other {# scenes}}{first, select, none {} other { · Point 1: {first}}}",
@@ -3766,7 +3766,7 @@
     "plainChecks": "The analysis is done. No goals found yet: {n, plural, one {one question} other {# questions}} in Check, then it shows more.",
     "plainNoGoals": "The analysis is done. It found no goals in this video.",
     "plainToCheck": "Answer the questions",
-    "plainBench": "Events and comments by hand",
+    "plainBench": "Set up by hand",
     "plainComments": "Comments on the video",
     "nextStepTitle": "The analysis is done, no three things yet.",
     "nextStepChecks": "No goals confirmed yet. {n, plural, one {1 targeted question} other {# targeted questions}}, about {minutes, plural, one {1 minute} other {# minutes}}, then the analysis shows more.",
@@ -3829,7 +3829,8 @@
     "pictureFailed": "The picture could not be made just now. Try again.",
     "scenesKickTerm": "<term>Scenes</term> · {matches, plural, one {1 match} other {# matches}} with video",
     "exampleBand": "Example · invented figures",
-    "prepareOpponent": "Prepare for the opponent"
+    "prepareOpponent": "Prepare for the opponent",
+    "plainBenchHint": "Record events, players and comments yourself."
   },
   "check": {
     "top": "Check · {opponent}",
@@ -4164,7 +4165,6 @@
     "fromEvents": "from the events",
     "fromVideo": "estimated from the video",
     "allNumbers": "All figures",
-    "allNumbersNote": "Match report, shots, goalkeepers in detail, running figures",
     "unknown": "no name",
     "confirmed": "Confirmed",
     "confirmedYes": "all goals confirmed",

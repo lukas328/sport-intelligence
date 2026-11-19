@@ -66,7 +66,7 @@ export function NotificationBell({ orgId }: { orgId: string }) {
         <Bell aria-hidden className={cn("size-5", unread > 0 && "-translate-x-1 translate-y-1")} strokeWidth={1.8} />
         {unread > 0 && (
           <span
-            className="absolute top-0 right-0 grid min-w-[1.375rem] place-items-center bg-accent px-1 font-mono text-[13px] font-bold leading-[1.375rem] text-accent-contrast ring-2 ring-background"
+            className="absolute top-0 right-0 grid min-w-[1.375rem] place-items-center bg-accent px-1 text-[13px] font-bold tabular-nums leading-[1.375rem] text-accent-contrast ring-2 ring-background"
             data-testid="unread"
           >
             {unread}

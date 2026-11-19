@@ -353,6 +353,34 @@
     width: 100%;
     max-width: var(--court-max);
   }
+  /* one look for every fold (app review UI-04): no native triangle, a chevron on the right that
+     turns when open, like «Am Spieltag gemerkt» */
+  .fold {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+    cursor: pointer;
+    list-style: none;
+  }
+  .fold::-webkit-details-marker {
+    display: none;
+  }
+  .fold::after {
+    content: "";
+    flex: none;
+    width: 0.5rem;
+    height: 0.5rem;
+    margin-left: auto;
+    margin-right: 0.25rem;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: translateY(-25%) rotate(45deg);
+    transition: transform 150ms;
+  }
+  details[open] > .fold::after {
+    transform: translateY(25%) rotate(-135deg);
+  }
   /* zones that reach the edges of the content column (Wurf head, Streifen, Seitenkopf) */
   .bleed-x {
     margin-inline: -1rem;

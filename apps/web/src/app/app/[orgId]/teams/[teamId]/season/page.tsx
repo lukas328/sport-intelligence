@@ -429,7 +429,7 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
 
       {/* everything the season page showed before, one click away (nothing is lost) */}
       <details className="mt-16 border-t-2 border-ink pt-4" data-testid="season-more">
-        <summary className="min-h-11 cursor-pointer content-center">
+        <summary className="fold items-baseline gap-3">
           <span className="font-slant text-[22px]">{ts("more")}</span> <span className="text-[15px] text-ink-2">{ts("moreNote")}</span>
         </summary>
         <div className="mt-8 space-y-12">

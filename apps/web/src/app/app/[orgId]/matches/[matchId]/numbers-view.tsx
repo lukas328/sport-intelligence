@@ -7,7 +7,7 @@ import { useState } from "react";
 import { SectionHead } from "@/components/anlauf/blocks";
 import { KeeperLock, useKeeperModule } from "@/components/billing/keeper-lock";
 import { useOptionalShell } from "@/components/shell/context";
-import type { MatchGraphics } from "@/lib/graphics";
+import { goalRuns, type MatchGraphics } from "@/lib/graphics";
 import { againstCovered, ownKeepers } from "@/lib/keepers";
 import { mainSource } from "@/lib/telegram";
 import { cn } from "@/lib/utils";
@@ -23,7 +23,7 @@ const pct = (v: number | null) => (v == null || v > 1 ? "" : `${Math.round(v * 1
 /**
  * Zahlen (SPEC 7.4): the field players and the goalkeepers of the own team as two tables, at the
  * side the goals conceded by position, the goal target and the phases. The full report, shots,
- * goalkeepers in detail and the running figures stay one click away («Alle Zahlen»).
+ * goalkeepers in detail and the running figures follow, open («Alle Zahlen»).
  */
 const TARGET_ROWS = [
   ["TL", "TC", "TR"],
@@ -215,7 +215,8 @@ export function NumbersView({
           {drill && orgId && match && <Drill drill={drill} orgId={orgId} matchId={match.id} onPlay={onPlay} names={names} close={close} />}
         </div>
         <aside className="min-w-0 space-y-12">
-          {graphics && graphics.goals.some((g) => g.team === "opp") && <MatchZones graphics={graphics} only="opp" />}
+          {/* both sides by position, once on the match page (UX-08) */}
+          {graphics && goalRuns(graphics).length > 0 && <MatchZones graphics={graphics} />}
           {marked > 0 && (
             <section>
               <SectionHead as="h3" title={t("target")} note={t("targetNote")} />
@@ -267,12 +268,13 @@ export function NumbersView({
           )}
         </aside>
       </div>
-      <details className="border-t-2 border-ink pt-4" data-testid="numbers-more">
-        <summary className="min-h-11 cursor-pointer content-center">
-          <span className="font-slant text-[22px]">{t("allNumbers")}</span> <span className="text-[15px] text-ink-2">{t("allNumbersNote")}</span>
-        </summary>
+      {/* every figure open, nothing more to unfold (app review UX-08) */}
+      <section className="border-t-2 border-ink pt-4" aria-labelledby="numbers-more-title" data-testid="numbers-more">
+        <h2 id="numbers-more-title" className="font-slant m-0 text-[22px]">
+          {t("allNumbers")}
+        </h2>
         <div className="mt-8 space-y-12">{children}</div>
-      </details>
+      </section>
     </div>
   );
 }
