@@ -13,7 +13,7 @@ import { ArrowLeftRight, Check, ChevronDown, ChartNoAxesColumn, Clapperboard, Fi
 import { useRosterNames } from "@/components/analysis/tagger";
 import { DEFAULT_CLUB, matchStyle } from "@/lib/color";
 import { markOpened } from "@/lib/fresh-match";
-import { checkCount, goalRuns, useMatchGraphics } from "@/lib/graphics";
+import { checkCount, furtherMoments, goalRuns, useMatchGraphics } from "@/lib/graphics";
 import { ownName } from "@/lib/own-name";
 import { ThreeThingsView } from "@/components/anlauf/three-things-view";
 import { ExampleBanner } from "@/components/anlauf/example-banner";
@@ -377,6 +377,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
   const club: [string, string | null] = [shell?.org.primary_color ?? DEFAULT_CLUB, shell?.org.secondary_color ?? null];
   const oppKit = match.opponent_colors ? [match.opponent_colors.color, match.opponent_colors.second ?? null] : null;
   const checks = graphics.data ? checkCount(graphics.data) : 0;
+  const further = graphics.data ? furtherMoments(graphics.data) : 0;
   // the stage of the tab Video (SPEC 7.3) once there are goals to show on it
   const stage = Boolean(main && graphics.data && graphics.data.goals.some((g) => g.has_video || g.source === "demo"));
   // «von dir bestätigt»: the goals a person confirmed (Prüfen, by hand), and of those how many have
@@ -443,6 +444,14 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
               <Link href={`${base}/check`} className="font-slant flex min-h-11 items-center gap-2 px-2 text-xl text-ink no-underline" data-testid="check-link">
                 {ta("check")}
                 <em className="grid h-[30px] min-w-[30px] place-items-center bg-attn px-1 font-sans text-base font-extrabold text-attn-ink not-italic">{checks}</em>
+              </Link>
+            )}
+            {/* the main round answered, moments still wait behind «Mehr prüfen»: not rung, but
+                reachable until answered (livegang L3: after leaving Prüfen they were gone) */}
+            {staff && checks === 0 && further > 0 && (
+              <Link href={`${base}/check`} aria-label={ta("checkFurtherLabel", { n: further })} className="font-slant flex min-h-11 items-center gap-2 px-2 text-xl text-ink no-underline" data-testid="check-further">
+                {ta("check")}
+                <span className="font-sans text-[15px] font-bold not-italic text-ink-2">{ta("checkFurther", { n: further })}</span>
               </Link>
             )}
             {MATCHDAY_OFFERED && liveFirst && (

@@ -59,12 +59,15 @@ interface Props {
   bare?: boolean;
   /** the window plays in a loop instead of stopping at its end (Prüfen «Von wo?») */
   loop?: boolean;
+  /** the control bar always under the picture, never over it: nothing of the picture is covered
+   * where the coach judges it (Prüfen «Tor oder kein Tor?», app review BUG-14) */
+  under?: boolean;
 }
 
 const SPEEDS = [0.25, 0.5, 1, 1.5, 2];
 
 export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
-  { src, poster, thumbsVtt, fps, markers = [], annotations = [], window: win, onWindowEnd, onTime, onKey, overlay, autoPlay, clock, bare, loop },
+  { src, poster, thumbsVtt, fps, markers = [], annotations = [], window: win, onWindowEnd, onTime, onKey, overlay, autoPlay, clock, bare, loop, under },
   ref,
 ) {
   const t = useTranslations("player");
@@ -315,7 +318,7 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
           muted={muted}
           playsInline
           preload="metadata"
-          className="block aspect-video w-full bg-black"
+          className="block aspect-video w-full bg-black object-contain"
           onPlay={() => setPlaying(true)}
           onPause={() => setPlaying(false)}
           onLoadedMetadata={(e) => setDuration(e.currentTarget.duration)}
@@ -344,8 +347,9 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
           has to be tapped away */}
       <div
         className={cn(
-          "space-y-0.5 bg-black px-2 pt-1 pb-1 text-white transition-opacity duration-200 sm:absolute sm:inset-x-0 sm:bottom-0 sm:space-y-1 sm:bg-transparent sm:bg-gradient-to-t sm:from-black/85 sm:via-black/45 sm:to-transparent sm:px-3 sm:pt-10 sm:pb-2",
-          playing && !hover && "sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100",
+          "space-y-0.5 bg-black px-2 pt-1 pb-1 text-white transition-opacity duration-200",
+          !under && "sm:absolute sm:inset-x-0 sm:bottom-0 sm:space-y-1 sm:bg-transparent sm:bg-gradient-to-t sm:from-black/85 sm:via-black/45 sm:to-transparent sm:px-3 sm:pt-10 sm:pb-2",
+          !under && playing && !hover && "sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100",
           bare && "max-sm:hidden",
         )}
       >

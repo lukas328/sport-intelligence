@@ -119,6 +119,12 @@ export function checkCount(g: MatchGraphics): number {
   return g.checks.length;
 }
 
+/** The goal moments waiting behind «Mehr prüfen»: not rung, but never hidden either. With the main
+ * round answered they stay reachable from the match until answered (livegang L3). */
+export function furtherMoments(g: MatchGraphics): number {
+  return (g.more_checks ?? []).filter((c) => c.kind === "goal").length;
+}
+
 /** The goals that have a place in the video (confirmed there or pinned to it). */
 export function videoGoals(g: MatchGraphics): MatchGraphics["goals"] {
   return g.goals.filter((x) => x.has_video);
