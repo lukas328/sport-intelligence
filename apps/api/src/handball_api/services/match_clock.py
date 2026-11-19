@@ -44,15 +44,32 @@ class ClockMap:
         row = self.anchors.setdefault(period, [])
         bisect.insort(row, Anchor(float(clock_s), int(t_ms)), key=lambda a: (a.clock_s, a.t_ms))
 
-    def video_ms(self, period: int, clock_s: float) -> tuple[int | None, int | None]:
-        """(video time, uncertainty in ms; 0 exact, None unknown); (None, None) without any
-        anchor in the half."""
+    def _in_runs(self, period: int, clock_s: float) -> list[int]:
+        """The video times at which an overlay run showed this clock time, in run order."""
+        out = []
         for start, end, c0 in self.runs:
             if self.period_of(c0) != period:
                 continue
             c1 = c0 + (end - start) / 1000
             if c0 - MAX_RUN_GAP_S <= clock_s <= c1 + MAX_RUN_GAP_S:
-                return round(start + (clock_s - c0) * 1000), 0
+                out.append(round(start + (clock_s - c0) * 1000))
+        return out
+
+    def read_ms(self, period: int, clock_s: float) -> int | None:
+        """The video time at which the overlay clock showed this time, only where it was read:
+        inside one run of the overlay clock (readings every 2 s), never counted from an anchor or
+        a throw-off. None when no run shows it, or when two runs show it at different moments
+        (a misread clock; MAX_RUN_GAP_S apart at most counts as the same moment)."""
+        times = self._in_runs(period, clock_s)
+        if not times or max(times) - min(times) > MAX_RUN_GAP_S * 1000:
+            return None
+        return times[0]
+
+    def video_ms(self, period: int, clock_s: float) -> tuple[int | None, int | None]:
+        """(video time, uncertainty in ms; 0 exact, None unknown); (None, None) without any
+        anchor in the half."""
+        for t in self._in_runs(period, clock_s):
+            return t, 0
         row = self.anchors.get(period) or []
         if not row:
             return None, None
