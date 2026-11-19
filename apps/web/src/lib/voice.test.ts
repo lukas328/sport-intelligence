@@ -42,7 +42,8 @@ describe("voice", () => {
     expect(seasonStatement([{ ...row(22, 15, 22, 21), xg_against_coverage: 0.8 }])?.headline.key).toBe("voice.defenceHeld");
     // nothing stands out in a single match: neutral title
     expect(seasonStatement([row(22, 20)])).toBeNull();
-    expect(seasonStatement([row(22, 20, 22, 20, 1), row(18, 24, 18, 24, 2)])?.headline.key).toBe("voice.level");
+    // otherwise the facts: the record as the title, no verdict (TXT-08)
+    expect(seasonStatement([row(22, 20, 22, 20, 1), row(18, 24, 18, 24, 2)])).toEqual({ headline: { key: "voice.record", params: { w: 1, d: 0, l: 1 } }, evidence: null });
   });
 
   it("describes a match by its margin and marks xG as estimated in the evidence", () => {

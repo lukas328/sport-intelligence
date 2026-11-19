@@ -3054,16 +3054,13 @@
   "voice": {
     "runWins": "{n} Siege in Folge.",
     "runLosses": "{n} Niederlagen in Folge.",
-    "record": "{w, plural, =1 {1 Sieg} other {# Siege}}, {d, plural, =1 {1 Unentschieden} other {# Unentschieden}}, {l, plural, =1 {1 Niederlage} other {# Niederlagen}}.",
+    "record": "{w, plural, =1 {1 Sieg} other {# Siege}}{d, plural, =0 {} =1 {, 1 Unentschieden} other {, # Unentschieden}}, {l, plural, =1 {1 Niederlage} other {# Niederlagen}}.",
     "overXg": "Mehr getroffen, als die Chancen hergaben.",
     "underXg": "Die Chancen waren da. Die Tore noch nicht.",
     "xgEvidence": "{goals} Tore aus {xg} erwarteten (geschätzt).",
     "defenceHeld": "Hinten mehr gehalten als erwartet.",
     "defenceLeaked": "Hinten mehr kassiert, als die Chancen hergaben.",
     "xgaEvidence": "{against} Gegentore bei {xga} erwarteten (geschätzt).",
-    "moreWins": "Mehr Siege als Niederlagen.",
-    "moreLosses": "Mehr Niederlagen als Siege. Noch ist Zeit.",
-    "level": "Ausgeglichen bis hierher.",
     "wonClear": "Deutlich gewonnen gegen {opponent}.",
     "wonTight": "Knapp, aber gewonnen gegen {opponent}.",
     "won": "Sieg gegen {opponent}.",
@@ -4104,7 +4101,7 @@
     "colPerMatch": "pro Spiel",
     "wholeSquad": "Ganzer Kader",
     "table": "Tabelle",
-    "tableNote": "handball.ch, {when}",
+    "tableNote": "handball.ch, abgeglichen {when}",
     "colRank": "Rang",
     "colGames": "Sp.",
     "colDiff": "Diff.",
@@ -4137,7 +4134,8 @@
     "trainingTips": "Trainingstipps dazu",
     "tipsAction": "Trainingstipps",
     "tickAgainst": "Strich: Gegentore",
-    "tickFor": "Strich: Tore"
+    "tickFor": "Strich: Tore",
+    "syncedFrom": "Alles von handball.ch, abgeglichen {when}."
   },
   "numbersTab": {
     "intro": "Tore, 7 m und 2 Minuten aus Spielbericht und Video, Würfe und Paraden aus den markierten Ereignissen.",

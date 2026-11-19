@@ -3054,16 +3054,13 @@
   "voice": {
     "runWins": "{n} victoires d'affilée.",
     "runLosses": "{n} défaites d'affilée.",
-    "record": "{w, plural, =1 {1 victoire} other {# victoires}}, {d, plural, =1 {1 nul} other {# nuls}}, {l, plural, =1 {1 défaite} other {# défaites}}.",
+    "record": "{w, plural, =1 {1 victoire} other {# victoires}}{d, plural, =0 {} =1 {, 1 nul} other {, # nuls}}, {l, plural, =1 {1 défaite} other {# défaites}}.",
     "overXg": "Plus de buts que les occasions ne le laissaient prévoir.",
     "underXg": "Les occasions étaient là. Les buts pas encore.",
     "xgEvidence": "{goals} buts pour {xg} attendus (estimation).",
     "defenceHeld": "La défense a tenu plus que prévu.",
     "defenceLeaked": "Plus de buts encaissés que les occasions adverses ne le laissaient prévoir.",
     "xgaEvidence": "{against} buts encaissés pour {xga} attendus (estimation).",
-    "moreWins": "Plus de victoires que de défaites.",
-    "moreLosses": "Plus de défaites que de victoires. Il reste du temps.",
-    "level": "Équilibré jusqu'ici.",
     "wonClear": "Victoire nette contre {opponent}.",
     "wonTight": "Serré, mais gagné contre {opponent}.",
     "won": "Victoire contre {opponent}.",
@@ -4104,7 +4101,7 @@
     "colPerMatch": "par match",
     "wholeSquad": "Tout l'effectif",
     "table": "Classement",
-    "tableNote": "handball.ch, {when}",
+    "tableNote": "handball.ch, synchronisé {when}",
     "colRank": "Rang",
     "colGames": "J",
     "colDiff": "Diff.",
@@ -4137,7 +4134,8 @@
     "trainingTips": "Conseils d'entraînement à ce sujet",
     "tipsAction": "Conseils d'entraînement",
     "tickAgainst": "Trait : buts encaissés",
-    "tickFor": "Trait : buts marqués"
+    "tickFor": "Trait : buts marqués",
+    "syncedFrom": "Tout de handball.ch, synchronisé {when}."
   },
   "numbersTab": {
     "intro": "Buts, 7 m et 2 minutes de la feuille de match et de la vidéo, tirs et arrêts des événements saisis.",

@@ -3054,16 +3054,13 @@
   "voice": {
     "runWins": "{n} wins in a row.",
     "runLosses": "{n} losses in a row.",
-    "record": "{w, plural, =1 {1 win} other {# wins}}, {d, plural, =1 {1 draw} other {# draws}}, {l, plural, =1 {1 loss} other {# losses}}.",
+    "record": "{w, plural, =1 {1 win} other {# wins}}{d, plural, =0 {} =1 {, 1 draw} other {, # draws}}, {l, plural, =1 {1 loss} other {# losses}}.",
     "overXg": "Scored more than the chances suggested.",
     "underXg": "The chances were there. The goals not yet.",
     "xgEvidence": "{goals} goals from {xg} expected (estimated).",
     "defenceHeld": "The defence held more than expected.",
     "defenceLeaked": "Conceded more than the opponents' chances suggested.",
     "xgaEvidence": "{against} goals conceded from {xga} expected (estimated).",
-    "moreWins": "More wins than losses.",
-    "moreLosses": "More losses than wins. There is still time.",
-    "level": "Even so far.",
     "wonClear": "A clear win against {opponent}.",
     "wonTight": "Tight, but won against {opponent}.",
     "won": "Win against {opponent}.",
@@ -4104,7 +4101,7 @@
     "colPerMatch": "per match",
     "wholeSquad": "Whole squad",
     "table": "Table",
-    "tableNote": "handball.ch, {when}",
+    "tableNote": "handball.ch, synced {when}",
     "colRank": "Rank",
     "colGames": "P",
     "colDiff": "Diff.",
@@ -4137,7 +4134,8 @@
     "trainingTips": "Training tips for this",
     "tipsAction": "Training tips",
     "tickAgainst": "Mark: goals against",
-    "tickFor": "Mark: goals scored"
+    "tickFor": "Mark: goals scored",
+    "syncedFrom": "All from handball.ch, synced {when}."
   },
   "numbersTab": {
     "intro": "Goals, 7 m and 2 minutes from the match report and the video, shots and saves from the tagged events.",

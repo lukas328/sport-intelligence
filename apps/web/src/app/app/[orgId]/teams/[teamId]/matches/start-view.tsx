@@ -230,6 +230,8 @@ function LastMatch({ orgId, m, next, teamName, canWrite, club }: { orgId: string
 /** Rank, form, table excerpt, scorers and next game from handball.ch for a linked team. */
 function FromReport({ orgId, teamId, hideNext }: { orgId: string; teamId: string; hideNext: boolean }) {
   const t = useTranslations("entry");
+  const tw = useTranslations("seasonPage");
+  const format = useFormatter();
   const link = useQuery({
     queryKey: ["official", teamId],
     queryFn: async () => (await api.GET("/v1/orgs/{org_id}/teams/{team_id}/official", { params: { path: { org_id: orgId, team_id: teamId } } })).data ?? null,
@@ -251,7 +253,10 @@ function FromReport({ orgId, teamId, hideNext }: { orgId: string; teamId: string
       {/* the next opponent stands once, at the side (UX test B40); the scorers stand in the
           season, counted from the match reports in the app like the roster (app review R3) */}
       <TeamFacts p={preview.data} hideNext={hideNext} hideScorers />
-      <p className="m-0 text-[15px] text-ink-2">{t("source")}</p>
+      {/* one timestamp format everywhere: «abgeglichen vor 9 Stunden» (app review TXT-08) */}
+      <p className="m-0 text-[15px] text-ink-2">
+        {link.data?.synced_at ? tw("syncedFrom", { when: format.relativeTime(new Date(link.data.synced_at), new Date()) }) : t("source")}
+      </p>
     </section>
   );
 }

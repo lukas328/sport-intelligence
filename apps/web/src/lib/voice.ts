@@ -81,7 +81,8 @@ export function seasonStatement(rows: SeasonRow[], xgCoverage?: number | null, u
     return { headline: { key: "voice.defenceLeaked", params: {} }, evidence: { key: "voice.xgaEvidence", params: { against, xga: round1(xga) } } };
   }
   if (rows.length >= 2) {
-    return { headline: { key: w > l ? "voice.moreWins" : w < l ? "voice.moreLosses" : "voice.level", params: {} }, evidence: record };
+    // facts first, no verdict: «4 Siege, 5 Niederlagen.» (app review TXT-08)
+    return { headline: record, evidence: null };
   }
   return null;
 }
