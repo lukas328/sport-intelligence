@@ -246,6 +246,14 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
   const counted = (stats.data?.quality.events ?? 0) > 0;
   // scenes are goals with a place in the video: collections and highlights need them (review R34)
   const hasScenes = Boolean(graphics.data?.goals.some((g) => g.has_video || g.source === "demo"));
+  // «Highlights teilen» only once there is a finished reel to share (app review UX-06); the same
+  // query as the highlights section below
+  const reels = useQuery({
+    queryKey: ["highlights", match.id],
+    enabled: staff && hasScenes,
+    queryFn: async () => (await api.GET("/v1/orgs/{org_id}/matches/{match_id}/highlights", { params: { path: { org_id: orgId, match_id: match.id } } })).data ?? [],
+  });
+  const hasReels = (reels.data ?? []).some((r) => r.status === "ready");
   // a match still to come without a score: nothing to share or look back on yet
   const upcoming = !main && match.score_own == null && Date.parse(match.kickoff_at) > Date.now();
   // the Spielkarte, rendered on the server: into the chat by the share sheet, else saved (K20)
@@ -767,7 +775,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
             // before the match there is nothing to share yet (UX test A05), nor before a goal is
             // known (open questions alone make no reel, L6)
             // highlights are made of scenes: without a goal in the video there is none (R34)
-            onHighlights={upcoming || noGoals || !hasScenes ? undefined : () => {
+            onHighlights={upcoming || noGoals || !hasScenes || !hasReels ? undefined : () => {
               if (more.current) more.current.open = true;
               requestAnimationFrame(() => document.getElementById("highlights")?.scrollIntoView({ behavior: "smooth", block: "start" }));
             }}

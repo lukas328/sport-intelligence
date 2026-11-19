@@ -1794,7 +1794,9 @@
     "highlightKick": "Temps forts · {n, plural, one {# scène} other {# scènes}}",
     "playKick": "Combinaison · {n, plural, one {# phase} other {# phases}}",
     "matchKick": "Rapport de match",
-    "noVideo": "Il n'y a plus de vidéo pour cette scène."
+    "noVideo": "Il n'y a plus de vidéo pour cette scène.",
+    "afterVerification": "Seulement une fois le club confirmé.",
+    "afterVerificationLink": "Comment faire"
   },
   "ops": {
     "title": "Backoffice",

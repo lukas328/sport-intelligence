@@ -1794,7 +1794,9 @@
     "highlightKick": "Highlights · {n, plural, one {# scene} other {# scenes}}",
     "playKick": "Play · {n, plural, one {# phase} other {# phases}}",
     "matchKick": "Match report",
-    "noVideo": "There is no video for this scene any more."
+    "noVideo": "There is no video for this scene any more.",
+    "afterVerification": "Only once the club is confirmed.",
+    "afterVerificationLink": "How"
   },
   "ops": {
     "title": "Backoffice",

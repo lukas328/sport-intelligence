@@ -1,6 +1,7 @@
 "use client";
 
 import { Check, Copy, Download, Image as ImageIcon, MessageCircle, Share2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useFormatter, useTranslations } from "next-intl";
 import { useEffect, useRef, useState, type ReactNode } from "react";
@@ -64,6 +65,30 @@ export function ShareButton({
   const [own, setOwn] = useState(false);
   const open = controlled ?? own;
   const setOpen = (o: boolean) => (onOpenChange ? onOpenChange(o) : setOwn(o));
+  // a club not confirmed yet cannot share at all: the button says so before it is pressed, with
+  // the way to the confirmation (app review UX-06); the other reasons are explained in the dialog
+  const options = useQuery({
+    queryKey: ["share-options", orgId, teamId],
+    enabled: trigger === undefined,
+    staleTime: 60_000,
+    queryFn: async () => ((await api.GET("/v1/orgs/{org_id}/teams/{team_id}/share-options", { params: { path: { org_id: orgId, team_id: teamId } } })).data as ShareOptions | undefined) ?? null,
+  });
+  if (trigger === undefined && blockedReason(options.data, kind) === "unverified") {
+    return (
+      <span className="inline-flex flex-wrap items-center gap-x-3 gap-y-1" data-testid="share-unverified">
+        <Button variant={variant} disabled aria-describedby={`share-why-${targetId}`} data-testid="share-open">
+          <Share2 aria-hidden />
+          <span>{label ?? t("button")}</span>
+        </Button>
+        <span id={`share-why-${targetId}`} className="text-sm text-ink-2">
+          {t("afterVerification")}{" "}
+          <a href={`/app/${orgId}/club/federation`} className="font-semibold text-ink underline underline-offset-4">
+            {t("afterVerificationLink")}
+          </a>
+        </span>
+      </span>
+    );
+  }
   return (
     <Dialog
       open={open}
