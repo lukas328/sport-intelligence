@@ -3831,7 +3831,8 @@
     "pictureSaved": "Image enregistrée, tu la trouves dans tes téléchargements.",
     "pictureFailed": "L'image n'a pas pu être créée pour l'instant. Réessaie.",
     "scenesKickTerm": "<term>Scènes</term> · {matches, plural, one {1 match} other {# matchs}} avec vidéo",
-    "exampleBand": "Exemple · chiffres inventés"
+    "exampleBand": "Exemple · chiffres inventés",
+    "prepareOpponent": "Préparer l'adversaire"
   },
   "check": {
     "top": "Vérifier · {opponent}",

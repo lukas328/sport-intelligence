@@ -3831,7 +3831,8 @@
     "pictureSaved": "Bild gespeichert, du findest es bei deinen Downloads.",
     "pictureFailed": "Das Bild liess sich gerade nicht erstellen. Versuch es nochmals.",
     "scenesKickTerm": "<term>Szenen</term> · {matches, plural, one {1 Spiel} other {# Spiele}} mit Video",
-    "exampleBand": "Beispiel · erfundene Zahlen"
+    "exampleBand": "Beispiel · erfundene Zahlen",
+    "prepareOpponent": "Auf den Gegner vorbereiten"
   },
   "check": {
     "top": "Prüfen · {opponent}",

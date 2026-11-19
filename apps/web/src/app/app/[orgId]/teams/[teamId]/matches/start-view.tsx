@@ -72,7 +72,14 @@ export function StartView({
       {/* before the first video the next steps come before the list, not after ten rows (A10) */}
       {!anyVideo && <NextSteps hasVideo={false} row />}
       <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_340px]">
-        <section aria-labelledby="all-matches">
+        {/* the next opponent right under the head, before the list of all matches; beside it on a
+            wide screen (app review UX-05: it stood at the very end) */}
+        {next && (
+          <div className="min-w-0 lg:col-start-2 lg:row-start-1">
+            <NextOpponent orgId={orgId} teamId={team?.id} next={next} played={ours} rowOnly={tableAbove} />
+          </div>
+        )}
+        <section aria-labelledby="all-matches" className="lg:col-start-1 lg:row-span-2 lg:row-start-1">
           <SectionHead
             title={<span id="all-matches">{t("allMatches")}</span>}
             note={withoutVideo > 0 ? t("withoutVideo", { count: withoutVideo, total: ours.length }) : undefined}
@@ -87,11 +94,12 @@ export function StartView({
             ))}
           </ul>
         </section>
-        <aside className="flex min-w-0 flex-col gap-8">
-          {/* after taking over the team: the coach's next steps (K17) */}
-          {anyVideo && <NextSteps hasVideo />}
-          {next && <NextOpponent orgId={orgId} teamId={team?.id} next={next} played={ours} rowOnly={tableAbove} />}
-        </aside>
+        {/* after taking over the team: the coach's next steps (K17) */}
+        {anyVideo && (
+          <aside className="flex min-w-0 flex-col gap-8 lg:col-start-2">
+            <NextSteps hasVideo />
+          </aside>
+        )}
       </div>
     </div>
   );
@@ -469,8 +477,9 @@ export function NextOpponent({ orgId, teamId, next, played, rowOnly = false }: {
   if (duel) facts.push(t("lastMeeting", { score: `${duel.score_own}:${duel.score_opponent}` }) + (met && first ? `, ${text(first)}` : ""));
   // the table around both teams, own and opponent marked; the whole table a tap away (K1)
   const all = table.map((r) => ({ key: `${r.rank}-${r.name}`, rank: r.rank ?? null, name: r.name ?? "", games: r.games ?? null, diff: r.goalDifference ?? null, points: r.points ?? null, own: ownId != null && r.teamId === ownId, marked: r === row }));
-  // the whole table stands above (the head of a match without video): here only the opponent's row
-  const rows = rowOnly ? all.filter((r) => r.marked) : all;
+  // the whole table stands above (the head of a match without video): none here, the opponent's
+  // rank is in the facts already (UX-05: a table of one row said nothing more)
+  const rows = rowOnly ? [] : all;
   return (
     <section data-testid="next-opponent">
       <p className="m-0 text-[15px] font-semibold text-ink-2">
@@ -497,6 +506,10 @@ export function NextOpponent({ orgId, teamId, next, played, rowOnly = false }: {
       ) : (
         <p className="m-0 border-t border-rule py-2.5 text-base text-ink-2">{t("noVideoAgainst", { opponent: next.opponent_name })}</p>
       )}
+      {/* the opponent's profile with its preparation: the scouting page leads there */}
+      <Link href={`/app/${orgId}/matches/${next.id}/scouting`} className={cn(linkClass, "mt-2 inline-flex min-h-11 items-center")} data-testid="next-prepare">
+        {t("prepareOpponent")}
+      </Link>
       {rows.length > 0 && (
         <div className="mt-4">
           <LeagueTable rows={rows} caption={link.data?.league || link.data?.group_name || t("table")} excerpt={6} size="sm" testid="next-table" />

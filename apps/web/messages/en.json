@@ -3831,7 +3831,8 @@
     "pictureSaved": "Picture saved, you find it in your downloads.",
     "pictureFailed": "The picture could not be made just now. Try again.",
     "scenesKickTerm": "<term>Scenes</term> · {matches, plural, one {1 match} other {# matches}} with video",
-    "exampleBand": "Example · invented figures"
+    "exampleBand": "Example · invented figures",
+    "prepareOpponent": "Prepare for the opponent"
   },
   "check": {
     "top": "Check · {opponent}",
