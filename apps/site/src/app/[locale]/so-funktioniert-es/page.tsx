@@ -16,6 +16,7 @@ import { APP_LOCALE, fmt, messages, type Locale } from "@/lib/i18n";
 import { pageMeta } from "@/lib/seo";
 import { appShot } from "@/lib/product-shots";
 import { COLLECTION, SEARCH, SEASON_BARS, tourTimeline } from "@/lib/tour-cuts";
+import { HELP } from "../../../../content/help";
 import { AnswerCut, BarsCut, ButtonCut, ChatCut, SceneCut, TimelineCut, type TourCut } from "@/components/tour-cuts";
 
 type Props = { params: Promise<{ locale: Locale }> };
@@ -89,6 +90,26 @@ export default async function How({ params }: Props) {
       <Reveal />
       <PageHead kick={t.title} title={t.head} lead={t.lead} aside={<StepsArt steps={t.steps} label={t.stepsLabel} />} />
       <div className="wrap">
+        {/* step 0 (BEFUNDE-5 point 8): once a season, the team says yes or no by link */}
+        <section id="schritt-0" aria-labelledby="zero" data-reveal className="mt-14 grid grid-cols-1 items-start gap-x-6 gap-y-3 border-2 border-ink bg-paper p-6 sm:grid-cols-[auto_minmax(0,1fr)] md:mt-20 md:gap-x-10 md:p-10">
+          <p aria-hidden className="font-num text-[4.5rem] leading-[.8] text-club-text md:text-[6rem]">
+            0
+          </p>
+          <div className="min-w-0">
+            <h2 id="zero" className="text-[2rem] md:text-[2.5rem]">
+              {t.zero.title}
+            </h2>
+            <p className="measure mt-3 text-[1.1875rem]">{t.zero.text}</p>
+            <div className="mt-2 flex flex-wrap gap-x-8">
+              <Link href={`/${locale}/daten/`} className="link">
+                {m.cta.consent}
+              </Link>
+              <Link href={`/${locale}/hilfe/einwilligungen/`} className="link">
+                {`${m.help.title}: ${HELP.find((h) => h.slug === "einwilligungen")!.title[locale]}`}
+              </Link>
+            </div>
+          </div>
+        </section>
         {/* the four steps (U47): text and drawing share the row, left and right in turn; the
             drawings are cut-outs on the page's ground, and one ball path runs through them */}
         <div data-steps className="relative mt-14 md:mt-20">
@@ -153,7 +174,7 @@ export default async function How({ params }: Props) {
         </section>
 
         <div className="mt-16 flex flex-col gap-3 border-t-2 border-ink pt-10 sm:flex-row sm:flex-wrap">
-          <StartLink appLocale={APP_LOCALE[locale]} className="btn btn-ink">
+          <StartLink appLocale={APP_LOCALE[locale]} src="how" className="btn btn-ink">
             {m.cta.start}
           </StartLink>
           <Link href={`/${locale}/demo/`} className="btn btn-line">

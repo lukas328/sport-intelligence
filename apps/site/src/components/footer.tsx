@@ -57,6 +57,7 @@ export function Footer({ locale }: { locale: Locale }) {
           ["aufnahme", m.nav.filming],
           ["demo", m.nav.demo],
           ["preise", m.nav.pricing],
+          ["vereine", m.nav.clubs],
           ["ratgeber", m.nav.guides],
           ["fakten", m.nav.facts],
           ...(blogInFooter() ? [["blog", m.nav.blog] as [string, string]] : []),

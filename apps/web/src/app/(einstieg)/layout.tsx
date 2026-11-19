@@ -15,7 +15,7 @@ export default async function EinstiegLayout({ children }: { children: ReactNode
   return (
     <div className="flex min-h-dvh flex-col">
       <header className="border-b-2 border-ink">
-        <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-3 px-4 sm:gap-4 sm:px-6">
+        <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-3 px-4 sm:gap-4 md:px-8">
           <p className="m-0 flex min-w-0 items-center gap-1.5 text-[15px] font-bold">
             <SiteHomeMark className="inline-flex min-h-11 shrink-0 items-center gap-2.5 text-ink no-underline">
               {/* eslint-disable-next-line @next/next/no-img-element -- a static SVG mark */}
@@ -36,7 +36,7 @@ export default async function EinstiegLayout({ children }: { children: ReactNode
           </span>
         </div>
       </header>
-      <main id="main" className="mx-auto w-full max-w-6xl flex-1 px-4 pt-6 pb-16 sm:px-6 sm:pt-10">
+      <main id="main" className="mx-auto w-full max-w-6xl flex-1 px-4 pt-6 pb-16 sm:pt-10 md:px-8">
         {children}
         <LanguageSwitch className="mt-10 sm:hidden" />
       </main>

@@ -2,7 +2,7 @@ import de, { type Messages } from "@/messages/de";
 import en from "@/messages/en";
 import fr from "@/messages/fr";
 
-export const LOCALES = ["de", "fr", "en"] as const;
+export const LOCALES = ["de", "en", "fr"] as const;
 export type Locale = (typeof LOCALES)[number];
 export const HTML_LANG: Record<Locale, string> = { de: "de-CH", fr: "fr-CH", en: "en" };
 export const LOCALE_NAMES: Record<Locale, string> = { de: "Deutsch", fr: "Français", en: "English" };

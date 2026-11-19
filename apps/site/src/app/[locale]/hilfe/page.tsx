@@ -9,6 +9,7 @@ import { faqPage, graph } from "@/lib/schema";
 import { fileVars } from "@/lib/files";
 import { fmt, messages, type Locale } from "@/lib/i18n";
 import { pageMeta } from "@/lib/seo";
+import { BOTH } from "@/lib/currency";
 import { MailLine } from "@/components/mail-line";
 import { HELP, type HelpEntry } from "../../../../content/help";
 
@@ -35,7 +36,7 @@ export default async function Help({ params }: Props) {
   const m = messages(locale);
   const t = m.faq;
   const team = plans.plans.find((p) => p.plan === "team")!;
-  const answer = (a: string) => fmt(a, { month: team.price_chf_month, year: team.price_chf_year, ...fileVars(m) });
+  const answer = (a: string) => fmt(a, { month: team.price_chf_month, year: team.price_chf_year, cur: BOTH, ...fileVars(m) });
   // a link after an answer, by the question's place in faq.items
   const links: Record<number, [string, string]> = {
     2: [`/${locale}/aufnahme/`, m.cta.filming],
