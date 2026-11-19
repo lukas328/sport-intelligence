@@ -32,7 +32,7 @@ Einstieg danach wie immer: `docs/plans/HANDOVER.md`.
 | `ml/gpu/JOBS.md` aufgeräumt (12 bis 15 nach "Erledigt", 3 und 11 zurückgestellt) | Sitzungsbranch | erledigt |
 | `docs/OPEN_QUESTIONS.md` Punkt 12: GPU-Entscheid | Sitzungsbranch | erledigt |
 | Spielende in `scoreboard.play_intervals`: lief die Uhr zuletzt, zählt das Spiel bis zum Videoende, höchstens bis zum Ende der Halbzeit (neuer Parameter `half_s`, Standard 30:00; Jugend mit kürzeren Halbzeiten hat nur eine lockerere Obergrenze). Halbzeitende (30:00 oder 0:00) und stehende Uhr wie bisher. Lesungen nach dem letzten Lauf, die nicht die Matchuhr sein können (Strafzeit, Fehllesung), blockieren die Regel nicht mehr. 3 neue Tests, `packages/vision` 218 grün | `2783a798` | erledigt |
-| Code health 2, 3, 9 (totes Gerüst, `system_access` als Kontextmanager, PDF im Thread) | Helfer | läuft |
+| Code health 2, 3, 9: totes Gerüst gelöscht (`handball_worker/pipeline/`, GPU-Worker `jobs.py` und `backends/`; Integrationstest schickt jetzt `os.getpid` an die GPU-Queue); `async with system_access(session, reason=...)` an allen ungeschützten Stellen, Grund wird geloggt (info, eine Zeile pro Media-/Job-Aufruf: bei Log-Volumen auf debug senken); reportlab-PDFs per `asyncio.to_thread`. Offen gelassen: Einstellung `HB_GPU_BACKEND` (für das spätere GPU-Backend). Nach dem Merge: 886 Python-Tests grün | `6f574ed2`, `77ef89df`, `2827e14d`, `d5336b8d` | erledigt |
 | A22 Wurfort: «Von wo?» wählt die Schätzung vor (gelb, gestrichelt, «Vorschlag»), ein Tipp in diese Zone bestätigt; die API übernimmt dann den geschätzten Punkt als Trainerpunkt (`zone_source`/`position_source` «coach», Methode in `attributes.confirmed_estimate`), unbestätigt zählt weiter nichts. An allen drei Stellen (Prüfen, Wurfort nachtragen, Wurfort ändern). Website- und Hilfetexte de/fr/en. API 508, Web 411, Site 95 Tests grün; Site-Build und e2e nicht gelaufen | `2161ec58`, `8f299f20`, `63e94d4c` | erledigt |
 | Wurfzeit der Kandidaten: Ursache gefunden, **kein Fix**. Die Kandidatenzeit ist der Spitzenwert des "Spiel dreht"-Musters (Rücklauf, Abwurf), nicht der Abwurf; der Versatz 1.5 s wurde gegen das Spielprotokoll gelernt, das etwa 3 s nach dem Abwurf liegt; dazu schwankt die Verzögerung je nach Ausgang (Tor 0.9 s, gehalten 1.8 s, daneben 2.6 s). Ohne Abwurf-Markierungen auf Dev lässt sich nichts ehrlich korrigieren, der Endtest darf nicht dafür herhalten. Clips sind nicht betroffen (Start 8 s vor der Spitze). `shot_segments_eval.py score` schreibt jetzt `per_shot`. Nächste Schritte im Plan, Abschnitt "Wurfzeit der Kandidaten (2026-11-19)" | `1d199c84` | Diagnose erledigt, Fix wartet auf Daten |
 | App-Review vom 19.11. bewertet; Block 1 (beobachtete Spiele, Zahlen) beim Helfer | `docs/ux-test/livegang/BEFUNDE-6-app-review.md` | läuft |
@@ -51,3 +51,19 @@ Einstieg danach wie immer: `docs/plans/HANDOVER.md`.
   (Inhalt in main), `claude/produkt-integration` (nach dem Merge), dazu die Design-Entwürfe
   `claude/trikot-zielbild`, `claude/design-runde2-sport`, `claude/design-runde2-video` (die
   gewählte Marke liegt in `docs/design/brand2/`).
+
+## Warteschlange (noch nicht gestartet, in dieser Reihenfolge)
+Falls die Sitzung abbricht: hier weitermachen. Laufende Helfer stehen oben mit «läuft»; ihre
+Arbeit liegt nur in lokalen Worktrees und geht mit dem Container verloren, also neu starten.
+1. App-Block 3 (`docs/ux-test/livegang/BEFUNDE-6-app-review.md`, Abschnitt Umsetzung Punkt 3 und L5):
+   UX-05, UX-06, UX-08 bis UX-11, UI-01, UI-03, UI-04, BUG-22, TXT-02, TXT-04, TXT-05, TXT-08,
+   LEGAL-01, dazu `?src=` bei der Registrierung speichern, «Gemacht mit Handball Intelligence» auf
+   geteilten Szenen, «AGB» statt «Nutzungsbedingungen», Werkbank nur hinter «Einrichten von Hand»,
+   oben auf jeder Spielseite die nächste Aufgabe.
+2. L1 «nicht jedes Tor markieren»: Tor-Kandidaten, die klar zu einem Tor im offiziellen Spielbericht
+   passen, ohne Frage übernehmen (`apps/api/src/handball_api/services/goal_candidates.py`, heute nur
+   Vorschlag); erst nach Block 2, weil derselbe Code die offenen Fragen zählt.
+3. «die drei Dinge» wird «die drei Muster» (en «the three patterns», fr «les trois tendances") in App,
+   Website, Demo und Hilfe; nur sichtbare Texte, URLs bleiben. Als letzter Schritt.
+4. UI-Check der ganzen Spielanalyse (L5) nach Block 1 bis 3.
+5. Danach aus `HANDOVER.md`: Kalibrierung per Klick auf Staging, Ball, übrige Code-Health-Punkte.
