@@ -10,6 +10,7 @@ club content; clubs can leave at any time.
 
 from __future__ import annotations
 
+import asyncio
 import uuid
 from datetime import UTC, datetime, time, timedelta
 from typing import Any
@@ -125,7 +126,8 @@ async def invoice(ctx: Ctx, federation_id: uuid.UUID, lang: str) -> tuple[bytes,
         "voucher_code": None,
     }
     s = ctx.settings
-    pdf = invoice_pdf.render(
+    pdf = await asyncio.to_thread(
+        invoice_pdf.render,
         lang,
         creditor(ctx),
         s.invoice_iban,

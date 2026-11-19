@@ -4,6 +4,7 @@ import of sessions. Spond and ClubCorner sit behind the TeamOpsAdapter (ADR 018)
 
 from __future__ import annotations
 
+import asyncio
 import io
 import uuid
 from datetime import UTC, date, datetime, time, timedelta
@@ -153,7 +154,7 @@ async def session_pdf(ctx: Ctx, session_id: uuid.UUID, lang: str) -> tuple[bytes
     if s.notes:
         story += [Paragraph(_esc(t["notes"]), st["h2"]), Paragraph(_esc(s.notes), st["base"])]
     buf = io.BytesIO()
-    SimpleDocTemplate(
+    doc = SimpleDocTemplate(
         buf,
         pagesize=A4,
         leftMargin=16 * mm,
@@ -161,7 +162,8 @@ async def session_pdf(ctx: Ctx, session_id: uuid.UUID, lang: str) -> tuple[bytes
         topMargin=14 * mm,
         bottomMargin=14 * mm,
         title=s.title or t["title"],
-    ).build(story)
+    )
+    await asyncio.to_thread(doc.build, story)  # layout is CPU work: off the event loop
     return buf.getvalue(), f"training-{s.on_date.isoformat()}.pdf"
 
 

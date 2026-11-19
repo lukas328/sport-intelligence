@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import json
 import uuid
@@ -533,7 +534,8 @@ async def match_pdf(ctx: Ctx, match_id: uuid.UUID, lang: str) -> tuple[bytes, st
         for x in (match.kickoff_at.strftime("%d.%m.%Y %H:%M"), match.competition, match.venue)
         if x
     )
-    pdf = report_pdf.render(
+    pdf = await asyncio.to_thread(
+        report_pdf.render,
         lang,
         {"name": org.name, "primary_color": org.club_colour},
         {

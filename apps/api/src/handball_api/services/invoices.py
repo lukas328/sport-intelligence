@@ -7,6 +7,7 @@ the backoffice or matched from a camt.054 bank file (QR reference and amount).
 
 from __future__ import annotations
 
+import asyncio
 import uuid
 import xml.etree.ElementTree as ET
 from datetime import UTC, date, datetime, timedelta
@@ -140,9 +141,10 @@ def _inv_dict(inv: Invoice) -> dict[str, Any]:
     }
 
 
-def render_pdf(ctx: Ctx, inv: Invoice, kind: str = "invoice") -> bytes:
+async def render_pdf(ctx: Ctx, inv: Invoice, kind: str = "invoice") -> bytes:
     s = ctx.settings
-    return invoice_pdf.render(
+    return await asyncio.to_thread(
+        invoice_pdf.render,
         str(inv.recipient.get("locale") or "de-CH"),
         creditor(ctx),
         s.invoice_iban,
@@ -164,13 +166,14 @@ async def _send(ctx: Ctx, inv: Invoice, kind: str) -> bool:
         "total": f"CHF {invoice_pdf.chf(inv.amount_cents)}",
         "due": inv.due_date.strftime("%d.%m.%Y"),
     }
+    pdf = await render_pdf(ctx, inv, kind)
     return await try_send(
         ctx.email,
         Email(
             to=str(inv.recipient["email"]),
             subject=subject.format(**params),
             text=body.format(**params),
-            attachments=((f"{inv.number}.pdf", "application/pdf", render_pdf(ctx, inv, kind)),),
+            attachments=((f"{inv.number}.pdf", "application/pdf", pdf),),
         ),
         f"invoice_{kind}",
         invoice_id=str(inv.id),
@@ -272,7 +275,7 @@ async def order(ctx: Ctx, plan: Plan, voucher_code: str | None, contact: dict[st
         inv.due_date + timedelta(days=CUTOFF_DAYS), datetime.min.time(), UTC
     )
     await ctx.db.flush()
-    pdf = render_pdf(ctx, inv)
+    pdf = await render_pdf(ctx, inv)
     key = f"{org.id}/invoices/{inv.number}.pdf"
     await ctx.storage.put(ctx.settings.s3_bucket_artifacts, key, pdf, "application/pdf")
     inv.pdf_key = key
