@@ -4559,5 +4559,16 @@
     "datenschutz": "Privacy",
     "agb": "Terms",
     "kontakt": "Contact"
+  },
+  "nextTask": {
+    "label": "Next task",
+    "checks": "{n, plural, one {1 question open} other {# questions open}}",
+    "checksAction": "Answer the questions",
+    "spots": "{n, plural, one {1 goal has no shot spot} other {# goals have no shot spot}}",
+    "spotsAction": "Add the shot spots",
+    "upload": "No video for this match yet",
+    "uploadAction": "Upload a video",
+    "prepare": "The match is still to come",
+    "prepareAction": "Prepare for the opponent"
   }
 }

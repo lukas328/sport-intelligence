@@ -1,6 +1,7 @@
 "use client";
 
-import { checkMinutes } from "@/lib/shot-spot";
+import { checkMinutes, spotCounts } from "@/lib/shot-spot";
+import { nextTask } from "@/lib/next-task";
 import { ShareButton, shareMatchCard } from "@/components/sharing/share-button";
 import type { Schemas } from "@handball/api-client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -18,6 +19,7 @@ import { ownName } from "@/lib/own-name";
 import { ThreeThingsView } from "@/components/anlauf/three-things-view";
 import { ExampleBanner } from "@/components/anlauf/example-banner";
 import { MatchHead } from "./match-head";
+import { NextTaskLine } from "./next-task";
 import { AskColour } from "./ask-colour";
 import { VideoStage } from "./video-stage";
 import type { Kits } from "@/lib/kit";
@@ -417,6 +419,22 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
         )}
       </MatchHead>
       {example && <ExampleBanner orgId={orgId} teamId={match.team_id} />}
+      {/* one clear next task on every match page (L5): open questions, missing shot spots, the video */}
+      <NextTaskLine
+        base={base}
+        onUpload={toUpload}
+        task={nextTask({
+          staff,
+          example,
+          upcoming,
+          hasOpponent: Boolean(match.opponent),
+          running: progressShown || graphics.data?.analysis === "running",
+          checks,
+          spotsMissing: graphics.data ? spotCounts(graphics.data).missing : 0,
+          hasVideo: Boolean(main),
+          paper: match.source === "paper_report",
+        })}
+      />
       {/* one state at a time (L4): the progress block below says what runs; here only «fertig»
           and a failed match without progress to tell it */}
       {(justDone || (match.status === "failed" && !progressShown)) && (

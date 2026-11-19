@@ -4559,5 +4559,16 @@
     "datenschutz": "Datenschutz",
     "agb": "AGB",
     "kontakt": "Kontakt"
+  },
+  "nextTask": {
+    "label": "Nächste Aufgabe",
+    "checks": "{n, plural, one {1 Frage offen} other {# Fragen offen}}",
+    "checksAction": "Fragen beantworten",
+    "spots": "{n, plural, one {Bei 1 Tor fehlt der Wurfort} other {Bei # Toren fehlt der Wurfort}}",
+    "spotsAction": "Wurforte nachtragen",
+    "upload": "Noch kein Video zu diesem Spiel",
+    "uploadAction": "Video hochladen",
+    "prepare": "Das Spiel kommt noch",
+    "prepareAction": "Auf den Gegner vorbereiten"
   }
 }

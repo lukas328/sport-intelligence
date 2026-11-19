@@ -4559,5 +4559,16 @@
     "datenschutz": "Confidentialité",
     "agb": "CG",
     "kontakt": "Contact"
+  },
+  "nextTask": {
+    "label": "Prochaine tâche",
+    "checks": "{n, plural, one {1 question ouverte} other {# questions ouvertes}}",
+    "checksAction": "Répondre aux questions",
+    "spots": "{n, plural, one {Il manque le lieu de tir d'1 but} other {Il manque le lieu de tir de # buts}}",
+    "spotsAction": "Compléter les lieux de tir",
+    "upload": "Pas encore de vidéo pour ce match",
+    "uploadAction": "Téléverser une vidéo",
+    "prepare": "Le match est encore à venir",
+    "prepareAction": "Préparer l'adversaire"
   }
 }
