@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import plans from "@handball/plans";
 import { Faq } from "@/components/faq";
 import { KitScope, StartLink } from "@/components/kit";
@@ -298,6 +299,10 @@ export default async function Pricing({ params }: Props) {
           <p>{fmt(t.annual, { months: plans.annual_months, gift: gift(team) })}</p>
           <p>{t.currency}</p>
         </div>
+        {/* the board of a club with several teams reads on «Für Vereine» */}
+        <Link href={`/${locale}/vereine/`} className="link mt-4">
+          {m.nav.clubs}
+        </Link>
         <section aria-labelledby="faq" className="mt-16">
           <SectionHead id="faq" title={t.faqTitle} />
           <Faq items={t.faq.map((f) => ({ q: f.q, a: <p>{f.a}</p> }))} />

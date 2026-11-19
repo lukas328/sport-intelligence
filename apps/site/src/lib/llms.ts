@@ -23,6 +23,7 @@ function pages(locale: Locale): string[] {
     link(m.seo.how.title, pageUrl(locale, "so-funktioniert-es"), m.seo.how.description),
     link(m.seo.filming.title, pageUrl(locale, "aufnahme"), m.seo.filming.description),
     link(m.seo.pricing.title, pageUrl(locale, "preise"), m.seo.pricing.description),
+    link(m.seo.clubs.title, pageUrl(locale, "vereine"), m.seo.clubs.description),
     link(m.seo.data.title, pageUrl(locale, "daten"), m.seo.data.description),
     link(m.seo.faq.title, pageUrl(locale, "hilfe"), m.seo.faq.description),
     link(m.seo.demo.title, pageUrl(locale, "demo"), m.seo.demo.description),
