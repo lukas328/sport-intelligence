@@ -164,7 +164,7 @@ const fr: Messages = {
     loopLink: "Toute la semaine dans le match de démo",
     shareWhen: "Mardi, avant l'entraînement",
     shareTitle: "Quatre scènes dans le chat de l'équipe.",
-    shareText: "Les quatre scènes les plus claires partent dans le chat de l'équipe comme sélection : un choix de scènes derrière un lien. Les joueurs voient eux-mêmes où est le trou. En plus, l'app propose des conseils d'entraînement avec des exercices, ici « Repli à 2 contre 3 après la perte » contre les {fast} buts encaissés sur contre-attaque.",
+    shareText: "Les quatre scènes les plus claires partent dans le chat de l'équipe comme sélection : un choix de scènes derrière un lien. Les joueurs voient eux-mêmes où est le trou. En plus, l'app propose des conseils d'entraînement avec des exercices, ici « Repli à 3 contre 2 après la perte » contre les {fast} buts encaissés sur contre-attaque.",
     sharePoints: ["Sans compte", "Des numéros au lieu des noms", "Le lien expire"],
     shareAlt: "Voici comment une sélection arrive dans le chat : une carte aux couleurs du club avec le titre Fermer l'aile droite, puis l'équipe et 4 scènes. Plus bas, le bouton pour partager le lien.",
     chat: {
@@ -250,7 +250,7 @@ const fr: Messages = {
       },
       {
         title: "Regarder et partager",
-        text: "Résultat, déroulement, chaque but comme scène et les positions vues d'en haut. Si tu as confirmé pour les buts l'endroit d'où le tir est parti (le lieu de tir), les trois points s'ajoutent : les trois plus grands schémas pour l'entraînement, dès trois buts de la même zone. Les scènes importantes, tu les envoies en sélection dans le chat de l'équipe, un choix de scènes derrière un lien.",
+        text: "Résultat, déroulement, chaque but comme scène et les positions vues d'en haut. Si tu as confirmé le lieu de tir des buts, les trois points s'ajoutent : les trois plus grands schémas pour l'entraînement, dès trois buts de la même zone. Les scènes importantes, tu les envoies en sélection par lien dans le chat de l'équipe.",
         alt: "En grand : 11 buts encaissés sur 29 par l'aile droite, à côté le demi-terrain avec les lieux de tir des 29 buts encaissés, les 11 de l'aile droite en jaune. En dessous, la sélection pour le chat de l'équipe : Fermer l'aile droite, 4 scènes, HC Tannengrün Hommes 1, et le bouton Partager le lien.",
       },
     ],
@@ -747,7 +747,7 @@ const fr: Messages = {
       {
         title: "Pourquoi nous existons",
         text: [
-          "L'analyse vidéo était réservée aux pros : un système de caméras dans la salle et quelqu'un qui découpe des scènes pendant des heures. Dans le handball de club, l'entraîneuse coache, fait les changements, parle à l'arbitre, et lundi elle retourne au bureau. Ce qui s'est passé de l'autre côté, elle ne le sait pas vraiment. C'est pour ce soir-là que nous construisons.",
+          "L'analyse vidéo était réservée aux pros : un système de caméras dans la salle et quelqu'un qui découpe des scènes pendant des heures. Dans le handball de club, l'entraîneuse coache, fait les changements, parle à l'arbitre, et lundi elle retourne au bureau. Ce qui s'est passé de l'autre côté, elle ne le sait pas vraiment.",
         ],
       },
       {

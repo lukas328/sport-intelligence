@@ -164,7 +164,7 @@ const en: Messages = {
     loopLink: "The whole week in the demo match",
     shareWhen: "Tuesday, before training",
     shareTitle: "Four scenes in the team chat.",
-    shareText: "The four clearest scenes go to the team chat as a collection: a choice of scenes behind one link. The players see for themselves where the gap is. On top, the app suggests training tips with drills, here \"Getting back 2 against 3 after a turnover\" against the {fast} goals conceded from fast breaks.",
+    shareText: "The four clearest scenes go to the team chat as a collection: a choice of scenes behind one link. The players see for themselves where the gap is. On top, the app suggests training tips with drills, here \"Getting back 3 against 2 after a turnover\" against the {fast} goals conceded from fast breaks.",
     sharePoints: ["No account", "Shirt numbers, not names", "The link expires"],
     shareAlt: "How a collection arrives in the chat: a card in the club colour titled Close the right wing, below it the team and 4 scenes. Further down the button to share the link.",
     chat: {
@@ -250,7 +250,7 @@ const en: Messages = {
       },
       {
         title: "Watch and share",
-        text: "Score, run of the match, every goal as a scene and the positions from above. If you confirmed where each goal was thrown from (the shot spot), the three things come on top: the three biggest patterns for training, from three goals out of the same zone. The scenes that matter go to the team chat as a collection, a choice of scenes behind one link.",
+        text: "Score, run of the match, every goal as a scene and the positions from above. If you confirmed the shot spot of the goals, the three things come on top: the three biggest patterns for training, from three goals out of the same zone. The scenes that matter go to the team chat as a collection, by link.",
         alt: "Large: 11 of 29 goals conceded on the right wing, beside it the half court with the shot spots of the 29 goals conceded, the 11 on the right wing in yellow. Below it the collection for the team chat: Close the right wing, 4 scenes, HC Tannengrün Men 1, and the button Share link.",
       },
     ],
@@ -747,7 +747,7 @@ const en: Messages = {
       {
         title: "Why we exist",
         text: [
-          "Video analysis was something for professionals: a camera system in the hall and someone cutting scenes for hours. In club handball the coach is coaching, making changes, talking to the referee, and back at the office on Monday. What happened at the other end, she does not really know. We build for that evening.",
+          "Video analysis was something for professionals: a camera system in the hall and someone cutting scenes for hours. In club handball the coach is coaching, making changes, talking to the referee, and back at the office on Monday. What happened at the other end, she does not really know.",
         ],
       },
       {

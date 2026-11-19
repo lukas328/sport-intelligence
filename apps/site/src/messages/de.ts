@@ -248,7 +248,7 @@ const de = {
       },
       {
         title: "Anschauen und teilen",
-        text: "Resultat, Spielverlauf, jedes Tor als Szene und die Positionen von oben. Hast du bei den Toren bestätigt, von wo geworfen wurde (der Wurfort), kommen die drei Dinge dazu: die drei grössten Muster fürs Training, ab drei Toren aus derselben Zone. Die wichtigsten Szenen schickst du als Sammlung in den Teamchat, eine Auswahl hinter einem Link.",
+        text: "Resultat, Spielverlauf, jedes Tor als Szene und die Positionen von oben. Hast du bei den Toren den Wurfort bestätigt, kommen die drei Dinge dazu: die drei grössten Muster fürs Training, ab drei Toren aus derselben Zone. Die wichtigsten Szenen schickst du als Sammlung per Link in den Teamchat.",
         alt: "Gross: 11 von 29 Gegentoren über aussen rechts, daneben das halbe Feld mit den Wurforten der 29 Gegentore, die 11 aussen rechts in Gelb. Darunter die Sammlung für den Teamchat: Aussen rechts zumachen, 4 Szenen, HC Tannengrün Herren 1, und der Knopf Link teilen.",
       },
     ],
@@ -746,7 +746,7 @@ const de = {
       {
         title: "Warum es uns gibt",
         text: [
-          "Videoanalyse war etwas für Profis: ein Kamerasystem in der Halle und jemand, der stundenlang Szenen schneidet. Im Vereinshandball coacht die Trainerin, wechselt, redet mit dem Schiedsrichter und ist am Montag wieder im Büro. Was auf der anderen Seite passiert ist, weiss sie nicht genau. Für diesen Abend bauen wir.",
+          "Videoanalyse war etwas für Profis: ein Kamerasystem in der Halle und jemand, der stundenlang Szenen schneidet. Im Vereinshandball coacht die Trainerin, wechselt, redet mit dem Schiedsrichter und ist am Montag wieder im Büro. Was auf der anderen Seite passiert ist, weiss sie nicht genau.",
         ],
       },
       {
