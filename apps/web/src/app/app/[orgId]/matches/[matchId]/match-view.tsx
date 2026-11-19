@@ -10,7 +10,9 @@ import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, 
 import Link from "next/link";
 import { useEscape } from "@/lib/use-escape";
 import { ArrowLeftRight, Check, ChevronDown, ChartNoAxesColumn, Clapperboard, FileDown, Hand, Info, MoreHorizontal, Pencil, Plus, Radio, Shield, Trash2 } from "lucide-react";
-import { useRosterNames } from "@/components/analysis/tagger";
+import { MatchSidesProvider, useMatchRoster } from "@/components/domain/match-sides";
+import { homeFirst, matchSides, type MatchSides } from "@/lib/match-sides";
+import { courseOf } from "@/lib/score-flow";
 import { DEFAULT_CLUB, matchStyle } from "@/lib/color";
 import { markOpened } from "@/lib/fresh-match";
 import { checkCount, goalRuns, useMatchGraphics } from "@/lib/graphics";
@@ -226,10 +228,21 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
   // the example match of «Demo-Spiel ansehen» is looked at, not worked on (R1, R22): no upload,
   // no colour question, no files, no placeholders; seeded demo matches with a video stay matches
   const example = match.source === "demo";
-  const own = scouting ? (match.scouting_other ?? t("progress.otherTeam")) : ownName(teamName, shell?.org.name ?? teamName);
+  // the one notion of perspective (BUG-01 to 07): our team, or both teams by name when observed
+  const sides = matchSides(match, { team: ownName(teamName, shell?.org.name ?? teamName), opponent: oppName(match), otherFallback: t("progress.otherTeam") });
+  const own = sides.own;
+  // the other team of an observed match has a profile of its own when the club knows it as an
+  // opponent (by name)
+  const opponents = useQuery({
+    queryKey: ["opponents", orgId],
+    enabled: scouting && Boolean(match.scouting_other),
+    queryFn: async () => (await api.GET("/v1/orgs/{org_id}/opponents", { params: { path: { org_id: orgId } } })).data ?? [],
+  });
+  const otherProfile = scouting ? opponents.data?.find((o) => o.name.trim().toLowerCase() === (match.scouting_other ?? "").trim().toLowerCase()) : undefined;
   const more = useRef<HTMLDetailsElement>(null);
   // the example names nobody of the team: its players are invented numbers, never the roster (A4)
-  const rosterQuery = useRosterNames(orgId, match.team_id, match.season_id);
+  // an observed match names nobody of the team either: our roster plays no part in it (L4)
+  const rosterQuery = useMatchRoster(orgId, match);
   const rosterRows = useMemo(() => (example ? [] : (rosterQuery.data ?? [])), [example, rosterQuery.data]);
   const names = useMemo(
     () => Object.fromEntries(rosterRows.map((r) => [r.player_id, playerLabel(r.jersey_number, `${r.first_name} ${r.last_name}`)])),
@@ -363,6 +376,9 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
 
   const base = `/app/${orgId}/matches/${match.id}`;
   // what the video covers of the match, for the analysis to say which figures it can carry
+  // the course of the match over what the data covers (BUG-20): the match minutes of the video, or
+  // without a throw-off the video's own minutes (the goals then carry video times), never 0 to 60
+  const courseSpan = courseOf(graphics.data ?? null, match.kickoff_ms, main?.duration_s ?? null);
   const covers = main ? coverage(match.kickoff_ms, match.period_s, main.duration_s ? main.duration_s * 1000 : null) : null;
   const videoNote = covers?.length
     ? t("workflow.coverage", { clip: covers.map((c) => `${formatClock(c.from * 1000)} ${t("workflow.to")} ${formatClock(c.to * 1000)}`).join(", ") })
@@ -392,6 +408,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
       : null,
   ].filter(Boolean);
   return (
+    <MatchSidesProvider sides={sides}>
     <div className="space-y-8" style={matchStyle(club, oppKit) as CSSProperties}>
       <MatchHead match={match} ownName={own} oppName={oppName(match)} view={view} graphics={graphics.data}>
         {staff && !example && match.opponent && !match.opponent_colors?.color && <AskColour orgId={orgId} matchId={match.id} opponent={oppName(match)} />}
@@ -484,9 +501,15 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
                     {t("marks.title")}
                   </MenuItem>
                 )}
+                {/* an observed match: the profile of each team that has one, both by name (BUG-07) */}
                 {match.opponent && (
                   <MenuItem href={`/app/${orgId}/opponents/${match.opponent.id}`} icon={<Shield />}>
-                    {t("opponent.open")}: {match.opponent.name}
+                    {scouting ? t("opponent.openOf", { name: match.opponent.name }) : `${t("opponent.open")}: ${match.opponent.name}`}
+                  </MenuItem>
+                )}
+                {otherProfile && (
+                  <MenuItem href={`/app/${orgId}/opponents/${otherProfile.id}`} icon={<Shield />}>
+                    {t("opponent.openOf", { name: otherProfile.name })}
                   </MenuItem>
                 )}
                 <MenuSeparator />
@@ -644,7 +667,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
             <div className="mb-3">
               <PartsLine videos={match.videos} onJump={(ms) => benchAt(ms, true)} />
             </div>
-            <Workspace orgId={orgId} match={match} video={main} staff={staff} teamName={teamName} oppName={oppName(match)} names={names} handle={player} setup={setup} requestPane={askPane} checkSteps={false} />
+            <Workspace orgId={orgId} match={match} video={main} staff={staff} teamName={own} oppName={oppName(match)} names={names} handle={player} setup={setup} requestPane={askPane} checkSteps={false} />
           </section>
         ) : !staff ? (
           <EmptyState icon={<Clapperboard />} title={match.source === "paper_report" ? t("stats.noVideo") : t("player.notReady")} />
@@ -799,7 +822,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
           {/* only what the data carries and what is in scope (UX test B08): the course of the
               match; the comparison sits in Zahlen, the three things above, possession and attacks
               estimated from the video are not shown */}
-          {stats.data && stats.data.quality.events > 0 && <OverviewView orgId={orgId} match={match} teamName={teamName} stats={stats.data} names={names} staff={staff} onPlay={main ? onPlay : undefined} parts={["timeline"]} span={graphics.data && !graphics.data.has_report ? (graphics.data.span ?? null) : null} />}
+          {stats.data && stats.data.quality.events > 0 && <OverviewView orgId={orgId} match={match} teamName={own} stats={stats.data} names={names} staff={staff} onPlay={main ? onPlay : undefined} parts={["timeline"]} span={courseSpan?.span ?? null} videoTime={courseSpan?.video ?? false} />}
           <div className="space-y-8">
             <div id="highlights" className="scroll-mt-24"><HighlightsView orgId={orgId} matchId={match.id} teamId={match.team_id} staff={staff} names={names} scenes={Boolean(main && graphics.data?.goals.some((g) => g.has_video))} /></div>
             {/* the players' personal scenes are the staff's overview (K18) */}
@@ -819,7 +842,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
           {graphics.data && goalRuns(graphics.data).length > 0 && <MatchZones graphics={graphics.data} row />}
           {stats.data && stats.data.quality.events > 0 && (
             <section id="numbers-overview" className="scroll-mt-24">
-              <OverviewView orgId={orgId} match={match} teamName={teamName} stats={stats.data} names={names} staff={staff} onPlay={main ? onPlay : undefined} videoNote={videoNote} parts={["basis", "decided", "comparison"]} />
+              <OverviewView orgId={orgId} match={match} teamName={own} stats={stats.data} names={names} staff={staff} onPlay={main ? onPlay : undefined} videoNote={videoNote} parts={["basis", "decided", "comparison"]} />
             </section>
           )}
           {numberParts.length === 0 && (
@@ -853,14 +876,14 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
                   orgId={orgId}
                   matchId={match.id}
                   names={names}
-                  teamName={teamName}
+                  teamName={own}
                   oppName={oppName(match)}
                   videoNote={videoNote}
                   short={covers != null && covers.reduce((s, c) => s + c.to - c.from, 0) < match.period_s}
                 />
               ) : stats.data ? (
                 (() => {
-                  const props = { orgId, match, teamName, stats: stats.data, names, staff, onPlay: main ? onPlay : undefined };
+                  const props = { orgId, match, teamName: own, stats: stats.data, names, staff, onPlay: main ? onPlay : undefined };
                   if (part === "report") return <ReportView {...props} />;
                   if (part === "keepers") return <KeepersView {...props} />;
                   return <ShotsView {...props} />;
@@ -875,12 +898,13 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
       )}
 
       <Dialog open={dialog === "edit"} onOpenChange={(o) => setDialog(o ? "edit" : null)} title={t("matches.edit")}>
-        <MatchAdmin orgId={orgId} match={match} teamName={teamName} onSaved={() => setDialog(null)} />
+        <MatchAdmin orgId={orgId} match={match} sides={sides} onSaved={() => setDialog(null)} />
       </Dialog>
       <Dialog open={dialog === "exchange"} onOpenChange={(o) => setDialog(o ? "exchange" : null)} title={t("exchange.title")}>
         <ExchangePanel orgId={orgId} matchId={match.id} canImport={staff} />
       </Dialog>
     </div>
+    </MatchSidesProvider>
   );
 }
 
@@ -914,9 +938,8 @@ function QualityReport({ video }: { video: Video }) {
   );
 }
 
-function MatchAdmin({ orgId, match, teamName, onSaved }: { orgId: string; match: Match; teamName: string; onSaved: () => void }) {
+function MatchAdmin({ orgId, match, sides, onSaved }: { orgId: string; match: Match; sides: MatchSides; onSaved: () => void }) {
   const t = useTranslations();
-  const oppName = useOpponentName();
   const qc = useQueryClient();
   const [custom, setCustom] = useState(match.format === "custom");
   const saved: Kits = {
@@ -949,15 +972,24 @@ function MatchAdmin({ orgId, match, teamName, onSaved }: { orgId: string; match:
   }
   return (
     <form onSubmit={save} className="space-y-6" aria-label={t("matches.edit")}>
+      {/* the home team first, as in the head (BUG-18); the result of the whole match, not the
+          goals in the video (BUG-05) */}
       <fieldset className="grid grid-cols-2 gap-3">
         <legend className="mb-2 text-sm font-semibold">{t("matches.score")}</legend>
-        <Input label={teamName} name="score_own" type="number" min={0} max={99} defaultValue={match.score_own ?? ""} />
-        <Input label={oppName(match)} name="score_opponent" type="number" min={0} max={99} defaultValue={match.score_opponent ?? ""} />
+        {homeFirst(
+          sides,
+          <Input key="own" label={sides.own} name="score_own" type="number" min={0} max={99} defaultValue={match.score_own ?? ""} />,
+          <Input key="opp" label={sides.opp} name="score_opponent" type="number" min={0} max={99} defaultValue={match.score_opponent ?? ""} />,
+        )}
+        <p className="col-span-2 m-0 text-[15px] text-ink-2">{t("matches.scoreFinalHint")}</p>
       </fieldset>
       <fieldset className="grid grid-cols-2 gap-3">
         <legend className="mb-2 text-sm font-semibold">{t("matches.halftime")}</legend>
-        <Input label={teamName} name="ht_own" type="number" min={0} max={99} defaultValue={match.halftime_own ?? ""} />
-        <Input label={oppName(match)} name="ht_opp" type="number" min={0} max={99} defaultValue={match.halftime_opponent ?? ""} />
+        {homeFirst(
+          sides,
+          <Input key="own" label={sides.own} name="ht_own" type="number" min={0} max={99} defaultValue={match.halftime_own ?? ""} />,
+          <Input key="opp" label={sides.opp} name="ht_opp" type="number" min={0} max={99} defaultValue={match.halftime_opponent ?? ""} />,
+        )}
       </fieldset>
       <div className="grid grid-cols-2 gap-3">
         <div className="col-span-2">
@@ -978,7 +1010,7 @@ function MatchAdmin({ orgId, match, teamName, onSaved }: { orgId: string; match:
       </div>
       <fieldset>
         <legend className="mb-2 text-sm font-semibold">{t("matches.kits")}</legend>
-        <KitFields kits={kits} onChange={setKits} />
+        <KitFields kits={kits} onChange={setKits} names={sides.neutral ? { own: sides.own, opp: sides.opp } : null} />
       </fieldset>
       <Button type="submit">{t("common.save")}</Button>
     </form>

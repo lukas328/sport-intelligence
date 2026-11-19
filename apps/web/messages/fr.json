@@ -555,7 +555,10 @@
     "otherWaysFile": "Sans vidéo ? Crée le match et saisis le résultat. Le rapport papier se joint au match en photo ou PDF; le rapport officiel de handball.ch arrive tout seul.",
     "uploadBackToList": "Retour à la liste des matchs",
     "newHint": "Match amical ou vidéo de l'adversaire",
-    "newOwnMatch": "Créer un match de ton équipe"
+    "newOwnMatch": "Créer un match de ton équipe",
+    "kitFieldOf": "{team}, joueurs de champ",
+    "kitKeeperOf": "{team}, gardien",
+    "scoreFinalHint": "Le score final du match entier, pas les buts de la vidéo."
   },
   "upload": {
     "title": "Téléverser la vidéo",
@@ -683,7 +686,7 @@
     "headInterrupted": "Téléversement interrompu",
     "headDone": "Analyse terminée",
     "headFailed": "Cela n'a pas marché",
-    "scoutingName": "{opponent} contre {other}",
+    "scoutingName": "{home} contre {away}",
     "training": "Entraînement",
     "percent": "{n} %",
     "silentFor": "aucun signe depuis {m} min",
@@ -1058,7 +1061,19 @@
     "concededByPosition": "Buts encaissés par poste",
     "ofShots": "{n, plural, one {sur # tir} other {sur # tirs}}",
     "flowAbove": "En haut : {team} devant",
-    "flowBelow": "En bas : {team} devant"
+    "flowBelow": "En bas : {team} devant",
+    "notRecorded": "non saisi",
+    "droughtOf": "Plus longue période sans but ({team}) : {minutes} min",
+    "flowVideoTime": "Minutes de la vidéo",
+    "balanceShots": "{team} : {n, plural, one {# tir} other {# tirs}}",
+    "balanceGoals": "{n, plural, one {# but} other {# buts}}",
+    "balanceSaved": "{n} arrêtés",
+    "balanceMisses": "{n} à côté",
+    "balancePosts": "{n} sur le poteau ou la barre",
+    "balanceOther": "{n} sans résultat",
+    "balanceBlocked": "(plus {n} contrés)",
+    "balanceGoalsOnly": "{team} : seulement {goals, plural, one {# but saisi} other {# buts saisis}}, aucun tir manqué ni arrêt",
+    "reportEmpty": "Aucun but ni tir saisi avec un numéro ou un nom."
   },
   "shotsView": {
     "title": "Tirs",
@@ -1078,7 +1093,10 @@
     "noPosition": "{count} tirs sans position",
     "noPositions": "Aucune position de tir n'est saisie pour ces tirs. Touche le terrain en saisissant dans l'onglet Événements et la carte des tirs apparaît ici.",
     "fillGoals": "Le remplissage de chaque case montre la part de buts.",
-    "fillSaves": "Le remplissage de chaque case montre la part d'arrêts."
+    "fillSaves": "Le remplissage de chaque case montre la part d'arrêts.",
+    "noPositionOf": "{count} tirs sur {total} sans position",
+    "noGoalZones": "Le coin du but n'est saisi pour aucun tir. En saisissant, touche le coin du but et l'image du but apparaît ici.",
+    "noZones": "La zone de tir n'est saisie pour aucun tir."
   },
   "events": {
     "title": "Événements",
@@ -1131,7 +1149,8 @@
     "moreEvents": "Sanctions et interruptions",
     "whereTitle": "Position du tir et coin du but",
     "whereSet": "défini",
-    "setupTitle": "Gardiens et import"
+    "setupTitle": "Gardiens et import",
+    "shirtNumber": "Numéro"
   },
   "paper": {
     "title": "Importer une feuille de match papier",
@@ -1204,7 +1223,9 @@
     "assignHint": "Choisis le gardien lors de la saisie pour attribuer les arrêts.",
     "ownKeeper": "Notre gardien",
     "oppKeeper": "Gardien adverse n°",
-    "keeper": "Gardien"
+    "keeper": "Gardien",
+    "savesWithoutKeeper": "{n, plural, one {Un arrêt} other {# arrêts}} sans gardien",
+    "keeperOf": "Gardien {team} n°"
   },
   "physical": {
     "title": "Physique",
@@ -1225,12 +1246,14 @@
     "showHeatmap": "Afficher la carte de chaleur",
     "teamOwn": "Propre équipe",
     "teamOpp": "Adversaire",
-    "tracksOwn": "Traces de l'équipe, dès 1 minute",
+    "tracksOwn": "Traces de {team}, dès 1 minute",
     "playersAndTracks": "Joueurs et traces",
     "showShort": "Afficher {n} traces courtes (moins d'1 minute)",
     "hideShort": "Masquer les traces courtes",
     "shortClip": "La vidéo montre moins d'une mi-temps : distances, sprints et vitesse ne valent que pour cet extrait, pas pour tout le match.",
-    "estimated": "Estimé à partir des positions dans la vidéo."
+    "estimated": "Estimé à partir des positions dans la vidéo.",
+    "thin": "Trop peu de données de course",
+    "thinHint": "Les traces de la vidéo sont trop courtes pour des distances fiables. Nous n'affichons donc pas de chiffres plutôt que des chiffres incertains."
   },
   "identity": {
     "title": "Attribuer les joueurs",
@@ -1246,7 +1269,9 @@
     "shirt": "N° {n}",
     "unknown": "inconnu",
     "showAll": "Afficher les {n}",
-    "onScreen": "{s} s à l'image"
+    "onScreen": "{s} s à l'image",
+    "hintNumber": "Donne un numéro aux personnes des deux équipes. Les attributions restent après une nouvelle analyse.",
+    "numberPlaceholder": "N°"
   },
   "camera": {
     "label": "Caméra",
@@ -1636,7 +1661,8 @@
     "xgPerMatch": "xG par match (estimé)",
     "xgThin": "xG : trop peu de tirs avec position ({n} sur {of}).",
     "noScorers": "Aucun tir avec numéro de maillot saisi.",
-    "watchedAgainst": "observé contre {other}"
+    "watchedAgainst": "observé contre {other}",
+    "openOf": "Profil de {name}"
   },
   "billing": {
     "title": "Abonnement et factures",
@@ -3626,7 +3652,7 @@
     "collect": "Préparer pour l'équipe",
     "checksOpen": "{count, plural, one {1 question} other {# questions}}, environ {minutes, plural, one {1 minute} other {# minutes}}",
     "allMatches": "Tous les matchs",
-    "withoutVideo": "{count} sur {total} sans vidéo",
+    "withoutVideo": "{count} de vos {total} matchs sans vidéo",
     "miniNoVideo": "pas de vidéo",
     "miniRunning": "analyse en cours",
     "win": "Victoire",
@@ -3808,7 +3834,6 @@
     "positionsEstimated": "Positions estimées ; des personnes au bord du terrain peuvent en faire partie.",
     "howCountedVideo": "Les buts viennent de la vidéo, tels que tu les as confirmés dans Vérifier. Les courses sont les trajets du tireur ou de la tireuse dans les trois secondes avant le but, mesurés dans la vidéo. Les positions de tir estimées sont en pointillé jusqu'à ce que tu les confirmes.",
     "allGoals": "{n, plural, one {Le but} other {Les # buts}}",
-    "scoutingRow": "{opponent} contre {other}",
     "scoutingTag": "Observé",
     "exampleTitle": "Ceci est un exemple",
     "exampleBody": "Un match de démonstration avec des buts inventés : voilà à quoi ressemble un match une fois ta vidéo analysée. Il n'appartient pas à ton équipe et ne compte dans aucune statistique.",
@@ -3833,7 +3858,12 @@
     "pictureSaved": "Image enregistrée, tu la trouves dans tes téléchargements.",
     "pictureFailed": "L'image n'a pas pu être créée pour l'instant. Réessaie.",
     "scenesKickTerm": "<term>Scènes</term> · {matches, plural, one {1 match} other {# matchs}} avec vidéo",
-    "exampleBand": "Exemple · chiffres inventés"
+    "exampleBand": "Exemple · chiffres inventés",
+    "thing_zone_of": "Buts {team} {zone}",
+    "thing_fast_breaks_of": "Buts {team} sur contre-attaque",
+    "goalsOfTeam": "Buts {team}",
+    "observedMatches": "Matchs observés",
+    "observedNote": "ne comptent pas dans votre saison"
   },
   "check": {
     "top": "Vérifier · {opponent}",
@@ -4177,7 +4207,12 @@
     "savesPlain": "Arrêts",
     "againstNone": "{n, plural, one {Le but encaissé n'est attribué} other {Les # buts encaissés ne sont attribués}} à aucun gardien.",
     "savesNone": "{n, plural, one {Un arrêt n'est attribué} other {# arrêts ne sont attribués}} à aucun gardien de l'effectif.",
-    "againstNoMinutes": "Sans les minutes de jeu dans la feuille de match, les buts encaissés ne peuvent être attribués à aucun gardien."
+    "againstNoMinutes": "Sans les minutes de jeu dans la feuille de match, les buts encaissés ne peuvent être attribués à aucun gardien.",
+    "fieldOf": "Terrain {team}",
+    "keeperOf": "But {team}",
+    "againstNeutral": "Buts reçus",
+    "targetNoteOf": "Buts {team}, saisis par toi",
+    "targetMarkedOf": "{n} sur {of} buts de {team} saisis."
   },
   "entry": {
     "ask": "Comment s'appelle ton équipe ?",

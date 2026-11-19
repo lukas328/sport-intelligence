@@ -6,7 +6,7 @@ import { Check } from "lucide-react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { type CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useRosterNames } from "@/components/analysis/tagger";
+import { useMatchRoster } from "@/components/domain/match-sides";
 import { AnalysisNotice } from "@/components/analysis/analysis-notice";
 import { personGroups } from "@/lib/check-budget";
 import { VideoPlayer, type PlayerHandle } from "@/components/video/player";
@@ -18,6 +18,7 @@ import { PersonCrop } from "./person-box";
 import { Strip } from "@/components/anlauf/heads";
 import { useShell } from "@/components/shell/context";
 import { ownName } from "@/lib/own-name";
+import { matchSides, pairing } from "@/lib/match-sides";
 import { api } from "@/lib/client";
 import { matchStyle } from "@/lib/color";
 import { useOpponentName } from "@/lib/opponent";
@@ -74,9 +75,12 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
   const qc = useQueryClient();
   const router = useRouter();
   const { org, teams } = useShell();
-  // our side as everywhere else: the team's own name, the club's for «Herren 1» (UX test A06)
-  const own = ownName(teams.find((x) => x.id === match.team_id)?.name, org.name);
+  // our side as everywhere else: the team's own name, the club's for «Herren 1» (UX test A06); an
+  // observed match names its two teams, home team first, never ours (BUG-06, BUG-18)
   const oppName = useOpponentName()(match);
+  const tAll = useTranslations();
+  const sides = matchSides(match, { team: ownName(teams.find((x) => x.id === match.team_id)?.name, org.name), opponent: oppName, otherFallback: tAll("progress.otherTeam") });
+  const own = sides.own;
   const main = timelineVideo(match.videos) ?? null;
   const parts = partsOf(match.videos);
   const path = { org_id: orgId, match_id: match.id };
@@ -152,7 +156,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
   // a person box needs the homography of the very frame: with a panning camera only the hall
   // image's is known, so people are asked only with a fixed camera (E05)
   const people = useMemo<Question[]>(() => {
-    if (!main || cal0?.source !== "user_correction" || !analysis.data?.chunk_ms || analysis.data.camera !== "fixed") return [];
+    if (sides.neutral || !main || cal0?.source !== "user_correction" || !analysis.data?.chunk_ms || analysis.data.camera !== "fixed") return [];
     const own = (analysis.data.tracks ?? []).filter((tr) => (tr.team === "home" || tr.team === "home_gk") && !tr.player_id);
     return personGroups(own, PERSON_MIN_MS, PERSON_MAX)
       .filter((g) => !retired.has(`person:${g[0]!.track_no}`))
@@ -160,7 +164,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
         const tr = group[0]!;
         return { kind: "person" as const, tr, group, at: tr.first_ms + Math.min(2000, (tr.last_ms - tr.first_ms) / 2) };
       });
-  }, [analysis.data, cal0, main, retired]);
+  }, [analysis.data, cal0, main, retired, sides.neutral]);
   const toQuestions = useCallback(
     (list: Schemas["CheckOut"][]): Question[] =>
       list.flatMap((c): Question[] => {
@@ -263,7 +267,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
   const [byLines, setByLines] = useState(false);
   const corners = moved ?? startCorners;
 
-  const roster = useRosterNames(orgId, match.team_id, match.season_id);
+  const roster = useMatchRoster(orgId, match);
   const players = (roster.data ?? []).filter((r) => r.active);
   const read = current?.kind === "person" && current.tr.number != null ? players.find((r) => r.jersey_number === current.tr.number) : undefined;
   const player = useRef<PlayerHandle>(null);
@@ -576,7 +580,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
   return (
     <div style={matchStyle([org.primary_color, org.secondary_color ?? null], match.opponent_colors ? [match.opponent_colors.color, match.opponent_colors.second ?? null] : null) as CSSProperties} data-testid="check">
       <div className="bleed-x -mt-px flex h-[60px] items-center justify-between gap-3 border-b-2 border-ink px-4 md:px-8">
-        <span className="min-w-0 truncate text-[15px] font-bold">{t("top", { opponent: `${own} ${ta("vsShort")} ${oppName}` })}</span>
+        <span className="min-w-0 truncate text-[15px] font-bold">{t("top", { opponent: pairing(sides, ta("vsShort")) })}</span>
         {/* one line on a phone too (UX test B45) */}
         <Link href={back} className="inline-flex min-h-11 shrink-0 items-center border-2 border-ink px-3.5 text-[15px] font-bold whitespace-nowrap text-ink no-underline">
           {t("later")}
@@ -585,8 +589,8 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
       {/* «Von wo?» on a phone: video and court on one screen, the strip gives way */}
       <div className={cn("bleed-x", spotStep && "max-md:hidden")}>
         <Strip
-          name={own}
-          sub={`${ta("vsShort")} ${oppName} · ${left > 0 ? t("openCount", { n: left, minutes: leftMinutes }) : total > 0 ? t("count", { n: total }) : otherOpen > 0 ? t("count", { n: otherOpen }) : t("noneOpen")}`}
+          name={sides.neutral ? sides.home : own}
+          sub={`${ta("vsShort")} ${sides.neutral ? sides.away : oppName} · ${left > 0 ? t("openCount", { n: left, minutes: leftMinutes }) : total > 0 ? t("count", { n: total }) : otherOpen > 0 ? t("count", { n: otherOpen }) : t("noneOpen")}`}
           own={match.score_own}
           opp={match.score_opponent}
         />

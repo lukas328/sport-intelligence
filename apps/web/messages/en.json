@@ -555,7 +555,10 @@
     "otherWaysFile": "No video? Create the match and enter the result. Attach the paper report to the match as a photo or PDF; the official report from handball.ch comes by itself.",
     "uploadBackToList": "Back to the list of matches",
     "newHint": "Friendly or opponent video",
-    "newOwnMatch": "Add a match of your own"
+    "newOwnMatch": "Add a match of your own",
+    "kitFieldOf": "{team} court players",
+    "kitKeeperOf": "{team} goalkeeper",
+    "scoreFinalHint": "The final score of the whole match, not the goals in the video."
   },
   "upload": {
     "title": "Upload video",
@@ -683,7 +686,7 @@
     "headInterrupted": "Upload interrupted",
     "headDone": "Analysis done",
     "headFailed": "That did not work",
-    "scoutingName": "{opponent} against {other}",
+    "scoutingName": "{home} against {away}",
     "training": "Training",
     "percent": "{n} %",
     "silentFor": "no word for {m} min",
@@ -1058,7 +1061,19 @@
     "concededByPosition": "Goals conceded by position",
     "ofShots": "{n, plural, one {from # shot} other {from # shots}}",
     "flowAbove": "Above: {team} ahead",
-    "flowBelow": "Below: {team} ahead"
+    "flowBelow": "Below: {team} ahead",
+    "notRecorded": "not recorded",
+    "droughtOf": "Longest spell without a goal ({team}): {minutes} min",
+    "flowVideoTime": "Minutes of the video",
+    "balanceShots": "{team}: {n, plural, one {# shot} other {# shots}}",
+    "balanceGoals": "{n, plural, one {# goal} other {# goals}}",
+    "balanceSaved": "{n} saved",
+    "balanceMisses": "{n} missed",
+    "balancePosts": "{n} off the woodwork",
+    "balanceOther": "{n} without outcome",
+    "balanceBlocked": "(plus {n} blocked)",
+    "balanceGoalsOnly": "{team}: only the {goals, plural, one {# goal} other {# goals}} recorded, no misses or saves",
+    "reportEmpty": "No goals or shots recorded with a shirt number or name yet."
   },
   "shotsView": {
     "title": "Shots",
@@ -1078,7 +1093,10 @@
     "noPosition": "{count} shots without position",
     "noPositions": "No shot position is recorded for these shots. Tap the court when tagging in the Events tab and the shot map appears here.",
     "fillGoals": "The fill of each cell shows the share of goals.",
-    "fillSaves": "The fill of each cell shows the share of saves."
+    "fillSaves": "The fill of each cell shows the share of saves.",
+    "noPositionOf": "{count} of {total} shots without a position",
+    "noGoalZones": "No shot has its corner of the goal recorded. Tap the corner of the goal when recording and the goal map appears here.",
+    "noZones": "No shot has its shooting zone recorded."
   },
   "events": {
     "title": "Events",
@@ -1131,7 +1149,8 @@
     "moreEvents": "Penalties and breaks",
     "whereTitle": "Shot position and goal corner",
     "whereSet": "set",
-    "setupTitle": "Goalkeepers and import"
+    "setupTitle": "Goalkeepers and import",
+    "shirtNumber": "Shirt number"
   },
   "paper": {
     "title": "Import a paper match report",
@@ -1204,7 +1223,9 @@
     "assignHint": "Pick the goalkeeper while tagging so saves are credited.",
     "ownKeeper": "Our goalkeeper",
     "oppKeeper": "Opponent goalkeeper no.",
-    "keeper": "Goalkeeper"
+    "keeper": "Goalkeeper",
+    "savesWithoutKeeper": "{n, plural, one {One save} other {# saves}} without a goalkeeper",
+    "keeperOf": "{team} goalkeeper no."
   },
   "physical": {
     "title": "Physical",
@@ -1225,12 +1246,14 @@
     "showHeatmap": "Show where they were",
     "teamOwn": "Own team",
     "teamOpp": "Opponent",
-    "tracksOwn": "Own team's tracks, 1 minute and longer",
+    "tracksOwn": "Tracks of {team}, 1 minute and longer",
     "playersAndTracks": "Players and tracks",
     "showShort": "Show {n} short tracks (under 1 minute)",
     "hideShort": "Hide short tracks",
     "shortClip": "The video shows less than a half: distances, sprints and speed are for this stretch only, not the whole match.",
-    "estimated": "Estimated from the positions in the video."
+    "estimated": "Estimated from the positions in the video.",
+    "thin": "Too little running data",
+    "thinHint": "The tracks in the video are too short for reliable distances, so we show no figures rather than uncertain ones."
   },
   "identity": {
     "title": "Assign players",
@@ -1246,7 +1269,9 @@
     "shirt": "No. {n}",
     "unknown": "unknown",
     "showAll": "Show all {n}",
-    "onScreen": "{s} s on screen"
+    "onScreen": "{s} s on screen",
+    "hintNumber": "Give people of both teams a shirt number. Assignments stay after a new analysis.",
+    "numberPlaceholder": "No."
   },
   "camera": {
     "label": "Camera",
@@ -1636,7 +1661,8 @@
     "xgPerMatch": "xG per match (estimated)",
     "xgThin": "xG: too few shots with a position ({n} of {of}).",
     "noScorers": "No shots with a shirt number tagged yet.",
-    "watchedAgainst": "watched against {other}"
+    "watchedAgainst": "watched against {other}",
+    "openOf": "Profile of {name}"
   },
   "billing": {
     "title": "Plan and billing",
@@ -3626,7 +3652,7 @@
     "collect": "Put together for the team",
     "checksOpen": "{count, plural, one {1 question} other {# questions}}, about {minutes, plural, one {1 minute} other {# minutes}}",
     "allMatches": "All matches",
-    "withoutVideo": "{count} of {total} without video",
+    "withoutVideo": "{count} of your {total} matches without video",
     "miniNoVideo": "no video",
     "miniRunning": "analysis running",
     "win": "Win",
@@ -3808,7 +3834,6 @@
     "positionsEstimated": "Positions estimated; people beside the court may be among them.",
     "howCountedVideo": "The goals come from the video, as you confirmed them in Check. The runs are the scorer's ways in the three seconds before the goal, measured in the video. Estimated shot spots are dashed until you confirm them.",
     "allGoals": "{n, plural, one {The goal} other {All # goals}}",
-    "scoutingRow": "{opponent} against {other}",
     "scoutingTag": "Watched",
     "exampleTitle": "This is an example",
     "exampleBody": "A demo match with made-up goals: this is what a match looks like once the analysis has worked through your video. It is not part of your team and counts in no statistics.",
@@ -3833,7 +3858,12 @@
     "pictureSaved": "Picture saved, you find it in your downloads.",
     "pictureFailed": "The picture could not be made just now. Try again.",
     "scenesKickTerm": "<term>Scenes</term> · {matches, plural, one {1 match} other {# matches}} with video",
-    "exampleBand": "Example · invented figures"
+    "exampleBand": "Example · invented figures",
+    "thing_zone_of": "Goals {team} {zone}",
+    "thing_fast_breaks_of": "Goals {team} from fast breaks",
+    "goalsOfTeam": "Goals {team}",
+    "observedMatches": "Watched matches",
+    "observedNote": "not counted in your season"
   },
   "check": {
     "top": "Check · {opponent}",
@@ -4177,7 +4207,12 @@
     "savesPlain": "Saves",
     "againstNone": "{n, plural, one {The goal against is} other {The # goals against are}} not credited to a goalkeeper.",
     "savesNone": "{n, plural, one {One save is} other {# saves are}} not credited to a goalkeeper of the squad.",
-    "againstNoMinutes": "Without playing minutes in the match report, goals against cannot be credited to a goalkeeper."
+    "againstNoMinutes": "Without playing minutes in the match report, goals against cannot be credited to a goalkeeper.",
+    "fieldOf": "Court {team}",
+    "keeperOf": "Goal {team}",
+    "againstNeutral": "Goals let in",
+    "targetNoteOf": "Goals {team}, tagged by you",
+    "targetMarkedOf": "{n} of {of} goals by {team} tagged."
   },
   "entry": {
     "ask": "What is your team called?",

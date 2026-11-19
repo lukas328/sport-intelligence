@@ -3,7 +3,7 @@
 import type { Schemas } from "@handball/api-client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { useEffect, useState, type ChangeEvent } from "react";
+import { useEffect, useId, useState, type ChangeEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/card";
 import { api } from "@/lib/client";
@@ -13,6 +13,8 @@ import { cn } from "@/lib/utils";
 import { CourtHalf, ShotDot } from "./court-half";
 import { GoalGrid } from "./goal-grid";
 import { useOpponentName } from "@/lib/opponent";
+import { perspectiveOf } from "@/lib/match-sides";
+import { useOpponentSquad } from "@/components/domain/match-sides";
 import { FileField } from "@/components/ui/file-field";
 
 type EventIn = Schemas["EventIn"];
@@ -56,7 +58,13 @@ export function Tagger({
   const tk = useTranslations("keepers");
   const tf = useTranslations("file");
   const qc = useQueryClient();
-  const roster = useRosterNames(orgId, match.team_id, match.season_id);
+  // an observed match (K3): our roster plays no part, both teams by shirt number, the observed
+  // opponent's known squad as suggestions (L4)
+  const neutral = perspectiveOf(match) === "neutral";
+  const roster = useRosterNames(orgId, match.team_id, neutral ? "" : match.season_id);
+  const squad = useOpponentSquad(orgId, match.opponent?.id);
+  const squadList = useId();
+  const byNumber = (side: "own" | "opponent") => neutral || side === "opponent";
   const [side, setSide] = useState<"own" | "opponent">("own");
   const [player, setPlayer] = useState("");
   const [oppNumber, setOppNumber] = useState("");
@@ -127,8 +135,8 @@ export function Tagger({
       side,
       period: 1,
       t_ms: Math.round(getTime()),
-      player_id: side === "own" && player ? player : null,
-      number: side === "opponent" ? num : null,
+      player_id: !byNumber(side) && player ? player : null,
+      number: byNumber(side) ? num : null,
       attributes: {},
     } as EventIn;
   }
@@ -137,7 +145,9 @@ export function Tagger({
     const b = base("shot");
     const attributes =
       side === "opponent" && keepers.own
-        ? { goalkeeper_id: keepers.own }
+        ? neutral
+          ? { goalkeeper_number: Number(keepers.own) }
+          : { goalkeeper_id: keepers.own }
         : side === "own" && keepers.opp !== ""
           ? { goalkeeper_number: Number(keepers.opp) }
           : {};
@@ -214,7 +224,14 @@ export function Tagger({
         ))}
       </div>
 
-      {side === "own" ? (
+      <datalist id={squadList}>
+        {(squad.data ?? []).map((p) => (
+          <option key={p.id} value={p.number}>
+            {p.name ?? `#${p.number}`}
+          </option>
+        ))}
+      </datalist>
+      {!byNumber(side) ? (
         <label className="flex flex-col gap-1">
           <span className="font-medium">{t("player")}</span>
           <select value={player} onChange={(e) => setPlayer(e.target.value)} className={field}>
@@ -232,8 +249,8 @@ export function Tagger({
         </label>
       ) : (
         <label className="flex flex-col gap-1">
-          <span className="font-medium">{t("opponentNumber")}</span>
-          <input type="number" min={0} max={99} value={oppNumber} onChange={(e) => setOppNumber(e.target.value)} className={field} />
+          <span className="font-medium">{neutral ? t("shirtNumber") : t("opponentNumber")}</span>
+          <input type="number" min={0} max={99} value={oppNumber} onChange={(e) => setOppNumber(e.target.value)} className={field} list={side === "opponent" ? squadList : undefined} data-testid="tag-number" />
         </label>
       )}
 
@@ -328,7 +345,10 @@ export function Tagger({
         <div className="mt-3 space-y-3">
           <div className="grid grid-cols-2 gap-2">
             <label className="flex flex-col gap-1">
-              <span className="text-[0.9375rem] font-medium">{tk("ownKeeper")}</span>
+              <span className="text-[0.9375rem] font-medium">{neutral ? tk("keeperOf", { team: teamName }) : tk("ownKeeper")}</span>
+              {neutral ? (
+                <input type="number" min={0} max={99} value={keepers.own} onChange={(e) => updateKeepers({ ...keepers, own: e.target.value })} className={field} data-testid="tag-keeper-own" />
+              ) : (
               <select value={keepers.own} onChange={(e) => updateKeepers({ ...keepers, own: e.target.value })} className={field}>
                 <option value="">-</option>
                 {(roster.data ?? [])
@@ -341,10 +361,11 @@ export function Tagger({
                     </option>
                   ))}
               </select>
+              )}
             </label>
             <label className="flex flex-col gap-1">
-              <span className="text-[0.9375rem] font-medium">{tk("oppKeeper")}</span>
-              <input type="number" min={0} max={99} value={keepers.opp} onChange={(e) => updateKeepers({ ...keepers, opp: e.target.value })} className={field} />
+              <span className="text-[0.9375rem] font-medium">{neutral ? tk("keeperOf", { team: oppName(match) }) : tk("oppKeeper")}</span>
+              <input type="number" min={0} max={99} value={keepers.opp} onChange={(e) => updateKeepers({ ...keepers, opp: e.target.value })} className={field} list={squadList} />
             </label>
           </div>
           <label className="flex flex-col gap-1">

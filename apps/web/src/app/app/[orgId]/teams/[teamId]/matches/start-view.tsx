@@ -17,6 +17,7 @@ import { useShell } from "@/components/shell/context";
 import { buttonClass } from "@/components/ui/button";
 import { api } from "@/lib/client";
 import { ownName } from "@/lib/own-name";
+import { matchSides, pairing } from "@/lib/match-sides";
 import { TeamFacts, useStanding } from "@/app/(einstieg)/einstieg/entry-view";
 import { matchStyle } from "@/lib/color";
 import { checkCount, goalRuns, openMoments, reportCut, reportGoals, useMatchGraphics, videoScore, type MatchGraphics } from "@/lib/graphics";
@@ -61,6 +62,8 @@ export function StartView({
   const ours = played.filter((m) => m.kind !== "scouting");
   const last = ours.find((m) => m.id === fresh) ?? ours.find((m) => m.kind !== "training" && (m.score_own != null || m.has_video)) ?? ours[0] ?? null;
   const next = upcoming.find((m) => m.kind === "match") ?? null;
+  // observed matches have a section of their own: our list and its count are our matches (UX-07)
+  const observed = played.filter((m) => m.kind === "scouting");
   const withoutVideo = ours.filter((m) => !m.has_video).length;
   const anyVideo = ours.some((m) => m.has_video);
   // the head of a match without video shows the federation's table (FromReport): below, the next
@@ -80,12 +83,26 @@ export function StartView({
           {/* a new match and a report are not actions on the last match: they belong to the list */}
           {actions && <div className="-mt-1 mb-2 flex flex-wrap items-center gap-3">{actions}</div>}
           <ul className="m-0 list-none p-0" data-testid="match-list">
-            {played.map((m) => (
+            {ours.map((m) => (
               <li key={m.id}>
                 <GameRow orgId={orgId} m={m} mini={played.some((x) => x.has_video)} />
               </li>
             ))}
           </ul>
+          {observed.length > 0 && (
+            // videos of opponents against other teams (K3): their own list, with the year, without
+            // home or away of ours (BUG-17, UX-07)
+            <section aria-labelledby="observed-matches" className="mt-10" data-testid="observed-list">
+              <SectionHead title={<span id="observed-matches">{t("observedMatches")}</span>} note={t("observedNote")} />
+              <ul className="m-0 list-none p-0">
+                {observed.map((m) => (
+                  <li key={m.id}>
+                    <GameRow orgId={orgId} m={m} mini={played.some((x) => x.has_video)} />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
         </section>
         <aside className="flex min-w-0 flex-col gap-8">
           {/* after taking over the team: the coach's next steps (K17) */}
@@ -375,7 +392,8 @@ function GameRow({ orgId, m, mini }: { orgId: string; m: Match; mini: boolean })
   const format = useFormatter();
   const date = new Date(m.kickoff_at);
   // a scouting video: no win or loss of ours (K3)
-  const result = m.kind === "scouting" ? null : resultOf(m);
+  const observedRow = m.kind === "scouting";
+  const result = observedRow ? null : resultOf(m);
   const state = matchState(m);
   const base = `/app/${orgId}/matches/${m.id}`;
   return (
@@ -388,7 +406,8 @@ function GameRow({ orgId, m, mini }: { orgId: string; m: Match; mini: boolean })
       <p className="m-0 text-[15px] leading-tight text-ink-2 max-md:hidden">
         {format.dateTime(date, { weekday: "short" })}
         <b className="font-num block text-xl text-ink">{format.dateTime(date, { day: "2-digit", month: "2-digit" })}</b>
-        {m.is_home ? t("home") : t("away")}
+        {/* an observed match is nobody's home game of ours: its year instead (BUG-17) */}
+        {observedRow ? format.dateTime(date, { year: "numeric" }) : m.is_home ? t("home") : t("away")}
       </p>
       {m.has_video ? (
         <Link href={base} aria-hidden tabIndex={-1} className="block w-[84px] md:w-32">
@@ -402,12 +421,12 @@ function GameRow({ orgId, m, mini }: { orgId: string; m: Match; mini: boolean })
       <div className="min-w-0">
         <h3 className="m-0">
           <Link href={base} className="font-slant text-[17px] leading-tight text-ink no-underline hover:underline md:text-[22px]">
-            {m.kind === "training" ? tm("training") : m.kind === "scouting" ? t("scoutingRow", { opponent: m.opponent_name, other: m.scouting_other ?? "" }) : m.opponent_name}
+            {m.kind === "training" ? tm("training") : observedRow ? pairing(matchSides(m, { team: "", opponent: m.opponent_name }), tm("vs")) : m.opponent_name}
           </Link>
           {m.kind === "scouting" && <span className="ml-2 align-middle text-sm font-bold text-ink-2">{t("scoutingTag")}</span>}
         </h3>
         <p className="m-0 text-[15px] text-ink-2 md:text-[15px]">
-          <span className="md:hidden">{format.dateTime(date, { day: "2-digit", month: "2-digit" })} · </span>
+          <span className="md:hidden">{format.dateTime(date, observedRow ? { day: "2-digit", month: "2-digit", year: "numeric" } : { day: "2-digit", month: "2-digit" })} · </span>
           {["matches.status_processing", "matches.status_uploading", "matches.status_failed"].includes(state.label) ? (
             <ProgressLine orgId={orgId} matchId={m.id} className="max-md:inline" fallback={tm(state.label.replace("matches.", "") as "status_processing")} />
           ) : !m.has_video ? (
