@@ -153,7 +153,7 @@ export default async function Home({ params }: Props) {
         aria-labelledby="problem"
         className="-mt-10 bg-ink pt-10 text-ground md:-mt-16 md:pt-16 print:mt-0 print:bg-transparent print:pt-0 print:text-ink"
       >
-        <div className="wrap grid grid-cols-1 items-center gap-10 py-14 md:py-20 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-16">
+        <div className="wrap grid grid-cols-1 items-center gap-10 pt-14 pb-2 md:pt-20 md:pb-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-16">
           <div data-reveal className="min-w-0">
             <When dark>{t.problemWhen}</When>
             <h2 id="problem" className="mt-4 text-[2.5rem] md:text-[4rem]">
@@ -175,14 +175,14 @@ export default async function Home({ params }: Props) {
         <HallPhoto
           name="tor-ball"
           sizes="100vw"
-          className="h-52 [mask-image:linear-gradient(to_bottom,transparent,#000_45%)] sm:h-64 md:h-[22rem]"
+          className="h-44 [mask-image:linear-gradient(to_bottom,transparent,#000_35%)] sm:h-56 md:h-72"
           imgClassName="object-[50%_86%] brightness-[0.78] saturate-[0.8]"
         />
       </section>
 
       <div className="wrap">
         {/* 3 · Saturday, 10 pm: what you get, the three things (W7) */}
-        <section aria-labelledby="get" className="mt-20 md:mt-28">
+        <section aria-labelledby="get" className="mt-12 md:mt-16">
           <div data-reveal className="max-w-[44rem]">
             <When>{t.getWhen}</When>
             <h2 id="get" className="mt-4 text-[2.25rem] md:text-[3.5rem]">
