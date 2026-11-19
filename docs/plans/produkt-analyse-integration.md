@@ -778,9 +778,13 @@ nach Minute 60 nichts mehr; das Budget hängt von der echten Uhr ab.
 - Spiel laut `play_intervals`: vorher 21.1 min, nachher 48.2 min (ohne Füllen 44.0). In den
   gelesenen Spannen lief die Uhr etwa 54 min (erste Halbzeit 0:39 bis 30:00, zweite 1:55 bis
   26:29).
-- Offen: das Spielende. Nach dem letzten Uhrlauf ohne weitere Lesung endet das Spiel heute 7.5 s
-  danach. Vorschlag: bis zum Videoende weiterzählen, wenn die Uhr zuletzt lief und keine stehende
-  Uhr gelesen wurde.
+- Spielende (2026-11-19): Lief die Uhr bei der letzten Lesung und wurde danach keine stehende Uhr
+  gelesen, gilt das Video bis zum Ende als Spiel, höchstens aber bis die Uhr das Ende der Halbzeit
+  erreicht (`half_s`, Standard 30:00; rückwärts 0:00). Die Halbzeitlänge kennt das Produkt nicht,
+  darum der Standard der Erwachsenen; bei kürzeren Halbzeiten ist die Grenze nur lockerer.
+  Lesungen danach, die nicht diese Uhr sein können (zählt zurück oder schneller als das Video,
+  z. B. eine Strafzeit), halten das Spiel nicht an. Zeigt die letzte Lesung eine stehende Uhr oder
+  das Ende der Halbzeit (30:00 bzw. 0:00), bleibt es bei 7.5 s.
 
 ### Teamzuordnung: Torhüterfarbe als Feldfarbe (Staging 2026-11-17, #82, #83)
 
