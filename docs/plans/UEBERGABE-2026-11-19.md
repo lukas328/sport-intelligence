@@ -21,7 +21,7 @@ Einstieg danach wie immer: `docs/plans/HANDOVER.md`.
 | 2026-11-19 | Hauptsitzung | A22 Wurfort: Die Schätzung ist bei «Von wo?» vorausgewählt, ein Tipp bestätigt sie, nur bestätigte zählen für die drei Dinge. Website-Text entsprechend. Voll automatisch erst, wenn die Schätzung verlässlich ist. | Helfer A22 (siehe unten) |
 | 2026-11-19 | Hauptsitzung | Spielende in der Pausenerkennung: lief die Uhr zuletzt und wurde danach keine stehende Uhr gelesen, zählt das Spiel bis zum Videoende weiter (mit Obergrenze). | Helfer Spielende |
 | 2026-11-19 | Lukas | Die Website erzählt die Vision des fertigen Produkts (Aufwand, «Samstag, 22 Uhr»), nicht den Stand der Testphase. Keine Zahlen aus der CPU-Testphase auf die Website. | `BEFUNDE-5-website-review.md` |
-| 2026-11-19 | Hauptsitzung | App-Review: beobachtete Spiele neutral (kein «Wir»), Szenen beobachteter Spiele in «Szenen» mit Filter, eigener Abschnitt in der Spieleliste, Onboarding-Schritt 1 erledigt bei jedem analysierten Video; «die drei Dinge» bleibt als Begriff, wird aber erklärt. | `BEFUNDE-6-app-review.md` |
+| 2026-11-19 | Hauptsitzung | App-Review: beobachtete Spiele neutral (kein «Wir»), Szenen beobachteter Spiele in «Szenen» mit Filter, eigener Abschnitt in der Spieleliste, Onboarding-Schritt 1 erledigt bei jedem analysierten Video; aus «die drei Dinge» wird «die drei Muster» (Lukas), als letzter Schritt in App und Website. | `BEFUNDE-6-app-review.md` |
 | 2026-11-19 | Hauptsitzung | Keine offenen GPU-Aufträge; 12 bis 15 erledigt, 11 und 3 zurückgestellt. | `ml/gpu/JOBS.md` |
 
 ## Änderungen dieser Sitzung
