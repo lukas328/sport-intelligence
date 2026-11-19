@@ -807,3 +807,39 @@ nach Minute 60 nichts mehr; das Budget hängt von der echten Uhr ab.
   verloren, und der Watchdog nimmt nur laufende Jobs wieder auf. Nächste Schritte: Watchdog auch
   für wartende Jobs ohne RQ-Job (Produkt); Redis nicht bei jedem Deploy ersetzen oder AOF
   (Terraform, UX).
+
+### Wurf-Endtest mit der Produktkette (2026-11-19, einmalige Freigabe von Lukas)
+
+42 Endtest-Segmente (`ml/gold/shot_endtest_segments.json`, 42 Spiele in 42 nie trainierten Hallen,
+je 3 min), Lukas' Markierungen eingefroren (`ml/gold/data/shot_endtest_marks.json`: 130 Würfe, 76
+Tore, 41 gehalten, 13 daneben; Runde 1 nicht verwendet). Produktkette im CPU-Testsetting (hrp1 960
+px auf jedem 3. Bild, YOLOX jedes 3. Bild, `ml/integration/shot_segments_eval.py`), der Observe-Schritt
+als 4 Kaggle-CPU-Kernels (`ml/integration/kaggle/shot_endtest_push.py`; der Container der Sitzung wird im
+Leerlauf freigegeben, der erste 18-h-Lauf brach ab). Nur gemessen, nichts darauf eingestellt.
+95 %-Intervalle: Bootstrap über die 42 Spiele. Ergebnis: `ml/gold/data/shot_endtest_result.json`.
+
+| Mass | Wert | 95 % |
+|---|---|---|
+| Wurf-Kandidaten (Rate <= 4), Wurf gefunden, ±2 s um die geschätzte Zeit | 20.8 % | 12.5 bis 29.9 % |
+| dasselbe, Fenster der Kandidaten (Peak 3 s vor bis 8 s nach der Markierung) | **84.6 %** | 74.5 bis 92.4 % |
+| davon Tore / gehalten / daneben (−3/+8 s) | 88.2 / 78.0 / 84.6 % | 78 bis 96 / 61 bis 92 / 62 bis 100 % |
+| Präzision der Wurf-Kandidaten (−3/+8 s; ±2 s) | 25.8 % (6.3 %) | 21.7 bis 29.8 % |
+| Wurf-Kandidaten pro Minute | 3.39 | 3.00 bis 3.75 |
+| Tor-Kandidaten (Rate <= 2), Tore gefunden (−3/+8 s; ±2 s) | 75.0 % (6.6 %) | 63.4 bis 85.1 % |
+| Präzision der Tor-Kandidaten (−3/+8 s) | 29.1 % | 22.7 bis 35.7 % |
+| Tor-Kandidaten pro Minute | 1.56 | 1.36 bis 1.75 |
+| Ballpfad-Abdeckung ±1.5 s um jeden Wurf | **97.8 %** | 96.8 bis 98.5 % |
+| Würfe mit Ballpunkt auf mindestens der Hälfte der Bilder | 100 % | |
+
+Lesart:
+- ±2 s verfehlt fast alles, weil die geschätzte Zeit der Kandidaten systematisch neben der
+  Markierung liegt: im Median 2.8 s danach (Quartile 0.6 und 4.3 s, 114 Würfe mit einem Kandidaten in
+  −5/+6.5 s). Die Kandidaten wurden für das Fenster −3/+8 s gebaut (`ml/goals/shot_eval.py`); dort
+  finden sie 85 % der Würfe. Für Clips (7 s vor, 3 s nach dem Peak) reicht das, für eine genaue
+  Wurfzeit nicht. Das Fenster −3/+8 s wurde vor dem Blick auf die Endtest-Zahlen aus der Doku
+  gewählt (Dev-Segment), nicht auf dem Endtest.
+- Abdeckung heisst: der Ballpfad hat einen Punkt, nicht dass er richtig liegt. Der Endtest hat keine
+  Ballmarkierungen; die Trefferquote misst gold v1 (hrp1 960 jedes 3. Bild: 63.5 %). Das Ziel 85 bis
+  90 % Abdeckung ist erreicht, über die Richtigkeit sagt es nichts.
+- Nicht gemacht: die GPU-Einstellung (jedes Bild), auch nicht genähert (Budget). Laufzeit auf Kaggle
+  (4 Kerne, ein Prozess): im Mittel 1266 s pro 3-min-Segment, 7.0 x Videolänge.
