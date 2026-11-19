@@ -64,3 +64,13 @@ Neu:
 | L5 | UI/UX allgemein verwirrend: was ist wo, was muss man machen; wozu die Werkbank | Werkbank nur hinter «Einrichten von Hand» (wie B10), sonst nirgends; auf jeder Spielseite oben eine klare nächste Aufgabe («2 Fragen offen», «Wurforte nachtragen»). Danach ein UI-Check der ganzen Spielanalyse. | 3 |
 
 Stand pro Ticket wird hier nachgetragen.
+
+- L1 (19.11.): Kurzfristiger Teil umgesetzt. Ein Tor des Spielberichts wird ohne Frage auf seinen
+  Tor-Kandidaten gelegt, nur wenn die Uhr zu dieser Zeit im Video gelesen wurde, genau ein Kandidat
+  und genau ein Spielbericht-Tor beieinander liegen und das Team passt; in Prüfen und in der
+  Kandidatenliste «aus dem Spielbericht übernommen», mit «Rückgängig». Alles Unsichere bleibt eine
+  Frage. Befund dabei: Kandidaten an Spielbericht-Toren wurden schon vorher nicht gefragt («schon
+  erfasst»), aber an der aus dem Anwurf gerechneten Zeit, die nach einem Time-out danebenliegt.
+  Zahlen nur aus Tests, keine echten Spiele gemessen. Regel und Messung:
+  `docs/plans/produkt-analyse-integration.md`, Abschnitt «Tore aus dem Spielbericht ohne Frage».
+  Offen: bessere Tor-Kandidaten (mittelfristig).

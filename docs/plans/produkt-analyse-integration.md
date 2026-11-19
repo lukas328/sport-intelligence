@@ -908,3 +908,64 @@ Nächster Schritt:
    Kaggle-CPU-Kernel rechnen; die Sitzung braucht dazu den Kaggle-Zugang.
 3. Erst danach: die festgelegte Methode einmal auf dem Endtest melden (aus `per_shot` und den
    gespeicherten Kandidaten), und die API-Zuordnung zum Spielbericht auf die neue Zeit anpassen.
+
+### Tore aus dem Spielbericht ohne Frage (Livegang L1, 2026-11-19)
+
+Frage: Welche Tor-Kandidaten kann die App mit dem offiziellen Spielbericht selbst beantworten, ohne
+je ein falsches Tor zu setzen?
+
+Was vorher schon galt (`services/goal_candidates.py`, `services/checks.py`, `services/graphics.py`):
+- Ein Tor des Spielberichts deckt jeden Tor-Kandidaten in 20 s um seine gespeicherte Videozeit
+  («schon erfasst», keine Frage). Diese Zeit ist beim Import aus der Uhr gerechnet, meist ab dem
+  Anwurf der Halbzeit (`video_from_clock`). Nach einem Time-out liegt sie eine Minute zu früh, am
+  Ende einer Halbzeit oft mehrere Minuten. Dann deckt das Tor den falschen Kandidaten, und der
+  richtige wird gefragt.
+- Ein Spielbericht-Tor mit Videozeit zählt als platziert (`goals_missing`). Hat jedes Tor des
+  Resultats eine Zeit im Video, fragt die Hauptrunde gar keinen Tor-Moment mehr; die Kandidaten
+  warten unter «Mehr prüfen».
+- Das Tor selbst bleibt an der geschätzten Zeit, ohne Clip und ohne genaue Szene.
+
+Neu (`goal_candidates.auto_accept`, nach jeder Analyse und jedem Import des Spielberichts): Ein Tor
+des Spielberichts wird ohne Frage auf einen Kandidaten gelegt, nur wenn alles davon gilt:
+1. Die Matchuhr wurde zu dieser Spielzeit im Video gelesen: die Zeit liegt in einem Lauf der
+   gelesenen Uhr (Einblendung oder Hallentafel, `match_clock.read_ms`, Lesungen alle 2 s). Aus
+   dem Anwurf gezählt, zwischen zwei Läufen geschätzt oder von zwei Läufen verschieden gelesen:
+   nie.
+2. Kein anderes Tor des Spielberichts (beide Teams) liegt 20 s Spielzeit oder näher.
+3. Genau ein Tor-Kandidat (jede Rate, nur verworfene nicht gezählt) liegt 8 s vor bis 13 s nach
+   der Spielberichtszeit, und dieser liegt 3 s vor bis 8 s nach ihr (Peak minus Spielberichtszeit;
+   das Fenster, in dem die Messungen in `ml/goals` einen Kandidaten als dieses Tor zählen).
+4. Der Kandidat ist unberührt (offen, nicht «Weiss nicht»), schlägt nicht das andere Team vor, und
+   an seinem Moment ist sonst nichts bekannt (ein Tor von Hand, aus der Einblendung, ein bestätigter
+   Wurf, ein schon gelegter Spielbericht-Eintrag).
+5. Der Trainer hat diese Übernahme nicht schon einmal zurückgenommen.
+
+Gespeichert wie die Bestätigung des Trainers: der Spielbericht-Eintrag bekommt die Zeit des
+Kandidaten (`attributes.video`, mit `auto: "report"`), der Kandidat ist bestätigt, ohne Prüfer und
+ohne Zeitpunkt (er verbraucht keine Frage der Runde). Prüfen zeigt diese Tore unter «Beantwortet»
+mit «aus dem Spielbericht übernommen» und «Rückgängig», die Kandidatenliste mit demselben Hinweis.
+Zurückgenommen geht das Tor an seine Zeit aus der Uhr zurück und ist mit `auto_declined` markiert:
+nie wieder automatisch, auch nicht nach einem neuen Import. Bestätigt der Trainer es selbst, ist es
+seine Antwort. Alles andere bleibt eine Frage wie bisher.
+
+Gemessen: Echte Spiele mit Spielbericht, gelesener Uhr und gespeicherten Kandidaten liegen in diesem
+Repository nicht; eine Zahl für Lukas' Video oder andere echte Spiele gibt es darum nicht. In
+Lukas' 99 min las die Analyse die Uhr nur über einen Teil des Spiels (oben); nur dort könnte die
+Regel greifen. In den Tests (synthetisch, `tests/test_goal_auto_accept.py`):
+- Spielbericht-Beispiel mit einem durchgehenden Uhrlauf: 3 von 7 Kandidaten übernommen; die
+  Fragen in Prüfen bleiben gleich (1 Tor-Frage mit und ohne Regel), weil die Kandidaten an
+  Spielbericht-Toren schon vorher als «schon erfasst» galten. Neu ist, dass die Tore an der Zeit
+  des Kandidaten liegen.
+- Dasselbe mit einer Minute Uhrstillstand nach 03:30: ohne Regel 1 Tor-Frage (der Kandidat von
+  04:02 gilt nach der 20-s-Regel als das um eine Minute zu früh geschätzte Tor von 04:53, der von
+  04:53 wird gefragt); mit Regel 0 Fragen, beide Tore an ihrem Kandidaten.
+
+Nicht gemacht: Kandidaten ohne Spielbericht-Tor in der Nähe aus der Standardliste nehmen
+(Herabstufen auf Rate 4). Die Stufe gibt es, aber für einen «tiefen Wert» fehlt eine auf Daten
+festgelegte Schwelle, und mit vollständigem Spielbericht fragt die Hauptrunde ohnehin höchstens
+1.5 mal die Tore ohne Platz im Video. Ein Spielbericht-Tor, dessen Zeit aus der Uhr geschätzt ist,
+kann dort fehlen, wo es wirklich fiel; ein Herabstufen würde dann genau das echte Tor verstecken.
+
+Offen: Die Regel braucht die gelesene Uhr. Wo die Tafel minutenlang nicht im Bild ist (Abschnitt
+Pausenerkennung), bleibt es bei Fragen. Bessere Tor-Kandidaten (Präzision 29 %) sind ein eigener
+Auftrag.
