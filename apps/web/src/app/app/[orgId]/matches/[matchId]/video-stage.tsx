@@ -1,9 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import type { Schemas } from "@handball/api-client";
 import { useQuery } from "@tanstack/react-query";
 import { Check, SkipBack, SkipForward } from "lucide-react";
-import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { usePhone } from "@/lib/use-phone";
@@ -115,7 +115,8 @@ export function VideoStage({
   const [all, setAll] = useState(false);
   const player = useRef<PlayerHandle>(null);
   const stageTop = useRef<HTMLDivElement>(null);
-  const [kept, setKept] = useState<{ eventId: string; clipId: string } | null>(null);
+  // the scenes saved here, by goal: a second press takes the scene out again (BUG-21)
+  const [kept, setKept] = useState<Record<string, string>>({});
   // the end of a scene's clip: said, with the way on (UX-04); «Weiterlaufen lassen» lifts the window
   const [ended, setEnded] = useState(false);
   const [free, setFree] = useState(false);
@@ -168,19 +169,19 @@ export function VideoStage({
 
   async function keep() {
     if (goal?.t_ms == null) return;
-    // «Gemerkt» is a state that can be undone, not a greyed-out button (A11Y-01)
-    if (kept?.eventId === goal.event_id) {
-      const r = await api.DELETE("/v1/orgs/{org_id}/clips/{clip_id}", { params: { path: { org_id: orgId, clip_id: kept.clipId } } });
-      if (r.response.ok) setKept(null);
+    const id = kept[goal.event_id];
+    if (id) {
+      const r = await api.DELETE("/v1/orgs/{org_id}/clips/{clip_id}", { params: { path: { org_id: orgId, clip_id: id } } });
+      if (r.response.ok) setKept((k) => Object.fromEntries(Object.entries(k).filter(([e]) => e !== goal.event_id)));
       return;
     }
     const r = await api.POST("/v1/orgs/{org_id}/clips", {
       params: { path: { org_id: orgId } },
       body: { match_id: match.id, ...sceneOf(goal), title: label(goal) },
     });
-    if (r.response.ok && r.data) setKept({ eventId: goal.event_id, clipId: r.data.id });
+    if (r.response.ok && r.data) setKept((k) => ({ ...k, [goal.event_id]: r.data.id }));
   }
-  const isKept = goal != null && kept?.eventId === goal.event_id;
+  const isKept = goal != null && kept[goal.event_id] != null;
 
   const why = !hasCamera && !camera.isLoading && eventId ? (fieldOpen ? t("fieldHint") : t("noCamera")) : null;
   const toggle = (
@@ -313,6 +314,12 @@ export function VideoStage({
             {isKept && <Check aria-hidden />}
             {isKept ? t("kept") : t("keepScene")}
           </Button>
+          {/* where the saved scene is: the scenes of this match (BUG-21) */}
+          {isKept && (
+            <Link href={`/app/${orgId}/teams/${match.team_id}/scenes?match=${match.id}`} className="inline-flex min-h-11 items-center text-[15px] font-bold text-ink underline decoration-[1.5px] underline-offset-4" data-testid="kept-where">
+              {t("keptWhere")}
+            </Link>
+          )}
           {/* drawing is on the video: the workbench opens with the tools on this moment (BUG-13) */}
           {staff && mode === "video" && onDraw && (
             <Button

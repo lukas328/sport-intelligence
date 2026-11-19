@@ -109,7 +109,12 @@ export function durationParts(seconds: number): { h: number; m: number } {
 
 /** The clock time something is probably done. */
 export function finishAt(etaS: number, now = Date.now()): Date {
-  return new Date(now + etaS * 1000);
+  const at = now + etaS * 1000;
+  // past ten minutes the time is rounded up to five minutes: the estimate moves a little with
+  // every report, the clock time on the screen should not jump between 14:49 and 14:53 (BUG-16)
+  if (etaS < 600) return new Date(at);
+  const step = 5 * 60_000;
+  return new Date(Math.ceil(at / step) * step);
 }
 
 /** The key of the headline in the namespace «progress» for a match's state and step. */

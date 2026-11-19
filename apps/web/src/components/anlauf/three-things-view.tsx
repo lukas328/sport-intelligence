@@ -8,6 +8,7 @@ import { cameraScene, goalRuns, useSceneCamera, type MatchGraphics } from "@/lib
 import { threeThings, type Thing } from "@/lib/three-things";
 import { formatClock } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { useMatchSides, useSideLabel } from "@/components/domain/match-sides";
 import { LineKey } from "./blocks";
 import { Bundle, EmptyField } from "./bundle";
 import { SceneSpot, SpotChange, SpotStatus, useSpotText } from "./spot-parts";
@@ -22,8 +23,14 @@ export function clockOf(minute: number | null | undefined): string {
 /** The sentence of a thing, e.g. "Gegentore über rechts aussen". */
 export function useThingText() {
   const t = useTranslations("anlauf");
+  const sides = useMatchSides();
   return (x: Thing) => {
     const zone = x.zone ? t(`zoneFrom.${x.zone}` as "zoneFrom.la") : "";
+    // an observed match: «Tore {Team} …» for both teams, never «Gegentore» (BUG-07)
+    if (sides?.neutral) {
+      const team = x.team === "opp" ? sides.opp : sides.own;
+      return x.key === "conceded_fast_breaks" ? t("thing_fast_breaks_of", { team }) : t("thing_zone_of", { team, zone });
+    }
     return t(x.key === "conceded_zone" ? "thing_conceded_zone" : x.key === "scored_zone" ? "thing_scored_zone" : "thing_conceded_fast_breaks", { zone });
   };
 }
@@ -137,6 +144,7 @@ function ThingBundle({ thing, label, width = 360 }: { thing: Thing; label: strin
 /** Punkt 1: all its goals as a bundle, or one of them on the tactics camera. */
 function FirstThing({ orgId, matchId, graphics, thing, label, oppName }: { orgId: string; matchId: string; graphics: MatchGraphics; thing: Thing; label: string; oppName: string }) {
   const t = useTranslations("anlauf");
+  const side = useSideLabel();
   const [scene, setScene] = useState<string | null>(null);
   const first = thing.goals.find((g) => g.eventId)?.eventId ?? null;
   const goal = thing.goals.find((g) => g.eventId === (scene ?? first));
@@ -164,8 +172,8 @@ function FirstThing({ orgId, matchId, graphics, thing, label, oppName }: { orgId
       </div>
       {scene ? (
         <>
-          <SceneCamera orgId={orgId} matchId={matchId} eventId={scene} label={t("goalOf", { team: thing.team === "opp" ? oppName : t("us"), clock: clockOf(goal?.minute) })} />
-          <SceneSpot orgId={orgId} matchId={matchId} graphics={graphics} eventId={scene} label={t("goalOf", { team: thing.team === "opp" ? oppName : t("us"), clock: clockOf(goal?.minute) })} />
+          <SceneCamera orgId={orgId} matchId={matchId} eventId={scene} label={t("goalOf", { team: side(thing.team, oppName), clock: clockOf(goal?.minute) })} />
+          <SceneSpot orgId={orgId} matchId={matchId} graphics={graphics} eventId={scene} label={t("goalOf", { team: side(thing.team, oppName), clock: clockOf(goal?.minute) })} />
         </>
       ) : (
         <ThingBundle thing={thing} label={label} />
@@ -203,6 +211,14 @@ export function SceneCamera({
   if (!scene) {
     // the court not confirmed yet: no positions, the question instead, and the way to answer it
     const ask = q.data != null && q.data.field_confirmed === false;
+    // nothing measured and nothing to ask: one line, not a large empty court (UI-02)
+    if (!ask)
+      return (
+        <div className="my-1.5" data-testid="camera-empty">
+          <p className="m-0 border-l-4 border-rule py-1 pl-3 text-[15px] text-ink-2">{t("noCamera")}</p>
+          {barExtra && <div className="mt-1 flex items-center gap-2.5 bg-court-bar px-3 py-2">{barExtra}</div>}
+        </div>
+      );
     return (
       <div className="my-1.5" data-testid={ask ? "camera-field-question" : "camera-empty"}>
         <div className="relative">
@@ -256,7 +272,8 @@ export function VideoGoals({ orgId, matchId, graphics, oppName, onScene, folded 
   const [open, setOpen] = useState<string | null>(folded ? null : (playable[0]?.event_id ?? null));
   const shown = goals.find((g) => g.event_id === open);
   const when = (g: (typeof goals)[number]) => (g.minute != null ? clockOf(g.minute) : g.t_ms != null ? t("atVideo", { time: mmss(g.t_ms) }) : "");
-  const who = (g: (typeof goals)[number]) => (g.team === "own" ? t("us") : oppName);
+  const side = useSideLabel();
+  const who = (g: (typeof goals)[number]) => side(g.team, oppName);
   const spotText = useSpotText();
   return (
     <section className={folded ? "pt-2" : "border-t-2 border-ink pt-4"} data-testid="video-goals">

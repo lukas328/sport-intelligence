@@ -109,7 +109,7 @@ test("court from the hall: Passt moves on; shot review: Enter takes the report e
   await expect(panel.getByText("Erst das Team wählen: 1 oder 2.")).toBeVisible();
   await page.keyboard.press("1");
   await page.keyboard.press("g");
-  await expect(page.getByTestId("shot-candidates-said")).toContainText("1. HZ 12:52: Tor Herren 1.");
+  await expect(page.getByTestId("shot-candidates-said")).toContainText("1. HZ 12:52: Tor HC Würfe.");
   expect(reviews.at(-1)).toEqual({ status: "confirmed", side: "own", outcome: "goal" });
 
   // the last one in the full-screen review: its clip plays by itself, the keys work at once;

@@ -8,7 +8,8 @@ import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, type FormEvent, type Ref } from "react";
 import { useRouter } from "next/navigation";
 import { CourtCalibration, CourtPreview } from "@/components/analysis/court-calibration";
-import { Tagger, useRosterNames } from "@/components/analysis/tagger";
+import { Tagger } from "@/components/analysis/tagger";
+import { useMatchRoster, useMatchSides, useSideLabel } from "@/components/domain/match-sides";
 import { FROM_VIDEO_KEY, playFromVideo } from "@/lib/play-from-video";
 import { Button } from "@/components/ui/button";
 import { ShareButton } from "@/components/sharing/share-button";
@@ -284,15 +285,8 @@ export function Workspace({
     return () => window.clearInterval(id);
   }, [multi.auto, events.data, cams, pickCam]);
   const autoCam = multi.auto && autoCamId !== null;
-  const roster = useQuery({
-    queryKey: ["roster-names", match.season_id],
-    queryFn: async () =>
-      (
-        await api.GET("/v1/orgs/{org_id}/teams/{team_id}/seasons/{season_id}/roster", {
-          params: { path: { org_id: orgId, team_id: match.team_id, season_id: match.season_id } },
-        })
-      ).data ?? [],
-  });
+  // our roster only in a match of the team; an observed match goes by shirt numbers (L4)
+  const roster = useMatchRoster(orgId, match);
   const spotNames = Object.fromEntries((roster.data ?? []).map((r) => [r.player_id, `#${r.jersey_number ?? "?"} ${r.first_name}`]));
   const spotLabel = (() => {
     const tr = analysis.data?.tracks.find((x) => x.track_no === spot.track);
@@ -1045,10 +1039,10 @@ function AnalysisPanel({
   );
 }
 
-/** Own-team tracks worth naming: the longest 40. */
-function ownTracks(tracks: Analysis["tracks"]) {
+/** Own-team tracks worth naming, the longest 40; an observed match: the tracks of both teams (L4). */
+function ownTracks(tracks: Analysis["tracks"], both = false) {
   return tracks
-    .filter((tr) => tr.team === "home" || tr.team === "home_gk")
+    .filter((tr) => tr.team === "home" || tr.team === "home_gk" || (both && (tr.team === "away" || tr.team === "away_gk")))
     .sort((a, b) => b.last_ms - b.first_ms - (a.last_ms - a.first_ms))
     .slice(0, 40);
 }
@@ -1072,21 +1066,26 @@ function IdentityPanel({
 }) {
   const t = useTranslations("identity");
   const qc = useQueryClient();
-  const roster = useRosterNames(orgId, match.team_id, match.season_id);
+  // an observed match: the other team's people by shirt number, never our roster (L4)
+  const roster = useMatchRoster(orgId, match);
+  const sides = useMatchSides();
+  const neutral = sides?.neutral ?? false;
   const [notice, setNotice] = useState<string | null>(null);
   const [all, setAll] = useState(false);
   // in the order they appear, so the coach goes through the video once
-  const own = [...ownTracks(tracks)].sort((a, b) => a.first_ms - b.first_ms);
-  const open = own.filter((tr) => !tr.player_id);
+  const own = [...ownTracks(tracks, neutral)].sort((a, b) => a.first_ms - b.first_ms);
+  // named: a player of the roster, or in an observed match a shirt number somebody set
+  const named = (tr: (typeof own)[number]) => Boolean(tr.player_id) || (neutral && tr.identity_source === "user_correction");
+  const open = own.filter((tr) => !named(tr));
   // the next open people first; the whole list on request
   // a few seconds on screen is rarely worth a name: those fold away with the rest
   const long = open.filter((tr) => tr.last_ms - tr.first_ms >= 5000);
-  const shown = all ? own : [...long.slice(0, 8), ...own.filter((tr) => tr.player_id)].sort((a, b) => a.first_ms - b.first_ms);
+  const shown = all ? own : [...long.slice(0, 8), ...own.filter(named)].sort((a, b) => a.first_ms - b.first_ms);
   if (own.length === 0) return null;
-  async function assign(trackNo: number, playerId: string) {
+  async function assign(trackNo: number, playerId: string, number: number | null = null) {
     const { error } = await api.PUT("/v1/orgs/{org_id}/videos/{video_id}/tracks/{track_no}/identity", {
       params: { path: { org_id: orgId, video_id: videoId, track_no: trackNo } },
-      body: { player_id: playerId || null, number: null },
+      body: { player_id: playerId || null, number },
     });
     if (!error) {
       setNotice(t("saved"));
@@ -1100,7 +1099,7 @@ function IdentityPanel({
         <p className="mt-1 text-sm">
           {open.length > 0 ? t("openCount", { n: open.length, first: at(open[0]!.first_ms) }) : t("allDone")}
         </p>
-        <p className="mt-1 text-xs text-muted">{t("hint")}</p>
+        <p className="mt-1 text-xs text-muted">{neutral ? t("hintNumber") : t("hint")}</p>
         <ul className="mt-3 divide-y divide-border/70 text-sm">
           {shown.map((tr) => (
             <li key={tr.track_no} className="flex flex-wrap items-center gap-2 py-1.5">
@@ -1111,11 +1110,31 @@ function IdentityPanel({
                 <span className="text-muted">
                   {tr.number != null ? t("shirt", { n: tr.number }) : t("track", { n: tr.track_no })}
                   {` · ${t("onScreen", { s: Math.round((tr.last_ms - tr.first_ms) / 1000) })}`}
+                  {/* an observed match lists both teams: whose person it is */}
+                  {neutral && sides && ` · ${tr.team?.startsWith("home") ? sides.own : sides.opp}`}
                 </span>
               </Button>
               <label className="sr-only" htmlFor={`track-${tr.track_no}`}>
                 {t("track", { n: tr.track_no })}
               </label>
+              {neutral ? (
+                <input
+                  id={`track-${tr.track_no}`}
+                  type="number"
+                  min={0}
+                  max={99}
+                  inputMode="numeric"
+                  defaultValue={tr.number ?? ""}
+                  placeholder={t("numberPlaceholder")}
+                  onBlur={(e) => {
+                    const v = e.target.value.trim();
+                    if (v === String(tr.number ?? "")) return;
+                    void assign(tr.track_no, "", v === "" ? null : Number(v));
+                  }}
+                  className="min-h-9 w-24 bg-raised ring-1 ring-inset ring-border px-2"
+                  data-testid="identity-number"
+                />
+              ) : (
               <select
                 id={`track-${tr.track_no}`}
                 value={tr.player_id ?? ""}
@@ -1132,6 +1151,7 @@ function IdentityPanel({
                     </option>
                   ))}
               </select>
+              )}
               {tr.identity_source && <span className="text-xs text-muted">{tr.identity_source === "model" ? t("auto") : t("manual")}</span>}
             </li>
           ))}
@@ -1227,6 +1247,7 @@ function CameraSwitch({
 /** Defence systems per team over time (heuristic from positions, M6). */
 function FormationsCard({ formations, onSeek }: { formations: NonNullable<Analysis["formations"]>; onSeek: (ms: number) => void }) {
   const t = useTranslations("formations");
+  const side = useSideLabel();
   const label = (f: string) => (f === "open" ? t("open") : f.replaceAll("-", ":"));
   return (
     <section className="space-y-2" data-testid="formations">
@@ -1245,7 +1266,7 @@ function FormationsCard({ formations, onSeek }: { formations: NonNullable<Analys
         return (
           <div key={team} className="space-y-1 text-sm">
             <p>
-              <span className="font-medium">{team === "home" ? t("own") : t("opponent")}: </span>
+              <span className="font-medium">{team === "home" ? side("own") : side("opp", t("opponent"))}: </span>
               {share.map(([f, ms]) => `${label(f)} ${Math.round((ms / total) * 100)} %`).join(" · ")}
             </p>
             <ul className="flex flex-wrap gap-1">

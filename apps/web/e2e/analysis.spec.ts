@@ -59,7 +59,7 @@ test("paper report: import, overview, match report, shots", async ({ page }, inf
   // every number opens the events behind it
   // «Mehr zum Spiel» has no second list of three things any more (UX test B08)
   await expect(page.getByTestId("insights")).toHaveCount(0);
-  await table.getByRole("button", { name: "Tore Damen 1" }).click();
+  await table.getByRole("button", { name: "Tore HC Papier" }).click();
   await expect(page.getByTestId("event-list").getByRole("listitem")).toHaveCount(5);
 
   await openAnalysis(page, "Spielbericht");

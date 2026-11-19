@@ -105,6 +105,11 @@ async def _check_players(ctx: Ctx, match: Match, *ids: uuid.UUID | None) -> None
     wanted = {i for i in ids if i}
     if not wanted:
         return
+    if match.observed:
+        # our team does not play an observed match: its players are named by shirt number (L4)
+        raise ProblemError(
+            422, "player-not-in-team", "An observed match has no players of the team"
+        )
     found = set(
         (
             await ctx.db.scalars(

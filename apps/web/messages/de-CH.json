@@ -555,7 +555,10 @@
     "otherWaysFile": "Ohne Video? Leg das Spiel an und trag das Resultat ein. Den Papierbericht hängst du im Spiel als Foto oder PDF an; der offizielle Bericht von handball.ch kommt von selbst.",
     "uploadBackToList": "Zurück zur Liste der Spiele",
     "newHint": "Testspiel oder Gegner-Video",
-    "newOwnMatch": "Ein eigenes Spiel anlegen"
+    "newOwnMatch": "Ein eigenes Spiel anlegen",
+    "kitFieldOf": "{team} Feldspieler",
+    "kitKeeperOf": "{team} Torhüter",
+    "scoreFinalHint": "Das Endresultat des ganzen Spiels, nicht die Tore im Video."
   },
   "upload": {
     "title": "Video hochladen",
@@ -683,7 +686,7 @@
     "headInterrupted": "Upload unterbrochen",
     "headDone": "Analyse fertig",
     "headFailed": "Das hat nicht geklappt",
-    "scoutingName": "{opponent} gegen {other}",
+    "scoutingName": "{home} gegen {away}",
     "training": "Training",
     "percent": "{n} %",
     "silentFor": "seit {m} Min. keine Rückmeldung",
@@ -767,7 +770,8 @@
     "discard": "Verwerfen",
     "discardTitle": "Upload auch abbrechen?",
     "discardBody": "Der Hinweis ist weg. Der unterbrochene Upload zu {name} liegt noch bereit, damit du mit derselben Datei weitermachen kannst. Abbrechen löscht, was schon angekommen ist. Sonst bricht er nach 6 Stunden ohne neue Teile von selbst ab.",
-    "discardKeep": "Nein, nur ausblenden"
+    "discardKeep": "Nein, nur ausblenden",
+    "stepShare": "{n} % dieses Schritts"
   },
   "attachments": {
     "title": "Dateien zum Spiel",
@@ -920,7 +924,7 @@
     "delete": "Sammlung löschen",
     "note": "Notiz",
     "nowPlaying": "Szene {n} von {total}",
-    "noItems": "Diese Sammlung hat noch keine Szenen. Füge sie im Video mit «Szene merken» hinzu."
+    "noItems": "Diese Sammlung hat noch keine Szenen. Füge sie im Video mit «Szene speichern» hinzu."
   },
   "analysis": {
     "title": "Positionen",
@@ -1058,7 +1062,19 @@
     "concededByPosition": "Gegentore nach Position",
     "ofShots": "{n, plural, one {aus # Wurf} other {aus # Würfen}}",
     "flowAbove": "Oben: {team} vorne",
-    "flowBelow": "Unten: {team} vorne"
+    "flowBelow": "Unten: {team} vorne",
+    "notRecorded": "nicht erfasst",
+    "droughtOf": "Längste Phase ohne Tor ({team}): {minutes} min",
+    "flowVideoTime": "Minuten im Video",
+    "balanceShots": "{team}: {n, plural, one {# Wurf} other {# Würfe}}",
+    "balanceGoals": "{n, plural, one {# Tor} other {# Tore}}",
+    "balanceSaved": "{n} gehalten",
+    "balanceMisses": "{n} daneben",
+    "balancePosts": "{n} an Pfosten oder Latte",
+    "balanceOther": "{n} ohne Ergebnis",
+    "balanceBlocked": "(dazu {n} geblockt)",
+    "balanceGoalsOnly": "{team}: nur die {goals, plural, one {# Tor} other {# Tore}} erfasst, keine Fehlwürfe oder Paraden",
+    "reportEmpty": "Noch keine Tore oder Würfe mit Rückennummer oder Name erfasst."
   },
   "shotsView": {
     "title": "Würfe",
@@ -1078,7 +1094,10 @@
     "noPosition": "{count} Würfe ohne Position",
     "noPositions": "Für diese Würfe ist keine Wurfposition erfasst. Beim Erfassen im Tab Ereignisse auf das Feld tippen, dann erscheint hier das Wurfbild.",
     "fillGoals": "Die Füllung jedes Feldes zeigt den Anteil Tore.",
-    "fillSaves": "Die Füllung jedes Feldes zeigt den Anteil Paraden."
+    "fillSaves": "Die Füllung jedes Feldes zeigt den Anteil Paraden.",
+    "noPositionOf": "{count} von {total} Würfen ohne Wurfposition",
+    "noGoalZones": "Für keinen Wurf ist die Torecke erfasst. Beim Erfassen auf die Ecke im Tor tippen, dann erscheint hier das Torbild.",
+    "noZones": "Für keinen Wurf ist die Wurfzone erfasst."
   },
   "events": {
     "title": "Ereignisse",
@@ -1131,7 +1150,8 @@
     "moreEvents": "Strafen und Unterbrechungen",
     "whereTitle": "Wurfposition und Torecke",
     "whereSet": "gesetzt",
-    "setupTitle": "Torhüter und Import"
+    "setupTitle": "Torhüter und Import",
+    "shirtNumber": "Rückennummer"
   },
   "paper": {
     "title": "Spielbericht auf Papier importieren",
@@ -1204,7 +1224,9 @@
     "assignHint": "Wähle beim Erfassen die Torhüterin oder den Torhüter, damit Paraden zugeordnet werden.",
     "ownKeeper": "Eigener Torhüter",
     "oppKeeper": "Gegner-Torhüter Nr.",
-    "keeper": "Torhüter"
+    "keeper": "Torhüter",
+    "savesWithoutKeeper": "{n, plural, one {Eine Parade} other {# Paraden}} ohne Torhüter",
+    "keeperOf": "Torhüter {team} Nr."
   },
   "physical": {
     "title": "Laufleistung",
@@ -1225,12 +1247,14 @@
     "showHeatmap": "Aufenthaltsorte zeigen",
     "teamOwn": "Eigenes Team",
     "teamOpp": "Gegner",
-    "tracksOwn": "Spuren des eigenen Teams, ab 1 Minute",
+    "tracksOwn": "Spuren von {team}, ab 1 Minute",
     "playersAndTracks": "Spieler und Spuren",
     "showShort": "{n} kurze Spuren zeigen (unter 1 Minute)",
     "hideShort": "Kurze Spuren ausblenden",
     "shortClip": "Das Video zeigt weniger als eine Halbzeit: Distanzen, Sprints und Tempo gelten nur für diesen Ausschnitt, nicht für das ganze Spiel.",
-    "estimated": "Geschätzt aus den Positionen im Video."
+    "estimated": "Geschätzt aus den Positionen im Video.",
+    "thin": "Zu wenig Laufdaten",
+    "thinHint": "Die Spuren im Video sind zu kurz für verlässliche Distanzen. Wir zeigen darum keine Zahlen statt unsicherer."
   },
   "identity": {
     "title": "Spieler zuordnen",
@@ -1246,7 +1270,9 @@
     "shirt": "Nr. {n}",
     "unknown": "unbekannt",
     "showAll": "Alle {n} zeigen",
-    "onScreen": "{s} s im Bild"
+    "onScreen": "{s} s im Bild",
+    "hintNumber": "Personen beider Teams eine Rückennummer geben. Zuordnungen bleiben bei einer neuen Analyse erhalten.",
+    "numberPlaceholder": "Nr."
   },
   "camera": {
     "label": "Kamera",
@@ -1637,7 +1663,8 @@
     "xgPerMatch": "xG pro Spiel (geschätzt)",
     "xgThin": "xG: zu wenige Würfe mit Position ({n} von {of}).",
     "noScorers": "Noch keine Würfe mit Rückennummer erfasst.",
-    "watchedAgainst": "beobachtet gegen {other}"
+    "watchedAgainst": "beobachtet gegen {other}",
+    "openOf": "Profil von {name}"
   },
   "billing": {
     "title": "Abo und Rechnungen",
@@ -2676,7 +2703,7 @@
     "key_mistake": "Fehler",
     "key_defence": "Abwehr anschauen",
     "key_review": "Später anschauen",
-    "panel": "Am Spieltag gemerkt ({n})",
+    "panel": "Marken vom Spieltag ({n})",
     "open": "Spieltag öffnen",
     "device": "Gerät",
     "notSynced": "noch nicht mit dem Video abgeglichen",
@@ -3627,7 +3654,7 @@
     "collect": "Fürs Team zusammenstellen",
     "checksOpen": "{count, plural, one {1 Frage} other {# Fragen}}, etwa {minutes, plural, one {1 Minute} other {# Minuten}}",
     "allMatches": "Alle Spiele",
-    "withoutVideo": "{count} von {total} ohne Video",
+    "withoutVideo": "{count} von {total} eigenen Spielen ohne Video",
     "miniNoVideo": "kein Video",
     "miniRunning": "Analyse läuft",
     "win": "Sieg",
@@ -3720,13 +3747,13 @@
     "throwOff": "Anwurf",
     "halfTimeWord": "Halbzeit",
     "fullTime": "Schluss",
-    "kept": "Gemerkt",
-    "keepScene": "Szene merken",
+    "kept": "Gespeichert",
+    "keepScene": "Szene speichern",
     "highlight": "Person hervorheben",
     "phaseTitle": "Minute {from} bis {to}",
     "running": "läuft gerade",
     "notes": "Notizen",
-    "noNotes": "Noch keine Notiz zu dieser Phase.",
+    "noNotes": "Noch keine Notiz zu dieser Szene.",
     "writeNote": "Notiz schreiben",
     "bench": "Werkbank",
     "benchClose": "Werkbank schliessen",
@@ -3814,7 +3841,6 @@
     "positionsEstimated": "Positionen geschätzt; es können Personen neben dem Feld darunter sein.",
     "howCountedVideo": "Die Tore kommen aus dem Video, so wie du sie in Prüfen bestätigt hast. Die Anläufe sind die Wege der Werferin oder des Werfers in den drei Sekunden vor dem Tor, aus dem Video gemessen. Geschätzte Wurfpositionen sind gestrichelt, bis du sie bestätigst.",
     "allGoals": "{n, plural, one {Das Tor} other {Alle # Tore}}",
-    "scoutingRow": "{opponent} gegen {other}",
     "scoutingTag": "Beobachtet",
     "exampleTitle": "Das ist ein Beispiel",
     "exampleBody": "Ein Demo-Spiel mit erfundenen Toren: so sieht ein Spiel aus, wenn die Analyse dein Video ausgewertet hat. Es gehört nicht zu deinem Team und zählt in keiner Statistik.",
@@ -3839,7 +3865,13 @@
     "pictureSaved": "Bild gespeichert, du findest es bei deinen Downloads.",
     "pictureFailed": "Das Bild liess sich gerade nicht erstellen. Versuch es nochmals.",
     "scenesKickTerm": "<term>Szenen</term> · {matches, plural, one {1 Spiel} other {# Spiele}} mit Video",
-    "exampleBand": "Beispiel · erfundene Zahlen"
+    "exampleBand": "Beispiel · erfundene Zahlen",
+    "thing_zone_of": "Tore {team} {zone}",
+    "thing_fast_breaks_of": "Tore {team} aus Gegenstössen",
+    "goalsOfTeam": "Tore {team}",
+    "observedMatches": "Beobachtete Spiele",
+    "observedNote": "zählen nicht in eurer Saison",
+    "keptWhere": "In «Szenen» ansehen"
   },
   "check": {
     "top": "Prüfen · {opponent}",
@@ -3998,10 +4030,17 @@
     "emptyText": "Nach der Analyse ist jedes Tor, jeder Wurf und jeder Ballverlust eine Szene. Du suchst sie mit einem Satz und stellst sie zu Sammlungen zusammen.",
     "emptyPlays": "Spielzüge zeichnen geht schon jetzt:",
     "emptySearch": "Die Suche findet Szenen ab dem ersten Video.",
-    "emptyAnswer": "Noch keine Szenen. Lade ein Video hoch, dann findest du hier jedes Tor.",
+    "emptyAnswer": "Dazu gibt es noch keine Szene: noch kein Video ist analysiert.",
     "emptyAnswerRead": "Noch keine Szenen. Sobald ein Video eures Teams hochgeladen ist, findest du hier jedes Tor.",
     "backToCollection": "Zurück zur Sammlung «{title}»",
-    "addToCollection": "{n, plural, one {1 Szene} other {# Szenen}} zur Sammlung"
+    "addToCollection": "{n, plural, one {1 Szene} other {# Szenen}} zur Sammlung",
+    "originLabel": "Spiele",
+    "origin": {
+      "all": "Alle",
+      "own": "Eigene",
+      "observed": "Beobachtet"
+    },
+    "observedTag": "Beobachtet"
   },
   "teamPage": {
     "kick": "{team} · {source}",
@@ -4183,7 +4222,12 @@
     "savesPlain": "Paraden",
     "againstNone": "{n, plural, one {Das Gegentor ist} other {Die # Gegentore sind}} keinem Torhüter zugeordnet.",
     "savesNone": "{n, plural, one {Eine Parade ist} other {# Paraden sind}} keinem Torhüter aus dem Kader zugeordnet.",
-    "againstNoMinutes": "Ohne Spielminuten im Spielbericht lassen sich Gegentore keinem Torhüter zuordnen."
+    "againstNoMinutes": "Ohne Spielminuten im Spielbericht lassen sich Gegentore keinem Torhüter zuordnen.",
+    "fieldOf": "Feld {team}",
+    "keeperOf": "Tor {team}",
+    "againstNeutral": "Tore erhalten",
+    "targetNoteOf": "Tore {team}, von dir markiert",
+    "targetMarkedOf": "{n} von {of} Toren von {team} markiert."
   },
   "entry": {
     "ask": "Wie heisst dein Team?",

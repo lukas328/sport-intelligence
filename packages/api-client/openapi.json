@@ -9293,6 +9293,12 @@
             "title": "Kit Warnings",
             "type": "array"
           },
+          "official_game": {
+            "default": false,
+            "description": "a game of the federation's schedule (handball.ch): its official report comes by itself; false for a match the source does not know (app review TXT-06)",
+            "title": "Official Game",
+            "type": "boolean"
+          },
           "opponent": {
             "anyOf": [
               {
@@ -15844,6 +15850,18 @@
             "title": "Numbers",
             "type": "array"
           },
+          "observed": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "true: only observed matches (kind scouting); false: only the team's own matches; null: both (app review UX-07)",
+            "title": "Observed"
+          },
           "opponent_id": {
             "anyOf": [
               {
@@ -16004,6 +16022,12 @@
               }
             ],
             "title": "Number"
+          },
+          "observed": {
+            "default": false,
+            "description": "from an observed match: not a scene of the team's season",
+            "title": "Observed",
+            "type": "boolean"
           },
           "outcome": {
             "anyOf": [

@@ -31,6 +31,7 @@ from handball_api.services.matches import (
 )
 from handball_api.services.orgs import get_team
 from handball_api.services.policies import Action, can
+from handball_metrics.stats import OFFICIAL_SOURCES
 
 LEAD = timedelta(hours=72)
 MIN_SAMPLE = 5  # below this an observation is not made
@@ -374,7 +375,9 @@ async def run_due(ctx: Ctx, now: datetime | None = None) -> int:
                 Match.opponent_id == m.opponent_id,
                 Match.kickoff_at < m.kickoff_at,
                 counted(),
-                Match.id.in_(select(Event.match_id)),
+                # the same data the opponent's page shows: events of an analysis, not only the
+                # federation's report (app review BUG-15: the message led to an empty profile)
+                Match.id.in_(select(Event.match_id).where(Event.source.not_in(OFFICIAL_SOURCES))),
             )
             .limit(1)
         )

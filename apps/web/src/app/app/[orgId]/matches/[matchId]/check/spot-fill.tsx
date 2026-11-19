@@ -16,6 +16,7 @@ import { goalWindow } from "@/lib/goal-window";
 import { type MatchGraphics, useMatchGraphics } from "@/lib/graphics";
 import { useOpponentName } from "@/lib/opponent";
 import { ownName } from "@/lib/own-name";
+import { matchSides, pairing } from "@/lib/match-sides";
 import { goalsWithoutSpot, type SpotZone, spotSuggestion } from "@/lib/shot-spot";
 import { cn } from "@/lib/utils";
 import { timelineVideo } from "@/lib/video-parts";
@@ -35,8 +36,11 @@ export function SpotFill({ orgId, match, goalId }: { orgId: string; match: Match
   const tc = useTranslations("check");
   const ta = useTranslations("anlauf");
   const { org, teams } = useShell();
-  const own = ownName(teams.find((x) => x.id === match.team_id)?.name, org.name);
   const oppName = useOpponentName()(match);
+  // the teams as on every screen of the match: home first, an observed match without us (BUG-06)
+  const tAll = useTranslations();
+  const sides = matchSides(match, { team: ownName(teams.find((x) => x.id === match.team_id)?.name, org.name), opponent: oppName, otherFallback: tAll("progress.otherTeam") });
+  const own = sides.own;
   const graphics = useMatchGraphics(orgId, match.id);
   const save = useSaveSpot(orgId, match.id);
   const main = timelineVideo(match.videos) ?? null;
@@ -87,14 +91,14 @@ export function SpotFill({ orgId, match, goalId }: { orgId: string; match: Match
   return (
     <div style={matchStyle([org.primary_color, org.secondary_color ?? null], match.opponent_colors ? [match.opponent_colors.color, match.opponent_colors.second ?? null] : null) as CSSProperties} data-testid="spot-fill-view">
       <div className="bleed-x -mt-px flex h-[60px] items-center justify-between gap-3 border-b-2 border-ink px-4 md:px-8">
-        <span className="min-w-0 truncate text-[15px] font-bold">{t("fillTop", { opponent: `${own} ${ta("vsShort")} ${oppName}` })}</span>
+        <span className="min-w-0 truncate text-[15px] font-bold">{t("fillTop", { opponent: pairing(sides, ta("vsShort")) })}</span>
         <Link href={back} className="inline-flex min-h-11 shrink-0 items-center border-2 border-ink px-3.5 text-[15px] font-bold whitespace-nowrap text-ink no-underline">
           {tc("later")}
         </Link>
       </div>
       {/* on a phone video and court share one screen: the strip gives way */}
       <div className="bleed-x max-md:hidden">
-        <Strip name={own} sub={`${ta("vsShort")} ${oppName}${goal ? ` · ${t("fillCount", { n: at + 1, total })}` : ""}`} own={match.score_own} opp={match.score_opponent} />
+        <Strip name={sides.neutral ? sides.home : own} sub={`${ta("vsShort")} ${sides.neutral ? sides.away : oppName}${goal ? ` · ${t("fillCount", { n: at + 1, total })}` : ""}`} own={match.score_own} opp={match.score_opponent} />
       </div>
       {!list ? (
         <p className="py-10 text-ink-2">{tc("loading")}</p>

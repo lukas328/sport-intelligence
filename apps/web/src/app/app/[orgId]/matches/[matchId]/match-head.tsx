@@ -5,6 +5,7 @@ import { useFormatter, useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { AttnTag } from "@/components/anlauf/blocks";
 import { Breakable, Strip, WurfHead } from "@/components/anlauf/heads";
+import { useMatchSides } from "@/components/domain/match-sides";
 import { openMoments, reportCut, reportGoals, videoScore, type MatchGraphics } from "@/lib/graphics";
 
 type Match = Schemas["MatchOut"];
@@ -19,7 +20,13 @@ export function MatchHead({ match, ownName, oppName, view, graphics, children }:
   const tm = useTranslations("matches");
   const format = useFormatter();
   const kickoff = new Date(match.kickoff_at);
-  const title = match.opponent ? `${match.is_home ? ownName : oppName} ${tm("vs")} ${match.is_home ? oppName : ownName}` : `${tm("training")}: ${ownName}`;
+  // home team first (BUG-18); an observed match leads with the home team, not with us
+  const sides = useMatchSides();
+  const [first, second] = match.is_home ? [ownName, oppName] : [oppName, ownName];
+  const title = match.opponent ? `${first} ${tm("vs")} ${second}` : `${tm("training")}: ${ownName}`;
+  // the slim head names our team, the opponent beside it; in an observed match the home team
+  const stripName = sides?.neutral ? first : ownName;
+  const stripOther = sides?.neutral ? second : oppName;
   const when = format.dateTime(kickoff, { weekday: "long", day: "numeric", month: "long" });
   const half = match.halftime_own != null && match.halftime_opponent != null ? `${tm("halftime")} ${match.halftime_own}:${match.halftime_opponent}` : null;
   // a video of the opponent against another team says so first (K3)
@@ -86,11 +93,11 @@ export function MatchHead({ match, ownName, oppName, view, graphics, children }:
         <Strip
           name={
             <h1 className="m-0 text-[length:inherit] leading-[inherit]">
-              <Breakable text={ownName} />
-              {match.opponent && <span className="sr-only">{` ${ta("vsShort")} ${oppName}`}</span>}
+              <Breakable text={stripName} />
+              {match.opponent && <span className="sr-only">{` ${ta("vsShort")} ${stripOther}`}</span>}
             </h1>
           }
-          sub={[watched, match.opponent ? `${ta("vsShort")} ${oppName}` : null, when, match.venue, note].filter(Boolean).join(" · ")}
+          sub={[watched, match.opponent ? `${ta("vsShort")} ${stripOther}` : null, when, match.venue, note].filter(Boolean).join(" · ")}
           own={own}
           opp={opp}
           pending={pending}

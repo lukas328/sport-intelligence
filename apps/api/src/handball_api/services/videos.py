@@ -1489,6 +1489,9 @@ async def set_track_identity(
     if player_id is not None:
         match = await ctx.db.get(Match, asset.match_id)
         assert match is not None
+        if match.observed:
+            # an observed match goes by shirt numbers: our roster plays no part in it (L4)
+            raise ProblemError(422, "validation", "An observed match has no players of the team")
         entry = await ctx.db.scalar(
             select(RosterEntry).where(
                 RosterEntry.season_id == match.season_id, RosterEntry.player_id == player_id

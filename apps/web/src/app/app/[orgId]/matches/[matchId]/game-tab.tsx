@@ -5,6 +5,7 @@ import { type ReactNode, useState } from "react";
 import { SectionHead } from "@/components/anlauf/blocks";
 import { SceneSpot } from "@/components/anlauf/spot-parts";
 import { SceneCamera, clockOf, useThingText } from "@/components/anlauf/three-things-view";
+import { useSideLabel } from "@/components/domain/match-sides";
 import { buttonClass } from "@/components/ui/button";
 import { goalRuns, type MatchGraphics } from "@/lib/graphics";
 import { threeThings, type Thing } from "@/lib/three-things";
@@ -58,13 +59,14 @@ export function GameActions({ collect, onHighlights, onPicture }: { collect: Rea
 export function PointOpen({ orgId, matchId, graphics, oppName }: { orgId: string; matchId: string; graphics: MatchGraphics; oppName: string }) {
   const t = useTranslations("anlauf");
   const text = useThingText();
+  const side = useSideLabel();
   const thing: Thing | undefined = threeThings(goalRuns(graphics))[0];
   const scenes = (thing?.goals ?? []).filter((g) => g.eventId);
   const [at, setAt] = useState(0);
   const phone = usePhone();
   if (!thing || scenes.length === 0) return null;
   const goal = scenes[Math.min(at, scenes.length - 1)]!;
-  const label = t("goalOf", { team: thing.team === "opp" ? oppName : t("us"), clock: clockOf(goal.minute) });
+  const label = t("goalOf", { team: side(thing.team, oppName), clock: clockOf(goal.minute) });
   const of = t("pointOpenNote", { n: at + 1, total: scenes.length });
   return (
     <section data-testid="point-open">
