@@ -88,7 +88,7 @@ export default async function AboutUs({ params }: Props) {
             <MailLine template={t.contact} />
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-            <StartLink appLocale={APP_LOCALE[locale]} className="btn btn-ink">
+            <StartLink appLocale={APP_LOCALE[locale]} src="about" className="btn btn-ink">
               {m.cta.start}
             </StartLink>
             <Link href={`/${locale}/demo/`} className="btn btn-line">

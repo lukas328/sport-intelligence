@@ -132,6 +132,7 @@ export default async function Home({ params }: Props) {
             <div className="mt-8">
               <TeamField
                 id="team"
+                src="team-search"
                 label={t.teamLabel}
                 button={t.teamButton}
                 hint={t.teamHint}
@@ -376,7 +377,7 @@ export default async function Home({ params }: Props) {
               </p>
             </div>
             <div className="flex flex-col gap-2">
-              <StartLink appLocale={app} className="btn btn-ink">
+              <StartLink appLocale={app} src="home-price" className="btn btn-ink">
                 {m.cta.start}
               </StartLink>
               <Link href={`/${locale}/preise/`} className="link justify-center">
@@ -399,6 +400,7 @@ export default async function Home({ params }: Props) {
             <div className="mt-8">
               <TeamField
                 id="team-end"
+                src="team-search-end"
                 label={t.teamLabel}
                 button={t.teamButton}
                 hint={t.teamHint}

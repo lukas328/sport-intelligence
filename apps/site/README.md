@@ -1,7 +1,7 @@
 # apps/site: the public website and help centre
 
 Static Next.js site in the app's look «Anlauf» (concept and texts: `docs/site/KONZEPT.md`):
-start, So funktioniert es, Filmen, Demo-Spiel, Preise, Fragen (with the help guides), Daten und
+start, So funktioniert es, Filmen, Demo-Spiel, Preise, Für Vereine, Hilfe (questions and the help guides), Daten und
 Einwilligung, Über uns und Kontakt, Ratgeber (guides), Fakten auf einen Blick, Über uns, blog, terms, privacy, imprint; German (de-CH), French and
 English under `/de/`, `/fr/`, `/en/`. `/` picks the browser language. `/funktionen/` forwards to
 `/so-funktioniert-es/`.
@@ -72,6 +72,33 @@ centre lives at `{site}/{de|fr|en}/hilfe/{slug}/`; the app links there with `HB_
   «Anmelden»; on the phone the language first in the menu (L2, L3).
 - Help guides outside the core have `listed: false` in `content/help/index.ts`: reachable for the app's
   links, not listed, not in the sitemap, `noindex`.
+- Prices in EUR and CHF, the same amount (`docs/plans/europa.md` EU3): templates carry `{cur}`,
+  `src/components/currency.tsx` fills it with the visitor's currency (`?cur=chf|eur`, else CHF for
+  a Swiss browser language and EUR for all others; the switch on «Preise» only changes the
+  address). Places without a browser (titles, facts, `llms.txt`, JSON-LD) name both.
+
+## Measuring: `?src=`
+
+The site sets no cookie, stores nothing in the browser and loads nothing from third parties (the
+footer says so). The only measuring: every link and form into the app carries `?src=<place>`,
+and the app keeps it at sign-up. The values (`SOURCES` in `src/lib/site.ts`, a test keeps this
+list in step):
+
+| `src` | Where |
+|---|---|
+| `header` | «Kostenlos starten» in the top bar |
+| `menu` | «Kostenlos starten» in the phone menu |
+| `login` | «Anmelden» in the top bar and the phone menu |
+| `team-search` | the team search in the start page's head |
+| `team-search-end` | the team search at the end of the start page |
+| `home-price` | the price block on the start page |
+| `pricing` | the button in the head of «Preise» |
+| `pricing-table` | the buttons under the plans on «Preise» |
+| `how` | the end of «So funktioniert es» |
+| `demo` | the end of the demo match |
+| `about` | «Über uns» |
+| `clubs` | «Für Vereine» |
+| `guide` | the box on a guide (Ratgeber) |
 
 ## Hosting
 

@@ -174,7 +174,7 @@ export default async function How({ params }: Props) {
         </section>
 
         <div className="mt-16 flex flex-col gap-3 border-t-2 border-ink pt-10 sm:flex-row sm:flex-wrap">
-          <StartLink appLocale={APP_LOCALE[locale]} className="btn btn-ink">
+          <StartLink appLocale={APP_LOCALE[locale]} src="how" className="btn btn-ink">
             {m.cta.start}
           </StartLink>
           <Link href={`/${locale}/demo/`} className="btn btn-line">

@@ -80,7 +80,7 @@ export default async function Pricing({ params }: Props) {
         lead={<Cur text={fmt(t.lead, nums)} />}
         aside={<TrialArt days={team.trial_days} label={t.figureLabel} />}
       >
-        <StartLink appLocale={APP_LOCALE[locale]} className="btn btn-ink mt-8">
+        <StartLink appLocale={APP_LOCALE[locale]} src="pricing" className="btn btn-ink mt-8">
           {t.choose}
         </StartLink>
       </PageHead>
@@ -214,6 +214,7 @@ export default async function Pricing({ params }: Props) {
                   <td key={p.plan} className={cn("px-2 pt-5 pb-6 md:px-5", p.plan === "team" && "border-x-2 border-ink")}>
                     <StartLink
                       appLocale={APP_LOCALE[locale]}
+                      src="pricing-table"
                       className={cn("btn w-full px-3 max-md:text-[0.9375rem] md:w-auto", p.plan === "team" ? "btn-ink" : "btn-line")}
                     >
                       {t.choose}
@@ -286,7 +287,7 @@ export default async function Pricing({ params }: Props) {
           ))}
         </table>
         <div className="mt-5 flex flex-col gap-2 md:hidden">
-          <StartLink appLocale={APP_LOCALE[locale]} className="btn btn-ink">
+          <StartLink appLocale={APP_LOCALE[locale]} src="pricing-table" className="btn btn-ink">
             {t.choose}
           </StartLink>
           <p className="text-[1.0625rem] text-ink-2">{fmt(t.trial, { days: team.trial_days })}</p>
