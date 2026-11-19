@@ -52,7 +52,11 @@ Einstieg danach wie immer: `docs/plans/HANDOVER.md`.
   `claude/trikot-zielbild`, `claude/design-runde2-sport`, `claude/design-runde2-video` (die
   gewählte Marke liegt in `docs/design/brand2/`).
 
-## Warteschlange (noch nicht gestartet, in dieser Reihenfolge)
+## Warteschlange
+Stand 19.11. abends: Punkte 1 (App-Block 3) und 2 (L1) sind gestartet, laufen als Helfer. Am Nachmittag
+hat ein Ausgabenlimit (5 h) alle Helfer gestoppt; sie wurden nach dem Zurücksetzen fortgesetzt.
+Offen bleiben 3 bis 5.
+
 Falls die Sitzung abbricht: hier weitermachen. Laufende Helfer stehen oben mit «läuft»; ihre
 Arbeit liegt nur in lokalen Worktrees und geht mit dem Container verloren, also neu starten.
 1. App-Block 3 (`docs/ux-test/livegang/BEFUNDE-6-app-review.md`, Abschnitt Umsetzung Punkt 3 und L5):
