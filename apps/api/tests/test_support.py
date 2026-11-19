@@ -153,7 +153,7 @@ def test_analysis_ready_mail_names_the_match() -> None:
     mail = render(
         "analysis_ready", "de-CH", to="a@b.ch", name="Hans", team="HC Z", opponent="TV T", link="x"
     )
-    assert mail.subject == "Die drei Dinge gegen TV T sind da"
+    assert mail.subject == "Die Muster gegen TV T sind da"
     assert "HC Z gegen TV T" in mail.text and mail.text.endswith("x")
 
 
@@ -173,7 +173,7 @@ def test_after_the_analysis_the_mail_promises_only_what_is_there() -> None:
         questions=2,
     )
     assert mail.subject == "Die Analyse gegen TV T ist fertig"
-    assert "drei Dinge" not in mail.text and "2 Fragen an dich" in mail.text
+    assert "Muster" not in mail.text and "2 Fragen an dich" in mail.text
     assert mail.text.startswith("Hallo\n")
     # singular and plural as whole sentences, in every language (UX test round 3, final check)
     for loc, n, sentence in (
