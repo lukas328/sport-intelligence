@@ -104,13 +104,13 @@ export const HELP: HelpEntry[] = [
   {
     slug: "tags-und-filter",
     group: "work",
-    title: { de: "Szenen suchen", fr: "Chercher des scènes", en: "Searching scenes" },
+    title: { de: "Frag deine Spiele: Szenen suchen", fr: "Interroge tes matchs : chercher des scènes", en: "Ask your matches: searching scenes" },
     summary: {
       de: "Suchen über alle Spiele, die Antwort mit Basis, Sammlungen.",
       fr: "Chercher dans tous les matchs, la réponse avec sa base, sélections.",
       en: "Search across all matches, the answer with its base, collections.",
     },
-    keywords: { de: "szenen suchen filter sammlung", fr: "scènes chercher filtre sélection", en: "scenes search filter collection" },
+    keywords: { de: "szenen suchen filter sammlung frag deine spiele", fr: "scènes chercher filtre sélection interroge tes matchs", en: "scenes search filter collection ask your matches" },
   },
   {
     slug: "praesentation",
@@ -175,7 +175,7 @@ export const HELP: HelpEntry[] = [
     slug: "frag-deine-daten",
     group: "work",
     listed: false,
-    title: { de: "Frag deine Daten", fr: "Interroge tes données", en: "Ask your data" },
+    title: { de: "Frag deine Spiele", fr: "Interroge tes matchs", en: "Ask your matches" },
     summary: {
       de: "Fragen in normaler Sprache, Antworten nur aus euren Daten.",
       fr: "Des questions en langage courant, des réponses tirées uniquement de tes données.",
