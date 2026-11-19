@@ -4326,12 +4326,15 @@
     "close": "Fermer",
     "sideNote": "But en haut. Gauche et droite vues par l'attaque.",
     "courtLabelVideo": "Demi-terrain attaqué comme dans la vidéo, le but à {side, select, left {gauche} other {droite}}. Les noms sont vus par l'attaque.",
-    "sideVideoLeft": "Comme dans la vidéo : le but à gauche.",
-    "sideVideoRight": "Comme dans la vidéo : le but à droite.",
+    "sideVideoLeft": "Comme dans la vidéo : le but à gauche. Dans les graphiques, il est en haut.",
+    "sideVideoRight": "Comme dans la vidéo : le but à droite. Dans les graphiques, il est en haut.",
     "pause": "Pause",
     "play": "Lecture",
     "ofTerm": "<term>Lieu du tir</term> : {zone}",
-    "ofEstimatedTerm": "<term>Lieu du tir</term> : {zone}, estimé"
+    "ofEstimatedTerm": "<term>Lieu du tir</term> : {zone}, estimé",
+    "situation": "Situation : {zone}",
+    "situationEstimated": "Situation : {zone}, estimée",
+    "situationKeys": "Ou la situation :"
   },
   "personRoles": {
     "trainer": "Entraîneur",

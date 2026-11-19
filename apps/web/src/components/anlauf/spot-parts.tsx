@@ -51,9 +51,17 @@ export function useGoalView(orgId: string, matchId: string, eventId: string | nu
 export function useSpotText() {
   const t = useTranslations("spot");
   // «Weiss nicht» with an estimate behind it reads «…, geschätzt» too: only the coach's place is plain (V1)
+  // a fast break or a 7 m is a situation, not a place: «Situation: Gegenstoss» (app review TXT-02)
   return (g: { zone?: string | null; spot_by_coach?: boolean }) =>
-    g.zone ? t(g.spot_by_coach ? "of" : "ofEstimated", { zone: t(`zone.${g.zone}` as "zone.la") }) : t("missing");
+    g.zone
+      ? isSituation(g.zone)
+        ? t(g.spot_by_coach ? "situation" : "situationEstimated", { zone: t(`zone.${g.zone}` as "zone.la") })
+        : t(g.spot_by_coach ? "of" : "ofEstimated", { zone: t(`zone.${g.zone}` as "zone.la") })
+      : t("missing");
 }
+
+/** Gegenstoss and Siebenmeter are kept as zones, but they say how, not from where. */
+export const isSituation = (zone: string) => zone === "gs" || zone === "m7";
 
 /**
  * The place of one goal with «Wurfort ändern» (or «eintragen»): two taps, the button and the new
@@ -136,7 +144,7 @@ export function SceneSpot({ orgId, matchId, graphics, eventId, label }: { orgId:
   const term = (w: ReactNode) => <Term explain={tg("spot")}>{w}</Term>;
   return (
     <p className="m-0 mt-1.5 flex flex-wrap items-center gap-x-3 text-[15px]" data-testid="scene-spot">
-      <span className="text-ink-2">{goal.zone ? t.rich(goal.spot_by_coach ? "ofTerm" : "ofEstimatedTerm", { zone: t(`zone.${goal.zone}` as "zone.la"), term }) : text(goal)}</span>
+      <span className="text-ink-2">{goal.zone && !isSituation(goal.zone) ? t.rich(goal.spot_by_coach ? "ofTerm" : "ofEstimatedTerm", { zone: t(`zone.${goal.zone}` as "zone.la"), term }) : text(goal)}</span>
       <SpotChange orgId={orgId} matchId={matchId} goal={goal} label={label} />
     </p>
   );

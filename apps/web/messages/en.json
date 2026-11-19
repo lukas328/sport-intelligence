@@ -4326,12 +4326,15 @@
     "close": "Close",
     "sideNote": "Goal at the top. Left and right as the attack sees them.",
     "courtLabelVideo": "Attacked half as in the video, the goal on the {side, select, left {left} other {right}}. The names are as the attack sees them.",
-    "sideVideoLeft": "As in the video: the goal on the left.",
-    "sideVideoRight": "As in the video: the goal on the right.",
+    "sideVideoLeft": "As in the video: the goal on the left. In the graphics it is at the top.",
+    "sideVideoRight": "As in the video: the goal on the right. In the graphics it is at the top.",
     "pause": "Pause",
     "play": "Play",
     "ofTerm": "<term>Shot from</term>: {zone}",
-    "ofEstimatedTerm": "<term>Shot from</term>: {zone}, estimated"
+    "ofEstimatedTerm": "<term>Shot from</term>: {zone}, estimated",
+    "situation": "Situation: {zone}",
+    "situationEstimated": "Situation: {zone}, estimated",
+    "situationKeys": "Or the situation:"
   },
   "personRoles": {
     "trainer": "Coach",

@@ -119,6 +119,11 @@ export const ZONE_NAMES: Record<string, string> = {
   gs: "Gegenstoss",
 };
 
+/** A strip more below the half court: the name under the lowest zone (RM) stays in the picture. */
+const ZONES_BOX = [HALF_BOX[0], HALF_BOX[1], HALF_BOX[2], HALF_BOX[3] + 1.4].join(" ");
+/** metres between a zone's anchor and its words: clear of the dots set around the anchor (1.1 m) */
+const CLEAR = 1.5;
+
 /** Zones: goals by position, the count at each zone, the estimated shot spots as dots. */
 export function Zones({
   goals,
@@ -139,7 +144,7 @@ export function Zones({
   for (const g of goals) if (g.zone) count[g.zone] = (count[g.zone] ?? 0) + 1;
   const max = Math.max(0, ...Object.values(count));
   return (
-    <svg viewBox={BOX} role="img" aria-label={label} className="block court-frame">
+    <svg viewBox={ZONES_BOX} role="img" aria-label={label} className="block court-frame">
       <HalfCourtLines />
       {goals.map((g, i) => (
         <circle key={i} cx={g.shot[0]} cy={g.shot[1]} r={3 / kk} fill={g.confirmed ? c.line : "var(--ground)"} stroke={c.dot} strokeWidth={1.2} {...NS} />
@@ -150,9 +155,11 @@ export function Zones({
         const big = n === max;
         return (
           <g key={z}>
+            {/* the count above and the name below the zone's dots (a goal without a point is
+                drawn around the zone's anchor): no dot on a word (app review BUG-22) */}
             <text
               x={p[0]}
-              y={p[1]}
+              y={p[1] - CLEAR}
               textAnchor="middle"
               className="font-num"
               fill={big && team === "own" ? "var(--club-text)" : "var(--ink)"}
@@ -160,7 +167,7 @@ export function Zones({
             >
               {n}
             </text>
-            <text x={p[0]} y={p[1] + 13 / kk} textAnchor="middle" fill="var(--ink-2)" style={{ font: `600 ${11 / kk}px var(--font-sans)` }}>
+            <text x={p[0]} y={p[1] + CLEAR + 9 / kk} textAnchor="middle" fill="var(--ink-2)" style={{ font: `600 ${11 / kk}px var(--font-sans)` }}>
               {zoneNames[z] ?? z}
             </text>
           </g>

@@ -4326,12 +4326,15 @@
     "close": "Schliessen",
     "sideNote": "Tor oben. Links und rechts aus Sicht des Angriffs.",
     "courtLabelVideo": "Angegriffene Hälfte so wie im Video, das Tor {side, select, left {links} other {rechts}}. Die Namen gelten aus Sicht des Angriffs.",
-    "sideVideoLeft": "So wie im Video: das Tor links.",
-    "sideVideoRight": "So wie im Video: das Tor rechts.",
+    "sideVideoLeft": "So wie im Video: das Tor links. In den Grafiken steht es oben.",
+    "sideVideoRight": "So wie im Video: das Tor rechts. In den Grafiken steht es oben.",
     "pause": "Anhalten",
     "play": "Abspielen",
     "ofTerm": "<term>Wurfort</term>: {zone}",
-    "ofEstimatedTerm": "<term>Wurfort</term>: {zone}, geschätzt"
+    "ofEstimatedTerm": "<term>Wurfort</term>: {zone}, geschätzt",
+    "situation": "Situation: {zone}",
+    "situationEstimated": "Situation: {zone}, geschätzt",
+    "situationKeys": "Oder die Situation:"
   },
   "personRoles": {
     "trainer": "Trainer",

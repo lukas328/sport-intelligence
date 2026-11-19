@@ -190,7 +190,10 @@ export function ShotSpotPicker({
         // on its side the court is taller than wide: the keys go beside it, the width is used
         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2.5">
           {field}
-          <div className="flex w-[7.5rem] flex-col gap-2 sm:w-36">{keys}</div>
+          <div className="flex w-[7.5rem] flex-col gap-2 sm:w-36">
+            <p className="m-0 text-[14px] font-semibold text-ink-2">{t("situationKeys")}</p>
+            {keys}
+          </div>
         </div>
       ) : (
         field
@@ -203,7 +206,9 @@ export function ShotSpotPicker({
       <p className="m-0 mt-1 text-[14px] leading-snug text-ink-2" data-testid="spot-side-note">
         {side ? t(orientation === "left" ? "sideVideoLeft" : "sideVideoRight") : t("sideNote")}
       </p>
-      {!side && <div className="mt-2 grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] items-stretch gap-2">{keys}</div>}
+      {/* Siebenmeter and Gegenstoss say how, not from where (app review TXT-02): set apart */}
+      {!side && <p className="m-0 mt-2 text-[14px] font-semibold text-ink-2">{t("situationKeys")}</p>}
+      {!side && <div className="mt-1 grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] items-stretch gap-2">{keys}</div>}
     </div>
   );
 }
