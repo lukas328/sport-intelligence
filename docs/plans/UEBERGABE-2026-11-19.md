@@ -31,9 +31,15 @@ Einstieg danach wie immer: `docs/plans/HANDOVER.md`.
 | Spielende in `scoreboard.play_intervals`: lief die Uhr zuletzt, zählt das Spiel bis zum Videoende, höchstens bis zum Ende der Halbzeit (neuer Parameter `half_s`, Standard 30:00; Jugend mit kürzeren Halbzeiten hat nur eine lockerere Obergrenze). Halbzeitende (30:00 oder 0:00) und stehende Uhr wie bisher. Lesungen nach dem letzten Lauf, die nicht die Matchuhr sein können (Strafzeit, Fehllesung), blockieren die Regel nicht mehr. 3 neue Tests, `packages/vision` 218 grün | `2783a798` | erledigt |
 | Code health 2, 3, 9 (totes Gerüst, `system_access` als Kontextmanager, PDF im Thread) | Helfer | läuft |
 | A22 Wurfort vorausgewählt, Website-Text | Helfer | läuft |
-| Wurfzeit der Kandidaten (Versatz 2.8 s), nur auf Entwicklungsdaten gemessen, Endtest nicht zum Einstellen | Helfer | läuft |
+| Wurfzeit der Kandidaten: Ursache gefunden, **kein Fix**. Die Kandidatenzeit ist der Spitzenwert des "Spiel dreht"-Musters (Rücklauf, Abwurf), nicht der Abwurf; der Versatz 1.5 s wurde gegen das Spielprotokoll gelernt, das etwa 3 s nach dem Abwurf liegt; dazu schwankt die Verzögerung je nach Ausgang (Tor 0.9 s, gehalten 1.8 s, daneben 2.6 s). Ohne Abwurf-Markierungen auf Dev lässt sich nichts ehrlich korrigieren, der Endtest darf nicht dafür herhalten. Clips sind nicht betroffen (Start 8 s vor der Spitze). `shot_segments_eval.py score` schreibt jetzt `per_shot`. Nächste Schritte im Plan, Abschnitt "Wurfzeit der Kandidaten (2026-11-19)" | `1d199c84` | Diagnose erledigt, Fix wartet auf Daten |
+| Website-Review vom 19.11. Punkt für Punkt bewertet (was passt, was nicht, was nur Lukas kann) | `docs/ux-test/livegang/BEFUNDE-5-website-review.md` | bewertet, Umsetzung nach A22 |
 
 ## Was Lukas tun muss
+- Für die Wurfzeit: auf den 41 Dev-Wurfclips je den Abwurf anklicken (ein Klick pro Clip). Ohne
+  diese Wahrheit lässt sich die Wurfzeit nicht ehrlich verbessern.
+- Kaggle in der Cloud-Sitzung: Der Proxy hat am 19.11. keine Kaggle-Zugangsdaten eingesetzt
+  (private Datasets 403). Prüfen, ob das Kaggle-Geheimnis in der Umgebung noch hinterlegt ist.
+- Website-Review: die Punkte unter "Für Lukas" in `docs/ux-test/livegang/BEFUNDE-5-website-review.md`.
 - Den Branch `claude/affectionate-edison-lkw4r3` als PR nach main mergen, wenn die CI grün ist
   (diese Sitzung hat keinen GitHub-Zugriff für PRs). PR #104 ist darin enthalten und kann danach
   geschlossen werden.
