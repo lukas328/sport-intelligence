@@ -22,6 +22,7 @@ from sqlalchemy.orm import aliased
 
 from handball_api.models import CameraCalibration, Match, VideoAsset
 from handball_api.services.context import Ctx
+from handball_api.services.video_media import media_prefix_of
 
 MAX_REFERENCES = 3  # earlier videos the worker tries (the newest first)
 HallSource = Literal["official", "match", "home_matches"]
@@ -86,8 +87,6 @@ async def _references(
     """Earlier videos of the organisation in the same hall whose current court a person clicked
     or confirmed, newest first: what the worker needs to carry the court over (the hall image key
     and the court homography in that image)."""
-    from handball_api.services.videos import media_prefix_of
-
     key = fold(hall)
     if not key and not same_match:
         return []

@@ -104,24 +104,31 @@ Reporter, doppelte Helfer, Doku, Worker-Settings, Job-Vertragstest). Offen, für
    Watchdog in progress) und der Mahnlauf, der jetzt einmal für den ganzen Lauf statt in der
    Schleife einschaltet. Stellen mit try/finally und `invitations._by_token` (über mehrere
    Funktionen) bleiben wie sie sind.
-4. `services/official.py` entlang der Abschnittsmarken aufteilen: Suche und Übernahme
-   (search, claim), Abgleich (sync), Vorschläge, Zugangsanfragen, Worker-Tick.
-5. `services/videos.py` aufteilen: Uploads, Jobs und Rückmeldungen (Auswertung je Job-Art statt
-   der langen if/elif-Kette in `apply_job_update`), Media, Analyse-Ergebnisse, Tracks. Die
-   Importe innerhalb von Funktionen deuten auf Zyklen hin, die dabei aufgelöst werden.
-6. `handball_vision/pipeline.py` aufteilen: gemeinsames `_track_frames` für `analyse_video`
-   (Zeilen 307-339) und `_analyse_moving` (984-1015), Video-Ein- und Ausgabe nach
-   `video_io.py`, Identität nach `identity.py`.
+4. ~~`services/official.py` aufteilen~~ **erledigt**: Paket `services/official/` mit `claim`
+   (Suche und Übernahme), `sync`, `suggestions`, `access` (Zugangsanfragen) und `_base`
+   (Einstellungen); der Worker-Tick bleibt im `__init__`, das alle bisherigen Namen exportiert
+   (Tests ersetzen `sync_team`, `import_report` und `REPORT_BATCH` dort).
+5. ~~`services/videos.py` aufteilen~~ **erledigt**: Nachbarmodule `video_uploads`, `video_jobs`,
+   `video_callbacks`, `video_media`, `video_analysis`, `video_tracks` und `video_base`.
+   `apply_job_update` wertet über `ON_SUCCEEDED`/`ON_FAILED` je Job-Art aus. Die Importe in
+   Funktionen (progress, highlights, graphics, marks, shot_positions, goal_candidates) stehen
+   jetzt oben, ebenso `media_prefix`/`job_budget_s` in highlights, halls, shot_positions,
+   graphics und progress. `videos.py` exportiert alle Namen und behält den Link-Import.
+6. ~~`handball_vision/pipeline.py` aufteilen~~ **erledigt**: gemeinsames `_track_frames` für
+   feste und bewegte Kamera, Video lesen in `video_io.py`, Zuordnung über Nummern und Aussehen
+   in `identity.py`; `pipeline` exportiert die Namen weiter.
 7. Für die UI-Session: `workspace.tsx` (gut 1100 Zeilen) zerlegen: `AnalysisPanel`,
    `IdentityPanel`, `CameraSwitch`, `FormationsCard` in eigene Dateien, Datenladen in einen
    Hook `useWorkspaceData`.
-8. Gemeinsamer Helfer `run_artifact_job` für `export.run_presentation_export` und
-   `reels.run_highlight_reel` (Arbeitsordner, Download, Upload, Rückmeldung an die API).
+8. ~~Gemeinsamer Helfer `run_artifact_job`~~ **erledigt**: `handball_worker/artifacts.py`
+   (Arbeitsordner, Download, Upload, Rückmeldung an die API) für Export und Reels; die Reels
+   nutzen damit auch `HB_WORK_DIR`.
 9. ~~PDF-Erzeugung mit reportlab im Thread~~ **erledigt**: Spielbericht, Scouting, Präsentation,
    Trainingsplan und Rechnungen (Verein und Verband) laufen per `asyncio.to_thread`; die Daten
    werden vorher in der async-Funktion gelesen, `invoices.render_pdf` ist jetzt async.
-10. Kleine N+1-Abfragen: `presentations.py` (Export, Zeilen 370-395: Video und Kalibrierung je
-    Folie), `profiles.py:117`, `official_report.py:1209`.
+10. ~~Kleine N+1-Abfragen~~ **erledigt**: Präsentations-Export liest Videos und die neuste
+    Kalibrierung je Video in je einer Abfrage (die Dateien je Spiel einmal), `profiles.mine` die
+    Profile, `official_report` die Wurfkandidaten beim Umhängen.
 11. Die echten Namen sind aus `dhb_76839.txt` und `hla_70984286.txt` entfernt, stehen aber noch
     in der Git-Geschichte. Falls nötig vor einer Veröffentlichung des Repos die Geschichte
     bereinigen.

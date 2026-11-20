@@ -482,11 +482,17 @@ async def _settle_video_goals(ctx: Ctx, match: Match, known: _Known, added: _Add
         if id(g) in taken:
             await ctx.db.delete(g)
     await ctx.db.flush()
-    for cand_id, ev in added.relink:  # the candidate now points to the official entry
+    # the candidates now point to the official entries (all read in one query)
+    relink: dict[uuid.UUID, Event] = {}
+    for cand_id, ev in added.relink:
         with contextlib.suppress(ValueError):
-            c = await ctx.db.get(GoalCandidate, uuid.UUID(cand_id))
-            if c is not None and c.match_id == match.id and c.status == "confirmed":
-                c.event_id = ev.id
+            relink[uuid.UUID(cand_id)] = ev
+    if relink:
+        for c in (
+            await ctx.db.scalars(select(GoalCandidate).where(GoalCandidate.id.in_(relink)))
+        ).all():
+            if c.match_id == match.id and c.status == "confirmed":
+                c.event_id = relink[c.id].id
     return unmatched_video
 
 

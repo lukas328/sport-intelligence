@@ -47,6 +47,7 @@ from handball_api.services.context import Ctx
 from handball_api.services.matches import DUPLICATE, halves, parts_of
 from handball_api.services.policies import Action, can, visible_team_ids
 from handball_api.services.support import failure_code
+from handball_api.services.video_jobs import job_budget_s
 
 log = get_logger("handball_api.progress")
 
@@ -351,8 +352,6 @@ def _job_file(
     stage: ProgressStage = "ingest" if kind == "ingest" else "analysis"
     restarted = _restarted(jobs, kind)
     if job is not None and job.status == JobStatus.FAILED:
-        from handball_api.services.videos import job_budget_s  # imports this module
-
         code = failure_code(job.error)
         return FileProgressOut(
             **base,
@@ -776,6 +775,4 @@ async def abandon_uploads(ctx: Ctx, now: datetime | None = None) -> int:
 
 def _old_limit(job: ProcessingJob) -> float:
     """A job of a worker without heartbeat: only once it is past the time its worker has."""
-    from handball_api.services import videos
-
-    return float(max(RESTART_AFTER_S, videos.job_budget_s(job.kind)))
+    return float(max(RESTART_AFTER_S, job_budget_s(job.kind)))

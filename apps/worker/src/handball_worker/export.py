@@ -10,15 +10,14 @@ from __future__ import annotations
 import itertools
 import math
 import subprocess
-import tempfile
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
-import httpx
 import structlog
 from PIL import Image, ImageDraw, ImageFont
 
+from handball_worker.artifacts import run_artifact_job
 from handball_worker.config import WorkerSettings
 
 log = structlog.get_logger("worker.export")
@@ -245,40 +244,18 @@ def render(
 
 
 def run_presentation_export(payload: dict[str, Any]) -> dict[str, Any]:
-    settings = WorkerSettings()
-    s3 = settings.s3()
-    base = settings.api_internal_url.rstrip("/")
-    url = f"{base}/internal/presentations/{payload['presentation_id']}/export"
-    headers = {"x-internal-token": settings.internal_token}
-    try:
-        with tempfile.TemporaryDirectory(
-            dir=settings.work_dir if Path(settings.work_dir).exists() else None
-        ) as tmp:
-            work = Path(tmp)
-            sources: dict[str, Path] = {}
-            for vid, key in payload["sources"].items():
-                dst = work / f"src_{vid}.mp4"
-                s3.download_file(payload["bucket_videos"], key, str(dst))
-                sources[vid] = dst
-            final = render(
-                settings,
-                payload["slides"],
-                sources,
-                work,
-                _spotlight_pieces(settings, payload, s3, work),
-            )
-            s3.upload_file(
-                str(final),
-                payload["bucket_artifacts"],
-                payload["out_key"],
-                ExtraArgs={"ContentType": "video/mp4"},
-            )
-        body: dict[str, Any] = {"status": "ready", "key": payload["out_key"]}
-    except Exception as exc:  # reported to the API, the coach sees the error
-        log.warning("presentation_export_failed", error=str(exc))
-        body = {"status": "failed", "error": str(exc)[:500]}
-    httpx.post(url, json=body, headers=headers, timeout=30).raise_for_status()
-    return body
+    def build(settings: WorkerSettings, s3: Any, work: Path, sources: dict[str, Path]) -> Path:
+        spot = _spotlight_pieces(settings, payload, s3, work)
+        return render(settings, payload["slides"], sources, work, spot)
+
+    return run_artifact_job(
+        payload,
+        callback_path=f"/internal/presentations/{payload['presentation_id']}/export",
+        build=build,
+        log=log,
+        failed_event="presentation_export_failed",
+        sources=payload["sources"],
+    )
 
 
 def _spotlight_pieces(

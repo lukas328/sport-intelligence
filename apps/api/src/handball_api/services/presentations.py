@@ -375,14 +375,22 @@ def slide_lines(slide: PresentationSlide, lang: str = "de-CH") -> list[str]:
 
 
 async def _in_its_file(
-    ctx: Ctx, video: VideoAsset, c: dict[str, Any]
+    ctx: Ctx,
+    video: VideoAsset,
+    c: dict[str, Any],
+    files_of: dict[uuid.UUID, timeline.Files] | None = None,
 ) -> tuple[VideoAsset, dict[str, Any]]:
     """A clip slide of a match in several files (Q-VIDEO-PARTS): its times are on the match
     timeline of the first part; the export cuts it from the file of its half, at the time in that
-    file. A clip over the break ends where that file ends."""
+    file. A clip over the break ends where that file ends. `files_of` keeps the files of each
+    match already read (one read per match, not per slide)."""
     if c.get("in_ms") is None:
         return video, c
-    files = await timeline.Files.of(ctx, video.match_id)
+    files = (files_of or {}).get(video.match_id)
+    if files is None:
+        files = await timeline.Files.of(ctx, video.match_id)
+        if files_of is not None:
+            files_of[video.match_id] = files
     if len(files.parts) < 2 or files.parts[0].video_id != video.id:
         return video, c
     hit = files.at(int(c["in_ms"]))
@@ -406,18 +414,35 @@ async def _in_its_file(
     return part, out
 
 
+async def _videos(ctx: Ctx, ids: set[uuid.UUID]) -> dict[uuid.UUID, VideoAsset]:
+    if not ids:
+        return {}
+    rows = await ctx.db.scalars(select(VideoAsset).where(VideoAsset.id.in_(ids)))
+    return {v.id: v for v in rows.all()}
+
+
 async def start_export(ctx: Ctx, pres_id: uuid.UUID) -> Presentation:
     p, slides, _ = await detail(ctx, pres_id)
     await get_team(ctx, p.team_id, Action.CLIP_WRITE)
     sources: dict[str, str] = {}
     payload_slides: list[dict[str, Any]] = []
+    # the videos of all clip slides in one query, the files of each match once
+    videos = await _videos(
+        ctx,
+        {
+            uuid.UUID(str((s.content or {})["video_id"]))
+            for s in slides
+            if s.type == SlideType.CLIP and (s.content or {}).get("video_id")
+        },
+    )
+    files_of: dict[uuid.UUID, timeline.Files] = {}
     for s in slides:
         c = dict(s.content or {})
         if s.type == SlideType.CLIP and c.get("video_id"):
-            v = await ctx.db.get(VideoAsset, uuid.UUID(str(c["video_id"])))
+            v = videos.get(uuid.UUID(str(c["video_id"])))
             if v is None or not v.proxy_key:
                 continue
-            v, c = await _in_its_file(ctx, v, c)
+            v, c = await _in_its_file(ctx, v, c, files_of)
             sources[str(v.id)] = v.proxy_key or ""
             payload_slides.append({"type": "clip", **c})
         elif s.type in (SlideType.TEXT, SlideType.STAT_CARD):
@@ -425,16 +450,31 @@ async def start_export(ctx: Ctx, pres_id: uuid.UUID) -> Presentation:
     if not payload_slides:
         raise ProblemError(422, "nothing-to-export", "Add clip or text slides first")
     analysis: dict[str, dict[str, Any]] = {}
-    for vid in {
-        str(sl["video_id"]) for sl in payload_slides if sl["type"] == "clip" and sl.get("spotlight")
-    }:
-        v = await ctx.db.get(VideoAsset, uuid.UUID(vid))
-        cal = await ctx.db.scalar(
-            select(CameraCalibration)
-            .where(CameraCalibration.video_asset_id == uuid.UUID(vid))
-            .order_by(CameraCalibration.created_at.desc())
-            .limit(1)
-        )
+    spot = {
+        uuid.UUID(str(sl["video_id"]))
+        for sl in payload_slides
+        if sl["type"] == "clip" and sl.get("spotlight")
+    }
+    spot_videos = await _videos(ctx, spot)
+    # the latest calibration of each video, in one query
+    latest = (
+        {
+            c.video_asset_id: c
+            for c in (
+                await ctx.db.scalars(
+                    select(CameraCalibration)
+                    .where(CameraCalibration.video_asset_id.in_(spot))
+                    .distinct(CameraCalibration.video_asset_id)
+                    .order_by(CameraCalibration.video_asset_id, CameraCalibration.created_at.desc())
+                )
+            ).all()
+        }
+        if spot
+        else {}
+    )
+    for vid_id in spot:
+        vid = str(vid_id)
+        v, cal = spot_videos.get(vid_id), latest.get(vid_id)
         if v is not None and cal is not None and (v.analysis or {}).get("chunk_ms"):
             analysis[vid] = {
                 "chunks_prefix": media_prefix(v) + "analysis/",

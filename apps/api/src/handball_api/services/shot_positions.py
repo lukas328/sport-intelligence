@@ -38,6 +38,7 @@ from handball_api.core.storage import ObjectNotFoundError
 from handball_api.models import CameraCalibration, Event, Match, Track, VideoAsset
 from handball_api.services.context import Ctx
 from handball_api.services.timeline import Files
+from handball_api.services.video_media import media_prefix
 from handball_court.zones import shot_zone, spec
 
 WINDOW_MS = 10_000
@@ -119,8 +120,6 @@ def _goal_distance(x: float, y: float, gx: float) -> float:
 
 
 async def _rows(ctx: Ctx, asset: VideoAsset, t0: int, t1: int) -> np.ndarray:
-    from handball_api.services.videos import media_prefix
-
     meta = asset.analysis or {}
     chunk_ms, chunks = meta.get("chunk_ms"), meta.get("chunks")
     if not isinstance(chunk_ms, int) or not isinstance(chunks, int) or chunk_ms <= 0:

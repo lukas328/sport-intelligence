@@ -114,9 +114,25 @@ async def mine(ctx: Ctx) -> list[dict[str, Any]]:
             .where(Guardianship.user_id == ctx.user_id)
         )
     ).all()
+    players = [*((p, "self") for p in own), *((p, "guardian") for p in kids)]
+    # the profiles of all these players in one query
+    profiles = (
+        {
+            pp.player_id: pp
+            for pp in (
+                await ctx.db.scalars(
+                    select(PublicProfile).where(
+                        PublicProfile.player_id.in_([p.id for p, _ in players])
+                    )
+                )
+            ).all()
+        }
+        if players
+        else {}
+    )
     out = []
-    for p, rel in [*((p, "self") for p in own), *((p, "guardian") for p in kids)]:
-        profile = await ctx.db.scalar(select(PublicProfile).where(PublicProfile.player_id == p.id))
+    for p, rel in players:
+        profile = profiles.get(p.id)
         out.append(
             {
                 "player_id": p.id,
