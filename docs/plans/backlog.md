@@ -117,9 +117,11 @@ Reporter, doppelte Helfer, Doku, Worker-Settings, Job-Vertragstest). Offen, für
 6. ~~`handball_vision/pipeline.py` aufteilen~~ **erledigt**: gemeinsames `_track_frames` für
    feste und bewegte Kamera, Video lesen in `video_io.py`, Zuordnung über Nummern und Aussehen
    in `identity.py`; `pipeline` exportiert die Namen weiter.
-7. Für die UI-Session: `workspace.tsx` (gut 1100 Zeilen) zerlegen: `AnalysisPanel`,
-   `IdentityPanel`, `CameraSwitch`, `FormationsCard` in eigene Dateien, Datenladen in einen
-   Hook `useWorkspaceData`.
+7. ~~`workspace.tsx` zerlegen~~ **erledigt**: `analysis-panel.tsx`, `identity-panel.tsx` (mit
+   `ownTracks`), `camera-switch.tsx` und `formations-card.tsx` neben der Werkbank; das Laden
+   (Kommentare, Clips, Zeichnungen, Analyse, Playlists, Ereignisse, Tor- und Wurfkandidaten,
+   offizielle Tore) steckt im Hook `use-workspace-data.ts`. Texte und Test-IDs sind gleich
+   geblieben, `workspace.tsx` hat noch gut 800 Zeilen.
 8. ~~Gemeinsamer Helfer `run_artifact_job`~~ **erledigt**: `handball_worker/artifacts.py`
    (Arbeitsordner, Download, Upload, Rückmeldung an die API) für Export und Reels; die Reels
    nutzen damit auch `HB_WORK_DIR`.
