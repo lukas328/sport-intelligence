@@ -85,15 +85,18 @@ Behoben:
 | Szenen | Mit Filter «Alle» zählte die Startfrage «Gegentor, aussen rechts, letzte 3 mit Video» das beobachtete Spiel mit: «25 von 81» statt «26 von 77»; «Gegentor» hiess dort «Tor des beobachteten Gegners». Widerspricht dem Entscheid «zählen nicht in Saison und Mustern des eigenen Teams» | Unter «Alle» meinen «letztes Spiel», «letzte 3» und die Startantwort die eigenen Spiele; Gegentor, Tor, Parade, Ballverlust suchen dort nur in eigenen Spielen. Unter «Beobachtet» bleibt alles wählbar |
 | Handy, Spielseite | «Prüfen», «Teilen», «Mehr» brauchten 358 px bei 358 px Platz; «Mehr» rutschte allein auf eine zweite Zeile | kleinerer Abstand am Handy, eine Zeile |
 
-Offen (mit Empfehlung):
-| Was | Empfehlung |
-|---|---|
-| Saison-Titel «Fünf Spiele. Und aussen rechts bleibt offen.» Der Entscheid TXT-08 sagt «Fakten zuerst, ohne Urteil»; umgesetzt ist das nur, wenn sich nichts wiederholt. Mit Muster bleibt der Satz mit «bleibt offen» (auch die Geschichte der Website und das Produktbild «get-season»). | Lukas entscheiden lassen. Vorschlag: so lassen, weil es eine Tatsache aus den Daten ist und kein Urteil über das Team; sonst Website-Text und Produktbild mit ändern. |
-| Video-Tab beobachteter Spiele: die Rail unter dem Video zeigt die Datenseite (andere Mannschaft) oben, auch wenn das beobachtete Team Heimteam ist. | Klein; mit der Frage «wer ist Heimteam» im Formular für beobachtete Spiele lösen (offen seit BUG-18). |
-| «Ballverluste nach Typ: Schritte 1 · Fehlpass 5 · …»: die Zahl steht weit weg vom Wort, liest sich wie «1 Fehlpass». | Zahl vor das Wort («1 Schritte», besser «Schritte: 1»), P3. |
-| «Aus: Video · 56 Tore von dir bestätigt, bei 56 mit Wurfort ⓘ»: am Handy steht das Info-Zeichen allein auf einer Zeile. | Zeichen mit dem letzten Wort zusammenhalten (`whitespace-nowrap`), P3. |
-| Ein Torhüter ohne Nummer und ohne bekannten Namen erscheint im Spielbericht als «#?». Im Check künstlich (Testdaten mit einer erfundenen `goalkeeper_id`, die die API ungeprüft in `attributes` annimmt). | «ohne Nummer» statt «#?»; prüfen, ob die API `goalkeeper_id` gegen den Kader prüfen soll. P3. |
-| Die Spielseite zeigt im Seed-Demo «1 Frage offen» (Feld prüfen); die Analyse des synthetischen Videos braucht immer die Feldbestätigung. | Für die Demo so lassen; ehrlich. |
+Offen (mit Empfehlung), Stand nach der Nacharbeit vom 20.11.:
+| Was | Empfehlung | Stand |
+|---|---|---|
+| Saison-Titel «Fünf Spiele. Und aussen rechts bleibt offen.» Der Entscheid TXT-08 sagt «Fakten zuerst, ohne Urteil»; umgesetzt ist das nur, wenn sich nichts wiederholt. Mit Muster bleibt der Satz mit «bleibt offen» (auch die Geschichte der Website und das Produktbild «get-season»). | Lukas entscheiden lassen. Vorschlag: so lassen, weil es eine Tatsache aus den Daten ist und kein Urteil über das Team; sonst Website-Text und Produktbild mit ändern. | offen, Entscheid Lukas |
+| Video-Tab beobachteter Spiele: die Rail unter dem Video zeigt die Datenseite (andere Mannschaft) oben, auch wenn das beobachtete Team Heimteam ist. | Klein; mit der Frage «wer ist Heimteam» im Formular für beobachtete Spiele lösen (offen seit BUG-18). | erledigt: die Rail (Video-Tab und Bühne) setzt das Heimteam oben (`oppFirst` aus `lib/match-sides.ts`), jedes Team in seiner Farbe. Das Formular «Gegner beobachten» fragt «Wer spielt zu Hause?», vorgewählt das zuerst genannte Team (der beobachtete Gegner), gespeichert als `is_home` (keine Migration: bestehende beobachtete Spiele behalten «das andere Team ist Heimteam», änderbar per PATCH). API-Test und e2e `scouting.spec` |
+| «Ballverluste nach Typ: Schritte 1 · Fehlpass 5 · …»: die Zahl steht weit weg vom Wort, liest sich wie «1 Fehlpass». | Zahl vor das Wort («1 Schritte», besser «Schritte: 1»), P3. | erledigt: «Schritte: 1 · Fehlpass: 5», Wort und Zahl bleiben zusammen (fr «Marcher : 1») |
+| «Aus: Video · 56 Tore von dir bestätigt, bei 56 mit Wurfort ⓘ»: am Handy steht das Info-Zeichen allein auf einer Zeile. | Zeichen mit dem letzten Wort zusammenhalten (`whitespace-nowrap`), P3. | erledigt: das letzte Wort und das Zeichen brechen nicht mehr auseinander |
+| Ein Torhüter ohne Nummer und ohne bekannten Namen erscheint im Spielbericht als «#?». Im Check künstlich (Testdaten mit einer erfundenen `goalkeeper_id`, die die API ungeprüft in `attributes` annimmt). | «ohne Nummer» statt «#?»; prüfen, ob die API `goalkeeper_id` gegen den Kader prüfen soll. P3. | erledigt: ohne Nummer steht der Name, sonst «Torhüter» (Feldspieler «Spieler»), nie «#?» (`lib/player-label.ts` mit Test). Die API nimmt `goalkeeper_id` nur noch für einen Spieler aus dem Kader des Teams, nur bei Würfen des Gegners und nie im beobachteten Spiel, sonst 422 (auch beim Umhängen der Seite per PATCH); Test in `test_observed_perspective.py` |
+| Die Spielseite zeigt im Seed-Demo «1 Frage offen» (Feld prüfen); die Analyse des synthetischen Videos braucht immer die Feldbestätigung. | Für die Demo so lassen; ehrlich. | so gelassen |
+| Website-Tour (`/so-funktioniert-es`, Bild «get-video»): die Karte der laufenden Szene sagte «läuft gerade», die App zeigt das seit UX-04 nicht mehr. | Wie die App. | erledigt: die Karte zeigt wie die App das Team und darunter den Ort («Aussen rechts», fr «Aile droite», en «Right wing»), die Zeit nur einmal |
+
+E2E_PLACEHOLDER
 
 ## Stand Block 3 (19.11.2026)
 | Ticket | Stand | Was |
