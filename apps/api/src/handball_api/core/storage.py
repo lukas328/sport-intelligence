@@ -18,6 +18,16 @@ from botocore.config import Config as BotoConfig
 from botocore.exceptions import ClientError
 
 from handball_api.core.config import Settings
+from handball_api.core.presign import GetSigner, window_start
+
+
+def presign_window(ttl_s: int) -> int:
+    """The signing window for presigned GETs: an eighth of the lifetime, at most one hour, and a
+    divisor of a day (so a window never spans two signing dates)."""
+    for w in (3600, 1800, 900, 600, 300, 60):
+        if w * 8 <= ttl_s:
+            return w
+    return 1
 
 
 class ObjectNotFoundError(Exception):
@@ -61,6 +71,13 @@ class ObjectStorage(Protocol):
 
     async def size(self, bucket: str, key: str) -> int: ...
 
+    def presign_gets(
+        self, bucket: str, keys: list[str], ttl_s: int, cache_control: str
+    ) -> list[str]:
+        """Presigned GET URLs the browser reaches (segments straight from storage), valid for at
+        least `ttl_s`, the same URL for a key within one signing window."""
+        ...
+
 
 @dataclass
 class MemoryStorage:
@@ -90,6 +107,13 @@ class MemoryStorage:
         upload_id = uuid.uuid4().hex
         self.uploads[upload_id] = {}
         return upload_id
+
+    def presign_gets(
+        self, bucket: str, keys: list[str], ttl_s: int, cache_control: str
+    ) -> list[str]:
+        start = window_start(datetime.now(UTC), presign_window(ttl_s))
+        exp = int(start.timestamp()) + ttl_s + presign_window(ttl_s)
+        return [f"https://storage.test/{bucket}/{k}?expires={exp}" for k in keys]
 
     async def presign_part(self, bucket: str, key: str, upload_id: str, number: int) -> str:
         return f"memory://{bucket}/{key}?uploadId={upload_id}&partNumber={number}"
@@ -148,6 +172,27 @@ class S3Storage:
         # Presigned URLs must carry the host the browser reaches (signature covers the host).
         self._public = client(settings.s3_public_endpoint_url or settings.s3_endpoint_url)
         self._ttl = settings.presign_ttl_s
+        self._get_endpoint = settings.s3_public_endpoint_url or settings.s3_endpoint_url
+        self._region = settings.s3_region
+        self._access_key = settings.s3_access_key
+        self._secret_key = settings.s3_secret_key
+
+    def presign_gets(
+        self, bucket: str, keys: list[str], ttl_s: int, cache_control: str
+    ) -> list[str]:
+        if not self._get_endpoint:
+            raise RuntimeError("direct media needs HB_S3_PUBLIC_ENDPOINT_URL or HB_S3_ENDPOINT_URL")
+        window = presign_window(ttl_s)
+        signer = GetSigner(
+            self._get_endpoint,
+            self._region,
+            self._access_key,
+            self._secret_key.get_secret_value(),
+            window_start(datetime.now(UTC), window),
+            ttl_s + window,
+        )
+        extra = {"response-cache-control": cache_control}
+        return [signer.url(bucket, k, extra) for k in keys]
 
     async def put(self, bucket: str, key: str, data: bytes, content_type: str) -> None:
         await asyncio.to_thread(

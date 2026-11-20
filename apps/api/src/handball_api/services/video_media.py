@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import hashlib
 import hmac
+import posixpath
 import re
 import uuid
 from datetime import UTC, datetime
@@ -27,6 +28,13 @@ MEDIA_TYPES = {
     "jpg": "image/jpeg",
     "vtt": "text/vtt",
 }
+
+
+# HLS media segments and init segments: what a playlist may point straight to storage for
+SEGMENT_PATH = re.compile(r"\.(m4s|mp4|ts)$")
+# a segment never changes under its key (a reprocess writes a new folder)
+SEGMENT_CACHE = "private, max-age=86400, immutable"
+_MAP_URI = re.compile(r'URI="([^"]+)"')
 
 
 def media_prefix(asset: VideoAsset) -> str:
@@ -53,6 +61,70 @@ def _same_route(other: VideoAsset) -> str:
     return f"{other.id}/media/"
 
 
+def _servable(path: str) -> bool:
+    """Player media a browser may get: never originals or the analysis proxy."""
+    return (
+        bool(MEDIA_PATH.match(path))
+        and ".." not in path
+        and path != "proxy.mp4"
+        and not path.startswith("original")
+    )
+
+
+def rewrite_playlist(text: str, urls: dict[str, str]) -> str:
+    """The playlist with the URIs of `urls` replaced (segment lines and `#EXT-X-MAP` URIs)."""
+    out = []
+    for raw in text.splitlines():
+        line = raw.strip()
+        if line.startswith("#EXT-X-MAP:"):
+            m = _MAP_URI.search(line)
+            if m and m.group(1) in urls:
+                line = line.replace(m.group(0), f'URI="{urls[m.group(1)]}"')
+        elif line and not line.startswith("#"):
+            line = urls.get(line, line)
+        out.append(line)
+    return "\n".join(out) + ("\n" if text.endswith("\n") else "")
+
+
+def playlist_segments(text: str) -> list[str]:
+    """The relative URIs of the media and init segments of a playlist (not other playlists)."""
+    uris = []
+    for raw in text.splitlines():
+        line = raw.strip()
+        if line.startswith("#EXT-X-MAP:"):
+            m = _MAP_URI.search(line)
+            uri = m.group(1) if m else ""
+        elif line and not line.startswith("#"):
+            uri = line
+        else:
+            continue
+        if uri and "://" not in uri and not uri.startswith("/") and SEGMENT_PATH.search(uri):
+            uris.append(uri)
+    return uris
+
+
+def direct_playlist(ctx: Ctx, part: VideoAsset, path: str, data: bytes) -> bytes:
+    """A playlist of `part` (at `path` in its media folder) whose segments point to presigned
+    storage URLs, so the bytes go from storage to the player without the API (ADR 002 point 7).
+    Only files of the part's own media folder are signed, never originals or the proxy."""
+    text = data.decode()
+    base = posixpath.dirname(path)
+    keys: dict[str, str] = {}
+    for uri in playlist_segments(text):
+        rel = posixpath.normpath(posixpath.join(base, uri))
+        if _servable(rel):
+            keys[uri] = media_prefix(part) + rel
+    if not keys:
+        return data
+    signed = ctx.storage.presign_gets(
+        ctx.settings.s3_bucket_videos,
+        list(keys.values()),
+        ctx.settings.media_direct_ttl_s,
+        SEGMENT_CACHE,
+    )
+    return rewrite_playlist(text, dict(zip(keys, signed, strict=True))).encode()
+
+
 async def read_media_object(
     ctx: Ctx, asset: VideoAsset, path: str, sibling: Any = _same_route
 ) -> tuple[bytes, str]:
@@ -61,19 +133,19 @@ async def read_media_object(
     A missing object is a 404; any other storage error propagates (a 500 the alerting sees, not a
     silent 404). The first part of a match with several parts serves playlists and previews over
     all parts (`sibling(part)`: the URL path from the videos folder to that part's media)."""
-    if (
-        not MEDIA_PATH.match(path)
-        or ".." in path
-        or path == "proxy.mp4"
-        or path.startswith("original")
-    ):
+    if not _servable(path):
         raise ProblemError(404, "not-found", "Not found")
+    # with direct media, the segments of every playlist point straight to storage; the access
+    # check above and in the callers stays the same, only the bytes take another way
+    direct = ctx.settings.media_direct and path.endswith(".m3u8")
 
     async def read(part: VideoAsset, p: str) -> bytes | None:
         try:
             data, _ = await ctx.storage.get(ctx.settings.s3_bucket_videos, media_prefix(part) + p)
         except ObjectNotFoundError:
             return None
+        if direct and p.endswith(".m3u8"):
+            return direct_playlist(ctx, part, p, bytes(data))
         return bytes(data)
 
     joined = await timeline.joined_playlist(ctx, asset, path, read, sibling)
@@ -83,6 +155,8 @@ async def read_media_object(
         data, _ = await ctx.storage.get(ctx.settings.s3_bucket_videos, media_prefix(asset) + path)
     except ObjectNotFoundError as exc:
         raise ProblemError(404, "not-found", "Not found") from exc
+    if direct:
+        data = direct_playlist(ctx, asset, path, bytes(data))
     return data, MEDIA_TYPES[path.rsplit(".", 1)[1]]
 
 
