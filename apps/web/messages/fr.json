@@ -3842,6 +3842,7 @@
     "exampleBody": "Un match de démonstration avec des buts inventés : voilà à quoi ressemble un match une fois ta vidéo analysée. Il n'appartient pas à ton équipe et ne compte dans aucune statistique.",
     "exampleBack": "Retour à tes matchs",
     "thingsExplain": "Les tendances : ce qui revient le plus nettement parmi les buts de ce match, par exemple le côté par lequel la plupart des buts encaissés sont tombés. Seul ce qui revient au moins trois fois est montré.",
+    "thingsExplainNeutral": "Les tendances : ce qui revient le plus nettement parmi les buts de ce match, par exemple le côté par lequel une équipe a marqué le plus de buts. Seul ce qui revient au moins trois fois est montré.",
     "tgKeepers": "Dans les buts : {list}.",
     "tgKeeperItem": "{name} ({saves, plural, one {1 arrêt} other {# arrêts}})",
     "noticeLead": "L'analyse est terminée, mais elle a vu trop peu pour te poser des questions.",

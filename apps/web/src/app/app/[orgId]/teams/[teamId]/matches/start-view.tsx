@@ -18,6 +18,7 @@ import { buttonClass } from "@/components/ui/button";
 import { api } from "@/lib/client";
 import { ownName } from "@/lib/own-name";
 import { matchSides, pairing } from "@/lib/match-sides";
+import { MatchSidesProvider } from "@/components/domain/match-sides";
 import { TeamFacts, useStanding } from "@/app/(einstieg)/einstieg/entry-view";
 import { matchStyle } from "@/lib/color";
 import { checkCount, goalRuns, openMoments, reportCut, reportGoals, useMatchGraphics, videoScore, type MatchGraphics } from "@/lib/graphics";
@@ -446,6 +447,11 @@ function GameRow({ orgId, m, mini }: { orgId: string; m: Match; mini: boolean })
           ) : !m.has_video ? (
             // per row only the state; the upload is once at the top (A10)
             m.kind === "scouting" || m.score_own == null ? tm("noVideoYet") : t("reportOnly")
+          ) : observedRow ? (
+            // an observed match names its teams, never «Gegentore» (BUG-07)
+            <MatchSidesProvider sides={matchSides(m, { team: "", opponent: m.opponent_name })}>
+              <RowSummary orgId={orgId} m={m} />
+            </MatchSidesProvider>
           ) : (
             <RowSummary orgId={orgId} m={m} />
           )}

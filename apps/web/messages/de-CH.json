@@ -3842,6 +3842,7 @@
     "exampleBody": "Ein Demo-Spiel mit erfundenen Toren: so sieht ein Spiel aus, wenn die Analyse dein Video ausgewertet hat. Es gehört nicht zu deinem Team und zählt in keiner Statistik.",
     "exampleBack": "Zurück zu deinen Spielen",
     "thingsExplain": "Die Muster: was sich in den Toren dieses Spiels am deutlichsten wiederholt, etwa über welche Seite die meisten Gegentore fielen. Gezeigt wird nur, was mindestens dreimal vorkommt.",
+    "thingsExplainNeutral": "Die Muster: was sich in den Toren dieses Spiels am deutlichsten wiederholt, etwa über welche Seite ein Team die meisten Tore warf. Gezeigt wird nur, was mindestens dreimal vorkommt.",
     "tgKeepers": "Im Tor: {list}.",
     "tgKeeperItem": "{name} ({saves, plural, one {1 Parade} other {# Paraden}})",
     "noticeLead": "Die Analyse ist fertig, aber sie hat zu wenig gesehen, um dich etwas zu fragen.",

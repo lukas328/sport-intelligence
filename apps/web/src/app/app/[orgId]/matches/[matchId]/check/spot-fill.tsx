@@ -16,7 +16,7 @@ import { goalWindow } from "@/lib/goal-window";
 import { type MatchGraphics, useMatchGraphics } from "@/lib/graphics";
 import { useOpponentName } from "@/lib/opponent";
 import { ownName } from "@/lib/own-name";
-import { matchSides, pairing } from "@/lib/match-sides";
+import { matchSides, oppFirst, pairing } from "@/lib/match-sides";
 import { goalsWithoutSpot, type SpotZone, spotSuggestion } from "@/lib/shot-spot";
 import { cn } from "@/lib/utils";
 import { timelineVideo } from "@/lib/video-parts";
@@ -98,7 +98,7 @@ export function SpotFill({ orgId, match, goalId }: { orgId: string; match: Match
       </div>
       {/* on a phone video and court share one screen: the strip gives way */}
       <div className="bleed-x max-md:hidden">
-        <Strip name={sides.neutral ? sides.home : own} sub={`${ta("vsShort")} ${sides.neutral ? sides.away : oppName}${goal ? ` · ${t("fillCount", { n: at + 1, total })}` : ""}`} own={match.score_own} opp={match.score_opponent} />
+        <Strip name={sides.neutral ? sides.home : own} sub={`${ta("vsShort")} ${sides.neutral ? sides.away : oppName}${goal ? ` · ${t("fillCount", { n: at + 1, total })}` : ""}`} own={match.score_own} opp={match.score_opponent} oppFirst={oppFirst(sides)} />
       </div>
       {!list ? (
         <p className="py-10 text-ink-2">{tc("loading")}</p>

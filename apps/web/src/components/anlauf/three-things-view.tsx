@@ -61,6 +61,7 @@ export function ThreeThingsView({
 }) {
   const t = useTranslations("anlauf");
   const text = useThingText();
+  const neutral = useMatchSides()?.neutral ?? false;
   const things = threeThings(goalRuns(graphics));
   if (things.length === 0) {
     // confirmed goals, but not enough with a spot for three things: the goals themselves, as
@@ -72,7 +73,7 @@ export function ThreeThingsView({
     <div>
       {/* what the three things are, where they first appear: on Start and in the match (R20) */}
       <p className="m-0 mb-3 max-w-[72ch] text-[15px] text-ink-2" data-testid="things-explain">
-        {t("thingsExplain")}
+        {t(neutral ? "thingsExplainNeutral" : "thingsExplain")}
       </p>
       {/* one thing fills the row (figure and text left, the bundle large right), two share it */}
       <ol className={cn("m-0 grid list-none grid-cols-1 border-t-2 border-ink p-0", things.length === 2 ? "md:grid-cols-2" : things.length >= 3 && "md:grid-cols-3")} data-testid="three-things">

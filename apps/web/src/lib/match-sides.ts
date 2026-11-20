@@ -65,3 +65,12 @@ export function sideLabel(sides: Pick<MatchSides, "neutral" | "own" | "opp">, si
   if (side === "own") return sides.neutral ? sides.own : us;
   return sides.opp;
 }
+
+/**
+ * The result and the two names start with the opponent side: only in an observed match whose home
+ * team is the data's opponent side (BUG-18, UI check 20.11.: «HSG Sturmfalke gegen SC Eisberg»
+ * read 24:26 with Sturmfalke's 26 second). A match of the team keeps its own score first.
+ */
+export function oppFirst(sides: Pick<MatchSides, "neutral" | "ownHome"> | null | undefined): boolean {
+  return Boolean(sides?.neutral && !sides.ownHome);
+}

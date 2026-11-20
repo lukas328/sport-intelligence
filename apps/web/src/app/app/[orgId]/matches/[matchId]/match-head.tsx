@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import { AttnTag } from "@/components/anlauf/blocks";
 import { Breakable, Strip, WurfHead } from "@/components/anlauf/heads";
 import { useMatchSides } from "@/components/domain/match-sides";
+import { oppFirst } from "@/lib/match-sides";
 import { openMoments, reportCut, reportGoals, videoScore, type MatchGraphics } from "@/lib/graphics";
 
 type Match = Schemas["MatchOut"];
@@ -27,6 +28,9 @@ export function MatchHead({ match, ownName, oppName, view, graphics, children }:
   // the slim head names our team, the opponent beside it; in an observed match the home team
   const stripName = sides?.neutral ? first : ownName;
   const stripOther = sides?.neutral ? second : oppName;
+  // the result follows the title in an observed match: home team first (BUG-18); in a match of the
+  // team it stays ours first, as everywhere in the app
+  const resultOppFirst = oppFirst(sides);
   const when = format.dateTime(kickoff, { weekday: "long", day: "numeric", month: "long" });
   const half = match.halftime_own != null && match.halftime_opponent != null ? `${tm("halftime")} ${match.halftime_own}:${match.halftime_opponent}` : null;
   // a video of the opponent against another team says so first (K3)
@@ -76,6 +80,7 @@ export function MatchHead({ match, ownName, oppName, view, graphics, children }:
           ownName={ownName}
           oppName={oppName}
           ownColor={match.kit_own}
+          oppFirst={resultOppFirst}
           scoreless={graphics != null}
           goals={graphics ? reportGoals(graphics) : null}
           goalsUntil={graphics ? reportCut(graphics, match.score_own, match.score_opponent, (match.period_s * match.periods) / 60) : null}
@@ -101,6 +106,7 @@ export function MatchHead({ match, ownName, oppName, view, graphics, children }:
           own={own}
           opp={opp}
           pending={pending}
+          oppFirst={resultOppFirst}
         />
       )}
     </div>

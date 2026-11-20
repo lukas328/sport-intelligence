@@ -19,6 +19,7 @@ import { decided } from "@/lib/match-decided";
 import { cn } from "@/lib/utils";
 import { useOpponentName } from "@/lib/opponent";
 import { useMatchSides } from "@/components/domain/match-sides";
+import { oppFirst } from "@/lib/match-sides";
 import { shotBalance, withoutPosition } from "@/lib/shot-balance";
 
 type ZoneCount = Record<string, { shots: number; goals: number }>;
@@ -188,7 +189,10 @@ export function OverviewView({
   const has = (p: OverviewPart) => parts.includes(p);
   const t = useTranslations("stats");
   // an observed match: no «eigenes Tor», no «Der Gegner war besser» (BUG-07)
-  const neutral = useMatchSides()?.neutral ?? false;
+  const sides = useMatchSides();
+  const neutral = sides?.neutral ?? false;
+  // an observed match lists the home team first, also in the table (BUG-18)
+  const cols: ("own" | "opp")[] = oppFirst(sides) ? ["opp", "own"] : ["own", "opp"];
   const te = useTranslations("events");
   const oppName = useOpponentName();
   const { drill, open, close } = useDrill();
@@ -335,8 +339,11 @@ export function OverviewView({
             <thead className="text-muted">
               <tr>
                 <th scope="col" className="text-left font-normal" />
-                <th scope="col" className="text-right font-medium">{teamName}</th>
-                <th scope="col" className="text-right font-medium">{oppName(match)}</th>
+                {cols.map((c) => (
+                  <th key={c} scope="col" className="text-right font-medium">
+                    {c === "own" ? teamName : oppName(match)}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
@@ -353,17 +360,20 @@ export function OverviewView({
                       <span className={cn(r.label === signalRow && "underline decoration-resin decoration-[5px] underline-offset-[5px]")}>{r.label}</span>
                     )}
                   </th>
-                  <td className="text-right">
-                    <N value={r.own} label={`${r.label} ${teamName}`} onClick={r.filter && (() => open(`${r.label}: ${teamName}`, r.filter!("own")))} />
-                  </td>
-                  <td className="text-right">
-                    <N value={r.opp} label={`${r.label} ${oppName(match)}`} onClick={r.filter && (() => open(`${r.label}: ${oppName(match)}`, r.filter!("opponent")))} />
-                  </td>
+                  {cols.map((c) => (
+                    <td key={c} className="text-right">
+                      {c === "own" ? (
+                        <N value={r.own} label={`${r.label} ${teamName}`} onClick={r.filter && (() => open(`${r.label}: ${teamName}`, r.filter!("own")))} />
+                      ) : (
+                        <N value={r.opp} label={`${r.label} ${oppName(match)}`} onClick={r.filter && (() => open(`${r.label}: ${oppName(match)}`, r.filter!("opponent")))} />
+                      )}
+                    </td>
+                  ))}
                 </tr>
               ))}
             </tbody>
           </table>
-          {attempts && <ShotBalanceLines stats={stats} own={teamName} opp={oppName(match)} />}
+          {attempts && <ShotBalanceLines stats={stats} own={teamName} opp={oppName(match)} oppFirst={cols[0] === "opp"} />}
         </Sheet>}
       </div>
       {has("scorers") && scorers.length > 0 && (
@@ -392,7 +402,7 @@ export function OverviewView({
  * How each side's shots add up, from the same statistics as the table above (BUG-08): «9 Würfe:
  * 6 Tore, 2 gehalten, 1 daneben». A side with only its goals recorded says so.
  */
-function ShotBalanceLines({ stats, own, opp }: { stats: Stats; own: string; opp: string }) {
+function ShotBalanceLines({ stats, own, opp, oppFirst = false }: { stats: Stats; own: string; opp: string; oppFirst?: boolean }) {
   const t = useTranslations("stats");
   const line = (name: string, side: TeamStats, other: TeamStats) => {
     const b = shotBalance(side, other);
@@ -407,8 +417,8 @@ function ShotBalanceLines({ stats, own, opp }: { stats: Stats; own: string; opp:
     return `${t("balanceShots", { team: name, n: b.shots })}: ${parts.join(", ")}${b.blocked ? ` ${t("balanceBlocked", { n: b.blocked })}` : ""}`;
   };
   return (
-    <ul className="m-0 list-none space-y-0.5 p-0 text-[0.9375rem] text-muted" data-testid="shot-balance">
-      <li>{line(own, stats.own, stats.opponent)}</li>
+    <ul className="m-0 flex list-none flex-col gap-0.5 p-0 text-[0.9375rem] text-muted" data-testid="shot-balance">
+      <li className={oppFirst ? "order-last" : undefined}>{line(own, stats.own, stats.opponent)}</li>
       <li>{line(opp, stats.opponent, stats.own)}</li>
     </ul>
   );

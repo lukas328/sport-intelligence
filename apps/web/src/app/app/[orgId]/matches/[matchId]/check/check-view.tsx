@@ -18,7 +18,7 @@ import { PersonCrop } from "./person-box";
 import { Strip } from "@/components/anlauf/heads";
 import { useShell } from "@/components/shell/context";
 import { ownName } from "@/lib/own-name";
-import { matchSides, pairing } from "@/lib/match-sides";
+import { matchSides, oppFirst, pairing } from "@/lib/match-sides";
 import { api } from "@/lib/client";
 import { matchStyle } from "@/lib/color";
 import { useOpponentName } from "@/lib/opponent";
@@ -621,6 +621,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
           sub={`${ta("vsShort")} ${sides.neutral ? sides.away : oppName} · ${left > 0 ? t("openCount", { n: left, minutes: leftMinutes }) : total > 0 ? t("count", { n: total }) : otherOpen > 0 ? t("count", { n: otherOpen }) : t("noneOpen")}`}
           own={match.score_own}
           opp={match.score_opponent}
+          oppFirst={oppFirst(sides)}
         />
       </div>
       {loading ? (

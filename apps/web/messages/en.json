@@ -3842,6 +3842,7 @@
     "exampleBody": "A demo match with made-up goals: this is what a match looks like once the analysis has worked through your video. It is not part of your team and counts in no statistics.",
     "exampleBack": "Back to your matches",
     "thingsExplain": "The patterns: what repeats most clearly in this match's goals, such as the side most goals against came from. Only what happens at least three times is shown.",
+    "thingsExplainNeutral": "The patterns: what repeats most clearly in this match's goals, such as the side a team scored most of its goals from. Only what happens at least three times is shown.",
     "tgKeepers": "In goal: {list}.",
     "tgKeeperItem": "{name} ({saves, plural, one {1 save} other {# saves}})",
     "noticeLead": "The analysis is done, but it saw too little to ask you anything.",

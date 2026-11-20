@@ -83,7 +83,10 @@ export function ScenesView({ orgId, teamId, matches, side, into = null }: { orgI
         .sort((a, b) => b.kickoff_at.localeCompare(a.kickoff_at)),
     [matches, origin],
   );
-  const ctx = { lastMatch: withVideo[0]?.id ?? null, last3: withVideo.slice(0, 3).map((m) => m.id) };
+  // «letztes Spiel», «letzte 3» and the opening answer are the team's own matches unless the coach
+  // looks at observed ones only: an observed match is no game of the team (UX-07, UI check 20.11.)
+  const ranged = origin === "all" ? withVideo.filter((m) => m.kind !== "scouting") : withVideo;
+  const ctx = { lastMatch: ranged[0]?.id ?? null, last3: ranged.slice(0, 3).map((m) => m.id) };
   // the page opens on the first thing of the last match (as the start says it), over the last
   // three matches: an answer, not a list
   const lastGraphics = useMatchGraphics(orgId, ctx.lastMatch ?? "");
@@ -127,7 +130,10 @@ export function ScenesView({ orgId, teamId, matches, side, into = null }: { orgI
     ...(extra.number != null ? { numbers: [extra.number] } : {}),
     ...(onlyMatch && picked == null ? { match_ids: [onlyMatch] } : {}),
   });
-  const observed = origin === "all" ? {} : { observed: origin === "observed" };
+  // «Gegentor», «Tor», «Parade», «Ballverlust» speak from the team's side: under «Alle» they
+  // search the team's own matches, never an observed match's teams as «us» (UI check 20.11.)
+  const sided = scope.some((c) => c.group === "event");
+  const observed = origin === "all" ? (sided ? { observed: false } : {}) : { observed: origin === "observed" };
   const filter = { ...withExtra(combine(scope, ctx)), ...observed };
   // the base of the answer: the same search without the position
   const baseChips = scope.filter((c) => c.group !== "position");
