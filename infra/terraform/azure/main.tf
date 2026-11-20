@@ -396,6 +396,7 @@ locals {
     HB_S3_ACCESS_KEY          = var.s3_access_key
     HB_S3_BUCKET_VIDEOS       = var.s3_bucket_videos
     HB_S3_BUCKET_ARTIFACTS    = var.s3_bucket_artifacts
+    HB_MEDIA_DIRECT           = var.media_direct ? "true" : "false"
     HB_EMAIL_BACKEND          = "smtp"
     HB_EMAIL_FROM             = var.email_from
     HB_SMTP_HOST              = var.smtp_host
