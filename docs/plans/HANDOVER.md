@@ -23,7 +23,10 @@ hat), dann `docs/plans/backlog.md`.
 - GPU im Betrieb: später Azure (Entscheid Lukas 2026-11-19), mit Umzug der Umgebung in eine andere
   Azure-Region; macht Lukas später. Kein Modal-Backend.
 
-## Prioritäten ab 2026-11-19 (Hauptsitzung entscheidet selbst)
+## Prioritäten
+Aktuell: `docs/plans/backlog.md`, Abschnitt «Nächste Aufgaben» (Stand 20.11.). Die Liste darunter ist vom 19.11.
+
+### Prioritäten ab 2026-11-19 (Verlauf)
 1. Was der Trainer auf echtem Material sieht: Wurfzeit der Kandidaten genauer (Versatz 2.8 s),
    Präzision der Wurf- und Tor-Kandidaten, Wurfort-Vorschlag mit Ein-Klick-Bestätigung (A22).
 2. Kalibrierung per Klick Ende-zu-Ende auf Staging, danach Deploy (braucht Lukas' Staging-Zugang).
