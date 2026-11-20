@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
+import { Replace } from "@/components/shell/replace";
 import { getTranslations } from "next-intl/server";
 import { AccessRequests, Verification } from "@/components/official/requests";
 import { loadSettings } from "../../settings/load";
@@ -14,7 +14,7 @@ export default async function ClubFederationPage({ params }: { params: Promise<{
   const { org, teams, access } = await loadSettings(orgId);
   // not a 404 (UX test B32): others go to the club; a club without the link learns how it comes.
   // Coaches see the verification (they may be the second person, review R21), not the requests
-  if (!access.isAdmin && access.coachOf === 0) redirect(`/app/${orgId}/club`);
+  if (!access.isAdmin && access.coachOf === 0) return <Replace to={`/app/${orgId}/club`} />;
   if (!access.official) {
     const t = await getTranslations("verification");
     return (

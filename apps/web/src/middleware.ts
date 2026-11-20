@@ -1,4 +1,5 @@
 import { LOCALE_COOKIE, locales } from "@/i18n/config";
+import { movedAddress } from "@/lib/moved";
 import { NextResponse, type NextRequest } from "next/server";
 
 const PROTECTED = ["/app", "/onboarding", "/ops", "/federation"];
@@ -76,6 +77,10 @@ export function middleware(req: NextRequest) {
     redirect.cookies.set(LOCALE_COOKIE, lang, { path: "/", maxAge: 60 * 60 * 24 * 365, sameSite: "lax" });
     return redirect;
   }
+  // old addresses with a fixed new one: a real redirect, never one in the middle of the stream
+  // (lib/moved.ts: the streamed one reloads the page a second later)
+  const target = movedAddress(pathname, req.nextUrl.searchParams);
+  if (target) return NextResponse.redirect(new URL(target, req.nextUrl));
   // an unknown address in the app shows the 404 in the frame and says 404, not 200 (UX test N18):
   // the frame streams, so the page alone cannot set the status any more
   const seg = pathname.match(/^\/app\/[^/]+\/([^/]+)/)?.[1];
