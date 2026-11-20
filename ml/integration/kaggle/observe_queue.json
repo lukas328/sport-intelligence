@@ -5344,6 +5344,173 @@
 "file": "UK_PremierLeague_Olympia_LondonGD_2023_s4.mp4",
 "fps": 30.0
 }
+],
+[
+{
+"game": "CH_Cup_RTVBasel_Kadetten_2024-04-27",
+"dataset": "handball-segs-l01",
+"file": "CH_Cup_RTVBasel_Kadetten_2024-04-27_s2.mp4",
+"fps": 50.0
+},
+{
+"game": "CH_Cup_RTVBasel_Kadetten_2024-04-27",
+"dataset": "handball-segs-l01",
+"file": "CH_Cup_RTVBasel_Kadetten_2024-04-27_s4.mp4",
+"fps": 50.0
+},
+{
+"game": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19",
+"dataset": "handball-segs-l01",
+"file": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19_s0.mp4",
+"fps": 60.0
+},
+{
+"game": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02",
+"dataset": "handball-segs-l02",
+"file": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02_s2.mp4",
+"fps": 30.0
+},
+{
+"game": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27",
+"dataset": "handball-segs-l02",
+"file": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27_s2.mp4",
+"fps": 50.0
+},
+{
+"game": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27",
+"dataset": "handball-segs-l02",
+"file": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27_s4.mp4",
+"fps": 50.0
+},
+{
+"game": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16",
+"dataset": "handball-segs-l02",
+"file": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16_s2.mp4",
+"fps": 30.0
+},
+{
+"game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+"dataset": "handball-segs-b01",
+"file": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03_s2.mp4",
+"fps": 60.0
+},
+{
+"game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23.f298",
+"dataset": "handball-segs-b03",
+"file": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23.f298_s2.mp4",
+"fps": 60.0
+},
+{
+"game": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10",
+"dataset": "handball-segs-b03",
+"file": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10_s0.mp4",
+"fps": 60.0
+},
+{
+"game": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10",
+"dataset": "handball-segs-b03",
+"file": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10_s2.mp4",
+"fps": 60.0
+},
+{
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"dataset": "handball-segs-b03",
+"file": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19_s2.mp4",
+"fps": 60.0
+},
+{
+"game": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02",
+"dataset": "handball-segs-l07",
+"file": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02_s2.mp4",
+"fps": 60.0
+},
+{
+"game": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09",
+"dataset": "handball-segs-l07",
+"file": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09_s2.mp4",
+"fps": 60.0
+}
+],
+[
+{
+"game": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14",
+"dataset": "handball-segs-l07",
+"file": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14_s0.mp4",
+"fps": 60.0
+},
+{
+"game": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14",
+"dataset": "handball-segs-l07",
+"file": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14_s2.mp4",
+"fps": 60.0
+},
+{
+"game": "AT_Challenge_Lauterach_Traun_2021",
+"dataset": "handball-segs-l10",
+"file": "AT_Challenge_Lauterach_Traun_2021_s0.mp4",
+"fps": 30.0
+},
+{
+"game": "AT_Challenge_Lauterach_Traun_2021",
+"dataset": "handball-segs-l10",
+"file": "AT_Challenge_Lauterach_Traun_2021_s1.mp4",
+"fps": 30.0
+},
+{
+"game": "AT_Challenge_Lauterach_Traun_2021",
+"dataset": "handball-segs-l10",
+"file": "AT_Challenge_Lauterach_Traun_2021_s2.mp4",
+"fps": 30.0
+},
+{
+"game": "AT_Challenge_Lauterach_Traun_2021",
+"dataset": "handball-segs-l10",
+"file": "AT_Challenge_Lauterach_Traun_2021_s3.mp4",
+"fps": 30.0
+},
+{
+"game": "AT_Challenge_Lauterach_Traun_2021",
+"dataset": "handball-segs-l10",
+"file": "AT_Challenge_Lauterach_Traun_2021_s4.mp4",
+"fps": 30.0
+},
+{
+"game": "AT_Cup_Feldkirch_Bregenz_2021",
+"dataset": "handball-segs-l10",
+"file": "AT_Cup_Feldkirch_Bregenz_2021_s0.mp4",
+"fps": 60.0
+},
+{
+"game": "AT_Cup_Feldkirch_Bregenz_2021",
+"dataset": "handball-segs-l10",
+"file": "AT_Cup_Feldkirch_Bregenz_2021_s1.mp4",
+"fps": 60.0
+},
+{
+"game": "AT_Cup_Feldkirch_Bregenz_2021",
+"dataset": "handball-segs-l10",
+"file": "AT_Cup_Feldkirch_Bregenz_2021_s2.mp4",
+"fps": 60.0
+},
+{
+"game": "AT_Cup_Feldkirch_Bregenz_2021",
+"dataset": "handball-segs-l10",
+"file": "AT_Cup_Feldkirch_Bregenz_2021_s3.mp4",
+"fps": 60.0
+},
+{
+"game": "AT_Cup_Feldkirch_Bregenz_2021",
+"dataset": "handball-segs-l10",
+"file": "AT_Cup_Feldkirch_Bregenz_2021_s4.mp4",
+"fps": 60.0
+}
 ]
+],
+"front": [
+59,
+60
+],
+"requeued": [
+0
 ]
 }

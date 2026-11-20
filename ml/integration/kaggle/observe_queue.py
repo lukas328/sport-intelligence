@@ -8,6 +8,7 @@ kernel `handball-obs-qNNN`, so the queue file alone says what is done: any sessi
     python ml/integration/kaggle/observe_queue.py build LIBRARY_DIR     # writes the queue file
     python ml/integration/kaggle/observe_queue.py step                  # push into free slots
     python ml/integration/kaggle/observe_queue.py status
+    python ml/integration/kaggle/observe_queue.py requeue N             # batch N lost (12 h limit)
 
 Order of the queue: the rest of the dev games (segments with an official log, the pauses between
 them), then every other game of the library. The end-test games are never queued (no design work
@@ -131,7 +132,9 @@ def step() -> None:
     q = json.loads(QUEUE.read_text())
     st = status()
     # other kernels of the account (e.g. a dev run) take slots as well; Kaggle refuses past the cap
-    for i, s in enumerate(st):
+    front = q.get("front", [])
+    for i in [*front, *(j for j in range(len(st)) if j not in front)]:
+        s = st[i]
         if s != "new":  # an error is reported, not retried: look at its log first
             continue
         part = q["batches"][i]
@@ -160,6 +163,20 @@ def step() -> None:
             break  # slots full (or another error): try again at the next step
 
 
+def requeue(i: int) -> None:
+    """A batch that ended without output (killed at the 12 h limit): its segments again, in
+    batches of BATCH at the end of the queue, pushed before every other new batch."""
+    q = json.loads(QUEUE.read_text())
+    segs = q["batches"][i]
+    new = [segs[k : k + BATCH] for k in range(0, len(segs), BATCH)]
+    start = len(q["batches"])
+    q["batches"].extend(new)
+    q["front"] = [*q.get("front", []), *range(start, start + len(new))]
+    q.setdefault("requeued", []).append(i)
+    QUEUE.write_text(json.dumps(q, indent=0) + "\n")
+    print("batch", i, "->", [SLUG.format(j) for j in range(start, start + len(new))])
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -167,9 +184,13 @@ def main() -> None:
     b.add_argument("library", type=Path, help="library/ of the dataset handball-library-state")
     sub.add_parser("step")
     sub.add_parser("status")
+    r = sub.add_parser("requeue")
+    r.add_argument("batch", type=int)
     a = ap.parse_args()
     if a.cmd == "build":
         build(a.library)
+    elif a.cmd == "requeue":
+        requeue(a.batch)
     elif a.cmd == "step":
         step()
     else:
