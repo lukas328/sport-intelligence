@@ -61,7 +61,7 @@ Einstieg danach wie immer: `docs/plans/HANDOVER.md`.
   gewählte Marke liegt in `docs/design/brand2/`).
 
 ## Warteschlange
-Stand 20.11.: Punkte 1 bis 4 sind erledigt (siehe Tabelle oben). Offen für die nächste Sitzung:
+Stand 20.11.: Punkte 1 bis 4 sind erledigt (siehe Tabelle oben). Am 20.11. gestartet (Helfer): unten 1 bis 3 und Code health 4, 5, 6, 8, 10. Nicht aus der Cloud machbar: Kalibrierung auf Staging (kein Staging-Zugang), Ball (Kaggle-Zugang fehlt). Offen für die nächste Sitzung:
 1. Aus dem UI-Check vom 20.11. (BEFUNDE-6, «UI-Check 20.11.»): Zeitleiste unter dem Video folgt bei
    beobachteten Spielen nicht dem Heimteam; «Ballverluste nach Typ» Zahlen zu weit vom Wort;
    Info-Symbol bricht am Handy um; Torhüter ohne Nummer als «#?», API prüft `goalkeeper_id` nicht;
