@@ -17,6 +17,7 @@ import { api } from "@/lib/client";
 import { move, toDrillItem, totalMinutes, type DrillItem } from "@/lib/drill-snapshot";
 import { drillItemOf, useTeamDrills } from "@/lib/team-drills";
 import { errorKey, type ErrorKey } from "@/lib/errors";
+import { refreshList } from "@/lib/refresh-list";
 
 type Session = Schemas["TrainingSessionOut"];
 type Focus = Schemas["FocusOut"];
@@ -240,7 +241,7 @@ export function TrainingView({ orgId, teamId, canPlan, tasks = true }: { orgId: 
   });
   const remove = useMutation({
     mutationFn: async (id: string) => api.DELETE("/v1/orgs/{org_id}/sessions/{session_id}", { params: { path: { org_id: orgId, session_id: id } } }),
-    onSuccess: () => void qc.invalidateQueries({ queryKey: ["sessions", teamId] }),
+    onSuccess: () => void refreshList(qc, ["sessions", teamId]),
   });
   const importIcs = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -258,7 +259,7 @@ export function TrainingView({ orgId, teamId, canPlan, tasks = true }: { orgId: 
       return;
     }
     setImported(r.data as { created: number; updated: number });
-    void qc.invalidateQueries({ queryKey: ["sessions", teamId] });
+    void refreshList(qc, ["sessions", teamId]);
   };
   const today = new Date().toISOString().slice(0, 10);
   const all = sessions.data ?? [];
@@ -271,7 +272,7 @@ export function TrainingView({ orgId, teamId, canPlan, tasks = true }: { orgId: 
   const past = all.filter((s) => s.on_date < today).reverse().slice(0, 10);
   const done = () => {
     setEditing(null);
-    void qc.invalidateQueries({ queryKey: ["sessions", teamId] });
+    void refreshList(qc, ["sessions", teamId]);
   };
 
   const item = (s: Session) => (
@@ -324,10 +325,10 @@ export function TrainingView({ orgId, teamId, canPlan, tasks = true }: { orgId: 
         </Link>
       </div>
       {/* first what to train, from the matches (K21); planning by hand comes after */}
-      {canPlan && <TrainingTips orgId={orgId} teamId={teamId} tasks={tasks} onPlanned={() => void qc.invalidateQueries({ queryKey: ["sessions", teamId] })} />}
+      {canPlan && <TrainingTips orgId={orgId} teamId={teamId} tasks={tasks} onPlanned={() => void refreshList(qc, ["sessions", teamId])} />}
       {error && <Alert>{tr(`errors.${error}`)}</Alert>}
       {canPlan && season && (
-        <TrainingSlots orgId={orgId} teamId={teamId} season={season} onGenerated={() => void qc.invalidateQueries({ queryKey: ["sessions", teamId] })} />
+        <TrainingSlots orgId={orgId} teamId={teamId} season={season} onGenerated={() => void refreshList(qc, ["sessions", teamId])} />
       )}
       <section className="space-y-2" aria-labelledby="upcoming">
         <div className="flex flex-wrap items-center justify-between gap-3">
