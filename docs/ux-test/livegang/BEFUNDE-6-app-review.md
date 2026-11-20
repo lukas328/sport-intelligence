@@ -65,6 +65,36 @@ Neu:
 
 Stand pro Ticket wird hier nachgetragen.
 
+## UI-Check 20.11.
+Wie: lokaler Stack ohne Docker (`docs/runbooks/local-stack-ohne-docker.md`), Produktions-Build,
+Seed-Daten (HC Tannengrün, Herren 1), dazu für den Check ein beobachtetes Spiel «HSG Sturmfalke
+gegen SC Eisberg» (HSG Sturmfalke Heimteam, synthetisches Video, 97 Ereignisse ohne Spieler; danach
+wieder gelöscht, damit die Produktbilder die Seed-Daten zeigen). Als Trainerin durchgegangen:
+Startseite (Spiele), Spielseite Spiel/Video/Zahlen, Prüfen, Szenen, Saison, Team; je Desktop
+1280 x 800 und Handy 390 x 844, Bilder angeschaut, Texte nach «drei Dinge», «Wir», «Gegentor»,
+«Eigene», «undefined», «NaN» und Querscroll durchsucht. Kein «drei Dinge» mehr gefunden, kein
+Querscroll, keine Fehler in der Browser-Konsole.
+
+Behoben:
+| Was | Befund | Behebung |
+|---|---|---|
+| Resultat beobachteter Spiele | Titel «HSG Sturmfalke gegen SC Eisberg», aber Resultat 24:26 und Legende «SC Eisberg, HSG Sturmfalke»: die Zahlen standen in Datenreihenfolge (die andere Mannschaft als eigene Seite), nicht Heimteam zuerst (BUG-18) | Kopf (Spiel, Streifen in Video/Zahlen), Prüfen und «Wurfort nachtragen» zeigen 26:24, die Legende, der Spielverlauf (Heimteam oben) und «Halbzeit»/«Schluss» folgen. Eigene Spiele bleiben «wir zuerst» wie bisher. `oppFirst` in `lib/match-sides.ts` mit Test |
+| Kennzahlen beobachteter Spiele | Tabelle «Kennzahlen im Vergleich» und die Zeilen «38 Würfe: …» mit dem Auswärtsteam zuerst | Spalten und Zeilen Heimteam zuerst |
+| Spieleliste | Beim beobachteten Spiel «Muster 1: Gegentore aus Gegenstössen» | «Muster 1: Tore HSG Sturmfalke aus Gegenstössen» (die Zeile kennt jetzt die neutrale Perspektive) |
+| Erklärsatz der Muster | «etwa über welche Seite die meisten Gegentore fielen» auch im beobachteten Spiel | eigener Satz für beobachtete Spiele: «über welche Seite ein Team die meisten Tore warf» (de, fr, en) |
+| Szenen | Mit Filter «Alle» zählte die Startfrage «Gegentor, aussen rechts, letzte 3 mit Video» das beobachtete Spiel mit: «25 von 81» statt «26 von 77»; «Gegentor» hiess dort «Tor des beobachteten Gegners». Widerspricht dem Entscheid «zählen nicht in Saison und Mustern des eigenen Teams» | Unter «Alle» meinen «letztes Spiel», «letzte 3» und die Startantwort die eigenen Spiele; Gegentor, Tor, Parade, Ballverlust suchen dort nur in eigenen Spielen. Unter «Beobachtet» bleibt alles wählbar |
+| Handy, Spielseite | «Prüfen», «Teilen», «Mehr» brauchten 358 px bei 358 px Platz; «Mehr» rutschte allein auf eine zweite Zeile | kleinerer Abstand am Handy, eine Zeile |
+
+Offen (mit Empfehlung):
+| Was | Empfehlung |
+|---|---|
+| Saison-Titel «Fünf Spiele. Und aussen rechts bleibt offen.» Der Entscheid TXT-08 sagt «Fakten zuerst, ohne Urteil»; umgesetzt ist das nur, wenn sich nichts wiederholt. Mit Muster bleibt der Satz mit «bleibt offen» (auch die Geschichte der Website und das Produktbild «get-season»). | Lukas entscheiden lassen. Vorschlag: so lassen, weil es eine Tatsache aus den Daten ist und kein Urteil über das Team; sonst Website-Text und Produktbild mit ändern. |
+| Video-Tab beobachteter Spiele: die Rail unter dem Video zeigt die Datenseite (andere Mannschaft) oben, auch wenn das beobachtete Team Heimteam ist. | Klein; mit der Frage «wer ist Heimteam» im Formular für beobachtete Spiele lösen (offen seit BUG-18). |
+| «Ballverluste nach Typ: Schritte 1 · Fehlpass 5 · …»: die Zahl steht weit weg vom Wort, liest sich wie «1 Fehlpass». | Zahl vor das Wort («1 Schritte», besser «Schritte: 1»), P3. |
+| «Aus: Video · 56 Tore von dir bestätigt, bei 56 mit Wurfort ⓘ»: am Handy steht das Info-Zeichen allein auf einer Zeile. | Zeichen mit dem letzten Wort zusammenhalten (`whitespace-nowrap`), P3. |
+| Ein Torhüter ohne Nummer und ohne bekannten Namen erscheint im Spielbericht als «#?». Im Check künstlich (Testdaten mit einer erfundenen `goalkeeper_id`, die die API ungeprüft in `attributes` annimmt). | «ohne Nummer» statt «#?»; prüfen, ob die API `goalkeeper_id` gegen den Kader prüfen soll. P3. |
+| Die Spielseite zeigt im Seed-Demo «1 Frage offen» (Feld prüfen); die Analyse des synthetischen Videos braucht immer die Feldbestätigung. | Für die Demo so lassen; ehrlich. |
+
 ## Stand Block 3 (19.11.2026)
 | Ticket | Stand | Was |
 |---|---|---|
