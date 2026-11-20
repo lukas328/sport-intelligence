@@ -110,6 +110,10 @@ und infra/terraform/azure/README.md und führe mich durch die Test-Umgebung"):
    löschen).
 
 ## Datenstand und Hintergrundprozesse
+- **Gratis-CPU auf Kaggle immer belegt halten** (Wunsch Lukas, 2026-11-20): höchstens 5 CPU-Kernels
+  gleichzeitig, je bis 12 h. Warteschlange `ml/integration/kaggle/observe_queue.json` (871 Segmente
+  in 34 Kernels zu je etwa 9 h; Endtest-Spiele nie). Jede Sitzung ruft beim Start und dann alle
+  10 min `python ml/integration/kaggle/observe_queue.py step` auf; `status` zeigt den Stand.
 Die Cloud-Sitzung ist flüchtig: alles ausserhalb des Repos ist mit ihr weg. Darum:
 - **Kaggle ist der gemeinsame Speicher** (Konto `lukasde1000`): Segmente `handball-segs-bNN` (Cloud)
   und `handball-segs-lNN` (Lukas' Uploads), GPU-Ergebnisse `handball-gpu-<job>-<datum>`, Ballmodell
