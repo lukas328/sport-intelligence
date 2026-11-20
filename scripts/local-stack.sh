@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Local stack without Docker images: Postgres 16, Redis and an S3 stand-in (moto) from the host,
 # API, worker and web as plain processes. For environments where `make up` cannot pull images
-# (cloud sessions hit Docker Hub rate limits). See docs/runbooks/local-stack-without-docker.md.
+# (cloud sessions hit Docker Hub rate limits). See docs/runbooks/local-stack-ohne-docker.md.
 #
 #   scripts/local-stack.sh up       # start everything (idempotent)
 #   scripts/local-stack.sh down     # stop the processes started here
@@ -40,6 +40,8 @@ fi
 export HB_RATE_LIMIT_AUTH="300/60"
 export HB_UPLOAD_PART_SIZE=5242880
 export HB_GPU_BACKEND=local
+# the component pages under /dev for `next start` (e2e of the calibration dialog), as in compose
+export HB_DEV_PAGES=1
 export HB_OPERATOR_EMAILS='["@ops-e2e.ch"]'
 export HB_S3_PUBLIC_URL=http://localhost:9000
 export FORWARDED_ALLOW_IPS="*"
