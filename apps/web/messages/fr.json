@@ -817,6 +817,8 @@
     "opponentShort": "l'adversaire",
     "otherShort": "l'autre équipe",
     "colourWhy": "L'analyse a besoin des couleurs pour distinguer les équipes. Regarde dans la vidéo si tu n'es pas sûr.",
+    "home": "Qui joue à domicile ?",
+    "homeWhy": "L'équipe à domicile figure partout en premier, comme dans le calendrier.",
     "colourMissing": "Choisis la couleur des maillots des deux équipes.",
     "submit": "Continuer vers la vidéo",
     "otherColour": "autre couleur"
@@ -1033,6 +1035,7 @@
     "equal": "Égalité",
     "situations": "Efficacité par situation",
     "byType": "par type",
+    "byTypeItem": "{type} :",
     "opponentPlayers": "Adversaire par numéro",
     "noVideo": "sans vidéo",
     "noDataHint": "Téléversez la vidéo ; l'analyse démarre ensuite automatiquement.",

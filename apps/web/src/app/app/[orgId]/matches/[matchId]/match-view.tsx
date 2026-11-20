@@ -419,6 +419,9 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
       ? `${coachGoals.length === totalGoals ? ta("sourceMarkedAll", { n: coachGoals.length }) : ta("sourceMarked", { n: coachGoals.length, total: totalGoals })}${ta("sourcePlaced", { n: placedGoals })}`
       : null,
   ].filter(Boolean);
+  const sourceText = `${ta("sources")}: ${sourceParts.join(" · ")}`;
+  const sourceCut = sourceText.lastIndexOf(" ") + 1;
+  const [sourceHead, sourceTail] = [sourceText.slice(0, sourceCut), sourceText.slice(sourceCut)];
   return (
     <MatchSidesProvider sides={sides}>
     <div className="space-y-8" style={matchStyle(club, oppKit) as CSSProperties}>
@@ -583,10 +586,11 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
       {sourceParts.length > 0 && (
         <div className="-mt-6 text-[15px] text-ink-2" data-testid="source-line">
           {/* «So rechnen wir» as the info sign right beside the source it explains (A17) */}
-          <p className="m-0 flex flex-wrap items-center gap-x-1">
-            <span>
-              {ta("sources")}: {sourceParts.join(" · ")}
-            </span>
+          {/* the sign stays with the last word, never alone on a line on the phone (UI check 20.11.) */}
+          <p className="m-0">
+            {sourceHead}
+            <span className="whitespace-nowrap">
+            {sourceTail}
             <button
               type="button"
               onClick={() => setHowOpen((v) => !v)}
@@ -594,11 +598,12 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
               aria-controls="how-counted"
               aria-label={ta("howCounted")}
               title={ta("howCounted")}
-              className="-my-2 inline-flex size-11 cursor-pointer items-center justify-center text-ink"
+              className="-my-3 inline-flex size-11 cursor-pointer items-center justify-center align-middle text-ink"
               data-testid="how-counted-open"
             >
               <Info aria-hidden className="size-5" strokeWidth={2.4} />
             </button>
+            </span>
           </p>
           {howOpen && (
             <p id="how-counted" ref={howRef} className="m-0 mt-1 max-w-[66ch] border-l-4 border-rule pl-3 text-ink-2" data-testid="how-counted">
