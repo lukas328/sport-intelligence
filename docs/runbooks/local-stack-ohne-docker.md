@@ -72,7 +72,7 @@ Build nötig. Mit moto statt SeaweedFS sind die Videos weg (dann neu anfangen, s
   vorinstalliert in `/opt/pw-browsers` (`PLAYWRIGHT_BROWSERS_PATH`), passend zu Playwright 1.63.
   Mehr als 2 Worker lohnen sich mit 4 CPU nicht, weil die Analyse der hochgeladenen Videos
   dieselben Kerne braucht. Ein Lauf dauert gegen den Build etwa 7 bis 10 Minuten (20.11.:
-  121 Tests, davon 49 nur in einem der beiden Projekte und dort übersprungen).
+  122 Tests, davon 49 nur in einem der beiden Projekte und dort übersprungen).
 - API-Tests: `uv run pytest apps/api -n auto -q` brauchen nur Postgres
   (`HB_TEST_ADMIN_DSN`, Standard `postgresql://handball:handball@localhost:5432/postgres`).
 - Vitest (`pnpm --filter @handball/web test`) braucht nichts.

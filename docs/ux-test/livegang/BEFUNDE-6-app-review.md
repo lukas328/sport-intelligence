@@ -96,7 +96,27 @@ Offen (mit Empfehlung), Stand nach der Nacharbeit vom 20.11.:
 | Die Spielseite zeigt im Seed-Demo «1 Frage offen» (Feld prüfen); die Analyse des synthetischen Videos braucht immer die Feldbestätigung. | Für die Demo so lassen; ehrlich. | so gelassen |
 | Website-Tour (`/so-funktioniert-es`, Bild «get-video»): die Karte der laufenden Szene sagte «läuft gerade», die App zeigt das seit UX-04 nicht mehr. | Wie die App. | erledigt: die Karte zeigt wie die App das Team und darunter den Ort («Aussen rechts», fr «Aile droite», en «Right wing»), die Zeit nur einmal |
 
-E2E_PLACEHOLDER
+### e2e-Lauf 20.11.
+Ganzer Lauf nach allen Fixes gegen den Produktions-Build (lokaler Stack ohne Docker, 2 Worker,
+`--trace off`): **73 bestanden, 49 übersprungen (nur in einem der beiden Projekte), 0 rot**, 5,8 min.
+Pro Spec (bestanden): account 5, analysis 1, calibration 9, calibration-real 1, collection 1,
+data 1, entry 5, family 1, first-video 1, keepers 1, layout 4, live 1, m11 1, match 2,
+matchday-offline 2, official 3, onboarding 8, ops 1, perf 3, phone-search 1, player 1,
+real-normal 3, scouting 1 (neu), season-scorers 1, session 1, share 2, shot-zone 1, shots 1,
+status 6, tactics 1, training 1, two-files 2. `data.spec` danach 10-mal grün (2 x 5, einmal direkt
+nach einem Neustart des Webservers).
+
+Unterwegs rot und behoben:
+| Spec | Ursache | Behebung |
+|---|---|---|
+| data (unregelmässig, «execution context destroyed» nach «Suchen») | Die alte Adresse `/assistant` leitete mit `redirect()` in der Seite weiter. Unter `teams/[teamId]/loading.tsx` streamt der Rahmen schon, also antwortet Next mit 200 und `<meta http-equiv="refresh" content="1;url=…">` und leitet im Browser weiter. Das Meta-Element bleibt im Dokument: eine Sekunde später lädt der Browser `/scenes?q=` ein zweites Mal ganz neu, und jede Navigation von dieser Seite aus wird ein voller Seitenaufruf. Fiel der Neuladen in eine Prüfung (axe, Fokus), war der Kontext weg. Nach einem Neustart des Webservers langsamer, darum dort häufiger. Dazu startete `restart-web` bis heute immer `next dev` statt des Builds. Gleiches Muster beim Start `/app/<Verein>` nach jeder Anmeldung (zweimal geladen). | Feste alte Adressen (assistant, search, library, paper, matrix, profile, marks, live, settings/access-requests) leitet die Middleware mit 307 um, bevor etwas rendert (`lib/moved.ts` mit Test). Datenabhängige Weiterleitungen unter einem `loading.tsx` (Verein, Verband, Trainingstipps, alte Gegner-Seite, Präsentation) ersetzen die Adresse im Browser (`components/shell/replace.tsx`). Der Vereinsstart hat kein `loading.tsx` mehr und leitet echt um. `restart-web` bleibt beim Build. |
+| account «sign-in lands in the first club» | wartete auf `/app/<Verein>`, das nur kurz während der gestreamten Weiterleitung in der Adresszeile stand | Spec erwartet jetzt Spiele des Teams und zählt, dass der Start nicht zweimal lädt |
+| real-normal (unter Last) | Prüfen: nach einer Antwort holte die Seite die Kandidaten neu, die beantwortete Torfrage war nicht mehr «offen» und fiel aus der Liste: «Frage 4 von 5» wurde «Frage 3 von 4» | eine in dieser Runde beantwortete Frage bleibt in der Liste (`lib/check-round.ts` mit Test) |
+| m11 (unter Last) | Spieltag-Markierungen: ein Tipp während eines laufenden Uploads wartete auf den 15-s-Takt («1 noch nicht hochgeladen») | ein Tipp während des Uploads wird gleich danach gesendet (`lib/serial.ts` mit Test) |
+| scouting (neu) | Spec suchte «Neues Spiel», ein neues Team zeigt aber das Formular für das erste Spiel | über «Video hochladen» › «Video vom Gegner» |
+
+Nur am Entwicklungsserver gesehen (nicht im Build, nicht weiter verfolgt): in `data.spec` schloss
+sich das Formular «Neue Einheit» nach «Speichern», die Liste zeigte die Einheit aber nicht.
 
 ## Stand Block 3 (19.11.2026)
 | Ticket | Stand | Was |
