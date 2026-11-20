@@ -13,7 +13,9 @@
   const timeline = S.rect("video", "timeline", [32, 802, 844, 118]);
   const s = S.browser(
     "video",
-    [16, video[1] - 24, 1248, timeline[1] + timeline[3] - video[1] + 40],
+    // from the bar above the picture (Video, Feld von oben, the clock) to the labels under the
+    // timeline: since UX-01 the switch stands above the video and the buttons under it
+    [16, video[1] - 88, 1248, timeline[1] + timeline[3] - video[1] + 88 + 24],
     {
       left: 28,
       top: 30,

@@ -47,12 +47,11 @@ const QUIET_CSS = `
 
 /**
  * The app's words the screens are found by, in each language (the app's message catalogues,
- * apps/web/messages: anlauf.running, anlauf.throwOff, scenesPage.playAll …). `hb.w(key)` gives
+ * apps/web/messages: anlauf.throwOff, scenesPage.playAll …). `hb.w(key)` gives
  * the one of the page's language; a RegExp also matches a part.
  */
 const WORDS = {
   de: {
-    running: /läuft gerade/,
     throwOff: "Anwurf",
     halfTime: "Halbzeit",
     fullTime: "Schluss",
@@ -73,7 +72,6 @@ const WORDS = {
     confirmMail: /^Bestätige deine E-Mail/,
   },
   fr: {
-    running: /en cours/,
     throwOff: "Engagement",
     halfTime: "Mi-temps",
     fullTime: "Fin",
@@ -94,7 +92,6 @@ const WORDS = {
     confirmMail: /^Confirme ton adresse e-mail/,
   },
   en: {
-    running: /playing now/,
     throwOff: "Throw-off",
     halfTime: "Half time",
     fullTime: "Full time",
@@ -143,6 +140,11 @@ function pageHelpers(words) {
         all.find((e) => !Array.from(e.children).some((c) => ok((c.textContent ?? "").trim()))) ??
         null
       );
+    },
+    /** the scene that plays in the list beside the video: pressed, with background and bar (the
+     * words «läuft gerade» left the list with UX-04, 19.11.) */
+    playing() {
+      return document.querySelector('li > button[aria-pressed="true"]');
     },
     /** the closest ancestor (or the element) for which test(el) holds */
     up(el, test) {
@@ -275,7 +277,7 @@ const SHOTS = [
   {
     name: "video",
     app: true,
-    size: { ...DESKTOP, height: 1000 },
+    size: { ...DESKTOP, height: 1100 },
     // a clean state: no empty «Noch keine Notiz» under the three things. The picture of the
     // synthetic clip is covered by the hall recording (stage.js), so its own clock goes with it
     hide: (w) => [w.noNotes, /^\d+:\d\d \/ \d+:\d\d$/],
@@ -317,13 +319,13 @@ const SHOTS = [
     find: {
       video: () => document.querySelector("video"),
       active: (hb) => {
-        const t = hb.text(hb.w("running"));
+        const t = hb.playing();
         return (
           t && hb.up(t, (e) => e.tagName === "BUTTON" || e.tagName === "A" || e.tagName === "LI")
         );
       },
       list: (hb) => {
-        const t = hb.text(hb.w("running"));
+        const t = hb.playing();
         return t && hb.up(t, (e) => e.tagName === "UL" || e.tagName === "OL");
       },
       // the marks of all goals with the labels under them
@@ -473,11 +475,11 @@ const SHOTS = [
     find: {
       video: () => document.querySelector("video"),
       active: (hb) => {
-        const t = hb.text(hb.w("running"));
+        const t = hb.playing();
         return t && hb.up(t, (e) => e.tagName === "BUTTON" || e.tagName === "A" || e.tagName === "LI");
       },
       list: (hb) => {
-        const t = hb.text(hb.w("running"));
+        const t = hb.playing();
         return t && hb.up(t, (e) => e.tagName === "UL" || e.tagName === "OL");
       },
       phase: (hb) => hb.text(hb.w("phase")),
