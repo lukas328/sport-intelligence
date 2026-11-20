@@ -154,9 +154,10 @@ test("match: create, upload with pause and resume, processing, player, comment, 
   await page.getByTestId("step-players").click();
   await expect(page.getByTestId("identity-panel")).toBeVisible();
   await openAnalysis(page, "Laufleistung");
-  await expect(page.getByTestId("physical-table")).toContainText("km");
-  await page.getByRole("button", { name: /Aufenthaltsorte zeigen/ }).nth(1).click();
-  await expect(page.getByTestId("court-heatmap")).toBeVisible();
+  // the 30 s clip covers less than the 2 minutes a team needs for its distances (BUG-11): one
+  // honest sentence instead of a table with figures nobody can trust
+  await expect(page.getByText("Zu wenig Laufdaten")).toBeVisible();
+  await expect(page.getByTestId("physical-table")).toHaveCount(0);
   await expectAccessible(page);
 
   // the current moment of the video as a play on the tactics board

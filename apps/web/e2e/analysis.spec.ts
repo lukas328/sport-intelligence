@@ -67,8 +67,10 @@ test("paper report: import, overview, match report, shots", async ({ page }, inf
   await expectAccessible(page);
 
   await openAnalysis(page, "Würfe");
-  // Zahlen stacks the sheets: the shots section has its own goal grid
-  await expect(page.getByRole("region", { name: "Würfe" }).getByTestId("goal-grid")).toBeVisible();
+  // Zahlen stacks the sheets: the shots section has its own goal picture; the report names no
+  // corner, so it is one sentence, not a grid of zeros (BUG-10)
+  await expect(page.getByRole("region", { name: "Würfe" }).getByTestId("goal-grid-empty")).toBeVisible();
+  await expect(page.getByRole("region", { name: "Würfe" }).getByTestId("goal-grid")).toHaveCount(0);
   await expectAccessible(page);
 
   // goalkeeper module: the sheet's keeper with saves and goals against by zone

@@ -100,7 +100,8 @@ test("a club without video: Szenen says one sentence and the way to the video (U
   await page.getByTestId("scene-search").fill("Gegentore aussen rechts");
   await page.getByTestId("scene-search").press("Enter");
   const answer = page.getByTestId("scenes-empty-answer");
-  await expect(answer).toContainText("Noch keine Szenen. Lade ein Video hoch, dann findest du hier jedes Tor.");
+  // one sentence, not the empty text twice (BUG-12)
+  await expect(answer).toContainText("Dazu gibt es noch keine Szene: noch kein Video ist analysiert.");
   await expect(answer.getByRole("link", { name: "Video hochladen" })).toHaveAttribute("href", /\/matches\?upload=1$/);
   await expect(page.getByText(/0 Szenen aus 0 Spielen/)).toHaveCount(0);
 });

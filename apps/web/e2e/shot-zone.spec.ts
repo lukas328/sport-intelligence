@@ -56,8 +56,11 @@ test("a confirmed goal asks «Von wo?»; three from one place make a thing; the 
     const at = () => page.getByTestId("video").evaluate((v: HTMLVideoElement) => v.currentTime);
     const t0 = await at();
     await expect.poll(at, { timeout: 15_000 }).toBeGreaterThan(t0 + 0.5);
-    // without tracks there is no estimate: nothing is preselected (with one it is a «Vorschlag», A22)
-    await expect(page.getByTestId("spot-picker")).not.toContainText("Vorschlag");
+    // the synthetic clip has tracks, so the analysis may estimate the place (A22): then it is
+    // preselected as a «Vorschlag» and said in words; without an estimate nothing is preselected
+    const picker = page.getByTestId("spot-picker");
+    if ((await picker.getByText("Vorschlag", { exact: true }).count()) > 0) await expect(picker).toContainText("Die App schlägt vor:");
+    else await expect(picker).not.toContainText("Die App schlägt vor:");
     if (n === 0) {
       // one screen on a phone: the bottom of the video and «Überspringen» are in view together, no scrolling
       for (const size of [{ width: 390, height: 844 }, { width: 360, height: 740 }]) {
