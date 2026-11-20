@@ -918,7 +918,7 @@ const fr: Messages = {
     share: { chat: "Ce qui arrive dans le chat de l'équipe", nologin: "Un lien, sans compte" },
     app: {
       goal: "But {team} {clock}",
-      playing: "en cours",
+      place: "Aile droite",
       throwOff: "Engagement",
       halfTime: "Mi-temps",
       fullTime: "Fin",
