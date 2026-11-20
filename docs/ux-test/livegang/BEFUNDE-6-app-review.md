@@ -117,6 +117,10 @@ Unterwegs rot und behoben:
 
 Nur am Entwicklungsserver gesehen (nicht im Build, nicht weiter verfolgt): in `data.spec` schloss
 sich das Formular «Neue Einheit» nach «Speichern», die Liste zeigte die Einheit aber nicht.
+Ursache (20.11.): lief das erste Laden der Liste beim Speichern noch (langsamer Dev-Server), hängte
+sich das Neuladen an diese Anfrage an, die vor dem Speichern begonnen hatte; eine neue Anfrage
+folgte nicht. Behoben mit `lib/refresh-list.ts` (laufendes Laden abbrechen, dann neu laden, mit
+Test) für alle Stellen, die die Trainingsliste neu laden.
 
 ## Stand Block 3 (19.11.2026)
 | Ticket | Stand | Was |
