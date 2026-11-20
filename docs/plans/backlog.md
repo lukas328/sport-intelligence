@@ -20,7 +20,7 @@ Die eine Liste für alle Sitzungen. Wer etwas anfängt, schreibt «läuft (Sitzu
 fertig ist, streicht es und trägt das Ergebnis im passenden Plan ein.
 
 **A. Aus der Cloud-Sitzung machbar (Hauptsitzung)**
-1. **Weniger Fragen: bessere Tor-Kandidaten.** Präzision heute 29 %, auf Lukas' 99-min-Video 122
+1. **Weniger Fragen: bessere Tor-Kandidaten.** *Läuft (Cloud-Hauptsitzung, 20.11.): 49 Dev-Segmente aus 13 Spielen mit Spielbericht (109 Tore) mit Ballnetz beobachtet, gleiche Einstellung wie der Wurf-Endtest, Kaggle-Kernels `handball-shot-dev-0` bis `-4`; daraus auf Dev ein Ballsignal festlegen, erst dann einmal auf dem Endtest messen.* Präzision heute 29 %, auf Lukas' 99-min-Video 122
    Fragen. Die Regel «Tore aus dem Spielbericht» spart kaum Fragen (Kandidaten nahe Berichtstoren
    waren schon verdeckt). Hebel: Pausen, Einspielen und Nachspiel ohne Fragen (Pausenerkennung ohne
    Hallentafel über die `no_play`-Regel), Tor-Kandidaten mit Ballpfad bestätigen. Braucht für die
