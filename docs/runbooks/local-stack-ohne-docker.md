@@ -50,9 +50,12 @@ Prüfen:
 - Mails: <http://localhost:8025>.
 
 ## Nach Änderungen
-- Web-Code: `pnpm --filter @handball/web build`, dann `scripts/local-stack.sh down` und `up`
-  (oder mit `HB_WEB_DEV=1` arbeiten; `scripts/local-stack.sh restart-web` leert den Cache von
-  `next dev`, der `apps/web/messages/*.json` sonst nicht neu liest).
+- Web-Code: `pnpm --filter @handball/web build`, dann `scripts/local-stack.sh restart-web`
+  (startet `next start` auf dem neuen Build). Mit `HB_WEB_DEV=1 scripts/local-stack.sh restart-web`
+  stattdessen `next dev` mit leerem Cache (der Cache liest `apps/web/messages/*.json` sonst nicht
+  neu). Bis 20.11. löschte `restart-web` immer den Build und startete `next dev`: die e2e liefen
+  danach unbemerkt gegen den Entwicklungsserver. Für e2e immer den Build nehmen; welcher läuft,
+  zeigt `ps aux | grep "next (dev|start)"`.
 - Backend: `scripts/local-stack.sh restart-api` (mit Migrationen).
 - Neu anfangen: `scripts/local-stack.sh down`, `su postgres -c "dropdb handball"`,
   `rm -rf /tmp/handball-local/s3`, dann `up` und Seed. Mit moto unbedingt so: nach `down` sind die
@@ -68,7 +71,8 @@ Build nötig. Mit moto statt SeaweedFS sind die Videos weg (dann neu anfangen, s
 - Browser-Tests: `cd apps/web && npx playwright test --trace off --workers 2`. Chromium liegt
   vorinstalliert in `/opt/pw-browsers` (`PLAYWRIGHT_BROWSERS_PATH`), passend zu Playwright 1.63.
   Mehr als 2 Worker lohnen sich mit 4 CPU nicht, weil die Analyse der hochgeladenen Videos
-  dieselben Kerne braucht. Ein Lauf dauert etwa 20 bis 30 Minuten.
+  dieselben Kerne braucht. Ein Lauf dauert gegen den Build etwa 7 bis 10 Minuten (20.11.:
+  121 Tests, davon 49 nur in einem der beiden Projekte und dort übersprungen).
 - API-Tests: `uv run pytest apps/api -n auto -q` brauchen nur Postgres
   (`HB_TEST_ADMIN_DSN`, Standard `postgresql://handball:handball@localhost:5432/postgres`).
 - Vitest (`pnpm --filter @handball/web test`) braucht nichts.
