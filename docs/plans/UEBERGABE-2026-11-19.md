@@ -38,11 +38,15 @@ Einstieg danach wie immer: `docs/plans/HANDOVER.md`.
 | App-Block 1: beobachtete Spiele mit neutraler Perspektive (`apps/web/src/lib/match-sides.ts`, API `Match.observed`, Spieler des eigenen Kaders dort abgelehnt), Heimteam zuerst, Zahlen aus einer Quelle («nicht erfasst» statt «-»), Laufleistung erst ab 2 min Video, eigener Abschnitt «Beobachtete Spiele», Szenen mit Filter Alle/Eigene/Beobachtet, Vorbereitungs-Mitteilung erst mit Analyse, handball.ch-Hinweis nur für dessen Spiele (`official_game`), L4 Spielerauswahl per Nummer. Offen: Formular fragt nicht, wer Heimteam ist | `88ce55e8` bis `21adfbee` | erledigt |
 | App-Block 3: nächste Aufgabe oben auf jeder Spielseite (L5), Werkbank heisst «Einrichten von Hand», Nächster Gegner oben auf der Startseite, Teilen ausgegraut mit Grund, «Alle Zahlen» offen, Saison-Titel mit Fakten, Tor oben in allen Grafiken (Wurfort-Dialog folgt dem Video, beschriftet), «Situation: Gegenstoss», keine «Spur 306», Mitteilungen mit Team, App-Fusszeile mit Rechtslinks, «Gemacht mit Handball Intelligence» auf geteilten Seiten, «AGB» in der App, `?src=` bei der Registrierung gespeichert (Spalte `signup_source`, Migration 0052, sichtbar in /ops). Merge mit Block 1, 2 und L1 vom Helfer gelöst; Web 434, API 518 Tests grün; e2e nicht gelaufen | 15 Commits bis `17053c51`, Merge `b7d77c71` | erledigt |
 | «Muster» statt «die drei Dinge» in App, Mails, PDF, Website, Hilfe, Ratgeber, Blog (en «patterns», fr «tendances»); `docs/design/ux-reset/SPEC.md` definiert den Begriff. Die App zeigt weiter höchstens drei Muster, darum bleibt die Zahl nur dort, wo sie stimmt («Und drei Muster zum Mitnehmen»). **Offen:** Produktbilder der Website (`apps/site/public/product/*.webp`) zeigen noch «Die drei Dinge», neu aufnehmen mit dem lokalen Stack (`pnpm --filter @handball/site shots`) | `bb716495` bis `8dcc79cc` | erledigt (Bilder offen) |
+| e2e, UI-Check, Produktbilder: lokaler Stack ohne Docker (`scripts/local-stack.sh`, SeaweedFS, Mailpit, Runbook), e2e erstmals mit Backend gelaufen (Specs an die Änderungen angepasst, Kalibrierung brauchte `HB_DEV_PAGES=1`), UI-Check mit Fixes (beobachtete Spiele überall Heimteam zuerst inkl. Resultat, Szenen-Chips nur eigene Spiele, Handy-Aktionen auf einer Zeile), Produktbilder der Website neu (de, fr, en, 7 Trikotfarben) | `cd79ea21` bis `ef471ee4` | erledigt |
 | L1 Tore aus dem Spielbericht: `goal_candidates.auto_accept` übernimmt ein Berichtstor ohne Frage nur bei gelesener Matchuhr, eindeutigem Kandidaten und freiem Moment; Label «aus dem Spielbericht übernommen» mit «Rückgängig». **Wirkung bescheiden:** Kandidaten nahe Berichtstoren wurden schon vorher nicht gefragt; die Regel hilft vor allem nach Uhr-Stopps (Time-out) und setzt das Tor an den genauen Moment. Achtung: automatisch bestätigte Kandidaten (`auto`) nicht als Trainingslabels verwenden. Auf echten Spielen nicht gemessen | `1c6d5b35`, `34d67500`, `7bf84327` | erledigt |
 | App-Block 2: Video als Standard (Wahl gemerkt), Player fixiert links, Szenen vor/zurück (Tasten N/P), Szenenende mit «Nächste Szene», «Zeichnen» öffnet die Werkbank am aktuellen Moment, nur ein Video-Element bei geschlossener Werkbank, Legende nur in «Feld von oben», «Szene merken» als Umschalter, Loop-Vorschau im Wurfort-Dialog; Prüfen zeigt den ganzen Clip (L2, BUG-14); L3: Fragen hinter «Mehr prüfen» blieben in der DB, waren aber nicht mehr erreichbar, jetzt «Prüfen · n weitere» und Glocke verlinkt. Web 415 Tests, Typecheck grün; e2e nicht gelaufen | `65501c30` bis `35d9afec` | erledigt |
 | Website-Review umgesetzt (Details pro Punkt in BEFUNDE-5, «Stand Umsetzung»): ein Beispieluniversum (auch App-Beispiel 11 von 29), «Hilfe», «Frag deine Spiele», Schritt 0 Einwilligung, Daten-Seite sagt, was ein Nein im Code bewirkt, Animationen, Zeitmarke Sonntag 10 Uhr, Preise CHF/EUR umschaltbar (`?cur=`), ehrliche Teamsuche ausserhalb der Schweiz (Website und App), `?src=` an allen App-Links ohne Cookies (Werte in `apps/site/README.md`), neue Seite `/vereine/`, Fokusrahmen, Querscroll, «3 gegen 2» überall. Handy-Breiten 375/768 px: alle 155 Seiten ohne Querscroll. Bewusst nicht: Hinweis «noch nicht endgültig» bei Preisen (widerspricht Lukas' Regel vom 17.11.) | 22 Commits bis `9a128f2f` | erledigt |
 
 ## Was Lukas tun muss
+- Entscheiden: Saison-Titel «Fünf Spiele. Und aussen rechts bleibt offen.» (Website-Story) gegen
+  TXT-08 «Fakten zuerst»; Launch zur Rückrunde im Januar; mehr als drei Muster pro Spiel zulassen?
+- Echter Handy-Test (iPhone und Android) von Website und App.
 - Für die Wurfzeit: auf den 41 Dev-Wurfclips je den Abwurf anklicken (ein Klick pro Clip). Ohne
   diese Wahrheit lässt sich die Wurfzeit nicht ehrlich verbessern.
 - Kaggle in der Cloud-Sitzung: Der Proxy hat am 19.11. keine Kaggle-Zugangsdaten eingesetzt
@@ -57,21 +61,33 @@ Einstieg danach wie immer: `docs/plans/HANDOVER.md`.
   gewählte Marke liegt in `docs/design/brand2/`).
 
 ## Warteschlange
-Stand 20.11. nachts: Punkte 1 bis 3 erledigt; 4 läuft (UI-Check, e2e, Produktbilder). Am Nachmittag
-hat ein Ausgabenlimit (5 h) alle Helfer gestoppt; sie wurden nach dem Zurücksetzen fortgesetzt.
-Offen bleiben 3 bis 5.
+Stand 20.11.: Punkte 1 bis 4 sind erledigt (siehe Tabelle oben). Offen für die nächste Sitzung:
+1. Aus dem UI-Check vom 20.11. (BEFUNDE-6, «UI-Check 20.11.»): Zeitleiste unter dem Video folgt bei
+   beobachteten Spielen nicht dem Heimteam; «Ballverluste nach Typ» Zahlen zu weit vom Wort;
+   Info-Symbol bricht am Handy um; Torhüter ohne Nummer als «#?», API prüft `goalkeeper_id` nicht;
+   Website-Tour zeigt noch «läuft gerade».
+2. e2e `data.spec`: zweimal «execution context destroyed» kurz nach einem Neustart des Webservers,
+   danach dreimal grün; Ursache offen. Der ganze e2e-Lauf nach allen Fixes steht noch aus.
+3. Formular für beobachtete Spiele fragt nicht, wer Heimteam ist (Block 1).
+4. Aus `HANDOVER.md`: Kalibrierung per Klick auf Staging (Ende-zu-Ende), Ball (Fehlalarme, Testset),
+   übrige Code-Health-Punkte (4 bis 8, 10).
+5. Wurfzeit verbessern, sobald Lukas die Abwürfe auf den Dev-Clips markiert hat (Plan, Abschnitt
+   «Wurfzeit der Kandidaten»).
 
-Falls die Sitzung abbricht: hier weitermachen. Laufende Helfer stehen oben mit «läuft»; ihre
-Arbeit liegt nur in lokalen Worktrees und geht mit dem Container verloren, also neu starten.
-1. App-Block 3 (`docs/ux-test/livegang/BEFUNDE-6-app-review.md`, Abschnitt Umsetzung Punkt 3 und L5):
-   UX-05, UX-06, UX-08 bis UX-11, UI-01, UI-03, UI-04, BUG-22, TXT-02, TXT-04, TXT-05, TXT-08,
-   LEGAL-01, dazu `?src=` bei der Registrierung speichern, «Gemacht mit Handball Intelligence» auf
-   geteilten Szenen, «AGB» statt «Nutzungsbedingungen», Werkbank nur hinter «Einrichten von Hand»,
-   oben auf jeder Spielseite die nächste Aufgabe.
-2. L1 «nicht jedes Tor markieren»: Tor-Kandidaten, die klar zu einem Tor im offiziellen Spielbericht
-   passen, ohne Frage übernehmen (`apps/api/src/handball_api/services/goal_candidates.py`, heute nur
-   Vorschlag); erst nach Block 2, weil derselbe Code die offenen Fragen zählt.
-3. «die drei Dinge» wird «Muster» ohne Zahl (en «patterns», fr «tendances»; Lukas 19.11. spät) in App,
-   Website, Demo und Hilfe; nur sichtbare Texte, URLs bleiben. Als letzter Schritt.
-4. UI-Check der ganzen Spielanalyse (L5) nach Block 1 bis 3.
-5. Danach aus `HANDOVER.md`: Kalibrierung per Klick auf Staging, Ball, übrige Code-Health-Punkte.
+Lokale App ohne Docker (für e2e, Screenshots, Produktbilder): `docs/runbooks/local-stack-ohne-docker.md`.
+
+## PR-Text für Lukas (Branch `claude/affectionate-edison-lkw4r3` nach `main`)
+Titel: Hauptsitzung 19./20.11.: App- und Website-Review, beobachtete Spiele, Wurfort-Vorschlag, Muster
+
+Inhalt:
+- Wurf-Endtest (enthält PR #104), Diagnose der Wurfzeit, Spielende in der Pausenerkennung
+- Code health: totes Gerüst gelöscht, `system_access` als Kontextmanager, PDFs im Thread
+- A22: Wurfort-Vorschlag mit Bestätigen per Tipp
+- App-Review Block 1 bis 3: beobachtete Spiele neutral, Zahlen aus einer Quelle, Video-Tab, Prüfen,
+  nächste Aufgabe pro Spiel, Fusszeile, `?src=` bei der Registrierung (Migration 0052)
+- L1: Tore aus dem Spielbericht ohne Frage, wenn eindeutig
+- Website-Review: Europa (CHF/EUR), «Für Vereine», `?src=`, Fokus, ein Beispieluniversum
+- «Muster» statt «die drei Dinge», Produktbilder neu
+- Lokaler Stack ohne Docker, e2e angepasst und gelaufen
+Tests: API 518, Web 435, Website 100 grün; e2e: alle Specs grün bis auf einen unregelmässigen
+Fehler in `data.spec` (siehe Übergabe). Details: `docs/plans/UEBERGABE-2026-11-19.md`.
