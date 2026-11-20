@@ -58,6 +58,12 @@ Prüfen:
   `rm -rf /tmp/handball-local/s3`, dann `up` und Seed. Mit moto unbedingt so: nach `down` sind die
   Videos weg, die Zeilen in der Datenbank nicht.
 
+## Nach einem Neustart des Containers
+Am 20.11. erprobt: Postgres läuft nach dem Neustart wieder, alle anderen Dienste nicht.
+`scripts/local-stack.sh up` startet sie in etwa 1 min neu. Datenbank, SeaweedFS-Daten
+(`/tmp/handball-local/s3`) und der Web-Build bleiben erhalten, also kein neuer Seed und kein neuer
+Build nötig. Mit moto statt SeaweedFS sind die Videos weg (dann neu anfangen, siehe oben).
+
 ## Tests
 - Browser-Tests: `cd apps/web && npx playwright test --trace off --workers 2`. Chromium liegt
   vorinstalliert in `/opt/pw-browsers` (`PLAYWRIGHT_BROWSERS_PATH`), passend zu Playwright 1.63.
@@ -73,6 +79,10 @@ Prüfen:
 - `pgrep -f` im Skript sucht die Prozesse an ihrer Kommandozeile. Steht dieselbe Zeichenkette in
   der Kommandozeile der aufrufenden Shell (zum Beispiel in einem Heredoc im selben Befehl), meint
   das Skript, der Dienst laufe schon. Das Skript dann in einem eigenen Befehl aufrufen.
+- `capture.mjs --colours` färbt den Demo-Verein der Reihe nach um und setzt ihn erst am Ende
+  zurück. Bricht der Lauf ab, bleibt der Verein in einer fremden Farbe. Zurück auf Grün:
+  `psql postgresql://handball:handball@localhost:5432/handball -c "update organizations set primary_color='#10684a', secondary_color='#ffffff' where name='HC Tannengrün'"`
+  und dasselbe für `matches.kit_own` der Spiele des Vereins (ausser beobachteten Spielen).
 - `service redis-server start` meldet `ulimit: error setting limit`; Redis läuft trotzdem.
 - Ohne Mailpit scheitern die e2e-Specs, die Links aus Mails lesen (`e2e/helpers.ts`,
   `linkFromMail`): account, entry, family, onboarding, player.
