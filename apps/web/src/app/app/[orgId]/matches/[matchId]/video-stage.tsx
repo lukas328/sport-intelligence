@@ -9,10 +9,12 @@ import { useEffect, useRef, useState } from "react";
 import { usePhone } from "@/lib/use-phone";
 import { CameraKey, SectionHead } from "@/components/anlauf/blocks";
 import { Rail } from "@/components/anlauf/charts";
+import { useMatchSides } from "@/components/domain/match-sides";
 import { clockOf, SceneCamera, useThingText } from "@/components/anlauf/three-things-view";
 import { Button } from "@/components/ui/button";
 import { VideoPlayer, type PlayerHandle } from "@/components/video/player";
 import { api } from "@/lib/client";
+import { oppFirst } from "@/lib/match-sides";
 import { cameraScene, goalRuns, reportGoals, thingSequence, useSceneCamera, type MatchGraphics } from "@/lib/graphics";
 import { threeThings } from "@/lib/three-things";
 import { SpotChange, useSpotText } from "@/components/anlauf/spot-parts";
@@ -74,6 +76,8 @@ export function VideoStage({
   onDraw?: (ms: number) => void;
 }) {
   const t = useTranslations("anlauf");
+  // the home team above the line, also in an observed match (UI check 20.11.)
+  const railOppFirst = oppFirst(useMatchSides());
   const tz = useTranslations("seasonPage");
   const text = useThingText();
   const partMarkers = usePartMarkers(match.videos);
@@ -343,6 +347,7 @@ export function VideoStage({
               at={goal?.t_ms != null ? goal.t_ms / 60_000 : null}
               length={Math.max(1, video.duration_s / 60)}
               label={t("rail")}
+              oppFirst={railOppFirst}
             />
             <p className="mt-1 flex justify-between text-[15px] text-ink-2" data-testid="rail-video">
               <span>{t("atVideo", { time: "0:00" })}</span>
@@ -353,7 +358,7 @@ export function VideoStage({
           <div className="mt-6">
             {span ? (
               <>
-                <Rail goals={reportGoals(graphics)} phase={short ? null : phase} at={goal?.minute ?? null} from={span[0]} length={Math.max(1, span[1] - span[0])} label={t("rail")} />
+                <Rail goals={reportGoals(graphics)} phase={short ? null : phase} at={goal?.minute ?? null} from={span[0]} length={Math.max(1, span[1] - span[0])} label={t("rail")} oppFirst={railOppFirst} />
                 <p className="mt-1 flex justify-between text-[15px] text-ink-2" data-testid="rail-span">
                   <span>{t("minuteAt", { n: Math.floor(span[0]) })}</span>
                   <span>{t("minuteAt", { n: Math.ceil(span[1]) })}</span>
@@ -361,7 +366,7 @@ export function VideoStage({
               </>
             ) : (
               <>
-                <Rail goals={reportGoals(graphics)} phase={phase} at={goal?.minute ?? null} label={t("rail")} />
+                <Rail goals={reportGoals(graphics)} phase={phase} at={goal?.minute ?? null} label={t("rail")} oppFirst={railOppFirst} />
                 <p className="mt-1 flex justify-between text-[15px] text-ink-2">
                   <span>{t("throwOff")}</span>
                   <span>{t("halfTimeWord")}</span>
