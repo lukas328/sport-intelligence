@@ -483,7 +483,9 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
               { value: "numbers", label: t("tabs.numbers") },
             ]}
           />
-          <div className="flex flex-wrap items-center justify-end gap-2 pb-2.5">
+          {/* on a 390 px phone Prüfen, Teilen and Mehr fit one line only with the smaller gap
+              (UI check 20.11.: «Mehr» fell onto a line of its own) */}
+          <div className="flex flex-wrap items-center justify-end gap-1 pb-2.5 sm:gap-2">
             {staff && checks > 0 && (
               <Link href={`${base}/check`} className="font-slant flex min-h-11 items-center gap-2 px-2 text-xl text-ink no-underline" data-testid="check-link">
                 {ta("check")}
