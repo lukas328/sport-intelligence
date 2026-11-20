@@ -123,6 +123,26 @@ async def _check_players(ctx: Ctx, match: Match, *ids: uuid.UUID | None) -> None
         raise ProblemError(422, "player-not-in-team", "Player is not in this team's roster")
 
 
+async def _check_keeper(ctx: Ctx, match: Match, side: str, attributes: dict[str, Any]) -> None:
+    """`goalkeeper_id` in the attributes names our goalkeeper (stats credit the save to them):
+    a player of the match's team, behind the opponent's shots, never in an observed match (UI
+    check 20.11.: an invented id showed as «#?»). A keeper we do not know is `goalkeeper_number`."""
+    raw = (attributes or {}).get("goalkeeper_id")
+    if raw is None:
+        return
+    try:
+        keeper = uuid.UUID(str(raw))
+    except ValueError:
+        raise ProblemError(
+            422, "player-not-in-team", "goalkeeper_id is not a player of this team"
+        ) from None
+    if side != "opponent":
+        raise ProblemError(
+            422, "invalid-event", "goalkeeper_id names our goalkeeper: only on the opponent's shots"
+        )
+    await _check_players(ctx, match, keeper)
+
+
 async def create_event(
     ctx: Ctx, match_id: uuid.UUID, data: EventIn, source: str = "user_correction"
 ) -> Event:
@@ -134,6 +154,7 @@ async def create_event(
         if existing is not None:
             return existing
     await _check_players(ctx, match, data.player_id, data.assist_player_id)
+    await _check_keeper(ctx, match, data.side, data.attributes)
     values = data.model_dump()
     if data.t_ms is not None and data.clock_s is None:
         derived = clock_from_video(match, data.t_ms)
@@ -188,6 +209,8 @@ async def update_event(ctx: Ctx, event_id: uuid.UUID, data: EventPatch) -> Event
     before = _snapshot(ev)
     values = data.model_dump(exclude_unset=True)
     await _check_players(ctx, match, values.get("player_id"), values.get("assist_player_id"))
+    if "side" in values:
+        await _check_keeper(ctx, match, values["side"] or ev.side, ev.attributes)
     for k, v in values.items():
         setattr(ev, k, v)
     if ev.type != "shot" and (ev.outcome or ev.goal_zone):
