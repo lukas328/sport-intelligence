@@ -1,15 +1,13 @@
 "use client";
 
-import { track } from "@/lib/analytics";
 import type { Schemas } from "@handball/api-client";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Crosshair, Keyboard, Maximize2, Play, Share2, X } from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Crosshair, Keyboard, Maximize2, Share2, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, type FormEvent, type Ref } from "react";
 import { useRouter } from "next/navigation";
-import { CourtCalibration, CourtPreview } from "@/components/analysis/court-calibration";
 import { Tagger } from "@/components/analysis/tagger";
-import { useMatchRoster, useMatchSides, useSideLabel } from "@/components/domain/match-sides";
+import { useMatchRoster } from "@/components/domain/match-sides";
 import { FROM_VIDEO_KEY, playFromVideo } from "@/lib/play-from-video";
 import { Button } from "@/components/ui/button";
 import { ShareButton } from "@/components/sharing/share-button";
@@ -22,20 +20,24 @@ import { MultiAngleControls, useMultiAngle } from "@/components/video/multi-angl
 import { SyncedCam } from "@/components/video/synced-cam";
 import { cameraAt } from "@/lib/best-camera";
 import { DrawLayer } from "@/components/video/draw-layer";
-import { MiniCourt } from "@/components/video/mini-court";
 import { VideoPlayer, type Marker, type PlayerHandle } from "@/components/video/player";
 import type { Shape, Tool } from "@/components/video/shapes";
 import { api } from "@/lib/client";
 import { errorKey, type ErrorKey } from "@/lib/errors";
 import { formatClock } from "@/lib/format";
-import { courtFromHall, courtFromHallSure, courtUnconfirmed, coverage, firstOpen, steps } from "@/lib/match-workflow";
+import { courtUnconfirmed, coverage, firstOpen, steps } from "@/lib/match-workflow";
 import { goalRows } from "@/lib/official-goals";
 import { cn } from "@/lib/utils";
-import { GoalCandidatesPanel, useGoalCandidates } from "./goal-candidates";
-import { ShotCandidatesPanel, useShotCandidates } from "./shot-candidates";
+import { AnalysisPanel } from "./analysis-panel";
+import { CameraSwitch } from "./camera-switch";
+import { FormationsCard } from "./formations-card";
+import { IdentityPanel, ownTracks } from "./identity-panel";
+import { useWorkspaceData } from "./use-workspace-data";
+import { GoalCandidatesPanel } from "./goal-candidates";
+import { ShotCandidatesPanel } from "./shot-candidates";
 import { KickoffPanel } from "./kickoff-panel";
 import { MatchTimeline } from "./match-timeline";
-import { OfficialGoalsPanel, useOfficialGoals } from "./official-goals";
+import { OfficialGoalsPanel } from "./official-goals";
 import { OfficialReportImport } from "./official-report";
 import { WorkRail, type Pane } from "./work-rail";
 import { usePartMarkers } from "./parts-panel";
@@ -151,20 +153,14 @@ export function Workspace({
   const m = { org_id: orgId, match_id: match.id };
   const media = `/v1/orgs/${orgId}/videos/${cam.id}/media`;
 
-  const comments = useQuery({
-    queryKey: ["comments", match.id],
-    queryFn: async () => (await api.GET("/v1/orgs/{org_id}/matches/{match_id}/comments", { params: { path: m } })).data ?? [],
-  });
-  const clips = useQuery({
-    queryKey: ["clips", match.id],
-    queryFn: async () => (await api.GET("/v1/orgs/{org_id}/matches/{match_id}/clips", { params: { path: m } })).data ?? [],
-  });
-  const analysis = useQuery({
-    queryKey: ["analysis", video.id],
-    refetchInterval: (q) => (q.state.data?.status === "running" ? 10_000 : false),
-    queryFn: async () =>
-      (await api.GET("/v1/orgs/{org_id}/videos/{video_id}/analysis", { params: { path: { org_id: orgId, video_id: video.id } } }))
-        .data ?? null,
+  const multi = useMultiAngle(cams, video.id);
+  const pickCam = multi.pick;
+  const { comments, clips, analysis, annotations, playlists, events, hasReport, candidates, shotCandidates, official } = useWorkspaceData({
+    orgId,
+    match,
+    videoId: video.id,
+    staff,
+    autoCamera: multi.auto && cams.length > 1,
   });
   const kitColours = useMemo(
     () => ({ home: match.kit_own, home_gk: match.kit_own_gk, away: match.kit_opponent, away_gk: match.kit_opponent_gk, referee: match.kit_referee ?? "#111827" }),
@@ -181,17 +177,6 @@ export function Workspace({
       setNow(ms);
     }
   }, []);
-  const annotations = useQuery({
-    queryKey: ["annotations", match.id],
-    queryFn: async () => (await api.GET("/v1/orgs/{org_id}/matches/{match_id}/annotations", { params: { path: m } })).data ?? [],
-  });
-  const playlists = useQuery({
-    queryKey: ["playlists", match.team_id],
-    enabled: staff,
-    queryFn: async () =>
-      (await api.GET("/v1/orgs/{org_id}/teams/{team_id}/playlists", { params: { path: { org_id: orgId, team_id: match.team_id } } }))
-        .data ?? [],
-  });
 
   const partMarkers = usePartMarkers(match.videos);
   const markers: Marker[] = useMemo(
@@ -264,15 +249,7 @@ export function Workspace({
   const spot = useSpotlight(analysis.data ?? null);
   const [spotOpen, setSpotOpen] = useState(false);
   const spotShown = spotOpen || spot.track != null || spot.picking;
-  const multi = useMultiAngle(cams, video.id);
-  const pickCam = multi.pick;
   const mainVideo = useCallback(() => raw.current?.video() ?? null, []);
-  const events = useQuery({
-    queryKey: ["events", match.id],
-    // the auto camera and the events lane of the timeline
-    enabled: (multi.auto && cams.length > 1) || staff,
-    queryFn: async () => (await api.GET("/v1/orgs/{org_id}/matches/{match_id}/events", { params: { path: { org_id: orgId, match_id: match.id } } })).data ?? [],
-  });
   // best camera around events (4.5): the goal camera takes over shortly before a shot on goal
   const [autoCamId, setAutoCamId] = useState<string | null>(null);
   useEffect(() => {
@@ -293,11 +270,7 @@ export function Workspace({
     return tr ? (tr.player_id && spotNames[tr.player_id]) || (tr.number != null ? `#${tr.number}` : "") : "";
   })();
 
-  // the order of work: court, throw-off, goals, players; the lists share the panels' caches
-  const hasReport = match.report_extra?.official_report != null;
-  const candidates = useGoalCandidates(orgId, match.id, staff);
-  const shotCandidates = useShotCandidates(orgId, match.id, staff);
-  const official = useOfficialGoals(orgId, match.id, staff && hasReport);
+  // the order of work: court, throw-off, goals, players
   const durationMs = video.duration_s ? video.duration_s * 1000 : null;
   const rate = candidates.data?.default_rate ?? 2;
   const a = analysis.data;
@@ -860,431 +833,5 @@ export function Workspace({
       </div>
       </div>
     </div>
-  );
-}
-
-type Analysis = Schemas["AnalysisOut"];
-
-function AnalysisPanel({
-  analysis,
-  orgId,
-  videoId,
-  colours,
-  getTime,
-  canCalibrate,
-  onConfirmed,
-}: {
-  analysis: Analysis | null;
-  orgId: string;
-  videoId: string;
-  colours: Record<string, string>;
-  getTime: () => number;
-  canCalibrate: boolean;
-  onConfirmed?: () => void;
-}) {
-  const t = useTranslations("analysis");
-  // the court dialog; «Neu markieren» beside the court preview goes straight to the lines
-  const [marking, setMarking] = useState<false | "suggest" | "mark">(false);
-  const qc = useQueryClient();
-  const confirm = useMutation({
-    mutationFn: async () => {
-      const { error } = await api.POST("/v1/orgs/{org_id}/videos/{video_id}/calibration/confirm", {
-        params: { path: { org_id: orgId, video_id: videoId } },
-      });
-      if (error) throw new Error("confirm");
-    },
-    onSuccess: async () => {
-      await qc.invalidateQueries({ queryKey: ["analysis", videoId] });
-      onConfirmed?.();
-    },
-  });
-  const confirmCourt = () => confirm.mutate();
-  const confirming = confirm.isPending;
-  const confirmFailed = confirm.isError;
-  const ready = analysis?.status === "ready";
-  useEffect(() => {
-    if (ready) track("analysis_viewed");
-  }, [ready]);
-  if (!analysis || analysis.status === "none") return null;
-  const canMark = canCalibrate && analysis.status === "ready" && analysis.panorama != null;
-  const unconfirmed = courtUnconfirmed(analysis);
-  const courtState = analysis.calibration_state;
-  const info = (analysis.calibration_info ?? {}) as { reason?: string; method?: string };
-  const REASONS = ["camera_motion", "no_floor", "flat_view", "few_people", "court"] as const;
-  const reason = REASONS.find((r) => r === info.reason) ?? (analysis.needs_calibration && analysis.calibration_error ? "court" : null);
-  const hallName = analysis.hall?.name ?? null;
-  const fromHall = courtFromHall(analysis);
-  const hallCheck = canMark && fromHall && unconfirmed && courtState !== "undeterminable";
-  const hallConfirmed = fromHall && analysis.calibration?.source === "user_correction";
-  const hallSure = !hallConfirmed && courtFromHallSure(analysis);
-  return (
-    // while the court waits for its check the answer bar is fixed on phones: room for it at the end
-    <section className={cn("space-y-3", hallCheck && "max-lg:pb-24")} data-testid="analysis-panel">
-      <h2 className="sr-only">{t("title")}</h2>
-      {analysis.status === "running" && <p className="text-sm">{t("running")}</p>}
-      {analysis.status === "failed" && (
-        <Alert>
-          <span className="block font-medium">{t(`failure_${analysis.error_code ?? "generic"}` as "failure_generic")}</span>
-          <span className="block">{t(`failureNext_${analysis.error_code ?? "generic"}` as "failureNext_generic")}</span>
-          <span className="block text-xs">{t("failureCredit")}</span>
-        </Alert>
-      )}
-      {analysis.status === "ready" && analysis.needs_calibration && courtState !== "undeterminable" && (
-        <Alert kind="info">
-          {t(canMark ? "needsCalibration" : "needsCalibrationStaff")}
-          {/* why the automatic court failed, in the coach's words (ADR 025: a reason code) */}
-          {reason && <span className="mt-1 block text-muted">{t(`calibReason_${reason}`)}</span>}
-        </Alert>
-      )}
-      {/* one sentence: does the court fit (the coach said it cannot be set, or it is being applied) */}
-      {analysis.status === "ready" && (courtState === "undeterminable" || courtState === "updating") ? (
-        <p className="text-[0.9375rem]" data-testid="court-state">
-          {t(courtState === "undeterminable" ? "courtUndeterminable" : "courtUpdating")}
-        </p>
-      ) : analysis.status === "ready" && !analysis.needs_calibration ? (
-        <p className="text-[0.9375rem]">
-          {fromHall
-            ? hallSure
-              ? t("courtFromHallSure")
-              : t(hallConfirmed ? "courtFromHallOk" : hallCheck ? "courtFromHallCheck" : "courtFromHall", { hall: hallName ?? "" })
-            : unconfirmed
-              ? t("checkCourt")
-              : t("courtOk")}
-        </p>
-      ) : null}
-      {/* a court from the hall is checked here in one look, not in the marking dialog */}
-      {hallCheck && <CourtPreview orgId={orgId} videoId={videoId} analysis={analysis} alt={t("courtPreviewAlt")} />}
-      {/* a court marked once is carried over to the next videos of the same hall */}
-      {canMark && !fromHall && (analysis.needs_calibration || unconfirmed) && (
-        <p className="text-xs text-muted" data-testid="hall-hint">
-          {hallName ? t("hallOnce", { hall: hallName }) : t("hallUnknown")}
-        </p>
-      )}
-      {hallCheck ? (
-        // phones: the one answer waits in the thumb zone above the bottom navigation, wherever the
-        // page is scrolled, until the court is checked
-        <div className="flex flex-wrap gap-2 max-lg:fixed max-lg:inset-x-0 max-lg:bottom-[calc(4.25rem+env(safe-area-inset-bottom))] max-lg:z-20 max-lg:border-t max-lg:border-foreground/15 max-lg:bg-background max-lg:px-4 max-lg:py-3 max-lg:[&>*]:flex-1">
-          <Button onClick={confirmCourt} loading={confirming} data-testid="court-confirm">
-            {t("courtFits")}
-          </Button>
-          <Button variant="secondary" onClick={() => setMarking("mark")} data-testid="mark-court">
-            {t("courtRemark")}
-          </Button>
-        </div>
-      ) : canMark && (
-        <Button
-          variant={analysis.needs_calibration ? "primary" : "secondary"}
-          size={analysis.needs_calibration || unconfirmed ? "md" : "sm"}
-          onClick={() => setMarking("suggest")}
-          data-testid="mark-court"
-        >
-          {t(courtState === "undeterminable" ? "courtMarkAnyway" : analysis.needs_calibration ? "markCourt" : unconfirmed ? "checkCourtButton" : "realign")}
-        </Button>
-      )}
-      {confirmFailed && <Alert className="py-2">{t("courtConfirmError")}</Alert>}
-      {marking && <CourtCalibration orgId={orgId} videoId={videoId} analysis={analysis} start={marking} onClose={() => setMarking(false)} />}
-      {/* no positions on a court the coach said cannot be set */}
-      {courtState !== "undeterminable" && analysis.chunks != null && analysis.chunk_ms != null && analysis.chunks > 0 && (
-        <MiniCourt
-          baseUrl={`/v1/orgs/${orgId}/videos/${videoId}/tracks`}
-          chunkMs={analysis.chunk_ms}
-          chunks={analysis.chunks}
-          tracks={analysis.tracks}
-          colours={colours}
-          getTime={getTime}
-          label={t("title")}
-        />
-      )}
-      {/* the legend of the mini court: nothing to explain without it */}
-      {courtState !== "undeterminable" && analysis.chunks != null && analysis.chunks > 0 && (
-        <div className="flex flex-wrap gap-3 text-xs text-muted">
-          {(["home", "away", "referee"] as const).map((k) => (
-            <span key={k} className="flex items-center gap-1">
-              <span aria-hidden className="inline-block size-3 rounded-full ring-1 ring-foreground/50" style={{ background: colours[k] }} />
-              {t(k)}
-            </span>
-          ))}
-        </div>
-      )}
-      {/* what the analysis did, for those who want to know; not a coach's task */}
-      <details className="text-xs text-muted">
-        <summary className="cursor-pointer hover:text-foreground">{t("technical")}</summary>
-        <div className="mt-2 space-y-1.5">
-          {analysis.detector === "heuristic" && <p title={t("heuristicHint")}>{t("heuristic")}</p>}
-          {analysis.auto_events && (
-            <p data-testid="auto-events">
-              {(analysis.auto_events.missing as string[] | undefined)?.includes("goalkeepers")
-                ? t("autoNoGoalkeepers")
-                : t("autoSummary", { events: Number(analysis.auto_events.events ?? 0), possessions: Number(analysis.auto_events.possessions ?? 0) })}{" "}
-              {t("autoLimits")}
-              {Number(analysis.auto_events.overlay_goals ?? 0) > 0 && (
-                <span className="block" data-testid="overlay-goals">
-                  {t("autoOverlay", { goals: Number(analysis.auto_events.overlay_goals) })}
-                </span>
-              )}
-            </p>
-          )}
-          {analysis.calibration && (
-            <p>
-              {t("calibration")}: {t(`calibration_${analysis.calibration.source as "heuristic"}`)},{" "}
-              {/* the automatic court's error is not measured yet (reprojection 0): no «100 %»,
-                  the court is asked in Prüfen (real-video test, Q-CAL-QUALITY) */}
-              {analysis.calibration.source !== "user_correction" && !analysis.calibration.reprojection_px ? t("confidenceUnmeasured") : t("confidence", { value: Math.round(analysis.calibration.confidence * 100) })}
-            </p>
-          )}
-          {analysis.tracks.length > 0 && <p>{t("tracks", { count: analysis.tracks.length })}</p>}
-        </div>
-      </details>
-    </section>
-  );
-}
-
-/** Own-team tracks worth naming, the longest 40; an observed match: the tracks of both teams (L4). */
-function ownTracks(tracks: Analysis["tracks"], both = false) {
-  return tracks
-    .filter((tr) => tr.team === "home" || tr.team === "home_gk" || (both && (tr.team === "away" || tr.team === "away_gk")))
-    .sort((a, b) => b.last_ms - b.first_ms - (a.last_ms - a.first_ms))
-    .slice(0, 40);
-}
-
-
-/** Manual track identities (M5): own-team tracks to roster players; kept across re-analysis. */
-function IdentityPanel({
-  orgId,
-  match,
-  videoId,
-  tracks,
-  onSeek,
-  at,
-}: {
-  orgId: string;
-  match: Match;
-  videoId: string;
-  tracks: Analysis["tracks"];
-  onSeek: (ms: number) => void;
-  at: (videoMs: number) => string;
-}) {
-  const t = useTranslations("identity");
-  const qc = useQueryClient();
-  // an observed match: the other team's people by shirt number, never our roster (L4)
-  const roster = useMatchRoster(orgId, match);
-  const sides = useMatchSides();
-  const neutral = sides?.neutral ?? false;
-  const [notice, setNotice] = useState<string | null>(null);
-  const [all, setAll] = useState(false);
-  // in the order they appear, so the coach goes through the video once
-  const own = [...ownTracks(tracks, neutral)].sort((a, b) => a.first_ms - b.first_ms);
-  // named: a player of the roster, or in an observed match a shirt number somebody set
-  const named = (tr: (typeof own)[number]) => Boolean(tr.player_id) || (neutral && tr.identity_source === "user_correction");
-  const open = own.filter((tr) => !named(tr));
-  // the next open people first; the whole list on request
-  // a few seconds on screen is rarely worth a name: those fold away with the rest
-  const long = open.filter((tr) => tr.last_ms - tr.first_ms >= 5000);
-  const shown = all ? own : [...long.slice(0, 8), ...own.filter(named)].sort((a, b) => a.first_ms - b.first_ms);
-  if (own.length === 0) return null;
-  async function assign(trackNo: number, playerId: string, number: number | null = null) {
-    const { error } = await api.PUT("/v1/orgs/{org_id}/videos/{video_id}/tracks/{track_no}/identity", {
-      params: { path: { org_id: orgId, video_id: videoId, track_no: trackNo } },
-      body: { player_id: playerId || null, number },
-    });
-    if (!error) {
-      setNotice(t("saved"));
-      void qc.invalidateQueries({ queryKey: ["analysis", videoId] });
-      void qc.invalidateQueries({ queryKey: ["physical", match.id] });
-    }
-  }
-  return (
-    <section data-testid="identity-panel" aria-labelledby="identity-title">
-        <h2 id="identity-title" className="font-display text-xl">{t("title")}</h2>
-        <p className="mt-1 text-sm">
-          {open.length > 0 ? t("openCount", { n: open.length, first: at(open[0]!.first_ms) }) : t("allDone")}
-        </p>
-        <p className="mt-1 text-xs text-muted">{neutral ? t("hintNumber") : t("hint")}</p>
-        <ul className="mt-3 divide-y divide-border/70 text-sm">
-          {shown.map((tr) => (
-            <li key={tr.track_no} className="flex flex-wrap items-center gap-2 py-1.5">
-              <Button variant="quiet" size="sm" className="min-w-0 justify-start" onClick={() => onSeek(tr.first_ms + 500)} aria-label={`${t("seek")}: ${t("track", { n: tr.track_no })}, ${at(tr.first_ms)}`}>
-                <Play aria-hidden className="size-3 fill-current" />
-                <span className="font-score tabular-nums">{at(tr.first_ms)}</span>
-                {/* a shirt number the analysis read helps to recognise the person; the track id does not */}
-                <span className="text-muted">
-                  {tr.number != null ? t("shirt", { n: tr.number }) : t("track", { n: tr.track_no })}
-                  {` · ${t("onScreen", { s: Math.round((tr.last_ms - tr.first_ms) / 1000) })}`}
-                  {/* an observed match lists both teams: whose person it is */}
-                  {neutral && sides && ` · ${tr.team?.startsWith("home") ? sides.own : sides.opp}`}
-                </span>
-              </Button>
-              <label className="sr-only" htmlFor={`track-${tr.track_no}`}>
-                {t("track", { n: tr.track_no })}
-              </label>
-              {neutral ? (
-                <input
-                  id={`track-${tr.track_no}`}
-                  type="number"
-                  min={0}
-                  max={99}
-                  inputMode="numeric"
-                  defaultValue={tr.number ?? ""}
-                  placeholder={t("numberPlaceholder")}
-                  onBlur={(e) => {
-                    const v = e.target.value.trim();
-                    if (v === String(tr.number ?? "")) return;
-                    void assign(tr.track_no, "", v === "" ? null : Number(v));
-                  }}
-                  className="min-h-9 w-24 bg-raised ring-1 ring-inset ring-border px-2"
-                  data-testid="identity-number"
-                />
-              ) : (
-              <select
-                id={`track-${tr.track_no}`}
-                value={tr.player_id ?? ""}
-                onChange={(e) => void assign(tr.track_no, e.target.value)}
-                className="min-h-9 flex-1 bg-raised ring-1 ring-inset ring-border px-2"
-              >
-                <option value="">{t("none")}</option>
-                {(roster.data ?? [])
-                  .filter((r) => r.active)
-                  .map((r) => (
-                    <option key={r.player_id} value={r.player_id}>
-                      {r.jersey_number != null ? `#${r.jersey_number} ` : ""}
-                      {r.first_name} {r.last_name}
-                    </option>
-                  ))}
-              </select>
-              )}
-              {tr.identity_source && <span className="text-xs text-muted">{tr.identity_source === "model" ? t("auto") : t("manual")}</span>}
-            </li>
-          ))}
-        </ul>
-        {own.length > shown.length && (
-          <Button variant="ghost" size="sm" className="mt-1" onClick={() => setAll(true)}>
-            {t("showAll", { n: own.length })}
-          </Button>
-        )}
-        {notice && (
-          <p className="mt-2 text-xs text-ok" aria-live="polite">
-            {notice}
-          </p>
-        )}
-    </section>
-  );
-}
-
-
-function CameraSwitch({
-  orgId,
-  cams,
-  active,
-  staff,
-  onSwitch,
-}: {
-  orgId: string;
-  cams: Video[];
-  active: Video;
-  staff: boolean;
-  onSwitch: (id: string) => void;
-}) {
-  const t = useTranslations("camera");
-  const qc = useQueryClient();
-  const sync = active.sync;
-  return (
-    <div className="flex flex-wrap items-center gap-2 text-sm" data-testid="camera-switch">
-      <span className="font-medium">{t("label")}:</span>
-      <div role="group" aria-label={t("label")} className="flex flex-wrap gap-1">
-        {cams.map((c) => (
-          <button
-            key={c.id}
-            aria-pressed={c.id === active.id}
-            onClick={() => onSwitch(c.id)}
-            className={cn("border px-2 py-1", c.id === active.id ? "border-foreground bg-foreground text-background" : "border-border bg-raised hover:bg-surface")}
-          >
-            {t(c.role)}
-          </button>
-        ))}
-      </div>
-      {active.role !== "main" && sync?.source === "audio" && sync.applied && (
-        <span className="text-xs text-muted">{t("synced", { confidence: Math.round((sync.confidence ?? 0) * 100) })}</span>
-      )}
-      {active.role !== "main" && sync?.source === "user_correction" && <span className="text-xs text-muted">{t("manual")}</span>}
-      {active.role !== "main" && (!sync || (sync.source === "audio" && !sync.applied)) && (
-        <span className="text-xs text-accent">{t("syncLow")}</span>
-      )}
-      {staff && active.role !== "main" && (
-        <form
-          className="flex items-end gap-1"
-          onSubmit={async (e) => {
-            e.preventDefault();
-            const form = e.currentTarget;
-            const value = Number(new FormData(form).get("offset"));
-            await api.PATCH("/v1/orgs/{org_id}/videos/{video_id}", {
-              params: { path: { org_id: orgId, video_id: active.id } },
-              body: { time_offset_ms: value },
-            });
-            void qc.invalidateQueries({ queryKey: ["match"] });
-          }}
-        >
-          <label className="flex flex-col text-xs">
-            {t("offset")}
-            <input
-              name="offset"
-              type="number"
-              step={10}
-              defaultValue={active.time_offset_ms}
-              key={active.id}
-              className="min-h-9 w-28 bg-raised ring-1 ring-inset ring-border px-2 text-sm"
-            />
-          </label>
-          <Button type="submit" variant="secondary" className="min-h-9 px-2 text-xs">
-            {t("save")}
-          </Button>
-        </form>
-      )}
-    </div>
-  );
-}
-
-
-/** Defence systems per team over time (heuristic from positions, M6). */
-function FormationsCard({ formations, onSeek }: { formations: NonNullable<Analysis["formations"]>; onSeek: (ms: number) => void }) {
-  const t = useTranslations("formations");
-  const side = useSideLabel();
-  const label = (f: string) => (f === "open" ? t("open") : f.replaceAll("-", ":"));
-  return (
-    <section className="space-y-2" data-testid="formations">
-      <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="font-semibold">{t("title")}</h2>
-        <p className="text-xs text-muted">{t("hint")}</p>
-      </div>
-      {formations.length === 0 && <p className="text-sm text-muted">{t("none")}</p>}
-      {(["home", "away"] as const).map((team) => {
-        const segs = formations.filter((f) => f.team === team);
-        if (segs.length === 0) return null;
-        const total = segs.reduce((s, f) => s + f.end_ms - f.start_ms, 0);
-        const share = Object.entries(
-          segs.reduce<Record<string, number>>((acc, f) => ({ ...acc, [f.formation]: (acc[f.formation] ?? 0) + f.end_ms - f.start_ms }), {}),
-        ).sort((a, b) => b[1] - a[1]);
-        return (
-          <div key={team} className="space-y-1 text-sm">
-            <p>
-              <span className="font-medium">{team === "home" ? side("own") : side("opp", t("opponent"))}: </span>
-              {share.map(([f, ms]) => `${label(f)} ${Math.round((ms / total) * 100)} %`).join(" · ")}
-            </p>
-            <ul className="flex flex-wrap gap-1">
-              {segs.map((f) => (
-                <li key={`${f.start_ms}-${f.team}`}>
-                  <button
-                    className="bg-surface px-2 py-0.5 font-score text-xs hover:brightness-90"
-                    onClick={() => onSeek(f.start_ms)}
-                    aria-label={t("jump", { formation: label(f.formation), time: formatClock(f.start_ms) })}
-                  >
-                    {formatClock(f.start_ms)} {label(f.formation)}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-        );
-      })}
-    </section>
   );
 }
