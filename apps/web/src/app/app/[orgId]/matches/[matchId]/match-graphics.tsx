@@ -7,6 +7,7 @@ import { Zones } from "@/components/anlauf/bundle";
 import { Rail } from "@/components/anlauf/charts";
 import { clockOf, SceneCamera } from "@/components/anlauf/three-things-view";
 import { useMatchSides, useSideLabel } from "@/components/domain/match-sides";
+import { oppFirst } from "@/lib/match-sides";
 import { goalRuns, reportGoals, zoneLine, zonesWorthACourt, type MatchGraphics } from "@/lib/graphics";
 import { cn } from "@/lib/utils";
 
@@ -59,6 +60,7 @@ function count(goals: { zone?: string | null }[]): Record<string, number> {
 export function MatchCamera({ orgId, matchId, graphics, oppName }: { orgId: string; matchId: string; graphics: MatchGraphics; oppName: string }) {
   const t = useTranslations("anlauf");
   const side = useSideLabel();
+  const railOppFirst = oppFirst(useMatchSides());
   const goals = graphics.goals.filter((g) => g.has_video || g.source === "demo");
   const [eventId, setEventId] = useState<string | null>(goals[0]?.event_id ?? null);
   const goal = goals.find((g) => g.event_id === eventId) ?? null;
@@ -72,7 +74,7 @@ export function MatchCamera({ orgId, matchId, graphics, oppName }: { orgId: stri
         <p className="mt-1 text-[15px] text-ink-2">{t("numberRead")}</p>
         {graphics.report_goals.length > 0 && (
           <div className="mt-6">
-            <Rail goals={reportGoals(graphics)} at={goal?.minute ?? null} label={t("rail")} />
+            <Rail goals={reportGoals(graphics)} at={goal?.minute ?? null} label={t("rail")} oppFirst={railOppFirst} />
             <p className="mt-1 flex justify-between text-[15px] text-ink-2">
               <span>0:00</span>
               <span>60:00</span>

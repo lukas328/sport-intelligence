@@ -817,6 +817,8 @@
     "opponentShort": "der Gegner",
     "otherShort": "das andere Team",
     "colourWhy": "Die Farben braucht die Analyse, um die Teams auseinanderzuhalten. Schau im Video nach, wenn du unsicher bist.",
+    "home": "Wer spielt zu Hause?",
+    "homeWhy": "Das Heimteam steht überall zuerst, wie auf dem Spielplan.",
     "colourMissing": "Wähl für beide Teams die Trikotfarbe.",
     "submit": "Weiter zum Video",
     "otherColour": "andere Farbe"
@@ -1033,6 +1035,7 @@
     "equal": "Gleichzahl",
     "situations": "Effizienz nach Situation",
     "byType": "nach Typ",
+    "byTypeItem": "{type}:",
     "opponentPlayers": "Gegner nach Rückennummer",
     "noVideo": "ohne Video",
     "noDataHint": "Lade das Video hoch, die Analyse startet danach automatisch.",

@@ -60,6 +60,7 @@ export function Rail({
   from = 0,
   length = 60,
   label,
+  oppFirst = false,
 }: {
   goals: readonly ReportGoal[];
   phase?: readonly [number, number] | null;
@@ -68,6 +69,9 @@ export function Rail({
   from?: number;
   length?: number;
   label: string;
+  /** the opponent side's goals above the line: an observed match whose home team is the data's
+   * opponent side (`oppFirst` in lib/match-sides), the home team is always on top */
+  oppFirst?: boolean;
 }) {
   const W = 1000;
   const base = 36;
@@ -80,13 +84,23 @@ export function Rail({
       {phase && <rect x={x(phase[0])} y={0} width={x(phase[1]) - x(phase[0])} height={72} fill="var(--attn)" />}
       <line x1={0} x2={W} y1={base} y2={base} stroke="var(--ink)" strokeWidth={1.5} />
       {half != null && <line x1={x(half)} x2={x(half)} y1={2} y2={70} stroke="var(--ink)" strokeDasharray="2 4" />}
-      {goals.map((g, i) =>
-        g.team === "own" ? (
-          <rect key={i} x={x(g.minute) - 2.5} y={base - 26} width={5} height={24} fill="var(--club-line)" stroke="var(--club-pipe)" strokeWidth={1} />
-        ) : (
-          <rect key={i} x={x(g.minute) - 2.5} y={base + 2} width={5} height={24} fill="var(--opp-line)" stroke="var(--opp-pipe)" strokeWidth={1} />
-        ),
-      )}
+      {goals.map((g, i) => {
+        const own = g.team === "own";
+        // the home team above the line, each side in its own colour
+        const top = own !== oppFirst;
+        return (
+          <rect
+            key={i}
+            x={x(g.minute) - 2.5}
+            y={top ? base - 26 : base + 2}
+            width={5}
+            height={24}
+            fill={own ? "var(--club-line)" : "var(--opp-line)"}
+            stroke={own ? "var(--club-pipe)" : "var(--opp-pipe)"}
+            strokeWidth={1}
+          />
+        );
+      })}
       {at != null && (
         <>
           <line x1={x(at)} x2={x(at)} y1={-6} y2={78} stroke="var(--ink)" strokeWidth={2.5} />

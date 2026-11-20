@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils";
 import { useOpponentName } from "@/lib/opponent";
 import { useMatchSides } from "@/components/domain/match-sides";
 import { oppFirst } from "@/lib/match-sides";
+import { rowLabel } from "@/lib/player-label";
 import { shotBalance, withoutPosition } from "@/lib/shot-balance";
 
 type ZoneCount = Record<string, { shots: number; goals: number }>;
@@ -271,7 +272,7 @@ export function OverviewView({
     .filter((p) => p.side === "own" && p.goals > 0)
     .sort((a, b) => b.goals - a.goals || (a.number ?? 99) - (b.number ?? 99))
     .slice(0, 8);
-  const who = (p: (typeof scorers)[number]) => (p.player_id && names[p.player_id]) || `#${p.number ?? "?"}`;
+  const who = (p: (typeof scorers)[number]) => (p.player_id && names[p.player_id]) || (p.number != null ? `#${p.number}` : t("player"));
   const drought = stats.timeline ? ownDrought(stats.timeline.score, span, stats.timeline.longest_own_drought_s.seconds) : 0;
   return (
     <div className="space-y-10">
@@ -540,17 +541,15 @@ function ScoreChart({
 export function ReportView({ orgId, match, stats, onPlay, names }: ViewProps) {
   const t = useTranslations("stats");
   const te = useTranslations("events");
+  const tk = useTranslations("keepers");
   const { drill, open, close } = useDrill();
   const own = Object.values(stats.players).filter((p) => p.side === "own" && (p.player_id || p.number != null));
   own.sort((a, b) => b.goals - a.goals || (a.number ?? 99) - (b.number ?? 99));
   const opp = Object.values(stats.players).filter((p) => p.side === "opponent" && p.number != null);
   opp.sort((a, b) => b.goals - a.goals);
   const sheet = ((match.report_extra as { names?: Record<string, string> } | null)?.names ?? {}) as Record<string, string>;
-  // the number has its own column: the name goes without it
-  const nameOf = (p: PlayerRow) =>
-    ((p.player_id && names[p.player_id]) || "").replace(/^#\d+\s+/, "") ||
-    (p.side === "own" && p.number != null && sheet[String(p.number)]) ||
-    `#${p.number ?? "?"}`;
+  // the number has its own column: the name goes without it; never «#?» (UI check 20.11.)
+  const nameOf = (p: PlayerRow) => rowLabel(p, names, { keeper: tk("keeper"), player: t("player") }, sheet);
   const base = (p: PlayerRow): EventFilter => (p.player_id ? { player_id: p.player_id } : { side: p.side, number: p.number ?? undefined });
   const cols: { key: keyof PlayerRow; label: string; filter?: EventFilter }[] = [
     { key: "goals", label: t("goals"), filter: { type: "shot", outcome: "goal" } },
@@ -619,11 +618,14 @@ export function ReportView({ orgId, match, stats, onPlay, names }: ViewProps) {
       {Object.keys(tt).length > 0 && (
         <p className="text-sm">
           <span className="font-medium">{t("turnovers")} {t("byType")}: </span>
+          {/* «Schritte: 1 · Fehlpass: 5», each number held to its word (UI check 20.11.) */}
           {Object.entries(tt).map(([k, v], i) => (
             <span key={k}>
-              {i > 0 && " · "}
-              {te(`tt_${k}` as "tt_other")}{" "}
+              {i > 0 && <span className="mx-1.5" aria-hidden>·</span>}
+              <span className="whitespace-nowrap">
+              {t("byTypeItem", { type: te(`tt_${k}` as "tt_other") })}{" "}
               <N value={v} label={`${te(`tt_${k}` as "tt_other")}`} onClick={() => open(te(`tt_${k}` as "tt_other"), { side: "own", type: "turnover", turnover_type: k })} />
+              </span>
             </span>
           ))}
         </p>

@@ -154,15 +154,15 @@ export function ButtonCut({ children }: { children: ReactNode }) {
   );
 }
 
-/** the scene that plays in the list of the phase, in yellow */
-export function SceneCut({ clock, what, playing }: { clock: string; what: string; playing: string }) {
+/** the scene that plays in the list of the phase, in yellow, with its place below as in the app (no «läuft gerade» any more) */
+export function SceneCut({ clock, what, place }: { clock: string; what: string; place: string }) {
   return (
     <div className="pt-[.6em]">
       <div className="grid grid-cols-[3.6em_minmax(0,1fr)] items-center gap-[.5em] bg-attn px-[.8em] py-[.6em]">
         <span className="font-num text-[1.35em] leading-none">{clock}</span>
         <span className="grid leading-snug">
           <span>{what}</span>
-          <span className="text-[.9em]">{playing}</span>
+          <span className="text-[.9em]">{place}</span>
         </span>
       </div>
     </div>

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { Replace } from "@/components/shell/replace";
 import { ChevronLeft } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { PageHeader } from "@/components/ui/page-header";
@@ -29,7 +29,7 @@ export default async function SeasonTipsPage({ params }: { params: Promise<{ org
   ]);
   const base = `/app/${orgId}/teams/${teamId}`;
   // planning a unit is for Trainer and Co-Trainer; everyone else finds the season itself
-  if (!coachRights(org.data?.my_role, team.data?.my_role)) redirect(`${base}/season`);
+  if (!coachRights(org.data?.my_role, team.data?.my_role)) return <Replace to={`${base}/season`} />;
   const eyebrow = [tshell("season"), team.data?.current_season?.label, team.data?.name].filter(Boolean).join(" · ");
   return (
     <div className="space-y-6">

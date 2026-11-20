@@ -9,6 +9,7 @@ import { type CSSProperties, useCallback, useEffect, useMemo, useRef, useState }
 import { useMatchRoster } from "@/components/domain/match-sides";
 import { AnalysisNotice } from "@/components/analysis/analysis-notice";
 import { personGroups } from "@/lib/check-budget";
+import { roundCandidate } from "@/lib/check-round";
 import { VideoPlayer, type PlayerHandle } from "@/components/video/player";
 import type { Homography } from "@/lib/spotlight";
 import { CORNERS, cornersOf, FieldCheck } from "./field-check";
@@ -186,10 +187,11 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
             ? [{ kind: "field", videoId: c.id, part: parts.find((p) => p.id === c.id)?.part ?? null, copyFrom: c.copy_from ?? (c.id !== main.id && fieldsConfirmed.includes(main.id) ? main.id : null) }]
             : [];
         if (c.kind === "kickoff") return [{ kind: "kickoff", period: c.frame_ref }];
-        const cand = candidates.data?.candidates.find((x) => x.id === c.id && x.status === "open");
+        // a moment answered in this round stays in it: the count does not jump (lib/check-round)
+        const cand = roundCandidate(candidates.data?.candidates, c.id, done);
         return cand ? [{ kind: "goal", c: cand }] : [];
       }),
-    [candidates.data, main, parts, fieldsConfirmed],
+    [candidates.data, main, parts, fieldsConfirmed, done],
   );
   const questions = useMemo<Question[]>(() => {
     if (!asked) return [];

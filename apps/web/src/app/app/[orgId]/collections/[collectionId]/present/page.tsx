@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
+import { Replace } from "@/components/shell/replace";
 import { getTranslations } from "next-intl/server";
 import { serverApi } from "@/lib/api";
 import { PresentView } from "./present-view";
@@ -22,6 +23,6 @@ export default async function PresentCollection({ params }: { params: Promise<{ 
     params: { path: { org_id: orgId, collection_id: collectionId } },
   });
   if (!data) notFound();
-  if (data.source === "presentation") redirect(`/app/${orgId}/presentations/${collectionId}/present`);
+  if (data.source === "presentation") return <Replace to={`/app/${orgId}/presentations/${collectionId}/present`} />;
   return <PresentView orgId={orgId} collection={data} />;
 }

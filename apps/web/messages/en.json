@@ -817,6 +817,8 @@
     "opponentShort": "the opponent",
     "otherShort": "the other team",
     "colourWhy": "The analysis needs the colours to tell the teams apart. Look in the video if you are not sure.",
+    "home": "Who plays at home?",
+    "homeWhy": "The home team comes first everywhere, as in the schedule.",
     "colourMissing": "Choose the shirt colour of both teams.",
     "submit": "On to the video",
     "otherColour": "other colour"
@@ -1033,6 +1035,7 @@
     "equal": "Even strength",
     "situations": "Efficiency by situation",
     "byType": "by type",
+    "byTypeItem": "{type}:",
     "opponentPlayers": "Opponent by jersey number",
     "noVideo": "no video",
     "noDataHint": "Upload the video; the analysis starts automatically afterwards.",

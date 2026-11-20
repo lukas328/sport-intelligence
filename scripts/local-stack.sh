@@ -6,7 +6,8 @@
 #   scripts/local-stack.sh up       # start everything (idempotent)
 #   scripts/local-stack.sh down     # stop the processes started here
 #   scripts/local-stack.sh status
-#   scripts/local-stack.sh restart-web   # after editing apps/web/messages (dev server cache)
+#   scripts/local-stack.sh restart-web   # restart the web server in its mode (build: next start,
+#                                        # HB_WEB_DEV=1: next dev with a clean cache)
 #   scripts/local-stack.sh restart-api   # after backend changes (runs the migrations too)
 set -euo pipefail
 
@@ -132,12 +133,20 @@ SQL
 }
 
 
-# messages/*.json are cached by the dev server: after editing them, restart it with a clean cache
+# The web server again, in the mode `up` chose. With a production build it is `next start` on that
+# build (after `pnpm --filter @handball/web build`). Only with HB_WEB_DEV=1 (or without a build)
+# `next dev` with a clean cache: it caches messages/*.json. Until 20.11. this always deleted the
+# build and started `next dev`: e2e then ran against the dev server, whose compiles on first
+# visit reload pages (the «execution context destroyed» in data.spec after a restart).
 restart-web() {
   stop web
   sleep 2
-  rm -rf "$ROOT/apps/web/.next"
-  start web pnpm --filter @handball/web dev
+  if [[ -f "$ROOT/apps/web/.next/BUILD_ID" && "${HB_WEB_DEV:-}" != "1" ]]; then
+    start web pnpm --filter @handball/web start
+  else
+    rm -rf "$ROOT/apps/web/.next"
+    start web pnpm --filter @handball/web dev
+  fi
   wait_for http://localhost:3000/api/healthz 180
 }
 

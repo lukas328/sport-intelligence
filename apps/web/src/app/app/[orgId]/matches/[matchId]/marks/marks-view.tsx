@@ -9,7 +9,8 @@ import { useShell } from "@/components/shell/context";
 import { matchStyle } from "@/lib/color";
 import { useFormatter, useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { serial } from "@/lib/serial";
 import { api } from "@/lib/client";
 import { flush, forget, mark, pending } from "@handball/client-core";
 import { keepOffline, remember, remembered } from "@/lib/offline";
@@ -149,13 +150,9 @@ export function MarksView({
   });
   useEffect(() => keepOffline(), []);
 
-  // one upload at a time: a tap, the «online» event and the timer must not send the queue twice
-  const busy = useRef<Promise<void> | null>(null);
-  const sync = useCallback(async () => {
-    if (busy.current) return busy.current;
-    busy.current = upload().finally(() => (busy.current = null));
-    return busy.current;
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  // one upload at a time: a tap, the «online» event and the timer must not send the queue twice;
+  // a tap during an upload sends its mark right after it, not with the timer (lib/serial)
+  const sync = useMemo(() => serial(() => upload()), []); // eslint-disable-line react-hooks/exhaustive-deps
   const upload = async () => {
     try {
       if (!session.current) session.current = localStorage.getItem(SESSION_KEY(matchId));

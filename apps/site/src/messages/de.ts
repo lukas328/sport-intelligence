@@ -919,7 +919,7 @@ const de = {
     /** the app's own words at the places the app tour pulls out of its pictures (U34, apps/web/messages) */
     app: {
       goal: "Tor {team} {clock}",
-      playing: "läuft gerade",
+      place: "Aussen rechts",
       throwOff: "Anwurf",
       halfTime: "Halbzeit",
       fullTime: "Schluss",

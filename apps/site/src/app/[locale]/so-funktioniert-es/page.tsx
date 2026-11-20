@@ -38,7 +38,7 @@ function tourCuts(shot: (typeof SHOTS)[number], m: ReturnType<typeof messages>):
   if (shot === "get-video") {
     const t = tourTimeline();
     return [
-      { id: "tap", label: p["get-video"].tap, content: <SceneCut clock={t.scene.clock} what={fmt(a.goal, { team: "TSV Nachtwind", clock: t.scene.clock })} playing={a.playing} /> },
+      { id: "tap", label: p["get-video"].tap, content: <SceneCut clock={t.scene.clock} what={fmt(a.goal, { team: "TSV Nachtwind", clock: "" }).trim()} place={a.place} /> },
       { id: "timeline", label: p["get-video"].timeline, content: <TimelineCut t={t} words={a} /> },
     ];
   }
