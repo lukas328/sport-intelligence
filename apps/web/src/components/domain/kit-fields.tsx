@@ -45,8 +45,11 @@ export function KitFields({
   unknown = [],
   presets,
   only,
+  names,
 }: {
   kits: Kits;
+  /** an observed match: both teams by name, nothing is «Eigene» (BUG-05) */
+  names?: { own: string; opp: string } | null;
   onChange: (kits: Kits) => void;
   unknown?: readonly TeamKitKey[];
   presets?: { home: string; away: string | null } | null;
@@ -68,6 +71,8 @@ export function KitFields({
     onChange(next);
   };
   const referee = `${t("matches.kitReferee")} (${t("common.optional")})`;
+  const labelOf = (k: TeamKitKey, key: string) =>
+    names ? t(k.endsWith("_gk") ? "matches.kitKeeperOf" : "matches.kitFieldOf", { team: k.startsWith("own") ? names.own : names.opp }) : t(key as "matches.kitOwn");
   return (
     <>
       {presets && (
@@ -104,7 +109,7 @@ export function KitFields({
               <Shirt colour={isOpen(k) ? undefined : kits[k]} empty={isOpen(k)} />
               {isOpen(k) && <Plus aria-hidden className="absolute size-3.5" />}
               <input
-                aria-label={t(label)}
+                aria-label={labelOf(k, label)}
                 name={`kit_${k}`}
                 type="color"
                 value={kits[k]}
@@ -112,7 +117,7 @@ export function KitFields({
                 className={PICKER}
               />
             </span>
-            {t(label)}
+            {labelOf(k, label)}
           </label>
         ))}
         {!only && (

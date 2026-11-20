@@ -10,7 +10,12 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getTranslations("shell"))("today") };
 }
 
-/** The club's start: Spiele for staff (SPEC section 6), the start page for players and parents. */
+/**
+ * The club's start: Spiele for staff (SPEC section 6), the start page for players and parents. No
+ * `loading.tsx` here: with one the frame streams before the redirect, Next answers 200 with a meta
+ * refresh and the page loads twice after every sign-in (e2e 20.11., lib/moved.ts); without it the
+ * staff get a real redirect.
+ */
 export default async function TodayPage({ params }: { params: Promise<{ orgId: string }> }) {
   const { orgId } = await params;
   const client = await serverApi();

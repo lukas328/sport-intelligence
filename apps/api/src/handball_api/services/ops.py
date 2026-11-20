@@ -143,6 +143,7 @@ async def organizations(ctx: Ctx, q: str | None) -> list[dict[str, Any]]:
             "status": o.subscription_status,
             "trial_ends_at": o.trial_ends_at.isoformat() if o.trial_ends_at else None,
             "created_at": o.created_at.isoformat(),
+            "source": o.signup_source,
             "teams": teams.get(o.id, 0),
             "members": members.get(o.id, 0),
             "matches": matches.get(o.id, 0),

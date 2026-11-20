@@ -293,6 +293,9 @@ async def test_claim_creates_club_and_team_and_prefills(
         "official_game_id": 509192,
         "source": "official",
     }
+    # the match page says the official report comes only for a game of the schedule (TXT-06)
+    match_url = f"/v1/orgs/{c['organization_id']}/matches/{m['id']}"
+    assert (await api.get(match_url)).json()["official_game"] is True
 
     link = (await api.get(base(c) + "/official")).json()
     assert link["linked"] is True and link["official_group_id"] == GROUP
@@ -1091,8 +1094,16 @@ async def test_daily_tick_syncs_and_imports_reports(
     assert count > 40
     reports = {s["payload"]["game_id"] for s in await suggestions(api, c, "report")}
     assert 509192 not in reports and len(reports) == PLAYED - 1
-    kinds = {r["kind"] for r in await owner_conn.fetch("SELECT kind FROM notifications")}
+    notes = await owner_conn.fetch("SELECT kind, params FROM notifications")
+    kinds = {r["kind"] for r in notes}
     assert {"official_suggestions", "official_report"} <= kinds
+    # each note says what it is about: the team, the match's opponent (app review UX-10)
+    for r in notes:
+        params = json.loads(r["params"])
+        if r["kind"] == "official_suggestions":
+            assert params["team"]
+        if r["kind"] == "official_report":
+            assert params["opponent"] and params["date"]
     r = await api.http.post("/internal/official/sync", headers=token)
     assert r.json() == {
         "teams": 0,

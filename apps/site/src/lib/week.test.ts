@@ -8,6 +8,7 @@ import fr from "@/messages/fr";
 import { demoGoals, demoScene, goalDistance, sceneGap } from "./demo";
 import { MATCH } from "./things";
 import { threeThings } from "./three-things";
+import { SEASON_BARS } from "./tour-cuts";
 import { matchPhases, preparedAnswers, seasonRightWing } from "./week";
 
 describe("the demo week (U32)", () => {
@@ -40,8 +41,8 @@ describe("the demo week (U32)", () => {
     const s = seasonRightWing();
     expect(s.map((x) => [x.opp, x.n, x.of, x.example])).toEqual([
       ["TSV Nachtwind", 11, 29, false],
-      ["BSV Wirbelstern", 4, 25, true],
-      ["TV Rotdorn", 4, 27, true],
+      ["SG Blitzfang", 4, 25, true],
+      ["HSG Funkenflug", 4, 27, true],
       ["TV Silberpfeil", 3, 26, true],
     ]);
     for (const x of s) {
@@ -49,6 +50,13 @@ describe("the demo week (U32)", () => {
       expect(x.dots.filter((d) => d.ra)).toHaveLength(x.n);
     }
     for (const msgs of [de, fr, en]) expect(msgs.demo.nextExample.length).toBeGreaterThan(10);
+  });
+
+  it("is one example universe with «So funktioniert es»: the season before ends with the demo match, the matches after it have other opponents", () => {
+    const s = seasonRightWing();
+    expect(SEASON_BARS.at(-1)).toEqual({ name: "Nachtwind", n: s[0]!.n });
+    const before = SEASON_BARS.slice(0, -1).map((b) => b.name);
+    for (const x of s.slice(1)) expect(before.some((name) => x.opp.includes(name))).toBe(false);
   });
 
   it("plays every goal of the three things on the camera: fast breaks as a sprint, our own goals with us attacking", () => {

@@ -30,6 +30,8 @@ class User(Base, EntityMixin):
     # onboarding e-mail series (addendum 01, 4.11): days already sent, opt-out
     onboarding_sent: Mapped[list[int]] = mapped_column(JSONB, nullable=False, default=list)
     onboarding_opt_out: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    # where the sign-up came from: the website's `?src=<place>` (e.g. «hero»), for operators
+    signup_source: Mapped[str | None] = mapped_column(String(40))
 
     @property
     def totp_enabled(self) -> bool:

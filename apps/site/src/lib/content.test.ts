@@ -58,10 +58,10 @@ describe("content", () => {
     }
   });
 
-  it("links the blog from the footer only from three posts of its own (U28)", () => {
+  it("links the blog from the footer as soon as it has a post of its own (BEFUNDE-5 point 19)", () => {
     const post = (slug: string, movedTo?: string) => ({ slug, date: "2026-11-01", movedTo, title: { de: slug, fr: slug, en: slug }, summary: { de: "", fr: "", en: "" } });
-    expect(blogInFooter([post("a"), post("b", "ratgeber/x"), post("c")])).toBe(false);
-    expect(blogInFooter([post("a"), post("b"), post("c")])).toBe(true);
-    expect(blogInFooter()).toBe(BLOG.filter((p) => !p.movedTo).length >= 3);
+    expect(blogInFooter([post("b", "ratgeber/x")])).toBe(false);
+    expect(blogInFooter([post("a"), post("b", "ratgeber/x")])).toBe(true);
+    expect(blogInFooter()).toBe(true);
   });
 });

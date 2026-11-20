@@ -40,11 +40,11 @@ test("start after a first video without goals: one sentence, one step", async ({
   await expect(step.getByTestId("start-step")).toHaveText("Fragen beantworten");
   // nothing that says the same again, no collection without scenes
   await expect(page.getByTestId("collection-from-match")).toHaveCount(0);
-  await expect(page.getByText(/Für drei Dinge braucht es/)).toHaveCount(0);
+  await expect(page.getByText(/Für ein Muster braucht es/)).toHaveCount(0);
   await expect(page.getByText(/danach Fragen zu den Personen/)).toHaveCount(0);
   // the list: the state in words
   await expect(page.getByTestId("match-list")).toContainText(/Analyse fertig, (1 Frage|\d+ Fragen) offen/);
-  await expect(page.getByTestId("match-list")).not.toContainText("Kein Ding");
+  await expect(page.getByTestId("match-list")).not.toContainText("Kein Muster");
   // the start and Prüfen count the same questions
   const n = Number((await step.locator("p").textContent())!.match(/(\d+) gezielte Frage/)![1]);
   const g = await (await page.request.get(`/v1/orgs/${org}/matches/${match.id}/graphics`)).json();

@@ -6,7 +6,7 @@ from typing import Literal
 
 from pydantic import EmailStr, Field
 
-from handball_api.schemas.common import ApiModel, Name
+from handball_api.schemas.common import ApiModel, Name, SignupSource
 
 Locale = Literal["de-CH", "en", "fr"]
 
@@ -18,6 +18,8 @@ class RegisterIn(ApiModel):
     locale: Locale = "de-CH"
     accept_terms: bool
     invitation_token: str | None = None
+    # the website's `?src=<place>` the visitor came with (kept in the browser, no cookie)
+    source: SignupSource = None
 
 
 class LoginIn(ApiModel):

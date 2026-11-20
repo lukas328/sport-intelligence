@@ -50,7 +50,7 @@ export const GAME_DRILLS: Drill[] = [
     minutes: 12,
     players: "6-12",
     level: "basic",
-    name: L("Rückzug 3 gegen 2 nach Ballverlust", "Repli à 2 contre 3 après la perte", "Getting back 2 against 3 after a turnover"),
+    name: L("Rückzug 3 gegen 2 nach Ballverlust", "Repli à 3 contre 2 après la perte", "Getting back 3 against 2 after a turnover"),
     setup: L(
       "Ganzes Feld. Drei Angreifer an der Mittellinie mit Ball, zwei Verteidiger einen Schritt weiter vorne, Torhüter.",
       "Terrain entier. Trois attaquants à la ligne médiane avec ballon, deux défenseurs un pas plus loin, gardien.",

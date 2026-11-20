@@ -61,19 +61,19 @@ _T: dict[str, dict[str, tuple[str, str]]] = {
     },
     "analysis_ready": {
         "de-CH": (
-            "Die drei Dinge gegen {opponent} sind da",
-            "Hallo {name}\n\nDie Analyse des Spiels {team} gegen {opponent} ist fertig. Die drei "
-            "Dinge und die Szenen warten:\n\n{link}",
+            "Die Muster gegen {opponent} sind da",
+            "Hallo {name}\n\nDie Analyse des Spiels {team} gegen {opponent} ist fertig. Die "
+            "Muster und die Szenen warten:\n\n{link}",
         ),
         "en": (
-            "The three things against {opponent} are ready",
-            "Hello {name}\n\nThe analysis of {team} against {opponent} is done. The three things "
+            "The patterns against {opponent} are ready",
+            "Hello {name}\n\nThe analysis of {team} against {opponent} is done. The patterns "
             "and the scenes are waiting:\n\n{link}",
         ),
         "fr": (
-            "Les trois choses contre {opponent} sont prêtes",
+            "Les tendances contre {opponent} sont prêtes",
             "Bonjour {name}\n\nL'analyse du match {team} contre {opponent} est terminée. Les "
-            "trois choses et les scènes t'attendent :\n\n{link}",
+            "tendances et les scènes t'attendent :\n\n{link}",
         ),
     },
     # the analysis is done, but there are no three things yet (UX test N05): say what is there
@@ -191,15 +191,15 @@ _T: dict[str, dict[str, tuple[str, str]]] = {
     "onboarding_0": {
         "de-CH": (
             "Willkommen bei Handball Intelligence",
-            "Hallo {name}\n\nschön, dass du da bist. Der schnellste Weg zur ersten Analyse:\n1. Team anlegen und Spieler eintragen (CSV geht auch)\n2. Ein Spielvideo hochladen, Handy auf Stativ reicht\n3. Nach der Analyse: die drei Dinge, Würfe und deine Szenen ansehen\n\nOhne eigenes Video? Probier das Demo-Spiel aus:\n{link}\n\nKeine weiteren Tipps per E-Mail: {unsubscribe}",
+            "Hallo {name}\n\nschön, dass du da bist. Der schnellste Weg zur ersten Analyse:\n1. Team anlegen und Spieler eintragen (CSV geht auch)\n2. Ein Spielvideo hochladen, Handy auf Stativ reicht\n3. Nach der Analyse: die Muster, Würfe und deine Szenen ansehen\n\nOhne eigenes Video? Probier das Demo-Spiel aus:\n{link}\n\nKeine weiteren Tipps per E-Mail: {unsubscribe}",
         ),
         "en": (
             "Welcome to Handball Intelligence",
-            "Hello {name}\n\ngreat to have you. The fastest way to your first analysis:\n1. Create a team and enter the players (CSV works too)\n2. Upload a match video, a phone on a tripod is enough\n3. After the analysis: the three things, shots and your scenes\n\nNo video yet? Try the demo match:\n{link}\n\nNo more tips by e-mail: {unsubscribe}",
+            "Hello {name}\n\ngreat to have you. The fastest way to your first analysis:\n1. Create a team and enter the players (CSV works too)\n2. Upload a match video, a phone on a tripod is enough\n3. After the analysis: the patterns, shots and your scenes\n\nNo video yet? Try the demo match:\n{link}\n\nNo more tips by e-mail: {unsubscribe}",
         ),
         "fr": (
             "Bienvenue sur Handball Intelligence",
-            "Bonjour {name}\n\nravi de vous accueillir. Le chemin le plus court vers la première analyse :\n1. Créer l'équipe et saisir les joueur·euse·s (CSV possible)\n2. Envoyer une vidéo de match, un téléphone sur trépied suffit\n3. Après l'analyse : les trois points, tirs et vos scènes\n\nPas encore de vidéo ? Essayez le match de démonstration :\n{link}\n\nPlus de conseils par e-mail : {unsubscribe}",
+            "Bonjour {name}\n\nravi de vous accueillir. Le chemin le plus court vers la première analyse :\n1. Créer l'équipe et saisir les joueur·euse·s (CSV possible)\n2. Envoyer une vidéo de match, un téléphone sur trépied suffit\n3. Après l'analyse : les tendances, tirs et vos scènes\n\nPas encore de vidéo ? Essayez le match de démonstration :\n{link}\n\nPlus de conseils par e-mail : {unsubscribe}",
         ),
     },
     "onboarding_1": {

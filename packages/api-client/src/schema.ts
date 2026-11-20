@@ -7535,6 +7535,11 @@ export interface components {
          *     review.
          */
         GoalCandidateRow: {
+            /**
+             * Auto
+             * @default false
+             */
+            auto?: boolean;
             /** Clock S */
             clock_s: number | null;
             /** End Ms */
@@ -7695,7 +7700,7 @@ export interface components {
             source: ("tracking" | "marked" | "demo") | null;
             /**
              * Spot By Coach
-             * @description the zone was given by a person; only these make the three things and count as «mit Wurfort» (an estimate does not)
+             * @description the zone was given by a person (tapped, or the estimate confirmed with one tap); only these make the three things and count as «mit Wurfort» (an estimate nobody confirmed does not)
              * @default false
              */
             spot_by_coach?: boolean;
@@ -8678,6 +8683,12 @@ export interface components {
              * @description kit pairs with similar colours, e.g. own/opponent
              */
             kit_warnings: string[];
+            /**
+             * Official Game
+             * @description a game of the federation's schedule (handball.ch): its official report comes by itself; false for a match the source does not know (app review TXT-06)
+             * @default false
+             */
+            official_game?: boolean;
             /** @description null for trainings */
             opponent: components["schemas"]["OpponentOut"] | null;
             /** @description null for trainings */
@@ -9553,6 +9564,8 @@ export interface components {
              * @default #ffffff
              */
             secondary_color?: string;
+            /** Source */
+            source?: string | null;
         };
         /** OrgDelete */
         OrgDelete: {
@@ -10654,6 +10667,8 @@ export interface components {
             name: string;
             /** Password */
             password: string;
+            /** Source */
+            source?: string | null;
         };
         /** RemoteCommand */
         RemoteCommand: {
@@ -10977,6 +10992,11 @@ export interface components {
             match_ids?: string[];
             /** Numbers */
             numbers?: number[];
+            /**
+             * Observed
+             * @description true: only observed matches (kind scouting); false: only the team's own matches; null: both (app review UX-07)
+             */
+            observed?: boolean | null;
             /** Opponent Id */
             opponent_id?: string | null;
             /** Outcomes */
@@ -11031,6 +11051,12 @@ export interface components {
             match_label: string;
             /** Number */
             number?: number | null;
+            /**
+             * Observed
+             * @description from an observed match: not a scene of the team's season
+             * @default false
+             */
+            observed?: boolean;
             /** Outcome */
             outcome?: string | null;
             /** Player Id */

@@ -326,6 +326,11 @@ class MatchOut(ApiModel):
     scouting_other: str | None = Field(
         default=None, description="scouting: the team the opponent plays against"
     )
+    official_game: bool = Field(
+        default=False,
+        description="a game of the federation's schedule (handball.ch): its official report comes "
+        "by itself; false for a match the source does not know (app review TXT-06)",
+    )
     progress: MatchProgressOut | None = Field(
         default=None,
         description="uploads and processing while they run and a while after (services/progress); "
@@ -809,8 +814,9 @@ class GoalRunOut(ApiModel):
     )
     spot_by_coach: bool = Field(
         default=False,
-        description="the zone was given by a person; only these make the three things and count "
-        "as «mit Wurfort» (an estimate does not)",
+        description="the zone was given by a person (tapped, or the estimate confirmed with one "
+        "tap); only these make the three things and count as «mit Wurfort» (an estimate nobody "
+        "confirmed does not)",
     )
     spot_missing: bool = Field(
         default=False,

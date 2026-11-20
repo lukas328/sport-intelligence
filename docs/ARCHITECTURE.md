@@ -65,8 +65,7 @@ payloads the API queues fit the parameters (and payload keys) of the worker func
   interfaces. Domain code knows no provider.
 - **Jobs chained by the API**: each video step is one RQ job; the API enqueues the next one when a
   job reports success (ingest, then analysis and camera sync). Corrections by users do not re-run
-  jobs: statistics and insights are recomputed from the events. (`handball_worker.pipeline` with
-  `PipelineGraph` is early scaffolding that nothing runs; see the backlog.)
+  jobs: statistics and insights are recomputed from the events.
 - **Derived statistics are never truth**: computed from events/possessions/tracks into caches keyed by
   pipeline version.
 - **Configuration over code**: thresholds, zones, plan limits, feature flags in versioned config.

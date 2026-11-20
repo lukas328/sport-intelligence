@@ -53,23 +53,47 @@ export const COMPANY = {
  * empty search; «Kostenlos starten» leads there too. `lang` keeps the visitor's language, `farbe`
  * the shirt colour picked on the site (blau, rot, …), so the app does not ask again.
  */
-export function startUrl(appLocale: string, team?: string, farbe?: string): string {
+export function startUrl(appLocale: string, team?: string, farbe?: string, src?: Source): string {
   const q = team ? `q=${encodeURIComponent(team)}&` : "";
   const f = farbe ? `farbe=${encodeURIComponent(farbe)}&` : "";
-  return `${APP_URL}/einstieg?${q}${f}lang=${encodeURIComponent(appLocale)}`;
+  const s = src ? `src=${src}&` : "";
+  return `${APP_URL}/einstieg?${q}${f}${s}lang=${encodeURIComponent(appLocale)}`;
 }
+
+/**
+ * Where on the site a way into the app sits: every link and form into the app carries it as
+ * `?src=` (the app stores it at sign-up). The only measuring of the site: no cookie, no storage,
+ * no third party (the footer's promise). The list is in apps/site/README.md, keep both in step.
+ */
+export const SOURCES = [
+  "header",
+  "menu",
+  "login",
+  "team-search",
+  "team-search-end",
+  "home-price",
+  "pricing",
+  "pricing-table",
+  "how",
+  "demo",
+  "about",
+  "clubs",
+  "guide",
+] as const;
+export type Source = (typeof SOURCES)[number];
 
 /** Form target of the team field (GET; the query is added by the browser). */
 export const START_ACTION = `${APP_URL}/einstieg`;
 
 /** The app's entry with the way by hand open at once, for teams the federation data does not cover. */
-export function byHandUrl(appLocale: string, farbe?: string): string {
+export function byHandUrl(appLocale: string, farbe?: string, src?: Source): string {
   const f = farbe ? `&farbe=${encodeURIComponent(farbe)}` : "";
-  return `${APP_URL}/einstieg?step=name${f}&lang=${encodeURIComponent(appLocale)}`;
+  const s = src ? `&src=${src}` : "";
+  return `${APP_URL}/einstieg?step=name${f}${s}&lang=${encodeURIComponent(appLocale)}`;
 }
 
-export function loginUrl(appLocale: string): string {
-  return `${APP_URL}/login?lang=${encodeURIComponent(appLocale)}`;
+export function loginUrl(appLocale: string, src: Source = "login"): string {
+  return `${APP_URL}/login?src=${src}&lang=${encodeURIComponent(appLocale)}`;
 }
 
 export function pageUrl(locale: string, path = ""): string {

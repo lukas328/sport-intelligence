@@ -39,7 +39,8 @@ export default async function ScenesPage({
   const path = { params: { path: { org_id: orgId, team_id: teamId } } };
   const [{ data: team }, { data: matches = [] }, { data: collections = [] }, { data: into }] = await Promise.all([
     client.GET("/v1/orgs/{org_id}/teams/{team_id}", path),
-    client.GET("/v1/orgs/{org_id}/teams/{team_id}/matches", path),
+    // observed matches too: their scenes are found here, marked «Beobachtet» (UX-07, BUG-12)
+    client.GET("/v1/orgs/{org_id}/teams/{team_id}/matches", { params: { ...path.params, query: { scouting: true } } }),
     client.GET("/v1/orgs/{org_id}/teams/{team_id}/collections", path),
     intoId ? client.GET("/v1/orgs/{org_id}/collections/{collection_id}", { params: { path: { org_id: orgId, collection_id: intoId } } }) : Promise.resolve({ data: undefined }),
   ]);
@@ -48,7 +49,8 @@ export default async function ScenesPage({
   const withVideo = matches
     .filter((m) => m.has_video)
     .sort((a, b) => b.kickoff_at.localeCompare(a.kickoff_at));
-  const last = withVideo[0];
+  // the highlights belong to the team's own last match
+  const last = withVideo.find((m) => m.kind !== "scouting");
   const { data: highlights = [] } = last
     ? await client.GET("/v1/orgs/{org_id}/matches/{match_id}/highlights", {
         params: { path: { org_id: orgId, match_id: last.id } },

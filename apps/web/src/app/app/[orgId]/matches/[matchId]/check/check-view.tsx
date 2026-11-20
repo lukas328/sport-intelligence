@@ -6,9 +6,10 @@ import { Check } from "lucide-react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { type CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useRosterNames } from "@/components/analysis/tagger";
+import { useMatchRoster } from "@/components/domain/match-sides";
 import { AnalysisNotice } from "@/components/analysis/analysis-notice";
 import { personGroups } from "@/lib/check-budget";
+import { roundCandidate } from "@/lib/check-round";
 import { VideoPlayer, type PlayerHandle } from "@/components/video/player";
 import type { Homography } from "@/lib/spotlight";
 import { CORNERS, cornersOf, FieldCheck } from "./field-check";
@@ -18,6 +19,7 @@ import { PersonCrop } from "./person-box";
 import { Strip } from "@/components/anlauf/heads";
 import { useShell } from "@/components/shell/context";
 import { ownName } from "@/lib/own-name";
+import { matchSides, oppFirst, pairing } from "@/lib/match-sides";
 import { api } from "@/lib/client";
 import { matchStyle } from "@/lib/color";
 import { useOpponentName } from "@/lib/opponent";
@@ -29,8 +31,8 @@ import { openMoments, useMatchGraphics } from "@/lib/graphics";
 import { useRouter } from "next/navigation";
 import { partName, partsOf, partStarts, timelineVideo } from "@/lib/video-parts";
 import { ShotSpotPicker } from "@/components/anlauf/shot-spot-picker";
-import { useGoalView, useSaveSpot } from "@/components/anlauf/spot-parts";
-import { afterSpot, checkMinutes, type SpotAnswer, type SpotZone } from "@/lib/shot-spot";
+import { isSituation, useGoalView, useSaveSpot } from "@/components/anlauf/spot-parts";
+import { afterSpot, checkMinutes, type CourtZone, type SpotAnswer, type SpotZone, spotSuggestion } from "@/lib/shot-spot";
 import type { Pt as HalfPt } from "@/components/anlauf/geometry";
 
 type Match = Schemas["MatchOut"];
@@ -52,9 +54,18 @@ const MORE_BATCH = 10;
 /** `summary`: how the answer reads in «Beantwortet» when the button's words say too little
  * («Jetzt ist Anwurf» becomes «Video 0:42»), taken at the moment of the tap */
 type Answer = { key: string; label: string; first?: boolean; numeral?: string; summary?: () => string; run: () => Promise<void> };
-/** «Von wo?» after a confirmed goal (fourth real-video test H7): the goal's event, the place to mark */
-type SpotStep = { q: Question; eventId: string; goal: string; suggestion: { zone: SpotZone; kind: "current" } | null; index: number; fromList?: boolean };
-type Answered = { q: Question; label: string; eventId?: string; spot?: SpotAnswer };
+/** «Von wo?» after a confirmed goal (fourth real-video test H7): the goal's event, the place to mark;
+ * `suggestion` is the coach's earlier answer («Bisher») or the estimate to confirm («Vorschlag», A22) */
+type SpotStep = { q: Question; eventId: string; goal: string; suggestion: { zone: SpotZone; kind: "current" } | { zone: CourtZone; kind: "suggested" } | null; index: number; fromList?: boolean };
+
+/** What «Von wo?» marks for a goal: the coach's place as «Bisher», else the estimate as «Vorschlag» (A22). */
+function spotMark(coach: SpotZone | null | undefined, estimate: { zone?: string | null; zone_source?: string | null; spot_by_coach?: boolean } | undefined): SpotStep["suggestion"] {
+  if (coach) return { zone: coach, kind: "current" };
+  const zone = estimate ? spotSuggestion(estimate) : null;
+  return zone ? { zone, kind: "suggested" } : null;
+}
+/** `auto`: a goal of the match report taken over without a question (livegang L1), undone with one tap */
+type Answered = { q: Question; label: string; eventId?: string; spot?: SpotAnswer; auto?: boolean };
 
 // one rounding on every screen: full seconds, as the scoreboard (fourth real-video test H8)
 const clock = (s: number | null | undefined) => (s == null ? "" : formatClock(s * 1000 + 1));
@@ -74,9 +85,12 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
   const qc = useQueryClient();
   const router = useRouter();
   const { org, teams } = useShell();
-  // our side as everywhere else: the team's own name, the club's for «Herren 1» (UX test A06)
-  const own = ownName(teams.find((x) => x.id === match.team_id)?.name, org.name);
+  // our side as everywhere else: the team's own name, the club's for «Herren 1» (UX test A06); an
+  // observed match names its two teams, home team first, never ours (BUG-06, BUG-18)
   const oppName = useOpponentName()(match);
+  const tAll = useTranslations();
+  const sides = matchSides(match, { team: ownName(teams.find((x) => x.id === match.team_id)?.name, org.name), opponent: oppName, otherFallback: tAll("progress.otherTeam") });
+  const own = sides.own;
   const main = timelineVideo(match.videos) ?? null;
   const parts = partsOf(match.videos);
   const path = { org_id: orgId, match_id: match.id };
@@ -152,7 +166,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
   // a person box needs the homography of the very frame: with a panning camera only the hall
   // image's is known, so people are asked only with a fixed camera (E05)
   const people = useMemo<Question[]>(() => {
-    if (!main || cal0?.source !== "user_correction" || !analysis.data?.chunk_ms || analysis.data.camera !== "fixed") return [];
+    if (sides.neutral || !main || cal0?.source !== "user_correction" || !analysis.data?.chunk_ms || analysis.data.camera !== "fixed") return [];
     const own = (analysis.data.tracks ?? []).filter((tr) => (tr.team === "home" || tr.team === "home_gk") && !tr.player_id);
     return personGroups(own, PERSON_MIN_MS, PERSON_MAX)
       .filter((g) => !retired.has(`person:${g[0]!.track_no}`))
@@ -160,7 +174,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
         const tr = group[0]!;
         return { kind: "person" as const, tr, group, at: tr.first_ms + Math.min(2000, (tr.last_ms - tr.first_ms) / 2) };
       });
-  }, [analysis.data, cal0, main, retired]);
+  }, [analysis.data, cal0, main, retired, sides.neutral]);
   const toQuestions = useCallback(
     (list: Schemas["CheckOut"][]): Question[] =>
       list.flatMap((c): Question[] => {
@@ -173,10 +187,11 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
             ? [{ kind: "field", videoId: c.id, part: parts.find((p) => p.id === c.id)?.part ?? null, copyFrom: c.copy_from ?? (c.id !== main.id && fieldsConfirmed.includes(main.id) ? main.id : null) }]
             : [];
         if (c.kind === "kickoff") return [{ kind: "kickoff", period: c.frame_ref }];
-        const cand = candidates.data?.candidates.find((x) => x.id === c.id && x.status === "open");
+        // a moment answered in this round stays in it: the count does not jump (lib/check-round)
+        const cand = roundCandidate(candidates.data?.candidates, c.id, done);
         return cand ? [{ kind: "goal", c: cand }] : [];
       }),
-    [candidates.data, main, parts, fieldsConfirmed],
+    [candidates.data, main, parts, fieldsConfirmed, done],
   );
   const questions = useMemo<Question[]>(() => {
     if (!asked) return [];
@@ -232,7 +247,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
         const goal = c.event_id ? graphics.data!.goals.find((x) => x.event_id === c.event_id) : undefined;
         const label = c.status === "rejected" ? t("noGoal") : t("goalOf", { team: c.side === "own" ? own : oppName });
         const spot: SpotAnswer | undefined = goal?.spot_by_coach && goal.zone ? (goal.zone as SpotZone) : goal?.zone_source === "unknown" ? "unknown" : undefined;
-        return { q: { kind: "goal", c }, label, ...(c.status === "confirmed" && c.outcome === "goal" && c.event_id ? { eventId: c.event_id } : {}), ...(spot ? { spot } : {}) };
+        return { q: { kind: "goal", c }, label, ...(c.status === "confirmed" && c.outcome === "goal" && c.event_id ? { eventId: c.event_id } : {}), ...(spot ? { spot } : {}), ...(c.auto ? { auto: true } : {}) };
       })
       .sort((a, b) => (a.q.kind === "goal" && b.q.kind === "goal" ? a.q.c.goal_ms - b.q.c.goal_ms : 0));
     const saved = [...court, ...throwOffs, ...goals];
@@ -263,7 +278,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
   const [byLines, setByLines] = useState(false);
   const corners = moved ?? startCorners;
 
-  const roster = useRosterNames(orgId, match.team_id, match.season_id);
+  const roster = useMatchRoster(orgId, match);
   const players = (roster.data ?? []).filter((r) => r.active);
   const read = current?.kind === "person" && current.tr.number != null ? players.find((r) => r.jersey_number === current.tr.number) : undefined;
   const player = useRef<PlayerHandle>(null);
@@ -427,7 +442,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
     setAnswered((list) => (revisit != null ? list.map((x, i) => (i === revisit ? entry : x)) : [...list, entry]));
     if (goal && row) {
       const zone = row.shot_zone as SpotZone | null | undefined;
-      setSpotStep({ q: current, eventId: goal, goal: a.label, index, suggestion: zone && row.zone_source === "coach" ? { zone, kind: "current" } : null });
+      setSpotStep({ q: current, eventId: goal, goal: a.label, index, suggestion: spotMark(zone && row.zone_source === "coach" ? zone : null, { zone, zone_source: row.zone_source }) });
       return;
     }
     if (revisit != null) {
@@ -436,6 +451,25 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
     }
     next(current);
   }
+
+  // a goal taken over from the match report, taken back: the report goal goes back to its time
+  // from the clock and is never taken over again (livegang L1)
+  const [undone, setUndone] = useState(false);
+  const [undoFailed, setUndoFailed] = useState<string | null>(null);
+  async function undoFromReport(c: Candidate) {
+    try {
+      setUndoFailed(null);
+      await review(c, { status: null });
+    } catch (e) {
+      setUndoFailed(e instanceof Error ? e.message : String(e));
+      return;
+    }
+    setAnswered((list) => list.filter((x) => id(x.q) !== c.id));
+    setUndone(true);
+    for (const key of ["goal-candidates", "events", "stats", "official-goals"]) void qc.invalidateQueries({ queryKey: [key, match.id] });
+    void qc.invalidateQueries({ queryKey: ["notifications", orgId] });
+  }
+  const fromReport = answered.filter((x) => x.auto).length;
 
   /** The place of the goal: saved at once, then the next question (no «Weiter»). */
   async function pickSpot(step: SpotStep, spot: SpotAnswer, point?: HalfPt) {
@@ -576,7 +610,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
   return (
     <div style={matchStyle([org.primary_color, org.secondary_color ?? null], match.opponent_colors ? [match.opponent_colors.color, match.opponent_colors.second ?? null] : null) as CSSProperties} data-testid="check">
       <div className="bleed-x -mt-px flex h-[60px] items-center justify-between gap-3 border-b-2 border-ink px-4 md:px-8">
-        <span className="min-w-0 truncate text-[15px] font-bold">{t("top", { opponent: `${own} ${ta("vsShort")} ${oppName}` })}</span>
+        <span className="min-w-0 truncate text-[15px] font-bold">{t("top", { opponent: pairing(sides, ta("vsShort")) })}</span>
         {/* one line on a phone too (UX test B45) */}
         <Link href={back} className="inline-flex min-h-11 shrink-0 items-center border-2 border-ink px-3.5 text-[15px] font-bold whitespace-nowrap text-ink no-underline">
           {t("later")}
@@ -585,10 +619,11 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
       {/* «Von wo?» on a phone: video and court on one screen, the strip gives way */}
       <div className={cn("bleed-x", spotStep && "max-md:hidden")}>
         <Strip
-          name={own}
-          sub={`${ta("vsShort")} ${oppName} · ${left > 0 ? t("openCount", { n: left, minutes: leftMinutes }) : total > 0 ? t("count", { n: total }) : otherOpen > 0 ? t("count", { n: otherOpen }) : t("noneOpen")}`}
+          name={sides.neutral ? sides.home : own}
+          sub={`${ta("vsShort")} ${sides.neutral ? sides.away : oppName} · ${left > 0 ? t("openCount", { n: left, minutes: leftMinutes }) : total > 0 ? t("count", { n: total }) : otherOpen > 0 ? t("count", { n: otherOpen }) : t("noneOpen")}`}
           own={match.score_own}
           opp={match.score_opponent}
+          oppFirst={oppFirst(sides)}
         />
       </div>
       {loading ? (
@@ -661,6 +696,19 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
           {answered.length > 0 && (
             <section aria-labelledby="answered" data-testid="check-answered">
               <h2 id="answered" className="text-[22px]">{t("answered")}</h2>
+              {fromReport > 0 && (
+                <p className="text-[17px] text-ink-2" data-testid="check-from-report-note">
+                  {t("fromReportNote", { n: fromReport })}
+                </p>
+              )}
+              <p aria-live="polite" className="m-0 text-[15px] text-ink-2 empty:hidden">
+                {undone ? t("fromReportUndone") : ""}
+              </p>
+              {undoFailed && (
+                <p role="alert" className="max-w-[54ch] border-l-4 border-loss pl-3 text-[17px] font-semibold" data-testid="check-failed">
+                  {t("saveFailed")} <span className="block text-[15px] font-normal text-ink-2">{undoFailed}</span>
+                </p>
+              )}
               <ul className="m-0 list-none border-t-2 border-ink p-0">
                 {answered.map((x, i) => (
                   <li key={id(x.q)} className="flex min-h-12 flex-wrap items-center justify-between gap-x-3 gap-y-1 border-b border-rule py-1.5 text-[17px]" data-testid="check-answered-row">
@@ -670,17 +718,29 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
                         <span className="mr-2 font-mono text-[15px] font-semibold text-ink-2">{x.q.c.clock_s != null ? `${clock(x.q.c.clock_s)} · ${t("videoAt", { video: clock(x.q.c.goal_ms / 1000) })}` : t("videoAt", { video: clock(x.q.c.goal_ms / 1000) })}</span>
                       )}
                       {x.q.kind === "field" ? t("fieldQuestion") : x.q.kind === "kickoff" ? t("kickoffQuestion", { n: x.q.period }) : x.q.kind === "person" ? t("personQuestion") : t("goalQuestion")} <b>{x.label}</b>
-                      {x.eventId && <span className="block text-[15px] text-ink-2">{x.spot && x.spot !== "unknown" ? ts("of", { zone: ts(`zone.${x.spot}` as "zone.la") }) : ts("missing")}</span>}
+                      {x.auto && (
+                        <span className="block text-[15px] text-ink-2" data-testid="check-from-report">
+                          {t("fromReport")}
+                        </span>
+                      )}
+                      {x.eventId && <span className="block text-[15px] text-ink-2">{x.spot && x.spot !== "unknown" ? ts(isSituation(x.spot) ? "situation" : "of", { zone: ts(`zone.${x.spot}` as "zone.la") }) : ts("missing")}</span>}
                     </span>
                     <span className="flex flex-wrap gap-x-4">
                       {x.eventId && (
                         <button
                           type="button"
-                          onClick={() => setSpotStep({ q: x.q, eventId: x.eventId!, goal: x.label, index: i, fromList: true, suggestion: x.spot && x.spot !== "unknown" ? { zone: x.spot, kind: "current" } : null })}
+                          onClick={() =>
+                            setSpotStep({ q: x.q, eventId: x.eventId!, goal: x.label, index: i, fromList: true, suggestion: spotMark(x.spot && x.spot !== "unknown" ? x.spot : null, graphics.data?.goals.find((g) => g.event_id === x.eventId)) })
+                          }
                           className="min-h-11 cursor-pointer border-0 bg-transparent p-0 font-bold underline underline-offset-4"
                           data-testid="check-spot-change"
                         >
                           {x.spot && x.spot !== "unknown" ? ts("change") : ts("set")}
+                        </button>
+                      )}
+                      {x.auto && x.q.kind === "goal" && (
+                        <button type="button" onClick={() => x.q.kind === "goal" && void undoFromReport(x.q.c)} className="min-h-11 cursor-pointer border-0 bg-transparent p-0 font-bold underline underline-offset-4" data-testid="check-from-report-undo">
+                          {t("fromReportUndo")}
                         </button>
                       )}
                       <button type="button" onClick={() => setRevisit(i)} className="min-h-11 cursor-pointer border-0 bg-transparent p-0 font-bold underline underline-offset-4">
@@ -700,8 +760,10 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
         // the court gets the whole width: the hall image as large as possible (E04)
         <>
         {notice && current.kind === "field" && !notice.failed && <AnalysisNotice notice={notice} className="mt-6" testId="check-field-notice" />}
-        <div className={cn("grid gap-5 py-6 md:gap-14 md:py-10", spotStep && "max-md:gap-2 max-md:py-2", current.kind === "field" ? "md:grid-cols-1 md:gap-6" : "md:grid-cols-[minmax(0,1fr)_420px]")}>
-          <figure className="relative m-0 self-start bg-[#1d2125]">
+        <div className={cn("grid gap-5 py-6 md:gap-14 md:py-10", spotStep && "max-md:gap-2 max-md:py-2", current.kind === "field" ? "md:grid-cols-1 md:gap-6" : "md:grid-cols-[minmax(0,1fr)_340px] md:gap-8 xl:grid-cols-[minmax(0,1fr)_420px] xl:gap-14")}>
+          {/* the clip whole, with its controls under it: on a laptop the answers sit beside a
+              picture that fits the screen (app review BUG-14, livegang L2: only a strip showed) */}
+          <figure className={cn("relative m-0 w-full self-start bg-[#1d2125]", current.kind !== "field" && "md:max-w-[calc((100svh-24rem)*16/9)]")}>
             {current.kind === "field" && main && panoSize && corners ? (
               <FieldCheck key={current.videoId} src={`/v1/orgs/${orgId}/videos/${current.videoId}/panorama`} alt={t("fieldAlt")} size={panoSize} corners={corners} onChange={setMoved} />
             ) : current.kind === "field" && main ? (
@@ -714,6 +776,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
                 src={`${media}/hls/master.m3u8`}
                 window={{ start_ms: Math.max(0, current.at - 1500), end_ms: current.at + 2500 }}
                 autoPlay
+                under
                 overlay={
                   <PersonCrop
                     getVideo={getVideo}
@@ -728,9 +791,9 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
               />
             ) : current.kind === "kickoff" && media ? (
               // the second half's throw-off: the player starts where the second half's file starts
-              <VideoPlayer ref={player} key={`kickoff-${current.period}`} src={`${media}/hls/master.m3u8`} window={kickoffFrom(current.period)} />
+              <VideoPlayer ref={player} key={`kickoff-${current.period}`} src={`${media}/hls/master.m3u8`} window={kickoffFrom(current.period)} under />
             ) : current.kind === "goal" && media ? (
-              <VideoPlayer ref={player} key={current.c.id} src={`${media}/hls/master.m3u8`} window={goalWindow(current.c)} autoPlay bare={spotStep != null} loop={spotStep != null} />
+              <VideoPlayer ref={player} key={current.c.id} src={`${media}/hls/master.m3u8`} window={goalWindow(current.c)} autoPlay bare={spotStep != null} loop under />
             ) : current.kind !== "field" ? (
               // the video is not playable yet (still uploaded or converted): said, never an empty
               // black area; the page looks again until it plays (livegang K5)
@@ -835,7 +898,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
                   </p>
                 )}
                 <div className="mt-2 md:mt-4">
-                  <ShotSpotPicker key={`${spotStep.eventId}-${spotStep.index}`} current={spotStep.suggestion?.zone ?? null} orientation={spotView.orientation} disabled={!spotView.ready} onPick={(spot, point) => void pickSpot(spotStep, spot, point)} onSkip={spotStep.fromList ? undefined : () => leaveSpot(spotStep)} />
+                  <ShotSpotPicker key={`${spotStep.eventId}-${spotStep.index}`} current={spotStep.suggestion?.kind === "current" ? spotStep.suggestion.zone : null} suggested={spotStep.suggestion?.kind === "suggested" ? spotStep.suggestion.zone : null} orientation={spotView.orientation} disabled={!spotView.ready} onPick={(spot, point) => void pickSpot(spotStep, spot, point)} onSkip={spotStep.fromList ? undefined : () => leaveSpot(spotStep)} />
                 </div>
               </section>
             ) : (

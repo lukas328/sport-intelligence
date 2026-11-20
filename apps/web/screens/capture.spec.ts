@@ -298,7 +298,7 @@ test("screens", async ({ page, browser }, info) => {
     await p.getByRole("link", { name: "Konto erstellen und annehmen" }).click();
     await p.getByLabel("Vor- und Nachname").fill(name);
     await p.getByLabel("Passwort").fill("correct-horse-1");
-    await p.getByLabel(/Nutzungsbedingungen/).check();
+    await p.getByLabel(/AGB/).check();
     await p.getByRole("button", { name: "Konto erstellen" }).click();
     await p.waitForURL((url) => !url.pathname.startsWith("/register"), { timeout: 30_000 });
     return { ctx, p };

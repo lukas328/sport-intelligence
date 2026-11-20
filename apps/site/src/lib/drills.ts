@@ -102,7 +102,7 @@ export const DRILLS: Record<"defence_6_0_shift" | "transition_3v2_back", Drill> 
     minutes: 12,
     players: "6-12",
     level: "basic",
-    name: { "de-CH": "Rückzug 3 gegen 2 nach Ballverlust", fr: "Repli à 2 contre 3 après la perte", en: "Getting back 2 against 3 after a turnover" },
+    name: { "de-CH": "Rückzug 3 gegen 2 nach Ballverlust", fr: "Repli à 3 contre 2 après la perte", en: "Getting back 3 against 2 after a turnover" },
     setup: {
       "de-CH": "Ganzes Feld. Drei Angreifer an der Mittellinie mit Ball, zwei Verteidiger einen Schritt weiter vorne, Torhüter.",
       fr: "Terrain entier. Trois attaquants à la ligne médiane avec ballon, deux défenseurs un pas plus loin, gardien.",

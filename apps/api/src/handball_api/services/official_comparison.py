@@ -50,6 +50,7 @@ class Seen:
     event: Event | None = None
     outcome: str = "goal"
     candidate_id: str | None = None  # the video candidate it was confirmed on
+    auto: str | None = None  # confirmed without a question (goal_candidates.auto_accept)
 
 
 def nearest(cands: list[Any], side: str, clock: float, outcome: str = "goal") -> Any | None:

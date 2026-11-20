@@ -5,7 +5,10 @@ import { useFormatter, useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { AttnTag } from "@/components/anlauf/blocks";
 import { Breakable, Strip, WurfHead } from "@/components/anlauf/heads";
+import { useMatchSides } from "@/components/domain/match-sides";
+import { oppFirst } from "@/lib/match-sides";
 import { openMoments, reportCut, reportGoals, videoScore, type MatchGraphics } from "@/lib/graphics";
+import type { ReportGoal } from "@/components/anlauf/charts";
 
 type Match = Schemas["MatchOut"];
 
@@ -19,9 +22,19 @@ export function MatchHead({ match, ownName, oppName, view, graphics, children }:
   const tm = useTranslations("matches");
   const format = useFormatter();
   const kickoff = new Date(match.kickoff_at);
-  const title = match.opponent ? `${match.is_home ? ownName : oppName} ${tm("vs")} ${match.is_home ? oppName : ownName}` : `${tm("training")}: ${ownName}`;
+  // home team first (BUG-18); an observed match leads with the home team, not with us
+  const sides = useMatchSides();
+  const [first, second] = match.is_home ? [ownName, oppName] : [oppName, ownName];
+  const title = match.opponent ? `${first} ${tm("vs")} ${second}` : `${tm("training")}: ${ownName}`;
+  // the slim head names our team, the opponent beside it; in an observed match the home team
+  const stripName = sides?.neutral ? first : ownName;
+  const stripOther = sides?.neutral ? second : oppName;
+  // the result follows the title in an observed match: home team first (BUG-18); in a match of the
+  // team it stays ours first, as everywhere in the app
+  const resultOppFirst = oppFirst(sides);
   const when = format.dateTime(kickoff, { weekday: "long", day: "numeric", month: "long" });
-  const half = match.halftime_own != null && match.halftime_opponent != null ? `${tm("halftime")} ${match.halftime_own}:${match.halftime_opponent}` : null;
+  const halfScore = resultOppFirst ? `${match.halftime_opponent}:${match.halftime_own}` : `${match.halftime_own}:${match.halftime_opponent}`;
+  const half = match.halftime_own != null && match.halftime_opponent != null ? `${tm("halftime")} ${halfScore}` : null;
   // a video of the opponent against another team says so first (K3)
   const watched = match.kind === "scouting" ? t("scoutingTag") : null;
   const kick = [watched, when, match.competition, match.venue].filter(Boolean).join(" · ");
@@ -69,8 +82,9 @@ export function MatchHead({ match, ownName, oppName, view, graphics, children }:
           ownName={ownName}
           oppName={oppName}
           ownColor={match.kit_own}
+          oppFirst={resultOppFirst}
           scoreless={graphics != null}
-          goals={graphics ? reportGoals(graphics) : null}
+          goals={graphics ? homeUp(reportGoals(graphics), resultOppFirst) : null}
           goalsUntil={graphics ? reportCut(graphics, match.score_own, match.score_opponent, (match.period_s * match.periods) / 60) : null}
           flightLabels={{ half: t("halftime", { v: "{v}" }), end: t("end", { v: "{v}" }), cut: t("flightCut", { m: "{m}" }) }}
           meta={
@@ -86,16 +100,23 @@ export function MatchHead({ match, ownName, oppName, view, graphics, children }:
         <Strip
           name={
             <h1 className="m-0 text-[length:inherit] leading-[inherit]">
-              <Breakable text={ownName} />
-              {match.opponent && <span className="sr-only">{` ${ta("vsShort")} ${oppName}`}</span>}
+              <Breakable text={stripName} />
+              {match.opponent && <span className="sr-only">{` ${ta("vsShort")} ${stripOther}`}</span>}
             </h1>
           }
-          sub={[watched, match.opponent ? `${ta("vsShort")} ${oppName}` : null, when, match.venue, note].filter(Boolean).join(" · ")}
+          sub={[watched, match.opponent ? `${ta("vsShort")} ${stripOther}` : null, when, match.venue, note].filter(Boolean).join(" · ")}
           own={own}
           opp={opp}
           pending={pending}
+          oppFirst={resultOppFirst}
         />
       )}
     </div>
   );
+}
+
+/** The run of the match from the home team's side: in an observed match whose home team is the
+ * data's opponent side, its goals go up and the labels read its score first (UI check 20.11.). */
+function homeUp(goals: ReportGoal[], flip: boolean): ReportGoal[] {
+  return flip ? goals.map((g) => ({ ...g, team: g.team === "own" ? "opp" : "own" })) : goals;
 }

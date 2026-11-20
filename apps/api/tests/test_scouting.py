@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import re
+import uuid
 from collections.abc import Callable
 from datetime import UTC, datetime, timedelta
 
+import asyncpg
 import pytest
 
 from handball_api.core.email import MemoryEmailSender
@@ -142,6 +144,36 @@ async def test_reports_are_created_72h_before(make_api: Callable[[], Api]) -> No
     assert (await coach.get(f"/v1/orgs/{org}/matches/{due['id']}/scouting")).status_code == 200
     notes = (await coach.get(f"/v1/orgs/{org}/me/notifications")).json()
     assert any(n["kind"] == "scouting_ready" for n in notes["items"])
+
+
+async def test_no_report_message_from_the_official_report_alone(
+    make_api: Callable[[], Api], owner_conn: asyncpg.Connection
+) -> None:
+    """App review BUG-15: «Der Vorbereitungsbericht ist da» led to an opponent page that said «noch
+    keine Spiele mit erfassten Ereignissen»: the earlier match had only the federation's report.
+    The message needs the data the page shows (an analysis), else it is not sent."""
+    coach = make_api()
+    ids = await setup_club(coach)
+    org = ids["org"]
+    earlier = await _earlier_match(coach, ids, "2026-09-05T18:00:00+02:00")
+    await owner_conn.execute(
+        "UPDATE events SET source = 'official_report' WHERE match_id = $1", uuid.UUID(earlier)
+    )
+    soon = (datetime.now(UTC) + timedelta(hours=48)).isoformat()
+    due = await new_match(coach, ids, opponent_name="TV Gegner", kickoff_at=soon)
+    token = {"x-internal-token": coach.app.state.settings.internal_token.get_secret_value()}
+    assert (await coach.post("/internal/scouting/due", headers=token)).json() == {"created": 0}
+    notes = (await coach.get(f"/v1/orgs/{org}/me/notifications")).json()
+    assert not any(n["kind"] == "scouting_ready" for n in notes["items"])
+    opponent = (await coach.get(f"/v1/orgs/{org}/matches/{due['id']}")).json()["opponent"]["id"]
+    profile = (await coach.get(f"/v1/orgs/{org}/opponents/{opponent}/profile")).json()
+    assert profile["tagged_matches"] == 0  # what the page would have shown
+
+    # once a match against them is analysed the report comes
+    await owner_conn.execute(
+        "UPDATE events SET source = 'user_correction' WHERE match_id = $1", uuid.UUID(earlier)
+    )
+    assert (await coach.post("/internal/scouting/due", headers=token)).json() == {"created": 1}
 
 
 def test_report_clips_are_moments_of_the_video() -> None:

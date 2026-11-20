@@ -1,6 +1,7 @@
 "use client";
 
-import { checkMinutes } from "@/lib/shot-spot";
+import { checkMinutes, spotCounts } from "@/lib/shot-spot";
+import { nextTask } from "@/lib/next-task";
 import { ShareButton, shareMatchCard } from "@/components/sharing/share-button";
 import type { Schemas } from "@handball/api-client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -10,16 +11,18 @@ import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, 
 import Link from "next/link";
 import { useEscape } from "@/lib/use-escape";
 import { ArrowLeftRight, Check, ChevronDown, ChartNoAxesColumn, Clapperboard, FileDown, Hand, Info, MoreHorizontal, Pencil, Plus, Radio, Shield, Trash2 } from "lucide-react";
-import { useRosterNames } from "@/components/analysis/tagger";
+import { MatchSidesProvider, useMatchRoster } from "@/components/domain/match-sides";
+import { homeFirst, matchSides, type MatchSides } from "@/lib/match-sides";
+import { courseOf } from "@/lib/score-flow";
 import { DEFAULT_CLUB, matchStyle } from "@/lib/color";
 import { markOpened } from "@/lib/fresh-match";
-import { checkCount, goalRuns, useMatchGraphics } from "@/lib/graphics";
+import { checkCount, furtherMoments, goalRuns, useMatchGraphics } from "@/lib/graphics";
 import { ownName } from "@/lib/own-name";
 import { ThreeThingsView } from "@/components/anlauf/three-things-view";
 import { ExampleBanner } from "@/components/anlauf/example-banner";
 import { MatchHead } from "./match-head";
+import { NextTaskLine } from "./next-task";
 import { AskColour } from "./ask-colour";
-import { MatchZones } from "./match-graphics";
 import { VideoStage } from "./video-stage";
 import type { Kits } from "@/lib/kit";
 import { playerLabel } from "@/lib/player-name";
@@ -190,6 +193,11 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
   const stats = useStats(orgId, initial.id);
   const graphics = useMatchGraphics(orgId, initial.id);
   const [bench, setBench] = useState(false);
+  // «Zeichnen» on the stage: the workbench opens drawing on the stage's moment (app review BUG-13)
+  const [drawAt, setDrawAt] = useState<{ t_ms: number } | null>(null);
+  useEffect(() => {
+    if (!bench) setDrawAt(null);
+  }, [bench]);
   // Escape closes the Werkbank like its «Schliessen» (A15)
   const benchRef = useRef<HTMLElement>(null);
   useEscape(bench, () => setBench(false), benchRef);
@@ -200,13 +208,16 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
   // deep links (?t=ms), e.g. a scene from Szenen or a play drawn on a video moment: the moment
   // plays in the full player, so it opens (behind the stage it would seek out of sight)
   // a moment in the full player: it opens, and the moment is sought once the video can
-  const benchAt = useCallback((t0: number, play = false) => {
+  // the workbench and its player are mounted only while open: one video on the page, not a second
+  // one loading hidden behind the stage (app review BUG-19); so a jump waits for its player
+  const benchAt = useCallback((t0: number, play = false, show = false) => {
     setBench(true);
     const id = window.setInterval(() => {
       const v = player.current?.video();
       if (v && v.readyState >= 1) {
         player.current?.seek(t0);
         if (play) player.current?.play();
+        if (show) reveal();
         window.clearInterval(id);
       }
     }, 300);
@@ -226,10 +237,21 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
   // the example match of «Demo-Spiel ansehen» is looked at, not worked on (R1, R22): no upload,
   // no colour question, no files, no placeholders; seeded demo matches with a video stay matches
   const example = match.source === "demo";
-  const own = scouting ? (match.scouting_other ?? t("progress.otherTeam")) : ownName(teamName, shell?.org.name ?? teamName);
+  // the one notion of perspective (BUG-01 to 07): our team, or both teams by name when observed
+  const sides = matchSides(match, { team: ownName(teamName, shell?.org.name ?? teamName), opponent: oppName(match), otherFallback: t("progress.otherTeam") });
+  const own = sides.own;
+  // the other team of an observed match has a profile of its own when the club knows it as an
+  // opponent (by name)
+  const opponents = useQuery({
+    queryKey: ["opponents", orgId],
+    enabled: scouting && Boolean(match.scouting_other),
+    queryFn: async () => (await api.GET("/v1/orgs/{org_id}/opponents", { params: { path: { org_id: orgId } } })).data ?? [],
+  });
+  const otherProfile = scouting ? opponents.data?.find((o) => o.name.trim().toLowerCase() === (match.scouting_other ?? "").trim().toLowerCase()) : undefined;
   const more = useRef<HTMLDetailsElement>(null);
   // the example names nobody of the team: its players are invented numbers, never the roster (A4)
-  const rosterQuery = useRosterNames(orgId, match.team_id, match.season_id);
+  // an observed match names nobody of the team either: our roster plays no part in it (L4)
+  const rosterQuery = useMatchRoster(orgId, match);
   const rosterRows = useMemo(() => (example ? [] : (rosterQuery.data ?? [])), [example, rosterQuery.data]);
   const names = useMemo(
     () => Object.fromEntries(rosterRows.map((r) => [r.player_id, playerLabel(r.jersey_number, `${r.first_name} ${r.last_name}`)])),
@@ -246,6 +268,14 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
   const counted = (stats.data?.quality.events ?? 0) > 0;
   // scenes are goals with a place in the video: collections and highlights need them (review R34)
   const hasScenes = Boolean(graphics.data?.goals.some((g) => g.has_video || g.source === "demo"));
+  // «Highlights teilen» only once there is a finished reel to share (app review UX-06); the same
+  // query as the highlights section below
+  const reels = useQuery({
+    queryKey: ["highlights", match.id],
+    enabled: staff && hasScenes,
+    queryFn: async () => (await api.GET("/v1/orgs/{org_id}/matches/{match_id}/highlights", { params: { path: { org_id: orgId, match_id: match.id } } })).data ?? [],
+  });
+  const hasReels = (reels.data ?? []).some((r) => r.status === "ready");
   // a match still to come without a score: nothing to share or look back on yet
   const upcoming = !main && match.score_own == null && Date.parse(match.kickoff_at) > Date.now();
   // the Spielkarte, rendered on the server: into the chat by the share sheet, else saved (K20)
@@ -352,17 +382,14 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
 
   function onPlay(ms: number) {
     setView("video");
-    setBench(true);
-    // the player is kept mounted, so the seek works right after the switch
-    requestAnimationFrame(() => {
-      player.current?.seek(ms);
-      player.current?.play();
-      reveal();
-    });
+    benchAt(ms, true, true);
   }
 
   const base = `/app/${orgId}/matches/${match.id}`;
   // what the video covers of the match, for the analysis to say which figures it can carry
+  // the course of the match over what the data covers (BUG-20): the match minutes of the video, or
+  // without a throw-off the video's own minutes (the goals then carry video times), never 0 to 60
+  const courseSpan = courseOf(graphics.data ?? null, match.kickoff_ms, main?.duration_s ?? null);
   const covers = main ? coverage(match.kickoff_ms, match.period_s, main.duration_s ? main.duration_s * 1000 : null) : null;
   const videoNote = covers?.length
     ? t("workflow.coverage", { clip: covers.map((c) => `${formatClock(c.from * 1000)} ${t("workflow.to")} ${formatClock(c.to * 1000)}`).join(", ") })
@@ -377,6 +404,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
   const club: [string, string | null] = [shell?.org.primary_color ?? DEFAULT_CLUB, shell?.org.secondary_color ?? null];
   const oppKit = match.opponent_colors ? [match.opponent_colors.color, match.opponent_colors.second ?? null] : null;
   const checks = graphics.data ? checkCount(graphics.data) : 0;
+  const further = graphics.data ? furtherMoments(graphics.data) : 0;
   // the stage of the tab Video (SPEC 7.3) once there are goals to show on it
   const stage = Boolean(main && graphics.data && graphics.data.goals.some((g) => g.has_video || g.source === "demo"));
   // «von dir bestätigt»: the goals a person confirmed (Prüfen, by hand), and of those how many have
@@ -391,7 +419,11 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
       ? `${coachGoals.length === totalGoals ? ta("sourceMarkedAll", { n: coachGoals.length }) : ta("sourceMarked", { n: coachGoals.length, total: totalGoals })}${ta("sourcePlaced", { n: placedGoals })}`
       : null,
   ].filter(Boolean);
+  const sourceText = `${ta("sources")}: ${sourceParts.join(" · ")}`;
+  const sourceCut = sourceText.lastIndexOf(" ") + 1;
+  const [sourceHead, sourceTail] = [sourceText.slice(0, sourceCut), sourceText.slice(sourceCut)];
   return (
+    <MatchSidesProvider sides={sides}>
     <div className="space-y-8" style={matchStyle(club, oppKit) as CSSProperties}>
       <MatchHead match={match} ownName={own} oppName={oppName(match)} view={view} graphics={graphics.data}>
         {staff && !example && match.opponent && !match.opponent_colors?.color && <AskColour orgId={orgId} matchId={match.id} opponent={oppName(match)} />}
@@ -410,6 +442,22 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
         )}
       </MatchHead>
       {example && <ExampleBanner orgId={orgId} teamId={match.team_id} />}
+      {/* one clear next task on every match page (L5): open questions, missing shot spots, the video */}
+      <NextTaskLine
+        base={base}
+        onUpload={toUpload}
+        task={nextTask({
+          staff,
+          example,
+          upcoming,
+          hasOpponent: Boolean(match.opponent),
+          running: progressShown || graphics.data?.analysis === "running",
+          checks,
+          spotsMissing: graphics.data ? spotCounts(graphics.data).missing : 0,
+          hasVideo: Boolean(main),
+          paper: match.source === "paper_report",
+        })}
+      />
       {/* one state at a time (L4): the progress block below says what runs; here only «fertig»
           and a failed match without progress to tell it */}
       {(justDone || (match.status === "failed" && !progressShown)) && (
@@ -438,11 +486,21 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
               { value: "numbers", label: t("tabs.numbers") },
             ]}
           />
-          <div className="flex flex-wrap items-center justify-end gap-2 pb-2.5">
+          {/* on a 390 px phone Prüfen, Teilen and Mehr fit one line only with the smaller gap
+              (UI check 20.11.: «Mehr» fell onto a line of its own) */}
+          <div className="flex flex-wrap items-center justify-end gap-1 pb-2.5 sm:gap-2">
             {staff && checks > 0 && (
               <Link href={`${base}/check`} className="font-slant flex min-h-11 items-center gap-2 px-2 text-xl text-ink no-underline" data-testid="check-link">
                 {ta("check")}
                 <em className="grid h-[30px] min-w-[30px] place-items-center bg-attn px-1 font-sans text-base font-extrabold text-attn-ink not-italic">{checks}</em>
+              </Link>
+            )}
+            {/* the main round answered, moments still wait behind «Mehr prüfen»: not rung, but
+                reachable until answered (livegang L3: after leaving Prüfen they were gone) */}
+            {staff && checks === 0 && further > 0 && (
+              <Link href={`${base}/check`} aria-label={ta("checkFurtherLabel", { n: further })} className="font-slant flex min-h-11 items-center gap-2 px-2 text-xl text-ink no-underline" data-testid="check-further">
+                {ta("check")}
+                <span className="font-sans text-[15px] font-bold not-italic text-ink-2">{ta("checkFurther", { n: further })}</span>
               </Link>
             )}
             {MATCHDAY_OFFERED && liveFirst && (
@@ -484,9 +542,15 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
                     {t("marks.title")}
                   </MenuItem>
                 )}
+                {/* an observed match: the profile of each team that has one, both by name (BUG-07) */}
                 {match.opponent && (
                   <MenuItem href={`/app/${orgId}/opponents/${match.opponent.id}`} icon={<Shield />}>
-                    {t("opponent.open")}: {match.opponent.name}
+                    {scouting ? t("opponent.openOf", { name: match.opponent.name }) : `${t("opponent.open")}: ${match.opponent.name}`}
+                  </MenuItem>
+                )}
+                {otherProfile && (
+                  <MenuItem href={`/app/${orgId}/opponents/${otherProfile.id}`} icon={<Shield />}>
+                    {t("opponent.openOf", { name: otherProfile.name })}
                   </MenuItem>
                 )}
                 <MenuSeparator />
@@ -522,10 +586,11 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
       {sourceParts.length > 0 && (
         <div className="-mt-6 text-[15px] text-ink-2" data-testid="source-line">
           {/* «So rechnen wir» as the info sign right beside the source it explains (A17) */}
-          <p className="m-0 flex flex-wrap items-center gap-x-1">
-            <span>
-              {ta("sources")}: {sourceParts.join(" · ")}
-            </span>
+          {/* the sign stays with the last word, never alone on a line on the phone (UI check 20.11.) */}
+          <p className="m-0">
+            {sourceHead}
+            <span className="whitespace-nowrap">
+            {sourceTail}
             <button
               type="button"
               onClick={() => setHowOpen((v) => !v)}
@@ -533,11 +598,12 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
               aria-controls="how-counted"
               aria-label={ta("howCounted")}
               title={ta("howCounted")}
-              className="-my-2 inline-flex size-11 cursor-pointer items-center justify-center text-ink"
+              className="-my-3 inline-flex size-11 cursor-pointer items-center justify-center align-middle text-ink"
               data-testid="how-counted-open"
             >
               <Info aria-hidden className="size-5" strokeWidth={2.4} />
             </button>
+            </span>
           </p>
           {howOpen && (
             <p id="how-counted" ref={howRef} className="m-0 mt-1 max-w-[66ch] border-l-4 border-rule pl-3 text-ink-2" data-testid="how-counted">
@@ -594,6 +660,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
             scene={scene}
             onThing={(n) => setView("video", n)}
             onBench={() => setBench(true)}
+            onDraw={(ms) => (setDrawAt({ t_ms: ms }), setBench(true))}
           />
         )}
         {/* the jump to the second half also with goals on the stage: it plays in the full player
@@ -633,9 +700,13 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
           <section ref={benchRef} hidden={!bench} aria-labelledby="bench-title" className="border-t-2 border-ink pt-6">
             {(
               <div className="mb-4 flex items-center justify-between gap-3">
-                <h2 id="bench-title" className="text-[26px]">
-                  {ta("bench")}
-                </h2>
+                {/* the workbench has one name, «Einrichten von Hand», and is reached only by it (L5) */}
+                <div>
+                  <h2 id="bench-title" className="text-[26px]">
+                    {ta("bench")}
+                  </h2>
+                  {staff && <p className="m-0 text-[15px] text-ink-2">{ta("plainBenchHint")}</p>}
+                </div>
                 <Button variant="secondary" size="sm" onClick={() => setBench(false)}>
                   {ta("benchClose")}
                 </Button>
@@ -644,7 +715,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
             <div className="mb-3">
               <PartsLine videos={match.videos} onJump={(ms) => benchAt(ms, true)} />
             </div>
-            <Workspace orgId={orgId} match={match} video={main} staff={staff} teamName={teamName} oppName={oppName(match)} names={names} handle={player} setup={setup} requestPane={askPane} checkSteps={false} />
+            {bench && <Workspace orgId={orgId} match={match} video={main} staff={staff} teamName={own} oppName={oppName(match)} names={names} handle={player} setup={setup} requestPane={askPane} requestDraw={drawAt} checkSteps={false} />}
           </section>
         ) : !staff ? (
           <EmptyState icon={<Clapperboard />} title={match.source === "paper_report" ? t("stats.noVideo") : t("player.notReady")} />
@@ -767,7 +838,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
             // before the match there is nothing to share yet (UX test A05), nor before a goal is
             // known (open questions alone make no reel, L6)
             // highlights are made of scenes: without a goal in the video there is none (R34)
-            onHighlights={upcoming || noGoals || !hasScenes ? undefined : () => {
+            onHighlights={upcoming || noGoals || !hasScenes || !hasReels ? undefined : () => {
               if (more.current) more.current.open = true;
               requestAnimationFrame(() => document.getElementById("highlights")?.scrollIntoView({ behavior: "smooth", block: "start" }));
             }}
@@ -782,8 +853,8 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
                 {telegram}
               </div>
             )}
+            {/* the goals by position stand once, in Zahlen (app review UX-08: no doubles) */}
             <div className="space-y-10">
-              {graphics.data && goalRuns(graphics.data).length > 0 && <MatchZones graphics={graphics.data} />}
               {stats.data && <ThreeFigures stats={stats.data} names={names} roster={rosterRows} />}
             </div>
           </div>
@@ -791,7 +862,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
               match, when there is nothing in it yet (UX test A05) */}
           {!upcoming && (
           <details ref={more} className="group border-t-2 border-ink pt-4" data-testid="game-more">
-            <summary className="flex min-h-11 cursor-pointer list-none items-baseline gap-3 [&::-webkit-details-marker]:hidden">
+            <summary className="fold items-baseline gap-3">
               <span className="font-slant text-[22px]">{ta("moreGame")}</span>
               <span className="text-[15px] text-ink-2 group-open:hidden">{ta("moreGameHint")}</span>
             </summary>
@@ -799,7 +870,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
           {/* only what the data carries and what is in scope (UX test B08): the course of the
               match; the comparison sits in Zahlen, the three things above, possession and attacks
               estimated from the video are not shown */}
-          {stats.data && stats.data.quality.events > 0 && <OverviewView orgId={orgId} match={match} teamName={teamName} stats={stats.data} names={names} staff={staff} onPlay={main ? onPlay : undefined} parts={["timeline"]} span={graphics.data && !graphics.data.has_report ? (graphics.data.span ?? null) : null} />}
+          {stats.data && stats.data.quality.events > 0 && <OverviewView orgId={orgId} match={match} teamName={own} stats={stats.data} names={names} staff={staff} onPlay={main ? onPlay : undefined} parts={["timeline"]} span={courseSpan?.span ?? null} videoTime={courseSpan?.video ?? false} />}
           <div className="space-y-8">
             <div id="highlights" className="scroll-mt-24"><HighlightsView orgId={orgId} matchId={match.id} teamId={match.team_id} staff={staff} names={names} scenes={Boolean(main && graphics.data?.goals.some((g) => g.has_video))} /></div>
             {/* the players' personal scenes are the staff's overview (K18) */}
@@ -809,17 +880,16 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
             </div>
           </details>
           )}
-          {!example && <AttachmentsPanel orgId={orgId} matchId={match.id} staff={staff} hasReport={graphics.data?.has_report ?? false} linked={Boolean(official.data?.official_team_id)} />}
+          {!example && <AttachmentsPanel orgId={orgId} matchId={match.id} staff={staff} hasReport={graphics.data?.has_report ?? false} linked={Boolean(official.data?.official_team_id) && Boolean(match.official_game) && !scouting} />}
         </div>
       )}
 
       {view === "numbers" && (
         <div className="animate-fade">
           <NumbersView stats={stats.data ?? null} graphics={graphics.data ?? null} roster={rosterRows} orgId={orgId} match={match} names={names} onPlay={main ? onPlay : undefined}>
-          {graphics.data && goalRuns(graphics.data).length > 0 && <MatchZones graphics={graphics.data} row />}
           {stats.data && stats.data.quality.events > 0 && (
             <section id="numbers-overview" className="scroll-mt-24">
-              <OverviewView orgId={orgId} match={match} teamName={teamName} stats={stats.data} names={names} staff={staff} onPlay={main ? onPlay : undefined} videoNote={videoNote} parts={["basis", "decided", "comparison"]} />
+              <OverviewView orgId={orgId} match={match} teamName={own} stats={stats.data} names={names} staff={staff} onPlay={main ? onPlay : undefined} videoNote={videoNote} parts={["basis", "decided", "comparison"]} />
             </section>
           )}
           {numberParts.length === 0 && (
@@ -853,14 +923,14 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
                   orgId={orgId}
                   matchId={match.id}
                   names={names}
-                  teamName={teamName}
+                  teamName={own}
                   oppName={oppName(match)}
                   videoNote={videoNote}
                   short={covers != null && covers.reduce((s, c) => s + c.to - c.from, 0) < match.period_s}
                 />
               ) : stats.data ? (
                 (() => {
-                  const props = { orgId, match, teamName, stats: stats.data, names, staff, onPlay: main ? onPlay : undefined };
+                  const props = { orgId, match, teamName: own, stats: stats.data, names, staff, onPlay: main ? onPlay : undefined };
                   if (part === "report") return <ReportView {...props} />;
                   if (part === "keepers") return <KeepersView {...props} />;
                   return <ShotsView {...props} />;
@@ -875,12 +945,13 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
       )}
 
       <Dialog open={dialog === "edit"} onOpenChange={(o) => setDialog(o ? "edit" : null)} title={t("matches.edit")}>
-        <MatchAdmin orgId={orgId} match={match} teamName={teamName} onSaved={() => setDialog(null)} />
+        <MatchAdmin orgId={orgId} match={match} sides={sides} onSaved={() => setDialog(null)} />
       </Dialog>
       <Dialog open={dialog === "exchange"} onOpenChange={(o) => setDialog(o ? "exchange" : null)} title={t("exchange.title")}>
         <ExchangePanel orgId={orgId} matchId={match.id} canImport={staff} />
       </Dialog>
     </div>
+    </MatchSidesProvider>
   );
 }
 
@@ -914,9 +985,8 @@ function QualityReport({ video }: { video: Video }) {
   );
 }
 
-function MatchAdmin({ orgId, match, teamName, onSaved }: { orgId: string; match: Match; teamName: string; onSaved: () => void }) {
+function MatchAdmin({ orgId, match, sides, onSaved }: { orgId: string; match: Match; sides: MatchSides; onSaved: () => void }) {
   const t = useTranslations();
-  const oppName = useOpponentName();
   const qc = useQueryClient();
   const [custom, setCustom] = useState(match.format === "custom");
   const saved: Kits = {
@@ -949,15 +1019,24 @@ function MatchAdmin({ orgId, match, teamName, onSaved }: { orgId: string; match:
   }
   return (
     <form onSubmit={save} className="space-y-6" aria-label={t("matches.edit")}>
+      {/* the home team first, as in the head (BUG-18); the result of the whole match, not the
+          goals in the video (BUG-05) */}
       <fieldset className="grid grid-cols-2 gap-3">
         <legend className="mb-2 text-sm font-semibold">{t("matches.score")}</legend>
-        <Input label={teamName} name="score_own" type="number" min={0} max={99} defaultValue={match.score_own ?? ""} />
-        <Input label={oppName(match)} name="score_opponent" type="number" min={0} max={99} defaultValue={match.score_opponent ?? ""} />
+        {homeFirst(
+          sides,
+          <Input key="own" label={sides.own} name="score_own" type="number" min={0} max={99} defaultValue={match.score_own ?? ""} />,
+          <Input key="opp" label={sides.opp} name="score_opponent" type="number" min={0} max={99} defaultValue={match.score_opponent ?? ""} />,
+        )}
+        <p className="col-span-2 m-0 text-[15px] text-ink-2">{t("matches.scoreFinalHint")}</p>
       </fieldset>
       <fieldset className="grid grid-cols-2 gap-3">
         <legend className="mb-2 text-sm font-semibold">{t("matches.halftime")}</legend>
-        <Input label={teamName} name="ht_own" type="number" min={0} max={99} defaultValue={match.halftime_own ?? ""} />
-        <Input label={oppName(match)} name="ht_opp" type="number" min={0} max={99} defaultValue={match.halftime_opponent ?? ""} />
+        {homeFirst(
+          sides,
+          <Input key="own" label={sides.own} name="ht_own" type="number" min={0} max={99} defaultValue={match.halftime_own ?? ""} />,
+          <Input key="opp" label={sides.opp} name="ht_opp" type="number" min={0} max={99} defaultValue={match.halftime_opponent ?? ""} />,
+        )}
       </fieldset>
       <div className="grid grid-cols-2 gap-3">
         <div className="col-span-2">
@@ -978,7 +1057,7 @@ function MatchAdmin({ orgId, match, teamName, onSaved }: { orgId: string; match:
       </div>
       <fieldset>
         <legend className="mb-2 text-sm font-semibold">{t("matches.kits")}</legend>
-        <KitFields kits={kits} onChange={setKits} />
+        <KitFields kits={kits} onChange={setKits} names={sides.neutral ? { own: sides.own, opp: sides.opp } : null} />
       </fieldset>
       <Button type="submit">{t("common.save")}</Button>
     </form>

@@ -9,17 +9,16 @@ from __future__ import annotations
 import contextlib
 import io
 import subprocess
-import tempfile
 import threading
 from pathlib import Path
 from typing import IO, Any
 
-import httpx
 import numpy as np
 import structlog
 from numpy.typing import NDArray
 from PIL import Image, ImageDraw, ImageFont
 
+from handball_worker.artifacts import run_artifact_job
 from handball_worker.config import WorkerSettings
 from handball_worker.export import ENC, FFMPEG_TIMEOUT_S, FPS
 
@@ -288,26 +287,13 @@ def _rows(
 
 
 def run_highlight_reel(payload: dict[str, Any]) -> dict[str, Any]:
-    settings = WorkerSettings()
-    s3 = settings.s3()
-    url = f"{settings.api_internal_url.rstrip('/')}/internal/highlights/{payload['reel_id']}"
-    headers = {"x-internal-token": settings.internal_token}
-    try:
-        with tempfile.TemporaryDirectory() as tmp:
-            work = Path(tmp)
-            final = render_reel(settings, payload, work, s3)
-            s3.upload_file(
-                str(final),
-                payload["bucket_artifacts"],
-                payload["out_key"],
-                ExtraArgs={"ContentType": "video/mp4"},
-            )
-        body: dict[str, Any] = {"status": "ready", "key": payload["out_key"]}
-    except Exception as exc:  # reported to the API
-        log.warning("reel_failed", error=str(exc))
-        body = {"status": "failed", "error": str(exc)[:500]}
-    httpx.post(url, json=body, headers=headers, timeout=30).raise_for_status()
-    return body
+    return run_artifact_job(
+        payload,
+        callback_path=f"/internal/highlights/{payload['reel_id']}",
+        build=lambda settings, s3, work, _: render_reel(settings, payload, work, s3),
+        log=log,
+        failed_event="reel_failed",
+    )
 
 
 def render_reel(settings: WorkerSettings, payload: dict[str, Any], work: Path, s3: Any) -> Path:

@@ -194,9 +194,10 @@ function TipItem({
       )}
 
       <h4 className="mt-3 text-[15px] font-semibold">{t("tipDrills")}</h4>
-      {/* the bridge from the finding to the drills, one line per tip (review R31) */}
+      {/* the bridge from the finding to the drills, one line per tip (review R31): the finding is
+          the sentence above, here only what the drills train (app review TXT-05, no template) */}
       <p className="mt-1 max-w-[70ch] text-[15px] text-ink-2" data-testid="tip-why">
-        <span className="font-semibold text-ink">{t("whyTitle")}:</span> {t("whyLine", { focus: td(`focus_${topic}`) })} {t(`why_${topic}`)}
+        {t(`why_${topic}`)}
       </p>
       <ul className="mt-2 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {drills.map((d) => (

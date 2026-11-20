@@ -37,7 +37,7 @@ test("parent consents for own child; coach sees kit warning", async ({ page, con
   await parent.getByRole("link", { name: "Konto erstellen und annehmen" }).click();
   await parent.getByLabel("Vor- und Nachname").fill("Eva Kind");
   await parent.getByLabel("Passwort").fill("correct-horse-1");
-  await parent.getByLabel(/Nutzungsbedingungen/).check();
+  await parent.getByLabel(/AGB/).check();
   await parent.getByRole("button", { name: "Konto erstellen" }).click();
   await parent.waitForURL((url) => !url.pathname.startsWith("/register"), { timeout: 30_000 });
   await parent.goto(`/app/${orgId}/consents`);

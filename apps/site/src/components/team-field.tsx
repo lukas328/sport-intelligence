@@ -1,7 +1,7 @@
 "use client";
 
 import { FARBE, useShirt } from "@/components/kit";
-import { START_ACTION } from "@/lib/site";
+import { START_ACTION, type Source } from "@/lib/site";
 
 /**
  * «Wie heisst dein Team?»: the main way in. One field, one button, the label above the field and
@@ -17,6 +17,7 @@ export function TeamField({
   hint,
   after,
   appLocale,
+  src,
   onClub = false,
 }: {
   id: string;
@@ -27,6 +28,8 @@ export function TeamField({
   /** what the search brings, right under the hint (S7, U16) */
   after?: string;
   appLocale: string;
+  /** where the field sits, for `?src=` (lib/site.ts SOURCES) */
+  src: Source;
   onClub?: boolean;
 }) {
   const { shirt, chosen } = useShirt();
@@ -48,6 +51,7 @@ export function TeamField({
           className="min-h-16 w-full min-w-0 flex-1 border-2 border-ink bg-paper px-4 text-[1.25rem] text-ink shadow-[0_0_0_2px_var(--club-ink)] outline-offset-4"
         />
         {chosen && shirt && <input type="hidden" name="farbe" value={FARBE[shirt]} />}
+        <input type="hidden" name="src" value={src} />
         <input type="hidden" name="lang" value={appLocale} />
         <button type="submit" className="btn btn-ink min-h-16 px-8 text-[1.25rem] shadow-[0_0_0_2px_var(--club-ink)]">
           {button}

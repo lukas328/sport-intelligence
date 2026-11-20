@@ -76,9 +76,13 @@ test("sign-in lands in the first club, server-rendered without errors", async ({
   await page.getByLabel("E-Mail").fill(email);
   await page.getByLabel("Passwort").fill("correct-horse-1");
   await page.getByRole("button", { name: "Anmelden", exact: true }).click();
-  await page.waitForURL(new RegExp(`/app/${orgId}$`), { timeout: 30_000 });
+  // the club's start for a coach is Spiele of the team, a real redirect from the server
+  await page.waitForURL(new RegExp(`/app/${orgId}/teams/[^/]+/matches$`), { timeout: 30_000 });
   await expect(page.getByRole("link", { name: "Team", exact: true })).toBeVisible();
-  // /app is answered by the server (first club) with one document request, not a client redirect chain
+  // /app is answered by the server (first club) with one document request, not a client redirect
+  // chain, and no streamed meta refresh loads the start a second time (e2e 20.11.)
   expect(documents.filter((d) => d === "/app")).toHaveLength(1);
+  expect(documents.filter((d) => d === `/app/${orgId}`).length).toBeLessThanOrEqual(1);
+  expect(documents.filter((d) => d.endsWith("/matches"))).toHaveLength(1);
   expect(errors).toEqual([]);
 });

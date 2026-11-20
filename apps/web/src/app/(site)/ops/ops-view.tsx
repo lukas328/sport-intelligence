@@ -26,6 +26,7 @@ interface Org {
   plan: string;
   status: string | null;
   trial_ends_at: string | null;
+  source: string | null;
   teams: number;
   members: number;
   matches: number;
@@ -108,7 +109,7 @@ export function OpsView() {
             <caption className="sr-only">{t("organizations")}</caption>
             <thead className="text-xs text-muted">
               <tr>
-                {[t("name"), t("plan"), t("teams"), t("members"), t("matches"), t("storage"), ""].map((h, i) => (
+                {[t("name"), t("plan"), t("source"), t("teams"), t("members"), t("matches"), t("storage"), ""].map((h, i) => (
                   <th key={i} scope="col" className="px-3 py-2 text-left font-medium">
                     {h}
                   </th>
@@ -124,6 +125,7 @@ export function OpsView() {
                     {org.status && ` (${org.status})`}
                     {org.trial_ends_at && ` · ${t("trialUntil", { date: format.dateTime(new Date(org.trial_ends_at), { dateStyle: "short" }) })}`}
                   </td>
+                  <td className="px-3 py-1.5">{org.source}</td>
                   <td className="px-3 py-1.5 tabular-nums">{org.teams}</td>
                   <td className="px-3 py-1.5 tabular-nums">{org.members}</td>
                   <td className="px-3 py-1.5 tabular-nums">{org.matches}</td>

@@ -286,6 +286,36 @@ def test_play_intervals_last_run_lasts_to_the_end_of_the_video() -> None:
     assert sb.play_intervals(stopped, end_ms=300_000) == [(0, 119_000)]
 
 
+def test_play_intervals_match_end_clock_running_to_the_end() -> None:
+    """The board is read last while the clock runs: play lasts to the end of the video, but not
+    beyond the end of the half the clock shows; a penalty timer read afterwards does not stop it."""
+    running = [(t * 1000, 1200 + t) for t in range(0, 120)]  # 20:00 -> 21:59, 8:01 left
+    assert sb.play_intervals(running, end_ms=300_000) == [(0, 300_000)]
+    assert sb.play_intervals(running, end_ms=900_000) == [(0, 119_000 + 481_000)]  # at 30:00
+    assert sb.play_intervals(running, end_ms=900_000, half_s=1500) == [(0, 119_000 + 181_000)]
+    timer = running + [(t * 1000, 119 - (t - 150)) for t in range(150, 153)]  # 1:59, 1:58, 1:57
+    assert sb.play_intervals(timer, end_ms=300_000) == [(0, 300_000)]
+    down = [(t * 1000, 600 - t) for t in range(0, 120)]  # counting down 10:00 -> 8:01
+    assert sb.play_intervals(down, end_ms=900_000) == [(0, 119_000 + 481_000)]  # at 0:00
+
+
+def test_play_intervals_match_end_clock_stopped_at_the_end() -> None:
+    """A standing clock read after the last run (the final whistle, a timeout until the video
+    ends): play ends where the clock stopped, as before."""
+    running = [(t * 1000, 1200 + t) for t in range(0, 120)]
+    stopped = running + [(t * 1000, 1322) for t in range(140, 150)]  # ran 3 s more, then stood
+    assert sb.play_intervals(stopped, end_ms=900_000) == [(0, 119_000 + 3_000)]
+
+
+@pytest.mark.parametrize("d", [1, -1])
+def test_play_intervals_match_end_clock_at_the_end_of_the_half(d: int) -> None:
+    """Read last at 30:00 (counting up) or 0:00 (counting down): the half is over, the run ends
+    `edge_s` after it, as before."""
+    end = 1800 if d > 0 else 0
+    reads = [(t * 1000, end - d * (119 - t)) for t in range(0, 120)]
+    assert sb.play_intervals(reads, end_ms=900_000) == [(0, 119_000 + 7_500)]
+
+
 def test_play_intervals_without_a_running_clock() -> None:
     assert sb.play_intervals([]) == []
     assert sb.play_intervals([(t * 1000, 175) for t in range(0, 300, 5)]) == []

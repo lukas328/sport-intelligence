@@ -1,5 +1,7 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { START_ACTION, byHandUrl, startUrl } from "./site";
+import { SOURCES, START_ACTION, byHandUrl, loginUrl, startUrl } from "./site";
 
 describe("links into the app", () => {
   it("leads to the team preview, with the team name and the language", () => {
@@ -12,5 +14,13 @@ describe("links into the app", () => {
   it("leads teams outside the federation data straight to the way by hand", () => {
     expect(byHandUrl("de-CH")).toBe("https://app.handball-intelligence.com/einstieg?step=name&lang=de-CH");
     expect(byHandUrl("fr", "rot")).toBe("https://app.handball-intelligence.com/einstieg?step=name&farbe=rot&lang=fr");
+  });
+
+  it("says where on the site the way in sat (?src=), with the values the README lists", () => {
+    expect(startUrl("de-CH", undefined, "gruen", "header")).toBe("https://app.handball-intelligence.com/einstieg?farbe=gruen&src=header&lang=de-CH");
+    expect(loginUrl("en")).toBe("https://app.handball-intelligence.com/login?src=login&lang=en");
+    expect(byHandUrl("fr", undefined, "team-search")).toBe("https://app.handball-intelligence.com/einstieg?step=name&src=team-search&lang=fr");
+    const readme = readFileSync(join(__dirname, "..", "..", "README.md"), "utf8");
+    for (const s of SOURCES) expect(readme, s).toContain(`\`${s}\``);
   });
 });

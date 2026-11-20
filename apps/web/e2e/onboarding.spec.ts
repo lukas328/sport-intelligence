@@ -113,7 +113,7 @@ test("new club: club, colour and team in three steps, roster from the team page,
   await expect(player.getByLabel("E-Mail")).toHaveValue(playerEmail);
   await player.getByLabel("Vor- und Nachname").fill("Paul Spieler");
   await player.getByLabel("Passwort").fill("correct-horse-1");
-  await player.getByLabel(/Nutzungsbedingungen/).check();
+  await player.getByLabel(/AGB/).check();
   await player.getByRole("button", { name: "Konto erstellen" }).click();
   // players start on Spiele like the staff (K18: they see everything of the team)
   await player.waitForURL(/\/teams\/[^/]+\/matches/, { timeout: 30_000 });

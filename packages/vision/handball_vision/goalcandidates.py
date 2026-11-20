@@ -147,7 +147,10 @@ class ShotModel:
 
     template: Template
     weights: dict[str, float]  # "shot" (template cosine), "goal" (goal template), "lull"
-    offset_s: float  # median peak - shot
+    # median peak - shot, the shot as logged in the official game logs: the log lags the release,
+    # so the estimated shot time lies seconds after it (docs/plans/produkt-analyse-integration.md,
+    # "Wurfzeit der Kandidaten")
+    offset_s: float
 
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> ShotModel:

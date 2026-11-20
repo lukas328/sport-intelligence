@@ -181,7 +181,7 @@ export default async function GuidePage({ params }: Props) {
               <div className="mt-8 border-2 border-ink bg-paper p-5">
                 <p className="font-bold text-[1.375rem] leading-tight">{m.home.finalTitle}</p>
                 <p className="mt-2 text-[1.0625rem]">{t.try}</p>
-                <StartLink appLocale={APP_LOCALE[locale]} className="btn btn-ink mt-4 w-full">
+                <StartLink appLocale={APP_LOCALE[locale]} src="guide" className="btn btn-ink mt-4 w-full">
                   {m.cta.start}
                 </StartLink>
                 <Link href={`/${locale}/demo/`} className="link mt-3">

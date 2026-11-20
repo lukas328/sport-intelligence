@@ -12,6 +12,7 @@ import { Checkbox, Input } from "@/components/ui/field";
 import { api } from "@/lib/client";
 import { errorKey, fieldErrors, type ErrorKey } from "@/lib/errors";
 import { enterApp } from "@/lib/nav";
+import { signupSource } from "@/lib/signup-source";
 
 export function RegisterForm({
   invitationToken,
@@ -56,6 +57,7 @@ export function RegisterForm({
         accept_terms: form.get("terms") === "on",
         locale: (["de-CH", "en", "fr"].includes(locale) ? locale : "de-CH") as "de-CH" | "en" | "fr",
         invitation_token: invitationToken ?? null,
+        source: signupSource(),
       },
     });
     setBusy(false);

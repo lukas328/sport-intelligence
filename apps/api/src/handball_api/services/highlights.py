@@ -46,7 +46,7 @@ from handball_api.services.matches import (
 )
 from handball_api.services.policies import Action, can
 from handball_api.services.roster import consented
-from handball_api.services.videos import media_prefix
+from handball_api.services.video_media import media_prefix
 
 MIN_CONFIDENCE = 0.6
 PRE_MS, POST_MS = 6000, 2500

@@ -35,10 +35,13 @@ export function Score({
   phoneLeft = false,
   className,
   pending,
+  oppFirst = false,
 }: {
   own: number | null;
   opp: number | null;
   outlines?: 0 | 1 | 2;
+  /** the opponent side first: an observed match where it is the home team (BUG-18) */
+  oppFirst?: boolean;
   /** before the game: date and time in place of a «-:-» placeholder (UX test B42) */
   pending?: ReactNode;
   /** left-aligned on the phone: the outlines step to the right */
@@ -55,22 +58,30 @@ export function Score({
   }
   // no result (yet, or while it loads): the place stays empty, not a block of «-:-» (UX test A09)
   if (text) return <div aria-hidden className={cn("font-num invisible whitespace-nowrap", className)} style={{ lineHeight: 0.8 }} data-testid="score-empty">0:0</div>;
+  const oppMark = <u className="decoration-opp [text-decoration-skip-ink:none] [text-decoration-thickness:.045em] [text-underline-offset:.06em]">{opp}</u>;
   const body = text ?? (
-    <>
-      {own}:<u className="decoration-opp [text-decoration-skip-ink:none] [text-decoration-thickness:.045em] [text-underline-offset:.06em]">{opp}</u>
-    </>
+    oppFirst ? (
+      <>
+        {oppMark}:{own}
+      </>
+    ) : (
+      <>
+        {own}:{oppMark}
+      </>
+    )
   );
+  const echo = text ?? (oppFirst ? `${opp}:${own}` : `${own}:${opp}`);
   return (
     // line height inline: tailwind-merge drops a leading class when a size class follows
     <div className={cn("font-num relative whitespace-nowrap", className)} style={{ lineHeight: 0.8 }}>
       {outlines >= 2 && (
         <span aria-hidden className={cn("score-echo absolute top-0 right-0 opacity-[.22] [transform:translate(-.2em,-.04em)]", phoneLeft && "max-md:right-auto max-md:left-0 max-md:[transform:translate(.2em,-.06em)]")}>
-          {text ?? `${own}:${opp}`}
+          {echo}
         </span>
       )}
       {outlines >= 1 && (
         <span aria-hidden className={cn("score-echo absolute top-0 right-0 opacity-[.42] [transform:translate(-.1em,-.02em)]", phoneLeft && "max-md:right-auto max-md:left-0 max-md:[transform:translate(.1em,-.03em)]")}>
-          {text ?? `${own}:${opp}`}
+          {echo}
         </span>
       )}
       <span className="relative block">{body}</span>
@@ -109,6 +120,7 @@ export function WurfHead({
   scoreNote,
   ownColor,
   scoreless = false,
+  oppFirst = false,
   titleText,
   goalsUntil,
 }: {
@@ -136,6 +148,8 @@ export function WurfHead({
   scoreNote?: ReactNode;
   /** our shirt colour in this match: a square before our name like the opponent's */
   ownColor?: string | null;
+  /** an observed match whose home team is the opponent side: result and names start with it */
+  oppFirst?: boolean;
   /** the data is loaded: without a result no empty place is kept for one (it only avoids a jump
    * while loading) */
   scoreless?: boolean;
@@ -168,7 +182,7 @@ export function WurfHead({
         {children}
       </div>
       <div className="flex min-w-0 flex-col">
-        {!(scoreless && (own == null || opp == null) && !pending) && <Score own={own} opp={opp} pending={pending} phoneLeft className="mt-[18px] text-[100px] md:mt-1 md:text-right md:text-[128px] lg:text-[196px]" />}
+        {!(scoreless && (own == null || opp == null) && !pending) && <Score own={own} opp={opp} pending={pending} oppFirst={oppFirst} phoneLeft className="mt-[18px] text-[100px] md:mt-1 md:text-right md:text-[128px] lg:text-[196px]" />}
         {scoreNote && (
           // on a wide screen above the score: under it the drawn course covered it (real-video
           // test, second round, 1280 px)
@@ -177,7 +191,7 @@ export function WurfHead({
           </p>
         )}
         <p className="font-slant mt-2 flex flex-wrap gap-[18px] text-[15px] md:order-first md:mt-0 md:mb-3.5 md:justify-end md:gap-7 md:text-[15px]">
-          <span>
+          <span className={oppFirst ? "order-last" : undefined}>
             {ownColor && <OwnChip color={ownColor} className="mr-2" />}
             {ownName}
           </span>
@@ -196,7 +210,7 @@ export function WurfHead({
 }
 
 /** Streifen: the slim head of every sub-page of a match (Video, Zahlen, Prüfen, Spieltag). */
-export function Strip({ name, sub, own, opp, children, live, pending }: { name: ReactNode; sub?: ReactNode; own: number | null; opp: number | null; children?: ReactNode; live?: boolean; pending?: ReactNode }) {
+export function Strip({ name, sub, own, opp, children, live, pending, oppFirst }: { name: ReactNode; sub?: ReactNode; own: number | null; opp: number | null; children?: ReactNode; live?: boolean; pending?: ReactNode; oppFirst?: boolean }) {
   return (
     <header
       data-zone="strip"
@@ -211,7 +225,7 @@ export function Strip({ name, sub, own, opp, children, live, pending }: { name: 
         {sub && <small className="mt-1.5 block font-sans text-xs font-medium not-italic md:text-[15px]">{sub}</small>}
         {children}
       </div>
-      <Score own={own} opp={opp} pending={pending} outlines={1} className="text-[48px] md:text-[72px]" />
+      <Score own={own} opp={opp} pending={pending} oppFirst={oppFirst} outlines={1} className="text-[48px] md:text-[72px]" />
     </header>
   );
 }

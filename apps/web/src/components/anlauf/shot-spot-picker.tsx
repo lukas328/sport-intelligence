@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { type MouseEvent, useRef } from "react";
 import {
   COURT_ZONES,
+  type CourtZone,
   halfToCourt,
   orientationBox,
   orientationMatrix,
@@ -11,6 +12,7 @@ import {
   type SpotAnswer,
   type SpotOrientation,
   type SpotZone,
+  tapAnswer,
   toPicture,
   ZONE_AREA,
   ZONE_LABEL_AT,
@@ -33,11 +35,14 @@ const NS = { vectorEffect: "non-scaling-stroke" } as const;
  * with the goal always at the top, the coach had to turn it in his head for every attack on the
  * left goal): the attacked goal on the left or right as in the video, the far sideline at the top,
  * the words upright where their places are. Without it the goal is at the top. The names keep the
- * attacker's view («Aussen links» is the attacker's left wing). Only the coach's own earlier answer
- * is marked («Bisher»); an estimate never is (V2).
+ * attacker's view («Aussen links» is the attacker's left wing). The coach's own earlier answer is
+ * marked «Bisher». The estimate from the tracks is preselected as «Vorschlag» (A22): lighter, with
+ * a dashed edge and a line under the court; one tap on it confirms it (the zone alone, the API
+ * takes the estimated point over), a tap elsewhere sets another place as before.
  */
 export function ShotSpotPicker({
   current,
+  suggested,
   orientation = "top",
   onPick,
   onSkip,
@@ -45,6 +50,8 @@ export function ShotSpotPicker({
 }: {
   /** the place the coach gave before («Bisher») */
   current?: SpotZone | null;
+  /** the estimate nobody confirmed yet («Vorschlag»); ignored next to the coach's own answer */
+  suggested?: CourtZone | null;
   orientation?: SpotOrientation;
   /** the answer and, for a tap on the court, the point in court metres (attacked goal at x = 40) */
   onPick: (answer: SpotAnswer, point?: Pt) => void;
@@ -55,19 +62,24 @@ export function ShotSpotPicker({
   const t = useTranslations("spot");
   const court = useRef<SVGGElement>(null);
   const side = orientation !== "top";
-  const mark = (z: SpotZone) => (current === z ? t("current") : null);
+  // the coach's own answer wins over the estimate
+  const offer = current ? null : (suggested ?? null);
+  const mark = (z: SpotZone) => (current === z ? t("current") : offer === z ? t("suggested") : null);
   // words at 14 px and more on a 360 px phone, also on the court turned on its side
   const font = side ? 1.3 : 0.95;
 
-  const tap = (zone: (typeof COURT_ZONES)[number], e: MouseEvent<SVGElement>) => {
+  const tap = (zone: CourtZone, e: MouseEvent<SVGElement>) => {
     if (disabled) return;
     // a pointer tap gives the place on the court (through the turned group: half-court metres);
-    // a key gives only the zone
+    // a key gives only the zone, and so does a tap on the suggestion: it confirms the estimate
     const m = court.current?.getScreenCTM();
+    let point: Pt | undefined;
     if (m && e.detail > 0) {
       const p = new DOMPoint(e.clientX, e.clientY).matrixTransform(m.inverse());
-      onPick(zone, halfToCourt([Math.min(20, Math.max(0, p.x)), Math.min(16, Math.max(0, p.y))]));
-    } else onPick(zone);
+      point = halfToCourt([Math.min(20, Math.max(0, p.x)), Math.min(16, Math.max(0, p.y))]);
+    }
+    const a = tapAnswer(zone, offer, point);
+    onPick(a.answer, a.point);
   };
 
   const keys = (
@@ -120,9 +132,10 @@ export function ShotSpotPicker({
                 if (!disabled) onPick(z);
               }
             }}
+            data-suggested={offer === z || undefined}
             className={cn(
               "cursor-pointer outline-none [stroke:var(--ink)] [stroke-opacity:.3] [stroke-width:1px] hover:[fill:rgb(22_23_26/.07)] focus-visible:[stroke-opacity:1] focus-visible:[stroke-width:3px]",
-              mark(z) ? "[fill:var(--attn)]" : "[fill:transparent]",
+              current === z ? "[fill:var(--attn)]" : offer === z ? "[fill:var(--attn)] [fill-opacity:.45] [stroke-dasharray:6_4] [stroke-opacity:1] [stroke-width:2px] hover:[fill:var(--attn)] hover:[fill-opacity:.7]" : "[fill:transparent]",
             )}
             {...NS}
           />
@@ -145,7 +158,7 @@ export function ShotSpotPicker({
             fontWeight={700}
             fill="var(--ink)"
             // a halo in the area's colour: the court lines do not run through the words
-            stroke={word ? "var(--attn)" : "var(--ground)"}
+            stroke={current === z ? "var(--attn)" : "var(--ground)"}
             strokeWidth={0.28}
             strokeLinejoin="round"
             paintOrder="stroke"
@@ -177,15 +190,25 @@ export function ShotSpotPicker({
         // on its side the court is taller than wide: the keys go beside it, the width is used
         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2.5">
           {field}
-          <div className="flex w-[7.5rem] flex-col gap-2 sm:w-36">{keys}</div>
+          <div className="flex w-[7.5rem] flex-col gap-2 sm:w-36">
+            <p className="m-0 text-[14px] font-semibold text-ink-2">{t("situationKeys")}</p>
+            {keys}
+          </div>
         </div>
       ) : (
         field
       )}
+      {offer && (
+        <p className="m-0 mt-1.5 text-[15px] leading-snug font-semibold text-ink" data-testid="spot-suggestion-note">
+          {t("suggestedNote", { zone: t(`zone.${offer}` as "zone.la") })}
+        </p>
+      )}
       <p className="m-0 mt-1 text-[14px] leading-snug text-ink-2" data-testid="spot-side-note">
         {side ? t(orientation === "left" ? "sideVideoLeft" : "sideVideoRight") : t("sideNote")}
       </p>
-      {!side && <div className="mt-2 grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] items-stretch gap-2">{keys}</div>}
+      {/* Siebenmeter and Gegenstoss say how, not from where (app review TXT-02): set apart */}
+      {!side && <p className="m-0 mt-2 text-[14px] font-semibold text-ink-2">{t("situationKeys")}</p>}
+      {!side && <div className="mt-1 grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] items-stretch gap-2">{keys}</div>}
     </div>
   );
 }

@@ -289,6 +289,18 @@ the owner confirms each one in a video page (7 s clip, release time set by pausi
 LLM labelling of the 61 logged dev shots on keyframe-only candidates found the shot in 1 of 10 clips
 and was stopped; it restarts on the full Modal pre-labels (job 12) with the training-clip pipeline.
 
+**Shot end test, result** (2026-11-19, the owner's one-off release, measured only): product chain in
+the CPU test setting (hrp1 at 960 px on every 3rd frame) on the 42 segments, the owner's frozen marks
+(`ml/gold/data/shot_endtest_marks.json`, 130 shots; round 1 not used), bootstrap over the 42 games
+(`ml/integration/shot_segments_eval.py`, observe on Kaggle CPU kernels, result
+`ml/gold/data/shot_endtest_result.json`). Shot candidates find 84.6 % of the shots [74.5, 92.4] in their
+design window (peak 3 s before to 8 s after the mark) at 3.4 per minute, precision 25.8 %; within
++-2 s of their estimated time only 20.8 % (estimated time a median 2.8 s after the mark). Goal
+candidates: 75.0 % of goals at 1.6 per minute. The ball path has a point on 97.8 % [96.8, 98.5] of
+the frames within 1.5 s of each shot; presence only (no ball labels in the end test). Details and the
+reading: `docs/plans/produkt-analyse-integration.md`, "Wurf-Endtest". The end test is now used and
+must not be used for tuning.
+
 **Shot gold** (2026-11-16): picked (`82889c6`), split frozen (`1a40b6a`); pre-labels by Modal job 12
 (nets hr1, hrp1, hr2, hrp2 and OWLv2) planned; labelling with visibility levels and owner yes/no per
 `tracking-strategie.md` section 9 step 0. Not done yet.

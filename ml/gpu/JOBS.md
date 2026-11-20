@@ -6,107 +6,25 @@ Dauer, Kosten, Auffälligkeiten). Vor dem Commit `git pull --rebase`, danach pus
 
 ## Offen
 
-### 15. Ballnetz im eigenen Thread mit uint8 im ganzen Job (T4), 2026-11-17 (Integrations-Sitzung), erst nach Freigabe von Lukas
-- Wozu: Auftrag 14 hat das Ballnetz allein mit uint8-Eingabe bei 62 ms pro Bild gemessen (1280 px;
-  960 px: 42 ms). Im Job kostete es 122 ms pro Bild, weil es nacheinander mit Kamera, YOLOX und
-  Nummern lief. Seit PR #67 läuft das Netz in einem eigenen Thread. Im besten Fall dauert der Job
-  dann max(Netz, Rest) statt der Summe: bei 1280 px auf jedem Bild etwa 1.55 x Videolänge und
-  1.02 USD pro Spiel. Das ist zu messen (Plan, Abschnitt GPU-Profil).
-- Was läuft: `ml/integration/profile_variants.py` (der echte `run_analysis`) auf 2 Minuten des
-  Spiels aus den Aufträgen 13 und 14, YOLOX jedes 3. Bild, Nummern-Budget 0.3, in dieser
-  Reihenfolge:
-  - `lean_u8_1280_e1`, `lean_u8_960_e1`, `lean_u8_1280_e2`, `lean_u8_960_e2`: hrp1 uint8 bei
-    1280 und 960 px, jedes bzw. jedes 2. Bild;
-  - `cuda_lean`: ohne Netz, also der Rest;
-  - `lean_ens_u8_1280_e1`: hr1 + hrp1, nur wenn die Zeit reicht.
+Stand 2026-11-19 (Hauptsitzung): keine offenen GPU-Aufträge. Die Aufträge 12 bis 15 sind gelaufen und
+ausgewertet (unten unter "Erledigt"). GPU im Betrieb: später auf Azure (Entscheid Lukas 2026-11-19),
+bis dahin rechnet Staging auf der CPU.
 
-  Testphase: hr1/hrp1 enthalten DeepSport, hier wird nur gemessen.
-- Befehl (wie Auftrag 14): `modal deploy ml/gpu/profile_lean_gpu.py`, dann
-  `modal.Function.from_name("handball-profile-lean", "run_t4").spawn(2, "handball-gpu-lean-u8", 25, "lean_u8_1280_e1,lean_u8_960_e1,lean_u8_1280_e2,lean_u8_960_e2,cuda_lean,lean_ens_u8_1280_e1")`.
-- Fortsetzbar: Fertige Varianten liegen auf dem Volume `handball-gpu-out`
-  (`handball-gpu-lean-u8/`), derselbe Aufruf setzt fort. Den Proxy schneidet der Job aus dem von
-  Auftrag 14 auf dem Volume. Nach 25 Minuten startet keine neue Variante mehr. Eine laufende
-  Variante wird 2.5 Minuten vor dem harten Modal-Ende (30 min) gestoppt, damit der Upload sicher
-  kommt.
-- Erwartet: etwa 22 Minuten auf einer T4, rund 0.25 USD (höchstens 30 Minuten, 0.33 USD).
-- Ergebnis: Kaggle-Dataset `handball-gpu-lean-u8` (summary.json, je Variante ein JSON mit
-  `observe_counters.ball_net_busy_ms`). Die Integrations-Sitzung holt es ab.
-- Wichtig: In der ersten Logzeile muss `session ['CUDAExecutionProvider', ...]` stehen, sonst bricht
-  das Skript ab. Bei "budget"/"spend limit" abbrechen und melden.
+## Stand 2026-11-09 nachts (Hauptsitzung)
+Ball-Testset 2 (177 Bälle, 42 neue Hallen, `ml/ball/README.md`) zeigt: Runde 6 mit den OWL-Labels
+ist in neuen Hallen klar besser als Runde 3 (29 % gegen 15 %). Die OWL-Labels helfen also; die
+Aufträge 4 bis 10 laufen darum jetzt, aber **auf Kaggle aus der Hauptsitzung** (Gratis-Kontingent),
+nicht auf Modal: Kernels `handball-owl-r7-1` und `-2`, 144 Segmente aus l04 bis l13 (zwei pro Spiel,
+ohne die Testspiele aus `ml/ball/test_games.json` und deren Hallen). **Die lokale Sitzung führt 4
+bis 10 nicht aus.** Auftrag 3 (l02/l03 auf Modal) bleibt bei der lokalen Sitzung, falls er schon
+läuft oder Azure Pause hat; sonst hat Azure Vorrang.
+Regel für alle Ball-Trainings: die Spiele aus `ml/ball/test_games.json` und Spiele derselben
+Heimhalle nie verwenden.
 
-### 14. Ballnetz billiger auf der T4 (Kurzmessung), 2026-11-17 (Integrations-Sitzung), erst nach Freigabe von Lukas
-- Wozu: Auftrag 13 hat das Ballnetz hrp1 auf der T4 mit 80 bis 120 ms pro Bild gemessen, dazu 21 ms
-  CPU-Vorbereitung; Stapeln brachte nichts. Mit hrp1 auf jedem Bild kostet ein 60-Minuten-Spiel
-  etwa 3 USD. Gesucht ist der billigere Weg (Plan `docs/plans/produkt-analyse-integration.md`,
-  Abschnitt GPU-Profil T4).
-- Was läuft: (1) `ml/integration/bench_ballnet.py`: hrp1 allein auf 120 echten Dreiergruppen, bei
-  1280 und 960 px: wie im Produkt, uint8-Eingabe mit Vorbereitung im Graphen
-  (`ml/ball/onnx_u8.py`), dasselbe mit IO-Binding, TensorRT fp16 (uint8- und float-Eingabe).
-  (2) `ml/integration/profile_variants.py`: der ganze Produkt-Job auf 3 Minuten des Spiels aus
-  Auftrag 13 mit YOLOX auf jedem 3. Bild und Nummern-Budget 0.3, ohne Ballnetz (`cuda_lean`) und
-  mit hrp1 auf jedem Bild (`cuda_lean_hrp1`). Testphase: hrp1 enthält DeepSport, hier wird nur
-  gemessen.
-- Befehl (wie Auftrag 12 auf diesem PC): `modal deploy ml/gpu/bench_ballnet_gpu.py`, dann
-  `modal.Function.from_name("handball-bench-ballnet", "run_t4").spawn(3, "handball-gpu-bench-ballnet", 25, "cuda_lean,cuda_lean_hrp1")`.
-  Alternativ `modal run --detach ml/gpu/bench_ballnet_gpu.py`.
-- Fortsetzbar: jede fertige Variante liegt auf dem Volume `handball-gpu-out`
-  (`handball-gpu-bench-ballnet/`, auch der TensorRT-Cache); derselbe Aufruf setzt fort. Stopp:
-  nach 25 Minuten startet keine neue Variante mehr, nach 30 Minuten beendet Modal die Funktion
-  sicher.
-- Erwartet: etwa 25 Minuten auf einer T4, rund 0.30 USD (höchstens 30 Minuten, 0.35 USD).
-- Ergebnis: Kaggle-Dataset `handball-gpu-bench-ballnet` (bench.json, bench_summary.json,
-  cuda_lean.json, cuda_lean_hrp1.json, summary.json). Die Integrations-Sitzung holt es ab.
-- Wichtig: In der ersten Logzeile muss `session ['CUDAExecutionProvider', ...]` stehen, sonst bricht
-  das Skript selbst ab. Fehlt `TensorrtExecutionProvider` unter "available", laufen die übrigen
-  Varianten trotzdem; bitte melden. Bei "budget"/"spend limit" abbrechen und melden.
+## Zurückgestellt (2026-11-19, Hauptsitzung)
 
-### 13. Laufzeit und Kosten der Produkt-Analyse auf einer T4, 2026-11-17 (Integrations-Sitzung)
-- Wozu: Entscheid GPU-Verarbeitung (Plan `docs/plans/produkt-analyse-integration.md` Schritte 3 und
-  4). Die CPU-Kette braucht 4.4 x Videolänge (Plan Abschnitt 4); gesucht sind die Zeiten pro Stufe
-  auf einer T4 mit und ohne Ballnetze und daraus die Kosten pro 60-Minuten-Spiel.
-- Was läuft: `ml/integration/profile_variants.py` (der echte `run_analysis` mit lokalen Attrappen
-  für S3 und API) auf 5 Minuten von AT_Cup_Feldkirch_Bregenz_2021 (`handball-segs-l10`), fünf
-  Einstellungen nacheinander (cuda_image, cuda_ball_ens, cuda_ball_hrp1, cuda_ball_ens_lean,
-  cpu_image) plus Kurzmessung der Ballnetze (fp32/fp16, Stapel 1/4/8). Die Ballnetze werden im
-  Container aus `handball-ball-hrmodels` nach ONNX exportiert. Testphase: hr1/hrp1 enthalten
-  DeepSport, hier wird nur gemessen.
-- Befehl: `modal run --detach ml/gpu/profile_gpu.py --minutes 5 --tag game1`
-- Fortsetzbar: jede fertige Einstellung liegt auf dem Volume `handball-gpu-out`
-  (`handball-gpu-profile-game1/`); derselbe Befehl setzt fort. `--budget-min 90` hält vor einer
-  weiteren Einstellung an, wenn 90 Minuten verbraucht sind.
-- Erwartet: etwa 1 h auf einer T4, rund 0.70 USD (Obergrenze mit Budget: 1.5 h, etwa 1 USD).
-- Ergebnis: Kaggle-Dataset `handball-gpu-profile-game1` (summary.json, je Einstellung ein JSON,
-  bench_nets.json). Die Integrations-Sitzung holt es ab und trägt die Zahlen in den Plan ein.
-- Bei "budget"/"spend limit" abbrechen und melden.
-
-
-Gemeinsam für 3 bis 10: OWLv2 wie Auftrag 2, Rechnung mit den gemessenen ~210 s pro Segment auf
-einer T4 (inkl. Download) und 0.66 USD/h (7.23 USD für 11.0 h). `--budget-h 10` lässt Luft bis 11 h
-für den Upload. Jeder Auftrag ist für sich, sie dürfen parallel laufen (Modal-Ausgabenlimit für
-alle zusammen: etwa 33 USD). Vorher `git pull` (Auftrag 3 braucht `--resume-from`). Bei
-"budget"/"spend limit" abbrechen und melden.
-
-### 12. Vorlabels für den Wurf-Goldstandard (61 Wurf-Clips), 2026-11-16, Vorrang
-- Wozu: Würfe aufs Tor sind das neue Hauptmass für den Balltracker. Die 61 Clips
-  (`ml/gold/shot_clips.json`, Würfe aus den offiziellen Spielprotokollen, `ml/gold/pick_shots.py`)
-  brauchen die Kandidaten der vier neuen Ballnetze und OWLv2. Kaggle-GPU ist bis Samstag
-  aufgebraucht, Lukas gibt dafür Modal-Guthaben frei (23 CHF übrig).
-- **Neu ab 2026-11-16 abends (nach drei Abbrüchen durch Modal-Preemption ohne Ergebnis):** Das Skript
-  schreibt jetzt nach jedem Paket von 5 Clips auf das Volume `handball-gpu-out` und macht nach einer
-  Unterbrechung dort weiter. Derselbe Befehl nochmals setzt ebenfalls fort. Nur noch hr1 und hrp1,
-  OWLv2 auf jedem 4. Bild. Erwartet etwa 3.5 h auf einer T4, rund 2.5 USD.
-- Befehl: `modal run --detach ml/gpu/prelabel_clips.py --clips ml/gold/shot_clips.json --tag shots`
-  (Ergebnis-Dataset `handball-gpu-prelabel-shots`, ohne Datum). Unterbricht Modal den Lauf und startet
-  ihn nicht selbst neu: denselben Befehl nochmals ausführen.
-- Eingaben: `handball-segs-l01`, `-l02`, `-b01`, `-b03`, `-b04`, `handball-ball-hrmodels` (die
-  Netze hr1, hrp1, hr2, hrp2). Ergebnis: Dataset `handball-gpu-prelabel-shots-<datum>`.
-- Bei "budget"/"spend limit" abbrechen und melden. Die Cloud-Sitzung holt das Ergebnis selbst ab.
-
-### 3. OWLv2 Rest von l01 bis l03 (111 Segmente: 11 aus l02, 100 aus l03)
-- Befehl: `modal run --detach ml/gpu/owl_pseudo.py --datasets handball-segs-l02,handball-segs-l03 --resume-from handball-gpu-owl-20261105-1449 --gpu T4 --budget-h 8`
-- `--resume-from` übernimmt die 189 fertigen Segmente (zuerst vom Modal-Volume, sonst aus dem
-  Kaggle-Dataset); das neue Dataset enthält dann alle 300 zusammen.
-- Dauer etwa 6.5 h, Kosten etwa 4.3 USD.
+- Auftrag 11 ist geparkt, bis die Würfe im Endtest gemessen sind (`docs/plans/tracking-strategie.md`); der Wurf-Endtest ist inzwischen gemessen (PR #104), der Auftrag bleibt trotzdem geparkt, bis der Ball wieder Vorrang hat.
+- Auftrag 3 ist wahrscheinlich überholt: OWL-Labels für Runde 7 kamen von Kaggle (`handball-owl-r7-*`). Nicht ausführen ohne neuen Auftrag.
 
 ### 11. Ball-Testset 2 in Originalauflösung (lokale Sitzung, kein GPU nötig), 2026-11-12
 - Frage von Lukas: Verlieren wir Bälle, weil wir zu stark verkleinern? Ingest skaliert jedes Segment
@@ -122,22 +40,23 @@ alle zusammen: etwa 33 USD). Vorher `git pull` (Auftrag 3 braucht `--resume-from
 - Aufwand: ein paar Minuten CPU plus Upload von ~1 GB. Fehlt ein Original, Spiel in `native.json`
   mit `"missing": true` aufführen statt raten.
 
-## Stand 2026-11-09 nachts (Hauptsitzung)
-Ball-Testset 2 (177 Bälle, 42 neue Hallen, `ml/ball/README.md`) zeigt: Runde 6 mit den OWL-Labels
-ist in neuen Hallen klar besser als Runde 3 (29 % gegen 15 %). Die OWL-Labels helfen also; die
-Aufträge 4 bis 10 laufen darum jetzt, aber **auf Kaggle aus der Hauptsitzung** (Gratis-Kontingent),
-nicht auf Modal: Kernels `handball-owl-r7-1` und `-2`, 144 Segmente aus l04 bis l13 (zwei pro Spiel,
-ohne die Testspiele aus `ml/ball/test_games.json` und deren Hallen). **Die lokale Sitzung führt 4
-bis 10 nicht aus.** Auftrag 3 (l02/l03 auf Modal) bleibt bei der lokalen Sitzung, falls er schon
-läuft oder Azure Pause hat; sonst hat Azure Vorrang.
-Regel für alle Ball-Trainings: die Spiele aus `ml/ball/test_games.json` und Spiele derselben
-Heimhalle nie verwenden.
+### 3. OWLv2 Rest von l01 bis l03 (111 Segmente: 11 aus l02, 100 aus l03)
+- Befehl: `modal run --detach ml/gpu/owl_pseudo.py --datasets handball-segs-l02,handball-segs-l03 --resume-from handball-gpu-owl-20261105-1449 --gpu T4 --budget-h 8`
+- `--resume-from` übernimmt die 189 fertigen Segmente (zuerst vom Modal-Volume, sonst aus dem
+  Kaggle-Dataset); das neue Dataset enthält dann alle 300 zusammen.
+- Dauer etwa 6.5 h, Kosten etwa 4.3 USD.
 
 ## Zurückgestellt (erst nach der Auswertung von Ball-Runde 6, 2026-11-09 abends)
 GPU-Budget ist knapp (Modal-Gratisguthaben 30 USD pro Monat). Die Aufträge 4 bis 10 zusammen kosten
 etwa 28 USD. Sie laufen erst, wenn Runde 6 zeigt, dass die OWL-Labels das Ballnetz verbessern, und
 dann zuerst auf Kaggle (Gratis-Kontingent) statt Modal, soweit Kaggle-Stunden übrig sind. Die
 Cloud-Sitzung verschiebt sie dann wieder nach "Offen". Bis dahin: nur Auftrag 3 ausführen.
+
+Gemeinsam für 3 bis 10: OWLv2 wie Auftrag 2, Rechnung mit den gemessenen ~210 s pro Segment auf
+einer T4 (inkl. Download) und 0.66 USD/h (7.23 USD für 11.0 h). `--budget-h 10` lässt Luft bis 11 h
+für den Upload. Jeder Auftrag ist für sich, sie dürfen parallel laufen (Modal-Ausgabenlimit für
+alle zusammen: etwa 33 USD). Vorher `git pull` (Auftrag 3 braucht `--resume-from`). Bei
+"budget"/"spend limit" abbrechen und melden.
 
 ### 4. OWLv2 l04 (100 Segmente)
 - Befehl: `modal run --detach ml/gpu/owl_pseudo.py --datasets handball-segs-l04 --gpu T4 --budget-h 10`
@@ -172,6 +91,99 @@ Summe 3 bis 10: 841 Segmente, etwa 49 GPU-Stunden, etwa 32 USD. Falls ein Auftra
 Auftrag 3 (mit `--resume-from <Dataset des Teillaufs>`).
 
 ## Erledigt
+
+### 15. Ballnetz im eigenen Thread mit uint8 im ganzen Job (T4), 2026-11-17 (Integrations-Sitzung), erst nach Freigabe von Lukas (erledigt)
+- **Erledigt 2026-11-17: Dataset `handball-gpu-lean-u8`; Auswertung in `docs/plans/produkt-analyse-integration.md` (Abschnitt "Ballnetz im Thread im ganzen Job"). Ergebnis: hrp1 uint8, 960 px, jedes Bild, 0.87 USD pro Spiel auf Modal.**
+- Wozu: Auftrag 14 hat das Ballnetz allein mit uint8-Eingabe bei 62 ms pro Bild gemessen (1280 px;
+  960 px: 42 ms). Im Job kostete es 122 ms pro Bild, weil es nacheinander mit Kamera, YOLOX und
+  Nummern lief. Seit PR #67 läuft das Netz in einem eigenen Thread. Im besten Fall dauert der Job
+  dann max(Netz, Rest) statt der Summe: bei 1280 px auf jedem Bild etwa 1.55 x Videolänge und
+  1.02 USD pro Spiel. Das ist zu messen (Plan, Abschnitt GPU-Profil).
+- Was läuft: `ml/integration/profile_variants.py` (der echte `run_analysis`) auf 2 Minuten des
+  Spiels aus den Aufträgen 13 und 14, YOLOX jedes 3. Bild, Nummern-Budget 0.3, in dieser
+  Reihenfolge:
+  - `lean_u8_1280_e1`, `lean_u8_960_e1`, `lean_u8_1280_e2`, `lean_u8_960_e2`: hrp1 uint8 bei
+    1280 und 960 px, jedes bzw. jedes 2. Bild;
+  - `cuda_lean`: ohne Netz, also der Rest;
+  - `lean_ens_u8_1280_e1`: hr1 + hrp1, nur wenn die Zeit reicht.
+
+  Testphase: hr1/hrp1 enthalten DeepSport, hier wird nur gemessen.
+- Befehl (wie Auftrag 14): `modal deploy ml/gpu/profile_lean_gpu.py`, dann
+  `modal.Function.from_name("handball-profile-lean", "run_t4").spawn(2, "handball-gpu-lean-u8", 25, "lean_u8_1280_e1,lean_u8_960_e1,lean_u8_1280_e2,lean_u8_960_e2,cuda_lean,lean_ens_u8_1280_e1")`.
+- Fortsetzbar: Fertige Varianten liegen auf dem Volume `handball-gpu-out`
+  (`handball-gpu-lean-u8/`), derselbe Aufruf setzt fort. Den Proxy schneidet der Job aus dem von
+  Auftrag 14 auf dem Volume. Nach 25 Minuten startet keine neue Variante mehr. Eine laufende
+  Variante wird 2.5 Minuten vor dem harten Modal-Ende (30 min) gestoppt, damit der Upload sicher
+  kommt.
+- Erwartet: etwa 22 Minuten auf einer T4, rund 0.25 USD (höchstens 30 Minuten, 0.33 USD).
+- Ergebnis: Kaggle-Dataset `handball-gpu-lean-u8` (summary.json, je Variante ein JSON mit
+  `observe_counters.ball_net_busy_ms`). Die Integrations-Sitzung holt es ab.
+- Wichtig: In der ersten Logzeile muss `session ['CUDAExecutionProvider', ...]` stehen, sonst bricht
+  das Skript ab. Bei "budget"/"spend limit" abbrechen und melden.
+
+### 14. Ballnetz billiger auf der T4 (Kurzmessung), 2026-11-17 (Integrations-Sitzung), erst nach Freigabe von Lukas (erledigt)
+- **Erledigt 2026-11-17: Dataset `handball-gpu-bench-ballnet`; Auswertung im Plan (Abschnitt "Ballnetz billiger auf der T4").**
+- Wozu: Auftrag 13 hat das Ballnetz hrp1 auf der T4 mit 80 bis 120 ms pro Bild gemessen, dazu 21 ms
+  CPU-Vorbereitung; Stapeln brachte nichts. Mit hrp1 auf jedem Bild kostet ein 60-Minuten-Spiel
+  etwa 3 USD. Gesucht ist der billigere Weg (Plan `docs/plans/produkt-analyse-integration.md`,
+  Abschnitt GPU-Profil T4).
+- Was läuft: (1) `ml/integration/bench_ballnet.py`: hrp1 allein auf 120 echten Dreiergruppen, bei
+  1280 und 960 px: wie im Produkt, uint8-Eingabe mit Vorbereitung im Graphen
+  (`ml/ball/onnx_u8.py`), dasselbe mit IO-Binding, TensorRT fp16 (uint8- und float-Eingabe).
+  (2) `ml/integration/profile_variants.py`: der ganze Produkt-Job auf 3 Minuten des Spiels aus
+  Auftrag 13 mit YOLOX auf jedem 3. Bild und Nummern-Budget 0.3, ohne Ballnetz (`cuda_lean`) und
+  mit hrp1 auf jedem Bild (`cuda_lean_hrp1`). Testphase: hrp1 enthält DeepSport, hier wird nur
+  gemessen.
+- Befehl (wie Auftrag 12 auf diesem PC): `modal deploy ml/gpu/bench_ballnet_gpu.py`, dann
+  `modal.Function.from_name("handball-bench-ballnet", "run_t4").spawn(3, "handball-gpu-bench-ballnet", 25, "cuda_lean,cuda_lean_hrp1")`.
+  Alternativ `modal run --detach ml/gpu/bench_ballnet_gpu.py`.
+- Fortsetzbar: jede fertige Variante liegt auf dem Volume `handball-gpu-out`
+  (`handball-gpu-bench-ballnet/`, auch der TensorRT-Cache); derselbe Aufruf setzt fort. Stopp:
+  nach 25 Minuten startet keine neue Variante mehr, nach 30 Minuten beendet Modal die Funktion
+  sicher.
+- Erwartet: etwa 25 Minuten auf einer T4, rund 0.30 USD (höchstens 30 Minuten, 0.35 USD).
+- Ergebnis: Kaggle-Dataset `handball-gpu-bench-ballnet` (bench.json, bench_summary.json,
+  cuda_lean.json, cuda_lean_hrp1.json, summary.json). Die Integrations-Sitzung holt es ab.
+- Wichtig: In der ersten Logzeile muss `session ['CUDAExecutionProvider', ...]` stehen, sonst bricht
+  das Skript selbst ab. Fehlt `TensorrtExecutionProvider` unter "available", laufen die übrigen
+  Varianten trotzdem; bitte melden. Bei "budget"/"spend limit" abbrechen und melden.
+
+### 13. Laufzeit und Kosten der Produkt-Analyse auf einer T4, 2026-11-17 (Integrations-Sitzung) (erledigt)
+- **Erledigt 2026-11-17: Dataset `handball-gpu-profile-game1-gpu`; Auswertung im Plan (Abschnitt "GPU-Profil auf einer T4").**
+- Wozu: Entscheid GPU-Verarbeitung (Plan `docs/plans/produkt-analyse-integration.md` Schritte 3 und
+  4). Die CPU-Kette braucht 4.4 x Videolänge (Plan Abschnitt 4); gesucht sind die Zeiten pro Stufe
+  auf einer T4 mit und ohne Ballnetze und daraus die Kosten pro 60-Minuten-Spiel.
+- Was läuft: `ml/integration/profile_variants.py` (der echte `run_analysis` mit lokalen Attrappen
+  für S3 und API) auf 5 Minuten von AT_Cup_Feldkirch_Bregenz_2021 (`handball-segs-l10`), fünf
+  Einstellungen nacheinander (cuda_image, cuda_ball_ens, cuda_ball_hrp1, cuda_ball_ens_lean,
+  cpu_image) plus Kurzmessung der Ballnetze (fp32/fp16, Stapel 1/4/8). Die Ballnetze werden im
+  Container aus `handball-ball-hrmodels` nach ONNX exportiert. Testphase: hr1/hrp1 enthalten
+  DeepSport, hier wird nur gemessen.
+- Befehl: `modal run --detach ml/gpu/profile_gpu.py --minutes 5 --tag game1`
+- Fortsetzbar: jede fertige Einstellung liegt auf dem Volume `handball-gpu-out`
+  (`handball-gpu-profile-game1/`); derselbe Befehl setzt fort. `--budget-min 90` hält vor einer
+  weiteren Einstellung an, wenn 90 Minuten verbraucht sind.
+- Erwartet: etwa 1 h auf einer T4, rund 0.70 USD (Obergrenze mit Budget: 1.5 h, etwa 1 USD).
+- Ergebnis: Kaggle-Dataset `handball-gpu-profile-game1` (summary.json, je Einstellung ein JSON,
+  bench_nets.json). Die Integrations-Sitzung holt es ab und trägt die Zahlen in den Plan ein.
+- Bei "budget"/"spend limit" abbrechen und melden.
+
+### 12. Vorlabels für den Wurf-Goldstandard (61 Wurf-Clips), 2026-11-16, Vorrang (erledigt)
+- **Erledigt 2026-11-17: Dataset `handball-gpu-prelabel-shots`; Nutzung in `ml/ball/LINEAGE.md` und `ml/gold/shot_check.py`.**
+- Wozu: Würfe aufs Tor sind das neue Hauptmass für den Balltracker. Die 61 Clips
+  (`ml/gold/shot_clips.json`, Würfe aus den offiziellen Spielprotokollen, `ml/gold/pick_shots.py`)
+  brauchen die Kandidaten der vier neuen Ballnetze und OWLv2. Kaggle-GPU ist bis Samstag
+  aufgebraucht, Lukas gibt dafür Modal-Guthaben frei (23 CHF übrig).
+- **Neu ab 2026-11-16 abends (nach drei Abbrüchen durch Modal-Preemption ohne Ergebnis):** Das Skript
+  schreibt jetzt nach jedem Paket von 5 Clips auf das Volume `handball-gpu-out` und macht nach einer
+  Unterbrechung dort weiter. Derselbe Befehl nochmals setzt ebenfalls fort. Nur noch hr1 und hrp1,
+  OWLv2 auf jedem 4. Bild. Erwartet etwa 3.5 h auf einer T4, rund 2.5 USD.
+- Befehl: `modal run --detach ml/gpu/prelabel_clips.py --clips ml/gold/shot_clips.json --tag shots`
+  (Ergebnis-Dataset `handball-gpu-prelabel-shots`, ohne Datum). Unterbricht Modal den Lauf und startet
+  ihn nicht selbst neu: denselben Befehl nochmals ausführen.
+- Eingaben: `handball-segs-l01`, `-l02`, `-b01`, `-b03`, `-b04`, `handball-ball-hrmodels` (die
+  Netze hr1, hrp1, hr2, hrp2). Ergebnis: Dataset `handball-gpu-prelabel-shots-<datum>`.
+- Bei "budget"/"spend limit" abbrechen und melden. Die Cloud-Sitzung holt das Ergebnis selbst ab.
 
 ### 2. OWLv2-Pseudo-Labels für l01 bis l03 — Teilergebnis, gestoppt durch 11-h-Grenze, 2026-11-06
 - Ergebnis: `lukasde1000/handball-gpu-owl-20261105-1449` (Status ready, 189 `segs/*.json` plus

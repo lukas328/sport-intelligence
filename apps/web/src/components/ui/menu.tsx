@@ -31,7 +31,8 @@ export function MenuContent({ children, align = "end", className, side }: { chil
         side={side}
         sideOffset={6}
         collisionPadding={12}
-        className={cn(MENU_SURFACE, "min-w-56 p-1.5", className)}
+        // never cut off on a small screen: as high as there is room, the rest scrolls (UX-11)
+        className={cn(MENU_SURFACE, "max-h-[var(--radix-dropdown-menu-content-available-height)] min-w-56 overflow-y-auto overscroll-contain p-1.5", className)}
       >
         {children}
       </M.Content>

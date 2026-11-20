@@ -9,6 +9,7 @@ import uuid
 from collections.abc import Callable
 from typing import Any
 
+import asyncpg
 import numpy as np
 import pytest
 
@@ -118,6 +119,54 @@ async def test_a_goal_in_the_second_half_gets_its_place_estimated_then_tapped(
     # a repeated confirmation without a tap keeps what the coach said
     r = await api.put(review, json={"status": "confirmed", "side": "own"})
     assert (r.json()["shot_zone"], r.json()["zone_source"]) == ("kr", "coach")
+
+
+async def test_one_tap_confirms_the_estimate_and_then_it_counts(
+    make_api: Callable[[], Api], owner_conn: asyncpg.Connection
+) -> None:
+    # A22: «Von wo?» preselects the estimate; one tap on it sends the zone alone and makes the
+    # estimated place the coach's, stored as a tapped one; before that it counts nowhere
+    api = make_api()
+    ids = await setup_club(api)
+    base, _, _, cand = await _second_half_with_tracks(api, ids)
+    row = (
+        await api.put(
+            f"{base}/goal-candidates/{cand['id']}/review",
+            json={"status": "confirmed", "side": "own"},
+        )
+    ).json()
+    assert (row["shot_zone"], row["zone_source"]) == ("rl", "estimated")
+    goal = _goal((await api.get(f"{base}/graphics")).json(), row["event_id"])
+    assert goal["spot_by_coach"] is False and goal["spot_missing"] is True
+
+    spot = f"{base}/goals/{row['event_id']}/spot"
+    r = await api.put(spot, json={"shot_zone": "rl"})
+    assert r.status_code == 200, r.text
+    # the estimated point stays where it was (mirrored to the goal at x = 40), now the coach's
+    assert r.json() == {
+        "event_id": row["event_id"],
+        "shot_zone": "rl",
+        "zone_source": "coach",
+        "x": 34.0,
+        "y": 14.8,
+    }
+    goal = _goal((await api.get(f"{base}/graphics")).json(), row["event_id"])
+    assert (goal["zone"], goal["zone_source"], goal["confirmed"]) == ("rl", "coach", True)
+    assert goal["spot_by_coach"] is True and goal["spot_missing"] is False
+    assert goal["shot"] == [5.2, 6.0]
+    attrs = json.loads(
+        await owner_conn.fetchval(
+            "SELECT attributes FROM events WHERE id = $1", uuid.UUID(row["event_id"])
+        )
+    )
+    assert attrs["position_source"] == "coach"
+    assert attrs["confirmed_estimate"].startswith("tracking_")
+
+    # «Weiss nicht» afterwards: back to the estimate, which counts nowhere again
+    r = await api.put(spot, json={"shot_zone": "unknown"})
+    assert (r.json()["shot_zone"], r.json()["zone_source"]) == ("rl", "unknown")
+    goal = _goal((await api.get(f"{base}/graphics")).json(), row["event_id"])
+    assert goal["spot_by_coach"] is False and goal["confirmed"] is False
 
 
 async def test_review_with_the_place_and_its_corrections(make_api: Callable[[], Api]) -> None:

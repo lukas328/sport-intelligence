@@ -340,7 +340,11 @@ export function GoalCandidatesPanel({
                 </Button>
                 <span className={cn("min-w-0 flex-1", c.status === "rejected" && "text-muted line-through")}>
                   {c.status === "confirmed" ? (
-                    <span className="font-medium">{t("goalFor", { team: team(c.side) ?? "" })}</span>
+                    <>
+                      <span className="font-medium">{t("goalFor", { team: team(c.side) ?? "" })}</span>
+                      {/* taken over from the report without a question (L1): the undo beside it takes it back */}
+                      {c.auto && <span className="text-muted" data-testid="goal-candidate-auto">{" · "}{t("fromReport")}</span>}
+                    </>
                   ) : c.status === "rejected" ? (
                     t("rejected")
                   ) : known ? (
