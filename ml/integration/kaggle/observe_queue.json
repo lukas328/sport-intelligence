@@ -1,5 +1,5 @@
 {
-"batch": 26,
+"batch": 14,
 "batches": [
 [
 {
@@ -717,7 +717,9 @@
 "dataset": "handball-segs-l02",
 "file": "CH_Europa_Pfadi_GOG_ca2020_s1.mp4",
 "fps": 60.0
-},
+}
+],
+[
 {
 "game": "CH_Europa_Pfadi_GOG_ca2020",
 "dataset": "handball-segs-l02",
@@ -789,9 +791,7 @@
 "dataset": "handball-segs-l02",
 "file": "CH_Frauen_Cup_SpOno_LKZug_2022-05-07_s3.mp4",
 "fps": 50.0
-}
-],
-[
+},
 {
 "game": "CH_Frauen_Cup_SpOno_LKZug_2022-05-07",
 "dataset": "handball-segs-l02",
@@ -803,7 +803,9 @@
 "dataset": "handball-segs-l02",
 "file": "CH_Frauen_Cupfinal_Bruehl_Yellow_2016-05-08_s0.mp4",
 "fps": 24.927
-},
+}
+],
+[
 {
 "game": "CH_Frauen_Cupfinal_Bruehl_Yellow_2016-05-08",
 "dataset": "handball-segs-l02",
@@ -887,7 +889,9 @@
 "dataset": "handball-segs-l02",
 "file": "CH_Frauen_Cupfinal_LKZug_SpOno_2021-05-08_s4.mp4",
 "fps": 50.0
-},
+}
+],
+[
 {
 "game": "CH_Frauen_Final4_GCAmicitia_Yellow_ca2020",
 "dataset": "handball-segs-l02",
@@ -947,9 +951,7 @@
 "dataset": "handball-segs-l02",
 "file": "CH_Frauen_SPL1_GCAmicitia_HSGLeimental_ca2020_s4.mp4",
 "fps": 25.0
-}
-],
-[
+},
 {
 "game": "CH_Frauen_SPL1_GCAmicitia_Kreuzlingen_ca2020",
 "dataset": "handball-segs-l02",
@@ -973,7 +975,9 @@
 "dataset": "handball-segs-l02",
 "file": "CH_Frauen_SPL1_GCAmicitia_Kreuzlingen_ca2020_s3.mp4",
 "fps": 25.0
-},
+}
+],
+[
 {
 "game": "CH_Frauen_SPL1_GCAmicitia_Kreuzlingen_ca2020",
 "dataset": "handball-segs-l02",
@@ -1057,7 +1061,9 @@
 "dataset": "handball-segs-l02",
 "file": "CH_Frauen_SPL1_GCAmicitia_TVUster_ca2020_s2.mp4",
 "fps": 25.0
-},
+}
+],
+[
 {
 "game": "CH_Frauen_SPL1_GCAmicitia_TVUster_ca2020",
 "dataset": "handball-segs-l02",
@@ -1105,9 +1111,7 @@
 "dataset": "handball-segs-l03",
 "file": "CH_Frauen_SPL1_SpOnoEagles_GCAmicitia_ca2020_s0.mp4",
 "fps": 25.0
-}
-],
-[
+},
 {
 "game": "CH_Frauen_SPL1_SpOnoEagles_GCAmicitia_ca2020",
 "dataset": "handball-segs-l03",
@@ -1143,7 +1147,9 @@
 "dataset": "handball-segs-l03",
 "file": "CH_Frauen_SPL2_AargauOst_HSGLeimental_2024-09-01_s1.mp4",
 "fps": 30.0
-},
+}
+],
+[
 {
 "game": "CH_Frauen_SPL2_AargauOst_HSGLeimental_2024-09-01",
 "dataset": "handball-segs-l03",
@@ -1227,7 +1233,9 @@
 "dataset": "handball-segs-l03",
 "file": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-10-12_s0.mp4",
 "fps": 30.0
-},
+}
+],
+[
 {
 "game": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-10-12",
 "dataset": "handball-segs-l03",
@@ -1263,9 +1271,7 @@
 "dataset": "handball-segs-l03",
 "file": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2025-05-03_s1.mp4",
 "fps": 30.0
-}
-],
-[
+},
 {
 "game": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2025-05-03",
 "dataset": "handball-segs-l03",
@@ -1313,7 +1319,9 @@
 "dataset": "handball-segs-l03",
 "file": "CH_Frauen_SPL2_GCAmicitia_Bruehl2_2017-05-13_s4.mp4",
 "fps": 25.0
-},
+}
+],
+[
 {
 "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2024-05-18",
 "dataset": "handball-segs-l03",
@@ -1397,7 +1405,9 @@
 "dataset": "handball-segs-l03",
 "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz1_ca2025_s3.mp4",
 "fps": 60.0
-},
+}
+],
+[
 {
 "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz1_ca2025",
 "dataset": "handball-segs-l03",
@@ -1421,9 +1431,7 @@
 "dataset": "handball-segs-l03",
 "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz2_ca2025_s2.mp4",
 "fps": 60.0
-}
-],
-[
+},
 {
 "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz2_ca2025",
 "dataset": "handball-segs-l03",
@@ -1483,7 +1491,9 @@
 "dataset": "handball-segs-l03",
 "file": "CH_Frauen_SPL2_HSGLeimental_BSVStans_2023-02-12_s2.mp4",
 "fps": 30.0
-},
+}
+],
+[
 {
 "game": "CH_Frauen_SPL2_HSGLeimental_BSVStans_2023-02-12",
 "dataset": "handball-segs-l03",
@@ -1567,7 +1577,9 @@
 "dataset": "handball-segs-l03",
 "file": "CH_Frauen_SPL2_HSGLeimental_Bruehl2_ca2025_s1.mp4",
 "fps": 25.0
-},
+}
+],
+[
 {
 "game": "CH_Frauen_SPL2_HSGLeimental_Bruehl2_ca2025",
 "dataset": "handball-segs-l03",
@@ -1579,9 +1591,7 @@
 "dataset": "handball-segs-l03",
 "file": "CH_Frauen_SPL2_HSGLeimental_Bruehl2_ca2025_s3.mp4",
 "fps": 25.0
-}
-],
-[
+},
 {
 "game": "CH_Frauen_SPL2_HSGLeimental_Bruehl2_ca2025",
 "dataset": "handball-segs-l03",
@@ -1653,7 +1663,9 @@
 "dataset": "handball-segs-l03",
 "file": "CH_Frauen_SPL2_HSGLeimental_SpOno2_2024-09-07_s0.mp4",
 "fps": 30.0
-},
+}
+],
+[
 {
 "game": "CH_Frauen_SPL2_HSGLeimental_SpOno2_2024-09-07",
 "dataset": "handball-segs-l03",
@@ -1823,7 +1835,9 @@
 "dataset": "handball-segs-l04",
 "file": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-09-15_s3.mp4",
 "fps": 30.0
-},
+}
+],
+[
 {
 "game": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-09-15",
 "dataset": "handball-segs-l04",
@@ -1895,9 +1909,7 @@
 "dataset": "handball-segs-l04",
 "file": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-11-09_s0.mp4",
 "fps": 30.0
-}
-],
-[
+},
 {
 "game": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-11-09",
 "dataset": "handball-segs-l04",
@@ -1909,7 +1921,9 @@
 "dataset": "handball-segs-l04",
 "file": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-11-09_s2.mp4",
 "fps": 30.0
-},
+}
+],
+[
 {
 "game": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-11-09",
 "dataset": "handball-segs-l04",
@@ -1993,7 +2007,9 @@
 "dataset": "handball-segs-l04",
 "file": "CH_Frauen_SPL2_Uster_HSGLeimental_ca2025_s1.mp4",
 "fps": 30.0
-},
+}
+],
+[
 {
 "game": "CH_Frauen_SPL2_Uster_HSGLeimental_ca2025",
 "dataset": "handball-segs-l04",
@@ -2053,9 +2069,7 @@
 "dataset": "handball-segs-l04",
 "file": "CH_Frauen_Supercup_Bruehl_SpOno_2020_s1.mp4",
 "fps": 50.0
-}
-],
-[
+},
 {
 "game": "CH_Frauen_Supercup_Bruehl_SpOno_2020",
 "dataset": "handball-segs-l04",
@@ -2079,7 +2093,9 @@
 "dataset": "handball-segs-l04",
 "file": "CH_Frauen_Supercup_SpOno_LKZug_2022-08-21_s0.mp4",
 "fps": 50.0
-},
+}
+],
+[
 {
 "game": "CH_Frauen_Supercup_SpOno_LKZug_2022-08-21",
 "dataset": "handball-segs-l04",
@@ -2163,7 +2179,9 @@
 "dataset": "handball-segs-l05",
 "file": "CH_NLA_BSVBern_SuhrAarau_ca2017_s4.mp4",
 "fps": 25.0
-},
+}
+],
+[
 {
 "game": "CH_NLA_Finalissima_WackerThun_Kadetten_2013",
 "dataset": "handball-segs-l05",
@@ -2211,9 +2229,7 @@
 "dataset": "handball-segs-l05",
 "file": "CH_NLA_KriensLuzern_BSVBern_ca2018_s2.mp4",
 "fps": 25.0
-}
-],
-[
+},
 {
 "game": "CH_NLA_KriensLuzern_BSVBern_ca2018",
 "dataset": "handball-segs-l05",
@@ -2249,7 +2265,9 @@
 "dataset": "handball-segs-l05",
 "file": "CH_NLA_KriensLuzern_Kadetten_ca2018_s3.mp4",
 "fps": 25.0
-},
+}
+],
+[
 {
 "game": "CH_NLA_KriensLuzern_Kadetten_ca2018",
 "dataset": "handball-segs-l05",
@@ -2333,7 +2351,9 @@
 "dataset": "handball-segs-l06",
 "file": "CH_NLA_PlayoffHF_WackerThun_Otmar_2013-05-01_s2.mp4",
 "fps": 30.0
-},
+}
+],
+[
 {
 "game": "CH_NLA_PlayoffHF_WackerThun_Otmar_2013-05-01",
 "dataset": "handball-segs-l06",
@@ -2369,9 +2389,7 @@
 "dataset": "handball-segs-l06",
 "file": "CH_NLA_RTVBasel_BSVBern_2018-11-30_s3.mp4",
 "fps": 25.0
-}
-],
-[
+},
 {
 "game": "CH_NLA_RTVBasel_BSVBern_2018-11-30",
 "dataset": "handball-segs-l06",
@@ -2419,7 +2437,9 @@
 "dataset": "handball-segs-l06",
 "file": "CH_NLA_WackerThun_GCAmicitia_2013-09-04_s1.mp4",
 "fps": 30.0
-},
+}
+],
+[
 {
 "game": "CH_NLA_WackerThun_GCAmicitia_2013-09-04",
 "dataset": "handball-segs-l06",
@@ -2503,7 +2523,9 @@
 "dataset": "handball-segs-b01",
 "file": "CH_NLB_PlayoffFinal_Chenois_SGWaedenswilHorgen_2021-06-12_s0.mp4",
 "fps": 30.0
-},
+}
+],
+[
 {
 "game": "CH_NLB_PlayoffFinal_Chenois_SGWaedenswilHorgen_2021-06-12",
 "dataset": "handball-segs-b01",
@@ -2527,9 +2549,7 @@
 "dataset": "handball-segs-b01",
 "file": "CH_NLB_PlayoffFinal_Chenois_SGWaedenswilHorgen_2021-06-12_s4.mp4",
 "fps": 30.0
-}
-],
-[
+},
 {
 "game": "CH_NLB_SGHorgen_GSKadettenEspoirs_2016-10-22",
 "dataset": "handball-segs-l06",
@@ -2589,7 +2609,9 @@
 "dataset": "handball-segs-l06",
 "file": "CH_NLB_SGHorgen_TVEndingen_2016-11-20_s4.mp4",
 "fps": 25.0
-},
+}
+],
+[
 {
 "game": "CH_NLB_SGHorgen_TVSolothurn_2016-11-23",
 "dataset": "handball-segs-l06",
@@ -2673,7 +2695,9 @@
 "dataset": "handball-segs-l06",
 "file": "CH_NLB_SGWaedenswilHorgen_BSVStans_2024-02-25_s3.mp4",
 "fps": 60.0
-},
+}
+],
+[
 {
 "game": "CH_NLB_SGWaedenswilHorgen_BSVStans_2024-02-25",
 "dataset": "handball-segs-l06",
@@ -2685,9 +2709,7 @@
 "dataset": "handball-segs-b03",
 "file": "CH_NLB_SGWaedenswilHorgen_Chenois_2023-05-13_s0.mp4",
 "fps": 60.0
-}
-],
-[
+},
 {
 "game": "CH_NLB_SGWaedenswilHorgen_Chenois_2023-05-13",
 "dataset": "handball-segs-b03",
@@ -2759,7 +2781,9 @@
 "dataset": "handball-segs-b01",
 "file": "CH_NLB_SGWaedenswilHorgen_Emmen_2022-11-17_s2.mp4",
 "fps": 60.0
-},
+}
+],
+[
 {
 "game": "CH_NLB_SGWaedenswilHorgen_Emmen_2022-11-17",
 "dataset": "handball-segs-b01",
@@ -2929,7 +2953,9 @@
 "dataset": "handball-segs-l07",
 "file": "CH_NLB_SGWaedenswilHorgen_GCAmicitiaKuesnacht_2025-03-29_s0.mp4",
 "fps": 60.0
-},
+}
+],
+[
 {
 "game": "CH_NLB_SGWaedenswilHorgen_GCAmicitiaKuesnacht_2025-03-29",
 "dataset": "handball-segs-l07",
@@ -3001,9 +3027,7 @@
 "dataset": "handball-segs-b01",
 "file": "CH_NLB_SGWaedenswilHorgen_GSKadettenEspoirs_2022-10-23_s2.mp4",
 "fps": 60.0
-}
-],
-[
+},
 {
 "game": "CH_NLB_SGWaedenswilHorgen_GSKadettenEspoirs_2022-10-23",
 "dataset": "handball-segs-b01",
@@ -3015,7 +3039,9 @@
 "dataset": "handball-segs-b01",
 "file": "CH_NLB_SGWaedenswilHorgen_GSKadettenEspoirs_2022-10-23_s4.mp4",
 "fps": 60.0
-},
+}
+],
+[
 {
 "game": "CH_NLB_SGWaedenswilHorgen_GSKadettenEspoirs_2024-03-09",
 "dataset": "handball-segs-l07",
@@ -3099,7 +3125,9 @@
 "dataset": "handball-segs-l07",
 "file": "CH_NLB_SGWaedenswilHorgen_HCArbon_2024-09-07_s3.mp4",
 "fps": 60.0
-},
+}
+],
+[
 {
 "game": "CH_NLB_SGWaedenswilHorgen_HCArbon_2024-09-07",
 "dataset": "handball-segs-l07",
@@ -3159,9 +3187,7 @@
 "dataset": "handball-segs-l07",
 "file": "CH_NLB_SGWaedenswilHorgen_HandballBern_2025-03-09_s3.mp4",
 "fps": 60.0
-}
-],
-[
+},
 {
 "game": "CH_NLB_SGWaedenswilHorgen_HandballBern_2025-03-09",
 "dataset": "handball-segs-l07",
@@ -3185,7 +3211,9 @@
 "dataset": "handball-segs-l07",
 "file": "CH_NLB_SGWaedenswilHorgen_RTVBasel_2024-04-07_s2.mp4",
 "fps": 60.0
-},
+}
+],
+[
 {
 "game": "CH_NLB_SGWaedenswilHorgen_RTVBasel_2024-04-07",
 "dataset": "handball-segs-l07",
@@ -3269,7 +3297,9 @@
 "dataset": "handball-segs-l07",
 "file": "CH_NLB_SGWaedenswilHorgen_Staefa_2025-04-12_s1.mp4",
 "fps": 60.0
-},
+}
+],
+[
 {
 "game": "CH_NLB_SGWaedenswilHorgen_Staefa_2025-04-12",
 "dataset": "handball-segs-l07",
@@ -3317,9 +3347,7 @@
 "dataset": "handball-segs-b02",
 "file": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-03-25_s4.mp4",
 "fps": 60.0
-}
-],
-[
+},
 {
 "game": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-02-18",
 "dataset": "handball-segs-b02",
@@ -3355,7 +3383,9 @@
 "dataset": "handball-segs-l07",
 "file": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2025-02-19_s0.mp4",
 "fps": 60.0
-},
+}
+],
+[
 {
 "game": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2025-02-19",
 "dataset": "handball-segs-l07",
@@ -3439,7 +3469,9 @@
 "dataset": "handball-segs-l07",
 "file": "CH_NLB_SGWaedenswilHorgen_TVSteffisburg_2024-12-14_s4.mp4",
 "fps": 60.0
-},
+}
+],
+[
 {
 "game": "CH_NLB_SGWaedenswilHorgen_YellowPfadiEspoirs_2022-09-11",
 "dataset": "handball-segs-b01",
@@ -3475,9 +3507,7 @@
 "dataset": "handball-segs-l07",
 "file": "CH_NLB_SGWaedenswilHorgen_YellowPfadiEspoirs_2024-02-17_s0.mp4",
 "fps": 60.0
-}
-],
-[
+},
 {
 "game": "CH_NLB_SGWaedenswilHorgen_YellowPfadiEspoirs_2024-02-17",
 "dataset": "handball-segs-l07",
@@ -3525,7 +3555,9 @@
 "dataset": "handball-segs-l07",
 "file": "CH_NLB_SGWaedenswilHorgen_YellowPfadiEspoirs_2024-09-21_s3.mp4",
 "fps": 60.0
-},
+}
+],
+[
 {
 "game": "CH_NLB_SGWaedenswilHorgen_YellowPfadiEspoirs_2024-09-21",
 "dataset": "handball-segs-l07",
@@ -3609,7 +3641,9 @@
 "dataset": "handball-segs-l04",
 "file": "CH_Nati_Frauen_Schweiz_Norwegen_2017-10-01_s2.mp4",
 "fps": 25.0
-},
+}
+],
+[
 {
 "game": "CH_Nati_Frauen_Schweiz_Norwegen_2017-10-01",
 "dataset": "handball-segs-l04",
@@ -3633,9 +3667,7 @@
 "dataset": "handball-segs-l04",
 "file": "CH_Nati_Schweiz_Argentinien_2024-01-06_s1.mp4",
 "fps": 50.0
-}
-],
-[
+},
 {
 "game": "CH_Nati_Schweiz_Argentinien_2024-01-06",
 "dataset": "handball-segs-l04",
@@ -3695,7 +3727,9 @@
 "dataset": "handball-segs-l05",
 "file": "CH_Nati_Schweiz_Japan_2023-01-06_s1.mp4",
 "fps": 50.0
-},
+}
+],
+[
 {
 "game": "CH_Nati_Schweiz_Japan_2023-01-06",
 "dataset": "handball-segs-l05",
@@ -3779,7 +3813,9 @@
 "dataset": "handball-segs-l05",
 "file": "CH_Nati_Schweiz_Niederlande_2020-01-05_s0.mp4",
 "fps": 49.925
-},
+}
+],
+[
 {
 "game": "CH_Nati_Schweiz_Niederlande_2020-01-05",
 "dataset": "handball-segs-l05",
@@ -3791,9 +3827,7 @@
 "dataset": "handball-segs-l05",
 "file": "CH_Nati_Schweiz_Niederlande_2020-01-05_s2.mp4",
 "fps": 49.925
-}
-],
-[
+},
 {
 "game": "CH_Nati_Schweiz_Niederlande_2020-01-05",
 "dataset": "handball-segs-l05",
@@ -3865,7 +3899,9 @@
 "dataset": "handball-segs-l05",
 "file": "CH_Nati_Schweiz_Oesterreich_2023-01-08_s4.mp4",
 "fps": 50.0
-},
+}
+],
+[
 {
 "game": "CH_Nati_Schweiz_Rumaenien_2017-01-07",
 "dataset": "handball-segs-l05",
@@ -4035,7 +4071,9 @@
 "dataset": "handball-segs-l08",
 "file": "CH_RegioCup_HalbF_Frauen2_2017-03_s2.mp4",
 "fps": 30.0
-},
+}
+],
+[
 {
 "game": "CH_RegioCup_HalbF_Frauen2_2017-03",
 "dataset": "handball-segs-l08",
@@ -4107,9 +4145,7 @@
 "dataset": "handball-segs-l08",
 "file": "CH_Romandie_HCVevey_HCServette_2015-12-05_s4.mp4",
 "fps": 23.976
-}
-],
-[
+},
 {
 "game": "CH_Supercup_Kadetten_GCAmicitia_2022",
 "dataset": "handball-segs-l08",
@@ -4121,7 +4157,9 @@
 "dataset": "handball-segs-l08",
 "file": "CH_Supercup_Kadetten_GCAmicitia_2022_s1.mp4",
 "fps": 50.0
-},
+}
+],
+[
 {
 "game": "CH_Supercup_Kadetten_GCAmicitia_2022",
 "dataset": "handball-segs-l08",
@@ -4205,7 +4243,9 @@
 "dataset": "handball-segs-l08",
 "file": "CH_Test_Frauen_Chenois_Cassano_ca2023_s0.mp4",
 "fps": 60.0
-},
+}
+],
+[
 {
 "game": "CH_Test_Frauen_Chenois_Cassano_ca2023",
 "dataset": "handball-segs-l08",
@@ -4265,9 +4305,7 @@
 "dataset": "handball-segs-l08",
 "file": "CH_U15I_HSGLeimental_SGEspoirsNordwest_2023-09-09_s0.mp4",
 "fps": 30.0
-}
-],
-[
+},
 {
 "game": "CH_U15I_HSGLeimental_SGEspoirsNordwest_2023-09-09",
 "dataset": "handball-segs-l08",
@@ -4291,7 +4329,9 @@
 "dataset": "handball-segs-l08",
 "file": "CH_U15I_HSGLeimental_SGEspoirsNordwest_2023-09-09_s4.mp4",
 "fps": 30.0
-},
+}
+],
+[
 {
 "game": "CH_U15I_HSGLeimental_SGVaudLaCote_2023-09-02",
 "dataset": "handball-segs-l08",
@@ -4375,7 +4415,9 @@
 "dataset": "handball-segs-l09",
 "file": "CH_U19E_Final_HSGNordwest_SuhrAarau_ca2019_s3.mp4",
 "fps": 25.0
-},
+}
+],
+[
 {
 "game": "CH_U19E_Final_HSGNordwest_SuhrAarau_ca2019",
 "dataset": "handball-segs-l09",
@@ -4423,9 +4465,7 @@
 "dataset": "handball-segs-l09",
 "file": "CH_U19E_SuhrAarau_HSGNordwest_ca2019_s1.mp4",
 "fps": 25.0
-}
-],
-[
+},
 {
 "game": "CH_U19E_SuhrAarau_HSGNordwest_ca2019",
 "dataset": "handball-segs-l09",
@@ -4461,7 +4501,9 @@
 "dataset": "handball-segs-l09",
 "file": "CH_U19P_TVBalsthal_SGHandballBern_ca2021_s2.mp4",
 "fps": 60.0
-},
+}
+],
+[
 {
 "game": "CH_U19P_TVBalsthal_SGHandballBern_ca2021",
 "dataset": "handball-segs-l09",
@@ -4545,7 +4587,9 @@
 "dataset": "handball-segs-l09",
 "file": "DE_Bayernliga_VfLGuenzburg_TGLandshut_ca2020_s1.mp4",
 "fps": 25.0
-},
+}
+],
+[
 {
 "game": "DE_Bayernliga_VfLGuenzburg_TGLandshut_ca2020",
 "dataset": "handball-segs-l09",
@@ -4581,9 +4625,7 @@
 "dataset": "handball-segs-l09",
 "file": "DE_Bezirksliga_Unterpfaffenhofen_2022_s2.mp4",
 "fps": 30.0
-}
-],
-[
+},
 {
 "game": "DE_Bezirksliga_Unterpfaffenhofen_2022",
 "dataset": "handball-segs-l09",
@@ -4631,7 +4673,9 @@
 "dataset": "handball-segs-l09",
 "file": "DE_Oberliga_AhrensburgerTSV_Quickborn_2026-04-26_s0.mp4",
 "fps": 60.0
-},
+}
+],
+[
 {
 "game": "DE_Oberliga_AhrensburgerTSV_Quickborn_2026-04-26",
 "dataset": "handball-segs-l09",
@@ -4715,7 +4759,9 @@
 "dataset": "handball-segs-l09",
 "file": "DE_Regionalliga_BadBlankenburg_Oebisfelde_2026_s4.mp4",
 "fps": 50.0
-},
+}
+],
+[
 {
 "game": "DE_Test_TVPetterweil_TSFHeuchelheim_ca2020",
 "dataset": "handball-segs-l09",
@@ -4739,9 +4785,7 @@
 "dataset": "handball-segs-l09",
 "file": "DE_Test_TVPetterweil_TSFHeuchelheim_ca2020_s3.mp4",
 "fps": 30.0
-}
-],
-[
+},
 {
 "game": "DE_Test_TVPetterweil_TSFHeuchelheim_ca2020",
 "dataset": "handball-segs-l09",
@@ -4801,7 +4845,9 @@
 "dataset": "handball-segs-l10",
 "file": "DK_Herren_Arresoe_Furesoe_2018_s3.mp4",
 "fps": 25.0
-},
+}
+],
+[
 {
 "game": "DK_Herren_Arresoe_Furesoe_2018",
 "dataset": "handball-segs-l10",
@@ -4885,7 +4931,9 @@
 "dataset": "handball-segs-l12",
 "file": "ES_HonorPlata_Burgos_Sinfin_2026_s2.mp4",
 "fps": 29.97
-},
+}
+],
+[
 {
 "game": "ES_HonorPlata_Burgos_Sinfin_2026",
 "dataset": "handball-segs-l12",
@@ -4897,9 +4945,7 @@
 "dataset": "handball-segs-l12",
 "file": "ES_HonorPlata_Burgos_Sinfin_2026_s4.mp4",
 "fps": 29.97
-}
-],
-[
+},
 {
 "game": "FR_N1_Creteil2_Ivry2_2026",
 "dataset": "handball-segs-l10",
@@ -4971,7 +5017,9 @@
 "dataset": "handball-segs-l10",
 "file": "FR_N3_CPBRennes_Chateauneuf_2025_s1.mp4",
 "fps": 58.0
-},
+}
+],
+[
 {
 "game": "FR_N3_CPBRennes_Chateauneuf_2025",
 "dataset": "handball-segs-l10",
@@ -5141,7 +5189,9 @@
 "dataset": "handball-segs-l09",
 "file": "Pro_DHBPokal_EHVAue_Elbflorenz_2026_s4.mp4",
 "fps": 60.0
-},
+}
+],
+[
 {
 "game": "Pro_EuropeanCup_Karvina_HandballTirol_2025",
 "dataset": "handball-segs-l11",
@@ -5213,9 +5263,7 @@
 "dataset": "handball-segs-l12",
 "file": "UK_CupFinal_Cambridge_Warrington_2019_s1.mp4",
 "fps": 25.0
-}
-],
-[
+},
 {
 "game": "UK_CupFinal_Cambridge_Warrington_2019",
 "dataset": "handball-segs-l12",
@@ -5227,7 +5275,9 @@
 "dataset": "handball-segs-l12",
 "file": "UK_CupFinal_Cambridge_Warrington_2019_s3.mp4",
 "fps": 25.0
-},
+}
+],
+[
 {
 "game": "UK_CupFinal_Cambridge_Warrington_2019",
 "dataset": "handball-segs-l12",
