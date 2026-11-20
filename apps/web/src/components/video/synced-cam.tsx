@@ -40,5 +40,5 @@ export function SyncedCam({ src, offsetMs, main, className, label }: { src: stri
     }, 200);
     return () => window.clearInterval(id);
   }, [main, offsetMs]);
-  return <video ref={ref} muted playsInline aria-label={label} className={className} data-testid="synced-cam" />;
+  return <video ref={ref} crossOrigin="anonymous" muted playsInline aria-label={label} className={className} data-testid="synced-cam" />;
 }
