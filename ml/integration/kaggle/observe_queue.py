@@ -35,7 +35,7 @@ MAX_SLOTS = 5
 # a segment takes 20 min on a fast Kaggle machine and 42 to 50 min on a slow one (the dev run,
 # 2026-11-20; the same for 25 to 60 fps): 14 segments fit 12 h on a slow machine only just, so
 # the runner also stops starting new segments after GUARD_S and ends cleanly (output kept)
-BATCH = 14
+BATCH = 13  # 14 left one segment to the guard on every slow machine
 GUARD_S = 40_000
 # batches 0 to 3 were pushed with 26 segments and no guard before this was known
 KEEP_OLD = 4
@@ -104,9 +104,9 @@ def _status(i: int) -> str:
 
 def status() -> list[str]:
     q = json.loads(QUEUE.read_text())
-    st = [_status(i) for i in range(len(q["batches"]))]
+    st = [_status(i) if b else "empty" for i, b in enumerate(q["batches"])]
     for i, s in enumerate(st):
-        if s != "new":
+        if s not in ("new", "empty"):
             print(SLUG.format(i), s, len(q["batches"][i]), "segments")
     print({s: st.count(s) for s in sorted(set(st))})
     return st
@@ -135,6 +135,8 @@ def step() -> None:
     front = q.get("front", [])
     for i in [*front, *(j for j in range(len(st)) if j not in front)]:
         s = st[i]
+        if not q["batches"][i]:
+            continue  # re-split into later batches
         if s != "new":  # an error is reported, not retried: look at its log first
             continue
         part = q["batches"][i]
