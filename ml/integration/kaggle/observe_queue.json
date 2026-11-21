@@ -5504,13 +5504,513 @@
 "file": "AT_Cup_Feldkirch_Bregenz_2021_s4.mp4",
 "fps": 60.0
 }
+],
+[
+{
+"game": "AT_HLA_Bregenz_Baernbach_2021",
+"dataset": "handball-segs-l01",
+"file": "AT_HLA_Bregenz_Baernbach_2021_s0.mp4",
+"fps": 30.0
+},
+{
+"game": "AT_HLA_Bregenz_Baernbach_2021",
+"dataset": "handball-segs-l01",
+"file": "AT_HLA_Bregenz_Baernbach_2021_s1.mp4",
+"fps": 30.0
+},
+{
+"game": "AT_HLA_Bregenz_Baernbach_2021",
+"dataset": "handball-segs-l01",
+"file": "AT_HLA_Bregenz_Baernbach_2021_s2.mp4",
+"fps": 30.0
+},
+{
+"game": "AT_HLA_Bregenz_Baernbach_2021",
+"dataset": "handball-segs-l01",
+"file": "AT_HLA_Bregenz_Baernbach_2021_s3.mp4",
+"fps": 30.0
+},
+{
+"game": "AT_HLA_Bregenz_Baernbach_2021",
+"dataset": "handball-segs-l01",
+"file": "AT_HLA_Bregenz_Baernbach_2021_s4.mp4",
+"fps": 30.0
+},
+{
+"game": "AT_HLA_Bregenz_Schwaz_ca2015",
+"dataset": "handball-segs-l10",
+"file": "AT_HLA_Bregenz_Schwaz_ca2015_s0.mp4",
+"fps": 30.0
+},
+{
+"game": "AT_HLA_Bregenz_Schwaz_ca2015",
+"dataset": "handball-segs-l10",
+"file": "AT_HLA_Bregenz_Schwaz_ca2015_s1.mp4",
+"fps": 30.0
+},
+{
+"game": "AT_HLA_Bregenz_Schwaz_ca2015",
+"dataset": "handball-segs-l10",
+"file": "AT_HLA_Bregenz_Schwaz_ca2015_s2.mp4",
+"fps": 30.0
+},
+{
+"game": "AT_HLA_Bregenz_Schwaz_ca2015",
+"dataset": "handball-segs-l10",
+"file": "AT_HLA_Bregenz_Schwaz_ca2015_s3.mp4",
+"fps": 30.0
+},
+{
+"game": "AT_HLA_Bregenz_Schwaz_ca2015",
+"dataset": "handball-segs-l10",
+"file": "AT_HLA_Bregenz_Schwaz_ca2015_s4.mp4",
+"fps": 30.0
+},
+{
+"game": "AT_HLA_Ferlach_HandballTirol_2021",
+"dataset": "handball-segs-l01",
+"file": "AT_HLA_Ferlach_HandballTirol_2021_s0.mp4",
+"fps": 30.0
+},
+{
+"game": "AT_HLA_Ferlach_HandballTirol_2021",
+"dataset": "handball-segs-l01",
+"file": "AT_HLA_Ferlach_HandballTirol_2021_s1.mp4",
+"fps": 30.0
+},
+{
+"game": "AT_HLA_Ferlach_HandballTirol_2021",
+"dataset": "handball-segs-l01",
+"file": "AT_HLA_Ferlach_HandballTirol_2021_s2.mp4",
+"fps": 30.0
+},
+{
+"game": "AT_HLA_Ferlach_HandballTirol_2021",
+"dataset": "handball-segs-l01",
+"file": "AT_HLA_Ferlach_HandballTirol_2021_s3.mp4",
+"fps": 30.0
+}
+],
+[
+{
+"game": "AT_HLA_Ferlach_HandballTirol_2021",
+"dataset": "handball-segs-l01",
+"file": "AT_HLA_Ferlach_HandballTirol_2021_s4.mp4",
+"fps": 30.0
+},
+{
+"game": "AT_HLA_HandballTirol_Hard_2022",
+"dataset": "handball-segs-l01",
+"file": "AT_HLA_HandballTirol_Hard_2022_s0.mp4",
+"fps": 30.0
+},
+{
+"game": "AT_HLA_HandballTirol_Hard_2022",
+"dataset": "handball-segs-l01",
+"file": "AT_HLA_HandballTirol_Hard_2022_s1.mp4",
+"fps": 30.0
+},
+{
+"game": "AT_HLA_HandballTirol_Hard_2022",
+"dataset": "handball-segs-l01",
+"file": "AT_HLA_HandballTirol_Hard_2022_s2.mp4",
+"fps": 30.0
+},
+{
+"game": "AT_HLA_HandballTirol_Hard_2022",
+"dataset": "handball-segs-l01",
+"file": "AT_HLA_HandballTirol_Hard_2022_s3.mp4",
+"fps": 30.0
+},
+{
+"game": "AT_HLA_HandballTirol_Hard_2022",
+"dataset": "handball-segs-l01",
+"file": "AT_HLA_HandballTirol_Hard_2022_s4.mp4",
+"fps": 30.0
+},
+{
+"game": "AT_HLA_Schwaz_Bregenz_2021",
+"dataset": "handball-segs-l01",
+"file": "AT_HLA_Schwaz_Bregenz_2021_s0.mp4",
+"fps": 60.0
+},
+{
+"game": "AT_HLA_Schwaz_Bregenz_2021",
+"dataset": "handball-segs-l01",
+"file": "AT_HLA_Schwaz_Bregenz_2021_s1.mp4",
+"fps": 60.0
+},
+{
+"game": "AT_HLA_Schwaz_Bregenz_2021",
+"dataset": "handball-segs-l01",
+"file": "AT_HLA_Schwaz_Bregenz_2021_s2.mp4",
+"fps": 60.0
+},
+{
+"game": "AT_HLA_Schwaz_Bregenz_2021",
+"dataset": "handball-segs-l01",
+"file": "AT_HLA_Schwaz_Bregenz_2021_s3.mp4",
+"fps": 60.0
+},
+{
+"game": "AT_HLA_Schwaz_Bregenz_2021",
+"dataset": "handball-segs-l01",
+"file": "AT_HLA_Schwaz_Bregenz_2021_s4.mp4",
+"fps": 60.0
+},
+{
+"game": "CH_1Liga_HSGLeimental_PfaderNeuhausen_2023-03-18",
+"dataset": "handball-segs-l01",
+"file": "CH_1Liga_HSGLeimental_PfaderNeuhausen_2023-03-18_s0.mp4",
+"fps": 30.0
+}
+],
+[
+{
+"game": "CH_1Liga_HSGLeimental_PfaderNeuhausen_2023-03-18",
+"dataset": "handball-segs-l01",
+"file": "CH_1Liga_HSGLeimental_PfaderNeuhausen_2023-03-18_s1.mp4",
+"fps": 30.0
+},
+{
+"game": "CH_1Liga_HSGLeimental_PfaderNeuhausen_2023-03-18",
+"dataset": "handball-segs-l01",
+"file": "CH_1Liga_HSGLeimental_PfaderNeuhausen_2023-03-18_s2.mp4",
+"fps": 30.0
+},
+{
+"game": "CH_1Liga_HSGLeimental_PfaderNeuhausen_2023-03-18",
+"dataset": "handball-segs-l01",
+"file": "CH_1Liga_HSGLeimental_PfaderNeuhausen_2023-03-18_s3.mp4",
+"fps": 30.0
+},
+{
+"game": "CH_1Liga_HSGLeimental_PfaderNeuhausen_2023-03-18",
+"dataset": "handball-segs-l01",
+"file": "CH_1Liga_HSGLeimental_PfaderNeuhausen_2023-03-18_s4.mp4",
+"fps": 30.0
+},
+{
+"game": "CH_1Liga_RedDragonsUsterGC_Staefa_ca2022",
+"dataset": "handball-segs-l01",
+"file": "CH_1Liga_RedDragonsUsterGC_Staefa_ca2022_s0.mp4",
+"fps": 50.0
+},
+{
+"game": "CH_1Liga_RedDragonsUsterGC_Staefa_ca2022",
+"dataset": "handball-segs-l01",
+"file": "CH_1Liga_RedDragonsUsterGC_Staefa_ca2022_s1.mp4",
+"fps": 50.0
+},
+{
+"game": "CH_1Liga_RedDragonsUsterGC_Staefa_ca2022",
+"dataset": "handball-segs-l01",
+"file": "CH_1Liga_RedDragonsUsterGC_Staefa_ca2022_s2.mp4",
+"fps": 50.0
+},
+{
+"game": "CH_1Liga_RedDragonsUsterGC_Staefa_ca2022",
+"dataset": "handball-segs-l01",
+"file": "CH_1Liga_RedDragonsUsterGC_Staefa_ca2022_s3.mp4",
+"fps": 50.0
+},
+{
+"game": "CH_1Liga_RedDragonsUsterGC_Staefa_ca2022",
+"dataset": "handball-segs-l01",
+"file": "CH_1Liga_RedDragonsUsterGC_Staefa_ca2022_s4.mp4",
+"fps": 50.0
+},
+{
+"game": "CH_1Liga_RedDragonsUsterGC_Staefa_ca2023",
+"dataset": "handball-segs-l01",
+"file": "CH_1Liga_RedDragonsUsterGC_Staefa_ca2023_s0.mp4",
+"fps": 50.0
+},
+{
+"game": "CH_1Liga_RedDragonsUsterGC_Staefa_ca2023",
+"dataset": "handball-segs-l01",
+"file": "CH_1Liga_RedDragonsUsterGC_Staefa_ca2023_s1.mp4",
+"fps": 50.0
+},
+{
+"game": "CH_1Liga_RedDragonsUsterGC_Staefa_ca2023",
+"dataset": "handball-segs-l01",
+"file": "CH_1Liga_RedDragonsUsterGC_Staefa_ca2023_s2.mp4",
+"fps": 50.0
+},
+{
+"game": "CH_1Liga_RedDragonsUsterGC_Staefa_ca2023",
+"dataset": "handball-segs-l01",
+"file": "CH_1Liga_RedDragonsUsterGC_Staefa_ca2023_s3.mp4",
+"fps": 50.0
+},
+{
+"game": "CH_1Liga_RedDragonsUsterGC_Staefa_ca2023",
+"dataset": "handball-segs-l01",
+"file": "CH_1Liga_RedDragonsUsterGC_Staefa_ca2023_s4.mp4",
+"fps": 50.0
+}
+],
+[
+{
+"game": "CH_2Liga_TVZofingen_ca2019",
+"dataset": "handball-segs-l01",
+"file": "CH_2Liga_TVZofingen_ca2019_s0.mp4",
+"fps": 29.97
+},
+{
+"game": "CH_2Liga_TVZofingen_ca2019",
+"dataset": "handball-segs-l01",
+"file": "CH_2Liga_TVZofingen_ca2019_s1.mp4",
+"fps": 29.97
+},
+{
+"game": "CH_2Liga_TVZofingen_ca2019",
+"dataset": "handball-segs-l01",
+"file": "CH_2Liga_TVZofingen_ca2019_s2.mp4",
+"fps": 29.97
+},
+{
+"game": "CH_2Liga_TVZofingen_ca2019",
+"dataset": "handball-segs-l01",
+"file": "CH_2Liga_TVZofingen_ca2019_s3.mp4",
+"fps": 29.97
+},
+{
+"game": "CH_2Liga_TVZofingen_ca2019",
+"dataset": "handball-segs-l01",
+"file": "CH_2Liga_TVZofingen_ca2019_s4.mp4",
+"fps": 29.97
+},
+{
+"game": "CH_2Liga_TVZofingen_ca2022",
+"dataset": "handball-segs-l01",
+"file": "CH_2Liga_TVZofingen_ca2022_s0.mp4",
+"fps": 29.97
+},
+{
+"game": "CH_2Liga_TVZofingen_ca2022",
+"dataset": "handball-segs-l01",
+"file": "CH_2Liga_TVZofingen_ca2022_s1.mp4",
+"fps": 29.97
+},
+{
+"game": "CH_2Liga_TVZofingen_ca2022",
+"dataset": "handball-segs-l01",
+"file": "CH_2Liga_TVZofingen_ca2022_s2.mp4",
+"fps": 29.97
+},
+{
+"game": "CH_2Liga_TVZofingen_ca2022",
+"dataset": "handball-segs-l01",
+"file": "CH_2Liga_TVZofingen_ca2022_s3.mp4",
+"fps": 29.97
+},
+{
+"game": "CH_2Liga_TVZofingen_ca2022",
+"dataset": "handball-segs-l01",
+"file": "CH_2Liga_TVZofingen_ca2022_s4.mp4",
+"fps": 29.97
+},
+{
+"game": "CH_Aufstieg_Schwamendingen_TVBalsthal_2025-04-12",
+"dataset": "handball-segs-l01",
+"file": "CH_Aufstieg_Schwamendingen_TVBalsthal_2025-04-12_s0.mp4",
+"fps": 30.0
+},
+{
+"game": "CH_Aufstieg_Schwamendingen_TVBalsthal_2025-04-12",
+"dataset": "handball-segs-l01",
+"file": "CH_Aufstieg_Schwamendingen_TVBalsthal_2025-04-12_s1.mp4",
+"fps": 30.0
+}
+],
+[
+{
+"game": "CH_Aufstieg_Schwamendingen_TVBalsthal_2025-04-12",
+"dataset": "handball-segs-l01",
+"file": "CH_Aufstieg_Schwamendingen_TVBalsthal_2025-04-12_s2.mp4",
+"fps": 30.0
+},
+{
+"game": "CH_Aufstieg_Schwamendingen_TVBalsthal_2025-04-12",
+"dataset": "handball-segs-l01",
+"file": "CH_Aufstieg_Schwamendingen_TVBalsthal_2025-04-12_s3.mp4",
+"fps": 30.0
+},
+{
+"game": "CH_Aufstieg_Schwamendingen_TVBalsthal_2025-04-12",
+"dataset": "handball-segs-l01",
+"file": "CH_Aufstieg_Schwamendingen_TVBalsthal_2025-04-12_s4.mp4",
+"fps": 30.0
+},
+{
+"game": "CH_Cup_GCAmicitia_Pfadi_2022-05-07",
+"dataset": "handball-segs-l01",
+"file": "CH_Cup_GCAmicitia_Pfadi_2022-05-07_s0.mp4",
+"fps": 50.0
+},
+{
+"game": "CH_Cup_GCAmicitia_Pfadi_2022-05-07",
+"dataset": "handball-segs-l01",
+"file": "CH_Cup_GCAmicitia_Pfadi_2022-05-07_s1.mp4",
+"fps": 50.0
+},
+{
+"game": "CH_Cup_GCAmicitia_Pfadi_2022-05-07",
+"dataset": "handball-segs-l01",
+"file": "CH_Cup_GCAmicitia_Pfadi_2022-05-07_s2.mp4",
+"fps": 50.0
+},
+{
+"game": "CH_Cup_GCAmicitia_Pfadi_2022-05-07",
+"dataset": "handball-segs-l01",
+"file": "CH_Cup_GCAmicitia_Pfadi_2022-05-07_s3.mp4",
+"fps": 50.0
+},
+{
+"game": "CH_Cup_GCAmicitia_Pfadi_2022-05-07",
+"dataset": "handball-segs-l01",
+"file": "CH_Cup_GCAmicitia_Pfadi_2022-05-07_s4.mp4",
+"fps": 50.0
+},
+{
+"game": "CH_Cup_Kadetten_KriensLuzern_2023-05-06",
+"dataset": "handball-segs-l01",
+"file": "CH_Cup_Kadetten_KriensLuzern_2023-05-06_s0.mp4",
+"fps": 50.0
+},
+{
+"game": "CH_Cup_Kadetten_KriensLuzern_2023-05-06",
+"dataset": "handball-segs-l01",
+"file": "CH_Cup_Kadetten_KriensLuzern_2023-05-06_s1.mp4",
+"fps": 50.0
+},
+{
+"game": "CH_Cup_Kadetten_KriensLuzern_2023-05-06",
+"dataset": "handball-segs-l01",
+"file": "CH_Cup_Kadetten_KriensLuzern_2023-05-06_s2.mp4",
+"fps": 50.0
+},
+{
+"game": "CH_Cup_Kadetten_KriensLuzern_2023-05-06",
+"dataset": "handball-segs-l01",
+"file": "CH_Cup_Kadetten_KriensLuzern_2023-05-06_s3.mp4",
+"fps": 50.0
+},
+{
+"game": "CH_Cup_Kadetten_KriensLuzern_2023-05-06",
+"dataset": "handball-segs-l01",
+"file": "CH_Cup_Kadetten_KriensLuzern_2023-05-06_s4.mp4",
+"fps": 50.0
+},
+{
+"game": "CH_Cup_Kriens_SGWestYverdonCrissier_ca2022",
+"dataset": "handball-segs-l01",
+"file": "CH_Cup_Kriens_SGWestYverdonCrissier_ca2022_s0.mp4",
+"fps": 50.0
+}
+],
+[
+{
+"game": "CH_Cup_Kriens_SGWestYverdonCrissier_ca2022",
+"dataset": "handball-segs-l01",
+"file": "CH_Cup_Kriens_SGWestYverdonCrissier_ca2022_s1.mp4",
+"fps": 50.0
+},
+{
+"game": "CH_Cup_Kriens_SGWestYverdonCrissier_ca2022",
+"dataset": "handball-segs-l01",
+"file": "CH_Cup_Kriens_SGWestYverdonCrissier_ca2022_s2.mp4",
+"fps": 50.0
+},
+{
+"game": "CH_Cup_Kriens_SGWestYverdonCrissier_ca2022",
+"dataset": "handball-segs-l01",
+"file": "CH_Cup_Kriens_SGWestYverdonCrissier_ca2022_s3.mp4",
+"fps": 50.0
+},
+{
+"game": "CH_Cup_Kriens_SGWestYverdonCrissier_ca2022",
+"dataset": "handball-segs-l01",
+"file": "CH_Cup_Kriens_SGWestYverdonCrissier_ca2022_s4.mp4",
+"fps": 50.0
+},
+{
+"game": "CH_Cup_SGHorgen_WackerThun_2016-10-26",
+"dataset": "handball-segs-l01",
+"file": "CH_Cup_SGHorgen_WackerThun_2016-10-26_s0.mp4",
+"fps": 25.0
+},
+{
+"game": "CH_Cup_SGHorgen_WackerThun_2016-10-26",
+"dataset": "handball-segs-l01",
+"file": "CH_Cup_SGHorgen_WackerThun_2016-10-26_s1.mp4",
+"fps": 25.0
+},
+{
+"game": "CH_Cup_SGHorgen_WackerThun_2016-10-26",
+"dataset": "handball-segs-l01",
+"file": "CH_Cup_SGHorgen_WackerThun_2016-10-26_s2.mp4",
+"fps": 25.0
+},
+{
+"game": "CH_Cup_SGHorgen_WackerThun_2016-10-26",
+"dataset": "handball-segs-l01",
+"file": "CH_Cup_SGHorgen_WackerThun_2016-10-26_s3.mp4",
+"fps": 25.0
+},
+{
+"game": "CH_Cup_SGHorgen_WackerThun_2016-10-26",
+"dataset": "handball-segs-l01",
+"file": "CH_Cup_SGHorgen_WackerThun_2016-10-26_s4.mp4",
+"fps": 25.0
+},
+{
+"game": "CH_Cupfinal_Kadetten_Otmar_2016",
+"dataset": "handball-segs-l01",
+"file": "CH_Cupfinal_Kadetten_Otmar_2016_s0.mp4",
+"fps": 25.0
+},
+{
+"game": "CH_Cupfinal_Kadetten_Otmar_2016",
+"dataset": "handball-segs-l01",
+"file": "CH_Cupfinal_Kadetten_Otmar_2016_s1.mp4",
+"fps": 25.0
+},
+{
+"game": "CH_Cupfinal_Kadetten_Otmar_2016",
+"dataset": "handball-segs-l01",
+"file": "CH_Cupfinal_Kadetten_Otmar_2016_s2.mp4",
+"fps": 25.0
+},
+{
+"game": "CH_Europa_Pfadi_GOG_ca2020",
+"dataset": "handball-segs-l02",
+"file": "CH_Europa_Pfadi_GOG_ca2020_s1.mp4",
+"fps": 60.0
+}
 ]
 ],
 "front": [
 59,
-60
+60,
+61,
+62,
+63,
+64,
+65,
+66
 ],
 "requeued": [
-0
+0,
+1,
+2,
+3
+],
+"partial": {
+"4": [
+"CH_Europa_Pfadi_GOG_ca2020_s1.mp4"
 ]
+}
 }
