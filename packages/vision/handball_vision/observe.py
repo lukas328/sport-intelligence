@@ -297,11 +297,9 @@ def save_observations(obs: Observations, path: Path) -> None:
     role_idx = [(fo.index, k) for fo in obs.frames for k in fo.roles]
     role_p = [v for fo in obs.frames for v in fo.roles.values()]
     seg_idx = [i for i, sg in obs.segments.items() for _ in range(len(sg))]
-    segs = (
-        np.vstack([sg for sg in obs.segments.values() if len(sg)])
-        if obs.segments
-        else np.zeros((0, 4))
-    )
+    # a segment can hold only empty masks (a whole video with nothing segmented): store no rows
+    filled = [sg for sg in obs.segments.values() if len(sg)]
+    segs = np.vstack(filled) if filled else np.zeros((0, 4))
     np.savez_compressed(
         path,
         frames=np.array([fo.index for fo in obs.frames], np.int32),

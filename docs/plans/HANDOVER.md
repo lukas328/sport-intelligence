@@ -23,6 +23,11 @@ hat), dann `docs/plans/backlog.md`.
 - GPU im Betrieb: später Azure (Entscheid Lukas 2026-11-19), mit Umzug der Umgebung in eine andere
   Azure-Region; macht Lukas später. Kein Modal-Backend.
 
+## Stand 2026-11-23
+- A1 (weniger Fragen) und die Kaggle-Warteschlange: `docs/plans/UEBERGABE-2026-11-23.md`
+  (Branch `claude/happy-mendel-04tk4q`). Ballpfad hilft den Tor-Kandidaten nicht; offen sind die
+  Pausen-Messung und das Nachfüllen ausserhalb der Cloud-Sitzung (beides Entscheid Lukas).
+
 ## Prioritäten
 Aktuell: `docs/plans/backlog.md`, Abschnitt «Nächste Aufgaben» (Stand 20.11.). Die Liste darunter ist vom 19.11.
 
@@ -110,6 +115,13 @@ und infra/terraform/azure/README.md und führe mich durch die Test-Umgebung"):
    löschen).
 
 ## Datenstand und Hintergrundprozesse
+- **Gratis-CPU auf Kaggle immer belegt halten** (Wunsch Lukas, 2026-11-20): höchstens 5 CPU-Kernels
+  gleichzeitig, je bis 12 h. Warteschlange `ml/integration/kaggle/observe_queue.json` (etwa 860
+  Segmente, 13 pro Kernel: 20 bis 50 min pro Segment je nach Kaggle-Maschine, Zeitwächter nach
+  11 h, ein kaputtes Segment beendet den Kernel nicht; Endtest-Spiele nie). Jede Sitzung ruft beim
+  Start `python ml/integration/kaggle/observe_queue.py step` auf; fertige Kernels herunterladen und
+  mit `requeue N --have DIR` die fehlenden Segmente neu einreihen. Stand und Ablauf:
+  `docs/plans/UEBERGABE-2026-11-23.md`.
 Die Cloud-Sitzung ist flüchtig: alles ausserhalb des Repos ist mit ihr weg. Darum:
 - **Kaggle ist der gemeinsame Speicher** (Konto `lukasde1000`): Segmente `handball-segs-bNN` (Cloud)
   und `handball-segs-lNN` (Lukas' Uploads), GPU-Ergebnisse `handball-gpu-<job>-<datum>`, Ballmodell

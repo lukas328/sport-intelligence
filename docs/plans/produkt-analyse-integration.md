@@ -969,3 +969,41 @@ kann dort fehlen, wo es wirklich fiel; ein Herabstufen würde dann genau das ech
 Offen: Die Regel braucht die gelesene Uhr. Wo die Tafel minutenlang nicht im Bild ist (Abschnitt
 Pausenerkennung), bleibt es bei Fragen. Bessere Tor-Kandidaten (Präzision 29 %) sind ein eigener
 Auftrag.
+
+### Ballpfad als Bestätigung der Tor-Kandidaten (A1, 2026-11-20)
+
+Frage: Trennt der Ballpfad echte Tore von Fehlalarmen, so dass die Quote der Tor-Kandidaten (2 pro
+Spielminute) sinken darf?
+
+Daten: 49 Dev-Segmente aus 13 Spielen mit offiziellem Spielbericht (113 Tore, `ml/data/segment_labels`),
+beobachtet wie der Wurf-Endtest (hrp1 960 px jedes 3. Bild, YOLOX jedes 3. Bild), Kaggle-Kernels
+`handball-shot-dev-0` bis `-4`. Endtest nicht angeschaut. Merkmale pro Kandidat (alle 568 bis Rate 4)
+in `ml/integration/goal_ball_cues.py`, Auswertung `goal_ball_cues_eval.py`. Ball als Azimut auf dem
+Kamerazylinder, Spielfeld zwischen dem 3. und 97. Perzentil des Balls (keine Kalibrierung nötig).
+
+| Merkmal | AUC (Tor gegen Fehlalarm) |
+|---|---|
+| Wert der Kandidaten heute (`score`) | **0.81** |
+| Ballgeschwindigkeit 6 s vor dem Peak (95. Perzentil) | 0.67 |
+| Ball nahe einem Torende 4 s vor dem Peak | 0.55 |
+| Anwurf: Ball ruhig nahe der Mitte, 2 bis 25 s nach dem Peak | 0.53 |
+
+Kombiniert (logistische Regression, Spiel für Spiel ausgelassen), Tore gefunden / Präzision bei
+1, 1.5 und 2 Kandidaten pro Spielminute:
+
+| | 1 / min | 1.5 / min | 2 / min |
+|---|---|---|---|
+| nur `score` (heute) | 0.56 / 0.45 | 0.71 / 0.42 | 0.85 / 0.34 |
+| `score` + Ballgeschwindigkeit | 0.58 / 0.47 | 0.71 / 0.43 | 0.83 / 0.34 |
+| alle Merkmale | 0.58 / 0.46 | 0.70 / 0.42 | 0.83 / 0.34 |
+
+Ergebnis: **Der Ballpfad hilft den Tor-Kandidaten nicht.** Die Ballgeschwindigkeit trägt allein etwas,
+steckt aber schon im heutigen Wert (Kamera und Spieler kippen mit dem schnellen Ball). Das
+Anwurf-Muster ist im Ballpfad nicht zu sehen; der Pfad stimmt auf gold v1 nur zu etwa 64 %, und bei
+ruhigem Ball an der Mittellinie fehlt dem Netz oft der Kontrast. Nichts eingebaut, nicht auf dem
+Endtest gemessen. Eine tiefere Quote kostet so Tore: 1.5 pro Minute spart ein Viertel der Fragen und
+verliert 14 von 100 Toren.
+
+Was bleibt für weniger Fragen: Zeit ohne Spiel (Pausen, Einspielen, Nachspiel). Dafür beobachtet die
+Warteschlange `ml/integration/kaggle/observe_queue.py` die übrigen Segmente der Bibliothek, darunter
+die Halbzeiten der 13 Dev-Spiele.
