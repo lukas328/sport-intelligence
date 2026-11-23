@@ -99,7 +99,9 @@ def _status(i: int) -> str:
     out = _kaggle("kernels", "status", f"{OWNER}/{SLUG.format(i)}")
     if "has status" in out:
         return out.rsplit('"', 2)[-2].split(".")[-1].lower()  # running, complete, error, ...
-    return "new"
+    if "Cannot access kernel" in out or "404" in out:
+        return "new"  # never pushed
+    return "unknown"  # API hiccup: never push on it (a done batch was pushed again, 2026-11-23)
 
 
 def status() -> list[str]:
@@ -151,8 +153,8 @@ def step() -> None:
     front = q.get("front", [])
     for i in [*front, *(j for j in range(len(st)) if j not in front)]:
         s = st[i]
-        if not q["batches"][i]:
-            continue  # re-split into later batches
+        if not q["batches"][i] or i in q.get("requeued", []):
+            continue  # re-split into later batches, or already handled by requeue
         if s != "new":  # an error is reported, not retried: look at its log first
             continue
         part = q["batches"][i]
