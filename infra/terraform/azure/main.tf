@@ -127,7 +127,7 @@ resource "azurerm_role_assignment" "acr_pull" {
 resource "azurerm_email_communication_service" "this" {
   name                = "${local.prefix}-email"
   resource_group_name = azurerm_resource_group.this.name
-  data_location       = "Switzerland"
+  data_location       = var.mail_data_location
   tags                = local.tags
 }
 
@@ -148,7 +148,7 @@ resource "azurerm_email_communication_service_domain_sender_username" "this" {
 resource "azurerm_communication_service" "this" {
   name                = "${local.prefix}-acs-${local.unique}"
   resource_group_name = azurerm_resource_group.this.name
-  data_location       = "Switzerland"
+  data_location       = var.mail_data_location
   tags                = local.tags
 }
 
@@ -187,6 +187,16 @@ resource "azurerm_role_assignment" "kv_deployer" {
   principal_id         = coalesce(var.kv_deployer_object_id, data.azurerm_client_config.current.object_id)
 }
 
+# a new environment applied from GitHub Actions while kv_deployer_object_id names the owner: the
+# runner needs to write the vault too (the first environment got this role from
+# infra/azure/setup-github-deploy.sh, so it stays off there)
+resource "azurerm_role_assignment" "kv_runner" {
+  count                = var.kv_runner_role ? 1 : 0
+  scope                = azurerm_key_vault.this.id
+  role_definition_name = "Key Vault Secrets Officer"
+  principal_id         = data.azurerm_client_config.current.object_id
+}
+
 resource "random_password" "secret_key" {
   length  = 64
   special = false
@@ -220,9 +230,15 @@ locals {
   db_owner  = "postgresql+asyncpg://${local.pg_admin}:${random_password.pg_admin.result}@${local.pg_host}:5432/handball?ssl=require"
   dsn_owner = "postgresql://${local.pg_admin}:${random_password.pg_admin.result}@${local.pg_host}:5432/handball?sslmode=require"
 
+  # sessions and the encrypted columns depend on these two: Terraform writes a random value once and
+  # never overwrites it, so a new environment can take over the old one's values (the move to
+  # another region copies them before the database, docs/plans/staging-umzug-eu.md)
+  carried_secrets = {
+    "hb-secret-key"     = random_password.secret_key.result
+    "hb-encryption-key" = local.fernet
+  }
+
   generated_secrets = {
-    "hb-secret-key"       = random_password.secret_key.result
-    "hb-encryption-key"   = local.fernet
     "hb-internal-token"   = random_password.internal_token.result
     "hb-database-url"     = local.db_app
     "hb-migration-db-url" = local.db_owner
@@ -241,7 +257,29 @@ resource "azurerm_key_vault_secret" "generated" {
   name         = each.key
   value        = each.value
   key_vault_id = azurerm_key_vault.this.id
-  depends_on   = [azurerm_role_assignment.kv_deployer]
+  depends_on   = [azurerm_role_assignment.kv_deployer, azurerm_role_assignment.kv_runner]
+}
+
+resource "azurerm_key_vault_secret" "carried" {
+  for_each     = local.carried_secrets
+  name         = each.key
+  value        = each.value
+  key_vault_id = azurerm_key_vault.this.id
+  depends_on   = [azurerm_role_assignment.kv_deployer, azurerm_role_assignment.kv_runner]
+
+  lifecycle {
+    ignore_changes = [value, tags]
+  }
+}
+
+moved {
+  from = azurerm_key_vault_secret.generated["hb-secret-key"]
+  to   = azurerm_key_vault_secret.carried["hb-secret-key"]
+}
+
+moved {
+  from = azurerm_key_vault_secret.generated["hb-encryption-key"]
+  to   = azurerm_key_vault_secret.carried["hb-encryption-key"]
 }
 
 resource "azurerm_key_vault_secret" "manual" {
@@ -249,7 +287,7 @@ resource "azurerm_key_vault_secret" "manual" {
   name         = each.key
   value        = "set-me"
   key_vault_id = azurerm_key_vault.this.id
-  depends_on   = [azurerm_role_assignment.kv_deployer]
+  depends_on   = [azurerm_role_assignment.kv_deployer, azurerm_role_assignment.kv_runner]
 
   lifecycle {
     ignore_changes = [value, tags]
@@ -356,6 +394,15 @@ resource "azurerm_container_app_environment" "this" {
     workload_profile_type = "Consumption"
   }
 
+  # serverless T4 for the GPU job (only in regions that offer it, e.g. swedencentral)
+  dynamic "workload_profile" {
+    for_each = var.gpu ? [1] : []
+    content {
+      name                  = local.gpu_profile
+      workload_profile_type = "Consumption-GPU-NC8as-T4"
+    }
+  }
+
   lifecycle {
     ignore_changes = [infrastructure_resource_group_name]
   }
@@ -455,7 +502,10 @@ locals {
   # slots (check "db_connections")
   api_db = { processes = 2, pool = 3, overflow = 1 }
 
-  python_apps = {
+  # the analysis on the CPU of an always-on app; with var.gpu the GPU job below takes the GPU queue
+  python_apps = merge(local.base_apps, var.gpu ? {} : { gpu-worker = local.cpu_analysis_app })
+
+  base_apps = {
     api = {
       image   = "hb-api"
       cpu     = 0.5
@@ -482,24 +532,26 @@ locals {
       ingress = false
       env     = {}
     }
-    gpu-worker = {
-      image   = "hb-gpu-worker"
-      cpu     = var.gpu_worker_cpu
-      memory  = var.gpu_worker_memory
-      min     = 1
-      max     = 1
-      ingress = false
-      # Ball net on the CPU (no GPU on staging yet, tests with 5 to 10 minute clips): one net,
-      # every 3rd frame at 960 px width. The model file lies in the artifacts bucket and is
-      # checked against its SHA-256. The re-identification net stays off: HB_BALL_ALLOW_CPU
-      # would allow it on the CPU too.
-      env = {
-        HB_BALL_MODEL        = "models/ball/ball_hrp1_fp16-37153d8dfc83.onnx"
-        HB_BALL_MODEL_SHA256 = "37153d8dfc832e683283b43229d35ea5fd1a257757c689d1b05ffb81fd9779f5"
-        HB_BALL_ALLOW_CPU    = "1"
-        HB_BALL_WIDTH        = "960"
-        HB_BALL_EVERY        = "3"
-      }
+
+  }
+
+  cpu_analysis_app = {
+    image   = "hb-gpu-worker"
+    cpu     = var.gpu_worker_cpu
+    memory  = var.gpu_worker_memory
+    min     = 1
+    max     = 1
+    ingress = false
+    # Ball net on the CPU (no GPU on staging yet, tests with 5 to 10 minute clips): one net,
+    # every 3rd frame at 960 px width. The model file lies in the artifacts bucket and is
+    # checked against its SHA-256. The re-identification net stays off: HB_BALL_ALLOW_CPU
+    # would allow it on the CPU too.
+    env = {
+      HB_BALL_MODEL        = "models/ball/ball_hrp1_fp16-37153d8dfc83.onnx"
+      HB_BALL_MODEL_SHA256 = "37153d8dfc832e683283b43229d35ea5fd1a257757c689d1b05ffb81fd9779f5"
+      HB_BALL_ALLOW_CPU    = "1"
+      HB_BALL_WIDTH        = "960"
+      HB_BALL_EVERY        = "3"
     }
   }
 }
@@ -674,6 +726,7 @@ resource "azurerm_container_app" "python" {
     azurerm_role_assignment.acr_pull,
     azurerm_role_assignment.kv_apps,
     azurerm_key_vault_secret.generated,
+    azurerm_key_vault_secret.carried,
     azurerm_key_vault_secret.manual,
   ]
 }
@@ -826,8 +879,149 @@ resource "azurerm_container_app_job" "migrate" {
     azurerm_role_assignment.acr_pull,
     azurerm_role_assignment.kv_apps,
     azurerm_key_vault_secret.generated,
+    azurerm_key_vault_secret.carried,
     azurerm_key_vault_secret.manual,
     azurerm_postgresql_flexible_server_configuration.extensions,
     azurerm_postgresql_flexible_server_database.handball,
   ]
+}
+
+# --- GPU analysis: serverless T4, an event-driven job (docs/plans/staging-umzug-eu.md) ------------
+# One execution per batch of waiting analyses: KEDA watches the length of the GPU queue in Redis,
+# the execution runs the GPU worker in burst mode (works the queue, then ends). A job, not an app:
+# scaling in would stop an app replica mid-analysis once the job left the list, an execution runs
+# to its end. At most one at a time, nothing runs (and nothing is billed) while the queue is empty.
+
+locals {
+  gpu_profile = "gpu-t4"
+  gpu_env = {
+    # the uint8 ball net at 960 px on every frame (Dockerfile.cuda defaults), as staging-env.json
+    # names it for the CPU worker; videos over the limit end as «too long»
+    HB_ANALYSIS_MAX_MINUTES = tostring(var.gpu_max_video_minutes)
+    HB_BALL_MODEL           = var.gpu_ball_model
+    HB_BALL_MODEL_SHA256    = var.gpu_ball_model_sha256
+  }
+}
+
+resource "azurerm_container_app_job" "gpu" {
+  count                        = var.gpu ? 1 : 0
+  name                         = "${local.prefix}-gpu"
+  resource_group_name          = azurerm_resource_group.this.name
+  location                     = var.location
+  container_app_environment_id = azurerm_container_app_environment.this.id
+  workload_profile_name        = local.gpu_profile
+  replica_timeout_in_seconds   = var.gpu_job_timeout_s
+  replica_retry_limit          = 0
+  tags                         = local.tags
+
+  event_trigger_config {
+    parallelism              = 1
+    replica_completion_count = 1
+    scale {
+      min_executions              = 0
+      max_executions              = 1
+      polling_interval_in_seconds = 30
+      rules {
+        name             = "gpu-queue"
+        custom_rule_type = "redis"
+        metadata = {
+          address    = "${local.app_names.redis}:6379"
+          listName   = "rq:queue:gpu"
+          listLength = "1"
+        }
+      }
+    }
+  }
+
+  identity {
+    type         = "UserAssigned"
+    identity_ids = [azurerm_user_assigned_identity.apps.id]
+  }
+
+  registry {
+    server   = local.registry
+    identity = azurerm_user_assigned_identity.apps.id
+  }
+
+  dynamic "secret" {
+    for_each = local.python_secrets
+    content {
+      name                = secret.value
+      identity            = azurerm_user_assigned_identity.apps.id
+      key_vault_secret_id = "${local.kv_uri}secrets/${secret.value}"
+    }
+  }
+
+  template {
+    container {
+      name    = "gpu-worker"
+      image   = "${local.registry}/hb-gpu-worker-cuda:${var.image_tag}"
+      cpu     = 8
+      memory  = "56Gi"
+      command = ["python", "-m", "handball_gpu_worker", "--burst"]
+
+      dynamic "env" {
+        for_each = merge(local.python_env, local.gpu_env)
+        content {
+          name  = env.key
+          value = env.value
+        }
+      }
+
+      dynamic "env" {
+        for_each = local.python_secrets
+        content {
+          name        = env.key
+          secret_name = env.value
+        }
+      }
+    }
+  }
+
+  depends_on = [
+    azurerm_role_assignment.acr_pull,
+    azurerm_role_assignment.kv_apps,
+    azurerm_key_vault_secret.generated,
+    azurerm_key_vault_secret.carried,
+    azurerm_key_vault_secret.manual,
+  ]
+}
+
+# The GPU part has its own monthly budget (alerts at gpu_budget_warn and gpu_budget_amount, in
+# the billing currency), next to the one for the whole resource group.
+resource "azurerm_consumption_budget_resource_group" "gpu" {
+  count             = var.gpu ? 1 : 0
+  name              = "budget-${local.prefix}-gpu"
+  resource_group_id = azurerm_resource_group.this.id
+  amount            = var.gpu_budget_amount
+  time_grain        = "Monthly"
+
+  time_period {
+    start_date = formatdate("YYYY-MM-01'T'00:00:00Z", plantimestamp())
+  }
+
+  filter {
+    dimension {
+      name   = "ResourceId"
+      values = [azurerm_container_app_job.gpu[0].id]
+    }
+  }
+
+  notification {
+    operator       = "GreaterThan"
+    threshold      = floor(100 * var.gpu_budget_warn / var.gpu_budget_amount)
+    threshold_type = "Actual"
+    contact_emails = var.alert_emails
+  }
+
+  notification {
+    operator       = "GreaterThan"
+    threshold      = 100
+    threshold_type = "Actual"
+    contact_emails = var.alert_emails
+  }
+
+  lifecycle {
+    ignore_changes = [time_period]
+  }
 }

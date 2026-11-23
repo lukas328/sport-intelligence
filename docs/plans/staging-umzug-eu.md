@@ -119,3 +119,22 @@ mit Wartungsfenster etwa 30 bis 60 min Ausfall (DB-Kopie Minuten, DNS und Zertif
   Nachtrag), `docs/adr/002-hosting-region.md` (Nachtrag), `infra/terraform/azure/README.md` und
   `variables.tf` (`location`-Beschreibung), `terraform.tfvars.example`.
 - Datenschutzerklärung und Liste der Unterauftragsverarbeiter: Region von Azure (Microsoft) nennen.
+
+## 5. Entscheide und Umsetzung (2026-11-23)
+
+- Region: **Sweden Central** (Hauptsitzung, Lukas hat die Wahl überlassen).
+- GPU als **Container-Apps-Job mit Ereignis-Auslöser** statt als App: KEDA startet eine Ausführung,
+  solange die Redis-Liste `rq:queue:gpu` nicht leer ist; der Worker läuft mit `--burst` und endet,
+  wenn die Warteschlange leer ist. Eine App würde KEDA beim Herunterskalieren mitten in einer
+  Analyse beenden (der Job ist dann schon aus der Liste); eine Job-Ausführung läuft zu Ende. Höchstens
+  eine Ausführung, im Leerlauf nichts.
+- Die Audio-Synchronisation zweier Kameras läuft ebenfalls über die GPU-Warteschlange und weckt die
+  T4 kurz (Kaltstart, wenige Rappen).
+- Secrets: `hb-secret-key` (Sitzungen) und `hb-encryption-key` (verschlüsselte Spalten) schreibt
+  Terraform nur einmal; der Bootstrap kopiert die Werte der alten Umgebung, sonst wären Sitzungen und
+  verschlüsselte Daten nach dem DB-Umzug ungültig.
+- Längengrenze: `HB_ANALYSIS_MAX_MINUTES` (15) im GPU-Job; längere Videos enden sofort mit dem Code
+  `too_long` und einer Meldung in der App («Schneide das Video kürzer ...»), neu starten wird nicht
+  angeboten.
+- Registry Basic: das CUDA-Image ist gross (einige GB pro Tag); alte Tags von Zeit zu Zeit löschen,
+  sonst wächst der Speicher über die 10 GB im Preis.

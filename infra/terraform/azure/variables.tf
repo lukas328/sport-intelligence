@@ -214,3 +214,58 @@ variable "gpu_worker_memory" {
   type    = string
   default = "4Gi"
 }
+
+# --- Mail data location and serverless GPU (docs/plans/staging-umzug-eu.md) ----------------------
+
+variable "mail_data_location" {
+  description = "Data location of Azure Communication Services: Switzerland (the first environment) or Europe. Changing it replaces the mail resources (new DNS records)."
+  type        = string
+  default     = "Switzerland"
+}
+
+variable "gpu" {
+  description = "Run the analysis as a serverless T4 job (Consumption-GPU-NC8as-T4, scale to zero, at most one at a time) instead of the always-on CPU app. Only in regions with serverless GPUs (e.g. swedencentral, not switzerlandnorth) and with T4 quota."
+  type        = bool
+  default     = false
+}
+
+variable "gpu_max_video_minutes" {
+  description = "Longest video the GPU analysis takes, minutes; longer ones end at once as «too long»."
+  type        = number
+  default     = 15
+}
+
+variable "gpu_job_timeout_s" {
+  description = "Hard end of one GPU job execution (it works the queue in burst mode, several analyses in a row)."
+  type        = number
+  default     = 14400
+}
+
+variable "gpu_ball_model" {
+  description = "Ball net for the GPU job: key in the artifacts bucket (uint8 file, ml/ball/onnx_u8.py)."
+  type        = string
+  default     = "models/ball/ball_hrp1_fp16_u8-8efd55d05333.onnx"
+}
+
+variable "gpu_ball_model_sha256" {
+  type    = string
+  default = "8efd55d0533301889c0b3715bff3fa708a9e4f9be3b2d8162a4c56377a70253f"
+}
+
+variable "gpu_budget_amount" {
+  description = "Monthly budget of the GPU job in the billing currency: an alert when it is used up."
+  type        = number
+  default     = 30
+}
+
+variable "gpu_budget_warn" {
+  description = "Earlier alert of the GPU budget, same currency."
+  type        = number
+  default     = 20
+}
+
+variable "kv_runner_role" {
+  description = "Give whoever runs terraform the role «Key Vault Secrets Officer» on the vault (a new environment deployed from GitHub Actions; the first one has it from setup-github-deploy.sh)."
+  type        = bool
+  default     = false
+}

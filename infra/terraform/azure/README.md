@@ -201,6 +201,27 @@ az postgres flexible-server stop -g $(terraform output -raw resource_group) -n $
 To resume: `az postgres flexible-server start ...`, `paused = false`, `terraform apply`. While paused only
 the registry (~ CHF 5), Postgres storage (~ CHF 4) and a few cents for Key Vault and logs remain.
 
+## Serverless GPU and the second environment (stack «eu»)
+
+Switzerland North has no serverless GPU, so the staging environment moves to Sweden Central
+(`docs/plans/staging-umzug-eu.md`). The same module builds it with other settings:
+
+- `name = "hbeu"` (the resource group `rg-hbeu-stg` must be new), `location = "swedencentral"`,
+  `gpu = true`, `mail_data_location = "Europe"`, `kv_runner_role = true`;
+- `gpu = true` adds the workload profile `Consumption-GPU-NC8as-T4` and the job `<prefix>-gpu`
+  (image `hb-gpu-worker-cuda`, built by `acr-build-cuda.yaml`) instead of the always-on CPU app
+  `gpu-worker`. KEDA starts one execution while the Redis list `rq:queue:gpu` is not empty; it runs
+  the worker with `--burst` (works the queue, then ends): no cost while nothing waits, a running
+  analysis is never stopped by scaling in. Videos longer than `gpu_max_video_minutes` (15) end as
+  «too long»; own monthly budget `gpu_budget_amount` (30) with an alert at `gpu_budget_warn` (20);
+- `hb-secret-key` and `hb-encryption-key` are written once and never overwritten by Terraform: the
+  bootstrap copies the first environment's values, so sessions and encrypted columns stay valid.
+
+GitHub Actions: Deploy with `stack = eu`; `mode = bootstrap` the first time (derives
+`staging-eu.tfvars` from `staging.tfvars`, own state `staging-eu.tfstate`, builds vault and
+registry, copies the secrets, then deploys like `deploy`). The T4 quota («Managed Environment
+Consumption T4 GPUs») shows on the environment's Quota page once the environment exists.
+
 ## Known limits
 
 - `HB_GPU_BACKEND=local`: the analysis runs on the CPU of the gpu-worker container. Slow but enough for
