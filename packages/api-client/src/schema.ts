@@ -5489,7 +5489,7 @@ export interface components {
             error: string | null;
             /**
              * Error Code
-             * @description calibration, unreadable, too_short, timeout, stalled or generic
+             * @description calibration, unreadable, too_short, too_long, timeout, stalled or generic
              */
             error_code?: string | null;
             /** Formations */
@@ -6076,7 +6076,7 @@ export interface components {
             limit_s?: number | null;
             /**
              * Reason
-             * @description found little: camera_motion, no_floor, flat_view, few_people, court (court not recognised), no_play; failed: calibration, unreadable, too_short, timeout, stalled, generic
+             * @description found little: camera_motion, no_floor, flat_view, few_people, court (court not recognised), no_play; failed: calibration, unreadable, too_short, too_long, timeout, stalled, generic
              */
             reason: string;
             /**

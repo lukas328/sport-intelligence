@@ -648,7 +648,7 @@ class AnalysisOut(ApiModel):
     )
     error_code: str | None = Field(
         default=None,
-        description="calibration, unreadable, too_short, timeout, stalled or generic",
+        description="calibration, unreadable, too_short, too_long, timeout, stalled or generic",
     )
 
 
@@ -877,8 +877,8 @@ class CheckNoticeOut(ApiModel):
 
     reason: str = Field(
         description="found little: camera_motion, no_floor, flat_view, few_people, court "
-        "(court not recognised), no_play; failed: calibration, unreadable, too_short, timeout, "
-        "stalled, generic"
+        "(court not recognised), no_play; failed: calibration, unreadable, too_short, too_long, "
+        "timeout, stalled, generic"
     )
     failed: bool = Field(default=False, description="the analysis failed")
     video_id: uuid.UUID

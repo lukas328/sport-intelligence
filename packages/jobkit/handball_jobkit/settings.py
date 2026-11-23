@@ -33,6 +33,9 @@ class JobSettings(BaseSettings):
     # them run on a CPU for videos of at most ball_max_minutes (short trial runs).
     ball_allow_cpu: bool = False
     ball_max_minutes: float = 12.0  # the 10-minute test clips run 10:02 and 10:09
+    # longest video the analysis takes in this environment, minutes (0: no limit); longer ones end
+    # at once as failed «too long» (the coach is told to cut it), e.g. 15 on the GPU test phase
+    analysis_max_minutes: float = 0.0
     ball_cache_dir: str = "/tmp/handball-models"  # noqa: S108
     ball_every: int = 1  # every 2nd frame costs about 6 points on gold v1 (11 on fast balls)
     # input width of the ball nets (frames are scaled to it): 960 halves the CPU time; on gold v1

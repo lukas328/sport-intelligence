@@ -1,0 +1,14 @@
+# Builds the GPU worker image (apps/gpu-worker/Dockerfile.cuda: CUDA 12.6, cuDNN 9, onnxruntime-gpu)
+# inside the registry, for the serverless GPU job (var.gpu). Separate from acr-build.yaml: it is
+# large and only the environment with var.gpu needs it.
+# az acr run -r <registry> -f acr-build-cuda.yaml --set tag=<tag> --timeout 7200 <clean context>
+version: v1.1.0
+stepTimeout: 7200
+steps:
+  - id: gpu-worker-cuda
+    build: -t $Registry/hb-gpu-worker-cuda:{{.Values.tag}} -f apps/gpu-worker/Dockerfile.cuda .
+    env: ["DOCKER_BUILDKIT=1"]
+  - id: push
+    push:
+      - $Registry/hb-gpu-worker-cuda:{{.Values.tag}}
+    when: ["gpu-worker-cuda"]

@@ -955,6 +955,8 @@
     "failureNext_unreadable": "Lade die Originaldatei der Kamera nochmals hoch (MP4 oder MOV).",
     "failure_too_short": "Das Video ist zu kurz für eine Analyse.",
     "failureNext_too_short": "Lade das ganze Spiel hoch, mehrere Dateien sind möglich.",
+    "failure_too_long": "Das Video ist für die Analyse in dieser Umgebung zu lang.",
+    "failureNext_too_long": "Schneide das Video kürzer, etwa eine Halbzeit oder 10 Minuten, und lade es nochmals hoch.",
     "failure_timeout": "Die Analyse hat zu lange gedauert.",
     "failureNext_timeout": "Wir haben das Problem notiert. Du kannst die Analyse neu starten oder Ereignisse von Hand erfassen.",
     "failure_generic": "Die Analyse ist fehlgeschlagen.",
@@ -4561,6 +4563,8 @@
     "help_unreadable": "Lade die Originaldatei der Kamera nochmals hoch (MP4 oder MOV).",
     "title_too_short": "Das Video ist zu kurz für eine Analyse.",
     "help_too_short": "Lade das ganze Spiel oder mindestens ein paar Minuten am Stück hoch. Mehrere Dateien sind möglich.",
+    "title_too_long": "Das Video ist für die Analyse in dieser Umgebung zu lang.",
+    "help_too_long": "So geht es: Schneide das Video kürzer, etwa 10 Minuten, und lade es nochmals hoch. Neu starten bringt nichts, die Grenze gilt für jede Datei.",
     "title_generic": "Die Analyse hat nicht geklappt.",
     "help_generic": "Das Video bleibt abspielbar, und alles, was du erfasst hast, bleibt. Starte die Analyse neu; klappt es wieder nicht, sind wir schon informiert.",
     "filmLink": "So filmst du gut",
@@ -4578,6 +4582,7 @@
     "short_stalled": "Rechner hat nicht geantwortet",
     "short_unreadable": "Datei nicht lesbar",
     "short_too_short": "Video zu kurz",
+    "short_too_long": "Video zu lang",
     "short_generic": "nicht geklappt"
   },
   "formCheck": {

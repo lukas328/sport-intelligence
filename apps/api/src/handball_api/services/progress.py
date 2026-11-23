@@ -59,7 +59,12 @@ WEIGHTS_NO_ANALYSIS: dict[str, float] = {"upload": 0.25, "ingest": 0.75}
 UPLOAD_IDLE_S = 5 * 60  # no new part for this long: the upload stopped
 ABANDON_UPLOAD_S = 6 * 3600  # no new part for this long: the upload is given up
 ABANDONED_ERROR = "upload abandoned"
-NO_RETRY = ("timeout", "unreadable", "too_short")  # starting the same file again fails again
+NO_RETRY = (
+    "timeout",
+    "unreadable",
+    "too_short",
+    "too_long",
+)  # starting the same file again fails again
 STALL_S = 10 * 60  # a running job silent this long (it reports at least once a minute)
 STALL_S_OLD = 45 * 60  # a job of a worker without heartbeat (before the heartbeat existed)
 RESTART_AFTER_S = 30 * 60  # the watchdog restarts a job silent this long, once
