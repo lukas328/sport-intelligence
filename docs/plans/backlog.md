@@ -20,7 +20,7 @@ Die eine Liste für alle Sitzungen. Wer etwas anfängt, schreibt «läuft (Sitzu
 fertig ist, streicht es und trägt das Ergebnis im passenden Plan ein.
 
 **A. Aus der Cloud-Sitzung machbar (Hauptsitzung)**
-1. **Weniger Fragen: bessere Tor-Kandidaten.** *20.11.: Ballpfad als Bestätigung geprüft, hilft nicht (AUC 0.81 mit und ohne Ball, Dev, `produkt-analyse-integration.md` «Ballpfad als Bestätigung»). Offen bleibt die Zeit ohne Spiel; Daten dafür kommen aus `observe_queue`.* Präzision heute 29 %, auf Lukas' 99-min-Video 122
+1. **Weniger Fragen: bessere Tor-Kandidaten.** *20.11.: Ballpfad als Bestätigung geprüft, hilft nicht (AUC 0.81 mit und ohne Ball, Dev, `produkt-analyse-integration.md` «Ballpfad als Bestätigung»). Offen bleibt die Zeit ohne Spiel; Daten dafür kommen aus `observe_queue`. 23.11.: rund 160 von 860 Segmenten beobachtet; für die Pausen-Messung fehlt der Entscheid Hallentafel in der Warteschlange (empfohlen) oder nur Dev-Spiele mit Uhr aus dem Bericht (`UEBERGABE-2026-11-23.md`).* Präzision heute 29 %, auf Lukas' 99-min-Video 122
    Fragen. Die Regel «Tore aus dem Spielbericht» spart kaum Fragen (Kandidaten nahe Berichtstoren
    waren schon verdeckt). Hebel: Pausen, Einspielen und Nachspiel ohne Fragen (Pausenerkennung ohne
    Hallentafel über die `no_play`-Regel), Tor-Kandidaten mit Ballpfad bestätigen. Braucht für die
