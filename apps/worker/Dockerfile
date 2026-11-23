@@ -25,7 +25,10 @@ FROM python:3.12-slim AS runtime
 # Static ffmpeg/ffprobe (x264, aac, fMP4 HLS). Pinned version; smaller and fewer CVEs than distro ffmpeg.
 COPY --from=mwader/static-ffmpeg:7.1 /ffmpeg /ffprobe /usr/local/bin/
 # security updates of the base image (the scan fails on fixed HIGH/CRITICAL CVEs)
-RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/* \
+# APT_REFRESH (the build date in CI) renews this layer daily, so a cached layer does not keep
+# packages whose security fixes came out after it was built
+ARG APT_REFRESH=
+RUN echo "apt refresh ${APT_REFRESH}" && apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/* \
     && useradd --system --uid 10001 app && mkdir -p /tmp/handball-work && chown app /tmp/handball-work
 WORKDIR /app
 COPY --from=build /app/.venv /app/.venv
