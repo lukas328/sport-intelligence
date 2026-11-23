@@ -9,6 +9,7 @@ kernel `handball-obs-qNNN`, so the queue file alone says what is done: any sessi
     python ml/integration/kaggle/observe_queue.py step                  # push into free slots
     python ml/integration/kaggle/observe_queue.py status
     python ml/integration/kaggle/observe_queue.py requeue N             # batch N lost (12 h limit)
+    python ml/integration/kaggle/observe_queue.py requeue N --have DIR  # only its missing segments
 
 Order of the queue: the rest of the dev games (segments with an official log, the pauses between
 them), then every other game of the library. The end-test games are never queued (no design work
@@ -57,9 +58,8 @@ def _env() -> dict[str, str]:
 
 
 def _kaggle(*args: str) -> str:
-    r = subprocess.run(
-        ["kaggle", *args], capture_output=True, text=True, env=_env(), timeout=180
-    )
+    cmd = ["kaggle", *args]  # the Kaggle CLI from the PATH
+    r = subprocess.run(cmd, capture_output=True, text=True, env=_env(), timeout=180)
     return (r.stdout + r.stderr).strip()
 
 
@@ -113,21 +113,37 @@ def status() -> list[str]:
 
 
 def _runner() -> str:
-    from shot_endtest_push import RUNNER  # noqa: PLC0415
+    """The end-test runner, but one observe call per segment: a segment that fails is listed in
+    failed.json and the rest go on; no new segment starts after GUARD_S (output kept)."""
+    from shot_endtest_push import RUNNER
 
     old = "subprocess.run(cmd, env=env, check=True)"
     assert old in RUNNER
     new = (
-        "try:\n"
-        f"    subprocess.run(cmd, env=env, check=True, timeout={GUARD_S})\n"
-        "except subprocess.TimeoutExpired:\n"
-        "    print('guard: stopped before the 12 h limit', flush=True)"
+        "import time\n"
+        f"end = time.time() + {GUARD_S}\n"
+        "failed = []\n"
+        "for s in SEGS:\n"
+        "    left = end - time.time()\n"
+        "    if left < 600:\n"
+        "        print('guard: stopped before the 12 h limit', flush=True)\n"
+        "        break\n"
+        "    Path('/tmp/segs.json').write_text(json.dumps([s]))\n"
+        "    try:\n"
+        "        subprocess.run(cmd, env=env, check=True, timeout=left)\n"
+        "    except subprocess.TimeoutExpired:\n"
+        "        print('guard: stopped before the 12 h limit', flush=True)\n"
+        "        break\n"
+        "    except subprocess.CalledProcessError:\n"
+        "        print('failed:', s['file'], flush=True)\n"
+        "        failed.append(s['file'])\n"
+        "Path('/kaggle/working/failed.json').write_text(json.dumps(failed))"
     )
     return RUNNER.replace(old, new)
 
 
 def step() -> None:
-    from shot_endtest_push import CODE_SLUG  # noqa: PLC0415
+    from shot_endtest_push import CODE_SLUG
 
     q = json.loads(QUEUE.read_text())
     st = status()
@@ -165,11 +181,24 @@ def step() -> None:
             break  # slots full (or another error): try again at the next step
 
 
-def requeue(i: int) -> None:
-    """A batch that ended without output (killed at the 12 h limit): its segments again, in
-    batches of BATCH at the end of the queue, pushed before every other new batch."""
+def requeue(i: int, have: Path | None = None) -> None:
+    """Batch i again, in batches of BATCH at the end of the queue, pushed before every other new
+    batch. Without `have` all of it (lost at the 12 h limit); with `have` (its downloaded output)
+    only the segments without observe.json, and a segment in failed.json is not tried again but
+    kept in the queue file under "failed" (look at the kernel log)."""
     q = json.loads(QUEUE.read_text())
     segs = q["batches"][i]
+    if have is not None:
+        failed = set()
+        for f in have.rglob("failed.json"):
+            failed |= set(json.loads(f.read_text()))
+        done = {f.parent.name for f in have.rglob("observe.json")}
+        q.setdefault("failed", []).extend(sorted(failed - set(q.get("failed", []))))
+        segs = [
+            s
+            for s in segs
+            if s["file"].removesuffix(".mp4") not in done and s["file"] not in failed
+        ]
     new = [segs[k : k + BATCH] for k in range(0, len(segs), BATCH)]
     start = len(q["batches"])
     q["batches"].extend(new)
@@ -188,11 +217,12 @@ def main() -> None:
     sub.add_parser("status")
     r = sub.add_parser("requeue")
     r.add_argument("batch", type=int)
+    r.add_argument("--have", type=Path, help="downloaded output: requeue only what is missing")
     a = ap.parse_args()
     if a.cmd == "build":
         build(a.library)
     elif a.cmd == "requeue":
-        requeue(a.batch)
+        requeue(a.batch, a.have)
     elif a.cmd == "step":
         step()
     else:

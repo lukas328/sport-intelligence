@@ -403,6 +403,12 @@ def test_observe_store_and_track(tmp_path: Path) -> None:
     back = observe.load_observations(tmp_path / "obs.npz", obs.motion)
     assert [f.index for f in back.frames] == [f.index for f in obs.frames]
     assert sum(len(f.people) for f in back.frames) == sum(len(f.people) for f in obs.frames)
+    # only empty segments (a Kaggle queue kernel died on this): stored as none
+    seen = obs.segments
+    obs.segments = {i: sg[:0] for i, sg in seen.items()}
+    observe.save_observations(obs, tmp_path / "empty.npz")
+    assert not observe.load_observations(tmp_path / "empty.npz", obs.motion).segments
+    obs.segments = seen
     # tracking with the true court (panorama space): positions agree with the ground truth
     g0 = truth[0]
     assert g0.homography is not None

@@ -6070,6 +6070,64 @@
 "file": "UK_PremierLeague_Olympia_LondonGD_2023_s4.mp4",
 "fps": 30.0
 }
+],
+[
+{
+"game": "CH_Frauen_Cupfinal_LKZug_SpOno_2021-05-08",
+"dataset": "handball-segs-l02",
+"file": "CH_Frauen_Cupfinal_LKZug_SpOno_2021-05-08_s4.mp4",
+"fps": 50.0
+}
+],
+[
+{
+"game": "CH_Frauen_SPL1_GCAmicitia_LKZug_ca2020",
+"dataset": "handball-segs-l02",
+"file": "CH_Frauen_SPL1_GCAmicitia_LKZug_ca2020_s3.mp4",
+"fps": 25.0
+},
+{
+"game": "CH_Frauen_SPL1_GCAmicitia_LKZug_ca2020",
+"dataset": "handball-segs-l02",
+"file": "CH_Frauen_SPL1_GCAmicitia_LKZug_ca2020_s4.mp4",
+"fps": 25.0
+},
+{
+"game": "CH_Frauen_SPL1_GCAmicitia_SGYverdonCrissier_ca2020",
+"dataset": "handball-segs-l02",
+"file": "CH_Frauen_SPL1_GCAmicitia_SGYverdonCrissier_ca2020_s0.mp4",
+"fps": 25.0
+},
+{
+"game": "CH_Frauen_SPL1_GCAmicitia_SGYverdonCrissier_ca2020",
+"dataset": "handball-segs-l02",
+"file": "CH_Frauen_SPL1_GCAmicitia_SGYverdonCrissier_ca2020_s1.mp4",
+"fps": 25.0
+},
+{
+"game": "CH_Frauen_SPL1_GCAmicitia_SGYverdonCrissier_ca2020",
+"dataset": "handball-segs-l02",
+"file": "CH_Frauen_SPL1_GCAmicitia_SGYverdonCrissier_ca2020_s2.mp4",
+"fps": 25.0
+},
+{
+"game": "CH_Frauen_SPL1_GCAmicitia_SGYverdonCrissier_ca2020",
+"dataset": "handball-segs-l02",
+"file": "CH_Frauen_SPL1_GCAmicitia_SGYverdonCrissier_ca2020_s3.mp4",
+"fps": 25.0
+},
+{
+"game": "CH_Frauen_SPL1_GCAmicitia_SGYverdonCrissier_ca2020",
+"dataset": "handball-segs-l02",
+"file": "CH_Frauen_SPL1_GCAmicitia_SGYverdonCrissier_ca2020_s4.mp4",
+"fps": 25.0
+},
+{
+"game": "CH_Frauen_SPL1_GCAmicitia_TVUster_ca2020",
+"dataset": "handball-segs-l02",
+"file": "CH_Frauen_SPL1_GCAmicitia_TVUster_ca2020_s0.mp4",
+"fps": 25.0
+}
 ]
 ],
 "front": [
@@ -6081,13 +6139,17 @@
 64,
 65,
 66,
-67
+67,
+124,
+125
 ],
 "requeued": [
 0,
 1,
 2,
-3
+3,
+6,
+69
 ],
 "partial": {
 "4": [
@@ -6102,5 +6164,6 @@
 "61": [
 "AT_HLA_Ferlach_HandballTirol_2021_s3.mp4"
 ]
-}
+},
+"failed": []
 }
