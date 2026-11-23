@@ -64,18 +64,8 @@ Einstieg danach wie immer: `docs/plans/HANDOVER.md`.
   gewählte Marke liegt in `docs/design/brand2/`).
 
 ## Warteschlange
-Stand 20.11.: Punkte 1 bis 4 sind erledigt, ebenso unten 1 bis 3 und Code health 4, 5, 6, 8, 10 (siehe Tabelle oben). Code health 7 und der Fehler «Neue Einheit» sind ebenfalls erledigt. Alle Code-Health-Punkte aus `backlog.md` sind damit abgearbeitet (ausser 11, Git-Geschichte, nur vor einer Veröffentlichung). Nicht aus der Cloud machbar: Kalibrierung auf Staging (kein Staging-Zugang), Ball (Kaggle-Zugang fehlt). Offen für die nächste Sitzung:
-1. Aus dem UI-Check vom 20.11. (BEFUNDE-6, «UI-Check 20.11.»): Zeitleiste unter dem Video folgt bei
-   beobachteten Spielen nicht dem Heimteam; «Ballverluste nach Typ» Zahlen zu weit vom Wort;
-   Info-Symbol bricht am Handy um; Torhüter ohne Nummer als «#?», API prüft `goalkeeper_id` nicht;
-   Website-Tour zeigt noch «läuft gerade».
-2. e2e `data.spec`: zweimal «execution context destroyed» kurz nach einem Neustart des Webservers,
-   danach dreimal grün; Ursache offen. Der ganze e2e-Lauf nach allen Fixes steht noch aus.
-3. Formular für beobachtete Spiele fragt nicht, wer Heimteam ist (Block 1).
-4. Aus `HANDOVER.md`: Kalibrierung per Klick auf Staging (Ende-zu-Ende), Ball (Fehlalarme, Testset),
-   übrige Code-Health-Punkte (4 bis 8, 10).
-5. Wurfzeit verbessern, sobald Lukas die Abwürfe auf den Dev-Clips markiert hat (Plan, Abschnitt
-   «Wurfzeit der Kandidaten»).
+Alles aus dieser Sitzung ist erledigt und mit PR #105 in main (20.11.). Die nächsten Aufgaben stehen
+ab jetzt an einer Stelle: `docs/plans/backlog.md`, Abschnitt «Nächste Aufgaben».
 
 Lokale App ohne Docker (für e2e, Screenshots, Produktbilder): `docs/runbooks/local-stack-ohne-docker.md`.
 

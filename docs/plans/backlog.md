@@ -15,7 +15,40 @@ Würfe als Vorschläge, Mannschaft aus handball.ch (Phase 1 bis 3), Spielbericht
 HLA), Kalibrierung mit Gründen und Hallen-Wiederverwendung, Rückennummern breit gemessen,
 Code-Prüfung vor der Übergabe. Ball Runde 6: gleichauf mit Runde 3, nicht übernommen.
 
-## Als Nächstes (Reihenfolge)
+## Nächste Aufgaben (Stand 20.11., nach PR #105)
+Die eine Liste für alle Sitzungen. Wer etwas anfängt, schreibt «läuft (Sitzung, Datum)» dazu; wer
+fertig ist, streicht es und trägt das Ergebnis im passenden Plan ein.
+
+**A. Aus der Cloud-Sitzung machbar (Hauptsitzung)**
+1. **Weniger Fragen: bessere Tor-Kandidaten.** *20.11.: Ballpfad als Bestätigung geprüft, hilft nicht (AUC 0.81 mit und ohne Ball, Dev, `produkt-analyse-integration.md` «Ballpfad als Bestätigung»). Offen bleibt die Zeit ohne Spiel; Daten dafür kommen aus `observe_queue`. 23.11.: rund 160 von 860 Segmenten beobachtet; für die Pausen-Messung fehlt der Entscheid Hallentafel in der Warteschlange (empfohlen) oder nur Dev-Spiele mit Uhr aus dem Bericht (`UEBERGABE-2026-11-23.md`).* Präzision heute 29 %, auf Lukas' 99-min-Video 122
+   Fragen. Die Regel «Tore aus dem Spielbericht» spart kaum Fragen (Kandidaten nahe Berichtstoren
+   waren schon verdeckt). Hebel: Pausen, Einspielen und Nachspiel ohne Fragen (Pausenerkennung ohne
+   Hallentafel über die `no_play`-Regel), Tor-Kandidaten mit Ballpfad bestätigen. Braucht für die
+   Messung Daten von Kaggle oder Staging.
+2. **Wurfort-Schätzung messen.** Seit A22 werden bestätigte Schätzungen als
+   `attributes.confirmed_estimate` gespeichert; daraus die Trefferquote der Schätzung auswerten
+   (Staging-Daten), dann entscheiden, wann der Wurfort ganz automatisch sein darf.
+3. **Spieltag neu denken (A21).** Seit Runde 4 aus der App genommen; Konzept mit Lukas: was der
+   Trainer am Spielfeldrand wirklich erfasst.
+4. **Go-live-Punkte mit Code** (`GO_LIVE.md`): HLS-Segmente direkt aus R2 statt über API und Web
+   (ADR 002 Punkt 7); Overlays im Player für bewegte Kameras (ADR 020); Alarme und Proben im
+   Monitoring vorbereiten.
+5. **Europa Schritt 2 vorbereiten** (`docs/plans/europa.md`): Währung EUR in Abrechnung und Rechnung
+   (heute nur CHF), `de-DE` erst mit dem ersten deutschen Verein.
+
+**B. Braucht Lukas oder die lokale Sitzung**
+1. Kalibrierung per Klick Ende-zu-Ende auf Staging mit echtem Clip, danach Deploy
+   (`docs/plans/kalibrierung.md` Abschnitt 6).
+2. Wurfzeit: Lukas markiert die Abwürfe auf den 41 Dev-Wurfclips; danach Methode auf Dev wählen
+   (`docs/plans/produkt-analyse-integration.md`, «Wurfzeit der Kandidaten»).
+3. Ball: Fehlalarme zerlegen, Testset auf etwa 200 Bälle (Kaggle-Zugang in der Cloud fehlt seit 19.11.).
+4. Echter Handy-Test (iPhone, Android) von Website und App.
+5. Entscheide: Saison-Titel als Geschichte oder «Fakten zuerst» (TXT-08); mehr als drei Muster pro
+   Spiel; Launch zur Rückrunde im Januar; die 🔴-Punkte in `docs/OPEN_QUESTIONS.md` (Firma, Recht,
+   Einwilligung Jugend, AVV).
+6. GPU auf Azure mit Umzug der Region (Lukas, später).
+
+## Als Nächstes (Stand 2026-11-09, Verlauf)
 1. **Kalibrierung für Stream-Kameras.** Auf allen vier geprüften Wädenswil/Horgen-Clips scheiterte
    die automatische Spielfeld-Erkennung (flache Sicht). Ohne Spielfeld keine Positionen, kein
    Ballbesitz pro Team, kein Bank-Filter, schlechtere Nummern. Erst messen, wie oft das auf allen
