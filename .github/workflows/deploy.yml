@@ -265,19 +265,26 @@ jobs:
         id: state
         run: |
           pg=$(terraform output -raw postgres_server 2>/dev/null || true)
-          if [ -z "$pg" ] || ! az postgres flexible-server show -g "$rg" -n "$pg" -o none 2>/dev/null; then
-            # a new environment (bootstrap): nothing runs yet, nothing to keep
-            db=Ready
+          web=$(terraform output -raw web_app 2>/dev/null || true)
+          # «keep» means what runs now in Azure, not what the settings file remembers
+          api=""
+          if [ -n "$web" ]; then
+            api=$(az containerapp show -g "$rg" -n "${web%-web}-api" -o json 2>/dev/null || true)
+          fi
+          if [ -n "$pg" ] && az postgres flexible-server show -g "$rg" -n "$pg" -o none 2>/dev/null; then
+            db=$(az postgres flexible-server show -g "$rg" -n "$pg" --query state -o tsv)
+          else
+            db=Ready  # no server yet: a new environment (bootstrap)
+          fi
+          if [ -z "$api" ]; then
+            # no apps yet (a new or half-built environment): nothing runs, nothing to keep
             api='{"properties":{"template":{"containers":[{"env":[]}]}}}'
             paused=false
           else
-            db=$(az postgres flexible-server show -g "$rg" -n "$pg" --query state -o tsv)
-            # «keep» means what runs now in Azure, not what the settings file remembers
-            api=$(az containerapp show -g "$rg" -n "$(terraform output -raw web_app | sed 's/-web$/-api/')" -o json)
             # paused: the cron rule «paused» on the api (README, «Pause»), or the database stopped
             paused=$(jq -r '[.properties.template.scale.rules // [] | .[] | select(.name == "paused")] | length > 0' <<<"$api")
-            [ "$db" = Ready ] || paused=true
           fi
+          [ "$db" = Ready ] || paused=true
           want="${{ steps.mode.outputs.state }}"
           case "$want" in resume) paused=false ;; pause) paused=true ;; esac
           echo "database $pg: $db; paused after this run: $paused"
