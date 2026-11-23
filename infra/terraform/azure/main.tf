@@ -884,6 +884,9 @@ resource "azurerm_container_app_job" "migrate" {
     azurerm_key_vault_secret.manual,
     azurerm_postgresql_flexible_server_configuration.extensions,
     azurerm_postgresql_flexible_server_database.handball,
+    # without it the job cannot reach the server: a targeted apply of the job (the deploy's
+    # migration step on a new environment) must create it too (stack eu bootstrap, 23.11.)
+    azurerm_postgresql_flexible_server_firewall_rule.azure,
   ]
 }
 
