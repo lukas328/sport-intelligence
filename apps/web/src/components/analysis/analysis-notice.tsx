@@ -13,7 +13,7 @@ export type Notice = { reason: string; failed?: boolean; duration_s?: number | n
 
 /** The reasons the court is missing: setting its four corners by hand is what helps now. */
 const COURT_REASONS = new Set(["camera_motion", "no_floor", "flat_view", "court", "calibration"]);
-const KNOWN = new Set([...COURT_REASONS, "few_people", "no_play", "timeout", "stalled", "unreadable", "too_short", "generic"]);
+const KNOWN = new Set([...COURT_REASONS, "few_people", "no_play", "timeout", "stalled", "unreadable", "too_short", "too_long", "generic"]);
 
 export function noticeKey(reason: string): string {
   return KNOWN.has(reason) ? reason : "generic";

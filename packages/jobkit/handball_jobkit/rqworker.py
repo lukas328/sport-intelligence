@@ -118,8 +118,20 @@ def run_worker(
     maintenance: Sequence[Callable[[Redis], None]] = (),
     sleep: Callable[[float], None] = time.sleep,
     worker_class: type[ResilientWorker] = ResilientWorker,
+    burst: bool = False,
 ) -> None:
-    """Work `queue_names` until a shutdown signal; restart the worker after Redis failures."""
+    """Work `queue_names` until a shutdown signal; restart the worker after Redis failures.
+    `burst`: work what is queued and return (a Container Apps job execution per batch of waiting
+    jobs, e.g. the GPU worker that scales to zero: a running job is never cut by scaling in)."""
+    if burst:
+        once = worker_class(
+            [Queue(name, connection=conn) for name in queue_names],
+            connection=conn,
+            worker_ttl=WORKER_TTL_S,
+            maintenance=maintenance,
+        )
+        once.work(burst=True, with_scheduler=with_scheduler)
+        return
     first, cap = RESTART_BACKOFF_S
     delay = first
     while True:

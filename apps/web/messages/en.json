@@ -955,6 +955,8 @@
     "failureNext_unreadable": "Upload the camera's original file again (MP4 or MOV).",
     "failure_too_short": "The video is too short for an analysis.",
     "failureNext_too_short": "Upload the whole match, several files are possible.",
+    "failure_too_long": "The video is too long for the analysis in this environment.",
+    "failureNext_too_long": "Cut the video shorter, about one half or 10 minutes, and upload it again.",
     "failure_timeout": "The analysis took too long.",
     "failureNext_timeout": "We have noted the problem. You can restart the analysis or tag events by hand.",
     "failure_generic": "The analysis failed.",
@@ -4561,6 +4563,8 @@
     "help_unreadable": "Upload the camera's original file again (MP4 or MOV).",
     "title_too_short": "The video is too short for an analysis.",
     "help_too_short": "Upload the whole match or at least a few minutes in one go. Several files are possible.",
+    "title_too_long": "The video is too long for the analysis in this environment.",
+    "help_too_long": "What to do: cut the video shorter, about 10 minutes, and upload it again. Restarting does not help, the limit applies to every file.",
     "title_generic": "The analysis did not work.",
     "help_generic": "The video stays playable, and everything you entered stays. Start the analysis again; if it fails again, we already know.",
     "filmLink": "How to film well",
@@ -4578,6 +4582,7 @@
     "short_stalled": "the computer did not answer",
     "short_unreadable": "file unreadable",
     "short_too_short": "video too short",
+    "short_too_long": "video too long",
     "short_generic": "did not work"
   },
   "formCheck": {
