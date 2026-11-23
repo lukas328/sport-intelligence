@@ -426,7 +426,16 @@ jobs:
           for i in $(seq 1 90); do
             status=$(az containerapp job execution show -n "$job" -g "$rg" --job-execution-name "$run" --query properties.status -o tsv)
             echo "$(date -u +%T) $status"
-            case "$status" in Succeeded) exit 0 ;; Failed|Stopped|Degraded) exit 1 ;; esac
+            case "$status" in
+              Succeeded) exit 0 ;;
+              Failed|Stopped|Degraded)
+                # the job's own output (Log Analytics takes a minute or two to have it)
+                ws=$(az monitor log-analytics workspace list -g "$rg" --query "[0].customerId" -o tsv)
+                sleep 90
+                az monitor log-analytics query -w "$ws" -o tsv --analytics-query "ContainerAppConsoleLogs_CL | where TimeGenerated > ago(1h) | where ContainerJobName_s == '$job' or ContainerGroupName_s startswith '$run' | order by TimeGenerated asc | project TimeGenerated, Log=substring(Log_s, 0, 400) | take 200" 2>&1 | cut -c1-450 || true
+                az containerapp job execution show -n "$job" -g "$rg" --job-execution-name "$run" -o json | jq '.properties' || true
+                exit 1 ;;
+            esac
             sleep 20
           done
           echo "migration did not finish in 30 minutes"; exit 1
