@@ -63,7 +63,8 @@ def _code(exc: ClientError) -> str:
 
 
 def cors_rule(settings: Settings) -> dict[str, Any]:
-    # Browsers upload parts directly to storage (presigned URLs) and need the ETag header.
+    # Browsers upload parts directly to storage (presigned URLs) and need the ETag header; with
+    # HB_MEDIA_DIRECT they also play HLS segments from it (GET with Range, players load with CORS).
     return {
         "AllowedOrigins": [settings.web_base_url, *settings.cors_origins],
         "AllowedMethods": ["PUT", "GET", "HEAD"],
@@ -136,7 +137,8 @@ def _ensure_cors(
         log.warning("bucket_cors_manual", bucket=bucket, code=code, wanted=rule)
         result.manual_steps.append(
             f"This key may not set CORS on '{bucket}' ({code}): set this rule by hand in the "
-            f"storage console, otherwise browser uploads fail: {json.dumps(rule)}"
+            "storage console, otherwise browser uploads and direct playback fail: "
+            f"{json.dumps(rule)}"
         )
         return
     result.cors_updated = True

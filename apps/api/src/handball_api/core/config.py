@@ -44,6 +44,16 @@ class Settings(BaseSettings):
     upload_part_size: int = 16 * 1024 * 1024  # min 5 MiB (S3), 2 GB = 128 parts
     max_video_bytes: int = 40 * 1024**3
     presign_ttl_s: int = 3600
+    # HLS segments straight from storage (ADR 002 point 7): the API still serves the playlists
+    # (authorisation, joined parts) but writes presigned GET URLs on the public endpoint into
+    # them, so the video bytes never pass through the API and the web proxy. Off: segments are
+    # read through the API as before (dev, tests). Needs the bucket CORS rule for GET from the
+    # web origin and the storage origin in the web CSP (HB_S3_PUBLIC_URL).
+    media_direct: bool = False
+    # how long a segment URL stays valid at least (the player loads the playlist again on an
+    # error, so a longer pause only costs a reload); also how long a revoked share link's
+    # already loaded segments keep playing
+    media_direct_ttl_s: int = Field(default=4 * 3600, ge=300, le=24 * 3600)
 
     # Internal callbacks from workers (never exposed through the web origin)
     internal_token: SecretStr = SecretStr("dev-only-internal-token")

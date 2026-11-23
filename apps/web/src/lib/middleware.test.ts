@@ -2,15 +2,18 @@ import { describe, expect, it } from "vitest";
 import { csp, thirdPartiesFromEnv } from "../middleware";
 
 describe("csp", () => {
-  it("allows the storage origin for uploads only in connect-src", () => {
+  it("allows the storage origin for uploads and HLS segments", () => {
     const value = csp("http://localhost:9000", false);
     expect(value).toContain("connect-src 'self' http://localhost:9000");
+    expect(value).toContain("media-src 'self' blob: http://localhost:9000;");
+    expect(value).not.toContain("img-src 'self' data: blob: http://localhost:9000");
     expect(value).not.toContain("unsafe-eval");
     expect(value).toContain("frame-ancestors 'none'");
   });
   it("adds unsafe-eval only in development", () => {
     expect(csp(undefined, true)).toContain("'unsafe-eval'");
     expect(csp(undefined, false)).toContain("connect-src 'self';");
+    expect(csp(undefined, false)).toContain("media-src 'self' blob:;");
   });
   it("allows analytics and chat only when configured", () => {
     expect(csp(undefined, false)).not.toContain("posthog");
