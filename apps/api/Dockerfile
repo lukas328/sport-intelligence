@@ -25,7 +25,10 @@ FROM python:3.12-slim AS runtime
 # pdftotext (poppler-utils, GPL-2.0, called as a separate program) reads DHB press reports
 # (services/official_report.py)
 # security updates of the base image first (the scan fails on fixed HIGH/CRITICAL CVEs)
-RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends poppler-utils \
+# APT_REFRESH (the build date in CI) renews this layer daily, so a cached layer does not keep
+# packages whose security fixes came out after it was built
+ARG APT_REFRESH=
+RUN echo "apt refresh ${APT_REFRESH}" && apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends poppler-utils \
     && rm -rf /var/lib/apt/lists/* && useradd --system --uid 10001 app
 WORKDIR /app
 COPY --from=build /app/.venv /app/.venv
