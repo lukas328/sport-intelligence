@@ -1,0 +1,122 @@
+# Staging-Umzug in eine EU-Region mit serverloser GPU (Plan, Stand 2026-11-23)
+
+Auftrag: Lukas-Entscheid 23.11., über die Hauptsitzung. Staging (heute Azure «hb-stg», Switzerland
+North) zieht in eine EU-Region mit serverloser T4. Kandidaten: Italy North (bevorzugt, Nähe) und
+Sweden Central. Nichts wird ohne Go der Hauptsitzung und Lukas' OK angewendet.
+
+Grundlage: ADR 002 verlangt EU (die Schweiz wurde am 09.11. mit ADR 025 gewählt, nicht verlangt).
+Switzerland North hat keine serverlose GPU (Azure-Doku «Serverless GPUs, supported regions»: T4 in
+Italy North und Sweden Central ja, Switzerland North fehlt).
+
+## 1. Regionen im Vergleich
+
+Preise: Azure Retail Prices API, abgerufen am 23.11.2026, USD, Listenpreis ohne Rabatt.
+
+| | Switzerland North (heute) | Italy North | Sweden Central |
+|---|---|---|---|
+| Serverlose T4 (Container Apps) | nein | ja | ja |
+| Container Apps vCPU aktiv, pro vCPU-h | 0.086 | 0.122 (+42 %) | 0.086 |
+| Container Apps Speicher aktiv, pro GiB-h | 0.011 | 0.014 (+33 %) | 0.011 |
+| Container Apps vCPU im Leerlauf, pro vCPU-h | 0.011 | 0.014 | 0.011 |
+| T4-GPU-Zähler, pro h | 0.374 | 0.342 | 0.342 |
+| eine T4-Replika (Profil NC8as-T4: 8 vCPU, 56 GiB, 1 T4), pro h | | etwa 2.13 | etwa 1.64 |
+| Analyse eines 10-min-Clips auf der T4 (1.55 x Videolänge aus Modal-Auftrag 15, plus etwa 3 min Kaltstart) | | etwa 0.66 | etwa 0.51 |
+| Postgres Flexible B1ms, pro h | 0.0219 | 0.0199 | 0.0199 |
+| Leerlaufkosten GPU (scale to zero) | | 0 | 0 |
+
+Annahme bei der T4-Replika: Container Apps verrechnet beim GPU-Profil vCPU und Speicher der ganzen
+Replika zu den Consumption-Preisen, dazu den GPU-Zähler. Das ist aus der Doku («billed based on
+per-replica usage») und den Zählern geschlossen, nicht mit einer Rechnung belegt. Der erste echte Lauf
+zeigt es in der Kostenanalyse.
+
+Noch offen (nur mit Azure-Zugang prüfbar, Anfrage an die UX-Sitzung ist gestellt):
+- Kontingent «Managed Environment Consumption T4 GPUs» in der Subscription je Region. Laut Doku ist
+  es erst sichtbar, wenn dort eine Umgebung mit Workload-Profilen existiert. Notfalls legt Terraform
+  eine leere Test-Umgebung an (kostet ohne Apps nichts) und löscht sie danach wieder.
+- `az containerapp env workload-profile list-supported` je Region.
+- Postgres Flexible B1ms je Region (`az postgres flexible-server list-skus`); der Preiszähler
+  existiert in beiden Regionen.
+- Key Vault, Log Analytics, Container Registry Basic, Storage (Azure Files für Redis-AOF) und Azure
+  Communication Services sind in beiden Regionen Standarddienste. ACS ist ein globaler Dienst mit
+  eigenem Datenstandort (heute «Switzerland», neu «Europe»).
+
+Empfehlung: **Sweden Central**. Gleiche Preise wie heute für die Grundlast, eine T4-Stunde etwa
+23 % billiger als in Italy North. Die Latenz aus der Schweiz (etwa 30 bis 40 ms statt 15 bis 20 ms)
+merkt man bei einer Web-App mit Videos aus R2 kaum. Italy North kostet bei der Grundlast etwa 40 %
+mehr, bei kleinem Staging-Volumen sind das wenige Franken im Monat. Entscheid bei Lukas.
+
+## 2. Inventar (was liegt heute in Azure)
+
+Aus dem Code (Terraform, ADR 002, 025):
+- Videos und Artefakte liegen in **Cloudflare R2 (EU)**, nicht in Azure. Sie ziehen nicht um.
+- In Azure: Postgres 16 (B1ms, 32 GiB, 14 Tage PITR), Redis als Container App mit AOF auf einer
+  Azure-Files-Freigabe (nur die Job-Warteschlange), Key Vault (generierte und manuelle Secrets:
+  R2-Token, OAuth usw.), Container Registry Basic (Images), Log Analytics (30 Tage), Communication
+  Services (E-Mail, Domain mit SPF/DKIM), Budget-Alarm.
+
+Aus der Datenbank (offen, kommt aus dem Diag-Lauf der UX-Sitzung): Anzahl Organisationen,
+Nutzer (davon echte, ohne Testkonten), Spiele, Videos, Jobs, DB-Grösse.
+
+## 3. Migrationsplan
+
+Leitlinie: neue Umgebung parallel aufbauen, testen, dann umschalten; die alte bleibt bis nach dem
+Smoke-Test stehen und ist der Rückweg.
+
+Schritt A, Terraform (ein PR, nichts angewendet):
+1. Zweiter State-Key (z. B. `staging-eu.tfstate`) und eigene tfvars. Der Name der Ressourcengruppe
+   ist heute `rg-hb-stg` und muss in derselben Subscription eindeutig sein: `name` bekommt für den
+   neuen Stack einen anderen Wert (z. B. `hbeu`), oder ein neuer Variablen-Suffix.
+2. `location` = Zielregion; ACS mit `data_location = "Europe"`.
+3. GPU-Worker: Workload-Profil `Consumption-GPU-NC8as-T4` in der Umgebung, App `gpu-worker` darauf
+   mit dem Mittelweg-Image (`Dockerfile.cuda`), `min_replicas = 0`, `max_replicas = 1`, Scale-Regel
+   KEDA «redis» auf die Länge der GPU-Warteschlange (`rq:queue:gpu`). Ballnetz hrp1 uint8 960
+   (Key/SHA wie #76), ReID wie heute. Ein CPU-Worker für Einlesen und Kurzes bleibt.
+4. Längengrenze: Analyse auf der GPU nur bis z. B. 15 min Video (neue Einstellung neben
+   `ball_max_minutes`), längere Videos mit klarer Meldung ablehnen oder auf der CPU ohne Ballnetz.
+5. Budget-Alarm für den GPU-Anteil bei 20 und 30 EUR (Budget mit Filter auf die GPU-App bzw. die
+   Zähler, zusätzlich zum bestehenden Gruppenbudget).
+
+Schritt B, Aufbau (mit Go):
+1. `terraform apply` des neuen Stacks (etwa 30 min, Postgres etwa 10 min davon).
+2. Images in die neue Registry übernehmen (`az acr import` aus der alten).
+3. Manuelle Secrets aus dem alten Key Vault in den neuen kopieren (Skript mit `az keyvault secret
+   show/set`, läuft bei Lukas oder im Workflow, nie im Chat). Generierte Secrets werden neu erzeugt;
+   der App-Signaturschlüssel wird übernommen, sonst sind alle abgemeldet.
+4. GPU-Kontingent prüfen bzw. beantragen (Lukas), erster GPU-Lauf mit einem kurzen Clip.
+
+Schritt C, Umschalten (Wartungsfenster):
+1. Alte Umgebung auf Wartung (Web zeigt Hinweis, Worker auf 0), damit nichts mehr schreibt.
+2. `pg_dump -Fc` aus der alten DB, `pg_restore` in die neue (Testdaten, wenige MB: Minuten), danach
+   Migrationen-Job laufen lassen (Rolle `handball_app`), Zeilenzahlen vergleichen.
+3. Warteschlange: laufende Jobs vorher fertig werden lassen; Redis-Inhalt zieht nicht um (der
+   Watchdog stellt verlorene Jobs neu ein).
+4. Smoke-Test auf der Standard-Adresse der neuen Umgebung (Login per Link, Spiel öffnen, Video aus
+   R2 abspielen, kurzer Analyse-Lauf auf der GPU).
+5. DNS: CNAME von `app.handball-intelligence.com` und `asuid`-TXT auf die neue Umgebung, verwaltetes
+   Zertifikat binden (README Schritt 6). OAuth-Redirect-URIs bleiben gleich (gleiche Domain).
+6. E-Mail: neue ACS-Domain verifizieren, SPF/DKIM-Einträge ersetzen (oder die alte ACS-Ressource bis
+   dahin weiterverwenden).
+
+Schritt D, Abbau (erst nach erfolgreichem Smoke-Test und einigen Tagen Betrieb): alte Umgebung mit
+`paused = true` stehen lassen, dann `terraform destroy` des alten Stacks; Key-Vault-Soft-Delete
+beachten (7 Tage).
+
+Rückweg: bis Schritt D steht die alte Umgebung. DNS zurück auf die alte Umgebung, Worker hoch; Daten,
+die in der neuen DB in der Zwischenzeit entstanden sind, per `pg_dump` zurück (bei Staging
+vertretbar).
+
+Dauer und Ausfall (Schätzung): Terraform-PR und Review 1 Tag; Aufbau und Tests 0.5 Tage; Umschalten
+mit Wartungsfenster etwa 30 bis 60 min Ausfall (DB-Kopie Minuten, DNS und Zertifikat der Rest).
+
+## 4. Texte zum Datenstandort, die angepasst werden müssen (Umsetzung UX-Sitzung)
+
+- `apps/site/src/messages/de.ts` und `en.ts`: Zeile 195/197 («Daten in der Schweiz und der EU»),
+  597/598 («Die App und ihre Datenbank laufen auf Servern in der Schweiz ...»), 729/730
+  («Datenstandort: App und Datenbank in der Schweiz ...»), 773/774 («Die Daten liegen in der Schweiz
+  und der EU ...»). «Entwickelt in der Schweiz» bleibt.
+- `apps/site/content/help/de/datenschutz-und-loeschen.mdx` Zeile 5 (und die englische Fassung, falls
+  vorhanden).
+- Doku: `docs/LIVEGANG.md` (Zeilen 7, 26, 28), `docs/adr/025-azure-app-hosting.md` (Region, neuer
+  Nachtrag), `docs/adr/002-hosting-region.md` (Nachtrag), `infra/terraform/azure/README.md` und
+  `variables.tf` (`location`-Beschreibung), `terraform.tfvars.example`.
+- Datenschutzerklärung und Liste der Unterauftragsverarbeiter: Region von Azure (Microsoft) nennen.
