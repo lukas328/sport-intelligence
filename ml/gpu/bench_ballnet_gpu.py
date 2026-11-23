@@ -144,9 +144,6 @@ def _run(minutes: int, slug: str, budget_min: int, variants: str) -> str:
 
     t_start = time.time()
     stop_at = t_start + budget_min * 60
-    # hard deadline for running steps: Modal kills the function at TIMEOUT_MIN, and the Kaggle upload
-    # only happens at the end, so a step still running then would lose everything; 2.5 min stay for it
-    hard_at = t_start + (TIMEOUT_MIN - 2.5) * 60
     out = Path("/vol") / slug
     out.mkdir(parents=True, exist_ok=True)
     models = Path("/tmp/models")
@@ -166,16 +163,13 @@ def _run(minutes: int, slug: str, budget_min: int, variants: str) -> str:
     print(f"setup {time.time() - t_start:.0f} s", flush=True)
 
     # 1. ball net alone; the TensorRT engines are cached on the volume for a restart
-    try:
-        subprocess.run(
-            ["python", "/src/ml/integration/bench_ballnet.py", str(proxy),
-             "--f32", str(fp16), "--u8", str(models / "ball_hrp1_fp16_u8.onnx"),
-             "--trt-u8", str(models / "ball_hrp1_u8.onnx"), "--trt-f32", str(hrp1),
-             "--out", str(out), "--cache", str(out / "trt-cache"), "--stop-at", str(stop_at)],
-            check=False, timeout=max(1.0, hard_at - time.time()),
-        )
-    except subprocess.TimeoutExpired:
-        print("hard deadline: bench stopped", flush=True)
+    subprocess.run(
+        ["python", "/src/ml/integration/bench_ballnet.py", str(proxy),
+         "--f32", str(fp16), "--u8", str(models / "ball_hrp1_fp16_u8.onnx"),
+         "--trt-u8", str(models / "ball_hrp1_u8.onnx"), "--trt-f32", str(hrp1),
+         "--out", str(out), "--cache", str(out / "trt-cache"), "--stop-at", str(stop_at)],
+        check=False,
+    )
     out_vol.commit()
 
     # 2. the full job with the lean settings
@@ -185,15 +179,11 @@ def _run(minutes: int, slug: str, budget_min: int, variants: str) -> str:
         if time.time() > stop_at:
             print(f"budget: {budget_min} min used, stopping before {name}", flush=True)
             break
-        try:
-            subprocess.run(
-                ["python", "/src/ml/integration/profile_variants.py", str(proxy), "--models", str(models),
-                 "--out", str(out), "--variants", name, "--no-bench"],
-                check=True, timeout=max(1.0, hard_at - time.time()),
-            )
-        except subprocess.TimeoutExpired:
-            print(f"hard deadline: {name} stopped, not finished", flush=True)
-            break
+        subprocess.run(
+            ["python", "/src/ml/integration/profile_variants.py", str(proxy), "--models", str(models),
+             "--out", str(out), "--variants", name, "--no-bench"],
+            check=True,
+        )
         out_vol.commit()
     shutil.rmtree(out / "work", ignore_errors=True)
     pub = Path("/tmp/pub")

@@ -22,9 +22,8 @@ pick: per game one segment drawn with a fixed seed among those without the gold 
 is in both. sheets: tiles 320 x 180 with the second in the corner; a looker lists the seconds where
 a shot on goal may happen (attack at the 6 m line, then the keeper with the ball, the ball in the
 net, a restart from the goal or the keeper's throw). zoom: the candidate at 5 fps (426 x 240 tiles)
-to confirm it and give the release time. clips: each confirmed shot becomes a clip from 6 s before
-to 4 s after the release, or, from the owner page answers without a release, from 8 s before to 5 s
-after the candidate time; split "test" (frozen; whole set).
+to confirm it and give the release time. clips: each confirmed shot becomes a clip from 4 s before
+to 2 s after the release, split "test" (frozen; whole set).
 """
 
 import argparse
@@ -36,8 +35,7 @@ import cv2
 import numpy as np
 
 HERE = Path(__file__).resolve().parent
-PRE, POST = 6000, 4000  # around a known release: wind-up, release, flight and end inside
-CAND_PRE, CAND_POST = 8000, 5000  # generous window around a product shot candidate (page clip was -5 s to +2 s)
+PRE, POST = 4000, 2000
 
 
 def pick(a: argparse.Namespace) -> None:
@@ -118,30 +116,14 @@ def zoom(a: argparse.Namespace) -> None:
 
 def clips(a: argparse.Namespace) -> None:
     segs = {s["file"]: s for s in json.loads((HERE / "shot_endtest_segments.json").read_text())}
-    raw = json.loads(a.answers.read_text())
-    # either [{file, release_s, kind}] (release known) or the owner page answers
-    # {"answers": [{seg, cand_t, state, kind, release_s?}]}: only state "shot"; without a release the clip
-    # is cand_t - 8 s to cand_t + 5 s (the owner page showed -5 s to +2 s and shots sat at its edges), and the
-    # release is labelled later
-    if isinstance(raw, dict):
-        shots = [{"file": r["seg"] + ".mp4", "kind": r.get("kind", "shot"), "release_s": r.get("release_s"),
-                  "cand_t": r["cand_t"], "round": r.get("round", 1)} for r in raw["answers"] if r["state"] == "shot"]
-    else:
-        shots = raw
+    shots = json.loads(a.answers.read_text())  # [{file, release_s, kind}]
     out = []
-    for s in sorted(shots, key=lambda x: (x["file"], x.get("release_s") or x.get("cand_t"))):
+    for s in sorted(shots, key=lambda x: (x["file"], x["release_s"])):
         g = segs[s["file"]]
-        if s.get("release_s") is not None:
-            start, dur, rel = round(s["release_s"] * 1000) - PRE, PRE + POST, PRE
-        else:
-            start, dur, rel = round(s["cand_t"] * 1000) - CAND_PRE, CAND_PRE + CAND_POST, None
-        c = {"id": f"e{len(out):03d}", "game": g["game"], "dataset": g["dataset"], "file": s["file"],
-             "start_ms": max(0, start), "dur_ms": dur, "fps": g["fps"], "width": 1280, "height": 720,
-             "shot": {"kind": s.get("kind", "shot"), "release_ms": rel}, "split": "test"}
-        if s.get("cand_t") is not None:
-            c["cand_ms"] = round(s["cand_t"] * 1000)
-            c["round"] = s.get("round", 1)
-        out.append(c)
+        out.append({"id": f"e{len(out):03d}", "game": g["game"], "dataset": g["dataset"], "file": s["file"],
+                    "start_ms": round(s["release_s"] * 1000) - PRE, "dur_ms": PRE + POST, "fps": g["fps"],
+                    "width": 1280, "height": 720,
+                    "shot": {"kind": s.get("kind", "shot"), "release_ms": PRE}, "split": "test"})
     note = ("Shot end test: shots found by eye in the 42 never-trained halls of test set 2 "
             "(ml/gold/shot_scan.py). Frozen: no development or tuning on it; measured once at the end.")
     (HERE / "shot_endtest_clips.json").write_text(json.dumps({"note": note, "clips": out}, indent=1) + "\n")

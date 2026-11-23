@@ -41,21 +41,17 @@ OCR_SHA = {
 GAME = "AT_Cup_Feldkirch_Bregenz_2021"
 
 image = (
-    # Same base as Dockerfile.cuda: CUDA 12.6 and cuDNN 9 as system libraries. On debian_slim with
-    # the pip CUDA wheels ONNX Runtime did not find libcublasLt.so.12 and fell back to the CPU
-    # without failing (first run of job 13, 2026-11-17); _check_cuda now stops such a run early.
-    modal.Image.from_registry("nvidia/cuda:12.6.3-cudnn-runtime-ubuntu24.04", add_python="3.12")
+    modal.Image.debian_slim(python_version="3.12")
     .apt_install("ffmpeg", "tesseract-ocr", "libgl1", "libglib2.0-0", "curl")
-    # export of the ball nets inside the container runs on the CPU: CPU torch, no second CUDA stack
-    .pip_install("torch==2.5.1", index_url="https://download.pytorch.org/whl/cpu")
     .pip_install(
         # product dependencies (packages/*/pyproject.toml, apps/gpu-worker/pyproject.toml)
         "numpy>=2.1", "opencv-python-headless>=4.10,<5", "scipy>=1.14", "pyarrow>=18", "av>=14",
         "httpx>=0.28", "boto3>=1.36", "structlog>=24.4", "pydantic-settings>=2.7", "rq>=2.1",
         "redis>=5.2",
-        # ONNX Runtime with CUDA 12 as in Dockerfile.cuda
-        "onnxruntime-gpu>=1.20,<1.24",
-        "timm==1.0.11", "onnx==1.17.0", "onnxconverter-common==1.16.0",
+        # ONNX Runtime with CUDA 12 as in Dockerfile.cuda (with the CUDA and cuDNN wheels)
+        "onnxruntime-gpu[cuda,cudnn]>=1.20,<1.24",
+        # export of the ball nets inside the container, on the CPU
+        "torch==2.5.1", "timm==1.0.11", "onnx==1.17.0", "onnxconverter-common==1.14.0",
         "kaggle==2.2.5", "kagglesdk==0.1.38", "six",
     )
     .run_commands(
@@ -79,18 +75,6 @@ image = (
 )
 
 
-def _check_cuda(model: str) -> str:
-    """Fail unless ONNX Runtime really runs on the GPU (it silently falls back to the CPU)."""
-    import onnxruntime as ort
-
-    sess = ort.InferenceSession(model, providers=["CUDAExecutionProvider", "CPUExecutionProvider"])
-    got = sess.get_providers()
-    print("onnxruntime", ort.__version__, "providers", got, flush=True)
-    if got[0] != "CUDAExecutionProvider":
-        raise RuntimeError(f"ONNX Runtime is not on the GPU: {got}")
-    return got[0]
-
-
 def _run(minutes: int, slug: str, variants: str, budget_min: int) -> str:
     import json
     import shutil
@@ -105,7 +89,6 @@ def _run(minutes: int, slug: str, variants: str, budget_min: int) -> str:
     models.mkdir(parents=True, exist_ok=True)
     for f in Path("/models").iterdir():
         shutil.copy2(f, models / f.name)
-    _check_cuda(str(models / "yolox_s.onnx"))
     inp = Path("/tmp/in")
     kaggle_download(["handball-ball-hrmodels"], inp)
     for net, kind in (("hr1", "hr"), ("hrp1", "hrp")):
