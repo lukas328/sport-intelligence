@@ -86,6 +86,14 @@ if [ "${ONEOFF:-false}" = true ]; then
       psql "$dsn" -v ON_ERROR_STOP=1 -X --single-transaction -f "$f" 2>&1 | tee "$OUT/oneoff-$(basename "$f" .sql).txt"
   done
 fi
+# One-off Azure questions: every diag-queries/*.sh runs here (read-only az commands by convention:
+# list, show, query; nothing that creates, updates or deletes).
+for f in "$(dirname "$0")"/diag-queries/*.sh; do
+  [ -e "$f" ] || continue
+  n=$(basename "$f" .sh)
+  echo "== az $n (read only)"
+  rg="$rg" bash "$f" 2>&1 | tee "$OUT/az-$n.txt" | head -300 || true
+done
 # One-off database questions: every diag-queries/*.sql runs read-only (no writes possible).
 for f in "$(dirname "$0")"/diag-queries/*.sql; do
   [ -e "$f" ] || continue
