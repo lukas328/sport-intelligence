@@ -207,7 +207,8 @@ Switzerland North has no serverless GPU, so the staging environment moves to Swe
 (`docs/plans/staging-umzug-eu.md`). The same module builds it with other settings:
 
 - `name = "hbeu"` (the resource group `rg-hbeu-stg` must be new), `location = "swedencentral"`,
-  `gpu = true`, `mail_data_location = "Europe"`, `kv_runner_role = true`;
+  `mail_data_location = "Europe"`, `kv_runner_role = true`; `gpu = false` at first (the CPU app
+  analyses as before) and `gpu = true` in `staging-eu.tfvars` once Azure granted the T4 quota;
 - `gpu = true` adds the workload profile `Consumption-GPU-NC8as-T4` and the job `<prefix>-gpu`
   (image `hb-gpu-worker-cuda`, built by `acr-build-cuda.yaml`) instead of the always-on CPU app
   `gpu-worker`. KEDA starts one execution while the Redis list `rq:queue:gpu` is not empty; it runs

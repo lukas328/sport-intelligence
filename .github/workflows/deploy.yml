@@ -133,7 +133,9 @@ jobs:
             python3 - <<'PY'
           import re
           text = open("base.tfvars").read()
-          eu = {"name": '"hbeu"', "location": '"swedencentral"', "gpu": "true",
+          # gpu stays off until Azure grants the T4 quota (a T4 profile without quota can fail the
+          # environment); the CPU app analyses as today, `gpu = true` in staging-eu.tfvars switches
+          eu = {"name": '"hbeu"', "location": '"swedencentral"', "gpu": "false",
                 "mail_data_location": '"Europe"', "kv_runner_role": "true",
                 "bind_custom_domain": "false", "paused": "false"}
           for key in eu:
