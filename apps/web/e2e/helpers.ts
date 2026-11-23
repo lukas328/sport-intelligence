@@ -56,7 +56,7 @@ export async function register(page: Page, email: string, name = "Test Trainerin
   await page.getByLabel("Vor- und Nachname").fill(name);
   await page.getByLabel("E-Mail").fill(email);
   await page.getByLabel("Passwort").fill("correct-horse-1");
-  await page.getByLabel(/Nutzungsbedingungen/).check();
+  await page.getByLabel(/AGB/).check();
   await page.getByRole("button", { name: "Konto erstellen" }).click();
   // password hashing is deliberately slow; wait until the app has moved on
   await page.waitForURL((url) => !url.pathname.startsWith("/register"), { timeout: 30_000 });
@@ -118,18 +118,14 @@ export async function openTraining(page: Page) {
  * Spiel; the figure sheets are stacked on Zahlen, each under its heading. */
 export async function openAnalysis(page: Page, section: "Übersicht" | "Würfe" | "Torhüter" | "Laufleistung" | "Spielbericht") {
   if (section === "Übersicht") {
-    // the comparison sits in Zahlen › Alle Zahlen; «Mehr zum Spiel» keeps the course (UX test B08)
+    // the comparison sits in Zahlen › Alle Zahlen, open (UX-08); «Mehr zum Spiel» keeps the course (UX test B08)
     await page.getByRole("tab", { name: "Zahlen", exact: true }).click();
-    const all = page.getByTestId("numbers-more");
-    if (!(await all.evaluate((d) => (d as HTMLDetailsElement).open))) await all.locator(":scope > summary").click();
     await page.locator("#numbers-overview").scrollIntoViewIfNeeded();
     return;
   }
   await page.getByRole("tab", { name: "Zahlen", exact: true }).click();
   const id = { Spielbericht: "report", Würfe: "shots", Torhüter: "keepers", Laufleistung: "physical" }[section];
-  // the full report, shots, goalkeepers and running figures sit behind «Alle Zahlen»
-  const more = page.getByTestId("numbers-more");
-  if (!(await more.evaluate((d) => (d as HTMLDetailsElement).open))) await more.locator(":scope > summary").click();
+  // the full report, shots, goalkeepers and running figures stand open under «Alle Zahlen» (UX-08)
   await page.locator(`#numbers-${id}`).scrollIntoViewIfNeeded();
 }
 

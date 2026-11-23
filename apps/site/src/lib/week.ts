@@ -122,10 +122,14 @@ export interface SeasonMatch {
   dots: StoryDot[];
 }
 
-/** The invented matches after the demo match: opponent, goals conceded by position. */
+/**
+ * The invented matches after the demo match: opponent, goals conceded by position. Other opponents
+ * than the season before it (lib/tour-cuts.ts SEASON_BARS: Rotdorn 6, Wirbelstern 9, Nachtwind 11),
+ * so one name never carries two numbers across the pages (BEFUNDE-5 point 3).
+ */
 const NEXT: [string, number, [string, number][]][] = [
-  ["BSV Wirbelstern", 20261121, [["ra", 4], ["la", 3], ["rl", 4], ["rm", 4], ["rr", 4], ["kr", 3], ["rm", 3]]],
-  ["TV Rotdorn", 20261128, [["ra", 4], ["la", 4], ["rl", 4], ["rm", 4], ["rr", 4], ["kr", 4], ["rm", 3]]],
+  ["SG Blitzfang", 20261121, [["ra", 4], ["la", 3], ["rl", 4], ["rm", 4], ["rr", 4], ["kr", 3], ["rm", 3]]],
+  ["HSG Funkenflug", 20261128, [["ra", 4], ["la", 4], ["rl", 4], ["rm", 4], ["rr", 4], ["kr", 4], ["rm", 3]]],
 ];
 
 /**

@@ -150,7 +150,6 @@ async def dunning(ctx: CtxDep, x_internal_token: Annotated[str, Header()] = "") 
     """Worker tick: invoice reminders and final notices (addendum 01, 4.10)."""
     if not constant_time_equals(x_internal_token, ctx.settings.internal_token.get_secret_value()):
         raise ProblemError(403, "forbidden", "Invalid internal token")
-    await enable_system_access(ctx.db, reason="dunning run")
     return await invoices.run_dunning(ctx)
 
 

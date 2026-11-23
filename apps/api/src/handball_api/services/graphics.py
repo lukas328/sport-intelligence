@@ -58,6 +58,7 @@ from handball_api.services.shot_positions import (
     zone_source,
 )
 from handball_api.services.timeline import Files
+from handball_api.services.video_jobs import job_budget_s
 
 LENGTH, WIDTH = 40.0, 20.0
 RUN_MS = 3000  # the run before the shot: 2 to 4 s
@@ -104,7 +105,8 @@ def scene_window_of(e: Event, length: int | None) -> tuple[int, int]:
 def spot_by_coach(e: Event) -> bool:
     """The place of the shot comes from a person (tapped in Prüfen, marked by hand, a penalty of
     the report). Only these make the three things and count as «mit Wurfort» (real-clip test of
-    «Von wo?», V1): an estimate is shown as estimated and counts nowhere."""
+    «Von wo?», V1): an estimate is shown as estimated and counts nowhere until the coach confirms
+    it with one tap (A22, shot_positions.set_spot)."""
     return zone_said(e) == COACH
 
 
@@ -704,8 +706,6 @@ async def _rounds(
                 out.notice = checks.little_notice(reason, a)
     job = await _analysis_job(ctx, asset)
     if asset is not None and not match.is_demo and _job_state(job) == "failed" and job is not None:
-        from handball_api.services.videos import job_budget_s
-
         code = failure_code(job.error)
         limit = job_budget_s("analysis", asset.duration_s) if code == "timeout" else None
         out.notice = checks.failure_notice(code, asset, limit)

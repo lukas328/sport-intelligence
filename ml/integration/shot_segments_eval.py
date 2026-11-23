@@ -16,7 +16,9 @@ Two steps, both resumable (one directory per segment under OUT):
   * ball path coverage: share of frames from 1.5 s before to 1.5 s after each shot with a ball
     point (`ballpossession.ball_path_v2`, no clock gate, no court needed); also the share of shots
     with a point on at least half of those frames;
-  * 95 % intervals by a bootstrap over games (segments of one game together).
+  * 95 % intervals by a bootstrap over games (segments of one game together);
+  * per shot (`per_shot` in score.json): the nearest shot candidate's peak minus the mark, to
+    score a fixed time estimate later without running the chain again.
 
     uv run python ml/integration/shot_segments_eval.py observe SEGMENTS.json OUT MODELS \
         --ball MODEL.onnx --width 960 --every 3
@@ -55,17 +57,22 @@ DESIGN_WINDOW_S = (3.0, 8.0)
 BALL_WINDOW_S = 1.5
 OWNER = "lukasde1000"
 DENSE_S = 8.0
+NEAR_S = (10.0, 15.0)  # per-shot output: candidate peaks from 10 s before to 15 s after a mark
 
 
 def _game(seg: str) -> str:
     return re.sub(r"_s\d+$", "", seg)
 
 
-def _fetch_proxy(item: dict, d: Path) -> Path:
-    """The segment from Kaggle as the product proxy (1280 px, 25 fps) in d."""
+def _fetch_proxy(item: dict, d: Path, input_root: Path | None = None) -> Path:
+    """The segment as the product proxy (1280 px, 25 fps) in d: from INPUT_ROOT/<dataset>/<file>
+    (the datasets attached to a Kaggle kernel), else downloaded from Kaggle."""
     from profile_analysis import _proxy_cmd
 
     raw, proxy = d / "raw.mp4", d / "proxy.mp4"
+    local = input_root / item["dataset"] / item["file"] if input_root else None
+    if not proxy.exists() and local is not None:
+        subprocess.run(_proxy_cmd(local, proxy), check=True)
     if not proxy.exists():
         url = f"https://www.kaggle.com/api/v1/datasets/download/{OWNER}/{item['dataset']}/{item['file']}"
         curl = shutil.which("curl") or "curl"
@@ -156,7 +163,15 @@ def _dense_cover(d: Path, shots: list[tuple[float, str]]) -> list[float] | None:
     return out
 
 
-def observe(segments: Path, out: Path, models: Path, ball: Path, width: int, every: int) -> None:
+def observe(
+    segments: Path,
+    out: Path,
+    models: Path,
+    ball: Path,
+    width: int,
+    every: int,
+    input_root: Path | None = None,
+) -> None:
     from handball_vision import observe as learned
     from handball_vision.ballnet import BallNet
     from handball_vision.detection import YoloxDetector
@@ -169,7 +184,7 @@ def observe(segments: Path, out: Path, models: Path, ball: Path, width: int, eve
         if (d / "observations.npz").exists():
             continue
         d.mkdir(parents=True, exist_ok=True)
-        proxy = _fetch_proxy(item, d)
+        proxy = _fetch_proxy(item, d, input_root)
         t0 = time.perf_counter()
         obs = learned.observe(proxy, det, detect_every=3, ball_net=net, ball_every=every)
         obs.motion.save(d / "motion.npz")
@@ -245,6 +260,12 @@ def _match(
     return hit, len(used)
 
 
+def _nearest(t: float, peaks: list[float]) -> float | None:
+    """The nearest peak - t within NEAR_S (s), or None."""
+    d = [p - t for p in peaks if -NEAR_S[0] <= p - t <= NEAR_S[1]]
+    return round(min(d, key=abs), 2) if d else None
+
+
 def _per_segment(marks: dict[str, list], out: Path) -> dict[str, dict]:
     per = {}
     for seg, shots in marks.items():
@@ -267,6 +288,9 @@ def _per_segment(marks: dict[str, list], out: Path) -> dict[str, dict]:
             cover.append(sum(f in frames for f in range(lo, hi + 1)) / n)
         dense_cover = _dense_cover(d, shots)
         per[seg] = {
+            # per mark: the nearest shot candidate's peak (rate <= 4) - mark, so that a later time
+            # estimate can be scored on these segments without running the chain again
+            "peak_minus_mark": [_nearest(t, r["shot_peaks"]) for t, _ in shots],
             "dense": dense_cover,
             "game": _game(seg),
             "shots": [(o, s_hit[k], cover[k]) for k, (_, o) in enumerate(shots)],
@@ -386,6 +410,11 @@ def score(marks_path: Path, out: Path, boot: int = 2000) -> None:
                 "shots": n_shots,
                 "by_outcome": counts,
                 "metrics": report,
+                "per_shot": [
+                    {"seg": seg, "t_s": t, "kind": o, "peak_minus_mark_s": d}
+                    for seg, p in per.items()
+                    for (t, o), d in zip(marks[seg], p["peak_minus_mark"], strict=True)
+                ],
             },
             indent=1,
         )
@@ -402,6 +431,7 @@ def main() -> None:
     o.add_argument("--ball", type=Path, required=True)
     o.add_argument("--width", type=int, default=960)
     o.add_argument("--every", type=int, default=3)
+    o.add_argument("--input-root", type=Path, help="segments under DIR/<dataset>/<file>")
     dn = sub.add_parser("dense")
     dn.add_argument("segments", type=Path)
     dn.add_argument("marks", type=Path)
@@ -414,7 +444,7 @@ def main() -> None:
     s.add_argument("out", type=Path)
     a = ap.parse_args()
     if a.cmd == "observe":
-        observe(a.segments, a.out, a.models, a.ball, a.width, a.every)
+        observe(a.segments, a.out, a.models, a.ball, a.width, a.every, a.input_root)
     elif a.cmd == "dense":
         dense(a.segments, a.marks, a.out, a.ball, a.width)
     else:

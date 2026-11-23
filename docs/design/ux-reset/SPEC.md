@@ -119,15 +119,15 @@ screen carries is fixed in `ANLAUF.md` section 3.
 
 ### 7.1 Spiele, the start (`#start`, `startDesk`, `startPhone`)
 
-- **Wurf-Kopf** of the last match. **Title** from its state: "Gewonnen. Und drei Dinge zum
-  Mitnehmen." (or "Verloren. …", "Unentschieden. …"), "Gestern war Spiel." (no video), "Die
+- **Wurf-Kopf** of the last match. **Title** from its state: "Gewonnen. Und drei Muster zum
+  Mitnehmen." (the number is the real count) (or "Verloren. …", "Unentschieden. …"), "Gestern war Spiel." (no video), "Die
   Analyse läuft.", "Willkommen." (no match). Kick line: opponent and when the analysis finished.
   Result with the opponent's underline, the names, the Verlauf from the goal sequence.
 - Actions: "Spiel öffnen" (primary), "Fürs Team zusammenstellen" (creates a collection draft),
   the open check questions as a link with a duration ("3 Fragen offen, 1 Minute").
-- **Drei Dinge** in a row: index, numeral, unit, sentence, sub-line, the bundle of runs, "n
-  Szenen" with length. Desktop: Punkt 1 switches in the same frame between "Alle 9" (bundle) and
-  "Szene 39:55" (tactics camera). Phone: the scene of Punkt 1 as its own section below.
+- **Muster** in a row: index, numeral, unit, sentence, sub-line, the bundle of runs, "n
+  Szenen" with length. Desktop: Muster 1 switches in the same frame between "Alle 9" (bundle) and
+  "Szene 39:55" (tactics camera). Phone: the scene of Muster 1 as its own section below.
 - **Alle Spiele** as rows: date, Minifeld (bundle of that match's Punkt 1; empty with "Analyse
   läuft" or "kein Video"), opponent, one status line, result with "Sieg" / "Niederlage". Running:
   a bar and minutes left. No video: link "Video hochladen".
@@ -141,7 +141,7 @@ screen carries is fixed in `ANLAUF.md` section 3.
   Spiel · Video · Zahlen and "Prüfen n". **Source line**: "Quellen: Video (60 von 60 Minuten) ·
   Spielbericht von handball.ch · 21 von 24 Toren von dir bestätigt"; details behind "Wie
   gerechnet?".
-- **Drei Dinge** with bundles; each may carry "Dazu üben: [drill]". Punkt 3 is "Tore vom Kreis"
+- **Muster** with bundles; each may carry "Dazu üben: [drill]". Muster 3 is "Tore vom Kreis"
   (goals from the circle), not "Kreisanspiel": passes are not measured.
 - Actions: "Fürs Team zusammenstellen", "Highlights teilen", "Als Bild für den Chat".
 - **Punkt 1, geöffnet**: the tactics camera of the selected scene with the Ball-Linie and the
@@ -262,7 +262,7 @@ Every screen has designed empty, running and error states: say what is going on,
 come, offer one action.
 
 - **Kein Video**: head with result and Verlauf from the report, tab Video greyed, dashed block
-  "Lad das Video hoch. Nach etwa 40 Minuten bekommst du die drei Dinge und alle Szenen.", "Video
+  "Lad das Video hoch. Nach etwa 40 Minuten bekommst du die Muster und alle Szenen.", "Video
   wählen", "Link einfügen", the Kurzbericht.
 - **Analyse läuft**: "Die Analyse läuft." in the head with the result from the report, steps with
   "fertig / läuft / danach", a bar, minutes left, something useful meanwhile, three empty fields.
@@ -288,7 +288,7 @@ come, offer one action.
 | de-CH | fr | en | Replaces |
 |---|---|---|---|
 | Spiele | Matchs | Matches | Übersicht, Spielplan |
-| Drei Dinge | Trois points | Three things | Erkenntnisse, Was auffällt |
+| Muster, ein Muster | Tendances, une tendance | Patterns, a pattern | Drei Dinge, Trois points, Three things (until 19.11.2026, TXT-01), Erkenntnisse, Was auffällt |
 | Szenen, Szene | Scènes, scène | Scenes, scene | Clip, Reel, Markierung |
 | Sammlung | Sélection | Collection | Playlist, Präsentation, Folien, Aufgabe |
 | Highlights | Temps forts | Highlights | Reel |
@@ -300,6 +300,12 @@ come, offer one action.
 | Dazu üben | À travailler | Drill for this | |
 | Saison | Saison | Season | |
 | Team | Équipe | Team | Kader |
+
+«Muster» (owner, 19.11.2026, TXT-01): an insight of a match is «ein Muster», shown without a fixed
+number in the text («die Muster», «die wichtigsten Muster»), because a match can have any number;
+a count is only said where it is the real count («Und zwei Muster zum Mitnehmen.»). Internal names
+stay as they are so links and data keep working: `three-things.ts`, `?thing=`, `?ding=`, `#things`,
+message keys such as `titleThings`.
 
 Apply in `apps/web/messages/*.json`, the mobile app and e-mails.
 

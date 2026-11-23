@@ -113,6 +113,13 @@ class Match(Base, EntityMixin, TenantMixin):
     )
     official_report_retry_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
+    @property
+    def observed(self) -> bool:
+        """The perspective of the match (app review 19.11., BUG-01 to 07, L4): an observed match
+        (kind scouting, K3) is neutral. The team of the account does not play; the data's own side
+        is another team (`scouting_other`), so none of the team's players belongs to it."""
+        return self.kind == "scouting"
+
 
 class VideoAsset(Base, EntityMixin, TenantMixin):
     __tablename__ = "video_assets"

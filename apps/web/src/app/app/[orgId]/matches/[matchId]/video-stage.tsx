@@ -1,21 +1,26 @@
 "use client";
 
+import Link from "next/link";
 import type { Schemas } from "@handball/api-client";
 import { useQuery } from "@tanstack/react-query";
+import { Check, SkipBack, SkipForward } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { usePhone } from "@/lib/use-phone";
 import { CameraKey, SectionHead } from "@/components/anlauf/blocks";
 import { Rail } from "@/components/anlauf/charts";
+import { useMatchSides } from "@/components/domain/match-sides";
 import { clockOf, SceneCamera, useThingText } from "@/components/anlauf/three-things-view";
 import { Button } from "@/components/ui/button";
 import { VideoPlayer, type PlayerHandle } from "@/components/video/player";
 import { api } from "@/lib/client";
-import { goalRuns, reportGoals, thingSequence, type MatchGraphics } from "@/lib/graphics";
+import { oppFirst } from "@/lib/match-sides";
+import { cameraScene, goalRuns, reportGoals, thingSequence, useSceneCamera, type MatchGraphics } from "@/lib/graphics";
 import { threeThings } from "@/lib/three-things";
 import { SpotChange, useSpotText } from "@/components/anlauf/spot-parts";
 import { cn } from "@/lib/utils";
 import { usePartMarkers } from "./parts-panel";
+import { readStageMode, STAGE_MODE_KEY, type StageMode } from "./stage-mode";
 
 type Match = Schemas["MatchOut"];
 type Video = Schemas["VideoOut"];
@@ -31,10 +36,15 @@ const sceneOf = (g: { t_ms?: number | null; scene?: [number, number] | null }) =
 
 /**
  * The tab Video (SPEC 7.3): one stage that switches between the video and the tactics camera,
- * the Ball-Linie and the legend, the Rail with the marked phase, the scenes at the side, the
- * actions. With `thing` (?thing=n) the side holds exactly the scenes of that thing, one after
- * the other («Nächste Szene», «Alle abspielen»); without it the scenes of the phase around the
- * chosen goal. The workbench sits behind «Mehr» (onBench); checks are in Prüfen.
+ * the Rail with the marked phase, the scenes at the side, the actions. With `thing` (?thing=n)
+ * the side holds exactly the scenes of that thing, one after the other («Nächste Szene», «Alle
+ * abspielen»); without it the scenes of the phase around the chosen goal. The workbench sits
+ * behind «Mehr» (onBench); checks are in Prüfen.
+ *
+ * App review 19.11. (UX-01 to 04, UI-05, UI-06, A11Y-01): the video is the default, the switch
+ * sits above the picture and is remembered; «Feld von oben» is offered only where the scene has
+ * positions, otherwise it says why. The player stays in view (sticky) while the list scrolls;
+ * scenes step with buttons and the keys N and P; the end of a clip is said, with the way on.
  */
 export function VideoStage({
   orgId,
@@ -48,6 +58,7 @@ export function VideoStage({
   scene = null,
   onThing,
   onBench,
+  onDraw,
 }: {
   orgId: string;
   match: Match;
@@ -61,8 +72,12 @@ export function VideoStage({
   scene?: string | null;
   onThing: (n: number | null) => void;
   onBench: () => void;
+  /** «Zeichnen»: the workbench draws on this moment of the video (app review BUG-13) */
+  onDraw?: (ms: number) => void;
 }) {
   const t = useTranslations("anlauf");
+  // the home team above the line, also in an observed match (UI check 20.11.)
+  const railOppFirst = oppFirst(useMatchSides());
   const tz = useTranslations("seasonPage");
   const text = useThingText();
   const partMarkers = usePartMarkers(match.videos);
@@ -83,13 +98,36 @@ export function VideoStage({
     if (asked) setEventId(asked);
   }, [asked]);
   const goal = goals.find((g) => g.event_id === eventId) ?? null;
-  // Taktik is the default once the court is confirmed (SPEC 7.3)
-  const [mode, setMode] = useState<"video" | "taktik">(graphics.field_confirmed ? "taktik" : "video");
+  // the video first (app review UX-01); the coach's last choice is kept on this device
+  const [wanted, setWanted] = useState<StageMode>("video");
+  useEffect(() => setWanted(readStageMode()), []);
+  const choose = (m: StageMode) => {
+    setWanted(m);
+    try {
+      window.localStorage.setItem(STAGE_MODE_KEY, m);
+    } catch {
+      // private mode or blocked storage: the choice holds for this visit only
+    }
+  };
+  // «Feld von oben» only where the scene has positions; otherwise the switch says why
+  const camera = useSceneCamera(orgId, match.id, eventId);
+  const hasCamera = camera.data != null && cameraScene(camera.data, null) != null;
+  const fieldOpen = camera.data != null && camera.data.field_confirmed === false;
+  const mode: StageMode = wanted === "taktik" && hasCamera ? "taktik" : "video";
   // on a phone the attacked half fills the width, numbers stay readable (UX test B51)
   const phone = usePhone();
   const [all, setAll] = useState(false);
   const player = useRef<PlayerHandle>(null);
-  const [kept, setKept] = useState<string | null>(null);
+  const stageTop = useRef<HTMLDivElement>(null);
+  // the scenes saved here, by goal: a second press takes the scene out again (BUG-21)
+  const [kept, setKept] = useState<Record<string, string>>({});
+  // the end of a scene's clip: said, with the way on (UX-04); «Weiterlaufen lassen» lifts the window
+  const [ended, setEnded] = useState(false);
+  const [free, setFree] = useState(false);
+  useEffect(() => {
+    setEnded(false);
+    setFree(false);
+  }, [eventId]);
   const minute = goal?.minute ?? 0;
   // the minutes the video covers (span): a short video is one phase with all its goals, the Rail
   // runs over these minutes, not over 60 (real-video test, second round)
@@ -113,21 +151,43 @@ export function VideoStage({
   });
   const near = (notes.data ?? []).filter((c) => goal?.t_ms != null && c.t_ms != null && Math.abs(c.t_ms - goal.t_ms) < PHASE * 60_000).slice(0, 3);
 
+  // a scene chosen further down the page: the player comes into view (UX-02)
+  const pick = (id: string) => {
+    setEventId(id);
+    const box = stageTop.current?.getBoundingClientRect();
+    if (!box || (box.top >= 0 && box.top < window.innerHeight / 2)) return;
+    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    stageTop.current?.scrollIntoView({ block: "start", behavior: still ? "auto" : "smooth" });
+  };
   const step = (d: 1 | -1) => {
     const next = list[at + d];
     if (next) setEventId(next.event_id);
     else if (d === 1) setAll(false);
   };
+  // N and P step through the scenes while the player has the focus (UX-03)
+  const onKey = (key: string) => {
+    if (key === "n" || key === "N") return step(1), true;
+    if (key === "p" || key === "P") return step(-1), true;
+    return false;
+  };
 
   async function keep() {
     if (goal?.t_ms == null) return;
+    const id = kept[goal.event_id];
+    if (id) {
+      const r = await api.DELETE("/v1/orgs/{org_id}/clips/{clip_id}", { params: { path: { org_id: orgId, clip_id: id } } });
+      if (r.response.ok) setKept((k) => Object.fromEntries(Object.entries(k).filter(([e]) => e !== goal.event_id)));
+      return;
+    }
     const r = await api.POST("/v1/orgs/{org_id}/clips", {
       params: { path: { org_id: orgId } },
       body: { match_id: match.id, ...sceneOf(goal), title: label(goal) },
     });
-    if (r.response.ok) setKept(goal.event_id);
+    if (r.response.ok && r.data) setKept((k) => ({ ...k, [goal.event_id]: r.data.id }));
   }
+  const isKept = goal != null && kept[goal.event_id] != null;
 
+  const why = !hasCamera && !camera.isLoading && eventId ? (fieldOpen ? t("fieldHint") : t("noCamera")) : null;
   const toggle = (
     <span className="flex border-[1.5px] border-[#4a5058]" role="group" aria-label={t("stageMode")}>
       {(["video", "taktik"] as const).map((m) => (
@@ -135,8 +195,15 @@ export function VideoStage({
           key={m}
           type="button"
           aria-pressed={mode === m}
-          onClick={() => setMode(m)}
-          className={cn("min-h-11 cursor-pointer border-0 px-3 font-sans text-[15px] font-bold", mode === m ? "bg-[#e9eef2] text-court-bar" : "bg-transparent text-[#a8b1ba]")}
+          disabled={m === "taktik" && !hasCamera}
+          aria-describedby={m === "taktik" && why ? "stage-mode-why" : undefined}
+          title={m === "taktik" && why ? why : undefined}
+          onClick={() => choose(m)}
+          className={cn(
+            "min-h-11 cursor-pointer border-0 px-3 font-sans text-[15px] font-bold disabled:cursor-not-allowed disabled:opacity-50",
+            mode === m ? "bg-[#e9eef2] text-court-bar" : "bg-transparent text-[#a8b1ba]",
+          )}
+          data-testid={`stage-mode-${m}`}
         >
           {t(m === "video" ? "modeVideo" : "modeTaktik")}
         </button>
@@ -147,44 +214,131 @@ export function VideoStage({
 
   return (
     <section className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_340px]" aria-label={t("cameraTitle")} data-testid="video-stage">
-      <div className="min-w-0">
-        <div hidden={mode !== "video"}>
-          {goal?.t_ms != null ? (
-            // one scene at a time: the window of the goal; «Alle abspielen» goes on by itself
-            <VideoPlayer
-              ref={player}
-              key={`${goal.event_id}-${all}`}
-              src={`${media}/hls/master.m3u8`}
-              poster={video.has_poster ? `${media}/poster.jpg` : undefined}
-              fps={video.fps}
-              window={sceneOf(goal)}
-              onWindowEnd={() => (all ? step(1) : undefined)}
-              autoPlay={all}
-            />
-          ) : (
-            <VideoPlayer ref={player} src={`${media}/hls/master.m3u8`} poster={video.has_poster ? `${media}/poster.jpg` : undefined} fps={video.fps} markers={partMarkers} />
-          )}
+      {/* phones: the column dissolves into the grid, so the player stays on top while the list
+          below it scrolls; from laptops up it stays beside the list (UX-02) */}
+      <div className="min-w-0 max-lg:contents">
+        <div
+          ref={stageTop}
+          className={cn("scroll-mt-16 bg-ground", mode === "video" && "sticky top-14 z-20 lg:top-4")}
+          data-testid="stage-player"
+        >
+          {/* the switch above the picture (UX-01) */}
           <div className="flex flex-wrap items-center gap-2.5 bg-court-bar px-3 py-2 font-mono text-[13px] font-semibold text-court-text">
             {toggle}
-            {chosen && at >= 0 && <span>{t("sceneOf", { n: at + 1, total: list.length })}</span>}
-            {goal && <span className="ml-auto font-mono text-xl text-white">{when(goal)}</span>}
+            {list.length > 1 && at >= 0 && <span>{t("sceneOf", { n: at + 1, total: list.length })}</span>}
+            {goal && <span className="ml-auto text-xl font-semibold tabular-nums text-white">{when(goal)}</span>}
           </div>
+          {why && (
+            <p id="stage-mode-why" className="m-0 bg-court-bar px-3 pb-2 text-[15px] text-court-text" data-testid="stage-mode-why">
+              {why}
+              {fieldOpen && staff && (
+                <>
+                  {" "}
+                  <Link href={`/app/${orgId}/matches/${match.id}/check`} className="font-semibold text-white underline underline-offset-4">
+                    {t("fieldCheck")}
+                  </Link>
+                </>
+              )}
+            </p>
+          )}
+          {/* one video element; the picture fits the screen beside the controls (UI-05) */}
+          <div hidden={mode !== "video"} className="mx-auto w-full lg:max-w-[calc((100svh-12rem)*16/9)]">
+            {goal?.t_ms != null ? (
+              // one scene at a time: the window of the goal; «Alle abspielen» goes on by itself
+              <VideoPlayer
+                ref={player}
+                key={`${goal.event_id}-${all}`}
+                src={`${media}/hls/master.m3u8`}
+                poster={video.has_poster ? `${media}/poster.jpg` : undefined}
+                fps={video.fps}
+                window={free ? undefined : sceneOf(goal)}
+                onWindowEnd={() => (all ? step(1) : setEnded(true))}
+                onKey={onKey}
+                autoPlay={all}
+              />
+            ) : (
+              <VideoPlayer ref={player} src={`${media}/hls/master.m3u8`} poster={video.has_poster ? `${media}/poster.jpg` : undefined} fps={video.fps} markers={partMarkers} />
+            )}
+          </div>
+          {mode === "video" && ended && !all && (
+            <p role="status" className="m-0 flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-rule px-3 py-1.5 text-[15px]" data-testid="scene-ended">
+              <b>{t("sceneEnded")}</b>
+              {at >= 0 && at < list.length - 1 && (
+                <button type="button" onClick={() => step(1)} className="min-h-11 cursor-pointer font-bold underline decoration-[1.5px] underline-offset-4">
+                  {t("nextScene")}
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => (setFree(true), setEnded(false), player.current?.play())}
+                className="min-h-11 cursor-pointer font-bold underline decoration-[1.5px] underline-offset-4"
+                data-testid="scene-run-on"
+              >
+                {t("letItRun")}
+              </button>
+            </p>
+          )}
+          {mode === "taktik" && eventId && goal && (
+            <SceneCamera
+              key={eventId}
+              orgId={orgId}
+              matchId={match.id}
+              eventId={eventId}
+              label={label(goal)}
+              view={phone ? "halfB" : "camL"}
+              width={phone ? 390 : 900}
+              caption={chosen && at >= 0 ? `${label(goal)} · ${t("sceneOf", { n: at + 1, total: list.length })}` : label(goal)}
+              captionSmall={t("positionsFromVideo")}
+            />
+          )}
         </div>
-        {mode === "taktik" && eventId && goal && (
-          <SceneCamera
-            key={eventId}
-            orgId={orgId}
-            matchId={match.id}
-            eventId={eventId}
-            label={label(goal)}
-            view={phone ? "halfB" : "camL"}
-            width={phone ? 390 : 900}
-            caption={chosen && at >= 0 ? `${label(goal)} · ${t("sceneOf", { n: at + 1, total: list.length })}` : label(goal)}
-            captionSmall={t("positionsFromVideo")}
-            barExtra={toggle}
-          />
-        )}
-        <CameraKey us={ownName} them={oppName} referee={t("referee")} ball={t("ball")} />
+        <div className="min-w-0">
+        {/* the legend belongs to the dots of «Feld von oben», not to the video (UI-06) */}
+        {mode === "taktik" && <CameraKey us={ownName} them={oppName} referee={t("referee")} ball={t("ball")} />}
+        <div className="mt-4 flex flex-wrap gap-3" data-testid="stage-actions">
+          {/* the scenes one after the other, also without a thing (UX-03) */}
+          {list.length > 1 && (
+            <>
+              <Button variant="secondary" onClick={() => step(-1)} disabled={at <= 0} data-testid="prev-scene">
+                <SkipBack aria-hidden />
+                {t("prevScene")}
+              </Button>
+              <Button variant={chosen ? "primary" : "secondary"} onClick={() => step(1)} disabled={at >= list.length - 1} data-testid="next-scene">
+                {t("nextScene")}
+                <SkipForward aria-hidden />
+              </Button>
+            </>
+          )}
+          {chosen && (
+            <Button variant="secondary" aria-pressed={all} onClick={() => (choose("video"), setAll((x) => !x))} data-testid="play-all">
+              {all ? t("stopAll") : t("playAll", { n: list.length })}
+            </Button>
+          )}
+          <Button variant={chosen ? "secondary" : "primary"} aria-pressed={isKept} onClick={() => void keep()} disabled={goal?.t_ms == null} data-testid="keep-scene">
+            {isKept && <Check aria-hidden />}
+            {isKept ? t("kept") : t("keepScene")}
+          </Button>
+          {/* where the saved scene is: the scenes of this match (BUG-21) */}
+          {isKept && (
+            <Link href={`/app/${orgId}/teams/${match.team_id}/scenes?match=${match.id}`} className="inline-flex min-h-11 items-center text-[15px] font-bold text-ink underline decoration-[1.5px] underline-offset-4" data-testid="kept-where">
+              {t("keptWhere")}
+            </Link>
+          )}
+          {/* drawing is on the video: the workbench opens with the tools on this moment (BUG-13) */}
+          {staff && mode === "video" && onDraw && (
+            <Button
+              variant="secondary"
+              onClick={() => {
+                player.current?.pause();
+                onDraw(Math.round(player.current?.time() ?? (goal ? sceneOf(goal).start_ms : 0)));
+              }}
+              data-testid="stage-draw"
+            >
+              {t("draw")}
+            </Button>
+          )}
+        </div>
+        {list.length > 1 && mode === "video" && <p className="mt-2 mb-0 text-[15px] text-ink-2 max-md:hidden">{t("sceneKeys")}</p>}
         {/* no throw-off: the Rail over the video's own time, the goals at their place in it (G8) */}
         {!span && goals.length > 0 && goals.every((g) => g.minute == null) && video.duration_s ? (
           <div className="mt-6">
@@ -193,6 +347,7 @@ export function VideoStage({
               at={goal?.t_ms != null ? goal.t_ms / 60_000 : null}
               length={Math.max(1, video.duration_s / 60)}
               label={t("rail")}
+              oppFirst={railOppFirst}
             />
             <p className="mt-1 flex justify-between text-[15px] text-ink-2" data-testid="rail-video">
               <span>{t("atVideo", { time: "0:00" })}</span>
@@ -203,7 +358,7 @@ export function VideoStage({
           <div className="mt-6">
             {span ? (
               <>
-                <Rail goals={reportGoals(graphics)} phase={short ? null : phase} at={goal?.minute ?? null} from={span[0]} length={Math.max(1, span[1] - span[0])} label={t("rail")} />
+                <Rail goals={reportGoals(graphics)} phase={short ? null : phase} at={goal?.minute ?? null} from={span[0]} length={Math.max(1, span[1] - span[0])} label={t("rail")} oppFirst={railOppFirst} />
                 <p className="mt-1 flex justify-between text-[15px] text-ink-2" data-testid="rail-span">
                   <span>{t("minuteAt", { n: Math.floor(span[0]) })}</span>
                   <span>{t("minuteAt", { n: Math.ceil(span[1]) })}</span>
@@ -211,7 +366,7 @@ export function VideoStage({
               </>
             ) : (
               <>
-                <Rail goals={reportGoals(graphics)} phase={phase} at={goal?.minute ?? null} label={t("rail")} />
+                <Rail goals={reportGoals(graphics)} phase={phase} at={goal?.minute ?? null} label={t("rail")} oppFirst={railOppFirst} />
                 <p className="mt-1 flex justify-between text-[15px] text-ink-2">
                   <span>{t("throwOff")}</span>
                   <span>{t("halfTimeWord")}</span>
@@ -221,28 +376,6 @@ export function VideoStage({
             )}
           </div>
         )}
-        <div className="mt-6 flex flex-wrap gap-3" data-testid="stage-actions">
-          {chosen && (
-            <>
-              <Button onClick={() => step(1)} disabled={at >= list.length - 1} data-testid="next-scene">
-                {t("nextScene")}
-              </Button>
-              <Button variant="secondary" onClick={() => step(-1)} disabled={at <= 0}>
-                {t("prevScene")}
-              </Button>
-              <Button variant="secondary" aria-pressed={all} onClick={() => (setMode("video"), setAll((x) => !x))} data-testid="play-all">
-                {all ? t("stopAll") : t("playAll", { n: list.length })}
-              </Button>
-            </>
-          )}
-          <Button variant={chosen ? "secondary" : "primary"} onClick={() => void keep()} disabled={goal?.t_ms == null || kept === goal?.event_id}>
-            {kept === goal?.event_id ? t("kept") : t("keepScene")}
-          </Button>
-          {staff && (
-            <Button variant="secondary" onClick={onBench}>
-              {t("draw")}
-            </Button>
-          )}
         </div>
       </div>
       <aside className="min-w-0">
@@ -264,17 +397,29 @@ export function VideoStage({
             const on = g.event_id === eventId;
             return (
               <li key={g.event_id}>
+                {/* the running scene by its background and a bar, its place of the shot kept;
+                    the team by its colour dot and name, the time once (UX-04) */}
                 <button
                   type="button"
                   aria-pressed={on}
-                  onClick={() => setEventId(g.event_id)}
-                  className={cn("grid min-h-11 w-full cursor-pointer grid-cols-[28px_52px_minmax(0,1fr)] gap-2 border-t border-rule px-3 py-2.5 text-left", on ? "bg-attn text-attn-ink" : "bg-transparent text-ink hover:bg-ink/5")}
+                  onClick={() => pick(g.event_id)}
+                  className={cn(
+                    "grid min-h-11 w-full cursor-pointer grid-cols-[28px_52px_minmax(0,1fr)] gap-2 border-t border-rule px-3 py-2.5 text-left",
+                    on ? "bg-attn text-attn-ink shadow-[inset_4px_0_0_var(--ink)]" : "bg-transparent text-ink hover:bg-ink/5",
+                  )}
                 >
                   <b className="font-num text-[17px]">{chosen ? i + 1 : ""}</b>
                   <b className="font-num text-[17px]">{when(g)}</b>
                   <span className="text-[15px] leading-snug">
-                    {label(g)}
-                    <small className={cn("block text-[15px]", on ? "text-attn-ink" : "text-ink-2")}>{on ? t("running") : where(g)}</small>
+                    <i
+                      aria-hidden
+                      className={cn(
+                        "mr-1.5 inline-block size-3 rounded-full align-[-1px]",
+                        g.team === "opp" ? "bg-opp-cam shadow-[inset_0_0_0_2.5px_var(--opp-cam-edge),0_0_0_1px_var(--ink)]" : "bg-club-cam shadow-[0_0_0_1px_var(--ink)]",
+                      )}
+                    />
+                    {t("goalOf", { team: team(g), clock: "" }).trim()}
+                    <small className={cn("block text-[15px]", on ? "text-attn-ink" : "text-ink-2")}>{where(g)}</small>
                   </span>
                 </button>
               </li>
@@ -285,7 +430,7 @@ export function VideoStage({
         {goal && goal.has_video && (
           <p className="m-0 flex flex-wrap items-center justify-between gap-x-3 border-t border-rule px-3 py-1.5 text-[15px]" data-testid="stage-spot">
             <span className="text-ink-2">{spotText(goal)}</span>
-            {staff && <SpotChange orgId={orgId} matchId={match.id} goal={goal} label={label(goal)} />}
+            {staff && <SpotChange orgId={orgId} matchId={match.id} goal={goal} label={label(goal)} clip={{ src: `${media}/hls/master.m3u8`, window: sceneOf(goal) }} />}
           </p>
         )}
         {!chosen && things.length > 0 && (
@@ -324,17 +469,17 @@ export function VideoStage({
         </div>
         <p className="mt-8">
           <button type="button" onClick={onBench} className="min-h-11 cursor-pointer font-bold underline decoration-[1.5px] underline-offset-4" data-testid="bench-open">
-            {t("more")}
+            {staff ? t("plainBench") : t("plainComments")}
           </button>
         </p>
         <details className="mt-6">
-          <summary className="min-h-11 cursor-pointer content-center font-bold underline decoration-[1.5px] underline-offset-4">
+          <summary className="fold font-bold">
             {t("sceneList")} ({goals.length})
           </summary>
           <ul className="m-0 mt-2 max-h-[420px] list-none overflow-y-auto p-0">
             {goals.map((g) => (
               <li key={g.event_id}>
-                <button type="button" onClick={() => (onThing(null), setEventId(g.event_id))} className="flex min-h-11 w-full cursor-pointer items-center gap-3 border-t border-rule bg-transparent px-1 text-left text-[15px] text-ink hover:bg-ink/5" aria-pressed={g.event_id === eventId}>
+                <button type="button" onClick={() => (onThing(null), pick(g.event_id))} className="flex min-h-11 w-full cursor-pointer items-center gap-3 border-t border-rule bg-transparent px-1 text-left text-[15px] text-ink hover:bg-ink/5" aria-pressed={g.event_id === eventId}>
                   <b className="font-num w-12">{clockOf(g.minute)}</b>
                   {label(g)}
                 </button>

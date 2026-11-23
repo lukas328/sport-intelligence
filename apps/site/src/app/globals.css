@@ -200,8 +200,11 @@
     outline: 3px solid var(--ink);
     outline-offset: 3px;
   }
+  /* on the club colour, the court and every ink ground the ring turns white with an ink edge, so
+     keyboard focus always shows (WCAG 2.4.7, checked by tabbing through the pages) */
   .on-club :focus-visible,
-  .on-court :focus-visible {
+  .on-court :focus-visible,
+  .bg-ink :focus-visible {
     outline-color: #ffffff;
     box-shadow: 0 0 0 6px var(--ink);
   }
@@ -497,8 +500,8 @@
     /* blocks glide in once as they come into view (components/reveal.tsx, U19): visible as
        rendered, the animation only plays from `in` on; the hero pictures rise on load */
     [data-reveal].in {
-      animation: reveal-in 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
-      animation-delay: calc(var(--d, 0) * 90ms);
+      animation: reveal-in 0.35s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+      animation-delay: calc(var(--d, 0) * 50ms);
     }
     .rise {
       animation: rise 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;

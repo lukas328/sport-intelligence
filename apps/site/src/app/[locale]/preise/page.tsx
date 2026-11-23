@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import plans from "@handball/plans";
 import { Faq } from "@/components/faq";
 import { KitScope, StartLink } from "@/components/kit";
@@ -9,6 +10,8 @@ import { faqPage, graph } from "@/lib/schema";
 import { APP_LOCALE, fmt, messages, type Locale } from "@/lib/i18n";
 import { pageMeta } from "@/lib/seo";
 import { cn } from "@/lib/cn";
+import { Cur, CurrencySwitch } from "@/components/currency";
+import { perTeam } from "@/lib/currency";
 
 type Plan = (typeof plans.plans)[number];
 /** the plan features named on the page, in this order (packages/plans/plans.json) */
@@ -39,6 +42,7 @@ export default async function Pricing({ params }: Props) {
   const t = m.pricing;
   const names = t.featureNames as Record<string, string>;
   const team = plans.plans.find((p) => p.plan === "team")!;
+  const free = plans.plans.find((p) => p.plan === "free")!;
   const nums = { days: team.trial_days, month: team.price_chf_month, year: team.price_chf_year };
   const list = plans.plans;
   // the yearly price in months given: CHF 390 for 12 months of CHF 39 is «2 Monate geschenkt»
@@ -74,10 +78,10 @@ export default async function Pricing({ params }: Props) {
       <PageHead
         kick={t.title}
         title={t.head}
-        lead={fmt(t.lead, nums)}
+        lead={<Cur text={fmt(t.lead, nums)} />}
         aside={<TrialArt days={team.trial_days} label={t.figureLabel} />}
       >
-        <StartLink appLocale={APP_LOCALE[locale]} className="btn btn-ink mt-8">
+        <StartLink appLocale={APP_LOCALE[locale]} src="pricing" className="btn btn-ink mt-8">
           {t.choose}
         </StartLink>
       </PageHead>
@@ -110,15 +114,21 @@ export default async function Pricing({ params }: Props) {
                 {fmt(s.when, nums)}
               </p>
               <h2 className="mt-3 text-[1.875rem] leading-tight md:text-[2.375rem]">
-                {fmt(s.title, nums)}
+                <Cur text={fmt(s.title, nums)} />
               </h2>
-              <p className="mt-3 max-w-[30rem] text-[1.125rem]">{fmt(s.text, nums)}</p>
+              <p className="mt-3 max-w-[30rem] text-[1.125rem]">
+                <Cur text={fmt(s.text, nums)} />
+              </p>
             </li>
           ))}
         </ol>
-        <h2 id="plaene" className="mt-16 text-[1.875rem] md:mt-20 md:text-[2.375rem]">
-          {t.plansTitle}
-        </h2>
+        <div className="mt-16 flex flex-wrap items-end justify-between gap-x-8 gap-y-4 md:mt-20">
+          <h2 id="plaene" className="text-[1.875rem] md:text-[2.375rem]">
+            {t.plansTitle}
+          </h2>
+          {/* EUR or CHF, the same amount (europa.md EU3); from the browser's language, switchable */}
+          <CurrencySwitch label={t.currencyLabel} />
+        </div>
         {/* the plans side by side (U23): one column per plan, one row per thing, ticks where it is in */}
         <div className="mt-6 max-md:hidden">
           <table aria-describedby="fair" className="w-full border-collapse text-left">
@@ -142,17 +152,22 @@ export default async function Pricing({ params }: Props) {
                         <span className="mt-4 block">
                           <span className="font-num block text-[2.25rem] leading-none md:text-[3rem]">{p.price_chf_month}</span>
                           <span className="mt-1 block text-[0.9375rem] font-semibold md:text-base">
-                            {fmt(t.perMonth, { price: p.price_chf_month })}
+                            <Cur text={fmt(t.perMonth, { price: p.price_chf_month })} />
                           </span>
                           <span className="block text-[0.9375rem] text-ink-2 md:text-base">
-                            {fmt(t.perYear, { price: p.price_chf_year, gift: gift(p) })}
+                            <Cur text={fmt(t.perYear, { price: p.price_chf_year, gift: gift(p) })} />
                           </span>
+                          {p.teams > 1 && (
+                            <span className="block text-[0.9375rem] text-ink-2 md:text-base">
+                              <Cur text={fmt(t.perTeam, { price: perTeam(p) })} />
+                            </span>
+                          )}
                         </span>
                       ) : (
                         <span className="mt-4 block">
                           <span className="font-num block text-[2.25rem] leading-none md:text-[3rem]">0</span>
                           <span className="mt-1 block text-[0.9375rem] font-semibold md:text-base">
-                            {fmt(t.perMonth, { price: 0 })}
+                            <Cur text={fmt(t.perMonth, { price: 0 })} />
                           </span>
                         </span>
                       )}
@@ -200,6 +215,7 @@ export default async function Pricing({ params }: Props) {
                   <td key={p.plan} className={cn("px-2 pt-5 pb-6 md:px-5", p.plan === "team" && "border-x-2 border-ink")}>
                     <StartLink
                       appLocale={APP_LOCALE[locale]}
+                      src="pricing-table"
                       className={cn("btn w-full px-3 max-md:text-[0.9375rem] md:w-auto", p.plan === "team" ? "btn-ink" : "btn-line")}
                     >
                       {t.choose}
@@ -224,7 +240,14 @@ export default async function Pricing({ params }: Props) {
                 <th key={p.plan} id={`m-${p.plan}`} scope="col" className="px-1.5 pt-4 pb-3 font-normal first:pl-0">
                   <span className="block font-slant text-[1.375rem] leading-tight">{t.plans[p.plan as keyof typeof t.plans].name}</span>
                   <span className="font-num mt-2 block text-[2rem] leading-none">{p.price_chf_month}</span>
-                  <span className="mt-1 block text-[0.875rem] leading-snug font-semibold">{fmt(t.perMonth, { price: p.price_chf_month })}</span>
+                  <span className="mt-1 block text-[0.875rem] leading-snug font-semibold">
+                    <Cur text={fmt(t.perMonth, { price: p.price_chf_month })} />
+                  </span>
+                  {p.teams > 1 && (
+                    <span className="mt-1 block text-[0.875rem] leading-snug text-ink-2">
+                      <Cur text={fmt(t.perTeam, { price: perTeam(p) })} />
+                    </span>
+                  )}
                 </th>
               ))}
             </tr>
@@ -265,16 +288,21 @@ export default async function Pricing({ params }: Props) {
           ))}
         </table>
         <div className="mt-5 flex flex-col gap-2 md:hidden">
-          <StartLink appLocale={APP_LOCALE[locale]} className="btn btn-ink">
+          <StartLink appLocale={APP_LOCALE[locale]} src="pricing-table" className="btn btn-ink">
             {t.choose}
           </StartLink>
           <p className="text-[1.0625rem] text-ink-2">{fmt(t.trial, { days: team.trial_days })}</p>
         </div>
         <div className="mt-6 max-w-[48rem] space-y-2 text-[1.0625rem] text-ink-2">
+          <p>{fmt(t.freeAfter, { matches: free.matches_per_season ?? 0, gb: free.storage_gb })}</p>
           <p id="fair">{t.fairUseText}</p>
           <p>{fmt(t.annual, { months: plans.annual_months, gift: gift(team) })}</p>
           <p>{t.currency}</p>
         </div>
+        {/* the board of a club with several teams reads on «Für Vereine» */}
+        <Link href={`/${locale}/vereine/`} className="link mt-4">
+          {m.nav.clubs}
+        </Link>
         <section aria-labelledby="faq" className="mt-16">
           <SectionHead id="faq" title={t.faqTitle} />
           <Faq items={t.faq.map((f) => ({ q: f.q, a: <p>{f.a}</p> }))} />

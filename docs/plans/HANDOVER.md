@@ -1,17 +1,37 @@
 # Übergabe an die nächste Hauptsitzung
 
-Stand 2026-11-09. Diese Datei ist der Einstieg für eine neue Claude-Sitzung. Erst diese Datei lesen,
-dann `docs/plans/backlog.md`.
+Stand 2026-11-19. Diese Datei ist der Einstieg für eine neue Claude-Sitzung. Erst diese Datei lesen,
+dann `docs/plans/UEBERGABE-2026-11-19.md` (was die Hauptsitzung am 19.11. entschieden und geändert
+hat), dann `docs/plans/backlog.md`.
 
-## Stand
-- **main enthält alles.** PRs 2 bis 14 sind gemergt, keine offenen Branches mit Arbeit. CI ist grün
-  und braucht pro PR etwa 7 Minuten (Python-Tests parallel, Caches, eigener Job für Lint und Typen).
-- **Produkt:** Upload, Analyse (Spieler, Teams, Spielfeld, Torkandidaten, Würfe, Nummern, Ball als
-  Forschung), offizielle Daten (Spielberichte per Link, Mannschaft von handball.ch übernehmen),
-  Saison-Statistik, Berichte, Trainingsplanung, Abrechnung. Pilot-Infrastruktur für Azure liegt in
-  `infra/terraform/azure/`, noch nicht ausgerollt.
-- **Code-Prüfung vor der Übergabe** (PR 12, 13): die gefundenen Fehler sind behoben, die grösseren
-  Umbauten stehen in `docs/plans/backlog.md` unter "Code health".
+## Stand 2026-11-19
+- main bis PR #103 (`c52f78b`). PR #104 (Wurf-Endtest) und die Arbeit vom 19.11. liegen im Branch
+  `claude/affectionate-edison-lkw4r3`, bis Lukas ihn merged.
+- Seit dem 9.11. dazugekommen (Details in den Plänen):
+  - Produkt-Analyse mit der Forschung verbunden: Ballnetz hrp1 hinter `HB_BALL_MODEL`, Ballpfad,
+    Pausenerkennung über die Hallentafel, weniger Tor-Kandidaten, Teamzuordnung
+    (`docs/plans/produkt-analyse-integration.md`).
+  - GPU gemessen (Modal-Aufträge 12 bis 15): GPU-Standard für die Testphase in
+    `apps/gpu-worker/Dockerfile.cuda`, geschätzt 1.27 USD pro Spiel. Staging rechnet auf der CPU.
+  - Kalibrierung: automatisch auf Vereinsmaterial praktisch nie auf 1 m genau; darum Feld per
+    Linien-Klicks einmal pro Halle (Löser #81, API #91, Zustand #92, Dialog), siehe
+    `docs/plans/kalibrierung.md` Abschnitt 6. Offen: Ende-zu-Ende auf Staging mit echtem Clip.
+  - Wurf-Endtest (42 Spiele): Wurf-Kandidaten finden 85 % der Würfe im Fenster -3/+8 s, aber die
+    geschätzte Wurfzeit liegt im Median 2.8 s neben der Markierung, Präzision 26 %.
+  - Website Runde 4 und App-Befunde (`docs/ux-test/livegang/BEFUNDE-4.md`), Staging-Befunde aus
+    den Logs (Verbindungsname pro Prozess und Watchdog für wartende Jobs sind umgesetzt).
+- GPU im Betrieb: später Azure (Entscheid Lukas 2026-11-19), mit Umzug der Umgebung in eine andere
+  Azure-Region; macht Lukas später. Kein Modal-Backend.
+
+## Prioritäten ab 2026-11-19 (Hauptsitzung entscheidet selbst)
+1. Was der Trainer auf echtem Material sieht: Wurfzeit der Kandidaten genauer (Versatz 2.8 s),
+   Präzision der Wurf- und Tor-Kandidaten, Wurfort-Vorschlag mit Ein-Klick-Bestätigung (A22).
+2. Kalibrierung per Klick Ende-zu-Ende auf Staging, danach Deploy (braucht Lukas' Staging-Zugang).
+3. Pausenerkennung: Spielende, später eine Pausenerkennung ohne Hallentafel (`no_play`-Regel).
+4. Code health aus `docs/plans/backlog.md`.
+5. Ball: Fehlalarme zerlegen, Testset vergrössern; vor dem Livegang Netze ohne DeepSport.
+
+## Frühere Stände (Verlauf)
 
 ## Nacht 2026-11-09/10 (Hauptsitzung)
 Gemergt (alle bei grüner CI): #16 bis #32.

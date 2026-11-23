@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cameraScene, goalRuns, reportCut, reportGoals, spotless, videoScore, zoneLine, zonesWorthACourt, type MatchGraphics, type SceneCamera } from "./graphics";
+import { cameraScene, checkCount, furtherMoments, goalRuns, reportCut, reportGoals, spotless, videoScore, zoneLine, zonesWorthACourt, type MatchGraphics, type SceneCamera } from "./graphics";
 
 const G: MatchGraphics = {
   has_video: true,
@@ -78,5 +78,16 @@ describe("graphics data", () => {
   it("shows positions without a match clock, on the video time (real-video test E02)", () => {
     expect(cameraScene({ ...S, clock_s: null, video_s: 312 })).toMatchObject({ clock: 312, videoTime: true });
     expect(cameraScene(S)).toMatchObject({ videoTime: false });
+  });
+});
+
+describe("open questions (livegang L3)", () => {
+  const check = (id: string, kind: string) => ({ id, kind, frame_ref: 0, box: null, candidates: [] }) as unknown as MatchGraphics["checks"][number];
+  it("keeps the moments behind «Mehr prüfen» countable once the main round is answered", () => {
+    const answered: MatchGraphics = { ...G, checks: [], more_checks: [check("a", "goal"), check("b", "goal"), check("k", "kickoff")] };
+    // the bell's count stays quiet, the further moments are still there to reach
+    expect(checkCount(answered)).toBe(0);
+    expect(furtherMoments(answered)).toBe(2);
+    expect(furtherMoments({ ...G, more_checks: undefined })).toBe(0);
   });
 });

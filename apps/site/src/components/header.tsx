@@ -67,11 +67,11 @@ export function Header({ locale }: { locale: Locale }) {
           >
             {t.login}
           </a>
-          <StartLink appLocale={app} className="btn btn-ink ml-1.5 min-h-12 whitespace-nowrap max-xl:px-3.5">
+          <StartLink appLocale={app} src="header" className="btn btn-ink ml-1.5 min-h-12 whitespace-nowrap max-xl:px-3.5">
             {t.start}
           </StartLink>
         </div>
-        <StartLink appLocale={app} className="btn btn-ink ml-auto hidden min-h-12 md:max-lg:inline-flex">
+        <StartLink appLocale={app} src="header" className="btn btn-ink ml-auto hidden min-h-12 md:max-lg:inline-flex">
           {t.start}
         </StartLink>
         <MenuDisclosure label={t.menu} className="group ml-auto md:ml-0 lg:hidden">
@@ -84,7 +84,7 @@ export function Header({ locale }: { locale: Locale }) {
               </div>
               <NavLinks locale={locale} links={links} stacked />
               <div className="mt-4 flex flex-col gap-3 border-t-2 border-ink pt-4 sm:flex-row">
-                <StartLink appLocale={app} className="btn btn-ink">
+                <StartLink appLocale={app} src="menu" className="btn btn-ink">
                   {t.start}
                 </StartLink>
                 <a href={loginUrl(app)} className="btn btn-line">

@@ -37,7 +37,9 @@ export function NotificationBell({ orgId }: { orgId: string }) {
   // a kind the web has no text for yet still shows as a notification, not as a raw key
   // with the match's name where the note carries it (UX test H06, B29)
   const text = (n: Note) => {
-    const named = `${n.kind}_match`;
+    // the main round answered while moments still wait behind «Mehr prüfen»: never «Alles geprüft» (livegang L3)
+    const further = Number((n.params as { further?: number } | null)?.further ?? 0);
+    const named = n.kind === "analysis_checked" && further > 0 ? "analysis_checked_more_match" : `${n.kind}_match`;
     // the questions with about how long they take: «3 Fragen, etwa 1 Minute» (second round A6)
     const questions = Number((n.params as { questions?: number } | null)?.questions ?? 0);
     const params = { ...(n.params as object), minutes: checkMinutes(questions, 0) };
@@ -45,6 +47,9 @@ export function NotificationBell({ orgId }: { orgId: string }) {
     // who asks for which team (K17); older notes without a name keep the plain text
     const person = `${n.kind}_${(n.params as { team?: string } | null)?.team ? "team" : "named"}`;
     if ((n.params as { name?: string } | null)?.name && t.has(person as "assignment")) return t(person as "assignment", n.params as never);
+    // a note about a team names it: «… für die Herren 1» (app review UX-10)
+    const forTeam = `${n.kind}_forTeam`;
+    if ((n.params as { team?: string } | null)?.team && t.has(forTeam as "assignment")) return t(forTeam as "assignment", n.params as never);
     return t.has(n.kind as "assignment") ? t(n.kind as "assignment", n.params as never) : t("other");
   };
   // which match: its day beside the time of the note (A12)
@@ -63,7 +68,7 @@ export function NotificationBell({ orgId }: { orgId: string }) {
         <Bell aria-hidden className={cn("size-5", unread > 0 && "-translate-x-1 translate-y-1")} strokeWidth={1.8} />
         {unread > 0 && (
           <span
-            className="absolute top-0 right-0 grid min-w-[1.375rem] place-items-center bg-accent px-1 font-mono text-[13px] font-bold leading-[1.375rem] text-accent-contrast ring-2 ring-background"
+            className="absolute top-0 right-0 grid min-w-[1.375rem] place-items-center bg-accent px-1 text-[14px] font-bold tabular-nums leading-[1.375rem] text-accent-contrast ring-2 ring-background"
             data-testid="unread"
           >
             {unread}

@@ -18,6 +18,7 @@ import { goalRuns, type MatchGraphics } from "@/lib/graphics";
 import { threeThings } from "@/lib/three-things";
 import { cn } from "@/lib/utils";
 import { sitePage, useMailEnabled, useSiteConfig } from "@/lib/site-config";
+import { signupSource } from "@/lib/signup-source";
 import { enterApp } from "@/lib/nav";
 import { ENTRY_EMAIL, remember } from "@/lib/offline";
 
@@ -119,7 +120,13 @@ function SearchStep({ initial, byHand = false, onPick, onName }: { initial: stri
       </form>
       {hits.isFetching && <p className="text-[17px] text-ink-2" aria-busy="true">…</p>}
       {hits.error && <p className="text-[17px]">{(hits.error as { status?: number }).status === 429 ? t("tooMany") : t("unavailable")}</p>}
-      {hits.data && hits.data.length === 0 && <p className="text-[17px]">{t("none", { q })}</p>}
+      {hits.data && hits.data.length === 0 && (
+        <div className="space-y-2" data-testid="entry-none">
+          <p className="m-0 text-[17px] font-semibold">{t("none", { q })}</p>
+          {/* honest about the federation data (europa.md step 1): a team elsewhere goes by hand */}
+          <p className="m-0 text-[17px]">{t("noneAbroad")}</p>
+        </div>
+      )}
       {/* found only with a letter's difference: say so (UX test N10) */}
       {hits.data && hits.data.length > 0 && hits.data.every((h) => h.fuzzy) && <p className="m-0 text-[17px]" data-testid="entry-fuzzy">{t("fuzzy", { q })}</p>}
       {hits.data && hits.data.length > 0 && (
@@ -455,7 +462,7 @@ function SaveStep({ club, team, name, colour, onBack }: { club: number | null; t
     setBusy(true);
     remember(ENTRY_EMAIL, email);
     const r = await api.POST("/v1/auth/register", {
-      body: { name: String(f.get("name")).trim(), email, password: String(f.get("password")), accept_terms: true, locale: lang, invitation_token: null },
+      body: { name: String(f.get("name")).trim(), email, password: String(f.get("password")), accept_terms: true, locale: lang, invitation_token: null, source: signupSource() },
     });
     if (r.error) {
       setBusy(false);

@@ -204,7 +204,7 @@ the registry (~ CHF 5), Postgres storage (~ CHF 4) and a few cents for Key Vault
 ## Known limits
 
 - `HB_GPU_BACKEND=local`: the analysis runs on the CPU of the gpu-worker container. Slow but enough for
-  the pilot; the Modal backend is not implemented yet (`apps/gpu-worker/.../backends/base.py`).
+  the pilot; a Modal backend is not implemented yet.
 - Redis writes an append-only file to a small Azure Files share (`azurerm_storage_share.redis`), so
   queued jobs survive a restart of its replica. The API watchdog also enqueues again a job that waits
   but is missing from the queue (`progress.requeue_lost`).

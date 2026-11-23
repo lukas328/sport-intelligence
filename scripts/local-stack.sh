@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 # Local stack without Docker images: Postgres 16, Redis and an S3 stand-in (moto) from the host,
 # API, worker and web as plain processes. For environments where `make up` cannot pull images
-# (cloud sessions hit Docker Hub rate limits). See docs/runbooks/local-stack-without-docker.md.
+# (cloud sessions hit Docker Hub rate limits). See docs/runbooks/local-stack-ohne-docker.md.
 #
 #   scripts/local-stack.sh up       # start everything (idempotent)
 #   scripts/local-stack.sh down     # stop the processes started here
 #   scripts/local-stack.sh status
-#   scripts/local-stack.sh restart-web   # after editing apps/web/messages (dev server cache)
+#   scripts/local-stack.sh restart-web   # restart the web server in its mode (build: next start,
+#                                        # HB_WEB_DEV=1: next dev with a clean cache)
 #   scripts/local-stack.sh restart-api   # after backend changes (runs the migrations too)
 set -euo pipefail
 
@@ -21,16 +22,27 @@ export HB_REDIS_URL=redis://localhost:6379/0
 export HB_S3_ENDPOINT_URL=http://localhost:9000
 export HB_S3_PUBLIC_ENDPOINT_URL=http://localhost:9000
 export HB_S3_ACCESS_KEY=handball
+# SeaweedFS as in compose when a `weed` binary is on the PATH (keeps the objects on disk under
+# $RUN/s3), otherwise moto (in memory: gone after `down`)
+if command -v weed >/dev/null; then HB_S3_SERVER=seaweedfs; else HB_S3_SERVER=moto; fi
 export HB_S3_REGION=us-east-1  # moto needs a LocationConstraint for any other region
 export HB_S3_SECRET_KEY=handball-secret
 export HB_INTERNAL_TOKEN=dev-only-internal-token
 export HB_API_INTERNAL_URL=http://localhost:8000
 export HB_CORS_ORIGINS='["http://localhost:3000"]'
 export HB_WEB_BASE_URL=http://localhost:3000
-export HB_EMAIL_BACKEND=console
+# with a mailpit binary on the PATH the mails go to it (SMTP 1025, web 8025), as in compose;
+# the e2e checks that read mails need it. Otherwise they end up in api.log.
+if command -v mailpit >/dev/null; then
+  export HB_EMAIL_BACKEND=smtp HB_SMTP_HOST=localhost HB_SMTP_PORT=1025
+else
+  export HB_EMAIL_BACKEND=console
+fi
 export HB_RATE_LIMIT_AUTH="300/60"
 export HB_UPLOAD_PART_SIZE=5242880
 export HB_GPU_BACKEND=local
+# the component pages under /dev for `next start` (e2e of the calibration dialog), as in compose
+export HB_DEV_PAGES=1
 export HB_OPERATOR_EMAILS='["@ops-e2e.ch"]'
 export HB_S3_PUBLIC_URL=http://localhost:9000
 export FORWARDED_ALLOW_IPS="*"
@@ -38,7 +50,8 @@ export FORWARDED_ALLOW_IPS="*"
 # how each service shows up in the process list (uv and pnpm start child processes, so pid files lie)
 pattern() {
   case "$1" in
-    s3) echo "moto_server -H 127.0.0.1 -p 9000" ;;
+    s3) echo "moto_server -H 127.0.0.1 -p 9000|weed server -dir=$RUN/s3" ;;
+    mail) echo "mailpit --smtp 127.0.0.1:1025" ;;
     api) echo "bin/handball-api" ;;
     worker) echo "bin/handball-worker" ;;
     gpu-worker) echo "bin/handball-gpu-worker" ;;
@@ -92,8 +105,19 @@ DO $$BEGIN
 END$$;
 SQL
   su postgres -c "psql -lqt" | cut -d'|' -f1 | grep -qw handball || su postgres -c "createdb -O handball handball"
-  start s3 uvx --from 'moto[server]==5.1.4' moto_server -H 127.0.0.1 -p 9000
-  wait_for http://localhost:9000/moto-api/ 60
+  if [[ "$HB_S3_SERVER" == "seaweedfs" ]]; then
+    mkdir -p "$RUN/s3"
+    start s3 weed server -dir="$RUN/s3" -ip=127.0.0.1 -s3 -s3.port=9000 \
+      -s3.config="$ROOT/infra/seaweedfs/s3.json" -master.volumeSizeLimitMB=512 -volume.max=200 \
+      -master.volumePreallocate=false
+    wait_for http://localhost:9000/healthz 60
+  else
+    start s3 uvx --from 'moto[server]==5.1.4' moto_server -H 127.0.0.1 -p 9000
+    wait_for http://localhost:9000/moto-api/ 60
+  fi
+  if [[ "$HB_EMAIL_BACKEND" == "smtp" ]]; then
+    start mail mailpit --smtp 127.0.0.1:1025 --listen 127.0.0.1:8025
+  fi
   (cd "$ROOT/apps/api" && uv run alembic upgrade head && uv run python -m handball_api.bootstrap)
   start api uv run handball-api
   start worker uv run handball-worker
@@ -109,12 +133,20 @@ SQL
 }
 
 
-# messages/*.json are cached by the dev server: after editing them, restart it with a clean cache
+# The web server again, in the mode `up` chose. With a production build it is `next start` on that
+# build (after `pnpm --filter @handball/web build`). Only with HB_WEB_DEV=1 (or without a build)
+# `next dev` with a clean cache: it caches messages/*.json. Until 20.11. this always deleted the
+# build and started `next dev`: e2e then ran against the dev server, whose compiles on first
+# visit reload pages (the «execution context destroyed» in data.spec after a restart).
 restart-web() {
   stop web
   sleep 2
-  rm -rf "$ROOT/apps/web/.next"
-  start web pnpm --filter @handball/web dev
+  if [[ -f "$ROOT/apps/web/.next/BUILD_ID" && "${HB_WEB_DEV:-}" != "1" ]]; then
+    start web pnpm --filter @handball/web start
+  else
+    rm -rf "$ROOT/apps/web/.next"
+    start web pnpm --filter @handball/web dev
+  fi
   wait_for http://localhost:3000/api/healthz 180
 }
 
@@ -128,11 +160,11 @@ restart-api() {
 }
 
 down() {
-  for name in web gpu-worker worker api s3; do stop "$name"; done
+  for name in web gpu-worker worker api mail s3; do stop "$name"; done
 }
 
 status() {
-  for name in s3 api worker gpu-worker web; do
+  for name in s3 mail api worker gpu-worker web; do
     if running "$name"; then echo "$name running"; else echo "$name stopped"; fi
   done
 }

@@ -53,7 +53,7 @@ communication features that only work when everyone in the club uses the app.
   no sub-tabs). Matrix and the data assistant stay as pages under Szenen until the search field
   answers questions itself.
 - E2e specs follow the new addresses and words; Mailpit-dependent specs were not run in the
-  cloud session (see `docs/runbooks/local-stack-without-docker.md`).
+  cloud session (see `docs/runbooks/local-stack-ohne-docker.md`).
 
 ## Alternatives considered
 

@@ -5,7 +5,7 @@ import { createContext, type CSSProperties, type KeyboardEvent, type ReactNode, 
 import { cn } from "@/lib/cn";
 import { DEMO_CLUB, kit, kitVars, SHIRTS } from "@/lib/color";
 import { withKit } from "@/lib/links";
-import { startUrl } from "@/lib/site";
+import { startUrl, type Source } from "@/lib/site";
 
 /** The demo opponent: black with white (TSV Nachtwind). The clash rule decides how it shows. */
 export const DEMO_OPPONENT = ["#17191c", "#ffffff"] as const;
@@ -220,10 +220,10 @@ export function DemoLink({ href, className, children }: { href: string; classNam
 }
 
 /** «Kostenlos starten»: the app's /einstieg with the language and, once picked, the colour. */
-export function StartLink({ appLocale, className, children }: { appLocale: string; className?: string; children: ReactNode }) {
+export function StartLink({ appLocale, src, className, children }: { appLocale: string; src: Source; className?: string; children: ReactNode }) {
   const { shirt, chosen } = useShirt();
   return (
-    <a href={startUrl(appLocale, undefined, chosen && shirt ? FARBE[shirt] : undefined)} className={className}>
+    <a href={startUrl(appLocale, undefined, chosen && shirt ? FARBE[shirt] : undefined, src)} className={className}>
       {children}
     </a>
   );

@@ -1,33 +1,33 @@
 {
   "app-desktop-de": {
     "width": 1200,
-    "height": 913,
+    "height": 1000,
     "densities": [1, 2, 3],
     "colours": ["blue", "red", "yellow", "black", "white", "orange", "purple"
    ],
     "colourDensities": [2],
     "callouts": [],
-    "lettering": [2.66, 25.82, 65.72, 40.6]
+    "lettering": [2.66, 32.13, 65.72, 37.06]
   },
   "app-desktop-en": {
     "width": 1200,
-    "height": 913,
+    "height": 1000,
     "densities": [1, 2, 3],
     "colours": ["blue", "red", "yellow", "black", "white", "orange", "purple"
    ],
     "colourDensities": [2],
     "callouts": [],
-    "lettering": [2.66, 25.82, 65.72, 40.6]
+    "lettering": [2.66, 32.13, 65.72, 37.06]
   },
   "app-desktop-fr": {
     "width": 1200,
-    "height": 913,
+    "height": 1000,
     "densities": [1, 2, 3],
     "colours": ["blue", "red", "yellow", "black", "white", "orange", "purple"
    ],
     "colourDensities": [2],
     "callouts": [],
-    "lettering": [2.66, 25.82, 65.72, 40.6]
+    "lettering": [2.66, 32.13, 65.72, 37.06]
   },
   "app-result-de": {
     "width": 640,
@@ -110,10 +110,10 @@
     "densities": [1, 2, 3],
     "callouts": [],
     "marks": {
-      "tap": [69.27, 38.36, 25.81, 7.49],
-      "timeline": [4.79, 73.67, 63.1, 13.51]
+      "tap": [69.27, 35.55, 25.81, 7.49],
+      "timeline": [4.79, 80.38, 63.1, 13.51]
     },
-    "lettering": [5.34, 14.36, 61.99, 40.34]
+    "lettering": [5.34, 20.87, 61.99, 40.34]
   },
   "get-video-en": {
     "width": 720,
@@ -121,10 +121,10 @@
     "densities": [1, 2, 3],
     "callouts": [],
     "marks": {
-      "tap": [69.27, 38.36, 25.81, 7.49],
-      "timeline": [4.79, 73.67, 63.1, 13.51]
+      "tap": [69.27, 35.55, 25.81, 7.49],
+      "timeline": [4.79, 80.38, 63.1, 13.51]
     },
-    "lettering": [5.34, 14.36, 61.99, 40.34]
+    "lettering": [5.34, 20.87, 61.99, 40.34]
   },
   "get-video-fr": {
     "width": 720,
@@ -132,10 +132,10 @@
     "densities": [1, 2, 3],
     "callouts": [],
     "marks": {
-      "tap": [69.27, 38.36, 25.81, 7.49],
-      "timeline": [4.79, 73.67, 63.1, 13.51]
+      "tap": [69.27, 35.55, 25.81, 7.49],
+      "timeline": [4.79, 80.38, 63.1, 13.51]
     },
-    "lettering": [5.34, 14.36, 61.99, 40.34]
+    "lettering": [5.34, 20.87, 61.99, 40.34]
   },
   "share-de": {
     "width": 640,

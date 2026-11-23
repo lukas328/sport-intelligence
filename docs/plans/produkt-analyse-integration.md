@@ -778,9 +778,13 @@ nach Minute 60 nichts mehr; das Budget hängt von der echten Uhr ab.
 - Spiel laut `play_intervals`: vorher 21.1 min, nachher 48.2 min (ohne Füllen 44.0). In den
   gelesenen Spannen lief die Uhr etwa 54 min (erste Halbzeit 0:39 bis 30:00, zweite 1:55 bis
   26:29).
-- Offen: das Spielende. Nach dem letzten Uhrlauf ohne weitere Lesung endet das Spiel heute 7.5 s
-  danach. Vorschlag: bis zum Videoende weiterzählen, wenn die Uhr zuletzt lief und keine stehende
-  Uhr gelesen wurde.
+- Spielende (2026-11-19): Lief die Uhr bei der letzten Lesung und wurde danach keine stehende Uhr
+  gelesen, gilt das Video bis zum Ende als Spiel, höchstens aber bis die Uhr das Ende der Halbzeit
+  erreicht (`half_s`, Standard 30:00; rückwärts 0:00). Die Halbzeitlänge kennt das Produkt nicht,
+  darum der Standard der Erwachsenen; bei kürzeren Halbzeiten ist die Grenze nur lockerer.
+  Lesungen danach, die nicht diese Uhr sein können (zählt zurück oder schneller als das Video,
+  z. B. eine Strafzeit), halten das Spiel nicht an. Zeigt die letzte Lesung eine stehende Uhr oder
+  das Ende der Halbzeit (30:00 bzw. 0:00), bleibt es bei 7.5 s.
 
 ### Teamzuordnung: Torhüterfarbe als Feldfarbe (Staging 2026-11-17, #82, #83)
 
@@ -807,3 +811,161 @@ nach Minute 60 nichts mehr; das Budget hängt von der echten Uhr ab.
   verloren, und der Watchdog nimmt nur laufende Jobs wieder auf. Nächste Schritte: Watchdog auch
   für wartende Jobs ohne RQ-Job (Produkt); Redis nicht bei jedem Deploy ersetzen oder AOF
   (Terraform, UX).
+
+### Wurf-Endtest mit der Produktkette (2026-11-19, einmalige Freigabe von Lukas)
+
+42 Endtest-Segmente (`ml/gold/shot_endtest_segments.json`, 42 Spiele in 42 nie trainierten Hallen,
+je 3 min), Lukas' Markierungen eingefroren (`ml/gold/data/shot_endtest_marks.json`: 130 Würfe, 76
+Tore, 41 gehalten, 13 daneben; Runde 1 nicht verwendet). Produktkette im CPU-Testsetting (hrp1 960
+px auf jedem 3. Bild, YOLOX jedes 3. Bild, `ml/integration/shot_segments_eval.py`), der Observe-Schritt
+als 4 Kaggle-CPU-Kernels (`ml/integration/kaggle/shot_endtest_push.py`; der Container der Sitzung wird im
+Leerlauf freigegeben, der erste 18-h-Lauf brach ab). Nur gemessen, nichts darauf eingestellt.
+95 %-Intervalle: Bootstrap über die 42 Spiele. Ergebnis: `ml/gold/data/shot_endtest_result.json`.
+
+| Mass | Wert | 95 % |
+|---|---|---|
+| Wurf-Kandidaten (Rate <= 4), Wurf gefunden, ±2 s um die geschätzte Zeit | 20.8 % | 12.5 bis 29.9 % |
+| dasselbe, Fenster der Kandidaten (Peak 3 s vor bis 8 s nach der Markierung) | **84.6 %** | 74.5 bis 92.4 % |
+| davon Tore / gehalten / daneben (−3/+8 s) | 88.2 / 78.0 / 84.6 % | 78 bis 96 / 61 bis 92 / 62 bis 100 % |
+| Präzision der Wurf-Kandidaten (−3/+8 s; ±2 s) | 25.8 % (6.3 %) | 21.7 bis 29.8 % |
+| Wurf-Kandidaten pro Minute | 3.39 | 3.00 bis 3.75 |
+| Tor-Kandidaten (Rate <= 2), Tore gefunden (−3/+8 s; ±2 s) | 75.0 % (6.6 %) | 63.4 bis 85.1 % |
+| Präzision der Tor-Kandidaten (−3/+8 s) | 29.1 % | 22.7 bis 35.7 % |
+| Tor-Kandidaten pro Minute | 1.56 | 1.36 bis 1.75 |
+| Ballpfad-Abdeckung ±1.5 s um jeden Wurf | **97.8 %** | 96.8 bis 98.5 % |
+| Würfe mit Ballpunkt auf mindestens der Hälfte der Bilder | 100 % | |
+
+Lesart:
+- ±2 s verfehlt fast alles, weil die geschätzte Zeit der Kandidaten systematisch neben der
+  Markierung liegt: im Median 2.8 s danach (Quartile 0.6 und 4.3 s, 114 Würfe mit einem Kandidaten in
+  −5/+6.5 s). Die Kandidaten wurden für das Fenster −3/+8 s gebaut (`ml/goals/shot_eval.py`); dort
+  finden sie 85 % der Würfe. Für Clips (7 s vor, 3 s nach dem Peak) reicht das, für eine genaue
+  Wurfzeit nicht. Das Fenster −3/+8 s wurde vor dem Blick auf die Endtest-Zahlen aus der Doku
+  gewählt (Dev-Segment), nicht auf dem Endtest.
+- Abdeckung heisst: der Ballpfad hat einen Punkt, nicht dass er richtig liegt. Der Endtest hat keine
+  Ballmarkierungen; die Trefferquote misst gold v1 (hrp1 960 jedes 3. Bild: 63.5 %). Das Ziel 85 bis
+  90 % Abdeckung ist erreicht, über die Richtigkeit sagt es nichts.
+- Nicht gemacht: die GPU-Einstellung (jedes Bild), auch nicht genähert (Budget). Laufzeit auf Kaggle
+  (4 Kerne, ein Prozess): im Mittel 1266 s pro 3-min-Segment, 7.0 x Videolänge.
+
+### Wurfzeit der Kandidaten (2026-11-19)
+
+Frage: Warum liegt die geschätzte Wurfzeit der Wurf-Kandidaten im Endtest im Median 2.8 s nach
+Lukas' Markierung, und lässt sie sich ohne Verlust an Recall genauer machen?
+
+Wie die Zeit entsteht (`goalcandidates.shot_candidates`):
+- Der Kandidat ist der Peak von `shot_score` = rz(Kosinus zur Wurf-Vorlage) + rz(Kosinus zur
+  Tor-Vorlage) + rz(Flaute danach), auf dem 10-Hz-Raster aus Kameraschwenk und Personen-Bewegung.
+  Beide Vorlagen (Fenster 2 s vor bis 3 s nach dem Peak) zeigen dasselbe: die Kamera schwenkt
+  anhaltend in eine Richtung, die Spieler laufen schnell und werden langsamer. Das ist das Kippen
+  des Spiels nach dem Angriff (Rücklauf, Abwurf des Torhüters, Anwurf), nicht der Abwurf selbst.
+- Die Wurfzeit ist Peak minus `shot_offset_s` = 1.5 s (`data/shot_template.json`). Diese 1.5 s sind
+  der Median von Peak minus **Protokollzeit** auf den Dev-Daten, nicht minus Abwurf.
+
+Diagnose (zwei Anteile):
+- **Systematisch: die Bezugszeit.** Dev (28 Segmente, 7 Spiele, 93 Würfe aus den offiziellen
+  Spielberichten, leave-one-game-out, gespeichert in `shot_template.json`): Peak minus Protokollzeit
+  im Median +1.5 s. Endtest (gespeicherter Bericht oben, Markierung = Abwurf auf etwa 1 s): Peak minus
+  Markierung im Median 1.5 + 2.8 = 4.3 s. Liegt der Peak in beiden Sätzen gleich zum Spiel, kommt der
+  Protokolleintrag rund 3 s nach dem Abwurf (Schluss aus zwei Datensätzen, nicht gemessen). Das passt
+  zu den Protokollen der 3. Liga, die 4 bis 6 s hinter der Anzeige liegen (`ml/goals/README.md`), und
+  zu `pick_shots.py` / `shot_check.py`, die den Wurf vor der Protokollzeit suchen.
+- **Veränderlich: das Kippen folgt dem Wurf nicht im festen Abstand.** Dev, Peak minus Protokollzeit
+  nach Ausgang: Tore +0.9 s, gehalten +1.8 s, daneben +2.6 s (IQR 2.6 bis 3.5 s). Endtest: Quartile
+  0.6 und 4.3 s, also 3.7 s Breite bei Markierungen auf etwa 1 s; die Streuung kommt vom Signal, nicht
+  von den Markierungen.
+
+Warum keine Korrektur eingebaut ist:
+- **Konstante Verschiebung:** Auf Dev gibt es keine Abwurfzeiten, nur Protokollzeiten; damit lernt
+  man wieder die 1.5 s von heute. Die Konstante aus dem Endtest zu nehmen hiesse, auf dem Endtest
+  einzustellen. Selbst die ideale Konstante brächte bei 3.7 s Quartilbreite nur etwa die Hälfte der
+  114 Würfe mit einem Kandidaten in ±2 s (grob, aus den gespeicherten Endtest-Quartilen gelesen,
+  nicht verwendet).
+- **Auf den Ballpfad setzen** (schnellste Ballbewegung zum Tor vor dem Peak): Für die Dev-Segmente
+  ist kein Ballnetz-Ergebnis gespeichert (`ml/goals/README.md`, Shots/Data), und die privaten
+  Kaggle-Daten waren aus dieser Sitzung nicht erreichbar (403, kein Schlüssel eingesetzt). Die einzige
+  Dev-Prüfung dazu (41 Dev-Wurfclips, oben «Wurf-Ereignisse: erster Befund») fand den Wurf über die
+  Ballgeschwindigkeit nicht besser als Zufall.
+- **Die API rechnet mit der Protokollzeit:** `goal_ms` dient auch zum Zuordnen der Spielbericht-Einträge
+  (`services/goal_candidates.py`, Fenster 8 bis 20 s). Eine auf den Abwurf verschobene Zeit müsste
+  dort die Protokoll-Verzögerung wieder dazurechnen.
+- Für die Clips reicht die heutige Zeit: der Abwurf liegt im Median 4.3 s und im oberen Quartil 5.8 s
+  vor dem Peak, der Clip beginnt 8 s davor.
+
+Geändert: nur Doku und Messung. In `goalcandidates.py` sagt der Kommentar zu `offset_s` jetzt, dass er
+auf die Protokollzeit bezogen ist. `ml/integration/shot_segments_eval.py score` schreibt pro Wurf den
+Abstand des nächsten Kandidaten-Peaks zur Markierung (`per_shot` in score.json), damit eine auf Dev
+festgelegte Methode später auf dem Endtest ohne neuen Lauf der Kette gemessen werden kann. Der
+gespeicherte `shot_endtest_result.json` hat keine Werte pro Wurf.
+
+Nächster Schritt:
+1. Abwurfzeiten auf Dev: Lukas markiert mit der Seite «Würfe markieren» die Abwürfe der 41
+   Dev-Wurfclips (`ml/gold/shot_clips.json`, split dev, ein Klick pro Clip) oder der 28
+   Protokoll-Segmente (93 Würfe). Damit: Konstante auf Dev, und der Ballpfad als Anker (letzte schnelle
+   Bewegung Richtung des Tors, auf das die Kamera schaut, im Fenster 6 s bis 0.5 s vor dem Peak, mit
+   Sicherheit aus Geschwindigkeit und Abdeckung), beides gegen ±2 s auf Dev.
+2. Dafür die Beobachtungen der Dev-Segmente mit Ballnetz (CPU-Testeinstellung wie im Endtest) als
+   Kaggle-CPU-Kernel rechnen; die Sitzung braucht dazu den Kaggle-Zugang.
+3. Erst danach: die festgelegte Methode einmal auf dem Endtest melden (aus `per_shot` und den
+   gespeicherten Kandidaten), und die API-Zuordnung zum Spielbericht auf die neue Zeit anpassen.
+
+### Tore aus dem Spielbericht ohne Frage (Livegang L1, 2026-11-19)
+
+Frage: Welche Tor-Kandidaten kann die App mit dem offiziellen Spielbericht selbst beantworten, ohne
+je ein falsches Tor zu setzen?
+
+Was vorher schon galt (`services/goal_candidates.py`, `services/checks.py`, `services/graphics.py`):
+- Ein Tor des Spielberichts deckt jeden Tor-Kandidaten in 20 s um seine gespeicherte Videozeit
+  («schon erfasst», keine Frage). Diese Zeit ist beim Import aus der Uhr gerechnet, meist ab dem
+  Anwurf der Halbzeit (`video_from_clock`). Nach einem Time-out liegt sie eine Minute zu früh, am
+  Ende einer Halbzeit oft mehrere Minuten. Dann deckt das Tor den falschen Kandidaten, und der
+  richtige wird gefragt.
+- Ein Spielbericht-Tor mit Videozeit zählt als platziert (`goals_missing`). Hat jedes Tor des
+  Resultats eine Zeit im Video, fragt die Hauptrunde gar keinen Tor-Moment mehr; die Kandidaten
+  warten unter «Mehr prüfen».
+- Das Tor selbst bleibt an der geschätzten Zeit, ohne Clip und ohne genaue Szene.
+
+Neu (`goal_candidates.auto_accept`, nach jeder Analyse und jedem Import des Spielberichts): Ein Tor
+des Spielberichts wird ohne Frage auf einen Kandidaten gelegt, nur wenn alles davon gilt:
+1. Die Matchuhr wurde zu dieser Spielzeit im Video gelesen: die Zeit liegt in einem Lauf der
+   gelesenen Uhr (Einblendung oder Hallentafel, `match_clock.read_ms`, Lesungen alle 2 s). Aus
+   dem Anwurf gezählt, zwischen zwei Läufen geschätzt oder von zwei Läufen verschieden gelesen:
+   nie.
+2. Kein anderes Tor des Spielberichts (beide Teams) liegt 20 s Spielzeit oder näher.
+3. Genau ein Tor-Kandidat (jede Rate, nur verworfene nicht gezählt) liegt 8 s vor bis 13 s nach
+   der Spielberichtszeit, und dieser liegt 3 s vor bis 8 s nach ihr (Peak minus Spielberichtszeit;
+   das Fenster, in dem die Messungen in `ml/goals` einen Kandidaten als dieses Tor zählen).
+4. Der Kandidat ist unberührt (offen, nicht «Weiss nicht»), schlägt nicht das andere Team vor, und
+   an seinem Moment ist sonst nichts bekannt (ein Tor von Hand, aus der Einblendung, ein bestätigter
+   Wurf, ein schon gelegter Spielbericht-Eintrag).
+5. Der Trainer hat diese Übernahme nicht schon einmal zurückgenommen.
+
+Gespeichert wie die Bestätigung des Trainers: der Spielbericht-Eintrag bekommt die Zeit des
+Kandidaten (`attributes.video`, mit `auto: "report"`), der Kandidat ist bestätigt, ohne Prüfer und
+ohne Zeitpunkt (er verbraucht keine Frage der Runde). Prüfen zeigt diese Tore unter «Beantwortet»
+mit «aus dem Spielbericht übernommen» und «Rückgängig», die Kandidatenliste mit demselben Hinweis.
+Zurückgenommen geht das Tor an seine Zeit aus der Uhr zurück und ist mit `auto_declined` markiert:
+nie wieder automatisch, auch nicht nach einem neuen Import. Bestätigt der Trainer es selbst, ist es
+seine Antwort. Alles andere bleibt eine Frage wie bisher.
+
+Gemessen: Echte Spiele mit Spielbericht, gelesener Uhr und gespeicherten Kandidaten liegen in diesem
+Repository nicht; eine Zahl für Lukas' Video oder andere echte Spiele gibt es darum nicht. In
+Lukas' 99 min las die Analyse die Uhr nur über einen Teil des Spiels (oben); nur dort könnte die
+Regel greifen. In den Tests (synthetisch, `tests/test_goal_auto_accept.py`):
+- Spielbericht-Beispiel mit einem durchgehenden Uhrlauf: 3 von 7 Kandidaten übernommen; die
+  Fragen in Prüfen bleiben gleich (1 Tor-Frage mit und ohne Regel), weil die Kandidaten an
+  Spielbericht-Toren schon vorher als «schon erfasst» galten. Neu ist, dass die Tore an der Zeit
+  des Kandidaten liegen.
+- Dasselbe mit einer Minute Uhrstillstand nach 03:30: ohne Regel 1 Tor-Frage (der Kandidat von
+  04:02 gilt nach der 20-s-Regel als das um eine Minute zu früh geschätzte Tor von 04:53, der von
+  04:53 wird gefragt); mit Regel 0 Fragen, beide Tore an ihrem Kandidaten.
+
+Nicht gemacht: Kandidaten ohne Spielbericht-Tor in der Nähe aus der Standardliste nehmen
+(Herabstufen auf Rate 4). Die Stufe gibt es, aber für einen «tiefen Wert» fehlt eine auf Daten
+festgelegte Schwelle, und mit vollständigem Spielbericht fragt die Hauptrunde ohnehin höchstens
+1.5 mal die Tore ohne Platz im Video. Ein Spielbericht-Tor, dessen Zeit aus der Uhr geschätzt ist,
+kann dort fehlen, wo es wirklich fiel; ein Herabstufen würde dann genau das echte Tor verstecken.
+
+Offen: Die Regel braucht die gelesene Uhr. Wo die Tafel minutenlang nicht im Bild ist (Abschnitt
+Pausenerkennung), bleibt es bei Fragen. Bessere Tor-Kandidaten (Präzision 29 %) sind ein eigener
+Auftrag.

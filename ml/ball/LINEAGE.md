@@ -290,6 +290,18 @@ LLM labelling of the 61 logged dev shots on keyframe-only candidates found the s
 and was stopped; it restarts on the full Modal pre-labels (job 12) with the training-clip pipeline.
 Round 1 done 2026-11-17 (owner, artifact RqUCxpw8KdxotdaSH43vfC; answers in `ml/gold/data/shot_endtest_answers.json`): 212 candidates at rate <= 2 in 37 segments: 76 shots (47 goals, 17 saves, 11 misses, 1 outcome unclear), 3 fouls, 133 no shot; yield 36 %. The 76 shots come from 33 of the 42 games (halls); no release time was set. Owner note: shots often sat at the start or end of the 7 s page clip (cand_t - 5 s to + 2 s); so the end-test clips (`shot_scan.py clips`, `shot_endtest_clips.json`, 76 clips) are cand_t - 8 s to + 5 s until a release is labelled, then release - 6 s to + 4 s. Three clips touch the segment start (e015, e023, e026; e026 has its candidate at 0.5 s, so its wind-up may lie in the previous segment). Round 2 (76 < 100): 215 candidates at rate 4 not shown in round 1 (more than 3 s from any round-1 candidate), clips cand_t - 6 s to + 4 s, artifact L2SY9nT53ESjKc322EvH2F (collection `shots2`, list `ml/gold/data/shot_endtest_round2_items.json`). At round 1's yield this would give about 75 more shots, lower-ranked candidates likely fewer; 40 to 60 make the 100. Next: release and ball positions on the confirmed shots, labelled without candidate rings. Update 2026-11-17 (owner feedback): round 2 dropped after 1 answer, because its candidate clips overlap heavily (the same play 3 to 4 times). Switched from candidate clips to marking whole segments: page "Würfe markieren" (artifact CaQAw96yAhXqBhGdPEYQ4D, db collection `marks`, one doc per segment), all 42 end-test segments (3 min each, 126 min of video, 640 px h264), played once (1.5x default); the owner presses W/Enter at each shot without pausing, then an outcome key (open if none); `t_s` is an approximate release (`approx: true`, about +/- 1 s). Round-1 shots are shown as markers and can be confirmed in time (K). `ml/gold/shot_marks.py` combines `marks` with round 1 into `ml/gold/data/shot_endtest_marks.json`. The exact release will be derived from the ball path in a +/- 1.5 s window around `t_s` (not built yet). Frozen end-test data: no tuning.
 
+**Shot end test, result** (2026-11-19, the owner's one-off release, measured only): product chain in
+the CPU test setting (hrp1 at 960 px on every 3rd frame) on the 42 segments, the owner's frozen marks
+(`ml/gold/data/shot_endtest_marks.json`, 130 shots; round 1 not used), bootstrap over the 42 games
+(`ml/integration/shot_segments_eval.py`, observe on Kaggle CPU kernels, result
+`ml/gold/data/shot_endtest_result.json`). Shot candidates find 84.6 % of the shots [74.5, 92.4] in their
+design window (peak 3 s before to 8 s after the mark) at 3.4 per minute, precision 25.8 %; within
++-2 s of their estimated time only 20.8 % (estimated time a median 2.8 s after the mark). Goal
+candidates: 75.0 % of goals at 1.6 per minute. The ball path has a point on 97.8 % [96.8, 98.5] of
+the frames within 1.5 s of each shot; presence only (no ball labels in the end test). Details and the
+reading: `docs/plans/produkt-analyse-integration.md`, "Wurf-Endtest". The end test is now used and
+must not be used for tuning.
+
 **Shot gold** (2026-11-16): picked (`82889c6`), split frozen (`1a40b6a`); pre-labels by Modal job 12
 (nets hr1, hrp1, hr2, hrp2 and OWLv2) planned; labelling with visibility levels and owner yes/no per
 `tracking-strategie.md` section 9 step 0. Not done yet.

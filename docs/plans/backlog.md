@@ -5,7 +5,12 @@ Stand 2026-11-09. Ziel des Produkts: Video hochladen, automatisch die Schlüssel
 macht eine eigene Sitzung (`docs/plans/ui-match-workspace.md`).
 
 ## Läuft gerade
-Stand und Prioritäten der Woche: `docs/plans/HANDOVER.md` (2026-11-09). Fertig seit dem 5.11.:
+Stand 2026-11-19: Prioritäten in `docs/plans/HANDOVER.md`, Entscheide und Änderungen vom 19.11. in
+`docs/plans/UEBERGABE-2026-11-19.md`. Die Liste "Als Nächstes" unten ist vom 9.11.; Punkt 1
+(Kalibrierung) ist jetzt die Klick-Kalibrierung pro Halle, Punkt 2 (ganzes Spiel) ist auf Staging
+gelaufen (99 min), die GPU-Frage ist entschieden (später Azure).
+
+Stand 2026-11-09: `docs/plans/HANDOVER.md` (Verlauf). Fertig seit dem 5.11.:
 Würfe als Vorschläge, Mannschaft aus handball.ch (Phase 1 bis 3), Spielberichte per Link (nuLiga,
 HLA), Kalibrierung mit Gründen und Hallen-Wiederverwendung, Rückennummern breit gemessen,
 Code-Prüfung vor der Übergabe. Ball Runde 6: gleichauf mit Runde 3, nicht übernommen.
@@ -88,32 +93,44 @@ Reporter, doppelte Helfer, Doku, Worker-Settings, Job-Vertragstest). Offen, für
    `services/official_comparison.py`; `apply` in Schritte zerlegt (`_known`, `_add_entries`,
    `_settle_video_goals`, `_write_result`). `official_report` exportiert weiter alle Namen, die
    Code und Tests nutzen; die Abruffunktionen und `_pdf_text` bleiben dort ersetzbar.
-2. Totes Gerüst löschen: `handball_worker/pipeline/` (`PipelineGraph`, `PIPELINE_VERSION`
-   0.1.0, nur von `tests/test_graph.py` benutzt) und im GPU-Worker `jobs.run_stage`/`echo` mit
-   `backends/base.py` (nur von Tests und dem Integrationstest benutzt). Die API reiht die Jobs
-   direkt ein (docs/ARCHITECTURE.md).
-3. Systemzugriff als Kontextmanager: `async with system_access(ctx.db, reason=...)` mit
-   try/finally (heute bleibt die RLS-Umgehung bei einer Ausnahme zwischen `enable` und `disable`
-   bis zum Ende der Transaktion an) und geloggtem Grund. Stellen: `sessions.py:475`,
-   `sharing.py:149`, `videos.py` (Media-Link, Job-Rückmeldung), `profiles.py:237`,
-   `federation.py:60-98`, `orgs.py:44-60`, `invoices.py:418` (in einer Schleife).
-4. `services/official.py` entlang der Abschnittsmarken aufteilen: Suche und Übernahme
-   (search, claim), Abgleich (sync), Vorschläge, Zugangsanfragen, Worker-Tick.
-5. `services/videos.py` aufteilen: Uploads, Jobs und Rückmeldungen (Auswertung je Job-Art statt
-   der langen if/elif-Kette in `apply_job_update`), Media, Analyse-Ergebnisse, Tracks. Die
-   Importe innerhalb von Funktionen deuten auf Zyklen hin, die dabei aufgelöst werden.
-6. `handball_vision/pipeline.py` aufteilen: gemeinsames `_track_frames` für `analyse_video`
-   (Zeilen 307-339) und `_analyse_moving` (984-1015), Video-Ein- und Ausgabe nach
-   `video_io.py`, Identität nach `identity.py`.
-7. Für die UI-Session: `workspace.tsx` (gut 1100 Zeilen) zerlegen: `AnalysisPanel`,
-   `IdentityPanel`, `CameraSwitch`, `FormationsCard` in eigene Dateien, Datenladen in einen
-   Hook `useWorkspaceData`.
-8. Gemeinsamer Helfer `run_artifact_job` für `export.run_presentation_export` und
-   `reels.run_highlight_reel` (Arbeitsordner, Download, Upload, Rückmeldung an die API).
-9. PDF-Erzeugung mit reportlab (Spielbericht, Scouting, Präsentation, Rechnungen) per
-   `asyncio.to_thread`, damit lange PDFs die Event-Loop nicht blockieren.
-10. Kleine N+1-Abfragen: `presentations.py` (Export, Zeilen 370-395: Video und Kalibrierung je
-    Folie), `profiles.py:117`, `official_report.py:1209`.
+2. ~~Totes Gerüst löschen~~ **erledigt**: `handball_worker/pipeline/` sowie `jobs.py` und
+   `backends/` im GPU-Worker sind weg, samt ihren Tests. Der Integrationstest prüft die GPU-Queue
+   mit einer gewöhnlichen Funktion. `HB_GPU_BACKEND` bleibt in Einstellungen und Infra stehen
+   (Schalter für ein späteres Modal-Backend, ADR 025), wird aber heute nicht gelesen.
+3. ~~Systemzugriff als Kontextmanager~~ **erledigt**: `async with system_access(ctx.db,
+   reason=...)` in `core/db.py` schaltet die RLS-Umgehung beim Verlassen des Blocks wieder aus,
+   auch bei einer Ausnahme; jede Umgehung loggt ihren Grund (`system_access`). Umgestellt sind
+   die ungeschützten Paare (sessions, sharing, consent_links, videos, profiles, federation, orgs,
+   Watchdog in progress) und der Mahnlauf, der jetzt einmal für den ganzen Lauf statt in der
+   Schleife einschaltet. Stellen mit try/finally und `invitations._by_token` (über mehrere
+   Funktionen) bleiben wie sie sind.
+4. ~~`services/official.py` aufteilen~~ **erledigt**: Paket `services/official/` mit `claim`
+   (Suche und Übernahme), `sync`, `suggestions`, `access` (Zugangsanfragen) und `_base`
+   (Einstellungen); der Worker-Tick bleibt im `__init__`, das alle bisherigen Namen exportiert
+   (Tests ersetzen `sync_team`, `import_report` und `REPORT_BATCH` dort).
+5. ~~`services/videos.py` aufteilen~~ **erledigt**: Nachbarmodule `video_uploads`, `video_jobs`,
+   `video_callbacks`, `video_media`, `video_analysis`, `video_tracks` und `video_base`.
+   `apply_job_update` wertet über `ON_SUCCEEDED`/`ON_FAILED` je Job-Art aus. Die Importe in
+   Funktionen (progress, highlights, graphics, marks, shot_positions, goal_candidates) stehen
+   jetzt oben, ebenso `media_prefix`/`job_budget_s` in highlights, halls, shot_positions,
+   graphics und progress. `videos.py` exportiert alle Namen und behält den Link-Import.
+6. ~~`handball_vision/pipeline.py` aufteilen~~ **erledigt**: gemeinsames `_track_frames` für
+   feste und bewegte Kamera, Video lesen in `video_io.py`, Zuordnung über Nummern und Aussehen
+   in `identity.py`; `pipeline` exportiert die Namen weiter.
+7. ~~`workspace.tsx` zerlegen~~ **erledigt**: `analysis-panel.tsx`, `identity-panel.tsx` (mit
+   `ownTracks`), `camera-switch.tsx` und `formations-card.tsx` neben der Werkbank; das Laden
+   (Kommentare, Clips, Zeichnungen, Analyse, Playlists, Ereignisse, Tor- und Wurfkandidaten,
+   offizielle Tore) steckt im Hook `use-workspace-data.ts`. Texte und Test-IDs sind gleich
+   geblieben, `workspace.tsx` hat noch gut 800 Zeilen.
+8. ~~Gemeinsamer Helfer `run_artifact_job`~~ **erledigt**: `handball_worker/artifacts.py`
+   (Arbeitsordner, Download, Upload, Rückmeldung an die API) für Export und Reels; die Reels
+   nutzen damit auch `HB_WORK_DIR`.
+9. ~~PDF-Erzeugung mit reportlab im Thread~~ **erledigt**: Spielbericht, Scouting, Präsentation,
+   Trainingsplan und Rechnungen (Verein und Verband) laufen per `asyncio.to_thread`; die Daten
+   werden vorher in der async-Funktion gelesen, `invoices.render_pdf` ist jetzt async.
+10. ~~Kleine N+1-Abfragen~~ **erledigt**: Präsentations-Export liest Videos und die neuste
+    Kalibrierung je Video in je einer Abfrage (die Dateien je Spiel einmal), `profiles.mine` die
+    Profile, `official_report` die Wurfkandidaten beim Umhängen.
 11. Die echten Namen sind aus `dhb_76839.txt` und `hla_70984286.txt` entfernt, stehen aber noch
     in der Git-Geschichte. Falls nötig vor einer Veröffentlichung des Repos die Geschichte
     bereinigen.

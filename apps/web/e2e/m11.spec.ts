@@ -35,7 +35,7 @@ test("coach marks during a match, opens the profile and paper pages", async ({ p
   await page.getByRole("tab", { name: "Spiel", exact: true }).click();
   // the marks sit behind «Mehr zum Spiel» (UX test B08)
   await page.getByTestId("game-more").locator(":scope > summary").click();
-  await page.getByTestId("marks-panel").getByText(/Am Spieltag gemerkt \(2\)/).click();
+  await page.getByTestId("marks-panel").getByText(/Marken vom Spieltag \(2\)/).click();
   await expect(page.getByTestId("marks-panel")).toContainText("noch nicht mit dem Video abgeglichen");
 
   // the coach has no player profile: "Ich" (the old /profile redirects there) leaves it out

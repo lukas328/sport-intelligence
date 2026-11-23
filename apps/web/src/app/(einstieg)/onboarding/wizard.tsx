@@ -14,6 +14,7 @@ import { similarTeams } from "@/lib/team-names";
 import { Alert, Card } from "@/components/ui/card";
 import { Checkbox, Input, Select } from "@/components/ui/field";
 import { api } from "@/lib/client";
+import { signupSource } from "@/lib/signup-source";
 import { OfficialTeamSearch } from "./team-search";
 import { CLAIM_KEY, CONFIRM_COOKIE, forgetClaim } from "./claim-storage";
 import { ConfirmTeam } from "./confirm-team";
@@ -81,7 +82,7 @@ export function OnboardingWizard({ existingOrg, resume = false, waiting = [] }: 
     setError(null);
     const { data, error } = await api.POST("/v1/orgs", {
       // no colour yet: the next step asks for it
-      body: { name: String(f.get("name")), country: String(f.get("country")) },
+      body: { name: String(f.get("name")), country: String(f.get("country")), source: signupSource() },
     });
     if (error || !data) {
       setBusy(false);

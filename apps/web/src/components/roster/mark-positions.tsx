@@ -27,7 +27,7 @@ export function positionOrder<P extends Player>(players: readonly P[]): P[] {
 /**
  * The court positions as quick to set as the keepers (finding A14, the keeper block as the
  * pattern): choose a position, then tap every player who plays it; a second tap takes the
- * position away again. Open while court players have no position, else one line that opens it.
+ * position away again. Closed on arrival: one line says what is missing and opens it.
  */
 export function MarkPositions({ orgId, teamId, players }: { orgId: string; teamId: string; players: Player[] }) {
   const t = useTranslations("teamPage");
@@ -35,8 +35,8 @@ export function MarkPositions({ orgId, teamId, players }: { orgId: string; teamI
   const router = useRouter();
   const field = positionOrder(players);
   const missing = field.filter((p) => !p.main_position).length;
-  // the keepers first: once they are marked, the block opens while court players lack a position
-  const [open, setOpen] = useState(missing > 0 && players.some((p) => p.main_position === "TW"));
+  // a mode of its own, never open on arrival (app review UX-09): one line says what is missing
+  const [open, setOpen] = useState(false);
   const [pos, setPos] = useState<CourtPosition>("LA");
   const [busy, setBusy] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
@@ -64,7 +64,7 @@ export function MarkPositions({ orgId, teamId, players }: { orgId: string; teamI
       <p className="m-0 flex flex-wrap items-baseline gap-x-3 gap-y-1 text-[15px] md:col-span-full" data-testid="mark-positions">
         <span>{missing > 0 ? t("positionsMissing", { n: missing }) : t("positionsAll")}</span>
         <button ref={opener} type="button" onClick={() => setOpen(true)} className="cursor-pointer font-semibold underline underline-offset-4" data-testid="positions-open">
-          {t("positionsChange")}
+          {missing > 0 ? t("positionsSet") : t("positionsChange")}
         </button>
       </p>
     );

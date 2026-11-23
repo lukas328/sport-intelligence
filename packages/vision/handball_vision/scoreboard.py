@@ -610,6 +610,7 @@ def play_intervals(
     fill_gap_s: float = 30.0,
     fill_share: float = 0.5,
     end_ms: int | None = None,
+    half_s: int = 1800,
 ) -> list[tuple[int, int]]:
     """Video stretches (start_ms, end_ms) in which the match clock runs, from (t_ms, clock_s)
     readings of an overlay or a hall scoreboard.
@@ -630,9 +631,13 @@ def play_intervals(
     which the clock ran at least `fill_share` of the time counts as play as a whole (the board out
     of view while play went on; where the short stops were is unknown, and the ball gate should
     rather keep a loose ball than drop real play). Otherwise a run reaches at most `edge_s` beyond
-    its outer readings, except after the last reading of all when `end_ms` (the video's length)
-    is given and the clock was still running there: then play lasts to the end of the video (the
-    board goes out of view while play goes on; a stop would have shown as a standing clock).
+    its outer readings, except after the last run of all when `end_ms` (the video's length) is
+    given and the clock was still running there: then play lasts to the end of the video (the
+    board goes out of view while play goes on; a stop would have shown as a standing clock), but
+    at most until the clock reaches the end of the half (a multiple of `half_s`, 30:00 in adult
+    handball, counting up; a multiple of it or 0:00 counting down). Readings after the last run
+    that cannot be its clock (it would have counted back or faster than the video: a penalty timer,
+    a misreading) do not stop it. A last reading at the end of the half keeps the `edge_s` rule.
     Empty: no running clock found."""
     reads = sorted({t: c for t, c in clocks}.items())
     runs, outliers = _clock_runs(reads, tol_s, drift)
@@ -653,15 +658,34 @@ def play_intervals(
     in_run = {k for _, r in runs for k in r}
     edge = edge_s * 1000
 
+    def could_be(k: int, d: int, j: int) -> bool:
+        """Whether the later reading j can be the clock of the run with last reading k: it has
+        not counted back nor run faster than the video (it may have stopped in between)."""
+        ran = d * (reads[j][1] - reads[k][1]) * 1000
+        return 0 <= ran <= reads[j][0] - reads[k][0] + tol_s * 1000
+
+    def to_end(k: int, d: int) -> float | None:
+        """Where play ends after the last run of all, last reading k, when the clock was still
+        running there and nothing read after it says it stopped: at the end of the video, but
+        not beyond the end of the half the clock shows. None: the `edge_s` rule applies."""
+        t, c = reads[k]
+        later = kept[at[k] + 1 :]
+        if end_ms is None or end_ms <= t or any(j in in_run or could_be(k, d, j) for j in later):
+            return None
+        left = c % half_s if d < 0 else -c % half_s  # clock time left in the half, s
+        if left == 0:
+            return None  # read at the end of the half (30:00, or 0:00 counting down)
+        # the board went out of view while play went on, so play lasts to the end of the video
+        # (a stop would have shown as a standing clock), or until the half was over
+        return float(min(end_ms, t + left * 1000))
+
     def reach(k: int, d: int, side: int) -> float:
         """Where the run with outer reading k (side -1: first, +1: last) begins or ends."""
         t, c = reads[k]
+        if side > 0 and (end := to_end(k, d)) is not None:
+            return end
         i = at[k] + side
         if not 0 <= i < len(kept):
-            if side > 0 and end_ms is not None and end_ms > t:
-                # the clock was running at its last reading and nothing says it stopped: the board
-                # went out of view while play went on, so play lasts to the end of the video
-                return float(end_ms)
             return max(0.0, t - edge) if side < 0 else t + edge
         tn, cn = reads[kept[i]]
         gap = abs(tn - t)

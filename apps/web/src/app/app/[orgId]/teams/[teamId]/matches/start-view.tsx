@@ -17,6 +17,8 @@ import { useShell } from "@/components/shell/context";
 import { buttonClass } from "@/components/ui/button";
 import { api } from "@/lib/client";
 import { ownName } from "@/lib/own-name";
+import { matchSides, pairing } from "@/lib/match-sides";
+import { MatchSidesProvider } from "@/components/domain/match-sides";
 import { TeamFacts, useStanding } from "@/app/(einstieg)/einstieg/entry-view";
 import { matchStyle } from "@/lib/color";
 import { checkCount, goalRuns, openMoments, reportCut, reportGoals, useMatchGraphics, videoScore, type MatchGraphics } from "@/lib/graphics";
@@ -61,8 +63,11 @@ export function StartView({
   const ours = played.filter((m) => m.kind !== "scouting");
   const last = ours.find((m) => m.id === fresh) ?? ours.find((m) => m.kind !== "training" && (m.score_own != null || m.has_video)) ?? ours[0] ?? null;
   const next = upcoming.find((m) => m.kind === "match") ?? null;
+  // observed matches have a section of their own: our list and its count are our matches (UX-07)
+  const observed = played.filter((m) => m.kind === "scouting");
   const withoutVideo = ours.filter((m) => !m.has_video).length;
-  const anyVideo = ours.some((m) => m.has_video);
+  // the first video is done with any video, an observed one too (UX-07)
+  const anyVideo = played.some((m) => m.has_video);
   // the head of a match without video shows the federation's table (FromReport): below, the next
   // opponent keeps only its own row, the table stands once (finding A10)
   const tableAbove = Boolean(last && !last.has_video);
@@ -72,7 +77,14 @@ export function StartView({
       {/* before the first video the next steps come before the list, not after ten rows (A10) */}
       {!anyVideo && <NextSteps hasVideo={false} row />}
       <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_340px]">
-        <section aria-labelledby="all-matches">
+        {/* the next opponent right under the head, before the list of all matches; beside it on a
+            wide screen (app review UX-05: it stood at the very end) */}
+        {next && (
+          <div className="min-w-0 lg:col-start-2 lg:row-start-1">
+            <NextOpponent orgId={orgId} teamId={team?.id} next={next} played={ours} rowOnly={tableAbove} />
+          </div>
+        )}
+        <section aria-labelledby="all-matches" className="lg:col-start-1 lg:row-span-2 lg:row-start-1">
           <SectionHead
             title={<span id="all-matches">{t("allMatches")}</span>}
             note={withoutVideo > 0 ? t("withoutVideo", { count: withoutVideo, total: ours.length }) : undefined}
@@ -80,18 +92,33 @@ export function StartView({
           {/* a new match and a report are not actions on the last match: they belong to the list */}
           {actions && <div className="-mt-1 mb-2 flex flex-wrap items-center gap-3">{actions}</div>}
           <ul className="m-0 list-none p-0" data-testid="match-list">
-            {played.map((m) => (
+            {ours.map((m) => (
               <li key={m.id}>
                 <GameRow orgId={orgId} m={m} mini={played.some((x) => x.has_video)} />
               </li>
             ))}
           </ul>
+          {observed.length > 0 && (
+            // videos of opponents against other teams (K3): their own list, with the year, without
+            // home or away of ours (BUG-17, UX-07)
+            <section aria-labelledby="observed-matches" className="mt-10" data-testid="observed-list">
+              <SectionHead title={<span id="observed-matches">{t("observedMatches")}</span>} note={t("observedNote")} />
+              <ul className="m-0 list-none p-0">
+                {observed.map((m) => (
+                  <li key={m.id}>
+                    <GameRow orgId={orgId} m={m} mini={played.some((x) => x.has_video)} />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
         </section>
-        <aside className="flex min-w-0 flex-col gap-8">
-          {/* after taking over the team: the coach's next steps (K17) */}
-          {anyVideo && <NextSteps hasVideo />}
-          {next && <NextOpponent orgId={orgId} teamId={team?.id} next={next} played={ours} rowOnly={tableAbove} />}
-        </aside>
+        {/* after taking over the team: the coach's next steps (K17) */}
+        {anyVideo && (
+          <aside className="flex min-w-0 flex-col gap-8 lg:col-start-2">
+            <NextSteps hasVideo />
+          </aside>
+        )}
       </div>
     </div>
   );
@@ -222,6 +249,8 @@ function LastMatch({ orgId, m, next, teamName, canWrite, club }: { orgId: string
 /** Rank, form, table excerpt, scorers and next game from handball.ch for a linked team. */
 function FromReport({ orgId, teamId, hideNext }: { orgId: string; teamId: string; hideNext: boolean }) {
   const t = useTranslations("entry");
+  const tw = useTranslations("seasonPage");
+  const format = useFormatter();
   const link = useQuery({
     queryKey: ["official", teamId],
     queryFn: async () => (await api.GET("/v1/orgs/{org_id}/teams/{team_id}/official", { params: { path: { org_id: orgId, team_id: teamId } } })).data ?? null,
@@ -243,7 +272,10 @@ function FromReport({ orgId, teamId, hideNext }: { orgId: string; teamId: string
       {/* the next opponent stands once, at the side (UX test B40); the scorers stand in the
           season, counted from the match reports in the app like the roster (app review R3) */}
       <TeamFacts p={preview.data} hideNext={hideNext} hideScorers />
-      <p className="m-0 text-[15px] text-ink-2">{t("source")}</p>
+      {/* one timestamp format everywhere: «abgeglichen vor 9 Stunden» (app review TXT-08) */}
+      <p className="m-0 text-[15px] text-ink-2">
+        {link.data?.synced_at ? tw("syncedFrom", { when: format.relativeTime(new Date(link.data.synced_at), new Date()) }) : t("source")}
+      </p>
     </section>
   );
 }
@@ -375,7 +407,8 @@ function GameRow({ orgId, m, mini }: { orgId: string; m: Match; mini: boolean })
   const format = useFormatter();
   const date = new Date(m.kickoff_at);
   // a scouting video: no win or loss of ours (K3)
-  const result = m.kind === "scouting" ? null : resultOf(m);
+  const observedRow = m.kind === "scouting";
+  const result = observedRow ? null : resultOf(m);
   const state = matchState(m);
   const base = `/app/${orgId}/matches/${m.id}`;
   return (
@@ -388,7 +421,8 @@ function GameRow({ orgId, m, mini }: { orgId: string; m: Match; mini: boolean })
       <p className="m-0 text-[15px] leading-tight text-ink-2 max-md:hidden">
         {format.dateTime(date, { weekday: "short" })}
         <b className="font-num block text-xl text-ink">{format.dateTime(date, { day: "2-digit", month: "2-digit" })}</b>
-        {m.is_home ? t("home") : t("away")}
+        {/* an observed match is nobody's home game of ours: its year instead (BUG-17) */}
+        {observedRow ? format.dateTime(date, { year: "numeric" }) : m.is_home ? t("home") : t("away")}
       </p>
       {m.has_video ? (
         <Link href={base} aria-hidden tabIndex={-1} className="block w-[84px] md:w-32">
@@ -402,17 +436,22 @@ function GameRow({ orgId, m, mini }: { orgId: string; m: Match; mini: boolean })
       <div className="min-w-0">
         <h3 className="m-0">
           <Link href={base} className="font-slant text-[17px] leading-tight text-ink no-underline hover:underline md:text-[22px]">
-            {m.kind === "training" ? tm("training") : m.kind === "scouting" ? t("scoutingRow", { opponent: m.opponent_name, other: m.scouting_other ?? "" }) : m.opponent_name}
+            {m.kind === "training" ? tm("training") : observedRow ? pairing(matchSides(m, { team: "", opponent: m.opponent_name }), tm("vs")) : m.opponent_name}
           </Link>
           {m.kind === "scouting" && <span className="ml-2 align-middle text-sm font-bold text-ink-2">{t("scoutingTag")}</span>}
         </h3>
         <p className="m-0 text-[15px] text-ink-2 md:text-[15px]">
-          <span className="md:hidden">{format.dateTime(date, { day: "2-digit", month: "2-digit" })} · </span>
+          <span className="md:hidden">{format.dateTime(date, observedRow ? { day: "2-digit", month: "2-digit", year: "numeric" } : { day: "2-digit", month: "2-digit" })} · </span>
           {["matches.status_processing", "matches.status_uploading", "matches.status_failed"].includes(state.label) ? (
             <ProgressLine orgId={orgId} matchId={m.id} className="max-md:inline" fallback={tm(state.label.replace("matches.", "") as "status_processing")} />
           ) : !m.has_video ? (
             // per row only the state; the upload is once at the top (A10)
             m.kind === "scouting" || m.score_own == null ? tm("noVideoYet") : t("reportOnly")
+          ) : observedRow ? (
+            // an observed match names its teams, never «Gegentore» (BUG-07)
+            <MatchSidesProvider sides={matchSides(m, { team: "", opponent: m.opponent_name })}>
+              <RowSummary orgId={orgId} m={m} />
+            </MatchSidesProvider>
           ) : (
             <RowSummary orgId={orgId} m={m} />
           )}
@@ -469,8 +508,9 @@ export function NextOpponent({ orgId, teamId, next, played, rowOnly = false }: {
   if (duel) facts.push(t("lastMeeting", { score: `${duel.score_own}:${duel.score_opponent}` }) + (met && first ? `, ${text(first)}` : ""));
   // the table around both teams, own and opponent marked; the whole table a tap away (K1)
   const all = table.map((r) => ({ key: `${r.rank}-${r.name}`, rank: r.rank ?? null, name: r.name ?? "", games: r.games ?? null, diff: r.goalDifference ?? null, points: r.points ?? null, own: ownId != null && r.teamId === ownId, marked: r === row }));
-  // the whole table stands above (the head of a match without video): here only the opponent's row
-  const rows = rowOnly ? all.filter((r) => r.marked) : all;
+  // the whole table stands above (the head of a match without video): none here, the opponent's
+  // rank is in the facts already (UX-05: a table of one row said nothing more)
+  const rows = rowOnly ? [] : all;
   return (
     <section data-testid="next-opponent">
       <p className="m-0 text-[15px] font-semibold text-ink-2">
@@ -497,6 +537,10 @@ export function NextOpponent({ orgId, teamId, next, played, rowOnly = false }: {
       ) : (
         <p className="m-0 border-t border-rule py-2.5 text-base text-ink-2">{t("noVideoAgainst", { opponent: next.opponent_name })}</p>
       )}
+      {/* the opponent's profile with its preparation: the scouting page leads there */}
+      <Link href={`/app/${orgId}/matches/${next.id}/scouting`} className={cn(linkClass, "mt-2 inline-flex min-h-11 items-center")} data-testid="next-prepare">
+        {t("prepareOpponent")}
+      </Link>
       {rows.length > 0 && (
         <div className="mt-4">
           <LeagueTable rows={rows} caption={link.data?.league || link.data?.group_name || t("table")} excerpt={6} size="sm" testid="next-table" />

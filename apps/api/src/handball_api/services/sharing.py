@@ -19,7 +19,7 @@ from typing import Any
 from sqlalchemy import select
 
 from handball_api.core.colors import FALLBACK_CLUB_COLOUR
-from handball_api.core.db import disable_system_access, enable_system_access, set_tenant
+from handball_api.core.db import set_tenant, system_access
 from handball_api.core.errors import ProblemError
 from handball_api.core.security import SecretBox, hash_token, new_token
 from handball_api.core.storage import ObjectNotFoundError
@@ -217,9 +217,10 @@ async def revoke(ctx: Ctx, link_id: uuid.UUID) -> None:
 
 
 async def _resolve(ctx: Ctx, token: str) -> ShareLink:
-    await enable_system_access(ctx.db, reason="share link lookup")
-    link = await ctx.db.scalar(select(ShareLink).where(ShareLink.token_hash == hash_token(token)))
-    await disable_system_access(ctx.db)
+    async with system_access(ctx.db, reason="share link lookup"):
+        link = await ctx.db.scalar(
+            select(ShareLink).where(ShareLink.token_hash == hash_token(token))
+        )
     if link is None or link.revoked_at is not None or link.expires_at <= _now():
         raise ProblemError(404, "not-found", "This link is no longer valid")
     await set_tenant(ctx.db, link.organization_id)

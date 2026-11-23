@@ -308,7 +308,7 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
 
           <section>
             {/* the course shows the last ten (six on a phone): said when there are more (H9) */}
-            <SectionHead title={ts("trend")} note={chrono.length > 6 ? ts("trendNoteLast", { shown: Math.min(10, chrono.length), phone: 6, n: chrono.length }) : ts("trendNote")} />
+            <SectionHead title={ts("trend")} note={chrono.length > 6 ? ts("trendNoteLast", { shown: Math.min(10, chrono.length), n: chrono.length }) : ts("trendNote")} />
             {/* phones: the last six matches at a readable size */}
             <div className="sm:hidden">
               <DiffBars matches={chrono.slice(-6).map(bar)} width={400} label={t("chartLabel")} />
@@ -429,7 +429,7 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
 
       {/* everything the season page showed before, one click away (nothing is lost) */}
       <details className="mt-16 border-t-2 border-ink pt-4" data-testid="season-more">
-        <summary className="min-h-11 cursor-pointer content-center">
+        <summary className="fold items-baseline gap-3">
           <span className="font-slant text-[22px]">{ts("more")}</span> <span className="text-[15px] text-ink-2">{ts("moreNote")}</span>
         </summary>
         <div className="mt-8 space-y-12">

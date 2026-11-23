@@ -3,7 +3,7 @@
 Stand: 12. November 2026, Branch `claude/trikot-ui` (Commit f78f8e8), getestet auf `claude/ux-test`.
 Testerin: unabhängig, hat die Oberfläche nicht gebaut. Nichts in `apps/` oder `packages/` geändert.
 
-Aufbau: lokaler Stack nach `docs/runbooks/local-stack-without-docker.md` (Produktions-Build von
+Aufbau: lokaler Stack nach `docs/runbooks/local-stack-ohne-docker.md` (Produktions-Build von
 `apps/web`, `next start`), Demo-Daten mit `make seed`, Demo-Konto `demo@handball-demo.ch`. Dazu
 eigene Konten über die Registrierung: zwei Vereine aus handball.ch (Handball Stäfa, Pfadi
 Winterthur) und ein Verein von Hand ohne Daten («FC Leer»). Playwright mit Chromium, Desktop

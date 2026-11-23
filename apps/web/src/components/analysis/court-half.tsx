@@ -1,11 +1,17 @@
 "use client";
 
-import { COURT, type Point } from "@handball/court";
 import type { MouseEvent, ReactNode } from "react";
+import { HalfCourtLines } from "@/components/anlauf/court";
 
-/** Attacking half (x 20..40) as SVG; the attacked goal is on the right (positions are normalised). */
-const X0 = 20;
-const PAD = 1;
+/**
+ * The attacked half with the goal at the top, in the paper style of every other court of the app
+ * (app review UI-01, UI-03: this one stood dark with the goal on the right). Positions come in
+ * court metres with the attacked goal at x = 40 (they are normalised); left and right are seen
+ * from the attack, as on the goal maps.
+ */
+const BOX = [-0.6, -1.2, 21.2, 22] as const;
+/** court metres (x 20..40, y 0..20) to the half: u = 20 - y across, v = 40 - x from the goal line */
+const TO_HALF = "matrix(0 -1 -1 0 20 40)";
 
 export function CourtHalf({
   children,
@@ -16,44 +22,26 @@ export function CourtHalf({
   onPick?: (x: number, y: number) => void;
   label: string;
 }) {
-  const w = COURT.length - X0 + 2 * PAD;
-  const h = COURT.width + 2 * PAD;
-  const path = (pts: readonly Point[]) =>
-    pts
-      .filter(([x]) => x >= X0 - 0.01)
-      .map(([x, y], i) => `${i ? "L" : "M"}${x - X0 + PAD} ${COURT.width - y + PAD}`)
-      .join(" ");
   function click(e: MouseEvent<SVGSVGElement>) {
     if (!onPick) return;
     const r = e.currentTarget.getBoundingClientRect();
-    const x = ((e.clientX - r.left) / r.width) * w - PAD + X0;
-    const y = COURT.width - (((e.clientY - r.top) / r.height) * h - PAD);
+    const u = BOX[0] + ((e.clientX - r.left) / r.width) * BOX[2];
+    const v = BOX[1] + ((e.clientY - r.top) / r.height) * BOX[3];
+    const x = Math.min(40, Math.max(20, 40 - v));
+    const y = Math.min(20, Math.max(0, 20 - u));
     onPick(Math.round(x * 10) / 10, Math.round(y * 10) / 10);
   }
   return (
     <svg
-      viewBox={`0 0 ${w} ${h}`}
+      viewBox={BOX.join(" ")}
       role="img"
       aria-label={label}
-      className={`court-frame ${onPick ? "cursor-crosshair" : ""}`}
-      style={{ background: "var(--court)" }}
+      className={`court-frame block bg-paper ${onPick ? "cursor-crosshair" : ""}`}
       onClick={click}
       data-testid="court-half"
     >
-      {Object.entries(COURT.lines)
-        .filter(([name]) => !name.includes("left") && !name.startsWith("substitution"))
-        .map(([name, pts]) => (
-          <path
-            key={name}
-            d={path(pts)}
-            fill="none"
-            stroke="var(--court-line)"
-            strokeWidth={name.startsWith("goal_right") ? 0.4 : 0.08}
-            strokeDasharray={COURT.dashedLines.includes(name) ? "0.3 0.3" : undefined}
-          />
-        ))}
-      <path d={`M${PAD} ${PAD} V${h - PAD}`} stroke="var(--court-line)" strokeWidth={0.08} />
-      <g transform={`translate(${PAD - X0} ${PAD}) scale(1 -1) translate(0 ${-COURT.width})`}>{children}</g>
+      <HalfCourtLines />
+      <g transform={TO_HALF}>{children}</g>
     </svg>
   );
 }
@@ -62,7 +50,7 @@ export function CourtHalf({
 export function ShotDot({ x, y, outcome, title }: { x: number; y: number; outcome: string; title?: string }) {
   const fill = { goal: "var(--ok)", save: "var(--error)", miss: "#9ca3af", post: "#f59e0b", blocked: "#6b7280" }[outcome] ?? "#6b7280";
   return (
-    <circle cx={x} cy={y} r={0.45} fill={fill} stroke="#111827" strokeWidth={0.06}>
+    <circle cx={x} cy={y} r={0.45} fill={fill} stroke="var(--ink)" strokeWidth={0.06}>
       {title && <title>{title}</title>}
     </circle>
   );

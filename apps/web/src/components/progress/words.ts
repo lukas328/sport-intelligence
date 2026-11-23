@@ -2,6 +2,7 @@
 
 import { useFormatter, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import { matchSides } from "@/lib/match-sides";
 import { storedUploadIds } from "@/lib/upload";
 import type { LocalUpload } from "@/lib/upload-store";
 import { durationParts, finishAt, headlineKey, isActive, type FileProgress, type MatchProgress } from "@/lib/progress";
@@ -45,9 +46,13 @@ export function useProgressWords() {
 
   const headline = (p: MatchProgress) => t(headlineKey(p) as "headAnalysis");
 
-  /** «TV Gegner», or for a video of the opponent «TV Gegner gegen HC Dritte» */
-  const matchName = (p: Pick<MatchProgress, "opponent_name" | "scouting_other" | "kind">) =>
-    p.kind === "scouting" && p.scouting_other ? t("scoutingName", { opponent: p.opponent_name, other: p.scouting_other }) : p.opponent_name || t("training");
+  /** «TV Gegner», or for a video of the opponent both teams, home team first as on the match's
+   * page (BUG-18): «HC Dritte gegen TV Gegner» */
+  const matchName = (p: Pick<MatchProgress, "opponent_name" | "scouting_other" | "kind"> & { is_home?: boolean }) => {
+    if (!(p.kind === "scouting" && p.scouting_other)) return p.opponent_name || t("training");
+    const sides = matchSides(p, { team: "", opponent: p.opponent_name });
+    return t("scoutingName", { home: sides.home, away: sides.away });
+  };
 
   /** «1. Halbzeit», «Teil 2», «Torkamera links» or the file name */
   const fileName = (f: FileProgress, files: FileProgress[]) => {

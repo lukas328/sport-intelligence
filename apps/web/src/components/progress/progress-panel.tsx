@@ -73,7 +73,8 @@ export function ProgressPanel({
                 ? t("filesSummary", { n: p.files.length, list: summary.map((x) => t(`fileState_${x.word}`, { n: x.n })).join(", ") })
                 : trouble
                   ? `${t(`step_${trouble.stage}`)}: ${w.percent(trouble.fraction ?? 0)}`
-                  : (when ?? t("noEta"))}
+                  : // the same figure as the strip on every page: the whole way, then the time (BUG-16)
+                    `${w.percent(p.overall)} · ${when ?? t("noEta")}`}
             </p>
             {when && !trouble && (
               <p className="m-0 text-[15px] text-ink-2">
@@ -249,8 +250,9 @@ function FileNote({
     );
   }
   // running
+  // the step's own share, named as such: the figure of the whole way stands above (BUG-16)
   const parts = [
-    f.fraction != null ? w.percent(f.fraction) : null,
+    f.fraction != null ? t("stepShare", { n: Math.floor(f.fraction * 100) }) : null,
     f.stage === "upload" && f.uploaded_bytes != null && f.size_bytes ? t("bytesOf", { done: formatBytes(f.uploaded_bytes), total: formatBytes(f.size_bytes) }) : null,
     f.eta_s != null ? w.left(f.eta_s) : t("stepRuns"),
   ].filter(Boolean);
