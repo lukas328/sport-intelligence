@@ -180,6 +180,39 @@ Then set `bind_custom_domain = true`, run `terraform apply`, and bind the free m
 az containerapp hostname bind -g $(terraform output -raw resource_group) -n $(terraform output -raw web_app) --hostname <app_domain> --environment $(terraform output -raw container_app_environment) --validation-method CNAME
 ```
 
+## 7. Video straight from R2 (ADR 002 point 7)
+
+With `media_direct = true` (the default) the API still serves the HLS playlists, with the same access
+checks as before, but writes presigned R2 URLs for the segments into them (`HB_MEDIA_DIRECT=true`). The
+video bytes then go from R2 to the browser and never through the API, the web proxy or Azure egress.
+Without it (`media_direct = false`), segments are read through the API as in development.
+
+The browser loads segments from the R2 endpoint (`s3_endpoint_url`) with CORS, so the video bucket needs
+this rule. The migration job sets it when its token may (Admin Read & Write); with an object-scoped token
+it logs it as `bootstrap_manual_step`. By hand: Cloudflare dashboard → R2 → `hb-videos` → Settings →
+CORS policy, with your app origin (both `https://<app_domain>` and the default FQDN while you use it):
+
+```json
+[
+  {
+    "AllowedOrigins": ["https://<app_domain>"],
+    "AllowedMethods": ["GET", "HEAD", "PUT"],
+    "AllowedHeaders": ["*"],
+    "ExposeHeaders": ["ETag"],
+    "MaxAgeSeconds": 3600
+  }
+]
+```
+
+`PUT` and `ETag` are for the direct uploads, `GET`/`HEAD` with any header (`Range`) for playback. The web
+CSP allows the R2 origin in `connect-src` and `media-src` (`HB_S3_PUBLIC_URL`, set from
+`s3_endpoint_url`). A segment URL stays valid at least `HB_MEDIA_DIRECT_TTL_S` (default 4 h, set it in
+`extra_env` to change); the player loads the playlist again when one has expired. That is also how long
+a viewer of a revoked share link can keep playing the segments already in the loaded playlist.
+
+Check after the first apply: open a match, DevTools → Network: `index.m3u8` from the app domain,
+`init.mp4` and `seg_*.m4s` from `*.eu.r2.cloudflarestorage.com` with status 200 or 206.
+
 ## Deploying a new version
 
 Build and push with a new tag (step 3), set `image_tag`, `terraform apply`, then start the migration job

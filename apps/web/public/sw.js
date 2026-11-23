@@ -20,7 +20,14 @@ self.addEventListener("fetch", (event) => {
   const req = event.request;
   if (req.method !== "GET") return;
   const url = new URL(req.url);
-  if (url.origin !== self.location.origin) return;
+  if (url.origin !== self.location.origin) {
+    // HLS segments straight from storage (presigned, ADR 002 point 7): a packed presentation
+    // holds them under their full URL; network first, the pack when the hall is offline
+    if (url.searchParams.has("X-Amz-Signature") && /\.(m4s|mp4|ts)$/.test(url.pathname)) {
+      event.respondWith(fetch(req).catch(() => caches.match(req, { ignoreSearch: false }).then((hit) => hit || Response.error())));
+    }
+    return;
+  }
   if (url.pathname.startsWith("/_next/static/")) {
     event.respondWith(
       caches.match(req).then(

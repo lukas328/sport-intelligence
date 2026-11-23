@@ -116,6 +116,12 @@ variable "s3_bucket_artifacts" {
   default = "hb-artifacts"
 }
 
+variable "media_direct" {
+  description = "HLS segments straight from R2 with presigned URLs in the playlists (HB_MEDIA_DIRECT, ADR 002 point 7). Needs the CORS rule on the video bucket (README, step 5). false: segments go through the API and the web proxy (Azure egress)."
+  type        = bool
+  default     = true
+}
+
 # --- E-mail (ADR 009) ---------------------------------------------------------------------------
 
 variable "email_from" {

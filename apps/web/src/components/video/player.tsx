@@ -314,6 +314,10 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
       <div className="relative">
         <video
           ref={videoRef}
+          // segments may come straight from storage (ADR 002 point 7): Chrome's own HLS player
+          // stops on segments of another origin unless they load with CORS; the playlist stays
+          // same-origin, so its cookies are still sent
+          crossOrigin="anonymous"
           poster={poster}
           muted={muted}
           playsInline

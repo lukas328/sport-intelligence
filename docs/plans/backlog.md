@@ -30,8 +30,8 @@ fertig ist, streicht es und trägt das Ergebnis im passenden Plan ein.
    (Staging-Daten), dann entscheiden, wann der Wurfort ganz automatisch sein darf.
 3. **Spieltag neu denken (A21).** Seit Runde 4 aus der App genommen; Konzept mit Lukas: was der
    Trainer am Spielfeldrand wirklich erfasst.
-4. **Go-live-Punkte mit Code** (`GO_LIVE.md`): HLS-Segmente direkt aus R2 statt über API und Web
-   (ADR 002 Punkt 7); Overlays im Player für bewegte Kameras (ADR 020); Alarme und Proben im
+4. **Go-live-Punkte mit Code** (`GO_LIVE.md`): ~~HLS-Segmente direkt aus R2~~ erledigt 20.11.
+   (`HB_MEDIA_DIRECT`, ADR 002 Nachtrag; Lukas: R2-CORS-Regel prüfen, README Azure Schritt 7); Overlays im Player für bewegte Kameras (ADR 020); Alarme und Proben im
    Monitoring vorbereiten.
 5. **Europa Schritt 2 vorbereiten** (`docs/plans/europa.md`): Währung EUR in Abrechnung und Rechnung
    (heute nur CHF), `de-DE` erst mit dem ersten deutschen Verein.
@@ -47,6 +47,8 @@ fertig ist, streicht es und trägt das Ergebnis im passenden Plan ein.
    Spiel; Launch zur Rückrunde im Januar; die 🔴-Punkte in `docs/OPEN_QUESTIONS.md` (Firma, Recht,
    Einwilligung Jugend, AVV).
 6. GPU auf Azure mit Umzug der Region (Lukas, später).
+7. R2-CORS-Regel auf `hb-videos` (GET, HEAD, PUT von der App-Domain), sonst spielen Safari und Chrome
+   die Videos nicht direkt aus R2; Anleitung `infra/terraform/azure/README.md` Schritt 7.
 
 ## Als Nächstes (Stand 2026-11-09, Verlauf)
 1. **Kalibrierung für Stream-Kameras.** Auf allen vier geprüften Wädenswil/Horgen-Clips scheiterte

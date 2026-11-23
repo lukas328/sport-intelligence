@@ -681,3 +681,39 @@ async def test_without_recording_times_two_parts_stay_halves(make_api: Callable[
     await _ingest(api, second["id"], HALF)
     match = (await api.get(f"/v1/orgs/{ids['org']}/matches/{m['id']}")).json()
     assert [v["half"] for v in match["videos"] if v["part"]] == [1, 2]
+
+
+async def test_both_halves_play_straight_from_storage(make_api: Callable[[], Api]) -> None:
+    """ADR 002 point 7: the joined playlist keeps its order and break; every segment of both
+    files points to storage, for the web and for the native apps' signed path."""
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    match_id, first, second = await _two_halves(api, ids)
+    storage: MemoryStorage = api.app.state.storage
+    variant = (
+        '#EXTM3U\n#EXT-X-TARGETDURATION:4\n#EXT-X-MAP:URI="init.mp4"\n'
+        "#EXTINF:4.000000,\nseg_00000.m4s\n#EXTINF:4.000000,\nseg_00001.m4s\n#EXT-X-ENDLIST\n"
+    )
+    for vid in (first, second):
+        prefix = f"{org}/{match_id}/{vid}/"
+        master = "#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=1\n720p/index.m3u8\n"
+        await storage.put("videos", prefix + "hls/master.m3u8", master.encode(), "x")
+        await storage.put("videos", prefix + "hls/720p/index.m3u8", variant.encode(), "x")
+    api.app.state.settings.media_direct = True
+    try:
+        signed = (await api.post(f"/v1/orgs/{org}/videos/{first}/media-token")).json()["base"]
+        for url in (f"/v1/orgs/{org}/videos/{first}/media/hls/720p/", f"{signed}hls/720p/"):
+            text = (await api.http.get(url + "index.m3u8")).text
+            lines = text.splitlines()
+            segs = [x.split("?")[0] for x in lines if x and not x.startswith("#")]
+            assert segs == [
+                f"https://storage.test/videos/{org}/{match_id}/{v}/hls/720p/seg_0000{n}.m4s"
+                for v in (first, second)
+                for n in (0, 1)
+            ]
+            maps = [x for x in lines if x.startswith("#EXT-X-MAP")]
+            assert len(maps) == 2 and all("https://storage.test/videos/" in x for x in maps)
+            assert lines.count("#EXT-X-DISCONTINUITY") == 1 and "../" not in text
+    finally:
+        api.app.state.settings.media_direct = False

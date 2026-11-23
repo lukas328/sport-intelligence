@@ -35,6 +35,34 @@ grows with every club; storage itself is cheap.
    gigabyte would be Azure egress. Before production, segments are served from R2 directly
    (short-lived presigned URLs or a Cloudflare-cached custom domain with signed tokens), the API keeps
    the authorisation check and the playlist.
+   *Done 2026-11-20 (`HB_MEDIA_DIRECT`, on in `infra/terraform/azure` via `media_direct`):* the API
+   serves the playlists as before and writes presigned R2 GET URLs for the init and media segments into
+   them; see «Addendum: direct segment delivery» below.
+
+## Addendum: direct segment delivery (point 7, 2026-11-20)
+- **Playlists stay with the API**, with the same checks (tenant, guardian access, share links and their
+  scope, native-app media tokens) and the same join over a match's parts. Only the URIs of `init.mp4` and
+  `*.m4s` change: each becomes a presigned GET on the public storage endpoint
+  (`HB_S3_PUBLIC_ENDPOINT_URL`). Only files of the video's own media folder are signed, never originals or
+  the analysis proxy. What a playlist does not list (another video, a match outside a share link) is not
+  signed, so access is decided exactly where it was.
+- **Presigned S3 URLs, not a custom domain with tokens.** R2 presigned URLs work on the S3 endpoint
+  only; R2 has no egress fees, so a CDN in front is not needed for cost. A Cloudflare custom domain with
+  signed tokens (WAF rule) stays the option for caching close to the viewer (GO_LIVE: CDN for HLS).
+- **Expiry:** a URL is valid at least `HB_MEDIA_DIRECT_TTL_S` (default 4 h). The signing time is rounded
+  down to a window (an eighth of the lifetime, at most 1 h), so the same segment has the same URL for that
+  window and the browser cache hits across playlist reloads. A longer pause costs one reload: the web
+  player loads the playlist again at the same moment on a network error. Trade-off: segments of a loaded
+  playlist keep playing up to that long after a share link is revoked.
+- **Signing** is our own SigV4 query signer (`core/presign.py`, tested equal to boto3): a full match lists
+  over a thousand segments per variant and boto3 needs about 0.3 ms per URL.
+- **Browser:** the bucket CORS rule (GET/HEAD, any header for `Range`) is set by the bootstrap or by hand
+  (`infra/terraform/azure/README.md`, step 7); the CSP allows the storage origin in `connect-src` and
+  `media-src`; the players load with `crossorigin="anonymous"` because Chrome's native HLS stops on
+  cross-origin segments otherwise (verified locally with SeaweedFS, hls.js and native). Offline
+  presentation packs cache presigned segments under their full URL; the service worker serves them.
+- **Fallback:** with `HB_MEDIA_DIRECT=false` (default in development and tests) segments are read through
+  the API as before; the API path also keeps answering segment requests when the setting is on.
 
 ## Consequences
 - Local development and CI stay provider-free (docker compose, SeaweedFS). Nothing in domain code

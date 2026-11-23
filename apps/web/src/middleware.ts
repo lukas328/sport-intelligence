@@ -7,8 +7,10 @@ const PROTECTED = ["/app", "/onboarding", "/ops", "/federation"];
 const APP_SEGMENTS = new Set(["assignments", "club", "collections", "consents", "drills", "feed", "matches", "me", "opponents", "playlists", "plays", "presentations", "profile", "schedule", "settings", "teams"]);
 
 /**
- * Content Security Policy, built at runtime so the storage origin for direct uploads can be
- * configured per deployment (HB_S3_PUBLIC_URL). Scripts: 'unsafe-inline' is still needed for
+ * Content Security Policy, built at runtime so the storage origin for direct uploads and for HLS
+ * segments straight from storage (HB_MEDIA_DIRECT, ADR 002 point 7) can be configured per
+ * deployment (HB_S3_PUBLIC_URL): hls.js fetches segments (connect-src), Safari plays them
+ * natively (media-src). Scripts: 'unsafe-inline' is still needed for
  * Next.js inline bootstrap; nonces follow in M9 (OPEN_QUESTIONS).
  */
 export interface ThirdParties {
@@ -35,7 +37,7 @@ export function csp(storageOrigin: string | undefined, dev: boolean, third: Thir
     `script-src ${scripts.join(" ")}`,
     `style-src 'self' 'unsafe-inline'${third.crisp ? " https://client.crisp.chat" : ""}`,
     `img-src 'self' data: blob:${third.crisp ? " https://image.crisp.chat https://client.crisp.chat" : ""}`,
-    "media-src 'self' blob:",
+    `media-src ${["'self'", "blob:", storageOrigin].filter(Boolean).join(" ")}`,
     `connect-src ${connect}`,
     "worker-src 'self' blob:",
     "font-src 'self'",

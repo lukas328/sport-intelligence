@@ -32,4 +32,5 @@
 - hls.js (dynamic import, only on video pages) in Chrome/Firefox/Edge, native HLS in Safari and iOS.
 - Clips are time windows on the HLS stream, never cut copies (BRIEF 6.2). Physical cuts only for downloads (M8).
 - **Later (M9, with the hosting decision)**: CDN in front of the media endpoint with signed cookies, so
-  segments do not pass through the API.
+  segments do not pass through the API. *Superseded 2026-11-20:* with `HB_MEDIA_DIRECT` the playlists
+  carry presigned storage URLs for the segments (ADR 002 point 7 and its addendum).

@@ -50,6 +50,16 @@ export function lowestVariant(master: string): string | null {
   return (best as { uri: string } | null)?.uri ?? null;
 }
 
+/**
+ * The URL a segment is cached under: the path for the API's own media, the full URL (with its
+ * signature) for a segment straight from storage (ADR 002 point 7). The player asks for exactly
+ * the URLs of the cached playlist, so the service worker finds them when the hall is offline.
+ */
+export function segmentUrl(uri: string, dir: string, origin: string): string {
+  const url = new URL(uri, origin + dir);
+  return url.origin === origin ? url.pathname : url.href;
+}
+
 export function cacheName(presId: string): string {
   return `hb-pres-${presId}`;
 }
@@ -74,7 +84,7 @@ export async function packPresentation(
     urls.add(playlistUrl);
     const dir = playlistUrl.slice(0, playlistUrl.lastIndexOf("/") + 1);
     // the cache is asked with the URL the player resolves: "../" of a joined playlist resolved
-    const at = (uri: string) => new URL(uri, location.origin + dir).pathname;
+    const at = (uri: string) => segmentUrl(uri, dir, location.origin);
     if (init) urls.add(at(init));
     for (const s of segments)
       if (s.end > c.in_ms / 1000 && s.start < c.out_ms / 1000) {

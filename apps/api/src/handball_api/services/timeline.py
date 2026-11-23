@@ -354,6 +354,12 @@ def nearest_variant(name: str, available: list[str]) -> str | None:
     return min(available, key=lambda v: abs(int(v.rstrip("p")) - want))
 
 
+def _under(prefix: str, uri: str) -> str:
+    """A playlist URI from a part's own folder seen from the first playlist's place; absolute
+    URIs (presigned segments straight from storage) stay as they are."""
+    return uri if "://" in uri else prefix + uri
+
+
 def join_variants(playlists: list[tuple[str, str]]) -> str:
     """One VOD playlist of several files' variant playlists (`(text, prefix)` per file, `prefix`
     leading from the first playlist's place to the file's variant folder). Each file after the
@@ -372,12 +378,14 @@ def join_variants(playlists: list[tuple[str, str]]) -> str:
             elif line.startswith("#EXT-X-MAP:"):
                 uri = re.search(r'URI="([^"]+)"', line)
                 body.append(
-                    line.replace(uri.group(0), f'URI="{prefix}{uri.group(1)}"') if uri else line
+                    line.replace(uri.group(0), f'URI="{_under(prefix, uri.group(1))}"')
+                    if uri
+                    else line
                 )
             elif line.startswith("#EXTINF") or line.startswith("#EXT-X-BYTERANGE"):
                 body.append(line)
             elif not line.startswith("#"):
-                body.append(prefix + line)
+                body.append(_under(prefix, line))
     head = [
         "#EXTM3U",
         "#EXT-X-VERSION:7",

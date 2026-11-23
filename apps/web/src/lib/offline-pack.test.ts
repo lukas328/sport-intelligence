@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { lowestVariant, parseMediaPlaylist } from "./offline-pack";
+import { lowestVariant, parseMediaPlaylist, segmentUrl } from "./offline-pack";
 
 describe("offline presentation pack", () => {
   it("picks the lowest variant", () => {
@@ -37,5 +37,17 @@ describe("a joined playlist of two files (Q-VIDEO-PARTS)", () => {
       [0, 4, "init.mp4"],
       [4, 10, "../../../../b/media/hls/720p/init.mp4"],
     ]);
+  });
+});
+
+describe("segments straight from storage (ADR 002 point 7)", () => {
+  const dir = "/v1/orgs/o/videos/v/media/hls/720p/";
+  it("caches the API's own segments by path", () => {
+    expect(segmentUrl("seg_00000.m4s", dir, "https://app.test")).toBe(`${dir}seg_00000.m4s`);
+    expect(segmentUrl("../../../../b/media/hls/720p/init.mp4", dir, "https://app.test")).toBe("/v1/orgs/o/videos/b/media/hls/720p/init.mp4");
+  });
+  it("caches a presigned segment under its full URL", () => {
+    const signed = "https://acc.eu.r2.cloudflarestorage.com/videos/o/m/v/hls/720p/seg_00000.m4s?X-Amz-Signature=abc";
+    expect(segmentUrl(signed, dir, "https://app.test")).toBe(signed);
   });
 });

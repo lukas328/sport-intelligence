@@ -330,3 +330,39 @@ def test_byte_ranges() -> None:
     assert byte_range("bytes=5-2", 100) == "invalid"
     assert byte_range("bytes=0-1,4-5", 100) is None
     assert byte_range("items=0-1", 100) is None
+
+
+async def test_shared_media_straight_from_storage(make_api: Callable[[], Api]) -> None:
+    """ADR 002 point 7: with direct media the shared playlist points to presigned storage URLs;
+    which videos a link may play is checked exactly as before."""
+    api = make_api()
+    ids = await setup_club(api)
+    org, team = ids["org"], ids["team"]
+    api.app.state.settings.media_direct = True
+    try:
+        m = await new_match(api, ids)
+        vid = (await upload(api, ids, m["id"], b"v" * 100))["id"]
+        other = await new_match(api, ids, opponent_name="Andere")
+        other_vid = (await upload(api, ids, other["id"], b"w" * 100))["id"]
+        storage: MemoryStorage = api.app.state.storage
+        variant = '#EXTM3U\n#EXT-X-MAP:URI="init.mp4"\n#EXTINF:4,\nseg_00000.m4s\n'
+        for mid, v in ((m["id"], vid), (other["id"], other_vid)):
+            key = f"{org}/{mid}/{v}/hls/720p/index.m3u8"
+            await storage.put("videos", key, variant.encode(), "x")
+        base = f"/v1/orgs/{org}/teams/{team}/share-links"
+        link = (await api.post(base, json={"kind": "match", "target_id": m["id"]})).json()
+        anon = make_api()
+        media = f"/v1/share/{link['token']}/videos"
+        r = await anon.get(f"{media}/{vid}/media/hls/720p/index.m3u8")
+        assert r.status_code == 200 and r.headers["cache-control"] == "private, no-cache"
+        folder = f"https://storage.test/videos/{org}/{m['id']}/{vid}/hls/720p/"
+        segs = [x.split("?")[0] for x in r.text.splitlines() if x and not x.startswith("#")]
+        assert segs == [f"{folder}seg_00000.m4s"]
+        assert f'URI="{folder}init.mp4?' in r.text and other_vid not in r.text
+        # another match's video stays closed, and so does a revoked link
+        closed = await anon.get(f"{media}/{other_vid}/media/hls/720p/index.m3u8")
+        assert closed.status_code == 404
+        await api.delete(f"/v1/orgs/{org}/share-links/{link['id']}")
+        assert (await anon.get(f"{media}/{vid}/media/hls/720p/index.m3u8")).status_code == 404
+    finally:
+        api.app.state.settings.media_direct = False
