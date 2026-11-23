@@ -110,12 +110,11 @@ mit Wartungsfenster etwa 30 bis 60 min Ausfall (DB-Kopie Minuten, DNS und Zertif
 
 ## 4. Texte zum Datenstandort, die angepasst werden müssen (Umsetzung UX-Sitzung)
 
-- `apps/site/src/messages/de.ts` und `en.ts`: Zeile 195/197 («Daten in der Schweiz und der EU»),
+- `apps/site/src/messages/de.ts`, `en.ts` und `fr.ts`: Zeile 195/197 («Daten in der Schweiz und der EU»),
   597/598 («Die App und ihre Datenbank laufen auf Servern in der Schweiz ...»), 729/730
   («Datenstandort: App und Datenbank in der Schweiz ...»), 773/774 («Die Daten liegen in der Schweiz
   und der EU ...»). «Entwickelt in der Schweiz» bleibt.
-- `apps/site/content/help/de/datenschutz-und-loeschen.mdx` Zeile 5 (und die englische Fassung, falls
-  vorhanden).
+- `apps/site/content/help/{de,en,fr}/datenschutz-und-loeschen.mdx` Zeile 5.
 - Doku: `docs/LIVEGANG.md` (Zeilen 7, 26, 28), `docs/adr/025-azure-app-hosting.md` (Region, neuer
   Nachtrag), `docs/adr/002-hosting-region.md` (Nachtrag), `infra/terraform/azure/README.md` und
   `variables.tf` (`location`-Beschreibung), `terraform.tfvars.example`.
