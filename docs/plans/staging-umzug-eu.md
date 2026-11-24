@@ -155,9 +155,12 @@ Ablauf und Messwerte:
 - Deploy stack=eu (Run 45394191027): Zertifikat gebunden 12:40 UTC, Mail-Domain 4 von 4 verifiziert,
   `mail_live`, Health 200 über die Domain. Smoke-Test grün (Login, Spiele, Spiel, Szenen, Spieltag,
   Video; Laptop und Handy).
-- Die alte Umgebung ist pausiert (Run 45396182436: Apps auf 0, Postgres gestoppt, Domain-Bindung
-  entfernt). Abbau nach einigen Tagen stabilem Betrieb, mit Lukas' OK. Rückweg bis dahin: CNAME
-  zurück, Deploy stack=ch mit state=resume.
+- Alte Umgebung pausieren: der erste Lauf (45396182436) scheiterte im Plan, weil move-db den Ingress
+  der alten Web-App abgeschaltet hatte und Terraform ihre Custom Domain ohne Ingress nicht lesen kann.
+  Der Workflow schaltet den Ingress vor dem Plan wieder ein (PR zu diesem Abschnitt), dann Pause:
+  Apps auf 0, Postgres gestoppt, Domain-Bindung der alten App entfernt. Abbau nach einigen Tagen
+  stabilem Betrieb, mit Lukas' OK. Rückweg bis dahin: CNAME zurück, Deploy stack=ch mit
+  state=resume.
 - GPU: noch aus (`gpu = false`). Nach Freigabe des T4-Kontingents ein Deploy stack=eu mit gpu=on.
 
 Ausfall: 23.11. 19:57 bis 24.11. 12:40 UTC, etwa 16.7 h. Die eigentliche Umschaltung (DNS,
@@ -172,3 +175,5 @@ Lehren für künftige Umzüge:
 - Die TXT-Einträge (asuid, Domain-Verifizierung) vorab setzen; sie stören die alte Umgebung nicht.
 - Erste Läufe auf einer neuen Umgebung mit gezieltem Apply prüfen alle Abhängigkeiten (Firewall)
   und den halben State bei Wiederholung.
+- Was ein Skript an Terraform vorbei ändert (Ingress aus für die Wartung), muss der nächste Lauf
+  wieder herstellen, bevor Terraform plant.
