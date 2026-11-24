@@ -86,3 +86,12 @@ grows with every club; storage itself is cheap.
 - **Azure Blob Storage:** not S3-compatible, would need a storage abstraction in API and workers, and
   egress is billed.
 - **AWS S3 (Frankfurt/Zurich):** reliable, but egress costs make video delivery expensive.
+
+## Addendum 2026-11-24: region Sweden Central
+
+Staging ("hbeu-stg", app.handball-intelligence.com) moved from Switzerland North to **Sweden Central**
+on 2026-11-24: Switzerland North offers no serverless GPUs (Consumption-GPU-NC8as-T4), Sweden Central
+does. App, database, Redis, Key Vault, monitoring and the GPU job are now in the EU (Sweden); videos and
+artefacts stay in Cloudflare R2 (EU). Switzerland recognises the EU as providing adequate data
+protection (FADP). The data-location texts on the website, in the help and in the privacy policy are
+updated. Plan and steps: `docs/plans/staging-umzug-eu.md`.

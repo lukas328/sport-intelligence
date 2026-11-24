@@ -194,7 +194,7 @@ const en: Messages = {
     trust: [
       { title: "It belongs to your club", text: "Only the coaching staff sees it, unless you share a link." },
       { title: "Consent by link", text: "Every player says yes or no, up to 16 the parents." },
-      { title: "GDPR and Swiss FADP", text: "No ads, no selling of data. Data in Switzerland and the EU." },
+      { title: "GDPR and Swiss FADP", text: "No ads, no selling of data. Data in the EU." },
     ],
     trustLink: "About us",
     priceTitle: "Start for free, then {cur} {price} per team.",
@@ -595,7 +595,7 @@ const en: Messages = {
       },
       {
         title: "Where the data lives",
-        text: "The app and its database run on servers in Switzerland, the videos are kept in storage in the EU. We follow the GDPR and the Swiss Federal Act on Data Protection (FADP). The EU recognises Switzerland as a country with adequate data protection.",
+        text: "The app and its database run on servers in the EU (a data centre in Sweden), the videos are kept in storage in the EU. We follow the GDPR and the Swiss Federal Act on Data Protection (FADP). Switzerland recognises the EU as providing adequate data protection.",
       },
       {
         title: "How long",
@@ -649,7 +649,7 @@ const en: Messages = {
     compareTitle: "Team or Club",
     rowPrice: "Price",
     dataTitle: "Data and consent",
-    data: "The videos belong to the club. Only the coaches of each team see them, unless they share a link. Every player says yes or no by link, for each purpose separately; under 16 the parents. Original videos are deleted after 90 days. The app and its database run in Switzerland, the videos are stored in the EU.",
+    data: "The videos belong to the club. Only the coaches of each team see them, unless they share a link. Every player says yes or no by link, for each purpose separately; under 16 the parents. Original videos are deleted after 90 days. The app, its database and the videos are stored in the EU.",
     contactTitle: "Questions from the board",
     contact: "About the contract, the invoice or more than {teams} teams: write to us at {email}.",
   },
@@ -727,7 +727,7 @@ const en: Messages = {
       { k: "What you do", v: "Answer a few questions where the analysis is unsure, confirm the court with a single tap, confirm the suggested shot spot with one tap if you like, mark saves and missed shots if you want them, and decide which scenes the team sees." },
       { k: "Other ways", v: "Cameras such as Veo or Pixellot film with their own camera, usually on a subscription. Handball Intelligence needs no camera of its own: a phone or an existing camera is enough, and a Veo download link works too.", to: "ratgeber/wege-zur-videoanalyse" },
       { k: "Prices", v: "Free without automatic analysis. Team: CHF or EUR {team} a month. Club: CHF or EUR {club} a month for up to {clubTeams} teams. 30 days free.", to: "preise" },
-      { k: "Data location", v: "App and database in Switzerland, videos in storage in the EU. Data protection under the GDPR and the Swiss FADP.", to: "datenschutz" },
+      { k: "Data location", v: "App and database in the EU (Sweden), videos in storage in the EU. Data protection under the GDPR and the Swiss FADP.", to: "datenschutz" },
       { k: "Consent", v: "By link in the team chat, no account, separately for each purpose and changeable at any time. The law has no fixed age; in the app the parents decide up to 16, because that is simple and cautious.", to: "daten" },
       { k: "Languages", v: "German, French and English." },
       { k: "Contact", v: "{email}" },
@@ -771,7 +771,7 @@ const en: Messages = {
       {
         title: "Developed in Switzerland",
         text: [
-          "We develop Handball Intelligence in Switzerland, for clubs across Europe. The data stays in Switzerland and the EU, and data protection follows the GDPR and the Swiss FADP. The app is available in German, French and English.",
+          "We develop Handball Intelligence in Switzerland, for clubs across Europe. The data stays in the EU, and data protection follows the GDPR and the Swiss FADP. The app is available in German, French and English.",
           "For teams in Switzerland, the app brings in fixtures and results automatically from handball.ch. Everyone else sets up their team by hand in a minute; video, analysis and scenes work the same for everyone.",
         ],
       },

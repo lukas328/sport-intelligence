@@ -192,7 +192,7 @@ const de = {
     trust: [
       { title: "Es gehört deinem Verein", text: "Nur das Trainerteam sieht es, ausser du teilst einen Link." },
       { title: "Einwilligung per Link", text: "Jede und jeder sagt selbst ja oder nein, bis 16 die Eltern." },
-      { title: "DSGVO und Schweizer DSG", text: "Keine Werbung, kein Datenverkauf. Daten in der Schweiz und der EU." },
+      { title: "DSGVO und Schweizer DSG", text: "Keine Werbung, kein Datenverkauf. Daten in der EU." },
     ],
     trustLink: "Über uns",
     priceTitle: "Gratis starten, dann {cur} {price} pro Team.",
@@ -594,7 +594,7 @@ const de = {
       },
       {
         title: "Wo die Daten liegen",
-        text: "Die App und ihre Datenbank laufen auf Servern in der Schweiz, die Videos liegen in einem Speicher in der EU. Wir halten uns an die DSGVO und das Schweizer Datenschutzgesetz (DSG). Für die EU gilt die Schweiz als Land mit angemessenem Datenschutz.",
+        text: "Die App und ihre Datenbank laufen auf Servern in der EU (Rechenzentrum in Schweden), die Videos liegen in einem Speicher in der EU. Wir halten uns an die DSGVO und das Schweizer Datenschutzgesetz (DSG). Für die Schweiz gilt die EU als Raum mit angemessenem Datenschutz.",
       },
       {
         title: "Wie lange",
@@ -648,7 +648,7 @@ const de = {
     compareTitle: "Team oder Verein",
     rowPrice: "Preis",
     dataTitle: "Daten und Einwilligung",
-    data: "Die Videos gehören dem Verein. Sehen kann sie nur das Trainerteam des jeweiligen Teams, ausser es teilt einen Link. Jede Spielerin und jeder Spieler sagt per Link selbst ja oder nein, für jeden Zweck einzeln, bis 16 die Eltern. Originalvideos werden nach 90 Tagen gelöscht. App und Datenbank laufen in der Schweiz, die Videos liegen in der EU.",
+    data: "Die Videos gehören dem Verein. Sehen kann sie nur das Trainerteam des jeweiligen Teams, ausser es teilt einen Link. Jede Spielerin und jeder Spieler sagt per Link selbst ja oder nein, für jeden Zweck einzeln, bis 16 die Eltern. Originalvideos werden nach 90 Tagen gelöscht. App, Datenbank und Videos liegen in der EU.",
     contactTitle: "Fragen des Vorstands",
     contact: "Zu Vertrag, Rechnung oder mehr als {teams} Teams: Schreib uns an {email}.",
   },
@@ -726,7 +726,7 @@ const de = {
       { k: "Was du machst", v: "Ein paar Fragen beantworten, wo die Analyse unsicher ist, das Spielfeld mit einem Tippen bestätigen, den vorgeschlagenen Wurfort mit einem Tipp bestätigen, wenn du magst, Paraden und Fehlwürfe markieren, wenn du sie willst, und entscheiden, welche Szenen das Team sieht." },
       { k: "Andere Wege", v: "Kameras wie Veo oder Pixellot filmen mit eigener Kamera, meist im Abo. Handball Intelligence braucht keine eigene Kamera: Ein Handy oder eine vorhandene Kamera reicht, auch ein Download-Link von Veo geht.", to: "ratgeber/wege-zur-videoanalyse" },
       { k: "Preise", v: "Gratis ohne automatische Analyse. Team: CHF oder EUR {team} im Monat. Verein: CHF oder EUR {club} im Monat für bis zu {clubTeams} Teams. 30 Tage gratis.", to: "preise" },
-      { k: "Datenstandort", v: "App und Datenbank in der Schweiz, Videos in einem Speicher in der EU. Datenschutz nach DSGVO und Schweizer DSG.", to: "datenschutz" },
+      { k: "Datenstandort", v: "App und Datenbank in der EU (Schweden), Videos in einem Speicher in der EU. Datenschutz nach DSGVO und Schweizer DSG.", to: "datenschutz" },
       { k: "Einwilligung", v: "Per Link im Teamchat, ohne Konto, für jeden Zweck einzeln und jederzeit änderbar. Das Gesetz kennt keine feste Altersgrenze; in der App entscheiden bis 16 die Eltern, weil das einfach und vorsichtig ist.", to: "daten" },
       { k: "Sprachen", v: "Deutsch, Französisch und Englisch." },
       { k: "Kontakt", v: "{email}" },
@@ -770,7 +770,7 @@ const de = {
       {
         title: "Entwickelt in der Schweiz",
         text: [
-          "Wir entwickeln Handball Intelligence in der Schweiz, für Vereine in ganz Europa. Die Daten liegen in der Schweiz und der EU, der Datenschutz richtet sich nach der DSGVO und dem Schweizer DSG. Die App gibt es auf Deutsch, Französisch und Englisch.",
+          "Wir entwickeln Handball Intelligence in der Schweiz, für Vereine in ganz Europa. Die Daten liegen in der EU, der Datenschutz richtet sich nach der DSGVO und dem Schweizer DSG. Die App gibt es auf Deutsch, Französisch und Englisch.",
           "Für Teams aus der Schweiz übernimmt die App Spielplan und Resultate automatisch von handball.ch. Alle anderen legen ihr Team in einer Minute von Hand an; Video, Analyse und Szenen funktionieren für alle gleich.",
         ],
       },
