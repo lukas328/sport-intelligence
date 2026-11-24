@@ -436,7 +436,10 @@ jobs:
         run: |
           terraform apply -input=false -auto-approve -no-color -var-file="$TFVARS" \
             -var "image_tag=$TAG" -var "app_domain=$APP_DOMAIN" -var "bind_custom_domain=$BIND" \
-            -var "paused=$PAUSED" -var "mail_live=$MAIL_LIVE" -target=azurerm_container_app_job.migrate
+            -var "paused=$PAUSED" -var "mail_live=$MAIL_LIVE" -target=azurerm_container_app_job.migrate \
+            -target=azurerm_key_vault_secret.carried -target=azurerm_key_vault_secret.generated
+          # the two secrets that moved address (moved blocks) must be in a targeted apply until the
+          # state has them at the new address; their values do not change (Terraform refuses otherwise)
           job=$(terraform output -raw migrate_job)
           run=$(az containerapp job start -n "$job" -g "$rg" --query name -o tsv)
           echo "migration run $run"
