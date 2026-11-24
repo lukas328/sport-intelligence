@@ -56,3 +56,8 @@ output "mail_verification_records" {
   description = "DNS records Azure needs to verify the sending domain (domain, SPF, DKIM, DKIM2, DMARC)."
   value       = azurerm_email_communication_service_domain.this.verification_records
 }
+
+output "gpu_job" {
+  description = "Name of the serverless GPU job (empty without var.gpu)."
+  value       = var.gpu ? azurerm_container_app_job.gpu[0].name : ""
+}

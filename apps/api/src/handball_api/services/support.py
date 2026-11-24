@@ -62,6 +62,9 @@ def failure_code(error: str | None) -> str:
         return "unreadable"
     if "too short" in e:
         return "too_short"
+    # longer than the environment's limit (HB_ANALYSIS_MAX_MINUTES, e.g. the GPU test phase)
+    if "too long for this environment" in e:
+        return "too_long"
     if "timeout" in e or "timed out" in e:
         return "timeout"
     return "generic"

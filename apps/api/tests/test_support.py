@@ -26,6 +26,8 @@ def test_failure_codes() -> None:
     assert support.failure_code("calibration: no court lines found") == "calibration"
     assert support.failure_code("ProbeError: no video stream") == "unreadable"
     assert support.failure_code("TimeoutError: timed out") == "timeout"
+    too_long = "TooLongError: too long for this environment: 41.0 min, limit 15 min"
+    assert support.failure_code(too_long) == "too_long"
     assert support.failure_code(None) == "generic"
 
 

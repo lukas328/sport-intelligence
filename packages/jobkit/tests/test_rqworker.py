@@ -123,3 +123,24 @@ def test_a_killed_work_horse_is_reported_to_the_api(monkeypatch: pytest.MonkeyPa
     assert rqworker.report_lost("tick-watchdog", 9) is False  # not a job of the API
     assert len(sent) == 1
     assert rqworker.lost_error(256).startswith("worker lost: work horse ended unexpectedly")
+
+
+def test_burst_works_the_queue_once_and_returns() -> None:
+    """The GPU job execution: take what is waiting, then end (one worker, no restart loop)."""
+    runs: list[dict[str, Any]] = []
+
+    class Burst:
+        shutdown_requested = False
+
+        def __init__(self, queues: list[Queue], **kwargs: Any) -> None:
+            self.queues = [q.name for q in queues]
+
+        def work(self, burst: bool = False, with_scheduler: bool = False) -> bool:
+            runs.append({"queues": self.queues, "burst": burst})
+            return False
+
+    slept: list[float] = []
+    conn = fakeredis.FakeRedis()
+    run_worker(conn, ["gpu"], burst=True, sleep=slept.append, worker_class=Burst)  # type: ignore[arg-type]
+    assert runs == [{"queues": ["gpu"], "burst": True}]
+    assert slept == []

@@ -153,6 +153,18 @@ def _cpu_gate(settings: JobSettings, video_s: float | None) -> str | None:
     return None
 
 
+class TooLongError(ValueError):
+    """The video is longer than `analysis_max_minutes` (the API reports «too_long»)."""
+
+
+def _check_length(settings: JobSettings, video_s: float | None) -> None:
+    limit = settings.analysis_max_minutes
+    if limit > 0 and video_s is not None and video_s > 60 * limit:
+        raise TooLongError(
+            f"too long for this environment: {video_s / 60:.1f} min, limit {limit:g} min"
+        )
+
+
 def load_ball_net(
     settings: JobSettings, s3: Any = None, video_s: float | None = None
 ) -> tuple[BallNet | None, str]:
@@ -753,6 +765,7 @@ def _run_learned(
                 log.info("detector_sees_few_people", median=seen[len(seen) // 2] if seen else 0)
                 return None
             _, _, fps, total = _open(video)
+            _check_length(settings, total / fps if fps and total else None)
             reader = _overlay_reader(spread, fps, total / fps if fps else 0.0)
             del spread
             numbers = load_number_reader(settings)

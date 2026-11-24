@@ -955,6 +955,8 @@
     "failureNext_unreadable": "Renvoyez le fichier original de la caméra (MP4 ou MOV).",
     "failure_too_short": "La vidéo est trop courte pour une analyse.",
     "failureNext_too_short": "Envoyez tout le match, plusieurs fichiers sont possibles.",
+    "failure_too_long": "La vidéo est trop longue pour l'analyse dans cet environnement.",
+    "failureNext_too_long": "Raccourcis la vidéo, environ une mi-temps ou 10 minutes, et charge-la de nouveau.",
     "failure_timeout": "L'analyse a duré trop longtemps.",
     "failureNext_timeout": "Nous avons noté le problème. Vous pouvez relancer l'analyse ou saisir les événements à la main.",
     "failure_generic": "L'analyse a échoué.",
@@ -4561,6 +4563,8 @@
     "help_unreadable": "Charge à nouveau le fichier original de la caméra (MP4 ou MOV).",
     "title_too_short": "La vidéo est trop courte pour une analyse.",
     "help_too_short": "Charge tout le match ou au moins quelques minutes d'affilée. Plusieurs fichiers sont possibles.",
+    "title_too_long": "La vidéo est trop longue pour l'analyse dans cet environnement.",
+    "help_too_long": "Marche à suivre : raccourcis la vidéo, environ 10 minutes, et charge-la de nouveau. Relancer ne sert à rien, la limite vaut pour chaque fichier.",
     "title_generic": "L'analyse n'a pas fonctionné.",
     "help_generic": "La vidéo reste lisible et tout ce que tu as saisi reste. Relance l'analyse ; si cela échoue encore, nous sommes déjà informés.",
     "filmLink": "Comment bien filmer",
@@ -4578,6 +4582,7 @@
     "short_stalled": "l'ordinateur n'a pas répondu",
     "short_unreadable": "fichier illisible",
     "short_too_short": "vidéo trop courte",
+    "short_too_long": "vidéo trop longue",
     "short_generic": "n'a pas fonctionné"
   },
   "formCheck": {

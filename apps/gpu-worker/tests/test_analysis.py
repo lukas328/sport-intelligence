@@ -952,3 +952,14 @@ def test_ball_net_and_reid_need_a_gpu_by_default(
     monkeypatch.setattr(analysis, "_has_cuda", lambda: True)
     assert analysis.load_ball_net(JobSettings(ball_model=str(net)), None, 3600)[1] == "ok"
     assert analysis.load_embedder(JobSettings(reid_model=str(net)))[1] == "ok"
+
+
+def test_videos_over_the_environment_limit_end_as_too_long() -> None:
+    """HB_ANALYSIS_MAX_MINUTES (the GPU test phase: 15): longer videos fail at once with a reason
+    the API maps to «too_long»; 0 means no limit, an unknown length is let through."""
+    limited = JobSettings(analysis_max_minutes=15)
+    analysis._check_length(limited, 15 * 60)
+    analysis._check_length(limited, None)
+    analysis._check_length(JobSettings(), 3 * 3600)
+    with pytest.raises(analysis.TooLongError, match=r"too long for this environment: 41\.0 min"):
+        analysis._check_length(limited, 41 * 60)
