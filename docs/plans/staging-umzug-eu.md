@@ -138,3 +138,42 @@ mit Wartungsfenster etwa 30 bis 60 min Ausfall (DB-Kopie Minuten, DNS und Zertif
   angeboten.
 - Registry Basic: das CUDA-Image ist gross (einige GB pro Tag); alte Tags von Zeit zu Zeit löschen,
   sonst wächst der Speicher über die 10 GB im Preis.
+
+## 6. Abschluss (2026-11-24)
+
+Ablauf und Messwerte:
+- Aufbau Sweden Central: dritter Bootstrap-Lauf grün (Run 45235594879). Die zwei ersten scheiterten an
+  der fehlenden Postgres-Firewall-Regel im gezielten Apply (#111) und an einem halb aufgebauten State
+  (#112).
+- DB-Umzug: Run 45253681754, 23.11. 19:57 UTC. Dump 0.67 MB; Zeilen alt | neu identisch
+  (organizations 3, users 5, org_memberships 3, teams 3, matches 29, video_assets 7,
+  processing_jobs 17, events 1585, alembic_version 1).
+- DNS (Cloudflare, mit Lukas' OK, 24.11. 12:27 UTC): CNAME app auf
+  `hbeu-stg-web.lemonmoss-a4ad245c.swedencentral.azurecontainerapps.io`; zusätzlicher TXT
+  `ms-domain-verification=d3695dad-…`. `asuid.app` war schon richtig. Rückweg-CNAME:
+  `hb-stg-web.victorioussky-d3bd8932.switzerlandnorth.azurecontainerapps.io`.
+- Deploy stack=eu (Run 45394191027): Zertifikat gebunden 12:40 UTC, Mail-Domain 4 von 4 verifiziert,
+  `mail_live`, Health 200 über die Domain. Smoke-Test grün (Login, Spiele, Spiel, Szenen, Spieltag,
+  Video; Laptop und Handy).
+- Alte Umgebung pausieren: der erste Lauf (45396182436) scheiterte im Plan, weil move-db den Ingress
+  der alten Web-App abgeschaltet hatte und Terraform ihre Custom Domain ohne Ingress nicht lesen kann.
+  Der Workflow schaltet den Ingress vor dem Plan wieder ein (PR zu diesem Abschnitt), dann Pause:
+  Apps auf 0, Postgres gestoppt, Domain-Bindung der alten App entfernt. Abbau nach einigen Tagen
+  stabilem Betrieb, mit Lukas' OK. Rückweg bis dahin: CNAME zurück, Deploy stack=ch mit
+  state=resume.
+- GPU: noch aus (`gpu = false`). Nach Freigabe des T4-Kontingents ein Deploy stack=eu mit gpu=on.
+
+Ausfall: 23.11. 19:57 bis 24.11. 12:40 UTC, etwa 16.7 h. Die eigentliche Umschaltung (DNS,
+Zertifikat) dauerte 13 min. Der Rest war Warten: Die Sitzungen wurden über Nacht neu gestartet, und
+der Cloudflare-Zugang lag nicht bei der Sitzung, die den CNAME umstellen sollte.
+
+Lehren für künftige Umzüge:
+- DB-Kopie und DNS-Umstellung direkt hintereinander, ohne Pause dazwischen. Das Wartungsfenster erst
+  beginnen, wenn alle Beteiligten bereit sind.
+- Vorher prüfen, wer die DNS-Schreibrechte wirklich hat, und den Weg testen (Lesezugriff auf die
+  Zone genügt als Probe).
+- Die TXT-Einträge (asuid, Domain-Verifizierung) vorab setzen; sie stören die alte Umgebung nicht.
+- Erste Läufe auf einer neuen Umgebung mit gezieltem Apply prüfen alle Abhängigkeiten (Firewall)
+  und den halben State bei Wiederholung.
+- Was ein Skript an Terraform vorbei ändert (Ingress aus für die Wartung), muss der nächste Lauf
+  wieder herstellen, bevor Terraform plant.

@@ -285,6 +285,16 @@ jobs:
             paused=$(jq -r '[.properties.template.scale.rules // [] | .[] | select(.name == "paused")] | length > 0' <<<"$api")
           fi
           [ "$db" = Ready ] || paused=true
+          # move-db turns the old web app's ingress off (maintenance) with az; Terraform cannot read
+          # its custom domain without ingress (plan fails), and it defines the ingress anyway: on
+          # again before the plan (a paused environment then goes to 0 replicas in this run)
+          if [ -n "$web" ] && az containerapp show -g "$rg" -n "$web" -o none 2>/dev/null; then
+            ing=$(az containerapp show -g "$rg" -n "$web" --query "properties.configuration.ingress" -o tsv 2>/dev/null || true)
+            if [ -z "$ing" ]; then
+              echo "ingress of $web is off (maintenance): turning it on for Terraform"
+              az containerapp ingress enable -g "$rg" -n "$web" --type external --target-port 3000 -o none
+            fi
+          fi
           want="${{ steps.mode.outputs.state }}"
           case "$want" in resume) paused=false ;; pause) paused=true ;; esac
           echo "database $pg: $db; paused after this run: $paused"
