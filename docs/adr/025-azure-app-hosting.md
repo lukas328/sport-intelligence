@@ -40,3 +40,12 @@ Postgres 16 with RLS, `pgcrypto` and `citext`, a Redis for the job queue and TLS
 - **Scaleway / Exoscale EU**: managed Postgres and serverless containers, but unknown to the owner.
 - **Azure App Service**: one container per plan, less fitting for background workers than Container Apps.
 - **Azure Kubernetes Service**: more control than needed, fixed node cost.
+
+## Addendum 2026-11-24: region Sweden Central
+
+Staging ("hbeu-stg", app.handball-intelligence.com) moved from Switzerland North to **Sweden Central**
+on 2026-11-24: Switzerland North offers no serverless GPUs (Consumption-GPU-NC8as-T4), Sweden Central
+does. App, database, Redis, Key Vault, monitoring and the GPU job are now in the EU (Sweden); videos and
+artefacts stay in Cloudflare R2 (EU). Switzerland recognises the EU as providing adequate data
+protection (FADP). The data-location texts on the website, in the help and in the privacy policy are
+updated. Plan and steps: `docs/plans/staging-umzug-eu.md`.

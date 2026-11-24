@@ -4,8 +4,8 @@ Stand 2026-11-04. Checkliste für den Owner: was entschieden, gekauft, geprüft 
 die Plattform als stabile Web-App für echte Vereine läuft. Technische Details stehen in `GO_LIVE.md`
 und `docs/OPEN_QUESTIONS.md`; diese Datei verweist dorthin.
 
-**Stand 17.11.2026:** App live unter https://app.handball-intelligence.com (Azure «hb-stg», Switzerland
-North, Deploy per GitHub-Workflow `.github/workflows/deploy.yml`, Modi plan, deploy, status; Pausieren und
+**Stand 24.11.2026:** App live unter https://app.handball-intelligence.com (Azure «hbeu-stg», Sweden
+Central seit 24.11., vorher «hb-stg» in Switzerland North; Deploy per GitHub-Workflow `.github/workflows/deploy.yml`, Modi plan, deploy, status; Pausieren und
 Fortsetzen über `state`), Website live unter https://handball-intelligence.com (Cloudflare Workers, baut
 bei jeder Änderung an `apps/site` auf `main`). Befunde aus dem ersten Test und ihr Stand:
 `docs/ux-test/livegang/BEFUNDE.md`. Noch ohne Mail-Versand (`HB_EMAIL_BACKEND=console`, die App sagt das
@@ -23,9 +23,9 @@ Legende: 🔴 blockiert den Livegang · 🟡 vor dem Pilot nötig · ⚪ kann wa
 |---|---|---|---|
 | ☑ 🔴 | **Produktname** (Q-PROD-1) | Entschieden: «Handball Intelligence», Logo «Taktik» (docs/design/brand2/taktik). Domain entschieden: `handball-intelligence.com` (App unter `app.`, `support@handball-intelligence.com`), in allen Vorgaben gesetzt. Offen: Markenrecherche | DNS, Mail-Versand (SPF, DKIM, DMARC) und App-Link-Dateien einrichten (docs/site/SEO.md, «Vor dem Livegang»); App-IDs (`ch.handballai.app`) bleiben bis zum Entscheid |
 | ☐ 🔴 | **Firma** (GmbH, Einzelfirma?), MWST, Währungen CHF/EUR (Q-PROD-3, Q-ADD-3) | Firma vor dem ersten zahlenden Verein; Treuhand für MWST fragen | Impressum, Verträge, Stripe, QR-Rechnung (IBAN), Apple-Konto brauchen eine Firma |
-| ✅ | Hosting | Azure West Europe für App, Datenbank, Secrets, Monitoring; Cloudflare R2 (EU) für Videos (ADR 002) | |
+| ✅ | Hosting | Azure Sweden Central (EU) für App, Datenbank, Secrets, Monitoring und die serverlose GPU, seit 24.11. (vorher Switzerland North); Cloudflare R2 (EU) für Videos (ADR 002, ADR 025) | |
 | ☐ 🟡 | **E-Mail-Anbieter** (Q-INFRA-3) | **Azure Communication Services** (alles in Azure, Daten in Europa, Kosten fast null) statt Postmark | Login-Links und Einladungen |
-| ☑ 🟡 | **GPU** | Entschieden 16.11.: GPU kommt (Azure Serverless GPU T4, Switzerland North, skaliert auf null, geschätzt CHF 0.50 bis 1.50 pro Spiel), siehe `docs/plans/gpu-analyse.md`. Der Test zeigte: auf CPU dauert ein ganzes Spiel viele Stunden | Ohne GPU ist ein ganzes Spiel für Trainer nicht tragbar |
+| ☑ 🟡 | **GPU** | Entschieden 16.11.: GPU kommt (Azure Serverless GPU T4, Sweden Central, skaliert auf null; Switzerland North bietet keine serverlose GPU, geschätzt CHF 0.50 bis 1.50 pro Spiel), siehe `docs/plans/gpu-analyse.md`. Der Test zeigte: auf CPU dauert ein ganzes Spiel viele Stunden | Ohne GPU ist ein ganzes Spiel für Trainer nicht tragbar |
 | ☐ 🟡 | **Umgebungen** | Staging + Produktion; Staging skaliert nachts auf null | Neue Versionen erst auf Staging testen |
 | ☐ 🟡 | **Preise** (Q-PROD-4) | Platzhalter in `packages/plans/plans.json` prüfen | Website und Abo-Seite zeigen sie |
 | ☐ 🟡 | **Automatische Ereignisse zu schwach?** (Q-ADD-1) | Start mit "assistiert": Tore aus Live-Erfassung, Spielbericht oder Score-Einblendung; Automatik als Bonus | Bälle und Würfe erkennt die Analyse noch nicht |

@@ -194,7 +194,7 @@ const fr: Messages = {
     trust: [
       { title: "Elle appartient à ton club", text: "Seul le staff la voit, sauf si tu partages un lien." },
       { title: "Consentement par lien", text: "Chacune et chacun dit oui ou non, jusqu'à 16 ans les parents." },
-      { title: "RGPD et LPD suisse", text: "Pas de publicité, pas de vente de données. Données en Suisse et dans l'UE." },
+      { title: "RGPD et LPD suisse", text: "Pas de publicité, pas de vente de données. Données dans l'UE." },
     ],
     trustLink: "À propos",
     priceTitle: "Commence gratuitement, puis {cur} {price} par équipe.",
@@ -595,7 +595,7 @@ const fr: Messages = {
       },
       {
         title: "Où sont les données",
-        text: "L'app et sa base de données tournent sur des serveurs en Suisse, les vidéos sont dans un stockage dans l'UE. Nous respectons le RGPD et la loi suisse sur la protection des données (LPD). Pour l'UE, la Suisse est un pays offrant un niveau de protection adéquat.",
+        text: "L'app et sa base de données tournent sur des serveurs dans l'UE (centre de données en Suède), les vidéos sont dans un stockage dans l'UE. Nous respectons le RGPD et la loi suisse sur la protection des données (LPD). Pour la Suisse, l'UE offre un niveau de protection adéquat.",
       },
       {
         title: "Combien de temps",
@@ -649,7 +649,7 @@ const fr: Messages = {
     compareTitle: "Équipe ou Club",
     rowPrice: "Prix",
     dataTitle: "Données et consentement",
-    data: "Les vidéos appartiennent au club. Seul le staff de chaque équipe les voit, sauf s'il partage un lien. Chaque joueuse et chaque joueur dit oui ou non par lien, pour chaque usage séparément ; avant 16 ans, les parents. Les vidéos originales sont supprimées après 90 jours. L'app et sa base de données tournent en Suisse, les vidéos sont stockées dans l'UE.",
+    data: "Les vidéos appartiennent au club. Seul le staff de chaque équipe les voit, sauf s'il partage un lien. Chaque joueuse et chaque joueur dit oui ou non par lien, pour chaque usage séparément ; avant 16 ans, les parents. Les vidéos originales sont supprimées après 90 jours. L'app, sa base de données et les vidéos sont stockées dans l'UE.",
     contactTitle: "Questions du comité",
     contact: "Pour le contrat, la facture ou plus de {teams} équipes : écris-nous à {email}.",
   },
@@ -727,7 +727,7 @@ const fr: Messages = {
       { k: "Ce que tu fais", v: "Répondre à quelques questions là où l'analyse hésite, confirmer le terrain en touchant une fois, confirmer le lieu de tir proposé en touchant une fois si tu veux, marquer les arrêts et les tirs manqués si tu les veux, et décider quelles scènes l'équipe voit." },
       { k: "Autres solutions", v: "Des caméras comme Veo ou Pixellot filment avec leur propre caméra, le plus souvent avec un abonnement. Handball Intelligence n'a pas besoin de caméra à lui : un téléphone ou une caméra existante suffit, un lien de téléchargement Veo marche aussi.", to: "ratgeber/wege-zur-videoanalyse" },
       { k: "Prix", v: "Gratuit sans analyse automatique. Équipe : CHF ou EUR {team} par mois. Club : CHF ou EUR {club} par mois jusqu'à {clubTeams} équipes. 30 jours gratuits.", to: "preise" },
-      { k: "Lieu des données", v: "App et base de données en Suisse, vidéos dans un stockage dans l'UE. Protection des données selon le RGPD et la LPD suisse.", to: "datenschutz" },
+      { k: "Lieu des données", v: "App et base de données dans l'UE (Suède), vidéos dans un stockage dans l'UE. Protection des données selon le RGPD et la LPD suisse.", to: "datenschutz" },
       { k: "Consentement", v: "Par lien dans le chat d'équipe, sans compte, séparément pour chaque usage et modifiable à tout moment. La loi ne fixe pas d'âge ; dans l'app, les parents décident jusqu'à 16 ans, parce que c'est simple et prudent.", to: "daten" },
       { k: "Langues", v: "Allemand, français et anglais." },
       { k: "Contact", v: "{email}" },
@@ -771,7 +771,7 @@ const fr: Messages = {
       {
         title: "Développé en Suisse",
         text: [
-          "Nous développons Handball Intelligence en Suisse, pour les clubs de toute l'Europe. Les données restent en Suisse et dans l'UE, et la protection des données suit le RGPD et la LPD suisse. L'app existe en allemand, en français et en anglais.",
+          "Nous développons Handball Intelligence en Suisse, pour les clubs de toute l'Europe. Les données restent dans l'UE, et la protection des données suit le RGPD et la LPD suisse. L'app existe en allemand, en français et en anglais.",
           "Pour les équipes de Suisse, l'app reprend automatiquement le calendrier et les résultats depuis handball.ch. Toutes les autres créent leur équipe à la main en une minute ; vidéo, analyse et scènes fonctionnent pareil pour tout le monde.",
         ],
       },
