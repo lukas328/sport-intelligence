@@ -131,7 +131,7 @@ export function AppShell({
       <ShellContext.Provider value={value}>
         <div className="flex min-h-dvh flex-col">
           {!ownTop && (
-            <header className="flex h-[60px] items-center gap-3 border-b-2 border-ink px-4 md:px-8">
+            <header className="flex min-h-[60px] items-center gap-3 border-b-2 border-ink px-4 py-1 md:px-8">
               <Link
                 href={back}
                 className="flex min-h-11 flex-1 items-center gap-1.5 text-[15px] font-bold"
@@ -240,7 +240,7 @@ export function AppShell({
                 text, the bell, «Suchen» and «Video» with their words, the account */}
             <div className="flex h-[60px] items-center gap-2 px-4 lg:hidden">
               {/* with large text the crest gives way, the team name stays (UX test H09) */}
-              <Link href={home} aria-label={org.name} className="flex shrink-0 items-center max-[359px]:hidden">
+              <Link href={home} aria-label={org.name} className="flex min-h-11 min-w-11 shrink-0 items-center justify-center max-[359px]:hidden">
                 <ClubMark org={org} className="h-[34px] w-[30px] text-[14px]" />
               </Link>
               {/* the name keeps room for two lines; the rest of the bar gives way first (UX test A01) */}

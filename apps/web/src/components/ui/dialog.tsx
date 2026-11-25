@@ -48,12 +48,13 @@ export function DialogContent({
           </div>
           <D.Close
             aria-label={t("close")}
-            className="-mr-2 -mt-1 grid size-9 shrink-0 place-items-center text-muted hover:bg-surface hover:text-foreground"
+            className="-mt-2.5 -mr-3 grid size-11 shrink-0 place-items-center text-muted hover:bg-surface hover:text-foreground"
           >
             <X aria-hidden className="size-4" />
           </D.Close>
         </div>
-        <div className="overflow-y-auto px-6 pt-4 pb-6">{children}</div>
+        {/* as a bottom sheet the last button stays above the iPhone's home bar */}
+        <div className="overflow-y-auto px-6 pt-4 pb-[max(1.5rem,env(safe-area-inset-bottom))]">{children}</div>
       </D.Content>
     </D.Portal>
   );
