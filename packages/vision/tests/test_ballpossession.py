@@ -204,3 +204,31 @@ def test_clock_read_too_rarely_does_not_drop_the_balls() -> None:
     # enough play: the gate holds
     out = bp.from_observations(obs, result, play=[(0, 6000)])
     assert out is not None and out["ball_gated_by_clock"] is True and "clock_too_sparse" not in out
+
+
+class _PanningCamera:
+    """An operated camera that pans 3 px per frame to the right (canvas x = frame x + 3 f)."""
+
+    moving = True
+
+    def __init__(self, size: tuple[int, int]) -> None:
+        self.frame_size = size
+
+    def frame_to_canvas(self, f: int) -> np.ndarray:
+        return np.array([[1.0, 0.0, 3.0 * f], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
+
+
+def test_ball_net_path_skips_a_spare_ball_still_on_the_canvas() -> None:
+    obs, _ = _observed()
+    obs = _with_ball_net(obs)
+    obs.motion = _PanningCamera(obs.motion.frame_size)
+    for f, row in obs.ball_cands.items():  # a spare ball at the bench: still on the canvas
+        row.append((1100.0 - 3.0 * f, 650.0, 0.95))
+    first, path, _ = bp.ball_path_v2(obs, obs.ball_cands)
+    on_spare = sum(
+        1
+        for k, q in enumerate(path)
+        if q is not None and abs(q[0] - (1100 - 3 * (first + k))) < 12 and abs(q[1] - 650) < 12
+    )
+    assert on_spare == 0
+    assert sum(q is not None for q in path) > 0.5 * len(path)
