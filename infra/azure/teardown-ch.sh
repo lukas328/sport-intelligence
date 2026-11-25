@@ -9,11 +9,12 @@
 # 2. Lists what is in the group (log and artefact), then deletes the whole group.
 # 3. Purges the old vault from soft delete (secrets gone at once; if the deployer lacks the right,
 #    Azure removes it by itself after 7 days).
-# 4. Moves the ch state and settings into tfstate/archive/: a later run with stack «ch» then stops at
-#    «Settings and state» instead of planning a new environment.
+# The ch state (staging.tfstate) and the state account stay untouched. Until the follow-up change
+# (stack eu as the default, stack ch gone) nobody runs plan or deploy with stack «ch»: it would plan
+# a new first environment.
 set -euo pipefail
 
-: "${CONFIRM:?}" "${rg:?}" "${APP_DOMAIN:?}" "${TFSTATE_ACCOUNT:?}" "${TFSTATE_KEY:?}" "${TFVARS:?}"
+: "${CONFIRM:?}" "${rg:?}" "${APP_DOMAIN:?}" "${TFSTATE_ACCOUNT:?}"
 OUT=${OUT:-$RUNNER_TEMP/teardown}
 EU_STATE=${EU_STATE:-staging-eu.tfstate}
 mkdir -p "$OUT"
@@ -69,23 +70,4 @@ if [ -n "$kv" ]; then
   fi
 fi
 
-echo "== archive state and settings of stack ch"
-day=$(date -u +%Y-%m-%d)
-for blob in "$TFSTATE_KEY" "$TFVARS"; do
-  if az storage blob exists --account-name "$TFSTATE_ACCOUNT" -c tfstate -n "$blob" --auth-mode login \
-      --query exists -o tsv | grep -q true; then
-    az storage blob copy start --account-name "$TFSTATE_ACCOUNT" -c tfstate --auth-mode login \
-      -b "archive/$day-$blob" --source-container tfstate --source-blob "$blob" -o none
-    # copy within one account is synchronous for small blobs; check before deleting the original
-    for _ in 1 2 3 4 5 6; do
-      st=$(az storage blob show --account-name "$TFSTATE_ACCOUNT" -c tfstate -n "archive/$day-$blob" \
-        --auth-mode login --query properties.copy.status -o tsv 2>/dev/null || true)
-      [ "$st" = success ] && break
-      sleep 5
-    done
-    [ "$st" = success ] || { echo "::error::copy of $blob not confirmed; original kept"; exit 1; }
-    az storage blob delete --account-name "$TFSTATE_ACCOUNT" -c tfstate -n "$blob" --auth-mode login -o none
-    echo "$blob → archive/$day-$blob"
-  fi
-done
-echo "first environment removed. Left to do by hand: docs/plans/staging-umzug-eu.md, section 7"
+echo "first environment removed; staging.tfstate kept. Left to do by hand: docs/plans/staging-umzug-eu.md, section 7"

@@ -206,12 +206,14 @@ Das Skript `infra/azure/teardown-ch.sh`
   (10 bis 30 min);
 - löscht den alten Vault endgültig aus dem Soft Delete (fehlt das Recht, nur eine Warnung: Azure
   entfernt ihn nach 7 Tagen);
-- verschiebt `staging.tfstate` und `staging.tfvars` nach `tfstate/archive/<datum>-…`. Ein späterer
-  Lauf mit stack `ch` bricht dann bei «Settings and state» ab, statt eine neue Umgebung zu planen.
+- lässt `staging.tfstate`, `staging.tfvars` und das State-Konto unverändert. Bis zur Bereinigung
+  unten keinen Plan oder Deploy mit stack `ch` starten: er würde eine neue erste Umgebung planen.
 
 Danach von Hand (eigener PR beziehungsweise Cloudflare):
-- Workflow: Standard-Stack auf `eu` (heute `ch`; ein Push mit `[deploy]` ginge sonst auf den
-  gelöschten Stack und bräche ab), später den Stack `ch` und `move-db` ganz entfernen.
-- Cloudflare: den alten TXT `ms-domain-verification` der ersten Umgebung löschen (der neue beginnt
-  mit `d3695dad`), `asuid.app` bleibt. Den Rückweg-CNAME aus Abschnitt 6 hier als ungültig vermerken.
+- Workflow und README: Standard-Stack auf `eu` (heute `ch`; ein Push mit `[deploy]` ginge sonst auf
+  den gelöschten Stack), danach den Stack `ch` und `move-db` entfernen.
+- Cloudflare: den TXT `ms-domain-verification=04d1e832-…` der ersten Umgebung löschen. Bleiben:
+  `ms-domain-verification=d3695dad-…` (EU), `asuid.app` (gilt für beide), die DKIM-CNAMEs
+  `selector1/2-azurecomm-prod-net._domainkey` (gleicher Wert für beide), SPF und DMARC.
+- Der Rückweg-CNAME aus Abschnitt 6 ist danach ungültig.
 - Kosten: im Cost Management nach einigen Tagen prüfen, dass für `rg-hb-stg` nichts mehr anfällt.
