@@ -9,6 +9,9 @@
 #     environment's vault (never printed), then images, migrations and apps as a deploy.
 #     «move-db» copies the database from the first environment (infra/azure/move-db.sh: the old web
 #     app goes into maintenance, pg_dump/pg_restore, row counts compared).
+#   - «teardown» (stack ch, input confirm = the resource group name) deletes the first environment
+#     for good (infra/azure/teardown-ch.sh, docs/plans/staging-umzug-eu.md section 7). Only with the
+#     owner's OK.
 #   - A paused environment (README, «Pause») stays paused: only «resume» ([resume] in the commit
 #     message) starts the database and scales the apps up again; «pause» ([pause]) does the reverse.
 #
@@ -22,7 +25,7 @@ on:
       mode:
         description: "plan, deploy, or status (read only: apps, jobs, recent logs)"
         type: choice
-        options: [plan, deploy, status, bootstrap, move-db]
+        options: [plan, deploy, status, bootstrap, move-db, teardown]
         default: plan
       gpu:
         description: "stack eu: switch the serverless GPU job on (once Azure granted the T4 quota) or off; keep leaves the setting as it is"
@@ -39,6 +42,10 @@ on:
         type: choice
         options: [keep, resume, pause]
         default: keep
+      confirm:
+        description: "with teardown: the name of the resource group that is deleted (rg-hb-stg)"
+        type: string
+        default: ""
       diag:
         description: "with status: read the newest finished analysis (log, result, artefacts) into a run artefact"
         type: boolean
@@ -101,6 +108,7 @@ jobs:
           else state=keep; fi
           stack="${{ inputs.stack || 'ch' }}"
           case "$mode" in bootstrap|move-db) [ "$stack" = eu ] || { echo "::error::$mode is for the stack eu"; exit 1; } ;; esac
+          [ "$mode" != teardown ] || [ "$stack" = ch ] || { echo "::error::teardown is for the stack ch only"; exit 1; }
           if [ "$stack" = eu ]; then
             echo "TFSTATE_KEY=staging-eu.tfstate" >>"$GITHUB_ENV"
             echo "TFVARS=staging-eu.tfvars" >>"$GITHUB_ENV"
@@ -111,6 +119,9 @@ jobs:
           if [ "$mode" = deploy ] || [ "$mode" = bootstrap ]; then apply=true; fi
           echo "mode=$mode" >>"$GITHUB_OUTPUT"
           echo "apply=$apply" >>"$GITHUB_OUTPUT"
+          # the steps of plan and deploy: not for the read-only and one-off modes
+          case "$mode" in plan|deploy|bootstrap) infra=true ;; *) infra=false ;; esac
+          echo "infra=$infra" >>"$GITHUB_OUTPUT"
           echo "stack=$stack" >>"$GITHUB_OUTPUT"
           echo "state=$state" >>"$GITHUB_OUTPUT"
           echo "tag=$(git rev-parse --short=7 HEAD)" >>"$GITHUB_OUTPUT"
@@ -260,8 +271,22 @@ jobs:
           FW_RULE: gh-move-db-${{ github.run_id }}
         run: bash ../../azure/move-db.sh
 
+      - name: Delete the first environment (stack ch, teardown)
+        if: steps.mode.outputs.mode == 'teardown'
+        env:
+          CONFIRM: ${{ inputs.confirm }}
+        run: bash ../../azure/teardown-ch.sh
+
+      - name: Teardown artefact
+        if: always() && steps.mode.outputs.mode == 'teardown'
+        uses: actions/upload-artifact@v4
+        with:
+          name: teardown-${{ github.run_id }}
+          path: ${{ runner.temp }}/teardown
+          if-no-files-found: ignore
+
       - name: Paused or running
-        if: steps.mode.outputs.mode != 'status' && steps.mode.outputs.mode != 'move-db'
+        if: steps.mode.outputs.infra == 'true'
         id: state
         run: |
           pg=$(terraform output -raw postgres_server 2>/dev/null || true)
@@ -342,7 +367,7 @@ jobs:
           echo "PG=$pg" >>"$GITHUB_ENV"
 
       - name: DNS records for the app domain
-        if: steps.mode.outputs.mode != 'status' && steps.mode.outputs.mode != 'move-db'
+        if: steps.mode.outputs.infra == 'true'
         id: dns
         run: |
           fqdn=$(terraform output -raw web_default_fqdn 2>/dev/null || true)
@@ -356,7 +381,7 @@ jobs:
           echo "DNS ready: $ok"
 
       - name: Mail domain (Azure Communication Services)
-        if: steps.mode.outputs.mode != 'status' && steps.mode.outputs.mode != 'move-db'
+        if: steps.mode.outputs.infra == 'true'
         run: |
           # the sending domain exists after the first apply with the mail service; its DNS records
           # are set by hand (terraform output mail_verification_records). Here Azure is asked to
@@ -390,7 +415,7 @@ jobs:
           echo "mail live: $live"
 
       - name: Plan
-        if: steps.mode.outputs.mode != 'status' && steps.mode.outputs.mode != 'move-db'
+        if: steps.mode.outputs.infra == 'true'
         run: |
           tag=$([ "${{ steps.mode.outputs.apply }}" = true ] && echo "${{ steps.mode.outputs.tag }}" || sed -n 's/^image_tag *= *"\(.*\)"/\1/p' "$TFVARS")
           echo "TAG=$tag" >>"$GITHUB_ENV"

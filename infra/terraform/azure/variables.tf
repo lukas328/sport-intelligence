@@ -275,3 +275,15 @@ variable "kv_runner_role" {
   type        = bool
   default     = false
 }
+
+variable "monitoring" {
+  description = "Alerts by e-mail to alert_emails: health probe of the app domain (only where it is bound), API errors, failed jobs, out-of-memory kills, database storage (infra/monitoring/alerts.md)."
+  type        = bool
+  default     = true
+}
+
+variable "probe_locations" {
+  description = "Application Insights locations of the health probe; the alert fires when all of them fail."
+  type        = list(string)
+  default     = ["emea-nl-ams-azr", "emea-ch-zrh-edge"]
+}
