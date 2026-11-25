@@ -217,3 +217,9 @@ Danach von Hand (eigener PR beziehungsweise Cloudflare):
   `selector1/2-azurecomm-prod-net._domainkey` (gleicher Wert für beide), SPF und DMARC.
 - Der Rückweg-CNAME aus Abschnitt 6 ist danach ungültig.
 - Kosten: im Cost Management nach einigen Tagen prüfen, dass für `rg-hb-stg` nichts mehr anfällt.
+
+Ausgeführt am 25.11.2026 mit Lukas' OK: Run 45680936069 (mode teardown, stack ch). Prüfungen
+bestanden, `rg-hb-stg` gelöscht 19:01 bis 19:30 UTC (Container-Apps, Registry, Postgres, Vault,
+Mail-Dienst, Redis-Speicher, Log Analytics), Vault `kv-hbstg1tovl` gepurgt, `staging.tfstate`
+behalten. Danach: TXT `ms-domain-verification=04d1e832-…` in Cloudflare gelöscht; App über die Domain
+weiter 200. Der Workflow nimmt seither stack `eu` als Standard.
