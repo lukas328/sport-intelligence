@@ -1,0 +1,489 @@
+{
+ "summary": {
+  "play": {
+   "segments": 51,
+   "truth_play_mean": 0.773,
+   "product_play_mean": 0.951,
+   "product_none": 0,
+   "abs_error_median": 0.125
+  },
+  "before": {
+   "segments": 1,
+   "truth_play_mean": 0.0,
+   "product_play_mean": 0.0,
+   "product_none": 0,
+   "abs_error_median": 0.0
+  },
+  "break": {
+   "segments": 11,
+   "truth_play_mean": 0.0,
+   "product_play_mean": 0.977,
+   "product_none": 0,
+   "abs_error_median": 1.0
+  },
+  "after": {
+   "segments": 2,
+   "truth_play_mean": 0.0,
+   "product_play_mean": 0.0,
+   "product_none": 1,
+   "abs_error_median": 0.0
+  }
+ },
+ "rows": [
+  {
+   "seg": "CH_Cup_RTVBasel_Kadetten_2024-04-27_s0",
+   "game": "CH_Cup_RTVBasel_Kadetten_2024-04-27",
+   "kind": "play",
+   "play": 0.9204545454545454,
+   "product": 1.0
+  },
+  {
+   "seg": "CH_Cup_RTVBasel_Kadetten_2024-04-27_s1",
+   "game": "CH_Cup_RTVBasel_Kadetten_2024-04-27",
+   "kind": "play",
+   "play": 0.9886363636363636,
+   "product": 1.0
+  },
+  {
+   "seg": "CH_Cup_RTVBasel_Kadetten_2024-04-27_s2",
+   "game": "CH_Cup_RTVBasel_Kadetten_2024-04-27",
+   "kind": "break",
+   "play": 0.0,
+   "product": 1.0
+  },
+  {
+   "seg": "CH_Cup_RTVBasel_Kadetten_2024-04-27_s3",
+   "game": "CH_Cup_RTVBasel_Kadetten_2024-04-27",
+   "kind": "play",
+   "play": 1.0,
+   "product": 1.0
+  },
+  {
+   "seg": "CH_Cup_RTVBasel_Kadetten_2024-04-27_s4",
+   "game": "CH_Cup_RTVBasel_Kadetten_2024-04-27",
+   "kind": "after",
+   "play": 0.0,
+   "product": 0.0
+  },
+  {
+   "seg": "CH_Cup_RedDragonsUster_SeenTigersPfadi_ca2024_s0",
+   "game": "CH_Cup_RedDragonsUster_SeenTigersPfadi_ca2024",
+   "kind": "play",
+   "play": 0.35795454545454547,
+   "product": 1.0
+  },
+  {
+   "seg": "CH_Cup_RedDragonsUster_SeenTigersPfadi_ca2024_s1",
+   "game": "CH_Cup_RedDragonsUster_SeenTigersPfadi_ca2024",
+   "kind": "play",
+   "play": 0.45454545454545453,
+   "product": 0.9638888888888889
+  },
+  {
+   "seg": "CH_Cup_RedDragonsUster_SeenTigersPfadi_ca2024_s2",
+   "game": "CH_Cup_RedDragonsUster_SeenTigersPfadi_ca2024",
+   "kind": "play",
+   "play": 0.6477272727272727,
+   "product": 1.0
+  },
+  {
+   "seg": "CH_Cup_RedDragonsUster_SeenTigersPfadi_ca2024_s3",
+   "game": "CH_Cup_RedDragonsUster_SeenTigersPfadi_ca2024",
+   "kind": "play",
+   "play": 0.8693181818181818,
+   "product": 1.0
+  },
+  {
+   "seg": "CH_Cup_RedDragonsUster_SeenTigersPfadi_ca2024_s4",
+   "game": "CH_Cup_RedDragonsUster_SeenTigersPfadi_ca2024",
+   "kind": "play",
+   "play": 0.9602272727272727,
+   "product": 1.0
+  },
+  {
+   "seg": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19_s0",
+   "game": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19",
+   "kind": "before",
+   "play": 0.0,
+   "product": 0.0
+  },
+  {
+   "seg": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19_s1",
+   "game": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19",
+   "kind": "play",
+   "play": 1.0,
+   "product": 1.0
+  },
+  {
+   "seg": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19_s2",
+   "game": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19",
+   "kind": "play",
+   "play": 0.9318181818181818,
+   "product": 1.0
+  },
+  {
+   "seg": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19_s3",
+   "game": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19",
+   "kind": "play",
+   "play": 1.0,
+   "product": 1.0
+  },
+  {
+   "seg": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19_s4",
+   "game": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19",
+   "kind": "play",
+   "play": 1.0,
+   "product": 1.0
+  },
+  {
+   "seg": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02_s0",
+   "game": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02",
+   "kind": "play",
+   "play": 1.0,
+   "product": 1.0
+  },
+  {
+   "seg": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02_s1",
+   "game": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02",
+   "kind": "play",
+   "play": 0.9204545454545454,
+   "product": 1.0
+  },
+  {
+   "seg": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02_s2",
+   "game": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02",
+   "kind": "break",
+   "play": 0.0,
+   "product": 0.7777777777777778
+  },
+  {
+   "seg": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02_s3",
+   "game": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02",
+   "kind": "play",
+   "play": 1.0,
+   "product": 1.0
+  },
+  {
+   "seg": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02_s4",
+   "game": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02",
+   "kind": "play",
+   "play": 0.5,
+   "product": 1.0
+  },
+  {
+   "seg": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27_s0",
+   "game": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27",
+   "kind": "play",
+   "play": 0.9545454545454546,
+   "product": 1.0
+  },
+  {
+   "seg": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27_s1",
+   "game": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27",
+   "kind": "play",
+   "play": 0.6193181818181818,
+   "product": 1.0
+  },
+  {
+   "seg": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27_s2",
+   "game": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27",
+   "kind": "break",
+   "play": 0.0,
+   "product": 1.0
+  },
+  {
+   "seg": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27_s3",
+   "game": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27",
+   "kind": "play",
+   "play": 0.8295454545454546,
+   "product": 1.0
+  },
+  {
+   "seg": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27_s4",
+   "game": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27",
+   "kind": "after",
+   "play": 0.0,
+   "product": null
+  },
+  {
+   "seg": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16_s0",
+   "game": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16",
+   "kind": "play",
+   "play": 0.8977272727272727,
+   "product": 1.0
+  },
+  {
+   "seg": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16_s1",
+   "game": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16",
+   "kind": "play",
+   "play": 0.6931818181818182,
+   "product": 1.0
+  },
+  {
+   "seg": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16_s2",
+   "game": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16",
+   "kind": "break",
+   "play": 0.0,
+   "product": 1.0
+  },
+  {
+   "seg": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16_s3",
+   "game": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16",
+   "kind": "play",
+   "play": 0.8181818181818182,
+   "product": 1.0
+  },
+  {
+   "seg": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16_s4",
+   "game": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16",
+   "kind": "play",
+   "play": 1.0,
+   "product": 1.0
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03_s0",
+   "game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+   "kind": "play",
+   "play": 0.875,
+   "product": 1.0
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03_s1",
+   "game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+   "kind": "play",
+   "play": 0.4147727272727273,
+   "product": 1.0
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03_s2",
+   "game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+   "kind": "break",
+   "play": 0.0,
+   "product": 0.975
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03_s3",
+   "game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+   "kind": "play",
+   "play": 0.6875,
+   "product": 1.0
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03_s4",
+   "game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+   "kind": "play",
+   "play": 0.5738636363636364,
+   "product": 0.7361111111111112
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23.f298_s0",
+   "game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23.f298",
+   "kind": "play",
+   "play": 1.0,
+   "product": 1.0
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23.f298_s1",
+   "game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23.f298",
+   "kind": "play",
+   "play": 1.0,
+   "product": 1.0
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23.f298_s2",
+   "game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23.f298",
+   "kind": "break",
+   "play": 0.0,
+   "product": 1.0
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23.f298_s3",
+   "game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23.f298",
+   "kind": "play",
+   "play": 0.8409090909090909,
+   "product": 1.0
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23.f298_s4",
+   "game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23.f298",
+   "kind": "play",
+   "play": 1.0,
+   "product": 1.0
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10_s0",
+   "game": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10",
+   "kind": "play",
+   "play": 0.09090909090909091,
+   "product": 0.30277777777777776
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10_s1",
+   "game": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10",
+   "kind": "play",
+   "play": 0.9375,
+   "product": 1.0
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10_s2",
+   "game": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10",
+   "kind": "break",
+   "play": 0.0,
+   "product": 1.0
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10_s3",
+   "game": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10",
+   "kind": "play",
+   "play": 1.0,
+   "product": 1.0
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10_s4",
+   "game": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10",
+   "kind": "play",
+   "play": 0.5568181818181818,
+   "product": 0.7222222222222222
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19_s0",
+   "game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+   "kind": "play",
+   "play": 0.5681818181818182,
+   "product": 1.0
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19_s1",
+   "game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+   "kind": "play",
+   "play": 0.5340909090909091,
+   "product": 0.75
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19_s2",
+   "game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+   "kind": "break",
+   "play": 0.0,
+   "product": 1.0
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19_s3",
+   "game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+   "kind": "play",
+   "play": 0.9659090909090909,
+   "product": 1.0
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19_s4",
+   "game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+   "kind": "play",
+   "play": 0.6590909090909091,
+   "product": 1.0
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02_s0",
+   "game": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02",
+   "kind": "play",
+   "play": 0.4943181818181818,
+   "product": 0.55
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02_s1",
+   "game": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02",
+   "kind": "play",
+   "play": 0.9772727272727273,
+   "product": 1.0
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02_s2",
+   "game": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02",
+   "kind": "break",
+   "play": 0.0,
+   "product": 0.9916666666666667
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02_s3",
+   "game": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02",
+   "kind": "play",
+   "play": 0.75,
+   "product": 0.9888888888888889
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02_s4",
+   "game": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02",
+   "kind": "play",
+   "play": 0.8863636363636364,
+   "product": 1.0
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09_s0",
+   "game": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09",
+   "kind": "play",
+   "play": 0.8977272727272727,
+   "product": 1.0
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09_s1",
+   "game": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09",
+   "kind": "play",
+   "play": 0.8977272727272727,
+   "product": 1.0
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09_s2",
+   "game": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09",
+   "kind": "break",
+   "play": 0.0,
+   "product": 1.0
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09_s3",
+   "game": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09",
+   "kind": "play",
+   "play": 0.48295454545454547,
+   "product": 0.675
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09_s4",
+   "game": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09",
+   "kind": "play",
+   "play": 0.4375,
+   "product": 0.8138888888888889
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14_s0",
+   "game": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14",
+   "kind": "play",
+   "play": 0.16477272727272727,
+   "product": 1.0
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14_s1",
+   "game": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14",
+   "kind": "play",
+   "play": 0.7897727272727273,
+   "product": 1.0
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14_s2",
+   "game": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14",
+   "kind": "break",
+   "play": 0.0,
+   "product": 1.0
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14_s3",
+   "game": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14",
+   "kind": "play",
+   "play": 0.6818181818181818,
+   "product": 1.0
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14_s4",
+   "game": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14",
+   "kind": "play",
+   "play": 0.875,
+   "product": 1.0
+  }
+ ]
+}

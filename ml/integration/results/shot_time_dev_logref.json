@@ -1,0 +1,32 @@
+{
+ "shots": 171,
+ "games": 13,
+ "reference": "log time",
+ "peak": {
+  "within_2s": 0.579,
+  "ci95": [
+   0.5,
+   0.648
+  ],
+  "found_-3_+8": 0.918,
+  "offset_median_s": 1.35
+ },
+ "ball90": {
+  "within_2s": 0.544,
+  "ci95": [
+   0.433,
+   0.642
+  ],
+  "found_-3_+8": 0.889,
+  "offset_median_s": 0.0
+ },
+ "ball98": {
+  "within_2s": 0.468,
+  "ci95": [
+   0.375,
+   0.543
+  ],
+  "found_-3_+8": 0.713,
+  "offset_median_s": -0.85
+ }
+}
