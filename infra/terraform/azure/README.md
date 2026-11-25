@@ -256,6 +256,12 @@ GitHub Actions: Deploy with `stack = eu`; `mode = bootstrap` the first time (der
 registry, copies the secrets, then deploys like `deploy`). The T4 quota («Managed Environment
 Consumption T4 GPUs») shows on the environment's Quota page once the environment exists.
 
+## Alerts
+
+`monitoring = true` (default) creates the alerts listed in `infra/monitoring/alerts.md` (section
+«Azure»): health probe of the app domain with the certificate check (only where the domain is bound),
+API errors, failed jobs, out-of-memory kills and database storage, by e-mail to `alert_emails`.
+
 ## Known limits
 
 - `HB_GPU_BACKEND=local`: the analysis runs on the CPU of the gpu-worker container. Slow but enough for
