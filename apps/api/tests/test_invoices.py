@@ -2,11 +2,9 @@
 
 from __future__ import annotations
 
-import uuid
 from collections.abc import Callable
 from datetime import date, timedelta
 
-import asyncpg
 import pytest
 from stdnum import iso11649
 
@@ -148,65 +146,3 @@ async def test_order_to_payment(
     listed = (await ops.get("/v1/ops/invoices")).json()
     assert listed[0]["paid_at"] is not None
     assert (await api.get("/v1/ops/invoices")).status_code == 404
-
-
-def test_eur_invoice_pdf() -> None:
-    """The QR bill takes EUR too (Europa step 2): amounts and the payment part in EUR."""
-    assert invoice_pdf.money(39000, "EUR") == "EUR 390.00"
-    inv = {
-        "number": "HB-2026-00042",
-        "recipient": {**CONTACT, "city": "Konstanz", "pcode": "78462", "country": "DE"},
-        "issued_on": date(2026, 11, 25),
-        "due_date": date(2026, 12, 25),
-        "period_start": date(2026, 11, 25),
-        "period_end": date(2027, 11, 24),
-        "lines": [{"text": "Jahresabo Team (10 Monatspreise)", "cents": 39000}],
-        "net_cents": 39000,
-        "discount_cents": 0,
-        "vat_cents": 0,
-        "vat_rate_bp": 0,
-        "total_cents": 39000,
-        "currency": "EUR",
-        "reference": rf_reference("HB202600042"),
-        "voucher_code": None,
-    }
-    creditor = {
-        "name": "Handball AG",
-        "street": "Weg 1",
-        "pcode": "8000",
-        "city": "Zürich",
-        "country": "CH",
-    }
-    assert invoice_pdf.qr_bill(creditor, "CH9300762011623852957", inv, "de-CH").currency == "EUR"
-    pdf = invoice_pdf.render("de-CH", creditor, "CH9300762011623852957", None, inv, 30)
-    assert pdf.startswith(b"%PDF") and len(pdf) > 10_000
-
-
-async def test_club_abroad_gets_an_eur_invoice_without_swiss_vat(
-    make_api: Callable[[], Api], outbox: MemoryEmailSender, owner_conn: asyncpg.Connection
-) -> None:
-    api = make_api()
-    ids = await setup_club(api)
-    org = ids["org"]
-    await owner_conn.execute(
-        "UPDATE organizations SET country = 'DE' WHERE id = $1", uuid.UUID(org)
-    )
-    s = api.app.state.settings
-    old = s.invoice_vat_registered
-    s.invoice_vat_registered = True  # registered for Swiss VAT: still none abroad
-    try:
-        base = f"/v1/orgs/{org}/billing"
-        price = (await api.get(f"{base}/annual", params={"plan": "team"})).json()
-        assert (price["net_cents"], price["currency"], price["vat_rate_percent"]) == (
-            39000,
-            "EUR",
-            None,
-        )
-        contact = {**CONTACT, "city": "Konstanz", "pcode": "78462", "country": "DE"}
-        r = await api.post(f"{base}/invoices", json={"plan": "team", "contact": contact})
-        assert r.status_code == 201, r.text
-        inv = r.json()
-        assert (inv["currency"], inv["vat_cents"], inv["amount_cents"]) == ("EUR", 0, 39000)
-        assert "EUR 390.00" in outbox.outbox[-1].text
-    finally:
-        s.invoice_vat_registered = old

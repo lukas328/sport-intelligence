@@ -97,10 +97,6 @@ class Settings(BaseSettings):
     stripe_webhook_secret: SecretStr | None = None
     stripe_price_team: str | None = None
     stripe_price_club: str | None = None
-    # the same plans in EUR for clubs outside Switzerland and Liechtenstein (plans.currency_for);
-    # without them a club paying in EUR cannot start a card checkout (the QR invoice still works)
-    stripe_price_team_eur: str | None = None
-    stripe_price_club_eur: str | None = None
     # the former goalkeeper add-on's price (A9): no longer sold; a subscription still carrying it
     # loses the item, without proration, at its next update (services/billing._on_subscription)
     stripe_price_goalkeeper: str | None = None

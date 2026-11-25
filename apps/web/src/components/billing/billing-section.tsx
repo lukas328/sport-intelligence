@@ -13,8 +13,7 @@ import { cn } from "@/lib/utils";
 
 interface PlanRow {
   plan: "free" | "team" | "club";
-  /** the same number in CHF and EUR; the club pays in `Billing.currency` */
-  price_month: number;
+  price_chf_month: number;
   teams: number;
   matches_per_season: number | null;
   storage_gb: number;
@@ -30,7 +29,6 @@ interface Billing {
   current_period_end: string | null;
   enforced: boolean;
   checkout_available: boolean;
-  currency?: "CHF" | "EUR";
   limits: { teams: number; matches_per_season: number | null; storage_gb: number; gpu_minutes_month: number };
   usage: { teams: number; storage_bytes: number; gpu_minutes: number; max_matches_per_season: number };
   plans: PlanRow[];
@@ -162,7 +160,7 @@ export function BillingSection({ orgId }: { orgId: string }) {
                 <span className="block font-semibold">{t(`plan_${p.plan}`)}</span>
                 {p.plan === b.plan && <span className="block text-[0.9375rem] font-semibold text-muted">{t("current")}</span>}
               </span>
-              <span className="w-40 shrink-0 font-semibold tabular-nums">{t("price", { price: p.price_month ?? 0, currency: b.currency ?? "CHF" })}</span>
+              <span className="w-40 shrink-0 font-semibold tabular-nums">{t("price", { price: p.price_chf_month ?? 0 })}</span>
               <span className="min-w-48 flex-1 text-sm text-muted">
                 {[
                   t("teamsN", { count: p.teams }),

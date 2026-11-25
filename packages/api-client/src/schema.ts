@@ -5550,11 +5550,6 @@ export interface components {
             contact: {
                 [key: string]: string;
             };
-            /**
-             * Currency
-             * @description CHF for clubs in Switzerland and Liechtenstein, else EUR
-             */
-            currency: string;
             /** Months */
             months: number;
             /** Net Cents */
@@ -7994,12 +7989,6 @@ export interface components {
         InvoiceOut: {
             /** Amount Cents */
             amount_cents: number;
-            /**
-             * Currency
-             * @description CHF or EUR
-             * @default CHF
-             */
-            currency?: string;
             /** Discount Cents */
             discount_cents: number;
             /**

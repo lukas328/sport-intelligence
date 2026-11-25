@@ -11,8 +11,7 @@ import { api } from "@/lib/client";
 import { errorKey, type ErrorKey } from "@/lib/errors";
 import { useMailEnabled } from "@/lib/site-config";
 
-/** CHF for clubs in Switzerland and Liechtenstein, EUR elsewhere (the API says which) */
-const money = (cents: number, currency = "CHF") => `${currency} ${(cents / 100).toFixed(2)}`;
+const chf = (cents: number) => `CHF ${(cents / 100).toFixed(2)}`;
 
 /** Annual subscription by invoice with Swiss QR bill (addendum 01, 4.10). */
 export function InvoiceOrder({ orgId }: { orgId: string }) {
@@ -90,7 +89,7 @@ export function InvoiceOrder({ orgId }: { orgId: string }) {
             <option value="club">{tr("billing.plan_club")}</option>
           </Select>
           <p className="self-end text-lg font-semibold tabular-nums" data-testid="annual-price">
-            {money(price.data.net_cents, price.data.currency)} {t("perYear")}
+            {chf(price.data.net_cents)} {t("perYear")}
             {price.data.vat_rate_percent != null && <span className="ml-1 text-sm font-normal text-muted">{t("plusVat", { rate: price.data.vat_rate_percent })}</span>}
           </p>
           <Input label={t("clubName")} name="name" required defaultValue={c.name ?? ""} maxLength={120} />
@@ -134,7 +133,7 @@ export function InvoiceOrder({ orgId }: { orgId: string }) {
                   </a>
                 </td>
                 <td>{format.dateTime(new Date(i.due_date), { dateStyle: "medium" })}</td>
-                <td className="text-right tabular-nums">{money(i.amount_cents, i.currency)}</td>
+                <td className="text-right tabular-nums">{chf(i.amount_cents)}</td>
                 <td>{i.paid_at ? t("paid") : i.dunning_level >= 2 ? t("dunned") : i.dunning_level === 1 ? t("reminded") : t("open")}</td>
               </tr>
             ))}
