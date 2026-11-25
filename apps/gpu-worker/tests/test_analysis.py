@@ -906,6 +906,21 @@ def test_ball_summary_for_the_job_log() -> None:
     assert none["ball_path_coverage"] is None and none["clock_play_s"] is None
 
 
+def test_ball_coverage_counts_video_frames() -> None:
+    """The ball path has a row per video frame; the tracking result counts detection frames
+    (every 3rd), so the coverage was against the wrong count and went above 1 (staging run
+    90c0bf9a: 4,810 ball rows on 4,000 detection frames of a 12,000-frame video)."""
+    frames = [SimpleNamespace(index=i) for i in range(0, 12_000, 3)]
+    obs: Any = SimpleNamespace(total=12_000, frames=frames)
+    assert analysis.video_frames(obs) == 12_000
+    coverage = analysis.ball_summary("ok", 4810, analysis.video_frames(obs), None)
+    assert coverage["ball_path_coverage"] == 0.401
+    # observations stored before the fix kept the last frame index in `total`
+    old: Any = SimpleNamespace(total=11_999, frames=[*frames, SimpleNamespace(index=11_999)])
+    assert analysis.video_frames(old) == 12_000
+    assert analysis.video_frames(SimpleNamespace(total=0, frames=[])) == 0
+
+
 def test_reid_and_role_models_from_bucket_or_file(tmp_path: Path) -> None:
     """HB_REID_MODEL / HB_ROLE_MODEL: the image default without the file stays off; a bucket key
     with its checksum is fetched and loaded; a wrong checksum is not used."""

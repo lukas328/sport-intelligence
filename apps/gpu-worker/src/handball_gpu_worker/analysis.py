@@ -245,6 +245,13 @@ def write_ball_path(result: AnalysisResult, out: Path) -> int:
     return len(rows)
 
 
+def video_frames(obs: learned.Observations) -> int:
+    """The video's length in frames: `obs.total`, at least one past the last observed frame
+    (observations stored before 2026-11-25 kept the last frame index there, one less)."""
+    last = obs.frames[-1].index + 1 if obs.frames else 0
+    return max(int(getattr(obs, "total", 0) or 0), last)
+
+
 def ball_summary(
     ball_status: str, ball_rows: int, frames: int, play: dict[str, Any] | None
 ) -> dict[str, Any]:
@@ -930,7 +937,8 @@ def _run_learned(
         result.write_parquet(out / "tracks.parquet")
         chunks = write_chunks(result, out)
         ball_rows = write_ball_path(result, out)
-        ball_info = ball_summary(ball_status, ball_rows, result.frames, play)
+        # ball rows are per video frame; result.frames counts the detection frames only
+        ball_info = ball_summary(ball_status, ball_rows, video_frames(obs), play)
         upload_dir(s3, settings.s3_bucket_artifacts, out, prefix + "analysis/")
         payload: dict[str, Any] = {
             **view,
