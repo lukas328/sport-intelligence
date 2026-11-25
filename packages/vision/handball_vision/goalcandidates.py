@@ -60,6 +60,7 @@ import json
 import time
 from dataclasses import dataclass
 from functools import lru_cache
+from itertools import pairwise
 from pathlib import Path
 from typing import Any
 
@@ -583,7 +584,7 @@ def clock_breaks(t: F64, play_ms: list[tuple[int, int]] | None) -> NDArray[np.bo
     (the warm-up has its own rule)."""
     out = np.zeros(len(t), bool)
     runs = sorted(play_ms or [])
-    for (_, b), (a, _) in zip(runs, runs[1:], strict=False):
+    for (_, b), (a, _) in pairwise(runs):
         if (a - b) / 1000 >= CLOCK_BREAK_S:
             out |= (t > b / 1000 + CLOCK_BREAK_MARGIN_S) & (t < a / 1000 - CLOCK_BREAK_MARGIN_S)
     return out
