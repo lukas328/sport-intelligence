@@ -196,6 +196,17 @@
             "description": "automatic calibration: goal fit, players on the court, camera position; method 'hall' when the court was carried over from an earlier video of the hall (reference_video_id; sure when the hall images matched well enough not to ask); hall_tried lists earlier videos that did not fit",
             "title": "Calibration Info"
           },
+          "calibration_origin": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CalibrationOriginOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "where a confirmed court came from when nobody set it on this video: carried over from an earlier video of the same hall; null for a court a person clicked or confirmed on this video, an automatic court and no court"
+          },
           "calibration_state": {
             "default": "missing",
             "description": "confirmed: set or confirmed by a person (or carried over from such a court with a sure hall match); suggested: the automatic court, a proposal to confirm or to click anew (calibration_suggestion); missing: no court; updating: a clicked court is being applied; undeterminable: the coach said it cannot be set on this video",
@@ -1594,6 +1605,70 @@
           "points"
         ],
         "title": "CalibrationIn",
+        "type": "object"
+      },
+      "CalibrationOriginOut": {
+        "description": "A confirmed court carried over from an earlier video of the same hall (calibration_state\n\"confirmed\"), for the note that says so and offers to click the court anew.",
+        "properties": {
+          "hall": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "the hall's name, when known",
+            "title": "Hall"
+          },
+          "reference_kickoff_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "kickoff of that match, for the label",
+            "title": "Reference Kickoff At"
+          },
+          "reference_match_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "the match of reference_video_id",
+            "title": "Reference Match Id"
+          },
+          "reference_video_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "the earlier video whose court was carried over",
+            "title": "Reference Video Id"
+          },
+          "source": {
+            "const": "hall",
+            "default": "hall",
+            "title": "Source",
+            "type": "string"
+          }
+        },
+        "title": "CalibrationOriginOut",
         "type": "object"
       },
       "CalibrationOut": {

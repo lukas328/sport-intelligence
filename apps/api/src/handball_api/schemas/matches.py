@@ -643,6 +643,12 @@ class AnalysisOut(ApiModel):
         "being applied; undeterminable: the coach said it cannot be set on this video",
     )
     calibration_suggestion: CalibrationSuggestionOut | None = None
+    calibration_origin: CalibrationOriginOut | None = Field(
+        default=None,
+        description="where a confirmed court came from when nobody set it on this video: "
+        "carried over from an earlier video of the same hall; null for a court a person clicked "
+        "or confirmed on this video, an automatic court and no court",
+    )
     court_clicks: CourtClicksIn | None = Field(
         default=None, description="the coach's latest line clicks, to edit them again"
     )
@@ -729,6 +735,23 @@ class CalibrationSuggestionOut(ApiModel):
     from_video_id: uuid.UUID | None = None
     from_kickoff_at: datetime | None = Field(
         default=None, description="kickoff of the match of from_video_id, for the label"
+    )
+
+
+class CalibrationOriginOut(ApiModel):
+    """A confirmed court carried over from an earlier video of the same hall (calibration_state
+    "confirmed"), for the note that says so and offers to click the court anew."""
+
+    source: Literal["hall"] = "hall"
+    hall: str | None = Field(default=None, description="the hall's name, when known")
+    reference_video_id: uuid.UUID | None = Field(
+        default=None, description="the earlier video whose court was carried over"
+    )
+    reference_match_id: uuid.UUID | None = Field(
+        default=None, description="the match of reference_video_id"
+    )
+    reference_kickoff_at: datetime | None = Field(
+        default=None, description="kickoff of that match, for the label"
     )
 
 
