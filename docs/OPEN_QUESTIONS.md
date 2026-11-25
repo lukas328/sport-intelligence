@@ -28,6 +28,14 @@ was der Code heute tut.
 4. 🔴 **Auftragsverarbeitung** (Q-INFRA-1, Q-SITE-4). Akzeptierst du die AVVs von Microsoft (Azure)
    und Cloudflare (R2) in den Konten? Empfehlung: ja, beim Anlegen der Konten, danach beide in der
    Datenschutzerklärung nennen. Ohne Entscheid: kein echtes Vereinsvideo in die Produktion.
+4a. 🔴 **Ball-Netze und DeepSport-Lizenz** (Auslieferung). Alle Ball-Netze ab Runde 3, auch hr1 und
+   hrp1 (heute im Produkt hinter dem Schalter Ball v2), sind mit DeepSport-Bildern trainiert
+   (CC BY-NC-SA 4.0, nur nicht-kommerziell). Kommerziell auslieferbar ist erst ein Netz ohne diese
+   Daten. Läuft: `handball-ml-hr-nods` (hr1 ohne DeepSport, Kaggle, 25.11.), danach Messung gegen hr1
+   auf Ball-Testset 2. Bei hrp1 zusätzlich die Lizenz der ImageNet-Gewichte (timm `hrnet_w18`)
+   prüfen. Empfehlung: vor dem ersten zahlenden Verein nur Netze ohne DeepSport ausliefern; bis dahin
+   Ball v2 nur im Test. Ohne Entscheid: Ball v2 bleibt Testbetrieb (`handball_vision.ballnet`,
+   Lizenzhinweis).
 5. 🟡 **Wem gehört ein Team** (Q-AUTH-OWNER). Wie wird geprüft, dass wer ein Team im Einstieg
    speichert, wirklich dazugehört? Empfehlung: im Pilot (a) Übergabe durch den Support, weil die
    Pilotvereine bekannt sind; (b) Bestätigung über die Verbandsadresse erst vor dem breiten Start.
