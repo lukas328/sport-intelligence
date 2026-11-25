@@ -223,6 +223,23 @@ picks the wrong candidate, 5.4 % no detector sees the ball. Before rescoring (RE
 357 misses of 1555): 8.2 % of balls on the net's top peak and 5.6 % among its top 5 but another
 candidate chosen, 2.4 % only OWLv2 has the ball, 6.2 % no detector.
 
+**Spots still on the canvas (product, 2026-11-25, analysis session).** The owner's shot check
+(section 6) showed tracker points on objects at the bench (spare balls, green ball-like items) with
+high confidence; the static-spot rule works in picture pixels and has weight 0 in the no-OWLv2
+rescoring, so objects that move through the picture with a panning camera are never caught.
+`balltrack2` now takes the candidates' canvas positions (`world`, from the camera motion, operated
+cameras only, `ballpossession._canvas_points`): a spot held in more than 30 % of the window's
+frames within 11 px (per 1280) loses its reward. Product CPU setting on the 41 dev shot clips,
+against the owner's judged points: on a known ball 111 -> 115, on a known wrong object 89 -> 74, at
+the bench 22 -> 9 (`ml/integration/ball_world_static.py`, `ml/integration/results/ball_world_static.json`).
+Chosen among five settings on these clips; balls found move by a few points either way across the
+settings (noise), the bench objects drop in all of them. Not measured on gold v1 (no product
+observations there) nor in the GPU setting.
+
+Tried on the same clips and left out: a candidate in the top 15 to 25 % of a person box (a head)
+loses its reward. Points on people 40 -> 34 to 38, but points on a known ball 115 -> 108 to 111
+(a ball held high is there too). No gain.
+
 ## 6. Labelling pipeline lineage
 
 **Test set 2 page** (2026-11-09, `be3b2ec`, `206ec85`, `c91e955`): owner clicks the ball in single
