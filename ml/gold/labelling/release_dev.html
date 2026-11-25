@@ -1,0 +1,216 @@
+<title>Abwürfe Dev</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* One shot per screen: a 12 s clip around the log time, stop on the release, press A. */
+:root {
+  --bg: #eef1f4; --panel: #ffffff; --ink: #17202b; --muted: #5a6675; --line: #d3d9e1;
+  --ball: #e8b100; --good: #1f8a4c; --warn: #b25d00; --mark: #d6304f; --log: #2b6cb0;
+  --display: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+  --body: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f141a; --panel: #18202a; --ink: #e6ebf1; --muted: #9aa6b4; --line: #2a3542;
+    --ball: #f2c230; --good: #4cc27f; --warn: #f0a24a; --mark: #ff6b85; --log: #6aa6e8; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f141a; --panel: #18202a; --ink: #e6ebf1; --muted: #9aa6b4; --line: #2a3542;
+  --ball: #f2c230; --good: #4cc27f; --warn: #f0a24a; --mark: #ff6b85; --log: #6aa6e8; color-scheme: dark;
+}
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; margin: 0;
+  padding-block: 14px 24px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 18px; margin-bottom: 12px; max-width: 1240px; }
+h1 { font-family: var(--display); font-weight: 700; font-size: 26px; margin: 0; }
+.progress { font-family: var(--mono); font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.bar { flex: 1 1 160px; height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; align-self: center; min-width: 120px; }
+.bar > i { display: block; height: 100%; width: 0; background: var(--ball); transition: width .3s; }
+.note { font-size: 13px; color: var(--warn); }
+.row { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 12px; align-items: start; max-width: 1240px; }
+@media (max-width: 820px) { .row { grid-template-columns: minmax(0, 1fr); } }
+.stage { min-width: 0; display: grid; gap: 8px; }
+video { display: block; width: 100%; max-width: 100%; aspect-ratio: 16 / 9; background: #000; border-radius: 6px; }
+.transport { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.time { font-family: var(--mono); font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; margin-left: auto; }
+.tl { position: relative; height: 30px; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; cursor: pointer; }
+.tl .head { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--ink); pointer-events: none; }
+.tl .m { position: absolute; top: 3px; width: 8px; height: 22px; margin-left: -4px; border-radius: 3px; background: var(--mark); pointer-events: none; }
+.tl .lg { position: absolute; top: 0; bottom: 0; width: 0; border-left: 2px dashed var(--log); pointer-events: none; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px; display: grid; gap: 10px; }
+.btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+button { font: 600 15px var(--body); padding: 10px 8px; min-height: 42px; border-radius: 6px; border: 1px solid var(--line);
+  background: var(--panel); color: var(--ink); cursor: pointer; }
+button:hover { border-color: var(--muted); }
+button:focus-visible { outline: 3px solid var(--log); outline-offset: 2px; }
+button.primary { background: var(--mark); border-color: var(--mark); color: #fff; }
+button.on { outline: 2px solid var(--ball); }
+kbd { font-family: var(--mono); font-size: 12px; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; }
+.state { font-size: 14px; }
+.state b { font-family: var(--mono); }
+.help { font-size: 13px; color: var(--muted); line-height: 1.45; }
+.help b { color: var(--ink); }
+.toast { min-height: 20px; font-size: 13px; color: var(--good); }
+.legend { display: flex; gap: 14px; font-size: 12px; color: var(--muted); flex-wrap: wrap; }
+.legend .a::before, .legend .b::before { content: ""; display: inline-block; width: 10px; height: 10px; margin-right: 5px; vertical-align: -1px; border-radius: 2px; }
+.legend .a::before { background: var(--mark); } .legend .b::before { border-left: 2px dashed var(--log); width: 0; height: 12px; border-radius: 0; }
+@media (prefers-reduced-motion: reduce) { .bar > i { transition: none; } }
+</style>
+
+<header>
+  <h1>Abwürfe Dev</h1>
+  <span class="progress" id="progress">lädt …</span>
+  <div class="bar" aria-hidden="true"><i id="barfill"></i></div>
+</header>
+<p class="note" id="note" hidden></p>
+<div class="row">
+  <div class="stage">
+    <video id="vid" playsinline muted preload="auto"></video>
+    <div class="tl" id="tl"><div class="head" id="head"></div></div>
+    <div class="legend"><span class="a">dein Abwurf</span><span class="b">Zeit im Spielbericht (kommt meist einige Sekunden nach dem Abwurf)</span></div>
+    <div class="transport">
+      <button id="play">Play/Pause</button>
+      <button id="fb">−1 Bild</button>
+      <button id="ff">+1 Bild</button>
+      <button id="back">−1 s</button>
+      <button id="speed">1×</button>
+      <span class="time" id="time">0.00 s</span>
+    </div>
+  </div>
+  <div class="panel">
+    <div id="meta" class="progress"></div>
+    <div class="state" id="state"></div>
+    <button class="primary" id="mark">Abwurf hier (<kbd>A</kbd>)</button>
+    <div class="btns">
+      <button id="none">Kein Wurf sichtbar (<kbd>N</kbd>)</button>
+      <button id="clear">Löschen (<kbd>Z</kbd>)</button>
+      <button id="prev">← Wurf</button>
+      <button id="next">Wurf → (<kbd>Enter</kbd>)</button>
+    </div>
+    <div class="toast" id="toast" role="status"></div>
+    <div class="help">
+      Pro Wurf ein Clip von 12 s. Er endet 3 s nach der Zeit im Spielbericht; der Abwurf liegt meist davor.
+      Laufen lassen, beim <b>Abwurf</b> (Ball verlässt die Hand des Werfers) anhalten, mit <kbd>,</kbd> und <kbd>.</kbd> Bild für Bild
+      zum Moment gehen und <kbd>A</kbd> drücken. Auf etwa ein Viertel Sekunde reicht.<br>
+      Mehrere Würfe im Clip: den nehmen, der zum Ausgang im Spielbericht passt (oben angezeigt), meist der letzte vor der blauen Linie.
+      Wurf nicht zu sehen (Wiederholung, Kamera weg, ausserhalb des Clips): <kbd>N</kbd>.
+      <kbd>Leertaste</kbd> Play/Pause, <kbd>←</kbd> 1 s zurück, <kbd>S</kbd> Tempo, <kbd>Enter</kbd> nächster offener Wurf.
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const KIND = { goal: "Tor", penalty_goal: "7-m-Tor", empty_goal: "Tor ins leere Tor", shot_saved: "gehalten", penalty_saved: "7 m gehalten",
+  shot_missed: "daneben/geblockt", penalty_missed: "7 m daneben", shot_post: "Pfosten", penalty_post: "7 m Pfosten" };
+const SPEEDS = [1, 0.5, 0.25];
+const FPS = 30;
+const state = { items: [], idx: 0, labels: {}, db: null, speed: 1 };
+const cur = () => state.items[state.idx];
+function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* storage blocked */ } }
+function toast(t) { $("toast").textContent = t; clearTimeout(toast.h); toast.h = setTimeout(() => ($("toast").textContent = ""), 2000); }
+function dur() { const v = $("vid"); return v.duration && isFinite(v.duration) ? v.duration : (cur() ? cur().dur : 12); }
+function docId(it) { return it.id.replace(/[^A-Za-z0-9_\-.~:@+]/g, "_"); }
+
+function render(load) {
+  const it = cur(); if (!it) return;
+  const v = $("vid");
+  if (load) { v.src = it.video; v.playbackRate = state.speed; lsSet("ad_idx", String(state.idx)); }
+  const done = state.items.filter((x) => state.labels[docId(x)]).length;
+  $("progress").textContent = `${done} von ${state.items.length} Würfen erledigt`;
+  $("barfill").style.width = (done / Math.max(1, state.items.length) * 100) + "%";
+  $("meta").textContent = `${state.idx + 1} / ${state.items.length} · ${it.game.replace(/_/g, " ")}`;
+  const lab = state.labels[docId(it)];
+  const st = $("state"); st.textContent = "";
+  const k = document.createElement("div"); k.textContent = "Spielbericht: " + (KIND[it.kind] || it.kind); st.appendChild(k);
+  const s = document.createElement("div");
+  s.textContent = lab ? (lab.state === "release" ? `Abwurf bei ${lab.t_clip.toFixed(2)} s` : "kein Wurf sichtbar") : "noch offen";
+  st.appendChild(s);
+  $("speed").textContent = state.speed + "×";
+  drawTimeline();
+}
+function drawTimeline() {
+  const tl = $("tl"); for (const m of tl.querySelectorAll(".m,.lg")) m.remove();
+  const it = cur(), D = dur();
+  const lg = document.createElement("div"); lg.className = "lg"; lg.style.left = ((it.log_t - it.start) / D * 100) + "%"; tl.appendChild(lg);
+  const lab = state.labels[docId(it)];
+  if (lab && lab.state === "release") { const e = document.createElement("div"); e.className = "m"; e.style.left = (lab.t_clip / D * 100) + "%"; tl.appendChild(e); }
+  $("head").style.left = (($("vid").currentTime || 0) / D * 100) + "%";
+}
+async function save(body) {
+  const it = cur(), id = docId(it);
+  if (body) state.labels[id] = body; else delete state.labels[id];
+  render(false);
+  if (!state.db) { toast("Nicht gespeichert: Speicher nicht erreichbar."); return; }
+  try {
+    if (body) await state.db.collection("releases").doc(id).set(body);
+    else await state.db.collection("releases").doc(id).delete();
+  } catch (e) { toast("Speichern fehlgeschlagen: " + (e && e.message ? e.message : "unbekannter Fehler")); }
+}
+function base(it) { return { seg: it.seg, game: it.game, log_t: it.log_t, kind: it.kind, start: it.start, at: Date.now() }; }
+function mark() {
+  const it = cur(), t = Math.round($("vid").currentTime * 100) / 100;
+  $("vid").pause();
+  save({ ...base(it), state: "release", t_clip: t, t_s: Math.round((it.start + t) * 100) / 100 });
+  toast(`Abwurf bei ${t.toFixed(2)} s gespeichert`);
+}
+function none() { save({ ...base(cur()), state: "none" }); toast("Als «kein Wurf sichtbar» gespeichert"); }
+function clear() { save(null); toast("Gelöscht"); }
+function go(i) { state.idx = Math.max(0, Math.min(state.items.length - 1, i)); render(true); }
+function nextOpen() {
+  for (let d = 1; d <= state.items.length; d++) {
+    const j = (state.idx + d) % state.items.length;
+    if (!state.labels[docId(state.items[j])]) { go(j); return; }
+  }
+  toast("Alle Würfe erledigt, danke!");
+}
+function toggle() { const v = $("vid"); if (v.paused) v.play().catch(() => {}); else v.pause(); }
+function step(s) { const v = $("vid"); v.pause(); v.currentTime = Math.max(0, Math.min(dur(), v.currentTime + s)); }
+function speed() { state.speed = SPEEDS[(SPEEDS.indexOf(state.speed) + 1) % SPEEDS.length]; $("vid").playbackRate = state.speed; lsSet("ad_speed", String(state.speed)); render(false); }
+
+$("vid").addEventListener("timeupdate", () => { $("time").textContent = $("vid").currentTime.toFixed(2) + " s"; $("head").style.left = ($("vid").currentTime / dur() * 100) + "%"; });
+$("vid").addEventListener("seeked", () => { $("time").textContent = $("vid").currentTime.toFixed(2) + " s"; $("head").style.left = ($("vid").currentTime / dur() * 100) + "%"; });
+$("vid").addEventListener("loadedmetadata", () => { $("vid").playbackRate = state.speed; drawTimeline(); });
+$("tl").addEventListener("click", (ev) => { const r = $("tl").getBoundingClientRect(); $("vid").currentTime = (ev.clientX - r.left) / r.width * dur(); });
+$("play").onclick = toggle; $("fb").onclick = () => step(-1 / FPS); $("ff").onclick = () => step(1 / FPS); $("back").onclick = () => step(-1);
+$("speed").onclick = speed; $("mark").onclick = mark; $("none").onclick = none; $("clear").onclick = clear;
+$("prev").onclick = () => go(state.idx - 1); $("next").onclick = nextOpen;
+document.addEventListener("keydown", (ev) => {
+  if (ev.ctrlKey || ev.metaKey || ev.altKey) return;
+  const k = ev.key.toLowerCase();
+  if (k === " ") { ev.preventDefault(); toggle(); }
+  else if (k === "a") mark();
+  else if (k === "n") none();
+  else if (k === "z") clear();
+  else if (k === ",") step(-1 / FPS);
+  else if (k === ".") step(1 / FPS);
+  else if (k === "arrowleft") { ev.preventDefault(); step(-1); }
+  else if (k === "arrowright") { ev.preventDefault(); step(1); }
+  else if (k === "s") speed();
+  else if (k === "enter") { ev.preventDefault(); nextOpen(); }
+});
+
+async function start() {
+  try { state.items = await (await fetch("items.json")).json(); }
+  catch (e) { $("progress").textContent = "Liste konnte nicht geladen werden."; return; }
+  const sp = parseFloat(lsGet("ad_speed")); if (SPEEDS.includes(sp)) state.speed = sp;
+  const si = parseInt(lsGet("ad_idx"), 10); if (si >= 0 && si < state.items.length) state.idx = si;
+  render(true);
+  const db = window.claude && window.claude.use ? await window.claude.use("db") : null;
+  if (!db) { const n = $("note"); n.hidden = false; n.textContent = "Speicher nicht verfügbar: bitte bei claude.ai angemeldet öffnen."; return; }
+  state.db = db;
+  const timer = setTimeout(() => { const n = $("note"); n.hidden = false; n.textContent = "Gespeicherte Abwürfe noch nicht erreichbar."; }, 10000);
+  let first = true;
+  db.collection("releases").onSnapshot((snap) => {
+    if (!snap.metadata.fromCache) { clearTimeout(timer); $("note").hidden = true; }
+    state.labels = {};
+    for (const d of snap.docs) state.labels[d.id] = d.data();
+    if (first) { first = false; if (state.labels[docId(cur())]) { const j = state.items.findIndex((x) => !state.labels[docId(x)]); if (j >= 0) { go(j); return; } } }
+    render(false);
+  }, (e) => { clearTimeout(timer); const n = $("note"); n.hidden = false; n.textContent = "Abwürfe konnten nicht geladen werden (" + e.code + ")."; });
+}
+start();
+</script>

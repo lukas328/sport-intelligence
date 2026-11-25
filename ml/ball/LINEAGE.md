@@ -318,6 +318,23 @@ on every 2nd. Test-split exposure: while inspecting the file layout, the metadat
 candidate numbers (no image, no tracker output) of one test clip (w01) were printed once; no test
 frame was drawn or scored. Recorded here for completeness; judged not to bias the test.
 
+**Shot check result (read 2026-11-25, analysis session).** The owner had labelled all 574 frames;
+the labels are now in `ml/gold/data/shot_check_dev_labels.json`. Tracker v2 (with OWLv2) on the 546
+frames with a tracker point: **37 % right** (200 ball, 4 partly hidden), 53 % ring on another object,
+9 % a point although no game ball is in the picture. Far below gold v1 (84 %): gold labels favour
+frames a detector found (section 3), these frames are fixed times around shots, and 8 of the 9 dev
+games are in one home hall with a flat camera. By time to the log: 17 to 36 % right from 4 s to 0.5 s
+before the log (the shot itself), 46 to 51 % after. By confidence: 17 % right below 0.2, 65 % at 0.8
+and above; precision 0.53 at recall 0.27 (threshold 0.5), so confidence filters little.
+False points decomposed (Claude looked at the middle frame of all 342 wrong points,
+`ml/gold/data/shot_check_dev_fp_cats.json`): 41 % part of a person (heads, raised hands, shoes,
+referees), 15 % objects at the bench (spare balls and green ball-like items, high confidence, median
+0.77; in one clip on 12 of 14 frames), 3 % spectators, 3 % boards and logos, 6 % unclear, and **32 %
+look like a ball to Claude** although the owner said "ring wrong" (label disagreement or near miss;
+the owner should look at these 111 again before they count as tracker errors). Levers that follow:
+penalise candidates that stay still in world coordinates outside the court (bench objects), and a
+person-part check for low-confidence points. Not measured yet; dev only.
+
 ## 7. Things tried that did not help or were set aside
 
 | What | When, where | Numbers | Reason set aside |

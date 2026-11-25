@@ -1007,3 +1007,66 @@ verliert 14 von 100 Toren.
 Was bleibt für weniger Fragen: Zeit ohne Spiel (Pausen, Einspielen, Nachspiel). Dafür beobachtet die
 Warteschlange `ml/integration/kaggle/observe_queue.py` die übrigen Segmente der Bibliothek, darunter
 die Halbzeiten der 13 Dev-Spiele.
+
+### Wurfzeit auf Dev, Fehlalarme und Pausen (Analyse-Sitzung, 2026-11-25)
+
+Nur Dev-Daten, Endtest nicht angeschaut. Daten: 49 Dev-Segmente aus 13 Spielen (Kernels
+`handball-shot-dev-0` bis `-4`, wie im Wurf-Endtest beobachtet), 171 Würfe aus den Spielberichten.
+Skripte `ml/integration/shot_time_dev.py` (Merkmale und Auswertung), `ml/integration/pause_dev.py`.
+
+**1. Dev-Abwurfmarken gibt es noch nicht.** Die Seite «Würfe markieren» enthält nur die 42
+Endtest-Segmente; «Würfe Ball prüfen» hat Ball-Urteile auf den 41 Dev-Clips, aber keine Abwurfzeit.
+Ohne Abwurf auf Dev lässt sich die Wurfzeit nicht ehrlich wählen: gegen die Spielbericht-Zeit
+gemessen liegt die heutige Methode schon bei 58 % in ±2 s (Versatz 1.35 s, Spiel für Spiel
+ausgelassen), weil sie auf diese Zeit eingestellt ist; im Endtest gegen Lukas' Abwurf sind es 21 %.
+Neu: die Seite **«Abwürfe Dev»** (https://claude.ai/artifact/X1AUB2nXAkX9eVTV977paz, Quelle
+`ml/gold/labelling/release_dev.html`, Clips `ml/gold/release_dev_clips.py`): pro Dev-Wurf ein Clip
+von 12 s (9 s vor bis 3 s nach der Spielbericht-Zeit), Bild für Bild, ein Klick beim Abwurf, 175
+Würfe. Gespeichert in der db-Sammlung `releases` (`t_s` = Sekunde im Segment). Danach
+`shot_time_dev.py eval FEAT.pkl MARKS.json` vergleicht die Methoden mit ±2 s und Bootstrap über die
+Spiele; die gewählte Methode wird dann einmal auf dem Endtest gemessen.
+
+**2. Ballpfad als Abwurf-Anker, gegen die Spielbericht-Zeit (nur Vorprüfung):**
+
+| Methode (Versatz Spiel für Spiel ausgelassen) | in ±2 s der Spielbericht-Zeit | Wurf im Fenster −3/+8 s |
+|---|---|---|
+| Kandidaten-Peak (heute) | 57.9 % (50.0 bis 64.8) | 91.8 % |
+| letzter schneller Ball (90. Perzentil) 6 bis 0.5 s vor dem Peak | 54.4 % (43.3 bis 64.2) | 88.9 % |
+| dasselbe, 98. Perzentil | 46.8 % (37.5 bis 54.3) | 71.3 % |
+
+Streuung (IQR) gegen die Spielbericht-Zeit: Peak 3.0 s, Ball-Anker 2.9 bis 3.3 s. Der Ballpfad macht
+die Zeit gegen den Spielbericht nicht genauer. Ob er gegen den echten Abwurf hilft, zeigen erst die
+Marken; der Spielbericht selbst streut um einige Sekunden. Ergebnis: `ml/integration/results/shot_time_dev_logref.json`.
+
+**3. Fehlalarme der Wurf-Kandidaten und Ballpfad:** 568 Kandidaten bis Rate 4 auf Dev, 28.9 % nahe
+einem Wurf. Kandidaten-Wert allein AUC 0.823, mit Ballgeschwindigkeit, Anteil schneller Ball und
+Abdeckung 0.825 (logistische Regression, Spiel für Spiel ausgelassen). Wie bei den Tor-Kandidaten
+(A1) hilft der Ballpfad nicht; nichts eingebaut. Die Rate bleibt der Hebel (3.9 pro Minute auf Dev).
+
+**4. Pausen, Variante 2 (Uhr der Dev-Spiele):** Wahrheit pro Segment aus der im Video gelesenen
+Uhr, über den Spielbericht auf Halbzeiten gelegt (Segment in der Halbzeit: Anteil laufende Uhr;
+ganz vor Anpfiff, in der Pause oder nach Schluss: 0). 65 Segmente (49 aus den Dev-Kernels, 16 aus der
+Warteschlange q059, q060, q067). Produkt: `play_s` aus `goalcandidates.from_observations`.
+
+| Segmente | Anzahl | Uhr läuft (Anteil) | Produkt sagt «Spiel» | Fehler (Median) |
+|---|---|---|---|---|
+| in einer Halbzeit | 51 | 77 % | 95 % | 0.13 |
+| Halbzeitpause | 11 | 0 % | **98 %** | 1.00 |
+| vor Anpfiff / nach Schluss | 1 / 2 | 0 % | 0 % (eins ohne Ergebnis) | 0 |
+
+Lesart: Die `no_play`-Regel (Spieler stehen still oder in einer Gruppe) erkennt die Halbzeitpause
+fast nie. Im Bild (Stäfa s2 angeschaut): Einblendung «Pausenstand», Wiederholungen von Szenen der
+ersten Halbzeit und Einwerfen der Spieler; das sieht für Kamera und Bewegung wie Spiel aus. In der
+Halbzeit nennt das Produkt auch Time-outs und Unterbrüche meist Spiel (95 % statt 77 %). Hebel: keine
+laufende Uhr über mehrere Minuten (Einblendung oder Hallentafel) als Pause werten, die
+Spielbericht-Zeiten der Halbzeiten nutzen, wo ein Bericht da ist. Die 11 Pausen-Segmente sind 3 min
+lang; eine ganze Pause dauert 10 bis 15 min, auf Lukas' 99-min-Video also grob 20 bis 30 Wurf- und
+Tor-Fragen, die so wegfallen könnten (Schätzung aus den Raten, nicht gemessen). Ergebnis:
+`ml/integration/results/pause_dev.json`.
+
+**5. Wurfort-Schätzung (A2):** Aus dieser Sitzung kein Zugang zu Staging. Dazu eine Lücke im Produkt:
+`set_spot` speichert nur bestätigte Schätzungen (`confirmed_estimate`). Wählt der Trainer eine andere
+Zone oder tippt einen Punkt, wird die Schätzung überschrieben; die Zahl der abgelehnten Schätzungen
+fehlt damit, und eine Trefferquote lässt sich aus den gespeicherten Daten nicht rechnen (nur nachträglich,
+indem `fill_one` für beantwortete Würfe aus den Spuren neu gerechnet wird). Vorschlag: die geschätzte
+Zone beim Antworten mitspeichern (`attributes.estimated_zone`).
