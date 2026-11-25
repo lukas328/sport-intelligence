@@ -296,6 +296,81 @@ async def test_a_court_from_the_hall_is_confirmed_only_with_a_sure_match(
         assert sug["from_kickoff_at"] is not None
 
 
+@pytest.mark.parametrize("named", [True, False])
+async def test_a_court_carried_over_from_the_hall_says_where_it_came_from(
+    make_api: Callable[[], Api], named: bool
+) -> None:
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    first, job, payload = await _video(
+        api, ids, venue="Sporthalle Moosgarten", kickoff_at="2026-11-07T17:00:00+01:00"
+    )
+    await _finish(
+        api,
+        job,
+        {"calibration": _court("user_correction"), "tracks": _tracks(), "panorama": PANORAMA},
+    )
+    # the court the coach clicked on this video has no origin to tell
+    a = (await api.get(f"/v1/orgs/{org}/videos/{first}/analysis")).json()
+    assert a["calibration_state"] == "confirmed" and a["calibration_origin"] is None
+    second, job2, _ = await _video(
+        api, ids, venue="Sporthalle Moosgarten", kickoff_at="2026-11-14T18:00:00+01:00"
+    )
+    info: dict[str, Any] = {
+        "method": "hall",
+        "hall_match": "same_place",
+        "reference_video_id": first,
+        "floor_inliers": 140,
+        "error_px": 1.5,
+    }
+    if named:
+        info["hall"] = "Halle Moosgarten"
+    await _finish(
+        api,
+        job2,
+        {
+            "calibration": _court("heuristic"),
+            "calibration_info": info,
+            "tracks": _tracks(),
+            "panorama": PANORAMA,
+        },
+    )
+    a = (await api.get(f"/v1/orgs/{org}/videos/{second}/analysis")).json()
+    assert a["calibration_state"] == "confirmed" and a["calibration_suggestion"] is None
+    origin = a["calibration_origin"]
+    # without a name in the info the reference match's venue names the hall
+    assert origin["source"] == "hall"
+    assert origin["hall"] == ("Halle Moosgarten" if named else "Sporthalle Moosgarten")
+    assert origin["reference_video_id"] == first
+    assert origin["reference_match_id"] == payload["match_id"]
+    assert origin["reference_kickoff_at"].startswith("2026-11-07T16:00:00")
+    # once the coach confirms it on this video it is theirs: no origin any more
+    r = await api.post(f"/v1/orgs/{org}/videos/{second}/calibration/confirm")
+    assert r.status_code == 200, r.text
+    a = (await api.get(f"/v1/orgs/{org}/videos/{second}/analysis")).json()
+    assert a["calibration_state"] == "confirmed" and a["calibration_origin"] is None
+
+
+async def test_an_automatic_court_has_no_origin(make_api: Callable[[], Api]) -> None:
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    vid, job, _ = await _video(api, ids)
+    await _finish(
+        api,
+        job,
+        {
+            "calibration": _court("heuristic"),
+            "calibration_info": {"goal_score": 0.6, "line_score": 1.3},
+            "tracks": _tracks(),
+            "panorama": PANORAMA,
+        },
+    )
+    a = (await api.get(f"/v1/orgs/{org}/videos/{vid}/analysis")).json()
+    assert a["calibration_state"] == "suggested" and a["calibration_origin"] is None
+
+
 async def test_an_undeterminable_court_closes_its_question_until_clicked(
     make_api: Callable[[], Api],
 ) -> None:

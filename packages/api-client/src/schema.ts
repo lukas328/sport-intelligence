@@ -5465,6 +5465,8 @@ export interface components {
             calibration_info?: {
                 [key: string]: unknown;
             } | null;
+            /** @description where a confirmed court came from when nobody set it on this video: carried over from an earlier video of the same hall; null for a court a person clicked or confirmed on this video, an automatic court and no court */
+            calibration_origin?: components["schemas"]["CalibrationOriginOut"] | null;
             /**
              * Calibration State
              * @description confirmed: set or confirmed by a person (or carried over from such a court with a sure hall match); suggested: the automatic court, a proposal to confirm or to click anew (calibration_suggestion); missing: no court; updating: a clicked court is being applied; undeterminable: the coach said it cannot be set on this video
@@ -5950,6 +5952,39 @@ export interface components {
              * @enum {string}
              */
             space?: "frame" | "panorama";
+        };
+        /**
+         * CalibrationOriginOut
+         * @description A confirmed court carried over from an earlier video of the same hall (calibration_state
+         *     "confirmed"), for the note that says so and offers to click the court anew.
+         */
+        CalibrationOriginOut: {
+            /**
+             * Hall
+             * @description the hall's name, when known
+             */
+            hall?: string | null;
+            /**
+             * Reference Kickoff At
+             * @description kickoff of that match, for the label
+             */
+            reference_kickoff_at?: string | null;
+            /**
+             * Reference Match Id
+             * @description the match of reference_video_id
+             */
+            reference_match_id?: string | null;
+            /**
+             * Reference Video Id
+             * @description the earlier video whose court was carried over
+             */
+            reference_video_id?: string | null;
+            /**
+             * Source
+             * @default hall
+             * @constant
+             */
+            source?: "hall";
         };
         /** CalibrationOut */
         CalibrationOut: {
