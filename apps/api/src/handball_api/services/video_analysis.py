@@ -521,6 +521,9 @@ async def calibration_origin(
     ref = await _hall_reference(ctx, asset, info)
     if ref is not None:
         video_id, match_id, kickoff_at, venue = ref
+        if match_id == asset.match_id:
+            # carried over from another part of this same match: not «from an earlier match»
+            return None
         out["reference_video_id"] = video_id
         out["reference_match_id"] = match_id
         out["reference_kickoff_at"] = kickoff_at
