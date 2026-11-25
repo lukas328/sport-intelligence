@@ -103,7 +103,7 @@ export function IdentityPanel({
                     if (v === String(tr.number ?? "")) return;
                     void assign(tr.track_no, "", v === "" ? null : Number(v));
                   }}
-                  className="min-h-9 w-24 bg-raised ring-1 ring-inset ring-border px-2"
+                  className="min-h-11 w-24 bg-raised px-2 text-base ring-1 ring-inset ring-border"
                   data-testid="identity-number"
                 />
               ) : (
@@ -111,7 +111,7 @@ export function IdentityPanel({
                 id={`track-${tr.track_no}`}
                 value={tr.player_id ?? ""}
                 onChange={(e) => void assign(tr.track_no, e.target.value)}
-                className="min-h-9 flex-1 bg-raised ring-1 ring-inset ring-border px-2"
+                className="min-h-11 flex-1 bg-raised px-2 text-base ring-1 ring-inset ring-border"
               >
                 <option value="">{t("none")}</option>
                 {(roster.data ?? [])
