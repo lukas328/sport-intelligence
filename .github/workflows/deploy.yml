@@ -55,7 +55,7 @@ on:
         type: boolean
         default: false
       diag_asset:
-        description: "with diag: this video asset id instead of the newest"
+        description: "with diag: this video asset id (or a unique prefix, e.g. the first 8 characters) instead of the newest"
         type: string
         default: ""
   push:
