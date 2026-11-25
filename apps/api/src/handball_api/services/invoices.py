@@ -29,7 +29,7 @@ from handball_api.models import Invoice, Organization, OrgMembership, User, Vouc
 from handball_api.models.enums import OrgRole, PaymentMethod, Plan
 from handball_api.services import audit, invoice_pdf
 from handball_api.services.context import Ctx
-from handball_api.services.plans import PLANS
+from handball_api.services.plans import PLANS, currency_for
 from handball_api.services.policies import Action, authorize
 
 REMINDER_DAYS = 3
@@ -106,9 +106,9 @@ def one_year_after(start: date) -> date:
 
 def price_cents(ctx: Ctx, plan: Plan) -> int:
     """The annual price: the plan's monthly price times the annual months (the goalkeeper
-    functions are part of the plan, A9)."""
+    functions are part of the plan, A9); the same number in CHF and EUR (plans.currency_for)."""
     months = ctx.settings.invoice_annual_months
-    return PLANS[plan].price_chf_month * months * 100
+    return PLANS[plan].price_month * months * 100
 
 
 def creditor(ctx: Ctx) -> dict[str, str]:
@@ -136,6 +136,7 @@ def _inv_dict(inv: Invoice) -> dict[str, Any]:
         "vat_cents": inv.vat_cents,
         "vat_rate_bp": inv.vat_rate_bp,
         "total_cents": inv.amount_cents,
+        "currency": inv.currency,
         "reference": inv.reference,
         "voucher_code": inv.voucher_code,
     }
@@ -163,7 +164,7 @@ async def _send(ctx: Ctx, inv: Invoice, kind: str) -> bool:
         "number": inv.number,
         "creditor": ctx.settings.invoice_creditor_name,
         "plan": (inv.plan or "").title(),
-        "total": f"CHF {invoice_pdf.chf(inv.amount_cents)}",
+        "total": invoice_pdf.money(inv.amount_cents, inv.currency),
         "due": inv.due_date.strftime("%d.%m.%Y"),
     }
     pdf = await render_pdf(ctx, inv, kind)
@@ -223,9 +224,16 @@ async def order(ctx: Ctx, plan: Plan, voucher_code: str | None, contact: dict[st
         raise ProblemError(409, "invoice-open", "There is an open invoice already")
     voucher = await _voucher(ctx, voucher_code)
     s = ctx.settings
+    currency = currency_for(org.country)
     net = price_cents(ctx, plan)
     discount = net * (voucher.percent_off if voucher else 0) // 100
-    vat_bp = round(s.invoice_vat_rate_percent * 100) if s.invoice_vat_registered else 0
+    # Swiss VAT only for clubs in Switzerland and Liechtenstein; abroad (EUR) the service is not
+    # subject to it (legal check before the first EU club: docs/plans/europa.md, EU5)
+    vat_bp = (
+        round(s.invoice_vat_rate_percent * 100)
+        if s.invoice_vat_registered and currency == "CHF"
+        else 0
+    )
     vat = round((net - discount) * vat_bp / 10_000)
     today = _today()
     start = max(today, org.paid_until.date() if org.paid_until else today)
@@ -234,7 +242,7 @@ async def order(ctx: Ctx, plan: Plan, voucher_code: str | None, contact: dict[st
     lines = [
         {
             "text": f"Jahresabo {plan.value.title()} ({s.invoice_annual_months} Monatspreise)",
-            "cents": PLANS[plan].price_chf_month * s.invoice_annual_months * 100,
+            "cents": PLANS[plan].price_month * s.invoice_annual_months * 100,
         }
     ]
     org.billing_contact = contact
@@ -242,6 +250,7 @@ async def order(ctx: Ctx, plan: Plan, voucher_code: str | None, contact: dict[st
         organization_id=org.id,
         number=number,
         amount_cents=net - discount + vat,
+        currency=currency,
         net_cents=net,
         discount_cents=discount,
         vat_cents=vat,

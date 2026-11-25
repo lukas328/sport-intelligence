@@ -478,6 +478,11 @@
             "title": "Contact",
             "type": "object"
           },
+          "currency": {
+            "description": "CHF for clubs in Switzerland and Liechtenstein, else EUR",
+            "title": "Currency",
+            "type": "string"
+          },
           "months": {
             "title": "Months",
             "type": "integer"
@@ -504,6 +509,7 @@
         },
         "required": [
           "net_cents",
+          "currency",
           "months",
           "vat_rate_percent",
           "payment_days",
@@ -7376,6 +7382,12 @@
           "amount_cents": {
             "title": "Amount Cents",
             "type": "integer"
+          },
+          "currency": {
+            "default": "CHF",
+            "description": "CHF or EUR",
+            "title": "Currency",
+            "type": "string"
           },
           "discount_cents": {
             "title": "Discount Cents",

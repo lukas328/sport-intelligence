@@ -1689,7 +1689,7 @@
     "matches": "Spiele pro Saison (grösstes Team)",
     "storage": "Videospeicher",
     "gpu": "Analyseminuten diesen Monat",
-    "price": "CHF {price} pro Monat",
+    "price": "{currency} {price} pro Monat",
     "free": "gratis",
     "teamsN": "{count, plural, one {# Team} other {bis # Teams}}",
     "matchesUnlimited": "unbegrenzt Spiele (faire Nutzung)",

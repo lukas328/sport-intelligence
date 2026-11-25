@@ -346,3 +346,50 @@ async def test_new_club_starts_the_trial_and_its_first_video_is_analysed(
     )
     b = (await api.get(f"/v1/orgs/{ids['org']}/billing")).json()
     assert (b["plan"], b["effective_plan"]) == ("team", "free")
+
+
+def test_currency_from_the_country() -> None:
+    """Europa step 2 (EU3): clubs in Switzerland and Liechtenstein pay in CHF, all others in EUR,
+    the same number."""
+    from handball_api.models.enums import Plan
+    from handball_api.services.plans import PLANS, currency_for
+
+    assert [currency_for(c) for c in ("CH", "LI", "li", None)] == ["CHF"] * 4
+    assert [currency_for(c) for c in ("DE", "FR", "AT", "SE")] == ["EUR"] * 4
+    assert PLANS[Plan.TEAM].price_month == 39 and PLANS[Plan.CLUB].price_month == 199
+
+
+async def test_club_abroad_pays_in_eur(
+    make_api: Callable[[], Api], billing_on: FakeGateway, owner_conn: asyncpg.Connection
+) -> None:
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    await owner_conn.execute(
+        "UPDATE organizations SET country = 'DE' WHERE id = $1", uuid.UUID(org)
+    )
+    overview = (await api.get(f"/v1/orgs/{org}/billing")).json()
+    assert overview["currency"] == "EUR"
+    assert {p["plan"]: p["price_month"] for p in overview["plans"]} == {
+        "free": 0,
+        "team": 39,
+        "club": 199,
+    }
+    # no EUR price configured: no card checkout in EUR (never the CHF price instead)
+    r = await api.post(f"/v1/orgs/{org}/billing/checkout", json={"plan": "team"})
+    assert r.status_code == 503
+    s = api.app.state.settings
+    s.stripe_price_team_eur = "price_team_eur"
+    try:
+        r = await api.post(f"/v1/orgs/{org}/billing/checkout", json={"plan": "team"})
+        assert r.status_code == 200, r.text
+        _kind, (_customer, items, _trial, _success) = billing_on.calls[-1]
+        assert items == [("price_team_eur", 1)]
+        from handball_api.models.enums import Plan
+        from handball_api.services.billing import _plan_for
+
+        # a subscription with the EUR price is the same plan
+        assert _plan_for(s, ["price_team_eur"]) == Plan.TEAM
+        assert _plan_for(s, ["price_team"]) == Plan.TEAM
+    finally:
+        s.stripe_price_team_eur = None
