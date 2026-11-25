@@ -112,7 +112,7 @@ def test_a_spot_still_on_the_canvas_loses_its_reward() -> None:
         peaks.append([(900.0 - 4 * k, 600.0, 0.9), (bx - 4 * k, by, 0.35)])
         world.append([(900.0, 600.0), (bx, by)])
 
-    def on_spare(out: list) -> int:
+    def on_spare(out: list[tuple[float, float] | None]) -> int:
         return sum(
             1
             for k, q in enumerate(out)
