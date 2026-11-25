@@ -177,3 +177,41 @@ Lehren für künftige Umzüge:
   und den halben State bei Wiederholung.
 - Was ein Skript an Terraform vorbei ändert (Ingress aus für die Wartung), muss der nächste Lauf
   wieder herstellen, bevor Terraform plant.
+
+## 7. Abbau der ersten Umgebung (rg-hb-stg)
+
+Nur mit Lukas' OK (geplant 28.11.). Spätestens am 1.12. entscheiden: Azure startet einen gestoppten
+Postgres nach 7 Tagen von selbst wieder (gestoppt am 24.11.), dann kostet er wieder.
+
+Was wegfällt: alles in `rg-hb-stg` (Container-Apps, Registry, Postgres mit seinen Backups, Vault,
+Mail-Dienst, Redis-Speicher, Log Analytics, Budget). Der Weg zurück (CNAME zurück, Deploy stack=ch
+mit state=resume) geht danach nicht mehr. Die Daten liegen seit dem 23.11. in der EU-Datenbank
+(Zeilenzahlen identisch, Abschnitt 6) und laufen dort weiter. Nicht betroffen: der Terraform-State
+(`rg-hb-tfstate`), R2, Cloudflare, die EU-Umgebung `rg-hbeu-stg`.
+
+Vorher prüfen:
+1. Die EU-Umgebung lief einige Tage stabil (Alarme ruhig, Smoke-Test grün).
+2. Nichts zeigt mehr auf die alte Umgebung: CNAME `app` auf `…swedencentral.azurecontainerapps.io`,
+   Mail aus der EU-Umgebung (`mail_live`).
+3. Keine Analyse läuft (Regel: nichts ausrollen während einer Analyse; der Abbau berührt die
+   EU-Umgebung nicht, trotzdem nicht gleichzeitig mit einem EU-Deploy, die Workflow-Concurrency
+   reiht ohnehin ein).
+
+Ausführen: Actions → Deploy → Run workflow mit mode `teardown`, stack `ch`, confirm `rg-hb-stg`.
+Das Skript `infra/azure/teardown-ch.sh`
+- bricht ab, wenn confirm nicht der Name der Ressourcengruppe aus dem ch-State ist, wenn es die
+  EU-Gruppe wäre, wenn `app` noch auf die alte Umgebung zeigt oder `https://app…/api/healthz` nicht
+  200 antwortet;
+- listet die Ressourcen der Gruppe (Log und Artefakt `teardown-<run>`) und löscht die ganze Gruppe
+  (10 bis 30 min);
+- löscht den alten Vault endgültig aus dem Soft Delete (fehlt das Recht, nur eine Warnung: Azure
+  entfernt ihn nach 7 Tagen);
+- verschiebt `staging.tfstate` und `staging.tfvars` nach `tfstate/archive/<datum>-…`. Ein späterer
+  Lauf mit stack `ch` bricht dann bei «Settings and state» ab, statt eine neue Umgebung zu planen.
+
+Danach von Hand (eigener PR beziehungsweise Cloudflare):
+- Workflow: Standard-Stack auf `eu` (heute `ch`; ein Push mit `[deploy]` ginge sonst auf den
+  gelöschten Stack und bräche ab), später den Stack `ch` und `move-db` ganz entfernen.
+- Cloudflare: den alten TXT `ms-domain-verification` der ersten Umgebung löschen (der neue beginnt
+  mit `d3695dad`), `asuid.app` bleibt. Den Rückweg-CNAME aus Abschnitt 6 hier als ungültig vermerken.
+- Kosten: im Cost Management nach einigen Tagen prüfen, dass für `rg-hb-stg` nichts mehr anfällt.
