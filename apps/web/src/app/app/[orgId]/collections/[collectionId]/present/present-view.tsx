@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { VideoPlayer } from "@/components/video/player";
 import { api } from "@/lib/client";
+import { enterFullscreen } from "@/lib/video-touch";
 
 type Collection = Schemas["CollectionOut"];
 type Item = Schemas["ItemOut"];
@@ -49,7 +50,7 @@ export function PresentView({ orgId, collection, onClose }: { orgId: string; col
         <b className="font-slant truncate text-xl text-white">{collection.title}</b>
         <span className="flex items-center gap-3">
           <span className="font-mono">{t("presentOf", { n: k + 1, total: items.length })}</span>
-          <button type="button" onClick={() => void box.current?.requestFullscreen?.()} className="min-h-11 cursor-pointer border-[1.5px] border-[#4a5058] px-3 font-bold text-white">
+          <button type="button" onClick={() => enterFullscreen(box.current)} className="min-h-11 cursor-pointer border-[1.5px] border-[#4a5058] px-3 font-bold text-white">
             {t("fullscreen")}
           </button>
           <button type="button" onClick={leave} className="min-h-11 cursor-pointer border-[1.5px] border-[#4a5058] px-3 font-bold text-white" data-testid="present-close">
