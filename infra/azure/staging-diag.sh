@@ -63,7 +63,8 @@ q "SELECT u || ' | ' || a || ' | ' || s || ' | ' || count(*) FROM (SELECT coales
    coalesce(nullif(regexp_replace(application_name, ' [0-9]+$', ''), ''), '-') AS a, coalesce(state, '-') AS s
    FROM pg_stat_activity WHERE backend_type = 'client backend') c GROUP BY u, a, s ORDER BY 1" || true
 if [ -n "${DIAG_ASSET:-}" ]; then
-  where="id = '${DIAG_ASSET//[^0-9a-f-]/}'"
+  # a full id or a unique prefix (docs often name assets by their first 8 characters)
+  where="id::text LIKE '${DIAG_ASSET//[^0-9a-f-]/}%' ORDER BY updated_at DESC LIMIT 1"
 else
   where="analysis IS NOT NULL ORDER BY updated_at DESC LIMIT 1"
 fi
