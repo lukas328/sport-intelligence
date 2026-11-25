@@ -3,6 +3,9 @@
 #
 #   - Actions → Deploy → Run workflow: «plan» shows what would change, «deploy» rolls out this commit.
 #   - A push to the working branch whose commit message contains [deploy] or [deploy-plan] does the same.
+#   - stack «eu» is the default since the first environment (stack «ch», Switzerland North) was
+#     deleted on 25.11.2026: «ch» only allows «status» and «teardown» (its state staging.tfstate is
+#     kept but describes nothing any more; a plan would build a new first environment).
 #   - stack «eu» (docs/plans/staging-umzug-eu.md): the second environment in Sweden Central, own state
 #     (staging-eu.tfstate) and settings (staging-eu.tfvars, derived from staging.tfvars the first
 #     time). «bootstrap» builds it: vault and registry first, the secrets copied from the first
@@ -33,10 +36,10 @@ on:
         options: [keep, "on", "off"]
         default: keep
       stack:
-        description: "ch: the environment in Switzerland North; eu: the one in Sweden Central with the serverless GPU (bootstrap builds it the first time)"
+        description: "eu: the environment in Sweden Central; ch: the deleted first environment (only status and teardown)"
         type: choice
-        options: [ch, eu]
-        default: ch
+        options: [eu, ch]
+        default: eu
       state:
         description: keep the environment as it is, resume a paused one, or pause it
         type: choice
@@ -106,7 +109,10 @@ jobs:
           elif ${{ contains(github.event.head_commit.message, '[resume]') }}; then state=resume;
           elif ${{ contains(github.event.head_commit.message, '[pause]') }}; then state=pause;
           else state=keep; fi
-          stack="${{ inputs.stack || 'ch' }}"
+          stack="${{ inputs.stack || 'eu' }}"
+          case "$mode" in status|teardown) ;; *)
+            [ "$stack" = eu ] || { echo "::error::the stack ch was deleted (25.11.2026): only status and teardown"; exit 1; } ;;
+          esac
           case "$mode" in bootstrap|move-db) [ "$stack" = eu ] || { echo "::error::$mode is for the stack eu"; exit 1; } ;; esac
           [ "$mode" != teardown ] || [ "$stack" = ch ] || { echo "::error::teardown is for the stack ch only"; exit 1; }
           if [ "$stack" = eu ]; then
