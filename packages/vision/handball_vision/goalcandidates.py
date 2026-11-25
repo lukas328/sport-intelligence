@@ -25,8 +25,8 @@ the post-goal lull (busy around t, quiet 8 to 24 s later), each as a rolling rob
 Channels and scores are normalised over a rolling window of 3 minutes, the segment length the
 template was learned on, so the camera operator's style and the zoom may change during a game.
 
-No play (`no_play`): an operated camera that stands still for 2.5 minutes is parked (half-time,
-before and after the game), and people bunched together for 40 s do not play (time-outs, the
+No play (`no_play`): an operated camera (`operated`: it turns at least 10 degrees over the video)
+that stands still for 2.5 minutes is parked (half-time, before and after the game), and people bunched together for 40 s do not play (time-outs, the
 huddle around an injured player, a stoppage, the line-ups before the game): the median spread of
 the people on court (`spread`, 10 to 90 % of their x in body heights) below 3.5 body heights,
 against 5 to 7.5 in play. With match clock readings (`from_observations(play=...)`, the
@@ -98,6 +98,10 @@ MATCH_HEIGHTS = 1.2  # nearest-neighbour match within this many body heights
 STILL_PX_S = 40.0  # camera speed below this is "still" (reference px/s)
 STILL_WINDOW_S = 150.0  # centred window
 STILL_SHARE = 0.97  # share of the window the camera must be still
+# an operated camera follows the play across the court (club streams turn 50 to 90 degrees over a
+# game); a camera that turns less over the whole video is a fixed one with a little drift or zoom
+# (motion.py calls a camera moving from 1 degree or 3 % zoom on), so it is never "parked"
+MIN_OPERATED_PAN_DEG = 10.0
 # no play: people bunched (time-out huddle, stoppage), whatever the camera
 BUNCHED_WINDOW_S = 40.0  # centred window of the median spread
 BUNCHED_SPREAD = 3.5  # median spread below this many body heights (5 to 7.5 in play)
@@ -551,6 +555,18 @@ def bunched(s: dict[str, F64]) -> NDArray[np.bool_]:
     return np.asarray(np.isfinite(med) & (med < BUNCHED_SPREAD), dtype=bool)
 
 
+def operated(motion: Any) -> bool:
+    """A camera someone turns after the play: moving, and turning at least
+    `MIN_OPERATED_PAN_DEG` over the video (`pan_deg` of the motion stats; without it, any moving
+    camera). A tripod camera with a degree or two of drift counts as moving in `motion.py`, but
+    its stillness is not a parked camera: flagged as parked, the whole video was no play and gave
+    no goal candidates (staging 2026-11-19, a wide club camera with 2 degrees of pan)."""
+    if not motion.moving:
+        return False
+    pan_deg = (motion.stats or {}).get("pan_deg")
+    return pan_deg is None or float(pan_deg) >= MIN_OPERATED_PAN_DEG
+
+
 def no_play(s: dict[str, F64], moving: bool) -> NDArray[np.bool_]:
     """True where nobody plays: a parked operated camera (`parked`) or people bunched together
     (`bunched`)."""
@@ -755,7 +771,7 @@ def from_observations(
         return None
     s = signals(cam_t, cam_x, pt, px, py, ph, duration)
     warm = warm_up(s["t"], play)
-    idle = no_play(s, bool(obs.motion.moving)) | warm
+    idle = no_play(s, operated(obs.motion)) | warm
     found = demote_weak(pick(s["t"], score(s, tmpl), play=~idle))
     return {
         "template": tmpl.version,
