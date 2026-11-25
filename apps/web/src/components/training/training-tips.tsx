@@ -218,7 +218,7 @@ function TipItem({
         ))}
       </ul>
       <p className="mt-2 text-[15px]">
-        <Link href={`/app/${orgId}/drills?focus=${tip.topics.join(",")}`} className="font-semibold underline underline-offset-4">
+        <Link href={`/app/${orgId}/drills?focus=${tip.topics.join(",")}`} className="hit font-semibold underline underline-offset-4">
           {t("moreDrills", { focus: td(`focus_${topic}`) })}
         </Link>
       </p>

@@ -100,7 +100,7 @@ export function ProfileBasics({ me }: { me: Me }) {
             ) : (
               <button
                 type="button"
-                className="underline underline-offset-4"
+                className="hit cursor-pointer underline underline-offset-4"
                 onClick={async () => {
                   const { error: err } = await api.POST("/v1/me/email/verify");
                   if (err) return setResendError(errorKey(err));

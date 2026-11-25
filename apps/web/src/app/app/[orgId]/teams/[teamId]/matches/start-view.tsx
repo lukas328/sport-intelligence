@@ -435,7 +435,7 @@ function GameRow({ orgId, m, mini }: { orgId: string; m: Match; mini: boolean })
       )}
       <div className="min-w-0">
         <h3 className="m-0">
-          <Link href={base} className="font-slant text-[17px] leading-tight text-ink no-underline hover:underline md:text-[22px]">
+          <Link href={base} className="hit font-slant text-[17px] leading-tight text-ink no-underline hover:underline md:text-[22px]">
             {m.kind === "training" ? tm("training") : observedRow ? pairing(matchSides(m, { team: "", opponent: m.opponent_name }), tm("vs")) : m.opponent_name}
           </Link>
           {m.kind === "scouting" && <span className="ml-2 align-middle text-sm font-bold text-ink-2">{t("scoutingTag")}</span>}
