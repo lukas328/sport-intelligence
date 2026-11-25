@@ -1070,3 +1070,26 @@ Zone oder tippt einen Punkt, wird die Schätzung überschrieben; die Zahl der ab
 fehlt damit, und eine Trefferquote lässt sich aus den gespeicherten Daten nicht rechnen (nur nachträglich,
 indem `fill_one` für beantwortete Würfe aus den Spuren neu gerechnet wird). Vorschlag: die geschätzte
 Zone beim Antworten mitspeichern (`attributes.estimated_zone`).
+
+**Nachtrag 25.11.: Pause zwischen zwei Uhr-Läufen im Produkt (`goalcandidates.clock_breaks`).** Eine
+Lücke von mindestens 2 min zwischen zwei Läufen der Matchuhr gilt als kein Spiel (10 s Rand an
+beiden Enden), zusätzlich zu Kamera geparkt, Spieler zusammen und Einspielen. Begründung: Eine Tafel,
+die bei laufendem Spiel aus dem Bild ist, überbrückt `scoreboard.play_intervals` schon (Uhr lief
+mindestens die Hälfte der Lücke); eine übrig bleibende lange Lücke heisst, die Uhr stand. Vor dem
+ersten und nach dem letzten Lauf greift die Regel nicht. Ausgabe neu `clock_break_ms`; die Strecken
+stehen auch in `no_play_ms` (Prüfen zeigt sie so schon an). Tests in `test_goalcandidates.py`.
+
+Messung auf den 65 Dev-Segmenten, vorher (ohne Uhr) und nachher (mit den zwei Halbzeiten aus dem
+Spielbericht als Uhr-Läufe; Annahme: das Produkt liest die Uhr vor und nach der Pause):
+
+| Segmente | Uhr läuft | Produkt vorher | Produkt nachher |
+|---|---|---|---|
+| in einer Halbzeit (51) | 77 % | 95 % (Fehler 0.13) | 92 % (Fehler 0.10) |
+| Halbzeitpause (11) | 0 % | 98 % | **0 %** |
+| vor Anpfiff / nach Schluss (3) | 0 % | 0 % | 0 % |
+
+Kein Halbzeit-Segment verliert echtes Spiel; die drei, die sich ändern (Anfang einer Halbzeit),
+liegen danach näher an der Uhr. Grenze der Messung: Die Uhr-Läufe sind aus dem Spielbericht
+genähert, nicht vom Produkt gelesen; ob die Tafel in echten Videos um die Pause lesbar ist, zeigt erst
+ein ganzer Lauf (Lukas' 99-min-Video: Uhr bei 0:00 in der Pause gelesen, `Nachtrag` oben, dort
+also wirksam). Ergebnis: `ml/integration/results/pause_dev.json`.

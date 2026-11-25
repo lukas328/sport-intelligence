@@ -14,6 +14,9 @@ ml/data/segment_labels (the clock read in the video, mapped to the official log)
 Half boundaries in video time come from the log entries (video_ms and match_s): kick-off of a
 half = the earliest entry's video time minus its match time in that half; its end = the latest
 entry's video time plus the remaining match time (a lower bound when the clock stopped later).
+"product_clock" passes these two halves as the clock runs (`from_observations(play=...)`), an
+approximation of what the product reads in the whole video (assumes the clock is read before and
+after the break); "product" runs without clock.
 
 The end test games are never read (they are not in segment_labels).
 """
@@ -76,11 +79,11 @@ def truth(d: dict[str, Any]) -> dict[str, dict[str, Any]]:
     return out
 
 
-def product_play(seg_dir: Path) -> float | None:
+def product_play(seg_dir: Path, play: list[tuple[int, int]] | None = None) -> float | None:
     obs = ob.load_observations(
         seg_dir / "observations.npz", CameraMotion.load(seg_dir / "motion.npz")
     )
-    res = gc.from_observations(obs)
+    res = gc.from_observations(obs, play=play)
     if res is None:
         return None
     return res["play_s"] / res["duration_s"]
@@ -99,24 +102,31 @@ def main() -> None:
             if stem not in dirs:
                 continue
             p = product_play(dirs[stem])
-            rows.append({"seg": stem, "game": d["name"], **t, "product": p})
-            print(
-                stem, t["kind"], round(t["play"], 2), None if p is None else round(p, 2), flush=True
-            )
+            # with the clock: the runs of the whole game as the product would read them, here
+            # approximated by the halves from the log (an assumption: the clock is read before
+            # and after the break), in segment milliseconds
+            start = next(x["start_s"] for x in d["segments"] if x["file"][:-4] == stem)
+            runs = [
+                (round((h0 - start) * 1000), round((h1 - start) * 1000))
+                for h0, h1 in halves(d).values()
+            ]
+            pc = product_play(dirs[stem], runs if len(runs) == 2 else None)
+            rows.append({"seg": stem, "game": d["name"], **t, "product": p, "product_clock": pc})
+            print(stem, t["kind"], round(t["play"], 2), p, pc, flush=True)
     summary: dict[str, Any] = {}
     for kind in ("play", "before", "break", "after"):
         r = [x for x in rows if x["kind"] == kind]
         if not r:
             continue
-        prod = np.array([np.nan if x["product"] is None else x["product"] for x in r])
         tru = np.array([x["play"] for x in r])
-        summary[kind] = {
-            "segments": len(r),
-            "truth_play_mean": round(float(tru.mean()), 3),
-            "product_play_mean": round(float(np.nanmean(prod)), 3),
-            "product_none": int(np.isnan(prod).sum()),
-            "abs_error_median": round(float(np.nanmedian(np.abs(prod - tru))), 3),
-        }
+        summary[kind] = {"segments": len(r), "truth_play_mean": round(float(tru.mean()), 3)}
+        for key in ("product", "product_clock"):
+            prod = np.array([np.nan if x[key] is None else x[key] for x in r])
+            summary[kind][key] = {
+                "play_mean": round(float(np.nanmean(prod)), 3),
+                "none": int(np.isnan(prod).sum()),
+                "abs_error_median": round(float(np.nanmedian(np.abs(prod - tru))), 3),
+            }
     a.out.write_text(json.dumps({"summary": summary, "rows": rows}, indent=1))
     print(json.dumps(summary, indent=1))
 
