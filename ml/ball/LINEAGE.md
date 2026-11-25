@@ -234,6 +234,10 @@ Chosen among five settings on these clips; balls found move by a few points eith
 settings (noise), the bench objects drop in all of them. Not measured on gold v1 (no product
 observations there) nor in the GPU setting.
 
+Tried on the same clips and left out: a candidate in the top 15 to 25 % of a person box (a head)
+loses its reward. Points on people 40 -> 34 to 38, but points on a known ball 115 -> 108 to 111
+(a ball held high is there too). No gain.
+
 ## 6. Labelling pipeline lineage
 
 **Test set 2 page** (2026-11-09, `be3b2ec`, `206ec85`, `c91e955`): owner clicks the ball in single
