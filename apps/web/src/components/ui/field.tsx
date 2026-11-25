@@ -93,7 +93,8 @@ export function Checkbox({
   return (
     <div className="flex items-start gap-2">
       <input id={boxId} type="checkbox" className="mt-0.5 size-4 accent-[var(--accent)]" {...props} />
-      <label htmlFor={boxId} className="text-sm">
+      {/* the words are the target (a 44 px tap area), not only the 16 px box */}
+      <label htmlFor={boxId} className="hit text-sm">
         {label}
       </label>
     </div>
