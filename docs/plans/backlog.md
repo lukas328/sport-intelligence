@@ -41,9 +41,7 @@ fertig ist, streicht es und trägt das Ergebnis im passenden Plan ein.
    (`docs/plans/kalibrierung.md` Abschnitt 6).
 2. Wurfzeit: Lukas markiert die Abwürfe auf den 41 Dev-Wurfclips; danach Methode auf Dev wählen
    (`docs/plans/produkt-analyse-integration.md`, «Wurfzeit der Kandidaten»).
-3. Ball: Testset auf etwa 200 Bälle: Seite «Ball-Testset 2» (https://claude.ai/artifact/XHMwGf3yff6zXy7xuMNt1C,
-   294 Bilder aus den 42 nie trainierten Hallen, ohne Ringe, etwa 25 min; `ml/ball/LINEAGE.md` T5).
-   Fehlalarme zerlegt in #120.
+3. Ball: Fehlalarme zerlegen, Testset auf etwa 200 Bälle (Kaggle-Zugang in der Cloud fehlt seit 19.11.).
 4. Echter Handy-Test (iPhone, Android) von Website und App.
 5. Entscheide: Saison-Titel als Geschichte oder «Fakten zuerst» (TXT-08); mehr als drei Muster pro
    Spiel; Launch zur Rückrunde im Januar; die 🔴-Punkte in `docs/OPEN_QUESTIONS.md` (Firma, Recht,
