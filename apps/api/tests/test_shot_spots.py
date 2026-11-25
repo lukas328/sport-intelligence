@@ -77,7 +77,7 @@ def _goal(g: dict[str, Any], event_id: str) -> dict[str, Any]:
 
 
 async def test_a_goal_in_the_second_half_gets_its_place_estimated_then_tapped(
-    make_api: Callable[[], Api],
+    make_api: Callable[[], Api], owner_conn: asyncpg.Connection
 ) -> None:
     api = make_api()
     ids = await setup_club(api)
@@ -115,6 +115,23 @@ async def test_a_goal_in_the_second_half_gets_its_place_estimated_then_tapped(
     assert goal["shot"] == [9.5, 4.5]
     listed = (await api.get(f"{base}/goal-candidates")).json()["candidates"][-1]
     assert (listed["shot_zone"], listed["zone_source"]) == ("kr", "coach")
+    # the estimate the coach overruled stays stored for its hit rate (A2)
+    attrs = json.loads(
+        await owner_conn.fetchval(
+            "SELECT attributes FROM events WHERE id = $1", uuid.UUID(row["event_id"])
+        )
+    )
+    assert attrs["estimated_zone"] == "rl"
+    assert attrs["estimate_method"].startswith("tracking_")
+    # a second answer does not overwrite it with the coach's own place
+    await api.put(spot, json={"shot_zone": "ra"})
+    attrs = json.loads(
+        await owner_conn.fetchval(
+            "SELECT attributes FROM events WHERE id = $1", uuid.UUID(row["event_id"])
+        )
+    )
+    assert attrs["estimated_zone"] == "rl"
+    await api.put(spot, json={"shot_zone": "kr", "x": 35.5, "y": 10.5})
 
     # a repeated confirmation without a tap keeps what the coach said
     r = await api.put(review, json={"status": "confirmed", "side": "own"})
@@ -161,6 +178,7 @@ async def test_one_tap_confirms_the_estimate_and_then_it_counts(
     )
     assert attrs["position_source"] == "coach"
     assert attrs["confirmed_estimate"].startswith("tracking_")
+    assert attrs["estimated_zone"] == "rl"
 
     # «Weiss nicht» afterwards: back to the estimate, which counts nowhere again
     r = await api.put(spot, json={"shot_zone": "unknown"})
