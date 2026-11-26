@@ -104,6 +104,23 @@ def _status(i: int) -> str:
     return "unknown"  # API hiccup: never push on it (a done batch was pushed again, 2026-11-23)
 
 
+class ApiDownError(RuntimeError):
+    """The Kaggle API answered no kernel status at all (rate limit or outage, 2026-11-26)."""
+
+
+def _check_api(st: list[str]) -> None:
+    """All asked batches «unknown»: the API is down, not the kernels. Raise, so a scheduled step
+    fails visibly instead of pushing nothing and looking fine; a few unknown ones only warn."""
+    asked = [s for s in st if s != "empty"]
+    unknown = asked.count("unknown")
+    if asked and unknown == len(asked):
+        raise ApiDownError(
+            f"Kaggle API gave no status for any of {len(asked)} batches (rate limit?)"
+        )
+    if unknown:
+        print(f"warning: {unknown} of {len(asked)} batches without status, not pushed this time")
+
+
 def status() -> list[str]:
     q = json.loads(QUEUE.read_text())
     st = [_status(i) if b else "empty" for i, b in enumerate(q["batches"])]
@@ -111,6 +128,7 @@ def status() -> list[str]:
         if s not in ("new", "empty"):
             print(SLUG.format(i), s, len(q["batches"][i]), "segments")
     print({s: st.count(s) for s in sorted(set(st))})
+    _check_api(st)
     return st
 
 
@@ -221,6 +239,13 @@ def main() -> None:
     r.add_argument("batch", type=int)
     r.add_argument("--have", type=Path, help="downloaded output: requeue only what is missing")
     a = ap.parse_args()
+    try:
+        _run(a)
+    except ApiDownError as exc:
+        sys.exit(f"error: {exc}")
+
+
+def _run(a: argparse.Namespace) -> None:
     if a.cmd == "build":
         build(a.library)
     elif a.cmd == "requeue":
