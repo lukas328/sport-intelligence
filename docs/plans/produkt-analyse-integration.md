@@ -1573,4 +1573,19 @@ des anderen Teams daneben. Darum werden die Rohstücke vor dem Verknüpfen gesch
   Person an der Bank, einmal umgekehrt), 2 unklar. Falsch benannt über beide Spiele 2 -> 5:
   **Kriterium nicht erfüllt, `LONG_LINKS` bleibt aus** (die Sichtprüfung der 83 Horgen-Verknüpfungen
   ändert daran nichts und wurde nicht gemacht). Der Schnitt allein bleibt an.
+- **Nachtrag: Spielfeldseiten.** Bei der Gesamtmessung fiel auf, dass der Schnitt die Seiten auf
+  Horgen H2 verschlechterte (100 -> 94.6 % richtig, die letzten 16 s falsch). Zwei Ursachen:
+  1. Der Torhüter trägt eine eigene Farbe («keine Mannschaft») und sein Track wurde in Stücke unter
+     10 s geschnitten, die die Positionsregel nicht mehr als Torhüter nimmt. Behoben: ein Stück, das
+     mehrheitlich innerhalb 6.5 m eines Tores steht, wird nicht geschnitten.
+  2. Am Ende von H2 zeigen die Formationsstimmen auch ohne Schnitt auf die falsche Seite (270 bis
+     300 s: 75 zu 66, mit Schnitt 63 zu 39), und die letzte Strecke galt schon nach 15 s. Neu
+     `events.LAST_SIDE_MS` 30 s: ein 16-s-Kippen am Videoende zählt nicht mehr, ein echter
+     Seitenwechsel mit 40 s Rest (synthetischer Test) weiterhin.
+  - Danach Seiten mit und ohne Schnitt auf Horgen H1, H2 und ATV s1 je 100 % richtig, mit und ohne
+    Torhüter. Die Zahl der Ereignisse steigt mit Schnitt (H1 7 -> 9, H2 9 -> 12); ob die
+    zusätzlichen richtig sind, ist nicht beschriftet.
+  - Wer ist wer mit Torhüter-Ausnahme (`identity_dev.py`): richtig 10 -> 11 von 27, falsch 1 -> 0,
+    benannte Zeit 24.6 -> 23.2 %; mit Kader 13 / 0 / 27.5 % -> 14 / 0 / 26.8 %. Nicht-Feldspieler
+    benannt 7 -> 4, als Spieler 22 -> 14 von 72; ATV unverändert wie oben.
 
