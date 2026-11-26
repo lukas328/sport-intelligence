@@ -82,11 +82,26 @@ test("new club: club, colour and team in three steps, roster from the team page,
   await expect(page.getByTestId("roster-row")).toHaveCount(4);
   await expectAccessible(page);
 
+  // and quickly: number and name per line (audit #160); a player without a number is pointed out.
+  // The CSV dialog stays open with its «importiert» until closed: closed first, as a coach would
+  // (a modal dialog keeps the page behind it from being clicked)
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await page.getByTestId("quick-roster-open").click();
+  await expect(page.getByRole("dialog")).toHaveCount(1); // only the quick entry, never two
+  await page.getByTestId("quick-roster-text").fill("21 Ida Ruf\nZoe Wald");
+  await expect(page.getByTestId("quick-roster-nonumber")).toBeVisible();
+  await page.getByRole("button", { name: "2 Spieler übernehmen" }).click();
+  await expect(page.getByText("2 Spieler übernommen.").first()).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.getByTestId("roster-row")).toHaveCount(6);
+  await expect(page.getByTestId("roster-without-number")).toContainText("Zoe Wald");
+
   // the squad page says the state of the squad in its title (SPEC 7.10)
   await page.goto(teamUrl);
-  await expect(page.getByRole("heading", { level: 1, name: /^4 im Kader\./ })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: /^6 im Kader\./ })).toBeVisible();
   await expect(page.getByText(/^Herren 1 · /)).toBeVisible();
-  await expect(page.getByTestId("team-row")).toHaveCount(4);
+  await expect(page.getByTestId("team-row")).toHaveCount(6);
 
   // invite a player from the club (Teams und Rollen)
   const orgId = teamUrl.match(/\/app\/([^/]+)/)![1]!;
@@ -120,7 +135,8 @@ test("new club: club, colour and team in three steps, roster from the team page,
   // players see everything of the team (K18): the four destinations; Teamleben is off for a new team
   await expect(player.getByRole("navigation", { name: "Hauptnavigation" }).first().getByRole("link")).toHaveCount(4);
   await player.getByRole("link", { name: "Team", exact: true }).click();
-  await expect(player.getByTestId("team-row")).toHaveCount(4);
+  // the whole squad (K18): 1 by hand + 3 by CSV + 2 by the quick entry above
+  await expect(player.getByTestId("team-row")).toHaveCount(6);
   // players cannot edit the roster
   await expect(player.getByRole("form", { name: "Spieler hinzufügen" })).toHaveCount(0);
   await expect(player.getByTestId("roster-edit")).toHaveCount(0);

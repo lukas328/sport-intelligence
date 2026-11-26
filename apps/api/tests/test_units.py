@@ -364,3 +364,20 @@ def test_opponent_key_joins_spellings_of_one_team(a: str, b: str, same: bool) ->
     """Review R7: one opponent under the league's and the cup's name; same rule as the web."""
     assert (opponent_key(a) == opponent_key(b)) is same
     assert opponent_key("SG Kalvenegg/Lärchenwil (M2)") == "sgkalvenegglarchenwil"
+
+
+def test_roster_csv_from_the_quick_entry() -> None:
+    """The web's quick squad entry (number and name per line) sends Nr;Vorname;Nachname, quoted,
+    a row without a number left empty (lib/roster-numbers quickCsv)."""
+    from handball_api.services.csv_import import parse_roster_csv
+
+    text = (
+        'Nr;Vorname;Nachname\n7;"Lena";"Muster"\n;"Ella";"""Elli"" Test"\n12;"Noa";"von Probst"\n'
+    )
+    rows, errors = parse_roster_csv(text.encode())
+    assert errors == []
+    assert [(r.jersey_number, r.first_name, r.last_name) for r in rows] == [
+        (7, "Lena", "Muster"),
+        (None, "Ella", '"Elli" Test'),
+        (12, "Noa", "von Probst"),
+    ]
