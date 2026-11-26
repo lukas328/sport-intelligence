@@ -170,18 +170,17 @@ export function KitFields({
         </div>
       )}
       {pics && playing && (
-        <div className="mb-3">
-          <InlinePersonPlayer
-            video={pics.video}
-            track={playing}
-            geometry={pics.geometry}
-            chunkMs={pics.chunkMs}
-            title={t("matches.kitPlaying", { who: who(playing.track_no, playing.number) })}
-            closeLabel={t("matches.kitClosePlayer")}
-            onClose={() => setPlaying(null)}
-            testId="kit-player"
-          />
-        </div>
+        <InlinePersonPlayer
+          className="mb-3"
+          video={pics.video}
+          track={playing}
+          geometry={pics.geometry}
+          chunkMs={pics.chunkMs}
+          title={t("matches.kitPlaying", { who: who(playing.track_no, playing.number) })}
+          closeLabel={t("matches.kitClosePlayer")}
+          onClose={() => setPlaying(null)}
+          testId="kit-player"
+        />
       )}
       <div className="flex flex-wrap gap-x-5 gap-y-3">
         {shown.map(([k, label]) => (

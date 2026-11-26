@@ -153,15 +153,13 @@ test("match: create, upload with pause and resume, processing, player, comment, 
   // tracks can be assigned to players; physical load per track with heatmap
   await page.getByTestId("step-players").click();
   await expect(page.getByTestId("identity-panel")).toBeVisible();
-  // each person as a still from the video, and played right above the list (no trip to the
-  // main player and back)
+  // each person as a still from the video; a tap plays them in the workbench's player, which is
+  // in view beside the list (above it on a phone), with the ring on them
   await expect.poll(async () => page.locator('[data-testid="person-still"][data-state="shown"]').count(), { timeout: 60_000 }).toBeGreaterThan(0);
+  await video.evaluate((v: HTMLVideoElement) => v.pause());
   await page.getByTestId("identity-row").first().getByRole("button").first().click();
-  const inline = page.getByTestId("identity-player");
-  await expect(inline).toBeVisible();
-  await expect.poll(async () => inline.locator("video").evaluate((v: HTMLVideoElement) => v.currentTime), { timeout: 30_000 }).toBeGreaterThan(0);
-  await inline.getByRole("button", { name: "Player schliessen" }).click();
-  await expect(inline).toHaveCount(0);
+  await expect.poll(async () => video.evaluate((v: HTMLVideoElement) => !v.paused), { timeout: 30_000 }).toBe(true);
+  await expect(page.getByTestId("identity-player")).toHaveCount(0); // no second player in the workbench
   await openAnalysis(page, "Laufleistung");
   // the 30 s clip covers less than the 2 minutes a team needs for its distances (BUG-11): one
   // honest sentence instead of a table with figures nobody can trust
