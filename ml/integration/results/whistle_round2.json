@@ -1,0 +1,50 @@
+{
+ "8000": {
+  "chosen_on_mue": {
+   "band_hz": [
+    3500.0,
+    4200.0
+   ],
+   "c_db": 9.0,
+   "min_s": 0.2
+  },
+  "mue_dev": {
+   "f1": 0.677,
+   "precision": 0.537,
+   "recall": 0.917,
+   "detected": 41,
+   "truth": 24
+  },
+  "lei_holdout": {
+   "f1": 0.687,
+   "precision": 0.63,
+   "recall": 0.756,
+   "detected": 54,
+   "truth": 45
+  }
+ },
+ "16000": {
+  "chosen_on_mue": {
+   "band_hz": [
+    3500.0,
+    4200.0
+   ],
+   "c_db": 12.0,
+   "min_s": 0.2
+  },
+  "mue_dev": {
+   "f1": 0.836,
+   "precision": 0.742,
+   "recall": 0.958,
+   "detected": 31,
+   "truth": 24
+  },
+  "lei_holdout": {
+   "f1": 0.828,
+   "precision": 0.857,
+   "recall": 0.8,
+   "detected": 42,
+   "truth": 45
+  }
+ }
+}

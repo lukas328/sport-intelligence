@@ -1,0 +1,52 @@
+{
+ "ip_truth_sha256": "04ae6002a1d6e885e01ecd30cf8b5fed5a7a20ae119d725ef809ce8d5bb0cdfc",
+ "dead_after_s": 5.0,
+ "round1_8000": {
+  "seconds": 1025,
+  "dead": 178,
+  "flagged": 190,
+  "precision": 0.189,
+  "precision_ci95": [
+   0.088,
+   0.312
+  ],
+  "recall": 0.202,
+  "brauchbar": false
+ },
+ "round2_8000": {
+  "seconds": 1025,
+  "dead": 178,
+  "flagged": 365,
+  "precision": 0.26,
+  "precision_ci95": [
+   0.162,
+   0.362
+  ],
+  "recall": 0.534,
+  "brauchbar": false
+ },
+ "round1_16000": {
+  "seconds": 1025,
+  "dead": 178,
+  "flagged": 77,
+  "precision": 0.247,
+  "precision_ci95": [
+   0.063,
+   0.464
+  ],
+  "recall": 0.107,
+  "brauchbar": false
+ },
+ "round2_16000": {
+  "seconds": 1025,
+  "dead": 178,
+  "flagged": 289,
+  "precision": 0.273,
+  "precision_ci95": [
+   0.176,
+   0.375
+  ],
+  "recall": 0.444,
+  "brauchbar": false
+ }
+}

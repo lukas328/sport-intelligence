@@ -335,6 +335,50 @@ er wartet, wie viel er selbst korrigieren muss, und ob er den Zahlen trauen kann
   Sekunden folgen auf ein Tor. Skript `ml/integration/possession/dead_eval.py`, Ergebnis
   `ml/integration/results/possession_dead_ball.json`.
 
+- **Pfiff aus dem Ton (26.11., Analyse-Sitzung).** Die Horgen-Clips haben keine Tonspur.
+  Mess-Clips sind darum:
+  - Mülheim-Südpfalz H1, 480 s;
+  - Leimental-Arbon, 600 s ab Spielbeginn. Halle aus Ball-Testset 1: nur Messung, nicht für
+    Ballnetz-Training oder Ball-Tuning.
+
+  Keines davon ist Endtest. Die Labels sind LLM-Labels: Pfiffe aus Spektrogramm-Bildern plus
+  Video, zwei Durchgänge (65 von 68 Paaren gleich), dritter Blick; 69 Pfiffe, eingefroren mit
+  sha256 69f1b8aa…. Dazu «Ball im Spiel» pro Sekunde, zwei Durchgänge, 1025 übereinstimmende
+  Sekunden, davon 178 tot. Der Pfiff-Grundton liegt bei 3,7 bis 4,1 kHz, also an der Grenze von
+  8-kHz-Audio.
+
+  | Detektor | Audio | Präzision | Recall | F1 |
+  |---|---|---|---|---|
+  | Runde 1 (Regel vorab) | 8 kHz | 40 % | 25 % | |
+  | Runde 1 | 16 kHz | 13 % | 3 % | |
+  | Runde 2, gewählt auf Mülheim, Test Leimental | 8 kHz | 63 % | 76 % | 0,69 |
+  | Runde 2, gewählt auf Mülheim, Test Leimental | 16 kHz | 86 % | 80 % | 0,83 |
+
+  Runde 1 scheiterte an der Bedingung «stetige Frequenz»: die Doppellinien der Pfeife lassen den
+  stärksten Bin springen. Runde 2 misst den Kontrast im Band 3,5 bis 4,2 kHz gegen die eigene
+  Tonalität der Halle. Auf Mülheim lag sie gleich hoch (F1 0,68 und 0,84), also ohne sichtbare
+  Überanpassung. **Folge: Ton im Produkt jetzt 16 kHz (Integration #180).**
+
+  **Pfiff als Signal «Ball nicht im Spiel»: nicht brauchbar.** Regel vorab: die 5 s nach einem
+  Pfiff sind tot; brauchbar heisst Präzision ≥ 0,70 mit CI-Untergrenze ≥ 0,60.
+
+  | Detektor | Präzision tot | CI | Recall tot |
+  |---|---|---|---|
+  | Runde 2, 8 kHz | 26 % | 16–36 % | 53 % |
+  | Runde 2, 16 kHz | 27 % | 18–38 % | 44 % |
+
+  Der Anteil toter Sekunden liegt bei 17 %. Warum, gemessen mit den gelabelten Pfiffen statt dem
+  Detektor:
+  - Fast jede echte Unterbrechung beginnt mit einem Pfiff (18 von 20 toten Strecken).
+  - Mehr als ein Drittel der Pfiffe (26 von 69) fällt aber in laufendes Spiel: schnell
+    ausgeführte Freiwürfe unter 2 s, Pfiffe zur Wiederaufnahme (Anwurf, Freiwurf).
+
+  Der Pfiff taugt also als Startmarke einer Unterbrechung, nicht als Tot-Signal allein. Er
+  braucht eine zweite Bestätigung, etwa dass die Spieler stehen bleiben, sich zum Anwurf
+  sammeln, oder dass ein zweiter Pfiff die Wiederaufnahme markiert. Nicht ins Produkt.
+  Weitere Nutzen, nicht gemessen: Zeitpunkte für Tor und Foul, Bestätigung von
+  Wurf-Kandidaten. Skripte und Labels: `ml/integration/whistle/`.
+
 ### 7. Wurfort unzuverlässig, Torzone fehlt
 
 - **Befund:** Ohne gelesene Nummer nimmt der Wurfort den nächsten Angreifer der letzten 10 s

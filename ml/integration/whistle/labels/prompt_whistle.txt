@@ -1,0 +1,23 @@
+You label REFEREE WHISTLES in handball audio by looking at spectrogram images (you cannot hear audio; you are a vision-capable model: use the Read tool on JPEG files). Data labelling for a research evaluation; accuracy matters more than speed. Your labels are marked as LLM labels.
+
+SCR=/tmp/claude-0/-home-user-sport-intelligence/90b1d550-54f3-5af2-9e4d-128d1f5ace9d/scratchpad/aud
+PY=/home/user/sport-intelligence/.venv/bin/python
+Audio: $SCR/WAV (16 kHz, DUR s). Video of the same time span (time 0 = audio time 0): $SCR/VID.
+
+Tools:
+- `$PY $SCR/spec.py $SCR/WAV T0 SECONDS OUT` writes a spectrogram strip: time left to right (grid every second, labelled every 5 s), frequency 0 (bottom) to 8 kHz (top), green lines every 1 kHz.
+- `$PY /tmp/claude-0/-home-user-sport-intelligence/90b1d550-54f3-5af2-9e4d-128d1f5ace9d/scratchpad/wl/sheet.py $SCR/VID T0 STEP N OUT [COLS] [W]` writes a grid of video frames labelled with their time.
+
+What a whistle looks like: thin, bright, HORIZONTAL lines, usually a stack of 2 to 3 close parallel lines (the pea whistle warble) between about 2.5 and 5 kHz, often with a fainter copy near twice the frequency; 0.1 s to 2 s long; short blasts can come in pairs. Not whistles: vertical streaks (ball bounces, shoe squeaks, claps: broadband, very short), voices and shouting (smeared energy below 2 kHz with wavy harmonics), crowd noise (broad haze), the buzzer/horn (very loud, long, usually lower and with many harmonics: label it with kind "horn").
+
+Procedure:
+1. Strips of 30 s: T0 = 0, 30, 60, ... (output $SCR/workP/CLIP_<T0>.jpg). Read each and note every whistle: start and end time to about 0.1 s (zoom with a 10 s strip around it when needed).
+2. Where unsure whether a mark is a whistle, look at the video around it (a sheet with STEP 0.5): a referee whistle usually stops play (players stop, a referee signals, a free throw, a goal and the throw-off, a timeout). Do not drop a clear whistle tone because the video does not show its reason (spectators and the other referee whistle too: still label it).
+3. Save notes in $SCR/workP/CLIP_notes.txt as you go and save the result file after every few strips (images drop out of your context over time).
+
+Work only in $SCR/workP; write only $SCR/passP/CLIP.json. Do NOT read other passes' folders (passA/passB/workA/workB other than your own P), and do not read whistle.py or other files: your judgement must be independent.
+
+$SCR/passP/CLIP.json: a JSON list in time order, exactly these keys:
+{"start": <float s>, "end": <float s>, "kind": "whistle" | "horn", "sure": true | false, "freq_khz": <approx main line, float>, "note": "<short>"}
+"sure": false if it could also be something else.
+Final answer short: number of whistles (sure / unsure) and horns.

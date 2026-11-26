@@ -1,0 +1,362 @@
+[
+ {
+  "start": 29.0,
+  "end": 29.9,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.9,
+  "note": "after goal"
+ },
+ {
+  "start": 33.64,
+  "end": 34.72,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.85,
+  "note": "throw-off"
+ },
+ {
+  "start": 38.14,
+  "end": 38.5,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.9,
+  "note": "short"
+ },
+ {
+  "start": 117.1,
+  "end": 118.0,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.95,
+  "note": "two lines 3.95/3.3"
+ },
+ {
+  "start": 120.57,
+  "end": 121.5,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 4.0,
+  "note": ""
+ },
+ {
+  "start": 146.3,
+  "end": 147.2,
+  "kind": "whistle",
+  "sure": false,
+  "freq_khz": 3.85,
+  "note": "faint, in goal cheer"
+ },
+ {
+  "start": 149.7,
+  "end": 150.0,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.95,
+  "note": "short, throw-off"
+ },
+ {
+  "start": 156.2,
+  "end": 157.9,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 4.1,
+  "note": "long, 4.1/3.5 + harmonic 7k"
+ },
+ {
+  "start": 178.97,
+  "end": 180.53,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.85,
+  "note": "3.85/3.3 + harmonic"
+ },
+ {
+  "start": 180.97,
+  "end": 182.17,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.9,
+  "note": ""
+ },
+ {
+  "start": 184.97,
+  "end": 185.4,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.95,
+  "note": "short"
+ },
+ {
+  "start": 213.8,
+  "end": 214.6,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 4.0,
+  "note": ""
+ },
+ {
+  "start": 217.2,
+  "end": 218.67,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 4.0,
+  "note": "4.0/3.6"
+ },
+ {
+  "start": 222.45,
+  "end": 223.0,
+  "kind": "whistle",
+  "sure": false,
+  "freq_khz": 3.75,
+  "note": "with voice-like harmonics below"
+ },
+ {
+  "start": 230.5,
+  "end": 231.65,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.85,
+  "note": "after goal, in cheer"
+ },
+ {
+  "start": 235.15,
+  "end": 236.0,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.85,
+  "note": "throw-off"
+ },
+ {
+  "start": 241.85,
+  "end": 242.78,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.9,
+  "note": ""
+ },
+ {
+  "start": 277.1,
+  "end": 278.33,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.9,
+  "note": ""
+ },
+ {
+  "start": 292.0,
+  "end": 292.45,
+  "kind": "whistle",
+  "sure": false,
+  "freq_khz": 3.95,
+  "note": "faint, in goal cheer"
+ },
+ {
+  "start": 294.65,
+  "end": 295.55,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.95,
+  "note": "throw-off, 3.95/3.4"
+ },
+ {
+  "start": 329.35,
+  "end": 330.05,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.95,
+  "note": ""
+ },
+ {
+  "start": 340.3,
+  "end": 341.95,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.8,
+  "note": "warbling, harmonic 7.6k"
+ },
+ {
+  "start": 352.0,
+  "end": 352.7,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.75,
+  "note": ""
+ },
+ {
+  "start": 360.55,
+  "end": 361.0,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.9,
+  "note": "short"
+ },
+ {
+  "start": 372.23,
+  "end": 373.0,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 4.0,
+  "note": "4.0/3.7, voice harmonics below"
+ },
+ {
+  "start": 375.37,
+  "end": 376.0,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 4.05,
+  "note": "4.05/3.55"
+ },
+ {
+  "start": 381.5,
+  "end": 383.85,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.85,
+  "note": "long, harmonic 7.6k"
+ },
+ {
+  "start": 384.5,
+  "end": 385.45,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.8,
+  "note": ""
+ },
+ {
+  "start": 387.45,
+  "end": 387.9,
+  "kind": "whistle",
+  "sure": false,
+  "freq_khz": 4.7,
+  "note": "odd: lines 2.35k and 4.7k, maybe other whistle"
+ },
+ {
+  "start": 404.17,
+  "end": 405.68,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.75,
+  "note": "3.75/3.5 + 7.3k"
+ },
+ {
+  "start": 406.77,
+  "end": 407.94,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 4.0,
+  "note": "4.0/3.45"
+ },
+ {
+  "start": 410.34,
+  "end": 411.28,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 4.0,
+  "note": "4.0/3.4"
+ },
+ {
+  "start": 429.2,
+  "end": 430.6,
+  "kind": "whistle",
+  "sure": false,
+  "freq_khz": 3.9,
+  "note": "gliding pitch 3.4->4.0k, play continues"
+ },
+ {
+  "start": 448.02,
+  "end": 449.0,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 4.0,
+  "note": "4.0/3.5, in crowd noise"
+ },
+ {
+  "start": 451.7,
+  "end": 452.2,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.95,
+  "note": "3.95/3.5"
+ },
+ {
+  "start": 477.25,
+  "end": 479.0,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.95,
+  "note": "3.95/3.55/3.35 + 7.3k, play stops"
+ },
+ {
+  "start": 478.1,
+  "end": 479.15,
+  "kind": "horn",
+  "sure": false,
+  "freq_khz": 0.5,
+  "note": "faint comb of harmonics ~0.5k spacing, overlaps whistle; timeout?"
+ },
+ {
+  "start": 497.4,
+  "end": 498.62,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.8,
+  "note": "3.8/3.4 + 7k"
+ },
+ {
+  "start": 501.09,
+  "end": 502.31,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.75,
+  "note": "loud, broad"
+ },
+ {
+  "start": 519.28,
+  "end": 520.98,
+  "kind": "whistle",
+  "sure": false,
+  "freq_khz": 4.0,
+  "note": "thin faint intermittent line, distant?"
+ },
+ {
+  "start": 526.25,
+  "end": 527.55,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.65,
+  "note": "3.65/3.4/3.1, throw-off"
+ },
+ {
+  "start": 546.89,
+  "end": 549.0,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.75,
+  "note": "long, 3.75/3.6 + 7.2k"
+ },
+ {
+  "start": 567.0,
+  "end": 568.05,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.9,
+  "note": ""
+ },
+ {
+  "start": 572.02,
+  "end": 573.36,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.9,
+  "note": "3.9/3.25 + 7.3k"
+ },
+ {
+  "start": 593.17,
+  "end": 594.6,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.85,
+  "note": "fading tail"
+ }
+]
