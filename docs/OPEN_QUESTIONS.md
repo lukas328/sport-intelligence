@@ -49,6 +49,13 @@ was der Code heute tut.
    (`infra/model-licences.json`); seit #146 stehen in `infra/` nur freigegebene Modelle (hr-nods,
    kein ReID). Empfehlung: ein Termin bei einer Fachperson für alle
    vier Punkte. Ohne Entscheid: nichts davon ist geprüft, im Image laufen nur Apache-2.0-Modelle.
+4d. 🟡 **Training auf fremden Übertragungen** (`docs/plans/ballnetz-ohne-deepsport.md`). Die eigenen
+   Ball-Netze (auch hr-nods im Produkt) und die geplanten neuen Labels stammen aus Spielvideos, die
+   als öffentliche Übertragungen heruntergeladen wurden (Bibliothek auf Kaggle, `info.json`). Darf
+   ein kommerziell genutztes Netz auf solchen Bildern trainiert sein? Empfehlung: mit 4c bei
+   derselben Fachperson klären; für neue Labels Vereinsvideos mit Einwilligung bevorzugen. Ohne
+   Entscheid: das bestehende Netz bleibt, neue Trainings laufen weiter, aber ein neues Netz geht erst
+   nach Klärung über Staging hinaus.
 5. 🟡 **Wem gehört ein Team** (Q-AUTH-OWNER). Wie wird geprüft, dass wer ein Team im Einstieg
    speichert, wirklich dazugehört? Empfehlung: im Pilot (a) Übergabe durch den Support, weil die
    Pilotvereine bekannt sind; (b) Bestätigung über die Verbandsadresse erst vor dem breiten Start.
