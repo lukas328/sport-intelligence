@@ -1,4 +1,4 @@
-# ruff: noqa: S301
+# ruff: noqa: S301, N806
 """«Kein Besitz» from the throw-off formation, the throw-off event and an empty court, scored on
 the frozen possession truth (LLM labels). Rules fixed before any comparison with the labels
 (docs/plans/produkt-analyse-integration.md, «Kein Besitz aus Anwurf-Formation»):
