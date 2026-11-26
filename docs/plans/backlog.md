@@ -29,6 +29,7 @@ fertig ist, streicht es und trägt das Ergebnis im passenden Plan ein.
    `attributes.confirmed_estimate` gespeichert; daraus die Trefferquote der Schätzung auswerten
    (Staging-Daten), dann entscheiden, wann der Wurfort ganz automatisch sein darf.
    *26.11. (Analyse-Sitzung): Abwurfpunkt aus dem Ballpfad auf zwei Horgen-Clips gegen die heutige Regel gemessen (21 Würfe, LLM-Labels): nicht klar besser, nicht ins Produkt. Billigerer Hebel: angegriffenes Tor in `fill_one` aus `goal_by_sides` statt aus den Positionen (4 von 21 Würfen mit rund 30 m Fehler). `produkt-audit-2026-11.md` Punkt 7.*
+   *26.11. (Analyse-Sitzung): Ballhalter als zweite Quelle für den Ballbesitz gemessen (Horgen-Clips, LLM-Labels pro Sekunde): nicht klar besser als die Positionsregel (74,5 % gegen 75,7 % richtig). Die Positionsregel ist präzise, braucht aber die Seiten. Beide vergeben in toten Sekunden ein Team; dafür braucht es ein Signal «Ball nicht im Spiel». `produkt-audit-2026-11.md` Punkt 6.*
 3. **Spieltag neu denken (A21).** Seit Runde 4 aus der App genommen; Konzept mit Lukas: was der
    Trainer am Spielfeldrand wirklich erfasst.
 4. **Go-live-Punkte mit Code** (`GO_LIVE.md`): ~~HLS-Segmente direkt aus R2~~ erledigt 20.11.
