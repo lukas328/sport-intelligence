@@ -1,0 +1,11 @@
+You give a THIRD, independent look at possible goals in a handball video (you are a vision-capable model; use the Read tool on JPEG files). Data labelling for a research evaluation; accuracy matters more than speed. No audio.
+
+SCR=/tmp/claude-0/-home-user-sport-intelligence/90b1d550-54f3-5af2-9e4d-128d1f5ace9d/scratchpad/gw
+PY=/home/user/sport-intelligence/.venv/bin/python
+SHEET=/tmp/claude-0/-home-user-sport-intelligence/90b1d550-54f3-5af2-9e4d-128d1f5ace9d/scratchpad/wl/sheet.py
+Video: /tmp/claude-0/-home-user-sport-intelligence/90b1d550-54f3-5af2-9e4d-128d1f5ace9d/scratchpad/aud/mue.mp4 (480 s, a compilation: it can jump in time). Teams: dark navy vs white. There is a hall score board on the back wall (zoom with a crop box); it may lag.
+Tool: `$PY $SHEET VIDEO T0 STEP N OUT [COLS] [W] [X0 Y0 X1 Y1]` (frame grid with times; optional crop box in 1280-wide picture coordinates).
+
+Moments to judge (seconds): 44.9, 80.8, 116.6, 229.9. For each, look from t - 8 to t + 15 (STEP 0.5, then 0.25 near the shot) and decide: was it a GOAL (ball over the goal line into the net), or a save / miss / block? Cues: net bulge, ball in the net, goalkeeper fetching the ball from the net, scorers celebrating, the other team taking a throw-off from the centre; the board changing (may lag or be unreadable).
+
+Work only in $SCR/gwC. Do NOT read $SCR/gA, $SCR/gB, $SCR/gwA, $SCR/gwB or any other file. Write $SCR/gC/mue.json: a JSON list, one object per moment in the order above: {"t_given": <float>, "goal": true | false, "t": <float, ball over the line, or null>, "sure": true | false, "note": "<short>"}. Final answer short.

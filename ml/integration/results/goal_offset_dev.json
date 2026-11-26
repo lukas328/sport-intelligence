@@ -1,0 +1,19 @@
+{
+ "goals": 68,
+ "matched": 68,
+ "unmatched": 0,
+ "games": 13,
+ "peak_minus_release_s": {
+  "median": 5.25,
+  "q25": 3.63,
+  "q75": 5.99,
+  "ci95_median": [
+   4.42,
+   5.62
+  ]
+ },
+ "goal_offset_s_today": 1.5,
+ "klare_abweichung": true,
+ "log_minus_release_median_s": 3.87,
+ "note": "GOAL_OFFSET_S 1.5 was peak - official log time (log lies a median 3.9 s after the release); proposed 5.0"
+}

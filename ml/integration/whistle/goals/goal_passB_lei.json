@@ -1,0 +1,12 @@
+[
+{"t": 28.8, "team": "white (LEI)", "score_after": "1:0", "sure": true, "note": "wing dive shot into top-left goal; GK fetches ball, dark throw-off at 33; overlay 1:0 at 33.5"},
+{"t": 116.3, "team": "dark/black (ARB)", "score_after": "1:1", "sure": true, "note": "jump shot into top-right goal, net bulge 116.5; overlay 1:1 by 119"},
+{"t": 145.4, "team": "white (LEI)", "score_after": "2:1", "sure": true, "note": "shot into left goal, net bulge 145.5; overlay 2:1 at 151"},
+{"t": 180.3, "team": "dark/black (ARB)", "score_after": "2:2", "sure": true, "note": "7m throw (#5), net bulge 180.5; overlay 2:2 at 183"},
+{"t": 229.9, "team": "dark/black (ARB)", "score_after": "2:3", "sure": true, "note": "long throw into empty right goal (white GK out), net bulge 230.0; overlay 2:3 ~234"},
+{"t": 291.1, "team": "white (LEI)", "score_after": "3:3", "sure": true, "note": "close shot #13 into left goal, net bulge 291.25; overlay 3:3 ~295"},
+{"t": 371.1, "team": "white (LEI)", "score_after": "4:3", "sure": true, "note": "shot into left goal, net bulge 371.25; overlay 4:3 ~377"},
+{"t": 405.8, "team": "dark/black (ARB)", "score_after": "4:4", "sure": true, "note": "jump shot #5 into right goal (close camera angle), net bulge 406.0; overlay 4:4 ~410"},
+{"t": 447.35, "team": "dark/black (ARB)", "score_after": "4:5", "sure": true, "note": "fast break into right goal, GK dives, net bulge 447.5; hall board 4-5 at 450.75"},
+{"t": 471.0, "team": "dark/black (ARB)", "score_after": "4:6", "sure": false, "note": "low shot at left post of right goal, net bulge not seen; GK retrieves ball at post 473.5, white throw-off setup during clock stop/timeout 478-500; overlay 4:6 only at ~501 (late)"}
+]

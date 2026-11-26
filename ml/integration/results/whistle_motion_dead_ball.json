@@ -1,0 +1,47 @@
+{
+ "chosen_on_mue": {
+  "w_s": 5.0,
+  "q": 50
+ },
+ "mue_combo": {
+  "flagged": 63,
+  "dead": 61,
+  "precision": 0.397,
+  "recall": 0.41,
+  "f1": 0.403
+ },
+ "lei_combo": {
+  "flagged": 70,
+  "dead": 117,
+  "precision": 0.186,
+  "recall": 0.111,
+  "f1": 0.139,
+  "precision_ci95": [
+   0.053,
+   0.369
+  ]
+ },
+ "lei_motion": {
+  "flagged": 290,
+  "dead": 117,
+  "precision": 0.241,
+  "recall": 0.598,
+  "f1": 0.344,
+  "precision_ci95": [
+   0.094,
+   0.405
+  ]
+ },
+ "lei_whistle": {
+  "flagged": 171,
+  "dead": 117,
+  "precision": 0.257,
+  "recall": 0.376,
+  "f1": 0.306,
+  "precision_ci95": [
+   0.15,
+   0.389
+  ]
+ },
+ "brauchbar": false
+}

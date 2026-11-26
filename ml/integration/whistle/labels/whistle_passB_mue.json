@@ -1,0 +1,194 @@
+[
+ {
+  "start": 26.95,
+  "end": 28.15,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.8,
+  "note": "sloping 4.0->3.6k stack"
+ },
+ {
+  "start": 42.1,
+  "end": 43.65,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.8,
+  "note": "clear stack"
+ },
+ {
+  "start": 46.32,
+  "end": 47.0,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.9,
+  "note": "pair blast 1"
+ },
+ {
+  "start": 47.35,
+  "end": 47.95,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.9,
+  "note": "pair blast 2"
+ },
+ {
+  "start": 49.95,
+  "end": 50.35,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.8,
+  "note": "short blast"
+ },
+ {
+  "start": 143.67,
+  "end": 144.2,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.8,
+  "note": "clear stack"
+ },
+ {
+  "start": 156.5,
+  "end": 157.4,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.9,
+  "note": "clear stack"
+ },
+ {
+  "start": 172.32,
+  "end": 173.0,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.9,
+  "note": "clear stack"
+ },
+ {
+  "start": 202.7,
+  "end": 204.17,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.9,
+  "note": "long blast + short blip at end"
+ },
+ {
+  "start": 204.8,
+  "end": 205.85,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.9,
+  "note": "clear stack"
+ },
+ {
+  "start": 230.9,
+  "end": 231.7,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.9,
+  "note": "clear stack"
+ },
+ {
+  "start": 238.4,
+  "end": 239.3,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.8,
+  "note": "clear stack"
+ },
+ {
+  "start": 261.95,
+  "end": 262.8,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.9,
+  "note": "clear stack"
+ },
+ {
+  "start": 263.33,
+  "end": 264.0,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.9,
+  "note": "clear stack"
+ },
+ {
+  "start": 269.65,
+  "end": 270.5,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.9,
+  "note": "clear stack"
+ },
+ {
+  "start": 273.83,
+  "end": 275.47,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 4.0,
+  "note": "three linked pulses"
+ },
+ {
+  "start": 329.86,
+  "end": 330.64,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.9,
+  "note": "clear stack"
+ },
+ {
+  "start": 354.2,
+  "end": 355.5,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.9,
+  "note": "sloping stack"
+ },
+ {
+  "start": 365.08,
+  "end": 367.7,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 4.0,
+  "note": "long blast"
+ },
+ {
+  "start": 368.85,
+  "end": 371.0,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 4.05,
+  "note": "pulsed, weaker; maybe other referee"
+ },
+ {
+  "start": 371.8,
+  "end": 372.25,
+  "kind": "whistle",
+  "sure": false,
+  "freq_khz": 4.05,
+  "note": "weak line, mostly single"
+ },
+ {
+  "start": 410.0,
+  "end": 411.6,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 4.0,
+  "note": "clear stack"
+ },
+ {
+  "start": 450.32,
+  "end": 451.0,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.9,
+  "note": "fuzzy stack, tail to 451.5"
+ },
+ {
+  "start": 464.4,
+  "end": 465.6,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.9,
+  "note": "clear stack"
+ }
+]

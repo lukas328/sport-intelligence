@@ -1459,6 +1459,31 @@ Verknüpfungen unter 10 % falsch. Dev-Clips Horgen H1/H2, nie Endtest.
   unverändert, geprüft: gleiche Zahlen wie vorher). Einschalten nach einem Test auf einem weiteren
   Spiel mit derselben Sichtprüfung.
 
+**Nachtrag: zweites Spiel (ATVKVBasel–YellowWinterthur2, Segment s1, 3 min, 2026-11-26).** Gleiche
+Regeln, Dev. Das Segment s3 liess sich mit der eigenen Kamerabewegung nicht automatisch kalibrieren
+(Tor-Score knapp unter der Schwelle), darum nur s1.
+
+- **Labels:** 100 Detektionen alle 3 s (70 Feldspieler, 30 am Feldrand oder in fremder Farbe),
+  zweifach in gemischter Reihenfolge beschriftet, 99 übereinstimmend: 9 Feldspieler mit sichtbarer
+  Nummer, 71 ohne lesbare Nummer, 17 Schiedsrichter, Bank oder Zuschauer, 2 Torhüter. Die Labels
+  liegen nur im Messordner (das Spiel hat keine Kaderliste im Repo); wenige sichtbare Nummern, darum
+  zählt hier vor allem die Sichtprüfung.
+
+| Variante | richtig | falsch | benannte Zeit | Nicht-Feldsp. benannt | Nicht-Feldsp. als Spieler | Median | Tracks |
+|---|---|---|---|---|---|---|---|
+| heute (bis 4 s) | 2 von 9 | 1 | 16.3 % | 1 von 17 | 9 von 17 | 24.2 s | 88 |
+| Filter, bis 8 s | 2 | 1 | 15.0 % | 1 | 9 | 20.4 s | 84 |
+
+- **Sichtprüfung** der neuen Verknüpfungen über 4 s (Filter, bis 8 s): 3 von 16 klar falsch (gelb
+  an Schiedsrichter, schwarz an gelb, schwarz an gelb mit Ball), 2 unklar (Überdeckung zweier
+  Spielerinnen am Stückende). 19 % klar falsch, trotz Teambedingung: die Farbblicke am Stückende
+  stammen dort aus Überdeckungen.
+- **Bewertung über beide Spiele:** klar falsch zusammen etwa 11 % (Horgen etwa 7 bis 8 von 78, ATV 3
+  von 16), also über der 10-%-Grenze. Auf ATV keine Zunahme der benannten Zeit (16.3 -> 15.0 %) und
+  ein kürzerer Median, weil der Feldrand-Filter Stücke herausnimmt, die heute schon kurz verknüpft
+  werden. Falsch benannt und Nicht-Feldspieler unverändert. **Kriterium nicht erfüllt, bleibt aus.**
+  Nächster Hebel wäre die Teamfarbe am Stückende nur aus Blicken ohne Überdeckung.
+
 **Nachtrag: Endfarbe nur aus freien Blicken (2026-11-26).** Auf dem zweiten Spiel
 (ATVKVBasel–YellowWinterthur2 s1, Nachtrag dazu mit #179) waren 3 von 16 neuen Verknüpfungen klar
 falsch, Ursache schien die Überdeckung am Stückende. Darum: jede Farbprobe merkt sich, ob die
@@ -1497,3 +1522,49 @@ Bank-Strecken der Bankregel (`bench.bench_frames`: still, jenseits einer Seitenl
   (Spieler, dann Schiedsrichter oder Betreuer daneben). Das ist ein ID-Wechsel des Trackers
   innerhalb eines Stücks, kein Fehler des Verknüpfens; ein Filter auf ganze Stücke sieht ihn nicht.
   Weitere Hebel für lange Verknüpfungen erst nach einer Massnahme gegen Wechsel im Tracker.
+
+### Spielfeldseiten ohne Torhüter (Audit, 2026-11-26)
+
+Ohne Seiten gibt es keine Ereignisse (`missing: goalkeepers`), keinen Team-Vorschlag und kein
+`goal_by_sides`. Bisher kamen die Seiten nur aus Torhüter-Tracks. Gemessen auf den Testclips
+Horgen H1 (1. Halbzeit) und H2 (2. Halbzeit), Dev, nie Endtest.
+
+- **Labels:** `ml/gold/data/sides_dev_v1.json`. Welches Tor das gelbe Team (home) verteidigt, auf
+  zwei unabhängigen Sätzen von je sechs Bildern pro Clip, in denen beide Teams in einer Hälfte
+  stehen: Wer an der 6-m-Linie die Mauer bildet, verteidigt dieses Tor. Beide Blicke stimmen
+  überein (H1 rechts, H2 links: Seitenwechsel zur Pause). Ein Staging-Lauf aus einer anderen Halle
+  (90c0bf9a) liess sich auf den Bildern nicht sicher beschriften und ist nicht dabei.
+- **Neues Signal** (`events.formation_vote`, Schalter `FORMATION_VOTES`, an): Stehen in einem
+  200-ms-Bin mindestens 3 Feldspieler-Tracks je Team und beide Mediane mehr als 5 m in derselben
+  Hälfte, verteidigt das Team das Tor, dessen Median näher an der Torlinie liegt (die Mauer steht
+  zwischen den Angreifern und dem Tor). Die Stimme zählt wie eine Torhüter-Stimme, das bestehende
+  Fenster und die 45-s-Mindestdauer bleiben. Dazu gilt die erste Seite ab Videobeginn statt erst
+  ab der ersten Stimme (Seitenwechsel nur zur Pause).
+- **Ergebnis** (`ml/eval/sides_dev.py`, Anteil der Videozeit richtig / falsch / unbekannt):
+
+| Clip | Torhüter | vorher | neu |
+|---|---|---|---|
+| H1 | da | 100 / 0 / 0 %, 7 Ereignisse | 100 / 0 / 0 %, 7 |
+| H1 | weggenommen | 0 / 0 / 100 %, keine Ereignisse | 100 / 0 / 0 %, 7 |
+| H2 | da | 98.2 / 0 / 1.8 %, 8 | 100 / 0 / 0 %, 9 |
+| H2 | weggenommen | 0 / 0 / 100 %, keine | 100 / 0 / 0 %, 9 |
+
+- Rohstimmen des Signals: H1 104 zu 9, H2 114 zu 16 für die richtige Seite. Auf dem Staging-Lauf
+  90c0bf9a (ohne Labels) stimmt es mit den Torhütern überein (beide «home links»; das Signal ab 3 s,
+  die Torhüter erst ab 60 s).
+- **Grenze:** zwei Clips eines Spiels, eine Kamera. Die Ablation (Torhüter weggenommen) bildet den
+  Staging-Fall nach, ist aber kein zweites Spiel. Kriterium erfüllt (falsch steigt nicht, unbekannt
+  sinkt von 100 % auf 0 %), darum im Produkt. Sobald kalibrierte Segmente eines weiteren Spiels
+  da sind, dort mit derselben Beschriftung nachmessen.
+
+**Nachtrag: zweites Spiel (ATVKVBasel–YellowWinterthur2, Segment s1, 3 min, 2026-11-26).** Labels
+wie oben aus zwei unabhängigen Bildsätzen, übereinstimmend: home (gelb) verteidigt rechts.
+
+| Torhüter | vorher | neu |
+|---|---|---|
+| da | 100 / 0 / 0 % | 100 / 0 / 0 % |
+| weggenommen | 0 / 0 / 100 %, keine Ereignisse | 100 / 0 / 0 %, 5 Ereignisse |
+
+Rohstimmen 684 zu 64 für die richtige Seite. Damit auf einem zweiten Spiel mit anderer Halle und
+anderen Trikotfarben bestätigt, keine falsche Zuordnung. Segment s3 liess sich mit der eigenen
+Kamerabewegung nicht kalibrieren und fehlt.
