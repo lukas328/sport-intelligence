@@ -61,6 +61,7 @@ export function Workspace({
   names,
   setup,
   requestPane = null,
+  requestMark = null,
   requestDraw = null,
   handle,
   checkSteps = true,
@@ -76,6 +77,8 @@ export function Workspace({
   setup?: React.ReactNode;
   /** a pane to open from outside; a new object each time */
   requestPane?: { pane: Pane } | null;
+  /** the court marking asked for from outside (progress, strip); a new object each time */
+  requestMark?: { n: number } | null;
   /** drawing asked for from outside (the stage's «Zeichnen»): at this moment; a new object each time */
   requestDraw?: { t_ms: number } | null;
   handle?: Ref<PlayerHandle | null>;
@@ -280,7 +283,13 @@ export function Workspace({
   const reportOpen = hasReport && official.data?.imported ? goalRows(official.data, "open", false, spansFor).length : null;
   const stepList = steps({
     analysis: a
-      ? { status: a.status, needsCalibration: a.needs_calibration === true, unconfirmed: courtUnconfirmed(a) }
+      ? {
+          status: a.status,
+          needsCalibration: a.needs_calibration === true,
+          unconfirmed: courtUnconfirmed(a),
+          hallImage: a.panorama != null,
+          courtTaken: a.calibration_state === "updating" || a.calibration_state === "confirmed",
+        }
       : null,
     kickoff: match.kickoff_ms,
     periodS: match.period_s,
@@ -586,6 +595,7 @@ export function Workspace({
               colours={kitColours}
               getTime={getTime}
               canCalibrate={staff}
+              openMark={requestMark}
               // the court is checked: on to the next open step
               onConfirmed={() => setPane(null)}
             />

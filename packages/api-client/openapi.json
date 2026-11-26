@@ -5150,6 +5150,22 @@
       "FileProgressOut": {
         "description": "Where one file of a match is (services/progress): its step in the coach's words, how far\nthe step is, how long it probably takes, and whether it moves.",
         "properties": {
+          "court": {
+            "anyOf": [
+              {
+                "enum": [
+                  "mark",
+                  "taken"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "analysis running: 'mark' once its hall image is there and before its court stage (the court marked now is taken by this run, no second run); 'taken' when the coach marked it for this run already",
+            "title": "Court"
+          },
           "duration_s": {
             "anyOf": [
               {
@@ -7777,6 +7793,18 @@
       },
       "JobOut": {
         "properties": {
+          "court_points": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Court Points"
+          },
           "error": {
             "anyOf": [
               {

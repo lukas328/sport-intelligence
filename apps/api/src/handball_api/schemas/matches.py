@@ -188,6 +188,9 @@ class JobOut(ApiModel):
     video_asset_id: uuid.UUID | None
     started_at: datetime | None
     finished_at: datetime | None
+    # answer to a worker report: court points the coach marked on the hall image while this
+    # analysis ran, `{points, space, frame_ms}` (the worker uses them at its court stage)
+    court_points: dict[str, Any] | None = None
 
 
 ProgressStage = Literal["upload", "ingest", "analysis", "done"]
@@ -248,6 +251,12 @@ class FileProgressOut(ApiModel):
         default=False, description="this step was restarted once already after it went silent"
     )
     error: str | None = Field(default=None, description="failed: a stable failure code")
+    court: Literal["mark", "taken"] | None = Field(
+        default=None,
+        description="analysis running: 'mark' once its hall image is there and before its court "
+        "stage (the court marked now is taken by this run, no second run); 'taken' when the "
+        "coach marked it for this run already",
+    )
     retry: bool = Field(
         default=True,
         description="failed: whether starting the step again can help (not after a timeout on "
@@ -547,6 +556,8 @@ class JobUpdate(ApiModel):
     stages: dict[str, Any] | None = None
     error: str | None = Field(default=None, max_length=4000)
     result: dict[str, Any] | None = None
+    # analysis, while it runs: the hall image is stored, `{camera, panorama: {width, height}}`
+    view: dict[str, Any] | None = None
     gpu_seconds: float | None = None
     cost_chf: float | None = None
 

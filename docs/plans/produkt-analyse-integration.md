@@ -909,6 +909,43 @@ Nächster Schritt:
 3. Erst danach: die festgelegte Methode einmal auf dem Endtest melden (aus `per_shot` und den
    gespeicherten Kandidaten), und die API-Zuordnung zum Spielbericht auf die neue Zeit anpassen.
 
+### Torhüter in eigener Trikotfarbe (Audit Punkt 4, 2026-11-26)
+
+Befund aus dem Audit: Ein Torhüter in eigener Farbe landet im k-Means oft in einem dritten
+Cluster, `teams.relabel_by_clusters` nennt ihn «referee», und die Positionsregel
+`events.assign_goalkeepers` übersprang genau diese Tracks. Ohne Torhüter fehlen die Seiten und
+damit alle Ereignisse.
+
+Umgesetzt (Vorschlag 2 des Audits): «referee»-Tracks zählen jetzt mit einer strengeren Regel. Sie
+müssen mindestens 80 % der Zeit im 6,5-m-Raum eines Tores sein (statt 60 %), und es darf an diesem
+Tor keinen anderen Torhüter-Kandidaten geben. Bei mehreren «referee»-Tracks am selben Tor zählt
+der torgebundenste. Dazu muss der Track im Median vor dem Tor stehen (höchstens 2,5 m neben der
+Tormitte, auf der Feldseite der Torlinie, bis 5 m davor). Die Mannschaft kommt wie bisher aus der Abstimmung, wer das Tor verteidigt
+(mindestens 3 Stimmen), sonst bleibt der Track Schiedsrichter. Tests in `test_learned.py`: Torhüter
+im «referee»-Cluster gefunden; Schiedsrichter mit 70 % am Tor und Torrichter neben einem Tor mit
+Torhüter bleiben Schiedsrichter.
+
+Offline nachgerechnet auf den Staging-Artefakten im Testbucket (nur gelesen). Die Kalibrierung der
+Läufe steht nicht im Bucket, darum wurde die Homographie aus `tracks.parquet` und den Beobachtungen
+zurückgerechnet (rund 22 000 Paare, Median 3 px). Danach lief `observe.track` mit dem Code von
+`main` und mit dieser Regel, ohne Trikotfarben:
+
+| Lauf | Feld | «referee»-Tracks | Torhüter-Tracks main / neu | `missing` |
+|---|---|---|---|---|
+| U (76201462) | keine Kalibrierung, keine Tracks | - | - | Regel greift nicht |
+| H (90c0bf9a) | zurückgerechnet | 0 | 12 / 12 (alle home) | leer / leer |
+| fbdc76e6 (5 min) | zurückgerechnet | 10 | 4 / 4 | leer / leer |
+| 56fcc216 (5 min) | zurückgerechnet | 10 | 3 / 3 | leer / leer |
+
+Auf keinem dieser Läufe ändert die Regel etwas: wo Felddaten da sind, fehlten die Torhüter schon
+mit dem alten Code nicht. Lehrreich war fbdc76e6: zwei «referee»-Tracks stehen zu 95 und 97 % im
+6,5-m-Raum. Auf den Bildausschnitten ist das der Torlinien-Schiedsrichter (schwarz, neben dem Tor,
+knapp hinter der Linie). Abgewiesen wurden sie nur, weil das Tor schon einen Torhüter-Kandidaten
+hatte; an einem Tor ohne Kandidaten wäre er Torhüter geworden. Darum die zusätzliche Bedingung
+«vor dem Tor» (Test dazu). Den Fall, für den die Regel gebaut ist (Torhüter in eigener Farbe im
+«referee»-Cluster), zeigt keiner der vier Läufe. Er ist also nur im Test belegt. Offen bleibt
+Vorschlag 1 (Seiten aus Anwurf-Formationen, ohne Torhüter).
+
 ### Tore aus dem Spielbericht ohne Frage (Livegang L1, 2026-11-19)
 
 Frage: Welche Tor-Kandidaten kann die App mit dem offiziellen Spielbericht selbst beantworten, ohne
@@ -1007,6 +1044,34 @@ verliert 14 von 100 Toren.
 Was bleibt für weniger Fragen: Zeit ohne Spiel (Pausen, Einspielen, Nachspiel). Dafür beobachtet die
 Warteschlange `ml/integration/kaggle/observe_queue.py` die übrigen Segmente der Bibliothek, darunter
 die Halbzeiten der 13 Dev-Spiele.
+
+### Tor-Kandidaten Stufe 2 auf Dev (Audit Punkt 3, 2026-11-26)
+
+Frage: Sortiert ein zweiter Klassifikator auf den Signalen um den Kandidaten (Kameraschwenk,
+Bewegung und Streuung der Spieler, 2-s-Mittel von 10 s vor bis 30 s nach dem Peak, dazu der
+heutige Wert) echte Tore besser nach vorn als der Wert allein? Gleiche Daten wie beim Ballpfad
+(49 Dev-Segmente, 13 Spiele, 113 Tore, 568 Kandidaten bis Rate 4), Spiel für Spiel ausgelassen,
+Endtest nicht angeschaut. `ml/integration/goal_stage2_dev.py`, Ergebnis
+`ml/integration/results/goal_stage2_dev.json`.
+
+| | AUC | 1 / min | 1.5 / min | 2 / min |
+|---|---|---|---|---|
+| nur `score` (heute) | 0.81 | 0.56 / 0.45 | 0.71 / 0.42 | 0.85 / 0.34 |
+| logistische Regression | 0.82 | 0.54 / 0.44 | 0.66 / 0.40 | 0.81 / 0.33 |
+| Gradient Boosting (Tiefe 3) | 0.84 | 0.58 / 0.47 | 0.72 / 0.44 | 0.82 / 0.34 |
+
+(Tore gefunden / Präzision.) Unterschied zum Wert bei 2 / min, Bootstrap über Spiele: Präzision
+−3.6 bis +2.0 Punkte, gefunden −8.5 bis +4.2 Punkte. **Kein Gewinn:** die Signale tragen über den
+Wert hinaus nichts, wie schon der Ballpfad. Eine zweite Stufe braucht neue Information:
+- **Prüfen-Antworten als Labels:** gespeichert sind sie (`goal_candidates.status`, `reviewed_at`,
+  bestätigtes Ereignis), ein Export fehlt. Die Nutzung für Training hängt am offenen Entscheid
+  Q-DATA-4 (Vereinsdaten fürs Training, heute: nichts wird genutzt). Bis dahin baue ich keinen
+  Export; mit Entscheid ist er klein (Kandidat, Status, Zeiten, Asset-Schlüssel, nur Vereine mit
+  Einwilligung).
+- **Pfiff im Ton:** nicht messbar, die Forschungs-Segmente sind ohne Tonspur geschnitten (`-an` in
+  `ml/ball/collect_game.py`, `ml/goals/cut_negatives.py`). Neue Sammlungen sollten den Ton als
+  8-kHz-Spur behalten (wie `audio_8k.wav` im Produkt).
+- **Spieluhr-Stopp:** auf Dev gibt es keine Uhr pro Bild, nur den Bereich pro Segment.
 
 ### Wurfzeit auf Dev, Fehlalarme und Pausen (Analyse-Sitzung, 2026-11-25)
 

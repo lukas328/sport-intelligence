@@ -39,7 +39,12 @@ async def job_update(
 ) -> JobOut:
     if not constant_time_equals(x_internal_token, ctx.settings.internal_token.get_secret_value()):
         raise ProblemError(403, "forbidden", "Invalid internal token")
-    return JobOut.model_validate(await videos.apply_job_update(ctx, job_id, data))
+    job = await videos.apply_job_update(ctx, job_id, data)
+    out = JobOut.model_validate(job)
+    if job.kind == "analysis" and job.status == JobStatus.RUNNING and job.video_asset_id:
+        asset = await ctx.db.get(VideoAsset, job.video_asset_id)
+        out.court_points = videos.court_points_for(asset, job)
+    return out
 
 
 @router.post("/watchdog")

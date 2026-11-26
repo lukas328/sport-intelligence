@@ -50,6 +50,7 @@ import { coverage } from "@/lib/match-workflow";
 import { MyScenesLine } from "./feed-views";
 import { officialGoalsKey } from "./official-goals";
 import { PartsLine, PartsPanel, usePartMarkers } from "./parts-panel";
+import type { Pane } from "./work-rail";
 import { AnalysisNotice } from "@/components/analysis/analysis-notice";
 import { latestJobs, partsOf, timelineVideo } from "@/lib/video-parts";
 import { isActive, progressKey, useProgress, withLocal } from "@/lib/progress";
@@ -151,6 +152,8 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
   // one goal's scene from the Spiel tab (?scene=eventId): the Video tab opens at it
   const [scene, setScene] = useState<string | null>(null);
   const linkedView = useRef(false);
+  // ?mark=court (the strip's «Spielfeld markieren»): opened once the page knows its video
+  const [markCourtLink, setMarkCourtLink] = useState(false);
   const readAddress = useCallback(() => {
     const q = new URLSearchParams(window.location.search);
     const v = VIEW_PARAM[q.get("tab") ?? ""];
@@ -159,6 +162,12 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
     setViewState(v ?? (q.get("t") ? "video" : "game"));
     setThingState(Number.isInteger(n) && n >= 1 && n <= 3 ? n : null);
     setScene(q.get("scene"));
+    if (q.get("mark") === "court") {
+      // once: the address loses it, so a reload or «Zurück» does not open the dialog again
+      q.delete("mark");
+      window.history.replaceState(null, "", `${window.location.pathname}?${q.toString()}`);
+      setMarkCourtLink(true);
+    }
   }, []);
   useEffect(() => {
     readAddress();
@@ -188,7 +197,21 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
     q.delete("t");
     window.history.pushState(null, "", `${window.location.pathname}?${q.toString()}`);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-  const [askPane] = useState<{ pane: "feedback" } | null>(null);
+  const [askPane, setAskPane] = useState<{ pane: Pane } | null>(null);
+  // «Spielfeld markieren» (progress block, strip link ?mark=court): the workbench opens at the
+  // court step and the marking dialog opens as soon as the hall image is there (#141)
+  const [markAsk, setMarkAsk] = useState<{ n: number } | null>(null);
+  const markCourt = useCallback(() => {
+    setView("video");
+    setBench(true);
+    setAskPane({ pane: "court" });
+    setMarkAsk({ n: Date.now() });
+  }, [setView]);
+  useEffect(() => {
+    if (!markCourtLink) return;
+    setMarkCourtLink(false);
+    markCourt();
+  }, [markCourtLink, markCourt]);
   const player = useRef<PlayerHandle | null>(null);
   const stats = useStats(orgId, initial.id);
   const graphics = useMatchGraphics(orgId, initial.id);
@@ -635,6 +658,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
           onOtherFile={toUpload}
           onResumeUpload={toUpload}
           onRemoved={() => (void qc.invalidateQueries({ queryKey: key }), router.refresh())}
+          onMarkCourt={staff && main ? markCourt : undefined}
           aside={
             // what is known and what comes, once the video is in (during the upload the way on counts)
             isActive(progress) && progress.stage !== "upload" ? (
@@ -715,7 +739,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
             <div className="mb-3">
               <PartsLine videos={match.videos} onJump={(ms) => benchAt(ms, true)} />
             </div>
-            {bench && <Workspace orgId={orgId} match={match} video={main} staff={staff} teamName={own} oppName={oppName(match)} names={names} handle={player} setup={setup} requestPane={askPane} requestDraw={drawAt} checkSteps={false} />}
+            {bench && <Workspace orgId={orgId} match={match} video={main} staff={staff} teamName={own} oppName={oppName(match)} names={names} handle={player} setup={setup} requestPane={askPane} requestMark={markAsk} requestDraw={drawAt} checkSteps={false} />}
           </section>
         ) : !staff ? (
           <EmptyState icon={<Clapperboard />} title={match.source === "paper_report" ? t("stats.noVideo") : t("player.notReady")} />

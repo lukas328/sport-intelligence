@@ -36,6 +36,19 @@ was der Code heute tut.
    prüfen. Empfehlung: vor dem ersten zahlenden Verein nur Netze ohne DeepSport ausliefern; bis dahin
    Ball v2 nur im Test. Ohne Entscheid: Ball v2 bleibt Testbetrieb (`handball_vision.ballnet`,
    Lizenzhinweis).
+4b. 🔴 **ReID auf Staging** (Q-ML-5, `docs/plans/lizenzen-modelle.md`). Das Image enthält kein
+   ReID, aber Staging lädt FastReID (MSMT17, nur nicht-kommerzielle Forschung) zur Laufzeit aus dem
+   Bucket (`HB_REID_MODEL` in `infra/azure/staging-env.json`); ebenso hrp1 (4a). Empfehlung: ReID in
+   jeder Umgebung mit echten Vereinsvideos ausschalten (spart zudem rund die Hälfte der
+   CPU-Laufzeit, Audit Rang 2); ein eigenes Modell erst mit eigenen Spieler-Labels. Ohne Entscheid:
+   ReID läuft auf Staging mit.
+4c. 🔴 **Rechtsprüfung der Startgewichte und Datensätze** (`docs/plans/lizenzen-modelle.md`
+   Abschnitt 5). Ungeprüft sind: ImageNet-Startgewichte (hrp1, Rollenmodell; nicht hr1/hr-nods), die
+   COCO-Bilder hinter YOLOX, die Ball-Labels von TeamTrack (Grundlage von hr-nods) und der
+   FFmpeg-Build im PyAV-Wheel. Dazu fehlt der in ADR 003 versprochene CI-Schutz gegen nicht
+   freigegebene Modelle und `ultralytics`. Empfehlung: ein Termin bei einer Fachperson für alle vier
+   Punkte; den CI-Schutz bauen wir. Ohne Entscheid: nichts davon ist geprüft, im Image laufen nur
+   Apache-2.0-Modelle.
 5. 🟡 **Wem gehört ein Team** (Q-AUTH-OWNER). Wie wird geprüft, dass wer ein Team im Einstieg
    speichert, wirklich dazugehört? Empfehlung: im Pilot (a) Übergabe durch den Support, weil die
    Pilotvereine bekannt sind; (b) Bestätigung über die Verbandsadresse erst vor dem breiten Start.
@@ -92,7 +105,7 @@ Prüfzeit und drei Dingen (Q-REC-SHOTZONE).
 - **Q-INFRA-2**: Repository `lukas328/sport-intelligence`, GitHub Actions.
 - **Q-INFRA-3**: SMTP-Anschluss (ADR 009); Anbieter Azure Communication Services, kein neuer Vertrag.
 - **Q-INFRA-5**: Next.js 15.5 bleibt.
-- **Q-ML-1, Q-ML-2, Q-ML-5, Q-ML-6**: Das ausgelieferte Analyse-Image enthält nur YOLOX-s und PP-OCRv4 (Apache-2.0); kein ReID- und kein Ballmodell.
+- **Q-ML-1, Q-ML-2, Q-ML-5, Q-ML-6**: Das ausgelieferte Analyse-Image enthält nur YOLOX-s und PP-OCRv4 (Apache-2.0); kein ReID- und kein Ballmodell. Staging lädt aber Ballnetz hrp1 und ReID zur Laufzeit aus dem Bucket (Testbetrieb, Punkte 4a und 4b).
 - **Q-LEGAL-3**: Originalvideos 90 Tage, danach die komprimierte Fassung (Code und Datenschutz-Entwurf).
 - **Q-ADD-1**: Das Produkt ist «Vorschlag und Bestätigung» (Prüfen), Automatik ist kein Startversprechen.
 - **Q-ADD-2**: Spieltag bleibt optional unter «Mehr».

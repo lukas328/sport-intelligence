@@ -19,6 +19,9 @@ class JobSettings(BaseSettings):
     # the file the classical background detector runs (ADR 012)
     detector_model: str = "/models/yolox_s.onnx"
     detect_every: int = 3
+    # the camera motion in a quick pass of its own before the observation pass: the hall image
+    # reaches the coach after a few percent of the run, to mark the court while it goes on
+    motion_first: bool = True
     # 3-frame ball net(s) (docs/plans/produkt-analyse-integration.md step 2): comma-separated,
     # each a local ONNX file (ml/ball/export_onnx.py) or a key in the artifacts bucket (e.g.
     # models/ball/ball_hrp1-<sha12>.onnx), fetched once into ball_cache_dir. Two entries =

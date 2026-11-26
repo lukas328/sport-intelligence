@@ -25,6 +25,9 @@ ANALYSIS_FUNC = "handball_gpu_worker.analysis.run_analysis"
 SYNC_FUNC = "handball_gpu_worker.sync.run_sync"
 SYNC_MIN_CONFIDENCE = 0.35
 IMPORT_FUNC = "handball_worker.ingest.run_import"
+# analysis meta: the job whose hall image is stored already while it runs (worker `view` report);
+# court points marked on it before its court stage are handed to that job (`court_points_for`)
+VIEW_JOB = "view_job"
 WAITING = "waiting_job"  # analysis meta: the job of this part waits for an earlier part's analysis
 VIDEO_EXT = re.compile(r"\.(mp4|mov|m4v|mkv|avi|mts|m2ts|webm)$", re.IGNORECASE)
 

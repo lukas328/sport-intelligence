@@ -7284,6 +7284,11 @@ export interface components {
          *     the step is, how long it probably takes, and whether it moves.
          */
         FileProgressOut: {
+            /**
+             * Court
+             * @description analysis running: 'mark' once its hall image is there and before its court stage (the court marked now is taken by this run, no second run); 'taken' when the coach marked it for this run already
+             */
+            court?: ("mark" | "taken") | null;
             /** Duration S */
             duration_s?: number | null;
             /**
@@ -8142,6 +8147,10 @@ export interface components {
         };
         /** JobOut */
         JobOut: {
+            /** Court Points */
+            court_points?: {
+                [key: string]: unknown;
+            } | null;
             /** Error */
             error: string | null;
             /** Finished At */

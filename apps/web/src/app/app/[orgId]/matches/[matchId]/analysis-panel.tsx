@@ -4,7 +4,7 @@ import type { Schemas } from "@handball/api-client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useFormatter, useTranslations } from "next-intl";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CourtCalibration, CourtPreview } from "@/components/analysis/court-calibration";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/card";
@@ -25,6 +25,7 @@ export function AnalysisPanel({
   getTime,
   canCalibrate,
   onConfirmed,
+  openMark = null,
 }: {
   analysis: Analysis | null;
   orgId: string;
@@ -33,6 +34,8 @@ export function AnalysisPanel({
   getTime: () => number;
   canCalibrate: boolean;
   onConfirmed?: () => void;
+  /** the marking asked for from outside (the progress «Spielfeld markieren»); a new object each time */
+  openMark?: { n: number } | null;
 }) {
   const t = useTranslations("analysis");
   const format = useFormatter();
@@ -58,8 +61,30 @@ export function AnalysisPanel({
   useEffect(() => {
     if (ready) track("analysis_viewed");
   }, [ready]);
+  // «Spielfeld markieren» from the progress or the strip opens the dialog here once it can open
+  // (the analysis and its hall image may come a moment after the workbench)
+  const markable = Boolean(
+    canCalibrate &&
+      analysis?.panorama != null &&
+      (analysis.status === "ready" ||
+        (analysis.status === "running" && analysis.calibration_state !== "updating" && analysis.calibration_state !== "confirmed")),
+  );
+  const handledMark = useRef<number | null>(null);
+  useEffect(() => {
+    if (!openMark || handledMark.current === openMark.n || !markable) return;
+    handledMark.current = openMark.n;
+    setMarking("suggest");
+  }, [openMark, markable]);
   if (!analysis || analysis.status === "none") return null;
   const canMark = canCalibrate && analysis.status === "ready" && analysis.panorama != null;
+  // the hall image comes early in the run: the court is marked while the analysis goes on and
+  // that run takes it, no second run afterwards
+  const markEarly =
+    canCalibrate &&
+    analysis.status === "running" &&
+    analysis.panorama != null &&
+    analysis.calibration_state !== "updating" &&
+    analysis.calibration_state !== "confirmed";
   const unconfirmed = courtUnconfirmed(analysis);
   const courtState = analysis.calibration_state;
   const info = (analysis.calibration_info ?? {}) as { reason?: string; method?: string };
@@ -87,7 +112,18 @@ export function AnalysisPanel({
     // while the court waits for its check the answer bar is fixed on phones: room for it at the end
     <section className={cn("space-y-3", hallCheck && "max-lg:pb-24")} data-testid="analysis-panel">
       <h2 className="sr-only">{t("title")}</h2>
-      {analysis.status === "running" && <p className="text-sm">{t("running")}</p>}
+      {analysis.status === "running" &&
+        (markEarly ? (
+          // the one thing to do while the analysis runs: in the signal colour of an open step
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-l-4 border-attn pl-4" data-testid="mark-early">
+            <p className="min-w-0 flex-[1_1_16rem] text-[15px] font-semibold">{t("runningMark")}</p>
+            <Button className="max-sm:w-full" onClick={() => setMarking("suggest")} data-testid="mark-court">
+              {t("markCourt")}
+            </Button>
+          </div>
+        ) : (
+          <p className="text-sm">{t(analysis.calibration_state === "updating" ? "courtUpdating" : "running")}</p>
+        ))}
       {analysis.status === "failed" && (
         <Alert>
           <span className="block font-medium">{t(`failure_${analysis.error_code ?? "generic"}` as "failure_generic")}</span>

@@ -28,6 +28,7 @@ export function ProgressPanel({
   onOtherFile,
   onResumeUpload,
   onRemoved,
+  onMarkCourt,
   aside,
 }: {
   orgId: string;
@@ -38,6 +39,8 @@ export function ProgressPanel({
   onOtherFile?: () => void;
   onResumeUpload?: () => void;
   onRemoved?: () => void;
+  /** the hall image of the running analysis is there: open the court marking (#141) */
+  onMarkCourt?: () => void;
   aside?: ReactNode;
 }) {
   const w = useProgressWords();
@@ -52,6 +55,8 @@ export function ProgressPanel({
   // one line that sums up every file, never one file's step for all of them (second round A2)
   const summary = many ? filesLine(p.files) : null;
   const bar = barValue(p);
+  // marking the court while the analysis runs: that run takes it, no second run (#141)
+  const court = staff && isActive(p) ? (p.files.some((f) => f.court === "mark") ? "mark" : p.files.some((f) => f.court === "taken") ? "taken" : null) : null;
   return (
     <section
       className={cn("grid gap-8", aside && "md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]")}
@@ -91,6 +96,20 @@ export function ProgressPanel({
               </div>
             )}
           </>
+        )}
+        {court === "mark" && onMarkCourt && (
+          <div className="mt-5 border-l-4 border-attn py-1 pl-4" role="status" data-testid="progress-court">
+            <p className="m-0 text-[19px] font-bold">{t("courtTitle")}</p>
+            <p className="m-0 mt-1 max-w-[60ch] text-[15px]">{t("courtText")}</p>
+            <Button className="mt-3 max-sm:w-full" onClick={onMarkCourt} data-testid="progress-mark-court">
+              {t("courtButton")}
+            </Button>
+          </div>
+        )}
+        {court === "taken" && (
+          <p className="m-0 mt-4 max-w-[60ch] text-[15px] font-bold" role="status" data-testid="progress-court-taken">
+            {t("courtTaken")}
+          </p>
         )}
         {!isActive(p) && summary && (
           <p className="m-0 mt-1 text-[19px] font-bold" data-testid="progress-when">

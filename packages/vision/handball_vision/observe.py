@@ -106,6 +106,40 @@ def _torso_sample(frame: U8, d: Detection) -> NDArray[np.float64] | None:
     return np.asarray(cv2.cvtColor(small, cv2.COLOR_BGR2LAB).reshape(-1, 3), dtype=np.uint8)
 
 
+def _estimator(total: int) -> MotionEstimator:
+    return MotionEstimator(keep_every=max(1, total // 30) if total else 25)
+
+
+def _finish(est: MotionEstimator) -> CameraMotion:
+    motion = est.finish()
+    if len(motion.samples) > 30:
+        step = len(motion.samples) / 30
+        motion.samples = [motion.samples[int(k * step)] for k in range(30)]
+    return motion
+
+
+def motion_pass(
+    path: Path, max_frames: int | None = None, progress: Progress | None = None
+) -> CameraMotion:
+    """The camera motion alone, one quick decode of the video: the hall image (panorama or
+    median frame, `CameraMotion.background`) exists after this, long before the people, numbers
+    and ball are observed, so the coach can mark the court while the analysis runs. Gives the
+    same motion as `observe` estimates on its own (same estimator, same frames)."""
+    from handball_vision.pipeline import _open, iter_frames
+
+    _, _, _, total = _open(path)
+    if max_frames is not None:
+        total = min(total, max_frames) if total else max_frames
+    est = _estimator(total)
+    for n, frame in enumerate(iter_frames(path)):
+        if max_frames is not None and n >= max_frames:
+            break
+        est.add(frame)
+        if progress and total and n % 100 == 0:
+            progress("motion", min(1.0, n / total))
+    return _finish(est)
+
+
 def observe(
     path: Path,
     detector: Detector,
@@ -125,8 +159,10 @@ def observe(
     ball_batch: int = 8,
     number_gate: bool = True,
     number_budget: float = 0.0,
+    motion: CameraMotion | None = None,
 ) -> Observations:
-    """`on_frame(index, frame)` sees every decoded frame (e.g. the score overlay reader), so the
+    """`motion`: the camera motion of this video from `motion_pass` (the hall image is shown to
+    the coach before this pass); it is not estimated again here. `on_frame(index, frame)` sees every decoded frame (e.g. the score overlay reader), so the
     video is decoded only once. With `ball_net` the 3-frame ball net runs on every `ball_every`-th
     frame (`Observations.ball_cands`). `number_gate`: read shirt numbers only where it is worth it
     (`numbers.NumberGate`); off: every eligible torso on every number frame. `number_budget`: at
@@ -137,7 +173,7 @@ def observe(
     _, _, fps, total = _open(path)
     if max_frames is not None:
         total = min(total, max_frames) if total else max_frames
-    est = MotionEstimator(keep_every=max(1, total // 30) if total else 25)
+    est = None if motion is not None else _estimator(total)
     frames: list[FrameObservation] = []
     segments: dict[int, F64] = {}
     timings: dict[str, float] = defaultdict(float)
@@ -157,9 +193,10 @@ def observe(
         if max_frames is not None and n >= max_frames:
             break
         count = n + 1
-        t0 = time.perf_counter()
-        est.add(frame)
-        timings["camera_motion"] += time.perf_counter() - t0
+        if est is not None:
+            t0 = time.perf_counter()
+            est.add(frame)
+            timings["camera_motion"] += time.perf_counter() - t0
         if on_frame is not None:
             t0 = time.perf_counter()
             on_frame(n, frame)
@@ -207,12 +244,11 @@ def observe(
         t0 = time.perf_counter()
         balls_net.finish()  # waits for the worker thread
         timings["ball_net"] += time.perf_counter() - t0
-    t0 = time.perf_counter()
-    motion = est.finish()
-    timings["camera_motion"] += time.perf_counter() - t0
-    if len(motion.samples) > 30:
-        step = len(motion.samples) / 30
-        motion.samples = [motion.samples[int(k * step)] for k in range(30)]
+    if est is not None:
+        t0 = time.perf_counter()
+        motion = _finish(est)
+        timings["camera_motion"] += time.perf_counter() - t0
+    assert motion is not None
     static = static_edges([f for _, f in motion.samples]) if motion.moving else None
     counters = (
         {"number_crops": getattr(numbers, "calls", 0), "number_frames_skipped": skipped_numbers}
@@ -746,6 +782,41 @@ def _torso_colour(
     return np.asarray(np.median(lab, axis=0), dtype=np.float64)
 
 
+def _learned_kits(
+    obs: Observations,
+    calib: Calibration,
+    floor: F64 | None,
+    kits: dict[str, tuple[int, int, int]],
+    every_s: float = 0.5,
+) -> dict[str, tuple[int, int, int]]:
+    """Team colours learned from the torsos on court when fewer than two team kits are entered
+    (`teams.learn_kits`): the tracker needs both to keep the two teams apart in duels."""
+    from handball_vision.teams import bgr_to_lab, lab_to_bgr, learn_kits
+
+    if ("home" in kits and "away" in kits) or len(obs.frames) < 2:
+        return {}
+    motion = obs.motion
+    step = max(1, round(every_s * obs.fps / max(1, obs.frames[1].index - obs.frames[0].index)))
+    looks: list[NDArray[np.float64]] = []
+    for fo in obs.frames[::step]:
+        to_canvas = motion.frame_to_canvas(fo.index)
+        if to_canvas is None:
+            continue
+        frame_calib = Calibration(
+            np.linalg.inv(to_canvas) @ calib.homography,
+            calib.confidence,
+            calib.reprojection_px,
+            calib.source,
+            motion.frame_size,
+        )
+        kept = {id(d) for d in filter_on_court(frame_calib, fo.people)}
+        for d, torso in zip(fo.people, fo.torsos, strict=True):
+            if id(d) in kept and (c := _torso_colour(torso, floor)) is not None:
+                looks.append(c)
+    given = {k: bgr_to_lab(v) for k, v in kits.items() if k in ("home", "away")}
+    return {k: lab_to_bgr(v) for k, v in learn_kits(looks, given).items()}
+
+
 def track(
     obs: Observations,
     calib: Calibration,
@@ -778,6 +849,9 @@ def track(
                 .astype(np.float64)
                 .mean(axis=0)
             )
+    learned_kits = _learned_kits(obs, calib, floor, kits)
+    if learned_kits:
+        kits = {**kits, **learned_kits}
     teams = TeamAssigner(kits, floor_lab=floor)
     step_frames = obs.frames[1].index - obs.frames[0].index if len(obs.frames) > 1 else 1
     tracker = CourtTracker(fps=obs.fps / step_frames)
@@ -866,6 +940,7 @@ def track(
             "motion": {k2: round(v, 3) for k2, v in motion.stats.items()},
             "frames_without_view": n_lost,
             "detect_every": step_frames,
+            "kits_learned": sorted(learned_kits),
         },
         number_reads,
         vectors,

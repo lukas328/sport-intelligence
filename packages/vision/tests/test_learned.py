@@ -435,6 +435,41 @@ def test_observe_store_and_track(tmp_path: Path) -> None:
     assert len(dist) > 200
     assert float(np.median(dist)) < 0.6
     assert {"home", "away"} <= {v["label"] for v in res.teams.values()}
+    assert res.extra["kits_learned"] == []  # both team kits entered: nothing learned
+    # no kit entered (an own colour nobody chose, an unknown opponent): the two team colours
+    # are learned from the torsos on court, and the tracks still split into the two teams
+    bare = observe.track(back, calib, {}, hall)
+    assert bare.extra["kits_learned"] == ["away", "home"]
+    assert {"home", "away"} <= {v["label"] for v in bare.teams.values()}
+    one = observe.track(back, calib, {"home": k.home}, hall)
+    assert one.extra["kits_learned"] == ["away"]
+
+
+def test_team_colours_are_learned_from_torso_looks() -> None:
+    from handball_vision.teams import bgr_to_lab, colour_distance, learn_kits
+
+    rng = np.random.default_rng(3)
+    red, yellow, black = (
+        bgr_to_lab((40, 30, 200)),
+        bgr_to_lab((20, 200, 230)),
+        bgr_to_lab((30, 30, 30)),
+    )
+
+    def looks(c: np.ndarray, n: int) -> list[np.ndarray]:
+        return [c + rng.normal(0, 4, 3) for _ in range(n)]
+
+    seen = looks(red, 300) + looks(yellow, 260) + looks(black, 40)  # two teams and the referees
+    out = learn_kits(seen, {})
+    assert set(out) == {"home", "away"}
+    assert colour_distance(out["home"], yellow) < colour_distance(out["home"], red)  # lighter
+    assert colour_distance(out["away"], red) < colour_distance(out["away"], yellow)
+    # one team kit entered: the cluster nearer to it is that team, the other is learned
+    only = learn_kits(seen, {"home": bgr_to_lab((50, 40, 210))})
+    assert set(only) == {"away"} and colour_distance(only["away"], yellow) < 20
+    assert learn_kits(seen, {"home": red, "away": yellow}) == {}
+    # too few looks, or one colour only (no second team in view): nothing learned
+    assert learn_kits(seen[:100], {}) == {}
+    assert learn_kits(looks(red, 400), {}) == {}
 
 
 def test_teams_are_labelled_relative_to_the_match_colours() -> None:
@@ -513,6 +548,53 @@ def test_goalkeepers_by_position_and_defending_team() -> None:
     assert labels == {99: "home_gk"}
 
 
+def _defending_left() -> tuple[list[tuple[int, int, float, float]], dict[int, str]]:
+    """Home defends the left goal for a minute: home players near it, away further out."""
+    pts: list[tuple[int, int, float, float]] = []
+    teams: dict[int, str] = {}
+    for t in range(0, 60_000, 500):
+        for k in range(4):
+            pts.append((t, 10 + k, 6.5 + k * 0.3, 6 + 2.5 * k))
+            pts.append((t, 20 + k, 10.0 + k * 0.3, 6 + 2.5 * k))
+            teams[10 + k], teams[20 + k] = "home", "away"
+    return pts, teams
+
+
+def test_goalkeeper_in_own_kit_from_referee_cluster() -> None:
+    """A keeper whose kit put it in the "referee" cluster (audit 2026-11 point 4) is found when it
+    stays at its goal nearly all the time and no other keeper candidate is there."""
+    from handball_vision.events import assign_goalkeepers
+
+    pts, teams = _defending_left()
+    pts += [(t, 99, 1.5, 10.0) for t in range(0, 60_000, 500)]
+    assert assign_goalkeepers(pts, {**teams, 99: "referee"}) == {99: "home_gk"}
+    # a referee who is near the goal only part of the time (70 %) stays a referee
+    pts2, _ = _defending_left()
+    pts2 += [(t, 99, 1.5 if t % 10_000 < 7_000 else 15.0, 10.0) for t in range(0, 60_000, 500)]
+    assert assign_goalkeepers(pts2, {**teams, 99: "referee"}) == {}
+    # the goal-line referee: beside the goal and just behind the line the whole time (as on the
+    # Staging clip fbdc76e6), at a goal without a keeper candidate, stays a referee
+    pts3, _ = _defending_left()
+    pts3 += [(t, 99, -0.5, 14.5) for t in range(0, 60_000, 500)]
+    assert assign_goalkeepers(pts3, {**teams, 99: "referee"}) == {}
+
+
+def test_referee_at_goal_with_a_keeper_stays_referee() -> None:
+    """A goal judge beside a goal that already has a keeper candidate is not a second keeper; of
+    two "referee" tracks at a keeperless goal only the more goal-bound one counts."""
+    from handball_vision.events import assign_goalkeepers
+
+    pts, teams = _defending_left()
+    pts += [(t, 98, 1.5, 10.0) for t in range(0, 60_000, 500)]  # the keeper (home cluster)
+    pts += [(t, 99, 0.5, 4.5) for t in range(0, 60_000, 500)]  # goal judge beside the goal
+    assert assign_goalkeepers(pts, {**teams, 98: "home", 99: "referee"}) == {98: "home_gk"}
+    pts2, _ = _defending_left()
+    pts2 += [(t, 98, 1.5, 10.0) for t in range(0, 60_000, 500)]
+    pts2 += [(t, 99, 0.5 if t % 10_000 < 8_500 else 9.0, 4.5) for t in range(0, 60_000, 500)]
+    labels = assign_goalkeepers(pts2, {**teams, 98: "referee", 99: "referee"})
+    assert labels == {98: "home_gk"}
+
+
 class _FakeBallNet:
     """Stands in for `ballnet.BallNet`: one candidate per triplet, from the centre frame's mean."""
 
@@ -579,3 +661,24 @@ def test_court_doubt_accepts_a_court_where_goals_lines_and_floor_agree() -> None
 def test_court_doubt_rejects_courts_that_miss_a_check(change: dict[str, float], why: str) -> None:
     doubt = observe.court_doubt(_court_info(**change))
     assert doubt is not None and why in doubt
+
+
+@pytest.mark.skipif(FFMPEG is None, reason="ffmpeg not installed")
+def test_the_motion_pass_gives_the_motion_observe_would_estimate(tmp_path: Path) -> None:
+    """The hall image is made from a quick motion pass before the observation pass (the coach
+    marks the court meanwhile); the observation pass takes that motion instead of estimating
+    it again, and the result is the same as estimating it there."""
+    video = tmp_path / "pan.mp4"
+    truth = SyntheticMatch(SyntheticConfig(seconds=4, pan=1.0)).write(video)
+    boxes = {
+        g.index: [Detection(*o.bbox, 0.9) for o in g.objects if o.label != "ball"] for g in truth
+    }
+    alone = observe.observe(video, _Oracle(boxes), detect_every=observe_step)
+    motion = observe.motion_pass(video)
+    given = observe.observe(video, _Oracle(boxes), detect_every=observe_step, motion=motion)
+    assert given.motion is motion and "camera_motion" not in given.timings_s
+    assert motion.moving == alone.motion.moving and motion.stats == alone.motion.stats
+    assert len(motion.rotations) == len(alone.motion.rotations)
+    assert [i for i, _ in motion.samples] == [i for i, _ in alone.motion.samples]
+    assert np.array_equal(motion.background(), alone.motion.background())
+    assert len(given.frames) == len(alone.frames) and given.total == alone.total

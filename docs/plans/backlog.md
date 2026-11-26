@@ -20,7 +20,7 @@ Die eine Liste für alle Sitzungen. Wer etwas anfängt, schreibt «läuft (Sitzu
 fertig ist, streicht es und trägt das Ergebnis im passenden Plan ein.
 
 **A. Aus der Cloud-Sitzung machbar (Hauptsitzung)**
-1. **Weniger Fragen: bessere Tor-Kandidaten.** *20.11.: Ballpfad als Bestätigung geprüft, hilft nicht (AUC 0.81 mit und ohne Ball, Dev, `produkt-analyse-integration.md` «Ballpfad als Bestätigung»). Offen bleibt die Zeit ohne Spiel; Daten dafür kommen aus `observe_queue`. 25.11. Pausen Variante 2 gemessen (Dev, 65 Segmente): die Halbzeitpause nennt das Produkt zu 98 % Spiel, Hebel ist «keine laufende Uhr über Minuten = Pause». 23.11.: rund 160 von 860 Segmenten beobachtet; für die Pausen-Messung fehlt der Entscheid Hallentafel in der Warteschlange (empfohlen) oder nur Dev-Spiele mit Uhr aus dem Bericht (`UEBERGABE-2026-11-23.md`).* Präzision heute 29 %, auf Lukas' 99-min-Video 122
+1. **Weniger Fragen: bessere Tor-Kandidaten.** *26.11.: Stufe 2 aus Kamera- und Spielersignalen auf Dev gemessen, kein Gewinn (Präzision 0.34 wie heute); Prüfen-Antworten als Labels hängen an Q-DATA-4, Pfiff nicht messbar (Segmente ohne Ton), `produkt-analyse-integration.md` «Tor-Kandidaten Stufe 2». 20.11.: Ballpfad als Bestätigung geprüft, hilft nicht (AUC 0.81 mit und ohne Ball, Dev, `produkt-analyse-integration.md` «Ballpfad als Bestätigung»). Offen bleibt die Zeit ohne Spiel; Daten dafür kommen aus `observe_queue`. 25.11. Pausen Variante 2 gemessen (Dev, 65 Segmente): die Halbzeitpause nennt das Produkt zu 98 % Spiel, Hebel ist «keine laufende Uhr über Minuten = Pause». 23.11.: rund 160 von 860 Segmenten beobachtet; für die Pausen-Messung fehlt der Entscheid Hallentafel in der Warteschlange (empfohlen) oder nur Dev-Spiele mit Uhr aus dem Bericht (`UEBERGABE-2026-11-23.md`).* Präzision heute 29 %, auf Lukas' 99-min-Video 122
    Fragen. Die Regel «Tore aus dem Spielbericht» spart kaum Fragen (Kandidaten nahe Berichtstoren
    waren schon verdeckt). Hebel: Pausen, Einspielen und Nachspiel ohne Fragen (Pausenerkennung ohne
    Hallentafel über die `no_play`-Regel), Tor-Kandidaten mit Ballpfad bestätigen. Braucht für die
@@ -31,10 +31,15 @@ fertig ist, streicht es und trägt das Ergebnis im passenden Plan ein.
 3. **Spieltag neu denken (A21).** Seit Runde 4 aus der App genommen; Konzept mit Lukas: was der
    Trainer am Spielfeldrand wirklich erfasst.
 4. **Go-live-Punkte mit Code** (`GO_LIVE.md`): ~~HLS-Segmente direkt aus R2~~ erledigt 20.11.
-   (`HB_MEDIA_DIRECT`, ADR 002 Nachtrag; Lukas: R2-CORS-Regel prüfen, README Azure Schritt 7); ~~Overlays im Player für bewegte Kameras~~ erledigt 26.11. (ADR 020 Nachtrag: Kamera-Blick pro Bild, Spotlight und Personen-Fragen auch bei schwenkender Kamera; wirkt ab der nächsten Analyse eines Videos; offen: Reel- und Präsentations-Export lesen den Kamera-Blick noch nicht und zeichnen dort vorerst keinen Ring); Alarme und Proben im
+   (`HB_MEDIA_DIRECT`, ADR 002 Nachtrag; Lukas: R2-CORS-Regel prüfen, README Azure Schritt 7); ~~Overlays im Player für bewegte Kameras~~ erledigt 26.11. (ADR 020 Nachtrag: Kamera-Blick pro Bild, Spotlight und Personen-Fragen auch bei schwenkender Kamera; wirkt ab der nächsten Analyse eines Videos; Reel- und Präsentations-Export folgen der Kamera ebenso, Ring und 9:16-Zuschnitt); Alarme und Proben im
    Monitoring vorbereiten.
 5. **Europa Schritt 2 vorbereiten** (`docs/plans/europa.md`): Währung EUR in Abrechnung und Rechnung
    (heute nur CHF), `de-DE` erst mit dem ersten deutschen Verein.
+6. **Torhüter in eigener Trikotfarbe prüfen** (Audit Punkt 4). *26.11. (Analyse-Sitzung): die
+   Positionsregel nimmt jetzt auch «referee»-Tracks, streng (80 % am Tor, kein anderer Kandidat).*
+   Offline auf vier Staging-Läufen nachgerechnet: keine Änderung, Torlinien-Schiedsrichter durch die
+   Bedingung «vor dem Tor» ausgeschlossen. Offen: Seiten aus Anwurf-Formationen (Vorschlag 1). `produkt-analyse-integration.md`
+   «Torhüter in eigener Trikotfarbe».
 
 **B. Braucht Lukas oder die lokale Sitzung**
 1. Kalibrierung per Klick Ende-zu-Ende auf Staging mit echtem Clip, danach Deploy

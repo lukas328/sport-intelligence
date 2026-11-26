@@ -403,6 +403,108 @@ def test_learned_path_needs_calibration_then_reuses_observations(
     assert "goal_candidates" in second["timings_s"] and len(seen) == 2 and seen[0] > 0
 
 
+def test_the_court_marked_while_running_is_taken_at_the_court_stage(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The hall image is stored and announced after the motion pass, before the observation
+    pass; points the coach marks on it come back in the API's answer to the court stage report
+    and are used there: no request to mark the court, no second run."""
+    from handball_vision.calibration import calibrate_frames
+    from handball_vision.detection import Detection
+
+    root = tmp_path / "s3"
+    (root / "videos" / "o/m/a").mkdir(parents=True)
+    truth = SyntheticMatch(SyntheticConfig(seconds=4)).write(root / "videos" / "o/m/a/proxy.mp4")
+    boxes = {
+        g.index: [Detection(*o.bbox, 0.9) for o in g.objects if o.label != "ball"] for g in truth
+    }
+    s3 = FakeS3(root)
+    hall_before_observe: list[bool] = []
+
+    class Oracle:
+        source = "model"
+        model = "oracle"
+
+        def __init__(self) -> None:
+            self.n = 0
+
+        def detect(self, frames: list[Any]) -> list[list[Any]]:
+            if len(frames) == 1 and not hall_before_observe:  # the observation pass begins
+                hall_before_observe.append(
+                    (root / "artifacts/o/m/a/analysis/panorama.jpg").exists()
+                )
+            out = [boxes.get(self.n, [])]
+            self.n += 3
+            return out
+
+    monkeypatch.setattr(analysis, "s3_client", lambda *a: s3)
+    monkeypatch.setattr(analysis, "load_detector", lambda settings: Oracle())
+    monkeypatch.setattr(
+        goalcandidates, "from_observations", lambda obs, play=None: {"candidates": []}
+    )
+    h = truth[0].homography
+    if h is None:
+        h = calibrate_frames(
+            pipeline.sample_frames(root / "videos" / "o/m/a/proxy.mp4", 8)
+        ).homography
+    corners = [(0.0, 0.0), (40.0, 0.0), (40.0, 20.0), (0.0, 20.0), (20.0, 0.0), (20.0, 20.0)]
+    pts = [{"image": list(geometry.apply(h, np.array([c]))[0]), "court": list(c)} for c in corners]
+    posts: list[dict[str, Any]] = []
+
+    def handler(req: httpx.Request) -> httpx.Response:
+        body = json.loads(req.content)
+        posts.append(body)
+        if body.get("stage") == "calibration" and "stages" in body:
+            marked = {"points": pts, "space": "panorama", "frame_ms": 0}
+            return httpx.Response(200, json={"status": "running", "court_points": marked})
+        return httpx.Response(200, json={"status": "running", "court_points": None})
+
+    rep = Reporter(
+        "http://api",
+        "t",
+        "j",
+        analysis.STAGES_LEARNED,
+        client=httpx.Client(transport=httpx.MockTransport(handler)),
+        heartbeat_s=None,
+    )
+    out = analysis.run_analysis(
+        "j",
+        "o",
+        "m",
+        "a",
+        "videos",
+        "o/m/a/proxy.mp4",
+        "o/m/a/",
+        KITS,
+        settings=JobSettings(work_dir=str(tmp_path / "w")),
+        reporter=rep,
+    )
+    views = [i for i, p in enumerate(posts) if p.get("view")]
+    court = next(i for i, p in enumerate(posts) if p.get("stage") == "calibration")
+    assert views and views[0] < court
+    assert posts[views[0]]["view"]["panorama"]["width"] > 0
+    assert hall_before_observe == [True]
+    assert out["needs_calibration"] is False
+    assert out["calibration"]["source"] == "user_correction"
+    assert len(out["tracks"]) >= 8
+    # without the motion pass first the hall image comes with the court stage, as before
+    posts.clear()
+    off = analysis.run_analysis(
+        "j",
+        "o",
+        "m",
+        "a",
+        "videos",
+        "o/m/a/proxy.mp4",
+        "o/m/a/",
+        KITS,
+        settings=JobSettings(work_dir=str(tmp_path / "w2"), motion_first=False),
+        reporter=rep,
+    )
+    assert not any(p.get("view") for p in posts)
+    assert off["calibration"]["source"] == "user_correction"
+
+
 @pytest.mark.parametrize(
     ("rosters", "expected"),
     [
@@ -652,6 +754,7 @@ def test_an_earlier_court_of_the_hall_comes_before_the_automatic_one(
     monkeypatch.setattr(analysis, "_store_view", lambda *a: None)
     monkeypatch.setattr(analysis, "_hall_calibration", hall_calibration)
     monkeypatch.setattr(analysis, "goal_candidates", lambda obs, play=None: None)
+    monkeypatch.setattr(learned, "motion_pass", lambda *a, **kw: Obs.motion)
     monkeypatch.setattr(learned, "observe", lambda *a, **kw: Obs())
     monkeypatch.setattr(learned, "save_observations", lambda *a: None)
     monkeypatch.setattr(learned, "auto_calibrate", auto)
