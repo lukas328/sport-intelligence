@@ -4695,6 +4695,7 @@
     "none": "Aucun tir à vérifier",
     "back": "Retour à Vérifier",
     "entry": "{n, plural, one {Vérifier # tir rapidement} other {Vérifier # tirs rapidement}}",
-    "entryHint": "Un court clip et quatre boutons par tir. Les moins sûrs d'abord."
+    "entryHint": "Un court clip et quatre boutons par tir. Les moins sûrs d'abord.",
+    "suggestedSide": "Suggestion : {team}, comme au dernier tir. Touche pour changer."
   }
 }

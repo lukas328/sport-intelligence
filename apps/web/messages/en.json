@@ -4695,6 +4695,7 @@
     "none": "No shots to check",
     "back": "Back to Check",
     "entry": "{n, plural, one {Check # shot quickly} other {Check # shots quickly}}",
-    "entryHint": "One short clip and four buttons per shot. The least sure first."
+    "entryHint": "One short clip and four buttons per shot. The least sure first.",
+    "suggestedSide": "Suggested: {team}, as on the last shot. Tap to change."
   }
 }

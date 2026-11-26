@@ -9,7 +9,7 @@ import fr from "../../messages/fr.json";
 import { ShellContext, type ShellValue } from "@/components/shell/context";
 import { ShotQuick } from "@/app/app/[orgId]/matches/[matchId]/check/shot-quick";
 import type { CandidateList } from "./goal-candidates";
-import { quickBody, quickQueue, quickWindow, type ShotCandidate } from "./shot-candidates";
+import { quickBody, quickQueue, quickWindow, startSide, type ShotCandidate } from "./shot-candidates";
 
 // «Würfe schnell prüfen»: the shots the analysis found, the least sure first, a short clip each,
 // four answers saved through the same review as the shot list. Invented clubs.
@@ -68,6 +68,14 @@ describe("the clip and the answers", () => {
     expect(quickBody({ ...c, suggested_side: null }, null, "goal")).toBeNull();
     const withReport = cand("b", 10_000, 0.3, { suggestion: { side: "own", outcome: "goal" } as never });
     expect(quickBody(withReport, "own", "goal")).toEqual({ status: "confirmed" });
+  });
+});
+
+describe("startSide: the team a quick question starts with", () => {
+  it("the analysis' guess; without one the team chosen last, as a suggestion; else none", () => {
+    expect(startSide(cand("a", 1000, 0.3, { suggested_side: "opponent" }), "own")).toEqual({ side: "opponent", suggested: false });
+    expect(startSide(cand("b", 1000, 0.3, { suggested_side: null }), "own")).toEqual({ side: "own", suggested: true });
+    expect(startSide(cand("c", 1000, 0.3, { suggested_side: null }), null)).toEqual({ side: null, suggested: false });
   });
 });
 
