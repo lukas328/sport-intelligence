@@ -8,6 +8,7 @@ peak above it (false alarms, 30 frames); 95 % intervals from a bootstrap over ga
 gained / lost between the nets. Only for comparing nets measured once each; never tune on it.
 
     python ml/gold/eval_ball_test2.py VIDEOS_DIR NAME=ARCH:WEIGHTS [NAME=ARCH:WEIGHTS ...] [--out R.json]
+        [--labels ml/gold/data/ball_val1_labels.json]  # the validation set: all decisions there
 ARCH: ballhr or ballhrp (ml/ball/ballhr.py, ml/ball/ballhrp.py). Needs torch (CPU is enough).
 """
 
@@ -52,7 +53,9 @@ def triplet(video: Path, frame: int, fps: float) -> np.ndarray:
         if not ok:
             raise RuntimeError(f"{video} frame {f}")
         if im.shape[1] != 1280:
-            im = cv2.resize(im, (1280, round(im.shape[0] * 1280 / im.shape[1])), interpolation=cv2.INTER_AREA)
+            im = cv2.resize(
+                im, (1280, round(im.shape[0] * 1280 / im.shape[1])), interpolation=cv2.INTER_AREA
+            )
         ims.append(im)
     cap.release()
     h2 = ims[0].shape[0] // 32 * 32
@@ -83,9 +86,17 @@ def main() -> None:
     ap.add_argument("videos", type=Path)
     ap.add_argument("nets", nargs="+")
     ap.add_argument("--out", type=Path)
+    ap.add_argument(
+        "--labels",
+        type=Path,
+        default=LABELS,
+        help="another frozen label file (e.g. the validation set)",
+    )
     a = ap.parse_args()
     torch.set_num_threads(4)
-    labels = [r for r in json.loads(LABELS.read_text())["labels"] if r["label"] in ("ball", "no_ball")]
+    labels = [
+        r for r in json.loads(a.labels.read_text())["labels"] if r["label"] in ("ball", "no_ball")
+    ]
     nets = {}
     for spec in a.nets:
         name, rest = spec.split("=", 1)
@@ -96,7 +107,13 @@ def main() -> None:
         x = triplet(a.videos / r["file"], r["frame"], r["fps"])
         for k, net in nets.items():
             preds[k].append(top_peak(net, x))
-        print(i, r["id"], r["label"], {k: [round(v, 2) for v in p[-1]] for k, p in preds.items()}, flush=True)
+        print(
+            i,
+            r["id"],
+            r["label"],
+            {k: [round(v, 2) for v in p[-1]] for k, p in preds.items()},
+            flush=True,
+        )
     balls = [i for i, r in enumerate(labels) if r["label"] == "ball"]
     empty = [i for i, r in enumerate(labels) if r["label"] == "no_ball"]
     games_b = [labels[i]["game"] for i in balls]
