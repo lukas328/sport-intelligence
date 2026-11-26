@@ -831,8 +831,8 @@ def track(
     `play` (start_ms, end_ms): where the match clock runs; the ball counts only there
     (`ballpossession.from_observations`)."""
     from handball_vision.numbers import Reading
-    from handball_vision.pipeline import _confident_label, _finish
-    from handball_vision.teams import TeamAssigner
+    from handball_vision.pipeline import CLEAR_COVER, _confident_label, _finish
+    from handball_vision.teams import TeamAssigner, covered_share
     from handball_vision.tracking import CourtTracker
 
     motion = obs.motion
@@ -879,6 +879,7 @@ def track(
             kept = set(id(d) for d in filter_on_court(frame_calib, fo.people))
             keep = [i for i, d in enumerate(fo.people) if id(d) in kept]
         dets = [fo.people[i] for i in keep]
+        cover = covered_share(dets)
         timings["court_filter"] += time.perf_counter() - t0
         n_dets += len(dets)
         feats = np.array(
@@ -911,7 +912,12 @@ def track(
         stepped = [replace(tp, frame=fo.index) for tp in stepped]  # original frame numbers
         for tp in stepped:
             if tp.det_index is not None and not np.isnan(feats[tp.det_index]).any():
-                teams.add_sample(tp.track_id, feats[tp.det_index], tp.frame)
+                teams.add_sample(
+                    tp.track_id,
+                    feats[tp.det_index],
+                    tp.frame,
+                    bool(cover[tp.det_index] < CLEAR_COVER),
+                )
             if tp.det_index is not None and keep[tp.det_index] in fo.embeds:
                 vectors[tp.track_id].append((fo.index, fo.embeds[keep[tp.det_index]]))
             if tp.det_index is not None and keep[tp.det_index] in fo.roles:
