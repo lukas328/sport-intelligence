@@ -1151,3 +1151,40 @@ eingefrorene LLM-Labels, 85 Bälle und 30 Bilder ohne Ball, `ml/ball/LINEAGE.md`
 
 Paarweise: 9 Bälle nur hr1, 5 nur hr-nods; kein gesicherter Unterschied. Ein auslieferbares Netz
 kostet höchstens wenige Punkte. Ergebnis `ml/integration/results/ball_test2_hr1_vs_hrnods.json`.
+### Laufzeit eines ganzen Spiels auf CPU (Produkt-Audit Punkt 2, 2026-11-26)
+
+Das Audit (`docs/plans/produkt-audit-2026-11.md`) rechnete aus zwei 8-min-Läufen auf Staging 7 bis
+8 h Analyse für ein ganzes Spiel hoch, über dem RQ-Timeout von 6 h. Nachgeprüft:
+
+- **ReID lief nur auf kurzen Clips.** `HB_BALL_ALLOW_CPU=1` (Staging, für Ball-Tests) schaltete auch
+  ReID auf der CPU ein, aber nur bis `ball_max_minutes` (12 min). Die 8-min-Läufe hatten darum ReID
+  (34 von 60 min), ein ganzes Spiel nie. Neu läuft ReID nur mit GPU, unabhängig vom Schalter
+  (`load_embedder`); 8-min-Testläufe auf Staging werden damit etwa doppelt so schnell.
+- **Messung** (`ml/integration/profile_analysis.py`, Code von heute, Staging-Einstellungen inklusive
+  Ballnetz-Schalter, 2 Kerne wie der Staging-Worker; Video: die zwei 10-min-Testclips SG Horgen H1
+  und H2 hintereinander, 20 min, mit der Produkt-Umwandlung):
+
+| Stufe | s | x Videolänge |
+|---|---|---|
+| Proxy-Umwandlung (eigener Job, Ingest) | 230 | 0.19 |
+| Analyse gesamt | 2 980 | **2.46** |
+| davon YOLOX (alle 3 Bilder) | 1 412 | 1.17 |
+| davon Rückennummern | 909 | 0.75 (Budget-Deckel) |
+| davon Kamerabewegung | 349 | 0.29 |
+| davon Hallentafel | 78 | 0.06 |
+| davon Linien | 48 | 0.04 |
+
+  - Ballnetz: `too_long_for_cpu` (aus, wie für jedes Video über 12 min), ReID nicht geladen.
+  - Die Kalibrierung scheiterte auf dem zusammengesetzten Video (Schnitt zwischen den Halbzeiten);
+    Tracking, Stitching und Ereignisse fehlen darum. Auf den Einzelclips kosteten sie zusammen etwa
+    6 s pro 10 min (Tabelle «Ganze Kette auf den Testclips»), fallen also nicht ins Gewicht.
+  - Während etwa 2 min lief ein Testlauf mit, die Zahl ist eher etwas zu hoch.
+- **Hochgerechnet:** 60 min Spiel etwa 2.5 h, 99 min etwa 4.1 h Analyse auf 2 vCPU, unter 6 h. Das
+  passt zu Lukas' ganzem Lauf auf Staging (99 min, 2.2 x, 17.11.). Das Budget pro Job ist ohnehin
+  `max(6 h, 3 x Videolänge + 1 h)` (`services/video_jobs.job_budget_s`).
+- **Ingest** (1 vCPU, eigener Job): Gemessen auf einer Quelle 1080p50 mit 15 Mbit/s, 120 s, auf
+  einem Kern: HLS-Leiter 323 s, Proxy 97 s, zusammen 419 s (3.5 x Videolänge, wie Staging mit
+  3.6 x). Neu entstehen HLS und Proxy in einem ffmpeg-Lauf mit einem Decode: 371 s (3.1 x, minus
+  11 %), Dateien identisch (gleiche Bildzahl und Grösse). Ein 99-min-Video braucht so etwa 5.1 h
+  Umwandlung plus Thumbnails, knapp unter 6 h. Mehr vCPU für den Worker wäre der grössere Hebel;
+  Entscheid der Hauptsitzung (26.11.): vorerst nicht, die GPU löst die Analyse-Laufzeit.

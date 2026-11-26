@@ -545,8 +545,8 @@ locals {
     ingress = false
     # Ball net on the CPU (no GPU on staging yet, tests with 5 to 10 minute clips): one net,
     # every 3rd frame at 960 px width. The model file lies in the artifacts bucket and is
-    # checked against its SHA-256. The re-identification net stays off: HB_BALL_ALLOW_CPU
-    # would allow it on the CPU too.
+    # checked against its SHA-256. Re-identification runs only with a GPU (product audit
+    # 2026-11: 56 % of the CPU analysis time), HB_BALL_ALLOW_CPU does not switch it on.
     env = {
       HB_BALL_MODEL        = "models/ball/ball_hrp1_fp16-37153d8dfc83.onnx"
       HB_BALL_MODEL_SHA256 = "37153d8dfc832e683283b43229d35ea5fd1a257757c689d1b05ffb81fd9779f5"
