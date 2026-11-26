@@ -261,8 +261,10 @@ def test_run_ingest_end_to_end(
     assert (out / "poster.jpg").exists()
     assert "thumbs.jpg#xywh=0,0,160,90" in (out / "thumbs.vtt").read_text()
     assert result["width"] == 1280
-    assert result["audio_key"] == "o/m/a/audio_8k.wav"
-    assert (out / "audio_8k.wav").stat().st_size > 8000 * 2 * 5  # 8 kHz mono 16 bit, 8 s clip
+    assert result["audio_key"] == "o/m/a/audio_16k.wav"
+    assert (out / "audio_16k.wav").stat().st_size > 16000 * 2 * 7  # 16 kHz mono 16 bit, 8 s clip
+    audio = result["quality_report"]["audio"]
+    assert audio["silent"] is False and abs(audio["seconds"] - 8.0) < 0.1
     assert len(result["checksum_sha256"]) == 64
     assert result["quality_report"]["overall"] in ("warn", "fail")  # 8 s clip: duration_short
     assert posts[-1]["status"] == "succeeded"
@@ -443,3 +445,56 @@ def test_transcode_commands_log_errors_only(tmp_path: Path) -> None:
         transcode.proxy_command(Path("in.mp4"), tmp_path / "p.mp4", "ffmpeg", "fast"),
     ):
         assert cmd[cmd.index("-loglevel") + 1] == "error"
+
+
+def _clip(path: Path, audio: list[str], seconds: int = 3) -> Path:
+    subprocess.run(
+        [FFMPEG or "ffmpeg", "-hide_banner", "-y", "-f", "lavfi", "-i",
+         f"testsrc2=size=320x180:rate=25:duration={seconds}", *audio,
+         "-c:v", "libx264", "-preset", "ultrafast", "-c:a", "aac", "-shortest", str(path)],
+        check=True, capture_output=True,
+    )  # fmt: skip
+    return path
+
+
+@needs_ffmpeg
+def test_extract_audio_whole_video_16k_first_stream_and_silence(tmp_path: Path) -> None:
+    """The whole sound track at 16 kHz (whistles at 3.7 to 4.1 kHz need more than 8 kHz), from the
+    first audio stream, and a silent source (Uznach, 26.11.2026) is reported as silent."""
+    # two audio streams: the first is a tone, the second (more channels) is silence; ffmpeg alone
+    # would take the stereo one
+    two = _clip(
+        tmp_path / "two.mp4",
+        ["-f", "lavfi", "-i", "sine=frequency=4000:duration=3:sample_rate=48000",
+         "-f", "lavfi", "-i", "anullsrc=channel_layout=stereo:sample_rate=48000",
+         "-map", "0:v", "-map", "1:a", "-map", "2:a"],
+    )  # fmt: skip
+    got = transcode.extract_audio(two, tmp_path / "a.wav", FFMPEG or "ffmpeg", 3.0)
+    assert got["silent"] is False
+    assert abs(got["seconds"] - 3.0) < 0.1  # whole clip, no time limit
+    import wave
+
+    with wave.open(str(tmp_path / "a.wav"), "rb") as w:
+        assert (w.getframerate(), w.getnchannels(), w.getsampwidth()) == (16000, 1, 2)
+        a = np.frombuffer(w.readframes(w.getnframes()), "<i2").astype(np.float64)
+    # the 4 kHz tone survives (at 8 kHz it would sit on the Nyquist frequency and vanish)
+    spectrum = np.abs(np.fft.rfft(a))
+    assert abs(np.argmax(spectrum) * 16000 / len(a) - 4000) < 20
+    silent = _clip(tmp_path / "silent.mp4", ["-f", "lavfi", "-i", "anullsrc=sample_rate=48000"])
+    assert transcode.extract_audio(silent, tmp_path / "s.wav", FFMPEG or "ffmpeg", 3.0)["silent"]
+
+
+def test_extract_audio_command_has_no_time_limit(monkeypatch: pytest.MonkeyPatch) -> None:
+    seen: dict[str, object] = {}
+
+    def fake_run(cmd: list[str], **kw: object) -> None:
+        seen["cmd"], seen["timeout"] = cmd, kw.get("timeout")
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+    monkeypatch.setattr(transcode, "audio_summary", lambda p: {"seconds": 0.0, "silent": True})
+    transcode.extract_audio(Path("in.mp4"), Path("out.wav"), "ffmpeg", 99 * 60)
+    cmd = seen["cmd"]
+    assert isinstance(cmd, list)
+    assert "-t" not in cmd and cmd[cmd.index("-map") + 1] == "0:a:0"
+    assert cmd[cmd.index("-ar") + 1] == "16000"
+    assert seen["timeout"] == 60 + 99 * 6  # a 99-min file gets about 11 min to demux
