@@ -466,3 +466,33 @@ def test_pick_skips_no_play_and_scales_the_quota() -> None:
     assert all(not 60 <= c.t < 300 for c in got)
     # block 1: 1 minute of play, block 2: 1 minute
     assert [len([c for c in got if c.rate <= r]) for r in gc.RATES] == [2, 4, 8]
+
+
+def test_a_fixed_camera_with_a_little_drift_is_not_parked() -> None:
+    """A tripod camera that drifts a degree or two counts as moving in motion.py; it stands
+    still all game, which is not a parked operated camera: the whole video stays play and the
+    goals are found (staging 2026-11-19: 2 degrees of pan, no candidates at all)."""
+    goals = [100.0, 251.0]
+    obs = _synthetic_game(goals)
+    n = obs.total
+    drifting = _pan_motion(n, 0.0)  # moving, but the camera does not turn
+    drifting.canvas_f, drifting.canvas_c, drifting.canvas_size = 1500.0, (640.0, 360.0), (1280, 720)
+    drifting.stats = {"pan_deg": 2.0, "zoom_ratio": 1.03}
+    obs.motion = drifting
+    assert not gc.operated(drifting)
+    out = gc.from_observations(obs)
+    assert out is not None
+    assert out["play_s"] == pytest.approx(out["duration_s"], abs=0.5)
+    assert out["no_play_ms"] == []
+    found = [c["t_ms"] for c in out["candidates"] if c["rate"] <= gc.DEFAULT_RATE]
+    assert all(any(abs(f - g * 1000) <= 8000 for f in found) for g in goals)
+    # the same stillness from a camera that follows the play elsewhere in the video is parked
+    drifting.stats = {"pan_deg": 60.0, "zoom_ratio": 1.03}
+    assert gc.operated(drifting)
+    parked = gc.from_observations(obs)
+    assert parked is not None
+    assert parked["play_s"] == 0.0
+    # without the pan range (older motion files) every moving camera is operated, as before
+    drifting.stats = {}
+    assert gc.operated(drifting)
+    assert not gc.operated(CameraMotion.fixed((1280, 720), n))
