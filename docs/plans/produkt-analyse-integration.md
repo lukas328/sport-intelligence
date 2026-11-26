@@ -1459,6 +1459,31 @@ Verknüpfungen unter 10 % falsch. Dev-Clips Horgen H1/H2, nie Endtest.
   unverändert, geprüft: gleiche Zahlen wie vorher). Einschalten nach einem Test auf einem weiteren
   Spiel mit derselben Sichtprüfung.
 
+**Nachtrag: zweites Spiel (ATVKVBasel–YellowWinterthur2, Segment s1, 3 min, 2026-11-26).** Gleiche
+Regeln, Dev. Das Segment s3 liess sich mit der eigenen Kamerabewegung nicht automatisch kalibrieren
+(Tor-Score knapp unter der Schwelle), darum nur s1.
+
+- **Labels:** 100 Detektionen alle 3 s (70 Feldspieler, 30 am Feldrand oder in fremder Farbe),
+  zweifach in gemischter Reihenfolge beschriftet, 99 übereinstimmend: 9 Feldspieler mit sichtbarer
+  Nummer, 71 ohne lesbare Nummer, 17 Schiedsrichter, Bank oder Zuschauer, 2 Torhüter. Die Labels
+  liegen nur im Messordner (das Spiel hat keine Kaderliste im Repo); wenige sichtbare Nummern, darum
+  zählt hier vor allem die Sichtprüfung.
+
+| Variante | richtig | falsch | benannte Zeit | Nicht-Feldsp. benannt | Nicht-Feldsp. als Spieler | Median | Tracks |
+|---|---|---|---|---|---|---|---|
+| heute (bis 4 s) | 2 von 9 | 1 | 16.3 % | 1 von 17 | 9 von 17 | 24.2 s | 88 |
+| Filter, bis 8 s | 2 | 1 | 15.0 % | 1 | 9 | 20.4 s | 84 |
+
+- **Sichtprüfung** der neuen Verknüpfungen über 4 s (Filter, bis 8 s): 3 von 16 klar falsch (gelb
+  an Schiedsrichter, schwarz an gelb, schwarz an gelb mit Ball), 2 unklar (Überdeckung zweier
+  Spielerinnen am Stückende). 19 % klar falsch, trotz Teambedingung: die Farbblicke am Stückende
+  stammen dort aus Überdeckungen.
+- **Bewertung über beide Spiele:** klar falsch zusammen etwa 11 % (Horgen etwa 7 bis 8 von 78, ATV 3
+  von 16), also über der 10-%-Grenze. Auf ATV keine Zunahme der benannten Zeit (16.3 -> 15.0 %) und
+  ein kürzerer Median, weil der Feldrand-Filter Stücke herausnimmt, die heute schon kurz verknüpft
+  werden. Falsch benannt und Nicht-Feldspieler unverändert. **Kriterium nicht erfüllt, bleibt aus.**
+  Nächster Hebel wäre die Teamfarbe am Stückende nur aus Blicken ohne Überdeckung.
+
 ### Spielfeldseiten ohne Torhüter (Audit, 2026-11-26)
 
 Ohne Seiten gibt es keine Ereignisse (`missing: goalkeepers`), keinen Team-Vorschlag und kein
@@ -1492,3 +1517,15 @@ Horgen H1 (1. Halbzeit) und H2 (2. Halbzeit), Dev, nie Endtest.
   Staging-Fall nach, ist aber kein zweites Spiel. Kriterium erfüllt (falsch steigt nicht, unbekannt
   sinkt von 100 % auf 0 %), darum im Produkt. Sobald kalibrierte Segmente eines weiteren Spiels
   da sind, dort mit derselben Beschriftung nachmessen.
+
+**Nachtrag: zweites Spiel (ATVKVBasel–YellowWinterthur2, Segment s1, 3 min, 2026-11-26).** Labels
+wie oben aus zwei unabhängigen Bildsätzen, übereinstimmend: home (gelb) verteidigt rechts.
+
+| Torhüter | vorher | neu |
+|---|---|---|
+| da | 100 / 0 / 0 % | 100 / 0 / 0 % |
+| weggenommen | 0 / 0 / 100 %, keine Ereignisse | 100 / 0 / 0 %, 5 Ereignisse |
+
+Rohstimmen 684 zu 64 für die richtige Seite. Damit auf einem zweiten Spiel mit anderer Halle und
+anderen Trikotfarben bestätigt, keine falsche Zuordnung. Segment s3 liess sich mit der eigenen
+Kamerabewegung nicht kalibrieren und fehlt.
