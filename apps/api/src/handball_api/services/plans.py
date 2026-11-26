@@ -31,7 +31,8 @@ class PlanSpec:
     storage_gb: int
     gpu_minutes_month: int
     features: frozenset[str] = field(default_factory=frozenset)
-    price_chf_month: int = 0
+    # the monthly price: the same number in CHF and in EUR (Europa EU3, docs/plans/europa.md)
+    price_month: int = 0
     trial_days: int = 0
     assistant_usd_month: float = 0.0  # model cost cap of the data assistant per organisation
 
@@ -54,7 +55,7 @@ PLANS: dict[Plan, PlanSpec] = {
         storage_gb=250,
         gpu_minutes_month=1500,
         features=_ALL,
-        price_chf_month=39,
+        price_month=39,
         trial_days=30,
         assistant_usd_month=5.0,
     ),
@@ -65,7 +66,7 @@ PLANS: dict[Plan, PlanSpec] = {
         storage_gb=2500,
         gpu_minutes_month=15000,
         features=frozenset(FEATURES),
-        price_chf_month=199,
+        price_month=199,
         trial_days=30,
         assistant_usd_month=25.0,
     ),
@@ -75,3 +76,12 @@ PLANS: dict[Plan, PlanSpec] = {
 # free plan (owner decision 18.11.2026 afternoon, reverses A9's "in every plan").
 # fair use for "unlimited" matches; above this the UI asks to contact support
 FAIR_USE_MATCHES_PER_SEASON = 80
+
+
+# clubs in these countries pay in CHF, all others in EUR (Europa step 2, EU3: the same amount)
+CHF_COUNTRIES = frozenset({"CH", "LI"})
+
+
+def currency_for(country: str | None) -> str:
+    """The billing currency of a club from its country (ISO 3166-1 alpha-2)."""
+    return "CHF" if (country or "CH").upper() in CHF_COUNTRIES else "EUR"
