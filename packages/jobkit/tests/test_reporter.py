@@ -122,3 +122,16 @@ def test_shares_the_hall_image_and_reads_the_court_points_back(sleeps: list[floa
     rep2, _ = make(lambda r: httpx.Response(200, text="ok"))
     assert rep2.stage("a") is None and clicked_points(None) is None
     assert clicked_points({"court_points": {"points": []}}) is None
+
+
+def test_the_stage_reports_its_own_fraction(monkeypatch: pytest.MonkeyPatch) -> None:
+    """The API measures the running stage's pace from it (the job's progress weighs the stages by
+    fixed shares)."""
+    rep, posts = make(lambda r: httpx.Response(200))
+    clock = iter([0.0, 10.0, 20.0, 30.0])
+    monkeypatch.setattr(time, "monotonic", lambda: next(clock))
+    rep.stage("b")
+    rep.fraction(0.4)
+    assert posts[-1]["stages"]["b"]["fraction"] == 0.4
+    assert posts[-1]["stages"]["b"]["status"] == "running"
+    assert posts[-1]["progress"] == 0.3  # (3 · 0.4) / 4

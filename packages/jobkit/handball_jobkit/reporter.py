@@ -150,8 +150,22 @@ class Reporter:
         )
 
     def fraction(self, f: float) -> None:
+        """How far the running stage is (0 to 1). It goes to the API in the stage itself too: the
+        job's progress weighs the stages by fixed shares, the stage's own pace is measured."""
         self._fraction = max(0.0, min(1.0, f))
-        self._send({"status": "running", "progress": self.progress(), "stage": self._current})
+        if self._current:
+            self.stages[self._current] = {
+                **self.stages[self._current],
+                "fraction": round(self._fraction, 4),
+            }
+        self._send(
+            {
+                "status": "running",
+                "progress": self.progress(),
+                "stage": self._current,
+                "stages": self.stages,
+            }
+        )
 
     def succeed(self, result: dict[str, Any]) -> None:
         self.stop()

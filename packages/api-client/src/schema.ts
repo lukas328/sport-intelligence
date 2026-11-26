@@ -7350,6 +7350,11 @@ export interface components {
              */
             eta_basis?: ("measured" | "history") | null;
             /**
+             * Eta Range S
+             * @description [low, high] seconds left, measured from the pace of the running step (since it began and over the last minutes); null when not measured
+             */
+            eta_range_s?: number[] | null;
+            /**
              * Eta S
              * @description seconds left in the current stage; null: cannot be estimated
              */
@@ -8870,6 +8875,11 @@ export interface components {
          *     match (K6, K13, B4). Present while something runs and a while after it ended.
          */
         MatchProgressOut: {
+            /**
+             * Eta Range S
+             * @description [low, high] seconds until everything is done, when each file's time is measured; null otherwise
+             */
+            eta_range_s?: number[] | null;
             /**
              * Eta S
              * @description seconds until everything is done; null: cannot be estimated

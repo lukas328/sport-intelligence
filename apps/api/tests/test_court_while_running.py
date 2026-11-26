@@ -3,11 +3,13 @@ marked on it before the court stage go to the running job, later ones replace it
 
 from __future__ import annotations
 
+import re
 from collections.abc import Callable
 from typing import Any
 
 import pytest
 
+from handball_api.core.email import MemoryEmailSender
 from handball_api.core.jobs import MemoryJobQueue
 
 from .conftest import Api, setup_club
@@ -98,11 +100,21 @@ async def test_points_marked_before_the_court_stage_go_to_the_running_job(
     assert jobs.jobs[-1][3]["calibration_points"] == court["points"]
 
 
+def _done_mails(outbox: MemoryEmailSender) -> int:
+    """The mails that say the analysis of a match is done (whatever it found)."""
+    return sum(
+        1
+        for m in outbox.outbox
+        if re.search(r"Muster gegen .* sind da|Analyse gegen .* fertig", m.subject)
+    )
+
+
 async def test_a_run_that_did_not_take_the_points_is_followed_by_one_with_them(
-    make_api: Callable[[], Api],
+    make_api: Callable[[], Api], outbox: MemoryEmailSender
 ) -> None:
     """An older worker (or the classical path) never asks: its automatic court lands, and a run
-    with the marked points follows on its stored observations."""
+    with the marked points follows on its stored observations. The coach hears about the analysis
+    once, after that run: its results replace the first ones (honest waiting)."""
     api = make_api()
     ids = await setup_club(api)
     org = ids["org"]
@@ -121,12 +133,14 @@ async def test_a_run_that_did_not_take_the_points_is_followed_by_one_with_them(
     assert func == "handball_gpu_worker.analysis.run_analysis" and rerun != job
     assert payload["calibration_space"] == "panorama" and payload["calibration_points"]
     assert await _state(api, org, vid) == "updating"
+    assert _done_mails(outbox) == 0  # not yet: the run with the marked court follows
     await _finish(
         api,
         rerun,
         {"calibration": _court("user_correction"), "tracks": _tracks(), "panorama": PANORAMA},
     )
     assert await _state(api, org, vid) == "confirmed"
+    assert _done_mails(outbox) == 1
 
 
 async def test_points_marked_after_the_court_stage_replace_the_running_job(

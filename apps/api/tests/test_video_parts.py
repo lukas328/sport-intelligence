@@ -12,6 +12,7 @@ from typing import Any
 
 import pytest
 
+from handball_api.core.email import MemoryEmailSender
 from handball_api.core.jobs import MemoryJobQueue
 from handball_api.core.storage import MemoryStorage
 
@@ -717,3 +718,25 @@ async def test_both_halves_play_straight_from_storage(make_api: Callable[[], Api
             assert lines.count("#EXT-X-DISCONTINUITY") == 1 and "../" not in text
     finally:
         api.app.state.settings.media_direct = False
+
+
+async def test_one_mail_once_both_halves_are_analysed(
+    make_api: Callable[[], Api], outbox: MemoryEmailSender
+) -> None:
+    """Both halves chosen at once: the mail that the analysis is done comes once the second half
+    is through, not after the first while the second waits (honest waiting)."""
+    from .test_court_while_running import _done_mails
+
+    api = make_api()
+    ids = await setup_club(api)
+    m = await new_match(api, ids)
+    first = await upload(api, ids, m["id"], b"a" * 100, name="halbzeit1.mp4")
+    second = await upload(api, ids, m["id"], b"b" * 100, name="halbzeit2.mp4")
+    await _ingest(api, first["id"], HALF, "2026-11-07T18:00:00Z")
+    await _ingest(api, second["id"], HALF, "2026-11-07T18:45:00Z")
+    await _finish(
+        api, _job_of(api, first["id"], ANALYSIS)[0], {"tracks": _tracks(), "events": FIRST}
+    )
+    assert _done_mails(outbox) == 0
+    await _finish(api, _job_of(api, second["id"], ANALYSIS)[0], {"tracks": _tracks()})
+    assert _done_mails(outbox) == 1

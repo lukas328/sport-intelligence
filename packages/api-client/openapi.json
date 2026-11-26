@@ -5297,6 +5297,21 @@
             "description": "measured: from the pace of this run; history: from video length and the pace of the latest runs",
             "title": "Eta Basis"
           },
+          "eta_range_s": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "[low, high] seconds left, measured from the pace of the running step (since it began and over the last minutes); null when not measured",
+            "title": "Eta Range S"
+          },
           "eta_s": {
             "anyOf": [
               {
@@ -9697,6 +9712,21 @@
       "MatchProgressOut": {
         "description": "Uploads and processing of one match, for the progress in the head, on Spiele and in the\nmatch (K6, K13, B4). Present while something runs and a while after it ended.",
         "properties": {
+          "eta_range_s": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "[low, high] seconds until everything is done, when each file's time is measured; null otherwise",
+            "title": "Eta Range S"
+          },
           "eta_s": {
             "anyOf": [
               {
