@@ -52,6 +52,11 @@ class ClientErrorIn(ApiModel):
     route: str = Field(max_length=300)
     build: str | None = Field(default=None, max_length=64)
     device: Literal["phone", "tablet", "desktop"]
+    # hydration errors: where React swapped the server's page for its own, as tags and test ids
+    # only («-p#a,div#b|+div#c»); anything else (a letter of page text, a space) is refused
+    dom: str | None = Field(
+        default=None, max_length=500, pattern=r"^-[a-z0-9#_,-]*\|\+[a-z0-9#_,-]*$"
+    )
 
 
 @router.post("/client-errors", status_code=204)
@@ -68,4 +73,5 @@ async def report_client_error(data: ClientErrorIn, request: Request) -> None:
         route=mask_route(data.route),
         build=data.build,
         device=data.device,
+        dom=data.dom,
     )

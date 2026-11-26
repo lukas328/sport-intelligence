@@ -21,4 +21,7 @@ at most five per browser session and 30 per address in ten minutes. Each lands a
 `client_error`; the staging diagnosis lists the last 24 hours («client errors from browsers»). In
 production builds React's messages are minified (`#418` = hydration mismatch) and the stack has
 no component names: the route, the device and the count narrow it down, a local build of the same
-page gives the full message.
+page gives the full message. A hydration error carries `dom`: the elements with a `data-testid`
+React took out (−) and put in (+) as it swapped the server's page for its own, net of each other
+(«-p#kickoff|+div#kickoff»); tags and test ids only. Empty when the differing element has no
+test id.

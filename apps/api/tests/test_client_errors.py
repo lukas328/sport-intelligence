@@ -63,3 +63,18 @@ def test_masking() -> None:
     assert (
         mask(f"see https://a.test/p?token=abc and {ID.upper()}") == "see https://a.test/p and :id"
     )
+
+
+async def test_the_dom_hint_is_tags_and_test_ids_only(client: AsyncClient) -> None:
+    """A hydration mismatch says where React swapped the page: `tag#testid` lists, nothing else."""
+    with capture_logs() as logs:
+        ok = await client.post(
+            "/v1/client-errors", json=body(dom="-p#match-head,span#score|+div#match-head")
+        )
+    assert ok.status_code == 204
+    assert (
+        next(x for x in logs if x["event"] == "client_error")["dom"]
+        == "-p#match-head,span#score|+div#match-head"
+    )
+    for bad in ("-p#x|+div#Mia Probst", "free text", "-p#x|+div#y|+z", "-<b>|+"):
+        assert (await client.post("/v1/client-errors", json=body(dom=bad))).status_code == 422, bad

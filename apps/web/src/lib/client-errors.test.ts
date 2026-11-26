@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { deviceOf, maskRoute, maskText, MAX_PER_SESSION, reactCode, reportOf, takeSlot } from "./client-errors";
+import { deviceOf, domHint, isHydration, markOf, maskRoute, maskText, MAX_PER_SESSION, reactCode, reportOf, takeSlot } from "./client-errors";
 
 const ID = "4a9f2d24-f32c-42b7-9d1b-9a86a6c6ffd5";
 
@@ -39,5 +39,29 @@ describe("client error reports carry nothing personal", () => {
     expect(sent).toBe(MAX_PER_SESSION);
     const broken = { getItem: () => { throw new Error("blocked"); }, setItem: () => undefined };
     expect(Array.from({ length: 8 }, () => takeSlot(broken)).filter(Boolean).length).toBe(MAX_PER_SESSION);
+  });
+});
+
+describe("the DOM hint of a hydration mismatch: tags and test ids, nothing else", () => {
+  it("says what React took out and put in, net: a part rendered again the same cancels out", () => {
+    const removed = ["div#match-head", "span#score", "p#kickoff", "li#row", "li#row"];
+    const added = ["div#match-head", "span#score", "div#kickoff", "li#row"];
+    expect(domHint(removed, added)).toBe("-p#kickoff,li#row|+div#kickoff");
+    expect(domHint(["a#x"], ["a#x"])).toBeNull();
+    // anything that is not a mark (a space, page text) is never sent
+    expect(domHint(["p#a"], ["div#mia probst"])).toBeNull();
+  });
+
+  it("knows a hydration mismatch by React's number or, in a development build, its words", () => {
+    expect(isHydration({ code: 418, message: "Minified React error #418" })).toBe(true);
+    expect(isHydration({ code: null, message: "Hydration failed because the server rendered HTML didn't match" })).toBe(true);
+    expect(isHydration({ code: 310, message: "Minified React error #310" })).toBe(false);
+  });
+
+  it("marks elements by tag and test id only, lower case, and skips ids that are not code constants", () => {
+    const el = (tag: string, id: string | null) => ({ tagName: tag.toUpperCase(), getAttribute: () => id }) as unknown as Element;
+    expect(markOf(el("div", "Match-Head"))).toBe("div#match-head");
+    expect(markOf(el("span", "Mia Probst"))).toBeNull();
+    expect(markOf(el("span", null))).toBeNull();
   });
 });
