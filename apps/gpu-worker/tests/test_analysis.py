@@ -918,7 +918,8 @@ def test_ball_coverage_counts_video_frames() -> None:
     # observations stored before the fix kept the last frame index in `total`
     old: Any = SimpleNamespace(total=11_999, frames=[*frames, SimpleNamespace(index=11_999)])
     assert analysis.video_frames(old) == 12_000
-    assert analysis.video_frames(SimpleNamespace(total=0, frames=[])) == 0
+    empty: Any = SimpleNamespace(total=0, frames=[])
+    assert analysis.video_frames(empty) == 0
 
 
 def test_reid_and_role_models_from_bucket_or_file(tmp_path: Path) -> None:
