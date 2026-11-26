@@ -672,7 +672,11 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
       <div hidden={view !== "video"} className="space-y-6">
         {/* a player's own scenes of this match, one step away */}
         {!canDelete && <MyScenesLine orgId={orgId} matchId={match.id} />}
-        {stage && main && graphics.data && (
+        {/* one video on the page: while the workbench is open its full player is the one, the stage
+            (with its own player) waits; its scene stands in the address and comes back as it was.
+            Both at once showed two players, and the e2e step after a goal tagged by hand found two
+            whenever the goal had reached the stage */}
+        {stage && main && graphics.data && !bench && (
           <VideoStage
             orgId={orgId}
             match={match}
