@@ -367,8 +367,6 @@ async def _apply_analysis_result(
             )
             # courtside marks with device time follow the new goals (5.3)
             await marks.sync_match(ctx, match.id, authorised=True)
-            # goals marked by hand get their shot position from the tracking
-            await shot_positions.fill(ctx, match)
             asset.analysis = {
                 **asset.analysis,
                 "auto_events": {
@@ -386,6 +384,9 @@ async def _apply_analysis_result(
                     ],
                 },
             }
+            # goals marked by hand get their shot position from the tracking, at the goal the
+            # ends of this run say (goal_by_sides reads the sides stored just above)
+            await shot_positions.fill(ctx, match)
     if "goal_candidates" in r and on_timeline and part is not None:
         # moments that are probably goals, for the coach to confirm (needs no court, so also
         # when the analysis waits for court points); after the automatic events: their

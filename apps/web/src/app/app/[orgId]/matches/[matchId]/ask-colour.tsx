@@ -2,7 +2,7 @@
 
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { api } from "@/lib/client";
 import { SHIRTS } from "@/lib/color";
 
@@ -16,6 +16,12 @@ export function AskColour({ orgId, matchId, opponent }: { orgId: string; matchId
   const qc = useQueryClient();
   const [saved, setSaved] = useState(false);
   const question = useId();
+  // the colour buttons go once one is picked: the confirmation takes the focus, so it is read and
+  // the focus does not fall back to the top of the page (audit)
+  const done = useRef<HTMLParagraphElement>(null);
+  useEffect(() => {
+    if (saved) done.current?.focus();
+  }, [saved]);
   async function pick(colour: string) {
     const r = await api.PATCH("/v1/orgs/{org_id}/matches/{match_id}", { params: { path: { org_id: orgId, match_id: matchId } }, body: { opponent_kit: colour } });
     if (r.response.ok) {
@@ -23,7 +29,12 @@ export function AskColour({ orgId, matchId, opponent }: { orgId: string; matchId
       void qc.invalidateQueries({ queryKey: ["match", matchId] });
     }
   }
-  if (saved) return <p className="mt-2.5 text-sm font-bold">{t("colourSaved")}</p>;
+  if (saved)
+    return (
+      <p ref={done} tabIndex={-1} role="status" className="mt-2.5 text-sm font-bold outline-none" data-testid="ask-colour-saved">
+        {t("colourSaved")}
+      </p>
+    );
   return (
     // the question on its line, the colours together in one row under it (review R16: they broke
     // apart next to a long opponent name)

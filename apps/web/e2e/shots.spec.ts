@@ -70,6 +70,8 @@ test("court from the hall: Passt moves on; shot review: Enter takes the report e
   await expect(page.getByText("Spielfeld aus einem früheren Video derselben Halle übernommen (Sporthalle Schilfmatt). Liegen die orangen Linien")).toBeVisible();
   await expect(page.getByTestId("court-preview")).toBeVisible();
   await expect(page.getByTestId("step-court")).toContainText("bitte prüfen");
+  // the workbench's steps after the upload stay accessible (audit of the steps after the upload)
+  await expectAccessible(page);
   await page.getByTestId("court-confirm").click();
   await expect(page.getByTestId("step-kickoff")).toHaveAttribute("aria-selected", "true");
   await expect(page.getByTestId("step-court")).toContainText("bestätigt");
@@ -139,11 +141,17 @@ test("court from the hall: Passt moves on; shot review: Enter takes the report e
   await expect(quick.getByTestId("shot-quick-count")).toHaveText("1 von 1");
   await expect(quick.getByRole("heading", { name: "Wie endete der Wurf?" })).toBeVisible();
   for (const a of ["goal", "save", "miss", "none"]) await expect(quick.getByTestId(`shot-quick-${a}`)).toBeVisible();
+  // a screen reader hears «Gehalten», not «Gehalten2»: the key is in aria-keyshortcuts
+  for (const name of ["Tor", "Gehalten", "Daneben", "Kein Wurf"]) await expect(quick.getByRole("button", { name, exact: true })).toBeVisible();
   await page.keyboard.press("2");
   await expect(quick.getByTestId("shot-quick-error")).toContainText("Wähl zuerst, von welchem Team der Wurf ist.");
   await quick.getByTestId("shot-quick-side-own").click();
-  await page.keyboard.press("2");
+  // Space on a focused answer presses it (it does not replay the clip); the focus goes on to what
+  // comes next, here the end
+  await quick.getByTestId("shot-quick-save").focus();
+  await page.keyboard.press(" ");
   await expect(quick.getByTestId("shot-quick-done")).toContainText("Alle Würfe geprüft");
+  await expect(quick.getByRole("heading", { name: "Alle Würfe geprüft" })).toBeFocused();
   expect(reviews.at(-1)).toEqual({ status: "confirmed", side: "own", outcome: "save" });
   await quick.getByTestId("shot-quick-undo").click();
   await expect(quick.getByTestId("shot-quick-count")).toHaveText("1 von 1");

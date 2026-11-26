@@ -132,6 +132,59 @@ def test_tracker_bridges_short_occlusion_and_stitching() -> None:
     assert len(set(mapping.values())) == 1
 
 
+def _piece(tid: int, frames: range, x: float, y: float, dx: float = 0.0) -> list[TrackPoint]:
+    return [TrackPoint(tid, f, x + dx * k, y, 0.0, 0.0, True, 0) for k, f in enumerate(frames)]
+
+
+def test_long_links_skip_people_outside_the_court_and_the_other_team() -> None:
+    """Long links (pipeline.LONG_LINKS): a piece standing outside the court (bench at y -1.2 m)
+    is never linked; over a gap of more than 4 s the ending and the starting shirt must be the
+    same team; a shorter gap links as before."""
+    from handball_vision.pipeline import edge_pieces, piece_ends
+
+    a = _piece(1, range(0, 100), 10.0, 5.0, 0.01)  # a player, ends at frame 99 near x 11
+    b = _piece(2, range(250, 350), 11.5, 5.0)  # starts 6 s later close by
+    bench = _piece(3, range(0, 400), 12.0, -1.2)  # someone at the bench the whole time
+    pts = a + b + bench
+    assert edge_pieces(pts, 25.0) == {3}
+    # at the line (0.3 m out) or out for less than a second: no edge piece
+    line = _piece(4, range(0, 100), 12.0, -0.3)
+    short = _piece(5, range(0, 20), 12.0, -2.0)
+    assert edge_pieces(line + short, 25.0) == set()
+
+    teams_t = dict[int, tuple[str | None, str | None]]
+    same: teams_t = {1: ("home", "home"), 2: ("home", "home"), 3: ("none", "none")}
+    other: teams_t = {1: ("home", "home"), 2: ("away", "away"), 3: ("none", "none")}
+    linked, _ = stitch(pts, 25.0, max_gap_s=8.0, excluded={3}, piece_teams=same)
+    assert len({p.track_id for p in linked}) == 2  # 1 and 2 joined, the bench apart
+    apart, _ = stitch(pts, 25.0, max_gap_s=8.0, excluded={3}, piece_teams=other)
+    assert len({p.track_id for p in apart}) == 3
+    # the bench piece would be the best match for a player ending next to it: excluded
+    near = _piece(6, range(0, 50), 12.0, 0.0) + _piece(7, range(120, 200), 12.0, -1.2)
+    kept, _ = stitch(near, 25.0, max_gap_s=8.0, excluded={7})
+    assert len({p.track_id for p in kept}) == 2
+    # a short gap (under 4 s) needs no team condition, as before
+    c = _piece(8, range(130, 200), 11.2, 5.0)
+    short_gap, _ = stitch(a + c, 25.0, max_gap_s=8.0, piece_teams={1: ("home", "home")})
+    assert len({p.track_id for p in short_gap}) == 1
+
+    # the team at each end comes from the first and the last looks of the piece
+    home, away = np.array([120.0, 150.0, 190.0]), np.array([90.0, 170.0, 150.0])
+    kits = {"home": home, "away": away}
+    looks = {1: [home] * 6 + [away] * 6, 2: [np.array([30.0, 128.0, 128.0])] * 6}
+    frames = {1: list(range(12)), 2: list(range(6))}
+    ends = piece_ends(looks, frames, kits)
+    assert ends is not None
+    assert ends[1] == ("home", "away") and ends[2] == ("none", "none")  # black: neither team
+    assert piece_ends(looks, frames, {"home": home}) is None  # one team kit: no condition
+
+
+def test_long_links_are_off_by_default() -> None:
+    from handball_vision import pipeline
+
+    assert pipeline.LONG_LINKS is False
+
+
 def test_team_assigner() -> None:
     kits = {"home": hex_to_bgr("#2828c8"), "away": hex_to_bgr("#ebe6e6"), "referee": (25, 25, 25)}
     ta = TeamAssigner(kits)

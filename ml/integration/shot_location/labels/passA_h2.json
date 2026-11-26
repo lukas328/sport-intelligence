@@ -1,0 +1,10 @@
+[
+ {"release_t": 4.92, "floor_px": [350, 285], "team": "yellow", "kind": "open", "outcome": "unclear", "status": "unsure", "precision_s": 0.12, "note": "Yellow player dives in from the left wing at the right goal; he lands on the floor and the result is not clear."},
+ {"release_t": 41.06, "floor_px": [755, 340], "team": "red", "kind": "open", "outcome": "goal", "status": "unsure", "precision_s": 0.08, "note": "Red jump shot at the left goal past defender 43; the ball appears to end in the net."},
+ {"release_t": 79.9, "floor_px": null, "team": "yellow", "kind": "open", "outcome": "unclear", "status": "unsure", "precision_s": 0.3, "note": "Possible yellow shot from a crowd of players at the left goal; the ball rolls to the goalkeeper; the shooter is not identifiable."},
+ {"release_t": 86.52, "floor_px": [680, 325], "team": "yellow", "kind": "open", "outcome": "unclear", "status": "unsure", "precision_s": 0.08, "note": "Yellow close-range jump shot at the right goal; the goalkeeper dives, the result is uncertain (possibly a goal)."},
+ {"release_t": 92.74, "floor_px": [840, 255], "team": "red", "kind": "fast_break", "outcome": "unclear", "status": "unsure", "precision_s": 0.08, "note": "Red player breaks in and jump-shoots at the left goal; the shooter falls and the outcome is not seen."},
+ {"release_t": 127.38, "floor_px": [1105, 355], "team": "yellow", "kind": "open", "outcome": "save", "status": "unsure", "precision_s": 0.06, "note": "Yellow jump shot from the right wing at the right goal; the goalkeeper dives, probably a save."},
+ {"release_t": 187.08, "floor_px": [845, 300], "team": "red", "kind": "open", "outcome": "goal", "status": "unsure", "precision_s": 0.12, "note": "Red back-court shot through the block at the left goal; the goalkeeper dives and red fans cheer after it."},
+ {"release_t": 519.34, "floor_px": [960, 365], "team": "yellow", "kind": "open", "outcome": "goal", "status": "ok", "precision_s": 0.06, "note": "Yellow jump shot from the right side at the right goal; the goalkeeper fetches the ball out of the goal."}
+]

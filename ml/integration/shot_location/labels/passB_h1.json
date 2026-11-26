@@ -1,0 +1,17 @@
+[
+{"release_t": 32.72, "floor_px": [332, 496], "team": "yellow", "kind": "open", "outcome": "save", "status": "ok", "precision_s": 0.08, "note": "Yellow #17 back-court shot, saved by goalkeeper."},
+{"release_t": 41.68, "floor_px": [440, 458], "team": "red", "kind": "open", "outcome": "save", "status": "unsure", "precision_s": 0.12, "note": "Red shot, goalkeeper appears to save; release partly hidden."},
+{"release_t": 53.66, "floor_px": [305, 410], "team": "yellow", "kind": "open", "outcome": "save", "status": "unsure", "precision_s": 0.12, "note": "Yellow shot at left goal, probably saved."},
+{"release_t": 90.52, "floor_px": [1055, 485], "team": "red", "kind": "open", "outcome": "save", "status": "ok", "precision_s": 0.08, "note": "Red shot at right goal, most likely saved."},
+{"release_t": 107.20, "floor_px": [608, 290], "team": "red", "kind": "open", "outcome": "save", "status": "unsure", "precision_s": 0.2, "note": "Red shot in a far-away view, outcome probably a save; timing uncertain."},
+{"release_t": 214.04, "floor_px": [400, 268], "team": "red", "kind": "open", "outcome": "goal", "status": "unsure", "precision_s": 0.12, "note": "Red shot ends in a goal; release frame and floor point estimated."},
+{"release_t": 222.04, "floor_px": [175, 447], "team": "yellow", "kind": "open", "outcome": "goal", "status": "unsure", "precision_s": 0.2, "note": "Yellow goal near the left edge of frame, shot barely visible."},
+{"release_t": 301.44, "floor_px": [590, 330], "team": "red", "kind": "open", "outcome": "goal", "status": "unsure", "precision_s": 0.12, "note": "Red goal, shooter partly hidden by defenders."},
+{"release_t": 327.82, "floor_px": [730, 370], "team": "yellow", "kind": "open", "outcome": "unclear", "status": "unsure", "precision_s": 0.2, "note": "Long-haired yellow player shoots under contact at left goal, outcome unclear."},
+{"release_t": 391.48, "floor_px": [785, 365], "team": "red", "kind": "open", "outcome": "save", "status": "ok", "precision_s": 0.08, "note": "Red diving shot from 6 m, goalkeeper saves."},
+{"release_t": 459.32, "floor_px": [935, 425], "team": "red", "kind": "open", "outcome": "goal", "status": "ok", "precision_s": 0.08, "note": "Red wing jump shot at right goal, goal."},
+{"release_t": 515.88, "floor_px": [590, 405], "team": "yellow", "kind": "open", "outcome": "block", "status": "unsure", "precision_s": 0.12, "note": "Yellow #5 shoots in traffic, ball loops high, looks blocked or deflected."},
+{"release_t": 540.04, "floor_px": [415, 350], "team": "yellow", "kind": "open", "outcome": "unclear", "status": "ok", "precision_s": 0.08, "note": "Yellow jump shot from 6 m at left goal, goalkeeper dives, outcome unclear."},
+{"release_t": 576.16, "floor_px": [628, 245], "team": "red", "kind": "open", "outcome": "save", "status": "ok", "precision_s": 0.08, "note": "Red jump shot, goalkeeper blocks with arms up, ball rebounds."},
+{"release_t": 607.52, "floor_px": [580, 365], "team": "red", "kind": "open", "outcome": "unclear", "status": "unsure", "precision_s": 0.12, "note": "Red shot out of a cluster at right goal, goalkeeper dives, shooter hard to identify."}
+]

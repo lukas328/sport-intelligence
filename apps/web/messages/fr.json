@@ -1302,6 +1302,8 @@
     "title": "Attribuer les joueurs",
     "hint": "Attribue les personnes de ta propre équipe à un joueur de l'équipe. Les attributions restent lors d'une nouvelle analyse.",
     "track": "Personne {n}",
+    "trackPlayer": "Joueur pour {who}",
+    "trackNumber": "Numéro de {who}",
     "none": "non attribuée",
     "saved": "Attribution enregistrée.",
     "auto": "détecté automatiquement",

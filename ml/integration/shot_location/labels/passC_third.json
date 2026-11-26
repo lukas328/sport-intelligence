@@ -1,0 +1,149 @@
+{
+ "h1_5": {
+  "shot": true,
+  "release_t": 99.2,
+  "floor_px": [
+   680,
+   292
+  ],
+  "team": "yellow",
+  "kind": "open",
+  "outcome": "goal",
+  "status": "ok",
+  "note": "yellow breakthrough jump shot from right of keeper, ball faint, appears in net ~99.6"
+ },
+ "h1_6": {
+  "shot": true,
+  "release_t": 107.28,
+  "floor_px": [
+   614,
+   300
+  ],
+  "team": "red",
+  "kind": "open",
+  "outcome": "goal",
+  "status": "unsure",
+  "note": "red catches airborne pass and jump-shoots over block; ball in net ~107.64-107.9; release frame +-0.04, high jump so floor estimated"
+ },
+ "h1_7": {
+  "shot": true,
+  "release_t": 182.56,
+  "floor_px": [
+   618,
+   370
+  ],
+  "team": "yellow",
+  "kind": "penalty",
+  "outcome": "goal",
+  "status": "ok",
+  "note": "yellow #14 set-piece throw (looks like 7m: stood still ~4s, others cleared), ball in net ~183.1; kind somewhat unsure"
+ },
+ "h1_9": {
+  "shot": false,
+  "release_t": null,
+  "floor_px": null,
+  "team": "unclear",
+  "kind": "open",
+  "outcome": "unclear",
+  "status": "unsure",
+  "note": "left goal empty, players idle (stoppage); ball enters net ~222.24 from off-frame left side of goal, looks like a toss not a shot; no shot seen 218-225"
+ },
+ "h1_10": {
+  "shot": true,
+  "release_t": 301.46,
+  "floor_px": [
+   588,
+   368
+  ],
+  "team": "red",
+  "kind": "open",
+  "outcome": "goal",
+  "status": "unsure",
+  "note": "red back-court shot past yellow defender arm, ball streak at 301.54, in net 301.94; shooter partly occluded, release +-0.04, floor estimated"
+ },
+ "h1_13": {
+  "shot": true,
+  "release_t": 448.48,
+  "floor_px": [
+   632,
+   402
+  ],
+  "team": "yellow",
+  "kind": "open",
+  "outcome": "miss",
+  "status": "unsure",
+  "note": "yellow #14 low side-arm shot through red defenders, ball seen at x555 @448.56, x443 @448.68, ends wide of left post past keeper foot; release from back-extrapolation"
+ },
+ "h1_17": {
+  "shot": true,
+  "release_t": 576.12,
+  "floor_px": [
+   626,
+   243
+  ],
+  "team": "red",
+  "kind": "open",
+  "outcome": "save",
+  "status": "unsure",
+  "note": "red right-wing player (far side) throws at close range, blue keeper catches ball at head ~576.20, then yellow counter; release +-0.04"
+ },
+ "h1_18": {
+  "shot": true,
+  "release_t": 607.52,
+  "floor_px": [
+   457,
+   440
+  ],
+  "team": "red",
+  "kind": "open",
+  "outcome": "goal",
+  "status": "unsure",
+  "note": "red #22 low push-shot while held by yellow defender, ball low past diving keeper, in net 608.04; release +-0.08 (ball hard to see), floor approx"
+ },
+ "h2_2": {
+  "shot": false,
+  "release_t": null,
+  "floor_px": null,
+  "team": "unclear",
+  "kind": "open",
+  "outcome": "unclear",
+  "status": "unsure",
+  "note": "red pivot catches pass ~79.52, wrestled by yellow defenders; play stops (ref signals), blue keeper has ball ~80.1 and rolls it out 80.32; no shot seen"
+ },
+ "h2_6": {
+  "shot": true,
+  "release_t": 187.06,
+  "floor_px": [
+   860,
+   300
+  ],
+  "team": "red",
+  "kind": "open",
+  "outcome": "goal",
+  "status": "unsure",
+  "note": "red back/pivot shoots while held by yellow defender, ball flying left at 187.10, keeper dives 187.38, ball in net ~187.8, crowd cheers; release +-0.04"
+ },
+ "h2_7": {
+  "shot": false,
+  "release_t": null,
+  "floor_px": null,
+  "team": "unclear",
+  "kind": "open",
+  "outcome": "unclear",
+  "status": "unsure",
+  "note": "red attack vs yellow 6-0; contested pivot/pass at 509.1-509.4 (ball went up/left, not to goal), red #4 then dribbles back toward midcourt 510-512; no shot found in window"
+ },
+ "h2_9": {
+  "shot": true,
+  "release_t": 545.42,
+  "floor_px": [
+   690,
+   290
+  ],
+  "team": "red",
+  "kind": "open",
+  "outcome": "goal",
+  "status": "unsure",
+  "note": "red pivot between two yellow defenders, ball not clearly seen at release; keeper lunges 545.46, blurred ball inside goal 545.62, rolls out ~546.1-546.4, crowd cheers; release +-0.1 and shooter identity uncertain"
+ }
+}

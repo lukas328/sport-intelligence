@@ -1,0 +1,164 @@
+[
+ {
+  "start": 0.0,
+  "end": 33.6,
+  "team": "yellow",
+  "sure": true
+ },
+ {
+  "start": 33.6,
+  "end": 42.6,
+  "team": "red",
+  "sure": false
+ },
+ {
+  "start": 42.6,
+  "end": 53.8,
+  "team": "yellow",
+  "sure": true
+ },
+ {
+  "start": 53.8,
+  "end": 60.9,
+  "team": "none",
+  "sure": false
+ },
+ {
+  "start": 60.9,
+  "end": 91.2,
+  "team": "red",
+  "sure": false
+ },
+ {
+  "start": 91.2,
+  "end": 102.6,
+  "team": "yellow",
+  "sure": false
+ },
+ {
+  "start": 102.6,
+  "end": 108.6,
+  "team": "red",
+  "sure": false
+ },
+ {
+  "start": 108.6,
+  "end": 121.4,
+  "team": "none",
+  "sure": false
+ },
+ {
+  "start": 121.4,
+  "end": 161.2,
+  "team": "yellow",
+  "sure": true
+ },
+ {
+  "start": 161.2,
+  "end": 178.0,
+  "team": "none",
+  "sure": false
+ },
+ {
+  "start": 178.0,
+  "end": 215.2,
+  "team": "red",
+  "sure": false
+ },
+ {
+  "start": 215.2,
+  "end": 224.9,
+  "team": "yellow",
+  "sure": false
+ },
+ {
+  "start": 224.9,
+  "end": 249.8,
+  "team": "none",
+  "sure": true
+ },
+ {
+  "start": 249.8,
+  "end": 303.0,
+  "team": "red",
+  "sure": false
+ },
+ {
+  "start": 303.0,
+  "end": 330.5,
+  "team": "yellow",
+  "sure": false
+ },
+ {
+  "start": 330.5,
+  "end": 361.2,
+  "team": "red",
+  "sure": true
+ },
+ {
+  "start": 361.2,
+  "end": 364.5,
+  "team": "none",
+  "sure": false
+ },
+ {
+  "start": 364.5,
+  "end": 393.5,
+  "team": "red",
+  "sure": false
+ },
+ {
+  "start": 393.5,
+  "end": 449.7,
+  "team": "yellow",
+  "sure": false
+ },
+ {
+  "start": 449.7,
+  "end": 459.8,
+  "team": "red",
+  "sure": false
+ },
+ {
+  "start": 459.8,
+  "end": 517.0,
+  "team": "yellow",
+  "sure": false
+ },
+ {
+  "start": 517.0,
+  "end": 530.4,
+  "team": "red",
+  "sure": false
+ },
+ {
+  "start": 530.4,
+  "end": 540.4,
+  "team": "yellow",
+  "sure": false
+ },
+ {
+  "start": 540.4,
+  "end": 558.2,
+  "team": "none",
+  "sure": true
+ },
+ {
+  "start": 558.2,
+  "end": 577.3,
+  "team": "red",
+  "sure": false
+ },
+ {
+  "start": 577.3,
+  "end": 597.8,
+  "team": "yellow",
+  "sure": false
+ },
+ {
+  "start": 597.8,
+  "end": 609.0,
+  "team": "red",
+  "sure": true
+ }
+]

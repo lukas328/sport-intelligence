@@ -102,7 +102,9 @@ export function IdentityPanel({
           {shown.map((tr) => (
             <li key={tr.track_no} className="flex flex-wrap items-center gap-2 py-1.5" data-testid="identity-row">
               {geometry && chunkMs != null && (
-                <button type="button" className="cursor-pointer border-0 bg-transparent p-0" onClick={() => play(tr)} aria-label={`${t("playHere")}: ${who(tr)}, ${at(tr.first_ms)}`}>
+                // the picture plays the person as the button beside it does: for the finger, not a
+                // second stop of the same name for the keyboard and a screen reader (audit)
+                <button type="button" tabIndex={-1} aria-hidden className="cursor-pointer border-0 bg-transparent p-0" onClick={() => play(tr)}>
                   <PersonStill geometry={geometry} tracksUrl={`${video}/tracks`} chunkMs={chunkMs} track={tr.track_no} at={personMoment(tr)} label={who(tr)} className="h-16 w-12" />
                 </button>
               )}
@@ -118,7 +120,7 @@ export function IdentityPanel({
                 </span>
               </Button>
               <label className="sr-only" htmlFor={`track-${tr.track_no}`}>
-                {t("track", { n: tr.track_no })}
+                {neutral ? t("trackNumber", { who: who(tr) }) : t("trackPlayer", { who: who(tr) })}
               </label>
               {neutral ? (
                 <input

@@ -384,3 +384,76 @@ def test_one_scene_window_for_every_view() -> None:
     assert scene_window(cand, 21_000) == (8_000, 21_000)  # cut at the video's end
     assert scene_lead(hand, (8_000, 2_000)) == (8_000, 2_000)  # the camera's own lead
     assert scene_lead(cand, (8_000, 2_000)) == (12_000, 5_000)
+
+
+async def test_the_estimate_takes_the_attacked_goal_from_the_ends_of_the_half(
+    make_api: Callable[[], Api], owner_conn: asyncpg.Connection
+) -> None:
+    """A fast break: the home side stood at the goal it defends (x = 0) for most of the 10 s, then
+    player 2 ran to (36, 12) and scored at x = 40. From where the attackers stood the estimate
+    picks the wrong end; the ends the analysis found for the half (home defends left) pick the
+    right one (Horgen clips: 4 of 21 shots about 30 m off, produkt-audit-2026-11.md point 7)."""
+    api = make_api()
+    ids = await setup_club(api)
+    match_id, _, second = await _two_halves(api, ids)
+    storage: MemoryStorage = api.app.state.storage
+    prefix = f"{ids['org']}/{match_id}/{second}/analysis/"
+    run = [(42_500 + 1000 * i, 2, 5.0, 12.0) for i in range(6)]  # back at the own goal
+    run += [(48_500, 2, 20.0, 12.0), (49_500, 2, 30.0, 12.0), (50_500, 2, 36.0, 12.0)]
+    await storage.put(
+        "artifacts", prefix + "chunk_00001.bin", _rows(run), "application/octet-stream"
+    )
+    await _analyse(
+        api,
+        second,
+        events=SECOND,
+        goal_candidates={"candidates": [_cand(52_000, 1)]},
+        chunks=2,
+        chunk_ms=30_000,
+    )
+    await owner_conn.execute(
+        "UPDATE video_assets SET analysis = jsonb_set(analysis, '{auto_events}',"
+        ' \'{"sides": [{"from_ms": 0, "home_defends": "left"}]}\'::jsonb) WHERE id = $1',
+        uuid.UUID(second),
+    )
+    base = f"/v1/orgs/{ids['org']}/matches/{match_id}"
+    cand = (await api.get(f"{base}/goal-candidates")).json()["candidates"][-1]
+    r = await api.put(
+        f"{base}/goal-candidates/{cand['id']}/review", json={"status": "confirmed", "side": "own"}
+    )
+    assert r.status_code == 200, r.text
+    # the runner in front of the goal at x = 40 (circle), not the player at the own goal mirrored
+    # (which would read as the circle of the other end at x = 35, y = 8)
+    assert r.json()["shot_zone"] == "kr"
+    ev = next(
+        e for e in (await api.get(f"{base}/events")).json() if e["id"] == r.json()["event_id"]
+    )
+    assert (ev["x"], ev["y"]) == (36.0, 12.0)
+
+
+async def test_a_goal_marked_before_the_analysis_uses_the_ends_of_that_run(
+    make_api: Callable[[], Api],
+) -> None:
+    """A goal tagged by hand before the second half was analysed is filled when the analysis
+    arrives, at the goal the ends of that same run say (the sides are stored before the fill)."""
+    api = make_api()
+    ids = await setup_club(api)
+    match_id, _, second = await _two_halves(api, ids)
+    org = ids["org"]
+    tagged = await event(
+        api, org, match_id, type="shot", side="own", outcome="goal", t_ms=HALF + 51_000
+    )
+    storage: MemoryStorage = api.app.state.storage
+    run = [(42_500 + 1000 * i, 2, 5.0, 12.0) for i in range(6)]
+    run += [(48_500, 2, 20.0, 12.0), (49_500, 2, 30.0, 12.0), (50_500, 2, 36.0, 12.0)]
+    await storage.put(
+        "artifacts",
+        f"{org}/{match_id}/{second}/analysis/chunk_00001.bin",
+        _rows(run),
+        "application/octet-stream",
+    )
+    sides = [{"from_ms": 0, "home_defends": "left"}]
+    await _analyse(api, second, events={**SECOND, "sides": sides}, chunks=2, chunk_ms=30_000)
+    base = f"/v1/orgs/{org}/matches/{match_id}"
+    ev = next(e for e in (await api.get(f"{base}/events")).json() if e["id"] == tagged["id"])
+    assert (ev["x"], ev["y"]) == (36.0, 12.0)

@@ -1,0 +1,11 @@
+[
+{"release_t": 4.96, "floor_px": [355, 300], "team": "yellow", "kind": "open", "outcome": "save", "status": "unsure", "precision_s": 0.12, "note": "Yellow diving shot from the far wing at the right goal; ball bounces away and red counters."},
+{"release_t": 41.00, "floor_px": [750, 358], "team": "red", "kind": "open", "outcome": "goal", "status": "ok", "precision_s": 0.08, "note": "Red jump shot at the left goal; players run back and fans applaud."},
+{"release_t": 86.44, "floor_px": [690, 340], "team": "yellow", "kind": "open", "outcome": "unclear", "status": "ok", "precision_s": 0.08, "note": "Yellow close-range jump shot at the right goal after a quick attack; ball may be in the net."},
+{"release_t": 92.76, "floor_px": [845, 275], "team": "red", "kind": "open", "outcome": "save", "status": "unsure", "precision_s": 0.12, "note": "Red diving shot from about 7 m at the left goal; keeper reacts and yellow fans cheer."},
+{"release_t": 127.36, "floor_px": [1090, 375], "team": "yellow", "kind": "open", "outcome": "save", "status": "ok", "precision_s": 0.06, "note": "Yellow jump shot from the right side close to the right goal; keeper dives and red fans cheer."},
+{"release_t": 187.28, "floor_px": [855, 275], "team": "red", "kind": "open", "outcome": "goal", "status": "unsure", "precision_s": 0.15, "note": "Red back-court shot through the block at the left goal, then a goal celebration; ball mostly hidden."},
+{"release_t": 509.26, "floor_px": [630, 300], "team": "red", "kind": "open", "outcome": "goal", "status": "unsure", "precision_s": 0.3, "note": "Red shot out of a crowded 9 m area at the left goal; ball hidden at release and fans applaud afterwards."},
+{"release_t": 519.48, "floor_px": [945, 355], "team": "yellow", "kind": "open", "outcome": "save", "status": "ok", "precision_s": 0.06, "note": "Yellow jump shot from the right side at the right goal; keeper blocks with his leg."},
+{"release_t": 546.06, "floor_px": [695, 280], "team": "red", "kind": "open", "outcome": "goal", "status": "unsure", "precision_s": 0.3, "note": "Red shot through the block at the left goal; ball seen at the goal line at 546.18, followed by a yellow throw-off."}
+]
