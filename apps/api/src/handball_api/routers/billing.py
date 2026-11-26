@@ -12,6 +12,7 @@ from handball_api.routers.deps import CtxDep, OrgDep
 from handball_api.schemas.common import ApiModel
 from handball_api.services import billing as service
 from handball_api.services import invoices
+from handball_api.services.plans import currency_for
 
 router = APIRouter(tags=["billing"])
 
@@ -76,6 +77,7 @@ class InvoiceOut(ApiModel):
     number: str
     plan: str | None
     amount_cents: int
+    currency: str = Field(default="CHF", description="CHF or EUR")
     net_cents: int
     discount_cents: int
     vat_cents: int
@@ -90,6 +92,7 @@ class InvoiceOut(ApiModel):
 
 class AnnualPrice(ApiModel):
     net_cents: int
+    currency: str = Field(description="CHF for clubs in Switzerland and Liechtenstein, else EUR")
     months: int
     vat_rate_percent: float | None
     payment_days: int
@@ -100,10 +103,15 @@ class AnnualPrice(ApiModel):
 async def annual_price(scope: OrgDep, plan: Plan) -> AnnualPrice:
     """Price of the annual subscription by invoice and the stored billing contact."""
     s = scope.ctx.settings
+    currency = currency_for(scope.org.country)
     return AnnualPrice(
         net_cents=invoices.price_cents(scope.ctx, plan) if plan != Plan.FREE else 0,
+        currency=currency,
         months=s.invoice_annual_months,
-        vat_rate_percent=s.invoice_vat_rate_percent if s.invoice_vat_registered else None,
+        # Swiss VAT only on CHF invoices (services abroad are not subject to it)
+        vat_rate_percent=(
+            s.invoice_vat_rate_percent if s.invoice_vat_registered and currency == "CHF" else None
+        ),
         payment_days=s.invoice_payment_days,
         contact=await invoices.treasurer_default(scope.ctx, scope.org),
     )

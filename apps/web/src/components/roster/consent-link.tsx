@@ -41,7 +41,7 @@ export function ConsentLinkBox({ orgId, teamId }: { orgId: string; teamId: strin
           {t("status", { n: active.answers, date: format.dateTime(new Date(active.expires_at), { dateStyle: "medium" }) })}
         </p>
       )}
-      {url && <input readOnly value={url} onFocus={(e) => e.currentTarget.select()} className={cn(control, "font-mono text-xs")} data-testid="consent-link-url" />}
+      {url && <input readOnly value={url} onFocus={(e) => e.currentTarget.select()} className={cn(control, "font-mono sm:pointer-fine:text-xs")} data-testid="consent-link-url" />}
       <div className="flex flex-wrap gap-2">
         <Button variant="secondary" loading={create.isPending} onClick={() => create.mutate()}>
           {active ? t("renew") : t("create")}

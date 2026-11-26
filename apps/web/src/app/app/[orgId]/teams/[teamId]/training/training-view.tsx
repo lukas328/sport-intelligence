@@ -369,7 +369,7 @@ export function TrainingView({ orgId, teamId, canPlan, tasks = true }: { orgId: 
       {canPlan && (
         // the calendar is a schedule tool: folded, so the page stays about the units
         <details className="border-t border-foreground/15 pt-3">
-        <summary className="cursor-pointer font-medium">{t("calendarTools")}</summary>
+        <summary className="cursor-pointer py-2.5 font-medium">{t("calendarTools")}</summary>
         <section className="mt-4 grid gap-10 md:grid-cols-2 md:gap-x-12">
           <Sheet className="space-y-2">
             <h3 className="text-lg">{t("calendar")}</h3>

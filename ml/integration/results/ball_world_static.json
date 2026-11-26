@@ -1,0 +1,99 @@
+{
+ "without world": {
+  "points": {
+   "wrong_moved": 248,
+   "same_wrong": 89,
+   "right": 111,
+   "ball_elsewhere": 91,
+   "no_point": 7
+  },
+  "same_wrong_by_category": {
+   "A": 2,
+   "P": 42,
+   "U": 4,
+   "B": 19,
+   "E": 22
+  }
+ },
+ "world keep 0.0 share 0.3 cell 21.0": {
+  "points": {
+   "wrong_moved": 260,
+   "same_wrong": 76,
+   "right": 109,
+   "ball_elsewhere": 93,
+   "no_point": 8
+  },
+  "same_wrong_by_category": {
+   "A": 2,
+   "P": 42,
+   "U": 4,
+   "B": 20,
+   "E": 8
+  }
+ },
+ "world keep 0.0 share 0.2 cell 21.0": {
+  "points": {
+   "wrong_moved": 264,
+   "same_wrong": 73,
+   "right": 104,
+   "ball_elsewhere": 98,
+   "no_point": 7
+  },
+  "same_wrong_by_category": {
+   "A": 2,
+   "P": 40,
+   "U": 4,
+   "B": 22,
+   "C": 1,
+   "E": 4
+  }
+ },
+ "world keep 0.0 share 0.5 cell 21.0": {
+  "points": {
+   "wrong_moved": 250,
+   "same_wrong": 87,
+   "right": 111,
+   "ball_elsewhere": 91,
+   "no_point": 7
+  },
+  "same_wrong_by_category": {
+   "A": 2,
+   "P": 42,
+   "U": 4,
+   "B": 19,
+   "E": 20
+  }
+ },
+ "world keep 0.0 share 0.3 cell 11.0": {
+  "points": {
+   "wrong_moved": 263,
+   "same_wrong": 74,
+   "right": 115,
+   "ball_elsewhere": 87,
+   "no_point": 7
+  },
+  "same_wrong_by_category": {
+   "A": 2,
+   "P": 40,
+   "U": 4,
+   "B": 19,
+   "E": 9
+  }
+ },
+ "world keep 0.6 share 0.3 cell 21.0": {
+  "points": {
+   "wrong_moved": 248,
+   "same_wrong": 88,
+   "right": 114,
+   "ball_elsewhere": 88,
+   "no_point": 8
+  },
+  "same_wrong_by_category": {
+   "A": 2,
+   "P": 41,
+   "U": 4,
+   "B": 19,
+   "E": 22
+  }
+ }
+}

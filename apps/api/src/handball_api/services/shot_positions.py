@@ -18,7 +18,8 @@ The estimate is offered (A22): «Von wo?» preselects its zone as a suggestion, 
 confirms it. A confirmation is the zone alone; it takes the estimated point over as the coach's
 (`position_source` "coach", the method kept as `confirmed_estimate`), so a confirmed estimate
 counts for the three things exactly like a tapped place. An estimate nobody confirmed counts
-nowhere (V2).
+nowhere (V2). The first answer with a zone keeps the estimated zone (`estimated_zone`, with
+`estimate_method`), whatever the coach answers, so the hit rate of the estimate can be measured.
 
 Gegenstoss replaces the place in the question: for the three things a fast break is its own
 pattern (zone gs, read from shot_type before shot_zone), and a second tap would double the
@@ -311,6 +312,17 @@ async def set_spot(
         return
     if zone not in SPOT_ZONES:
         raise ValueError(f"unknown zone {zone}")
+    if (
+        "estimated_zone" not in attrs
+        and zone_source(g) != COACH
+        and attrs.get("position_source") != COACH
+        and g.x is not None
+        and g.y is not None
+    ):
+        # what the tracks proposed, kept when the coach first answers with a zone, also when the
+        # answer is another zone or a tap: the hit rate of the estimate (A2) needs the misses too
+        attrs["estimated_zone"] = zone_at(g.x, g.y)
+        attrs["estimate_method"] = attrs.get("position_source")
     g.shot_zone = EVENT_ZONE[zone]
     if zone == "m7":
         g.shot_type = "penalty"

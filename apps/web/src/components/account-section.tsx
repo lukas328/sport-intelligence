@@ -118,7 +118,7 @@ export function AccountSection({ me }: { me: Me }) {
               {s.current ? (
                 <span className="text-xs font-medium text-ok">{t("account.thisDevice")}</span>
               ) : (
-                <Button variant="ghost" className="min-h-8 px-2 py-1" onClick={() => revoke.mutate(s.id)}>
+                <Button variant="ghost" className="hit min-h-8 px-2 py-1" onClick={() => revoke.mutate(s.id)}>
                   {t("account.signOutDevice")}
                 </Button>
               )}
@@ -126,7 +126,7 @@ export function AccountSection({ me }: { me: Me }) {
           ))}
         </ul>
         {!allSessions && (sessions.data ?? []).length > 5 && (
-          <button type="button" className="block min-h-8 text-sm font-medium underline underline-offset-4" onClick={() => setAllSessions(true)}>
+          <button type="button" className="hit block min-h-8 cursor-pointer text-sm font-medium underline underline-offset-4" onClick={() => setAllSessions(true)}>
             {t("account.sessionsAll", { n: (sessions.data ?? []).length })}
           </button>
         )}

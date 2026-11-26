@@ -81,17 +81,18 @@ export function NotificationBell({ orgId }: { orgId: string }) {
           sideOffset={6}
           collisionPadding={12}
           aria-label={t("title")}
-          className={cn(MENU_SURFACE, "w-[22rem] max-w-[calc(100vw-1.5rem)]")}
+          // never taller than the room under the bell (a phone held sideways): the list scrolls
+          className={cn(MENU_SURFACE, "flex max-h-[var(--radix-dropdown-menu-content-available-height)] w-[22rem] max-w-[calc(100vw-1.5rem)] flex-col")}
         >
-          <div className="flex items-center justify-between border-b-2 border-ink px-4 py-3">
+          <div className="flex min-h-[3.25rem] shrink-0 items-center justify-between gap-3 border-b-2 border-ink py-1 pr-2 pl-4">
             <p className="font-bold">{t("title")}</p>
             {unread > 0 && (
-              <button className="text-xs font-medium text-accent underline decoration-[1.5px] underline-offset-4" onClick={() => read.mutate([])}>
+              <button className="inline-flex min-h-11 cursor-pointer items-center px-2 text-xs font-medium text-accent underline decoration-[1.5px] underline-offset-4" onClick={() => read.mutate([])}>
                 {t("markAll")}
               </button>
             )}
           </div>
-          <div className="max-h-[26rem] overflow-auto p-1.5">
+          <div className="max-h-[26rem] min-h-0 overflow-auto overscroll-contain p-1.5">
             {/* empty: say what will come here (K8) */}
             {items.length === 0 && (
               <div className="px-3 py-5" data-testid="bell-empty">

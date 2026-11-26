@@ -63,7 +63,7 @@ export function MarkPositions({ orgId, teamId, players }: { orgId: string; teamI
     return (
       <p className="m-0 flex flex-wrap items-baseline gap-x-3 gap-y-1 text-[15px] md:col-span-full" data-testid="mark-positions">
         <span>{missing > 0 ? t("positionsMissing", { n: missing }) : t("positionsAll")}</span>
-        <button ref={opener} type="button" onClick={() => setOpen(true)} className="cursor-pointer font-semibold underline underline-offset-4" data-testid="positions-open">
+        <button ref={opener} type="button" onClick={() => setOpen(true)} className="hit cursor-pointer font-semibold underline underline-offset-4" data-testid="positions-open">
           {missing > 0 ? t("positionsSet") : t("positionsChange")}
         </button>
       </p>

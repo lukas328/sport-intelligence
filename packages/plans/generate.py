@@ -24,8 +24,9 @@ def build() -> str:
         "plans": [
             {
                 "plan": p.plan.value,
-                "price_chf_month": p.price_chf_month,
-                "price_chf_year": p.price_chf_month * s.invoice_annual_months,
+                # the site shows CHF; the amount is the same in EUR (Europa EU3, plans.currency_for)
+                "price_chf_month": p.price_month,
+                "price_chf_year": p.price_month * s.invoice_annual_months,
                 "teams": p.teams,
                 "matches_per_season": p.matches_per_season,
                 "storage_gb": p.storage_gb,

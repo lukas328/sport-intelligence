@@ -978,3 +978,52 @@ def test_videos_over_the_environment_limit_end_as_too_long() -> None:
     analysis._check_length(JobSettings(), 3 * 3600)
     with pytest.raises(analysis.TooLongError, match=r"too long for this environment: 41\.0 min"):
         analysis._check_length(limited, 41 * 60)
+
+
+def _panning(frames: int) -> CameraMotion:
+    """A camera turning 0.2 degrees per frame around the vertical axis, one frame not placed."""
+    size = (640, 360)
+    rots: list[Any] = []
+    for i in range(frames):
+        a = np.radians(0.2 * i)
+        rots.append(np.array([[np.cos(a), 0, -np.sin(a)], [0, 1, 0], [np.sin(a), 0, np.cos(a)]]))
+    rots[3] = None
+    return CameraMotion(
+        size,
+        True,
+        rots,
+        [600.0] * frames,
+        canvas_f=600.0,
+        canvas_c=(900.0, 180.0),
+        canvas_size=(1800, 360),
+    )
+
+
+def test_view_chunks_map_the_hall_image_into_each_frame(tmp_path: Path) -> None:
+    fps = 25.0
+    motion = _panning(int(fps * 40))  # 40 s: two chunks
+    assert analysis.write_view_chunks(motion, fps, tmp_path) == 2
+    rows = np.frombuffer((tmp_path / "view_00000.bin").read_bytes(), "<f4").reshape(-1, 10)
+    later = np.frombuffer((tmp_path / "view_00001.bin").read_bytes(), "<f4").reshape(-1, 10)
+    assert rows[0, 0] == 0 and rows[-1, 0] < analysis.CHUNK_MS <= later[0, 0]
+    assert 3 * 40 not in rows[:, 0]  # the frame the motion pass could not place is left out
+    assert len(rows) + len(later) == len(motion) - 1
+    # each row is canvas -> frame of its frame, scaled to h22 = 1: a hall point lands where the
+    # motion model puts it in that frame
+    for row in (rows[0], rows[200], later[-1]):
+        i = round(row[0] * fps / 1000)
+        expect = motion.canvas_to_frame(i)
+        assert expect is not None
+        h = row[1:].reshape(3, 3).astype(np.float64)
+        assert h[2, 2] == pytest.approx(1.0)
+        p = np.array([1000.0, 200.0, 1.0])
+        got, want = h @ p, expect @ p
+        assert got[:2] / got[2] == pytest.approx(want[:2] / want[2], abs=0.05)
+
+
+def test_view_chunks_only_for_a_moving_camera(tmp_path: Path) -> None:
+    fixed = CameraMotion.fixed((640, 360), 100)
+    assert analysis.write_view_chunks(fixed, 25.0, tmp_path) == 0
+    assert not list(tmp_path.glob("view_*.bin"))
+    assert analysis._view_meta(0, fixed) == {}
+    assert analysis._view_meta(2, _panning(10)) == {"view_chunks": 2, "frame_size": [640, 360]}

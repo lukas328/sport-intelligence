@@ -222,9 +222,10 @@ export function MarksView({
   const back = `/app/${orgId}/matches/${matchId}`;
   return (
     <div style={style as CSSProperties} data-testid="marks">
-      {/* full screen: its own narrow top bar, the head of the match, the keys, what was marked */}
-      <div className="bleed-x -mt-px flex h-[60px] items-center justify-between gap-3 border-b-2 border-ink px-4 md:px-8">
-        <span className="text-[15px] font-bold">{t("top")}</span>
+      {/* full screen: its own narrow top bar, the head of the match, the keys, what was marked;
+          on a narrow phone (French) the title takes two or three lines and the bar grows with it */}
+      <div className="bleed-x -mt-px flex min-h-[60px] items-center justify-between gap-3 border-b-2 border-ink px-4 py-1 md:px-8">
+        <span className="min-w-0 text-[15px] leading-tight font-bold">{t("top")}</span>
         <button type="button" onClick={() => void share()} className="ml-auto min-h-11 cursor-pointer border-0 bg-transparent px-2 text-[15px] font-bold text-ink underline decoration-[1.5px] underline-offset-4" data-testid="share-matchday">
           {copied ? t("copied") : t("shareLink")}
         </button>
@@ -261,7 +262,7 @@ export function MarksView({
                   k.key === "goal_own" ? "border-club-edge bg-club text-club-ink" : "border-ink bg-ink text-ground",
                 )}
               >
-                <span className="font-slant block text-[22px] leading-tight md:text-[28px]">{labelOf(k)}</span>
+                <span className="font-slant block text-[22px] leading-tight [overflow-wrap:anywhere] md:text-[28px]">{labelOf(k)}</span>
                 <span className="text-[15px] font-semibold md:text-[15px]">{t("sofar", { n: k.key === "goal_own" ? score.own : score.opp })}</span>
               </button>
             ))}
@@ -298,7 +299,7 @@ export function MarksView({
                 </button>
               )}
             </span>
-            <a href={`/app/${orgId}/matches/${matchId}/matchday?mode=detail`} data-testid="per-player" className="font-bold text-ink underline decoration-[1.5px] underline-offset-4">
+            <a href={`/app/${orgId}/matches/${matchId}/matchday?mode=detail`} data-testid="per-player" className="hit font-bold text-ink underline decoration-[1.5px] underline-offset-4">
               {t("perPlayer")}
             </a>
           </p>

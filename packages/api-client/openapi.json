@@ -196,6 +196,17 @@
             "description": "automatic calibration: goal fit, players on the court, camera position; method 'hall' when the court was carried over from an earlier video of the hall (reference_video_id; sure when the hall images matched well enough not to ask); hall_tried lists earlier videos that did not fit",
             "title": "Calibration Info"
           },
+          "calibration_origin": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CalibrationOriginOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "where a confirmed court came from when nobody set it on this video: carried over from an earlier video of the same hall; null for a court a person clicked or confirmed on this video, an automatic court and no court"
+          },
           "calibration_state": {
             "default": "missing",
             "description": "confirmed: set or confirmed by a person (or carried over from such a court with a sure hall match); suggested: the automatic court, a proposal to confirm or to click anew (calibration_suggestion); missing: no court; updating: a clicked court is being applied; undeterminable: the coach said it cannot be set on this video",
@@ -330,6 +341,21 @@
             ],
             "title": "Fps"
           },
+          "frame_size": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "width and height of the frame the view files map into",
+            "title": "Frame Size"
+          },
           "hall": {
             "anyOf": [
               {
@@ -371,6 +397,18 @@
             },
             "title": "Tracks",
             "type": "array"
+          },
+          "view_chunks": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "moving camera: files of where the camera looked (GET .../views/{n}, hall image -> frame per frame), so overlays follow the picture; none for a fixed camera or an analysis from before",
+            "title": "View Chunks"
           }
         },
         "required": [
@@ -478,6 +516,11 @@
             "title": "Contact",
             "type": "object"
           },
+          "currency": {
+            "description": "CHF for clubs in Switzerland and Liechtenstein, else EUR",
+            "title": "Currency",
+            "type": "string"
+          },
           "months": {
             "title": "Months",
             "type": "integer"
@@ -504,6 +547,7 @@
         },
         "required": [
           "net_cents",
+          "currency",
           "months",
           "vat_rate_percent",
           "payment_days",
@@ -1594,6 +1638,70 @@
           "points"
         ],
         "title": "CalibrationIn",
+        "type": "object"
+      },
+      "CalibrationOriginOut": {
+        "description": "A confirmed court carried over from an earlier video of the same hall (calibration_state\n\"confirmed\"), for the note that says so and offers to click the court anew.",
+        "properties": {
+          "hall": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "the hall's name, when known",
+            "title": "Hall"
+          },
+          "reference_kickoff_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "kickoff of that match, for the label",
+            "title": "Reference Kickoff At"
+          },
+          "reference_match_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "the match of reference_video_id",
+            "title": "Reference Match Id"
+          },
+          "reference_video_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "the earlier video whose court was carried over",
+            "title": "Reference Video Id"
+          },
+          "source": {
+            "const": "hall",
+            "default": "hall",
+            "title": "Source",
+            "type": "string"
+          }
+        },
+        "title": "CalibrationOriginOut",
         "type": "object"
       },
       "CalibrationOut": {
@@ -7376,6 +7484,12 @@
           "amount_cents": {
             "title": "Amount Cents",
             "type": "integer"
+          },
+          "currency": {
+            "default": "CHF",
+            "description": "CHF or EUR",
+            "title": "Currency",
+            "type": "string"
           },
           "discount_cents": {
             "title": "Discount Cents",
@@ -39578,6 +39692,66 @@
           }
         },
         "summary": "Set Track Identity",
+        "tags": [
+          "matches",
+          "analysis"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/videos/{video_id}/views/{n}": {
+      "get": {
+        "description": "Moving camera, 30 s: little-endian float32 rows [t_ms, h00 .. h22], the homography hall\nimage (panorama) px -> video frame px of that moment, h22 = 1 (ADR 020).",
+        "operationId": "view_chunk_v1_orgs__org_id__videos__video_id__views__n__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "video_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Video Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "n",
+            "required": true,
+            "schema": {
+              "title": "N",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/octet-stream": {}
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "View Chunk",
         "tags": [
           "matches",
           "analysis"

@@ -1029,3 +1029,173 @@ resource "azurerm_consumption_budget_resource_group" "gpu" {
     ignore_changes = [time_period]
   }
 }
+
+# --- Monitoring: probe and alerts (infra/monitoring/alerts.md, GO_LIVE) ---------------------------
+# E-mail to alert_emails through one action group. The probe runs only for the environment the app
+# domain is bound to (bind_custom_domain): a paused or old environment does not probe a domain that
+# points elsewhere. Log alerts read the environment's own Log Analytics workspace every 15 minutes.
+# Rough cost: the probe about 7 USD per month (2 locations, every 15 min), each log alert about
+# 0.50 USD, the metric alerts a few cents.
+
+locals {
+  monitoring = var.monitoring
+  probe      = var.monitoring && var.bind_custom_domain
+}
+
+resource "azurerm_monitor_action_group" "ops" {
+  count               = local.monitoring ? 1 : 0
+  name                = "ag-${local.prefix}-ops"
+  resource_group_name = azurerm_resource_group.this.name
+  short_name          = "hb-ops"
+  tags                = local.tags
+
+  dynamic "email_receiver" {
+    for_each = var.alert_emails
+    content {
+      name                    = "mail-${email_receiver.key}"
+      email_address           = email_receiver.value
+      use_common_alert_schema = true
+    }
+  }
+}
+
+resource "azurerm_application_insights" "probe" {
+  count               = local.probe ? 1 : 0
+  name                = "appi-${local.prefix}"
+  resource_group_name = azurerm_resource_group.this.name
+  location            = var.location
+  workspace_id        = azurerm_log_analytics_workspace.this.id
+  application_type    = "other"
+  tags                = local.tags
+}
+
+# GET /api/healthz on the public domain (web and, behind it, the API), with the certificate's
+# remaining lifetime checked (alert below 14 days)
+resource "azurerm_application_insights_standard_web_test" "health" {
+  count                   = local.probe ? 1 : 0
+  name                    = "probe-${local.prefix}-health"
+  resource_group_name     = azurerm_resource_group.this.name
+  location                = var.location
+  application_insights_id = azurerm_application_insights.probe[0].id
+  frequency               = 900
+  timeout                 = 30
+  enabled                 = !var.paused
+  retry_enabled           = true
+  geo_locations           = var.probe_locations
+  tags                    = local.tags
+
+  request {
+    url = "https://${var.app_domain}/api/healthz"
+  }
+
+  validation_rules {
+    expected_status_code        = 200
+    ssl_check_enabled           = true
+    ssl_cert_remaining_lifetime = 14
+  }
+}
+
+resource "azurerm_monitor_metric_alert" "availability" {
+  count               = local.probe ? 1 : 0
+  name                = "alert-${local.prefix}-availability"
+  resource_group_name = azurerm_resource_group.this.name
+  description         = "The app domain fails its health probe (or the certificate expires within 14 days) from all probe locations."
+  severity            = 1
+  frequency           = "PT5M"
+  window_size         = "PT15M"
+  scopes = [
+    azurerm_application_insights_standard_web_test.health[0].id,
+    azurerm_application_insights.probe[0].id,
+  ]
+  tags = local.tags
+
+  application_insights_web_test_location_availability_criteria {
+    web_test_id           = azurerm_application_insights_standard_web_test.health[0].id
+    component_id          = azurerm_application_insights.probe[0].id
+    failed_location_count = length(var.probe_locations)
+  }
+
+  action {
+    action_group_id = azurerm_monitor_action_group.ops[0].id
+  }
+}
+
+locals {
+  # name -> (description, severity, query, threshold: alert when the count is above it)
+  log_alerts = {
+    api-errors = {
+      description = "The API answered with unexpected errors (500, unhandled exception) more than 3 times in 15 minutes."
+      severity    = 1
+      window      = "PT15M"
+      threshold   = 3
+      query       = "ContainerAppConsoleLogs_CL | where ContainerAppName_s endswith '-api' | where Log_s has 'unhandled_exception'"
+    }
+    job-failures = {
+      description = "At least 3 processing jobs (ingest, analysis, sync) failed in the last hour, or the watchdog ended silent ones."
+      severity    = 2
+      window      = "PT1H"
+      threshold   = 2
+      query       = "ContainerAppConsoleLogs_CL | where ContainerAppName_s endswith '-api' | where Log_s has_any ('\"job_failed\"', '\"job_failed_silent\"')"
+    }
+    out-of-memory = {
+      description = "A container was killed for using too much memory (analysis on a too small worker, a leak)."
+      severity    = 2
+      window      = "PT15M"
+      threshold   = 0
+      query       = "ContainerAppSystemLogs_CL | where Reason_s has 'OOMKilled' or Log_s has 'OOMKilled'"
+    }
+  }
+}
+
+resource "azurerm_monitor_scheduled_query_rules_alert_v2" "logs" {
+  for_each             = local.monitoring ? local.log_alerts : {}
+  name                 = "alert-${local.prefix}-${each.key}"
+  resource_group_name  = azurerm_resource_group.this.name
+  location             = var.location
+  description          = each.value.description
+  severity             = each.value.severity
+  scopes               = [azurerm_log_analytics_workspace.this.id]
+  evaluation_frequency = "PT15M"
+  window_duration      = each.value.window
+  enabled              = !var.paused
+  tags                 = local.tags
+
+  criteria {
+    query                   = each.value.query
+    time_aggregation_method = "Count"
+    operator                = "GreaterThan"
+    threshold               = each.value.threshold
+    failing_periods {
+      minimum_failing_periods_to_trigger_alert = 1
+      number_of_evaluation_periods             = 1
+    }
+  }
+
+  action {
+    action_groups = [azurerm_monitor_action_group.ops[0].id]
+  }
+}
+
+resource "azurerm_monitor_metric_alert" "postgres_storage" {
+  count               = local.monitoring ? 1 : 0
+  name                = "alert-${local.prefix}-postgres-storage"
+  resource_group_name = azurerm_resource_group.this.name
+  description         = "The database uses more than 80 % of its storage."
+  severity            = 2
+  frequency           = "PT15M"
+  window_size         = "PT1H"
+  scopes              = [azurerm_postgresql_flexible_server.this.id]
+  tags                = local.tags
+
+  criteria {
+    metric_namespace = "Microsoft.DBforPostgreSQL/flexibleServers"
+    metric_name      = "storage_percent"
+    aggregation      = "Maximum"
+    operator         = "GreaterThan"
+    threshold        = 80
+  }
+
+  action {
+    action_group_id = azurerm_monitor_action_group.ops[0].id
+  }
+}

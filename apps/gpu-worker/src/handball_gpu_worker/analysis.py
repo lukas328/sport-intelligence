@@ -286,6 +286,41 @@ def write_chunks(result: AnalysisResult, out: Path) -> int:
     return count
 
 
+def write_view_chunks(motion: CameraMotion, fps: float, out: Path) -> int:
+    """Where the moving camera looked, frame by frame (ADR 020 follow-up): `view_NNNNN.bin` per
+    CHUNK_MS, little-endian float32 rows [t_ms, h00 .. h22], the homography hall image (panorama)
+    px -> proxy frame px, scaled so h22 = 1. The web player composes it with the court calibration
+    (court -> panorama) to draw on the moving picture. Frames the motion pass could not place are
+    left out (the player hides its drawing there). A fixed camera writes nothing: its calibration
+    already refers to the frame. Returns the number of files (0: none)."""
+    if not motion.moving or not len(motion) or fps <= 0:
+        return 0
+    rows: list[list[float]] = []
+    for i in range(len(motion)):
+        h = motion.canvas_to_frame(i)
+        if h is None or not np.isfinite(h).all() or abs(h[2, 2]) < 1e-12:
+            continue
+        rows.append([round(i * 1000 / fps), *(h / h[2, 2]).ravel().tolist()])
+    if not rows:
+        return 0
+    arr = np.asarray(rows, np.float64)
+    last = int(arr[:, 0].max()) // CHUNK_MS
+    for n in range(last + 1):
+        sel = arr[(arr[:, 0] >= n * CHUNK_MS) & (arr[:, 0] < (n + 1) * CHUNK_MS)]
+        (out / f"view_{n:05d}.bin").write_bytes(sel.astype("<f4").tobytes())
+    return last + 1
+
+
+def _view_meta(views: int, motion: CameraMotion) -> dict[str, Any]:
+    """`view_chunks` and the proxy frame size they map into, only when there are any."""
+    if not views:
+        return {}
+    return {
+        "view_chunks": views,
+        "frame_size": [int(motion.frame_size[0]), int(motion.frame_size[1])],
+    }
+
+
 def events_payload(result: AnalysisResult, side_hint: str | None = None) -> dict[str, Any]:
     """Automatic events and possession phases (addendum 01, A3) for the API. `side_hint`: the
     side the home team defends at the start, known beforehand (a second half in its own file)."""
@@ -493,6 +528,7 @@ def run_analysis(
         out.mkdir()
         result.write_parquet(out / "tracks.parquet")
         chunks = write_chunks(result, out)
+        views = write_view_chunks(motion, result.fps, out)
         upload_dir(s3, settings.s3_bucket_artifacts, out, prefix + "analysis/")
         elapsed = time.perf_counter() - started
         tracks = result.summary()
@@ -505,6 +541,7 @@ def run_analysis(
             "frames": result.frames,
             "chunks": chunks,
             "chunk_ms": CHUNK_MS,
+            **_view_meta(views, motion),
             "detector": result.detector_source,
             "versions": {"vision": vision_version},
             "timings_s": {k: round(v, 2) for k, v in result.timings_s.items()},
@@ -936,6 +973,7 @@ def _run_learned(
         out.mkdir()
         result.write_parquet(out / "tracks.parquet")
         chunks = write_chunks(result, out)
+        views = write_view_chunks(obs.motion, result.fps, out)
         ball_rows = write_ball_path(result, out)
         # ball rows are per video frame; result.frames counts the detection frames only
         ball_info = ball_summary(ball_status, ball_rows, video_frames(obs), play)
@@ -950,6 +988,7 @@ def _run_learned(
             "frames": result.frames,
             "chunks": chunks,
             "chunk_ms": CHUNK_MS,
+            **_view_meta(views, obs.motion),
             "detector": result.detector_source,
             "versions": {
                 "vision": vision_version,

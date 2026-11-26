@@ -35,7 +35,7 @@ export function ConsentCopy({ orgId, teamId }: { orgId: string; teamId: string }
         {state === "shown" && t("copyFailed")}
       </p>
       {state === "shown" && url && (
-        <input readOnly value={url} onFocus={(e) => e.currentTarget.select()} className="w-full border-[1.5px] border-ink bg-transparent px-2 py-2 font-mono text-xs" data-testid="consent-link-url" />
+        <input readOnly value={url} onFocus={(e) => e.currentTarget.select()} className="w-full border-[1.5px] border-ink bg-transparent px-2 py-2 font-mono text-base sm:pointer-fine:text-xs" data-testid="consent-link-url" />
       )}
     </div>
   );
