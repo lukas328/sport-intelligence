@@ -426,6 +426,25 @@ er wartet, wie viel er selbst korrigieren muss, und ob er den Zahlen trauen kann
   Nebennutzen: das Pfiffpaar könnte die Torzeit eines Kandidaten auf ±1 s schärfen. Skripte und
   Labels: `ml/integration/whistle/goals/`.
 
+- **Pfiff + Bewegung als Tot-Signal (26.11.): nicht brauchbar.** Vorab festgelegt: tot, wenn in
+  den letzten W s ein Pfiff begann (Detektor Runde 2, 16 kHz) UND die Spieler ruhen. «Ruhen»
+  heisst: die Personen-Geschwindigkeit des Produkts (`goalcandidates.signals` «speed», ohne
+  Feld) liegt unter dem Q-ten Perzentil des Clips. (W, Q) gewählt auf Mülheim (W 5 s, Q 50),
+  einmal auf Leimental getestet, gegen dieselben «Ball im Spiel»-Labels.
+
+  | Leimental (117 tote Sekunden) | Präzision tot | CI | Recall |
+  |---|---|---|---|
+  | Pfiff + Bewegung | 19 % | 5–37 % | 11 % |
+  | Bewegung allein (unter Median) | 24 % | 9–41 % | 60 % |
+  | Pfiff allein (5 s danach) | 26 % | 15–39 % | 38 % |
+
+  Die Verbindung ist schlechter als jedes Signal allein. Unterbrechungen nach einem Pfiff sind
+  oft kurz (schneller Freiwurf), und in langen Unterbrechungen bewegen sich die Spieler weiter
+  (Wechsel, Zurücklaufen). Für tote Phasen bleibt der aussichtsreichste Weg das Pfiffpaar
+  (Torpfiff, dann Anwurfpfiff) zusammen mit erkannten Toren; das ist nur auf neuen Spielen mit
+  Ton prüfbar. Skript `ml/integration/whistle/goals/dead_combo.py`, Ergebnis
+  `ml/integration/results/whistle_motion_dead_ball.json`.
+
 ### 7. Wurfort unzuverlässig, Torzone fehlt
 
 - **Befund:** Ohne gelesene Nummer nimmt der Wurfort den nächsten Angreifer der letzten 10 s
