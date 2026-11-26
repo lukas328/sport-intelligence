@@ -1,0 +1,2138 @@
+{
+ "note": "ml/gold/pick_ball_frames.py, 18 per game, seed 20261126, prefix v",
+ "frames": [
+  {
+   "id": "v000",
+   "game": "CH_Frauen_SPL2_AargauOst_HSGLeimental_2024-09-01",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_AargauOst_HSGLeimental_2024-09-01_s4.mp4",
+   "fps": 30.0,
+   "frame": 2412,
+   "t_s": 80.4
+  },
+  {
+   "id": "v001",
+   "game": "CH_Frauen_SPL2_AargauOst_HSGLeimental_2024-09-01",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_AargauOst_HSGLeimental_2024-09-01_s3.mp4",
+   "fps": 30.0,
+   "frame": 4557,
+   "t_s": 151.9
+  },
+  {
+   "id": "v002",
+   "game": "CH_Frauen_SPL2_AargauOst_HSGLeimental_2024-09-01",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_AargauOst_HSGLeimental_2024-09-01_s4.mp4",
+   "fps": 30.0,
+   "frame": 3428,
+   "t_s": 114.267
+  },
+  {
+   "id": "v003",
+   "game": "CH_Frauen_SPL2_AargauOst_HSGLeimental_2024-09-01",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_AargauOst_HSGLeimental_2024-09-01_s4.mp4",
+   "fps": 30.0,
+   "frame": 633,
+   "t_s": 21.1
+  },
+  {
+   "id": "v004",
+   "game": "CH_Frauen_SPL2_AargauOst_HSGLeimental_2024-09-01",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_AargauOst_HSGLeimental_2024-09-01_s4.mp4",
+   "fps": 30.0,
+   "frame": 1376,
+   "t_s": 45.867
+  },
+  {
+   "id": "v005",
+   "game": "CH_Frauen_SPL2_AargauOst_HSGLeimental_2024-09-01",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_AargauOst_HSGLeimental_2024-09-01_s3.mp4",
+   "fps": 30.0,
+   "frame": 2888,
+   "t_s": 96.267
+  },
+  {
+   "id": "v006",
+   "game": "CH_Frauen_SPL2_AargauOst_HSGLeimental_2024-09-01",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_AargauOst_HSGLeimental_2024-09-01_s4.mp4",
+   "fps": 30.0,
+   "frame": 5261,
+   "t_s": 175.367
+  },
+  {
+   "id": "v007",
+   "game": "CH_Frauen_SPL2_AargauOst_HSGLeimental_2024-09-01",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_AargauOst_HSGLeimental_2024-09-01_s3.mp4",
+   "fps": 30.0,
+   "frame": 3807,
+   "t_s": 126.9
+  },
+  {
+   "id": "v008",
+   "game": "CH_Frauen_SPL2_AargauOst_HSGLeimental_2024-09-01",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_AargauOst_HSGLeimental_2024-09-01_s3.mp4",
+   "fps": 30.0,
+   "frame": 1926,
+   "t_s": 64.2
+  },
+  {
+   "id": "v009",
+   "game": "CH_Frauen_SPL2_AargauOst_HSGLeimental_2024-09-01",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_AargauOst_HSGLeimental_2024-09-01_s3.mp4",
+   "fps": 30.0,
+   "frame": 784,
+   "t_s": 26.133
+  },
+  {
+   "id": "v010",
+   "game": "CH_Frauen_SPL2_AargauOst_HSGLeimental_2024-09-01",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_AargauOst_HSGLeimental_2024-09-01_s4.mp4",
+   "fps": 30.0,
+   "frame": 4227,
+   "t_s": 140.9
+  },
+  {
+   "id": "v011",
+   "game": "CH_Frauen_SPL2_AargauOst_HSGLeimental_2024-09-01",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_AargauOst_HSGLeimental_2024-09-01_s3.mp4",
+   "fps": 30.0,
+   "frame": 139,
+   "t_s": 4.633
+  },
+  {
+   "id": "v012",
+   "game": "CH_Frauen_SPL2_AargauOst_HSGLeimental_2024-09-01",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_AargauOst_HSGLeimental_2024-09-01_s3.mp4",
+   "fps": 30.0,
+   "frame": 5178,
+   "t_s": 172.6
+  },
+  {
+   "id": "v013",
+   "game": "CH_Frauen_SPL2_BSVStans_HSGLeimental_2024-09-28",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_BSVStans_HSGLeimental_2024-09-28_s0.mp4",
+   "fps": 30.0,
+   "frame": 736,
+   "t_s": 24.533
+  },
+  {
+   "id": "v014",
+   "game": "CH_Frauen_SPL2_BSVStans_HSGLeimental_2024-09-28",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_BSVStans_HSGLeimental_2024-09-28_s0.mp4",
+   "fps": 30.0,
+   "frame": 1972,
+   "t_s": 65.733
+  },
+  {
+   "id": "v015",
+   "game": "CH_Frauen_SPL2_BSVStans_HSGLeimental_2024-09-28",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_BSVStans_HSGLeimental_2024-09-28_s0.mp4",
+   "fps": 30.0,
+   "frame": 4676,
+   "t_s": 155.867
+  },
+  {
+   "id": "v016",
+   "game": "CH_Frauen_SPL2_BSVStans_HSGLeimental_2024-09-28",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_BSVStans_HSGLeimental_2024-09-28_s4.mp4",
+   "fps": 30.0,
+   "frame": 4503,
+   "t_s": 150.1
+  },
+  {
+   "id": "v017",
+   "game": "CH_Frauen_SPL2_BSVStans_HSGLeimental_2024-09-28",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_BSVStans_HSGLeimental_2024-09-28_s0.mp4",
+   "fps": 30.0,
+   "frame": 108,
+   "t_s": 3.6
+  },
+  {
+   "id": "v018",
+   "game": "CH_Frauen_SPL2_BSVStans_HSGLeimental_2024-09-28",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_BSVStans_HSGLeimental_2024-09-28_s4.mp4",
+   "fps": 30.0,
+   "frame": 2663,
+   "t_s": 88.767
+  },
+  {
+   "id": "v019",
+   "game": "CH_Frauen_SPL2_BSVStans_HSGLeimental_2024-09-28",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_BSVStans_HSGLeimental_2024-09-28_s4.mp4",
+   "fps": 30.0,
+   "frame": 1581,
+   "t_s": 52.7
+  },
+  {
+   "id": "v020",
+   "game": "CH_Frauen_SPL2_BSVStans_HSGLeimental_2024-09-28",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_BSVStans_HSGLeimental_2024-09-28_s4.mp4",
+   "fps": 30.0,
+   "frame": 330,
+   "t_s": 11.0
+  },
+  {
+   "id": "v021",
+   "game": "CH_Frauen_SPL2_BSVStans_HSGLeimental_2024-09-28",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_BSVStans_HSGLeimental_2024-09-28_s0.mp4",
+   "fps": 30.0,
+   "frame": 2868,
+   "t_s": 95.6
+  },
+  {
+   "id": "v022",
+   "game": "CH_Frauen_SPL2_BSVStans_HSGLeimental_2024-09-28",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_BSVStans_HSGLeimental_2024-09-28_s0.mp4",
+   "fps": 30.0,
+   "frame": 3670,
+   "t_s": 122.333
+  },
+  {
+   "id": "v023",
+   "game": "CH_Frauen_SPL2_BSVStans_HSGLeimental_2024-09-28",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_BSVStans_HSGLeimental_2024-09-28_s4.mp4",
+   "fps": 30.0,
+   "frame": 3491,
+   "t_s": 116.367
+  },
+  {
+   "id": "v024",
+   "game": "CH_Frauen_SPL2_BSVStans_HSGLeimental_2024-09-28",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_BSVStans_HSGLeimental_2024-09-28_s4.mp4",
+   "fps": 30.0,
+   "frame": 980,
+   "t_s": 32.667
+  },
+  {
+   "id": "v025",
+   "game": "CH_Frauen_SPL2_BSVStans_HSGLeimental_2024-09-28",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_BSVStans_HSGLeimental_2024-09-28_s4.mp4",
+   "fps": 30.0,
+   "frame": 5245,
+   "t_s": 174.833
+  },
+  {
+   "id": "v026",
+   "game": "CH_Frauen_SPL2_BSVStans_HSGLeimental_2024-09-28",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_BSVStans_HSGLeimental_2024-09-28_s0.mp4",
+   "fps": 30.0,
+   "frame": 1357,
+   "t_s": 45.233
+  },
+  {
+   "id": "v027",
+   "game": "CH_Frauen_SPL2_BSVStans_HSGLeimental_2024-09-28",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_BSVStans_HSGLeimental_2024-09-28_s0.mp4",
+   "fps": 30.0,
+   "frame": 5284,
+   "t_s": 176.133
+  },
+  {
+   "id": "v028",
+   "game": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-04-13",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-04-13_s2.mp4",
+   "fps": 30.0,
+   "frame": 5251,
+   "t_s": 175.033
+  },
+  {
+   "id": "v029",
+   "game": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-04-13",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-04-13_s4.mp4",
+   "fps": 30.0,
+   "frame": 586,
+   "t_s": 19.533
+  },
+  {
+   "id": "v030",
+   "game": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-04-13",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-04-13_s4.mp4",
+   "fps": 30.0,
+   "frame": 4042,
+   "t_s": 134.733
+  },
+  {
+   "id": "v031",
+   "game": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-04-13",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-04-13_s4.mp4",
+   "fps": 30.0,
+   "frame": 1654,
+   "t_s": 55.133
+  },
+  {
+   "id": "v032",
+   "game": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-04-13",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-04-13_s2.mp4",
+   "fps": 30.0,
+   "frame": 393,
+   "t_s": 13.1
+  },
+  {
+   "id": "v033",
+   "game": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-04-13",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-04-13_s2.mp4",
+   "fps": 30.0,
+   "frame": 3975,
+   "t_s": 132.5
+  },
+  {
+   "id": "v034",
+   "game": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-04-13",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-04-13_s4.mp4",
+   "fps": 30.0,
+   "frame": 2965,
+   "t_s": 98.833
+  },
+  {
+   "id": "v035",
+   "game": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-04-13",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-04-13_s2.mp4",
+   "fps": 30.0,
+   "frame": 1857,
+   "t_s": 61.9
+  },
+  {
+   "id": "v036",
+   "game": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-04-13",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-04-13_s2.mp4",
+   "fps": 30.0,
+   "frame": 1226,
+   "t_s": 40.867
+  },
+  {
+   "id": "v037",
+   "game": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-04-13",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-04-13_s2.mp4",
+   "fps": 30.0,
+   "frame": 2503,
+   "t_s": 83.433
+  },
+  {
+   "id": "v038",
+   "game": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-04-13",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-04-13_s2.mp4",
+   "fps": 30.0,
+   "frame": 3110,
+   "t_s": 103.667
+  },
+  {
+   "id": "v039",
+   "game": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-04-13",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-04-13_s4.mp4",
+   "fps": 30.0,
+   "frame": 4731,
+   "t_s": 157.7
+  },
+  {
+   "id": "v040",
+   "game": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-04-13",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-04-13_s2.mp4",
+   "fps": 30.0,
+   "frame": 4641,
+   "t_s": 154.7
+  },
+  {
+   "id": "v041",
+   "game": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-04-13",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-04-13_s4.mp4",
+   "fps": 30.0,
+   "frame": 2352,
+   "t_s": 78.4
+  },
+  {
+   "id": "v042",
+   "game": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-10-12",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-10-12_s1.mp4",
+   "fps": 30.0,
+   "frame": 263,
+   "t_s": 8.767
+  },
+  {
+   "id": "v043",
+   "game": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-10-12",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-10-12_s2.mp4",
+   "fps": 30.0,
+   "frame": 2602,
+   "t_s": 86.733
+  },
+  {
+   "id": "v044",
+   "game": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-10-12",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-10-12_s2.mp4",
+   "fps": 30.0,
+   "frame": 1092,
+   "t_s": 36.4
+  },
+  {
+   "id": "v045",
+   "game": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-10-12",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-10-12_s1.mp4",
+   "fps": 30.0,
+   "frame": 2355,
+   "t_s": 78.5
+  },
+  {
+   "id": "v046",
+   "game": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-10-12",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-10-12_s1.mp4",
+   "fps": 30.0,
+   "frame": 3913,
+   "t_s": 130.433
+  },
+  {
+   "id": "v047",
+   "game": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-10-12",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-10-12_s1.mp4",
+   "fps": 30.0,
+   "frame": 3249,
+   "t_s": 108.3
+  },
+  {
+   "id": "v048",
+   "game": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-10-12",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-10-12_s1.mp4",
+   "fps": 30.0,
+   "frame": 1695,
+   "t_s": 56.5
+  },
+  {
+   "id": "v049",
+   "game": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-10-12",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-10-12_s2.mp4",
+   "fps": 30.0,
+   "frame": 5132,
+   "t_s": 171.067
+  },
+  {
+   "id": "v050",
+   "game": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-10-12",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-10-12_s2.mp4",
+   "fps": 30.0,
+   "frame": 3803,
+   "t_s": 126.767
+  },
+  {
+   "id": "v051",
+   "game": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-10-12",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-10-12_s2.mp4",
+   "fps": 30.0,
+   "frame": 248,
+   "t_s": 8.267
+  },
+  {
+   "id": "v052",
+   "game": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-10-12",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-10-12_s1.mp4",
+   "fps": 30.0,
+   "frame": 1047,
+   "t_s": 34.9
+  },
+  {
+   "id": "v053",
+   "game": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-10-12",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-10-12_s1.mp4",
+   "fps": 30.0,
+   "frame": 5189,
+   "t_s": 172.967
+  },
+  {
+   "id": "v054",
+   "game": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-10-12",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-10-12_s2.mp4",
+   "fps": 30.0,
+   "frame": 1762,
+   "t_s": 58.733
+  },
+  {
+   "id": "v055",
+   "game": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-10-12",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-10-12_s1.mp4",
+   "fps": 30.0,
+   "frame": 4532,
+   "t_s": 151.067
+  },
+  {
+   "id": "v056",
+   "game": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-10-12",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2024-10-12_s2.mp4",
+   "fps": 30.0,
+   "frame": 4447,
+   "t_s": 148.233
+  },
+  {
+   "id": "v057",
+   "game": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2025-05-03",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2025-05-03_s0.mp4",
+   "fps": 30.0,
+   "frame": 4659,
+   "t_s": 155.3
+  },
+  {
+   "id": "v058",
+   "game": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2025-05-03",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2025-05-03_s3.mp4",
+   "fps": 30.0,
+   "frame": 2843,
+   "t_s": 94.767
+  },
+  {
+   "id": "v059",
+   "game": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2025-05-03",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2025-05-03_s0.mp4",
+   "fps": 30.0,
+   "frame": 426,
+   "t_s": 14.2
+  },
+  {
+   "id": "v060",
+   "game": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2025-05-03",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2025-05-03_s0.mp4",
+   "fps": 30.0,
+   "frame": 2920,
+   "t_s": 97.333
+  },
+  {
+   "id": "v061",
+   "game": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2025-05-03",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2025-05-03_s0.mp4",
+   "fps": 30.0,
+   "frame": 1676,
+   "t_s": 55.867
+  },
+  {
+   "id": "v062",
+   "game": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2025-05-03",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2025-05-03_s0.mp4",
+   "fps": 30.0,
+   "frame": 3524,
+   "t_s": 117.467
+  },
+  {
+   "id": "v063",
+   "game": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2025-05-03",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2025-05-03_s3.mp4",
+   "fps": 30.0,
+   "frame": 173,
+   "t_s": 5.767
+  },
+  {
+   "id": "v064",
+   "game": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2025-05-03",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2025-05-03_s3.mp4",
+   "fps": 30.0,
+   "frame": 4514,
+   "t_s": 150.467
+  },
+  {
+   "id": "v065",
+   "game": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2025-05-03",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2025-05-03_s3.mp4",
+   "fps": 30.0,
+   "frame": 928,
+   "t_s": 30.933
+  },
+  {
+   "id": "v066",
+   "game": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2025-05-03",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2025-05-03_s0.mp4",
+   "fps": 30.0,
+   "frame": 1045,
+   "t_s": 34.833
+  },
+  {
+   "id": "v067",
+   "game": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2025-05-03",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2025-05-03_s3.mp4",
+   "fps": 30.0,
+   "frame": 5168,
+   "t_s": 172.267
+  },
+  {
+   "id": "v068",
+   "game": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2025-05-03",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2025-05-03_s3.mp4",
+   "fps": 30.0,
+   "frame": 3859,
+   "t_s": 128.633
+  },
+  {
+   "id": "v069",
+   "game": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2025-05-03",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2025-05-03_s3.mp4",
+   "fps": 30.0,
+   "frame": 1849,
+   "t_s": 61.633
+  },
+  {
+   "id": "v070",
+   "game": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2025-05-03",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2025-05-03_s0.mp4",
+   "fps": 30.0,
+   "frame": 2288,
+   "t_s": 76.267
+  },
+  {
+   "id": "v071",
+   "game": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2025-05-03",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_Bruehl2_HSGLeimental_2025-05-03_s0.mp4",
+   "fps": 30.0,
+   "frame": 5267,
+   "t_s": 175.567
+  },
+  {
+   "id": "v072",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2024-05-18",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2024-05-18_s2.mp4",
+   "fps": 30.0,
+   "frame": 3875,
+   "t_s": 129.167
+  },
+  {
+   "id": "v073",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2024-05-18",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2024-05-18_s1.mp4",
+   "fps": 30.0,
+   "frame": 2253,
+   "t_s": 75.1
+  },
+  {
+   "id": "v074",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2024-05-18",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2024-05-18_s1.mp4",
+   "fps": 30.0,
+   "frame": 1292,
+   "t_s": 43.067
+  },
+  {
+   "id": "v075",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2024-05-18",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2024-05-18_s1.mp4",
+   "fps": 30.0,
+   "frame": 520,
+   "t_s": 17.333
+  },
+  {
+   "id": "v076",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2024-05-18",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2024-05-18_s2.mp4",
+   "fps": 30.0,
+   "frame": 5093,
+   "t_s": 169.767
+  },
+  {
+   "id": "v077",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2024-05-18",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2024-05-18_s1.mp4",
+   "fps": 30.0,
+   "frame": 3031,
+   "t_s": 101.033
+  },
+  {
+   "id": "v078",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2024-05-18",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2024-05-18_s2.mp4",
+   "fps": 30.0,
+   "frame": 2967,
+   "t_s": 98.9
+  },
+  {
+   "id": "v079",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2024-05-18",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2024-05-18_s1.mp4",
+   "fps": 30.0,
+   "frame": 3804,
+   "t_s": 126.8
+  },
+  {
+   "id": "v080",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2024-05-18",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2024-05-18_s2.mp4",
+   "fps": 30.0,
+   "frame": 1219,
+   "t_s": 40.633
+  },
+  {
+   "id": "v081",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2024-05-18",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2024-05-18_s2.mp4",
+   "fps": 30.0,
+   "frame": 547,
+   "t_s": 18.233
+  },
+  {
+   "id": "v082",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2024-05-18",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2024-05-18_s1.mp4",
+   "fps": 30.0,
+   "frame": 4929,
+   "t_s": 164.3
+  },
+  {
+   "id": "v083",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2024-05-18",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2024-05-18_s2.mp4",
+   "fps": 30.0,
+   "frame": 1994,
+   "t_s": 66.467
+  },
+  {
+   "id": "v084",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2024-05-18",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2024-05-18_s2.mp4",
+   "fps": 30.0,
+   "frame": 4480,
+   "t_s": 149.333
+  },
+  {
+   "id": "v085",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2025-03-22",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2025-03-22_s4.mp4",
+   "fps": 30.0,
+   "frame": 4105,
+   "t_s": 136.833
+  },
+  {
+   "id": "v086",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2025-03-22",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2025-03-22_s4.mp4",
+   "fps": 30.0,
+   "frame": 1626,
+   "t_s": 54.2
+  },
+  {
+   "id": "v087",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2025-03-22",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2025-03-22_s1.mp4",
+   "fps": 30.0,
+   "frame": 2347,
+   "t_s": 78.233
+  },
+  {
+   "id": "v088",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2025-03-22",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2025-03-22_s4.mp4",
+   "fps": 30.0,
+   "frame": 1001,
+   "t_s": 33.367
+  },
+  {
+   "id": "v089",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2025-03-22",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2025-03-22_s1.mp4",
+   "fps": 30.0,
+   "frame": 3598,
+   "t_s": 119.933
+  },
+  {
+   "id": "v090",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2025-03-22",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2025-03-22_s1.mp4",
+   "fps": 30.0,
+   "frame": 4632,
+   "t_s": 154.4
+  },
+  {
+   "id": "v091",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2025-03-22",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2025-03-22_s4.mp4",
+   "fps": 30.0,
+   "frame": 3258,
+   "t_s": 108.6
+  },
+  {
+   "id": "v092",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2025-03-22",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2025-03-22_s1.mp4",
+   "fps": 30.0,
+   "frame": 343,
+   "t_s": 11.433
+  },
+  {
+   "id": "v093",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2025-03-22",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2025-03-22_s4.mp4",
+   "fps": 30.0,
+   "frame": 4822,
+   "t_s": 160.733
+  },
+  {
+   "id": "v094",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2025-03-22",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2025-03-22_s1.mp4",
+   "fps": 30.0,
+   "frame": 978,
+   "t_s": 32.6
+  },
+  {
+   "id": "v095",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2025-03-22",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2025-03-22_s1.mp4",
+   "fps": 30.0,
+   "frame": 5306,
+   "t_s": 176.867
+  },
+  {
+   "id": "v096",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2025-03-22",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2025-03-22_s4.mp4",
+   "fps": 30.0,
+   "frame": 2550,
+   "t_s": 85.0
+  },
+  {
+   "id": "v097",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2025-03-22",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2025-03-22_s1.mp4",
+   "fps": 30.0,
+   "frame": 1584,
+   "t_s": 52.8
+  },
+  {
+   "id": "v098",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2025-03-22",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2025-03-22_s4.mp4",
+   "fps": 30.0,
+   "frame": 357,
+   "t_s": 11.9
+  },
+  {
+   "id": "v099",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2025-03-22",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_2025-03-22_s1.mp4",
+   "fps": 30.0,
+   "frame": 2965,
+   "t_s": 98.833
+  },
+  {
+   "id": "v100",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz1_ca2025",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz1_ca2025_s4.mp4",
+   "fps": 60.0,
+   "frame": 6566,
+   "t_s": 109.433
+  },
+  {
+   "id": "v101",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz1_ca2025",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz1_ca2025_s3.mp4",
+   "fps": 60.0,
+   "frame": 1880,
+   "t_s": 31.333
+  },
+  {
+   "id": "v102",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz1_ca2025",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz1_ca2025_s4.mp4",
+   "fps": 60.0,
+   "frame": 5301,
+   "t_s": 88.35
+  },
+  {
+   "id": "v103",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz1_ca2025",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz1_ca2025_s4.mp4",
+   "fps": 60.0,
+   "frame": 2380,
+   "t_s": 39.667
+  },
+  {
+   "id": "v104",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz1_ca2025",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz1_ca2025_s3.mp4",
+   "fps": 60.0,
+   "frame": 8303,
+   "t_s": 138.383
+  },
+  {
+   "id": "v105",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz1_ca2025",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz1_ca2025_s3.mp4",
+   "fps": 60.0,
+   "frame": 10045,
+   "t_s": 167.417
+  },
+  {
+   "id": "v106",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz1_ca2025",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz1_ca2025_s3.mp4",
+   "fps": 60.0,
+   "frame": 6464,
+   "t_s": 107.733
+  },
+  {
+   "id": "v107",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz1_ca2025",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz1_ca2025_s4.mp4",
+   "fps": 60.0,
+   "frame": 9751,
+   "t_s": 162.517
+  },
+  {
+   "id": "v108",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz1_ca2025",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz1_ca2025_s3.mp4",
+   "fps": 60.0,
+   "frame": 4911,
+   "t_s": 81.85
+  },
+  {
+   "id": "v109",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz1_ca2025",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz1_ca2025_s4.mp4",
+   "fps": 60.0,
+   "frame": 7965,
+   "t_s": 132.75
+  },
+  {
+   "id": "v110",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz1_ca2025",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz1_ca2025_s3.mp4",
+   "fps": 60.0,
+   "frame": 3267,
+   "t_s": 54.45
+  },
+  {
+   "id": "v111",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz1_ca2025",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz1_ca2025_s4.mp4",
+   "fps": 60.0,
+   "frame": 377,
+   "t_s": 6.283
+  },
+  {
+   "id": "v112",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz1_ca2025",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz1_ca2025_s4.mp4",
+   "fps": 60.0,
+   "frame": 3833,
+   "t_s": 63.883
+  },
+  {
+   "id": "v113",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz1_ca2025",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz1_ca2025_s3.mp4",
+   "fps": 60.0,
+   "frame": 647,
+   "t_s": 10.783
+  },
+  {
+   "id": "v114",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz2_ca2025",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz2_ca2025_s2.mp4",
+   "fps": 60.0,
+   "frame": 3606,
+   "t_s": 60.1
+  },
+  {
+   "id": "v115",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz2_ca2025",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz2_ca2025_s3.mp4",
+   "fps": 60.0,
+   "frame": 8418,
+   "t_s": 140.3
+  },
+  {
+   "id": "v116",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz2_ca2025",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz2_ca2025_s3.mp4",
+   "fps": 60.0,
+   "frame": 2971,
+   "t_s": 49.517
+  },
+  {
+   "id": "v117",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz2_ca2025",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz2_ca2025_s3.mp4",
+   "fps": 60.0,
+   "frame": 1134,
+   "t_s": 18.9
+  },
+  {
+   "id": "v118",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz2_ca2025",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz2_ca2025_s3.mp4",
+   "fps": 60.0,
+   "frame": 5114,
+   "t_s": 85.233
+  },
+  {
+   "id": "v119",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz2_ca2025",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz2_ca2025_s2.mp4",
+   "fps": 60.0,
+   "frame": 578,
+   "t_s": 9.633
+  },
+  {
+   "id": "v120",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz2_ca2025",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz2_ca2025_s2.mp4",
+   "fps": 60.0,
+   "frame": 8713,
+   "t_s": 145.217
+  },
+  {
+   "id": "v121",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz2_ca2025",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz2_ca2025_s3.mp4",
+   "fps": 60.0,
+   "frame": 6387,
+   "t_s": 106.45
+  },
+  {
+   "id": "v122",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz2_ca2025",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz2_ca2025_s3.mp4",
+   "fps": 60.0,
+   "frame": 9786,
+   "t_s": 163.1
+  },
+  {
+   "id": "v123",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz2_ca2025",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz2_ca2025_s2.mp4",
+   "fps": 60.0,
+   "frame": 5245,
+   "t_s": 87.417
+  },
+  {
+   "id": "v124",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz2_ca2025",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz2_ca2025_s2.mp4",
+   "fps": 60.0,
+   "frame": 7513,
+   "t_s": 125.217
+  },
+  {
+   "id": "v125",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz2_ca2025",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz2_ca2025_s2.mp4",
+   "fps": 60.0,
+   "frame": 1979,
+   "t_s": 32.983
+  },
+  {
+   "id": "v126",
+   "game": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz2_ca2025",
+   "dataset": "handball-segs-l03",
+   "file": "CH_Frauen_SPL2_HCArbon_HSGLeimental_hz2_ca2025_s2.mp4",
+   "fps": 60.0,
+   "frame": 10554,
+   "t_s": 175.9
+  },
+  {
+   "id": "v127",
+   "game": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-03-28",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-03-28_s2.mp4",
+   "fps": 30.0,
+   "frame": 1775,
+   "t_s": 59.167
+  },
+  {
+   "id": "v128",
+   "game": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-03-28",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-03-28_s2.mp4",
+   "fps": 30.0,
+   "frame": 4840,
+   "t_s": 161.333
+  },
+  {
+   "id": "v129",
+   "game": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-03-28",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-03-28_s1.mp4",
+   "fps": 30.0,
+   "frame": 4339,
+   "t_s": 144.633
+  },
+  {
+   "id": "v130",
+   "game": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-03-28",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-03-28_s1.mp4",
+   "fps": 30.0,
+   "frame": 3157,
+   "t_s": 105.233
+  },
+  {
+   "id": "v131",
+   "game": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-03-28",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-03-28_s1.mp4",
+   "fps": 30.0,
+   "frame": 995,
+   "t_s": 33.167
+  },
+  {
+   "id": "v132",
+   "game": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-03-28",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-03-28_s2.mp4",
+   "fps": 30.0,
+   "frame": 3300,
+   "t_s": 110.0
+  },
+  {
+   "id": "v133",
+   "game": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-03-28",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-03-28_s1.mp4",
+   "fps": 30.0,
+   "frame": 1810,
+   "t_s": 60.333
+  },
+  {
+   "id": "v134",
+   "game": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-03-28",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-03-28_s2.mp4",
+   "fps": 30.0,
+   "frame": 123,
+   "t_s": 4.1
+  },
+  {
+   "id": "v135",
+   "game": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-03-28",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-03-28_s2.mp4",
+   "fps": 30.0,
+   "frame": 3957,
+   "t_s": 131.9
+  },
+  {
+   "id": "v136",
+   "game": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-03-28",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-03-28_s1.mp4",
+   "fps": 30.0,
+   "frame": 181,
+   "t_s": 6.033
+  },
+  {
+   "id": "v137",
+   "game": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-03-28",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-03-28_s2.mp4",
+   "fps": 30.0,
+   "frame": 1113,
+   "t_s": 37.1
+  },
+  {
+   "id": "v138",
+   "game": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-03-28",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-03-28_s2.mp4",
+   "fps": 30.0,
+   "frame": 2577,
+   "t_s": 85.9
+  },
+  {
+   "id": "v139",
+   "game": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-03-28",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-03-28_s1.mp4",
+   "fps": 30.0,
+   "frame": 5127,
+   "t_s": 170.9
+  },
+  {
+   "id": "v140",
+   "game": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-03-28",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-03-28_s1.mp4",
+   "fps": 30.0,
+   "frame": 2454,
+   "t_s": 81.8
+  },
+  {
+   "id": "v141",
+   "game": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-09-15",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-09-15_s0.mp4",
+   "fps": 30.0,
+   "frame": 2771,
+   "t_s": 92.367
+  },
+  {
+   "id": "v142",
+   "game": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-09-15",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-09-15_s3.mp4",
+   "fps": 30.0,
+   "frame": 409,
+   "t_s": 13.633
+  },
+  {
+   "id": "v143",
+   "game": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-09-15",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-09-15_s3.mp4",
+   "fps": 30.0,
+   "frame": 4721,
+   "t_s": 157.367
+  },
+  {
+   "id": "v144",
+   "game": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-09-15",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-09-15_s0.mp4",
+   "fps": 30.0,
+   "frame": 4254,
+   "t_s": 141.8
+  },
+  {
+   "id": "v145",
+   "game": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-09-15",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-09-15_s3.mp4",
+   "fps": 30.0,
+   "frame": 3569,
+   "t_s": 118.967
+  },
+  {
+   "id": "v146",
+   "game": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-09-15",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-09-15_s0.mp4",
+   "fps": 30.0,
+   "frame": 424,
+   "t_s": 14.133
+  },
+  {
+   "id": "v147",
+   "game": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-09-15",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-09-15_s3.mp4",
+   "fps": 30.0,
+   "frame": 1083,
+   "t_s": 36.1
+  },
+  {
+   "id": "v148",
+   "game": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-09-15",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-09-15_s0.mp4",
+   "fps": 30.0,
+   "frame": 5102,
+   "t_s": 170.067
+  },
+  {
+   "id": "v149",
+   "game": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-09-15",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-09-15_s3.mp4",
+   "fps": 30.0,
+   "frame": 2298,
+   "t_s": 76.6
+  },
+  {
+   "id": "v150",
+   "game": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-09-15",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-09-15_s0.mp4",
+   "fps": 30.0,
+   "frame": 2047,
+   "t_s": 68.233
+  },
+  {
+   "id": "v151",
+   "game": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-09-15",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-09-15_s0.mp4",
+   "fps": 30.0,
+   "frame": 3575,
+   "t_s": 119.167
+  },
+  {
+   "id": "v152",
+   "game": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-09-15",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-09-15_s3.mp4",
+   "fps": 30.0,
+   "frame": 2962,
+   "t_s": 98.733
+  },
+  {
+   "id": "v153",
+   "game": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-09-15",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-09-15_s0.mp4",
+   "fps": 30.0,
+   "frame": 1274,
+   "t_s": 42.467
+  },
+  {
+   "id": "v154",
+   "game": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-09-15",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2024-09-15_s3.mp4",
+   "fps": 30.0,
+   "frame": 1687,
+   "t_s": 56.233
+  },
+  {
+   "id": "v155",
+   "game": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2025-03-29",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2025-03-29_s1.mp4",
+   "fps": 30.0,
+   "frame": 5203,
+   "t_s": 173.433
+  },
+  {
+   "id": "v156",
+   "game": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2025-03-29",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2025-03-29_s1.mp4",
+   "fps": 30.0,
+   "frame": 4593,
+   "t_s": 153.1
+  },
+  {
+   "id": "v157",
+   "game": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2025-03-29",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2025-03-29_s1.mp4",
+   "fps": 30.0,
+   "frame": 536,
+   "t_s": 17.867
+  },
+  {
+   "id": "v158",
+   "game": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2025-03-29",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2025-03-29_s4.mp4",
+   "fps": 30.0,
+   "frame": 2844,
+   "t_s": 94.8
+  },
+  {
+   "id": "v159",
+   "game": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2025-03-29",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2025-03-29_s4.mp4",
+   "fps": 30.0,
+   "frame": 4275,
+   "t_s": 142.5
+  },
+  {
+   "id": "v160",
+   "game": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2025-03-29",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2025-03-29_s1.mp4",
+   "fps": 30.0,
+   "frame": 1877,
+   "t_s": 62.567
+  },
+  {
+   "id": "v161",
+   "game": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2025-03-29",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2025-03-29_s4.mp4",
+   "fps": 30.0,
+   "frame": 1170,
+   "t_s": 39.0
+  },
+  {
+   "id": "v162",
+   "game": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2025-03-29",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2025-03-29_s4.mp4",
+   "fps": 30.0,
+   "frame": 165,
+   "t_s": 5.5
+  },
+  {
+   "id": "v163",
+   "game": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2025-03-29",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2025-03-29_s1.mp4",
+   "fps": 30.0,
+   "frame": 3391,
+   "t_s": 113.033
+  },
+  {
+   "id": "v164",
+   "game": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2025-03-29",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2025-03-29_s4.mp4",
+   "fps": 30.0,
+   "frame": 2135,
+   "t_s": 71.167
+  },
+  {
+   "id": "v165",
+   "game": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2025-03-29",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2025-03-29_s4.mp4",
+   "fps": 30.0,
+   "frame": 5114,
+   "t_s": 170.467
+  },
+  {
+   "id": "v166",
+   "game": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2025-03-29",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2025-03-29_s4.mp4",
+   "fps": 30.0,
+   "frame": 3580,
+   "t_s": 119.333
+  },
+  {
+   "id": "v167",
+   "game": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2025-03-29",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2025-03-29_s1.mp4",
+   "fps": 30.0,
+   "frame": 2713,
+   "t_s": 90.433
+  },
+  {
+   "id": "v168",
+   "game": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2025-03-29",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_LKZug2_HSGLeimental_2025-03-29_s1.mp4",
+   "fps": 30.0,
+   "frame": 1251,
+   "t_s": 41.7
+  },
+  {
+   "id": "v169",
+   "game": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-03-23",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-03-23_s0.mp4",
+   "fps": 30.0,
+   "frame": 2155,
+   "t_s": 71.833
+  },
+  {
+   "id": "v170",
+   "game": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-03-23",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-03-23_s0.mp4",
+   "fps": 30.0,
+   "frame": 381,
+   "t_s": 12.7
+  },
+  {
+   "id": "v171",
+   "game": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-03-23",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-03-23_s2.mp4",
+   "fps": 30.0,
+   "frame": 3032,
+   "t_s": 101.067
+  },
+  {
+   "id": "v172",
+   "game": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-03-23",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-03-23_s2.mp4",
+   "fps": 30.0,
+   "frame": 653,
+   "t_s": 21.767
+  },
+  {
+   "id": "v173",
+   "game": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-03-23",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-03-23_s2.mp4",
+   "fps": 30.0,
+   "frame": 4784,
+   "t_s": 159.467
+  },
+  {
+   "id": "v174",
+   "game": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-03-23",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-03-23_s0.mp4",
+   "fps": 30.0,
+   "frame": 4586,
+   "t_s": 152.867
+  },
+  {
+   "id": "v175",
+   "game": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-03-23",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-03-23_s2.mp4",
+   "fps": 30.0,
+   "frame": 1520,
+   "t_s": 50.667
+  },
+  {
+   "id": "v176",
+   "game": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-03-23",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-03-23_s0.mp4",
+   "fps": 30.0,
+   "frame": 3040,
+   "t_s": 101.333
+  },
+  {
+   "id": "v177",
+   "game": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-03-23",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-03-23_s2.mp4",
+   "fps": 30.0,
+   "frame": 4029,
+   "t_s": 134.3
+  },
+  {
+   "id": "v178",
+   "game": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-03-23",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-03-23_s0.mp4",
+   "fps": 30.0,
+   "frame": 3836,
+   "t_s": 127.867
+  },
+  {
+   "id": "v179",
+   "game": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-03-23",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-03-23_s2.mp4",
+   "fps": 30.0,
+   "frame": 2333,
+   "t_s": 77.767
+  },
+  {
+   "id": "v180",
+   "game": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-03-23",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-03-23_s0.mp4",
+   "fps": 30.0,
+   "frame": 5257,
+   "t_s": 175.233
+  },
+  {
+   "id": "v181",
+   "game": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-03-23",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-03-23_s0.mp4",
+   "fps": 30.0,
+   "frame": 1549,
+   "t_s": 51.633
+  },
+  {
+   "id": "v182",
+   "game": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-11-09",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-11-09_s4.mp4",
+   "fps": 30.0,
+   "frame": 819,
+   "t_s": 27.3
+  },
+  {
+   "id": "v183",
+   "game": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-11-09",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-11-09_s3.mp4",
+   "fps": 30.0,
+   "frame": 1670,
+   "t_s": 55.667
+  },
+  {
+   "id": "v184",
+   "game": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-11-09",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-11-09_s3.mp4",
+   "fps": 30.0,
+   "frame": 2623,
+   "t_s": 87.433
+  },
+  {
+   "id": "v185",
+   "game": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-11-09",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-11-09_s4.mp4",
+   "fps": 30.0,
+   "frame": 2984,
+   "t_s": 99.467
+  },
+  {
+   "id": "v186",
+   "game": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-11-09",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-11-09_s3.mp4",
+   "fps": 30.0,
+   "frame": 766,
+   "t_s": 25.533
+  },
+  {
+   "id": "v187",
+   "game": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-11-09",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-11-09_s3.mp4",
+   "fps": 30.0,
+   "frame": 5206,
+   "t_s": 173.533
+  },
+  {
+   "id": "v188",
+   "game": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-11-09",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-11-09_s4.mp4",
+   "fps": 30.0,
+   "frame": 4436,
+   "t_s": 147.867
+  },
+  {
+   "id": "v189",
+   "game": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-11-09",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-11-09_s3.mp4",
+   "fps": 30.0,
+   "frame": 4442,
+   "t_s": 148.067
+  },
+  {
+   "id": "v190",
+   "game": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-11-09",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-11-09_s4.mp4",
+   "fps": 30.0,
+   "frame": 5057,
+   "t_s": 168.567
+  },
+  {
+   "id": "v191",
+   "game": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-11-09",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-11-09_s3.mp4",
+   "fps": 30.0,
+   "frame": 3629,
+   "t_s": 120.967
+  },
+  {
+   "id": "v192",
+   "game": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-11-09",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-11-09_s4.mp4",
+   "fps": 30.0,
+   "frame": 1991,
+   "t_s": 66.367
+  },
+  {
+   "id": "v193",
+   "game": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-11-09",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-11-09_s4.mp4",
+   "fps": 30.0,
+   "frame": 3682,
+   "t_s": 122.733
+  },
+  {
+   "id": "v194",
+   "game": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-11-09",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-11-09_s4.mp4",
+   "fps": 30.0,
+   "frame": 152,
+   "t_s": 5.067
+  },
+  {
+   "id": "v195",
+   "game": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-11-09",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_SpOno2_HSGLeimental_2024-11-09_s3.mp4",
+   "fps": 30.0,
+   "frame": 152,
+   "t_s": 5.067
+  },
+  {
+   "id": "v196",
+   "game": "CH_Frauen_SPL2_USYverdon_HSGLeimental_2024-05-11",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_USYverdon_HSGLeimental_2024-05-11_s2.mp4",
+   "fps": 30.0,
+   "frame": 3744,
+   "t_s": 124.8
+  },
+  {
+   "id": "v197",
+   "game": "CH_Frauen_SPL2_USYverdon_HSGLeimental_2024-05-11",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_USYverdon_HSGLeimental_2024-05-11_s2.mp4",
+   "fps": 30.0,
+   "frame": 2585,
+   "t_s": 86.167
+  },
+  {
+   "id": "v198",
+   "game": "CH_Frauen_SPL2_USYverdon_HSGLeimental_2024-05-11",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_USYverdon_HSGLeimental_2024-05-11_s4.mp4",
+   "fps": 30.0,
+   "frame": 423,
+   "t_s": 14.1
+  },
+  {
+   "id": "v199",
+   "game": "CH_Frauen_SPL2_USYverdon_HSGLeimental_2024-05-11",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_USYverdon_HSGLeimental_2024-05-11_s4.mp4",
+   "fps": 30.0,
+   "frame": 1077,
+   "t_s": 35.9
+  },
+  {
+   "id": "v200",
+   "game": "CH_Frauen_SPL2_USYverdon_HSGLeimental_2024-05-11",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_USYverdon_HSGLeimental_2024-05-11_s4.mp4",
+   "fps": 30.0,
+   "frame": 3009,
+   "t_s": 100.3
+  },
+  {
+   "id": "v201",
+   "game": "CH_Frauen_SPL2_USYverdon_HSGLeimental_2024-05-11",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_USYverdon_HSGLeimental_2024-05-11_s4.mp4",
+   "fps": 30.0,
+   "frame": 3670,
+   "t_s": 122.333
+  },
+  {
+   "id": "v202",
+   "game": "CH_Frauen_SPL2_USYverdon_HSGLeimental_2024-05-11",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_USYverdon_HSGLeimental_2024-05-11_s4.mp4",
+   "fps": 30.0,
+   "frame": 2263,
+   "t_s": 75.433
+  },
+  {
+   "id": "v203",
+   "game": "CH_Frauen_SPL2_USYverdon_HSGLeimental_2024-05-11",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_USYverdon_HSGLeimental_2024-05-11_s2.mp4",
+   "fps": 30.0,
+   "frame": 1280,
+   "t_s": 42.667
+  },
+  {
+   "id": "v204",
+   "game": "CH_Frauen_SPL2_USYverdon_HSGLeimental_2024-05-11",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_USYverdon_HSGLeimental_2024-05-11_s2.mp4",
+   "fps": 30.0,
+   "frame": 4750,
+   "t_s": 158.333
+  },
+  {
+   "id": "v205",
+   "game": "CH_Frauen_SPL2_USYverdon_HSGLeimental_2024-05-11",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_USYverdon_HSGLeimental_2024-05-11_s4.mp4",
+   "fps": 30.0,
+   "frame": 4295,
+   "t_s": 143.167
+  },
+  {
+   "id": "v206",
+   "game": "CH_Frauen_SPL2_USYverdon_HSGLeimental_2024-05-11",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_USYverdon_HSGLeimental_2024-05-11_s2.mp4",
+   "fps": 30.0,
+   "frame": 678,
+   "t_s": 22.6
+  },
+  {
+   "id": "v207",
+   "game": "CH_Frauen_SPL2_USYverdon_HSGLeimental_2024-05-11",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_USYverdon_HSGLeimental_2024-05-11_s4.mp4",
+   "fps": 30.0,
+   "frame": 5074,
+   "t_s": 169.133
+  },
+  {
+   "id": "v208",
+   "game": "CH_Frauen_SPL2_USYverdon_HSGLeimental_2024-05-11",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_USYverdon_HSGLeimental_2024-05-11_s2.mp4",
+   "fps": 30.0,
+   "frame": 1981,
+   "t_s": 66.033
+  },
+  {
+   "id": "v209",
+   "game": "CH_Frauen_SPL2_Uster_HSGLeimental_2024-10-05",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_Uster_HSGLeimental_2024-10-05_s2.mp4",
+   "fps": 30.0,
+   "frame": 3774,
+   "t_s": 125.8
+  },
+  {
+   "id": "v210",
+   "game": "CH_Frauen_SPL2_Uster_HSGLeimental_2024-10-05",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_Uster_HSGLeimental_2024-10-05_s0.mp4",
+   "fps": 30.0,
+   "frame": 3879,
+   "t_s": 129.3
+  },
+  {
+   "id": "v211",
+   "game": "CH_Frauen_SPL2_Uster_HSGLeimental_2024-10-05",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_Uster_HSGLeimental_2024-10-05_s0.mp4",
+   "fps": 30.0,
+   "frame": 3034,
+   "t_s": 101.133
+  },
+  {
+   "id": "v212",
+   "game": "CH_Frauen_SPL2_Uster_HSGLeimental_2024-10-05",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_Uster_HSGLeimental_2024-10-05_s0.mp4",
+   "fps": 30.0,
+   "frame": 1159,
+   "t_s": 38.633
+  },
+  {
+   "id": "v213",
+   "game": "CH_Frauen_SPL2_Uster_HSGLeimental_2024-10-05",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_Uster_HSGLeimental_2024-10-05_s2.mp4",
+   "fps": 30.0,
+   "frame": 3114,
+   "t_s": 103.8
+  },
+  {
+   "id": "v214",
+   "game": "CH_Frauen_SPL2_Uster_HSGLeimental_2024-10-05",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_Uster_HSGLeimental_2024-10-05_s2.mp4",
+   "fps": 30.0,
+   "frame": 1135,
+   "t_s": 37.833
+  },
+  {
+   "id": "v215",
+   "game": "CH_Frauen_SPL2_Uster_HSGLeimental_2024-10-05",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_Uster_HSGLeimental_2024-10-05_s2.mp4",
+   "fps": 30.0,
+   "frame": 4787,
+   "t_s": 159.567
+  },
+  {
+   "id": "v216",
+   "game": "CH_Frauen_SPL2_Uster_HSGLeimental_2024-10-05",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_Uster_HSGLeimental_2024-10-05_s0.mp4",
+   "fps": 30.0,
+   "frame": 1837,
+   "t_s": 61.233
+  },
+  {
+   "id": "v217",
+   "game": "CH_Frauen_SPL2_Uster_HSGLeimental_2024-10-05",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_Uster_HSGLeimental_2024-10-05_s0.mp4",
+   "fps": 30.0,
+   "frame": 4517,
+   "t_s": 150.567
+  },
+  {
+   "id": "v218",
+   "game": "CH_Frauen_SPL2_Uster_HSGLeimental_2024-10-05",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_Uster_HSGLeimental_2024-10-05_s2.mp4",
+   "fps": 30.0,
+   "frame": 108,
+   "t_s": 3.6
+  },
+  {
+   "id": "v219",
+   "game": "CH_Frauen_SPL2_Uster_HSGLeimental_2024-10-05",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_Uster_HSGLeimental_2024-10-05_s2.mp4",
+   "fps": 30.0,
+   "frame": 2374,
+   "t_s": 79.133
+  },
+  {
+   "id": "v220",
+   "game": "CH_Frauen_SPL2_Uster_HSGLeimental_2024-10-05",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_Uster_HSGLeimental_2024-10-05_s0.mp4",
+   "fps": 30.0,
+   "frame": 5255,
+   "t_s": 175.167
+  },
+  {
+   "id": "v221",
+   "game": "CH_Frauen_SPL2_Uster_HSGLeimental_2024-10-05",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_Uster_HSGLeimental_2024-10-05_s0.mp4",
+   "fps": 30.0,
+   "frame": 117,
+   "t_s": 3.9
+  },
+  {
+   "id": "v222",
+   "game": "CH_Frauen_SPL2_Uster_HSGLeimental_2024-10-05",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_Uster_HSGLeimental_2024-10-05_s2.mp4",
+   "fps": 30.0,
+   "frame": 1749,
+   "t_s": 58.3
+  },
+  {
+   "id": "v223",
+   "game": "CH_Frauen_SPL2_Uster_HSGLeimental_ca2025",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_Uster_HSGLeimental_ca2025_s3.mp4",
+   "fps": 30.0,
+   "frame": 405,
+   "t_s": 13.5
+  },
+  {
+   "id": "v224",
+   "game": "CH_Frauen_SPL2_Uster_HSGLeimental_ca2025",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_Uster_HSGLeimental_ca2025_s2.mp4",
+   "fps": 30.0,
+   "frame": 3903,
+   "t_s": 130.1
+  },
+  {
+   "id": "v225",
+   "game": "CH_Frauen_SPL2_Uster_HSGLeimental_ca2025",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_Uster_HSGLeimental_ca2025_s2.mp4",
+   "fps": 30.0,
+   "frame": 225,
+   "t_s": 7.5
+  },
+  {
+   "id": "v226",
+   "game": "CH_Frauen_SPL2_Uster_HSGLeimental_ca2025",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_Uster_HSGLeimental_ca2025_s2.mp4",
+   "fps": 30.0,
+   "frame": 2304,
+   "t_s": 76.8
+  },
+  {
+   "id": "v227",
+   "game": "CH_Frauen_SPL2_Uster_HSGLeimental_ca2025",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_Uster_HSGLeimental_ca2025_s3.mp4",
+   "fps": 30.0,
+   "frame": 3204,
+   "t_s": 106.8
+  },
+  {
+   "id": "v228",
+   "game": "CH_Frauen_SPL2_Uster_HSGLeimental_ca2025",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_Uster_HSGLeimental_ca2025_s2.mp4",
+   "fps": 30.0,
+   "frame": 3070,
+   "t_s": 102.333
+  },
+  {
+   "id": "v229",
+   "game": "CH_Frauen_SPL2_Uster_HSGLeimental_ca2025",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_Uster_HSGLeimental_ca2025_s3.mp4",
+   "fps": 30.0,
+   "frame": 4740,
+   "t_s": 158.0
+  },
+  {
+   "id": "v230",
+   "game": "CH_Frauen_SPL2_Uster_HSGLeimental_ca2025",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_Uster_HSGLeimental_ca2025_s2.mp4",
+   "fps": 30.0,
+   "frame": 4610,
+   "t_s": 153.667
+  },
+  {
+   "id": "v231",
+   "game": "CH_Frauen_SPL2_Uster_HSGLeimental_ca2025",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_Uster_HSGLeimental_ca2025_s2.mp4",
+   "fps": 30.0,
+   "frame": 1304,
+   "t_s": 43.467
+  },
+  {
+   "id": "v232",
+   "game": "CH_Frauen_SPL2_Uster_HSGLeimental_ca2025",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_Uster_HSGLeimental_ca2025_s3.mp4",
+   "fps": 30.0,
+   "frame": 1864,
+   "t_s": 62.133
+  },
+  {
+   "id": "v233",
+   "game": "CH_Frauen_SPL2_Uster_HSGLeimental_ca2025",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_Uster_HSGLeimental_ca2025_s3.mp4",
+   "fps": 30.0,
+   "frame": 3884,
+   "t_s": 129.467
+  },
+  {
+   "id": "v234",
+   "game": "CH_Frauen_SPL2_Uster_HSGLeimental_ca2025",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_Uster_HSGLeimental_ca2025_s3.mp4",
+   "fps": 30.0,
+   "frame": 1061,
+   "t_s": 35.367
+  },
+  {
+   "id": "v235",
+   "game": "CH_Frauen_SPL2_Uster_HSGLeimental_ca2025",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_Uster_HSGLeimental_ca2025_s3.mp4",
+   "fps": 30.0,
+   "frame": 2527,
+   "t_s": 84.233
+  },
+  {
+   "id": "v236",
+   "game": "CH_Frauen_SPL2_Uster_HSGLeimental_ca2025",
+   "dataset": "handball-segs-l04",
+   "file": "CH_Frauen_SPL2_Uster_HSGLeimental_ca2025_s2.mp4",
+   "fps": 30.0,
+   "frame": 5248,
+   "t_s": 174.933
+  }
+ ]
+}
