@@ -988,6 +988,7 @@
     "duration": "Analysedauer {seconds} s",
     "autoSummary": "Automatisch erkannt: {events} Ereignisse (Anwürfe, Tore aus dem Anwurf) und {possessions} Angriffe, als geschätzt markiert.",
     "autoOverlay": "Von der eingeblendeten Anzeigetafel gelesen: {goals, plural, =1 {1 Tor} other {# Tore}} mit Spielzeit.",
+    "autoNoThrowOffs": "Anwürfe wurden in diesem Video nicht erkannt (die Kamera zeigt die Aufstellung selten ganz), darum fehlen auch Tore aus dem Anwurf.",
     "autoNoGoalkeepers": "Ohne erkannte Torhüter können Seiten, Angriffe und Tore nicht automatisch bestimmt werden.",
     "autoLimits": "Würfe, Paraden und Ballverluste brauchen die Ballerkennung und kommen aus Erfassung oder Import.",
     "failure_calibration": "Das Spielfeld wurde nicht erkannt.",

@@ -1628,3 +1628,238 @@ des anderen Teams daneben. Darum werden die Rohstücke vor dem Verknüpfen gesch
     benannte Zeit 24.6 -> 23.2 %; mit Kader 13 / 0 / 27.5 % -> 14 / 0 / 26.8 %. Nicht-Feldspieler
     benannt 7 -> 4, als Spieler 22 -> 14 von 72; ATV unverändert wie oben.
 
+### Weniger Fehlalarme bei den Wurf- und Tor-Kandidaten (Audit, 2026-11-26)
+
+Auftrag: Präzision der Kandidaten deutlich hoch bei mindestens 95 % des heutigen Tor-Recalls im
+Fenster. Ohne Prüfen-Antworten (Q-DATA-4 offen), auf den eingefrorenen LLM-Abwurfmarken
+(`ml/gold/data/shot_release_dev_llm.json`), 49 Dev-Segmente aus 13 Spielen, Spiel für Spiel
+ausgelassen, Endtest nicht gelesen. Nicht wiederholt, was #145 und A1 schon zeigten (Kamera,
+Spielerbewegung, Ballpfad tragen nichts über den Wert hinaus).
+
+- **Neue Merkmale ohne Kalibrierung** (`ml/integration/shot_stage2/feats.py`): Fusspunkte aller
+  Personen auf dem Kamera-Zylinder (2 Hz), Team jeder Person aus der Torso-Farbe (gelernte Kits),
+  Spielfeldenden aus der Streuung der Fusspunkte. Pro Kandidat in sechs Fenstern von 10 s vor bis
+  35 s nach dem Peak: Anteil Personen nahe dem angegriffenen Ende und in der Mitte, Abstand zum
+  Ende, Streuung, Abstand der Teams, Teams auf getrennten Hälften (Anwurf-Formation), Spiel kehrt
+  zum anderen Ende (Gegenstoss). Die Seiten aus den Torhütern und die Uhr gibt es auf den
+  Dev-Segmenten nicht (keine Kalibrierung, Bewegung ohne Bilder; Videos nur für 34 von 49
+  Segmenten auffindbar); die Hallentafel bräuchte die Videos.
+- **Auswertung** (`ml/integration/shot_stage2/evaluate.py`): Schwelle pro ausgelassenem Spiel aus
+  den Trainingsspielen, so dass dort 95 % des Fenster-Recalls bleiben. Verglichen mit einer höheren
+  Schwelle auf dem heutigen Wert allein. Ergebnis `ml/integration/results/shot_stage2_dev.json`.
+
+| Wurf-Kandidaten | pro Minute | in ±2 s richtig (Präzision) | sichere Würfe in ±2 s | Fenster-Recall |
+|---|---|---|---|---|
+| heute (Rate 4) | 3.86 | 20.4 % (16.3 bis 25.0) | 74.5 % (62.4 bis 86.4) | 100 % |
+| **Rate 2** (Einstellung gibt es schon) | **1.92** | **39.0 %** (32.1 bis 46.1) | **73.4 %** (62.1 bis 84.3) | 95.7 % |
+| Rate 4, Wert-Schwelle aus Training | 1.88 | 42.4 % | | 94.7 % |
+| Rate 4, logistische Regression | 1.66 | 46.3 % | | 91.5 % |
+
+| Tor-Kandidaten (Standardliste, Rate 2) | pro Minute | Präzision ±2 s | Fenster-Recall |
+|---|---|---|---|
+| heute | 1.76 | 29.3 % | 95.6 % |
+| Wert-Schwelle aus Training | 1.64 | 30.7 % | 89.7 % |
+| logistische Regression mit Merkmalen | 1.40 | 35.0 % | 92.6 % |
+| Gradient Boosting mit Merkmalen | 1.31 | 35.9 % | 85.3 % |
+
+- **Wurf-Kandidaten: der Hebel ist die Rate, kein Modell.** Mit Rate 2 statt 4 halbieren sich die
+  Kandidaten und die Präzision verdoppelt sich; von 94 sicheren Würfen geht einer verloren (ein
+  Fehlwurf: Tore 52/68 und Gehaltene 12/19 gleich, Fehlwürfe 6/7 -> 5/7). Die Merkmale heben die
+  AUC leicht (0.877 -> 0.898), erreichen die 95 % beim Fenster-Recall aber nicht.
+- **Tor-Kandidaten: kleiner Gewinn.** Die logistische Regression hebt die Präzision um 5.4 Punkte
+  (Bootstrap über Spiele 3.3 bis 8.2) bei 20 % weniger Kandidaten; der Fenster-Recall sinkt um 2.9
+  Punkte (−7.4 bis 0). Das erfüllt die 95-%-Grenze im Mittel (92.6 von 95.6), nicht aber sicher,
+  und «deutlich» ist es nicht. Wichtigste Merkmale: Personen in der Mitte vor dem Peak, Kehrt zum
+  anderen Ende danach.
+- **Fixierter Kandidat für die eine Endtest-Messung:** Wurf-Kandidaten mit Rate 2 als Standard
+  (`SHOT_DEFAULT_RATE` 4 -> 2), sonst unverändert. Die Tor-Stufe 2 wird nicht eingebaut; ein
+  echter Gewinn braucht neue Information (Prüfen-Antworten, Pfiff, Hallentafel-Sprung).
+
+### Wurf-Kandidaten mit Rate 2: Entscheidungsregel für die eine Endtest-Messung (vor der Messung, 2026-11-26)
+
+Freigabe der Hauptsitzung für genau eine Endtest-Messung des auf Dev fixierten Kandidaten
+(Abschnitt «Weniger Fehlalarme», PR #191). Geändert wird nur `SHOT_DEFAULT_RATE` 4 -> 2, sonst
+nichts; kein zweiter Versuch.
+
+- **Messung:** `ml/integration/shot_segments_eval.py score` mit Lukas' Marken
+  (`ml/gold/data/shot_endtest_marks.json`) auf den gespeicherten Endtest-Beobachtungen (Kaggle-
+  Kernels des Wurf-Endtests), Kandidaten mit dem heutigen Code neu gerechnet, einmal mit
+  `SHOT_DEFAULT_RATE` 4 und einmal mit 2. Keine Endtest-Spiele in die Warteschlange, keine neuen
+  Beobachtungen.
+- **Regel (festgelegt vor der Messung):** übernehmen, wenn auf dem Endtest
+  1. der Wurf-Fenster-Recall («-3/+8 s: shot recall») um höchstens 2 Prozentpunkte sinkt,
+  2. der Tor-Recall im Fenster («-3/+8 s: goal recall») um höchstens 2 Prozentpunkte sinkt und
+  3. die Präzision der Wurf-Kandidaten («shot cand. precision», ±2 s) steigt.
+  Sonst bleibt Rate 4. Das Ergebnis wird in jedem Fall hier dokumentiert; bei «übernehmen» folgt
+  die Umstellung als eigener kleiner PR.
+
+### «Kein Besitz» aus Anwurf-Formation und leerem Feld: vorab festgelegt (Audit, 2026-11-26)
+
+Auftrag: Das Produkt vergibt in Sekunden ohne Ballbesitz meist ein Team (76.4 % auf den
+eingefrorenen Ballbesitz-Labels, «Stand 26.11.»). Nicht wiederholt, was schon verworfen ist
+(Hallenuhr, Bewegung, `no_play`, Pfiff, Pfiff + Bewegung; `produkt-audit-2026-11.md`). Neu sind
+Signale aus den Seiten (#179) und der Anwurf-Formation. Daten: Horgen H1 und H2 (je 609 s,
+Ballbesitz-Truth `ml/integration/possession/labels/truth.json`, LLM, sha256 fb1ae31a…), Tracks mit
+main gerechnet. Ein Spiel, zwei Halbzeiten: «nach Spiel validieren» geht hier nur als Halbzeit gegen
+Halbzeit; das ist eine Grenze der Messung.
+
+**Vorab festgelegt (vor jedem Vergleich mit den Labels):**
+- **A Anwurf-Formation:** In einer Sekunde stehen mindestens 4 Feldspieler je Team auf dem Feld,
+  und mindestens 80 % der Feldspieler jedes Teams stehen in der eigenen Hälfte (welche Hälfte das
+  Team verteidigt, aus den Seiten des Produkts). Gilt mindestens 3 s in Folge -> tot.
+- **E Ereignis Anwurf:** Die 15 s vor jedem `throw_off`-Ereignis des Produkts sind tot.
+- **L leeres Feld:** Weniger als die Hälfte der im Clip üblichen Feldspieler (Median pro Sekunde)
+  steht auf dem Feld, mindestens 5 s in Folge -> tot (Time-out, Spieler an der Bank).
+- **Hauptregel H = A oder E oder L.** Tote Sekunden bekommen kein Team, sonst gilt die
+  Positionsregel unverändert.
+- **Klarer Gewinn** (wie `dead_eval.py`): richtig über alle Sekunden mindestens 5 Punkte höher als
+  die Positionsregel allein, 95-%-CI (20-s-Block-Bootstrap) über 0, auf den Sekunden mit Team
+  höchstens 2 Punkte schlechter, und in beiden Halbzeiten einzeln besser. Berichtet werden dazu
+  Präzision und Recall «tot» sowie der Anteil der Sekunden ohne Besitz, die ein Team bekommen.
+
+**Ergebnis (nach der Festlegung gemessen, `ml/integration/possession/formation_dead_eval.py`,
+`ml/integration/results/possession_formation_dead.json`): kein klarer Gewinn, nicht ins Produkt.**
+
+| Signal | markiert | Präzision tot | Recall tot | richtig alle Sek. | richtig Team-Sek. | Team in Sek. ohne Besitz |
+|---|---|---|---|---|---|---|
+| Positionsregel allein | | | | 66.2 % | 76.6 % | 76.4 % |
+| A Anwurf-Formation | 0 | | | 66.2 % | 76.6 % | 76.4 % |
+| E 15 s vor `throw_off` | 0 | | | 66.2 % | 76.6 % | 76.4 % |
+| L leeres Feld | 87 | 46 % | 17 % | 67.6 % | 76.2 % | 67.8 % |
+| H = A oder E oder L | 87 | 46 % | 17 % | 67.6 % | 76.2 % | 67.8 % |
+
+- H minus Positionsregel: +1.4 Punkte über alle Sekunden (CI 0 bis +3.7), auf den Team-Sekunden
+  −0.4; H1 +2.9, H2 0. Verfehlt die 5 Punkte und «in beiden Halbzeiten besser».
+- **Warum A und E nichts markieren** (nur aus den Signalen geprüft, ohne Labels):
+  - Das Produkt findet in beiden 10-min-Clips keinen einzigen `throw_off`, obwohl in beiden Tore
+    fallen. Die Anwurf-Erkennung greift auf echten Bildern nicht (auf synthetischen Daten schon).
+  - Die Kamera folgt dem Ball und zeigt selten beide Teams ganz: im Median 4 bis 5 Feldspieler je
+    Team im Bild auf dem Feld; «mindestens 4 je Team und 80 % in der eigenen Hälfte» kommt in 1218 s
+    keine einzige Sekunde vor. Die Formation nach dem Tor ist mit dieser Kamera nicht beobachtbar.
+- Folge: «kein Besitz» bleibt offen. Was es bräuchte, ist ein Signal, das ohne ganzes Feld
+  auskommt: der Torpfiff mit Pfiffpaar (Plan Pfiff, Fenster um `goal_ms` −8 bis +4 s, braucht Spiele
+  mit Ton), erkannte Tore aus Prüfen oder der Hallentafel (dann die Sekunden bis zum Wiederanpfiff),
+  oder ein ruhender Ball in der Spielfeldmitte. Mit nur einem Spiel ist jede weitere Regel hier
+  ohnehin schwach validiert.
+
+### Anwurf-Erkennung auf echten Clips (Audit, 2026-11-26)
+
+Nebenbefund aus «kein Besitz»: Die Anwurf-Erkennung (`events.detect`, `throw_off`) findet auf den
+Horgen-Clips H1 und H2 (je 609 s, mehrere Tore) keinen einzigen Anwurf. Damit fehlen auch die
+Tore, die aus dem Anwurf abgeleitet werden.
+
+- **Ursache** (nur aus den Signalen, Zählung pro 200-ms-Bin, H1 / H2 je etwa 3000 Bins): Die Regel
+  verlangt gleichzeitig mindestens 4 sichtbare Feldspieler je Team, beide Teams ganz in der eigenen
+  Hälfte (je ein Ausreisser erlaubt), einen Spieler höchstens 2.5 m vom Mittelpunkt, Median-Tempo
+  unter 1.5 m/s, mindestens 1 s lang. «Beide Teams mit 4 Sichtbaren ganz in der eigenen Hälfte»
+  kommt nur in 18 / 10 Bins vor, mit Mittelpunkt in 6 / 3, zusammen mit «ruhig» in keinem. Die
+  Kamera folgt dem Ball und zeigt beim Anwurf meist die Mitte mit einem Team (Sichtprüfung der
+  Bilder nach den Toren: Kamera parkt an der Mittellinie, ein Team um den Mittelkreis, das andere
+  ausserhalb des Bildes).
+- **Labels:** Versucht als Bildsicht auf Blättern mit einem Bild pro Sekunde von 3 bis 45 s nach
+  jedem Wurf (21 Würfe der Wurfort-Labels). Der Aufbau an der Mittellinie ist erkennbar, der Moment
+  des Anpfiffs auf dieser Auflösung aber oft nicht sicher; zweifache Labels in der nötigen Güte
+  wären mit diesen Blättern nicht ehrlich gewesen. Keine neue Regel ohne verlässliche Wahrheit.
+- **Umgesetzt (ehrlich statt still):** Ein Video von mindestens 5 min mit Seiten, aber ohne einen
+  einzigen erkannten Anwurf, meldet `missing: ["throw_offs"]` (`events.THROW_OFF_EXPECT_MS`). Die
+  Analyse-Ansicht zeigt dann «Anwürfe wurden in diesem Video nicht erkannt …, darum fehlen auch Tore
+  aus dem Anwurf» (de-CH, en, fr). Beide Horgen-Clips melden es; synthetische Spiele mit Anwürfen
+  und kurze Clips nicht (Test `test_a_long_video_without_any_throw_off_says_so`).
+- **Nächster Schritt für eine Regel, die mit dem Sichtbaren auskommt:** Kamera parkt an der
+  Mittellinie (Schwenk nahe der Mitte des Bereichs, ruhig), Spieler eines Teams sammeln sich nahe
+  der Mittellinie, danach setzt die Bewegung zu einem Tor ein, und das innerhalb von 10 bis 45 s
+  nach einem Tor-Kandidaten. Messen braucht verlässliche Anwurf-Zeiten: Bilder in voller Auflösung
+  um die Tore (0.5 s), oder die Tore aus der Hallentafel bzw. aus Prüfen als Anker.
+
+### Tore aus dem Spielstand (Hallentafel, Einblendung): vorab festgelegt (Audit, 2026-11-26)
+
+Auftrag (Q-REC-SCOREBOARD): Ein Sprung im Spielstand ist ein Tor. Das Produkt hat die Leser
+schon (`scoreboard.py` für Einblendungen mit Tesseract, `hallboard.py` für die Hallentafel mit
+PP-OCR, im GPU-Job); gemessen wurde bisher nicht, wie gut die Tore daraus stimmen. Kein Endtest.
+
+**Daten:** die zwei Clips mit eingefrorenen Tor-Labels aus #181
+(`ml/integration/whistle/goals/goals_truth.json`, LLM): Mülheim-Südpfalz H1 (480 s, 4 Tore) und
+Leimental-Arbon (600 s ab 840 s im Stream, 10 Tore). Dazu für die Frage «wo ist eine Tafel
+sichtbar» eine Sichtprüfung auf allen Clips, die lokal liegen (Horgen H1/H2 10 min, ATV s1/s3,
+Mülheim, Leimental).
+
+**Vorab festgelegt:**
+- **Lauf wie im Produkt:** `proxy.mp4`; zuerst der Einblendungs-Leser (`find_overlay`,
+  `find_fields`, `scoreboard.Reader`), ohne Einblendung `HallBoardReader` mit PP-OCRv4 und den
+  Standard-Takten (1 s, Vollbild alle 4 s, Probe alle 0.25 s); Tore aus `goals_from_board` bzw. den
+  Einblendungs-Toren, ohne offiziellen Spielstand.
+- **Tafel sicher gelesen:** mindestens 20 Lesungen mit Spielstand im Clip.
+- **Treffer:** ein Spielstand-Tor zwischen 5 s vor und 60 s nach einem Label-Tor (der Leser setzt
+  das Tor auf die erste Lesung des neuen Standes, also spät, wenn die Tafel aus dem Bild war); jedes
+  Tor zählt einmal. Recall und Präzision der Spielstand-Tore.
+- **Als Bestätigung der Kandidaten** (`goal_candidates_<clip>.json` aus #181): ein Kandidat gilt als
+  bestätigt, wenn ein Spielstand-Tor zwischen 10 s vor und 60 s nach seinem `goal_ms` liegt;
+  Präzision und Recall (Treffer ±6 s um `goal_ms` wie in #181) der bestätigten gegen alle Kandidaten.
+- **Klarer Gewinn:** auf einem sicher gelesenen Clip Spielstand-Tore mit Präzision mindestens 90 %
+  und Recall mindestens 80 %, oder als Bestätigung Präzision mindestens 20 Punkte höher bei
+  höchstens 10 Punkten weniger Recall. Ins Produkt (als Tor-Quelle oder Bestätigung) nur dann und
+  nur dort, wo die Tafel sicher gelesen wird. Zwei Clips sind wenig; das Ergebnis gilt pro Clip.
+
+**Ergebnis (nach der Festlegung gemessen, `ml/integration/scoreboard/run.py`, `evaluate.py`,
+`ml/integration/results/scoreboard_goals.json`):**
+
+- **Wo ist ein Spielstand sichtbar** (Sichtprüfung, je 6 Bilder pro Clip): auf ATV s1, s3 und
+  Leimental eine Einblendung des Streams in jedem Bild («LEI 0:0 ARB» mit Uhr); auf Horgen H1, H2
+  und Mülheim keine Einblendung, eine Hallentafel nur ab und zu und klein im Bild. Auf diesen
+  Clips also 3 von 6 mit sicher lesbarem Stand, alle drei über eine Stream-Einblendung.
+
+| Clip | Leser | Lesungen | Spielstand-Tore | Treffer (von Labels) | Präzision | Recall |
+|---|---|---|---|---|---|---|
+| Leimental (10 Tore) | Einblendung (Tesseract) | 164 OCR-Lesungen, Stand 0:0 bis 4:6 | 10 | 10 | **100 %** | **100 %** |
+| Mülheim (4 Tore) | Hallentafel (PP-OCR) | 80, alle nur Uhr, kein Stand | 0 | 0 | | 0 % |
+
+- **Leimental:** jedes Tor mit der richtigen Seite, im Median 5.0 s nach dem Label (das Tor sitzt
+  auf der ersten Lesung des neuen Standes; eins 31 s spät). Das erfüllt «klarer Gewinn» als
+  Tor-Quelle. **Das Produkt nutzt diesen Weg schon:** Einblendungs-Tore werden als Ereignisse
+  übernommen (Analyse-Ansicht «Von der eingeblendeten Anzeigetafel gelesen: N Tore»). Die
+  Messung bestätigt ihn, eine Änderung braucht es nicht.
+- **Als Bestätigung der Tor-Kandidaten** (Leimental): 32 von 40 bestätigt, Präzision 25 -> 31 %,
+  Recall 100 % gleich; +6 Punkte statt der geforderten +20. Wo die Einblendung gelesen wird,
+  sind die Spielstand-Tore selbst die bessere Quelle als bestätigte Kandidaten.
+- **Mülheim:** Die Hallentafel liefert nur die Uhr (80 Lesungen), den Stand nie: Q-REC-SCOREBOARD
+  gilt weiter (Ziffern der Tafel werden nicht gefunden). Nicht ins Produkt; der nächste Schritt
+  bleibt der im offenen Punkt genannte (Tafel über Rot auf Schwarz finden, Siebensegment-Leser).
+- **Grenze:** zwei gelabelte Clips; die Einblendung ist eine einzige Grafik (Swiss-Handball-
+  Stream). Andere Einblendungen sind nicht gemessen.
+
+**Nachtrag: Leser für die Ziffern der Hallentafel, Machbarkeit (2026-11-26).** Auftrag war ein
+klassischer Siebensegment-Leser ohne neues Modell. Vor dem Bau geprüft, nur an Bildern, ohne Labels:
+- Die Tafel in Mülheim ist keine Siebensegment-Anzeige, sondern eine LED-Tafel mit gerenderten
+  Ziffern: Uhr weiss, Stand gelb und orange auf dunkelgrün («6 12:45 4», «8 18:09 5»).
+- Warum heute kein Stand gelesen wird: Der Textdetektor (PP-OCRv4) findet nur die weisse Uhr; die
+  farbigen Ziffern daneben erkennt er nicht als Text (einmal klebt eine an der Uhr: «18:095»).
+- Versuch ohne Modell: Fenster links und rechts der gefundenen Uhr, Helligkeit als Maximum der
+  Farbkanäle, Otsu-Schwelle, nur der Erkenner. Auf drei Ansichten richtig gelesen nur die grösste
+  (6 und 4); bei den zwei anderen falsch («I/1» statt 8 und 5, «8/1» statt 8 und 5), auch im
+  Original (2336 x 1080 statt 1280 x 592 im Proxy).
+- Die Ziffern sind im Proxy 8 bis 10 px hoch, im Original etwa 15 px; die Tafel ist nur einen Teil
+  der Zeit im Bild (80 Uhr-Lesungen in 480 s). Ihre Lage relativ zur Uhr verschiebt sich mit der
+  Perspektive.
+- **Ehrlicher Stand: zu klein und zu selten für einen Leser, den man auf diesem Clip bauen und auf
+  ihm auch messen dürfte** (4 gelabelte Tore; jede Fenster- oder Schwellenwahl wäre auf den
+  Messdaten gewählt). Auf Horgen ist die Tafel noch seltener und kleiner im Bild. Nicht gebaut.
+- Was es bräuchte: Ausschnitte von Hallentafeln aus mehreren Hallen als eigenes Lern- oder
+  Abstimmset (getrennt von den Mess-Clips), dann ein Ziffern-Leser auf der Tafel-Region und Lesen
+  aus dem Original statt dem Proxy nur für dieses kleine Fenster.
+
+**Nachtrag: Abstimmset für einen Tafel-Leser, Machbarkeit und Entscheid (2026-11-26).**
+- Pool nur Trainingsseite: 163 Spiele der Segment-Bibliothek, ohne Endtest-, Dev- und
+  Testset-2-Spiele und ohne die Hallen Uznach, Eisenach, Leimental, Horgen, Cottbus, Mülheim: 51
+  Spiele in 34 Hallen. Je ein Segment, 8 Bilder, Uhr per PP-OCR gesucht: Uhr in 21 Spielen
+  (17 Hallen), davon 12 feste Stream-Einblendungen (liest das Produkt schon) und etwa 7 echte
+  Hallentafeln in 5 bis 6 Hallen (LED rot/orange), mehrere nur als Nahaufnahmen des Streams (Uhr 60
+  bis 120 px hoch), im Weitwinkel 16 bis 29 px.
+- Die Bibliothek liegt nur in 720p vor (wie der Produkt-Proxy); Originale gibt es dort nicht.
+- **Entscheid der Hauptsitzung: geparkt.** Das Abstimmset würde gerade den Fall der
+  Amateurvideos nicht abdecken (kleine Tafel im Weitwinkel). Sinnvoll erst mit Original-Uploads
+  aus echten Vereinen.
+- **Offener Punkt, mögliche Produktvoraussetzung: das Tafel-Fenster aus dem Original lesen.** Auf
+  Mülheim sind die Stand-Ziffern im Proxy 8 bis 10 px hoch, im Original (2336 x 1080) etwa 15 px;
+  der GPU-Job liest heute nur den Proxy. Ein Leser für kleine Tafeln braucht vermutlich das
+  Original, aber nur für das kleine Fenster um die gefundene Tafel.
+

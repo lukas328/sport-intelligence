@@ -24,6 +24,7 @@ BIN_MS = 200
 PAUSE_MS = 45_000  # almost nobody on court
 BOUNDARY_MS = 90_000  # a long pause followed by a throw-off: probably the next match
 CENTRE = (20.0, 10.0)
+THROW_OFF_EXPECT_MS = 300_000  # a video this long without any throw-off: they were not seen
 THROW_OFF_LEAD_MS = 10_000  # an attack this soon after its own throw-off is not a fast break
 MIN_SIDE_MS = 45_000  # shortest stretch a side holds (noise lasts seconds, a half 20 to 30 minutes)
 # the last stretch needs less, the end of the video cuts it (15 s let a 16-s formation flip at
@@ -322,6 +323,12 @@ def detect(
         else:
             merged.append(e)
     events = merged
+    # every match half opens with a throw-off and every goal is followed by one: a long video with
+    # sides but not a single throw-off means the rule did not see them (on the dev clips Horgen
+    # H1/H2, 10 min each with goals, it found none: the camera follows the ball and rarely shows
+    # both teams lined up; docs/plans/produkt-analyse-integration.md, «Anwurf-Erkennung»)
+    if ordered and not events and (ordered[-1] - ordered[0]) * BIN_MS >= THROW_OFF_EXPECT_MS:
+        missing.append("throw_offs")
 
     # --- pauses and match boundaries (tournament videos, 4.8) ---
     pauses = _pauses(ordered, bins)
