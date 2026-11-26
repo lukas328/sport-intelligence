@@ -1,0 +1,104 @@
+[
+ {
+  "start": 0.0,
+  "end": 27.0,
+  "state": "live",
+  "sure": true
+ },
+ {
+  "start": 27.0,
+  "end": 34.0,
+  "state": "dead",
+  "sure": false
+ },
+ {
+  "start": 34.0,
+  "end": 45.2,
+  "state": "live",
+  "sure": false
+ },
+ {
+  "start": 45.2,
+  "end": 51.6,
+  "state": "dead",
+  "sure": true
+ },
+ {
+  "start": 51.6,
+  "end": 143.0,
+  "state": "live",
+  "sure": true
+ },
+ {
+  "start": 143.0,
+  "end": 147.6,
+  "state": "dead",
+  "sure": true
+ },
+ {
+  "start": 147.6,
+  "end": 233.6,
+  "state": "live",
+  "sure": false
+ },
+ {
+  "start": 233.6,
+  "end": 238.4,
+  "state": "dead",
+  "sure": false
+ },
+ {
+  "start": 238.4,
+  "end": 270.0,
+  "state": "live",
+  "sure": false
+ },
+ {
+  "start": 270.0,
+  "end": 282.1,
+  "state": "dead",
+  "sure": true
+ },
+ {
+  "start": 282.1,
+  "end": 353.9,
+  "state": "live",
+  "sure": true
+ },
+ {
+  "start": 353.9,
+  "end": 356.5,
+  "state": "dead",
+  "sure": false
+ },
+ {
+  "start": 356.5,
+  "end": 368.9,
+  "state": "live",
+  "sure": false
+ },
+ {
+  "start": 368.9,
+  "end": 396.5,
+  "state": "dead",
+  "sure": false
+ },
+ {
+  "start": 396.5,
+  "end": 454.2,
+  "state": "live",
+  "sure": false
+ },
+ {
+  "start": 454.2,
+  "end": 459.8,
+  "state": "dead",
+  "sure": false
+ },
+ {
+  "start": 459.8,
+  "end": 480.0,
+  "state": "live",
+  "sure": false
+ }
+]

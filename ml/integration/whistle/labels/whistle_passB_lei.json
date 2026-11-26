@@ -1,0 +1,386 @@
+[
+ {
+  "start": 29.0,
+  "end": 29.9,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.95,
+  "note": "after goal 1:0"
+ },
+ {
+  "start": 33.65,
+  "end": 34.7,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.9,
+  "note": "throw-off"
+ },
+ {
+  "start": 38.15,
+  "end": 38.6,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.9,
+  "note": "short blast"
+ },
+ {
+  "start": 117.1,
+  "end": 118.0,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.95,
+  "note": ""
+ },
+ {
+  "start": 120.55,
+  "end": 121.5,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.95,
+  "note": ""
+ },
+ {
+  "start": 124.1,
+  "end": 124.5,
+  "kind": "whistle",
+  "sure": false,
+  "freq_khz": 3.6,
+  "note": "short faint tone, could be voice"
+ },
+ {
+  "start": 146.3,
+  "end": 147.1,
+  "kind": "whistle",
+  "sure": false,
+  "freq_khz": 3.9,
+  "note": "faint lines in goal cheer 2:1"
+ },
+ {
+  "start": 149.7,
+  "end": 150.0,
+  "kind": "whistle",
+  "sure": false,
+  "freq_khz": 3.95,
+  "note": "very short"
+ },
+ {
+  "start": 156.2,
+  "end": 158.2,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 4.05,
+  "note": "long, throw-off after goal; 7.1k harmonic"
+ },
+ {
+  "start": 178.95,
+  "end": 180.55,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.9,
+  "note": "long, 6.8k harmonic"
+ },
+ {
+  "start": 181.0,
+  "end": 181.45,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.9,
+  "note": "pair blast 1"
+ },
+ {
+  "start": 181.6,
+  "end": 182.0,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.9,
+  "note": "pair blast 2"
+ },
+ {
+  "start": 184.92,
+  "end": 185.55,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.9,
+  "note": ""
+ },
+ {
+  "start": 213.8,
+  "end": 214.65,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.95,
+  "note": ""
+ },
+ {
+  "start": 217.2,
+  "end": 218.7,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 4.05,
+  "note": ""
+ },
+ {
+  "start": 222.45,
+  "end": 223.05,
+  "kind": "whistle",
+  "sure": false,
+  "freq_khz": 3.7,
+  "note": "stack near voices"
+ },
+ {
+  "start": 230.5,
+  "end": 231.6,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.9,
+  "note": "goal 2:3"
+ },
+ {
+  "start": 235.15,
+  "end": 235.75,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.9,
+  "note": "throw-off"
+ },
+ {
+  "start": 241.86,
+  "end": 243.0,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.95,
+  "note": ""
+ },
+ {
+  "start": 277.06,
+  "end": 278.28,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.95,
+  "note": "foul"
+ },
+ {
+  "start": 292.0,
+  "end": 293.1,
+  "kind": "whistle",
+  "sure": false,
+  "freq_khz": 3.9,
+  "note": "faint short lines in goal cheer"
+ },
+ {
+  "start": 294.64,
+  "end": 295.47,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.95,
+  "note": "after goal"
+ },
+ {
+  "start": 329.36,
+  "end": 330.11,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.9,
+  "note": ""
+ },
+ {
+  "start": 340.3,
+  "end": 340.75,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.9,
+  "note": "blast 1 of 2"
+ },
+ {
+  "start": 341.0,
+  "end": 341.9,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.9,
+  "note": "blast 2 of 2"
+ },
+ {
+  "start": 351.93,
+  "end": 352.56,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.6,
+  "note": "7.2k harmonic"
+ },
+ {
+  "start": 360.51,
+  "end": 361.03,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.85,
+  "note": ""
+ },
+ {
+  "start": 372.22,
+  "end": 372.9,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.95,
+  "note": "stack 3.6-3.95 over voices"
+ },
+ {
+  "start": 375.33,
+  "end": 375.97,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 4.0,
+  "note": ""
+ },
+ {
+  "start": 381.5,
+  "end": 383.83,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.85,
+  "note": "long, 7.5k harmonic"
+ },
+ {
+  "start": 384.5,
+  "end": 385.42,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.85,
+  "note": ""
+ },
+ {
+  "start": 387.44,
+  "end": 387.94,
+  "kind": "whistle",
+  "sure": false,
+  "freq_khz": 4.55,
+  "note": "odd tone 4.55k + 1.95k, maybe other whistle"
+ },
+ {
+  "start": 404.17,
+  "end": 405.6,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.85,
+  "note": "7.2k harmonic"
+ },
+ {
+  "start": 406.78,
+  "end": 407.94,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 4.05,
+  "note": ""
+ },
+ {
+  "start": 410.33,
+  "end": 411.0,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 4.05,
+  "note": ""
+ },
+ {
+  "start": 429.0,
+  "end": 430.4,
+  "kind": "whistle",
+  "sure": false,
+  "freq_khz": 3.8,
+  "note": "rising wavy tone, could be voice"
+ },
+ {
+  "start": 448.0,
+  "end": 449.0,
+  "kind": "whistle",
+  "sure": false,
+  "freq_khz": 4.0,
+  "note": "faint 4.0/3.3 lines"
+ },
+ {
+  "start": 450.35,
+  "end": 451.0,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.6,
+  "note": "goal 4:5"
+ },
+ {
+  "start": 451.65,
+  "end": 452.1,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.6,
+  "note": "short second blast"
+ },
+ {
+  "start": 477.25,
+  "end": 478.9,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 4.0,
+  "note": "stack 4.0/3.6/3.2, clock stops (timeout)"
+ },
+ {
+  "start": 478.1,
+  "end": 479.3,
+  "kind": "horn",
+  "sure": false,
+  "freq_khz": 3.0,
+  "note": "harmonic comb ~0.5k spacing 1-7k, timeout signal"
+ },
+ {
+  "start": 497.4,
+  "end": 498.3,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.6,
+  "note": "stack 3.6/3.3, restart after timeout"
+ },
+ {
+  "start": 501.1,
+  "end": 501.95,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.8,
+  "note": ""
+ },
+ {
+  "start": 526.25,
+  "end": 527.6,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.5,
+  "note": "stack 3.55/3.2"
+ },
+ {
+  "start": 546.9,
+  "end": 548.95,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.75,
+  "note": "long, 7.4k harmonic"
+ },
+ {
+  "start": 567.0,
+  "end": 567.85,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.8,
+  "note": "stack 3.85/3.55"
+ },
+ {
+  "start": 572.05,
+  "end": 573.4,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.95,
+  "note": "lines 3.95/3.3"
+ },
+ {
+  "start": 593.2,
+  "end": 594.9,
+  "kind": "whistle",
+  "sure": true,
+  "freq_khz": 3.95,
+  "note": "long"
+ }
+]

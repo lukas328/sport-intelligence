@@ -1,0 +1,45 @@
+{
+ "truth_sha256": "69f1b8aa25167d3a71c17bb7f701fa7584aeac25b9b3bfb8643c0199f9fd8efa",
+ "truth": {
+  "lei": 45,
+  "mue": 24
+ },
+ "mue_8000": {
+  "detected": 14,
+  "truth": 24,
+  "precision": 0.5,
+  "recall": 0.292
+ },
+ "lei_8000": {
+  "detected": 29,
+  "truth": 45,
+  "precision": 0.345,
+  "recall": 0.222
+ },
+ "pooled_8000": {
+  "precision": 0.395,
+  "recall": 0.246,
+  "det": 43,
+  "tp": 17,
+  "truth": 69
+ },
+ "mue_16000": {
+  "detected": 7,
+  "truth": 24,
+  "precision": 0.143,
+  "recall": 0.042
+ },
+ "lei_16000": {
+  "detected": 9,
+  "truth": 45,
+  "precision": 0.111,
+  "recall": 0.022
+ },
+ "pooled_16000": {
+  "precision": 0.125,
+  "recall": 0.029,
+  "det": 16,
+  "tp": 2,
+  "truth": 69
+ }
+}
