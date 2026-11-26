@@ -1,0 +1,63 @@
+{
+ "truth_sha256": "fb1ae31ae02463da822a652dabc2e6aa6d9adf2e2b67902d8cf0e8ce30b26aa4",
+ "clips": {
+  "h1": {
+   "usual": 11.0,
+   "throw_offs": 0
+  },
+  "h2": {
+   "usual": 12.0,
+   "throw_offs": 0
+  }
+ },
+ "A": {
+  "flagged": 0,
+  "precision": 0.0,
+  "recall": 0.0,
+  "acc_all": 0.662,
+  "correct_team": 0.766,
+  "team_on_none": 0.764
+ },
+ "E": {
+  "flagged": 0,
+  "precision": 0.0,
+  "recall": 0.0,
+  "acc_all": 0.662,
+  "correct_team": 0.766,
+  "team_on_none": 0.764
+ },
+ "L": {
+  "flagged": 87,
+  "precision": 0.46,
+  "recall": 0.172,
+  "acc_all": 0.676,
+  "correct_team": 0.762,
+  "team_on_none": 0.678
+ },
+ "H": {
+  "flagged": 87,
+  "precision": 0.46,
+  "recall": 0.172,
+  "acc_all": 0.676,
+  "correct_team": 0.762,
+  "team_on_none": 0.678
+ },
+ "position_alone": {
+  "acc_all": 0.662,
+  "correct_team": 0.766,
+  "team_on_none": 0.764
+ },
+ "H_minus_position": {
+  "acc_all": 0.014,
+  "ci95": [
+   0.0,
+   0.037
+  ],
+  "team_drop": 0.004,
+  "per_half": {
+   "h1": 0.029,
+   "h2": 0.0
+  }
+ },
+ "klarer_gewinn": false
+}

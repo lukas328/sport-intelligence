@@ -27,6 +27,9 @@ CENTRE = (20.0, 10.0)
 THROW_OFF_EXPECT_MS = 300_000  # a video this long without any throw-off: they were not seen
 THROW_OFF_LEAD_MS = 10_000  # an attack this soon after its own throw-off is not a fast break
 MIN_SIDE_MS = 45_000  # shortest stretch a side holds (noise lasts seconds, a half 20 to 30 minutes)
+# the last stretch needs less, the end of the video cuts it (15 s let a 16-s formation flip at
+# the end of the dev clip Horgen H2 through)
+LAST_SIDE_MS = 30_000
 
 
 @dataclass(frozen=True)
@@ -140,11 +143,10 @@ def _sides(
     # teams change ends only at half-time: a side that holds for less than MIN_SIDE_MS is noise
     # (few goalkeeper sightings at the start, a keeper running out); it merges into its neighbours
     ends = [t for t, _ in raw[1:]] + [votes[-1][0] * BIN_MS]
-    # the last stretch is cut by the end of the video, so it only needs 15 s
     kept = [
         (t, side)
         for k, ((t, side), end) in enumerate(zip(raw, ends, strict=True))
-        if end - t >= (15_000 if k == len(raw) - 1 else MIN_SIDE_MS)
+        if end - t >= (LAST_SIDE_MS if k == len(raw) - 1 else MIN_SIDE_MS)
     ]
     if not kept:  # a short clip: the majority side
         total = sum(v for _, v in votes)
