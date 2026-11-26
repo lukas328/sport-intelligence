@@ -537,6 +537,11 @@ def test_goalkeeper_in_own_kit_from_referee_cluster() -> None:
     pts2, _ = _defending_left()
     pts2 += [(t, 99, 1.5 if t % 10_000 < 7_000 else 15.0, 10.0) for t in range(0, 60_000, 500)]
     assert assign_goalkeepers(pts2, {**teams, 99: "referee"}) == {}
+    # the goal-line referee: beside the goal and just behind the line the whole time (as on the
+    # Staging clip fbdc76e6), at a goal without a keeper candidate, stays a referee
+    pts3, _ = _defending_left()
+    pts3 += [(t, 99, -0.5, 14.5) for t in range(0, 60_000, 500)]
+    assert assign_goalkeepers(pts3, {**teams, 99: "referee"}) == {}
 
 
 def test_referee_at_goal_with_a_keeper_stays_referee() -> None:

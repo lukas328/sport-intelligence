@@ -486,6 +486,16 @@ def refine_teams(
     return out
 
 
+def _in_front_of_goal(ps: list[tuple[int, float, float]], side: str) -> bool:
+    """Median position in front of the goal: at most 2.5 m off its centre line and on the court
+    side of the goal line, up to 5 m out. The goal-line referee stands beside the goal or behind the
+    line (Staging clip fbdc76e6: median 4.5 m to the side, 0.5 m behind the line) and is near the
+    goal nearly all the time too."""
+    depth = sorted((x if side == "left" else 40.0 - x) for _, x, _ in ps)[len(ps) // 2]
+    off = sorted(abs(y - 10.0) for _, _, y in ps)[len(ps) // 2]
+    return off <= 2.5 and 0.0 < depth <= 5.0
+
+
 def assign_goalkeepers(
     points: list[tuple[int, int, float, float]],
     teams: dict[int, str],
@@ -505,9 +515,10 @@ def assign_goalkeepers(
 
     A keeper in a kit of its own often ends up in a small third colour cluster that
     `teams.relabel_by_clusters` calls "referee". Such tracks count with a stricter rule (audit
-    2026-11 point 4): at least `referee_share` of the time near one goal, and only at a goal where
-    no other track is a keeper candidate (the most goal-bound one if several). A goal judge stands
-    beside the goal but rarely that steadily, and the team vote below still has to agree.
+    2026-11 point 4): at least `referee_share` of the time near one goal, standing in front of it
+    (median position, `_in_front_of_goal`), and only at a goal where no other track is a keeper
+    candidate (the most goal-bound one if several). The goal-line referee is near the goal as
+    steadily but stands beside it or behind the line; the team vote below still has to agree.
     """
     by_track: dict[int, list[tuple[int, float, float]]] = defaultdict(list)
     for t, tid, x, y in points:
@@ -521,7 +532,11 @@ def assign_goalkeepers(
         right = sum(math.hypot(40 - x, y - 10) < 6.5 for _, x, y in ps) / len(ps)
         side = "left" if left > right else "right"
         if teams.get(tid) == "referee":
-            if max(left, right) >= referee_share and max(left, right) > strict.get(side, (0, 0))[0]:
+            if (
+                max(left, right) >= referee_share
+                and max(left, right) > strict.get(side, (0, 0))[0]
+                and _in_front_of_goal(ps, side)
+            ):
                 strict[side] = (max(left, right), tid)
         elif max(left, right) >= area_share:
             keepers[tid] = side
