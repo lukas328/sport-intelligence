@@ -1847,3 +1847,19 @@ klassischer Siebensegment-Leser ohne neues Modell. Vor dem Bau geprüft, nur an 
   Abstimmset (getrennt von den Mess-Clips), dann ein Ziffern-Leser auf der Tafel-Region und Lesen
   aus dem Original statt dem Proxy nur für dieses kleine Fenster.
 
+**Nachtrag: Abstimmset für einen Tafel-Leser, Machbarkeit und Entscheid (2026-11-26).**
+- Pool nur Trainingsseite: 163 Spiele der Segment-Bibliothek, ohne Endtest-, Dev- und
+  Testset-2-Spiele und ohne die Hallen Uznach, Eisenach, Leimental, Horgen, Cottbus, Mülheim: 51
+  Spiele in 34 Hallen. Je ein Segment, 8 Bilder, Uhr per PP-OCR gesucht: Uhr in 21 Spielen
+  (17 Hallen), davon 12 feste Stream-Einblendungen (liest das Produkt schon) und etwa 7 echte
+  Hallentafeln in 5 bis 6 Hallen (LED rot/orange), mehrere nur als Nahaufnahmen des Streams (Uhr 60
+  bis 120 px hoch), im Weitwinkel 16 bis 29 px.
+- Die Bibliothek liegt nur in 720p vor (wie der Produkt-Proxy); Originale gibt es dort nicht.
+- **Entscheid der Hauptsitzung: geparkt.** Das Abstimmset würde gerade den Fall der
+  Amateurvideos nicht abdecken (kleine Tafel im Weitwinkel). Sinnvoll erst mit Original-Uploads
+  aus echten Vereinen.
+- **Offener Punkt, mögliche Produktvoraussetzung: das Tafel-Fenster aus dem Original lesen.** Auf
+  Mülheim sind die Stand-Ziffern im Proxy 8 bis 10 px hoch, im Original (2336 x 1080) etwa 15 px;
+  der GPU-Job liest heute nur den Proxy. Ein Leser für kleine Tafeln braucht vermutlich das
+  Original, aber nur für das kleine Fenster um die gefundene Tafel.
+
