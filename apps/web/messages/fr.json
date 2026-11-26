@@ -345,7 +345,7 @@
     "consentOk": "Complet",
     "consentMissing": "Consentement manquant",
     "empty": "Aucun joueur dans l'équipe.",
-    "emptyHint": "Ajoutez les joueurs un par un ou importez un fichier CSV.",
+    "emptyHint": "Saisis l'effectif rapidement avec numéro et nom par ligne, ajoute des joueurs un par un ou importe un fichier CSV.",
     "addTitle": "Ajouter un joueur",
     "added": "{name} a été ajouté·e.",
     "remove": "Retirer",

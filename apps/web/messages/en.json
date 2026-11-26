@@ -345,7 +345,7 @@
     "consentOk": "Complete",
     "consentMissing": "Consent missing",
     "empty": "No players in the team yet.",
-    "emptyHint": "Add players one by one or import a CSV file.",
+    "emptyHint": "Add the squad quickly with number and name per line, add players one by one or import a CSV file.",
     "addTitle": "Add player",
     "added": "{name} was added.",
     "remove": "Remove",

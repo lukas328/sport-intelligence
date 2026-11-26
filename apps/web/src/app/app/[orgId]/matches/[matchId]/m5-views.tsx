@@ -239,7 +239,7 @@ export function PhysicalView({
   const line = (r: Row, strong = false) => (
     <tr key={r.key} className={cn("border-t border-foreground/10", selected?.key === r.key && "bg-surface")}>
       <th scope="row" className={cn("px-3 py-1.5 text-left", strong ? "font-semibold" : "font-medium")}>
-        <button className="underline decoration-dotted underline-offset-4" onClick={() => setSel(r.key)} aria-label={`${t("showHeatmap")}: ${r.label}`}>
+        <button className="hit cursor-pointer underline decoration-dotted underline-offset-4" onClick={() => setSel(r.key)} aria-label={`${t("showHeatmap")}: ${r.label}`}>
           {r.label}
         </button>
       </th>
