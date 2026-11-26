@@ -147,6 +147,9 @@ test("match: create, upload with pause and resume, processing, player, comment, 
   const list = page.getByTestId("event-list");
   await expect(list).toContainText("1. HZ 0:08");
   await list.getByRole("button", { name: /Abspielen/ }).click();
+  // one video on the page: with the goal on the stage the open workbench's player is the only one
+  // (both were shown when the goal had reached the stage in time, and this step found two)
+  await expect(page.locator("video")).toHaveCount(1);
   await expect(page.getByTestId("player").filter({ visible: true })).toBeVisible();
   await expect.poll(async () => video.evaluate((v: HTMLVideoElement) => v.currentTime)).toBeGreaterThan(3.5);
 

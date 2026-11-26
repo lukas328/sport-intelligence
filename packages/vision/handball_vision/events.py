@@ -73,6 +73,30 @@ def _bins(
     return out
 
 
+FORMATION_VOTES = True
+FORMATION_MIN_TRACKS = 3  # field-player tracks per team in the bin
+FORMATION_OFF_CENTRE_M = 5.0  # both teams' medians at least this far into one half
+
+
+def formation_vote(g: dict[str, list[tuple[float, float]]]) -> int:
+    """+1 when the bin's field players say the home team defends the left goal, -1 right, 0 when
+    they say nothing. In an attack both teams stand in one half and the defending team stands
+    nearer its own goal (its wall at the 6 m line, the attackers beyond): the team whose median x
+    is nearer the goal line there defends that goal. Needs no goalkeeper and no ball; on the dev
+    clips Horgen H1/H2 the bins voted 104:9 and 114:16 for the side the goalkeepers and the frames
+    show."""
+    home = [x for x, _ in g.get("home", [])]
+    away = [x for x, _ in g.get("away", [])]
+    if len(home) < FORMATION_MIN_TRACKS or len(away) < FORMATION_MIN_TRACKS:
+        return 0
+    mh, ma = sorted(home)[len(home) // 2], sorted(away)[len(away) // 2]
+    if min(mh, ma) > 20 + FORMATION_OFF_CENTRE_M:  # play at the right goal
+        return -1 if mh > ma else 1
+    if max(mh, ma) < 20 - FORMATION_OFF_CENTRE_M:  # play at the left goal
+        return 1 if mh < ma else -1
+    return 0
+
+
 PRIOR_SHARE = 0.6  # a stretch that disagrees with the prior needs this share of the votes
 
 
@@ -94,10 +118,15 @@ def _sides(
             v += 1 if g["home_gk"][0][0] < 20 else -1
         if g.get("away_gk"):
             v += 1 if g["away_gk"][0][0] > 20 else -1
+        if FORMATION_VOTES:
+            v += formation_vote(g)
         if v:
             votes.append((b, 1 if v > 0 else -1))
     if not votes:
         return [(min(bins) * BIN_MS if bins else 0, prior)] if prior else []
+    # teams change ends only at half-time: the first side holds from the start of the video, not
+    # only from the first vote (a throw-off before the first goalkeeper sighting has a side too)
+    start = min(bins) * BIN_MS
     raw: list[tuple[int, str]] = []
     cur: str | None = None
     for i, (b, _) in enumerate(votes):
@@ -121,7 +150,7 @@ def _sides(
         side = "left" if total >= 0 else "right"
         if prior and side != prior and abs(total) < (2 * PRIOR_SHARE - 1) * len(votes):
             side = prior
-        return [(votes[0][0] * BIN_MS, side)]
+        return [(start, side)]
     if prior and kept[0][1] != prior:
         # the first stretch against the prior: only when its goalkeepers say so clearly
         end = kept[1][0] if len(kept) > 1 else votes[-1][0] * BIN_MS + 1
@@ -129,7 +158,7 @@ def _sides(
         agree = sum(1 for v in mine if (v > 0) == (kept[0][1] == "left"))
         if mine and agree < PRIOR_SHARE * len(mine):
             kept[0] = (kept[0][0], prior)
-    out: list[tuple[int, str]] = [(votes[0][0] * BIN_MS, kept[0][1])]
+    out: list[tuple[int, str]] = [(start, kept[0][1])]
     for t, side in kept[1:]:
         if side != out[-1][1]:
             out.append((t, side))

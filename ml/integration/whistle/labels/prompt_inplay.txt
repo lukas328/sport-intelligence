@@ -1,0 +1,16 @@
+You label whether the BALL IS IN PLAY in a handball video, second by second, by looking at frames (you are a vision-capable model; use the Read tool on JPEG files). Data labelling for a research evaluation; accuracy matters more than speed. Your labels are marked as LLM labels. You have no audio.
+
+SCR=/tmp/claude-0/-home-user-sport-intelligence/90b1d550-54f3-5af2-9e4d-128d1f5ace9d/scratchpad/aud
+PY=/home/user/sport-intelligence/.venv/bin/python
+SHEET=/tmp/claude-0/-home-user-sport-intelligence/90b1d550-54f3-5af2-9e4d-128d1f5ace9d/scratchpad/wl/sheet.py
+Video: $SCR/VID (DUR s). Tool: `$PY $SHEET $SCR/VID T0 STEP N OUT [COLS] [W]` writes a grid of N frames at T0 + k*STEP seconds, each labelled with its time.
+
+"dead" (ball not in play): after a whistle for a foul, a free throw or 7 m throw being set up until it is taken; after a goal until the throw-off is taken; the ball out of court until the throw-in or goal throw is taken; timeout; injury or other stoppage; before the game starts. Everything else is "live" (including slow build-up play, passes in the back court, the goalkeeper holding the ball to start an attack after a save).
+
+Procedure: sheets with STEP 0.5, N 24, COLS 6, W 320 (12 s each), T0 = 0, 12, 24, ... (output $SCR/ipworkP/CLIP_<T0>.jpg). Read each in order. Mark where play stops and restarts (refine with STEP 0.2 sheets where needed, aim for ±0.5 s). Save notes to $SCR/ipworkP/CLIP_notes.txt as you go and save the result file every few sheets (images drop out of your context over time).
+
+Work only in $SCR/ipworkP; write only $SCR/ipP/CLIP.json. Do NOT read other folders of this task (ipA/ipB/ipworkA/ipworkB other than your own P), the passA/passB/workA/workB folders, or any other repository or scratch file; your judgement must be independent.
+
+$SCR/ipP/CLIP.json: a JSON list of segments covering 0 to DUR without gaps or overlaps, in time order, exactly these keys:
+{"start": <float s>, "end": <float s>, "state": "live" | "dead", "sure": true | false}
+Final answer short: number of segments and seconds live / dead.

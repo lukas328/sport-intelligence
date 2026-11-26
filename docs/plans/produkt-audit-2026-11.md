@@ -335,6 +335,116 @@ er wartet, wie viel er selbst korrigieren muss, und ob er den Zahlen trauen kann
   Sekunden folgen auf ein Tor. Skript `ml/integration/possession/dead_eval.py`, Ergebnis
   `ml/integration/results/possession_dead_ball.json`.
 
+- **Pfiff aus dem Ton (26.11., Analyse-Sitzung).** Die Horgen-Clips haben keine Tonspur.
+  Mess-Clips sind darum:
+  - Mülheim-Südpfalz H1, 480 s;
+  - Leimental-Arbon, 600 s ab Spielbeginn. Halle aus Ball-Testset 1: nur Messung, nicht für
+    Ballnetz-Training oder Ball-Tuning.
+
+  Keines davon ist Endtest. Die Labels sind LLM-Labels: Pfiffe aus Spektrogramm-Bildern plus
+  Video, zwei Durchgänge (65 von 68 Paaren gleich), dritter Blick; 69 Pfiffe, eingefroren mit
+  sha256 69f1b8aa…. Dazu «Ball im Spiel» pro Sekunde, zwei Durchgänge, 1025 übereinstimmende
+  Sekunden, davon 178 tot. Der Pfiff-Grundton liegt bei 3,7 bis 4,1 kHz, also an der Grenze von
+  8-kHz-Audio.
+
+  | Detektor | Audio | Präzision | Recall | F1 |
+  |---|---|---|---|---|
+  | Runde 1 (Regel vorab) | 8 kHz | 40 % | 25 % | |
+  | Runde 1 | 16 kHz | 13 % | 3 % | |
+  | Runde 2, gewählt auf Mülheim, Test Leimental | 8 kHz | 63 % | 76 % | 0,69 |
+  | Runde 2, gewählt auf Mülheim, Test Leimental | 16 kHz | 86 % | 80 % | 0,83 |
+
+  Runde 1 scheiterte an der Bedingung «stetige Frequenz»: die Doppellinien der Pfeife lassen den
+  stärksten Bin springen. Runde 2 misst den Kontrast im Band 3,5 bis 4,2 kHz gegen die eigene
+  Tonalität der Halle. Auf Mülheim lag sie gleich hoch (F1 0,68 und 0,84), also ohne sichtbare
+  Überanpassung. **Folge: Ton im Produkt jetzt 16 kHz (Integration #180).**
+
+  **Pfiff als Signal «Ball nicht im Spiel»: nicht brauchbar.** Regel vorab: die 5 s nach einem
+  Pfiff sind tot; brauchbar heisst Präzision ≥ 0,70 mit CI-Untergrenze ≥ 0,60.
+
+  | Detektor | Präzision tot | CI | Recall tot |
+  |---|---|---|---|
+  | Runde 2, 8 kHz | 26 % | 16–36 % | 53 % |
+  | Runde 2, 16 kHz | 27 % | 18–38 % | 44 % |
+
+  Der Anteil toter Sekunden liegt bei 17 %. Warum, gemessen mit den gelabelten Pfiffen statt dem
+  Detektor:
+  - Fast jede echte Unterbrechung beginnt mit einem Pfiff (18 von 20 toten Strecken).
+  - Mehr als ein Drittel der Pfiffe (26 von 69) fällt aber in laufendes Spiel: schnell
+    ausgeführte Freiwürfe unter 2 s, Pfiffe zur Wiederaufnahme (Anwurf, Freiwurf).
+
+  Der Pfiff taugt also als Startmarke einer Unterbrechung, nicht als Tot-Signal allein. Er
+  braucht eine zweite Bestätigung, etwa dass die Spieler stehen bleiben, sich zum Anwurf
+  sammeln, oder dass ein zweiter Pfiff die Wiederaufnahme markiert. Nicht ins Produkt.
+  Weitere Nutzen, nicht gemessen: Zeitpunkte für Tor und Foul, Bestätigung von
+  Wurf-Kandidaten. Skripte und Labels: `ml/integration/whistle/`.
+
+- **Pfiff als Bedingung für Tor-Kandidaten (26.11.): kein klarer Gewinn, aber ein klares
+  Muster.** Truth sind die Tore auf Mülheim (4) und Leimental (10), LLM-Labels: zwei Durchgänge,
+  dritter Blick auf 4 strittige Mülheim-Momente, eingefroren mit sha256 06aa4402…. Die
+  Leimental-Durchgänge stimmten bei allen 10 Toren überein, passend zur TV-Einblendung.
+  Kandidaten sind die bestehenden `goal_candidates`.
+
+  Vorab festgelegt: Treffer = `goal_ms` ±6 s. Gate = mindestens K Pfiffe in
+  [`goal_ms` + A, `goal_ms` + B], mit A ∈ {0, 3, 5}, B ∈ {15, 30, 45}, K ∈ {1, 2}. Gewählt auf
+  Mülheim, einmal auf Leimental getestet.
+
+  | Leimental, alle Kandidaten | Kandidaten | Treffer (von 10) | Präzision |
+  |---|---|---|---|
+  | ohne Gate | 40 | 10 | 25 % |
+  | Gate 16 kHz (A 3, B 15, K 2) | 6 | 3 | 50 % |
+  | Gate 8 kHz (A 0, B 15, K 2) | 16 | 4 | 25 % |
+
+  Das Gate verliert 6 bis 7 von 10 Toren. Nicht ins Produkt.
+
+  Warum, gemessen und nicht getuned:
+  - Nach einem Tor folgt fast immer ein Pfiffpaar: 13 von 14 Toren haben einen gelabelten Pfiff
+    0 bis 1,5 s danach (der Torpfiff), 12 von 14 einen weiteren 3,5 bis 6,7 s danach. Der
+    Detektor findet die meisten davon.
+  - `goal_ms` der Kandidaten liegt aber meist 3 bis 5 s nach dem echten Tor. Das Pfiffpaar fällt
+    damit auf −3 bis +1 s relativ zu `goal_ms`, also vor jedes Fenster im Raster, denn das Raster
+    hatte keine negativen Startwerte. Das ist ein Entwurfsfehler der Analyse-Sitzung, nicht des
+    Signals.
+
+  **Nebenbefund Versatz der Tor-Kandidaten:** `goal_ms` minus echtes Tor, jeweils der nächste
+  Kandidat auf den 14 gelabelten Toren:
+  - Werte: −3,2, −2,8, −1,8, +1,0, +2,4, +2,6, +3,1, +3,2, +3,2, +3,8, +4,2, +4,9, +6,0 und
+    +12,0 s (der letzte Wert ist vermutlich kein echter Treffer).
+  - Median +3,15 s, mittlere Hälfte +1,0 bis +4,2 s. 10 von 14 liegen mehr als 1,5 s nach dem
+    Tor.
+  - `GOAL_OFFSET_S = 1,5` («median peak − goal»); gemessen ist Peak − Tor eher 4,5 bis 5 s.
+  - Ein Clip, der 1,5 s vor `goal_ms` beginnt («Würfe schnell prüfen»), startet so meist nach
+    dem Tor. Die Entscheidung über den Versatz liegt bei der Hauptsitzung.
+  - Vorbehalt: zwei Spiele, LLM-Labels.
+
+  **Weitere Spiele mit Ton** gibt es nicht. Die Kaggle-Segmente und `testclips/` sind ohne
+  Tonspur; die Quellen sind YouTube-Downloads (Opus 48 kHz), der Ton wurde beim Schneiden
+  verworfen.
+
+  Leimental ist jetzt verbraucht. Eine zweite Runde mit Fenster um `goal_ms` (etwa −8 bis +4 s,
+  Pfiffpaar) braucht neue Spiele mit Ton, zum Beispiel nach dem Re-Ingest mit 16 kHz (#180).
+  Nebennutzen: das Pfiffpaar könnte die Torzeit eines Kandidaten auf ±1 s schärfen. Skripte und
+  Labels: `ml/integration/whistle/goals/`.
+
+- **Pfiff + Bewegung als Tot-Signal (26.11.): nicht brauchbar.** Vorab festgelegt: tot, wenn in
+  den letzten W s ein Pfiff begann (Detektor Runde 2, 16 kHz) UND die Spieler ruhen. «Ruhen»
+  heisst: die Personen-Geschwindigkeit des Produkts (`goalcandidates.signals` «speed», ohne
+  Feld) liegt unter dem Q-ten Perzentil des Clips. (W, Q) gewählt auf Mülheim (W 5 s, Q 50),
+  einmal auf Leimental getestet, gegen dieselben «Ball im Spiel»-Labels.
+
+  | Leimental (117 tote Sekunden) | Präzision tot | CI | Recall |
+  |---|---|---|---|
+  | Pfiff + Bewegung | 19 % | 5–37 % | 11 % |
+  | Bewegung allein (unter Median) | 24 % | 9–41 % | 60 % |
+  | Pfiff allein (5 s danach) | 26 % | 15–39 % | 38 % |
+
+  Die Verbindung ist schlechter als jedes Signal allein. Unterbrechungen nach einem Pfiff sind
+  oft kurz (schneller Freiwurf), und in langen Unterbrechungen bewegen sich die Spieler weiter
+  (Wechsel, Zurücklaufen). Für tote Phasen bleibt der aussichtsreichste Weg das Pfiffpaar
+  (Torpfiff, dann Anwurfpfiff) zusammen mit erkannten Toren; das ist nur auf neuen Spielen mit
+  Ton prüfbar. Skript `ml/integration/whistle/goals/dead_combo.py`, Ergebnis
+  `ml/integration/results/whistle_motion_dead_ball.json`.
+
 ### 7. Wurfort unzuverlässig, Torzone fehlt
 
 - **Befund:** Ohne gelesene Nummer nimmt der Wurfort den nächsten Angreifer der letzten 10 s

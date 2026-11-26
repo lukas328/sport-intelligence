@@ -111,12 +111,13 @@ def test_shot_candidate_clip_and_time() -> None:
 
 
 def test_candidate_clip_and_goal_time() -> None:
-    d = gc.Candidate(5.0, 1.2, 2, 3).to_dict(duration_s=7.0)
+    # the goal lies GOAL_OFFSET_S (5 s) before the peak; the clip from 10 s before to 4 s after it
+    d = gc.Candidate(12.0, 1.2, 2, 3).to_dict(duration_s=15.0)
     assert d == {
-        "t_ms": 5000,
-        "goal_ms": 3500,
-        "start_ms": 0,
-        "end_ms": 7000,
+        "t_ms": 12_000,
+        "goal_ms": 7000,
+        "start_ms": 2000,
+        "end_ms": 15_000,
         "score": 1.2,
         "rate": 2,
         "rank": 3,

@@ -1,0 +1,15 @@
+{
+ "mue": [
+  {"start": 49.95, "end": 50.35, "whistle": false, "note": "only vertical streaks; whistles at 47.33-48.1 and 51.62-52.58 lie outside the window"},
+  {"start": 51.62, "end": 52.58, "whistle": true, "note": "clear 3-line stack at 3.6-4.1 kHz"},
+  {"start": 204.03, "end": 204.17, "whistle": true, "note": "short pip, 2-line stack at 3.6-4.0 kHz plus a copy at 7.8 kHz; whistles also at 202.7 and 204.8"},
+  {"start": 371.8, "end": 372.25, "whistle": false, "note": "scattered chirp blobs at 5.4, 4.7, 4.0 and 3.1 kHz, single lines with no stack; squeaks or noisemaker (low confidence)"}
+ ],
+ "lei": [
+  {"start": 124.1, "end": 124.5, "whistle": false, "note": "diffuse broadband blob at 3.5-4.2 kHz, not thin lines; crowd or shout"},
+  {"start": 181.61, "end": 182.0, "whistle": true, "note": "line at 3.8 kHz with a copy near 7.3 kHz, restart after the segment at 180.96-181.55; music underneath (medium confidence)"},
+  {"start": 341.0, "end": 341.87, "whistle": true, "note": "second burst of a clear stacked whistle that starts at 340.29"},
+  {"start": 450.35, "end": 451.0, "whistle": false, "note": "nothing at 450.35; a whistle stack (3.95 and 3.5 kHz) starts at 451.69"},
+  {"start": 519.28, "end": 520.98, "whistle": false, "note": "faint single 4.0 kHz tone pieces, no stack or harmonic; play stopped and clock not running (low confidence)"}
+ ]
+}

@@ -1,0 +1,115 @@
+{
+ "truth_sha256": "06aa44029f2fff93c4dd4c6aba4f1268a697ee24e3e5b8cb03f466fb5c48f72d",
+ "16000": {
+  "chosen_on_mue": {
+   "a_s": 3.0,
+   "b_s": 15.0,
+   "k": 2
+  },
+  "mue": {
+   "without": {
+    "candidates": 32,
+    "hits": 3,
+    "goals": 4,
+    "precision": 0.094,
+    "recall": 0.75
+   },
+   "with": {
+    "candidates": 8,
+    "hits": 2,
+    "goals": 4,
+    "precision": 0.25,
+    "recall": 0.5
+   }
+  },
+  "lei_all": {
+   "without": {
+    "candidates": 40,
+    "hits": 10,
+    "goals": 10,
+    "precision": 0.25,
+    "recall": 1.0
+   },
+   "with": {
+    "candidates": 6,
+    "hits": 3,
+    "goals": 10,
+    "precision": 0.5,
+    "recall": 0.3
+   }
+  },
+  "lei_default_rate": {
+   "without": {
+    "candidates": 20,
+    "hits": 8,
+    "goals": 10,
+    "precision": 0.4,
+    "recall": 0.8
+   },
+   "with": {
+    "candidates": 3,
+    "hits": 1,
+    "goals": 10,
+    "precision": 0.333,
+    "recall": 0.1
+   }
+  },
+  "klarer_gewinn": false
+ },
+ "8000": {
+  "chosen_on_mue": {
+   "a_s": 0.0,
+   "b_s": 15.0,
+   "k": 2
+  },
+  "mue": {
+   "without": {
+    "candidates": 32,
+    "hits": 3,
+    "goals": 4,
+    "precision": 0.094,
+    "recall": 0.75
+   },
+   "with": {
+    "candidates": 11,
+    "hits": 3,
+    "goals": 4,
+    "precision": 0.273,
+    "recall": 0.75
+   }
+  },
+  "lei_all": {
+   "without": {
+    "candidates": 40,
+    "hits": 10,
+    "goals": 10,
+    "precision": 0.25,
+    "recall": 1.0
+   },
+   "with": {
+    "candidates": 16,
+    "hits": 4,
+    "goals": 10,
+    "precision": 0.25,
+    "recall": 0.4
+   }
+  },
+  "lei_default_rate": {
+   "without": {
+    "candidates": 20,
+    "hits": 8,
+    "goals": 10,
+    "precision": 0.4,
+    "recall": 0.8
+   },
+   "with": {
+    "candidates": 8,
+    "hits": 3,
+    "goals": 10,
+    "precision": 0.375,
+    "recall": 0.3
+   }
+  },
+  "klarer_gewinn": false
+ }
+}

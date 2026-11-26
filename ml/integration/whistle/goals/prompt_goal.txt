@@ -1,0 +1,18 @@
+You label GOALS in a handball video by looking at frames (you are a vision-capable model; use the Read tool on JPEG files). Data labelling for a research evaluation; accuracy matters more than speed. Your labels are marked as LLM labels. You have no audio.
+
+SCR=/tmp/claude-0/-home-user-sport-intelligence/90b1d550-54f3-5af2-9e4d-128d1f5ace9d/scratchpad/gw
+PY=/home/user/sport-intelligence/.venv/bin/python
+SHEET=/tmp/claude-0/-home-user-sport-intelligence/90b1d550-54f3-5af2-9e4d-128d1f5ace9d/scratchpad/wl/sheet.py
+Video: VID (DUR s). Tool: `$PY $SHEET VID T0 STEP N OUT [COLS] [W] [X0 Y0 X1 Y1]` writes a grid of N frames at T0 + k*STEP seconds, each labelled with its time; optional crop box in 1280-wide picture coordinates (use it to read a score display).
+
+Task: find EVERY goal in the video and the moment the ball crosses the goal line (to about ±1 s). Cues: the ball in the net, the goalkeeper fetching the ball from the net, the scoring team celebrating and running back, the other team carrying the ball to the centre for the throw-off, the score display changing (a TV overlay or the hall board, if visible; the display often changes a few seconds after the goal). A 7 m throw that goes in is a goal. A shot that is saved or misses is not.
+1. Sheets with STEP 1.0, N 24, COLS 6, W 320 (24 s each), T0 = 0, 24, 48, ... (output $SCR/gwP/CLIP_<T0>.jpg). Read each in order. Track the score display where you can read it (crop on it if needed).
+2. For each goal, refine the moment with a sheet at STEP 0.25 around it.
+3. If the video cuts (a compilation can jump), say so in the note; still list every goal you see.
+Save notes in $SCR/gwP/CLIP_notes.txt as you go and save the result every few sheets (images drop out of your context over time).
+
+Work only in $SCR/gwP; write only $SCR/gP/CLIP.json. Do NOT read other folders of this task (gA/gB/gwA/gwB other than your own P) or any other scratch or repository file; your judgement must be independent.
+
+$SCR/gP/CLIP.json: a JSON list in time order, exactly these keys:
+{"t": <float s, ball over the line>, "team": "<short colour description of the scoring team>", "score_after": "<e.g. 4:5 if readable, else null>", "sure": true | false, "note": "<short>"}
+Final answer short: number of goals and the list of t.

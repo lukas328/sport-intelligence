@@ -1,0 +1,900 @@
+{
+ "template": "2026-11-05.2",
+ "default_rate": 2,
+ "rates": [
+  1,
+  2,
+  4
+ ],
+ "duration_s": 600.0,
+ "play_s": 600.0,
+ "no_play_ms": [],
+ "warm_up_ms": [],
+ "clock_break_ms": [],
+ "clip_s": [
+  -10.0,
+  4.0
+ ],
+ "candidates": [
+  {
+   "t_ms": 5400,
+   "goal_ms": 3900,
+   "start_ms": 0,
+   "end_ms": 9400,
+   "score": 2.122,
+   "rate": 2,
+   "rank": 5
+  },
+  {
+   "t_ms": 33200,
+   "goal_ms": 31700,
+   "start_ms": 23200,
+   "end_ms": 37200,
+   "score": 2.956,
+   "rate": 1,
+   "rank": 1
+  },
+  {
+   "t_ms": 43200,
+   "goal_ms": 41700,
+   "start_ms": 33200,
+   "end_ms": 47200,
+   "score": 0.783,
+   "rate": 4,
+   "rank": 7
+  },
+  {
+   "t_ms": 60400,
+   "goal_ms": 58900,
+   "start_ms": 50400,
+   "end_ms": 64400,
+   "score": 0.03,
+   "rate": 4,
+   "rank": 11
+  },
+  {
+   "t_ms": 69600,
+   "goal_ms": 68100,
+   "start_ms": 59600,
+   "end_ms": 73600,
+   "score": 2.459,
+   "rate": 1,
+   "rank": 2
+  },
+  {
+   "t_ms": 85600,
+   "goal_ms": 84100,
+   "start_ms": 75600,
+   "end_ms": 89600,
+   "score": 2.25,
+   "rate": 2,
+   "rank": 4
+  },
+  {
+   "t_ms": 93800,
+   "goal_ms": 92300,
+   "start_ms": 83800,
+   "end_ms": 97800,
+   "score": 1.651,
+   "rate": 4,
+   "rank": 6
+  },
+  {
+   "t_ms": 113200,
+   "goal_ms": 111700,
+   "start_ms": 103200,
+   "end_ms": 117200,
+   "score": 0.083,
+   "rate": 4,
+   "rank": 10
+  },
+  {
+   "t_ms": 121600,
+   "goal_ms": 120100,
+   "start_ms": 111600,
+   "end_ms": 125600,
+   "score": 3.012,
+   "rate": 1,
+   "rank": 0
+  },
+  {
+   "t_ms": 142200,
+   "goal_ms": 140700,
+   "start_ms": 132200,
+   "end_ms": 146200,
+   "score": 0.539,
+   "rate": 4,
+   "rank": 9
+  },
+  {
+   "t_ms": 151200,
+   "goal_ms": 149700,
+   "start_ms": 141200,
+   "end_ms": 155200,
+   "score": 2.403,
+   "rate": 2,
+   "rank": 3
+  },
+  {
+   "t_ms": 163000,
+   "goal_ms": 161500,
+   "start_ms": 153000,
+   "end_ms": 167000,
+   "score": 0.602,
+   "rate": 4,
+   "rank": 8
+  },
+  {
+   "t_ms": 185000,
+   "goal_ms": 183500,
+   "start_ms": 175000,
+   "end_ms": 189000,
+   "score": 2.861,
+   "rate": 1,
+   "rank": 1
+  },
+  {
+   "t_ms": 213400,
+   "goal_ms": 211900,
+   "start_ms": 203400,
+   "end_ms": 217400,
+   "score": 2.389,
+   "rate": 2,
+   "rank": 4
+  },
+  {
+   "t_ms": 229600,
+   "goal_ms": 228100,
+   "start_ms": 219600,
+   "end_ms": 233600,
+   "score": 0.067,
+   "rate": 4,
+   "rank": 11
+  },
+  {
+   "t_ms": 237800,
+   "goal_ms": 236300,
+   "start_ms": 227800,
+   "end_ms": 241800,
+   "score": 2.888,
+   "rate": 1,
+   "rank": 0
+  },
+  {
+   "t_ms": 266200,
+   "goal_ms": 264700,
+   "start_ms": 256200,
+   "end_ms": 270200,
+   "score": 1.665,
+   "rate": 2,
+   "rank": 5
+  },
+  {
+   "t_ms": 275400,
+   "goal_ms": 273900,
+   "start_ms": 265400,
+   "end_ms": 279400,
+   "score": 0.846,
+   "rate": 4,
+   "rank": 6
+  },
+  {
+   "t_ms": 295200,
+   "goal_ms": 293700,
+   "start_ms": 285200,
+   "end_ms": 299200,
+   "score": 2.553,
+   "rate": 2,
+   "rank": 3
+  },
+  {
+   "t_ms": 303400,
+   "goal_ms": 301900,
+   "start_ms": 293400,
+   "end_ms": 307400,
+   "score": 0.269,
+   "rate": 4,
+   "rank": 10
+  },
+  {
+   "t_ms": 311600,
+   "goal_ms": 310100,
+   "start_ms": 301600,
+   "end_ms": 315600,
+   "score": 2.735,
+   "rate": 1,
+   "rank": 2
+  },
+  {
+   "t_ms": 320400,
+   "goal_ms": 318900,
+   "start_ms": 310400,
+   "end_ms": 324400,
+   "score": 0.27,
+   "rate": 4,
+   "rank": 9
+  },
+  {
+   "t_ms": 335600,
+   "goal_ms": 334100,
+   "start_ms": 325600,
+   "end_ms": 339600,
+   "score": 0.293,
+   "rate": 4,
+   "rank": 7
+  },
+  {
+   "t_ms": 358200,
+   "goal_ms": 356700,
+   "start_ms": 348200,
+   "end_ms": 362200,
+   "score": 0.276,
+   "rate": 4,
+   "rank": 8
+  },
+  {
+   "t_ms": 375800,
+   "goal_ms": 374300,
+   "start_ms": 365800,
+   "end_ms": 379800,
+   "score": 3.022,
+   "rate": 1,
+   "rank": 1
+  },
+  {
+   "t_ms": 384000,
+   "goal_ms": 382500,
+   "start_ms": 374000,
+   "end_ms": 388000,
+   "score": 0.177,
+   "rate": 4,
+   "rank": 9
+  },
+  {
+   "t_ms": 413200,
+   "goal_ms": 411700,
+   "start_ms": 403200,
+   "end_ms": 417200,
+   "score": 1.749,
+   "rate": 4,
+   "rank": 6
+  },
+  {
+   "t_ms": 428600,
+   "goal_ms": 427100,
+   "start_ms": 418600,
+   "end_ms": 432600,
+   "score": -0.077,
+   "rate": 4,
+   "rank": 10
+  },
+  {
+   "t_ms": 445600,
+   "goal_ms": 444100,
+   "start_ms": 435600,
+   "end_ms": 449600,
+   "score": 2.474,
+   "rate": 2,
+   "rank": 3
+  },
+  {
+   "t_ms": 454400,
+   "goal_ms": 452900,
+   "start_ms": 444400,
+   "end_ms": 458400,
+   "score": 2.612,
+   "rate": 1,
+   "rank": 2
+  },
+  {
+   "t_ms": 465600,
+   "goal_ms": 464100,
+   "start_ms": 455600,
+   "end_ms": 469600,
+   "score": 3.341,
+   "rate": 1,
+   "rank": 0
+  },
+  {
+   "t_ms": 477400,
+   "goal_ms": 475900,
+   "start_ms": 467400,
+   "end_ms": 481400,
+   "score": 2.181,
+   "rate": 2,
+   "rank": 4
+  },
+  {
+   "t_ms": 493600,
+   "goal_ms": 492100,
+   "start_ms": 483600,
+   "end_ms": 497600,
+   "score": 0.612,
+   "rate": 4,
+   "rank": 8
+  },
+  {
+   "t_ms": 502000,
+   "goal_ms": 500500,
+   "start_ms": 492000,
+   "end_ms": 506000,
+   "score": 2.166,
+   "rate": 2,
+   "rank": 5
+  },
+  {
+   "t_ms": 521000,
+   "goal_ms": 519500,
+   "start_ms": 511000,
+   "end_ms": 525000,
+   "score": -0.276,
+   "rate": 4,
+   "rank": 11
+  },
+  {
+   "t_ms": 531800,
+   "goal_ms": 530300,
+   "start_ms": 521800,
+   "end_ms": 535800,
+   "score": 1.235,
+   "rate": 4,
+   "rank": 7
+  },
+  {
+   "t_ms": 547800,
+   "goal_ms": 546300,
+   "start_ms": 537800,
+   "end_ms": 551800,
+   "score": 1.687,
+   "rate": 2,
+   "rank": 1
+  },
+  {
+   "t_ms": 571800,
+   "goal_ms": 570300,
+   "start_ms": 561800,
+   "end_ms": 575800,
+   "score": 1.072,
+   "rate": 4,
+   "rank": 2
+  },
+  {
+   "t_ms": 581800,
+   "goal_ms": 580300,
+   "start_ms": 571800,
+   "end_ms": 585800,
+   "score": 3.061,
+   "rate": 1,
+   "rank": 0
+  },
+  {
+   "t_ms": 590000,
+   "goal_ms": 588500,
+   "start_ms": 580000,
+   "end_ms": 594000,
+   "score": 0.941,
+   "rate": 4,
+   "rank": 3
+  }
+ ],
+ "shots": {
+  "template": "2026-11-26.s2",
+  "default_rate": 4,
+  "rates": [
+   2,
+   4,
+   6
+  ],
+  "clip_s": [
+   -8.0,
+   4.0
+  ],
+  "candidates": [
+   {
+    "t_ms": 6400,
+    "goal_ms": 1400,
+    "start_ms": 0,
+    "end_ms": 10400,
+    "score": 3.658,
+    "rate": 2,
+    "rank": 5
+   },
+   {
+    "t_ms": 18600,
+    "goal_ms": 13600,
+    "start_ms": 10600,
+    "end_ms": 22600,
+    "score": -0.439,
+    "rate": 6,
+    "rank": 14
+   },
+   {
+    "t_ms": 33200,
+    "goal_ms": 28200,
+    "start_ms": 25200,
+    "end_ms": 37200,
+    "score": 5.118,
+    "rate": 2,
+    "rank": 1
+   },
+   {
+    "t_ms": 43200,
+    "goal_ms": 38200,
+    "start_ms": 35200,
+    "end_ms": 47200,
+    "score": 1.543,
+    "rate": 4,
+    "rank": 7
+   },
+   {
+    "t_ms": 52400,
+    "goal_ms": 47400,
+    "start_ms": 44400,
+    "end_ms": 56400,
+    "score": -1.527,
+    "rate": 6,
+    "rank": 17
+   },
+   {
+    "t_ms": 60600,
+    "goal_ms": 55600,
+    "start_ms": 52600,
+    "end_ms": 64600,
+    "score": 0.469,
+    "rate": 4,
+    "rank": 10
+   },
+   {
+    "t_ms": 68600,
+    "goal_ms": 63600,
+    "start_ms": 60600,
+    "end_ms": 72600,
+    "score": 4.39,
+    "rate": 2,
+    "rank": 2
+   },
+   {
+    "t_ms": 83400,
+    "goal_ms": 78400,
+    "start_ms": 75400,
+    "end_ms": 87400,
+    "score": 2.8,
+    "rate": 4,
+    "rank": 6
+   },
+   {
+    "t_ms": 91600,
+    "goal_ms": 86600,
+    "start_ms": 83600,
+    "end_ms": 95600,
+    "score": 3.761,
+    "rate": 2,
+    "rank": 4
+   },
+   {
+    "t_ms": 100600,
+    "goal_ms": 95600,
+    "start_ms": 92600,
+    "end_ms": 104600,
+    "score": -0.223,
+    "rate": 6,
+    "rank": 12
+   },
+   {
+    "t_ms": 113000,
+    "goal_ms": 108000,
+    "start_ms": 105000,
+    "end_ms": 117000,
+    "score": 0.288,
+    "rate": 4,
+    "rank": 11
+   },
+   {
+    "t_ms": 121400,
+    "goal_ms": 116400,
+    "start_ms": 113400,
+    "end_ms": 125400,
+    "score": 5.199,
+    "rate": 2,
+    "rank": 0
+   },
+   {
+    "t_ms": 132200,
+    "goal_ms": 127200,
+    "start_ms": 124200,
+    "end_ms": 136200,
+    "score": -0.299,
+    "rate": 6,
+    "rank": 13
+   },
+   {
+    "t_ms": 142000,
+    "goal_ms": 137000,
+    "start_ms": 134000,
+    "end_ms": 146000,
+    "score": 1.062,
+    "rate": 4,
+    "rank": 8
+   },
+   {
+    "t_ms": 150600,
+    "goal_ms": 145600,
+    "start_ms": 142600,
+    "end_ms": 154600,
+    "score": 4.037,
+    "rate": 2,
+    "rank": 3
+   },
+   {
+    "t_ms": 160800,
+    "goal_ms": 155800,
+    "start_ms": 152800,
+    "end_ms": 164800,
+    "score": 1.057,
+    "rate": 4,
+    "rank": 9
+   },
+   {
+    "t_ms": 170200,
+    "goal_ms": 165200,
+    "start_ms": 162200,
+    "end_ms": 174200,
+    "score": -0.622,
+    "rate": 6,
+    "rank": 16
+   },
+   {
+    "t_ms": 179800,
+    "goal_ms": 174800,
+    "start_ms": 171800,
+    "end_ms": 183800,
+    "score": -0.492,
+    "rate": 6,
+    "rank": 15
+   },
+   {
+    "t_ms": 188000,
+    "goal_ms": 183000,
+    "start_ms": 180000,
+    "end_ms": 192000,
+    "score": 3.778,
+    "rate": 2,
+    "rank": 4
+   },
+   {
+    "t_ms": 200600,
+    "goal_ms": 195600,
+    "start_ms": 192600,
+    "end_ms": 204600,
+    "score": -0.708,
+    "rate": 6,
+    "rank": 15
+   },
+   {
+    "t_ms": 213400,
+    "goal_ms": 208400,
+    "start_ms": 205400,
+    "end_ms": 217400,
+    "score": 3.994,
+    "rate": 2,
+    "rank": 3
+   },
+   {
+    "t_ms": 229600,
+    "goal_ms": 224600,
+    "start_ms": 221600,
+    "end_ms": 233600,
+    "score": 0.105,
+    "rate": 6,
+    "rank": 12
+   },
+   {
+    "t_ms": 237800,
+    "goal_ms": 232800,
+    "start_ms": 229800,
+    "end_ms": 241800,
+    "score": 4.801,
+    "rate": 2,
+    "rank": 0
+   },
+   {
+    "t_ms": 251400,
+    "goal_ms": 246400,
+    "start_ms": 243400,
+    "end_ms": 255400,
+    "score": 0.225,
+    "rate": 4,
+    "rank": 10
+   },
+   {
+    "t_ms": 266200,
+    "goal_ms": 261200,
+    "start_ms": 258200,
+    "end_ms": 270200,
+    "score": 2.48,
+    "rate": 2,
+    "rank": 5
+   },
+   {
+    "t_ms": 275400,
+    "goal_ms": 270400,
+    "start_ms": 267400,
+    "end_ms": 279400,
+    "score": 2.104,
+    "rate": 4,
+    "rank": 6
+   },
+   {
+    "t_ms": 284400,
+    "goal_ms": 279400,
+    "start_ms": 276400,
+    "end_ms": 288400,
+    "score": -0.038,
+    "rate": 6,
+    "rank": 13
+   },
+   {
+    "t_ms": 295200,
+    "goal_ms": 290200,
+    "start_ms": 287200,
+    "end_ms": 299200,
+    "score": 4.687,
+    "rate": 2,
+    "rank": 1
+   },
+   {
+    "t_ms": 303400,
+    "goal_ms": 298400,
+    "start_ms": 295400,
+    "end_ms": 307400,
+    "score": 0.348,
+    "rate": 4,
+    "rank": 8
+   },
+   {
+    "t_ms": 311600,
+    "goal_ms": 306600,
+    "start_ms": 303600,
+    "end_ms": 315600,
+    "score": 4.59,
+    "rate": 2,
+    "rank": 2
+   },
+   {
+    "t_ms": 320600,
+    "goal_ms": 315600,
+    "start_ms": 312600,
+    "end_ms": 324600,
+    "score": 0.213,
+    "rate": 4,
+    "rank": 11
+   },
+   {
+    "t_ms": 335000,
+    "goal_ms": 330000,
+    "start_ms": 327000,
+    "end_ms": 339000,
+    "score": -0.145,
+    "rate": 6,
+    "rank": 14
+   },
+   {
+    "t_ms": 343200,
+    "goal_ms": 338200,
+    "start_ms": 335200,
+    "end_ms": 347200,
+    "score": 0.304,
+    "rate": 4,
+    "rank": 9
+   },
+   {
+    "t_ms": 358200,
+    "goal_ms": 353200,
+    "start_ms": 350200,
+    "end_ms": 362200,
+    "score": 1.16,
+    "rate": 4,
+    "rank": 7
+   },
+   {
+    "t_ms": 367400,
+    "goal_ms": 362400,
+    "start_ms": 359400,
+    "end_ms": 371400,
+    "score": -1.422,
+    "rate": 6,
+    "rank": 16
+   },
+   {
+    "t_ms": 376000,
+    "goal_ms": 371000,
+    "start_ms": 368000,
+    "end_ms": 380000,
+    "score": 5.292,
+    "rate": 2,
+    "rank": 1
+   },
+   {
+    "t_ms": 384200,
+    "goal_ms": 379200,
+    "start_ms": 376200,
+    "end_ms": 388200,
+    "score": 0.135,
+    "rate": 4,
+    "rank": 10
+   },
+   {
+    "t_ms": 392400,
+    "goal_ms": 387400,
+    "start_ms": 384400,
+    "end_ms": 396400,
+    "score": -0.487,
+    "rate": 6,
+    "rank": 14
+   },
+   {
+    "t_ms": 401200,
+    "goal_ms": 396200,
+    "start_ms": 393200,
+    "end_ms": 405200,
+    "score": -1.002,
+    "rate": 6,
+    "rank": 15
+   },
+   {
+    "t_ms": 413200,
+    "goal_ms": 408200,
+    "start_ms": 405200,
+    "end_ms": 417200,
+    "score": 3.211,
+    "rate": 4,
+    "rank": 6
+   },
+   {
+    "t_ms": 427800,
+    "goal_ms": 422800,
+    "start_ms": 419800,
+    "end_ms": 431800,
+    "score": 0.474,
+    "rate": 4,
+    "rank": 8
+   },
+   {
+    "t_ms": 436400,
+    "goal_ms": 431400,
+    "start_ms": 428400,
+    "end_ms": 440400,
+    "score": -0.222,
+    "rate": 4,
+    "rank": 11
+   },
+   {
+    "t_ms": 445200,
+    "goal_ms": 440200,
+    "start_ms": 437200,
+    "end_ms": 449200,
+    "score": 4.391,
+    "rate": 2,
+    "rank": 3
+   },
+   {
+    "t_ms": 453400,
+    "goal_ms": 448400,
+    "start_ms": 445400,
+    "end_ms": 457400,
+    "score": 4.848,
+    "rate": 2,
+    "rank": 2
+   },
+   {
+    "t_ms": 465400,
+    "goal_ms": 460400,
+    "start_ms": 457400,
+    "end_ms": 469400,
+    "score": 5.992,
+    "rate": 2,
+    "rank": 0
+   },
+   {
+    "t_ms": 477400,
+    "goal_ms": 472400,
+    "start_ms": 469400,
+    "end_ms": 481400,
+    "score": 3.776,
+    "rate": 2,
+    "rank": 5
+   },
+   {
+    "t_ms": 493600,
+    "goal_ms": 488600,
+    "start_ms": 485600,
+    "end_ms": 497600,
+    "score": 0.461,
+    "rate": 4,
+    "rank": 9
+   },
+   {
+    "t_ms": 502000,
+    "goal_ms": 497000,
+    "start_ms": 494000,
+    "end_ms": 506000,
+    "score": 3.844,
+    "rate": 2,
+    "rank": 4
+   },
+   {
+    "t_ms": 513000,
+    "goal_ms": 508000,
+    "start_ms": 505000,
+    "end_ms": 517000,
+    "score": -0.256,
+    "rate": 6,
+    "rank": 12
+   },
+   {
+    "t_ms": 521200,
+    "goal_ms": 516200,
+    "start_ms": 513200,
+    "end_ms": 525200,
+    "score": -0.421,
+    "rate": 6,
+    "rank": 13
+   },
+   {
+    "t_ms": 531800,
+    "goal_ms": 526800,
+    "start_ms": 523800,
+    "end_ms": 535800,
+    "score": 2.391,
+    "rate": 4,
+    "rank": 7
+   },
+   {
+    "t_ms": 547800,
+    "goal_ms": 542800,
+    "start_ms": 539800,
+    "end_ms": 551800,
+    "score": 3.236,
+    "rate": 2,
+    "rank": 1
+   },
+   {
+    "t_ms": 556800,
+    "goal_ms": 551800,
+    "start_ms": 548800,
+    "end_ms": 560800,
+    "score": -0.229,
+    "rate": 6,
+    "rank": 4
+   },
+   {
+    "t_ms": 571800,
+    "goal_ms": 566800,
+    "start_ms": 563800,
+    "end_ms": 575800,
+    "score": 2.219,
+    "rate": 4,
+    "rank": 2
+   },
+   {
+    "t_ms": 581600,
+    "goal_ms": 576600,
+    "start_ms": 573600,
+    "end_ms": 585600,
+    "score": 5.15,
+    "rate": 2,
+    "rank": 0
+   },
+   {
+    "t_ms": 590000,
+    "goal_ms": 585000,
+    "start_ms": 582000,
+    "end_ms": 594000,
+    "score": 0.516,
+    "rate": 4,
+    "rank": 3
+   }
+  ]
+ },
+ "elapsed_s": 0.93
+}

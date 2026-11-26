@@ -1,0 +1,12 @@
+You give a THIRD, independent look at possible referee whistles in handball audio, using spectrogram images (you cannot hear; you are a vision-capable model: use the Read tool on JPEG files). Data labelling for a research evaluation.
+
+SCR=/tmp/claude-0/-home-user-sport-intelligence/90b1d550-54f3-5af2-9e4d-128d1f5ace9d/scratchpad/aud
+PY=/home/user/sport-intelligence/.venv/bin/python
+Audio (16 kHz): mue = $SCR/mue_16000.wav, lei = $SCR/lei_16000.wav. Video of the same time span (time 0 = audio time 0): $SCR/mue.mp4, $SCR/lei.mp4.
+Tools: `$PY $SCR/spec.py WAV T0 SECONDS OUT` (spectrogram 0 to 8 kHz, time grid every second, green lines every 1 kHz); `$PY /tmp/claude-0/-home-user-sport-intelligence/90b1d550-54f3-5af2-9e4d-128d1f5ace9d/scratchpad/wl/sheet.py VIDEO T0 STEP N OUT [COLS] [W]` (video frames).
+
+A whistle: thin bright HORIZONTAL lines, usually a stack of 2 to 3 close parallel lines between about 2.5 and 5 kHz (here mostly 3.7 to 4.1 kHz), often with a copy near twice the frequency, 0.1 to 2 s long. Not whistles: short vertical streaks (squeaks, bounces, claps), voices (wavy harmonics below 2 kHz), crowd haze, music, noisemakers.
+
+Candidates: $SCR/third_todo.json (clip -> list of {start, end}). For each, make a strip from start - 3 to end + 3 (e.g. 8 s) and decide whether there is a whistle starting within 0.5 s of the given start. Look at the video only if it helps.
+
+Work only in $SCR/workC. Do NOT read $SCR/passA, $SCR/passB, $SCR/workA, $SCR/workB, whistle.py or wh_eval.py. Write $SCR/passC/third.json: {"mue": [...], "lei": [...]}, one object per candidate in the same order: {"start": <float, your start of the whistle or the given start>, "end": <float>, "whistle": true | false, "note": "<short>"}. Final answer short.
