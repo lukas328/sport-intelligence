@@ -5510,6 +5510,19 @@
             "description": "the technical sub-step (download, transcode, observe, ...)",
             "title": "Step"
           },
+          "uploaded_by_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "who uploaded the file (told when the analysis is done); null for files from before and once the account is gone",
+            "title": "Uploaded By Id"
+          },
           "uploaded_bytes": {
             "anyOf": [
               {
