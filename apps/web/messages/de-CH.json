@@ -770,7 +770,12 @@
     "discardTitle": "Upload auch abbrechen?",
     "discardBody": "Der Hinweis ist weg. Der unterbrochene Upload zu {name} liegt noch bereit, damit du mit derselben Datei weitermachen kannst. Abbrechen löscht, was schon angekommen ist. Sonst bricht er nach 6 Stunden ohne neue Teile von selbst ab.",
     "discardKeep": "Nein, nur ausblenden",
-    "stepShare": "{n} % dieses Schritts"
+    "stepShare": "{n} % dieses Schritts",
+    "courtTitle": "Markiere jetzt das Spielfeld",
+    "courtText": "Das Hallenbild ist schon da. Markierst du das Spielfeld, solange die Analyse läuft, wird sie in einem Durchgang vollständig: mit Positionen und Laufwegen.",
+    "courtButton": "Spielfeld markieren",
+    "courtTaken": "Dein Spielfeld ist markiert. Die laufende Analyse übernimmt es.",
+    "stripCourt": "Spielfeld markieren"
   },
   "attachments": {
     "title": "Dateien zum Spiel",

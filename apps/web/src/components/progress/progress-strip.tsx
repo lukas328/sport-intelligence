@@ -75,6 +75,9 @@ export function ProgressStrip({ orgId }: { orgId: string }) {
     when,
     items.length > 1 ? t("stripMore", { n: items.length - 1 }) : null,
   ].filter(Boolean);
+  // the hall image of a running analysis is there: marking the court now completes it in one run
+  // (#141); the link opens the marking on the match
+  const courtMark = isActive(p) && p.files.some((f) => f.court === "mark");
   // on a phone one part: what needs a look, else the time, else how far
   const phone = p.state === "stalled" || p.state === "interrupted" ? detail[0] : isActive(p) ? (when ?? w.percent(p.overall)) : null;
   return (
@@ -104,9 +107,19 @@ export function ProgressStrip({ orgId }: { orgId: string }) {
             {/* on a phone the time comes in a second short part, the rest is in the match */}
             {phone && <span className="sm:hidden"> · {phone}</span>}
           </span>
-          <span className="shrink-0 font-bold underline decoration-[1.5px] underline-offset-4 max-[389px]:sr-only">{t("stripOpen")}</span>
-          <ChevronRight aria-hidden className="size-4 shrink-0" />
+          {!courtMark && <span className="shrink-0 font-bold underline decoration-[1.5px] underline-offset-4 max-[389px]:sr-only">{t("stripOpen")}</span>}
+          {!courtMark && <ChevronRight aria-hidden className="size-4 shrink-0" />}
         </Link>
+        {courtMark && (
+          <Link
+            href={`/app/${orgId}/matches/${p.match_id}?tab=video&mark=court`}
+            className="flex min-h-11 shrink-0 items-center gap-1 bg-attn px-2 text-[15px] font-bold text-attn-ink no-underline"
+            data-testid="strip-court"
+          >
+            {t("stripCourt")}
+            <ChevronRight aria-hidden className="size-4 shrink-0" />
+          </Link>
+        )}
         {p.state === "interrupted" && (
           <button type="button" onClick={() => void discard()} className="min-h-11 shrink-0 cursor-pointer border-0 bg-transparent px-1 text-[15px] font-bold text-inherit underline decoration-[1.5px] underline-offset-4" data-testid="strip-discard">
             {t("discard")}

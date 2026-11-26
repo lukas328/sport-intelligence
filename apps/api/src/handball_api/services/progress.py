@@ -29,7 +29,7 @@ import time
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from statistics import median
-from typing import Any
+from typing import Any, Literal
 
 from sqlalchemy import or_, select
 
@@ -47,6 +47,7 @@ from handball_api.services.context import Ctx
 from handball_api.services.matches import DUPLICATE, halves, parts_of
 from handball_api.services.policies import Action, can, visible_team_ids
 from handball_api.services.support import failure_code
+from handball_api.services.video_base import PENDING, VIEW_JOB
 from handball_api.services.video_jobs import job_budget_s
 
 log = get_logger("handball_api.progress")
@@ -56,6 +57,7 @@ STAGES: tuple[ProgressStage, ...] = ("upload", "ingest", "analysis")
 WEIGHTS: dict[str, float] = {"upload": 0.1, "ingest": 0.3, "analysis": 0.6}
 WEIGHTS_NO_ANALYSIS: dict[str, float] = {"upload": 0.25, "ingest": 0.75}
 
+CourtStep = Literal["mark", "taken"]
 UPLOAD_IDLE_S = 5 * 60  # no new part for this long: the upload stopped
 ABANDON_UPLOAD_S = 6 * 3600  # no new part for this long: the upload is given up
 ABANDONED_ERROR = "upload abandoned"
@@ -325,7 +327,15 @@ def file_progress(
             analysis.status == JobStatus.QUEUED
         )
         return _job_file(
-            base, "analysis", analysis, jobs, now, hist_analysis, overall, waiting=waiting
+            base,
+            "analysis",
+            analysis,
+            jobs,
+            now,
+            hist_analysis,
+            overall,
+            waiting=waiting,
+            court=court_step(asset, analysis),
         )
 
     # ---- fertig ------------------------------------------------------------------------------
@@ -342,6 +352,24 @@ def file_progress(
     )
 
 
+def court_step(asset: VideoAsset, job: ProcessingJob | None) -> CourtStep | None:
+    """While the analysis runs (#141): 'taken' when the coach marked the court for this run,
+    'mark' once its hall image is stored and its court stage has not begun (a court marked now
+    is taken by this run), else None. After the court stage a marked court means a second run,
+    so the progress does not ask for it any more."""
+    if job is None or job.status not in (JobStatus.QUEUED, JobStatus.RUNNING):
+        return None
+    meta = asset.analysis or {}
+    pending = meta.get(PENDING)
+    if isinstance(pending, dict) and pending.get("job_id") == str(job.id):
+        return "taken" if pending.get("while_running") else None
+    stage = (job.stages or {}).get("calibration")
+    started = isinstance(stage, dict) and stage.get("status") not in (None, "pending")
+    if meta.get(VIEW_JOB) == str(job.id) and meta.get("panorama") and not started:
+        return "mark"
+    return None
+
+
 def _job_file(
     base: dict[str, Any],
     kind: str,
@@ -352,6 +380,7 @@ def _job_file(
     overall: Any,
     after: float | None = None,
     waiting: bool = False,
+    court: CourtStep | None = None,
 ) -> FileProgressOut:
     """A file in a worker step (ingest or analysis): queued, waiting, running, stalled, failed."""
     stage: ProgressStage = "ingest" if kind == "ingest" else "analysis"
@@ -394,6 +423,7 @@ def _job_file(
             eta_basis=basis,
             idle_s=idle if idle is not None and idle >= QUEUE_LONG_S and not waiting else None,
             restarted=restarted,
+            court=court,
         )
     stages = job.stages or {}
     step = next(
@@ -422,6 +452,7 @@ def _job_file(
         idle_s=int(silent) if stalled else None,
         restart_at=restart_at,
         restarted=restarted,
+        court=court,
     )
 
 

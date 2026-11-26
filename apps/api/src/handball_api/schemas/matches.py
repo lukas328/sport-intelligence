@@ -251,6 +251,12 @@ class FileProgressOut(ApiModel):
         default=False, description="this step was restarted once already after it went silent"
     )
     error: str | None = Field(default=None, description="failed: a stable failure code")
+    court: Literal["mark", "taken"] | None = Field(
+        default=None,
+        description="analysis running: 'mark' once its hall image is there and before its court "
+        "stage (the court marked now is taken by this run, no second run); 'taken' when the "
+        "coach marked it for this run already",
+    )
     retry: bool = Field(
         default=True,
         description="failed: whether starting the step again can help (not after a timeout on "
