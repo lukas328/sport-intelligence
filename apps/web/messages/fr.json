@@ -557,7 +557,13 @@
     "newOwnMatch": "Créer un match de ton équipe",
     "kitFieldOf": "{team}, joueurs de champ",
     "kitKeeperOf": "{team}, gardien",
-    "scoreFinalHint": "Le score final du match entier, pas les buts de la vidéo."
+    "scoreFinalHint": "Le score final du match entier, pas les buts de la vidéo.",
+    "kitPeopleHint": "Sous chaque couleur : les personnes que l'analyse voit dans cette couleur. Touche une personne pour la lire.",
+    "kitNobody": "Personne reconnu dans cette couleur.",
+    "kitPlay": "Lire {who} dans cette couleur",
+    "kitPlaying": "En cours : {who}",
+    "kitClosePlayer": "Fermer le lecteur",
+    "kitPerson": "Personne {n}"
   },
   "upload": {
     "title": "Téléverser la vidéo",
@@ -626,7 +632,14 @@
     "ownKit": "Quel maillot portez-vous dans ce match ?",
     "ownKitSaved": "Enregistré.",
     "otherGame": "« {name} » porte un nom très différent de « {first} », déjà dans ce match. Le fichier appartient-il vraiment ici ? Un autre match se crée comme match à part. L'envoi continue.",
-    "moreAll": "Plus : comment filmer, fichiers et taille, autre caméra, lien"
+    "moreAll": "Plus : comment filmer, fichiers et taille, autre caméra, lien",
+    "kitFromVideo": "Prendre la couleur dans la vidéo",
+    "kitFromVideoStill": "Image de la vidéo : touche un maillot pour prendre sa couleur",
+    "kitFromVideoMoment": "Moment de la vidéo",
+    "kitFromVideoHint": "Avance jusqu'à un moment où l'on voit bien votre maillot, puis touche-le.",
+    "kitPicked": "Reprendre cette couleur pour :",
+    "kitPickOwn": "Notre maillot",
+    "kitPickGk": "Notre gardien"
   },
   "processing": {
     "title": "Traitement",
@@ -1287,7 +1300,10 @@
     "showAll": "Afficher les {n}",
     "onScreen": "{s} s à l'image",
     "hintNumber": "Donne un numéro aux personnes des deux équipes. Les attributions restent après une nouvelle analyse.",
-    "numberPlaceholder": "N°"
+    "numberPlaceholder": "N°",
+    "playHere": "Lire la personne ici",
+    "closePlayer": "Fermer le lecteur",
+    "playing": "En cours : {who}"
   },
   "camera": {
     "label": "Caméra",

@@ -139,3 +139,12 @@ export function courtToPicture(g: Geometry, views: ViewChunks | null, t: number)
   if (!v) return null;
   return { homography: compose(v, g.homography), size: g.view.frameSize };
 }
+
+/** Court -> picture at time t once, for a single still (no cache): null where it is not known. */
+export async function courtToPictureAt(g: Geometry, chunkMs: number, t: number): Promise<{ homography: Homography; size: [number, number] } | null> {
+  if (!g.view) return { homography: g.homography, size: g.imageSize };
+  const r = await fetch(`${g.view.baseUrl}/${Math.floor(t / chunkMs)}`, { credentials: "same-origin" }).catch(() => null);
+  if (!r?.ok) return null;
+  const v = viewAt(new Float32Array(await r.arrayBuffer()), t);
+  return v ? { homography: compose(v, g.homography), size: g.view.frameSize } : null;
+}

@@ -1,0 +1,79 @@
+{
+  "_doc": "Every model file the product may load, with its licence (docs/plans/lizenzen-modelle.md, ADR 003). status: shippable = commercial use allowed; test-only = must not reach a paying club. Checked by packages/jobkit/tests/test_model_licences.py.",
+  "models": {
+    "/models/yolox_s.onnx": {
+      "role": "person detector YOLOX-S (COCO)",
+      "licence": "Apache-2.0 (code and weights), COCO annotations CC BY 4.0",
+      "status": "shippable",
+      "source": "ml/models/yolox-coco.md"
+    },
+    "/models/ch_PP-OCRv4_det_infer.onnx": {
+      "role": "shirt numbers and hall clock, text detection (PP-OCRv4)",
+      "licence": "Apache-2.0 (PaddleOCR, RapidOCR wheel)",
+      "status": "shippable",
+      "source": "ml/models/ppocr-v4.md"
+    },
+    "/models/ch_PP-OCRv4_rec_infer.onnx": {
+      "role": "shirt numbers and hall clock, text recognition (PP-OCRv4)",
+      "licence": "Apache-2.0 (PaddleOCR, RapidOCR wheel)",
+      "status": "shippable",
+      "source": "ml/models/ppocr-v4.md"
+    },
+    "/models/reid.onnx": {
+      "role": "re-identification default path (no file in any image)",
+      "licence": "FastReID MSMT17: non-commercial research only",
+      "status": "test-only",
+      "source": "ml/models/reid-fastreid.md, OPEN_QUESTIONS 4b"
+    },
+    "/models/roles.onnx": {
+      "role": "role classifier default path (no file in any image)",
+      "licence": "ResNet18 ImageNet start, Roboflow data: unclear",
+      "status": "test-only",
+      "source": "ml/roles/README.md, OPEN_QUESTIONS 4c"
+    },
+    "models/reid/reid-6f3e1b1d0534.onnx": {
+      "role": "re-identification FastReID BoT-R50",
+      "licence": "MSMT17: non-commercial research only",
+      "status": "test-only",
+      "source": "ml/models/reid-fastreid.md, OPEN_QUESTIONS 4b"
+    },
+    "models/ball/ball_hrp1_fp16-37153d8dfc83.onnx": {
+      "role": "ball net hrp1 (fp16)",
+      "licence": "trained with DeepSport (CC BY-NC-SA 4.0); ImageNet start weights unchecked",
+      "status": "test-only",
+      "source": "ml/ball/LINEAGE.md, OPEN_QUESTIONS 4a"
+    },
+    "models/ball/ball_hrp1_fp16_u8-8efd55d05333.onnx": {
+      "role": "ball net hrp1 (uint8)",
+      "licence": "trained with DeepSport (CC BY-NC-SA 4.0); ImageNet start weights unchecked",
+      "status": "test-only",
+      "source": "ml/ball/LINEAGE.md, OPEN_QUESTIONS 4a"
+    },
+    "models/ball/ball_hr1_fp16-a99d126f7fc6.onnx": {
+      "role": "ball net hr1 (fp16)",
+      "licence": "trained with DeepSport (CC BY-NC-SA 4.0)",
+      "status": "test-only",
+      "source": "ml/ball/LINEAGE.md, OPEN_QUESTIONS 4a"
+    },
+    "models/ball/ball_hrnods_fp16-11eba692acd9.onnx": {
+      "role": "ball net hr-nods (fp16), hr1 without DeepSport",
+      "licence": "own code, trained from scratch; data without non-commercial sets (TeamTrack MIT, OWLv2 Apache-2.0 pseudo-labels, own labels); TeamTrack ball labels not legally checked (OPEN_QUESTIONS 4c)",
+      "status": "shippable",
+      "source": "ml/ball/LINEAGE.md (hr-nods), PR #146"
+    },
+    "models/ball/ball_hrnods_fp16_u8-1bbacb7bca86.onnx": {
+      "role": "ball net hr-nods (uint8), hr1 without DeepSport",
+      "licence": "own code, trained from scratch; data without non-commercial sets (TeamTrack MIT, OWLv2 Apache-2.0 pseudo-labels, own labels); TeamTrack ball labels not legally checked (OPEN_QUESTIONS 4c)",
+      "status": "shippable",
+      "source": "ml/ball/LINEAGE.md (hr-nods), PR #146"
+    }
+  },
+  "test_only_in_infra": {
+    "_doc": "Known places where infra sets a test-only model today, each with its open question. Removing the use requires removing the entry here (a stale entry fails the check); a new test-only use fails until it is listed."
+  },
+  "forbidden_packages": {
+    "ultralytics": "AGPL-3.0 (ADR 003: research only, never a dependency of apps/*)",
+    "boxmot": "AGPL-3.0 (docs/plans/ball-stand-der-technik.md 6.2)",
+    "yolov5": "AGPL-3.0 (Ultralytics)"
+  }
+}

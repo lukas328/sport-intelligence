@@ -251,7 +251,8 @@ export function Workspace({
 
   const paneId = `ws-${match.id}`;
   const spot = useSpotlight(analysis.data ?? null);
-  const spotGeometry = geometryOf(analysis.data, `/v1/orgs/${orgId}/videos/${video.id}`);
+  // memoised: the stills of the people list redraw only when the court changes
+  const spotGeometry = useMemo(() => geometryOf(analysis.data, `/v1/orgs/${orgId}/videos/${video.id}`), [analysis.data, orgId, video.id]);
   const [spotOpen, setSpotOpen] = useState(false);
   const spotShown = spotOpen || spot.track != null || spot.picking;
   const mainVideo = useCallback(() => raw.current?.video() ?? null, []);
@@ -643,7 +644,7 @@ export function Workspace({
           </div>
         )}
         {shown === "players" && staff && a?.status === "ready" && (
-          <IdentityPanel orgId={orgId} match={match} videoId={video.id} tracks={a.tracks} onSeek={seekPaused} at={gameAt} />
+          <IdentityPanel orgId={orgId} match={match} videoId={video.id} tracks={a.tracks} at={gameAt} geometry={spotGeometry} chunkMs={a.chunk_ms ?? null} />
         )}
         {shown === "players" && staff && a?.status !== "ready" && <p className="text-sm text-muted">{t("workflow.players_waiting")}</p>}
         {shown === "events" && staff && (

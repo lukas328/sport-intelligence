@@ -1011,6 +1011,8 @@ function QualityReport({ video }: { video: Video }) {
 
 function MatchAdmin({ orgId, match, sides, onSaved }: { orgId: string; match: Match; sides: MatchSides; onSaved: () => void }) {
   const t = useTranslations();
+  // the analysed video: the colours show who the analysis sees in them
+  const main = timelineVideo(match.videos);
   const qc = useQueryClient();
   const [custom, setCustom] = useState(match.format === "custom");
   const saved: Kits = {
@@ -1081,7 +1083,7 @@ function MatchAdmin({ orgId, match, sides, onSaved }: { orgId: string; match: Ma
       </div>
       <fieldset>
         <legend className="mb-2 text-sm font-semibold">{t("matches.kits")}</legend>
-        <KitFields kits={kits} onChange={setKits} names={sides.neutral ? { own: sides.own, opp: sides.opp } : null} />
+        <KitFields kits={kits} onChange={setKits} names={sides.neutral ? { own: sides.own, opp: sides.opp } : null} pictures={main ? { orgId, videoId: main.id } : null} />
       </fieldset>
       <Button type="submit">{t("common.save")}</Button>
     </form>
