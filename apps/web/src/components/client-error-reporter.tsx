@@ -1,6 +1,8 @@
 "use client";
 
-import { deviceOf, domHint, isHydration, marksOf, reportOf, takeSlot } from "@/lib/client-errors";
+import { deviceOf, domHint, isHydration, marksOf, reportOf, takeSlot, type ClientErrorReport } from "@/lib/client-errors";
+
+const HINT_AFTER_MS = 2500;
 
 /**
  * Sends errors of the app to our API (lib/client-errors): no cookies, nothing personal. Set up
@@ -26,15 +28,7 @@ function install(): void {
   const watch = typeof MutationObserver === "function" ? new MutationObserver(absorb) : null;
   watch?.observe(document.documentElement, { childList: true, subtree: true });
   window.setTimeout(() => watch?.disconnect(), 15_000);
-  const send = (error: unknown, kind: "error" | "rejection") => {
-    const device = deviceOf(window.innerWidth, window.matchMedia?.("(pointer: coarse)").matches ?? false);
-    const report = reportOf(error, kind, window.location.pathname, device, process.env.NEXT_PUBLIC_BUILD ?? null);
-    if (!report) return;
-    // a hydration mismatch: React has put its client render in place by now
-    if (isHydration(report)) {
-      if (watch) absorb(watch.takeRecords()); // the swap has happened, its records may still wait
-      report.dom = domHint(removed, added);
-    }
+  const post = (report: ClientErrorReport) => {
     let storage: Storage | null = null;
     try {
       storage = window.sessionStorage;
@@ -49,6 +43,24 @@ function install(): void {
       credentials: "omit",
       keepalive: true,
     }).catch(() => undefined);
+  };
+  // a hydration mismatch is told a little later: React first shows the route's loading frame
+  // and renders its part again, then the parts that are the same cancel out and the one that
+  // differs stays (first reports: the whole match page out, the skeleton in); sent at once
+  // when the page is left before
+  const later: ClientErrorReport[] = [];
+  const flush = () => {
+    if (watch) absorb(watch.takeRecords());
+    for (const r of later.splice(0)) post({ ...r, dom: domHint(removed, added) });
+  };
+  window.addEventListener("pagehide", flush);
+  const send = (error: unknown, kind: "error" | "rejection") => {
+    const device = deviceOf(window.innerWidth, window.matchMedia?.("(pointer: coarse)").matches ?? false);
+    const report = reportOf(error, kind, window.location.pathname, device, process.env.NEXT_PUBLIC_BUILD ?? null);
+    if (!report) return;
+    if (!isHydration(report)) return post(report);
+    later.push(report);
+    window.setTimeout(flush, HINT_AFTER_MS);
   };
   window.addEventListener("error", (e) => send(e.error ?? e.message, "error"));
   window.addEventListener("unhandledrejection", (e) => send(e.reason, "rejection"));
