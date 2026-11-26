@@ -281,15 +281,24 @@ def stitch(
     colours: dict[int, F64] | None = None,
     colour_gate: float = 35.0,
     rounds: int = 3,
+    excluded: set[int] | None = None,
+    piece_teams: dict[int, tuple[str | None, str | None]] | None = None,
+    long_gap_s: float = 4.0,
 ) -> tuple[list[TrackPoint], dict[int, int]]:
     """Offline tracklet stitching: link a chain that ends to one that starts shortly after, if a
     player could have run the distance in between (and the shirt colour agrees). Each round is a
     global optimum via Hungarian matching of chain ends to chain starts. The analysis runs after
-    the match, so using the future is allowed here."""
+    the match, so using the future is allowed here. `excluded` tracks (people standing outside the
+    court: bench, staff, spectators, `pipeline.edge_pieces`) are never linked. With `piece_teams` (track
+    -> team of the shirt at its start and at its end: "home", "away", "none" for neither team, None
+    unknown; `pipeline.piece_ends`), a link over a gap of more than `long_gap_s` needs the end of
+    the one piece and the start of the next on the same team."""
     by: dict[int, list[TrackPoint]] = {}
     for p in points:
         by.setdefault(p.track_id, []).append(p)
     chains: list[list[int]] = [[i] for i in sorted(by)]
+    out_of_play = excluded or set()
+    long_gap = round(long_gap_s * fps)
     max_gap = round(max_gap_s * fps)
 
     def colour(chain: list[int]) -> F64 | None:
@@ -306,11 +315,16 @@ def stitch(
         cost = np.full((n, n), 1e6)
         for a in range(n):
             for b in range(n):
-                if a == b:
+                if a == b or chains[a][-1] in out_of_play or chains[b][0] in out_of_play:
                     continue
                 gap = starts[b].frame - ends[a].frame
                 if gap <= 0 or gap > max_gap:
                     continue
+                if gap > long_gap and piece_teams is not None:
+                    team_end = piece_teams.get(chains[a][-1], (None, None))[1]
+                    team_start = piece_teams.get(chains[b][0], (None, None))[0]
+                    if team_end not in ("home", "away") or team_end != team_start:
+                        continue
                 d = float(np.hypot(starts[b].x - ends[a].x, starts[b].y - ends[a].y))
                 if d > 1.0 + speed_mps * gap / fps:
                     continue
