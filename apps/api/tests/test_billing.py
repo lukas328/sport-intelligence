@@ -393,3 +393,65 @@ async def test_club_abroad_pays_in_eur(
         assert _plan_for(s, ["price_team"]) == Plan.TEAM
     finally:
         s.stripe_price_team_eur = None
+
+
+async def test_the_country_sets_the_currency_and_a_subscription_keeps_it(
+    make_api: Callable[[], Api], owner_conn: asyncpg.Connection
+) -> None:
+    """The club settings change the country (Europa step 2): it moves the billing currency, but
+    not under a running subscription, which keeps the currency it was taken in."""
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    url = f"/v1/orgs/{org}"
+    r = await api.patch(url, json={"country": "DE"})
+    assert r.status_code == 200, r.text
+    assert r.json()["country"] == "DE"
+    assert (await api.get(f"{url}/billing")).json()["currency"] == "EUR"
+    await api.patch(url, json={"country": "CH"})
+    await owner_conn.execute(
+        "UPDATE organizations SET stripe_subscription_id = 'sub_1', subscription_status = 'active' "
+        "WHERE id = $1",
+        uuid.UUID(org),
+    )
+    locked = await api.patch(url, json={"country": "FR"})
+    assert locked.status_code == 409 and locked.json()["type"].endswith("currency-locked")
+    # the same currency stays possible (Liechtenstein pays in CHF too), and a cancelled one frees it
+    assert (await api.patch(url, json={"country": "LI"})).status_code == 200
+    await owner_conn.execute(
+        "UPDATE organizations SET subscription_status = 'canceled' WHERE id = $1", uuid.UUID(org)
+    )
+    assert (await api.patch(url, json={"country": "FR"})).json()["country"] == "FR"
+
+
+async def test_no_checkout_in_a_currency_without_prices(
+    make_api: Callable[[], Api], billing_on: FakeGateway, owner_conn: asyncpg.Connection
+) -> None:
+    """The EUR prices are an open decision (Q-BILL-EU5): a club abroad without them is told so
+    and never sent to a checkout in another currency; nothing here sets a price."""
+    from pydantic import SecretStr
+
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    s = api.app.state.settings
+    old = (s.stripe_secret_key, s.stripe_price_team_eur, s.stripe_price_club_eur)
+    s.stripe_secret_key = SecretStr("sk_test_x")
+    s.stripe_price_team_eur = s.stripe_price_club_eur = None
+    try:
+        ch = (await api.get(f"/v1/orgs/{org}/billing")).json()
+        assert (ch["checkout_available"], ch["checkout_unavailable"]) == (True, None)
+        await owner_conn.execute(
+            "UPDATE organizations SET country = 'DE' WHERE id = $1", uuid.UUID(org)
+        )
+        de = (await api.get(f"/v1/orgs/{org}/billing")).json()
+        assert (de["currency"], de["checkout_available"], de["checkout_unavailable"]) == (
+            "EUR",
+            False,
+            "currency",
+        )
+        r = await api.post(f"/v1/orgs/{org}/billing/checkout", json={"plan": "team"})
+        assert r.status_code == 503 and "EUR" in r.json()["detail"]
+        assert not [c for c in billing_on.calls if c[0] == "checkout"]
+    finally:
+        s.stripe_secret_key, s.stripe_price_team_eur, s.stripe_price_club_eur = old

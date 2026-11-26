@@ -181,7 +181,9 @@ class NumberReader:
         best: Reading | None = None
         for text, conf in self.recognise([self._crop(big, b) for b in boxes]):
             text = text.strip()
-            digits = text.isascii() and text.isdigit()
+            # shirt numbers run from 1 to 99: "0" or a leading zero is a misread (a folded "21"
+            # or "27" read as "0" on the dev labels, ml/gold/data/numbers_dev_v1.json)
+            digits = text.isascii() and text.isdigit() and not text.startswith("0")
             if 1 <= len(text) <= 2 and digits and (best is None or conf > best.confidence):
                 best = Reading(int(text), conf)
         return best

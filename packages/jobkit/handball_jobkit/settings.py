@@ -50,14 +50,20 @@ class JobSettings(BaseSettings):
     # each step runs only when its model files are installed
     number_det_model: str = "/models/ch_PP-OCRv4_det_infer.onnx"
     number_rec_model: str = "/models/ch_PP-OCRv4_rec_infer.onnx"
-    number_every: int = 6  # frames; 3 on the GPU image (every detection frame)
+    # frames: every detection frame, as on the GPU image. Until 2026-11-26 every 6th on the CPU;
+    # since re-identification is off (half the CPU time) the room goes to the numbers: dev
+    # clips Horgen H1/H2: 4 -> 7 and 8 -> 15 tracks with a number
+    # (docs/plans/produkt-analyse-integration.md, Rückennummern-Ausbeute)
+    number_every: int = 3
     # read a torso only when it is worth it (numbers.NumberGate): new boxes, unsettled numbers,
     # back-off after failed reads; off = every eligible torso on every number frame (as before)
     number_gate: bool = True
     # at most this many CPU seconds of shirt numbers per video second (0: no limit): keeps a whole
     # game under the job timeout on a CPU worker; on the 4-core profile reading every torso cost
     # 1.4 to 2.8 s per video second, the gate about 0.5
-    number_budget: float = 0.75
+    # 1.5 since 2026-11-26 (0.75 before): reading every detection frame took 1.63 s per video
+    # second on 4 shared cores (Horgen H1), 0.75 skipped 703 of the number frames
+    number_budget: float = 1.5
     # local file or artifacts-bucket key (fetched like the ball nets, with its checksum); test
     # phase: the FastReID weights are trained on MSMT17 (non-commercial), see ml/models
     reid_model: str = "/models/reid.onnx"
