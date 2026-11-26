@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { matchSides } from "@/lib/match-sides";
 import { storedUploadIds } from "@/lib/upload";
 import type { LocalUpload } from "@/lib/upload-store";
-import { durationParts, finishAt, headlineKey, isActive, type FileProgress, type MatchProgress } from "@/lib/progress";
+import { durationParts, finishAt, headlineKey, isActive, rangeParts, type FileProgress, type MatchProgress } from "@/lib/progress";
 
 /** The unfinished uploads this browser started, read after mount and when the uploads change. */
 export function useStoredUploads(local: LocalUpload[]): Set<string> {
@@ -36,12 +36,32 @@ export function useProgressWords() {
     return sameDay ? t("finishAt", { time: clock(at) }) : t("finishAtDay", { day: format.dateTime(at, { weekday: "long" }), time: clock(at) });
   };
 
+  /** «noch etwa 2½ bis 3½ Std.»: a range measured from the pace of the running step (one time
+   * when both ends say the same) */
+  const leftRange = (range: readonly number[]) => {
+    const [low = 0, high = 0] = range;
+    const parts = rangeParts(low, high);
+    if (!parts) return left((low + high) / 2);
+    return t(parts.unit === "min" ? "leftRangeMin" : "leftRangeHours", { low: parts.low, high: parts.high });
+  };
+
+  /** «fertig etwa zwischen 18:10 und 19:00» (a day named when it is not today) */
+  const finishRange = (range: readonly number[], now = Date.now()) => {
+    const [low = 0, high = 0] = range;
+    const a = finishAt(low, now);
+    const b = finishAt(high, now);
+    const today = new Date(now).toDateString();
+    const label = (d: Date) => (d.toDateString() === today ? clock(d) : `${format.dateTime(d, { weekday: "long" })} ${clock(d)}`);
+    if (label(a) === label(b)) return finish(low, now);
+    return t("finishBetween", { from: label(a), to: label(b) });
+  };
+
   /** The time sentence of a match: the finish when known, else the time left in the step. */
   const when = (p: MatchProgress, now = Date.now()): string | null => {
     if (!isActive(p)) return null;
-    if (p.eta_s != null) return p.stage === "upload" ? left(p.eta_s) : finish(p.eta_s, now);
+    if (p.eta_s != null) return p.stage === "upload" ? left(p.eta_s) : p.eta_range_s ? finishRange(p.eta_range_s, now) : finish(p.eta_s, now);
     const f = p.files.find((x) => x.stage === p.stage && x.eta_s != null);
-    return f?.eta_s != null ? `${t(`step_${f.stage}`)}: ${left(f.eta_s)}` : null;
+    return f?.eta_s != null ? `${t(`step_${f.stage}`)}: ${f.eta_range_s ? leftRange(f.eta_range_s) : left(f.eta_s)}` : null;
   };
 
   const headline = (p: MatchProgress) => t(headlineKey(p) as "headAnalysis");
@@ -65,5 +85,5 @@ export function useProgressWords() {
 
   const percent = (v: number) => t("percent", { n: Math.floor(v * 100) });
 
-  return { t, left, finish, when, headline, matchName, fileName, percent, clock };
+  return { t, left, leftRange, finish, finishRange, when, headline, matchName, fileName, percent, clock };
 }

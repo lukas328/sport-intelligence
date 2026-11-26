@@ -12,6 +12,7 @@ import Link from "next/link";
 import { useEscape } from "@/lib/use-escape";
 import { ArrowLeftRight, Check, ChevronDown, ChartNoAxesColumn, Clapperboard, FileDown, Hand, Info, MoreHorizontal, Pencil, Plus, Radio, Shield, Trash2 } from "lucide-react";
 import { MatchSidesProvider, useMatchRoster } from "@/components/domain/match-sides";
+import { numberGaps } from "@/lib/roster-numbers";
 import { RosterNumberHint } from "@/components/roster/number-hint";
 import { homeFirst, matchSides, type MatchSides } from "@/lib/match-sides";
 import { courseOf } from "@/lib/score-flow";
@@ -663,7 +664,21 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
           aside={
             // what is known and what comes, once the video is in (during the upload the way on counts)
             isActive(progress) && progress.stage !== "upload" ? (
-              <KnownFacts orgId={orgId} match={match} ownName={own} oppName={oppName(match)} stats={stats.data ?? null} names={names} hasReport={graphics.data?.has_report ?? false} checks={checks} staff={staff} onAttach={toAttachments} />
+              <KnownFacts
+                orgId={orgId}
+                match={match}
+                ownName={own}
+                oppName={oppName(match)}
+                stats={stats.data ?? null}
+                names={names}
+                hasReport={graphics.data?.has_report ?? false}
+                checks={checks}
+                staff={staff}
+                onAttach={toAttachments}
+                // read in, the analysis runs: the video plays already
+                onWatch={progress.stage === "analysis" ? () => setView("video") : undefined}
+                withoutNumber={numberGaps(rosterRows.filter((r) => r.active)).without.length}
+              />
             ) : undefined
           }
         />
