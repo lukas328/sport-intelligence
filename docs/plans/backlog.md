@@ -28,6 +28,7 @@ fertig ist, streicht es und trägt das Ergebnis im passenden Plan ein.
 2. **Wurfort-Schätzung messen.** *25.11. (Analyse-Sitzung): kein Staging-Zugang aus der Cloud; dazu werden abgelehnte Schätzungen nicht gespeichert, die Trefferquote ist so nicht rechenbar. Vorschlag `attributes.estimated_zone` (`produkt-analyse-integration.md`, «Wurfzeit auf Dev, Fehlalarme und Pausen» Punkt 5).* Seit A22 werden bestätigte Schätzungen als
    `attributes.confirmed_estimate` gespeichert; daraus die Trefferquote der Schätzung auswerten
    (Staging-Daten), dann entscheiden, wann der Wurfort ganz automatisch sein darf.
+   *26.11. (Analyse-Sitzung): Abwurfpunkt aus dem Ballpfad auf zwei Horgen-Clips gegen die heutige Regel gemessen (21 Würfe, LLM-Labels): nicht klar besser, nicht ins Produkt. Billigerer Hebel: angegriffenes Tor in `fill_one` aus `goal_by_sides` statt aus den Positionen (4 von 21 Würfen mit rund 30 m Fehler). `produkt-audit-2026-11.md` Punkt 7.*
 3. **Spieltag neu denken (A21).** Seit Runde 4 aus der App genommen; Konzept mit Lukas: was der
    Trainer am Spielfeldrand wirklich erfasst.
 4. **Go-live-Punkte mit Code** (`GO_LIVE.md`): ~~HLS-Segmente direkt aus R2~~ erledigt 20.11.

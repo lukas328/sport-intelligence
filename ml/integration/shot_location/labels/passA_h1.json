@@ -1,0 +1,17 @@
+[
+{"release_t": 32.76, "floor_px": [350, 485], "team": "yellow", "kind": "open", "outcome": "save", "status": "unsure", "precision_s": 0.08, "note": "Yellow back shoots through red defenders at left goal; GK appears to keep ball, outcome not clearly seen."},
+{"release_t": 41.56, "floor_px": [420, 440], "team": "red", "kind": "open", "outcome": "unclear", "status": "unsure", "precision_s": 0.12, "note": "Red jump shot from the back court at right goal; GK dives low, save or miss, ball not tracked."},
+{"release_t": 53.60, "floor_px": [285, 430], "team": "yellow", "kind": "open", "outcome": "save", "status": "unsure", "precision_s": 0.08, "note": "Yellow wing jump shot at left goal; GK blocks with leg."},
+{"release_t": 90.64, "floor_px": [1080, 515], "team": "red", "kind": "open", "outcome": "save", "status": "unsure", "precision_s": 0.08, "note": "Red #23 jumps in from pivot area at right goal; GK saves, ball rebounds out."},
+{"release_t": 99.44, "floor_px": [635, 280], "team": "yellow", "kind": "fast_break", "outcome": "goal", "status": "unsure", "precision_s": 0.08, "note": "Yellow player alone against GK at left goal, jump shot past GK into the net."},
+{"release_t": 182.72, "floor_px": [620, 365], "team": "yellow", "kind": "open", "outcome": "goal", "status": "ok", "precision_s": 0.06, "note": "Yellow long-haired player bounce shot at left goal with one red defender near; ball in net at 183.08."},
+{"release_t": 214.20, "floor_px": [405, 268], "team": "red", "kind": "open", "outcome": "unclear", "status": "unsure", "precision_s": 0.15, "note": "Red back throws through yellow defence at right goal from far camera view; GK reacts, then retrieves ball."},
+{"release_t": null, "floor_px": null, "team": "yellow", "kind": "fast_break", "outcome": "goal", "status": "not_visible", "precision_s": null, "note": "Yellow counter attack after camera pan; shooter out of frame left, ball in left net about 222.2."},
+{"release_t": 301.60, "floor_px": [445, 395], "team": "red", "kind": "open", "outcome": "unclear", "status": "unsure", "precision_s": 0.12, "note": "Red player shoots from crowd of defenders; shot moment and outcome hard to see."},
+{"release_t": 327.80, "floor_px": [720, 370], "team": "yellow", "kind": "open", "outcome": "unclear", "status": "unsure", "precision_s": 0.08, "note": "Yellow #14 back-court shot at left goal; outcome not visible, play restarts toward right."},
+{"release_t": 391.48, "floor_px": [790, 365], "team": "red", "kind": "open", "outcome": "save", "status": "ok", "precision_s": 0.04, "note": "Red jump shot at right goal; GK dives and deflects ball over/behind goal."},
+{"release_t": 448.76, "floor_px": [612, 400], "team": "yellow", "kind": "open", "outcome": "miss", "status": "unsure", "precision_s": 0.08, "note": "Yellow #14 shot at left goal among defenders; ball goes past left post."},
+{"release_t": 459.32, "floor_px": [935, 410], "team": "red", "kind": "open", "outcome": "goal", "status": "unsure", "precision_s": 0.06, "note": "Red wing jump shot from right side at right goal; ball in the net at 459.56."},
+{"release_t": 515.86, "floor_px": [595, 425], "team": "yellow", "kind": "open", "outcome": "miss", "status": "unsure", "precision_s": 0.08, "note": "Yellow #5 jump shot at left goal while held by defender; ball goes high over goal."},
+{"release_t": 540.22, "floor_px": [385, 335], "team": "yellow", "kind": "open", "outcome": "goal", "status": "unsure", "precision_s": 0.08, "note": "Yellow player dives in from right of the area at left goal and scores past diving GK."}
+]

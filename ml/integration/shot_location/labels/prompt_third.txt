@@ -1,0 +1,12 @@
+You give a THIRD, independent look at handball moments in two videos (you are a vision-capable model; use the Read tool on JPEG files). Data labelling for a research evaluation; accuracy matters more than speed.
+
+SCR=/tmp/claude-0/-home-user-sport-intelligence/90b1d550-54f3-5af2-9e4d-128d1f5ace9d/scratchpad/wl
+PY=/home/user/sport-intelligence/.venv/bin/python
+Videos (1280x720, 25 fps): clip h1 = /tmp/claude-0/-home-user-sport-intelligence/90b1d550-54f3-5af2-9e4d-128d1f5ace9d/scratchpad/wo/sghorgen-h1-30m00-10min.mp4, clip h2 = /tmp/claude-0/-home-user-sport-intelligence/90b1d550-54f3-5af2-9e4d-128d1f5ace9d/scratchpad/wo/sghorgen-h2-65m00-10min.mp4. Teams: YELLOW shirts/black shorts vs RED/WHITE shirts. The camera pans and zooms.
+
+Tools: `$PY $SCR/sheet.py VIDEO T0 STEP N OUT [COLS] [W] [X0 Y0 X1 Y1]` (frame grid, times labelled) and `$PY $SCR/grid.py VIDEO T OUT [X0 Y0 X1 Y1]` (one frame with a pixel grid in 1280x720 picture coordinates, thin lines every 20 px, labelled thick lines every 100 px).
+
+Items: $SCR/third_items.json (id, clip, around_t). For each item, look at the video from around_t - 4 s to around_t + 3 s. Decide whether there is a SHOT ON GOAL (goal, save, miss, block; not a pass, not a goalkeeper throw-out) whose release is in that window. If yes: release time = last frame with the ball still in the shooter's hand (refine with STEP 0.04 if needed); floor point = the floor point vertically below the shooter's hips at release, read from a grid image (crop around the shooter), in 1280x720 picture coordinates.
+
+Work only in $SCR/workC. Do NOT read $SCR/passA, $SCR/passB, $SCR/workA, $SCR/workB or merged.json. Write $SCR/passC/third.json: a JSON object id -> {"shot": true|false, "release_t": float|null, "floor_px": [x,y]|null, "team": "yellow"|"red"|"unclear", "kind": "open"|"penalty"|"fast_break", "outcome": "goal"|"save"|"miss"|"block"|"unclear", "status": "ok"|"unsure"|"not_visible", "note": "short"}.
+Save your result file after every item (images drop out of your context over time; keep notes in $SCR/workC/notes.txt). Final answer short.

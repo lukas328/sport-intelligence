@@ -1,0 +1,216 @@
+{
+ "h1": [
+  {
+   "court": [
+    6.689324279056514,
+    4.279298880232686
+   ],
+   "kind": "open",
+   "release_t": 32.74,
+   "source": "A+B",
+   "team": "yellow"
+  },
+  {
+   "court": [
+    32.40237585298963,
+    9.862926127459529
+   ],
+   "kind": "open",
+   "release_t": 41.62,
+   "source": "A+B",
+   "team": "red"
+  },
+  {
+   "court": [
+    1.5839179976362527,
+    5.0478024619611
+   ],
+   "kind": "open",
+   "release_t": 53.63,
+   "source": "A+B",
+   "team": "yellow"
+  },
+  {
+   "court": [
+    35.86481393538439,
+    5.679335223555309
+   ],
+   "kind": "open",
+   "release_t": 90.58,
+   "source": "A+B",
+   "team": "red"
+  },
+  {
+   "court": [
+    34.77026213566221,
+    18.07176654478845
+   ],
+   "kind": "open",
+   "release_t": 107.24,
+   "source": "B+C",
+   "team": "red"
+  },
+  {
+   "court": [
+    8.227863539263947,
+    9.548887687777238
+   ],
+   "kind": "disputed_kind:open/penalty",
+   "release_t": 182.64,
+   "source": "A+C",
+   "team": "yellow"
+  },
+  {
+   "court": [
+    35.41527101559393,
+    17.516940730387454
+   ],
+   "kind": "open",
+   "release_t": 214.12,
+   "source": "A+B",
+   "team": "red"
+  },
+  {
+   "court": [
+    8.921517980837141,
+    9.527105032212827
+   ],
+   "kind": "open",
+   "release_t": 327.81,
+   "source": "A+B",
+   "team": "yellow"
+  },
+  {
+   "court": [
+    35.848964857953405,
+    10.037917440378678
+   ],
+   "kind": "open",
+   "release_t": 391.48,
+   "source": "A+B",
+   "team": "red"
+  },
+  {
+   "court": [
+    8.859150493597294,
+    8.082155076522433
+   ],
+   "kind": "open",
+   "release_t": 448.62,
+   "source": "A+C",
+   "team": "yellow"
+  },
+  {
+   "court": [
+    38.18963800756792,
+    5.58129777904939
+   ],
+   "kind": "open",
+   "release_t": 459.32,
+   "source": "A+B",
+   "team": "red"
+  },
+  {
+   "court": [
+    9.849089479433665,
+    7.899218744800696
+   ],
+   "kind": "open",
+   "release_t": 515.87,
+   "source": "A+B",
+   "team": "yellow"
+  },
+  {
+   "court": [
+    4.534298546713768,
+    9.675644409668495
+   ],
+   "kind": "open",
+   "release_t": 540.13,
+   "source": "A+B",
+   "team": "yellow"
+  },
+  {
+   "court": [
+    39.34168862866545,
+    17.409589729020595
+   ],
+   "kind": "open",
+   "release_t": 576.14,
+   "source": "B+C",
+   "team": "red"
+  }
+ ],
+ "h2": [
+  {
+   "court": [
+    37.147865549306694,
+    15.583671845140941
+   ],
+   "kind": "open",
+   "release_t": 4.94,
+   "source": "A+B",
+   "team": "yellow"
+  },
+  {
+   "court": [
+    5.693347445604394,
+    11.270217296417602
+   ],
+   "kind": "open",
+   "release_t": 41.03,
+   "source": "A+B",
+   "team": "red"
+  },
+  {
+   "court": [
+    35.425721489022095,
+    6.615638338590693
+   ],
+   "kind": "open",
+   "release_t": 86.48,
+   "source": "A+B",
+   "team": "yellow"
+  },
+  {
+   "court": [
+    6.1282868043345875,
+    12.686794449358807
+   ],
+   "kind": "disputed_kind:fast_break/open",
+   "release_t": 92.75,
+   "source": "A+B",
+   "team": "red"
+  },
+  {
+   "court": [
+    36.553908160741045,
+    4.623811096072692
+   ],
+   "kind": "open",
+   "release_t": 127.37,
+   "source": "A+B",
+   "team": "yellow"
+  },
+  {
+   "court": [
+    8.457557807515375,
+    11.202290749440198
+   ],
+   "kind": "open",
+   "release_t": 187.07,
+   "source": "A+C",
+   "team": "red"
+  },
+  {
+   "court": [
+    36.451941620494466,
+    4.507434421498626
+   ],
+   "kind": "open",
+   "release_t": 519.41,
+   "source": "A+B",
+   "team": "yellow"
+  }
+ ]
+}
