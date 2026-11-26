@@ -1,0 +1,72 @@
+{
+ "balls": 85,
+ "no_ball_frames": 30,
+ "hr1": {
+  "top1_12px": 0.729,
+  "top1_12px_ci": [
+   0.64,
+   0.821
+  ],
+  "top1_25px": 0.729,
+  "at_0.3": {
+   "found": 0.729,
+   "found_ci": [
+    0.64,
+    0.821
+   ],
+   "false_alarm_frames": 0.233,
+   "false_alarm_ci": [
+    0.037,
+    0.419
+   ]
+  },
+  "at_0.5": {
+   "found": 0.624,
+   "found_ci": [
+    0.512,
+    0.745
+   ],
+   "false_alarm_frames": 0.1,
+   "false_alarm_ci": [
+    0.0,
+    0.2
+   ]
+  }
+ },
+ "hrnods": {
+  "top1_12px": 0.682,
+  "top1_12px_ci": [
+   0.571,
+   0.798
+  ],
+  "top1_25px": 0.682,
+  "at_0.3": {
+   "found": 0.635,
+   "found_ci": [
+    0.531,
+    0.747
+   ],
+   "false_alarm_frames": 0.2,
+   "false_alarm_ci": [
+    0.071,
+    0.375
+   ]
+  },
+  "at_0.5": {
+   "found": 0.588,
+   "found_ci": [
+    0.484,
+    0.704
+   ],
+   "false_alarm_frames": 0.1,
+   "false_alarm_ci": [
+    0.0,
+    0.24
+   ]
+  }
+ },
+ "hr1 vs hrnods": {
+  "only_first": 9,
+  "only_second": 5
+ }
+}

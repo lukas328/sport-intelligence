@@ -21,8 +21,9 @@ from .test_official_report import CH_URL, recorded  # noqa: F401  (fixture)
 pytestmark = pytest.mark.usefixtures("clean_db")
 
 
-def _cand(goal_ms: int, rate: int, before_ms: int = 8000) -> dict[str, Any]:
-    t_ms = goal_ms + 1500
+def _cand(goal_ms: int, rate: int, before_ms: int = 8000, offset_ms: int = 1500) -> dict[str, Any]:
+    # goal candidates: goal_ms = peak - 1.5 s; shot candidates: the release, peak - 5 s
+    t_ms = goal_ms + offset_ms
     return {
         "t_ms": t_ms,
         "goal_ms": goal_ms,
@@ -39,11 +40,11 @@ SHOTS = {
     "default_rate": 4,
     "rates": [2, 4, 6],
     "candidates": [
-        _cand(67_500, 2),  # report: save of the opponent's #5 at 2:06 = 66 s of video
-        _cand(90_000, 4),  # report: miss of our #7 at 2:24 = 84 s
-        _cand(214_500, 2),  # report: save, our #33, 4:34 = 214 s
-        _cand(400_000, 4),  # nothing in the report
-        _cand(500_000, 6),  # a shot tagged by hand at 501 s
+        _cand(64_000, 2, offset_ms=5000),  # report: save of the opponent's #5 at 2:06 = 66 s
+        _cand(86_500, 4, offset_ms=5000),  # report: miss of our #7 at 2:24 = 84 s
+        _cand(211_000, 2, offset_ms=5000),  # report: save, our #33, 4:34 = 214 s
+        _cand(396_500, 4, offset_ms=5000),  # nothing in the report
+        _cand(496_500, 6, offset_ms=5000),  # a shot tagged by hand at 501 s
     ],
 }
 FOUND = {
@@ -162,16 +163,16 @@ async def test_shot_candidates_with_the_official_report(
     events = (await api.get(f"{base}/events")).json()
     assert len(events) == len(events_before)
     pinned = next(e for e in events if e["id"] == entry["id"])
-    assert pinned["t_ms"] == 67_500 and pinned["number"] == 5
+    assert pinned["t_ms"] == 64_000 and pinned["number"] == 5
     assert pinned["attributes"]["video"]["source"] == "goal_candidate"
     assert pinned["attributes"]["video"]["candidate_id"] == save["id"]
     data = (await api.get(shot_url)).json()
     row = next(o for o in data["official"]["shots"] if o["event_id"] == entry["id"])
-    assert (row["status"], row["candidate_id"], row["t_ms"]) == ("confirmed", save["id"], 67_500)
+    assert (row["status"], row["candidate_id"], row["t_ms"]) == ("confirmed", save["id"], 64_000)
     # a re-import of the report keeps the confirmed video time; the candidate follows the entry
     assert (await api.post(f"{base}/official-report", json={"url": CH_URL})).status_code == 200
     again = next(e for e in (await api.get(f"{base}/events")).json() if e["clock_s"] == 126)
-    assert again["t_ms"] == 67_500 and again["attributes"]["video"]["candidate_id"] == save["id"]
+    assert again["t_ms"] == 64_000 and again["attributes"]["video"]["candidate_id"] == save["id"]
     rows = (await api.get(shot_url)).json()["candidates"]
     assert rows[0]["event_id"] == again["id"] and rows[0]["status"] == "confirmed"
     entry = {**entry, "id": again["id"]}
@@ -205,7 +206,7 @@ async def test_shot_candidates_with_the_official_report(
         "goal_candidate",
         "blocked",
         9,
-        400_000,
+        396_500,
     )
     assert mine["attributes"]["candidate_kind"] == "shot"
     # the coach says the miss was the opponent's: a new event, the report entry stays a suggestion
@@ -234,7 +235,10 @@ async def test_shot_candidates_with_the_official_report(
     rerun = {
         **FOUND,
         "candidates": [],
-        "shots": {**SHOTS, "candidates": [_cand(215_000, 2), _cand(300_000, 2)]},
+        "shots": {
+            **SHOTS,
+            "candidates": [_cand(211_500, 2, offset_ms=5000), _cand(296_500, 2, offset_ms=5000)],
+        },
     }
     await owner_conn.execute(
         "UPDATE processing_jobs SET status = 'running' WHERE id = $1::uuid", job
@@ -242,10 +246,10 @@ async def test_shot_candidates_with_the_official_report(
     await _finish(api, job, {**result, "goal_candidates": rerun})
     rows = (await api.get(shot_url)).json()["candidates"]
     assert [(r["goal_ms"], r["status"]) for r in rows] == [
-        (90_000, "confirmed"),
-        (214_500, "rejected"),
-        (300_000, "open"),
-        (400_000, "confirmed"),
+        (86_500, "confirmed"),
+        (211_000, "rejected"),
+        (296_500, "open"),
+        (396_500, "confirmed"),
     ]
     assert (await api.get(url)).json()["candidates"] == []
 
@@ -277,7 +281,7 @@ async def test_shots_confirmed_before_the_report_are_taken_over(
     assert own not in {e["id"] for e in events}
     saves = [e for e in events if e["outcome"] == "save" and e["clock_s"] == 126]
     assert len(saves) == 1 and saves[0]["source"] == "official_report"
-    assert saves[0]["t_ms"] == 67_500 and saves[0]["number"] == 5
+    assert saves[0]["t_ms"] == 64_000 and saves[0]["number"] == 5
     assert saves[0]["attributes"]["video"]["candidate_id"] == first["id"]
     # the other entries get their time from the overlay clock (1:00 at 0 s of the clip)
     miss = next(e for e in events if e["outcome"] == "miss" and e["clock_s"] == 144)
