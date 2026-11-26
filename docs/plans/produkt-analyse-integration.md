@@ -1219,7 +1219,7 @@ gleiche Abstände) auf den 11 Dev-Pausensegmenten und je dem Segment davor und d
 
 | Segmente | mit Ablesungen | mit laufender Uhr | Anteil Lauf (Mittel) |
 |---|---|---|---|
-| in einer Halbzeit (22) | 22 | 22 | 0.79 (Wahrheit 0.81, Median-Abweichung 0.01) |
+| in einer Halbzeit (22) | 22 | 22 | 0.79 (Wahrheit 0.81, Median-Abweichung 0.014) |
 | Halbzeitpause (11) | 4 | **1** | 0.09 |
 
 - **In den Halbzeiten:** Die Uhr wird überall gelesen, der Lauf-Anteil trifft die Wahrheit aus dem
