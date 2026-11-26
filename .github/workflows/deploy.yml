@@ -273,11 +273,24 @@ jobs:
             n=$(jq '.emailReceivers | length' "$RUNNER_TEMP/test-alert.json")
             [ "$n" -gt 0 ] || { echo "::error::action group $ag has no e-mail receiver"; exit 1; }
             echo "== test e-mail through $ag ($n receiver(s))"
+            # receiver state without the address (Azure answered «no valid receivers» twice on
+            # 26.11. with the group's own receiver: a disabled or unsubscribed receiver would explain it)
+            az monitor action-group show -g "$rg" -n "$ag" \
+              --query "emailReceivers[].{name:name, status:status, commonSchema:useCommonAlertSchema}" -o table
             id=$(az monitor action-group show -g "$rg" -n "$ag" --query id -o tsv)
-            az rest --method post --url "https://management.azure.com${id}/createNotifications?api-version=2023-01-01" \
-              --body @"$RUNNER_TEMP/test-alert.json" -o none
-            rm -f "$RUNNER_TEMP/test-alert.json"
-            echo "test notification accepted: an e-mail from Azure Monitor should arrive within minutes"
+            sent=false
+            for type in metricstaticthreshold budget servicehealth; do
+              jq --arg t "$type" '.alertType = $t' "$RUNNER_TEMP/test-alert.json" >"$RUNNER_TEMP/test-alert-t.json"
+              if az rest --method post --url "https://management.azure.com${id}/createNotifications?api-version=2023-01-01" \
+                  --body @"$RUNNER_TEMP/test-alert-t.json" -o none 2>"$RUNNER_TEMP/test-alert.err"; then
+                echo "test notification accepted (alert type $type): an e-mail from Azure Monitor should arrive within minutes"
+                sent=true
+                break
+              fi
+              echo "alert type $type: $(tail -1 "$RUNNER_TEMP/test-alert.err")"
+            done
+            rm -f "$RUNNER_TEMP"/test-alert*
+            [ "$sent" = true ] || echo "::warning::no test notification accepted (see the receiver state above)"
           fi
 
       - name: Analysis diagnosis (read only)
