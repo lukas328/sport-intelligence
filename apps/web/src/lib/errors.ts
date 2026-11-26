@@ -18,6 +18,7 @@ export const KNOWN_ERRORS = [
   "not-found",
   "unsupported-image",
   "logo-too-large",
+  "currency-locked",
   "validation-error",
   "unauthenticated",
   "oauth-state",

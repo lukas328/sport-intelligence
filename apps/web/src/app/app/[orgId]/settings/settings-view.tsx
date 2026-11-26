@@ -5,7 +5,7 @@
 import type { Schemas } from "@handball/api-client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useFormatter, useTranslations } from "next-intl";
+import { useFormatter, useLocale, useTranslations } from "next-intl";
 import QRCode from "qrcode";
 import { useEffect, useState, type CSSProperties, type FormEvent } from "react";
 import { Strip } from "@/components/anlauf/heads";
@@ -16,7 +16,8 @@ import { TeamPeople } from "@/components/people/team-people";
 import { personRole } from "@/lib/roles";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/card";
-import { Input } from "@/components/ui/field";
+import { Input, Select } from "@/components/ui/field";
+import { COUNTRIES, countryName, currencyOf } from "@/lib/country";
 import { api } from "@/lib/client";
 import { errorKey, type ErrorKey } from "@/lib/errors";
 import { FileField } from "@/components/ui/file-field";
@@ -35,6 +36,8 @@ export function ClubSection({ org }: { org: Org }) {
   const [chosen, setChosen] = useState<string | null>(org.color_chosen ? org.primary_color : null);
   const colour = chosen ?? DEFAULT_CLUB;
   const [second, setSecond] = useState(org.secondary_color);
+  const [country, setCountry] = useState(org.country);
+  const locale = useLocale();
 
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -48,6 +51,7 @@ export function ClubSection({ org }: { org: Org }) {
         name: String(f.get("name")),
         ...(chosen ? { primary_color: chosen } : {}),
         secondary_color: String(f.get("secondary_color")),
+        ...(country !== org.country ? { country } : {}),
       },
     });
     const logo = f.get("logo");
@@ -94,6 +98,14 @@ export function ClubSection({ org }: { org: Org }) {
               <Input label={t("onboarding.secondaryColor")} name="secondary_color" type="color" value={second} onChange={(e) => setSecond(e.target.value)} className="h-11 w-24 p-1" />
             </div>
           </details>
+          {/* the country sets the currency of the billing (CHF in CH and LI, else EUR) */}
+          <Select label={t("settings.country")} name="country" value={country} onChange={(e) => setCountry(e.target.value)} hint={t("settings.countryHint", { currency: currencyOf(country) })} data-testid="club-country">
+            {[...new Set([...COUNTRIES, org.country])].map((c) => (
+              <option key={c} value={c}>
+                {countryName(c, locale)}
+              </option>
+            ))}
+          </Select>
           <FileField label={t("onboarding.logo")} name="logo" accept="image/png,image/jpeg,image/webp" hint={t("onboarding.logoHint")} button={t("file.choose")} empty={t("file.none")} />
           <Button type="submit" loading={busy}>
             {t("common.save")}

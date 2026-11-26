@@ -59,3 +59,17 @@ Schritt 1 ist umgesetzt (Strang E). Für die Schritte 2 und 3 notiert:
 - **Recht:** AGB §11 «Es gilt Schweizer Recht» und Jahreszahlung nur per QR-Rechnung brauchen eine EU-Fassung. Die Datenschutzerklärung soll die Speicherorte nennen (Azure Switzerland North für App, Datenbank, Worker und Mail; Cloudflare R2 mit EU-Gerichtsstand für Videos), dazu Rechtsgrundlagen nach DSGVO und gegebenenfalls eine EU-Vertretung (Art. 27). Prüfung durch eine Fachperson (EU5). Im Impressum fehlen die Firmenangaben.
 - **Preise:** EUR neben CHF auf Website (Texte, «Alle Preise in Schweizer Franken», `priceCurrency`), in den Plänen und in der Abrechnung der App.
 - **Land und Sprache:** Ein von Hand angelegter Verein wird fest mit `country: "CH"` gespeichert (`apps/web/src/app/(einstieg)/einstieg/speichern/save-team.tsx`). Feiertage (`apps/web/src/lib/holidays.ts`) und Datumsformat sind schweizerisch. Dazu `de-DE` mit ß und hreflang für de-DE und fr-FR.
+
+## Stand 26.11.
+
+- **Land des Vereins:** Ein von Hand angelegter Verein (Einstieg und Onboarding) bekommt sein Land
+  aus der Zeitzone des Browsers, sonst aus der Region seiner Sprachen, sonst «CH»
+  (`apps/web/src/lib/country.ts`). Die Vereinseinstellungen zeigen und ändern das Land mit dem Satz,
+  welche Währung daraus folgt. Ein laufendes Abo behält seine Währung: ein Landwechsel in die andere
+  Währung gibt dann 409 `currency-locked`.
+- **Währung:** Abo (Stripe-Preise je Währung), Jahresrechnung (QR-Rechnung in CHF oder EUR, MWST
+  nur auf CHF) und Website (Umschalter CHF/EUR) waren schon umgesetzt.
+- **EUR-Preise bei Stripe:** offener Entscheid von Lukas (Q-BILL-EU5). Solange für die Währung des
+  Vereins kein Preis hinterlegt ist, meldet die Abrechnung `checkout_unavailable: "currency"` und die
+  Seite sagt «Online-Zahlung in EUR ist noch nicht freigeschaltet» statt eines Checkouts; der
+  Checkout selbst gibt 503 und nie eine andere Währung. Preise kommen nur aus den Einstellungen.
