@@ -1008,6 +1008,34 @@ Was bleibt für weniger Fragen: Zeit ohne Spiel (Pausen, Einspielen, Nachspiel).
 Warteschlange `ml/integration/kaggle/observe_queue.py` die übrigen Segmente der Bibliothek, darunter
 die Halbzeiten der 13 Dev-Spiele.
 
+### Tor-Kandidaten Stufe 2 auf Dev (Audit Punkt 3, 2026-11-26)
+
+Frage: Sortiert ein zweiter Klassifikator auf den Signalen um den Kandidaten (Kameraschwenk,
+Bewegung und Streuung der Spieler, 2-s-Mittel von 10 s vor bis 30 s nach dem Peak, dazu der
+heutige Wert) echte Tore besser nach vorn als der Wert allein? Gleiche Daten wie beim Ballpfad
+(49 Dev-Segmente, 13 Spiele, 113 Tore, 568 Kandidaten bis Rate 4), Spiel für Spiel ausgelassen,
+Endtest nicht angeschaut. `ml/integration/goal_stage2_dev.py`, Ergebnis
+`ml/integration/results/goal_stage2_dev.json`.
+
+| | AUC | 1 / min | 1.5 / min | 2 / min |
+|---|---|---|---|---|
+| nur `score` (heute) | 0.81 | 0.56 / 0.45 | 0.71 / 0.42 | 0.85 / 0.34 |
+| logistische Regression | 0.82 | 0.54 / 0.44 | 0.66 / 0.40 | 0.81 / 0.33 |
+| Gradient Boosting (Tiefe 3) | 0.84 | 0.58 / 0.47 | 0.72 / 0.44 | 0.82 / 0.34 |
+
+(Tore gefunden / Präzision.) Unterschied zum Wert bei 2 / min, Bootstrap über Spiele: Präzision
+−3.6 bis +2.0 Punkte, gefunden −8.5 bis +4.2 Punkte. **Kein Gewinn:** die Signale tragen über den
+Wert hinaus nichts, wie schon der Ballpfad. Eine zweite Stufe braucht neue Information:
+- **Prüfen-Antworten als Labels:** gespeichert sind sie (`goal_candidates.status`, `reviewed_at`,
+  bestätigtes Ereignis), ein Export fehlt. Die Nutzung für Training hängt am offenen Entscheid
+  Q-DATA-4 (Vereinsdaten fürs Training, heute: nichts wird genutzt). Bis dahin baue ich keinen
+  Export; mit Entscheid ist er klein (Kandidat, Status, Zeiten, Asset-Schlüssel, nur Vereine mit
+  Einwilligung).
+- **Pfiff im Ton:** nicht messbar, die Forschungs-Segmente sind ohne Tonspur geschnitten (`-an` in
+  `ml/ball/collect_game.py`, `ml/goals/cut_negatives.py`). Neue Sammlungen sollten den Ton als
+  8-kHz-Spur behalten (wie `audio_8k.wav` im Produkt).
+- **Spieluhr-Stopp:** auf Dev gibt es keine Uhr pro Bild, nur den Bereich pro Segment.
+
 ### Wurfzeit auf Dev, Fehlalarme und Pausen (Analyse-Sitzung, 2026-11-25)
 
 Nur Dev-Daten, Endtest nicht angeschaut. Daten: 49 Dev-Segmente aus 13 Spielen (Kernels
