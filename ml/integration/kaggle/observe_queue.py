@@ -16,6 +16,11 @@ them), then every other game of the library. The end-test games are never queued
 may look at other segments of those halls). Result per kernel: /kaggle/working/out/<segment>/
 (motion.npz, observations.npz, observe.json); `kaggle kernels output` fetches it. Needs the code
 dataset `handball-shot-endtest-code` (same code and models as the end test and the dev run).
+
+Known gap (decision 2026-11-26): `CH_Frauen_SPL1_GCAmicitia_LKZug_ca2020_s3` stays under "failed".
+It holds only empty masks, and the code dataset (version of 2026-11-19) predates the fix in
+`observe.save_observations` (801370fa). The dataset is not updated while the queue runs, so all
+segments are observed with one code version; the segment is redone after the queue, if needed.
 """
 
 from __future__ import annotations
