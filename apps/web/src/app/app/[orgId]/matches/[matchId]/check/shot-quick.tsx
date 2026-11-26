@@ -13,7 +13,7 @@ import type { CandidateSide } from "@/lib/goal-candidates";
 import { matchSides, pairing } from "@/lib/match-sides";
 import { useOpponentName } from "@/lib/opponent";
 import { ownName } from "@/lib/own-name";
-import { defaultSide, QUICK_ANSWERS, quickBody, quickQueue, quickWindow, type QuickAnswer, type ShotCandidate } from "@/lib/shot-candidates";
+import { QUICK_ANSWERS, quickBody, quickQueue, quickWindow, startSide, type QuickAnswer, type ShotCandidate } from "@/lib/shot-candidates";
 import { cn } from "@/lib/utils";
 import { useShotCandidates, useShotReview } from "../shot-candidates";
 
@@ -45,6 +45,9 @@ export function ShotQuick({ orgId, match }: { orgId: string; match: Match }) {
   const [at, setAt] = useState(0);
   // the team of the shot that is up: the analysis' (or the report's) guess, changeable
   const [side, setSide] = useState<CandidateSide | null>(null);
+  // without a guess from the analysis, the team chosen last is offered, marked as a suggestion
+  const [lastSide, setLastSide] = useState<CandidateSide | null>(null);
+  const [suggested, setSuggested] = useState(false);
   const player = useRef<PlayerHandle>(null);
   const back = `/app/${orgId}/matches/${match.id}/check`;
   const shot = queue?.[at] ?? null;
@@ -53,7 +56,9 @@ export function ShotQuick({ orgId, match }: { orgId: string; match: Match }) {
   const [sideFor, setSideFor] = useState<string | null>(null);
   if (shot && sideFor !== shot.id) {
     setSideFor(shot.id);
-    setSide(defaultSide(shot));
+    const start = startSide(shot, lastSide);
+    setSide(start.side);
+    setSuggested(start.suggested);
     setError(null);
   }
   const team = (s: CandidateSide | null) => (s === "own" ? sides.own : s === "opponent" ? oppName : null);
@@ -64,6 +69,7 @@ export function ShotQuick({ orgId, match }: { orgId: string; match: Match }) {
       if (!shot || review.isPending) return;
       const body = quickBody(shot, side, a);
       if (!body) return setError("needSide");
+      if (side) setLastSide(side);
       review.mutate({ id: shot.id, body });
       setAt((n) => n + 1);
     },
@@ -147,7 +153,7 @@ export function ShotQuick({ orgId, match }: { orgId: string; match: Match }) {
                   key={s}
                   type="button"
                   aria-pressed={side === s}
-                  onClick={() => (setSide(s), setError(null))}
+                  onClick={() => (setSide(s), setSuggested(false), setError(null))}
                   className={cn("min-h-11 cursor-pointer border-2 border-ink px-3 text-[15px] font-bold", side === s ? "bg-ink text-ground" : "bg-transparent text-ink", error === "needSide" && "border-attn")}
                   data-testid={`shot-quick-side-${s}`}
                 >
@@ -155,6 +161,11 @@ export function ShotQuick({ orgId, match }: { orgId: string; match: Match }) {
                 </button>
               ))}
             </div>
+            {suggested && side && (
+              <p className="m-0 mt-1 text-[15px] text-ink-2" data-testid="shot-quick-suggested">
+                {t("suggestedSide", { team: team(side) ?? "" })}
+              </p>
+            )}
             {error && (
               <p role="alert" className="mt-3 max-w-[54ch] border-l-4 border-loss pl-3 text-[15px] font-semibold" data-testid="shot-quick-error">
                 {error === "needSide" ? t("needSide") : tc("saveFailed")}

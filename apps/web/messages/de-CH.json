@@ -2289,7 +2289,7 @@
   },
   "highlights": {
     "title": "Highlights",
-    "intro": "Nach jeder Analyse entstehen automatisch Highlights fürs Team (16:9 und 9:16) und für einzelne Spieler. Nur Szenen mit genügend Sicherheit; Spieler ohne Einwilligung erscheinen nicht. Keine Musik.",
+    "intro": "Aus bestätigten Toren und Szenen entstehen Highlights fürs Team (16:9 und 9:16) und für einzelne Spieler. Nur Szenen mit genügend Sicherheit; Spieler ohne Einwilligung erscheinen nicht. Keine Musik.",
     "format": "Format",
     "landscape": "Querformat 16:9",
     "portrait": "Hochformat 9:16",
@@ -4695,6 +4695,7 @@
     "none": "Keine Würfe zu prüfen",
     "back": "Zurück zu Prüfen",
     "entry": "{n, plural, one {# Wurf schnell prüfen} other {# Würfe schnell prüfen}}",
-    "entryHint": "Pro Wurf ein kurzer Clip und vier Knöpfe. Die unsichersten zuerst."
+    "entryHint": "Pro Wurf ein kurzer Clip und vier Knöpfe. Die unsichersten zuerst.",
+    "suggestedSide": "Vorschlag: {team} wie beim letzten Wurf. Ein Tipp ändert es."
   }
 }

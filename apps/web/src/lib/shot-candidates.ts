@@ -129,3 +129,10 @@ export function quickWindow(c: { goal_ms: number }): { start_ms: number; end_ms:
 export function quickBody(c: ShotCandidate, side: CandidateSide | null, answer: QuickAnswer): ShotReviewBody | null {
   return answer === "none" ? { status: "rejected" } : shotAnswer(c, side, answer);
 }
+
+/** The team a quick question starts with: the analysis' (or report's) guess; without one the
+ * team chosen last, marked as a suggestion; else none (the coach picks). */
+export function startSide(c: ShotCandidate, last: CandidateSide | null): { side: CandidateSide | null; suggested: boolean } {
+  const guess = defaultSide(c);
+  return guess ? { side: guess, suggested: false } : { side: last, suggested: last != null };
+}
