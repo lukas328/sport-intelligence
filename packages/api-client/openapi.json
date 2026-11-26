@@ -7777,6 +7777,18 @@
       },
       "JobOut": {
         "properties": {
+          "court_points": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Court Points"
+          },
           "error": {
             "anyOf": [
               {
