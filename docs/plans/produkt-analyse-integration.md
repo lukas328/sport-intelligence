@@ -1484,6 +1484,45 @@ Regeln, Dev. Das Segment s3 liess sich mit der eigenen Kamerabewegung nicht auto
   werden. Falsch benannt und Nicht-Feldspieler unverändert. **Kriterium nicht erfüllt, bleibt aus.**
   Nächster Hebel wäre die Teamfarbe am Stückende nur aus Blicken ohne Überdeckung.
 
+**Nachtrag: Endfarbe nur aus freien Blicken (2026-11-26).** Auf dem zweiten Spiel
+(ATVKVBasel–YellowWinterthur2 s1, Nachtrag dazu mit #179) waren 3 von 16 neuen Verknüpfungen klar
+falsch, Ursache schien die Überdeckung am Stückende. Darum: jede Farbprobe merkt sich, ob die
+Personenbox zu mindestens 15 % von einer anderen bedeckt war; die Teamfarbe am Stückanfang und
+-ende kommt nur aus freien Blicken (bis 5 unter den ersten oder letzten 15, mindestens 3, sonst
+kein Team und keine lange Verknüpfung). Gleiche Regeln, beide Spiele, Dev.
+
+| Spiel | richtig | falsch | benannte Zeit | Nicht-Feldsp. benannt | Median | neue Verknüpfungen über 4 s | klar falsch |
+|---|---|---|---|---|---|---|---|
+| Horgen H1/H2 | 12 von 33 | 2 | 29.8 % (heute 23.2) | 9 von 72 (heute 7) | 28.0 s | 63 (vorher 78) | 9 (14 %) |
+| ATV s1 | 2 von 9 | 1 | 17.5 % (heute 16.3) | 1 von 17 (heute 1) | 20.3 s | 12 (vorher 16) | 2 (17 %) |
+
+- Zusammen 11 von 75 klar falsch (etwa 15 %), dazu etwa 20 % unklar. Die Regel nimmt
+  Verknüpfungen weg, aber nicht die falschen: die meisten klaren Fehler verbinden einen Spieler mit
+  einem Schiedsrichter, Betreuer oder einer Person an der Bank in Schwarz oder Grau (Horgen 7 von 9,
+  ATV 1 von 2), nicht zwei Spieler in Überdeckung.
+- **Kriterium nicht erfüllt, `LONG_LINKS` bleibt aus.** Der Code (Branch `claude/end-colour-clean`)
+  wirkt nur mit dem Schalter und wird nicht gemergt. Ein weiterer Hebel müsste Schiedsrichter und
+  Betreuer vor dem Verknüpfen sicher erkennen (Rolle statt Farbabstand), nicht die Überdeckung.
+
+**Nachtrag: Nicht-Spieler über die Rolle (Branch `claude/long-links-roles`, 2026-11-26).** Zusätzlich
+zum Feldrand-Filter werden vor dem langen Verknüpfen Rohstücke als Nicht-Spieler genommen (nicht
+verknüpft, keine Nummer), ohne neues Modell: (1) der Median der Trikotfarbe fällt in den
+«referee»-Cluster von `relabel_by_clusters` (ab 10 Farbblicken), ausser das Stück steht mehrheitlich
+innerhalb 6.5 m eines Tores (Torhüter, vgl. #147); (2) die Mehrheit der Positionen liegt auf
+Bank-Strecken der Bankregel (`bench.bench_frames`: still, jenseits einer Seitenlinie).
+
+- Gefangen werden pro Clip nur etwa 5 Stücke mehr als mit dem Feldrand-Filter (ATV 13 statt 17
+  Rand-Stücke plus 5, Horgen H1 11 plus 5). Die meisten Stücke sind zu kurz für den Cluster
+  (H1: 119 von 210 mit mindestens 10 Blicken), und auf ATV trägt ein Team Schwarz wie die Betreuer.
+- Sichtprüfung: Horgen 9 von 61 klar falsch (dieselben Fehler wie zuvor, die zwei weggefallenen
+  Verknüpfungen waren richtige), ATV unverändert 2 von 12. Zusammen 11 von 73, etwa 15 %. Zahlen
+  sonst wie zuvor (Horgen benannte Zeit 28.6 %, Nicht-Feldspieler benannt 8 von 72).
+- **Kriterium nicht erfüllt, `LONG_LINKS` bleibt aus, Code wird nicht gemergt.** Die Bilder zeigen
+  den Grund: in den falschen Verknüpfungen enthält meist schon ein Rohstück selbst den Wechsel
+  (Spieler, dann Schiedsrichter oder Betreuer daneben). Das ist ein ID-Wechsel des Trackers
+  innerhalb eines Stücks, kein Fehler des Verknüpfens; ein Filter auf ganze Stücke sieht ihn nicht.
+  Weitere Hebel für lange Verknüpfungen erst nach einer Massnahme gegen Wechsel im Tracker.
+
 ### Spielfeldseiten ohne Torhüter (Audit, 2026-11-26)
 
 Ohne Seiten gibt es keine Ereignisse (`missing: goalkeepers`), keinen Team-Vorschlag und kein
