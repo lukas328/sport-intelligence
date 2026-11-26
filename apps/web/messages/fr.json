@@ -345,7 +345,7 @@
     "consentOk": "Complet",
     "consentMissing": "Consentement manquant",
     "empty": "Aucun joueur dans l'équipe.",
-    "emptyHint": "Ajoutez les joueurs un par un ou importez un fichier CSV.",
+    "emptyHint": "Saisis l'effectif rapidement avec numéro et nom par ligne, ajoute des joueurs un par un ou importe un fichier CSV.",
     "addTitle": "Ajouter un joueur",
     "added": "{name} a été ajouté·e.",
     "remove": "Retirer",
@@ -2289,7 +2289,7 @@
   },
   "highlights": {
     "title": "Temps forts",
-    "intro": "Après chaque analyse, des temps forts pour l'équipe (16:9 et 9:16) et pour chaque joueur·euse sont créés automatiquement. Seulement des scènes sûres ; les joueur·euse·s sans consentement n'apparaissent pas. Pas de musique.",
+    "intro": "Les buts et scènes confirmés donnent des temps forts pour l'équipe (16:9 et 9:16) et pour chaque joueur·euse. Seulement des scènes sûres ; les joueur·euse·s sans consentement n'apparaissent pas. Pas de musique.",
     "format": "Format",
     "landscape": "Paysage 16:9",
     "portrait": "Portrait 9:16",
@@ -4695,6 +4695,7 @@
     "none": "Aucun tir à vérifier",
     "back": "Retour à Vérifier",
     "entry": "{n, plural, one {Vérifier # tir rapidement} other {Vérifier # tirs rapidement}}",
-    "entryHint": "Un court clip et quatre boutons par tir. Les moins sûrs d'abord."
+    "entryHint": "Un court clip et quatre boutons par tir. Les moins sûrs d'abord.",
+    "suggestedSide": "Suggestion : {team}, comme au dernier tir. Touche pour changer."
   }
 }

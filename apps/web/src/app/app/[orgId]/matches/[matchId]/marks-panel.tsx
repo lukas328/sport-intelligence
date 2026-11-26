@@ -60,7 +60,7 @@ export function MarksPanel({ orgId, matchId, onPlay }: { orgId: string; matchId:
           </div>
         ))}
         {(d?.sessions.length ?? 0) > 0 && (
-          <button type="button" className="font-medium text-accent underline decoration-[1.5px] underline-offset-4" onClick={() => resync.mutate()}>
+          <button type="button" className="hit cursor-pointer font-medium text-accent underline decoration-[1.5px] underline-offset-4" onClick={() => resync.mutate()}>
             {t("resync")}
           </button>
         )}

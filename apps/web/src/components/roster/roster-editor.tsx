@@ -461,7 +461,7 @@ function CsvImport({
     <div className="space-y-4">
       <h3 className="font-semibold">{t("roster.csvTitle")}</h3>
       <p className="text-sm text-muted">{t("roster.csvHint")}</p>
-      <a href={templateHref} download="kader-vorlage.csv" className="inline-block text-sm font-medium text-accent underline decoration-[1.5px] underline-offset-4">
+      <a href={templateHref} download="kader-vorlage.csv" className="hit inline-block text-sm font-medium text-accent underline decoration-[1.5px] underline-offset-4">
         {t("roster.csvTemplate")}
       </a>
       <div className="space-y-1">

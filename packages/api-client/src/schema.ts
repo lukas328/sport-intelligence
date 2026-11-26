@@ -265,6 +265,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/client-errors": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Report Client Error
+         * @description An error the web app hit in a browser (nothing personal, see the module text).
+         */
+        post: operations["report_client_error_v1_client_errors_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/consent/{token}": {
         parameters: {
             query?: never;
@@ -6276,6 +6296,34 @@ export interface components {
             max: number;
             /** Median */
             median: number;
+        };
+        /** ClientErrorIn */
+        ClientErrorIn: {
+            /** Build */
+            build?: string | null;
+            /**
+             * Code
+             * @description React's error number
+             */
+            code?: number | null;
+            /**
+             * Device
+             * @enum {string}
+             */
+            device: "phone" | "tablet" | "desktop";
+            /** Dom */
+            dom?: string | null;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "react" | "error" | "rejection";
+            /** Message */
+            message: string;
+            /** Route */
+            route: string;
+            /** Stack */
+            stack?: string | null;
         };
         /** Clip */
         Clip: {
@@ -13105,6 +13153,37 @@ export interface operations {
                 content: {
                     "text/calendar": unknown;
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    report_client_error_v1_client_errors_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ClientErrorIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {

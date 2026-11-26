@@ -38,6 +38,14 @@ grep 'analysis_done' "$OUT/workers-24h.log" || echo "(none in 24 hours)"
 echo "== warnings and errors"
 grep -Ei '\[(warning|error|critical) *\]|"level": ?"(warning|error|critical)"|Traceback|Killed|OOM' "$OUT/workers-24h.log" | cut -c1-600 || echo "(none)"
 
+echo "== client errors from browsers, last 24 hours (routers/client_errors: nothing personal, ids masked)"
+az monitor log-analytics query -w "$ws" -o json --analytics-query "ContainerAppConsoleLogs_CL
+  | where TimeGenerated > ago(24h) | where ContainerAppName_s contains 'api' | where Log_s has 'client_error'
+  | project TimeGenerated, Log_s | order by TimeGenerated asc" >"$OUT/client-errors-24h.json" || true
+jq -r '.[] | "\(.TimeGenerated) \(.Log_s)"' "$OUT/client-errors-24h.json" 2>/dev/null | cut -c1-600 >"$OUT/client-errors-24h.log" || true
+echo "lines: $(wc -l <"$OUT/client-errors-24h.log" 2>/dev/null || echo 0)"
+head -40 "$OUT/client-errors-24h.log" 2>/dev/null || true
+
 echo "== API requests on upload and video endpoints, last 24 hours (time, method, path with ids masked, status; no addresses)"
 az monitor log-analytics query -w "$ws" -o json --analytics-query "ContainerAppConsoleLogs_CL
   | where TimeGenerated > ago(24h) | where ContainerAppName_s contains 'api'

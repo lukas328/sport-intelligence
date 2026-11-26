@@ -345,7 +345,7 @@
     "consentOk": "Complete",
     "consentMissing": "Consent missing",
     "empty": "No players in the team yet.",
-    "emptyHint": "Add players one by one or import a CSV file.",
+    "emptyHint": "Add the squad quickly with number and name per line, add players one by one or import a CSV file.",
     "addTitle": "Add player",
     "added": "{name} was added.",
     "remove": "Remove",
@@ -2289,7 +2289,7 @@
   },
   "highlights": {
     "title": "Highlights",
-    "intro": "After every analysis, highlights for the team (16:9 and 9:16) and for single players are created automatically. Only confident scenes; players without consent do not appear. No music.",
+    "intro": "Confirmed goals and scenes become highlights for the team (16:9 and 9:16) and for single players. Only confident scenes; players without consent do not appear. No music.",
     "format": "Format",
     "landscape": "Landscape 16:9",
     "portrait": "Portrait 9:16",
@@ -4695,6 +4695,7 @@
     "none": "No shots to check",
     "back": "Back to Check",
     "entry": "{n, plural, one {Check # shot quickly} other {Check # shots quickly}}",
-    "entryHint": "One short clip and four buttons per shot. The least sure first."
+    "entryHint": "One short clip and four buttons per shot. The least sure first.",
+    "suggestedSide": "Suggested: {team}, as on the last shot. Tap to change."
   }
 }
