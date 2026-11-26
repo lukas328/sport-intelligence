@@ -21,6 +21,23 @@ class ReportError(RuntimeError):
     """A terminal job update did not reach the API."""
 
 
+def _answer(r: httpx.Response) -> dict[str, Any] | None:
+    try:
+        data = r.json()
+    except ValueError:
+        return None
+    return data if isinstance(data, dict) else None
+
+
+def clicked_points(answer: dict[str, Any] | None) -> dict[str, Any] | None:
+    """Court points the coach marked on the hall image while this job ran, from the API's answer
+    to a stage report: `{"points", "space", "frame_ms"}`, or None."""
+    court = (answer or {}).get("court_points")
+    if not isinstance(court, dict) or not court.get("points"):
+        return None
+    return court
+
+
 class Reporter:
     def __init__(
         self,
@@ -49,21 +66,24 @@ class Reporter:
         cur = self.weights.get(self._current or "", 0.0) * self._fraction
         return round(min(1.0, (done + cur) / sum(self.weights.values())), 4)
 
-    def _send(self, body: dict[str, Any], force: bool = False, terminal: bool = False) -> None:
+    def _send(
+        self, body: dict[str, Any], force: bool = False, terminal: bool = False
+    ) -> dict[str, Any] | None:
         """POST the update, three attempts on network errors and 5xx answers. Progress updates
         give up quietly (the next one follows); a terminal update (succeeded / failed) raises
-        ReportError, so RQ marks the job failed instead of the API waiting for it forever."""
+        ReportError, so RQ marks the job failed instead of the API waiting for it forever. Returns
+        the API's answer (the job as the API sees it), None when it was not sent or not readable."""
         with self._lock:
             now = time.monotonic()
             if not (force or terminal) and now - self._last < 2:
-                return
+                return None
             self._last = now
         error = ""
         for attempt in range(ATTEMPTS):
             try:
                 r = self.client.post(self.url, json=body, headers=self.headers)
                 if r.status_code < 500:
-                    return
+                    return _answer(r)
                 error = f"HTTP {r.status_code}"
             except httpx.HTTPError as exc:
                 error = str(exc) or type(exc).__name__
@@ -72,6 +92,7 @@ class Reporter:
                 time.sleep(1 + attempt * 2)
         if terminal:
             raise ReportError(f"could not report {body.get('status')} to the API: {error}")
+        return None
 
     def _start_heartbeat(self) -> None:
         if not self._heartbeat_s or self._beat is not None or self._stop.is_set():
@@ -93,7 +114,9 @@ class Reporter:
         """No more heartbeats: the job ended (succeed and fail call it)."""
         self._stop.set()
 
-    def stage(self, name: str) -> None:
+    def stage(self, name: str) -> dict[str, Any] | None:
+        """Start stage `name`; returns the API's answer (e.g. court points the coach marked while
+        the job ran, `clicked_points`)."""
         if self._current:
             self.stages[self._current] = {
                 **self.stages[self._current],
@@ -103,12 +126,25 @@ class Reporter:
         self._current, self._fraction = name, 0.0
         self.stages[name] = {"status": "running", "started": time.time()}
         self._start_heartbeat()
-        self._send(
+        return self._send(
             {
                 "status": "running",
                 "progress": self.progress(),
                 "stage": name,
                 "stages": self.stages,
+            },
+            force=True,
+        )
+
+    def share(self, view: dict[str, Any]) -> dict[str, Any] | None:
+        """Tell the API what the coach can already use while the job runs (the hall image:
+        `{"camera", "panorama": {"width", "height"}}`)."""
+        return self._send(
+            {
+                "status": "running",
+                "progress": self.progress(),
+                "stage": self._current,
+                "view": view,
             },
             force=True,
         )

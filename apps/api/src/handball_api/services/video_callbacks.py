@@ -26,6 +26,7 @@ from handball_api.services.video_analysis import (
     _apply_analysis_result,
     start_analysis,
     start_waiting,
+    store_view,
 )
 from handball_api.services.video_base import PENDING
 from handball_api.services.video_jobs import (
@@ -108,7 +109,8 @@ async def _ready_note(ctx: Ctx, match: Match) -> tuple[str, dict[str, Any]]:
 
 async def apply_job_update(ctx: Ctx, job_id: uuid.UUID, data: JobUpdate) -> ProcessingJob:
     async with system_access(ctx.db, reason="worker job callback"):
-        job = await ctx.db.get(ProcessingJob, job_id)
+        # locked: court points marked while it runs are handed over against its court stage
+        job = await ctx.db.get(ProcessingJob, job_id, with_for_update=True)
     if job is None:
         raise ProblemError(404, "not-found", "Job not found")
     await set_tenant(ctx.db, job.organization_id)
@@ -149,6 +151,13 @@ async def apply_job_update(ctx: Ctx, job_id: uuid.UUID, data: JobUpdate) -> Proc
     if data.status == JobStatus.FAILED:
         # one line per failed job: the alert «job failures» (infra/terraform/azure) counts it
         log.warning("job_failed", job=str(job.id), kind=job.kind, reason=failure_code(data.error))
+    if (
+        asset is not None
+        and data.view is not None
+        and job.kind == "analysis"
+        and data.status == JobStatus.RUNNING
+    ):
+        store_view(asset, job, data.view)
     if asset is not None and match is not None:
         if data.status == JobStatus.FAILED:
             await ON_FAILED.get(job.kind, _file_failed)(ctx, job, asset, match, data.error)
@@ -246,9 +255,26 @@ async def _analysis_succeeded(
 ) -> None:
     # the run after a court the coach corrected in Prüfen: Prüfen waits for it and asks
     # anew, no second mail and no notice (third real-video test G4)
-    pending = (asset.analysis or {}).get(PENDING)
-    corrected = isinstance(pending, dict) and pending.get("job_id") == str(job.id)
+    raw = (asset.analysis or {}).get(PENDING)
+    pending: dict[str, Any] = raw if isinstance(raw, dict) else {}
+    mine = pending.get("job_id") == str(job.id)
+    cal = r.get("calibration")
+    clicked = isinstance(cal, dict) and cal.get("source") == "user_correction"
+    # points marked while this run went on: it is still the first analysis (the coach hears
+    # about it); a run that did not take them (an older worker, the classical path, points that
+    # came as its court stage began) is followed by a run with them on its stored observations
+    while_running = mine and bool(pending.get("while_running"))
+    corrected = mine and not while_running
     on_timeline = await _apply_analysis_result(ctx, asset, job, r)
+    if while_running and not clicked:
+        await start_analysis(
+            ctx,
+            asset,
+            match,
+            pending["points"],
+            str(pending.get("space") or "panorama"),
+            int(pending.get("frame_ms") or 0),
+        )
     if not corrected:
         kind, extra = await _ready_note(ctx, match)
         await _tell_staff(ctx, match, kind, extra)

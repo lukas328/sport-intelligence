@@ -8142,6 +8142,10 @@ export interface components {
         };
         /** JobOut */
         JobOut: {
+            /** Court Points */
+            court_points?: {
+                [key: string]: unknown;
+            } | null;
             /** Error */
             error: string | null;
             /** Finished At */

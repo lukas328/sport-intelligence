@@ -4,7 +4,7 @@ the court (calibration) and what the analysis shows."""
 from __future__ import annotations
 
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 
 from sqlalchemy import delete, select
@@ -43,6 +43,7 @@ from handball_api.services.video_base import (
     LINE_CLICKS,
     PENDING,
     UNDETERMINABLE,
+    VIEW_JOB,
     WAITING,
     get_asset,
 )
@@ -663,7 +664,69 @@ async def calibrate_manually(
         target_id=asset.id,
         data={"points": len(points), "space": space},
     )
+    running = await ctx.db.scalar(
+        select(ProcessingJob)
+        .where(
+            ProcessingJob.video_asset_id == asset.id,
+            ProcessingJob.kind == "analysis",
+            ProcessingJob.status.in_((JobStatus.QUEUED, JobStatus.RUNNING)),
+        )
+        .order_by(ProcessingJob.created_at.desc())
+        .limit(1)
+        .with_for_update()
+    )
+    if running is not None and not court_stage_started(running):
+        # marked while the analysis runs, before its court stage: that run takes the points
+        # (the worker asks at its court stage), no second run
+        asset.analysis = {
+            **(asset.analysis or {}),
+            PENDING: {
+                "job_id": str(running.id),
+                "points": points,
+                "space": space,
+                "frame_ms": frame_ms,
+                "while_running": True,
+            },
+        }
+        asset.analysis.pop(UNDETERMINABLE, None)
+        return running
+    if running is not None:
+        # too late for the running job (its court is set): a new run on its stored observations
+        # replaces it; its own result would come later and overwrite the coach's court
+        running.status = JobStatus.CANCELLED
+        running.finished_at = datetime.now(UTC)
+        running.error = "superseded by the court the coach marked"
     return await start_analysis(ctx, asset, match, points, space, frame_ms)
+
+
+def court_stage_started(job: ProcessingJob) -> bool:
+    stage = (job.stages or {}).get("calibration")
+    return isinstance(stage, dict) and stage.get("status") not in (None, "pending")
+
+
+def court_points_for(asset: VideoAsset | None, job: ProcessingJob) -> dict[str, Any] | None:
+    """The answer to an analysis worker's report: court points the coach marked for this job
+    while it ran (`calibrate_manually`), or None."""
+    pending = (asset.analysis or {}).get(PENDING) if asset is not None else None
+    if job.kind != "analysis" or not isinstance(pending, dict):
+        return None
+    if pending.get("job_id") != str(job.id) or not pending.get("while_running"):
+        return None
+    return {k: pending[k] for k in ("points", "space", "frame_ms")}
+
+
+def store_view(asset: VideoAsset, job: ProcessingJob, view: dict[str, Any]) -> None:
+    """The hall image of a running analysis is stored (worker report): the coach can mark the
+    court on it before the analysis is done."""
+    pano = view.get("panorama")
+    if not isinstance(pano, dict) or not pano.get("width") or not pano.get("height"):
+        return
+    meta = dict(asset.analysis or {})
+    meta["panorama"] = {"width": int(pano["width"]), "height": int(pano["height"])}
+    if view.get("camera") in ("moving", "fixed"):
+        meta["camera"] = view["camera"]
+    meta[VIEW_JOB] = str(job.id)
+    asset.analysis = meta
 
 
 async def retry_analysis(ctx: Ctx, asset_id: uuid.UUID) -> ProcessingJob:

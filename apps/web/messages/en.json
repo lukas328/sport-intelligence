@@ -930,6 +930,7 @@
   "analysis": {
     "title": "Positions",
     "running": "Analysis is running. Positions appear here afterwards.",
+    "runningMark": "The analysis is running. The hall image is ready: mark the court now and the analysis finishes with it.",
     "failed": "The analysis failed: {error}",
     "none": "No analysis yet.",
     "heuristic": "estimated",

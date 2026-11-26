@@ -60,6 +60,14 @@ export function AnalysisPanel({
   }, [ready]);
   if (!analysis || analysis.status === "none") return null;
   const canMark = canCalibrate && analysis.status === "ready" && analysis.panorama != null;
+  // the hall image comes early in the run: the court is marked while the analysis goes on and
+  // that run takes it, no second run afterwards
+  const markEarly =
+    canCalibrate &&
+    analysis.status === "running" &&
+    analysis.panorama != null &&
+    analysis.calibration_state !== "updating" &&
+    analysis.calibration_state !== "confirmed";
   const unconfirmed = courtUnconfirmed(analysis);
   const courtState = analysis.calibration_state;
   const info = (analysis.calibration_info ?? {}) as { reason?: string; method?: string };
@@ -87,7 +95,17 @@ export function AnalysisPanel({
     // while the court waits for its check the answer bar is fixed on phones: room for it at the end
     <section className={cn("space-y-3", hallCheck && "max-lg:pb-24")} data-testid="analysis-panel">
       <h2 className="sr-only">{t("title")}</h2>
-      {analysis.status === "running" && <p className="text-sm">{t("running")}</p>}
+      {analysis.status === "running" &&
+        (markEarly ? (
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2" data-testid="mark-early">
+            <p className="min-w-0 flex-[1_1_16rem] text-sm">{t("runningMark")}</p>
+            <Button onClick={() => setMarking("suggest")} data-testid="mark-court">
+              {t("markCourt")}
+            </Button>
+          </div>
+        ) : (
+          <p className="text-sm">{t(analysis.calibration_state === "updating" ? "courtUpdating" : "running")}</p>
+        ))}
       {analysis.status === "failed" && (
         <Alert>
           <span className="block font-medium">{t(`failure_${analysis.error_code ?? "generic"}` as "failure_generic")}</span>

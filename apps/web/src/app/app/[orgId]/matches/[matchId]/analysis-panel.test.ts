@@ -103,3 +103,33 @@ describe("court step: where the court came from", () => {
     expect(html).toContain('data-testid="mark-court"');
   });
 });
+
+describe("court step while the analysis runs", () => {
+  const running = (extra: Record<string, unknown>) =>
+    analysis({ status: "running", calibration: null, calibration_info: null, calibration_origin: null, calibration_state: "missing", ...extra });
+
+  it("offers to mark the court on the early hall image", () => {
+    const html = render(running({}));
+    expect(html).toContain('data-testid="mark-early"');
+    expect(text(html)).toContain("Das Hallenbild ist schon da: markiere jetzt das Spielfeld");
+    expect(html.match(/data-testid="mark-court"/g)).toHaveLength(1);
+  });
+
+  it("waits without a hall image, and says the marked court is being applied", () => {
+    expect(render(running({ panorama: null }))).not.toContain('data-testid="mark-court"');
+    const html = render(running({ calibration_state: "updating" }));
+    expect(html).not.toContain('data-testid="mark-court"');
+    expect(text(html)).toContain("Dein Spielfeld wird übernommen");
+  });
+
+  it("does not offer it to whoever cannot set the court", () => {
+    const html = render(running({}), { canCalibrate: false });
+    expect(html).not.toContain('data-testid="mark-court"');
+    expect(text(html)).toContain("Die Analyse läuft.");
+  });
+
+  it("has the sentence in French and English", () => {
+    expect(text(render(running({}), { messages: fr, locale: "fr" }))).toContain("marque le terrain maintenant");
+    expect(text(render(running({}), { messages: en, locale: "en" }))).toContain("mark the court now");
+  });
+});

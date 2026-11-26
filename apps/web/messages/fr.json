@@ -930,6 +930,7 @@
   "analysis": {
     "title": "Positions",
     "running": "L'analyse est en cours. Les positions s'afficheront ici ensuite.",
+    "runningMark": "L'analyse est en cours. L'image de la salle est prête : marque le terrain maintenant et l'analyse se termine avec lui.",
     "failed": "L'analyse a échoué : {error}",
     "none": "Pas encore d'analyse.",
     "heuristic": "estimé",

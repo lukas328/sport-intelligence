@@ -10,7 +10,7 @@ from typing import Any
 import httpx
 import pytest
 
-from handball_jobkit.reporter import Reporter, ReportError
+from handball_jobkit.reporter import Reporter, ReportError, clicked_points
 
 
 @pytest.fixture
@@ -103,3 +103,22 @@ def test_no_heartbeat_thread_without_interval() -> None:
     quiet = Reporter("http://api", "s", "j", {"a": 1}, client=rep.client, heartbeat_s=None)
     quiet.stage("a")
     assert quiet._beat is None
+
+
+def test_shares_the_hall_image_and_reads_the_court_points_back(sleeps: list[float]) -> None:
+    marked = {"points": [{"image": [1, 2], "court": [0, 0]}], "space": "panorama", "frame_ms": 0}
+
+    def answer(r: httpx.Request) -> httpx.Response:
+        body = json.loads(r.content)
+        return httpx.Response(200, json={"court_points": marked if body["stage"] == "b" else None})
+
+    rep, posts = make(answer)
+    assert clicked_points(rep.stage("a")) is None
+    view = {"camera": "fixed", "panorama": {"width": 1280, "height": 720}}
+    rep.share(view)
+    assert posts[-1]["view"] == view and posts[-1]["stage"] == "a"
+    assert clicked_points(rep.stage("b")) == marked
+    # an answer that is not JSON, or none at all (an older API), gives no points
+    rep2, _ = make(lambda r: httpx.Response(200, text="ok"))
+    assert rep2.stage("a") is None and clicked_points(None) is None
+    assert clicked_points({"court_points": {"points": []}}) is None

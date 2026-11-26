@@ -188,6 +188,9 @@ class JobOut(ApiModel):
     video_asset_id: uuid.UUID | None
     started_at: datetime | None
     finished_at: datetime | None
+    # answer to a worker report: court points the coach marked on the hall image while this
+    # analysis ran, `{points, space, frame_ms}` (the worker uses them at its court stage)
+    court_points: dict[str, Any] | None = None
 
 
 ProgressStage = Literal["upload", "ingest", "analysis", "done"]
@@ -547,6 +550,8 @@ class JobUpdate(ApiModel):
     stages: dict[str, Any] | None = None
     error: str | None = Field(default=None, max_length=4000)
     result: dict[str, Any] | None = None
+    # analysis, while it runs: the hall image is stored, `{camera, panorama: {width, height}}`
+    view: dict[str, Any] | None = None
     gpu_seconds: float | None = None
     cost_chf: float | None = None
 
