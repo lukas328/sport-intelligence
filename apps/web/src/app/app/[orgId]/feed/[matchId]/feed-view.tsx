@@ -9,6 +9,7 @@ import { useRef, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/card";
 import { SpotlightOverlay } from "@/components/video/spotlight";
+import { geometryOf } from "@/lib/moving-camera";
 import { VideoPlayer, type PlayerHandle } from "@/components/video/player";
 import { api } from "@/lib/client";
 import { cn } from "@/lib/utils";
@@ -65,6 +66,8 @@ export function FeedView({ orgId, matchId, playerId }: { orgId: string; matchId:
   const a = analysis.data;
   // spotlight on the player automatically (4.7), when the analysis identified their track
   const myTrack = a?.tracks.find((tr) => tr.player_id === feed?.player_id);
+  // a moving camera follows the picture through its view files (ADR 020), else no spotlight
+  const geometry = feed?.video_id ? geometryOf(a, `/v1/orgs/${orgId}/videos/${feed.video_id}`) : null;
   if (q.isLoading) return <p className="text-muted">{t("loading")}</p>;
   if (!feed) return <Alert>{t("none")}</Alert>;
   const scene = feed.items[index];
@@ -178,12 +181,11 @@ export function FeedView({ orgId, matchId, playerId }: { orgId: string; matchId:
               window={{ start_ms: scene.start_ms, end_ms: scene.end_ms }}
               autoPlay
               overlay={
-                myTrack && a?.calibration && a.camera !== "moving" && a.chunk_ms ? (
+                myTrack && geometry && a?.chunk_ms ? (
                   <SpotlightOverlay
                     baseUrl={`/v1/orgs/${orgId}/videos/${feed.video_id}/tracks`}
                     chunkMs={a.chunk_ms}
-                    homography={a.calibration.homography}
-                    imageSize={a.calibration.image_size as [number, number]}
+                    geometry={geometry}
                     track={myTrack.track_no}
                     label=""
                     getTime={() => player.current?.time() ?? 0}

@@ -617,6 +617,15 @@ class AnalysisOut(ApiModel):
     tracks: list[TrackOut]
     chunk_ms: int | None
     chunks: int | None
+    view_chunks: int | None = Field(
+        default=None,
+        description="moving camera: files of where the camera looked (GET .../views/{n}, "
+        "hall image -> frame per frame), so overlays follow the picture; none for a fixed "
+        "camera or an analysis from before",
+    )
+    frame_size: list[int] | None = Field(
+        default=None, description="width and height of the frame the view files map into"
+    )
     fps: float | None
     detector: str | None
     elapsed_s: float | None
