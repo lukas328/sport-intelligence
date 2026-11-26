@@ -152,8 +152,9 @@ def test_long_links_skip_people_outside_the_court_and_the_other_team() -> None:
     short = _piece(5, range(0, 20), 12.0, -2.0)
     assert edge_pieces(line + short, 25.0) == set()
 
-    same = {1: ("home", "home"), 2: ("home", "home"), 3: ("none", "none")}
-    other = {1: ("home", "home"), 2: ("away", "away"), 3: ("none", "none")}
+    teams_t = dict[int, tuple[str | None, str | None]]
+    same: teams_t = {1: ("home", "home"), 2: ("home", "home"), 3: ("none", "none")}
+    other: teams_t = {1: ("home", "home"), 2: ("away", "away"), 3: ("none", "none")}
     linked, _ = stitch(pts, 25.0, max_gap_s=8.0, excluded={3}, piece_teams=same)
     assert len({p.track_id for p in linked}) == 2  # 1 and 2 joined, the bench apart
     apart, _ = stitch(pts, 25.0, max_gap_s=8.0, excluded={3}, piece_teams=other)

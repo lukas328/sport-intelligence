@@ -1418,3 +1418,43 @@ Median-Tracklänge und ID-Wechsel (Schnitte, die die Nummernschritte danach find
   mit sauberer Lizenz (eigene Spieler-Crops aus Prüfen, siehe `docs/plans/lizenzen-modelle.md`)
   oder ein Filter, der Personen am Feldrand vor dem Verknüpfen ausschliesst. Beides ist eine
   eigene Arbeit; Messung und Sichtprüfung wie hier.
+
+### Feldrand-Filter und lange Verknüpfungen (Audit, 2026-11-26)
+
+Auftrag: Personen am Feldrand vor dem Verknüpfen herausnehmen, dann das Verknüpfen über 6 bis 8 s
+erneut messen. Ziel: mehr benannte Zeit, falsch benannt nicht höher, Sichtprüfung der neuen
+Verknüpfungen unter 10 % falsch. Dev-Clips Horgen H1/H2, nie Endtest.
+
+- **Labels ergänzt:** `ml/gold/data/identity_dev_v1_nonfield.json`, 90 Detektionen am Feldrand
+  (2 m um die Linien, innen und aussen) oder mit einem Trikot keiner Mannschaft, zweifach
+  beschriftet, 84 übereinstimmend (41 Schiedsrichter, Bank oder Betreuer, 13 Torhüter, 30
+  Feldspieler), eingefroren vor der Wahl. Zusammen mit Teil 1: 33 Feldspieler mit sichtbarer Nummer,
+  72 Nicht-Feldspieler. Auswertung `ml/eval/track_length_dev.py` (`--long-links`).
+- **Was die falschen Verknüpfungen waren** (Sichtprüfung mit Positionen): Stücke, die mehrheitlich
+  ausserhalb des Feldes stehen (Bank bei y -1 m, hinter einer Ecke), Schiedsrichter und Betreuer in
+  Grau oder Schwarz, und Rohstücke, die selbst schon einen Tausch enthalten (Median gelb, Ende rot).
+- **Filter (Schalter `pipeline.LONG_LINKS`):**
+  - Feldrand: ein Rohstück mit mindestens 50 % der Positionen mehr als 0.5 m ausserhalb des Feldes,
+    über mindestens 1 s, wird nie verknüpft und trägt keine Nummer.
+  - Teambedingung für Lücken über 4 s: das Trikot am Ende des einen und am Anfang des nächsten
+    Stücks (je die letzten oder ersten 5 Farbblicke) muss dieselbe Mannschaft sein; «keine
+    Mannschaft» (mehr als 15 von beiden Teamfarben entfernt: Feldspieler 1 bis 8, 2 von 138 über
+    15; Schiedsrichter und Betreuer 20 von 31 über 15) und unbekannt sperren.
+  - Verknüpfen bis 8 s.
+
+| Variante | richtig | falsch | benannte Zeit | Nicht-Feldsp. benannt | Nicht-Feldsp. als Spieler | Median | ID-Wechsel |
+|---|---|---|---|---|---|---|---|
+| heute (bis 4 s) | 11 von 33 | 2 | 23.2 % | 7 von 72 | 22 von 72 | 24.8 s | 19 |
+| heute, bis 8 s | 12 | 5 | 33.9 % | 10 | 26 | 38.0 s | 29 |
+| Filter, bis 6 s | 11 | 2 | 23.2 % | 7 | 23 | 28.2 s | 18 |
+| **Filter, bis 8 s** | **12** | **2** | **29.2 %** | 8 | 23 | 29.5 s | 21 (+2 Lesefarbe) |
+
+- **Sichtprüfung** der neuen Verknüpfungen mit Filter, bis 8 s: Lücken 4 bis 6 s 4 bis 5 von 41
+  klar falsch, 6 bis 8 s 3 von 37; zusammen etwa 10 % klar falsch, dazu etwa 19 % unklar. Ohne Filter
+  waren es 22 bis 30 % klar falsch.
+- **Bewertung:** Der Filter macht das lange Verknüpfen erst brauchbar (ohne ihn bei 8 s falsch 2 -> 5,
+  Nicht-Feldspieler benannt 7 -> 10). Mit ihm: benannte Zeit 23 -> 29 %, falsch gleich, aber ein
+  Nicht-Feldspieler mehr benannt, vier ID-Wechsel mehr und die Sichtprüfung genau an der 10-%-Grenze.
+  Nicht klar besser in allen Zielen: **im Produkt aus** (`LONG_LINKS = False`, heutiges Verhalten
+  unverändert, geprüft: gleiche Zahlen wie vorher). Einschalten nach einem Test auf einem weiteren
+  Spiel mit derselben Sichtprüfung.
