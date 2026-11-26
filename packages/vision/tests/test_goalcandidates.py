@@ -41,7 +41,8 @@ def test_shot_template_asset_is_versioned_and_consistent() -> None:
     assert set(model.weights) <= {"shot", "goal", "lull"} and any(model.weights.values())
     sel = raw["selection"]
     assert sel["default_rate"] == gc.SHOT_DEFAULT_RATE and sel["rates_per_min"] == [2, 4, 6]
-    assert 0.0 <= model.offset_s <= 4.0
+    # the estimate is the release (peak minus the median peak - release on the dev shots)
+    assert sel["shot_offset_ref"].startswith("release") and 3.0 <= model.offset_s <= 7.0
     # the evaluation that came with it: most shots at the default rate, far above chance
     ev = raw["evaluation_leave_one_game_out"]["shots"]
     assert ev[f"recall@{gc.SHOT_DEFAULT_RATE}"] >= 0.8

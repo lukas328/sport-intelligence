@@ -207,6 +207,8 @@ def load_marks(path: Path) -> dict[str, list[tuple[float, str]]]:
     d = json.loads(path.read_text())
     out: dict[str, list[tuple[float, str]]] = {}
     for s in d["shots"]:
+        if s.get("t_s") is None or s.get("status", "ok") != "ok":
+            continue  # unsure or not visible: left out of the method choice
         out.setdefault(s["seg"], []).append((float(s["t_s"]), s.get("kind", "")))
     return out
 

@@ -84,6 +84,9 @@ SIDES = ("own", "opponent")
 OUTCOMES = ("goal", "save", "miss", "post", "blocked")
 SUGGEST_MS = 8000  # report shot - estimated shot time, when the clock maps exactly
 SUGGEST_MAX_MS = 20_000  # ... and at most (the clock map's uncertainty added)
+# a shot candidate's goal_ms is the estimated release; the report writes a shot down this much later
+# (median log - release 3.9 s on 94 dev shots, ml/gold/data/shot_release_dev_llm.json)
+SHOT_LOG_DELAY_MS = 4000
 # taken over from the report without a question (`auto_accept`)
 AUTO = "report"  # attributes.video.auto of a report goal pinned automatically
 DECLINED = "auto_declined"  # attributes of a report goal whose automatic pin the coach undid
@@ -287,10 +290,11 @@ class _Report:
         taken = {c.event_id for c in cands if c.event_id is not None}
         free = [e for e in self.official if _pinned(e) is None and e.id not in taken]
         pairs = sorted(
-            (abs(c.goal_ms - t), str(c.id), c, e)
+            (abs(c.goal_ms + SHOT_LOG_DELAY_MS - t), str(c.id), c, e)
             for c in cands
             for e in free
-            if (t := self.times[e.id][0]) is not None and abs(c.goal_ms - t) <= self.window(e)
+            if (t := self.times[e.id][0]) is not None
+            and abs(c.goal_ms + SHOT_LOG_DELAY_MS - t) <= self.window(e)
         )
         used: set[uuid.UUID] = set()
         for _, _, c, e in pairs:

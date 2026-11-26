@@ -39,10 +39,9 @@ fertig ist, streicht es und trägt das Ergebnis im passenden Plan ein.
 **B. Braucht Lukas oder die lokale Sitzung**
 1. Kalibrierung per Klick Ende-zu-Ende auf Staging mit echtem Clip, danach Deploy
    (`docs/plans/kalibrierung.md` Abschnitt 6).
-2. Wurfzeit: Lukas markiert die Abwürfe der 175 Dev-Würfe auf der Seite «Abwürfe Dev»
-   (https://claude.ai/artifact/X1AUB2nXAkX9eVTV977paz, etwa 45 min); danach Methode auf Dev wählen,
-   Auswertung bereit (`ml/integration/shot_time_dev.py eval`). Vorprüfung gegen die Spielbericht-Zeit:
-   Ballpfad-Anker nicht genauer, Ballpfad senkt die Wurf-Fehlalarme nicht (25.11.).
+2. ~~Wurfzeit~~ erledigt 26.11.: Abwürfe auf Dev als LLM-Marken (zwei Durchgänge plus dritter Blick),
+   Methode Peak minus 5.0 s gewählt, Endtest einmal: 55.8 % der Würfe in ±2 s (vorher 20.8 %);
+   `produkt-analyse-integration.md`, «Wurfzeit: Methode auf Dev gewählt».
 3. Ball: Fehlalarme zerlegt (25.11., Lukas' 574 Urteile auf den Dev-Wurfclips ausgewertet: Tracker nur
    37 % richtig, falsche Punkte vor allem Personenteile und Gegenstände an der Bank;
    `ml/ball/LINEAGE.md` Abschnitt 6). Offen: Lukas schaut die 111 Punkte nochmals an, die nach Ball

@@ -1,0 +1,671 @@
+{
+"note": "Second look (two independent Claude passes, LLM judgement) at the 111 tracker points the owner called 'ring wrong' but that looked like a ball in the first quick look (category B in shot_check_dev_fp_cats.json). final ball: both passes say the ring centre is on the game ball; wrong: both say not; unclear: otherwise.",
+"items": [
+{
+"id": "w10_30",
+"pass_a": "ball",
+"pass_b": "wrong",
+"final": "unclear"
+},
+{
+"id": "w10_390",
+"pass_a": "ball",
+"pass_b": "unclear",
+"final": "unclear"
+},
+{
+"id": "w11_330",
+"pass_a": "ball",
+"pass_b": "ball",
+"final": "ball"
+},
+{
+"id": "w11_420",
+"pass_a": "ball",
+"pass_b": "ball",
+"final": "ball"
+},
+{
+"id": "w11_480",
+"pass_a": "ball",
+"pass_b": "ball",
+"final": "ball"
+},
+{
+"id": "w11_555",
+"pass_a": "ball",
+"pass_b": "ball",
+"final": "ball"
+},
+{
+"id": "w12_120",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w12_180",
+"pass_a": "unclear",
+"pass_b": "wrong",
+"final": "unclear"
+},
+{
+"id": "w12_210",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w12_30",
+"pass_a": "ball",
+"pass_b": "unclear",
+"final": "unclear"
+},
+{
+"id": "w12_300",
+"pass_a": "ball",
+"pass_b": "ball",
+"final": "ball"
+},
+{
+"id": "w12_330",
+"pass_a": "ball",
+"pass_b": "ball",
+"final": "ball"
+},
+{
+"id": "w12_360",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w12_390",
+"pass_a": "ball",
+"pass_b": "ball",
+"final": "ball"
+},
+{
+"id": "w13_180",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w13_240",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w14_120",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w20_25",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w20_300",
+"pass_a": "ball",
+"pass_b": "ball",
+"final": "ball"
+},
+{
+"id": "w20_375",
+"pass_a": "ball",
+"pass_b": "wrong",
+"final": "unclear"
+},
+{
+"id": "w21_250",
+"pass_a": "ball",
+"pass_b": "ball",
+"final": "ball"
+},
+{
+"id": "w22_100",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w22_225",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w22_250",
+"pass_a": "ball",
+"pass_b": "ball",
+"final": "ball"
+},
+{
+"id": "w24_275",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w24_325",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w24_350",
+"pass_a": "ball",
+"pass_b": "ball",
+"final": "ball"
+},
+{
+"id": "w30_120",
+"pass_a": "part",
+"pass_b": "part",
+"final": "ball"
+},
+{
+"id": "w31_30",
+"pass_a": "ball",
+"pass_b": "ball",
+"final": "ball"
+},
+{
+"id": "w31_480",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w32_360",
+"pass_a": "ball",
+"pass_b": "ball",
+"final": "ball"
+},
+{
+"id": "w32_555",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w33_270",
+"pass_a": "unclear",
+"pass_b": "wrong",
+"final": "unclear"
+},
+{
+"id": "w33_300",
+"pass_a": "ball",
+"pass_b": "wrong",
+"final": "unclear"
+},
+{
+"id": "w34_210",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w34_240",
+"pass_a": "ball",
+"pass_b": "wrong",
+"final": "unclear"
+},
+{
+"id": "w34_330",
+"pass_a": "ball",
+"pass_b": "ball",
+"final": "ball"
+},
+{
+"id": "w34_360",
+"pass_a": "ball",
+"pass_b": "ball",
+"final": "ball"
+},
+{
+"id": "w34_390",
+"pass_a": "ball",
+"pass_b": "wrong",
+"final": "unclear"
+},
+{
+"id": "w34_555",
+"pass_a": "ball",
+"pass_b": "ball",
+"final": "ball"
+},
+{
+"id": "w35_330",
+"pass_a": "ball",
+"pass_b": "wrong",
+"final": "unclear"
+},
+{
+"id": "w37_120",
+"pass_a": "ball",
+"pass_b": "ball",
+"final": "ball"
+},
+{
+"id": "w37_360",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w39_360",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w40_270",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w40_420",
+"pass_a": "ball",
+"pass_b": "ball",
+"final": "ball"
+},
+{
+"id": "w41_300",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w41_420",
+"pass_a": "unclear",
+"pass_b": "unclear",
+"final": "unclear"
+},
+{
+"id": "w42_210",
+"pass_a": "ball",
+"pass_b": "ball",
+"final": "ball"
+},
+{
+"id": "w42_330",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w43_120",
+"pass_a": "unclear",
+"pass_b": "part",
+"final": "unclear"
+},
+{
+"id": "w44_210",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w48_120",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w48_180",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w48_210",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w48_240",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w48_270",
+"pass_a": "ball",
+"pass_b": "ball",
+"final": "ball"
+},
+{
+"id": "w48_300",
+"pass_a": "ball",
+"pass_b": "ball",
+"final": "ball"
+},
+{
+"id": "w48_360",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w48_390",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w48_420",
+"pass_a": "ball",
+"pass_b": "unclear",
+"final": "unclear"
+},
+{
+"id": "w48_450",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w48_480",
+"pass_a": "ball",
+"pass_b": "ball",
+"final": "ball"
+},
+{
+"id": "w49_30",
+"pass_a": "ball",
+"pass_b": "ball",
+"final": "ball"
+},
+{
+"id": "w49_300",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w49_330",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w49_555",
+"pass_a": "ball",
+"pass_b": "ball",
+"final": "ball"
+},
+{
+"id": "w50_360",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w50_390",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w50_420",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w51_30",
+"pass_a": "wrong",
+"pass_b": "ball",
+"final": "unclear"
+},
+{
+"id": "w51_360",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w52_270",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w52_330",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w53_210",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w53_240",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w53_270",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w53_300",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w53_360",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w54_300",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w54_330",
+"pass_a": "ball",
+"pass_b": "wrong",
+"final": "unclear"
+},
+{
+"id": "w55_270",
+"pass_a": "wrong",
+"pass_b": "ball",
+"final": "unclear"
+},
+{
+"id": "w55_390",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w55_480",
+"pass_a": "unclear",
+"pass_b": "wrong",
+"final": "unclear"
+},
+{
+"id": "w56_180",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w56_210",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w56_240",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w56_330",
+"pass_a": "ball",
+"pass_b": "ball",
+"final": "ball"
+},
+{
+"id": "w57_240",
+"pass_a": "unclear",
+"pass_b": "wrong",
+"final": "unclear"
+},
+{
+"id": "w57_270",
+"pass_a": "wrong",
+"pass_b": "unclear",
+"final": "unclear"
+},
+{
+"id": "w57_300",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w57_390",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w57_420",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w58_120",
+"pass_a": "unclear",
+"pass_b": "ball",
+"final": "unclear"
+},
+{
+"id": "w58_180",
+"pass_a": "unclear",
+"pass_b": "part",
+"final": "unclear"
+},
+{
+"id": "w58_210",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w58_240",
+"pass_a": "ball",
+"pass_b": "ball",
+"final": "ball"
+},
+{
+"id": "w58_270",
+"pass_a": "wrong",
+"pass_b": "ball",
+"final": "unclear"
+},
+{
+"id": "w58_300",
+"pass_a": "wrong",
+"pass_b": "ball",
+"final": "unclear"
+},
+{
+"id": "w58_390",
+"pass_a": "wrong",
+"pass_b": "ball",
+"final": "unclear"
+},
+{
+"id": "w58_555",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w59_240",
+"pass_a": "wrong",
+"pass_b": "unclear",
+"final": "unclear"
+},
+{
+"id": "w59_330",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w59_390",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w59_480",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w60_120",
+"pass_a": "wrong",
+"pass_b": "wrong",
+"final": "wrong"
+},
+{
+"id": "w60_180",
+"pass_a": "ball",
+"pass_b": "wrong",
+"final": "unclear"
+},
+{
+"id": "w60_240",
+"pass_a": "unclear",
+"pass_b": "ball",
+"final": "unclear"
+},
+{
+"id": "w60_270",
+"pass_a": "unclear",
+"pass_b": "ball",
+"final": "unclear"
+},
+{
+"id": "w60_300",
+"pass_a": "unclear",
+"pass_b": "wrong",
+"final": "unclear"
+},
+{
+"id": "w60_390",
+"pass_a": "unclear",
+"pass_b": "ball",
+"final": "unclear"
+}
+]
+}

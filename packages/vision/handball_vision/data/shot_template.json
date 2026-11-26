@@ -1,6 +1,6 @@
 {
  "name": "shot_candidates",
- "version": "2026-11-05.s1",
+ "version": "2026-11-26.s2",
  "dt_s": 0.1,
  "channels": [
   "pan",
@@ -53,7 +53,8 @@
    -8.0,
    4.0
   ],
-  "shot_offset_s": 1.5
+  "shot_offset_s": 5.0,
+  "shot_offset_ref": "release: median peak - release 4.96 s on 94 dev shots with LLM release marks (ml/gold/data/shot_release_dev_llm.json, 2026-11-26); until then 1.5 s, the median peak - log time"
  },
  "created": "2026-11-05",
  "trained_on": {
