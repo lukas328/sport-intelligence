@@ -49,11 +49,11 @@ function progress(extra: Record<string, unknown> = {}, file: Record<string, unkn
 
 function render(
   p: Schemas["MatchProgressOut"],
-  { messages = deCH as Record<string, unknown>, locale = "de-CH", role = null as string | null, mail = null as boolean | null } = {},
+  { messages = deCH as Record<string, unknown>, locale = "de-CH", role = null as string | null, mail = null as boolean | null, me = "u-coach" } = {},
 ): string {
   const client = new QueryClient();
   if (mail != null) client.setQueryData(["public-config"], { mail_enabled: mail });
-  const shell = { teams: [{ id: "t1", my_role: role }] } as unknown as ComponentProps<typeof ShellContext.Provider>["value"];
+  const shell = { teams: [{ id: "t1", my_role: role }], me: { id: me } } as unknown as ComponentProps<typeof ShellContext.Provider>["value"];
   return renderToStaticMarkup(
     createElement(
       QueryClientProvider,
@@ -111,6 +111,12 @@ describe("progress: whoever may close the page hears when it is done", () => {
     expect(player).toContain("Es läuft von selbst weiter");
     expect(player).not.toContain("Mail");
     expect(player).not.toContain("Glocke");
+  });
+
+  it("promises it to whoever uploaded the video, also without a role in the team", () => {
+    const mine = progress({}, { uploaded_by_id: "u-lina" });
+    expect(text(render(mine, { role: "player", mail: true, me: "u-lina" }))).toContain("Wir schicken dir eine Mail");
+    expect(text(render(mine, { role: "player", mail: true, me: "u-tim" }))).not.toContain("Mail");
   });
 
   it("has the words in French and English", () => {

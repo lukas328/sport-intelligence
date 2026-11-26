@@ -27,6 +27,8 @@ export interface ShellOrg {
 }
 
 export interface ShellMe {
+  /** the account (who uploaded a video is told when its analysis is done) */
+  id?: string;
   name: string;
   email: string;
   /** the club asks for two-factor and it is not set up */

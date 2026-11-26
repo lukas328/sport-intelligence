@@ -51,6 +51,7 @@ export default async function OrgLayout({ children, params }: { children: ReactN
           team_features: x.settings.team_features ?? false,
         }))}
         me={{
+          id: me.id,
           name: me.name,
           email: me.email,
           two_factor_due: Boolean(org.two_factor_required && !me.totp_enabled && org.something_to_protect),

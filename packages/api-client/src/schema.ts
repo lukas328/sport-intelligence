@@ -7440,6 +7440,11 @@ export interface components {
              * @description the technical sub-step (download, transcode, observe, ...)
              */
             step?: string | null;
+            /**
+             * Uploaded By Id
+             * @description who uploaded the file (told when the analysis is done); null for files from before and once the account is gone
+             */
+            uploaded_by_id?: string | null;
             /** Uploaded Bytes */
             uploaded_bytes?: number | null;
             /**
