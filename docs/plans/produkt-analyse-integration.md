@@ -1569,6 +1569,65 @@ Rohstimmen 684 zu 64 für die richtige Seite. Damit auf einem zweiten Spiel mit 
 anderen Trikotfarben bestätigt, keine falsche Zuordnung. Segment s3 liess sich mit der eigenen
 Kamerabewegung nicht kalibrieren und fehlt.
 
+### Farbsprung im Tracker: Rohstücke an Trikotwechseln schneiden (Audit, 2026-11-26)
+
+Ursache der falschen langen Verknüpfungen (Abschnitt «Feldrand-Filter»): meist enthält schon ein
+Rohstück des Trackers den Wechsel von einem Spieler zu einem Schiedsrichter, Betreuer oder Spieler
+des anderen Teams daneben. Darum werden die Rohstücke vor dem Verknüpfen geschnitten
+(`pipeline.cut_at_shirt_changes`, Schalter `COLOUR_CUT`). Dev, nie Endtest.
+
+- Jeder freie Farbblick (keine andere Personenbox deckt 15 % oder mehr der Box) bekommt eine
+  Klasse: home, away oder keine Mannschaft (`shirt_team`, mehr als 15 von beiden Teamfarben). Die
+  Klasse eines Blicks ist die Mehrheit im Fenster von 1 s; Strecken unter 1.5 s gehen an den
+  längeren Nachbarn (Hysterese). Zwischen zwei Strecken wird in der Mitte geschnitten; Farbproben,
+  Nummernlesungen, Aussehen- und Rollenblicke wandern mit.
+- **Ergebnis** (heute gegen Schnitt, gleiche Labels wie #160 und «Feldrand-Filter»):
+
+| Messung | heute | Schnitt |
+|---|---|---|
+| Horgen, `ml/eval/identity_dev.py`: richtig / falsch von 27 sichtbaren Nummern | 10 / 1 | **12 / 0** |
+| Horgen, benannte Zeit (identity_dev) | 24.6 % | 23.2 % |
+| Horgen mit Nicht-Feldspieler-Labels: richtig / falsch von 33 | 11 / 2 | **13 / 1** |
+| Horgen: Nicht-Feldspieler benannt / als Spieler geführt (von 72) | 7 / 22 | **5 / 14** |
+| Horgen: gemischte Tracks (beide Teamfarben je mindestens 25 %) | 1 von 152 | 1 von 154 |
+| Horgen: Tracks, Median-Länge | 250, 24.8 s | 275, 20.5 s |
+| ATV s1: richtig / falsch von 9 | 2 / 1 | 2 / 1 |
+| ATV s1: benannte Zeit | 16.3 % | 17.5 % |
+| ATV s1: Nicht-Feldspieler benannt / als Spieler (von 17) | 1 / 9 | 1 / 9 |
+| ATV s1: gemischte Tracks | 1 von 55 | 2 von 55 |
+| ATV s1: Tracks, Median-Länge (68 Schnitte) | 88, 24.2 s | 81, 29.7 s |
+
+- **Bewertung:** Falsch benannt sinkt auf Horgen (2 -> 1 bzw. 1 -> 0), auf ATV gleich; richtig
+  benannt steigt (Horgen +2), die benannte Zeit sinkt auf Horgen um 1.4 Prozentpunkte und steigt auf
+  ATV um 1.2. Deutlich weniger Schiedsrichter und Betreuer laufen als Spieler (Horgen 22 -> 14). Der
+  Median sinkt auf Horgen, weil Stücke mit zwei Personen jetzt zwei Tracks sind (gewollt); auf ATV
+  steigt er, weil die sauberen Stücke danach besser verknüpft werden. Gemischte Tracks auf ATV 1 ->
+  2 von 55 (ein Track, innerhalb des Rauschens). Kriterium erfüllt, **im Produkt an**.
+- Grenze: zwei Spiele, wenige sichtbare Nummern auf ATV (9).
+- **Lange Verknüpfungen mit Schnitt neu geprüft** (`LONG_LINKS`, bis 8 s, Feldrand-Filter und
+  Teambedingung aus freien Blicken): Horgen richtig / falsch 13 / 1 (wie ohne), benannte Zeit 23.8 %
+  (ohne 22.0), Nicht-Feldspieler benannt 4 von 72, 83 neue Verknüpfungen über 4 s; ATV s1 aber
+  falsch 1 -> 4 (eine Spielerin mit der 44 wird über eine lange Verknüpfung zur 9), benannte Zeit
+  25.0 % (ohne 17.5), Median 29.7 -> 14.9 s, Sichtprüfung 3 von 17 klar falsch (zweimal Spielerin an
+  Person an der Bank, einmal umgekehrt), 2 unklar. Falsch benannt über beide Spiele 2 -> 5:
+  **Kriterium nicht erfüllt, `LONG_LINKS` bleibt aus** (die Sichtprüfung der 83 Horgen-Verknüpfungen
+  ändert daran nichts und wurde nicht gemacht). Der Schnitt allein bleibt an.
+- **Nachtrag: Spielfeldseiten.** Bei der Gesamtmessung fiel auf, dass der Schnitt die Seiten auf
+  Horgen H2 verschlechterte (100 -> 94.6 % richtig, die letzten 16 s falsch). Zwei Ursachen:
+  1. Der Torhüter trägt eine eigene Farbe («keine Mannschaft») und sein Track wurde in Stücke unter
+     10 s geschnitten, die die Positionsregel nicht mehr als Torhüter nimmt. Behoben: ein Stück, das
+     mehrheitlich innerhalb 6.5 m eines Tores steht, wird nicht geschnitten.
+  2. Am Ende von H2 zeigen die Formationsstimmen auch ohne Schnitt auf die falsche Seite (270 bis
+     300 s: 75 zu 66, mit Schnitt 63 zu 39), und die letzte Strecke galt schon nach 15 s. Neu
+     `events.LAST_SIDE_MS` 30 s: ein 16-s-Kippen am Videoende zählt nicht mehr, ein echter
+     Seitenwechsel mit 40 s Rest (synthetischer Test) weiterhin.
+  - Danach Seiten mit und ohne Schnitt auf Horgen H1, H2 und ATV s1 je 100 % richtig, mit und ohne
+    Torhüter. Die Zahl der Ereignisse steigt mit Schnitt (H1 7 -> 9, H2 9 -> 12); ob die
+    zusätzlichen richtig sind, ist nicht beschriftet.
+  - Wer ist wer mit Torhüter-Ausnahme (`identity_dev.py`): richtig 10 -> 11 von 27, falsch 1 -> 0,
+    benannte Zeit 24.6 -> 23.2 %; mit Kader 13 / 0 / 27.5 % -> 14 / 0 / 26.8 %. Nicht-Feldspieler
+    benannt 7 -> 4, als Spieler 22 -> 14 von 72; ATV unverändert wie oben.
+
 ### Weniger Fehlalarme bei den Wurf- und Tor-Kandidaten (Audit, 2026-11-26)
 
 Auftrag: Präzision der Kandidaten deutlich hoch bei mindestens 95 % des heutigen Tor-Recalls im

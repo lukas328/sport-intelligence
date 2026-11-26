@@ -62,12 +62,15 @@ export function ProgressPanel({
   const bar = barValue(p);
   // marking the court while the analysis runs: that run takes it, no second run (#141)
   const court = staff && isActive(p) ? (p.files.some((f) => f.court === "mark") ? "mark" : p.files.some((f) => f.court === "taken") ? "taken" : null) : null;
-  // who hears that the analysis is done: the team's coaches and analysts, in the bell, and by mail
-  // when mails go out (services/video_callbacks); promised only to them, the mail only when on
+  // who hears that the analysis is done: the team's coaches and analysts and whoever uploaded the
+  // video, in the bell, and by mail when mails go out (services/video_callbacks); promised only
+  // to them, the mail only when on
   const shell = useOptionalShell();
   const mail = useMailEnabled();
   const role = shell?.teams.find((x) => x.id === p.team_id)?.my_role;
-  const told = (role === "coach" || role === "analyst") && p.files.some((f) => f.role === "main");
+  const me = shell?.me.id;
+  const uploaded = me != null && p.files.some((f) => f.uploaded_by_id === me);
+  const told = (role === "coach" || role === "analyst" || uploaded) && p.files.some((f) => f.role === "main");
   const closeKey = told ? (mail ? "mayCloseMail" : "mayCloseBell") : "mayClose";
   return (
     <section
