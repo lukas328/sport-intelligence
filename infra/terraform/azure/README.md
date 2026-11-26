@@ -160,10 +160,12 @@ optional_secrets = ["HB_GOOGLE_CLIENT_SECRET"]
 The same works for Apple (`HB_APPLE_PRIVATE_KEY`), Stripe, `HB_ANTHROPIC_API_KEY` and `HB_SENTRY_DSN`.
 Redirect URI for Google and Apple: `https://<app_domain>/v1/auth/oauth/<google|apple>/callback`.
 
-Non-secret settings that belong to the code, such as the analysis models (`HB_REID_MODEL` with its
-checksum, `HB_ROLE_MODEL` empty while the role model is off), live in
-`infra/azure/staging-env.json`. Every deploy merges that file into `extra_env` of the stored
-settings file; a key set to `null` there is removed.
+Non-secret settings that belong to the code, such as the analysis models (`HB_REID_MODEL` and
+`HB_ROLE_MODEL` empty: ReID was trained on MSMT17, research only, licence inventory; the role model
+is off), live in `infra/azure/staging-env.json`. Every deploy merges that file into `extra_env` of
+the stored settings file; a key set to `null` there is removed. The ball nets are Terraform
+variables (`cpu_ball_model*` for the CPU app, `gpu_ball_model*` for the GPU job), since 26.11.2026
+hr-nods without DeepSport data (hr1/hrp1 before were non-commercial).
 
 ## 6. Custom domain with a managed certificate
 
