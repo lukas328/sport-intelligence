@@ -548,8 +548,8 @@ locals {
     # checked against its SHA-256. Re-identification runs only with a GPU (product audit
     # 2026-11: 56 % of the CPU analysis time), HB_BALL_ALLOW_CPU does not switch it on.
     env = {
-      HB_BALL_MODEL        = "models/ball/ball_hrp1_fp16-37153d8dfc83.onnx"
-      HB_BALL_MODEL_SHA256 = "37153d8dfc832e683283b43229d35ea5fd1a257757c689d1b05ffb81fd9779f5"
+      HB_BALL_MODEL        = var.cpu_ball_model
+      HB_BALL_MODEL_SHA256 = var.cpu_ball_model_sha256
       HB_BALL_ALLOW_CPU    = "1"
       HB_BALL_WIDTH        = "960"
       HB_BALL_EVERY        = "3"

@@ -1,0 +1,81 @@
+{
+ "segments": 49,
+ "games": 13,
+ "goals": 113,
+ "candidates": 568,
+ "true": 108,
+ "score": {
+  "auc": 0.806,
+  "at_1": {
+   "found": 0.558,
+   "precision": 0.447,
+   "n": 141
+  },
+  "at_1.5": {
+   "found": 0.708,
+   "precision": 0.421,
+   "n": 190
+  },
+  "at_2": {
+   "found": 0.85,
+   "precision": 0.344,
+   "n": 282
+  }
+ },
+ "logreg": {
+  "auc": 0.815,
+  "at_1": {
+   "found": 0.54,
+   "precision": 0.44,
+   "n": 141
+  },
+  "at_1.5": {
+   "found": 0.655,
+   "precision": 0.395,
+   "n": 190
+  },
+  "at_2": {
+   "found": 0.814,
+   "precision": 0.33,
+   "n": 282
+  }
+ },
+ "boosting": {
+  "auc": 0.838,
+  "at_1": {
+   "found": 0.575,
+   "precision": 0.468,
+   "n": 141
+  },
+  "at_1.5": {
+   "found": 0.717,
+   "precision": 0.437,
+   "n": 190
+  },
+  "at_2": {
+   "found": 0.823,
+   "precision": 0.337,
+   "n": 282
+  }
+ },
+ "logreg - score at 2": {
+  "found_ci95": [
+   -0.084,
+   0.016
+  ],
+  "precision_ci95": [
+   -0.034,
+   0.007
+  ]
+ },
+ "boosting - score at 2": {
+  "found_ci95": [
+   -0.085,
+   0.042
+  ],
+  "precision_ci95": [
+   -0.036,
+   0.02
+  ]
+ }
+}
