@@ -135,7 +135,7 @@ test("new club: club, colour and team in three steps, roster from the team page,
   // players see everything of the team (K18): the four destinations; Teamleben is off for a new team
   await expect(player.getByRole("navigation", { name: "Hauptnavigation" }).first().getByRole("link")).toHaveCount(4);
   await player.getByRole("link", { name: "Team", exact: true }).click();
-  await expect(player.getByTestId("team-row")).toHaveCount(4);
+  await expect(player.getByTestId("team-row")).toHaveCount(6);
   // players cannot edit the roster
   await expect(player.getByRole("form", { name: "Spieler hinzufügen" })).toHaveCount(0);
   await expect(player.getByTestId("roster-edit")).toHaveCount(0);
