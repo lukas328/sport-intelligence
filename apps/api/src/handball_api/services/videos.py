@@ -236,6 +236,7 @@ async def import_link(ctx: Ctx, match_id: uuid.UUID, data: LinkImport) -> VideoA
         storage_key=_key(match, asset_id, name),
         part_size=ctx.settings.upload_part_size,
         source_url=url,
+        uploaded_by_id=ctx.user_id,
     )
     ctx.db.add(asset)
     await ctx.db.flush()

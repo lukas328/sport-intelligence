@@ -99,6 +99,7 @@ async def create_upload(
         storage_key=key,
         upload_id=upload_id,
         part_size=part_size,
+        uploaded_by_id=ctx.user_id,
     )
     ctx.db.add(asset)
     if match.status == MatchStatus.SCHEDULED:
