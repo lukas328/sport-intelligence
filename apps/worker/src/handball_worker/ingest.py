@@ -106,7 +106,12 @@ def run_ingest(
         transcode.thumbnails(src, out, info, settings.ffmpeg)
         q["thumbnails"] = True
         if info.has_audio:
-            transcode.sync_audio(src, out / "audio_8k.wav", settings.ffmpeg)
+            audio = transcode.extract_audio(
+                src, out / transcode.AUDIO_FILE, settings.ffmpeg, info.duration_s
+            )
+            q["audio"] = audio  # length and «silent»: the analysis skips a silent track
+            if audio["silent"]:
+                log.warning("audio_silent", job_id=job_id, asset_id=asset_id)
 
         rep.stage("upload")
         upload_dir(s3, bucket, out, prefix)
@@ -123,7 +128,7 @@ def run_ingest(
             "poster_key": prefix + "poster.jpg",
             "quality_report": q,
             "renditions": transcode.ladder(info),
-            "audio_key": prefix + "audio_8k.wav" if info.has_audio else None,
+            "audio_key": prefix + transcode.AUDIO_FILE if info.has_audio else None,
         }
         rep.succeed(result)
         log.info("ingest_done", job_id=job_id, duration_s=info.duration_s)

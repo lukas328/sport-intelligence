@@ -184,11 +184,22 @@ def run_with_progress(
         raise TranscodeError(err.splitlines()[-1] if err else "ffmpeg failed")
 
 
-AUDIO_SYNC_S = 600
+# the sound track of the whole video, mono 16 kHz WAV (32 kB per second: about 115 MB for 60 min,
+# 190 MB for 99 min). Camera sync reads its first minutes (handball_vision.audio.load_mono resamples
+# to 8 kHz); the analysis listens for whistles, whose fundamental lies at 3.7 to 4.1 kHz: at 8 kHz
+# (Nyquist 4 kHz) the whistle detection reached F1 0.69, at 16 kHz 0.83 (analysis, 26.11.2026).
+# Until then the file was audio_8k.wav with the first 600 s only; readers take the key the asset
+# stores (audio_key), so old and new files both work.
+AUDIO_SR = 16_000
+AUDIO_FILE = "audio_16k.wav"
+# a file whose loudest sample stays below this is silent (16-bit full scale is 32767)
+SILENT_PEAK = 8
 
 
-def sync_audio(src: Path, dst: Path, ffmpeg: str, seconds: int = AUDIO_SYNC_S) -> None:
-    """First minutes of audio as 8 kHz mono WAV (about 1 MB per minute) for camera sync."""
+def extract_audio(src: Path, dst: Path, ffmpeg: str, duration_s: float = 0.0) -> dict[str, object]:
+    """The first audio stream of the whole video as mono 16 kHz WAV; returns its length and
+    whether it is silent (a stream without any sound, as the Uznach upload of 26.11.2026: the
+    source's own track was digital silence, -inf dB on both channels)."""
     subprocess.run(
         [
             ffmpeg,
@@ -197,21 +208,42 @@ def sync_audio(src: Path, dst: Path, ffmpeg: str, seconds: int = AUDIO_SYNC_S) -
             "-y",
             "-i",
             str(src),
-            "-t",
-            str(seconds),
+            # the first audio stream, as load_mono decodes it (ffmpeg would pick the one with the
+            # most channels)
+            "-map",
+            "0:a:0",
             "-vn",
             "-ac",
             "1",
             "-ar",
-            "8000",
+            str(AUDIO_SR),
             "-c:a",
             "pcm_s16le",
             str(dst),
         ],
         check=True,
         capture_output=True,
-        timeout=300,
+        # demuxing a long file takes a while: a minute plus a second per 10 s of video
+        timeout=max(300, int(60 + duration_s / 10)),
     )
+    return audio_summary(dst)
+
+
+def audio_summary(wav: Path) -> dict[str, object]:
+    """Length in seconds and «silent» of a mono 16-bit WAV, read in blocks (no full load)."""
+    import wave
+
+    peak = 0
+    with wave.open(str(wav), "rb") as w:
+        rate, frames = w.getframerate(), w.getnframes()
+        while True:
+            block = w.readframes(1 << 20)
+            if not block:
+                break
+            a = np.frombuffer(block, "<i2")
+            if len(a):
+                peak = max(peak, int(np.abs(a.astype(np.int32)).max()))
+    return {"seconds": round(frames / rate, 2) if rate else 0.0, "silent": peak < SILENT_PEAK}
 
 
 def poster(src: Path, dst: Path, at_s: float, ffmpeg: str) -> None:
