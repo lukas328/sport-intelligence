@@ -1568,3 +1568,28 @@ wie oben aus zwei unabhängigen Bildsätzen, übereinstimmend: home (gelb) verte
 Rohstimmen 684 zu 64 für die richtige Seite. Damit auf einem zweiten Spiel mit anderer Halle und
 anderen Trikotfarben bestätigt, keine falsche Zuordnung. Segment s3 liess sich mit der eigenen
 Kamerabewegung nicht kalibrieren und fehlt.
+
+### «Kein Besitz» aus Anwurf-Formation und leerem Feld: vorab festgelegt (Audit, 2026-11-26)
+
+Auftrag: Das Produkt vergibt in Sekunden ohne Ballbesitz meist ein Team (76.4 % auf den
+eingefrorenen Ballbesitz-Labels, «Stand 26.11.»). Nicht wiederholt, was schon verworfen ist
+(Hallenuhr, Bewegung, `no_play`, Pfiff, Pfiff + Bewegung; `produkt-audit-2026-11.md`). Neu sind
+Signale aus den Seiten (#179) und der Anwurf-Formation. Daten: Horgen H1 und H2 (je 609 s,
+Ballbesitz-Truth `ml/integration/possession/labels/truth.json`, LLM, sha256 fb1ae31a…), Tracks mit
+main gerechnet. Ein Spiel, zwei Halbzeiten: «nach Spiel validieren» geht hier nur als Halbzeit gegen
+Halbzeit; das ist eine Grenze der Messung.
+
+**Vorab festgelegt (vor jedem Vergleich mit den Labels):**
+- **A Anwurf-Formation:** In einer Sekunde stehen mindestens 4 Feldspieler je Team auf dem Feld,
+  und mindestens 80 % der Feldspieler jedes Teams stehen in der eigenen Hälfte (welche Hälfte das
+  Team verteidigt, aus den Seiten des Produkts). Gilt mindestens 3 s in Folge -> tot.
+- **E Ereignis Anwurf:** Die 15 s vor jedem `throw_off`-Ereignis des Produkts sind tot.
+- **L leeres Feld:** Weniger als die Hälfte der im Clip üblichen Feldspieler (Median pro Sekunde)
+  steht auf dem Feld, mindestens 5 s in Folge -> tot (Time-out, Spieler an der Bank).
+- **Hauptregel H = A oder E oder L.** Tote Sekunden bekommen kein Team, sonst gilt die
+  Positionsregel unverändert.
+- **Klarer Gewinn** (wie `dead_eval.py`): richtig über alle Sekunden mindestens 5 Punkte höher als
+  die Positionsregel allein, 95-%-CI (20-s-Block-Bootstrap) über 0, auf den Sekunden mit Team
+  höchstens 2 Punkte schlechter, und in beiden Halbzeiten einzeln besser. Berichtet werden dazu
+  Präzision und Recall «tot» sowie der Anteil der Sekunden ohne Besitz, die ein Team bekommen.
+
