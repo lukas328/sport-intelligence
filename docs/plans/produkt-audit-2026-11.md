@@ -379,6 +379,38 @@ er wartet, wie viel er selbst korrigieren muss, und ob er den Zahlen trauen kann
   Weitere Nutzen, nicht gemessen: Zeitpunkte für Tor und Foul, Bestätigung von
   Wurf-Kandidaten. Skripte und Labels: `ml/integration/whistle/`.
 
+- **Pfiff als Bedingung für Tor-Kandidaten (26.11.): kein klarer Gewinn, aber ein klares
+  Muster.** Truth sind die Tore auf Mülheim (4) und Leimental (10), LLM-Labels: zwei Durchgänge,
+  dritter Blick auf 4 strittige Mülheim-Momente, eingefroren mit sha256 06aa4402…. Die
+  Leimental-Durchgänge stimmten bei allen 10 Toren überein, passend zur TV-Einblendung.
+  Kandidaten sind die bestehenden `goal_candidates`.
+
+  Vorab festgelegt: Treffer = `goal_ms` ±6 s. Gate = mindestens K Pfiffe in
+  [`goal_ms` + A, `goal_ms` + B], mit A ∈ {0, 3, 5}, B ∈ {15, 30, 45}, K ∈ {1, 2}. Gewählt auf
+  Mülheim, einmal auf Leimental getestet.
+
+  | Leimental, alle Kandidaten | Kandidaten | Treffer (von 10) | Präzision |
+  |---|---|---|---|
+  | ohne Gate | 40 | 10 | 25 % |
+  | Gate 16 kHz (A 3, B 15, K 2) | 6 | 3 | 50 % |
+  | Gate 8 kHz (A 0, B 15, K 2) | 16 | 4 | 25 % |
+
+  Das Gate verliert 6 bis 7 von 10 Toren. Nicht ins Produkt.
+
+  Warum, gemessen und nicht getuned:
+  - Nach einem Tor folgt fast immer ein Pfiffpaar: 13 von 14 Toren haben einen gelabelten Pfiff
+    0 bis 1,5 s danach (der Torpfiff), 12 von 14 einen weiteren 3,5 bis 6,7 s danach. Der
+    Detektor findet die meisten davon.
+  - `goal_ms` der Kandidaten liegt aber meist 3 bis 5 s nach dem echten Tor. Das Pfiffpaar fällt
+    damit auf −3 bis +1 s relativ zu `goal_ms`, also vor jedes Fenster im Raster, denn das Raster
+    hatte keine negativen Startwerte. Das ist ein Entwurfsfehler der Analyse-Sitzung, nicht des
+    Signals.
+
+  Leimental ist jetzt verbraucht. Eine zweite Runde mit Fenster um `goal_ms` (etwa −8 bis +4 s,
+  Pfiffpaar) braucht neue Spiele mit Ton, zum Beispiel nach dem Re-Ingest mit 16 kHz (#180).
+  Nebennutzen: das Pfiffpaar könnte die Torzeit eines Kandidaten auf ±1 s schärfen. Skripte und
+  Labels: `ml/integration/whistle/goals/`.
+
 ### 7. Wurfort unzuverlässig, Torzone fehlt
 
 - **Befund:** Ohne gelesene Nummer nimmt der Wurfort den nächsten Angreifer der letzten 10 s

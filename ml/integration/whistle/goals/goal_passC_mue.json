@@ -1,0 +1,6 @@
+[
+ {"t_given": 44.9, "goal": true, "t": 44.96, "sure": true, "note": "white #6 shot past diving red GK; ball low right inside goal at 45.0, rises into top-right of net 45.3-45.5 with big net bulge, drops inside net; later rolls out and GK fetches"},
+ {"t_given": 80.8, "goal": false, "t": null, "sure": true, "note": "shot vs green GK #75 goes wide past post behind the goal (~80.8); goal-line ref arm toward goal area (goal throw); GK fetches ball from behind goal at 81.9 and throws long for fast break"},
+ {"t_given": 116.6, "goal": false, "t": null, "sure": true, "note": "navy shot vs green GK; ball passes outside near post and rolls behind the net (~116.5), bounces off back wall netting; GK fetches it behind goal and throws long fast break"},
+ {"t_given": 229.9, "goal": true, "t": 229.98, "sure": true, "note": "navy 1-on-1 lob over green GK; ball enters under crossbar ~230.0, seen inside net 230.1-230.5 with strong bulge, then rolls out and GK picks it up"}
+]

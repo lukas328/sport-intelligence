@@ -1,0 +1,12 @@
+[
+{"t": 28.5, "team": "white (LEI)", "score_after": "1:0", "sure": true, "note": "shot into left goal, net bulges 28.5-28.9; overlay 1:0 by ~33"},
+{"t": 116.3, "team": "dark/black (ARB)", "score_after": "1:1", "sure": true, "note": "jump shot into right goal, net bulge 116.5; overlay 1:1 at ~120 (Hochreutener 1/1)"},
+{"t": 145.5, "team": "white (LEI)", "score_after": "2:1", "sure": true, "note": "jump shot from crowd into left goal, net bulge 145.6"},
+{"t": 180.4, "team": "dark/black (ARB)", "score_after": "2:2", "sure": true, "note": "7m throw into right goal, net bulge 180.6 (Ozcelik 1/2)"},
+{"t": 229.95, "team": "dark/black (ARB)", "score_after": "2:3", "sure": true, "note": "long-range shot into right goal, net bulge 230.0-230.2 (Windler 1/1)"},
+{"t": 291.1, "team": "white (LEI)", "score_after": "3:3", "sure": true, "note": "white #33 shot into left goal, net bulge 291.2-291.6"},
+{"t": 371.1, "team": "white (LEI)", "score_after": "4:3", "sure": true, "note": "shot into left goal, net bulge 371.2-371.6; overlay 4:3 by ~377"},
+{"t": 405.6, "team": "dark/black (ARB)", "score_after": "4:4", "sure": true, "note": "7m throw into right goal released ~405.4 (Ozcelik 2/3); overlay 4:4 by ~408"},
+{"t": 447.3, "team": "dark/black (ARB)", "score_after": "4:5", "sure": true, "note": "shot into right goal, net bulge 447.4-447.6 (Windler 2/2); overlay 4:5 at ~452"},
+{"t": 471.0, "team": "dark/black (ARB)", "score_after": "4:6", "sure": false, "note": "shot at right goal ~471.0, keeper fetches ball from goal 473.5, ball to centre, clock stops ~477.5 with long stoppage; overlay 4:6 (Windler 3/3) only at ~501; exact moment uncertain"}
+]
