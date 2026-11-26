@@ -16,6 +16,11 @@ them), then every other game of the library. The end-test games are never queued
 may look at other segments of those halls). Result per kernel: /kaggle/working/out/<segment>/
 (motion.npz, observations.npz, observe.json); `kaggle kernels output` fetches it. Needs the code
 dataset `handball-shot-endtest-code` (same code and models as the end test and the dev run).
+
+Known gap (decision 2026-11-26): `CH_Frauen_SPL1_GCAmicitia_LKZug_ca2020_s3` stays under "failed".
+It holds only empty masks, and the code dataset (version of 2026-11-19) predates the fix in
+`observe.save_observations` (801370fa). The dataset is not updated while the queue runs, so all
+segments are observed with one code version; the segment is redone after the queue, if needed.
 """
 
 from __future__ import annotations
@@ -104,6 +109,23 @@ def _status(i: int) -> str:
     return "unknown"  # API hiccup: never push on it (a done batch was pushed again, 2026-11-23)
 
 
+class ApiDownError(RuntimeError):
+    """The Kaggle API answered no kernel status at all (rate limit or outage, 2026-11-26)."""
+
+
+def _check_api(st: list[str]) -> None:
+    """All asked batches «unknown»: the API is down, not the kernels. Raise, so a scheduled step
+    fails visibly instead of pushing nothing and looking fine; a few unknown ones only warn."""
+    asked = [s for s in st if s != "empty"]
+    unknown = asked.count("unknown")
+    if asked and unknown == len(asked):
+        raise ApiDownError(
+            f"Kaggle API gave no status for any of {len(asked)} batches (rate limit?)"
+        )
+    if unknown:
+        print(f"warning: {unknown} of {len(asked)} batches without status, not pushed this time")
+
+
 def status() -> list[str]:
     q = json.loads(QUEUE.read_text())
     st = [_status(i) if b else "empty" for i, b in enumerate(q["batches"])]
@@ -111,6 +133,7 @@ def status() -> list[str]:
         if s not in ("new", "empty"):
             print(SLUG.format(i), s, len(q["batches"][i]), "segments")
     print({s: st.count(s) for s in sorted(set(st))})
+    _check_api(st)
     return st
 
 
@@ -221,6 +244,13 @@ def main() -> None:
     r.add_argument("batch", type=int)
     r.add_argument("--have", type=Path, help="downloaded output: requeue only what is missing")
     a = ap.parse_args()
+    try:
+        _run(a)
+    except ApiDownError as exc:
+        sys.exit(f"error: {exc}")
+
+
+def _run(a: argparse.Namespace) -> None:
     if a.cmd == "build":
         build(a.library)
     elif a.cmd == "requeue":
