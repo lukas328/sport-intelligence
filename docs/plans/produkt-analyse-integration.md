@@ -251,7 +251,9 @@ Lesart:
   Uhr-Lesungen (148 ohne, 145 mit den neuen Grenzen). Die Kosten dort sind klein (16 s auf 3 min);
   die Grenzen schützen Aufnahmen, auf denen die Tafel nie gefunden wird.
 - **Entscheid Hauptsitzung 2026-11-17:** Ein abgebrochenes Spiel liefert gar keine Nummern, das
-  wiegt schwerer. Darum Gate und Budget als Standard.
+  wiegt schwerer. Darum Gate und Budget als Standard. **Ersetzt am 2026-11-26 (Grund: ReID aus,
+  #146):** CPU-Standard jetzt jedes Detektionsbild und Budget 1.5, das Gate bleibt; siehe
+  «Rückennummern-Ausbeute auf Dev».
 - **Grobe Hochrechnung für Staging (2 vCPU, etwa doppelt so langsam):**
   - Rückennummern höchstens 0.75 x Videolänge, durch das Budget gedeckelt;
   - YOLOX und Kamera auf 4 Kernen etwa 0.8 bis 0.9 x, auf 2 vCPU etwa 1.7 x;
@@ -1333,7 +1335,8 @@ ReID (wie seit #146 im Produkt), mit gelernten Teamfarben (#149).
 | Nummernzeit | 225 s | 489 s | | |
 | Beobachtung gesamt | 744 s | 835 s (+12 %) | | |
 
-- **Entscheid (Audit-Sitzung, im PR zur Prüfung durch die Hauptsitzung):** CPU-Standard
+- **Entscheid (Hauptsitzung 2026-11-26, ersetzt den Budget-Entscheid vom 2026-11-17, Grund ReID
+  aus):** CPU-Standard
   `number_every` 3 (jedes Detektionsbild, wie das GPU-Image) und `number_budget` 1.5. Der Deckel
   bleibt, ein Spiel kann also nicht unbegrenzt wachsen. Die CPU-App nimmt Videos bis 12 min; ganze
   Spiele laufen auf dem GPU-Job, der schon dicht liest. Grobe Obergrenze auf Staging (2 vCPU):
