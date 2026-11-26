@@ -30,7 +30,7 @@ class JobSettings(BaseSettings):
     ball_model_sha256: str = ""
     # the ball nets and ReID only with a GPU (CUDA): on a CPU worker the nets take about 1 to 2 s
     # per frame (a whole game: days), ReID about 2.5 CPU s per video second. ball_allow_cpu=1 lets
-    # them run on a CPU for videos of at most ball_max_minutes (short trial runs).
+    # the ball nets (not ReID) run on a CPU for videos of at most ball_max_minutes (short trials).
     ball_allow_cpu: bool = False
     ball_max_minutes: float = 12.0  # the 10-minute test clips run 10:02 and 10:09
     # longest video the analysis takes in this environment, minutes (0: no limit); longer ones end

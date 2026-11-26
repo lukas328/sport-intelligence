@@ -221,14 +221,16 @@ def load_embedder(
     """Person re-identification (`HB_REID_MODEL`, local file or bucket key with
     `HB_REID_MODEL_SHA256`) and the status of `resolve_models`. TEST PHASE: the FastReID weights
     were trained on MSMT17 (non-commercial research only, ml/models/reid-fastreid.md, Q-ML-5);
-    not for a real go-live."""
+    not for a real go-live. Only with a GPU (CUDA), whatever `ball_allow_cpu` says: on a CPU it
+    took 56 % of the analysis time of an 8-minute staging run (34 of 60 min, product audit
+    2026-11) for little gain (25 to 35 % of the playing time with a number). `video_s` is kept
+    for the callers."""
     paths, status = resolve_models(settings.reid_model, settings.reid_model_sha256, settings, s3)
     if status != "ok":
         return None, status
-    gate = _cpu_gate(settings, video_s)
-    if gate is not None:
-        log.warning("reid_model_needs_gpu", model=settings.reid_model, status=gate)
-        return None, gate
+    if not _has_cuda():
+        log.info("reid_model_needs_gpu", model=settings.reid_model)
+        return None, "no_gpu"
     return Embedder(paths[0], threads=settings.detector_threads or None), status
 
 

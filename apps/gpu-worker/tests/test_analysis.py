@@ -931,17 +931,18 @@ def test_reid_and_role_models_from_bucket_or_file(tmp_path: Path) -> None:
 def test_ball_net_and_reid_need_a_gpu_by_default(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """Without CUDA the ball nets and ReID stay off; HB_BALL_ALLOW_CPU=1 lets them run on a CPU
-    for videos of at most HB_BALL_MAX_MINUTES (a whole game on a CPU worker would take days)."""
+    """Without CUDA the ball nets and ReID stay off; HB_BALL_ALLOW_CPU=1 lets the ball nets (not
+    ReID: 56 % of the CPU analysis time, product audit 2026-11) run on a CPU for videos of at most
+    HB_BALL_MAX_MINUTES (a whole game on a CPU worker would take days)."""
     net = _tiny_ball_net(tmp_path / "hr1.onnx")
     monkeypatch.setattr(analysis, "_has_cuda", lambda: False)
     assert analysis.load_ball_net(JobSettings(ball_model=str(net)), None, 60) == (None, "no_gpu")
     assert analysis.load_embedder(JobSettings(reid_model=str(net)), None, 60) == (None, "no_gpu")
     cpu = JobSettings(ball_model=str(net), reid_model=str(net), ball_allow_cpu=True)
     assert analysis.load_ball_net(cpu, None, 120)[1] == "ok"
-    assert analysis.load_embedder(cpu, None, 120)[1] == "ok"
+    assert analysis.load_embedder(cpu, None, 120) == (None, "no_gpu")
     assert analysis.load_ball_net(cpu, None, 721) == (None, "too_long_for_cpu")
-    assert analysis.load_embedder(cpu, None, 3600) == (None, "too_long_for_cpu")
+    assert analysis.load_embedder(cpu, None, 3600) == (None, "no_gpu")
     assert analysis.load_ball_net(cpu, None, None) == (None, "too_long_for_cpu")
     longer = JobSettings(ball_model=str(net), ball_allow_cpu=True, ball_max_minutes=20)
     assert analysis.load_ball_net(longer, None, 1100)[1] == "ok"
