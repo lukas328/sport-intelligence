@@ -1,0 +1,1046 @@
+{
+ "h1": [
+  {
+   "A": {
+    "release_t": null,
+    "floor_px": null,
+    "team": "yellow",
+    "kind": "fast_break",
+    "outcome": "goal",
+    "status": "not_visible",
+    "precision_s": null,
+    "note": "Yellow counter attack after camera pan; shooter out of frame left, ball in left net about 222.2."
+   },
+   "B": null,
+   "court_A": null,
+   "court_B": null,
+   "agreed": false
+  },
+  {
+   "A": {
+    "release_t": 32.76,
+    "floor_px": [
+     350,
+     485
+    ],
+    "team": "yellow",
+    "kind": "open",
+    "outcome": "save",
+    "status": "unsure",
+    "precision_s": 0.08,
+    "note": "Yellow back shoots through red defenders at left goal; GK appears to keep ball, outcome not clearly seen."
+   },
+   "B": {
+    "release_t": 32.72,
+    "floor_px": [
+     332,
+     496
+    ],
+    "team": "yellow",
+    "kind": "open",
+    "outcome": "save",
+    "status": "ok",
+    "precision_s": 0.08,
+    "note": "Yellow #17 back-court shot, saved by goalkeeper."
+   },
+   "court_A": [
+    6.605737387917303,
+    4.480002976787534
+   ],
+   "court_B": [
+    6.772911170195726,
+    4.078594783677838
+   ],
+   "agreed": true,
+   "truth": {
+    "release_t": 32.74,
+    "court": [
+     6.689324279056514,
+     4.279298880232686
+    ],
+    "team": "yellow",
+    "kind": "open"
+   }
+  },
+  {
+   "A": {
+    "release_t": 41.56,
+    "floor_px": [
+     420,
+     440
+    ],
+    "team": "red",
+    "kind": "open",
+    "outcome": "unclear",
+    "status": "unsure",
+    "precision_s": 0.12,
+    "note": "Red jump shot from the back court at right goal; GK dives low, save or miss, ball not tracked."
+   },
+   "B": {
+    "release_t": 41.68,
+    "floor_px": [
+     440,
+     458
+    ],
+    "team": "red",
+    "kind": "open",
+    "outcome": "save",
+    "status": "unsure",
+    "precision_s": 0.12,
+    "note": "Red shot, goalkeeper appears to save; release partly hidden."
+   },
+   "court_A": [
+    32.105575410025686,
+    10.219031156665311
+   ],
+   "court_B": [
+    32.69917629595357,
+    9.506821098253747
+   ],
+   "agreed": true,
+   "truth": {
+    "release_t": 41.62,
+    "court": [
+     32.40237585298963,
+     9.862926127459529
+    ],
+    "team": "red",
+    "kind": "open"
+   }
+  },
+  {
+   "A": {
+    "release_t": 53.6,
+    "floor_px": [
+     285,
+     430
+    ],
+    "team": "yellow",
+    "kind": "open",
+    "outcome": "save",
+    "status": "unsure",
+    "precision_s": 0.08,
+    "note": "Yellow wing jump shot at left goal; GK blocks with leg."
+   },
+   "B": {
+    "release_t": 53.66,
+    "floor_px": [
+     305,
+     410
+    ],
+    "team": "yellow",
+    "kind": "open",
+    "outcome": "save",
+    "status": "unsure",
+    "precision_s": 0.12,
+    "note": "Yellow shot at left goal, probably saved."
+   },
+   "court_A": [
+    2.0014919801894067,
+    4.633253759742427
+   ],
+   "court_B": [
+    1.166344015083099,
+    5.462351164179774
+   ],
+   "agreed": true,
+   "truth": {
+    "release_t": 53.63,
+    "court": [
+     1.5839179976362527,
+     5.0478024619611
+    ],
+    "team": "yellow",
+    "kind": "open"
+   }
+  },
+  {
+   "A": {
+    "release_t": 90.64,
+    "floor_px": [
+     1080,
+     515
+    ],
+    "team": "red",
+    "kind": "open",
+    "outcome": "save",
+    "status": "unsure",
+    "precision_s": 0.08,
+    "note": "Red #23 jumps in from pivot area at right goal; GK saves, ball rebounds out."
+   },
+   "B": {
+    "release_t": 90.52,
+    "floor_px": [
+     1055,
+     485
+    ],
+    "team": "red",
+    "kind": "open",
+    "outcome": "save",
+    "status": "ok",
+    "precision_s": 0.08,
+    "note": "Red shot at right goal, most likely saved."
+   },
+   "court_A": [
+    35.600379882612124,
+    5.259807049229384
+   ],
+   "court_B": [
+    36.12924798815665,
+    6.098863397881234
+   ],
+   "agreed": true,
+   "truth": {
+    "release_t": 90.58,
+    "court": [
+     35.86481393538439,
+     5.679335223555309
+    ],
+    "team": "red",
+    "kind": "open"
+   }
+  },
+  {
+   "A": {
+    "release_t": 99.44,
+    "floor_px": [
+     635,
+     280
+    ],
+    "team": "yellow",
+    "kind": "fast_break",
+    "outcome": "goal",
+    "status": "unsure",
+    "precision_s": 0.08,
+    "note": "Yellow player alone against GK at left goal, jump shot past GK into the net."
+   },
+   "B": null,
+   "court_A": [
+    -0.95159930611046,
+    15.883721543599838
+   ],
+   "court_B": null,
+   "agreed": false
+  },
+  {
+   "A": null,
+   "B": {
+    "release_t": 107.2,
+    "floor_px": [
+     608,
+     290
+    ],
+    "team": "red",
+    "kind": "open",
+    "outcome": "save",
+    "status": "unsure",
+    "precision_s": 0.2,
+    "note": "Red shot in a far-away view, outcome probably a save; timing uncertain."
+   },
+   "court_A": null,
+   "court_B": [
+    34.819037084214195,
+    18.47622720426364
+   ],
+   "agreed": false
+  },
+  {
+   "A": {
+    "release_t": 182.72,
+    "floor_px": [
+     620,
+     365
+    ],
+    "team": "yellow",
+    "kind": "open",
+    "outcome": "goal",
+    "status": "ok",
+    "precision_s": 0.06,
+    "note": "Yellow long-haired player bounce shot at left goal with one red defender near; ball in net at 183.08."
+   },
+   "B": null,
+   "court_A": [
+    8.15553522538262,
+    9.653054948907121
+   ],
+   "court_B": null,
+   "agreed": false
+  },
+  {
+   "A": {
+    "release_t": 214.2,
+    "floor_px": [
+     405,
+     268
+    ],
+    "team": "red",
+    "kind": "open",
+    "outcome": "unclear",
+    "status": "unsure",
+    "precision_s": 0.15,
+    "note": "Red back throws through yellow defence at right goal from far camera view; GK reacts, then retrieves ball."
+   },
+   "B": {
+    "release_t": 214.04,
+    "floor_px": [
+     400,
+     268
+    ],
+    "team": "red",
+    "kind": "open",
+    "outcome": "goal",
+    "status": "unsure",
+    "precision_s": 0.12,
+    "note": "Red shot ends in a goal; release frame and floor point estimated."
+   },
+   "court_A": [
+    35.45804874633226,
+    17.51223077320683
+   ],
+   "court_B": [
+    35.37249328485561,
+    17.521650687568073
+   ],
+   "agreed": true,
+   "truth": {
+    "release_t": 214.12,
+    "court": [
+     35.41527101559393,
+     17.516940730387454
+    ],
+    "team": "red",
+    "kind": "open"
+   }
+  },
+  {
+   "A": null,
+   "B": {
+    "release_t": 222.04,
+    "floor_px": [
+     175,
+     447
+    ],
+    "team": "yellow",
+    "kind": "open",
+    "outcome": "goal",
+    "status": "unsure",
+    "precision_s": 0.2,
+    "note": "Yellow goal near the left edge of frame, shot barely visible."
+   },
+   "court_A": null,
+   "court_B": [
+    8.1197607669344,
+    6.408616634048961
+   ],
+   "agreed": false
+  },
+  {
+   "A": {
+    "release_t": 301.6,
+    "floor_px": [
+     445,
+     395
+    ],
+    "team": "red",
+    "kind": "open",
+    "outcome": "unclear",
+    "status": "unsure",
+    "precision_s": 0.12,
+    "note": "Red player shoots from crowd of defenders; shot moment and outcome hard to see."
+   },
+   "B": {
+    "release_t": 301.44,
+    "floor_px": [
+     590,
+     330
+    ],
+    "team": "red",
+    "kind": "open",
+    "outcome": "goal",
+    "status": "unsure",
+    "precision_s": 0.12,
+    "note": "Red goal, shooter partly hidden by defenders."
+   },
+   "court_A": [
+    32.09053950405236,
+    10.67605110626786
+   ],
+   "court_B": [
+    35.56154657340813,
+    12.206828517704512
+   ],
+   "agreed": false
+  },
+  {
+   "A": {
+    "release_t": 327.8,
+    "floor_px": [
+     720,
+     370
+    ],
+    "team": "yellow",
+    "kind": "open",
+    "outcome": "unclear",
+    "status": "unsure",
+    "precision_s": 0.08,
+    "note": "Yellow #14 back-court shot at left goal; outcome not visible, play restarts toward right."
+   },
+   "B": {
+    "release_t": 327.82,
+    "floor_px": [
+     730,
+     370
+    ],
+    "team": "yellow",
+    "kind": "open",
+    "outcome": "unclear",
+    "status": "unsure",
+    "precision_s": 0.2,
+    "note": "Long-haired yellow player shoots under contact at left goal, outcome unclear."
+   },
+   "court_A": [
+    8.853170294717465,
+    9.493587711800629
+   ],
+   "court_B": [
+    8.989865666956815,
+    9.560622352625025
+   ],
+   "agreed": true,
+   "truth": {
+    "release_t": 327.81,
+    "court": [
+     8.921517980837141,
+     9.527105032212827
+    ],
+    "team": "yellow",
+    "kind": "open"
+   }
+  },
+  {
+   "A": {
+    "release_t": 391.48,
+    "floor_px": [
+     790,
+     365
+    ],
+    "team": "red",
+    "kind": "open",
+    "outcome": "save",
+    "status": "ok",
+    "precision_s": 0.04,
+    "note": "Red jump shot at right goal; GK dives and deflects ball over/behind goal."
+   },
+   "B": {
+    "release_t": 391.48,
+    "floor_px": [
+     785,
+     365
+    ],
+    "team": "red",
+    "kind": "open",
+    "outcome": "save",
+    "status": "ok",
+    "precision_s": 0.08,
+    "note": "Red diving shot from 6 m, goalkeeper saves."
+   },
+   "court_A": [
+    35.88234608480841,
+    10.022142514730067
+   ],
+   "court_B": [
+    35.8155836310984,
+    10.053692366027287
+   ],
+   "agreed": true,
+   "truth": {
+    "release_t": 391.48,
+    "court": [
+     35.848964857953405,
+     10.037917440378678
+    ],
+    "team": "red",
+    "kind": "open"
+   }
+  },
+  {
+   "A": {
+    "release_t": 448.76,
+    "floor_px": [
+     612,
+     400
+    ],
+    "team": "yellow",
+    "kind": "open",
+    "outcome": "miss",
+    "status": "unsure",
+    "precision_s": 0.08,
+    "note": "Yellow #14 shot at left goal among defenders; ball goes past left post."
+   },
+   "B": null,
+   "court_A": [
+    8.690653881623962,
+    8.047891791600044
+   ],
+   "court_B": null,
+   "agreed": false
+  },
+  {
+   "A": {
+    "release_t": 459.32,
+    "floor_px": [
+     935,
+     410
+    ],
+    "team": "red",
+    "kind": "open",
+    "outcome": "goal",
+    "status": "unsure",
+    "precision_s": 0.06,
+    "note": "Red wing jump shot from right side at right goal; ball in the net at 459.56."
+   },
+   "B": {
+    "release_t": 459.32,
+    "floor_px": [
+     935,
+     425
+    ],
+    "team": "red",
+    "kind": "open",
+    "outcome": "goal",
+    "status": "ok",
+    "precision_s": 0.08,
+    "note": "Red wing jump shot at right goal, goal."
+   },
+   "court_A": [
+    38.45288445037194,
+    5.780020018646942
+   ],
+   "court_B": [
+    37.9263915647639,
+    5.382575539451838
+   ],
+   "agreed": true,
+   "truth": {
+    "release_t": 459.32,
+    "court": [
+     38.18963800756792,
+     5.58129777904939
+    ],
+    "team": "red",
+    "kind": "open"
+   }
+  },
+  {
+   "A": {
+    "release_t": 515.86,
+    "floor_px": [
+     595,
+     425
+    ],
+    "team": "yellow",
+    "kind": "open",
+    "outcome": "miss",
+    "status": "unsure",
+    "precision_s": 0.08,
+    "note": "Yellow #5 jump shot at left goal while held by defender; ball goes high over goal."
+   },
+   "B": {
+    "release_t": 515.88,
+    "floor_px": [
+     590,
+     405
+    ],
+    "team": "yellow",
+    "kind": "open",
+    "outcome": "block",
+    "status": "unsure",
+    "precision_s": 0.12,
+    "note": "Yellow #5 shoots in traffic, ball loops high, looks blocked or deflected."
+   },
+   "court_A": [
+    10.17574874218949,
+    7.589034201400562
+   ],
+   "court_B": [
+    9.522430216677838,
+    8.20940328820083
+   ],
+   "agreed": true,
+   "truth": {
+    "release_t": 515.87,
+    "court": [
+     9.849089479433665,
+     7.899218744800696
+    ],
+    "team": "yellow",
+    "kind": "open"
+   }
+  },
+  {
+   "A": {
+    "release_t": 540.22,
+    "floor_px": [
+     385,
+     335
+    ],
+    "team": "yellow",
+    "kind": "open",
+    "outcome": "goal",
+    "status": "unsure",
+    "precision_s": 0.08,
+    "note": "Yellow player dives in from right of the area at left goal and scores past diving GK."
+   },
+   "B": {
+    "release_t": 540.04,
+    "floor_px": [
+     415,
+     350
+    ],
+    "team": "yellow",
+    "kind": "open",
+    "outcome": "unclear",
+    "status": "ok",
+    "precision_s": 0.08,
+    "note": "Yellow jump shot from 6 m at left goal, goalkeeper dives, outcome unclear."
+   },
+   "court_A": [
+    3.8674742778317177,
+    9.90526131524372
+   ],
+   "court_B": [
+    5.201122815595819,
+    9.44602750409327
+   ],
+   "agreed": true,
+   "truth": {
+    "release_t": 540.13,
+    "court": [
+     4.534298546713768,
+     9.675644409668495
+    ],
+    "team": "yellow",
+    "kind": "open"
+   }
+  },
+  {
+   "A": null,
+   "B": {
+    "release_t": 576.16,
+    "floor_px": [
+     628,
+     245
+    ],
+    "team": "red",
+    "kind": "open",
+    "outcome": "save",
+    "status": "ok",
+    "precision_s": 0.08,
+    "note": "Red jump shot, goalkeeper blocks with arms up, ball rebounds."
+   },
+   "court_A": null,
+   "court_B": [
+    39.3102178220233,
+    17.323491610632868
+   ],
+   "agreed": false
+  },
+  {
+   "A": null,
+   "B": {
+    "release_t": 607.52,
+    "floor_px": [
+     580,
+     365
+    ],
+    "team": "red",
+    "kind": "open",
+    "outcome": "unclear",
+    "status": "unsure",
+    "precision_s": 0.12,
+    "note": "Red shot out of a cluster at right goal, goalkeeper dives, shooter hard to identify."
+   },
+   "court_A": null,
+   "court_B": [
+    34.59155203811823,
+    10.695395387850672
+   ],
+   "agreed": false
+  }
+ ],
+ "h2": [
+  {
+   "A": {
+    "release_t": 4.92,
+    "floor_px": [
+     350,
+     285
+    ],
+    "team": "yellow",
+    "kind": "open",
+    "outcome": "unclear",
+    "status": "unsure",
+    "precision_s": 0.12,
+    "note": "Yellow player dives in from the left wing at the right goal; he lands on the floor and the result is not clear."
+   },
+   "B": {
+    "release_t": 4.96,
+    "floor_px": [
+     355,
+     300
+    ],
+    "team": "yellow",
+    "kind": "open",
+    "outcome": "save",
+    "status": "unsure",
+    "precision_s": 0.12,
+    "note": "Yellow diving shot from the far wing at the right goal; ball bounces away and red counters."
+   },
+   "court_A": [
+    37.57188936654725,
+    16.18364916430286
+   ],
+   "court_B": [
+    36.723841732066134,
+    14.98369452597902
+   ],
+   "agreed": true,
+   "truth": {
+    "release_t": 4.94,
+    "court": [
+     37.147865549306694,
+     15.583671845140941
+    ],
+    "team": "yellow",
+    "kind": "open"
+   }
+  },
+  {
+   "A": {
+    "release_t": 41.06,
+    "floor_px": [
+     755,
+     340
+    ],
+    "team": "red",
+    "kind": "open",
+    "outcome": "goal",
+    "status": "unsure",
+    "precision_s": 0.08,
+    "note": "Red jump shot at the left goal past defender 43; the ball appears to end in the net."
+   },
+   "B": {
+    "release_t": 41.0,
+    "floor_px": [
+     750,
+     358
+    ],
+    "team": "red",
+    "kind": "open",
+    "outcome": "goal",
+    "status": "ok",
+    "precision_s": 0.08,
+    "note": "Red jump shot at the left goal; players run back and fans applaud."
+   },
+   "court_A": [
+    5.326931099318344,
+    11.764837691007436
+   ],
+   "court_B": [
+    6.059763791890445,
+    10.77559690182777
+   ],
+   "agreed": true,
+   "truth": {
+    "release_t": 41.03,
+    "court": [
+     5.693347445604394,
+     11.270217296417602
+    ],
+    "team": "red",
+    "kind": "open"
+   }
+  },
+  {
+   "A": {
+    "release_t": 79.9,
+    "floor_px": null,
+    "team": "yellow",
+    "kind": "open",
+    "outcome": "unclear",
+    "status": "unsure",
+    "precision_s": 0.3,
+    "note": "Possible yellow shot from a crowd of players at the left goal; the ball rolls to the goalkeeper; the shooter is not identifiable."
+   },
+   "B": null,
+   "court_A": null,
+   "court_B": null,
+   "agreed": false
+  },
+  {
+   "A": {
+    "release_t": 86.52,
+    "floor_px": [
+     680,
+     325
+    ],
+    "team": "yellow",
+    "kind": "open",
+    "outcome": "unclear",
+    "status": "unsure",
+    "precision_s": 0.08,
+    "note": "Yellow close-range jump shot at the right goal; the goalkeeper dives, the result is uncertain (possibly a goal)."
+   },
+   "B": {
+    "release_t": 86.44,
+    "floor_px": [
+     690,
+     340
+    ],
+    "team": "yellow",
+    "kind": "open",
+    "outcome": "unclear",
+    "status": "ok",
+    "precision_s": 0.08,
+    "note": "Yellow close-range jump shot at the right goal after a quick attack; ball may be in the net."
+   },
+   "court_A": [
+    35.691423719007396,
+    6.897109912079965
+   ],
+   "court_B": [
+    35.16001925903679,
+    6.334166765101421
+   ],
+   "agreed": true,
+   "truth": {
+    "release_t": 86.48,
+    "court": [
+     35.425721489022095,
+     6.615638338590693
+    ],
+    "team": "yellow",
+    "kind": "open"
+   }
+  },
+  {
+   "A": {
+    "release_t": 92.74,
+    "floor_px": [
+     840,
+     255
+    ],
+    "team": "red",
+    "kind": "fast_break",
+    "outcome": "unclear",
+    "status": "unsure",
+    "precision_s": 0.08,
+    "note": "Red player breaks in and jump-shoots at the left goal; the shooter falls and the outcome is not seen."
+   },
+   "B": {
+    "release_t": 92.76,
+    "floor_px": [
+     845,
+     275
+    ],
+    "team": "red",
+    "kind": "open",
+    "outcome": "save",
+    "status": "unsure",
+    "precision_s": 0.12,
+    "note": "Red diving shot from about 7 m at the left goal; keeper reacts and yellow fans cheer."
+   },
+   "court_A": [
+    5.636579898812111,
+    13.251499914425255
+   ],
+   "court_B": [
+    6.619993709857065,
+    12.122088984292358
+   ],
+   "agreed": true,
+   "truth": {
+    "release_t": 92.75,
+    "court": [
+     6.1282868043345875,
+     12.686794449358807
+    ],
+    "team": "red",
+    "kind": "disputed_kind:fast_break/open"
+   }
+  },
+  {
+   "A": {
+    "release_t": 127.38,
+    "floor_px": [
+     1105,
+     355
+    ],
+    "team": "yellow",
+    "kind": "open",
+    "outcome": "save",
+    "status": "unsure",
+    "precision_s": 0.06,
+    "note": "Yellow jump shot from the right wing at the right goal; the goalkeeper dives, probably a save."
+   },
+   "B": {
+    "release_t": 127.36,
+    "floor_px": [
+     1090,
+     375
+    ],
+    "team": "yellow",
+    "kind": "open",
+    "outcome": "save",
+    "status": "ok",
+    "precision_s": 0.06,
+    "note": "Yellow jump shot from the right side close to the right goal; keeper dives and red fans cheer."
+   },
+   "court_A": [
+    37.05614196705785,
+    4.833497373092584
+   ],
+   "court_B": [
+    36.05167435442424,
+    4.4141248190528
+   ],
+   "agreed": true,
+   "truth": {
+    "release_t": 127.37,
+    "court": [
+     36.553908160741045,
+     4.623811096072692
+    ],
+    "team": "yellow",
+    "kind": "open"
+   }
+  },
+  {
+   "A": {
+    "release_t": 187.08,
+    "floor_px": [
+     845,
+     300
+    ],
+    "team": "red",
+    "kind": "open",
+    "outcome": "goal",
+    "status": "unsure",
+    "precision_s": 0.12,
+    "note": "Red back-court shot through the block at the left goal; the goalkeeper dives and red fans cheer after it."
+   },
+   "B": {
+    "release_t": 187.28,
+    "floor_px": [
+     855,
+     275
+    ],
+    "team": "red",
+    "kind": "open",
+    "outcome": "goal",
+    "status": "unsure",
+    "precision_s": 0.15,
+    "note": "Red back-court shot through the block at the left goal, then a goal celebration; ball mostly hidden."
+   },
+   "court_A": [
+    8.354948387259412,
+    11.14345380936114
+   ],
+   "court_B": [
+    7.585290016339967,
+    12.515803059095672
+   ],
+   "agreed": false
+  },
+  {
+   "A": null,
+   "B": {
+    "release_t": 509.26,
+    "floor_px": [
+     630,
+     300
+    ],
+    "team": "red",
+    "kind": "open",
+    "outcome": "goal",
+    "status": "unsure",
+    "precision_s": 0.3,
+    "note": "Red shot out of a crowded 9 m area at the left goal; ball hidden at release and fans applaud afterwards."
+   },
+   "court_A": null,
+   "court_B": [
+    7.062465808030952,
+    10.170224732513418
+   ],
+   "agreed": false
+  },
+  {
+   "A": {
+    "release_t": 519.34,
+    "floor_px": [
+     960,
+     365
+    ],
+    "team": "yellow",
+    "kind": "open",
+    "outcome": "goal",
+    "status": "ok",
+    "precision_s": 0.06,
+    "note": "Yellow jump shot from the right side at the right goal; the goalkeeper fetches the ball out of the goal."
+   },
+   "B": {
+    "release_t": 519.48,
+    "floor_px": [
+     945,
+     355
+    ],
+    "team": "yellow",
+    "kind": "open",
+    "outcome": "save",
+    "status": "ok",
+    "precision_s": 0.06,
+    "note": "Yellow jump shot from the right side at the right goal; keeper blocks with his leg."
+   },
+   "court_A": [
+    36.34854129456286,
+    4.29330434889888
+   ],
+   "court_B": [
+    36.55534194642607,
+    4.721564494098374
+   ],
+   "agreed": true,
+   "truth": {
+    "release_t": 519.41,
+    "court": [
+     36.451941620494466,
+     4.507434421498626
+    ],
+    "team": "yellow",
+    "kind": "open"
+   }
+  },
+  {
+   "A": null,
+   "B": {
+    "release_t": 546.06,
+    "floor_px": [
+     695,
+     280
+    ],
+    "team": "red",
+    "kind": "open",
+    "outcome": "goal",
+    "status": "unsure",
+    "precision_s": 0.3,
+    "note": "Red shot through the block at the left goal; ball seen at the goal line at 546.18, followed by a yellow throw-off."
+   },
+   "court_A": null,
+   "court_B": [
+    6.028195024429716,
+    11.400264996338429
+   ],
+   "agreed": false
+  }
+ ]
+}

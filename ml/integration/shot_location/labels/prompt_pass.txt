@@ -1,0 +1,23 @@
+You label handball SHOTS in a video by looking at frames (you are a vision-capable model; use the Read tool on JPEG files to see them). This is data labelling for a research evaluation; accuracy matters more than speed. Your labels are marked as LLM labels.
+
+SCR=/tmp/claude-0/-home-user-sport-intelligence/90b1d550-54f3-5af2-9e4d-128d1f5ace9d/scratchpad/wl
+PY=/home/user/sport-intelligence/.venv/bin/python
+Video: VIDEO (1280x720, 25 fps, 609 s). Teams: one team in YELLOW shirts with black shorts, the other in RED/WHITE shirts. The camera pans and zooms to follow play.
+
+Tools:
+- `$PY $SCR/sheet.py VIDEO T0 STEP N OUT [COLS] [W] [X0 Y0 X1 Y1]` writes OUT with N frames at times T0 + k*STEP (seconds), each labelled with its time in yellow; COLS columns, each frame W px wide; optional crop box in 1280x720 picture coordinates.
+- `$PY $SCR/grid.py VIDEO T OUT [X0 Y0 X1 Y1]` writes the frame at time T at 1280x720 (or the crop box enlarged) with a pixel grid in PICTURE coordinates: thin lines every 20 px, thick labelled lines every 100 px (x labels at the top in yellow, y labels at the left in magenta). Read coordinates directly off the grid labels.
+
+Work ONLY in $SCR/workP (scratch) and write your result ONLY to $SCR/passP/CLIP.json. Do NOT read anything in another pass's folders (passA/passB/workA/workB other than your own P) or any other repository file; your judgement must be independent.
+
+Task: find EVERY shot on goal in the whole video (a throw at the goal: goal, save, miss, blocked shot, penalty throw). Not passes, not throw-offs.
+1. Scan: sheets with STEP 1.0, N 24, COLS 6, W 320, T0 = 0, 24, 48, ... up to 609 (output $SCR/workP/CLIP_s<T0>.jpg). Read each. Note every moment that looks like a shot (player throwing towards the goal, goalkeeper reacting, ball in the net, players running back after a goal).
+2. For each suspected shot: a fine sheet around it (STEP 0.2 to 0.12, N 12, COLS 3, W 512, crop on shooter and goal if small). Release time = the time of the LAST frame in which the ball is still in the shooter's hand. Refine with STEP 0.04 if needed (25 fps: one frame is 0.04 s).
+3. At the release time make a grid image (crop around the shooter, e.g. a 400x225 box, so the grid is fine). Mark the FLOOR POINT below the shooter: the point on the floor vertically below the shooter's hips. If the shooter stands, that is between the feet; in a jump shot estimate where the floor is below the hips (the take-off spot or the shadow help). Give it in 1280x720 picture coordinates (x, y), to the nearest ~5 px.
+4. If a shot is not visible well enough (camera away, cut, ball hidden), still list it with status "not_visible" and null values where you cannot tell.
+
+Write $SCR/passP/CLIP.json: a JSON list, one object per shot in time order, exactly these keys:
+{"release_t": <float s, 2 decimals or null>, "floor_px": [x, y] or null, "team": "yellow" | "red" | "unclear", "kind": "open" | "penalty" | "fast_break", "outcome": "goal" | "save" | "miss" | "block" | "unclear", "status": "ok" | "unsure" | "not_visible", "precision_s": <honest uncertainty of release_t>, "note": "<one short sentence>"}
+"fast_break": the shooter ran the length of the court alone or almost alone (counter attack). "penalty": 7 m throw. "unsure": you picked a time/point but are not confident (shot or not, moment within about 0.3 s, or point within about 40 px).
+
+Keep your final answer short: number of shots and the list of release_t, status. Do not modify any other file.
