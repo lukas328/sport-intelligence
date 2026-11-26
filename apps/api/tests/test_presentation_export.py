@@ -58,3 +58,12 @@ async def test_spotlight_export_carries_the_latest_court(
     info = payload["analysis"][video["id"]]
     assert info["chunk_ms"] == 10_000 and info["chunks_prefix"].endswith("/analysis/")
     assert info["homography"][0][0] == 2.0  # the newer court
+    # a moving camera: its court refers to the hall image, the export draws no spotlight
+    await owner_conn.execute(
+        "UPDATE video_assets SET analysis = $1::jsonb WHERE id = $2::uuid",
+        json.dumps({"chunk_ms": 10_000, "camera": "moving", "view_chunks": 1}),
+        video["id"],
+    )
+    assert (await coach.post(f"{base}/export")).status_code == 202
+    payload = coach.app.state.jobs.jobs[-1][3]["payload"]
+    assert video["id"] not in payload["analysis"]

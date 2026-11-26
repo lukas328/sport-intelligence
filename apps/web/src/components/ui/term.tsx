@@ -20,7 +20,7 @@ export function Term({ children, explain, className }: { children: ReactNode; ex
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-controls={id}
-        className="cursor-help border-0 bg-transparent p-0 font-[inherit] text-[inherit] underline decoration-dotted decoration-[1.5px] underline-offset-4"
+        className="hit cursor-help border-0 bg-transparent p-0 font-[inherit] text-[inherit] underline decoration-dotted decoration-[1.5px] underline-offset-4"
         data-testid="term"
       >
         {children}

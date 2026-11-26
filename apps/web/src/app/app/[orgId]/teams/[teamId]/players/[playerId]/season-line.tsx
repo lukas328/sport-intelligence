@@ -86,7 +86,7 @@ export function SeasonLineView({ orgId, teamId, playerId }: { orgId: string; tea
     const v = c.value(f, m);
     // a count leads to its scenes; zeros and rates do not
     return staff && c.filter && v !== "0" ? (
-      <Link href={search(c.filter, m?.match_id)} className="underline decoration-[1.5px] underline-offset-4">
+      <Link href={search(c.filter, m?.match_id)} className="hit underline decoration-[1.5px] underline-offset-4">
         {v}
       </Link>
     ) : (
@@ -149,7 +149,7 @@ export function SeasonLineView({ orgId, teamId, playerId }: { orgId: string; tea
               {l.matches.map((m) => (
                 <tr key={m.match_id} className={cn("border-b border-rule", !m.involved && "text-ink-2")}>
                   <th scope="row" className="py-2 pr-2 text-left font-medium">
-                    <Link href={`/app/${orgId}/matches/${m.match_id}`} className="hover:underline hover:underline-offset-4">
+                    <Link href={`/app/${orgId}/matches/${m.match_id}`} className="hit hover:underline hover:underline-offset-4">
                       <span className="text-ink-2 tabular-nums">{format.dateTime(new Date(m.kickoff_at), { day: "numeric", month: "numeric" })}</span>{" "}
                       {t(m.is_home ? "home" : "away", { opponent: m.opponent })}
                     </Link>

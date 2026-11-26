@@ -41,3 +41,22 @@ and posts the component states to the external status page (`HB_STATUS_PAGE_PUSH
 
 **Storage policy:** the same tick deletes original uploads after `HB_RAW_VIDEO_DAYS` (default 90)
 once HLS and the analysis proxy exist; club admins get a notification 7 days before.
+
+## Azure (since 2026-11-25, `infra/terraform/azure`, variable `monitoring`)
+
+What the Azure environment alerts on today, by e-mail to `alert_emails` (action group
+`ag-<prefix>-ops`). The probe runs only for the environment the app domain is bound to.
+
+| Alert | Source | Fires when | Severity |
+|---|---|---|---|
+| `availability` | Application Insights standard test `GET https://<app_domain>/api/healthz` every 15 min from 2 locations (`probe_locations`), with the certificate check | all locations fail, or the certificate expires within 14 days | 1 |
+| `api-errors` | Log Analytics, API console log lines `unhandled_exception` (every unexpected 500) | more than 3 in 15 min | 1 |
+| `job-failures` | Log Analytics, API lines `job_failed` (each failed job) and `job_failed_silent` (watchdog) | 3 or more in 1 h | 2 |
+| `out-of-memory` | Log Analytics, Container Apps system log `OOMKilled` | any in 15 min | 2 |
+| `postgres-storage` | Postgres metric `storage_percent` | above 80 % (max over 1 h) | 2 |
+| budgets | Cost Management (resource group, GPU job) | 80 % / 100 % forecast; GPU 20 and 30 | mail |
+
+Not covered yet: queue depth and stuck jobs from `/internal/stats` (internal ingress, no outside probe;
+the watchdog restarts silent jobs, `job-failures` sees the second failure), latency p95 (needs
+OpenTelemetry), Sentry. Rough cost: the probe about 7 USD per month, the log alerts about 0.50 USD each.
+A paused environment disables the probe and the log alerts.

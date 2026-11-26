@@ -29,7 +29,7 @@ export function TeamSwitcher({ compact, href }: { compact?: boolean; href?: stri
     return (
       <div className={cn("min-w-0", compact ? "px-1" : "px-2")}>
         {href ? (
-          <Link href={href} className="block text-ink no-underline hover:underline">
+          <Link href={href} className="flex min-h-11 flex-col justify-center text-ink no-underline hover:underline">
             {name}
           </Link>
         ) : (

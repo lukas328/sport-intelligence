@@ -16,14 +16,14 @@ export function LegalFooter({ className }: { className?: string }) {
   return (
     <footer className={className} data-testid="legal-footer">
       <nav aria-label={t("label")}>
-        <ul className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted">
+        <ul className="flex flex-wrap gap-x-4 text-sm text-muted">
           {PAGES.map((page) => (
             <li key={page}>
               <a
                 href={sitePage(site, locale, page)}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex min-h-8 items-center underline decoration-1 underline-offset-4 hover:text-ink"
+                className="hit inline-flex min-h-11 items-center underline decoration-1 underline-offset-4 hover:text-ink"
               >
                 {t(page)}
               </a>

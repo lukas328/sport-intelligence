@@ -16,6 +16,7 @@ import { Segmented } from "@/components/ui/tabs";
 import { control, Input, Select } from "@/components/ui/field";
 import { SpotlightControls, useSpotlight } from "@/components/video/spotlight-controls";
 import { SpotlightOverlay } from "@/components/video/spotlight";
+import { geometryOf } from "@/lib/moving-camera";
 import { MultiAngleControls, useMultiAngle } from "@/components/video/multi-angle";
 import { SyncedCam } from "@/components/video/synced-cam";
 import { cameraAt } from "@/lib/best-camera";
@@ -247,6 +248,7 @@ export function Workspace({
 
   const paneId = `ws-${match.id}`;
   const spot = useSpotlight(analysis.data ?? null);
+  const spotGeometry = geometryOf(analysis.data, `/v1/orgs/${orgId}/videos/${video.id}`);
   const [spotOpen, setSpotOpen] = useState(false);
   const spotShown = spotOpen || spot.track != null || spot.picking;
   const mainVideo = useCallback(() => raw.current?.video() ?? null, []);
@@ -456,12 +458,11 @@ export function Workspace({
           overlay={
             drawing ? (
               <DrawLayer tool={tool} color={color} shapes={shapes} onChange={setShapes} />
-            ) : spot.ready && !offset ? (
+            ) : spot.ready && spotGeometry && !offset ? (
               <SpotlightOverlay
                 baseUrl={`/v1/orgs/${orgId}/videos/${video.id}/tracks`}
                 chunkMs={analysis.data!.chunk_ms!}
-                homography={analysis.data!.calibration!.homography}
-                imageSize={analysis.data!.calibration!.image_size as [number, number]}
+                geometry={spotGeometry}
                 track={spot.track}
                 label={spotLabel}
                 getTime={getTime}

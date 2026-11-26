@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState, type MouseEvent } from "react";
-import { nearestTrack, positionAt, project, trackSamples, trail, type Homography, type Sample } from "@/lib/spotlight";
+import { useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
+import { courtToPicture, ViewChunks, type Geometry } from "@/lib/moving-camera";
+import { nearestTrack, positionAt, project, trackSamples, trail, type Sample } from "@/lib/spotlight";
 
 interface Props {
   baseUrl: string; // .../videos/{id}/tracks
   chunkMs: number;
-  homography: Homography;
-  imageSize: [number, number];
+  /** court -> picture: the calibration, per frame for a moving camera (lib/moving-camera) */
+  geometry: Geometry;
   track: number | null;
   label: string;
   getTime: () => number;
@@ -18,10 +19,16 @@ interface Props {
 }
 
 /** Canvas overlay: ring under the feet, label, optional dimmed surroundings and trail (4.2). */
-export function SpotlightOverlay({ baseUrl, chunkMs, homography, imageSize, track, label, getTime, dim, showTrail, picking, onPick }: Props) {
+export function SpotlightOverlay({ baseUrl, chunkMs, geometry, track, label, getTime, dim, showTrail, picking, onPick }: Props) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const chunks = useRef(new Map<number, Float32Array | "loading">());
   const [, force] = useState(0);
+  const viewBase = geometry.view?.baseUrl;
+  const views = useMemo(() => (viewBase ? new ViewChunks(viewBase, chunkMs, () => force((x) => x + 1)) : null), [viewBase, chunkMs]);
+
+  function placeAt(t: number) {
+    return courtToPicture(geometry, views, t);
+  }
 
   function rowsAt(t: number): Float32Array | null {
     const n = Math.floor(t / chunkMs);
@@ -59,7 +66,10 @@ export function SpotlightOverlay({ baseUrl, chunkMs, homography, imageSize, trac
       if (!cache || cache.n !== n || cache.track !== track) cache = { n, track, samples: trackSamples(rows, track) };
       const pos = positionAt(cache.samples, t);
       if (!pos) return;
-      const p = project(homography, pos.x, pos.y, imageSize);
+      // a moving camera: where it looked at this moment; unknown, nothing is drawn
+      const place = placeAt(t);
+      if (!place) return;
+      const p = project(place.homography, pos.x, pos.y, place.size);
       if (!p) return;
       const [x, y] = [p[0] * w, p[1] * h];
       const rx = w * 0.028;
@@ -74,7 +84,7 @@ export function SpotlightOverlay({ baseUrl, chunkMs, homography, imageSize, trac
       }
       if (showTrail) {
         const path = trail(cache.samples, t, 3000)
-          .map((s) => project(homography, s.x, s.y, imageSize))
+          .map((s) => project(place.homography, s.x, s.y, place.size))
           .filter((q): q is [number, number] => q !== null);
         ctx.strokeStyle = "rgba(250,204,21,0.8)";
         ctx.lineWidth = 3 * devicePixelRatio;
@@ -108,7 +118,8 @@ export function SpotlightOverlay({ baseUrl, chunkMs, homography, imageSize, trac
     const r = e.currentTarget.getBoundingClientRect();
     const t = getTime();
     const rows = rowsAt(t);
-    onPick(rows ? nearestTrack(rows, t, homography, imageSize, [(e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height]) : null);
+    const place = placeAt(t);
+    onPick(rows && place ? nearestTrack(rows, t, place.homography, place.size, [(e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height]) : null);
   }
 
   return (
