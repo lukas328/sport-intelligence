@@ -25,7 +25,8 @@
       "page": "Seite {n}",
       "noEvents": "Für dieses Spiel sind noch keine Ereignisse erfasst.",
       "strength": "Stärke",
-      "weakness": "Baustelle"
+      "weakness": "Baustelle",
+      "notRecorded": "nicht erfasst"
     },
     "insights": {
       "shooting_below": "Wurfquote {value} % ({k} aus {n}), sonst {baseline} % in dieser Saison.",
@@ -163,7 +164,8 @@
       "page": "Page {n}",
       "noEvents": "No events have been tagged for this match yet.",
       "strength": "Strength",
-      "weakness": "To work on"
+      "weakness": "To work on",
+      "notRecorded": "not recorded"
     },
     "insights": {
       "shooting_below": "Shooting {value} % ({k} of {n}), usually {baseline} % this season.",
@@ -301,7 +303,8 @@
       "page": "Page {n}",
       "noEvents": "Aucun événement saisi pour ce match.",
       "strength": "Point fort",
-      "weakness": "À travailler"
+      "weakness": "À travailler",
+      "notRecorded": "non saisi"
     },
     "insights": {
       "shooting_below": "Réussite au tir {value} % ({k} sur {n}), habituellement {baseline} % cette saison.",

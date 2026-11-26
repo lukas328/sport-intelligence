@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import io
 import json
+from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -68,6 +69,80 @@ def _esc(text: object) -> str:
 
 def _pct(v: float | None) -> str:
     return "-" if v is None else f"{round(v * 100)} %"
+
+
+def _known(side: dict[str, Any], what: str) -> bool:
+    """Was this figure recorded at all? Older stats without `known` count as recorded."""
+    return (side.get("known") or {}).get(what, True) is not False
+
+
+def comparison_rows(
+    t: dict[str, str], own: dict[str, Any], opp: dict[str, Any], stats: dict[str, Any]
+) -> list[list[Any]]:
+    """The comparison table as the match page shows it (analysis-views): a figure no source
+    recorded reads «nicht erfasst» on its side, never 0; rows that only repeat the goals or are
+    0 on both sides are left out."""
+    none = t["notRecorded"]
+    attempts = (stats.get("quality") or {}).get("attempts_known", True) is not False
+
+    def count(side: dict[str, Any], key: str, what: str) -> Any:
+        return side[key] if _known(side, what) else none
+
+    def rate(side: dict[str, Any], key: str, what: str) -> str:
+        return _pct(side[key]) if _known(side, what) else none
+
+    rows: list[list[Any]] = [[t["goals"], own["goals"], opp["goals"]]]
+    if attempts:
+        rows.append([t["shots"], count(own, "shots", "shooting"), count(opp, "shots", "shooting")])
+    rows.append(
+        [
+            t["shootingPct"],
+            rate(own, "shooting_pct", "shooting"),
+            rate(opp, "shooting_pct", "shooting"),
+        ]
+    )
+    if attempts:
+        rows.append([t["saves"], count(own, "saves", "saving"), count(opp, "saves", "saving")])
+    rows.append([t["savePct"], rate(own, "save_pct", "saving"), rate(opp, "save_pct", "saving")])
+    if _known(own, "turnovers"):
+        rows.append([t["turnovers"], own["turnovers"], opp["turnovers"]])
+    if own["seven_m_shots"] + opp["seven_m_shots"] > 0:
+        rows.append(
+            [
+                t["sevenM"],
+                f"{own['seven_m_goals']}/{own['seven_m_shots']}",
+                f"{opp['seven_m_goals']}/{opp['seven_m_shots']}",
+            ]
+        )
+    if own["fast_break_goals"] + opp["fast_break_goals"] > 0:
+        rows.append([t["fastBreak"], own["fast_break_goals"], opp["fast_break_goals"]])
+    if own["suspensions"] + opp["suspensions"] > 0:
+        rows.append([t["suspensions"], own["suspensions"], opp["suspensions"]])
+    # xG only where shots with a position exist: 0.0 beside goals would read as a measurement
+    if own.get("xg_shots", 1) + opp.get("xg_shots", 1) > 0:
+        rows.append([t["xg"], f"{own['xg']:.1f}", f"{opp['xg']:.1f}"])
+    return rows
+
+
+def player_columns(
+    t: dict[str, str], known: dict[str, Any] | None
+) -> list[tuple[str, Callable[[dict[str, Any]], Any]]]:
+    """The player table's figures: shots, saves and turnovers only when the match recorded them
+    (goals alone are no shots: the shooting percentage would be 100 % for every scorer)."""
+    side = {"known": known}
+    cols: list[tuple[str, Callable[[dict[str, Any]], Any]]] = [(t["goals"], lambda p: p["goals"])]
+    if _known(side, "shooting"):
+        cols += [
+            (t["shots"], lambda p: p["shots"]),
+            (t["shootingPct"], lambda p: _pct(p["goals"] / p["shots"] if p["shots"] else None)),
+        ]
+    cols.append((t["sevenM"], lambda p: f"{p['seven_m_goals']}/{p['seven_m_shots']}"))
+    if _known(side, "turnovers"):
+        cols.append((t["turnovers"], lambda p: p["turnovers"]))
+    cols.append((t["suspensions"], lambda p: p["suspensions"]))
+    if _known(side, "saving"):
+        cols.append((t["saves"], lambda p: p["saves"]))
+    return cols
 
 
 def _contrast(hex_colour: str) -> colors.Color:
@@ -282,23 +357,7 @@ def render(
                     )
                 )
         own, opp = stats["own"], stats["opponent"]
-        rows = [
-            ["", match["own_name"], match["opp_name"]],
-            [t["goals"], own["goals"], opp["goals"]],
-            [t["shots"], own["shots"], opp["shots"]],
-            [t["shootingPct"], _pct(own["shooting_pct"]), _pct(opp["shooting_pct"])],
-            [t["saves"], own["saves"], opp["saves"]],
-            [t["savePct"], _pct(own["save_pct"]), _pct(opp["save_pct"])],
-            [t["turnovers"], own["turnovers"], opp["turnovers"]],
-            [
-                t["sevenM"],
-                f"{own['seven_m_goals']}/{own['seven_m_shots']}",
-                f"{opp['seven_m_goals']}/{opp['seven_m_shots']}",
-            ],
-            [t["fastBreak"], own["fast_break_goals"], opp["fast_break_goals"]],
-            [t["suspensions"], own["suspensions"], opp["suspensions"]],
-            [t["xg"], f"{own['xg']:.1f}", f"{opp['xg']:.1f}"],
-        ]
+        rows = [["", match["own_name"], match["opp_name"]], *comparison_rows(t, own, opp, stats)]
         table = Table(rows, colWidths=[70 * mm, 50 * mm, 50 * mm], hAlign="LEFT")
         table.setStyle(
             TableStyle(
@@ -340,35 +399,21 @@ def render(
         players = [p for p in stats["players"].values() if p["side"] == "own"]
         players.sort(key=lambda p: (-p["goals"], p.get("number") or 99))
         if players:
-            prow = [
-                [
-                    "#",
-                    t["player"],
-                    t["goals"],
-                    t["shots"],
-                    t["shootingPct"],
-                    t["sevenM"],
-                    t["turnovers"],
-                    t["suspensions"],
-                    t["saves"],
-                ]
-            ]
+            cols = player_columns(t, own.get("known"))
+            prow = [["#", t["player"], *(label for label, _ in cols)]]
             for p in players:
                 prow.append(
                     [
                         p.get("number") if p.get("number") is not None else "",
                         _esc(names.get(str(p.get("player_id")), "") or ""),
-                        p["goals"],
-                        p["shots"],
-                        _pct(p["goals"] / p["shots"] if p["shots"] else None),
-                        f"{p['seven_m_goals']}/{p['seven_m_shots']}",
-                        p["turnovers"],
-                        p["suspensions"],
-                        p["saves"],
+                        *(cell(p) for _, cell in cols),
                     ]
                 )
             pt = Table(
-                prow, colWidths=[9 * mm, 52 * mm] + [15.5 * mm] * 7, repeatRows=1, hAlign="LEFT"
+                prow,
+                colWidths=[9 * mm, 52 * mm] + [108.5 * mm / len(cols)] * len(cols),
+                repeatRows=1,
+                hAlign="LEFT",
             )
             pt.setStyle(
                 TableStyle(
