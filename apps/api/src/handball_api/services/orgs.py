@@ -33,7 +33,7 @@ from handball_api.schemas.orgs import (
 )
 from handball_api.services import audit, billing
 from handball_api.services.context import Ctx
-from handball_api.services.plans import PLANS
+from handball_api.services.plans import PLANS, currency_for
 from handball_api.services.policies import (
     Action,
     Actor,
@@ -150,6 +150,19 @@ async def _matches_follow_club_colour(ctx: Ctx, org: Organization, old: str | No
 async def update_org(ctx: Ctx, org: Organization, data: OrgUpdate) -> Organization:
     authorize(ctx.require_actor(), Action.ORG_UPDATE, two_factor=ctx.two_factor)
     old_colour = org.primary_color
+    # the country sets the billing currency (CHF in CH and LI, else EUR): a running subscription
+    # keeps the currency it was taken in, so the country cannot move it to the other one
+    if (
+        data.country is not None
+        and currency_for(data.country) != currency_for(org.country)
+        and org.stripe_subscription_id
+        and org.subscription_status in billing.ACTIVE
+    ):
+        raise ProblemError(
+            409,
+            "currency-locked",
+            "The subscription runs in another currency; cancel it before moving the club",
+        )
     for field, value in data.model_dump(exclude_unset=True).items():
         setattr(org, field, value)
     if "primary_color" in data.model_fields_set and org.primary_color != old_colour:

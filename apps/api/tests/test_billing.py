@@ -393,3 +393,32 @@ async def test_club_abroad_pays_in_eur(
         assert _plan_for(s, ["price_team"]) == Plan.TEAM
     finally:
         s.stripe_price_team_eur = None
+
+
+async def test_the_country_sets_the_currency_and_a_subscription_keeps_it(
+    make_api: Callable[[], Api], owner_conn: asyncpg.Connection
+) -> None:
+    """The club settings change the country (Europa step 2): it moves the billing currency, but
+    not under a running subscription, which keeps the currency it was taken in."""
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    url = f"/v1/orgs/{org}"
+    r = await api.patch(url, json={"country": "DE"})
+    assert r.status_code == 200, r.text
+    assert r.json()["country"] == "DE"
+    assert (await api.get(f"{url}/billing")).json()["currency"] == "EUR"
+    await api.patch(url, json={"country": "CH"})
+    await owner_conn.execute(
+        "UPDATE organizations SET stripe_subscription_id = 'sub_1', subscription_status = 'active' "
+        "WHERE id = $1",
+        uuid.UUID(org),
+    )
+    locked = await api.patch(url, json={"country": "FR"})
+    assert locked.status_code == 409 and locked.json()["type"].endswith("currency-locked")
+    # the same currency stays possible (Liechtenstein pays in CHF too), and a cancelled one frees it
+    assert (await api.patch(url, json={"country": "LI"})).status_code == 200
+    await owner_conn.execute(
+        "UPDATE organizations SET subscription_status = 'canceled' WHERE id = $1", uuid.UUID(org)
+    )
+    assert (await api.patch(url, json={"country": "FR"})).json()["country"] == "FR"

@@ -145,7 +145,8 @@
     "suggestion-resolved": "Dieser Vorschlag ist schon erledigt.",
     "suggestion-stale": "Dieser Vorschlag passt nicht mehr: Spiel oder Eintrag gibt es nicht mehr.",
     "email-unavailable": "Die E-Mail konnte gerade nicht gesendet werden. Bitte versuch es später nochmals.",
-    "mail-unavailable": "Wir verschicken gerade keine Mails. Erstell dein Konto mit Passwort."
+    "mail-unavailable": "Wir verschicken gerade keine Mails. Erstell dein Konto mit Passwort.",
+    "currency-locked": "Das Abo läuft in einer anderen Währung. Das Land lässt sich erst nach der Kündigung ändern."
   },
   "auth": {
     "loginTitle": "Anmelden",
@@ -280,13 +281,6 @@
     "inviteSend": "Einladung senden",
     "invited": "Eingeladen: {email}",
     "finish": "Zum Team",
-    "countries": {
-      "CH": "Schweiz",
-      "DE": "Deutschland",
-      "AT": "Österreich",
-      "FR": "Frankreich",
-      "LI": "Liechtenstein"
-    },
     "stepFind": "Team finden",
     "stepConfirm": "Bestätigen",
     "confirmTitle": "Ist das dein Team?",
@@ -425,7 +419,9 @@
     "clubPreviewSub": "Vorschau",
     "ownColours": "Eigene Farben",
     "clubColour": "Vereinsfarbe",
-    "clubColourNone": "Noch keine gewählt: Bis dahin zeigt sich euer Verein in Grau."
+    "clubColourNone": "Noch keine gewählt: Bis dahin zeigt sich euer Verein in Grau.",
+    "country": "Land",
+    "countryHint": "Bestimmt die Währung der Abrechnung: {currency}. In der Schweiz und in Liechtenstein CHF, sonst EUR."
   },
   "dashboard": {
     "teamsTitle": "Teams",

@@ -145,7 +145,8 @@
     "suggestion-resolved": "This suggestion is already done.",
     "suggestion-stale": "This suggestion no longer fits: the match or entry is gone.",
     "email-unavailable": "The e-mail could not be sent right now. Please try again later.",
-    "mail-unavailable": "We are not sending e-mails at the moment. Create your account with a password."
+    "mail-unavailable": "We are not sending e-mails at the moment. Create your account with a password.",
+    "currency-locked": "The subscription runs in another currency. The country can only change after it is cancelled."
   },
   "auth": {
     "loginTitle": "Sign in",
@@ -280,13 +281,6 @@
     "inviteSend": "Send invitation",
     "invited": "Invited: {email}",
     "finish": "Go to team",
-    "countries": {
-      "CH": "Switzerland",
-      "DE": "Germany",
-      "AT": "Austria",
-      "FR": "France",
-      "LI": "Liechtenstein"
-    },
     "stepFind": "Find the team",
     "stepConfirm": "Confirm",
     "confirmTitle": "That's you, right?",
@@ -425,7 +419,9 @@
     "clubPreviewSub": "Preview",
     "ownColours": "Own colours",
     "clubColour": "Club colour",
-    "clubColourNone": "None chosen yet: until then your club shows in grey."
+    "clubColourNone": "None chosen yet: until then your club shows in grey.",
+    "country": "Country",
+    "countryHint": "Sets the billing currency: {currency}. CHF in Switzerland and Liechtenstein, else EUR."
   },
   "dashboard": {
     "teamsTitle": "Teams",

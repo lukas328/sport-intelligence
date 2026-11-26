@@ -2,7 +2,7 @@
 
 import type { Schemas } from "@handball/api-client";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import type { CSSProperties } from "react";
 import { clubStyle, DEFAULT_CLUB } from "@/lib/color";
 import { PageHeader } from "@/components/ui/page-header";
@@ -15,6 +15,7 @@ import { Alert, Card } from "@/components/ui/card";
 import { Checkbox, Input, Select } from "@/components/ui/field";
 import { api } from "@/lib/client";
 import { signupSource } from "@/lib/signup-source";
+import { browserCountry, COUNTRIES, countryName } from "@/lib/country";
 import { OfficialTeamSearch } from "./team-search";
 import { CLAIM_KEY, CONFIRM_COOKIE, forgetClaim } from "./claim-storage";
 import { ConfirmTeam } from "./confirm-team";
@@ -30,10 +31,13 @@ const COLOUR_STEP = 1;
 const TEAM_STEP = 2;
 // with the official data the onboarding is two steps: find the team, confirm it (SPEC 7.12)
 const OFFICIAL_STEPS = ["stepFind", "stepConfirm"] as const;
-const COUNTRIES = ["CH", "DE", "AT", "FR", "LI"] as const;
 
 export function OnboardingWizard({ existingOrg, resume = false, waiting = [] }: { existingOrg?: Org; resume?: boolean; /** clubs whose admins have not answered an access request yet */ waiting?: string[] }) {
   const t = useTranslations();
+  const locale = useLocale();
+  // the browser's country after mount (the server does not know it): the select starts there
+  const [guess, setGuess] = useState("CH");
+  useEffect(() => setGuess(browserCountry()), []);
   const router = useRouter();
   // a club made here before: its colour if it has none yet, else the team
   const [step, setStep] = useState(existingOrg ? (existingOrg.color_chosen ? TEAM_STEP : COLOUR_STEP) : 0);
@@ -217,10 +221,11 @@ export function OnboardingWizard({ existingOrg, resume = false, waiting = [] }: 
             <details className="group">
               <summary className="min-h-11 cursor-pointer content-center text-[15px] font-bold underline decoration-[1.5px] underline-offset-4">{t("onboarding.moreClub")}</summary>
               <div className="space-y-4 pt-3">
-                <Select label={t("onboarding.country")} name="country" defaultValue="CH">
+                {/* a guess from the browser (time zone, language): it sets the billing currency */}
+                <Select label={t("onboarding.country")} name="country" key={guess} defaultValue={guess}>
                   {COUNTRIES.map((c) => (
                     <option key={c} value={c}>
-                      {t(`onboarding.countries.${c}`)}
+                      {countryName(c, locale)}
                     </option>
                   ))}
                 </Select>

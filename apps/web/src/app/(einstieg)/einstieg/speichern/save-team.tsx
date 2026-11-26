@@ -11,6 +11,7 @@ import { SHIRTS } from "@/lib/color";
 import { FARBE } from "../entry-view";
 import { ownershipMail, useSiteConfig } from "@/lib/site-config";
 import { similarTeams } from "@/lib/team-names";
+import { browserCountry } from "@/lib/country";
 
 type Suggestion = Schemas["SuggestionOut"];
 const num = (v: unknown) => (typeof v === "number" ? v : null);
@@ -66,7 +67,7 @@ export function SaveTeam() {
     if (name) {
       // the same address saves a second team into its club, not into a second club (UX test N21)
       const own = me.data.organizations.filter((o) => o.role === "org_admin");
-      const orgId = own.length === 1 ? own[0]!.id : (await api.POST("/v1/orgs", { body: { name, country: "CH", ...colours, source: signupSource() } })).data?.id;
+      const orgId = own.length === 1 ? own[0]!.id : (await api.POST("/v1/orgs", { body: { name, country: browserCountry(), ...colours, source: signupSource() } })).data?.id;
       if (!orgId) return setState("failed");
       if (own.length === 1 && !twinOk) {
         const existing = (await api.GET("/v1/orgs/{org_id}/teams", { params: { path: { org_id: orgId } } })).data ?? [];
