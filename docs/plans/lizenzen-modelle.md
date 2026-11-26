@@ -66,8 +66,13 @@ bei.
 
 1. `docs/OPEN_QUESTIONS.md` (Beantwortet, Q-ML-5, Q-ML-6): «kein ReID- und kein Ballmodell». Für das
    Image richtig; Staging lädt hrp1 und ReID zur Laufzeit. In diesem PR präzisiert.
-2. ADR 003 verspricht ab M3 einen CI-Check gegen `ultralytics` in Produktions-Lockfiles. Es gibt ihn
-   nicht (`.github/workflows/`).
+2. ADR 003 verspricht ab M3 einen CI-Check gegen `ultralytics` in Produktions-Lockfiles. Seit
+   2026-11-26 gibt es ihn: `packages/jobkit/tests/test_model_licences.py` mit dem Register
+   `infra/model-licences.json` (siehe Abschnitt 5, Punkt 3).
+5. (Behoben in #146.) Terraform setzte das Ballnetz hrp1 nicht nur für Staging: `HB_BALL_MODEL` der CPU-Analyse
+   (`main.tf:551`) und der Standard von `gpu_ball_model` (`variables.tf:253`) gelten für jede
+   Umgebung, und `environment` steht standardmässig auf `production`. Ein Produktions-Deploy würde
+   heute ein nicht-kommerzielles Netz laden.
 3. Rollenmodell: ADR 028 nennt es «eigenes (Roboflow-Daten CC BY 4.0)», `ml/roles/README.md` und der
    Audit «nur Forschung». Solange es aus ist, ohne Folgen; vor dem Einschalten klären.
 4. `ml/datasets/LICENSES.md`: keine Zeile ist geprüft («Verified: no»), TeamTrack «to check». hr-nods
@@ -85,9 +90,14 @@ Reihenfolge nach Aufwand und Wirkung:
 2. **Ball auf hr-nods umstellen:** Gewichte exportieren (`ml/ball/export_onnx.py`, fp16 und u8),
    in den Bucket, SHA-256 in Terraform. Danach auf Gold v1 mit Tracker messen (heute nur Ball-Testset
    2). Aufwand S bis M. Bis dahin bleibt Ball v2 Testbetrieb (`ballnet.py` Lizenzhinweis).
-3. **CI-Schutz:** ein Test, der (a) `ultralytics`, `torch`, `boxmot` im Produkt-Lockfile ablehnt und
-   (b) Modell-Schlüssel in `infra/` gegen eine Freigabeliste prüft (`hr1`, `hrp1`, `reid-*` sind dort
-   «nur Test»). Aufwand S.
+3. **CI-Schutz (erledigt 2026-11-26):** `packages/jobkit/tests/test_model_licences.py` läuft mit
+   den Python-Tests in CI. Jede Modelldatei in Images, Job-Einstellungen, `infra/` und Workflows
+   muss im Register `infra/model-licences.json` stehen (Lizenz, Status `shippable` oder
+   `test-only`). Ein `test-only`-Modell darf in `infra/` nur dort stehen, wo das Register die
+   Verwendung mit ihrer offenen Frage aufführt; eine aufgeführte Verwendung, die es nicht mehr gibt,
+   lässt den Test ebenfalls scheitern. `ultralytics`, `boxmot` und `yolov5` im Lockfile lassen ihn
+   scheitern. Seit #146 (ReID aus, hr-nods für CPU-App und GPU-Job) führt das Register keine
+   Ausnahme mehr: in `infra/` stehen nur noch freigegebene Modelle.
 4. **Juristisch prüfen lassen** (einmalig, ein Termin): ImageNet-Startgewichte (betrifft hrp1 und
    das Rollenmodell, nicht hr1 und hr-nods), COCO-Bilder hinter YOLOX, TeamTrack-Ball-Labels, FFmpeg
    im PyAV-Wheel.
