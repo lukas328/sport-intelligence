@@ -1813,7 +1813,7 @@ Mülheim, Leimental).
 | Leimental (10 Tore) | Einblendung (Tesseract) | 164 OCR-Lesungen, Stand 0:0 bis 4:6 | 10 | 10 | **100 %** | **100 %** |
 | Mülheim (4 Tore) | Hallentafel (PP-OCR) | 80, alle nur Uhr, kein Stand | 0 | 0 | | 0 % |
 
-- **Leimental:** jedes Tor mit der richtigen Seite, im Median 4.6 s nach dem Label (das Tor sitzt
+- **Leimental:** jedes Tor mit der richtigen Seite, im Median 5.0 s nach dem Label (das Tor sitzt
   auf der ersten Lesung des neuen Standes; eins 31 s spät). Das erfüllt «klarer Gewinn» als
   Tor-Quelle. **Das Produkt nutzt diesen Weg schon:** Einblendungs-Tore werden als Ereignisse
   übernommen (Analyse-Ansicht «Von der eingeblendeten Anzeigetafel gelesen: N Tore»). Die
