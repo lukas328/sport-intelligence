@@ -1346,3 +1346,40 @@ ReID (wie seit #146 im Produkt), mit gelernten Teamfarben (#149).
   erst ab Lesungen aus mindestens zwei verschiedenen Sekunden zählen und einstellige Nummern
   strenger prüfen, wenn das Team eine passende zweistellige trägt (auf diesen Labels nicht genug
   Fälle, um es zu messen).
+
+### Wer ist wer, Ende zu Ende auf Dev (Audit, 2026-11-26)
+
+Messgrösse: Anteil der Spielzeit von Feldspielern, deren Track die richtige Rückennummer trägt
+(daraus folgt der Kader-Spieler, `identity_source` model), und Anteil falsch benannter Zeit.
+Gemessen auf den Testclips Horgen H1 und H2 (Dev, nie Endtest), dichtes Nummernlesen (#157),
+gelernte Teamfarben (#149), ohne ReID (#146).
+
+- **Labels:** 200 Spieler-Detektionen auf dem Feld, alle 4 s zufällig aus den Track-Punkten
+  (also gleichmässig über die Spielzeit), zweimal von Claude in anderer Reihenfolge beschriftet,
+  nur übereinstimmende behalten: 186 (27 mit sichtbarer Nummer, 111 Feldspieler ohne sichtbare
+  Nummer, 31 Schiedsrichter oder Bank, 17 Torhüter). Eingefroren vor der Wahl,
+  `ml/gold/data/identity_dev_v1.json`, Auswertung `ml/eval/identity_dev.py`.
+- **Grenze:** Richtig oder falsch lässt sich nur bei sichtbarer Nummer prüfen (27 Proben, wenige).
+  Der Anteil benannter Zeit gilt für alle 138 Feldspieler-Proben.
+
+| Variante | richtig | falsch | unbenannt | benannte Zeit |
+|---|---|---|---|---|
+| heute (mind. 3 Lesungen, 70 %, Weitertragen über Brüche) | 10 von 27 (37 %) | 1 (3.7 %) | 16 | 24.6 % |
+| mind. 2 Lesungen | 10 | 1 | 16 | 29.0 % |
+| mind. 4 Lesungen | 9 | 1 | 17 | 21.0 % |
+| Mehrheit 80 % | 10 | 1 | 16 | 23.2 % |
+| ohne Weitertragen (`merge_by_number` aus) | 8 | 0 | 19 | 20.3 % |
+| mit Kader | 13 (48 %) | 0 | 14 | 27.5 % |
+| mit Kader, mind. 2 Lesungen | 13 | 0 | 14 | 31.9 % |
+
+- **Weitertragen über Track-Brüche** (gleiches Team, gleiche Nummer, nicht überlappend, schon im
+  Produkt) bringt 8 -> 10 richtig. Bleibt.
+- **Kader-Abgleich** (schon im Produkt, wenn der Kader Nummern hat) bringt 10 -> 13 richtig und
+  1 -> 0 falsch. Wichtigster Hebel: den Kader mit Nummern im Einstieg einfordern.
+- **Mind. 2 Lesungen** benennt mehr Zeit, aber die Sichtprüfung der drei dazukommenden Tracks
+  ergibt einen richtigen (#4), einen falschen (als #3 benannt, trägt sichtbar die 10) und einen
+  gemischten. Nicht klar besser, nicht übernommen. Mind. 4 Lesungen und 80 % Mehrheit verlieren nur.
+- **Falsch benannt** bleibt unter 5 %: 3.7 % ohne, 0 % mit Kader (auf 27 Proben).
+- **Ergebnis:** keine Änderung am Produkt. Der Engpass ist, dass nur etwa ein Viertel der
+  Feldspieler-Zeit überhaupt eine Nummer trägt; die Tracks sind zu kurz für genug Lesungen. Nächste
+  Hebel liegen beim Tracking (längere Tracks) und beim Kader im Einstieg.
