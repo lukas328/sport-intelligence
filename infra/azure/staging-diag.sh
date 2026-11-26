@@ -107,8 +107,15 @@ echo "== the 8 newest processing jobs (any asset)"
 q "SELECT coalesce(jsonb_agg(to_jsonb(r)), '[]'::jsonb) FROM (SELECT id, video_asset_id, kind, status,
    progress, error, created_at, updated_at FROM processing_jobs ORDER BY created_at DESC LIMIT 8) r" \
   | tail -1 | jq . | tee "$OUT/recent_jobs.json"
-asset=$(q "SELECT id FROM video_assets WHERE $where" | tail -1)
-[ -n "$asset" ] || { echo "no asset found"; exit 1; }
+# psql also prints «SET» for the bypass line: without a matching row that was taken as the id
+asset=$(q "SELECT id FROM video_assets WHERE $where" | grep -v '^SET$' | tail -1 || true)
+if [ -z "$asset" ]; then
+  echo "no asset found for: $where; all video assets (newest first):"
+  q "SELECT coalesce(jsonb_agg(to_jsonb(r)), '[]'::jsonb) FROM (SELECT id, match_id, filename, duration_s,
+     status, (analysis IS NOT NULL) AS has_analysis, created_at FROM video_assets ORDER BY created_at DESC) r" \
+    | tail -1 | jq . | tee "$OUT/all_assets.json"
+  exit 1
+fi
 echo "== asset $asset"
 q "SELECT row_to_json(r) FROM (SELECT id, organization_id, match_id, role, status, filename,
    size_bytes, storage_key, duration_s, fps, width, height, created_at, updated_at, error
