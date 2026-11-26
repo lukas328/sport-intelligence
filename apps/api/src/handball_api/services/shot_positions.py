@@ -168,7 +168,11 @@ async def _attack(
     ctx: Ctx, g: Event, files: Files, tracks_of: dict[uuid.UUID, list[Track]]
 ) -> tuple[list[Any], float, dict[int, int | None]] | None:
     """The attacking side's positions in the 10 s before goal `g` (its part of the match), the
-    goal they attack (x = 0 or 40, from where they are) and the shirt number per track."""
+    goal they attack (x = 0 or 40) and the shirt number per track. The goal comes from the ends the
+    analysis found for the half (`goal_by_sides`), else from where the attackers stood: before a
+    fast break or after a change of ends they stood at the goal they defend, and the estimate came
+    out at the wrong end (4 of 21 shots about 30 m off, Horgen clips, produkt-audit-2026-11.md
+    point 7)."""
     if g.t_ms is None:
         return None
     hit = files.at(g.t_ms)
@@ -186,7 +190,9 @@ async def _attack(
     attackers = [r for r in rows if team_of.get(int(r[1])) == label]
     if not attackers:
         return None
-    gx = LENGTH if float(np.mean([r[2] for r in attackers])) > LENGTH / 2 else 0.0
+    gx = goal_by_sides(asset, local, g.side == "own")
+    if gx is None:
+        gx = LENGTH if float(np.mean([r[2] for r in attackers])) > LENGTH / 2 else 0.0
     return attackers, gx, number_of
 
 
