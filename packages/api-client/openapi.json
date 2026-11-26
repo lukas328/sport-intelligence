@@ -2346,6 +2346,85 @@
         "title": "ClickResidualOut",
         "type": "object"
       },
+      "ClientErrorIn": {
+        "additionalProperties": false,
+        "properties": {
+          "build": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Build"
+          },
+          "code": {
+            "anyOf": [
+              {
+                "maximum": 9999.0,
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "React's error number",
+            "title": "Code"
+          },
+          "device": {
+            "enum": [
+              "phone",
+              "tablet",
+              "desktop"
+            ],
+            "title": "Device",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "react",
+              "error",
+              "rejection"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "message": {
+            "maxLength": 300,
+            "title": "Message",
+            "type": "string"
+          },
+          "route": {
+            "maxLength": 300,
+            "title": "Route",
+            "type": "string"
+          },
+          "stack": {
+            "anyOf": [
+              {
+                "maxLength": 3000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stack"
+          }
+        },
+        "required": [
+          "kind",
+          "message",
+          "route",
+          "device"
+        ],
+        "title": "ClientErrorIn",
+        "type": "object"
+      },
       "Clip": {
         "properties": {
           "event_id": {
@@ -21137,6 +21216,41 @@
         "summary": "Feed",
         "tags": [
           "training"
+        ]
+      }
+    },
+    "/v1/client-errors": {
+      "post": {
+        "description": "An error the web app hit in a browser (nothing personal, see the module text).",
+        "operationId": "report_client_error_v1_client_errors_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClientErrorIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Report Client Error",
+        "tags": [
+          "ops"
         ]
       }
     },

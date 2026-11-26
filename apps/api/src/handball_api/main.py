@@ -42,6 +42,7 @@ from handball_api.routers import assistant as assistant_router
 from handball_api.routers import attachments as attachments_router
 from handball_api.routers import auth, health, internal, matches, orgs, teams
 from handball_api.routers import billing as billing_router
+from handball_api.routers import client_errors as client_errors_router
 from handball_api.routers import collections as collections_router
 from handball_api.routers import consent_links as consent_links_router
 from handball_api.routers import devices as devices_router
@@ -298,6 +299,7 @@ def create_app(
     app.include_router(devices_router.router)
     app.include_router(profiles_router.public)
     app.include_router(public_teams_router.router)
+    app.include_router(client_errors_router.router)
     app.include_router(sessions_router.public)
     app.include_router(internal.router)
     return app
