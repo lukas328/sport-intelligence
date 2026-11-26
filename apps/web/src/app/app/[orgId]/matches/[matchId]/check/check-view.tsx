@@ -17,6 +17,7 @@ import { CORNERS, cornersOf, FieldCheck } from "./field-check";
 import { CourtCalibration } from "@/components/analysis/court-calibration";
 import type { Pt } from "@/lib/court-calibration";
 import { PersonCrop } from "./person-box";
+import { ShotQuickEntry } from "./shot-quick-entry";
 import { Strip } from "@/components/anlauf/heads";
 import { useShell } from "@/components/shell/context";
 import { ownName } from "@/lib/own-name";
@@ -685,6 +686,9 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
               <p className="text-[17px] text-ink-2">{t("allDoneText")}</p>
             </>
           )}
+          {/* the shots the analysis found, in a quick round of their own: offered once the goal
+              questions of this round are through (wurf-tracking, the core aim) */}
+          {!wantMore && <ShotQuickEntry orgId={orgId} matchId={match.id} primary={finished || moreGoals === 0} />}
           {/* the people in the picture, offered, not pressed on the coach (E07) */}
           {/* without a squad there is nobody to pick: first the squad, one tap away (livegang L5) */}
           {!wantPeople && !finished && moreGoals === 0 && stillOpen === 0 && otherOpen === 0 && moreCount > 0 && roster.isSuccess && (players.length > 0 ? (

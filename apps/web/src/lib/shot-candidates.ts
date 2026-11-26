@@ -103,3 +103,29 @@ export function withShotReview(list: CandidateList, id: string, body: ShotReview
     },
   };
 }
+
+/** The four answers of the quick review in Prüfen, in key order 1 to 4 ("none": not a shot). */
+export const QUICK_ANSWERS = ["goal", "save", "miss", "none"] as const;
+export type QuickAnswer = (typeof QUICK_ANSWERS)[number];
+
+/**
+ * The shots the quick review asks, in its order: open moments at the list's default rate that
+ * are not a shot known already (overlay, report, tagged), the least sure first (lowest analysis
+ * score), then by time. Taken once when it starts, so answered ones keep their place for undo.
+ */
+export function quickQueue(list: CandidateList): ShotCandidate[] {
+  return list.candidates
+    .filter((c) => isOpen(c) && c.known == null && c.rate <= list.default_rate)
+    .sort((a, b) => a.score - b.score || a.goal_ms - b.goal_ms);
+}
+
+/** The clip of a quick question: from shortly before the shot to its end, looped (3.5 s). */
+export function quickWindow(c: { goal_ms: number }): { start_ms: number; end_ms: number } {
+  return { start_ms: Math.max(0, c.goal_ms - 1500), end_ms: c.goal_ms + 2000 };
+}
+
+/** The review a quick answer sends: «Kein Wurf» rejects, the outcomes go through shotAnswer
+ * (the report's entry pinned when it says the same); null when no team is known yet. */
+export function quickBody(c: ShotCandidate, side: CandidateSide | null, answer: QuickAnswer): ShotReviewBody | null {
+  return answer === "none" ? { status: "rejected" } : shotAnswer(c, side, answer);
+}
