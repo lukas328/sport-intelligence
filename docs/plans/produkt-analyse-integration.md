@@ -1827,3 +1827,23 @@ Mülheim, Leimental).
 - **Grenze:** zwei gelabelte Clips; die Einblendung ist eine einzige Grafik (Swiss-Handball-
   Stream). Andere Einblendungen sind nicht gemessen.
 
+**Nachtrag: Leser für die Ziffern der Hallentafel, Machbarkeit (2026-11-26).** Auftrag war ein
+klassischer Siebensegment-Leser ohne neues Modell. Vor dem Bau geprüft, nur an Bildern, ohne Labels:
+- Die Tafel in Mülheim ist keine Siebensegment-Anzeige, sondern eine LED-Tafel mit gerenderten
+  Ziffern: Uhr weiss, Stand gelb und orange auf dunkelgrün («6 12:45 4», «8 18:09 5»).
+- Warum heute kein Stand gelesen wird: Der Textdetektor (PP-OCRv4) findet nur die weisse Uhr; die
+  farbigen Ziffern daneben erkennt er nicht als Text (einmal klebt eine an der Uhr: «18:095»).
+- Versuch ohne Modell: Fenster links und rechts der gefundenen Uhr, Helligkeit als Maximum der
+  Farbkanäle, Otsu-Schwelle, nur der Erkenner. Auf drei Ansichten richtig gelesen nur die grösste
+  (6 und 4); bei den zwei anderen falsch («I/1» statt 8 und 5, «8/1» statt 8 und 5), auch im
+  Original (2336 x 1080 statt 1280 x 592 im Proxy).
+- Die Ziffern sind im Proxy 8 bis 10 px hoch, im Original etwa 15 px; die Tafel ist nur einen Teil
+  der Zeit im Bild (80 Uhr-Lesungen in 480 s). Ihre Lage relativ zur Uhr verschiebt sich mit der
+  Perspektive.
+- **Ehrlicher Stand: zu klein und zu selten für einen Leser, den man auf diesem Clip bauen und auf
+  ihm auch messen dürfte** (4 gelabelte Tore; jede Fenster- oder Schwellenwahl wäre auf den
+  Messdaten gewählt). Auf Horgen ist die Tafel noch seltener und kleiner im Bild. Nicht gebaut.
+- Was es bräuchte: Ausschnitte von Hallentafeln aus mehreren Hallen als eigenes Lern- oder
+  Abstimmset (getrennt von den Mess-Clips), dann ein Ziffern-Leser auf der Tafel-Region und Lesen
+  aus dem Original statt dem Proxy nur für dieses kleine Fenster.
+
