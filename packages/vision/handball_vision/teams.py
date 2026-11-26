@@ -56,6 +56,22 @@ class TeamResult:
     samples: int
 
 
+def covered_share(boxes: list[Detection]) -> NDArray[np.float64]:
+    """For each person box, the largest share of its area that one other person box covers: where
+    two players overlap, the torso crop holds both shirts."""
+    out = np.zeros(len(boxes))
+    for i, a in enumerate(boxes):
+        area = max(1e-6, (a.x2 - a.x1) * (a.y2 - a.y1))
+        for j, b in enumerate(boxes):
+            if i == j:
+                continue
+            w = min(a.x2, b.x2) - max(a.x1, b.x1)
+            h = min(a.y2, b.y2) - max(a.y1, b.y1)
+            if w > 0 and h > 0:
+                out[i] = max(out[i], w * h / area)
+    return out
+
+
 class TeamAssigner:
     def __init__(
         self, kits: dict[str, tuple[int, int, int]], floor_lab: NDArray[np.float64] | None = None
@@ -65,10 +81,15 @@ class TeamAssigner:
         self.samples: dict[int, list[NDArray[Any]]] = defaultdict(list)
         # video frame of each sample (parallel to `samples`, filled by `add_sample`)
         self.frames: dict[int, list[int]] = defaultdict(list)
+        # whether the person was clear of other people at the sample (parallel to `samples`)
+        self.clear: dict[int, list[bool]] = defaultdict(list)
 
-    def add_sample(self, track_id: int, colour: NDArray[Any], frame: int) -> None:
+    def add_sample(
+        self, track_id: int, colour: NDArray[Any], frame: int, clear: bool = True
+    ) -> None:
         self.samples[track_id].append(colour)
         self.frames[track_id].append(frame)
+        self.clear[track_id].append(clear)
 
     def torso_colour(self, frame: NDArray[np.uint8], d: Detection) -> NDArray[np.float64] | None:
         h, w = d.y2 - d.y1, d.x2 - d.x1

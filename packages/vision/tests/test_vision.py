@@ -178,6 +178,53 @@ def test_long_links_skip_people_outside_the_court_and_the_other_team() -> None:
     assert ends[1] == ("home", "away") and ends[2] == ("none", "none")  # black: neither team
     assert piece_ends(looks, frames, {"home": home}) is None  # one team kit: no condition
 
+    # with clear flags only looks clear of other people count: the last looks of piece 1 were
+    # taken while it overlapped an away player, so its end is home; too few clear looks: unknown
+    clear = {1: [True] * 9 + [False] * 3, 2: [False] * 6}
+    looks_c = {1: [home] * 9 + [away] * 3, 2: looks[2]}
+    ends_c = piece_ends(looks_c, frames, kits, clear)
+    assert ends_c is not None
+    assert ends_c[1] == ("home", "home") and ends_c[2] == (None, None)
+
+
+def test_covered_share_is_the_largest_part_of_a_box_another_box_covers() -> None:
+    from handball_vision.teams import covered_share
+
+    a = Detection(0, 0, 10, 20, 0.9)
+    b = Detection(5, 0, 15, 20, 0.9)  # covers half of a
+    c = Detection(50, 0, 60, 20, 0.9)  # apart
+    share = covered_share([a, b, c])
+    assert share[0] == pytest.approx(0.5) and share[1] == pytest.approx(0.5) and share[2] == 0.0
+
+
+def test_a_raw_piece_is_cut_where_its_shirt_changes_for_good() -> None:
+    """pipeline.cut_at_shirt_changes: a piece that holds a home player for 3 s and then a referee
+    (no team's kit) for 3 s becomes two pieces, and the readings follow the frames; a flicker
+    of under 1.5 s or looks covered by another person do not cut."""
+    from handball_vision import pipeline
+    from handball_vision.numbers import Reading
+
+    home, away = (40, 160, 200), (60, 40, 200)
+    teams = TeamAssigner({"home": home, "away": away})
+    h, ref = teams.kits["home"], np.array([30.0, 128.0, 128.0])
+    pts = _piece(1, range(150), 10.0, 5.0)
+    for f in range(150):
+        teams.add_sample(1, h if f < 75 else ref, f)
+    # a second piece: home with a 1 s flicker of the referee colour, and covered looks of away
+    pts += _piece(2, range(150), 20.0, 5.0)
+    for f in range(150):
+        teams.add_sample(2, ref if 60 <= f < 85 else h, f)
+        teams.add_sample(2, teams.kits["away"], f, clear=False)
+    reads = {1: [Reading(7, 0.9, 10), Reading(3, 0.9, 140)]}
+    out, n = pipeline.cut_at_shirt_changes(pts, teams, 25.0, [reads])
+    assert n == 1
+    ids = {p.track_id for p in out if p.frame >= 100 and p.x == 10.0}
+    assert len(ids) == 1 and ids != {1}
+    (new,) = ids
+    assert [r.number for r in reads[1]] == [7] and [r.number for r in reads[new]] == [3]
+    assert {p.track_id for p in out if p.x == 20.0} == {2}
+    assert len(teams.samples[1]) == len(teams.frames[1]) == len(teams.clear[1])
+
 
 def test_long_links_are_off_by_default() -> None:
     from handball_vision import pipeline

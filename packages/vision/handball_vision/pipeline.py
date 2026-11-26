@@ -15,8 +15,9 @@ from __future__ import annotations
 
 import time
 from collections import defaultdict
-from collections.abc import Callable, Iterable
-from dataclasses import dataclass, field
+from collections.abc import Callable, Iterable, Sequence
+from dataclasses import dataclass, field, replace
+from itertools import pairwise
 from pathlib import Path
 from typing import Any, Literal
 
@@ -50,7 +51,7 @@ from handball_vision.identity import split_by_reading_colour as split_by_reading
 from handball_vision.motion import CameraMotion, estimate_motion
 from handball_vision.numbers import Reading
 from handball_vision.physical import physical
-from handball_vision.teams import TeamAssigner, colour_distance, relabel_by_clusters
+from handball_vision.teams import TeamAssigner, colour_distance, covered_share, relabel_by_clusters
 from handball_vision.tracking import CourtTracker, TrackPoint, stitch
 from handball_vision.video_io import U8 as U8
 from handball_vision.video_io import _frames as _frames
@@ -321,10 +322,16 @@ def _track_frames(
         pos = foot_positions(frame_calib, dets) if frame_calib is not None else np.zeros((0, 2))
         labels = [None if np.isnan(f).any() else _confident_label(teams, f) for f in feats]
         step = tracker.step(pos, np.array([d.score for d in dets]), None, labels)
+        cover = covered_share(dets)
         timings["tracking"] += time.perf_counter() - t0
         for tp in step:
             if tp.det_index is not None and not np.isnan(feats[tp.det_index]).any():
-                teams.add_sample(tp.track_id, feats[tp.det_index], tp.frame)
+                teams.add_sample(
+                    tp.track_id,
+                    feats[tp.det_index],
+                    tp.frame,
+                    bool(cover[tp.det_index] < CLEAR_COVER),
+                )
         points += step
         n += 1
         if progress and total and n % 100 == 0:
@@ -366,6 +373,13 @@ def edge_pieces(points: list[TrackPoint], fps: float) -> set[int]:
 
 NEUTRAL_DISTANCE = 15.0  # colour distance to the nearer team kit above which a shirt is no team's
 END_LOOKS = 5  # colour looks at each end of a piece
+# The end colours only from looks where the person stands clear of others: a box covered by
+# another person box by at least `CLEAR_COVER` of its area holds two shirts in its torso crop. Only
+# clear looks among the last (first) `END_WINDOW` looks count, at least `END_MIN_CLEAR` of them,
+# otherwise the end has no team and blocks a long link.
+CLEAR_COVER = 0.15
+END_WINDOW = 15
+END_MIN_CLEAR = 3
 
 
 def shirt_team(colour: NDArray[Any], kits: dict[str, NDArray[Any]]) -> str:
@@ -382,10 +396,12 @@ def piece_ends(
     samples: dict[int, list[NDArray[Any]]],
     frames: dict[int, list[int]],
     kits: dict[str, NDArray[Any]],
+    clear: dict[int, list[bool]] | None = None,
 ) -> dict[int, tuple[str | None, str | None]] | None:
     """The team of each raw piece's shirt at its start and at its end (median of its first and
     last `END_LOOKS` colour looks): a piece can hold a swap of its own, so its whole median says
-    little about the person at the moment it ends. None without both team kits (entered or
+    little about the person at the moment it ends. With `clear` (parallel to `samples`), only
+    looks clear of other people count, see `CLEAR_COVER`. None without both team kits (entered or
     learned); a piece without looks has (None, None)."""
     if "home" not in kits or "away" not in kits:
         return None
@@ -394,11 +410,144 @@ def piece_ends(
         if not looks:
             continue
         order = np.argsort(np.asarray(frames.get(t, list(range(len(looks))))), kind="stable")
-        ordered = [looks[k] for k in order] if len(order) == len(looks) else looks
-        first = np.median(np.stack(ordered[:END_LOOKS]), axis=0)
-        last = np.median(np.stack(ordered[-END_LOOKS:]), axis=0)
-        out[t] = (shirt_team(first, kits), shirt_team(last, kits))
+        if len(order) != len(looks):
+            order = np.arange(len(looks))
+        ordered = [looks[k] for k in order]
+        flags = clear.get(t) if clear is not None else None
+        if flags is None or len(flags) != len(looks):
+            first = np.median(np.stack(ordered[:END_LOOKS]), axis=0)
+            last = np.median(np.stack(ordered[-END_LOOKS:]), axis=0)
+            out[t] = (shirt_team(first, kits), shirt_team(last, kits))
+            continue
+        ok = [bool(flags[k]) for k in order]
+        ends: list[str | None] = []
+        for window in (
+            range(min(END_WINDOW, len(looks))),
+            range(max(0, len(looks) - END_WINDOW), len(looks)),
+        ):
+            clean = [ordered[k] for k in window if ok[k]]
+            clean = clean[:END_LOOKS] if window.start == 0 else clean[-END_LOOKS:]
+            ends.append(
+                shirt_team(np.median(np.stack(clean), axis=0), kits)
+                if len(clean) >= END_MIN_CLEAR
+                else None
+            )
+        out[t] = (ends[0], ends[1])
     return out
+
+
+# Cutting raw pieces where the shirt changes (docs/plans/produkt-analyse-integration.md, «Farbsprung
+# im Tracker»): the tracker sometimes hands a track from a player to a referee, a coach or a player
+# of the other team standing next to him. Each clear look (no other person box over
+# `CLEAR_COVER` of it) gets a class: home, away or none (no team's kit, `shirt_team`); a class
+# holds when it is the majority within `CUT_WINDOW_S` around the look, and only stretches of at
+# least `CUT_MIN_RUN_S` count (hysteresis: shorter ones go to the longer neighbour).
+COLOUR_CUT = False
+CUT_WINDOW_S = 1.0
+CUT_MIN_RUN_S = 1.5
+
+
+def shirt_runs(frames: list[int], classes: list[str], fps: float) -> list[tuple[int, int, str]]:
+    """Stretches of one shirt class (first frame, last frame, class) in time order, from the
+    classes of single clear looks: each look takes the majority within `CUT_WINDOW_S`, stretches
+    shorter than `CUT_MIN_RUN_S` go to the longer neighbour."""
+    if not frames:
+        return []
+    order = np.argsort(np.asarray(frames), kind="stable")
+    fr = np.asarray(frames, np.int64)[order]
+    cl = [classes[k] for k in order]
+    names = sorted(set(cl))
+    onehot = np.array([[c == n for n in names] for c in cl], np.int64)
+    csum = np.vstack([np.zeros(len(names), np.int64), np.cumsum(onehot, axis=0)])
+    half = CUT_WINDOW_S * fps / 2
+    lo = np.searchsorted(fr, fr - half, side="left")
+    hi = np.searchsorted(fr, fr + half, side="right")
+    counts = csum[hi] - csum[lo]
+    smooth = []
+    for k in range(len(fr)):
+        best = counts[k].max()
+        top = [names[j] for j in range(len(names)) if counts[k][j] == best]
+        smooth.append(cl[k] if cl[k] in top else top[0])
+    runs: list[list[Any]] = []
+    for f, c in zip(fr.tolist(), smooth, strict=True):
+        if runs and runs[-1][2] == c:
+            runs[-1][1] = f
+        else:
+            runs.append([f, f, c])
+    min_len = CUT_MIN_RUN_S * fps
+    while len(runs) > 1:
+        k = min(range(len(runs)), key=lambda i: runs[i][1] - runs[i][0])
+        if runs[k][1] - runs[k][0] >= min_len:
+            break
+        nb = [i for i in (k - 1, k + 1) if 0 <= i < len(runs)]
+        to = max(nb, key=lambda i: runs[i][1] - runs[i][0])
+        runs[to][0], runs[to][1] = min(runs[to][0], runs[k][0]), max(runs[to][1], runs[k][1])
+        del runs[k]
+        merged: list[list[Any]] = []
+        for r in runs:
+            if merged and merged[-1][2] == r[2]:
+                merged[-1][1] = r[1]
+            else:
+                merged.append(r)
+        runs = merged
+    return [(int(a), int(b), str(c)) for a, b, c in runs]
+
+
+def cut_at_shirt_changes(
+    points: list[TrackPoint],
+    teams: TeamAssigner,
+    fps: float,
+    per_track: Sequence[dict[int, list[Any]]],
+) -> tuple[list[TrackPoint], int]:
+    """Cut raw pieces at stable shirt changes (`shirt_runs`); each stretch becomes a piece of its
+    own. Colour samples in `teams` and the per-track lists in `per_track` (number readings with
+    `.frame`, (frame, item) tuples) move with them, in place. Needs both team kits. Returns the
+    points and the number of cuts."""
+    kits = teams.kits
+    if "home" not in kits or "away" not in kits:
+        return points, 0
+    next_id = max([p.track_id for p in points], default=0) + 1
+    cuts: dict[int, list[tuple[int, int]]] = {}  # track -> [(from frame, new id)]
+    for t, looks in list(teams.samples.items()):
+        frames = teams.frames.get(t, [])
+        clear = teams.clear.get(t, [])
+        if len(frames) != len(looks) or len(clear) != len(looks):
+            continue
+        sel = [k for k in range(len(looks)) if clear[k]]
+        runs = shirt_runs([frames[k] for k in sel], [shirt_team(looks[k], kits) for k in sel], fps)
+        if len(runs) < 2:
+            continue
+        bounds = []
+        for (_, a, _), (b, _, _) in pairwise(runs):
+            bounds.append(((a + b) // 2 + 1, next_id))
+            next_id += 1
+        cuts[t] = bounds
+    if not cuts:
+        return points, 0
+
+    def owner(t: int, frame: int) -> int:
+        tid = t
+        for f, nid in cuts.get(t, []):
+            if frame >= f:
+                tid = nid
+        return tid
+
+    for t in cuts:
+        items = list(zip(teams.frames[t], teams.samples[t], teams.clear[t], strict=True))
+        for nid in [t, *(n for _, n in cuts[t])]:
+            teams.samples[nid], teams.frames[nid], teams.clear[nid] = [], [], []
+        for f, c, ok in items:
+            nid = owner(t, f)
+            teams.samples[nid].append(c)
+            teams.frames[nid].append(f)
+            teams.clear[nid].append(ok)
+    for group in per_track:
+        for t in [t for t in group if t in cuts]:
+            for v in group.pop(t):
+                f = int(v.frame) if hasattr(v, "frame") else int(v[0])
+                group.setdefault(owner(t, f), []).append(v)
+    out = [replace(p, track_id=owner(p.track_id, p.frame)) for p in points]
+    return out, sum(len(b) for b in cuts.values())
 
 
 def _finish(
@@ -417,13 +566,21 @@ def _finish(
     rosters: dict[str, set[int]] | None = None,
 ) -> AnalysisResult:
     t0 = time.perf_counter()
+    if COLOUR_CUT:
+        number_reads = dict(number_reads or {})
+        vectors = dict(vectors or {})
+        role_samples = dict(role_samples or {})
+        points, n_cuts = cut_at_shirt_changes(
+            points, teams, fps, [number_reads, vectors, role_samples]
+        )
+        extra = {**extra, "shirt_cuts": n_cuts}
     colours = {tid: np.median(np.stack(v), axis=0) for tid, v in teams.samples.items() if v}
     raw_tracks = len({p.track_id for p in points})
     if LONG_LINKS:
         # people outside the court are not linked and nobody's shirt number; links over long gaps
         # only between pieces whose shirt at the meeting ends is the same team
         edge = edge_pieces(points, fps)
-        piece_teams = piece_ends(teams.samples, teams.frames, teams.kits)
+        piece_teams = piece_ends(teams.samples, teams.frames, teams.kits, teams.clear)
         points, mapping = stitch(
             points,
             fps,
