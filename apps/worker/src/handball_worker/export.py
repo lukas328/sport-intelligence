@@ -268,6 +268,14 @@ def _spotlight_pieces(
     if not analysis:
         return None
     rows_cache: dict[str, Any] = {}
+    ctx_cache: dict[str, dict[str, Any]] = {}
+
+    def clips_of(key: str) -> list[dict[str, Any]]:
+        return [
+            {"in_ms": s["in_ms"], "out_ms": s["out_ms"]}
+            for s in payload["slides"]
+            if s.get("video_id") == key
+        ]
 
     def piece(slide: dict[str, Any], src: Path, x: float, y: float, out: Path) -> bool:
         info = analysis.get(str(slide.get("video_id")))
@@ -282,26 +290,33 @@ def _spotlight_pieces(
         }
         key = str(slide["video_id"])
         if key not in rows_cache:
-            clips = [
-                {"in_ms": s["in_ms"], "out_ms": s["out_ms"]}
-                for s in payload["slides"]
-                if s.get("video_id") == key
-            ]
             rows_cache[key] = reels._rows(
                 s3,
                 payload["bucket_artifacts"],
                 info["chunks_prefix"],
                 info.get("chunk_ms"),
-                clips,
+                clips_of(key),
                 work,
             )
-        ctx = {
-            "format": "16x9",
-            "homography": info["homography"],
-            "image_size": info.get("image_size"),
-            "player_tracks": [],
-        }
-        reels.render_clip(settings, src, clip, rows_cache[key], ctx, out)
+        if key not in ctx_cache:
+            # a moving camera: the view files of these clips (where the camera looked, ADR 020)
+            ctx_cache[key] = reels.with_views(
+                s3,
+                payload["bucket_artifacts"],
+                {
+                    "format": "16x9",
+                    "homography": info["homography"],
+                    "image_size": info.get("image_size"),
+                    "player_tracks": [],
+                    "chunks_prefix": info["chunks_prefix"],
+                    "chunk_ms": info.get("chunk_ms"),
+                    "view_chunks": info.get("view_chunks"),
+                    "frame_size": info.get("frame_size"),
+                },
+                clips_of(key),
+                work,
+            )
+        reels.render_clip(settings, src, clip, rows_cache[key], ctx_cache[key], out)
         return True
 
     return piece

@@ -75,6 +75,9 @@ or moving, instead of asking clubs to film differently.
 - An analysis from before has no view files: there, as before, no spotlight and no person
   questions for a moving camera until it is analysed again. A court that does not refer to the
   hall image (its image size differs from the panorama's) is not drawn either.
-- Still open: the reel and presentation exports render on the server and do not read the view
-  files yet. Until they do, they get no court for a moving camera and render without ring and
-  crop (before, they drew both in the wrong place).
+- The reel and presentation exports render on the server and follow the camera the same way
+  (2026-11-26, later the same day): the API gives them the court of a moving camera only with
+  view files (`court_for_render`, the rule of the web's `geometryOf`), the worker loads the view
+  files the clips need (`reels.with_views`) and works out court -> frame per frame (`places`);
+  the burned-in ring and the 9:16 crop follow it. A frame without a view gets no ring, and the
+  crop stays where it was.

@@ -47,7 +47,7 @@ from handball_api.services.orgs import get_team
 from handball_api.services.policies import Action, can, is_coach
 from handball_api.services.report_pdf import _esc, _styles
 from handball_api.services.scouting_pdf import observation_text
-from handball_api.services.videos import media_prefix
+from handball_api.services.video_media import court_for_render, media_prefix
 
 MAX_SLIDES = 200
 REMOTE_TTL_S = 4 * 3600
@@ -475,20 +475,15 @@ async def start_export(ctx: Ctx, pres_id: uuid.UUID) -> Presentation:
     for vid_id in spot:
         vid = str(vid_id)
         v, cal = spot_videos.get(vid_id), latest.get(vid_id)
-        # a moving camera's court refers to the hall image: the export draws no spotlight there
-        # (ADR 020; the player follows the camera with the view files, the export does not yet)
+        # a moving camera: the court on the hall image plus where the camera looked (ADR 020);
+        # without view files no spotlight rather than one in the wrong place
         meta = (v.analysis or {}) if v is not None else {}
-        if (
-            v is not None
-            and cal is not None
-            and meta.get("chunk_ms")
-            and meta.get("camera") != "moving"
-        ):
+        court = court_for_render(meta, cal)
+        if v is not None and court is not None and meta.get("chunk_ms"):
             analysis[vid] = {
                 "chunks_prefix": media_prefix(v) + "analysis/",
-                "chunk_ms": v.analysis["chunk_ms"],  # type: ignore[index]
-                "homography": cal.homography,
-                "image_size": cal.image_size,
+                "chunk_ms": meta["chunk_ms"],
+                **court,
             }
     job_id = f"pres-{p.id}-{int(datetime.now(UTC).timestamp())}"
     await ctx.enqueue(

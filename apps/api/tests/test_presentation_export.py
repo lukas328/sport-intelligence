@@ -67,3 +67,21 @@ async def test_spotlight_export_carries_the_latest_court(
     assert (await coach.post(f"{base}/export")).status_code == 202
     payload = coach.app.state.jobs.jobs[-1][3]["payload"]
     assert video["id"] not in payload["analysis"]
+    # with view files (where the camera looked, ADR 020) the export follows the camera
+    await owner_conn.execute(
+        "UPDATE video_assets SET analysis = $1::jsonb WHERE id = $2::uuid",
+        json.dumps(
+            {
+                "chunk_ms": 10_000,
+                "camera": "moving",
+                "view_chunks": 1,
+                "frame_size": [640, 360],
+                "panorama": {"width": 1280, "height": 720},
+            }
+        ),
+        video["id"],
+    )
+    assert (await coach.post(f"{base}/export")).status_code == 202
+    info = coach.app.state.jobs.jobs[-1][3]["payload"]["analysis"][video["id"]]
+    assert (info["view_chunks"], info["frame_size"]) == (1, [640, 360])
+    assert info["homography"][0][0] == 2.0 and info["image_size"] == [1280, 720]
