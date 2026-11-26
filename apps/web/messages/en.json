@@ -2289,7 +2289,7 @@
   },
   "highlights": {
     "title": "Highlights",
-    "intro": "After every analysis, highlights for the team (16:9 and 9:16) and for single players are created automatically. Only confident scenes; players without consent do not appear. No music.",
+    "intro": "Confirmed goals and scenes become highlights for the team (16:9 and 9:16) and for single players. Only confident scenes; players without consent do not appear. No music.",
     "format": "Format",
     "landscape": "Landscape 16:9",
     "portrait": "Portrait 9:16",
