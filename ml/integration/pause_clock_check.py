@@ -74,7 +74,9 @@ def main() -> None:
                 continue
             r = read_segment(video, ocr)
             kind = rows[name]["kind"] if name in rows else "?"
-            out.append({"seg": name, "kind": kind, "truth_play": rows.get(name, {}).get("play"), **r})
+            out.append(
+                {"seg": name, "kind": kind, "truth_play": rows.get(name, {}).get("play"), **r}
+            )
             print(name, kind, r["readings"], r["run_share"], r["clock_values"], flush=True)
     summary: dict[str, Any] = {}
     for kind in sorted({x["kind"] for x in out}):
