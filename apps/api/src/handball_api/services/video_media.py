@@ -37,6 +37,30 @@ SEGMENT_CACHE = "private, max-age=86400, immutable"
 _MAP_URI = re.compile(r'URI="([^"]+)"')
 
 
+def court_for_render(analysis: dict[str, Any] | None, cal: Any) -> dict[str, Any] | None:
+    """The court a server-side render (reel, presentation export) draws with, or None.
+
+    A fixed camera: the calibration as it is (court -> frame). A moving camera's calibration
+    refers to the hall image; the render follows the camera with the view files (where it
+    looked, frame by frame, ADR 020), so it gets `view_chunks` and `frame_size` too. Without
+    view files (an analysis from before) or with a court not on the hall image: None, nothing
+    is drawn rather than something in the wrong place. The same rule as the web player's
+    `geometryOf`.
+    """
+    if cal is None:
+        return None
+    meta = analysis or {}
+    court = {"homography": cal.homography, "image_size": cal.image_size}
+    if meta.get("camera") != "moving":
+        return court
+    pano, frame, views = meta.get("panorama") or {}, meta.get("frame_size"), meta.get("view_chunks")
+    size = list(cal.image_size or [])
+    on_hall = len(size) == 2 and [pano.get("width"), pano.get("height")] == size
+    if not views or not frame or len(frame) != 2 or not on_hall:
+        return None
+    return {**court, "view_chunks": int(views), "frame_size": [int(frame[0]), int(frame[1])]}
+
+
 def media_prefix(asset: VideoAsset) -> str:
     return media_prefix_of(asset.organization_id, asset.match_id, asset.id)
 

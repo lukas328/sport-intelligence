@@ -31,7 +31,7 @@ fertig ist, streicht es und trägt das Ergebnis im passenden Plan ein.
 3. **Spieltag neu denken (A21).** Seit Runde 4 aus der App genommen; Konzept mit Lukas: was der
    Trainer am Spielfeldrand wirklich erfasst.
 4. **Go-live-Punkte mit Code** (`GO_LIVE.md`): ~~HLS-Segmente direkt aus R2~~ erledigt 20.11.
-   (`HB_MEDIA_DIRECT`, ADR 002 Nachtrag; Lukas: R2-CORS-Regel prüfen, README Azure Schritt 7); ~~Overlays im Player für bewegte Kameras~~ erledigt 26.11. (ADR 020 Nachtrag: Kamera-Blick pro Bild, Spotlight und Personen-Fragen auch bei schwenkender Kamera; wirkt ab der nächsten Analyse eines Videos; offen: Reel- und Präsentations-Export lesen den Kamera-Blick noch nicht und zeichnen dort vorerst keinen Ring); Alarme und Proben im
+   (`HB_MEDIA_DIRECT`, ADR 002 Nachtrag; Lukas: R2-CORS-Regel prüfen, README Azure Schritt 7); ~~Overlays im Player für bewegte Kameras~~ erledigt 26.11. (ADR 020 Nachtrag: Kamera-Blick pro Bild, Spotlight und Personen-Fragen auch bei schwenkender Kamera; wirkt ab der nächsten Analyse eines Videos; Reel- und Präsentations-Export folgen der Kamera ebenso, Ring und 9:16-Zuschnitt); Alarme und Proben im
    Monitoring vorbereiten.
 5. **Europa Schritt 2 vorbereiten** (`docs/plans/europa.md`): Währung EUR in Abrechnung und Rechnung
    (heute nur CHF), `de-DE` erst mit dem ersten deutschen Verein.

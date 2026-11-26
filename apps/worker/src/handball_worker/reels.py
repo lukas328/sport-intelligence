@@ -29,27 +29,81 @@ SMOOTH_FRAMES = 37  # 1.5 s moving average: the crop pans calmly
 FrameArray = NDArray[np.uint8]
 
 
-def project(h: list[list[float]], xy: NDArray[np.float64]) -> NDArray[np.float64]:
+def project(
+    h: list[list[float]] | NDArray[np.float64], xy: NDArray[np.float64]
+) -> NDArray[np.float64]:
     pts = np.c_[xy, np.ones(len(xy))] @ np.asarray(h, dtype=np.float64).T
     out: NDArray[np.float64] = pts[:, :2] / pts[:, 2:3]
+    return out
+
+
+Homography = list[list[float]] | NDArray[np.float64]
+# court -> picture of one frame and the image size it maps into; None: not known for that frame
+Place = tuple[Homography, tuple[int, int]]
+VIEW_ROW = 10  # view files: float32 [t_ms, h00 .. h22]
+VIEW_SPAN_MS = 100  # neighbouring view samples further apart are a gap (as in the web player)
+VIEW_NEAR_MS = 50
+
+
+def view_at(views: NDArray[np.float32], t: float) -> NDArray[np.float64] | None:
+    """Hall image -> frame of a moving camera at time t (ADR 020): interpolated between two
+    neighbouring frames, the nearest frame close by, else None (a gap: nothing is drawn)."""
+    if not len(views):
+        return None
+    ts = views[:, 0]
+    j = int(np.searchsorted(ts, t, side="right"))  # first row after t
+    i = j - 1
+    ti = float(ts[i]) if i >= 0 else -np.inf
+    tj = float(ts[j]) if j < len(views) else np.inf
+    if i >= 0 and j < len(views) and tj - ti <= VIEW_SPAN_MS:
+        f = (t - ti) / (tj - ti) if tj > ti else 0.0
+        a = views[i, 1:].astype(np.float64)
+        b = views[j, 1:].astype(np.float64)
+        out: NDArray[np.float64] = (a + (b - a) * f).reshape(3, 3)
+        return out
+    if t - ti <= VIEW_NEAR_MS:
+        return np.asarray(views[i, 1:], np.float64).reshape(3, 3)
+    if tj - t <= VIEW_NEAR_MS:
+        return np.asarray(views[j, 1:], np.float64).reshape(3, 3)
+    return None
+
+
+def places(ctx: dict[str, Any], times_ms: list[int]) -> list[Place | None]:
+    """Court -> picture per frame: the calibration itself for a fixed camera; for a moving one
+    (view files loaded as `views`) composed with where the camera looked at that moment."""
+    h = ctx.get("homography")
+    if h is None:
+        return [None] * len(times_ms)
+    w, hgt = ctx.get("image_size") or (SRC_W, SRC_H)
+    size = (int(w), int(hgt))
+    views = ctx.get("views")
+    if views is None:
+        return [(h, size)] * len(times_ms)
+    frame = (int(ctx["frame_size"][0]), int(ctx["frame_size"][1]))
+    court = np.asarray(h, np.float64)
+    out: list[Place | None] = []
+    for t in times_ms:
+        v = view_at(views, t)
+        out.append(None if v is None else (v @ court, frame))
     return out
 
 
 def crop_path(
     rows: NDArray[np.float32],
     times_ms: list[int],
-    h: list[list[float]] | None,
-    size: tuple[int, int],
+    where: list[Place | None],
     players: set[int],
     crop_w: int,
 ) -> list[int]:
-    """Left edge of a portrait crop per frame: median of the projected players, smoothed."""
-    centre = size[0] / 2
+    """Left edge of a portrait crop per frame: median of the projected players, smoothed. A
+    frame whose court -> picture is not known keeps the crop where it was."""
+    centre = SRC_W / 2
     xs: list[float] = []
-    for t in times_ms:
-        if h is None or len(rows) == 0:
-            xs.append(centre)
+    for t, place in zip(times_ms, where, strict=True):
+        if place is None or len(rows) == 0:
+            xs.append(xs[-1] if xs else centre)
             continue
+        h, size = place
         sel = rows[(np.abs(rows[:, 0] - t) <= 60) & np.isin(rows[:, 1], list(players))]
         if len(sel) == 0:
             xs.append(xs[-1] if xs else centre)
@@ -65,7 +119,7 @@ def crop_path(
 
 
 def spotlight_at(
-    rows: NDArray[np.float32], track: int, t: int, h: list[list[float]], size: tuple[int, int]
+    rows: NDArray[np.float32], track: int, t: int, h: Homography, size: tuple[int, int]
 ) -> tuple[float, float] | None:
     sel = rows[(rows[:, 1] == track) & (np.abs(rows[:, 0] - t) <= 120)]
     if len(sel) == 0:
@@ -151,9 +205,9 @@ def render_clip(
     a, b = clip["in_ms"], clip["out_ms"]
     n = int((b - a) / 1000 * FPS)
     times = [a + round(i * 1000 / FPS) for i in range(n)]
-    h, size = ctx.get("homography"), tuple(ctx.get("image_size") or (SRC_W, SRC_H))
+    where = places(ctx, times)
     lefts = (
-        crop_path(rows, times, h, size, set(ctx["player_tracks"]), crop_w) if portrait else [0] * n
+        crop_path(rows, times, where, set(ctx["player_tracks"]), crop_w) if portrait else [0] * n
     )
     dec = subprocess.Popen(
         [
@@ -214,7 +268,9 @@ def render_clip(
         # BrokenPipeError: the encoder stopped; its exit code below says why
         with contextlib.suppress(BrokenPipeError):
             try:
-                _pipe_frames(dec.stdout, enc.stdin, clip, rows, ctx, times, lefts, portrait, crop_w)
+                _pipe_frames(
+                    dec.stdout, enc.stdin, clip, rows, where, times, lefts, portrait, crop_w
+                )
             finally:
                 enc.stdin.close()
         dec.wait()
@@ -236,7 +292,7 @@ def _pipe_frames(
     stdin: IO[bytes],
     clip: dict[str, Any],
     rows: NDArray[np.float32],
-    ctx: dict[str, Any],
+    where: list[Place | None],
     times: list[int],
     lefts: list[int],
     portrait: bool,
@@ -245,7 +301,6 @@ def _pipe_frames(
     """Decoded frames in, overlay and crop, encoder frames out."""
     out_w, out_h = (720, 1280) if portrait else (1280, 720)
     a, n = clip["in_ms"], len(times)
-    h, size = ctx.get("homography"), tuple(ctx.get("image_size") or (SRC_W, SRC_H))
     frame_bytes = SRC_W * SRC_H * 3
     i = 0
     while True:
@@ -254,9 +309,10 @@ def _pipe_frames(
             break
         img = Image.frombuffer("RGB", (SRC_W, SRC_H), buf, "raw", "RGB", 0, 1)
         t = times[min(i, n - 1)] if n else a
+        place = where[min(i, n - 1)] if n else None
         ring = (
-            spotlight_at(rows, int(clip["spotlight_track"]), t, h, size)
-            if h and clip.get("spotlight_track") is not None and len(rows)
+            spotlight_at(rows, int(clip["spotlight_track"]), t, place[0], place[1])
+            if place is not None and clip.get("spotlight_track") is not None and len(rows)
             else None
         )
         img = draw_overlay(img.copy(), ring, str(clip.get("label") or ""), i < 3 * FPS)
@@ -286,6 +342,35 @@ def _rows(
     return np.concatenate(parts) if parts else np.zeros((0, 4), np.float32)
 
 
+def with_views(
+    s3: Any, bucket: str, ctx: dict[str, Any], clips: list[dict[str, Any]], work: Path
+) -> dict[str, Any]:
+    """A moving camera's court refers to the hall image: load the view files (where the camera
+    looked, ADR 020) the clips need, as `views`. None of them found: an empty table, so nothing
+    is drawn rather than something in the wrong place. A fixed camera: the context as it is."""
+    count, chunk_ms = ctx.get("view_chunks"), ctx.get("chunk_ms")
+    if not count or not chunk_ms or not ctx.get("frame_size") or ctx.get("homography") is None:
+        return ctx
+    needed = sorted(
+        {
+            n
+            for c in clips
+            for n in range(c["in_ms"] // chunk_ms, c["out_ms"] // chunk_ms + 1)
+            if n < int(count)
+        }
+    )
+    parts = []
+    for n in needed:
+        dst = work / f"view_{n:05d}.bin"
+        try:
+            s3.download_file(bucket, f"{ctx['chunks_prefix']}view_{n:05d}.bin", str(dst))
+            parts.append(np.frombuffer(dst.read_bytes(), dtype="<f4").reshape(-1, VIEW_ROW))
+        except Exception as exc:  # missing: no ring or crop for that part
+            log.info("view_missing", chunk=n, error=str(exc))
+    views = np.concatenate(parts) if parts else np.zeros((0, VIEW_ROW), np.float32)
+    return {**ctx, "views": views[np.argsort(views[:, 0], kind="stable")]}
+
+
 def run_highlight_reel(payload: dict[str, Any]) -> dict[str, Any]:
     return run_artifact_job(
         payload,
@@ -312,7 +397,8 @@ def render_reel(settings: WorkerSettings, payload: dict[str, Any], work: Path, s
         payload["clips"],
         work,
     )
-    return render_local(settings, payload, src, rows, logo, work)
+    ctx = with_views(s3, payload["bucket_artifacts"], payload, payload["clips"], work)
+    return render_local(settings, ctx, src, rows, logo, work)
 
 
 def _logo(s3: Any, payload: dict[str, Any]) -> bytes | None:
@@ -342,7 +428,13 @@ def _render_parts(settings: WorkerSettings, payload: dict[str, Any], work: Path,
             mine,
             sub,
         )
-        files.append((src, rows, {**payload, **source}))
+        files.append(
+            (
+                src,
+                rows,
+                with_views(s3, payload["bucket_artifacts"], {**payload, **source}, mine, sub),
+            )
+        )
     return render_local(
         settings, payload, files[0][0], files[0][1], _logo(s3, payload), work, files
     )
