@@ -557,7 +557,13 @@
     "newOwnMatch": "Ein eigenes Spiel anlegen",
     "kitFieldOf": "{team} Feldspieler",
     "kitKeeperOf": "{team} Torhüter",
-    "scoreFinalHint": "Das Endresultat des ganzen Spiels, nicht die Tore im Video."
+    "scoreFinalHint": "Das Endresultat des ganzen Spiels, nicht die Tore im Video.",
+    "kitPeopleHint": "Unter jeder Farbe: wen die Analyse in dieser Farbe sieht. Antippen spielt die Person ab.",
+    "kitNobody": "Niemand in dieser Farbe erkannt.",
+    "kitPlay": "{who} in dieser Farbe abspielen",
+    "kitPlaying": "Läuft: {who}",
+    "kitClosePlayer": "Player schliessen",
+    "kitPerson": "Person {n}"
   },
   "upload": {
     "title": "Video hochladen",
@@ -626,7 +632,14 @@
     "ownKit": "Welches Trikot tragt ihr in diesem Spiel?",
     "ownKitSaved": "Gespeichert.",
     "otherGame": "«{name}» heisst ganz anders als «{first}», das schon in diesem Spiel liegt. Gehört die Datei wirklich hierher? Ein anderes Spiel legst du als eigenes Spiel an. Der Upload läuft weiter.",
-    "moreAll": "Mehr: so filmst du, Dateien und Grösse, andere Kamera, Link"
+    "moreAll": "Mehr: so filmst du, Dateien und Grösse, andere Kamera, Link",
+    "kitFromVideo": "Farbe aus dem Video nehmen",
+    "kitFromVideoStill": "Standbild aus dem Video: auf ein Trikot tippen, um seine Farbe zu nehmen",
+    "kitFromVideoMoment": "Stelle im Video",
+    "kitFromVideoHint": "Schieb zu einer Stelle, wo man euer Trikot gut sieht, und tipp darauf.",
+    "kitPicked": "Diese Farbe übernehmen für:",
+    "kitPickOwn": "Unser Trikot",
+    "kitPickGk": "Unser Torhüter"
   },
   "processing": {
     "title": "Verarbeitung",

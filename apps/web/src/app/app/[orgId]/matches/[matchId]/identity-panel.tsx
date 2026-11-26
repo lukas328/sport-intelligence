@@ -2,14 +2,12 @@
 
 import type { Schemas } from "@handball/api-client";
 import { useQueryClient } from "@tanstack/react-query";
-import { Play, X } from "lucide-react";
+import { Play } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useMatchRoster, useMatchSides } from "@/components/domain/match-sides";
 import { Button } from "@/components/ui/button";
-import { FramesProvider, PersonStill } from "@/components/video/person-still";
-import { VideoPlayer, type PlayerHandle } from "@/components/video/player";
-import { SpotlightOverlay } from "@/components/video/spotlight";
+import { FramesProvider, InlinePersonPlayer, PersonStill } from "@/components/video/person-still";
 import { api } from "@/lib/client";
 import type { Geometry } from "@/lib/moving-camera";
 import type { Analysis } from "./analysis-panel";
@@ -61,7 +59,6 @@ export function IdentityPanel({
   const [notice, setNotice] = useState<string | null>(null);
   const [all, setAll] = useState(false);
   const [playing, setPlaying] = useState<Analysis["tracks"][number] | null>(null);
-  const player = useRef<PlayerHandle>(null);
   const video = `/v1/orgs/${orgId}/videos/${videoId}`;
   // in the order they appear, so the coach goes through the video once
   const own = [...ownTracks(tracks, neutral)].sort((a, b) => a.first_ms - b.first_ms);
@@ -94,27 +91,8 @@ export function IdentityPanel({
         <p className="mt-1 text-xs text-muted">{neutral ? t("hintNumber") : t("hint")}</p>
         {playing && (
           // the person plays here, above the list: on a phone it stays in view while scrolling
-          <div className="sticky top-0 z-10 mt-3 bg-paper pb-2" data-testid="identity-player">
-            <div className="mb-1 flex items-center justify-between gap-2">
-              <p className="m-0 min-w-0 truncate text-sm font-semibold">{t("playing", { who: who(playing) })}</p>
-              <Button variant="quiet" size="sm" className="min-h-11 min-w-11" onClick={() => setPlaying(null)} aria-label={t("closePlayer")}>
-                <X aria-hidden className="size-4" />
-              </Button>
-            </div>
-            <VideoPlayer
-              ref={player}
-              key={playing.track_no}
-              src={`${video}/media/hls/master.m3u8`}
-              window={{ start_ms: Math.max(0, playing.first_ms - 500), end_ms: Math.min(playing.last_ms, playing.first_ms + 8000) }}
-              autoPlay
-              loop
-              under
-              overlay={
-                geometry && chunkMs ? (
-                  <SpotlightOverlay baseUrl={`${video}/tracks`} chunkMs={chunkMs} geometry={geometry} track={playing.track_no} label="" getTime={() => player.current?.time() ?? 0} showTrail={false} />
-                ) : undefined
-              }
-            />
+          <div className="mt-3">
+            <InlinePersonPlayer video={video} track={playing} geometry={geometry} chunkMs={chunkMs} title={t("playing", { who: who(playing) })} closeLabel={t("closePlayer")} onClose={() => setPlaying(null)} testId="identity-player" />
           </div>
         )}
         <ul className="mt-3 divide-y divide-border/70 text-sm">

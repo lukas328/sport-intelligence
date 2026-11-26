@@ -9,6 +9,7 @@ import { useEarlyFiles } from "@/lib/early-files";
 import { sitePage, useSiteConfig } from "@/lib/site-config";
 import { useEffect, useRef, useState, type DragEvent, type FormEvent, type ReactNode } from "react";
 import { KitFields } from "@/components/domain/kit-fields";
+import { KitFromVideo } from "@/components/domain/kit-from-video";
 import { UploadFacts } from "@/components/upload/upload-facts";
 import { useOptionalShell } from "@/components/shell/context";
 import { Button } from "@/components/ui/button";
@@ -546,7 +547,7 @@ export function UploadPanel({
       )}
       {/* our shirt: it helps the analysis tell the teams apart (K2); saved at once, also while the
           upload runs */}
-      {kits && role === "main" && !hasMain && <OwnKit orgId={orgId} matchId={matchId} kits={kits} />}
+      {kits && role === "main" && !hasMain && <OwnKit orgId={orgId} matchId={matchId} kits={kits} file={"file" in state ? state.file : null} />}
       {shirts}
       {/* the rest can wait: how to film, files and size, another camera, a link (A11: about 200 words
           stood before the field) */}
@@ -593,7 +594,7 @@ export function UploadPanel({
 
 /** Our shirt in this match (K2): the club's home or away shirt in one tap, or another colour; the
  * goalkeeper too. Saved right away, the analysis reads it. */
-function OwnKit({ orgId, matchId, kits }: { orgId: string; matchId: string; kits: Kits }) {
+function OwnKit({ orgId, matchId, kits, file = null }: { orgId: string; matchId: string; kits: Kits; file?: File | null }) {
   const t = useTranslations();
   const qc = useQueryClient();
   const shell = useOptionalShell();
@@ -620,6 +621,8 @@ function OwnKit({ orgId, matchId, kits }: { orgId: string; matchId: string; kits
     <fieldset className="m-0 max-w-[62ch] border-0 p-0" data-testid="upload-own-kit">
       <legend className="mb-2 text-[17px] font-bold">{t("upload.ownKit")}</legend>
       <KitFields kits={value} onChange={change} only={["own", "own_gk"]} presets={shell ? { home: shell.org.primary_color, away: shell.org.secondary_color ?? null } : null} />
+      {/* the file is in the browser: its colour can be taken from it before any analysis */}
+      {file && <KitFromVideo file={file} onPick={(colour, which) => change({ ...value, [which]: colour })} />}
       <p className="m-0 mt-1 text-sm text-ink-2" aria-live="polite">
         {saved ? t("upload.ownKitSaved") : " "}
       </p>

@@ -1,11 +1,14 @@
 "use client";
 
-import { User } from "lucide-react";
+import { User, X } from "lucide-react";
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import { Button } from "@/components/ui/button";
 import { FrameGrabber, stillRect } from "@/lib/frame-grabber";
 import { courtToPictureAt, type Geometry } from "@/lib/moving-camera";
 import { personBox, trackSamples } from "@/lib/spotlight";
 import { cn } from "@/lib/utils";
+import { VideoPlayer, type PlayerHandle } from "./player";
+import { SpotlightOverlay } from "./spotlight";
 
 const Frames = createContext<FrameGrabber | null>(null);
 
@@ -91,5 +94,55 @@ export function PersonStill({
         <User aria-hidden className={cn("absolute inset-0 m-auto size-1/2 text-ink-2", state === "loading" && "animate-pulse motion-reduce:animate-none")} />
       )}
     </span>
+  );
+}
+
+/**
+ * One person of the analysis playing in a small player inside the step (sticky on a phone, so it
+ * stays in view over a list), with the ring on them where the court is known.
+ */
+export function InlinePersonPlayer({
+  video,
+  track,
+  geometry,
+  chunkMs,
+  title,
+  closeLabel,
+  onClose,
+  testId = "person-player",
+}: {
+  video: string; // /v1/orgs/{org}/videos/{id}
+  track: { track_no: number; first_ms: number; last_ms: number };
+  geometry: Geometry | null;
+  chunkMs: number | null;
+  title: string;
+  closeLabel: string;
+  onClose: () => void;
+  testId?: string;
+}) {
+  const player = useRef<PlayerHandle>(null);
+  return (
+    <div className="sticky top-0 z-10 bg-paper pb-2" data-testid={testId}>
+      <div className="mb-1 flex items-center justify-between gap-2">
+        <p className="m-0 min-w-0 truncate text-sm font-semibold">{title}</p>
+        <Button variant="quiet" size="sm" className="min-h-11 min-w-11" onClick={onClose} aria-label={closeLabel}>
+          <X aria-hidden className="size-4" />
+        </Button>
+      </div>
+      <VideoPlayer
+        ref={player}
+        key={track.track_no}
+        src={`${video}/media/hls/master.m3u8`}
+        window={{ start_ms: Math.max(0, track.first_ms - 500), end_ms: Math.min(track.last_ms, track.first_ms + 8000) }}
+        autoPlay
+        loop
+        under
+        overlay={
+          geometry && chunkMs ? (
+            <SpotlightOverlay baseUrl={`${video}/tracks`} chunkMs={chunkMs} geometry={geometry} track={track.track_no} label="" getTime={() => player.current?.time() ?? 0} showTrail={false} />
+          ) : undefined
+        }
+      />
+    </div>
   );
 }
