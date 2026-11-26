@@ -513,6 +513,53 @@ def test_goalkeepers_by_position_and_defending_team() -> None:
     assert labels == {99: "home_gk"}
 
 
+def _defending_left() -> tuple[list[tuple[int, int, float, float]], dict[int, str]]:
+    """Home defends the left goal for a minute: home players near it, away further out."""
+    pts: list[tuple[int, int, float, float]] = []
+    teams: dict[int, str] = {}
+    for t in range(0, 60_000, 500):
+        for k in range(4):
+            pts.append((t, 10 + k, 6.5 + k * 0.3, 6 + 2.5 * k))
+            pts.append((t, 20 + k, 10.0 + k * 0.3, 6 + 2.5 * k))
+            teams[10 + k], teams[20 + k] = "home", "away"
+    return pts, teams
+
+
+def test_goalkeeper_in_own_kit_from_referee_cluster() -> None:
+    """A keeper whose kit put it in the "referee" cluster (audit 2026-11 point 4) is found when it
+    stays at its goal nearly all the time and no other keeper candidate is there."""
+    from handball_vision.events import assign_goalkeepers
+
+    pts, teams = _defending_left()
+    pts += [(t, 99, 1.5, 10.0) for t in range(0, 60_000, 500)]
+    assert assign_goalkeepers(pts, {**teams, 99: "referee"}) == {99: "home_gk"}
+    # a referee who is near the goal only part of the time (70 %) stays a referee
+    pts2, _ = _defending_left()
+    pts2 += [(t, 99, 1.5 if t % 10_000 < 7_000 else 15.0, 10.0) for t in range(0, 60_000, 500)]
+    assert assign_goalkeepers(pts2, {**teams, 99: "referee"}) == {}
+    # the goal-line referee: beside the goal and just behind the line the whole time (as on the
+    # Staging clip fbdc76e6), at a goal without a keeper candidate, stays a referee
+    pts3, _ = _defending_left()
+    pts3 += [(t, 99, -0.5, 14.5) for t in range(0, 60_000, 500)]
+    assert assign_goalkeepers(pts3, {**teams, 99: "referee"}) == {}
+
+
+def test_referee_at_goal_with_a_keeper_stays_referee() -> None:
+    """A goal judge beside a goal that already has a keeper candidate is not a second keeper; of
+    two "referee" tracks at a keeperless goal only the more goal-bound one counts."""
+    from handball_vision.events import assign_goalkeepers
+
+    pts, teams = _defending_left()
+    pts += [(t, 98, 1.5, 10.0) for t in range(0, 60_000, 500)]  # the keeper (home cluster)
+    pts += [(t, 99, 0.5, 4.5) for t in range(0, 60_000, 500)]  # goal judge beside the goal
+    assert assign_goalkeepers(pts, {**teams, 98: "home", 99: "referee"}) == {98: "home_gk"}
+    pts2, _ = _defending_left()
+    pts2 += [(t, 98, 1.5, 10.0) for t in range(0, 60_000, 500)]
+    pts2 += [(t, 99, 0.5 if t % 10_000 < 8_500 else 9.0, 4.5) for t in range(0, 60_000, 500)]
+    labels = assign_goalkeepers(pts2, {**teams, 98: "referee", 99: "referee"})
+    assert labels == {98: "home_gk"}
+
+
 class _FakeBallNet:
     """Stands in for `ballnet.BallNet`: one candidate per triplet, from the centre frame's mean."""
 

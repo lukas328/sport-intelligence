@@ -909,6 +909,43 @@ Nächster Schritt:
 3. Erst danach: die festgelegte Methode einmal auf dem Endtest melden (aus `per_shot` und den
    gespeicherten Kandidaten), und die API-Zuordnung zum Spielbericht auf die neue Zeit anpassen.
 
+### Torhüter in eigener Trikotfarbe (Audit Punkt 4, 2026-11-26)
+
+Befund aus dem Audit: Ein Torhüter in eigener Farbe landet im k-Means oft in einem dritten
+Cluster, `teams.relabel_by_clusters` nennt ihn «referee», und die Positionsregel
+`events.assign_goalkeepers` übersprang genau diese Tracks. Ohne Torhüter fehlen die Seiten und
+damit alle Ereignisse.
+
+Umgesetzt (Vorschlag 2 des Audits): «referee»-Tracks zählen jetzt mit einer strengeren Regel. Sie
+müssen mindestens 80 % der Zeit im 6,5-m-Raum eines Tores sein (statt 60 %), und es darf an diesem
+Tor keinen anderen Torhüter-Kandidaten geben. Bei mehreren «referee»-Tracks am selben Tor zählt
+der torgebundenste. Dazu muss der Track im Median vor dem Tor stehen (höchstens 2,5 m neben der
+Tormitte, auf der Feldseite der Torlinie, bis 5 m davor). Die Mannschaft kommt wie bisher aus der Abstimmung, wer das Tor verteidigt
+(mindestens 3 Stimmen), sonst bleibt der Track Schiedsrichter. Tests in `test_learned.py`: Torhüter
+im «referee»-Cluster gefunden; Schiedsrichter mit 70 % am Tor und Torrichter neben einem Tor mit
+Torhüter bleiben Schiedsrichter.
+
+Offline nachgerechnet auf den Staging-Artefakten im Testbucket (nur gelesen). Die Kalibrierung der
+Läufe steht nicht im Bucket, darum wurde die Homographie aus `tracks.parquet` und den Beobachtungen
+zurückgerechnet (rund 22 000 Paare, Median 3 px). Danach lief `observe.track` mit dem Code von
+`main` und mit dieser Regel, ohne Trikotfarben:
+
+| Lauf | Feld | «referee»-Tracks | Torhüter-Tracks main / neu | `missing` |
+|---|---|---|---|---|
+| U (76201462) | keine Kalibrierung, keine Tracks | - | - | Regel greift nicht |
+| H (90c0bf9a) | zurückgerechnet | 0 | 12 / 12 (alle home) | leer / leer |
+| fbdc76e6 (5 min) | zurückgerechnet | 10 | 4 / 4 | leer / leer |
+| 56fcc216 (5 min) | zurückgerechnet | 10 | 3 / 3 | leer / leer |
+
+Auf keinem dieser Läufe ändert die Regel etwas: wo Felddaten da sind, fehlten die Torhüter schon
+mit dem alten Code nicht. Lehrreich war fbdc76e6: zwei «referee»-Tracks stehen zu 95 und 97 % im
+6,5-m-Raum. Auf den Bildausschnitten ist das der Torlinien-Schiedsrichter (schwarz, neben dem Tor,
+knapp hinter der Linie). Abgewiesen wurden sie nur, weil das Tor schon einen Torhüter-Kandidaten
+hatte; an einem Tor ohne Kandidaten wäre er Torhüter geworden. Darum die zusätzliche Bedingung
+«vor dem Tor» (Test dazu). Den Fall, für den die Regel gebaut ist (Torhüter in eigener Farbe im
+«referee»-Cluster), zeigt keiner der vier Läufe. Er ist also nur im Test belegt. Offen bleibt
+Vorschlag 1 (Seiten aus Anwurf-Formationen, ohne Torhüter).
+
 ### Tore aus dem Spielbericht ohne Frage (Livegang L1, 2026-11-19)
 
 Frage: Welche Tor-Kandidaten kann die App mit dem offiziellen Spielbericht selbst beantworten, ohne

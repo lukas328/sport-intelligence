@@ -35,6 +35,11 @@ fertig ist, streicht es und trägt das Ergebnis im passenden Plan ein.
    Monitoring vorbereiten.
 5. **Europa Schritt 2 vorbereiten** (`docs/plans/europa.md`): Währung EUR in Abrechnung und Rechnung
    (heute nur CHF), `de-DE` erst mit dem ersten deutschen Verein.
+6. **Torhüter in eigener Trikotfarbe prüfen** (Audit Punkt 4). *26.11. (Analyse-Sitzung): die
+   Positionsregel nimmt jetzt auch «referee»-Tracks, streng (80 % am Tor, kein anderer Kandidat).*
+   Offline auf vier Staging-Läufen nachgerechnet: keine Änderung, Torlinien-Schiedsrichter durch die
+   Bedingung «vor dem Tor» ausgeschlossen. Offen: Seiten aus Anwurf-Formationen (Vorschlag 1). `produkt-analyse-integration.md`
+   «Torhüter in eigener Trikotfarbe».
 
 **B. Braucht Lukas oder die lokale Sitzung**
 1. Kalibrierung per Klick Ende-zu-Ende auf Staging mit echtem Clip, danach Deploy

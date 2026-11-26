@@ -486,12 +486,23 @@ def refine_teams(
     return out
 
 
+def _in_front_of_goal(ps: list[tuple[int, float, float]], side: str) -> bool:
+    """Median position in front of the goal: at most 2.5 m off its centre line and on the court
+    side of the goal line, up to 5 m out. The goal-line referee stands beside the goal or behind the
+    line (Staging clip fbdc76e6: median 4.5 m to the side, 0.5 m behind the line) and is near the
+    goal nearly all the time too."""
+    depth = sorted((x if side == "left" else 40.0 - x) for _, x, _ in ps)[len(ps) // 2]
+    off = sorted(abs(y - 10.0) for _, _, y in ps)[len(ps) // 2]
+    return off <= 2.5 and 0.0 < depth <= 5.0
+
+
 def assign_goalkeepers(
     points: list[tuple[int, int, float, float]],
     teams: dict[int, str],
     min_track_ms: int = 10_000,
     area_share: float = 0.6,
     bin_ms: int = 2_000,
+    referee_share: float = 0.8,
 ) -> dict[int, str]:
     """Goalkeepers by position, not by shirt colour (kit colours entered for a match are often
     wrong or missing for goalkeepers).
@@ -501,18 +512,37 @@ def assign_goalkeepers(
     over the goalkeeper's time span says which team defended that goal (side changes included).
     `points` are (t_ms, track_id, x, y) of observed positions; returns new labels
     (`home_gk` / `away_gk`) for the goalkeeper tracks.
+
+    A keeper in a kit of its own often ends up in a small third colour cluster that
+    `teams.relabel_by_clusters` calls "referee". Such tracks count with a stricter rule (audit
+    2026-11 point 4): at least `referee_share` of the time near one goal, standing in front of it
+    (median position, `_in_front_of_goal`), and only at a goal where no other track is a keeper
+    candidate (the most goal-bound one if several). The goal-line referee is near the goal as
+    steadily but stands beside it or behind the line; the team vote below still has to agree.
     """
     by_track: dict[int, list[tuple[int, float, float]]] = defaultdict(list)
     for t, tid, x, y in points:
         by_track[tid].append((t, x, y))
     keepers: dict[int, str] = {}  # track -> goal side "left" | "right"
+    strict: dict[str, tuple[float, int]] = {}  # goal side -> (share, track) of "referee" tracks
     for tid, ps in by_track.items():
-        if teams.get(tid) == "referee" or ps[-1][0] - ps[0][0] < min_track_ms:
+        if ps[-1][0] - ps[0][0] < min_track_ms:
             continue
         left = sum(math.hypot(x, y - 10) < 6.5 for _, x, y in ps) / len(ps)
         right = sum(math.hypot(40 - x, y - 10) < 6.5 for _, x, y in ps) / len(ps)
-        if max(left, right) >= area_share:
-            keepers[tid] = "left" if left > right else "right"
+        side = "left" if left > right else "right"
+        if teams.get(tid) == "referee":
+            if (
+                max(left, right) >= referee_share
+                and max(left, right) > strict.get(side, (0, 0))[0]
+                and _in_front_of_goal(ps, side)
+            ):
+                strict[side] = (max(left, right), tid)
+        elif max(left, right) >= area_share:
+            keepers[tid] = side
+    for side, (_, tid) in strict.items():
+        if side not in keepers.values():
+            keepers[tid] = side
     if not keepers:
         return {}
     # defending team per time bin and goal
