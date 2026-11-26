@@ -82,11 +82,21 @@ test("new club: club, colour and team in three steps, roster from the team page,
   await expect(page.getByTestId("roster-row")).toHaveCount(4);
   await expectAccessible(page);
 
+  // and quickly: number and name per line (audit #160); a player without a number is pointed out
+  await page.getByTestId("quick-roster-open").click();
+  await page.getByTestId("quick-roster-text").fill("21 Ida Ruf\nZoe Wald");
+  await expect(page.getByTestId("quick-roster-nonumber")).toBeVisible();
+  await page.getByRole("button", { name: "2 Spieler übernehmen" }).click();
+  await expect(page.getByText("2 Spieler übernommen.").first()).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.getByTestId("roster-row")).toHaveCount(6);
+  await expect(page.getByTestId("roster-without-number")).toContainText("Zoe Wald");
+
   // the squad page says the state of the squad in its title (SPEC 7.10)
   await page.goto(teamUrl);
-  await expect(page.getByRole("heading", { level: 1, name: /^4 im Kader\./ })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: /^6 im Kader\./ })).toBeVisible();
   await expect(page.getByText(/^Herren 1 · /)).toBeVisible();
-  await expect(page.getByTestId("team-row")).toHaveCount(4);
+  await expect(page.getByTestId("team-row")).toHaveCount(6);
 
   // invite a player from the club (Teams und Rollen)
   const orgId = teamUrl.match(/\/app\/([^/]+)/)![1]!;
