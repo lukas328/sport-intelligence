@@ -6311,6 +6311,8 @@ export interface components {
              * @enum {string}
              */
             device: "phone" | "tablet" | "desktop";
+            /** Dom */
+            dom?: string | null;
             /**
              * Kind
              * @enum {string}

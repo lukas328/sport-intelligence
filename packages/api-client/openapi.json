@@ -2384,6 +2384,19 @@
             "title": "Device",
             "type": "string"
           },
+          "dom": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "pattern": "^-[a-z0-9#_,-]*\\|\\+[a-z0-9#_,-]*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dom"
+          },
           "kind": {
             "enum": [
               "react",
