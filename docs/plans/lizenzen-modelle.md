@@ -69,7 +69,7 @@ bei.
 2. ADR 003 verspricht ab M3 einen CI-Check gegen `ultralytics` in Produktions-Lockfiles. Seit
    2026-11-26 gibt es ihn: `packages/jobkit/tests/test_model_licences.py` mit dem Register
    `infra/model-licences.json` (siehe Abschnitt 5, Punkt 3).
-5. Terraform setzt das Ballnetz hrp1 nicht nur für Staging: `HB_BALL_MODEL` der CPU-Analyse
+5. (Behoben in #146.) Terraform setzte das Ballnetz hrp1 nicht nur für Staging: `HB_BALL_MODEL` der CPU-Analyse
    (`main.tf:551`) und der Standard von `gpu_ball_model` (`variables.tf:253`) gelten für jede
    Umgebung, und `environment` steht standardmässig auf `production`. Ein Produktions-Deploy würde
    heute ein nicht-kommerzielles Netz laden.
@@ -96,7 +96,8 @@ Reihenfolge nach Aufwand und Wirkung:
    `test-only`). Ein `test-only`-Modell darf in `infra/` nur dort stehen, wo das Register die
    Verwendung mit ihrer offenen Frage aufführt; eine aufgeführte Verwendung, die es nicht mehr gibt,
    lässt den Test ebenfalls scheitern. `ultralytics`, `boxmot` und `yolov5` im Lockfile lassen ihn
-   scheitern. Heute aufgeführt: ReID auf Staging (4b), hrp1 in `main.tf` und `variables.tf` (4a).
+   scheitern. Seit #146 (ReID aus, hr-nods für CPU-App und GPU-Job) führt das Register keine
+   Ausnahme mehr: in `infra/` stehen nur noch freigegebene Modelle.
 4. **Juristisch prüfen lassen** (einmalig, ein Termin): ImageNet-Startgewichte (betrifft hrp1 und
    das Rollenmodell, nicht hr1 und hr-nods), COCO-Bilder hinter YOLOX, TeamTrack-Ball-Labels, FFmpeg
    im PyAV-Wheel.
