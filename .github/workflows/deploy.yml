@@ -251,6 +251,31 @@ jobs:
           echo "== migration job runs"
           az containerapp job execution list -g "$rg" -n "$(terraform output -raw migrate_job)" --query "[0:3].{name:name, status:properties.status, start:properties.startTime}" -o table || true
 
+      - name: GPU quota (read only)
+        if: steps.mode.outputs.mode == 'status'
+        run: |
+          # the T4 quota of the Container Apps environment (its Quota page in the portal); gpu=on
+          # needs a limit of at least 1 (docs/plans/staging-umzug-eu.md)
+          env_id=$(az containerapp env list -g "$rg" --query "[0].id" -o tsv)
+          if [ -z "$env_id" ]; then echo "::warning::no Container Apps environment in $rg"; exit 0; fi
+          if ! az rest --method get --url "https://management.azure.com${env_id}/usages?api-version=2024-03-01" \
+              -o json >"$RUNNER_TEMP/usages.json" 2>"$RUNNER_TEMP/usages.err"; then
+            echo "::warning::quota not readable: $(tail -1 "$RUNNER_TEMP/usages.err")"; exit 0
+          fi
+          echo "== GPU rows of the environment's quota"
+          jq -r '.value[] | select((.name.localizedValue // .name.value) | test("GPU"; "i"))
+            | "\(.name.localizedValue // .name.value): \(.currentValue) of \(.limit)"' "$RUNNER_TEMP/usages.json"
+          t4=$(jq -r '[.value[] | select((.name.localizedValue // .name.value) | test("T4"; "i"))][0]
+            | if . == null then "" else "\(.currentValue) \(.limit)" end' "$RUNNER_TEMP/usages.json")
+          if [ -z "$t4" ]; then
+            echo "GPU-Kontingent: keine T4-Zeile gefunden -> gpu=on nicht prüfbar"
+          else
+            read -r used limit <<<"$t4"
+            if awk -v l="$limit" 'BEGIN { exit !(l >= 1) }'; then verdict="gpu=on möglich"; else verdict="gpu=on nicht möglich"; fi
+            echo "GPU-Kontingent: ${used%.*} von ${limit%.*} -> $verdict"
+          fi
+          rm -f "$RUNNER_TEMP"/usages.*
+
       - name: Alerts (read only; test e-mail on request)
         if: steps.mode.outputs.mode == 'status'
         env:
