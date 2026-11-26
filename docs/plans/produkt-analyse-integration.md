@@ -1568,3 +1568,22 @@ wie oben aus zwei unabhängigen Bildsätzen, übereinstimmend: home (gelb) verte
 Rohstimmen 684 zu 64 für die richtige Seite. Damit auf einem zweiten Spiel mit anderer Halle und
 anderen Trikotfarben bestätigt, keine falsche Zuordnung. Segment s3 liess sich mit der eigenen
 Kamerabewegung nicht kalibrieren und fehlt.
+
+### Wurf-Kandidaten mit Rate 2: Entscheidungsregel für die eine Endtest-Messung (vor der Messung, 2026-11-26)
+
+Freigabe der Hauptsitzung für genau eine Endtest-Messung des auf Dev fixierten Kandidaten
+(Abschnitt «Weniger Fehlalarme», PR #191). Geändert wird nur `SHOT_DEFAULT_RATE` 4 -> 2, sonst
+nichts; kein zweiter Versuch.
+
+- **Messung:** `ml/integration/shot_segments_eval.py score` mit Lukas' Marken
+  (`ml/gold/data/shot_endtest_marks.json`) auf den gespeicherten Endtest-Beobachtungen (Kaggle-
+  Kernels des Wurf-Endtests), Kandidaten mit dem heutigen Code neu gerechnet, einmal mit
+  `SHOT_DEFAULT_RATE` 4 und einmal mit 2. Keine Endtest-Spiele in die Warteschlange, keine neuen
+  Beobachtungen.
+- **Regel (festgelegt vor der Messung):** übernehmen, wenn auf dem Endtest
+  1. der Wurf-Fenster-Recall («-3/+8 s: shot recall») um höchstens 2 Prozentpunkte sinkt,
+  2. der Tor-Recall im Fenster («-3/+8 s: goal recall») um höchstens 2 Prozentpunkte sinkt und
+  3. die Präzision der Wurf-Kandidaten («shot cand. precision», ±2 s) steigt.
+  Sonst bleibt Rate 4. Das Ergebnis wird in jedem Fall hier dokumentiert; bei «übernehmen» folgt
+  die Umstellung als eigener kleiner PR.
+
