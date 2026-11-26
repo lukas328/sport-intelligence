@@ -68,7 +68,7 @@ function Shelf({ title, href, count, children }: { title: string; href: string; 
     <section className="space-y-4">
       <div className="flex items-baseline justify-between gap-3 border-b border-foreground/15 pb-3">
         <h2 className="text-lg font-bold">
-          <Link href={href} className="hover:underline hover:underline-offset-4">
+          <Link href={href} className="hit hover:underline hover:underline-offset-4">
             {title}
           </Link>
           {count > 0 && <span className="ml-2 text-sm font-medium text-muted tabular-nums">{count}</span>}

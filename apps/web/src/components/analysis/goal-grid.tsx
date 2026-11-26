@@ -38,7 +38,7 @@ export function GoalGrid({
               key={String(k)}
               aria-pressed={keeper === k}
               onClick={() => setKeeper(k)}
-              className={cn("min-h-7 border-b-2 font-semibold", keeper === k ? "border-foreground text-foreground" : "border-transparent text-muted hover:text-foreground")}
+              className={cn("min-h-11 border-b-2 font-semibold", keeper === k ? "border-foreground text-foreground" : "border-transparent text-muted hover:text-foreground")}
             >
               {k ? t("keeperView") : t("shooterView")}
             </button>

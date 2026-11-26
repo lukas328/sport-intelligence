@@ -228,7 +228,7 @@ export function PeopleSection({
                       {t("settings.expires", { date: format.dateTime(new Date(i.expires_at), { dateStyle: "medium" }) })}
                     </span>
                   </span>
-                  <Button variant="ghost" className="min-h-8 px-2 py-1" onClick={() => revoke.mutate(i.id)}>
+                  <Button variant="ghost" className="hit min-h-8 px-2 py-1" onClick={() => revoke.mutate(i.id)}>
                     {t("settings.revoke")}
                   </Button>
                 </li>

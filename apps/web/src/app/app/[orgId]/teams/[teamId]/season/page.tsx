@@ -359,7 +359,7 @@ export default async function SeasonPage({ params }: { params: Promise<{ orgId: 
                       </th>
                       <td className="py-3 text-right tabular-nums max-sm:hidden">{p.matches}</td>
                       <td className="py-3 text-right tabular-nums">
-                        <Link href={`${base}/scenes?chips=scored`} className="underline decoration-[1.5px] underline-offset-4">
+                        <Link href={`${base}/scenes?chips=scored`} className="hit underline decoration-[1.5px] underline-offset-4">
                           {p.goals}
                         </Link>
                       </td>

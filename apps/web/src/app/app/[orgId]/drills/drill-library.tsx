@@ -34,8 +34,8 @@ export function DrillLibrary({ orgId, initialFocus }: { orgId: string; initialFo
     return focus.length ? base.filter((d) => d.focus.some((f) => focus.includes(f))) : base;
   }, [focus, level, minutes, query, lang]);
   const filtered = focus.length > 0 || level !== "" || minutes !== "" || query.trim() !== "";
-  const chip = (on: boolean) => cn("-mb-px min-h-11 shrink-0 whitespace-nowrap border-b-2 px-0.5 text-[15px] font-semibold", on ? "border-foreground text-foreground" : "border-transparent text-muted hover:text-foreground");
-  const control = "min-h-11 bg-raised px-2 text-[15px] ring-1 ring-inset ring-border";
+  const chip = (on: boolean) => cn("-mb-px min-h-11 min-w-11 shrink-0 whitespace-nowrap border-b-2 px-0.5 text-[15px] font-semibold", on ? "border-foreground text-foreground" : "border-transparent text-muted hover:text-foreground");
+  const control = "min-h-11 bg-raised px-2 text-base ring-1 ring-inset ring-border";
 
   return (
     <div className="space-y-6">

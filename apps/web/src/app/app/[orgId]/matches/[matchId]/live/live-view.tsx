@@ -335,7 +335,7 @@ export function LiveView({ orgId, matchId }: { orgId: string; matchId: string })
         <h2 className="font-semibold">{match ? oppName(match) : t("opponent")}</h2>
         <label className="flex items-center gap-2 text-sm">
           {te("opponentNumber")}
-          <input inputMode="numeric" value={oppNumber} onChange={(e) => setOppNumber(e.target.value.replace(/\D/g, "").slice(0, 2))} className="min-h-10 w-16 bg-raised ring-1 ring-inset ring-border px-2" />
+          <input inputMode="numeric" value={oppNumber} onChange={(e) => setOppNumber(e.target.value.replace(/\D/g, "").slice(0, 2))} className="min-h-11 w-16 bg-raised px-2 text-base ring-1 ring-inset ring-border" />
         </label>
         <div className="grid grid-cols-3 gap-1">
           {opp.map((a) => (
