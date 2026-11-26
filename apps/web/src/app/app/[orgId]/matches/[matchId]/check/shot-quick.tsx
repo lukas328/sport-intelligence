@@ -21,7 +21,7 @@ type Match = Schemas["MatchOut"];
 
 /**
  * «Würfe schnell prüfen»: the shots the analysis found, one after the other, each as a short clip
- * from shortly before the shot, looped; four big answers under it (Tor, Gehalten, Daneben, Kein
+ * around the shot, looped (QUICK_CLIP); four big answers under it (Tor, Gehalten, Daneben, Kein
  * Wurf; keys 1 to 4), in reach of the thumb on a phone; on to the next by itself, «7 von 23»,
  * «Rückgängig». The least sure first. Saved through the same review as the shot list of the
  * workbench (useShotReview): one truth.

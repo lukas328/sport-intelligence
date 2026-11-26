@@ -56,9 +56,10 @@ describe("quickQueue: what the quick review asks, in which order", () => {
 });
 
 describe("the clip and the answers", () => {
-  it("plays from 1.5 s before the shot to 2 s after (3.5 s, looped)", () => {
-    expect(quickWindow({ goal_ms: 12_000 })).toEqual({ start_ms: 10_500, end_ms: 14_000 });
-    expect(quickWindow({ goal_ms: 800 }).start_ms).toBe(0);
+  it("plays from 6 s before the analysis' moment to 2 s after (8 s, looped)", () => {
+    // 6 s before the analysis' moment to 2 s after: it lies mostly 1 to 4 s after the shot (#181)
+    expect(quickWindow({ goal_ms: 12_000 })).toEqual({ start_ms: 6_000, end_ms: 14_000 });
+    expect(quickWindow({ goal_ms: 4_000 }).start_ms).toBe(0);
   });
 
   it("«Kein Wurf» rejects; an outcome needs a team; the report's entry is pinned when it says the same", () => {
