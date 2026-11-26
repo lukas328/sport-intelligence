@@ -441,8 +441,10 @@ def piece_ends(
 # of the other team standing next to him. Each clear look (no other person box over
 # `CLEAR_COVER` of it) gets a class: home, away or none (no team's kit, `shirt_team`); a class
 # holds when it is the majority within `CUT_WINDOW_S` around the look, and only stretches of at
-# least `CUT_MIN_RUN_S` count (hysteresis: shorter ones go to the longer neighbour).
-COLOUR_CUT = False
+# least `CUT_MIN_RUN_S` count (hysteresis: shorter ones go to the longer neighbour). On the dev
+# clips Horgen H1/H2 (ml/eval/identity_dev.py) right numbers 10 -> 12 of 27, wrong 1 -> 0, named
+# share 24.6 -> 23.2 %; referees and staff with a player label 22 -> 14 of 72.
+COLOUR_CUT = True
 CUT_WINDOW_S = 1.0
 CUT_MIN_RUN_S = 1.5
 

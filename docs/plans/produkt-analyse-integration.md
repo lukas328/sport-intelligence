@@ -1458,3 +1458,41 @@ Verknüpfungen unter 10 % falsch. Dev-Clips Horgen H1/H2, nie Endtest.
   Nicht klar besser in allen Zielen: **im Produkt aus** (`LONG_LINKS = False`, heutiges Verhalten
   unverändert, geprüft: gleiche Zahlen wie vorher). Einschalten nach einem Test auf einem weiteren
   Spiel mit derselben Sichtprüfung.
+
+### Farbsprung im Tracker: Rohstücke an Trikotwechseln schneiden (Audit, 2026-11-26)
+
+Ursache der falschen langen Verknüpfungen (Abschnitt «Feldrand-Filter»): meist enthält schon ein
+Rohstück des Trackers den Wechsel von einem Spieler zu einem Schiedsrichter, Betreuer oder Spieler
+des anderen Teams daneben. Darum werden die Rohstücke vor dem Verknüpfen geschnitten
+(`pipeline.cut_at_shirt_changes`, Schalter `COLOUR_CUT`). Dev, nie Endtest.
+
+- Jeder freie Farbblick (keine andere Personenbox deckt 15 % oder mehr der Box) bekommt eine
+  Klasse: home, away oder keine Mannschaft (`shirt_team`, mehr als 15 von beiden Teamfarben). Die
+  Klasse eines Blicks ist die Mehrheit im Fenster von 1 s; Strecken unter 1.5 s gehen an den
+  längeren Nachbarn (Hysterese). Zwischen zwei Strecken wird in der Mitte geschnitten; Farbproben,
+  Nummernlesungen, Aussehen- und Rollenblicke wandern mit.
+- **Ergebnis** (heute gegen Schnitt, gleiche Labels wie #160 und «Feldrand-Filter»):
+
+| Messung | heute | Schnitt |
+|---|---|---|
+| Horgen, `ml/eval/identity_dev.py`: richtig / falsch von 27 sichtbaren Nummern | 10 / 1 | **12 / 0** |
+| Horgen, benannte Zeit (identity_dev) | 24.6 % | 23.2 % |
+| Horgen mit Nicht-Feldspieler-Labels: richtig / falsch von 33 | 11 / 2 | **13 / 1** |
+| Horgen: Nicht-Feldspieler benannt / als Spieler geführt (von 72) | 7 / 22 | **5 / 14** |
+| Horgen: gemischte Tracks (beide Teamfarben je mindestens 25 %) | 1 von 152 | 1 von 154 |
+| Horgen: Tracks, Median-Länge | 250, 24.8 s | 275, 20.5 s |
+| ATV s1: richtig / falsch von 9 | 2 / 1 | 2 / 1 |
+| ATV s1: benannte Zeit | 16.3 % | 17.5 % |
+| ATV s1: Nicht-Feldspieler benannt / als Spieler (von 17) | 1 / 9 | 1 / 9 |
+| ATV s1: gemischte Tracks | 1 von 55 | 2 von 55 |
+| ATV s1: Tracks, Median-Länge (68 Schnitte) | 88, 24.2 s | 81, 29.7 s |
+
+- **Bewertung:** Falsch benannt sinkt auf Horgen (2 -> 1 bzw. 1 -> 0), auf ATV gleich; richtig
+  benannt steigt (Horgen +2), die benannte Zeit sinkt auf Horgen um 1.4 Prozentpunkte und steigt auf
+  ATV um 1.2. Deutlich weniger Schiedsrichter und Betreuer laufen als Spieler (Horgen 22 -> 14). Der
+  Median sinkt auf Horgen, weil Stücke mit zwei Personen jetzt zwei Tracks sind (gewollt); auf ATV
+  steigt er, weil die sauberen Stücke danach besser verknüpft werden. Gemischte Tracks auf ATV 1 ->
+  2 von 55 (ein Track, innerhalb des Rauschens). Kriterium erfüllt, **im Produkt an**.
+- Grenze: zwei Spiele, wenige sichtbare Nummern auf ATV (9). Lange Verknüpfungen (`LONG_LINKS`)
+  werden mit dem Schnitt neu geprüft.
+
