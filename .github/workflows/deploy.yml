@@ -265,7 +265,8 @@ jobs:
           echo "== GPU rows of the environment's quota"
           jq -r '.value[] | select((.name.localizedValue // .name.value) | test("GPU"; "i"))
             | "\(.name.localizedValue // .name.value): \(.currentValue) of \(.limit)"' "$RUNNER_TEMP/usages.json"
-          t4=$(jq -r '[.value[] | select((.name.localizedValue // .name.value) | test("T4"; "i"))][0]
+          # Azure writes «Managed Environment Consumption T 4 Gpus» (26.11.): spaces out before the test
+          t4=$(jq -r '[.value[] | select(((.name.localizedValue // "") + (.name.value // "")) | gsub(" "; "") | test("T4"; "i"))][0]
             | if . == null then "" else "\(.currentValue) \(.limit)" end' "$RUNNER_TEMP/usages.json")
           if [ -z "$t4" ]; then
             echo "GPU-Kontingent: keine T4-Zeile gefunden -> gpu=on nicht prüfbar"
