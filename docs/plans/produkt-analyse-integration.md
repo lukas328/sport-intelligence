@@ -1418,3 +1418,37 @@ Median-Tracklänge und ID-Wechsel (Schnitte, die die Nummernschritte danach find
   mit sauberer Lizenz (eigene Spieler-Crops aus Prüfen, siehe `docs/plans/lizenzen-modelle.md`)
   oder ein Filter, der Personen am Feldrand vor dem Verknüpfen ausschliesst. Beides ist eine
   eigene Arbeit; Messung und Sichtprüfung wie hier.
+
+### Spielfeldseiten ohne Torhüter (Audit, 2026-11-26)
+
+Ohne Seiten gibt es keine Ereignisse (`missing: goalkeepers`), keinen Team-Vorschlag und kein
+`goal_by_sides`. Bisher kamen die Seiten nur aus Torhüter-Tracks. Gemessen auf den Testclips
+Horgen H1 (1. Halbzeit) und H2 (2. Halbzeit), Dev, nie Endtest.
+
+- **Labels:** `ml/gold/data/sides_dev_v1.json`. Welches Tor das gelbe Team (home) verteidigt, auf
+  zwei unabhängigen Sätzen von je sechs Bildern pro Clip, in denen beide Teams in einer Hälfte
+  stehen: Wer an der 6-m-Linie die Mauer bildet, verteidigt dieses Tor. Beide Blicke stimmen
+  überein (H1 rechts, H2 links: Seitenwechsel zur Pause). Ein Staging-Lauf aus einer anderen Halle
+  (90c0bf9a) liess sich auf den Bildern nicht sicher beschriften und ist nicht dabei.
+- **Neues Signal** (`events.formation_vote`, Schalter `FORMATION_VOTES`, an): Stehen in einem
+  200-ms-Bin mindestens 3 Feldspieler-Tracks je Team und beide Mediane mehr als 5 m in derselben
+  Hälfte, verteidigt das Team das Tor, dessen Median näher an der Torlinie liegt (die Mauer steht
+  zwischen den Angreifern und dem Tor). Die Stimme zählt wie eine Torhüter-Stimme, das bestehende
+  Fenster und die 45-s-Mindestdauer bleiben. Dazu gilt die erste Seite ab Videobeginn statt erst
+  ab der ersten Stimme (Seitenwechsel nur zur Pause).
+- **Ergebnis** (`ml/eval/sides_dev.py`, Anteil der Videozeit richtig / falsch / unbekannt):
+
+| Clip | Torhüter | vorher | neu |
+|---|---|---|---|
+| H1 | da | 100 / 0 / 0 %, 7 Ereignisse | 100 / 0 / 0 %, 7 |
+| H1 | weggenommen | 0 / 0 / 100 %, keine Ereignisse | 100 / 0 / 0 %, 7 |
+| H2 | da | 98.2 / 0 / 1.8 %, 8 | 100 / 0 / 0 %, 9 |
+| H2 | weggenommen | 0 / 0 / 100 %, keine | 100 / 0 / 0 %, 9 |
+
+- Rohstimmen des Signals: H1 104 zu 9, H2 114 zu 16 für die richtige Seite. Auf dem Staging-Lauf
+  90c0bf9a (ohne Labels) stimmt es mit den Torhütern überein (beide «home links»; das Signal ab 3 s,
+  die Torhüter erst ab 60 s).
+- **Grenze:** zwei Clips eines Spiels, eine Kamera. Die Ablation (Torhüter weggenommen) bildet den
+  Staging-Fall nach, ist aber kein zweites Spiel. Kriterium erfüllt (falsch steigt nicht, unbekannt
+  sinkt von 100 % auf 0 %), darum im Produkt. Sobald kalibrierte Segmente eines weiteren Spiels
+  da sind, dort mit derselben Beschriftung nachmessen.

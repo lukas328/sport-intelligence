@@ -1,0 +1,7 @@
+{
+  "_doc": "Court sides, dev v1: which goal the yellow team (home: the lighter of the learned team colours) defends in the test clips sghorgen-h1-5min (first half) and sghorgen-h2-5min (second half), R2 handball-testdata/testclips; dev only, never the end test. Labelled twice by Claude on two independent sets of six frames per clip where both teams stood in one half: the team forming the wall at the 6 m line in front of a goal defends it. Both looks agree on both clips. Frozen 2026-11-26 before the formation vote was chosen. A staging run (90c0bf9a, another hall) was not labelled: the camera stands close to the court and pans, the frames did not show the side clearly. Evaluated by ml/eval/sides_dev.py.",
+  "clips": {
+    "h1": {"file": "testclips/sghorgen-h1-5min.mp4", "home_defends": "right", "home_colour": "yellow"},
+    "h2": {"file": "testclips/sghorgen-h2-5min.mp4", "home_defends": "left", "home_colour": "yellow"}
+  }
+}

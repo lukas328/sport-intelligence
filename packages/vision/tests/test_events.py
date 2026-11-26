@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import pytest
+
+from handball_vision import events
 from handball_vision.events import detect, score
 from handball_vision.synthetic import DEMO, SyntheticConfig, SyntheticMatch
 
@@ -43,12 +46,38 @@ def test_throw_offs_goals_possession_and_side_change() -> None:
     assert {p.outcome for p in r.possessions[:-1]} <= {"goal", "lost"}
 
 
-def test_without_goalkeepers_nothing_is_guessed() -> None:
+def test_without_goalkeepers_the_field_players_give_the_side(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """No goalkeeper tracks (keepers in the referee cluster, out of the picture): the side comes
+    from the field players' formation (`events.formation_vote`), the same side the goalkeepers
+    show, and the events are found. Without the formation votes nothing is guessed."""
     cfg = SyntheticConfig(seconds=60, restarts=True, phase_s=20)
     _, pts, teams = _positions(cfg)
+    with_keepers = detect(pts, teams)
     no_gk = {k: v for k, v in teams.items() if not v.endswith("_gk")}
-    r = detect([p for p in pts if p[1] in no_gk], no_gk)
+    field = [p for p in pts if p[1] in no_gk]
+    r = detect(field, no_gk)
+    assert [s for _, s in r.sides] == [s for _, s in with_keepers.sides] == ["left"]
+    assert r.missing == [] and any(e.type == "throw_off" for e in r.events)
+    monkeypatch.setattr(events, "FORMATION_VOTES", False)
+    r = detect(field, no_gk)
     assert r.events == [] and r.missing == ["goalkeepers"]
+
+
+def test_formation_vote_reads_the_defending_team_nearer_its_goal() -> None:
+    def g(home: list[float], away: list[float]) -> dict[str, list[tuple[float, float]]]:
+        return {"home": [(x, 10.0) for x in home], "away": [(x, 10.0) for x in away]}
+
+    # play at the right goal, the home wall at 34 m, the away attackers at 29 m: home defends right
+    assert events.formation_vote(g([33, 34, 35], [28, 29, 30])) == -1
+    assert events.formation_vote(g([28, 29, 30], [33, 34, 35])) == 1
+    # play at the left goal, home nearer x 0: home defends left
+    assert events.formation_vote(g([5, 6, 7], [10, 11, 12])) == 1
+    # around the centre line, too few players, or the teams in different halves: no vote
+    assert events.formation_vote(g([18, 20, 22], [19, 21, 23])) == 0
+    assert events.formation_vote(g([33, 34], [28, 29, 30])) == 0
+    assert events.formation_vote(g([5, 6, 7], [33, 34, 35])) == 0
 
 
 def test_half_opening_throw_off_is_not_a_goal() -> None:
