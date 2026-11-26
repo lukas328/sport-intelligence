@@ -211,6 +211,12 @@ async def overview(ctx: Ctx) -> dict[str, Any]:
     org = await _org(ctx)
     authorize(ctx.require_actor(), Action.ORG_READ)
     s = spec(org)
+    currency = currency_for(org.country)
+    # online payment needs Stripe and the club's currency priced for every paid plan: the EUR
+    # prices are Lukas' open decision (Q-BILL-EU5), so a club abroad may find none; then the page
+    # says so instead of a checkout that would fail (or bill in the wrong currency)
+    stripe_on = ctx.settings.stripe_secret_key is not None
+    priced = all(_price_or_none(ctx.settings, p, currency) for p in (Plan.TEAM, Plan.CLUB))
     return {
         "plan": org.plan.value,
         "effective_plan": effective_plan(org).value,
@@ -219,9 +225,13 @@ async def overview(ctx: Ctx) -> dict[str, Any]:
         "current_period_end": org.current_period_end,
         "paid_until": org.paid_until,
         "enforced": ctx.settings.billing_enforce,
-        "checkout_available": ctx.settings.stripe_secret_key is not None,
+        "checkout_available": stripe_on and priced,
+        # why not: "not_configured" (no Stripe), "currency" (no price in the club's currency)
+        "checkout_unavailable": None
+        if stripe_on and priced
+        else ("currency" if stripe_on else "not_configured"),
         # the club pays in this currency (from its country); the plans' prices are the same number
-        "currency": currency_for(org.country),
+        "currency": currency,
         "limits": {
             "teams": s.teams,
             "matches_per_season": s.matches_per_season,
@@ -314,16 +324,26 @@ class StripeGateway:
         )
 
 
-def _price(settings: Settings, plan: Plan, currency: str = "CHF") -> str:
-    """The Stripe price of a plan in the club's currency (CHF in CH and LI, else EUR)."""
+def _price_or_none(settings: Settings, plan: Plan, currency: str = "CHF") -> str | None:
+    """The Stripe price of a plan in the club's currency (CHF in CH and LI, else EUR); None when
+    none is set up. Prices are only ever read from the settings, never made up here."""
     prices = (
         {Plan.TEAM: settings.stripe_price_team_eur, Plan.CLUB: settings.stripe_price_club_eur}
         if currency == "EUR"
         else {Plan.TEAM: settings.stripe_price_team, Plan.CLUB: settings.stripe_price_club}
     )
-    price = prices.get(plan)
+    return prices.get(plan) or None
+
+
+def _price(settings: Settings, plan: Plan, currency: str = "CHF") -> str:
+    price = _price_or_none(settings, plan, currency)
     if not price:
-        raise ProblemError(503, "billing-unavailable", "Billing is not configured")
+        # never a checkout in another currency than the club's (Q-BILL-EU5: EUR prices open)
+        raise ProblemError(
+            503,
+            "billing-unavailable",
+            f"No {currency} price is set up for this plan",
+        )
     return price
 
 

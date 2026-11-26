@@ -33,8 +33,11 @@ fertig ist, streicht es und trägt das Ergebnis im passenden Plan ein.
 4. **Go-live-Punkte mit Code** (`GO_LIVE.md`): ~~HLS-Segmente direkt aus R2~~ erledigt 20.11.
    (`HB_MEDIA_DIRECT`, ADR 002 Nachtrag; Lukas: R2-CORS-Regel prüfen, README Azure Schritt 7); ~~Overlays im Player für bewegte Kameras~~ erledigt 26.11. (ADR 020 Nachtrag: Kamera-Blick pro Bild, Spotlight und Personen-Fragen auch bei schwenkender Kamera; wirkt ab der nächsten Analyse eines Videos; Reel- und Präsentations-Export folgen der Kamera ebenso, Ring und 9:16-Zuschnitt); Alarme und Proben im
    Monitoring vorbereiten.
-5. **Europa Schritt 2 vorbereiten** (`docs/plans/europa.md`): Währung EUR in Abrechnung und Rechnung
-   (heute nur CHF), `de-DE` erst mit dem ersten deutschen Verein.
+5. **Europa Schritt 2 vorbereiten** (`docs/plans/europa.md`): ~~Währung EUR in Abrechnung und Rechnung~~
+   erledigt (Abo, Jahresrechnung und Website rechnen in CHF oder EUR nach Land; 26.11.: das Land
+   eines von Hand angelegten Vereins kommt aus Zeitzone und Browsersprache statt fest «CH», die
+   Vereinseinstellungen ändern es, ein laufendes Abo behält seine Währung). Offen: `de-DE` erst mit
+   dem ersten deutschen Verein; AGB und Datenschutz für die EU (EU5, Fachperson).
 6. **Torhüter in eigener Trikotfarbe prüfen** (Audit Punkt 4). *26.11. (Analyse-Sitzung): die
    Positionsregel nimmt jetzt auch «referee»-Tracks, streng (80 % am Tor, kein anderer Kandidat).*
    Offline auf vier Staging-Läufen nachgerechnet: keine Änderung, Torlinien-Schiedsrichter durch die

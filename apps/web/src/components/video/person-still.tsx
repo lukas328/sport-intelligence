@@ -110,6 +110,7 @@ export function InlinePersonPlayer({
   closeLabel,
   onClose,
   testId = "person-player",
+  className,
 }: {
   video: string; // /v1/orgs/{org}/videos/{id}
   track: { track_no: number; first_ms: number; last_ms: number };
@@ -119,10 +120,13 @@ export function InlinePersonPlayer({
   closeLabel: string;
   onClose: () => void;
   testId?: string;
+  className?: string;
 }) {
   const player = useRef<PlayerHandle>(null);
+  // sticky under the app's top bar (56 px on a phone, as the video stage): it stays in view while
+  // the list under it scrolls; it must be a direct child of the list's box for that
   return (
-    <div className="sticky top-0 z-10 bg-paper pb-2" data-testid={testId}>
+    <div className={cn("sticky top-14 z-20 bg-ground pt-1 pb-2 lg:top-[66px]", className)} data-testid={testId}>
       <div className="mb-1 flex items-center justify-between gap-2">
         <p className="m-0 min-w-0 truncate text-sm font-semibold">{title}</p>
         <Button variant="quiet" size="sm" className="min-h-11 min-w-11" onClick={onClose} aria-label={closeLabel}>

@@ -145,7 +145,8 @@
     "suggestion-resolved": "Cette proposition est déjà traitée.",
     "suggestion-stale": "Cette proposition ne correspond plus : le match ou l'entrée n'existe plus.",
     "email-unavailable": "L'e-mail n'a pas pu être envoyé pour le moment. Veuillez réessayer plus tard.",
-    "mail-unavailable": "Nous n'envoyons pas d'e-mails en ce moment. Crée ton compte avec un mot de passe."
+    "mail-unavailable": "Nous n'envoyons pas d'e-mails en ce moment. Crée ton compte avec un mot de passe.",
+    "currency-locked": "L'abonnement est dans une autre monnaie. Le pays ne peut changer qu'après la résiliation."
   },
   "auth": {
     "loginTitle": "Connexion",
@@ -280,13 +281,6 @@
     "inviteSend": "Envoyer l'invitation",
     "invited": "Invité·e : {email}",
     "finish": "Vers l'équipe",
-    "countries": {
-      "CH": "Suisse",
-      "DE": "Allemagne",
-      "AT": "Autriche",
-      "FR": "France",
-      "LI": "Liechtenstein"
-    },
     "stepFind": "Trouver l'équipe",
     "stepConfirm": "Confirmer",
     "confirmTitle": "C'est bien vous ?",
@@ -425,7 +419,9 @@
     "clubPreviewSub": "Aperçu",
     "ownColours": "Couleurs propres",
     "clubColour": "Couleur du club",
-    "clubColourNone": "Aucune choisie pour l'instant : d'ici là, votre club s'affiche en gris."
+    "clubColourNone": "Aucune choisie pour l'instant : d'ici là, votre club s'affiche en gris.",
+    "country": "Pays",
+    "countryHint": "Définit la monnaie de facturation : {currency}. CHF en Suisse et au Liechtenstein, sinon EUR."
   },
   "dashboard": {
     "teamsTitle": "Équipes",
@@ -1737,7 +1733,8 @@
     "withKeepers": "Analyse des gardiens incluse",
     "keepersLocked": "Analyse des gardiens dans l'abonnement Équipe",
     "keepersLockedText": "Arrêts, buts encaissés, taux d'arrêts et zones par gardien ainsi que la fiche des tireurs sont inclus dans les abonnements Équipe et Club. Le gardien et ses arrêts se saisissent dans chaque abonnement.",
-    "keepersLockedLink": "Voir l'abonnement"
+    "keepersLockedLink": "Voir l'abonnement",
+    "unavailableCurrency": "Le paiement en ligne en {currency} n'est pas encore ouvert. Écris-nous et nous te répondrons."
   },
   "share": {
     "button": "Partager",
