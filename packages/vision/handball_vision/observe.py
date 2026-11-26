@@ -56,7 +56,7 @@ class Observations:
     frames: list[FrameObservation]
     segments: dict[int, F64]  # frame index -> floor marking segments (x1, y1, x2, y2), frame px
     fps: float
-    total: int
+    total: int  # frames in the video (read by the observation pass)
     timings_s: dict[str, float] = field(default_factory=dict)
     detector_source: str = "model"
     # frame pixels whose edges stay put while a moving camera turns: score bug, logo, "LIVE"
@@ -152,9 +152,11 @@ def observe(
         from handball_vision.ballnet import BallCandidates
 
         balls_net = BallCandidates(ball_net, fps, every=ball_every, batch=ball_batch)
+    count = 0  # frames read (the video's length in frames, `Observations.total`)
     for n, frame in enumerate(iter_frames(path)):
         if max_frames is not None and n >= max_frames:
             break
+        count = n + 1
         t0 = time.perf_counter()
         est.add(frame)
         timings["camera_motion"] += time.perf_counter() - t0
@@ -227,7 +229,7 @@ def observe(
         frames,
         segments,
         fps,
-        n,
+        count,
         dict(timings),
         detector.source,
         static=static,

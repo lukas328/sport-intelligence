@@ -397,6 +397,7 @@ def test_observe_store_and_track(tmp_path: Path) -> None:
     obs = observe.observe(video, _Oracle(boxes), detect_every=observe_step, segment_every=30)
     assert obs.motion.moving
     assert len(obs.frames) == len(truth) // observe_step + (len(truth) % observe_step > 0)
+    assert obs.total == len(truth)  # frames in the video, not the last index
     assert obs.segments
     # storage round trip
     observe.save_observations(obs, tmp_path / "obs.npz")

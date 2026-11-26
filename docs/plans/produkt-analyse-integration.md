@@ -1094,6 +1094,63 @@ genähert, nicht vom Produkt gelesen; ob die Tafel in echten Videos um die Pause
 ein ganzer Lauf (Lukas' 99-min-Video: Uhr bei 0:00 in der Pause gelesen, `Nachtrag` oben, dort
 also wirksam). Ergebnis: `ml/integration/results/pause_dev.json`.
 
+### Wurfzeit: Methode auf Dev gewählt, Endtest einmal gemessen (Analyse-Sitzung, 2026-11-26)
+
+**Wahrheit auf Dev: LLM-Marken, nicht Lukas'.** Lukas markiert nicht mehr (Entscheid der
+Hauptsitzung vom 25.11.). Die Abwürfe der 175 Dev-Würfe hat Claude per Bildsicht gesetzt: zwei
+unabhängige Durchgänge mit verschiedenem Raster und verschiedener Reihenfolge, ohne Zugriff
+aufeinander, und ein dritter Blick auf jeden Wurf, bei dem die beiden mehr als 0.4 s auseinander
+lagen oder nur einer einen Wurf fand. Abwurf = letztes Bild mit dem Ball in der Hand.
+- Übereinstimmung: 128 Würfe innerhalb 0.4 s (Median der Abweichung 0.04 s), 15 weiter auseinander,
+  18 nur in einem Durchgang, 14 in keinem (meist Spielbericht-Einträge ohne sichtbaren Wurf,
+  z. B. «leeres Tor», Schnitte, Wiederholungen).
+- Ergebnis eingefroren in `ml/gold/data/shot_release_dev_llm.json` (sha256
+  cca0c66c243925d1c2de76bba51afa80cdc3001d3044f98ffe6d238c94005521): 94 sichere, 65 unsichere,
+  16 nicht sichtbare Würfe. Zusammenführung `ml/gold/merge_release_marks.py`.
+- Der Spielbericht kommt im Median 3.9 s nach dem Abwurf (IQR 3.2 bis 4.7 s).
+
+**Methodenwahl (nur Dev, 94 sichere Marken, 13 Spiele, Versatz Spiel für Spiel ausgelassen):**
+
+| Methode | in ±2 s des Abwurfs | mit unsicheren Marken (159) |
+|---|---|---|
+| Kandidaten-Peak minus fester Versatz | **74.5 %** (62.4 bis 86.4), Versatz 4.96 s | 71.7 % |
+| letzter schneller Ball (Ballpfad, 90. Perzentil) | 77.7 % (66.2 bis 87.5) | 67.3 % |
+| dasselbe, 98. Perzentil | 58.5 % | 50.9 % |
+
+Gewählt: Peak minus fester Versatz. Der Ballpfad ist mit sicheren Marken innerhalb des Rauschens
+gleich, mit den unsicheren schlechter und hängt am Ballnetz. Versatz über ganz Dev 4.96 s, im
+Produkt 5.0 s (`shot_template.json`, Version 2026-11-26.s2). Die API ordnet Wurf-Kandidaten dem
+Spielbericht jetzt mit `goal_ms` + 4 s zu (`SHOT_LOG_DELAY_MS`), sonst unverändert. Ein bestätigter
+Wurf liegt damit beim Abwurf statt bei der Spielbericht-Zeit.
+
+**Endtest, einmal mit der eingefrorenen Methode** (Lukas' Marken, 41 von 42 Segmenten: bei
+`AT_Challenge_Lauterach_HandballTirol_2021_s1` fehlen die gespeicherten Beobachtungen, 129 Würfe;
+Kandidaten mit dem heutigen Produktcode aus den gespeicherten Beobachtungen neu gerechnet;
+`ml/gold/data/shot_endtest_result_release.json`):
+
+| Mass | vorher (19.11., Versatz 1.5 s) | jetzt (Versatz 5.0 s) |
+|---|---|---|
+| Würfe mit Kandidat in ±2 s | 20.8 % | **55.8 %** (46.8 bis 65.6) |
+| davon Tore / gehalten / daneben | | 61.3 / 48.8 / 46.2 % |
+| Präzision in ±2 s | 6.3 % | 17.3 % |
+| Fenster −3/+8 s (Peak), Würfe / Tore | 84.6 / 88.2 % | 84.5 / 88.0 % |
+| Wurf-Kandidaten pro Minute | 3.39 | 3.37 |
+
+Lesart: Die Mehrheit der Würfe liegt jetzt in ±2 s (Ziel erreicht), Fehlalarme und Rate sind
+gleich (nur die Zeit ist verschoben). Dev 74.5 % gegen Endtest 55.8 %: LLM-Marken auf Dev gegen
+Lukas' Marken (etwa 1 s genau) in 42 neuen Hallen; die Streuung des Kippens nach dem Wurf bleibt
+(Abschnitt «Wurfzeit der Kandidaten»). Der Endtest ist damit für die Wurfzeit verbraucht.
+
+**Ball: hr-nods (ohne DeepSport) gegen hr1 auf Ball-Testset 2** (`ml/gold/eval_ball_test2.py`,
+eingefrorene LLM-Labels, 85 Bälle und 30 Bilder ohne Ball, `ml/ball/LINEAGE.md` T5):
+
+| Netz | Top-1 in 12 px | gefunden bei 0.5 | Bilder ohne Ball mit Peak ≥ 0.5 |
+|---|---|---|---|
+| hr1 (mit DeepSport) | 72.9 % (64.0 bis 82.1) | 62.4 % | 10 % |
+| hr-nods (ohne DeepSport) | 68.2 % (57.1 bis 79.8) | 58.8 % | 10 % |
+
+Paarweise: 9 Bälle nur hr1, 5 nur hr-nods; kein gesicherter Unterschied. Ein auslieferbares Netz
+kostet höchstens wenige Punkte. Ergebnis `ml/integration/results/ball_test2_hr1_vs_hrnods.json`.
 ### Laufzeit eines ganzen Spiels auf CPU (Produkt-Audit Punkt 2, 2026-11-26)
 
 Das Audit (`docs/plans/produkt-audit-2026-11.md`) rechnete aus zwei 8-min-Läufen auf Staging 7 bis

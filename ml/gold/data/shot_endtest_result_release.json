@@ -1,0 +1,878 @@
+{
+ "segments": 41,
+ "games": 41,
+ "shots": 129,
+ "by_outcome": {
+  "goal": 75,
+  "save": 41,
+  "miss": 13
+ },
+ "metrics": {
+  "goal recall (goal cand.)": {
+   "value": 0.06666666666666667,
+   "lo": 0.013333333333333334,
+   "hi": 0.14084507042253522
+  },
+  "goal cand. precision": {
+   "value": 0.02631578947368421,
+   "lo": 0.005128205128205128,
+   "hi": 0.05405405405405406
+  },
+  "shot recall (shot cand.)": {
+   "value": 0.5581395348837209,
+   "lo": 0.46808510638297873,
+   "hi": 0.6564885496183206
+  },
+  "  goal": {
+   "value": 0.6133333333333333,
+   "lo": 0.5,
+   "hi": 0.734375
+  },
+  "  save": {
+   "value": 0.4878048780487805,
+   "lo": 0.3333333333333333,
+   "hi": 0.625
+  },
+  "  miss": {
+   "value": 0.46153846153846156,
+   "lo": 0.18181818181818182,
+   "hi": 0.7333333333333333
+  },
+  "shot cand. precision": {
+   "value": 0.17349397590361446,
+   "lo": 0.1405152224824356,
+   "hi": 0.21256038647342995
+  },
+  "-3/+8 s: goal recall": {
+   "value": 0.7466666666666667,
+   "lo": 0.6285714285714286,
+   "hi": 0.8529411764705882
+  },
+  "-3/+8 s: goal cand. precision": {
+   "value": 0.29473684210526313,
+   "lo": 0.23076923076923078,
+   "hi": 0.358974358974359
+  },
+  "-3/+8 s: shot recall": {
+   "value": 0.8449612403100775,
+   "lo": 0.7481481481481481,
+   "hi": 0.9262295081967213
+  },
+  "  -3/+8 s: goal": {
+   "value": 0.88,
+   "lo": 0.7857142857142857,
+   "hi": 0.9594594594594594
+  },
+  "  -3/+8 s: save": {
+   "value": 0.7804878048780488,
+   "lo": 0.6086956521739131,
+   "hi": 0.918918918918919
+  },
+  "  -3/+8 s: miss": {
+   "value": 0.8461538461538461,
+   "lo": 0.625,
+   "hi": 1.0
+  },
+  "-3/+8 s: shot cand. precision": {
+   "value": 0.26265060240963856,
+   "lo": 0.22169811320754718,
+   "hi": 0.3031578947368421
+  },
+  "ball coverage +-1.5 s": {
+   "value": 0.9789488343833509,
+   "lo": 0.9702733342140685,
+   "hi": 0.9868789522240773
+  },
+  "shots with ball >= 50 %": {
+   "value": 1.0,
+   "lo": 1.0,
+   "hi": 1.0
+  },
+  "goal cand. per min": {
+   "value": 1.5450587935530389,
+   "lo": 1.3336296954878861,
+   "hi": 1.7320922264568277
+  },
+  "shot cand. per min": {
+   "value": 3.374733680655322,
+   "lo": 2.9600073729121377,
+   "hi": 3.7244048813015356
+  }
+ },
+ "per_shot": [
+  {
+   "seg": "CH_NLA_BSVBern_WackerThun_2013-09-14_s3",
+   "t_s": 150.7,
+   "kind": "miss",
+   "peak_minus_mark_s": 4.1
+  },
+  {
+   "seg": "CH_NLA_GCAmicitia_KriensLuzern_ca2018_s1",
+   "t_s": 36.5,
+   "kind": "save",
+   "peak_minus_mark_s": -0.7
+  },
+  {
+   "seg": "CH_NLA_GCAmicitia_KriensLuzern_ca2018_s1",
+   "t_s": 69.1,
+   "kind": "goal",
+   "peak_minus_mark_s": 6.3
+  },
+  {
+   "seg": "CH_NLA_GCAmicitia_KriensLuzern_ca2018_s1",
+   "t_s": 167.9,
+   "kind": "miss",
+   "peak_minus_mark_s": 2.9
+  },
+  {
+   "seg": "CH_NLA_KriensLuzern_SuhrAarau_ca2018_s4",
+   "t_s": 8.0,
+   "kind": "goal",
+   "peak_minus_mark_s": 3.2
+  },
+  {
+   "seg": "CH_NLA_KriensLuzern_SuhrAarau_ca2018_s4",
+   "t_s": 107.5,
+   "kind": "goal",
+   "peak_minus_mark_s": 3.5
+  },
+  {
+   "seg": "CH_NLA_KriensLuzern_SuhrAarau_ca2018_s4",
+   "t_s": 135.6,
+   "kind": "miss",
+   "peak_minus_mark_s": -0.2
+  },
+  {
+   "seg": "CH_NLA_PlayoffF1_WackerThun_Kadetten_2013-05-11_s4",
+   "t_s": 1.5,
+   "kind": "goal",
+   "peak_minus_mark_s": null
+  },
+  {
+   "seg": "CH_NLA_PlayoffF1_WackerThun_Kadetten_2013-05-11_s4",
+   "t_s": 110.5,
+   "kind": "goal",
+   "peak_minus_mark_s": -1.9
+  },
+  {
+   "seg": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07_s3",
+   "t_s": 57.3,
+   "kind": "goal",
+   "peak_minus_mark_s": 7.3
+  },
+  {
+   "seg": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07_s3",
+   "t_s": 102.8,
+   "kind": "goal",
+   "peak_minus_mark_s": -1.4
+  },
+  {
+   "seg": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07_s3",
+   "t_s": 140.9,
+   "kind": "save",
+   "peak_minus_mark_s": -3.1
+  },
+  {
+   "seg": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07_s3",
+   "t_s": 171.2,
+   "kind": "miss",
+   "peak_minus_mark_s": -5.6
+  },
+  {
+   "seg": "CH_NLA_SuhrAarau_KriensLuzern_ca2018_s1",
+   "t_s": 26.1,
+   "kind": "goal",
+   "peak_minus_mark_s": 6.3
+  },
+  {
+   "seg": "CH_NLA_SuhrAarau_KriensLuzern_ca2018_s1",
+   "t_s": 56.5,
+   "kind": "goal",
+   "peak_minus_mark_s": 0.3
+  },
+  {
+   "seg": "CH_NLA_SuhrAarau_KriensLuzern_ca2018_s1",
+   "t_s": 122.6,
+   "kind": "goal",
+   "peak_minus_mark_s": 6.8
+  },
+  {
+   "seg": "CH_NLA_SuhrAarau_KriensLuzern_ca2018_s1",
+   "t_s": 164.2,
+   "kind": "goal",
+   "peak_minus_mark_s": -1.6
+  },
+  {
+   "seg": "CH_NLB_TVBirsfelden_GSKadetten_ca2025_s0",
+   "t_s": 1.0,
+   "kind": "save",
+   "peak_minus_mark_s": 5.6
+  },
+  {
+   "seg": "CH_NLB_TVBirsfelden_GSKadetten_ca2025_s0",
+   "t_s": 8.8,
+   "kind": "save",
+   "peak_minus_mark_s": -2.2
+  },
+  {
+   "seg": "CH_NLB_TVBirsfelden_GSKadetten_ca2025_s0",
+   "t_s": 43.5,
+   "kind": "goal",
+   "peak_minus_mark_s": -1.7
+  },
+  {
+   "seg": "CH_NLB_TVBirsfelden_GSKadetten_ca2025_s0",
+   "t_s": 78.3,
+   "kind": "goal",
+   "peak_minus_mark_s": 3.5
+  },
+  {
+   "seg": "CH_NLB_TVBirsfelden_GSKadetten_ca2025_s0",
+   "t_s": 91.2,
+   "kind": "goal",
+   "peak_minus_mark_s": 6.8
+  },
+  {
+   "seg": "CH_NLB_TVBirsfelden_GSKadetten_ca2025_s0",
+   "t_s": 154.9,
+   "kind": "goal",
+   "peak_minus_mark_s": 3.3
+  },
+  {
+   "seg": "CH_Nati_Schweiz_Rumaenien_2024-01-04_s1",
+   "t_s": 32.0,
+   "kind": "save",
+   "peak_minus_mark_s": 3.2
+  },
+  {
+   "seg": "CH_Nati_Schweiz_Rumaenien_2024-01-04_s1",
+   "t_s": 58.9,
+   "kind": "goal",
+   "peak_minus_mark_s": 1.1
+  },
+  {
+   "seg": "CH_Nati_Schweiz_Rumaenien_2024-01-04_s1",
+   "t_s": 157.4,
+   "kind": "save",
+   "peak_minus_mark_s": 4.2
+  },
+  {
+   "seg": "CH_Nati_Schweiz_Rumaenien_2024-01-04_s1",
+   "t_s": 169.3,
+   "kind": "miss",
+   "peak_minus_mark_s": -7.7
+  },
+  {
+   "seg": "CH_Nati_Schweiz_Ukraine_2020-01-03_s0",
+   "t_s": 22.4,
+   "kind": "save",
+   "peak_minus_mark_s": null
+  },
+  {
+   "seg": "CH_Nati_Schweiz_Ukraine_2020-01-03_s0",
+   "t_s": 28.9,
+   "kind": "goal",
+   "peak_minus_mark_s": null
+  },
+  {
+   "seg": "CH_Nati_Schweiz_Ukraine_2020-01-03_s0",
+   "t_s": 36.3,
+   "kind": "save",
+   "peak_minus_mark_s": null
+  },
+  {
+   "seg": "CH_Nati_Schweiz_Ukraine_2020-01-03_s0",
+   "t_s": 95.7,
+   "kind": "save",
+   "peak_minus_mark_s": null
+  },
+  {
+   "seg": "CH_Nati_Schweiz_Ukraine_2020-01-03_s0",
+   "t_s": 132.4,
+   "kind": "goal",
+   "peak_minus_mark_s": null
+  },
+  {
+   "seg": "CH_Nati_Schweiz_Ukraine_2020-01-03_s0",
+   "t_s": 168.9,
+   "kind": "goal",
+   "peak_minus_mark_s": null
+  },
+  {
+   "seg": "CH_RegioCup_HalbF_Frauen1_2017-03_s0",
+   "t_s": 32.3,
+   "kind": "goal",
+   "peak_minus_mark_s": 1.7
+  },
+  {
+   "seg": "CH_RegioCup_HalbF_Frauen1_2017-03_s0",
+   "t_s": 54.5,
+   "kind": "goal",
+   "peak_minus_mark_s": 5.7
+  },
+  {
+   "seg": "CH_RegioCup_HalbF_Frauen1_2017-03_s0",
+   "t_s": 94.4,
+   "kind": "miss",
+   "peak_minus_mark_s": 2.2
+  },
+  {
+   "seg": "CH_RegioCup_HalbF_Frauen1_2017-03_s0",
+   "t_s": 113.5,
+   "kind": "save",
+   "peak_minus_mark_s": 1.7
+  },
+  {
+   "seg": "CH_SGPilatus_Staefa_ca2024_s4",
+   "t_s": 3.8,
+   "kind": "goal",
+   "peak_minus_mark_s": 4.0
+  },
+  {
+   "seg": "CH_SGPilatus_Staefa_ca2024_s4",
+   "t_s": 90.3,
+   "kind": "goal",
+   "peak_minus_mark_s": 3.3
+  },
+  {
+   "seg": "CH_SGPilatus_Staefa_ca2024_s4",
+   "t_s": 145.8,
+   "kind": "goal",
+   "peak_minus_mark_s": 3.2
+  },
+  {
+   "seg": "CH_SGPilatus_Staefa_ca2024_s4",
+   "t_s": 167.3,
+   "kind": "miss",
+   "peak_minus_mark_s": 4.5
+  },
+  {
+   "seg": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20_s0",
+   "t_s": 2.5,
+   "kind": "goal",
+   "peak_minus_mark_s": -0.5
+  },
+  {
+   "seg": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20_s0",
+   "t_s": 115.4,
+   "kind": "goal",
+   "peak_minus_mark_s": 5.8
+  },
+  {
+   "seg": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20_s0",
+   "t_s": 127.4,
+   "kind": "miss",
+   "peak_minus_mark_s": -6.2
+  },
+  {
+   "seg": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20_s0",
+   "t_s": 164.3,
+   "kind": "goal",
+   "peak_minus_mark_s": 2.9
+  },
+  {
+   "seg": "CH_U17E_Final_HSGNordwest_SuhrAarau_ca2017_s4",
+   "t_s": 73.3,
+   "kind": "save",
+   "peak_minus_mark_s": 10.1
+  },
+  {
+   "seg": "CH_U17E_Final_HSGNordwest_SuhrAarau_ca2017_s4",
+   "t_s": 91.3,
+   "kind": "goal",
+   "peak_minus_mark_s": -7.9
+  },
+  {
+   "seg": "CH_U17E_Final_HSGNordwest_SuhrAarau_ca2017_s4",
+   "t_s": 151.0,
+   "kind": "save",
+   "peak_minus_mark_s": -1.8
+  },
+  {
+   "seg": "CH_U17E_Final_Pfadi_HSGNordwest_ca2019_s3",
+   "t_s": 122.4,
+   "kind": "goal",
+   "peak_minus_mark_s": -3.4
+  },
+  {
+   "seg": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10_s1",
+   "t_s": 30.1,
+   "kind": "goal",
+   "peak_minus_mark_s": -4.9
+  },
+  {
+   "seg": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10_s1",
+   "t_s": 71.8,
+   "kind": "goal",
+   "peak_minus_mark_s": 6.6
+  },
+  {
+   "seg": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10_s1",
+   "t_s": 106.0,
+   "kind": "goal",
+   "peak_minus_mark_s": 5.8
+  },
+  {
+   "seg": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10_s1",
+   "t_s": 146.2,
+   "kind": "goal",
+   "peak_minus_mark_s": -4.2
+  },
+  {
+   "seg": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20_s4",
+   "t_s": 21.5,
+   "kind": "goal",
+   "peak_minus_mark_s": 3.3
+  },
+  {
+   "seg": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20_s4",
+   "t_s": 74.1,
+   "kind": "save",
+   "peak_minus_mark_s": 4.3
+  },
+  {
+   "seg": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20_s4",
+   "t_s": 84.7,
+   "kind": "goal",
+   "peak_minus_mark_s": 2.7
+  },
+  {
+   "seg": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20_s4",
+   "t_s": 107.8,
+   "kind": "save",
+   "peak_minus_mark_s": 1.8
+  },
+  {
+   "seg": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20_s4",
+   "t_s": 131.9,
+   "kind": "save",
+   "peak_minus_mark_s": 5.3
+  },
+  {
+   "seg": "ES_1Nacional_AnaitasunaB_Trapagaran_2026_s3",
+   "t_s": 28.1,
+   "kind": "miss",
+   "peak_minus_mark_s": -3.3
+  },
+  {
+   "seg": "ES_1Nacional_AnaitasunaB_Trapagaran_2026_s3",
+   "t_s": 153.9,
+   "kind": "goal",
+   "peak_minus_mark_s": 4.3
+  },
+  {
+   "seg": "ES_1Nacional_Huarte_Erreka_2026_s3",
+   "t_s": 126.2,
+   "kind": "goal",
+   "peak_minus_mark_s": 6.8
+  },
+  {
+   "seg": "ES_1Nacional_PalmaDelRio_2026_s3",
+   "t_s": 8.0,
+   "kind": "goal",
+   "peak_minus_mark_s": 4.2
+  },
+  {
+   "seg": "ES_2Nacional_MarniB_Almoradi_2026_s4",
+   "t_s": 31.6,
+   "kind": "save",
+   "peak_minus_mark_s": 4.4
+  },
+  {
+   "seg": "ES_2Nacional_MarniB_Almoradi_2026_s4",
+   "t_s": 56.8,
+   "kind": "goal",
+   "peak_minus_mark_s": 3.8
+  },
+  {
+   "seg": "FI_Karsinta_Dynamo_GrIFK_2015_s3",
+   "t_s": 78.2,
+   "kind": "save",
+   "peak_minus_mark_s": 2.2
+  },
+  {
+   "seg": "FI_Karsinta_Dynamo_GrIFK_2015_s3",
+   "t_s": 144.4,
+   "kind": "goal",
+   "peak_minus_mark_s": 5.8
+  },
+  {
+   "seg": "FR_N1_SudMayenne_GrandLibournais_2025_s0",
+   "t_s": 59.8,
+   "kind": "goal",
+   "peak_minus_mark_s": -2.4
+  },
+  {
+   "seg": "FR_N1_SudMayenne_GrandLibournais_2025_s0",
+   "t_s": 102.1,
+   "kind": "goal",
+   "peak_minus_mark_s": 4.7
+  },
+  {
+   "seg": "IT_SerieA2_Flavioni_Salerno_2026_s3",
+   "t_s": 6.8,
+   "kind": "goal",
+   "peak_minus_mark_s": 6.4
+  },
+  {
+   "seg": "IT_SerieA2_Flavioni_Salerno_2026_s3",
+   "t_s": 17.5,
+   "kind": "save",
+   "peak_minus_mark_s": -4.3
+  },
+  {
+   "seg": "IT_SerieA2_Flavioni_Salerno_2026_s3",
+   "t_s": 52.0,
+   "kind": "goal",
+   "peak_minus_mark_s": -3.4
+  },
+  {
+   "seg": "IT_SerieA2_Flavioni_Salerno_2026_s3",
+   "t_s": 94.8,
+   "kind": "save",
+   "peak_minus_mark_s": -4.6
+  },
+  {
+   "seg": "IT_SerieA2_Flavioni_Salerno_2026_s3",
+   "t_s": 115.9,
+   "kind": "goal",
+   "peak_minus_mark_s": 4.9
+  },
+  {
+   "seg": "IT_SerieA2_Flavioni_Salerno_2026_s3",
+   "t_s": 129.3,
+   "kind": "goal",
+   "peak_minus_mark_s": 6.1
+  },
+  {
+   "seg": "IT_SerieA2_Flavioni_Salerno_2026_s3",
+   "t_s": 150.8,
+   "kind": "save",
+   "peak_minus_mark_s": -2.4
+  },
+  {
+   "seg": "IT_SerieA2_Leno_MedalpTirol_2020_s3",
+   "t_s": 66.0,
+   "kind": "save",
+   "peak_minus_mark_s": 6.6
+  },
+  {
+   "seg": "IT_SerieA2_Leno_MedalpTirol_2020_s3",
+   "t_s": 79.3,
+   "kind": "goal",
+   "peak_minus_mark_s": 5.7
+  },
+  {
+   "seg": "IT_SerieA2_Leno_MedalpTirol_2020_s3",
+   "t_s": 108.9,
+   "kind": "save",
+   "peak_minus_mark_s": 3.7
+  },
+  {
+   "seg": "IT_SerieA2_Leno_MedalpTirol_2020_s3",
+   "t_s": 115.3,
+   "kind": "goal",
+   "peak_minus_mark_s": -2.7
+  },
+  {
+   "seg": "IT_SerieA2_Leno_MedalpTirol_2020_s3",
+   "t_s": 145.9,
+   "kind": "save",
+   "peak_minus_mark_s": 2.7
+  },
+  {
+   "seg": "IT_SerieA2_Malo_Crenna_2018_s1",
+   "t_s": 42.7,
+   "kind": "save",
+   "peak_minus_mark_s": 5.5
+  },
+  {
+   "seg": "IT_SerieA2_Malo_Crenna_2018_s1",
+   "t_s": 65.8,
+   "kind": "goal",
+   "peak_minus_mark_s": 4.2
+  },
+  {
+   "seg": "IT_SerieA2_Malo_Crenna_2018_s1",
+   "t_s": 106.2,
+   "kind": "save",
+   "peak_minus_mark_s": -2.2
+  },
+  {
+   "seg": "IT_SerieA2_Malo_Crenna_2018_s1",
+   "t_s": 131.9,
+   "kind": "goal",
+   "peak_minus_mark_s": -1.3
+  },
+  {
+   "seg": "IT_SerieA2_Malo_Crenna_2018_s1",
+   "t_s": 166.7,
+   "kind": "save",
+   "peak_minus_mark_s": -0.7
+  },
+  {
+   "seg": "Int_Olympia_Finale_Frankreich_Daenemark_2021_s3",
+   "t_s": 20.1,
+   "kind": "goal",
+   "peak_minus_mark_s": -1.5
+  },
+  {
+   "seg": "Int_Olympia_Finale_Frankreich_Daenemark_2021_s3",
+   "t_s": 59.3,
+   "kind": "save",
+   "peak_minus_mark_s": -4.5
+  },
+  {
+   "seg": "Int_Olympia_Finale_Frankreich_Daenemark_2021_s3",
+   "t_s": 82.0,
+   "kind": "goal",
+   "peak_minus_mark_s": -5.8
+  },
+  {
+   "seg": "NL_1Divisie_JongSEW_Wijhe_2024_s3",
+   "t_s": 30.5,
+   "kind": "goal",
+   "peak_minus_mark_s": 5.1
+  },
+  {
+   "seg": "NL_1Divisie_JongSEW_Wijhe_2024_s3",
+   "t_s": 48.2,
+   "kind": "goal",
+   "peak_minus_mark_s": -4.4
+  },
+  {
+   "seg": "NL_1Divisie_JongSEW_Wijhe_2024_s3",
+   "t_s": 93.5,
+   "kind": "save",
+   "peak_minus_mark_s": -4.5
+  },
+  {
+   "seg": "NL_1Divisie_JongSEW_Wijhe_2024_s3",
+   "t_s": 129.3,
+   "kind": "save",
+   "peak_minus_mark_s": -1.7
+  },
+  {
+   "seg": "NL_1Divisie_JongSEW_Wijhe_2024_s3",
+   "t_s": 165.7,
+   "kind": "save",
+   "peak_minus_mark_s": 4.3
+  },
+  {
+   "seg": "NL_1Divisie_JongSEW_Wijhe_2024_s3",
+   "t_s": 177.9,
+   "kind": "goal",
+   "peak_minus_mark_s": -7.9
+  },
+  {
+   "seg": "NL_2Divisie_SEW2_Tukkers_2019_s2",
+   "t_s": 49.6,
+   "kind": "miss",
+   "peak_minus_mark_s": 7.8
+  },
+  {
+   "seg": "NL_2Divisie_SEW2_Tukkers_2019_s2",
+   "t_s": 79.3,
+   "kind": "goal",
+   "peak_minus_mark_s": -3.7
+  },
+  {
+   "seg": "NL_2Divisie_SEW2_Tukkers_2019_s2",
+   "t_s": 103.0,
+   "kind": "goal",
+   "peak_minus_mark_s": -3.0
+  },
+  {
+   "seg": "NL_2Divisie_SEW2_Tukkers_2019_s2",
+   "t_s": 130.6,
+   "kind": "goal",
+   "peak_minus_mark_s": -5.0
+  },
+  {
+   "seg": "NL_2Divisie_SEW2_Tukkers_2019_s2",
+   "t_s": 155.6,
+   "kind": "save",
+   "peak_minus_mark_s": 2.2
+  },
+  {
+   "seg": "NL_2Divisie_VZV2_SEW2_2019_s4",
+   "t_s": 56.9,
+   "kind": "save",
+   "peak_minus_mark_s": 7.9
+  },
+  {
+   "seg": "NL_2Divisie_VZV2_SEW2_2019_s4",
+   "t_s": 155.5,
+   "kind": "goal",
+   "peak_minus_mark_s": -1.7
+  },
+  {
+   "seg": "NL_Frauen_Final_VOC_SEW_2026_s4",
+   "t_s": 50.1,
+   "kind": "goal",
+   "peak_minus_mark_s": 4.5
+  },
+  {
+   "seg": "NL_Frauen_Final_VOC_SEW_2026_s4",
+   "t_s": 60.2,
+   "kind": "goal",
+   "peak_minus_mark_s": 2.6
+  },
+  {
+   "seg": "NL_Frauen_Final_VOC_SEW_2026_s4",
+   "t_s": 107.8,
+   "kind": "miss",
+   "peak_minus_mark_s": 5.8
+  },
+  {
+   "seg": "NL_Frauen_Final_VOC_SEW_2026_s4",
+   "t_s": 119.2,
+   "kind": "save",
+   "peak_minus_mark_s": 3.0
+  },
+  {
+   "seg": "NL_Frauen_Final_VOC_SEW_2026_s4",
+   "t_s": 162.1,
+   "kind": "save",
+   "peak_minus_mark_s": -3.9
+  },
+  {
+   "seg": "NO_Frauen_3Div_Sogndal_Askoey_2019_s0",
+   "t_s": 71.3,
+   "kind": "goal",
+   "peak_minus_mark_s": 2.3
+  },
+  {
+   "seg": "NO_Frauen_3Div_Sogndal_Askoey_2019_s0",
+   "t_s": 123.4,
+   "kind": "goal",
+   "peak_minus_mark_s": 7.4
+  },
+  {
+   "seg": "NO_Frauen_3Div_Sogndal_Askoey_2019_s0",
+   "t_s": 135.7,
+   "kind": "goal",
+   "peak_minus_mark_s": -4.9
+  },
+  {
+   "seg": "NO_Frauen_3Div_Sogndal_Askoey_2019_s0",
+   "t_s": 170.8,
+   "kind": "goal",
+   "peak_minus_mark_s": 5.4
+  },
+  {
+   "seg": "PT_Frauen_Madeira_Gaia_2022_s4",
+   "t_s": 48.1,
+   "kind": "goal",
+   "peak_minus_mark_s": -2.5
+  },
+  {
+   "seg": "PT_Frauen_Madeira_Gaia_2022_s4",
+   "t_s": 84.8,
+   "kind": "save",
+   "peak_minus_mark_s": 4.2
+  },
+  {
+   "seg": "PT_Frauen_Madeira_Gaia_2022_s4",
+   "t_s": 127.9,
+   "kind": "goal",
+   "peak_minus_mark_s": 7.3
+  },
+  {
+   "seg": "SE_Allsvenskan_Torslanda_Amo_2018_s4",
+   "t_s": 61.6,
+   "kind": "goal",
+   "peak_minus_mark_s": -0.4
+  },
+  {
+   "seg": "SE_Allsvenskan_Torslanda_Amo_2018_s4",
+   "t_s": 94.3,
+   "kind": "goal",
+   "peak_minus_mark_s": 5.9
+  },
+  {
+   "seg": "SE_Allsvenskan_Torslanda_Amo_2018_s4",
+   "t_s": 118.3,
+   "kind": "goal",
+   "peak_minus_mark_s": 4.3
+  },
+  {
+   "seg": "SE_Allsvenskan_Torslanda_Amo_2018_s4",
+   "t_s": 149.2,
+   "kind": "goal",
+   "peak_minus_mark_s": 6.0
+  },
+  {
+   "seg": "SE_Amateur_Sala_Vaesteras_2022_s1",
+   "t_s": 1.6,
+   "kind": "save",
+   "peak_minus_mark_s": 8.0
+  },
+  {
+   "seg": "SE_Amateur_Sala_Vaesteras_2022_s1",
+   "t_s": 4.2,
+   "kind": "goal",
+   "peak_minus_mark_s": 5.4
+  },
+  {
+   "seg": "SE_Amateur_Sala_Vaesteras_2022_s1",
+   "t_s": 69.9,
+   "kind": "miss",
+   "peak_minus_mark_s": 8.5
+  },
+  {
+   "seg": "SE_Amateur_Sala_Vaesteras_2022_s1",
+   "t_s": 109.1,
+   "kind": "goal",
+   "peak_minus_mark_s": 5.1
+  },
+  {
+   "seg": "SE_Test_Hammarby_Skanela_2026_s3",
+   "t_s": 20.8,
+   "kind": "miss",
+   "peak_minus_mark_s": 5.6
+  },
+  {
+   "seg": "SE_Test_Hammarby_Skanela_2026_s3",
+   "t_s": 64.5,
+   "kind": "save",
+   "peak_minus_mark_s": -4.9
+  },
+  {
+   "seg": "SE_Test_Hammarby_Skanela_2026_s3",
+   "t_s": 108.5,
+   "kind": "goal",
+   "peak_minus_mark_s": -2.3
+  },
+  {
+   "seg": "SE_Test_Hammarby_Skanela_2026_s3",
+   "t_s": 140.4,
+   "kind": "save",
+   "peak_minus_mark_s": 6.2
+  },
+  {
+   "seg": "US_NYCity_NYAC_2019_s3",
+   "t_s": 28.8,
+   "kind": "save",
+   "peak_minus_mark_s": -3.2
+  },
+  {
+   "seg": "US_NYCity_NYAC_2019_s3",
+   "t_s": 79.4,
+   "kind": "save",
+   "peak_minus_mark_s": 3.8
+  },
+  {
+   "seg": "US_NYCity_NYAC_2019_s3",
+   "t_s": 142.9,
+   "kind": "save",
+   "peak_minus_mark_s": 7.9
+  },
+  {
+   "seg": "US_NYCity_NYAC_2019_s3",
+   "t_s": 164.5,
+   "kind": "goal",
+   "peak_minus_mark_s": 3.1
+  }
+ ]
+}

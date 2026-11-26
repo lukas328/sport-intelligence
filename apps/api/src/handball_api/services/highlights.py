@@ -179,9 +179,17 @@ def _clip(
 
 
 async def build(
-    ctx: Ctx, match: Match, fmt: ReelFormat, player_id: uuid.UUID | None = None
+    ctx: Ctx,
+    match: Match,
+    fmt: ReelFormat,
+    player_id: uuid.UUID | None = None,
+    skip_same: bool = False,
 ) -> HighlightReel | None:
-    """Selects the scenes, records the consent check and queues the rendering."""
+    """Selects the scenes, records the consent check and queues the rendering. `skip_same`
+    (the automatic reels after an analysis): no new reel when one of the same match, format and
+    player with the same scenes exists and has not failed or been blocked (a re-run with
+    corrected court points or the next part of the match would otherwise render and list the
+    same reel again)."""
     video = await timeline_video(ctx, match.id, ready=True)
     if video is None or not video.proxy_key:
         return None
@@ -203,6 +211,20 @@ async def build(
     chosen = pick(scenes, TEAM_MAX_S)
     if len(chosen) < 3:
         return None
+    clip_ids = [str(s.event.id) for s in chosen]
+    if skip_same:
+        same = await ctx.db.scalars(
+            select(HighlightReel.clip_ids).where(
+                HighlightReel.match_id == match.id,
+                HighlightReel.format == fmt,
+                HighlightReel.player_id.is_(None)
+                if player_id is None
+                else HighlightReel.player_id == player_id,
+                HighlightReel.status.notin_([ReelStatus.FAILED, ReelStatus.BLOCKED_CONSENT]),
+            )
+        )
+        if any(list(ids) == clip_ids for ids in same):
+            return None
     team = await ctx.db.get(Team, match.team_id)
     org = await ctx.db.get(Organization, match.organization_id)
     opp = await opponent_of(ctx, match)
@@ -220,7 +242,7 @@ async def build(
             "purpose": ConsentKind.HIGHLIGHTS_INTERNAL.value,
             "excluded_players": excluded,
         },
-        clip_ids=[str(s.event.id) for s in chosen],
+        clip_ids=clip_ids,
     )
     ctx.db.add(reel)
     await ctx.db.flush()
@@ -283,11 +305,11 @@ async def auto(ctx: Ctx, match: Match) -> int:
         return 0
     created = 0
     for fmt in (ReelFormat.LANDSCAPE, ReelFormat.PORTRAIT):
-        created += 1 if await build(ctx, match, fmt) else 0
+        created += 1 if await build(ctx, match, fmt, skip_same=True) else 0
     events = (await ctx.db.scalars(select(Event).where(Event.match_id == match.id))).all()
     players = {s.player_id for s in rank(list(events), match) if s.player_id}
     for pid in sorted(players, key=str):
-        created += 1 if await build(ctx, match, ReelFormat.PORTRAIT, pid) else 0
+        created += 1 if await build(ctx, match, ReelFormat.PORTRAIT, pid, skip_same=True) else 0
     return created
 
 
