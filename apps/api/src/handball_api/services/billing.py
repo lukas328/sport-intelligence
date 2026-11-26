@@ -31,7 +31,7 @@ from handball_api.models import (
 from handball_api.models.enums import JobStatus, OrgRole, Plan
 from handball_api.services import audit
 from handball_api.services.context import Ctx
-from handball_api.services.plans import FEATURES, PLANS, PlanSpec
+from handball_api.services.plans import FEATURES, PLANS, PlanSpec, currency_for
 from handball_api.services.policies import Action, authorize
 
 log = get_logger("handball_api.billing")
@@ -220,6 +220,8 @@ async def overview(ctx: Ctx) -> dict[str, Any]:
         "paid_until": org.paid_until,
         "enforced": ctx.settings.billing_enforce,
         "checkout_available": ctx.settings.stripe_secret_key is not None,
+        # the club pays in this currency (from its country); the plans' prices are the same number
+        "currency": currency_for(org.country),
         "limits": {
             "teams": s.teams,
             "matches_per_season": s.matches_per_season,
@@ -231,7 +233,7 @@ async def overview(ctx: Ctx) -> dict[str, Any]:
         "plans": [
             {
                 "plan": p.plan.value,
-                "price_chf_month": p.price_chf_month,
+                "price_month": p.price_month,
                 "teams": p.teams,
                 "matches_per_season": p.matches_per_season,
                 "storage_gb": p.storage_gb,
@@ -312,8 +314,14 @@ class StripeGateway:
         )
 
 
-def _price(settings: Settings, plan: Plan) -> str:
-    price = {Plan.TEAM: settings.stripe_price_team, Plan.CLUB: settings.stripe_price_club}.get(plan)
+def _price(settings: Settings, plan: Plan, currency: str = "CHF") -> str:
+    """The Stripe price of a plan in the club's currency (CHF in CH and LI, else EUR)."""
+    prices = (
+        {Plan.TEAM: settings.stripe_price_team_eur, Plan.CLUB: settings.stripe_price_club_eur}
+        if currency == "EUR"
+        else {Plan.TEAM: settings.stripe_price_team, Plan.CLUB: settings.stripe_price_club}
+    )
+    price = prices.get(plan)
     if not price:
         raise ProblemError(503, "billing-unavailable", "Billing is not configured")
     return price
@@ -328,7 +336,7 @@ async def checkout(ctx: Ctx, gateway: BillingGateway | None, plan: Plan) -> str:
         raise ProblemError(422, "validation", "Choose a paid plan")
     org = await _org(ctx)
     # the goalkeeper functions are part of the plan, no add-on any more (A9)
-    items = [(_price(ctx.settings, plan), 1)]
+    items = [(_price(ctx.settings, plan, currency_for(org.country)), 1)]
     if not org.stripe_customer_id:
         user = await ctx.db.get(User, ctx.user_id)
         org.stripe_customer_id = await gateway.create_customer(
@@ -358,10 +366,13 @@ async def portal(ctx: Ctx, gateway: BillingGateway | None) -> str:
 
 
 def _plan_for(settings: Settings, price_ids: list[str]) -> Plan | None:
-    if settings.stripe_price_club and settings.stripe_price_club in price_ids:
-        return Plan.CLUB
-    if settings.stripe_price_team and settings.stripe_price_team in price_ids:
-        return Plan.TEAM
+    """The plan of a subscription from its price ids, in either currency."""
+    for plan, ids in (
+        (Plan.CLUB, (settings.stripe_price_club, settings.stripe_price_club_eur)),
+        (Plan.TEAM, (settings.stripe_price_team, settings.stripe_price_team_eur)),
+    ):
+        if any(p and p in price_ids for p in ids):
+            return plan
     return None
 
 
