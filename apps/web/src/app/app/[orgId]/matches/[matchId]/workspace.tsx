@@ -7,7 +7,7 @@ import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, type FormEvent, type Ref } from "react";
 import { useRouter } from "next/navigation";
 import { Tagger } from "@/components/analysis/tagger";
-import { useMatchRoster } from "@/components/domain/match-sides";
+import { useMatchRoster, useMatchSides } from "@/components/domain/match-sides";
 import { FROM_VIDEO_KEY, playFromVideo } from "@/lib/play-from-video";
 import { Button } from "@/components/ui/button";
 import { ShareButton } from "@/components/sharing/share-button";
@@ -33,9 +33,11 @@ import { AnalysisPanel } from "./analysis-panel";
 import { CameraSwitch } from "./camera-switch";
 import { FormationsCard } from "./formations-card";
 import { IdentityPanel, ownTracks } from "./identity-panel";
+import { RosterNumberHint } from "@/components/roster/number-hint";
 import { useWorkspaceData } from "./use-workspace-data";
 import { GoalCandidatesPanel } from "./goal-candidates";
 import { ShotCandidatesPanel } from "./shot-candidates";
+import { ShotQuickEntry } from "./check/shot-quick-entry";
 import { KickoffPanel } from "./kickoff-panel";
 import { MatchTimeline } from "./match-timeline";
 import { OfficialGoalsPanel } from "./official-goals";
@@ -251,6 +253,7 @@ export function Workspace({
 
   const paneId = `ws-${match.id}`;
   const spot = useSpotlight(analysis.data ?? null);
+  const matchSides = useMatchSides();
   // memoised: the stills of the people list redraw only when the court changes
   const spotGeometry = useMemo(() => geometryOf(analysis.data, `/v1/orgs/${orgId}/videos/${video.id}`), [analysis.data, orgId, video.id]);
   const [spotOpen, setSpotOpen] = useState(false);
@@ -651,7 +654,12 @@ export function Workspace({
           </div>
         )}
         {shown === "players" && staff && a?.status === "ready" && (
-          <IdentityPanel orgId={orgId} match={match} videoId={video.id} tracks={a.tracks} at={gameAt} geometry={spotGeometry} chunkMs={a.chunk_ms ?? null} onPlay={playPerson} />
+          <>
+            {/* names come from shirt numbers: who has none in the squad, with the way to add them
+                (audit #160); an observed match names the other team by number, not our squad */}
+            {match.kind !== "scouting" && !matchSides?.neutral && <RosterNumberHint orgId={orgId} teamId={match.team_id} seasonId={match.season_id} className="mb-4" />}
+            <IdentityPanel orgId={orgId} match={match} videoId={video.id} tracks={a.tracks} at={gameAt} geometry={spotGeometry} chunkMs={a.chunk_ms ?? null} onPlay={playPerson} />
+          </>
         )}
         {shown === "players" && staff && a?.status !== "ready" && <p className="text-sm text-muted">{t("workflow.players_waiting")}</p>}
         {shown === "events" && staff && (
@@ -666,6 +674,12 @@ export function Workspace({
                 <Maximize2 aria-hidden />
                 {t("workflow.reviewOpen")}
               </Button>
+            )}
+            {/* on a phone the quick round fits better: one clip, four big answers */}
+            {!reviewing && (
+              <div className="lg:hidden">
+                <ShotQuickEntry orgId={orgId} matchId={match.id} />
+              </div>
             )}
             <ShotCandidatesPanel
               orgId={orgId}

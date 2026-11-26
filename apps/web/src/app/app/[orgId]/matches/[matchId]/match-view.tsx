@@ -12,6 +12,7 @@ import Link from "next/link";
 import { useEscape } from "@/lib/use-escape";
 import { ArrowLeftRight, Check, ChevronDown, ChartNoAxesColumn, Clapperboard, FileDown, Hand, Info, MoreHorizontal, Pencil, Plus, Radio, Shield, Trash2 } from "lucide-react";
 import { MatchSidesProvider, useMatchRoster } from "@/components/domain/match-sides";
+import { RosterNumberHint } from "@/components/roster/number-hint";
 import { homeFirst, matchSides, type MatchSides } from "@/lib/match-sides";
 import { courseOf } from "@/lib/score-flow";
 import { DEFAULT_CLUB, matchStyle } from "@/lib/color";
@@ -752,6 +753,9 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
         {staff && !example && !main && (
           <section id="upload" className="max-w-3xl scroll-mt-24 space-y-4" aria-label={t("upload.title")}>
             <p className="m-0 max-w-[60ch] text-[17px] font-bold">{ta("noVideoBlock")}</p>
+            {/* before the first video: a squad with shirt numbers lets the analysis name people
+                (audit #160); not for an observed match, whose people are not our squad */}
+            {!scouting && !sides.neutral && <RosterNumberHint orgId={orgId} teamId={match.team_id} seasonId={match.season_id} />}
             {/* the field first (A11); the shirts after it, before «Mehr»: they are saved at once,
                 also while the upload runs. The analysis separates the teams by their shirts:
                 without the opponent's colour it guesses worse, so it is asked with the reason (E09) */}
