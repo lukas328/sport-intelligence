@@ -1458,3 +1458,23 @@ Verknüpfungen unter 10 % falsch. Dev-Clips Horgen H1/H2, nie Endtest.
   Nicht klar besser in allen Zielen: **im Produkt aus** (`LONG_LINKS = False`, heutiges Verhalten
   unverändert, geprüft: gleiche Zahlen wie vorher). Einschalten nach einem Test auf einem weiteren
   Spiel mit derselben Sichtprüfung.
+
+**Nachtrag: Endfarbe nur aus freien Blicken (2026-11-26).** Auf dem zweiten Spiel
+(ATVKVBasel–YellowWinterthur2 s1, Nachtrag dazu mit #179) waren 3 von 16 neuen Verknüpfungen klar
+falsch, Ursache schien die Überdeckung am Stückende. Darum: jede Farbprobe merkt sich, ob die
+Personenbox zu mindestens 15 % von einer anderen bedeckt war; die Teamfarbe am Stückanfang und
+-ende kommt nur aus freien Blicken (bis 5 unter den ersten oder letzten 15, mindestens 3, sonst
+kein Team und keine lange Verknüpfung). Gleiche Regeln, beide Spiele, Dev.
+
+| Spiel | richtig | falsch | benannte Zeit | Nicht-Feldsp. benannt | Median | neue Verknüpfungen über 4 s | klar falsch |
+|---|---|---|---|---|---|---|---|
+| Horgen H1/H2 | 12 von 33 | 2 | 29.8 % (heute 23.2) | 9 von 72 (heute 7) | 28.0 s | 63 (vorher 78) | 9 (14 %) |
+| ATV s1 | 2 von 9 | 1 | 17.5 % (heute 16.3) | 1 von 17 (heute 1) | 20.3 s | 12 (vorher 16) | 2 (17 %) |
+
+- Zusammen 11 von 75 klar falsch (etwa 15 %), dazu etwa 20 % unklar. Die Regel nimmt
+  Verknüpfungen weg, aber nicht die falschen: die meisten klaren Fehler verbinden einen Spieler mit
+  einem Schiedsrichter, Betreuer oder einer Person an der Bank in Schwarz oder Grau (Horgen 7 von 9,
+  ATV 1 von 2), nicht zwei Spieler in Überdeckung.
+- **Kriterium nicht erfüllt, `LONG_LINKS` bleibt aus.** Der Code (Branch `claude/end-colour-clean`)
+  wirkt nur mit dem Schalter und wird nicht gemergt. Ein weiterer Hebel müsste Schiedsrichter und
+  Betreuer vor dem Verknüpfen sicher erkennen (Rolle statt Farbabstand), nicht die Überdeckung.
