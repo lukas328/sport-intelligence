@@ -29,6 +29,8 @@ export function KnownFacts({
   checks,
   staff,
   onAttach,
+  onWatch,
+  withoutNumber = 0,
 }: {
   orgId: string;
   match: Match;
@@ -41,6 +43,10 @@ export function KnownFacts({
   staff: boolean;
   /** to the files of the match (photo of the paper report, notes) */
   onAttach?: () => void;
+  /** the video plays already (read in, the analysis runs): to the tab Video */
+  onWatch?: () => void;
+  /** players of the squad without a shirt number: with one the analysis puts the names to */
+  withoutNumber?: number;
 }) {
   const t = useTranslations("progress");
   const ta = useTranslations("anlauf");
@@ -104,7 +110,14 @@ export function KnownFacts({
         {staff && (
           <>
             <p className="m-0 mt-4 text-[17px] font-bold">{t("meanwhile")}</p>
-            <ul className="m-0 mt-1 list-none space-y-1 p-0">
+            <ul className="m-0 mt-1 list-none space-y-1 p-0" data-testid="meanwhile">
+              {onWatch && (
+                <li>
+                  <button type="button" onClick={onWatch} className={`${linkClass} inline-flex min-h-11 cursor-pointer items-center border-0 bg-transparent p-0 text-base`} data-testid="meanwhile-watch">
+                    {t("doWatch")}
+                  </button>
+                </li>
+              )}
               {checks > 0 && (
                 <li>
                   <Link href={`${base}/check`} className={`${linkClass} inline-flex min-h-11 items-center`}>
@@ -114,8 +127,8 @@ export function KnownFacts({
               )}
               {!scouting && (
                 <li>
-                  <Link href={`/app/${orgId}/teams/${match.team_id}`} className={`${linkClass} inline-flex min-h-11 items-center`}>
-                    {t("doRoster")}
+                  <Link href={`/app/${orgId}/teams/${match.team_id}`} className={`${linkClass} inline-flex min-h-11 items-center`} data-testid="meanwhile-roster">
+                    {withoutNumber > 0 ? t("doNumbers", { n: withoutNumber }) : t("doRoster")}
                   </Link>
                 </li>
               )}

@@ -107,6 +107,24 @@ export function durationParts(seconds: number): { h: number; m: number } {
   return { h: Math.floor(m / 60), m: m % 60 };
 }
 
+/**
+ * A measured range as people say it: under an hour in minutes (in fives), from an hour on in half
+ * hours («2½ bis 3½ Std.»). The low end rounded down, the high end up, so the range holds what was
+ * measured. Null when both ends say the same: then one time.
+ */
+export function rangeParts(low: number, high: number): { unit: "min" | "h"; low: string; high: string } | null {
+  const [a, b] = low <= high ? [low, high] : [high, low];
+  if (b < 3600) {
+    const lo = Math.max(5, Math.floor(a / 300) * 5);
+    const hi = Math.max(lo, Math.ceil(b / 300) * 5);
+    return lo === hi ? null : { unit: "min", low: String(lo), high: String(hi) };
+  }
+  const half = (x: number) => (Number.isInteger(x) ? String(x) : `${Math.floor(x) || ""}½`);
+  const lo = Math.max(0.5, Math.floor(a / 1800) / 2);
+  const hi = Math.max(lo, Math.ceil(b / 1800) / 2);
+  return lo === hi ? null : { unit: "h", low: half(lo), high: half(hi) };
+}
+
 /** The clock time something is probably done. */
 export function finishAt(etaS: number, now = Date.now()): Date {
   const at = now + etaS * 1000;

@@ -238,6 +238,11 @@ class FileProgressOut(ApiModel):
         description="measured: from the pace of this run; history: from video length and the "
         "pace of the latest runs",
     )
+    eta_range_s: list[int] | None = Field(
+        default=None,
+        description="[low, high] seconds left, measured from the pace of the running step (since "
+        "it began and over the last minutes); null when not measured",
+    )
     uploaded_bytes: int | None = None
     size_bytes: int | None = None
     duration_s: float | None = None
@@ -283,6 +288,11 @@ class MatchProgressOut(ApiModel):
     overall: float = Field(ge=0, le=1)
     eta_s: int | None = Field(
         default=None, description="seconds until everything is done; null: cannot be estimated"
+    )
+    eta_range_s: list[int] | None = Field(
+        default=None,
+        description="[low, high] seconds until everything is done, when each file's time is "
+        "measured; null otherwise",
     )
     finished_at: datetime | None = Field(
         default=None, description="done or failed: when the last step ended"

@@ -82,6 +82,22 @@ async def _tell_staff(ctx: Ctx, match: Match, kind: str, extra: dict[str, Any]) 
         )
 
 
+async def _more_to_come(ctx: Ctx, match: Match, job: ProcessingJob) -> bool:
+    """Another analysis of the match is still to run or running (a waiting second half, the run
+    with a court marked while this one ran): the mail waits for it."""
+    others = await ctx.db.scalar(
+        select(func.count())
+        .select_from(ProcessingJob)
+        .where(
+            ProcessingJob.match_id == match.id,
+            ProcessingJob.kind == "analysis",
+            ProcessingJob.status.in_((JobStatus.QUEUED, JobStatus.RUNNING)),
+            ProcessingJob.id != job.id,
+        )
+    )
+    return bool(others)
+
+
 async def _ready_note(ctx: Ctx, match: Match) -> tuple[str, dict[str, Any]]:
     """What the mail may promise after the analysis (UX test N05): the three things only with
     goals placed in the video; otherwise that the analysis is done and how many questions wait."""
@@ -136,6 +152,8 @@ async def apply_job_update(ctx: Ctx, job_id: uuid.UUID, data: JobUpdate) -> Proc
     )
     if data.stages is not None:
         job.stages = {**job.stages, **data.stages}
+    if data.status == JobStatus.RUNNING and job.kind == "analysis":
+        job.stages = progress.record_pace(job.stages or {}, data.stage, now)
     if data.gpu_seconds is not None:
         job.gpu_seconds = data.gpu_seconds
     elif job.kind == "analysis" and data.status == JobStatus.SUCCEEDED and data.result:
@@ -275,7 +293,13 @@ async def _analysis_succeeded(
             str(pending.get("space") or "panorama"),
             int(pending.get("frame_ms") or 0),
         )
-    if not corrected:
+        # its results replace these: the coach hears about the analysis after that run
+        meta = dict(asset.analysis or {})
+        meta[PENDING] = {**meta.get(PENDING, {}), "mail": True}
+        asset.analysis = meta
+    # one mail per match, once its analyses are through: not after the first half while the
+    # second waits, nor before the run with the court marked while it ran (honest waiting)
+    if (not corrected or pending.get("mail")) and not await _more_to_come(ctx, match, job):
         kind, extra = await _ready_note(ctx, match)
         await _tell_staff(ctx, match, kind, extra)
     if on_timeline:

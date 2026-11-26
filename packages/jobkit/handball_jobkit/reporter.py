@@ -15,6 +15,9 @@ ATTEMPTS = 3
 # reports no fraction (a download, the court, the upload): a job silent for many minutes has lost
 # its worker, and the API's watchdog can restart it instead of the coach waiting for hours.
 HEARTBEAT_S = 60.0
+# progress updates (a fraction) at most this often: each one is a write of the job in the API, and a
+# step reports its fraction per frame or batch; stage changes and the end always go at once
+PROGRESS_EVERY_S = 10.0
 
 
 class ReportError(RuntimeError):
@@ -75,7 +78,7 @@ class Reporter:
         the API's answer (the job as the API sees it), None when it was not sent or not readable."""
         with self._lock:
             now = time.monotonic()
-            if not (force or terminal) and now - self._last < 2:
+            if not (force or terminal) and now - self._last < PROGRESS_EVERY_S:
                 return None
             self._last = now
         error = ""
@@ -150,8 +153,22 @@ class Reporter:
         )
 
     def fraction(self, f: float) -> None:
+        """How far the running stage is (0 to 1). It goes to the API in the stage itself too: the
+        job's progress weighs the stages by fixed shares, the stage's own pace is measured."""
         self._fraction = max(0.0, min(1.0, f))
-        self._send({"status": "running", "progress": self.progress(), "stage": self._current})
+        if self._current:
+            self.stages[self._current] = {
+                **self.stages[self._current],
+                "fraction": round(self._fraction, 4),
+            }
+        self._send(
+            {
+                "status": "running",
+                "progress": self.progress(),
+                "stage": self._current,
+                "stages": self.stages,
+            }
+        )
 
     def succeed(self, result: dict[str, Any]) -> None:
         self.stop()

@@ -362,3 +362,105 @@ async def test_the_same_file_again_continues_its_unfinished_upload(
     videos = (await api.get(f"/v1/orgs/{org}/matches/{m['id']}")).json()["videos"]
     old = next(v for v in videos if v["id"] == first["video"]["id"])
     assert old["status"] == "failed"
+
+
+# ---- the time left of an analysis, measured per step (honest waiting) --------------------------
+
+
+def _steps(observe: float, t_observe: float, **extra: Any) -> dict[str, Any]:
+    """An analysis in its observation step: the download done, the rest still to come."""
+    t = NOW.timestamp()
+    return {
+        "download": {"status": "done", "started": t - t_observe - 60, "finished": t - t_observe},
+        "observe": {"status": "running", "started": t - t_observe, "fraction": observe},
+        "calibration": {"status": "pending"},
+        "tracking": {"status": "pending"},
+        "upload": {"status": "pending"},
+        **extra,
+    }
+
+
+def _match() -> Any:
+    from handball_api.models import Match
+
+    return Match(id=uuid.uuid4(), team_id=uuid.uuid4(), kind="match", is_home=True, kickoff_at=NOW)
+
+
+PACE_STEPS = Throughput(
+    analysis_per_video_s=3.0,
+    analysis_steps={"calibration": 0.1, "tracking": 0.05, "upload": 0.02},
+)
+
+
+def test_record_pace_keeps_a_sample_about_every_report_of_the_running_step() -> None:
+    t = NOW.timestamp()
+    stages = _steps(0.2, 600)
+    once = progress.record_pace(stages, "observe", NOW)
+    assert once[progress.PACE] == {"step": "observe", "marks": [[t, 0.2]]}
+    # half a minute later: no second sample yet
+    assert progress.record_pace(once, "observe", NOW + timedelta(seconds=30)) == once
+    later = {**once, "observe": {**once["observe"], "fraction": 0.25}}
+    twice = progress.record_pace(later, "observe", NOW + timedelta(seconds=60))
+    assert twice[progress.PACE]["marks"] == [[t, 0.2], [t + 60, 0.25]]
+    # a new step starts its own samples; a step without a fraction adds none
+    other = {**twice, "calibration": {"status": "running", "fraction": 0.1}}
+    new = progress.record_pace(other, "calibration", NOW + timedelta(seconds=120))
+    assert new[progress.PACE] == {"step": "calibration", "marks": [[t + 120, 0.1]]}
+    assert progress.record_pace(_steps(0.2, 600), "download", NOW) == _steps(0.2, 600)
+
+
+def test_the_time_left_is_a_measured_range_per_step() -> None:
+    """The step's pace since it began (an hour for a quarter: 3 h left) and over the last ten
+    minutes (5 % in ten minutes: 2.5 h left), plus the later steps at their measured pace."""
+    t = NOW.timestamp()
+    stages = _steps(0.25, 3600, **{progress.PACE: {"step": "observe", "marks": [[t - 600, 0.2]]}})
+    asset = _asset(VideoStatus.READY, duration_s=3600)
+    run = _job(
+        "analysis",
+        JobStatus.RUNNING,
+        progress=0.2,
+        stages=stages,
+        started_at=NOW - timedelta(minutes=61),
+        heartbeat_at=NOW,
+    )
+    f = file_progress(asset, [_job("ingest", JobStatus.SUCCEEDED), run], NOW, PACE_STEPS)
+    rest = int(3600 * (0.1 + 0.05 + 0.02))  # 612 s for the later steps
+    assert f is not None and f.eta_range_s == [9000 + rest, 10800 + rest]
+    assert f.eta_basis == "measured" and f.eta_s == (9000 + 10800) // 2 + rest
+    assert f.finish_s == f.eta_s
+    summary = match_summary(_match(), "TV Muster", [f], [run], NOW)
+    assert summary is not None and summary.eta_range_s == f.eta_range_s
+
+
+def test_no_range_without_a_measured_step_or_with_a_later_step_never_measured() -> None:
+    asset = _asset(VideoStatus.READY, duration_s=3600)
+
+    def run(stages: dict[str, Any]) -> ProcessingJob:
+        return _job(
+            "analysis",
+            JobStatus.RUNNING,
+            progress=0.3,
+            stages=stages,
+            started_at=NOW - timedelta(hours=1),
+            heartbeat_at=NOW,
+        )
+
+    # a worker without the step's fraction: as before, from the job's progress
+    old = {"observe": {"status": "running", "started": NOW.timestamp() - 3600}}
+    f = file_progress(asset, [run(old)], NOW, PACE_STEPS)
+    assert f is not None and f.eta_range_s is None and f.eta_basis == "measured"
+    # too early in the step: no range
+    f = file_progress(asset, [run(_steps(0.02, 3600))], NOW, PACE_STEPS)
+    assert f is not None and f.eta_range_s is None
+    # the tracking step was never measured: no time that was not measured
+    f = file_progress(
+        asset, [run(_steps(0.25, 3600))], NOW, Throughput(analysis_steps={"upload": 0.02})
+    )
+    assert f is not None and f.eta_range_s is None
+
+
+def test_step_seconds_reads_the_finished_steps() -> None:
+    t = NOW.timestamp()
+    stages = _steps(0.5, 100, **{progress.PACE: {"step": "observe", "marks": []}})
+    assert progress.step_seconds(stages) == {"download": 60.0}
+    assert progress.step_seconds({"x": {"status": "done", "started": t, "finished": t - 5}}) == {}

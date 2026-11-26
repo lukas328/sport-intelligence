@@ -26,7 +26,7 @@ Two files of one match run one after the other: the second half's analysis waits
 from __future__ import annotations
 
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from statistics import median
 from typing import Any, Literal
@@ -95,6 +95,9 @@ class Throughput:
 
     analysis_per_video_s: float | None = None
     ingest_per_gb: float | None = None
+    # seconds per second of video of each analysis step (from the steps' start and end the
+    # worker reports), for the steps after the running one
+    analysis_steps: dict[str, float] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -145,17 +148,23 @@ async def throughput(ctx: Ctx, now: datetime | None = None) -> Throughput:
         await disable_system_access(ctx.db)
     analysis: list[float] = []
     ingest: list[float] = []
+    steps: dict[str, list[float]] = {}
     for job, duration_s, size in rows:
         took = _elapsed(job)
         if took is None or took < 30:
             continue  # a re-run from cached observations says nothing about the pace
         if job.kind == "analysis" and duration_s and duration_s >= 60:
             analysis.append(took / duration_s)
+            for name, s in step_seconds(job.stages or {}).items():
+                steps.setdefault(name, []).append(s / duration_s)
         elif job.kind == "ingest" and size and size >= 50 * 1024**2:
             ingest.append(took / (size / GB))
     out = Throughput(
         analysis_per_video_s=median(analysis[:HISTORY_RUNS]) if len(analysis) >= 2 else None,
         ingest_per_gb=median(ingest[:HISTORY_RUNS]) if len(ingest) >= 2 else None,
+        analysis_steps={
+            k: median(v[:HISTORY_RUNS]) for k, v in steps.items() if len(v[:HISTORY_RUNS]) >= 2
+        },
     )
     _cache["all"] = (time.monotonic(), out)
     return out
@@ -200,6 +209,86 @@ def _remaining(
     if started and p >= 0.03 and elapsed >= after:
         return max(0, int(elapsed * (1 - p) / p)), "measured"
     return None, None
+
+
+PACE = "_pace"  # the samples of the running step's fraction, kept in job.stages by the API
+PACE_EVERY_S = 50.0  # one sample about every report (the worker reports at least once a minute)
+PACE_KEEP = 30
+RECENT_PACE_S = 10 * 60  # the recent pace: over about the last ten minutes
+STEP_MIN = (0.05, 120.0)  # a step's own pace counts from 5 % and two minutes into it
+
+
+def step_seconds(stages: dict[str, Any]) -> dict[str, float]:
+    """How long each finished step of a job took (from the times the worker reports)."""
+    out: dict[str, float] = {}
+    for name, v in stages.items():
+        if name == PACE or not isinstance(v, dict) or v.get("status") != "done":
+            continue
+        start, end = v.get("started"), v.get("finished")
+        if isinstance(start, int | float) and isinstance(end, int | float) and end >= start:
+            out[name] = float(end - start)
+    return out
+
+
+def record_pace(stages: dict[str, Any], step: str | None, now: datetime) -> dict[str, Any]:
+    """The job's steps with one more sample of the running step's fraction (when the worker
+    reports it): the recent pace needs where the step stood some minutes ago."""
+    v = stages.get(step or "")
+    f = v.get("fraction") if isinstance(v, dict) else None
+    if step is None or not isinstance(f, int | float):
+        return stages
+    t = now.timestamp()
+    old = stages.get(PACE)
+    marks: list[list[float]] = (
+        list(old.get("marks") or []) if isinstance(old, dict) and old.get("step") == step else []
+    )
+    if marks and t - marks[-1][0] < PACE_EVERY_S:
+        return stages
+    marks = [*marks, [t, float(f)]][-PACE_KEEP:]
+    return {**stages, PACE: {"step": step, "marks": marks}}
+
+
+def stage_band(
+    job: ProcessingJob, now: datetime, duration_s: float | None, pace: Throughput
+) -> tuple[int, int] | None:
+    """[low, high] seconds left in an analysis, measured: the running step's own pace, once since
+    it began and once over the last minutes (the two tell how steady it is), plus the steps after
+    it at the pace they took in the latest runs. None when the step does not report how far it is
+    yet, or a later step has never been measured: no time that was not measured."""
+    stages = job.stages or {}
+    names = [k for k in stages if k != PACE]
+    step = next((k for k in names if (stages[k] or {}).get("status") == "running"), None)
+    v = stages.get(step or "")
+    if step is None or not isinstance(v, dict):
+        return None
+    f, started = v.get("fraction"), v.get("started")
+    if not isinstance(f, int | float) or not isinstance(started, int | float):
+        return None
+    t = now.timestamp()
+    elapsed = t - started
+    least, after = STEP_MIN
+    if f < least or elapsed < after:
+        return None
+    since_start = elapsed * (1 - f) / f
+    guesses = [since_start]
+    marks = (stages.get(PACE) or {}).get("marks") if isinstance(stages.get(PACE), dict) else None
+    if marks and (stages.get(PACE) or {}).get("step") == step:
+        back = [m for m in marks if t - m[0] >= RECENT_PACE_S * 0.8]
+        if back:
+            t0, f0 = back[-1]
+            if f > f0 and t > t0:
+                guesses.append((1 - f) * (t - t0) / (f - f0))
+    later = names[names.index(step) + 1 :]
+    rest = 0.0
+    for name in later:
+        if (stages.get(name) or {}).get("status") == "done":
+            continue
+        per = pace.analysis_steps.get(name)
+        if per is None or not duration_s:
+            return None
+        rest += per * duration_s
+    low, high = min(guesses) + rest, max(guesses) + rest
+    return max(60, int(low)), max(60, int(high))
 
 
 def file_progress(
@@ -336,6 +425,11 @@ def file_progress(
             overall,
             waiting=waiting,
             court=court_step(asset, analysis),
+            band=(
+                stage_band(analysis, now, asset.duration_s, pace)
+                if analysis.status == JobStatus.RUNNING
+                else None
+            ),
         )
 
     # ---- fertig ------------------------------------------------------------------------------
@@ -381,6 +475,7 @@ def _job_file(
     after: float | None = None,
     waiting: bool = False,
     court: CourtStep | None = None,
+    band: tuple[int, int] | None = None,
 ) -> FileProgressOut:
     """A file in a worker step (ingest or analysis): queued, waiting, running, stalled, failed."""
     stage: ProgressStage = "ingest" if kind == "ingest" else "analysis"
@@ -405,6 +500,10 @@ def _job_file(
             ),
         )
     eta, basis = _remaining(kind, job, now, history_total)
+    if band is not None:
+        # measured per step (the whole job's fraction weighs the steps by fixed shares, and on a
+        # CPU the observation takes nearly all the time): the middle of the range
+        eta, basis = (band[0] + band[1]) // 2, "measured"
     # the analysis after the ingest: only once the video's length is known (never before)
     finish = eta + int(after) if eta is not None and after is not None else None
     if kind == "analysis":
@@ -449,6 +548,7 @@ def _job_file(
         eta_s=None if stalled else eta,
         finish_s=None if stalled else finish,
         eta_basis=None if stalled else basis,
+        eta_range_s=list(band) if band is not None and not stalled else None,
         idle_s=int(silent) if stalled else None,
         restart_at=restart_at,
         restarted=restarted,
@@ -498,6 +598,14 @@ def match_summary(
         if all(x is not None for x in finish) and finish
         else None
     )
+    # a range only when every active file's time is a measured range (one file runs at a time:
+    # the analyses of a match go one after the other, a waiting part starts after the others)
+    ranged = [f.eta_range_s for f in active]
+    eta_range: list[int] | None = None
+    if eta is not None and ranged and all(r is not None for r in ranged):
+        low = sum(r[0] for r in ranged if r)
+        high = sum(r[1] for r in ranged if r)
+        eta_range = [low, high]
     if any(f.state == "stalled" for f in active):
         state = "stalled"
     elif any(f.state == "interrupted" for f in active):
@@ -522,6 +630,7 @@ def match_summary(
         state=state,
         overall=round(sum(weights) / len(weights), 4),
         eta_s=eta if active else None,
+        eta_range_s=eta_range if active else None,
         finished_at=finished_at if not active else None,
         files=files,
     )

@@ -12,6 +12,8 @@ import { STEPS, barValue, fileActions, filesLine, isActive, progressKey, stepSta
 import { storedUploadIds } from "@/lib/upload";
 import { stopLocalUpload, useLocalUploads } from "@/lib/upload-store";
 import { cn } from "@/lib/utils";
+import { useOptionalShell } from "@/components/shell/context";
+import { useMailEnabled } from "@/lib/site-config";
 import { useProgressWords } from "./words";
 
 /**
@@ -50,13 +52,23 @@ export function ProgressPanel({
   const when = w.when(p, now);
   const tn = tone(p);
   const many = p.files.length > 1;
-  const basis = p.files.find((f) => f.stage === p.stage && isActive(f))?.eta_basis;
+  const running = p.files.find((f) => f.stage === p.stage && isActive(f));
+  // measured as a range (the running step's pace since it began and over the last minutes), or
+  // from this run's pace so far, or from the latest runs: said which
+  const basis = p.eta_range_s ? "range" : running?.eta_basis;
   const trouble = p.files.find((f) => f.state === "stalled" || f.state === "interrupted");
   // one line that sums up every file, never one file's step for all of them (second round A2)
   const summary = many ? filesLine(p.files) : null;
   const bar = barValue(p);
   // marking the court while the analysis runs: that run takes it, no second run (#141)
   const court = staff && isActive(p) ? (p.files.some((f) => f.court === "mark") ? "mark" : p.files.some((f) => f.court === "taken") ? "taken" : null) : null;
+  // who hears that the analysis is done: the team's coaches and analysts, in the bell, and by mail
+  // when mails go out (services/video_callbacks); promised only to them, the mail only when on
+  const shell = useOptionalShell();
+  const mail = useMailEnabled();
+  const role = shell?.teams.find((x) => x.id === p.team_id)?.my_role;
+  const told = (role === "coach" || role === "analyst") && p.files.some((f) => f.role === "main");
+  const closeKey = told ? (mail ? "mayCloseMail" : "mayCloseBell") : "mayClose";
   return (
     <section
       className={cn("grid gap-8", aside && "md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]")}
@@ -84,8 +96,8 @@ export function ProgressPanel({
             {when && !trouble && (
               <p className="m-0 text-[15px] text-ink-2">
                 {/* the clock time above, the time left here (a finish tomorrow is easier to read so) */}
-                {p.eta_s != null && p.stage !== "upload" ? `${w.left(p.eta_s)} · ` : ""}
-                {basis ? t(basis === "history" ? "basisHistory" : "basisMeasured") : ""}
+                {p.eta_s != null && p.stage !== "upload" ? `${p.eta_range_s ? w.leftRange(p.eta_range_s) : w.left(p.eta_s)} · ` : ""}
+                {basis ? t(basis === "range" ? "basisRange" : basis === "history" ? "basisHistory" : "basisMeasured") : ""}
               </p>
             )}
             {/* the bar goes with the line above: the upload while uploading, else the whole way;
@@ -133,7 +145,11 @@ export function ProgressPanel({
         {/* a stopped upload does not go on by itself: no «läuft von selbst weiter» then */}
         {/* nor while a file is still being sent from the browser: closing the window stops it (the
             upload panel says so) */}
-        {isActive(p) && p.state !== "interrupted" && p.stage !== "upload" && <p className="m-0 mt-4 max-w-[60ch] text-[15px] text-ink-2" data-testid="may-close">{t("mayClose")}</p>}
+        {isActive(p) && p.state !== "interrupted" && p.stage !== "upload" && (
+          <p className="m-0 mt-4 max-w-[60ch] text-[15px] text-ink-2" data-testid="may-close">
+            {t(closeKey)}
+          </p>
+        )}
       </div>
       {aside && <div className="min-w-0 space-y-8">{aside}</div>}
     </section>
@@ -273,7 +289,7 @@ function FileNote({
   const parts = [
     f.fraction != null ? t("stepShare", { n: Math.floor(f.fraction * 100) }) : null,
     f.stage === "upload" && f.uploaded_bytes != null && f.size_bytes ? t("bytesOf", { done: formatBytes(f.uploaded_bytes), total: formatBytes(f.size_bytes) }) : null,
-    f.eta_s != null ? w.left(f.eta_s) : t("stepRuns"),
+    f.eta_s != null ? (f.eta_range_s ? w.leftRange(f.eta_range_s) : w.left(f.eta_s)) : t("stepRuns"),
   ].filter(Boolean);
   void now;
   return (

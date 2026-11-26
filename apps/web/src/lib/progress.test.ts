@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { barValue, durationParts, fileActions, filesLine, headlineKey, isActive, onlyDismissed, stepState, tone, withLocal, type FileProgress, type MatchProgress } from "./progress";
+import { barValue, durationParts, fileActions, filesLine, headlineKey, isActive, onlyDismissed, rangeParts, stepState, tone, withLocal, type FileProgress, type MatchProgress } from "./progress";
 import { localEta, type LocalUpload } from "./upload-store";
 
 const file = (extra: Partial<FileProgress> = {}): FileProgress => ({
@@ -141,5 +141,19 @@ describe("the progress block of several files and its actions (second round A1, 
     expect(onlyDismissed(p, new Set())).toBe(false);
     // another file still runs: the line stays
     expect(onlyDismissed(match([file({ state: "interrupted" }), file({ video_id: "v2", stage: "analysis" })]), new Set(["v1"]))).toBe(false);
+  });
+});
+
+describe("rangeParts", () => {
+  it("says a measured range in minutes under an hour and in half hours from an hour on", () => {
+    expect(rangeParts(25 * 60, 33 * 60)).toEqual({ unit: "min", low: "25", high: "35" });
+    expect(rangeParts(2.6 * 3600, 3.2 * 3600)).toEqual({ unit: "h", low: "2½", high: "3½" });
+    expect(rangeParts(40 * 60, 80 * 60)).toEqual({ unit: "h", low: "½", high: "1½" });
+    expect(rangeParts(9612, 11412)).toEqual({ unit: "h", low: "2½", high: "3½" });
+  });
+  it("is one time when both ends say the same", () => {
+    expect(rangeParts(26 * 60, 29 * 60)).toEqual({ unit: "min", low: "25", high: "30" });
+    expect(rangeParts(3 * 3600, 3 * 3600)).toBeNull();
+    expect(rangeParts(10 * 60, 10 * 60)).toBeNull();
   });
 });
