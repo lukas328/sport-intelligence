@@ -1,0 +1,114 @@
+{
+ "truth_sha256": "fb1ae31ae02463da822a652dabc2e6aa6d9adf2e2b67902d8cf0e8ce30b26aa4",
+ "motion_0.8": {
+  "C": {
+   "flagged": 867,
+   "precision": 0.219,
+   "recall": 0.815,
+   "acc_all": 0.387,
+   "correct_team": 0.251
+  },
+  "M": {
+   "flagged": 438,
+   "precision": 0.295,
+   "recall": 0.554,
+   "acc_all": 0.51,
+   "correct_team": 0.456
+  },
+  "N": {
+   "flagged": 160,
+   "precision": 0.494,
+   "recall": 0.339,
+   "acc_all": 0.667,
+   "correct_team": 0.692
+  },
+  "D": {
+   "flagged": 956,
+   "precision": 0.204,
+   "recall": 0.837,
+   "acc_all": 0.321,
+   "correct_team": 0.166
+  },
+  "position_alone": {
+   "acc_all": 0.66,
+   "correct_team": 0.757
+  },
+  "D_minus_position": {
+   "acc_all": -0.339,
+   "ci95": [
+    -0.461,
+    -0.203
+   ],
+   "team_drop": 0.591
+  },
+  "klarer_gewinn": false
+ },
+ "motion_0.6": {
+  "C": {
+   "flagged": 867,
+   "precision": 0.219,
+   "recall": 0.815,
+   "acc_all": 0.387,
+   "correct_team": 0.251
+  },
+  "M": {
+   "flagged": 214,
+   "precision": 0.393,
+   "recall": 0.361,
+   "acc_all": 0.624,
+   "correct_team": 0.63
+  },
+  "N": {
+   "flagged": 160,
+   "precision": 0.494,
+   "recall": 0.339,
+   "acc_all": 0.667,
+   "correct_team": 0.692
+  },
+  "D": {
+   "flagged": 895,
+   "precision": 0.212,
+   "recall": 0.815,
+   "acc_all": 0.364,
+   "correct_team": 0.222
+  },
+  "position_alone": {
+   "acc_all": 0.66,
+   "correct_team": 0.757
+  }
+ },
+ "motion_1.0": {
+  "C": {
+   "flagged": 867,
+   "precision": 0.219,
+   "recall": 0.815,
+   "acc_all": 0.387,
+   "correct_team": 0.251
+  },
+  "M": {
+   "flagged": 665,
+   "precision": 0.232,
+   "recall": 0.661,
+   "acc_all": 0.379,
+   "correct_team": 0.271
+  },
+  "N": {
+   "flagged": 160,
+   "precision": 0.494,
+   "recall": 0.339,
+   "acc_all": 0.667,
+   "correct_team": 0.692
+  },
+  "D": {
+   "flagged": 1031,
+   "precision": 0.193,
+   "recall": 0.854,
+   "acc_all": 0.266,
+   "correct_team": 0.096
+  },
+  "position_alone": {
+   "acc_all": 0.66,
+   "correct_team": 0.757
+  }
+ }
+}

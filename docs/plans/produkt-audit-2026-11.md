@@ -299,6 +299,42 @@ er wartet, wie viel er selbst korrigieren muss, und ob er den Zahlen trauen kann
   Skripte und Labels: `ml/integration/possession/`, Ergebnis
   `ml/integration/results/possession_ballholder.json`.
 
+- **Signal «Ball nicht im Spiel» (26.11., dieselben eingefrorenen Ballbesitz-Labels, 233 tote
+  von 1193 Sekunden): kein klarer Gewinn.** Vorab festgelegt waren:
+  - C: die Hallenuhr läuft nicht (ausserhalb `play.json`);
+  - M: der gleitende 3-s-Median der Feldspieler-Geschwindigkeit liegt unter 0,8 m/s;
+  - N: das bestehende `no_play_ms` der Tor-Kandidaten;
+  - die Hauptregel D = C oder M.
+
+  Gewinn hiess: mindestens 5 Punkte mehr richtig über alle Sekunden, CI über 0, und auf den
+  Sekunden mit Team höchstens 2 Punkte schlechter.
+
+  | Signal | markiert | Präzision tot | Recall tot | richtig alle Sek. | richtig Team-Sek. |
+  |---|---|---|---|---|---|
+  | Positionsregel allein | | | | 66,0 % | 75,7 % |
+  | C Uhr steht | 867 | 22 % | 82 % | 38,7 % | 25,1 % |
+  | M Bewegung < 0,8 m/s | 438 | 30 % | 55 % | 51,0 % | 45,6 % |
+  | N `no_play` (Produkt) | 160 | 49 % | 34 % | 66,7 % | 69,2 % |
+  | D = C oder M | 956 | 20 % | 84 % | 32,1 % | 16,6 % |
+
+  D minus heute: −33,9 Punkte (CI −46 bis −20). Gründe:
+  - Die Hallenuhr ist kein Tot-Signal. In h2 wurde sie nur 39-mal gelesen (6 s Lauf); das Produkt
+    würde sie wegen `MIN_PLAY_SHARE` ohnehin ignorieren. Selbst in h1 (118 Lesungen) hat «Uhr
+    steht» nur 18 % Präzision bei 15 % toten Sekunden, denn im Amateurspiel läuft die Uhr bei den
+    meisten Unterbrechungen weiter.
+  - Die Bewegungsenergie trennt kaum: in h1 sind die Mediane gleich (1,10 gegen 1,05 m/s, AUC
+    0,54), in h2 etwas besser (0,62 gegen 0,87 m/s, AUC 0,71). Ein Positionsangriff ist fast so
+    ruhig wie eine Unterbrechung.
+  - Das Produkt-Signal `no_play` ist das beste (Präzision 49 %), bringt aber nur +0,7 Punkte über
+    alle Sekunden und kostet 6,5 Punkte auf den Sekunden mit Team.
+
+  Nicht ins Produkt. Nicht geprüft und nötig wären: eine ruhende Ballspur (die Ballnetz-Punkte
+  sind ausserhalb der Uhr-Intervalle abgeschaltet, das ist mit C vermengt), die
+  Anwurf-Formation nach dem Tor (geht nur mit erkannten Toren) und der Pfiff aus dem Ton
+  (`audio.py`). Am aussichtsreichsten scheint die Kombination Tor → Anwurf: die meisten toten
+  Sekunden folgen auf ein Tor. Skript `ml/integration/possession/dead_eval.py`, Ergebnis
+  `ml/integration/results/possession_dead_ball.json`.
+
 ### 7. Wurfort unzuverlässig, Torzone fehlt
 
 - **Befund:** Ohne gelesene Nummer nimmt der Wurfort den nächsten Angreifer der letzten 10 s
