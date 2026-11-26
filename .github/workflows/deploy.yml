@@ -49,6 +49,10 @@ on:
         description: "with teardown: the name of the resource group that is deleted (rg-hb-stg)"
         type: string
         default: ""
+      test_alert:
+        description: "with status: send a test e-mail through the alert action group (no real alert)"
+        type: boolean
+        default: false
       diag:
         description: "with status: read the newest finished analysis (log, result, artefacts) into a run artefact"
         type: boolean
@@ -246,6 +250,31 @@ jobs:
           fi
           echo "== migration job runs"
           az containerapp job execution list -g "$rg" -n "$(terraform output -raw migrate_job)" --query "[0:3].{name:name, status:properties.status, start:properties.startTime}" -o table || true
+
+      - name: Alerts (read only; test e-mail on request)
+        if: steps.mode.outputs.mode == 'status'
+        env:
+          TEST_ALERT: ${{ inputs.test_alert }}
+        run: |
+          echo "== action groups, probes, alert rules"
+          az monitor action-group list -g "$rg" --query "[].{name:name, enabled:enabled, mails:length(emailReceivers)}" -o table || true
+          az resource list -g "$rg" --resource-type Microsoft.Insights/webtests --query "[].name" -o tsv || true
+          az monitor metrics alert list -g "$rg" --query "[].{name:name, enabled:enabled, severity:severity}" -o table || true
+          az monitor scheduled-query list -g "$rg" --query "[].{name:name, enabled:enabled, severity:severity}" -o table || true
+          if [ "$TEST_ALERT" = true ]; then
+            ag=$(az monitor action-group list -g "$rg" --query "[?ends_with(name, '-ops')].name | [0]" -o tsv)
+            [ -n "$ag" ] || { echo "::error::no action group *-ops in $rg"; exit 1; }
+            args=()
+            # the receivers of the group itself (addresses are not printed)
+            while IFS=$'\t' read -r name addr; do
+              echo "::add-mask::$addr"
+              args+=(--add-action email "$name" "$addr")
+            done < <(az monitor action-group show -g "$rg" -n "$ag" --query "emailReceivers[].[name, emailAddress]" -o tsv)
+            [ ${#args[@]} -gt 0 ] || { echo "::error::action group $ag has no e-mail receiver"; exit 1; }
+            echo "== test e-mail through $ag ($(( ${#args[@]} / 4 )) receiver(s))"
+            az monitor action-group test-notifications create -g "$rg" --action-group "$ag" \
+              --alert-type budget "${args[@]}" --query "{state:state, completed:completedTime}" -o table
+          fi
 
       - name: Analysis diagnosis (read only)
         if: steps.mode.outputs.mode == 'status' && inputs.diag
