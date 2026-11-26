@@ -1593,3 +1593,28 @@ Halbzeit; das ist eine Grenze der Messung.
   höchstens 2 Punkte schlechter, und in beiden Halbzeiten einzeln besser. Berichtet werden dazu
   Präzision und Recall «tot» sowie der Anteil der Sekunden ohne Besitz, die ein Team bekommen.
 
+**Ergebnis (nach der Festlegung gemessen, `ml/integration/possession/formation_dead_eval.py`,
+`ml/integration/results/possession_formation_dead.json`): kein klarer Gewinn, nicht ins Produkt.**
+
+| Signal | markiert | Präzision tot | Recall tot | richtig alle Sek. | richtig Team-Sek. | Team in Sek. ohne Besitz |
+|---|---|---|---|---|---|---|
+| Positionsregel allein | | | | 66.2 % | 76.6 % | 76.4 % |
+| A Anwurf-Formation | 0 | | | 66.2 % | 76.6 % | 76.4 % |
+| E 15 s vor `throw_off` | 0 | | | 66.2 % | 76.6 % | 76.4 % |
+| L leeres Feld | 87 | 46 % | 17 % | 67.6 % | 76.2 % | 67.8 % |
+| H = A oder E oder L | 87 | 46 % | 17 % | 67.6 % | 76.2 % | 67.8 % |
+
+- H minus Positionsregel: +1.4 Punkte über alle Sekunden (CI 0 bis +3.7), auf den Team-Sekunden
+  −0.4; H1 +2.9, H2 0. Verfehlt die 5 Punkte und «in beiden Halbzeiten besser».
+- **Warum A und E nichts markieren** (nur aus den Signalen geprüft, ohne Labels):
+  - Das Produkt findet in beiden 10-min-Clips keinen einzigen `throw_off`, obwohl in beiden Tore
+    fallen. Die Anwurf-Erkennung greift auf echten Bildern nicht (auf synthetischen Daten schon).
+  - Die Kamera folgt dem Ball und zeigt selten beide Teams ganz: im Median 4 bis 5 Feldspieler je
+    Team im Bild auf dem Feld; «mindestens 4 je Team und 80 % in der eigenen Hälfte» kommt in 1218 s
+    keine einzige Sekunde vor. Die Formation nach dem Tor ist mit dieser Kamera nicht beobachtbar.
+- Folge: «kein Besitz» bleibt offen. Was es bräuchte, ist ein Signal, das ohne ganzes Feld
+  auskommt: der Torpfiff mit Pfiffpaar (Plan Pfiff, Fenster um `goal_ms` −8 bis +4 s, braucht Spiele
+  mit Ton), erkannte Tore aus Prüfen oder der Hallentafel (dann die Sekunden bis zum Wiederanpfiff),
+  oder ein ruhender Ball in der Spielfeldmitte. Mit nur einem Spiel ist jede weitere Regel hier
+  ohnehin schwach validiert.
+
