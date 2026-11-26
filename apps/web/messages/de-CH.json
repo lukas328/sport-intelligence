@@ -1287,7 +1287,10 @@
     "showAll": "Alle {n} zeigen",
     "onScreen": "{s} s im Bild",
     "hintNumber": "Personen beider Teams eine Rückennummer geben. Zuordnungen bleiben bei einer neuen Analyse erhalten.",
-    "numberPlaceholder": "Nr."
+    "numberPlaceholder": "Nr.",
+    "playHere": "Person hier abspielen",
+    "closePlayer": "Player schliessen",
+    "playing": "Läuft: {who}"
   },
   "camera": {
     "label": "Kamera",

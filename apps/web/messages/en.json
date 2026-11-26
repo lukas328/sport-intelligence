@@ -1287,7 +1287,10 @@
     "showAll": "Show all {n}",
     "onScreen": "{s} s on screen",
     "hintNumber": "Give people of both teams a shirt number. Assignments stay after a new analysis.",
-    "numberPlaceholder": "No."
+    "numberPlaceholder": "No.",
+    "playHere": "Play this person here",
+    "closePlayer": "Close the player",
+    "playing": "Playing: {who}"
   },
   "camera": {
     "label": "Camera",

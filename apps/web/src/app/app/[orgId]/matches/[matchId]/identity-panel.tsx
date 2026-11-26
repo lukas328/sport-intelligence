@@ -2,12 +2,16 @@
 
 import type { Schemas } from "@handball/api-client";
 import { useQueryClient } from "@tanstack/react-query";
-import { Play } from "lucide-react";
+import { Play, X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useMatchRoster, useMatchSides } from "@/components/domain/match-sides";
 import { Button } from "@/components/ui/button";
+import { FramesProvider, PersonStill } from "@/components/video/person-still";
+import { VideoPlayer, type PlayerHandle } from "@/components/video/player";
+import { SpotlightOverlay } from "@/components/video/spotlight";
 import { api } from "@/lib/client";
+import type { Geometry } from "@/lib/moving-camera";
 import type { Analysis } from "./analysis-panel";
 
 type Match = Schemas["MatchOut"];
@@ -20,21 +24,33 @@ export function ownTracks(tracks: Analysis["tracks"], both = false) {
     .slice(0, 40);
 }
 
-/** Manual track identities (M5): own-team tracks to roster players; kept across re-analysis. */
+/** The moment a person is shown at: a little after they appear, never past half their time. */
+export function personMoment(tr: { first_ms: number; last_ms: number }): number {
+  return tr.first_ms + Math.min(2000, (tr.last_ms - tr.first_ms) / 2);
+}
+
+/**
+ * Manual track identities (M5): own-team tracks to roster players; kept across re-analysis. Each
+ * person shows as a still from the video, and plays in a small player right above the list
+ * (sticky on a phone), so the coach sees who it is and names them without leaving the step.
+ */
 export function IdentityPanel({
   orgId,
   match,
   videoId,
   tracks,
-  onSeek,
   at,
+  geometry = null,
+  chunkMs = null,
 }: {
   orgId: string;
   match: Match;
   videoId: string;
   tracks: Analysis["tracks"];
-  onSeek: (ms: number) => void;
   at: (videoMs: number) => string;
+  /** court -> picture (lib/moving-camera geometryOf), memoised: stills and the ring need it */
+  geometry?: Geometry | null;
+  chunkMs?: number | null;
 }) {
   const t = useTranslations("identity");
   const qc = useQueryClient();
@@ -44,6 +60,9 @@ export function IdentityPanel({
   const neutral = sides?.neutral ?? false;
   const [notice, setNotice] = useState<string | null>(null);
   const [all, setAll] = useState(false);
+  const [playing, setPlaying] = useState<Analysis["tracks"][number] | null>(null);
+  const player = useRef<PlayerHandle>(null);
+  const video = `/v1/orgs/${orgId}/videos/${videoId}`;
   // in the order they appear, so the coach goes through the video once
   const own = [...ownTracks(tracks, neutral)].sort((a, b) => a.first_ms - b.first_ms);
   // named: a player of the roster, or in an observed match a shirt number somebody set
@@ -54,6 +73,7 @@ export function IdentityPanel({
   const long = open.filter((tr) => tr.last_ms - tr.first_ms >= 5000);
   const shown = all ? own : [...long.slice(0, 8), ...own.filter(named)].sort((a, b) => a.first_ms - b.first_ms);
   if (own.length === 0) return null;
+  const who = (tr: Analysis["tracks"][number]) => (tr.number != null ? t("shirt", { n: tr.number }) : t("track", { n: tr.track_no }));
   async function assign(trackNo: number, playerId: string, number: number | null = null) {
     const { error } = await api.PUT("/v1/orgs/{org_id}/videos/{video_id}/tracks/{track_no}/identity", {
       params: { path: { org_id: orgId, video_id: videoId, track_no: trackNo } },
@@ -65,22 +85,52 @@ export function IdentityPanel({
       void qc.invalidateQueries({ queryKey: ["physical", match.id] });
     }
   }
-  return (
+  const body = (
     <section data-testid="identity-panel" aria-labelledby="identity-title">
         <h2 id="identity-title" className="font-display text-xl">{t("title")}</h2>
         <p className="mt-1 text-sm">
           {open.length > 0 ? t("openCount", { n: open.length, first: at(open[0]!.first_ms) }) : t("allDone")}
         </p>
         <p className="mt-1 text-xs text-muted">{neutral ? t("hintNumber") : t("hint")}</p>
+        {playing && (
+          // the person plays here, above the list: on a phone it stays in view while scrolling
+          <div className="sticky top-0 z-10 mt-3 bg-paper pb-2" data-testid="identity-player">
+            <div className="mb-1 flex items-center justify-between gap-2">
+              <p className="m-0 min-w-0 truncate text-sm font-semibold">{t("playing", { who: who(playing) })}</p>
+              <Button variant="quiet" size="sm" className="min-h-11 min-w-11" onClick={() => setPlaying(null)} aria-label={t("closePlayer")}>
+                <X aria-hidden className="size-4" />
+              </Button>
+            </div>
+            <VideoPlayer
+              ref={player}
+              key={playing.track_no}
+              src={`${video}/media/hls/master.m3u8`}
+              window={{ start_ms: Math.max(0, playing.first_ms - 500), end_ms: Math.min(playing.last_ms, playing.first_ms + 8000) }}
+              autoPlay
+              loop
+              under
+              overlay={
+                geometry && chunkMs ? (
+                  <SpotlightOverlay baseUrl={`${video}/tracks`} chunkMs={chunkMs} geometry={geometry} track={playing.track_no} label="" getTime={() => player.current?.time() ?? 0} showTrail={false} />
+                ) : undefined
+              }
+            />
+          </div>
+        )}
         <ul className="mt-3 divide-y divide-border/70 text-sm">
           {shown.map((tr) => (
-            <li key={tr.track_no} className="flex flex-wrap items-center gap-2 py-1.5">
-              <Button variant="quiet" size="sm" className="min-w-0 justify-start" onClick={() => onSeek(tr.first_ms + 500)} aria-label={`${t("seek")}: ${t("track", { n: tr.track_no })}, ${at(tr.first_ms)}`}>
+            <li key={tr.track_no} className="flex flex-wrap items-center gap-2 py-1.5" data-testid="identity-row">
+              {geometry && chunkMs != null && (
+                <button type="button" className="cursor-pointer border-0 bg-transparent p-0" onClick={() => setPlaying(tr)} aria-label={`${t("playHere")}: ${who(tr)}, ${at(tr.first_ms)}`}>
+                  <PersonStill geometry={geometry} tracksUrl={`${video}/tracks`} chunkMs={chunkMs} track={tr.track_no} at={personMoment(tr)} label={who(tr)} className="h-16 w-12" />
+                </button>
+              )}
+              <Button variant="quiet" size="sm" className="min-w-0 justify-start" onClick={() => setPlaying(tr)} aria-pressed={playing?.track_no === tr.track_no} aria-label={`${t("playHere")}: ${who(tr)}, ${at(tr.first_ms)}`}>
                 <Play aria-hidden className="size-3 fill-current" />
                 <span className="font-score tabular-nums">{at(tr.first_ms)}</span>
                 {/* a shirt number the analysis read helps to recognise the person; the track id does not */}
                 <span className="text-muted">
-                  {tr.number != null ? t("shirt", { n: tr.number }) : t("track", { n: tr.track_no })}
+                  {who(tr)}
                   {` · ${t("onScreen", { s: Math.round((tr.last_ms - tr.first_ms) / 1000) })}`}
                   {/* an observed match lists both teams: whose person it is */}
                   {neutral && sides && ` · ${tr.team?.startsWith("home") ? sides.own : sides.opp}`}
@@ -140,4 +190,6 @@ export function IdentityPanel({
         )}
     </section>
   );
+  // one hidden video for every still of the list
+  return geometry ? <FramesProvider src={`${video}/media/hls/master.m3u8`}>{body}</FramesProvider> : body;
 }

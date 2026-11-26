@@ -1287,7 +1287,10 @@
     "showAll": "Afficher les {n}",
     "onScreen": "{s} s à l'image",
     "hintNumber": "Donne un numéro aux personnes des deux équipes. Les attributions restent après une nouvelle analyse.",
-    "numberPlaceholder": "N°"
+    "numberPlaceholder": "N°",
+    "playHere": "Lire la personne ici",
+    "closePlayer": "Fermer le lecteur",
+    "playing": "En cours : {who}"
   },
   "camera": {
     "label": "Caméra",
