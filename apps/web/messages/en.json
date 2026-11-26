@@ -1302,6 +1302,8 @@
     "title": "Assign players",
     "hint": "Assign people of the own team to a player of the team. Assignments stay when the video is analysed again.",
     "track": "Person {n}",
+    "trackPlayer": "Player for {who}",
+    "trackNumber": "Shirt number of {who}",
     "none": "not assigned",
     "saved": "Assignment saved.",
     "auto": "detected automatically",

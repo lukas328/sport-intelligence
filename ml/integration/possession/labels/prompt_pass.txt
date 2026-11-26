@@ -1,0 +1,22 @@
+You label BALL POSSESSION in a handball video by looking at frames (you are a vision-capable model; use the Read tool on JPEG files). Data labelling for a research evaluation; accuracy matters more than speed. Your labels are marked as LLM labels.
+
+SCR=/tmp/claude-0/-home-user-sport-intelligence/90b1d550-54f3-5af2-9e4d-128d1f5ace9d/scratchpad/poss
+PY=/home/user/sport-intelligence/.venv/bin/python
+SHEET=/tmp/claude-0/-home-user-sport-intelligence/90b1d550-54f3-5af2-9e4d-128d1f5ace9d/scratchpad/wl/sheet.py
+Video: VIDEO (1280x720, 25 fps, 609 s). Teams: YELLOW shirts with black shorts vs RED/WHITE shirts. Goalkeepers wear other colours: count a goalkeeper's ball for the goalkeeper's team (the yellow team's goalkeeper defends the goal the yellow players defend). Referees in black. The camera pans and zooms to follow play.
+
+Tool: `$PY $SHEET VIDEO T0 STEP N OUT [COLS] [W] [X0 Y0 X1 Y1]` writes OUT with N frames at times T0 + k*STEP (seconds), each labelled with its time in yellow; COLS columns, each frame W px wide; optional crop box in 1280x720 picture coordinates.
+
+Work only in $SCR/workP; write your result only to $SCR/passP/CLIP.json. Do NOT read other passes' folders (passA/passB/workA/workB other than your own P) or any repository file; your judgement must be independent.
+
+Task: for the whole video, which team has the ball, as time segments.
+1. Sheets with STEP 0.5, N 24, COLS 6, W 320 (12 s per sheet), T0 = 0, 12, 24, ... up to 609 (output $SCR/workP/CLIP_<T0>.jpg). Read each in order. Follow the ball: who holds it, who it is passed to, who picks it up.
+2. Where possession changes (shot then the goalkeeper or a defender gets the ball, interception, steal, ball lost out of play, goal then throw-off, free throw to the other team), refine the change time with a sheet at STEP 0.2 (N 12) if needed. Aim for ±0.5 s.
+3. "none" = the ball is not in play or nobody can be credited: after a goal until the throw-off whistle (the ball being carried back counts as none), the ball out of court until the throw-in is taken, timeout, stoppage, injury, the ball loose and contested, or you cannot see. A free throw or 7 m throw: the team taking it has the ball from when they hold it to take it. A shot: the shooting team keeps possession until the ball is caught or picked up by the other team (a save the goalkeeper holds = goalkeeper's team from that moment; a rebound back to the attackers = attackers continue).
+4. Save notes in $SCR/workP/CLIP_notes.txt as you go (images drop out of your context over time) and save the result file after every few sheets.
+
+Write $SCR/passP/CLIP.json: a JSON list of segments covering 0 to 609 without gaps or overlaps, in time order, exactly these keys:
+{"start": <float s>, "end": <float s>, "team": "yellow" | "red" | "none", "sure": true | false}
+"sure": false if you are not confident about the team or the change times (more than about 1 s off).
+
+Keep your final answer short: number of segments and how many seconds yellow / red / none. Do not modify any other file.

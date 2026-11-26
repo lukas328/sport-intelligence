@@ -8,9 +8,11 @@ off since #146) and prints: right / wrong / unnamed among the labelled field pla
 visible number, the named share of all field samples, the number of tracks and their median
 length, tracks mixing the two team colours (>= 25 % of >= 20 looks against two reference colours
 learned from all looks), and the identity switches the number steps find afterwards
-(`split_by_number`, reading-colour pieces). The labels sample field players only: links that join
-a spectator or referee to a player do not show in right / wrong; check them on crop pairs too
-(docs/plans/produkt-analyse-integration.md, «Track-Länge auf Dev»). Dev only, never the end test.
+(`split_by_number`, reading-colour pieces), and for referees, staff and bench people (the second
+label part, identity_dev_v1_nonfield.json) how many carry a number or count as a field player.
+Check new links on crop pairs too (docs/plans/produkt-analyse-integration.md, «Track-Länge auf
+Dev», «Feldrand-Filter»). `--long-links` switches `pipeline.LONG_LINKS` on. Dev only, never the
+end test.
 """
 
 from __future__ import annotations
@@ -34,6 +36,7 @@ from handball_vision.pipeline import _open, iter_frames
 from handball_vision.teams import _feature, learn_kits
 
 LABELS = Path(__file__).resolve().parents[1] / "gold" / "data" / "identity_dev_v1.json"
+NONFIELD = LABELS.with_name("identity_dev_v1_nonfield.json")
 FILES = {"h1": "sghorgen-h1-5min.mp4", "h2": "sghorgen-h2-5min.mp4"}
 
 
@@ -58,8 +61,11 @@ def main() -> None:
     ap.add_argument("--max-gap", type=float, default=None, help="stitching gap, s")
     ap.add_argument("--speed", type=float, default=None, help="stitching speed limit, m/s")
     ap.add_argument("--roster", action="store_true")
+    ap.add_argument("--long-links", action="store_true", help="pipeline.LONG_LINKS on")
     a = ap.parse_args()
     data = json.loads(LABELS.read_text(encoding="utf-8"))
+    data["items"] += json.loads(NONFIELD.read_text(encoding="utf-8"))["items"]
+    pipeline.LONG_LINKS = a.long_links
     squads = {k: set(v) for k, v in data["dev_squads"].items()}
 
     base_tracker = tracking.CourtTracker
@@ -122,10 +128,15 @@ def main() -> None:
                 mixed += min(count["h"], count["a"]) >= 0.25 * len(s)
         owner = {(p.frame, p.det_index): p.track_id for p in res.points if p.det_index is not None}
         for item in data["items"]:
-            if item["clip"] != clip or item["label"] in ("R", "G"):
+            if item["clip"] != clip or item["label"] == "G":
                 continue
             t = owner.get((item["frame"], item["k"]))
             team = res.teams.get(t, {}) if t is not None else {}
+            if item["label"] == "R":  # referee, staff, bench: never a squad player
+                tot["ref"] += 1
+                tot["ref_named"] += team.get("number") is not None
+                tot["ref_as_player"] += str(team.get("label", "")) in ("home", "away")
+                continue
             num = team.get("number")
             side = {"home": "y", "away": "r"}.get(str(team.get("label", "")).removesuffix("_gk"))
             tot["field"] += 1
@@ -150,6 +161,8 @@ def main() -> None:
                 "unnamed": tot["unnamed"],
                 "visible": tot["visible"],
                 "named_share": round(tot["named"] / max(1, tot["field"]), 3),
+                "ref_named": f"{tot['ref_named']}/{tot['ref']}",
+                "ref_as_player": f"{tot['ref_as_player']}/{tot['ref']}",
                 "tracks": len(lengths),
                 "median_s": round(statistics.median(lengths), 1) if lengths else None,
                 "mixed": f"{mixed}/{field}",

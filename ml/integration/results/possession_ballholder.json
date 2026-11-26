@@ -1,0 +1,35 @@
+{
+ "truth_sha256": "fb1ae31ae02463da822a652dabc2e6aa6d9adf2e2b67902d8cf0e8ce30b26aa4",
+ "seconds": 1193,
+ "truth_counts": {
+  "home": 505,
+  "away": 455,
+  "none": 233
+ },
+ "position": {
+  "correct": 0.757,
+  "coverage": 0.798,
+  "precision": 0.949,
+  "team_on_none": 0.742
+ },
+ "ball": {
+  "correct": 0.58,
+  "coverage": 0.732,
+  "precision": 0.792,
+  "team_on_none": 0.575
+ },
+ "combined": {
+  "correct": 0.745,
+  "coverage": 0.912,
+  "precision": 0.816,
+  "team_on_none": 0.936
+ },
+ "combined_minus_position": {
+  "correct": -0.012,
+  "ci95": [
+   -0.074,
+   0.048
+  ]
+ },
+ "klar_besser": false
+}

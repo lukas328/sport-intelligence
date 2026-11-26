@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { FrameGrabber, stillRect } from "@/lib/frame-grabber";
 import { courtToPictureAt, type Geometry } from "@/lib/moving-camera";
 import { personBox, trackSamples } from "@/lib/spotlight";
+import { useStickyFocusRoom } from "@/lib/sticky-focus";
 import { cn } from "@/lib/utils";
 import { VideoPlayer, type PlayerHandle } from "./player";
 import { SpotlightOverlay } from "./spotlight";
@@ -123,10 +124,13 @@ export function InlinePersonPlayer({
   className?: string;
 }) {
   const player = useRef<PlayerHandle>(null);
+  const box = useRef<HTMLDivElement>(null);
+  // a focused element in the list under it is scrolled into view below it
+  useStickyFocusRoom(box);
   // sticky under the app's top bar (56 px on a phone, as the video stage): it stays in view while
   // the list under it scrolls; it must be a direct child of the list's box for that
   return (
-    <div className={cn("sticky top-14 z-20 bg-ground pt-1 pb-2 lg:top-[66px]", className)} data-testid={testId}>
+    <div ref={box} className={cn("sticky top-14 z-20 bg-ground pt-1 pb-2 lg:top-[66px]", className)} data-testid={testId}>
       <div className="mb-1 flex items-center justify-between gap-2">
         <p className="m-0 min-w-0 truncate text-sm font-semibold">{title}</p>
         <Button variant="quiet" size="sm" className="min-h-11 min-w-11" onClick={onClose} aria-label={closeLabel}>

@@ -1,0 +1,194 @@
+[
+ {
+  "start": 0.0,
+  "end": 33.4,
+  "team": "yellow",
+  "sure": true
+ },
+ {
+  "start": 33.4,
+  "end": 42.0,
+  "team": "red",
+  "sure": false
+ },
+ {
+  "start": 42.0,
+  "end": 44.0,
+  "team": "none",
+  "sure": true
+ },
+ {
+  "start": 44.0,
+  "end": 53.7,
+  "team": "yellow",
+  "sure": false
+ },
+ {
+  "start": 53.7,
+  "end": 54.2,
+  "team": "none",
+  "sure": false
+ },
+ {
+  "start": 54.2,
+  "end": 91.0,
+  "team": "red",
+  "sure": false
+ },
+ {
+  "start": 91.0,
+  "end": 91.6,
+  "team": "none",
+  "sure": true
+ },
+ {
+  "start": 91.6,
+  "end": 98.9,
+  "team": "yellow",
+  "sure": true
+ },
+ {
+  "start": 98.9,
+  "end": 101.0,
+  "team": "none",
+  "sure": true
+ },
+ {
+  "start": 101.0,
+  "end": 108.7,
+  "team": "red",
+  "sure": false
+ },
+ {
+  "start": 108.7,
+  "end": 122.2,
+  "team": "none",
+  "sure": true
+ },
+ {
+  "start": 122.2,
+  "end": 161.2,
+  "team": "yellow",
+  "sure": false
+ },
+ {
+  "start": 161.2,
+  "end": 183.0,
+  "team": "none",
+  "sure": true
+ },
+ {
+  "start": 183.0,
+  "end": 215.2,
+  "team": "red",
+  "sure": false
+ },
+ {
+  "start": 215.2,
+  "end": 215.7,
+  "team": "none",
+  "sure": false
+ },
+ {
+  "start": 215.7,
+  "end": 222.4,
+  "team": "yellow",
+  "sure": false
+ },
+ {
+  "start": 222.4,
+  "end": 249.7,
+  "team": "none",
+  "sure": true
+ },
+ {
+  "start": 249.7,
+  "end": 302.4,
+  "team": "red",
+  "sure": true
+ },
+ {
+  "start": 302.4,
+  "end": 328.4,
+  "team": "yellow",
+  "sure": false
+ },
+ {
+  "start": 328.4,
+  "end": 330.0,
+  "team": "none",
+  "sure": false
+ },
+ {
+  "start": 330.0,
+  "end": 391.8,
+  "team": "red",
+  "sure": false
+ },
+ {
+  "start": 391.8,
+  "end": 396.0,
+  "team": "none",
+  "sure": false
+ },
+ {
+  "start": 396.0,
+  "end": 449.3,
+  "team": "yellow",
+  "sure": false
+ },
+ {
+  "start": 449.3,
+  "end": 450.3,
+  "team": "none",
+  "sure": false
+ },
+ {
+  "start": 450.3,
+  "end": 460.2,
+  "team": "red",
+  "sure": false
+ },
+ {
+  "start": 460.2,
+  "end": 517.2,
+  "team": "yellow",
+  "sure": false
+ },
+ {
+  "start": 517.2,
+  "end": 530.2,
+  "team": "red",
+  "sure": false
+ },
+ {
+  "start": 530.2,
+  "end": 540.3,
+  "team": "yellow",
+  "sure": false
+ },
+ {
+  "start": 540.3,
+  "end": 558.0,
+  "team": "none",
+  "sure": false
+ },
+ {
+  "start": 558.0,
+  "end": 577.0,
+  "team": "red",
+  "sure": false
+ },
+ {
+  "start": 577.0,
+  "end": 598.9,
+  "team": "yellow",
+  "sure": false
+ },
+ {
+  "start": 598.9,
+  "end": 609.0,
+  "team": "red",
+  "sure": false
+ }
+]

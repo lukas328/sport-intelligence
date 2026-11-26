@@ -91,6 +91,7 @@ test("new club: club, colour and team in three steps, roster from the team page,
   await expect(page.getByRole("dialog")).toHaveCount(1); // only the quick entry, never two
   await page.getByTestId("quick-roster-text").fill("21 Ida Ruf\nZoe Wald");
   await expect(page.getByTestId("quick-roster-nonumber")).toBeVisible();
+  await expectAccessible(page);
   await page.getByRole("button", { name: "2 Spieler übernehmen" }).click();
   await expect(page.getByText("2 Spieler übernommen.").first()).toBeVisible();
   await page.keyboard.press("Escape");

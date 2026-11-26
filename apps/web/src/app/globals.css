@@ -217,6 +217,16 @@
   html {
     -webkit-text-size-adjust: 100%;
     text-rendering: optimizeLegibility;
+    /* the keyboard focus never lands under the sticky frame (WCAG 2.4.11, accessibility audit):
+       the browser scrolls a focused element clear of the top bar and of a sticky player
+       (--sticky-player, set by the workbench on a phone) */
+    scroll-padding-top: calc(4.5rem + var(--sticky-player, 0px));
+  }
+  /* and clear of the phone's tab bar */
+  @media (max-width: 1023.98px) {
+    html {
+      scroll-padding-bottom: calc(5.5rem + env(safe-area-inset-bottom));
+    }
   }
   body {
     color: var(--ink);
