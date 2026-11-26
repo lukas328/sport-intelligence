@@ -5,7 +5,7 @@
 # stored files and the main artefacts (play.json, observations.npz, ball.bin, tracks.parquet).
 # The only change on Azure is a firewall rule for this runner's address on the database, removed
 # again by the caller's cleanup step. Nothing is written to the database or the bucket.
-# Needs: rg, OUT, DIAG_ASSET (optional asset id), staging.tfvars and terraform outputs in the cwd.
+# Needs: rg, OUT, DIAG_ASSET (optional asset id), $TFVARS (staging.tfvars or staging-eu.tfvars) and terraform outputs in the cwd.
 set -euo pipefail
 mkdir -p "$OUT/artefacts"
 
@@ -131,7 +131,7 @@ jq -r '.[] | "\(.created_at) \(.kind) \(.status) \(.error // "")"' "$OUT/jobs.js
 
 org=$(jq -r .organization_id "$OUT/asset.json"); match=$(jq -r .match_id "$OUT/asset.json")
 prefix="$org/$match/$asset/"
-tfvar() { sed -n "s/^$1 *= *\"\(.*\)\"/\1/p" staging.tfvars; }
+tfvar() { sed -n "s/^$1 *= *\"\(.*\)\"/\1/p" "${TFVARS:-staging.tfvars}"; }
 endpoint=$(tfvar s3_endpoint_url); bucket=$(tfvar s3_bucket_artifacts); bucket=${bucket:-hb-artifacts}
 export AWS_ACCESS_KEY_ID; AWS_ACCESS_KEY_ID=$(tfvar s3_access_key)
 export AWS_SECRET_ACCESS_KEY; AWS_SECRET_ACCESS_KEY=$(az keyvault secret show --vault-name "$kv" -n hb-s3-secret-key --query value -o tsv)
