@@ -1733,7 +1733,8 @@
     "withKeepers": "Goalkeeper analysis included",
     "keepersLocked": "Goalkeeper analysis in the Team plan",
     "keepersLockedText": "Saves, goals against, save rate and zones per goalkeeper and the shooter card come with the Team and Club plans. Marking the goalkeeper and recording saves works in every plan.",
-    "keepersLockedLink": "See the plan"
+    "keepersLockedLink": "See the plan",
+    "unavailableCurrency": "Online payment in {currency} is not open yet. Write to us and we will get back to you."
   },
   "share": {
     "button": "Share",

@@ -1733,7 +1733,8 @@
     "withKeepers": "Analyse des gardiens incluse",
     "keepersLocked": "Analyse des gardiens dans l'abonnement Équipe",
     "keepersLockedText": "Arrêts, buts encaissés, taux d'arrêts et zones par gardien ainsi que la fiche des tireurs sont inclus dans les abonnements Équipe et Club. Le gardien et ses arrêts se saisissent dans chaque abonnement.",
-    "keepersLockedLink": "Voir l'abonnement"
+    "keepersLockedLink": "Voir l'abonnement",
+    "unavailableCurrency": "Le paiement en ligne en {currency} n'est pas encore ouvert. Écris-nous et nous te répondrons."
   },
   "share": {
     "button": "Partager",

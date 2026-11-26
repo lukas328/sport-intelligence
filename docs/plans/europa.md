@@ -69,3 +69,7 @@ Schritt 1 ist umgesetzt (Strang E). Für die Schritte 2 und 3 notiert:
   Währung gibt dann 409 `currency-locked`.
 - **Währung:** Abo (Stripe-Preise je Währung), Jahresrechnung (QR-Rechnung in CHF oder EUR, MWST
   nur auf CHF) und Website (Umschalter CHF/EUR) waren schon umgesetzt.
+- **EUR-Preise bei Stripe:** offener Entscheid von Lukas (Q-BILL-EU5). Solange für die Währung des
+  Vereins kein Preis hinterlegt ist, meldet die Abrechnung `checkout_unavailable: "currency"` und die
+  Seite sagt «Online-Zahlung in EUR ist noch nicht freigeschaltet» statt eines Checkouts; der
+  Checkout selbst gibt 503 und nie eine andere Währung. Preise kommen nur aus den Einstellungen.

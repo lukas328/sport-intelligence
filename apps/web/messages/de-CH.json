@@ -1733,7 +1733,8 @@
     "withKeepers": "Torhüter-Auswertung inbegriffen",
     "keepersLocked": "Torhüter-Auswertung im Team-Plan",
     "keepersLockedText": "Paraden, Gegentore, Fangquote und Torzonen pro Torhüter und die Werferkarte gibt es im Team- und im Vereins-Plan. Wer im Tor steht und die Paraden erfasst du in jedem Plan.",
-    "keepersLockedLink": "Zum Abo"
+    "keepersLockedLink": "Zum Abo",
+    "unavailableCurrency": "Online-Zahlung in {currency} ist noch nicht freigeschaltet. Schreib uns, dann melden wir uns."
   },
   "share": {
     "button": "Teilen",

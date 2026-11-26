@@ -422,3 +422,36 @@ async def test_the_country_sets_the_currency_and_a_subscription_keeps_it(
         "UPDATE organizations SET subscription_status = 'canceled' WHERE id = $1", uuid.UUID(org)
     )
     assert (await api.patch(url, json={"country": "FR"})).json()["country"] == "FR"
+
+
+async def test_no_checkout_in_a_currency_without_prices(
+    make_api: Callable[[], Api], billing_on: FakeGateway, owner_conn: asyncpg.Connection
+) -> None:
+    """The EUR prices are an open decision (Q-BILL-EU5): a club abroad without them is told so
+    and never sent to a checkout in another currency; nothing here sets a price."""
+    from pydantic import SecretStr
+
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    s = api.app.state.settings
+    old = (s.stripe_secret_key, s.stripe_price_team_eur, s.stripe_price_club_eur)
+    s.stripe_secret_key = SecretStr("sk_test_x")
+    s.stripe_price_team_eur = s.stripe_price_club_eur = None
+    try:
+        ch = (await api.get(f"/v1/orgs/{org}/billing")).json()
+        assert (ch["checkout_available"], ch["checkout_unavailable"]) == (True, None)
+        await owner_conn.execute(
+            "UPDATE organizations SET country = 'DE' WHERE id = $1", uuid.UUID(org)
+        )
+        de = (await api.get(f"/v1/orgs/{org}/billing")).json()
+        assert (de["currency"], de["checkout_available"], de["checkout_unavailable"]) == (
+            "EUR",
+            False,
+            "currency",
+        )
+        r = await api.post(f"/v1/orgs/{org}/billing/checkout", json={"plan": "team"})
+        assert r.status_code == 503 and "EUR" in r.json()["detail"]
+        assert not [c for c in billing_on.calls if c[0] == "checkout"]
+    finally:
+        s.stripe_secret_key, s.stripe_price_team_eur, s.stripe_price_club_eur = old

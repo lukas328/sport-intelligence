@@ -30,6 +30,8 @@ interface Billing {
   current_period_end: string | null;
   enforced: boolean;
   checkout_available: boolean;
+  /** why not: no Stripe at all, or no price in the club's currency (EUR open, Q-BILL-EU5) */
+  checkout_unavailable?: "not_configured" | "currency" | null;
   currency?: "CHF" | "EUR";
   limits: { teams: number; matches_per_season: number | null; storage_gb: number; gpu_minutes_month: number };
   usage: { teams: number; storage_bytes: number; gpu_minutes: number; max_matches_per_season: number };
@@ -184,7 +186,15 @@ export function BillingSection({ orgId }: { orgId: string }) {
             </li>
           ))}
         </ul>
-        {!b.checkout_available && <p className="text-xs text-muted">{t("unavailable")}</p>}
+        {!b.checkout_available &&
+          (b.checkout_unavailable === "currency" ? (
+            // honest: no checkout in another currency, and the way that works meanwhile
+            <p className="text-sm" data-testid="billing-unavailable-currency">
+              {t("unavailableCurrency", { currency: b.currency ?? "EUR" })}
+            </p>
+          ) : (
+            <p className="text-xs text-muted">{t("unavailable")}</p>
+          ))}
         {problem && <Alert>{problem === "two-factor-required" ? t("needs2fa") : t("failed")}</Alert>}
       </div>
       <InvoiceOrder orgId={orgId} />
