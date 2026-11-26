@@ -135,3 +135,18 @@ def test_the_stage_reports_its_own_fraction(monkeypatch: pytest.MonkeyPatch) -> 
     assert posts[-1]["stages"]["b"]["fraction"] == 0.4
     assert posts[-1]["stages"]["b"]["status"] == "running"
     assert posts[-1]["progress"] == 0.3  # (3 · 0.4) / 4
+
+
+def test_fractions_go_at_most_every_ten_seconds(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A stage reports its fraction per frame or batch: the API gets it every ten seconds (each
+    report is a write of the job), a stage change and the end at once."""
+    rep, posts = make(lambda r: httpx.Response(200))
+    clock = iter([0.0, 5.0, 9.9, 12.0, 13.0])
+    monkeypatch.setattr(time, "monotonic", lambda: next(clock))
+    rep.stage("a")  # 0 s: at once
+    rep.fraction(0.1)  # 5 s: held back
+    rep.fraction(0.2)  # 9.9 s: held back
+    rep.fraction(0.3)  # 12 s: sent
+    rep.stage("b")  # 13 s: at once
+    assert [p.get("stage") for p in posts] == ["a", "a", "b"]
+    assert posts[1]["stages"]["a"]["fraction"] == 0.3

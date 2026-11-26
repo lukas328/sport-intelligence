@@ -15,6 +15,9 @@ ATTEMPTS = 3
 # reports no fraction (a download, the court, the upload): a job silent for many minutes has lost
 # its worker, and the API's watchdog can restart it instead of the coach waiting for hours.
 HEARTBEAT_S = 60.0
+# progress updates (a fraction) at most this often: each one is a write of the job in the API, and a
+# step reports its fraction per frame or batch; stage changes and the end always go at once
+PROGRESS_EVERY_S = 10.0
 
 
 class ReportError(RuntimeError):
@@ -75,7 +78,7 @@ class Reporter:
         the API's answer (the job as the API sees it), None when it was not sent or not readable."""
         with self._lock:
             now = time.monotonic()
-            if not (force or terminal) and now - self._last < 2:
+            if not (force or terminal) and now - self._last < PROGRESS_EVERY_S:
                 return None
             self._last = now
         error = ""
