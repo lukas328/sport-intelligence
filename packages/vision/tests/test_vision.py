@@ -224,6 +224,14 @@ def test_a_raw_piece_is_cut_where_its_shirt_changes_for_good() -> None:
     assert [r.number for r in reads[1]] == [7] and [r.number for r in reads[new]] == [3]
     assert {p.track_id for p in out if p.x == 20.0} == {2}
     assert len(teams.samples[1]) == len(teams.frames[1]) == len(teams.clear[1])
+    # a goalkeeper at his goal (kit of its own, now and then a team colour) is not cut
+    keeper = TeamAssigner({"home": home, "away": away})
+    for f in range(150):
+        keeper.add_sample(3, h if f < 75 else ref, f)
+    at_goal, n_keeper = pipeline.cut_at_shirt_changes(
+        _piece(3, range(150), 2.0, 10.0), keeper, 25.0, []
+    )
+    assert n_keeper == 0 and {p.track_id for p in at_goal} == {3}
 
 
 def test_long_links_are_off_by_default() -> None:

@@ -447,6 +447,7 @@ def piece_ends(
 COLOUR_CUT = True
 CUT_WINDOW_S = 1.0
 CUT_MIN_RUN_S = 1.5
+KEEPER_ZONE_M = 6.5
 
 
 def shirt_runs(frames: list[int], classes: list[str], fps: float) -> list[tuple[int, int, str]]:
@@ -509,8 +510,18 @@ def cut_at_shirt_changes(
     if "home" not in kits or "away" not in kits:
         return points, 0
     next_id = max([p.track_id for p in points], default=0) + 1
+    # goalkeepers wear a kit of their own ("none" here) and stand at their goal: a piece mostly
+    # within `KEEPER_ZONE_M` of a goal is not cut (the position rule needs keeper tracks of 10 s,
+    # `events.assign_goalkeepers`; cutting them cost the sides on the dev clip Horgen H2)
+    near: dict[int, list[bool]] = defaultdict(list)
+    for p in points:
+        if p.observed:
+            d = min(np.hypot(p.x, p.y - COURT_W / 2), np.hypot(COURT_L - p.x, p.y - COURT_W / 2))
+            near[p.track_id].append(bool(d < KEEPER_ZONE_M))
     cuts: dict[int, list[tuple[int, int]]] = {}  # track -> [(from frame, new id)]
     for t, looks in list(teams.samples.items()):
+        if near.get(t) and sum(near[t]) >= 0.5 * len(near[t]):
+            continue
         frames = teams.frames.get(t, [])
         clear = teams.clear.get(t, [])
         if len(frames) != len(looks) or len(clear) != len(looks):
