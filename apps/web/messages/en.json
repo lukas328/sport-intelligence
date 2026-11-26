@@ -557,7 +557,13 @@
     "newOwnMatch": "Add a match of your own",
     "kitFieldOf": "{team} court players",
     "kitKeeperOf": "{team} goalkeeper",
-    "scoreFinalHint": "The final score of the whole match, not the goals in the video."
+    "scoreFinalHint": "The final score of the whole match, not the goals in the video.",
+    "kitPeopleHint": "Under each colour: who the analysis sees in it. Tap a person to play them.",
+    "kitNobody": "Nobody recognised in this colour.",
+    "kitPlay": "Play {who} in this colour",
+    "kitPlaying": "Playing: {who}",
+    "kitClosePlayer": "Close the player",
+    "kitPerson": "Person {n}"
   },
   "upload": {
     "title": "Upload video",
@@ -626,7 +632,14 @@
     "ownKit": "Which shirt do you wear in this match?",
     "ownKitSaved": "Saved.",
     "otherGame": "“{name}” is named quite differently from “{first}”, which is already in this match. Does the file really belong here? Another game gets a match of its own. The upload goes on.",
-    "moreAll": "More: how to film, files and size, another camera, link"
+    "moreAll": "More: how to film, files and size, another camera, link",
+    "kitFromVideo": "Take the colour from the video",
+    "kitFromVideoStill": "Still from the video: tap a shirt to take its colour",
+    "kitFromVideoMoment": "Moment in the video",
+    "kitFromVideoHint": "Slide to a moment where your shirt shows well, then tap it.",
+    "kitPicked": "Use this colour for:",
+    "kitPickOwn": "Our shirt",
+    "kitPickGk": "Our goalkeeper"
   },
   "processing": {
     "title": "Processing",
@@ -1287,7 +1300,10 @@
     "showAll": "Show all {n}",
     "onScreen": "{s} s on screen",
     "hintNumber": "Give people of both teams a shirt number. Assignments stay after a new analysis.",
-    "numberPlaceholder": "No."
+    "numberPlaceholder": "No.",
+    "playHere": "Play this person here",
+    "closePlayer": "Close the player",
+    "playing": "Playing: {who}"
   },
   "camera": {
     "label": "Camera",
