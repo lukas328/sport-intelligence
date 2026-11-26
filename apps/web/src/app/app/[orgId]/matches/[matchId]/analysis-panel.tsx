@@ -231,6 +231,11 @@ export function AnalysisPanel({
                 ? t("autoNoGoalkeepers")
                 : t("autoSummary", { events: Number(analysis.auto_events.events ?? 0), possessions: Number(analysis.auto_events.possessions ?? 0) })}{" "}
               {t("autoLimits")}
+              {(analysis.auto_events.missing as string[] | undefined)?.includes("throw_offs") && (
+                <span className="block" data-testid="no-throw-offs">
+                  {t("autoNoThrowOffs")}
+                </span>
+              )}
               {Number(analysis.auto_events.overlay_goals ?? 0) > 0 && (
                 <span className="block" data-testid="overlay-goals">
                   {t("autoOverlay", { goals: Number(analysis.auto_events.overlay_goals) })}

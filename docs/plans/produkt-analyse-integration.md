@@ -1568,3 +1568,33 @@ wie oben aus zwei unabhängigen Bildsätzen, übereinstimmend: home (gelb) verte
 Rohstimmen 684 zu 64 für die richtige Seite. Damit auf einem zweiten Spiel mit anderer Halle und
 anderen Trikotfarben bestätigt, keine falsche Zuordnung. Segment s3 liess sich mit der eigenen
 Kamerabewegung nicht kalibrieren und fehlt.
+
+### Anwurf-Erkennung auf echten Clips (Audit, 2026-11-26)
+
+Nebenbefund aus «kein Besitz»: Die Anwurf-Erkennung (`events.detect`, `throw_off`) findet auf den
+Horgen-Clips H1 und H2 (je 609 s, mehrere Tore) keinen einzigen Anwurf. Damit fehlen auch die
+Tore, die aus dem Anwurf abgeleitet werden.
+
+- **Ursache** (nur aus den Signalen, Zählung pro 200-ms-Bin, H1 / H2 je etwa 3000 Bins): Die Regel
+  verlangt gleichzeitig mindestens 4 sichtbare Feldspieler je Team, beide Teams ganz in der eigenen
+  Hälfte (je ein Ausreisser erlaubt), einen Spieler höchstens 2.5 m vom Mittelpunkt, Median-Tempo
+  unter 1.5 m/s, mindestens 1 s lang. «Beide Teams mit 4 Sichtbaren ganz in der eigenen Hälfte»
+  kommt nur in 18 / 10 Bins vor, mit Mittelpunkt in 6 / 3, zusammen mit «ruhig» in keinem. Die
+  Kamera folgt dem Ball und zeigt beim Anwurf meist die Mitte mit einem Team (Sichtprüfung der
+  Bilder nach den Toren: Kamera parkt an der Mittellinie, ein Team um den Mittelkreis, das andere
+  ausserhalb des Bildes).
+- **Labels:** Versucht als Bildsicht auf Blättern mit einem Bild pro Sekunde von 3 bis 45 s nach
+  jedem Wurf (21 Würfe der Wurfort-Labels). Der Aufbau an der Mittellinie ist erkennbar, der Moment
+  des Anpfiffs auf dieser Auflösung aber oft nicht sicher; zweifache Labels in der nötigen Güte
+  wären mit diesen Blättern nicht ehrlich gewesen. Keine neue Regel ohne verlässliche Wahrheit.
+- **Umgesetzt (ehrlich statt still):** Ein Video von mindestens 5 min mit Seiten, aber ohne einen
+  einzigen erkannten Anwurf, meldet `missing: ["throw_offs"]` (`events.THROW_OFF_EXPECT_MS`). Die
+  Analyse-Ansicht zeigt dann «Anwürfe wurden in diesem Video nicht erkannt …, darum fehlen auch Tore
+  aus dem Anwurf» (de-CH, en, fr). Beide Horgen-Clips melden es; synthetische Spiele mit Anwürfen
+  und kurze Clips nicht (Test `test_a_long_video_without_any_throw_off_says_so`).
+- **Nächster Schritt für eine Regel, die mit dem Sichtbaren auskommt:** Kamera parkt an der
+  Mittellinie (Schwenk nahe der Mitte des Bereichs, ruhig), Spieler eines Teams sammeln sich nahe
+  der Mittellinie, danach setzt die Bewegung zu einem Tor ein, und das innerhalb von 10 bis 45 s
+  nach einem Tor-Kandidaten. Messen braucht verlässliche Anwurf-Zeiten: Bilder in voller Auflösung
+  um die Tore (0.5 s), oder die Tore aus der Hallentafel bzw. aus Prüfen als Anker.
+

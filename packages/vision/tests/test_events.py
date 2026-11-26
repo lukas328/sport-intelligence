@@ -167,3 +167,21 @@ def test_clear_goalkeepers_win_over_the_side_hint() -> None:
     # a wrong hint (the order of the files was wrong) does not overrule what the keepers show
     assert [s for _, s in detect(pts, teams, side_hint="right").sides] == ["left"]
     assert [s for _, s in detect(pts, teams, side_hint="nonsense").sides] == ["left"]
+
+
+def test_a_long_video_without_any_throw_off_says_so() -> None:
+    """Throw-offs that the rule cannot see (camera on the ball, teams not lined up in view) are
+    reported as missing instead of silently absent; a short clip or one with throw-offs is not."""
+    cfg = SyntheticConfig(seconds=360, restarts=False, phase_s=20, goal_share=0.0)
+    _, pts, teams = _positions(cfg)
+    r = detect(pts, teams)
+    assert not [e for e in r.events if e.type == "throw_off"]
+    assert "throw_offs" in r.missing
+    _, short, _ = _positions(SyntheticConfig(seconds=120, restarts=False, phase_s=20))
+    assert "throw_offs" not in detect(short, teams).missing
+    with_restarts = SyntheticConfig(seconds=360, restarts=True, phase_s=20, goal_share=0.5)
+    _, pts2, teams2 = _positions(with_restarts)
+    r2 = detect(pts2, teams2)
+    assert [e for e in r2.events if e.type == "throw_off"]
+    assert "throw_offs" not in r2.missing
+
