@@ -59,3 +59,22 @@ or moving, instead of asking clubs to film differently.
   and calibration, never as the detection image.
 - **Asking clubs to film with a fixed camera**: still the recommended setup (better quality), but not a
   requirement.
+
+## Addendum 2026-11-26: overlays follow a moving camera
+- The analysis writes, for a moving camera, where the camera looked: `analysis/view_NNNNN.bin`, one
+  file per 30 s like the track chunks, little-endian float32 rows `[t_ms, h00 .. h22]`, the
+  homography hall image (panorama) px -> proxy frame px of every placed frame, scaled to h22 = 1
+  (`write_view_chunks`, both detector paths, also a re-run with clicked points). Frames the motion
+  pass could not place are left out. The analysis carries `view_chunks` and `frame_size`; the API
+  serves the files at `GET /v1/orgs/{org}/videos/{id}/views/{n}`. A fixed camera writes none.
+- The web composes court -> frame at time t as `view(t) · calibration` (`lib/moving-camera.ts`),
+  interpolating between neighbouring frames (up to 100 ms apart) and drawing nothing in a gap. The
+  spotlight in the match workspace, the player feed and presentations uses it, and so does the
+  person crop in «Prüfen»: people are now also asked for panning cameras (E05 limited them to
+  fixed ones).
+- An analysis from before has no view files: there, as before, no spotlight and no person
+  questions for a moving camera until it is analysed again. A court that does not refer to the
+  hall image (its image size differs from the panorama's) is not drawn either.
+- Still open: the reel and presentation exports render on the server and do not read the view
+  files yet. Until they do, they get no court for a moving camera and render without ring and
+  crop (before, they drew both in the wrong place).
