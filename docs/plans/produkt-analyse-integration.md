@@ -1800,3 +1800,30 @@ Mülheim, Leimental).
   höchstens 10 Punkten weniger Recall. Ins Produkt (als Tor-Quelle oder Bestätigung) nur dann und
   nur dort, wo die Tafel sicher gelesen wird. Zwei Clips sind wenig; das Ergebnis gilt pro Clip.
 
+**Ergebnis (nach der Festlegung gemessen, `ml/integration/scoreboard/run.py`, `evaluate.py`,
+`ml/integration/results/scoreboard_goals.json`):**
+
+- **Wo ist ein Spielstand sichtbar** (Sichtprüfung, je 6 Bilder pro Clip): auf ATV s1, s3 und
+  Leimental eine Einblendung des Streams in jedem Bild («LEI 0:0 ARB» mit Uhr); auf Horgen H1, H2
+  und Mülheim keine Einblendung, eine Hallentafel nur ab und zu und klein im Bild. Auf diesen
+  Clips also 3 von 6 mit sicher lesbarem Stand, alle drei über eine Stream-Einblendung.
+
+| Clip | Leser | Lesungen | Spielstand-Tore | Treffer (von Labels) | Präzision | Recall |
+|---|---|---|---|---|---|---|
+| Leimental (10 Tore) | Einblendung (Tesseract) | 164 OCR-Lesungen, Stand 0:0 bis 4:6 | 10 | 10 | **100 %** | **100 %** |
+| Mülheim (4 Tore) | Hallentafel (PP-OCR) | 80, alle nur Uhr, kein Stand | 0 | 0 | | 0 % |
+
+- **Leimental:** jedes Tor mit der richtigen Seite, im Median 4.6 s nach dem Label (das Tor sitzt
+  auf der ersten Lesung des neuen Standes; eins 31 s spät). Das erfüllt «klarer Gewinn» als
+  Tor-Quelle. **Das Produkt nutzt diesen Weg schon:** Einblendungs-Tore werden als Ereignisse
+  übernommen (Analyse-Ansicht «Von der eingeblendeten Anzeigetafel gelesen: N Tore»). Die
+  Messung bestätigt ihn, eine Änderung braucht es nicht.
+- **Als Bestätigung der Tor-Kandidaten** (Leimental): 32 von 40 bestätigt, Präzision 25 -> 31 %,
+  Recall 100 % gleich; +6 Punkte statt der geforderten +20. Wo die Einblendung gelesen wird,
+  sind die Spielstand-Tore selbst die bessere Quelle als bestätigte Kandidaten.
+- **Mülheim:** Die Hallentafel liefert nur die Uhr (80 Lesungen), den Stand nie: Q-REC-SCOREBOARD
+  gilt weiter (Ziffern der Tafel werden nicht gefunden). Nicht ins Produkt; der nächste Schritt
+  bleibt der im offenen Punkt genannte (Tafel über Rot auf Schwarz finden, Siebensegment-Leser).
+- **Grenze:** zwei gelabelte Clips; die Einblendung ist eine einzige Grafik (Swiss-Handball-
+  Stream). Andere Einblendungen sind nicht gemessen.
+
