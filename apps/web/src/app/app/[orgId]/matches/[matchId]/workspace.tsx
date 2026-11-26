@@ -37,6 +37,7 @@ import { RosterNumberHint } from "@/components/roster/number-hint";
 import { useWorkspaceData } from "./use-workspace-data";
 import { GoalCandidatesPanel } from "./goal-candidates";
 import { ShotCandidatesPanel } from "./shot-candidates";
+import { ShotQuickEntry } from "./check/shot-quick-entry";
 import { KickoffPanel } from "./kickoff-panel";
 import { MatchTimeline } from "./match-timeline";
 import { OfficialGoalsPanel } from "./official-goals";
@@ -673,6 +674,12 @@ export function Workspace({
                 <Maximize2 aria-hidden />
                 {t("workflow.reviewOpen")}
               </Button>
+            )}
+            {/* on a phone the quick round fits better: one clip, four big answers */}
+            {!reviewing && (
+              <div className="lg:hidden">
+                <ShotQuickEntry orgId={orgId} matchId={match.id} />
+              </div>
             )}
             <ShotCandidatesPanel
               orgId={orgId}

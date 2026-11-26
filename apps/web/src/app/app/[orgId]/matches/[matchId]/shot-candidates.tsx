@@ -40,6 +40,45 @@ export function useShotCandidates(orgId: string, matchId: string, enabled = true
   });
 }
 
+/**
+ * The answer to a shot candidate, saved through the one review endpoint (the panel here and the
+ * quick review in Prüfen alike: one truth): one at a time in order, the cached list updated at
+ * once and set back on an error, and everything counted from shots refreshed afterwards.
+ */
+export function useShotReview(orgId: string, matchId: string, on: { start?: () => void; error?: (e: unknown) => void } = {}) {
+  const qc = useQueryClient();
+  const key = shotCandidatesKey(matchId);
+  const reviewKey = ["review", ...key];
+  return useMutation({
+    // one at a time, in key order: an answer and its undo reach the server in that order
+    mutationKey: reviewKey,
+    scope: { id: reviewKey.join(":") },
+    mutationFn: async (v: { id: string; body: ShotReviewBody }) => {
+      const r = await api.PUT("/v1/orgs/{org_id}/matches/{match_id}/goal-candidates/{candidate_id}/review", {
+        params: { path: { org_id: orgId, match_id: matchId, candidate_id: v.id } },
+        body: v.body,
+      });
+      if (r.error) throw r.error;
+    },
+    onMutate: async ({ id, body }) => {
+      on.start?.();
+      await qc.cancelQueries({ queryKey: key });
+      const before = qc.getQueryData<CandidateList | null>(key);
+      if (before) qc.setQueryData(key, withShotReview(before, id, body));
+      return { before };
+    },
+    onError: (err, _v, ctx) => {
+      if (ctx?.before) qc.setQueryData(key, ctx.before);
+      on.error?.(err);
+    },
+    onSettled: () => {
+      if (qc.isMutating({ mutationKey: reviewKey }) > 1) return;
+      // a confirmed shot is an event (or pins a report entry): everything counted from shots moves
+      for (const k of ["shot-candidates", "goal-candidates", "stats", "events", "official-goals"]) void qc.invalidateQueries({ queryKey: [k, matchId] });
+    },
+  });
+}
+
 /** Moments the video analysis proposes as shots. With an official report most of them come with
  * the report's entry for that moment: Enter takes it (player, outcome and all). Otherwise the
  * coach says the team (1, 2) and the outcome with the tagger's letters (G, S, M, P, B). */
@@ -73,9 +112,6 @@ export function ShotCandidatesPanel({
   const t = useTranslations("shotCandidates");
   const te = useTranslations("events");
   const tr = useTranslations();
-  const qc = useQueryClient();
-  const key = shotCandidatesKey(matchId);
-  const path = { org_id: orgId, match_id: matchId };
   const q = useShotCandidates(orgId, matchId);
   const list = q.data;
   const [filter, setFilter] = useState<ShotFilter | null>(null);
@@ -88,35 +124,7 @@ export function ShotCandidatesPanel({
   const rowRefs = useRef<(HTMLLIElement | null)[]>([]);
   const refocus = useRef<string | null>(null);
   const lastDecided = useRef<string | null>(null);
-  const reviewKey = ["review", ...key];
-  const review = useMutation({
-    // one at a time, in key order: an answer and its undo reach the server in that order
-    mutationKey: reviewKey,
-    scope: { id: reviewKey.join(":") },
-    mutationFn: async (v: { id: string; body: ShotReviewBody }) => {
-      const r = await api.PUT("/v1/orgs/{org_id}/matches/{match_id}/goal-candidates/{candidate_id}/review", {
-        params: { path: { ...path, candidate_id: v.id } },
-        body: v.body,
-      });
-      if (r.error) throw r.error;
-    },
-    onMutate: async ({ id, body }) => {
-      setError(null);
-      await qc.cancelQueries({ queryKey: key });
-      const before = qc.getQueryData<CandidateList | null>(key);
-      if (before) qc.setQueryData(key, withShotReview(before, id, body));
-      return { before };
-    },
-    onError: (err, _v, ctx) => {
-      if (ctx?.before) qc.setQueryData(key, ctx.before);
-      setError(errorKey(err));
-    },
-    onSettled: () => {
-      if (qc.isMutating({ mutationKey: reviewKey }) > 1) return;
-      // a confirmed shot is an event (or pins a report entry): everything counted from shots moves
-      for (const k of ["shot-candidates", "goal-candidates", "stats", "events", "official-goals"]) void qc.invalidateQueries({ queryKey: [k, matchId] });
-    },
-  });
+  const review = useShotReview(orgId, matchId, { start: () => setError(null), error: (err) => setError(errorKey(err)) });
 
   // with a report, the moments it explains come first: roughly one per logged shot
   const shown: ShotFilter = filter ?? ((list?.counts.suggested ?? 0) > 0 ? "report" : "open");

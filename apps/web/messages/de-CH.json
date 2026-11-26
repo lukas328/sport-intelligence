@@ -4677,5 +4677,24 @@
     "uploadAction": "Video hochladen",
     "prepare": "Das Spiel kommt noch",
     "prepareAction": "Auf den Gegner vorbereiten"
+  },
+  "shotQuick": {
+    "top": "Würfe prüfen · {pairing}",
+    "question": "Wie endete der Wurf?",
+    "whose": "Wurf von",
+    "needSide": "Wähl zuerst, von welchem Team der Wurf ist.",
+    "answer_goal": "Tor",
+    "answer_save": "Gehalten",
+    "answer_miss": "Daneben",
+    "answer_none": "Kein Wurf",
+    "count": "{n} von {total}",
+    "undo": "Rückgängig",
+    "replay": "Nochmals",
+    "done": "Alle Würfe geprüft",
+    "doneText": "{n, plural, one {# Wurf geprüft.} other {# Würfe geprüft.}} Die Zahlen des Spiels sind nachgeführt.",
+    "none": "Keine Würfe zu prüfen",
+    "back": "Zurück zu Prüfen",
+    "entry": "{n, plural, one {# Wurf schnell prüfen} other {# Würfe schnell prüfen}}",
+    "entryHint": "Pro Wurf ein kurzer Clip und vier Knöpfe. Die unsichersten zuerst."
   }
 }

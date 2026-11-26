@@ -4677,5 +4677,24 @@
     "uploadAction": "Téléverser une vidéo",
     "prepare": "Le match est encore à venir",
     "prepareAction": "Préparer l'adversaire"
+  },
+  "shotQuick": {
+    "top": "Vérifier les tirs · {pairing}",
+    "question": "Comment s'est terminé le tir ?",
+    "whose": "Tir de",
+    "needSide": "Choisis d'abord l'équipe qui a tiré.",
+    "answer_goal": "But",
+    "answer_save": "Arrêt",
+    "answer_miss": "À côté",
+    "answer_none": "Pas un tir",
+    "count": "{n} sur {total}",
+    "undo": "Annuler",
+    "replay": "Revoir",
+    "done": "Tous les tirs vérifiés",
+    "doneText": "{n, plural, one {# tir vérifié.} other {# tirs vérifiés.}} Les chiffres du match sont à jour.",
+    "none": "Aucun tir à vérifier",
+    "back": "Retour à Vérifier",
+    "entry": "{n, plural, one {Vérifier # tir rapidement} other {Vérifier # tirs rapidement}}",
+    "entryHint": "Un court clip et quatre boutons par tir. Les moins sûrs d'abord."
   }
 }

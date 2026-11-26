@@ -4677,5 +4677,24 @@
     "uploadAction": "Upload a video",
     "prepare": "The match is still to come",
     "prepareAction": "Prepare for the opponent"
+  },
+  "shotQuick": {
+    "top": "Check shots · {pairing}",
+    "question": "How did the shot end?",
+    "whose": "Shot by",
+    "needSide": "First choose which team took the shot.",
+    "answer_goal": "Goal",
+    "answer_save": "Saved",
+    "answer_miss": "Missed",
+    "answer_none": "No shot",
+    "count": "{n} of {total}",
+    "undo": "Undo",
+    "replay": "Again",
+    "done": "All shots checked",
+    "doneText": "{n, plural, one {# shot checked.} other {# shots checked.}} The match figures are up to date.",
+    "none": "No shots to check",
+    "back": "Back to Check",
+    "entry": "{n, plural, one {Check # shot quickly} other {Check # shots quickly}}",
+    "entryHint": "One short clip and four buttons per shot. The least sure first."
   }
 }
