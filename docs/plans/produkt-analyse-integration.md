@@ -1151,3 +1151,15 @@ eingefrorene LLM-Labels, 85 Bälle und 30 Bilder ohne Ball, `ml/ball/LINEAGE.md`
 
 Paarweise: 9 Bälle nur hr1, 5 nur hr-nods; kein gesicherter Unterschied. Ein auslieferbares Netz
 kostet höchstens wenige Punkte. Ergebnis `ml/integration/results/ball_test2_hr1_vs_hrnods.json`.
+
+**hr-nods fürs Produkt exportiert (2026-11-26).** `ml/ball/export_onnx.py` (fp16, Abweichung zu torch
+höchstens 1.1e-5) und `ml/ball/onnx_u8.py` (uint8-Eingang, identisch zur fp16-Datei), im
+Staging-Bucket `handball-testdata`, per Rückdownload mit SHA geprüft:
+- `models/ball/ball_hrnods_fp16_u8-1bbacb7bca86.onnx`, SHA-256
+  `1bbacb7bca86219be31bba6c7d5696d0fef1458defe12021dd3e319e1ade800d` (für `HB_BALL_MODEL`);
+- `models/ball/ball_hrnods_fp16-11eba692acd9.onnx`, SHA-256
+  `11eba692acd9f772572561a48a8a5c6f276798969f34e91765feeb1bea8f3e95` (float-Eingang).
+`handball_vision.ballnet.BallNet` lädt die uint8-Datei (erkennt den Eingang selbst) und findet auf
+Testset-2-Bildern die Bälle an den Labels. Das Netz ist ohne DeepSport trainiert (TeamTrack MIT,
+OWLv2-Labels, eigene Labels); damit fällt der Lizenzhinweis für das Ballnetz weg, sobald Staging
+umgestellt ist. Ersetzt hrp1 allein (heute `ball_hrp1_fp16_u8`), nicht das Paar hr1 + hrp1.
