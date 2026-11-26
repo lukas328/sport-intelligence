@@ -492,6 +492,7 @@ def assign_goalkeepers(
     min_track_ms: int = 10_000,
     area_share: float = 0.6,
     bin_ms: int = 2_000,
+    referee_share: float = 0.8,
 ) -> dict[int, str]:
     """Goalkeepers by position, not by shirt colour (kit colours entered for a match are often
     wrong or missing for goalkeepers).
@@ -501,18 +502,32 @@ def assign_goalkeepers(
     over the goalkeeper's time span says which team defended that goal (side changes included).
     `points` are (t_ms, track_id, x, y) of observed positions; returns new labels
     (`home_gk` / `away_gk`) for the goalkeeper tracks.
+
+    A keeper in a kit of its own often ends up in a small third colour cluster that
+    `teams.relabel_by_clusters` calls "referee". Such tracks count with a stricter rule (audit
+    2026-11 point 4): at least `referee_share` of the time near one goal, and only at a goal where
+    no other track is a keeper candidate (the most goal-bound one if several). A goal judge stands
+    beside the goal but rarely that steadily, and the team vote below still has to agree.
     """
     by_track: dict[int, list[tuple[int, float, float]]] = defaultdict(list)
     for t, tid, x, y in points:
         by_track[tid].append((t, x, y))
     keepers: dict[int, str] = {}  # track -> goal side "left" | "right"
+    strict: dict[str, tuple[float, int]] = {}  # goal side -> (share, track) of "referee" tracks
     for tid, ps in by_track.items():
-        if teams.get(tid) == "referee" or ps[-1][0] - ps[0][0] < min_track_ms:
+        if ps[-1][0] - ps[0][0] < min_track_ms:
             continue
         left = sum(math.hypot(x, y - 10) < 6.5 for _, x, y in ps) / len(ps)
         right = sum(math.hypot(40 - x, y - 10) < 6.5 for _, x, y in ps) / len(ps)
-        if max(left, right) >= area_share:
-            keepers[tid] = "left" if left > right else "right"
+        side = "left" if left > right else "right"
+        if teams.get(tid) == "referee":
+            if max(left, right) >= referee_share and max(left, right) > strict.get(side, (0, 0))[0]:
+                strict[side] = (max(left, right), tid)
+        elif max(left, right) >= area_share:
+            keepers[tid] = side
+    for side, (_, tid) in strict.items():
+        if side not in keepers.values():
+            keepers[tid] = side
     if not keepers:
         return {}
     # defending team per time bin and goal

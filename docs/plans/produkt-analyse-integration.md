@@ -909,6 +909,27 @@ Nächster Schritt:
 3. Erst danach: die festgelegte Methode einmal auf dem Endtest melden (aus `per_shot` und den
    gespeicherten Kandidaten), und die API-Zuordnung zum Spielbericht auf die neue Zeit anpassen.
 
+### Torhüter in eigener Trikotfarbe (Audit Punkt 4, 2026-11-26)
+
+Befund aus dem Audit: Ein Torhüter in eigener Farbe landet im k-Means oft in einem dritten
+Cluster, `teams.relabel_by_clusters` nennt ihn «referee», und die Positionsregel
+`events.assign_goalkeepers` übersprang genau diese Tracks. Ohne Torhüter fehlen die Seiten und
+damit alle Ereignisse.
+
+Umgesetzt (Vorschlag 2 des Audits): «referee»-Tracks zählen jetzt mit einer strengeren Regel. Sie
+müssen mindestens 80 % der Zeit im 6,5-m-Raum eines Tores sein (statt 60 %), und es darf an diesem
+Tor keinen anderen Torhüter-Kandidaten geben. Bei mehreren «referee»-Tracks am selben Tor zählt
+der torgebundenste. Die Mannschaft kommt wie bisher aus der Abstimmung, wer das Tor verteidigt
+(mindestens 3 Stimmen), sonst bleibt der Track Schiedsrichter. Tests in `test_learned.py`: Torhüter
+im «referee»-Cluster gefunden; Schiedsrichter mit 70 % am Tor und Torrichter neben einem Tor mit
+Torhüter bleiben Schiedsrichter.
+
+Nicht gemessen: Dev-Clips mit Torhüter-Labels und Feldkoordinaten gibt es nicht, die Dev-Segmente
+haben keine Kalibrierung. Prüfen lässt sich die Regel auf Staging: Läufe U und H neu analysieren
+und schauen, ob `missing: goalkeepers` verschwindet und die neuen Torhüter-Tracks wirklich
+Torhüter sind (Torhüter-Ansicht). Offen bleibt Vorschlag 1 (Seiten aus Anwurf-Formationen, ohne
+Torhüter).
+
 ### Tore aus dem Spielbericht ohne Frage (Livegang L1, 2026-11-19)
 
 Frage: Welche Tor-Kandidaten kann die App mit dem offiziellen Spielbericht selbst beantworten, ohne
