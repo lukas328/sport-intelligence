@@ -28,6 +28,7 @@ import { errorKey, type ErrorKey } from "@/lib/errors";
 import { formatClock } from "@/lib/format";
 import { courtUnconfirmed, coverage, firstOpen, steps } from "@/lib/match-workflow";
 import { goalRows } from "@/lib/official-goals";
+import { useStickyFocusRoom } from "@/lib/sticky-focus";
 import { cn } from "@/lib/utils";
 import { AnalysisPanel } from "./analysis-panel";
 import { CameraSwitch } from "./camera-switch";
@@ -317,6 +318,9 @@ export function Workspace({
   // «Zeichnen» on the stage (app review BUG-13): the moment of the stage, paused, the drawing tools
   // open beside it, the player in view; once its picture can be sought
   const drawBox = useRef<HTMLDivElement>(null);
+  // on a phone the player sticks at the top: a focused element is scrolled into view below it
+  const stickyPlayer = useRef<HTMLDivElement>(null);
+  useStickyFocusRoom(stickyPlayer, { phoneOnly: true });
   useEffect(() => {
     if (!requestDraw || !staff) return;
     const id = window.setInterval(() => {
@@ -447,12 +451,13 @@ export function Workspace({
           )}
         </div>
       ) : null}
-      <div ref={drawBox} className="scroll-mt-20 grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_24rem] xl:grid-cols-[minmax(0,1fr)_27rem]">
+      <div ref={drawBox} className="scroll-mt-[calc(0.5rem_-_var(--sticky-player,0px))] grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_24rem] xl:grid-cols-[minmax(0,1fr)_27rem]">
       {/* the player stays in view while the coach works through a list beside it */}
       {/* phones: the column dissolves into the grid, so the player can stay at the top while the
           list below it scrolls */}
       <div className="min-w-0 max-lg:contents lg:sticky lg:top-4 lg:space-y-3">
         <div
+          ref={stickyPlayer}
           className={cn(
             "relative max-lg:sticky max-lg:z-20 max-lg:self-start",
             reviewing ? "max-lg:top-0" : "max-lg:top-14",

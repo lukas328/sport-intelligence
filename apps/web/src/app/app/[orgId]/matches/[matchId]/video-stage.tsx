@@ -18,6 +18,7 @@ import { oppFirst } from "@/lib/match-sides";
 import { cameraScene, goalRuns, reportGoals, thingSequence, useSceneCamera, type MatchGraphics } from "@/lib/graphics";
 import { threeThings } from "@/lib/three-things";
 import { SpotChange, useSpotText } from "@/components/anlauf/spot-parts";
+import { useStickyFocusRoom } from "@/lib/sticky-focus";
 import { cn } from "@/lib/utils";
 import { usePartMarkers } from "./parts-panel";
 import { readStageMode, STAGE_MODE_KEY, type StageMode } from "./stage-mode";
@@ -211,6 +212,8 @@ export function VideoStage({
     </span>
   );
   const media = `/v1/orgs/${orgId}/videos/${video.id}/media`;
+  // on a phone the picture sticks at the top: a focused element is scrolled into view below it
+  useStickyFocusRoom(stageTop, { active: mode === "video", phoneOnly: true });
 
   return (
     <section className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_340px]" aria-label={t("cameraTitle")} data-testid="video-stage">
@@ -219,7 +222,9 @@ export function VideoStage({
       <div className="min-w-0 max-lg:contents">
         <div
           ref={stageTop}
-          className={cn("scroll-mt-16 bg-ground", mode === "video" && "sticky top-14 z-20 lg:top-4")}
+          // the page's scroll padding holds the sticky player's own room: taken off here, so a jump
+          // to the picture lands under the top bar as before (4 rem)
+          className={cn("scroll-mt-[calc(-0.5rem_-_var(--sticky-player,0px))] bg-ground", mode === "video" && "sticky top-14 z-20 lg:top-4")}
           data-testid="stage-player"
         >
           {/* the switch above the picture (UX-01) */}
