@@ -459,6 +459,11 @@ async def test_analysis_flow(make_api: Callable[[], Api]) -> None:
     await storage.put(
         "artifacts", prefix + "analysis/chunk_00000.bin", chunk, "application/octet-stream"
     )
+    # a moving camera: where it looked, frame by frame (ADR 020)
+    view = b"\x01" * 40
+    await storage.put(
+        "artifacts", prefix + "analysis/view_00000.bin", view, "application/octet-stream"
+    )
     result = {
         "calibration": {
             "homography": [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
@@ -489,6 +494,8 @@ async def test_analysis_flow(make_api: Callable[[], Api]) -> None:
         ],
         "chunks": 1,
         "chunk_ms": 30000,
+        "view_chunks": 1,
+        "frame_size": [1280, 720],
         "fps": 25.0,
         "frames": 250,
         "detector": "heuristic",
@@ -509,6 +516,10 @@ async def test_analysis_flow(make_api: Callable[[], Api]) -> None:
     r = await api.get(f"/v1/orgs/{org}/videos/{vid}/tracks/0")
     assert r.content == chunk and r.headers["content-type"] == "application/octet-stream"
     assert (await api.get(f"/v1/orgs/{org}/videos/{vid}/tracks/1")).status_code == 404
+    assert (a["view_chunks"], a["frame_size"]) == (1, [1280, 720])
+    r = await api.get(f"/v1/orgs/{org}/videos/{vid}/views/0")
+    assert r.content == view and r.headers["content-type"] == "application/octet-stream"
+    assert (await api.get(f"/v1/orgs/{org}/videos/{vid}/views/1")).status_code == 404
     # manual calibration re-runs the analysis with the points
     bad = await api.post(f"/v1/orgs/{org}/videos/{vid}/calibration", json={"points": pts[:3]})
     assert bad.status_code == 422

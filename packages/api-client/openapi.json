@@ -341,6 +341,21 @@
             ],
             "title": "Fps"
           },
+          "frame_size": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "width and height of the frame the view files map into",
+            "title": "Frame Size"
+          },
           "hall": {
             "anyOf": [
               {
@@ -382,6 +397,18 @@
             },
             "title": "Tracks",
             "type": "array"
+          },
+          "view_chunks": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "moving camera: files of where the camera looked (GET .../views/{n}, hall image -> frame per frame), so overlays follow the picture; none for a fixed camera or an analysis from before",
+            "title": "View Chunks"
           }
         },
         "required": [
@@ -39653,6 +39680,66 @@
           }
         },
         "summary": "Set Track Identity",
+        "tags": [
+          "matches",
+          "analysis"
+        ]
+      }
+    },
+    "/v1/orgs/{org_id}/videos/{video_id}/views/{n}": {
+      "get": {
+        "description": "Moving camera, 30 s: little-endian float32 rows [t_ms, h00 .. h22], the homography hall\nimage (panorama) px -> video frame px of that moment, h22 = 1 (ADR 020).",
+        "operationId": "view_chunk_v1_orgs__org_id__videos__video_id__views__n__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "video_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Video Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "n",
+            "required": true,
+            "schema": {
+              "title": "N",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/octet-stream": {}
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "View Chunk",
         "tags": [
           "matches",
           "analysis"

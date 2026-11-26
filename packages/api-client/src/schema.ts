@@ -5174,6 +5174,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/videos/{video_id}/views/{n}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * View Chunk
+         * @description Moving camera, 30 s: little-endian float32 rows [t_ms, h00 .. h22], the homography hall
+         *     image (panorama) px -> video frame px of that moment, h22 = 1 (ADR 020).
+         */
+        get: operations["view_chunk_v1_orgs__org_id__videos__video_id__views__n__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/public/clubs/{club_id}/teams/{official_id}": {
         parameters: {
             query?: never;
@@ -5498,6 +5519,11 @@ export interface components {
             formations?: components["schemas"]["FormationSegment"][];
             /** Fps */
             fps: number | null;
+            /**
+             * Frame Size
+             * @description width and height of the frame the view files map into
+             */
+            frame_size?: number[] | null;
             hall?: components["schemas"]["HallOut"] | null;
             /**
              * Needs Calibration
@@ -5512,6 +5538,11 @@ export interface components {
             status: "none" | "running" | "ready" | "failed";
             /** Tracks */
             tracks: components["schemas"]["TrackOut"][];
+            /**
+             * View Chunks
+             * @description moving camera: files of where the camera looked (GET .../views/{n}, hall image -> frame per frame), so overlays follow the picture; none for a fixed camera or an analysis from before
+             */
+            view_chunks?: number | null;
         };
         /** AnnotationCreate */
         AnnotationCreate: {
@@ -24036,6 +24067,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TrackOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    view_chunk_v1_orgs__org_id__videos__video_id__views__n__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                video_id: string;
+                n: number;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/octet-stream": unknown;
                 };
             };
             /** @description Validation Error */

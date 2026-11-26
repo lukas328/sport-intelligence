@@ -271,6 +271,23 @@ async def track_chunk(video_id: uuid.UUID, n: int, scope: OrgDep) -> Response:
     )
 
 
+@router.get(
+    "/videos/{video_id}/views/{n}",
+    tags=["analysis"],
+    response_class=Response,
+    responses={200: {"content": {"application/octet-stream": {}}}},
+)
+async def view_chunk(video_id: uuid.UUID, n: int, scope: OrgDep) -> Response:
+    """Moving camera, 30 s: little-endian float32 rows [t_ms, h00 .. h22], the homography hall
+    image (panorama) px -> video frame px of that moment, h22 = 1 (ADR 020)."""
+    data = await videos.read_view_chunk(scope.ctx, video_id, n)
+    return Response(
+        data,
+        media_type="application/octet-stream",
+        headers={"cache-control": "private, max-age=3600"},
+    )
+
+
 @router.put(
     "/videos/{video_id}/tracks/{track_no}/identity", response_model=TrackOut, tags=["analysis"]
 )
