@@ -88,11 +88,23 @@ export function ShotQuick({ orgId, match }: { orgId: string; match: Match }) {
       const i = Number(e.key) - 1;
       if (i >= 0 && i < QUICK_ANSWERS.length) return (e.preventDefault(), answer(QUICK_ANSWERS[i]!));
       if (e.key === "u" || e.key === "U" || e.key === "Backspace") return (e.preventDefault(), undo());
-      if (e.key === " ") return (e.preventDefault(), player.current?.restart?.());
+      // Space presses a focused button, link or slider as everywhere; elsewhere it plays the clip again
+      if (e.key === " " && !(e.target as HTMLElement)?.closest("button, a, summary, [role=button], [role=slider], [role=tab]")) return (e.preventDefault(), player.current?.restart?.());
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [answer, undo]);
+  // after an answer (or undo) the next question takes the focus, so a screen reader reads it and
+  // Tab goes on from there; not when the focus is elsewhere (the player, the link at the top)
+  const heading = useRef<HTMLHeadingElement>(null);
+  const answers = useRef<HTMLElement>(null);
+  const shownAt = useRef(at);
+  useEffect(() => {
+    if (shownAt.current === at) return;
+    shownAt.current = at;
+    const active = document.activeElement;
+    if (!active || active === document.body || answers.current?.contains(active)) heading.current?.focus({ preventScroll: true });
+  }, [at, shot]);
 
   const media = shot ? `/v1/orgs/${orgId}/videos/${shot.video_asset_id}/media/hls/master.m3u8` : null;
   return (
@@ -107,7 +119,9 @@ export function ShotQuick({ orgId, match }: { orgId: string; match: Match }) {
         <p className="py-10 text-ink-2">{tc("loading")}</p>
       ) : !shot ? (
         <div className="max-w-[60ch] space-y-4 py-10" data-testid="shot-quick-done">
-          <h1 className="text-[40px] md:text-[58px]">{total === 0 ? t("none") : t("done")}</h1>
+          <h1 ref={heading} tabIndex={-1} className="text-[40px] outline-none md:text-[58px]">
+            {total === 0 ? t("none") : t("done")}
+          </h1>
           {total > 0 && <p className="text-[17px] text-ink-2">{t("doneText", { n: total })}</p>}
           <div className="flex flex-wrap gap-3">
             {total > 0 && (
@@ -131,9 +145,10 @@ export function ShotQuick({ orgId, match }: { orgId: string; match: Match }) {
               </button>
             </figcaption>
           </figure>
-          <section aria-labelledby="shot-quick-question" className="flex flex-col" data-testid="shot-quick-step">
+          <section ref={answers} aria-labelledby="shot-quick-question" className="flex flex-col" data-testid="shot-quick-step">
             <div className="flex items-center justify-between gap-3">
-              <p className="m-0 text-[15px] font-semibold md:text-[17px]" data-testid="shot-quick-count">
+              {/* «2 von 23» is said when it changes */}
+              <p className="m-0 text-[15px] font-semibold md:text-[17px]" aria-live="polite" aria-atomic="true" data-testid="shot-quick-count">
                 {t("count", { n: at + 1, total })}
               </p>
               {at > 0 && (
@@ -142,7 +157,7 @@ export function ShotQuick({ orgId, match }: { orgId: string; match: Match }) {
                 </button>
               )}
             </div>
-            <h1 id="shot-quick-question" className="mt-1 mb-0 text-[32px] leading-[.95] md:mt-2 md:text-[52px]">
+            <h1 ref={heading} id="shot-quick-question" tabIndex={-1} className="mt-1 mb-0 text-[32px] leading-[.95] outline-none md:mt-2 md:text-[52px]">
               {t("question")}
             </h1>
             {/* whose shot: the analysis' guess, one tap changes it */}
@@ -179,16 +194,20 @@ export function ShotQuick({ orgId, match }: { orgId: string; match: Match }) {
                   key={a}
                   type="button"
                   onClick={() => answer(a)}
-                  disabled={review.isPending}
+                  // not disabled while saving: a disabled button drops the focus (answer() waits itself)
+                  aria-disabled={review.isPending || undefined}
                   aria-keyshortcuts={String(i + 1)}
                   className={cn(
-                    "flex min-h-16 cursor-pointer items-center justify-between gap-2 border-2 border-ink px-4 text-left text-[19px] font-bold disabled:opacity-60",
+                    "flex min-h-16 cursor-pointer items-center justify-between gap-2 border-2 border-ink px-4 text-left text-[19px] font-bold aria-disabled:opacity-60",
                     a === "none" ? "bg-transparent text-ink" : "bg-ink text-ground",
                   )}
                   data-testid={`shot-quick-${a}`}
                 >
                   <span>{t(`answer_${a}`)}</span>
-                  <kbd className="font-mono text-[13px] font-normal opacity-70 max-md:hidden">{i + 1}</kbd>
+                  {/* the key is in aria-keyshortcuts; in the name it read «Tor1» */}
+                  <kbd aria-hidden className="font-mono text-[13px] font-normal opacity-70 max-md:hidden">
+                    {i + 1}
+                  </kbd>
                 </button>
               ))}
             </div>
