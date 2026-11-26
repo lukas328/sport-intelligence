@@ -345,7 +345,7 @@
     "consentOk": "Vollständig",
     "consentMissing": "Einwilligung fehlt",
     "empty": "Noch keine Spieler im Team.",
-    "emptyHint": "Füg Spieler einzeln hinzu oder importiere eine CSV-Datei.",
+    "emptyHint": "Erfass den Kader schnell mit Nummer und Name pro Zeile, füg Spieler einzeln hinzu oder importiere eine CSV-Datei.",
     "addTitle": "Spieler hinzufügen",
     "added": "{name} wurde hinzugefügt.",
     "remove": "Entfernen",
