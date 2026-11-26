@@ -28,8 +28,14 @@ target "gpu-worker" {
   tags       = ["handball-ai-gpu-worker"]
 }
 
+# the commit as the app version of the web build: GIT_SHA=$(git rev-parse --short=7 HEAD) docker buildx bake ...
+variable "GIT_SHA" {
+  default = ""
+}
+
 target "web" {
   context    = "."
   dockerfile = "apps/web/Dockerfile"
   tags       = ["handball-ai-web"]
+  args       = { GIT_SHA = GIT_SHA }
 }

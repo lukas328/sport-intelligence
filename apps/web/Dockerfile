@@ -21,6 +21,10 @@ COPY tsconfig.base.json ./
 COPY packages packages
 COPY apps/web apps/web
 ENV NEXT_TELEMETRY_DISABLED=1
+# the commit of the image (CI, deploy and bake pass it): the build reads it as the app version
+# (client error reports); here, right before the build, so a new commit only redoes this layer
+ARG GIT_SHA=""
+ENV GIT_SHA=$GIT_SHA
 RUN pnpm --filter @handball/web build
 
 FROM node:22-alpine AS runtime
