@@ -40,6 +40,7 @@ export function IdentityPanel({
   at,
   geometry = null,
   chunkMs = null,
+  onPlay,
 }: {
   orgId: string;
   match: Match;
@@ -49,6 +50,9 @@ export function IdentityPanel({
   /** court -> picture (lib/moving-camera geometryOf), memoised: stills and the ring need it */
   geometry?: Geometry | null;
   chunkMs?: number | null;
+  /** the page has a player in view (the workbench: on a phone it sticks above the list): the
+   * person plays there, with the ring on them; without it a small player opens above the list */
+  onPlay?: (track: Analysis["tracks"][number]) => void;
 }) {
   const t = useTranslations("identity");
   const qc = useQueryClient();
@@ -70,6 +74,7 @@ export function IdentityPanel({
   const long = open.filter((tr) => tr.last_ms - tr.first_ms >= 5000);
   const shown = all ? own : [...long.slice(0, 8), ...own.filter(named)].sort((a, b) => a.first_ms - b.first_ms);
   if (own.length === 0) return null;
+  const play = (tr: Analysis["tracks"][number]) => (onPlay ? onPlay(tr) : setPlaying(tr));
   const who = (tr: Analysis["tracks"][number]) => (tr.number != null ? t("shirt", { n: tr.number }) : t("track", { n: tr.track_no }));
   async function assign(trackNo: number, playerId: string, number: number | null = null) {
     const { error } = await api.PUT("/v1/orgs/{org_id}/videos/{video_id}/tracks/{track_no}/identity", {
@@ -91,19 +96,17 @@ export function IdentityPanel({
         <p className="mt-1 text-xs text-muted">{neutral ? t("hintNumber") : t("hint")}</p>
         {playing && (
           // the person plays here, above the list: on a phone it stays in view while scrolling
-          <div className="mt-3">
-            <InlinePersonPlayer video={video} track={playing} geometry={geometry} chunkMs={chunkMs} title={t("playing", { who: who(playing) })} closeLabel={t("closePlayer")} onClose={() => setPlaying(null)} testId="identity-player" />
-          </div>
+          <InlinePersonPlayer video={video} track={playing} geometry={geometry} chunkMs={chunkMs} title={t("playing", { who: who(playing) })} closeLabel={t("closePlayer")} onClose={() => setPlaying(null)} testId="identity-player" className="mt-3" />
         )}
         <ul className="mt-3 divide-y divide-border/70 text-sm">
           {shown.map((tr) => (
             <li key={tr.track_no} className="flex flex-wrap items-center gap-2 py-1.5" data-testid="identity-row">
               {geometry && chunkMs != null && (
-                <button type="button" className="cursor-pointer border-0 bg-transparent p-0" onClick={() => setPlaying(tr)} aria-label={`${t("playHere")}: ${who(tr)}, ${at(tr.first_ms)}`}>
+                <button type="button" className="cursor-pointer border-0 bg-transparent p-0" onClick={() => play(tr)} aria-label={`${t("playHere")}: ${who(tr)}, ${at(tr.first_ms)}`}>
                   <PersonStill geometry={geometry} tracksUrl={`${video}/tracks`} chunkMs={chunkMs} track={tr.track_no} at={personMoment(tr)} label={who(tr)} className="h-16 w-12" />
                 </button>
               )}
-              <Button variant="quiet" size="sm" className="min-w-0 justify-start" onClick={() => setPlaying(tr)} aria-pressed={playing?.track_no === tr.track_no} aria-label={`${t("playHere")}: ${who(tr)}, ${at(tr.first_ms)}`}>
+              <Button variant="quiet" size="sm" className="min-w-0 justify-start" onClick={() => play(tr)} aria-pressed={playing?.track_no === tr.track_no} aria-label={`${t("playHere")}: ${who(tr)}, ${at(tr.first_ms)}`}>
                 <Play aria-hidden className="size-3 fill-current" />
                 <span className="font-score tabular-nums">{at(tr.first_ms)}</span>
                 {/* a shirt number the analysis read helps to recognise the person; the track id does not */}
