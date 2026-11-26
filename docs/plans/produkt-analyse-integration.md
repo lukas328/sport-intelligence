@@ -1628,3 +1628,32 @@ des anderen Teams daneben. Darum werden die Rohstücke vor dem Verknüpfen gesch
     benannte Zeit 24.6 -> 23.2 %; mit Kader 13 / 0 / 27.5 % -> 14 / 0 / 26.8 %. Nicht-Feldspieler
     benannt 7 -> 4, als Spieler 22 -> 14 von 72; ATV unverändert wie oben.
 
+### Tore aus dem Spielstand (Hallentafel, Einblendung): vorab festgelegt (Audit, 2026-11-26)
+
+Auftrag (Q-REC-SCOREBOARD): Ein Sprung im Spielstand ist ein Tor. Das Produkt hat die Leser
+schon (`scoreboard.py` für Einblendungen mit Tesseract, `hallboard.py` für die Hallentafel mit
+PP-OCR, im GPU-Job); gemessen wurde bisher nicht, wie gut die Tore daraus stimmen. Kein Endtest.
+
+**Daten:** die zwei Clips mit eingefrorenen Tor-Labels aus #181
+(`ml/integration/whistle/goals/goals_truth.json`, LLM): Mülheim-Südpfalz H1 (480 s, 4 Tore) und
+Leimental-Arbon (600 s ab 840 s im Stream, 10 Tore). Dazu für die Frage «wo ist eine Tafel
+sichtbar» eine Sichtprüfung auf allen Clips, die lokal liegen (Horgen H1/H2 10 min, ATV s1/s3,
+Mülheim, Leimental).
+
+**Vorab festgelegt:**
+- **Lauf wie im Produkt:** `proxy.mp4`; zuerst der Einblendungs-Leser (`find_overlay`,
+  `find_fields`, `scoreboard.Reader`), ohne Einblendung `HallBoardReader` mit PP-OCRv4 und den
+  Standard-Takten (1 s, Vollbild alle 4 s, Probe alle 0.25 s); Tore aus `goals_from_board` bzw. den
+  Einblendungs-Toren, ohne offiziellen Spielstand.
+- **Tafel sicher gelesen:** mindestens 20 Lesungen mit Spielstand im Clip.
+- **Treffer:** ein Spielstand-Tor zwischen 5 s vor und 60 s nach einem Label-Tor (der Leser setzt
+  das Tor auf die erste Lesung des neuen Standes, also spät, wenn die Tafel aus dem Bild war); jedes
+  Tor zählt einmal. Recall und Präzision der Spielstand-Tore.
+- **Als Bestätigung der Kandidaten** (`goal_candidates_<clip>.json` aus #181): ein Kandidat gilt als
+  bestätigt, wenn ein Spielstand-Tor zwischen 10 s vor und 60 s nach seinem `goal_ms` liegt;
+  Präzision und Recall (Treffer ±6 s um `goal_ms` wie in #181) der bestätigten gegen alle Kandidaten.
+- **Klarer Gewinn:** auf einem sicher gelesenen Clip Spielstand-Tore mit Präzision mindestens 90 %
+  und Recall mindestens 80 %, oder als Bestätigung Präzision mindestens 20 Punkte höher bei
+  höchstens 10 Punkten weniger Recall. Ins Produkt (als Tor-Quelle oder Bestätigung) nur dann und
+  nur dort, wo die Tafel sicher gelesen wird. Zwei Clips sind wenig; das Ergebnis gilt pro Clip.
+
