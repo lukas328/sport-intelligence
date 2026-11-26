@@ -13,7 +13,16 @@ from handball_api.core.db import set_tenant, system_access
 from handball_api.core.email import try_send
 from handball_api.core.errors import ProblemError
 from handball_api.core.logging import get_logger
-from handball_api.models import Event, Match, Opponent, ProcessingJob, Team, User, VideoAsset
+from handball_api.models import (
+    Event,
+    Match,
+    Opponent,
+    OrgMembership,
+    ProcessingJob,
+    Team,
+    User,
+    VideoAsset,
+)
 from handball_api.models.enums import JobStatus, MatchStatus, VideoRole, VideoStatus
 from handball_api.schemas.matches import JobUpdate
 from handball_api.services import billing, feed, highlights, progress, timeline, training
@@ -44,9 +53,28 @@ THREE_THINGS_MIN_GOALS = 3  # fewer goals in the video carry no three things
 log = get_logger("handball_api.jobs")
 
 
+async def _told(ctx: Ctx, match: Match) -> list[uuid.UUID]:
+    """Who hears about the match's video: the team's coaches and analysts, and whoever uploaded
+    its video (also without a role in the team: they wait for it), while still in the club. Each
+    once."""
+    staff = await training.staff_of(ctx, match.team_id)
+    uploaders = (
+        await ctx.db.scalars(
+            select(VideoAsset.uploaded_by_id)
+            .join(
+                OrgMembership,
+                (OrgMembership.user_id == VideoAsset.uploaded_by_id)
+                & (OrgMembership.organization_id == match.organization_id),
+            )
+            .where(VideoAsset.match_id == match.id, VideoAsset.uploaded_by_id.is_not(None))
+        )
+    ).all()
+    return list(dict.fromkeys([*staff, *(u for u in uploaders if u is not None)]))
+
+
 async def _tell_staff(ctx: Ctx, match: Match, kind: str, extra: dict[str, Any]) -> None:
-    """A note in the bell and an e-mail to the team's coaches and analysts, naming the match
-    (UX test H06, B29): on the phone the bell alone is easy to miss."""
+    """A note in the bell and an e-mail to the team's coaches and analysts and to whoever uploaded
+    the video, naming the match (UX test H06, B29): on the phone the bell alone is easy to miss."""
     team = await ctx.db.get(Team, match.team_id)
     opp = await ctx.db.get(Opponent, match.opponent_id) if match.opponent_id else None
     opponent = opp.name if opp else "Training"
@@ -54,7 +82,7 @@ async def _tell_staff(ctx: Ctx, match: Match, kind: str, extra: dict[str, Any]) 
     # the link leads to the next step: questions wait in Prüfen (real-video test, second round)
     if kind == "analysis_questions":
         link += "/check"
-    staff = await training.staff_of(ctx, match.team_id)
+    staff = await _told(ctx, match)
     await training.notify(
         ctx,
         match.organization_id,

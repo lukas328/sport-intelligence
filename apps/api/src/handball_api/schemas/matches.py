@@ -246,6 +246,11 @@ class FileProgressOut(ApiModel):
     uploaded_bytes: int | None = None
     size_bytes: int | None = None
     duration_s: float | None = None
+    uploaded_by_id: uuid.UUID | None = Field(
+        default=None,
+        description="who uploaded the file (told when the analysis is done); null for files "
+        "from before and once the account is gone",
+    )
     idle_s: int | None = Field(
         default=None, description="seconds without a sign of life (stalled, interrupted, queued)"
     )

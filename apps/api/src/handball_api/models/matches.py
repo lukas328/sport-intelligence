@@ -138,6 +138,11 @@ class VideoAsset(Base, EntityMixin, TenantMixin):
     upload_id: Mapped[str | None] = mapped_column(String(400))
     part_size: Mapped[int] = mapped_column(Integer, nullable=False)
     source_url: Mapped[str | None] = mapped_column(String(2000))
+    # who uploaded it (or gave the link): told when the analysis is done, also without a role in
+    # the team, while still in the club; NULL for videos from before and once the account is gone
+    uploaded_by_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL")
+    )
     checksum_sha256: Mapped[str | None] = mapped_column(String(64))
     duration_s: Mapped[float | None] = mapped_column(Float)
     fps: Mapped[float | None] = mapped_column(Float)

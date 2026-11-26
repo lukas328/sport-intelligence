@@ -321,6 +321,7 @@ def file_progress(
         "half": half,
         "size_bytes": asset.size_bytes or None,
         "duration_s": asset.duration_s,
+        "uploaded_by_id": asset.uploaded_by_id,
     }
 
     def overall(stage: str, fraction: float) -> float:
