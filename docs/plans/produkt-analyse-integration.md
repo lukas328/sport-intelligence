@@ -1188,3 +1188,23 @@ Das Audit (`docs/plans/produkt-audit-2026-11.md`) rechnete aus zwei 8-min-Läufe
   11 %), Dateien identisch (gleiche Bildzahl und Grösse). Ein 99-min-Video braucht so etwa 5.1 h
   Umwandlung plus Thumbnails, knapp unter 6 h. Mehr vCPU für den Worker wäre der grössere Hebel;
   Entscheid der Hauptsitzung (26.11.): vorerst nicht, die GPU löst die Analyse-Laufzeit.
+
+### Seiten aus Anwurf-Formationen (Audit Punkt 4, Vorschlag 1, 2026-11-26)
+
+Idee: Ohne Torhüter die Spielrichtung aus den Anwürfen ableiten. Dabei stehen beide Teams in der
+eigenen Hälfte und fast still, wie `events.refine_teams` solche Momente schon sucht; die Labels
+links der Mittellinie sagen dann, wer links verteidigt. Offline geprüft auf drei Staging-Läufen
+aus dem Testbucket (Homographie zurückgerechnet, `ml/integration/staging_offline/`, siehe #147):
+
+| Lauf | Momente streng (≥ 10 Spieler, je ≥ 4 pro Hälfte, Median < 1 m/s) | locker (≥ 8, je ≥ 3, < 1,5 m/s) | Seite wie Torhüter |
+|---|---|---|---|
+| H (8 min) | 1 | 27 Bins | ja (1 von 1) |
+| fbdc76e6 (5 min) | 0 | 0 | - |
+| 56fcc216 (5 min) | 0 | 0 | - |
+
+Ergebnis: Mit schwenkenden Vereinskameras ist eine Anwurf-Formation fast nie ganz im Bild. Die
+Kamera zeigt eine Hälfte, und selten sind genug Spieler auf beiden Seiten getrackt. Als zweite
+Quelle für die Seiten trägt das nicht. Nicht ins Produkt übernommen (eine Übereinstimmung ist
+kein Beleg). Bessere Kandidaten für Seiten ohne Torhüter: die Hallentafel (Seitenwechsel zur
+Halbzeit) zusammen mit einem Hinweis des Trainers, auf welcher Seite er beginnt, oder die
+Angriffsrichtung aus der Bewegung beider Teams über längere Abschnitte.
