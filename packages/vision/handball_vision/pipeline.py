@@ -344,6 +344,7 @@ def _track_frames(
 # about 10 % of the new links were visibly wrong and one more referee sample got a number.
 LONG_LINKS = False
 LONG_LINK_GAP_S = 8.0
+ROLE_FILTER = True  # with LONG_LINKS: referee-cluster and bench pieces are not linked either
 EDGE_MARGIN_M = 0.5  # outside the court lines by more than this
 EDGE_SHARE = 0.5  # share of a piece's positions out there
 EDGE_MIN_S = 1.0  # and for at least this long
@@ -435,6 +436,57 @@ def piece_ends(
     return out
 
 
+ROLE_MIN_LOOKS = 10  # colour looks a raw piece needs to be put in a colour cluster
+ROLE_SHARE = 0.5  # share of a piece's positions on bench stretches / near a goal
+KEEPER_RADIUS_M = 6.5
+
+
+def non_player_pieces(
+    points: list[TrackPoint],
+    fps: float,
+    calib: Calibration | None,
+    samples: dict[int, list[NDArray[Any]]],
+    kits: dict[str, NDArray[Any]],
+) -> set[int]:
+    """Raw pieces that are no field player, by role without a model: (1) the piece's median
+    shirt falls in the «referee» colour cluster of `teams.relabel_by_clusters` (referees, staff,
+    other kits), unless it stands mostly within `KEEPER_RADIUS_M` of a goal (goalkeepers in a kit
+    of their own land in that cluster too, see `events.assign_goalkeepers`); (2) most of its
+    positions lie on bench stretches (`bench.bench_frames`: still, beyond a sideline)."""
+    from handball_vision.bench import DEFAULT_RULE, bench_frames, sideline_margins
+
+    by: dict[int, list[TrackPoint]] = defaultdict(list)
+    for p in points:
+        if p.observed:
+            by[p.track_id].append(p)
+    out: set[int] = set()
+    colours = {
+        t: (np.median(np.stack(v), axis=0), len(v))
+        for t, v in samples.items()
+        if len(v) >= ROLE_MIN_LOOKS
+    }
+    for t, label in relabel_by_clusters(colours, kits, min_samples=ROLE_MIN_LOOKS).items():
+        pts = by.get(t, [])
+        if label != "referee" or not pts:
+            continue
+        near_goal = sum(
+            min(np.hypot(p.x, p.y - COURT_W / 2), np.hypot(COURT_L - p.x, p.y - COURT_W / 2))
+            < KEEPER_RADIUS_M
+            for p in pts
+        )
+        if near_goal < ROLE_SHARE * len(pts):
+            out.add(t)
+    for t, pts in by.items():
+        pts.sort(key=lambda p: p.frame)
+        frames = np.array([p.frame for p in pts], dtype=np.int64)
+        xy = np.array([[p.x, p.y] for p in pts], dtype=np.float64)
+        runs = bench_frames(frames, xy, fps, sideline_margins(calib, xy[:, 0], DEFAULT_RULE))
+        on_bench = sum(int(((frames >= a) & (frames <= b)).sum()) for a, b in runs)
+        if on_bench >= ROLE_SHARE * len(pts):
+            out.add(t)
+    return out
+
+
 def _finish(
     points: list[TrackPoint],
     teams: TeamAssigner,
@@ -457,6 +509,8 @@ def _finish(
         # people outside the court are not linked and nobody's shirt number; links over long gaps
         # only between pieces whose shirt at the meeting ends is the same team
         edge = edge_pieces(points, fps)
+        if ROLE_FILTER:
+            edge |= non_player_pieces(points, fps, calib, teams.samples, teams.kits)
         piece_teams = piece_ends(teams.samples, teams.frames, teams.kits, teams.clear)
         points, mapping = stitch(
             points,
