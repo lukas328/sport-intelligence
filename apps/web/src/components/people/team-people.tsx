@@ -79,7 +79,7 @@ export function TeamPeople({ orgId, teamId, isAdmin, meId }: { orgId: string; te
                       value={role ?? ""}
                       disabled={setRole.isPending}
                       onChange={(e) => setRole.mutate({ userId: m.user_id, role: e.target.value as PersonRole })}
-                      className="min-h-11 border-2 border-ink bg-transparent px-2 text-[15px]"
+                      className="min-h-11 border-2 border-ink bg-transparent px-2 text-base"
                       data-testid="person-role"
                     >
                       {GIVEN.filter((r) => canGive(isAdmin ? "org_admin" : "member", r) || r === role).map((r) => (

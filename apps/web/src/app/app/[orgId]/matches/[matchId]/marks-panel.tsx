@@ -29,7 +29,7 @@ export function MarksPanel({ orgId, matchId, onPlay }: { orgId: string; matchId:
   const mmss = (ms: number) => `${Math.floor(ms / 60000)}:${String(Math.floor((ms % 60000) / 1000)).padStart(2, "0")}`;
   return (
     <details className="group border-t border-foreground/15 pt-3" data-testid="marks-panel">
-      <summary className="flex cursor-pointer list-none items-center gap-2 font-semibold [&::-webkit-details-marker]:hidden">
+      <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 font-semibold [&::-webkit-details-marker]:hidden">
         <Hand aria-hidden className="size-4 text-muted" />
         {t("panel", { n: d?.marks.length ?? 0 })}
         <ChevronDown aria-hidden className="ml-auto size-4 text-muted transition-transform group-open:rotate-180" />

@@ -21,6 +21,13 @@ them (dynamic programming over frames):
 - spots that hold a candidate in most frames of the window (lamps, a spare ball) are static; note
   that the no-OWLv2 rescoring gives this flag weight 0 (as in research), so a still spot loses
   only through missing motion support and its slow persistence.
+- with the candidates' positions on the camera's canvas (`world`, an operated camera), a spot that
+  holds a candidate in more than `world_static_frac` of the window's frames there (within
+  `world_static_px`) earns only `world_static_keep` of its reward: objects at the bench (spare
+  balls, bottles) move through the picture with the camera but stand still on the canvas. Dev shot
+  clips (41, product CPU setting, the owner's 546 judged tracker points): points on a known wrong
+  object 89 -> 74, of them at the bench 22 -> 9; points on a known ball 111 -> 115
+  (`ml/integration/ball_world_static.py`; values chosen there among five, so a little optimistic).
 Gaps inside a segment are filled linearly.
 
 Confidence ("don't know"): each output point gets the geometric mean of its ball probability (for a
@@ -68,6 +75,11 @@ class Params:
     gap_fast: int = 4
     v_fast: float = 8.0
     rescore: float = 3.0  # reward = rescore * ball probability (0 = hand-set reward w_net * score)
+    # still on the camera's canvas (only with `world`): cell size per 1280 px, share of the window
+    # the cell must hold a candidate in, share of the reward such a spot keeps
+    world_static_px: float = 11.0
+    world_static_frac: float = 0.3
+    world_static_keep: float = 0.0
 
 
 @dataclass
@@ -77,6 +89,7 @@ class Cand:
     net: float
     r: float = 0.0
     static: bool = False
+    world_static: bool = False
 
 
 def merge_candidates(
@@ -118,6 +131,36 @@ def candidates(
             q.static = len(holds.get(g, ())) > p.static_frac * ran
             q.r = (p.static_keep if q.static else 1.0) * p.w_net * q.net
     return frames
+
+
+def mark_world_static(
+    frames: list[list[Cand]],
+    world: Sequence[Sequence[Point | None]],
+    peaks: Sequence[Sequence[tuple[float, float, float]]],
+    width: float,
+    p: Params,
+) -> None:
+    """Flag candidates whose canvas position (`world[k][i]` for `peaks[k][i]`, None where the camera
+    is unknown) is held by a candidate in more than `world_static_frac` of the frames."""
+    cell = p.world_static_px * width / 1280
+    pos = [
+        [w for w, (_x, _y, s) in zip(wr, row, strict=True) if s >= p.net_min]
+        for wr, row in zip(world, peaks, strict=True)
+    ]
+    holds: dict[tuple[int, int], set[int]] = {}
+    for k, ws in enumerate(pos):
+        for w in ws:
+            if w is None:
+                continue
+            gx, gy = int(w[0] // cell), int(w[1] // cell)
+            for dx in (-1, 0, 1):
+                for dy in (-1, 0, 1):
+                    holds.setdefault((gx + dx, gy + dy), set()).add(k)
+    ran = max(1, len(frames))
+    for cs, ws in zip(frames, pos, strict=True):
+        for q, w in zip(cs, ws, strict=True):
+            g = (int(w[0] // cell), int(w[1] // cell)) if w is not None else None
+            q.world_static = g is not None and len(holds.get(g, ())) > p.world_static_frac * ran
 
 
 def features(frames: list[list[Cand]], scale: float) -> list[list[list[float]]]:
@@ -178,17 +221,25 @@ def track(
     fps: float,
     width: float = 1280.0,
     p: Params | None = None,
+    world: Sequence[Sequence[Point | None]] | None = None,
 ) -> tuple[list[Point | None], list[float]]:
     """Per frame (x, y) or None, and a confidence in 0..1 per frame (0 where None).
 
     `peaks[k]`: the candidates (x, y, score) of frame k in frame pixels of a `width` px wide
-    picture; consecutive entries are consecutive frames at `fps`."""
+    picture; consecutive entries are consecutive frames at `fps`. `world[k][i]`: optional canvas
+    position of `peaks[k][i]` (same scale as the frame), for spots that stand still there."""
     p = p or Params()
     frames = candidates(peaks, p)
     n = len(frames)
     scale = width / 1280 * 30 / fps  # px per frame at this video
     if p.rescore > 0:
         _rescore(frames, scale, p)
+    if world is not None:
+        mark_world_static(frames, world, peaks, width, p)
+        for cs in frames:
+            for q in cs:
+                if q.world_static:
+                    q.r *= p.world_static_keep
     norm = p.rescore if p.rescore > 0 else p.w_net
     vmax = p.vmax * scale
     dup = p.dup_px * width / 1280
@@ -290,19 +341,22 @@ def track_windows(
     window_s: float = 8.0,
     overlap_s: float = 2.0,
     p: Params | None = None,
+    world: Sequence[Sequence[Point | None]] | None = None,
 ) -> tuple[list[Point | None], list[float]]:
     """`track` over overlapping windows of `window_s` (the gold clip length); each frame takes the
     result of the window whose centre is nearest."""
     n = len(peaks)
     win = max(1, round(window_s * fps))
     if n <= win:
-        return track(peaks, fps, width, p)
+        return track(peaks, fps, width, p, world)
     hop = max(1, win - round(overlap_s * fps))
     out: list[Point | None] = [None] * n
     conf = [0.0] * n
     near = [math.inf] * n  # distance of the frame to the centre of its chosen window
     for s in [*range(0, n - win, hop), n - win]:
-        o, c = track(peaks[s : s + win], fps, width, p)
+        o, c = track(
+            peaks[s : s + win], fps, width, p, None if world is None else world[s : s + win]
+        )
         centre = (win - 1) / 2
         for t in range(win):
             d = abs(t - centre)

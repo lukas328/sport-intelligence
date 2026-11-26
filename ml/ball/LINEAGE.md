@@ -84,6 +84,7 @@ are never in the repo.
 | T3 gold v1 | `ml/gold/pick_clips.py` (seed 2026): one 8 s clip per test set 2 game, at running clock where clock data exist (`ml/gold/gold_clips.json`, commit `a0e3b6d`); labelled with the owner's rough tracks plus Claude's precise points and the owner's review (section 6) | 42 clips, 42 halls; 25 clips with running clock; fps 30 (17), 25 (13), 50 (5), 60 (4), 59.94 (2), 23.976 (1). 1 555 usable positioned points at `9a5ac20` (905 free, 650 held); **1 553 after `75bd04d`** (2 points rejected: g08 frame 126, g34 frame 108); 14 "out" labels; 738 fast points by `eval_ball.gold_points` (ball moves more than 12 px per frame to a labelled neighbour; the 561 on the overview page came from another count, its definition is unverified); 17 unconfirmed "check" points not used | rounds 8 to 10, hr1/hrp1, ensemble, all tracker work (`ml/gold/eval_ball.py`) | (a) Points cluster in 42 clips: paired p values are optimistic. (b) Only 14 no-ball frames: false positives are barely measurable. (c) **Heavy development use on 2026-11-16**: the repeated-frame step came from error analysis on gold (g08, 50 fps clips), the rescoring scale 3 was chosen on gold (checked with 2-fold CV by clip), tracker parameters were tuned with 2-fold CV on gold, the hit radius was examined on gold, and the owner inspected the three clips with most misses (g34, g08, g03). Gold v1 is therefore a development set for the tracker from 2026-11-16 on, not a clean final test. (d) The README tables after `75bd04d` still say "1555"; the tracker numbers from `46331ba` on use 1 553 points (rechecked 2026-11-16, n printed by the evaluation). |
 | T3p pilot without rough track | 8 gold clips (g00, g05, g10, g15, g20, g25, g30, g33) labelled by Claude without the owner's rough track and compared with gold (`ml/gold/data/pilot_nolead/`) | 173 points (overview page) | validating the training-label method: 98 % of "sure" points within 12 px | uses gold clips, so the method was tuned in view of gold labels (small leak of method choice, not of training data) |
 | T4 shot gold | `ml/gold/pick_shots.py`: shots from the official game logs (goals, saves, misses; `ml/data/segment_labels/*.json`), independent of any detector, at most 5 per game, clips 7 s before to 3 s after the logged time, at least 10 s from any round 9/10 training clip (`ml/gold/shot_clips.json`, commit `82889c6`) | 61 shots, 13 games: 22 goals, 24 saves, 15 misses; fps 60 (36), 30 (15), 50 (10). Frozen final-test split by home hall (`1a40b6a`): test 20 shots from 4 halls (6 goals, 8 saves, 6 misses), dev 41 shots from 9 games | to become the main measure for shots (`tracking-strategie.md` section 9, step 0); pre-labels via Modal job 12 (`ml/gpu/JOBS.md`) done; owner yes/no page on 574 dev frames (`ml/gold/shot_check.py`, section 6) | Not labelled yet (status 2026-11-17). None of the 13 games is a test set 2 game; 3 of them also give training clips, so shot halls can be training halls: results will be somewhat easier than gold v1 and must say so. Split "test" must not be used for development, tuning or looking at results before the end. |
+| T5 ball test 2 (gold v2) | `ml/gold/pick_ball_test2.py` (seed 20261125, 2026-11-25): 7 random frames per test set 2 game from the 3 segments per game that hold neither the gold v1 clip nor the shot end-test segment, at least 3 s from segment edges and 20 s apart, whatever is on screen (`ml/gold/ball_test2_frames.json`) | 294 frames, 42 games, 42 halls never in ball training; label count after the owner's pass (aim about 200 balls plus the frames without one) | to become the clean ball test: net and tracker rounds from now on, measured once per candidate | Labelled by the owner **without detector rings** (page `ml/gold/labelling/balltest2.html`, https://claude.ai/artifact/XHMwGf3yff6zXy7xuMNt1C, db collection `labels`: ball with a click, partly hidden, fully hidden, no ball in the picture, unsure), so no detector bias. Same halls as gold v1, on which the tracker was tuned (section 3, T3 caveat c): hall-level exposure for the tracker, none for the nets. Single frames (with the frames 2 steps before and after for the labeller), not clips: no per-shot metrics. Frozen once labelling starts. |
 | V-in validation inside training | round 6 on: one game per OWL source held out (`val_games`, `train_r6.py` line 584), mined segment `magdeburg_rostock_s4`, up to 2 000 tiles; round 8 on: every third game of the owner's peaks (and from round 9 the training-clip labels) as group "human" | varies | hourly checkpoint selection and "human validation" numbers (e.g. hr1 0.61 -> 0.63, hrp1 0.67 -> 0.71 at threshold 0.5) | Same sources as training: overstates transfer (verifier v1: 0.91 validation AUC vs 0.81 on test peaks). |
 | V-ver verifier tuning set | v2: games of the owner's first 500 peaks split by game: train 23 games (90 ball, 242 no ball), tuning 11 games (45 ball, 121 no ball) | 166 confident peaks | choosing the verifier v2 rule | 45 tuning balls: differences of 0.02 AUC are noise |
 
@@ -115,6 +116,7 @@ channels from the single-frame weights, neighbours zero). Results are copied fro
 | hr1 + hrp1 | 2026-11-16 `f98b29f` | ensemble of candidates: both nets' top 5 merged within 8 px, mean score; no parameter fitted | - | - | - | `ml/gold/tracker.py` input | Gold v1: net top 1 73.8 %, tracker v2 77.0 % (fast 77.0 %; vs r10 130 / 73 p 8e-5, vs hr1 73 / 34 p 2e-4, vs hrp1 78 / 31 p 8e-6); + repeated frames 78.2 % (fast 79.5 %); + gaps and rescoring **84.0 % (fast 86.0 %)**, 2-fold held-out 83.9 % (fast 86.2 %) | **current best research path**. Adding round 10 as third net: 75.6 % (worse). |
 | hr2 | after 2026-11-16 `f98b29f` (no result commit) | BallHR | hr1 | same data | fresh warm-up and cosine schedule at half the learning rates | `kaggle/train_hr2_push.py hr`, kernel `handball-ball-hr2` | **none recorded in the repo** | trained: listed in `handball-ball-hrmodels` by `ml/gpu/JOBS.md` job 12 and `ml/gpu/prelabel_clips.py` defaults; gold results unverified/not yet measured |
 | hrp2 | as hr2 | BallHRP | hrp1 | same data | half learning rates (backbone 1.5e-4, head 5e-4) | `kaggle/train_hr2_push.py hrp`, kernel `handball-ball-hrp2` | **none recorded in the repo** | as hr2 |
+| hr-nods | 2026-11-25, kernel pushed (analysis session) | BallHR | scratch | the hr1 data **without DeepSport** (D5 removed, its batch share to the own tiles) | budget 9.5 h T4, as hr1 | `kaggle/train_hr_nods_push.py`, kernel `handball-ml-hr-nods` | running; to be measured against hr1 on ball test 2 (T5) | first net that could ship (no NC data; TeamTrack MIT, OWLv2 Apache, own labels) |
 | OWLv2 (teacher, no training) | first bench 2026-11-05 (PR #3 `3c96676`) | OWLv2 base, open vocabulary, queries "a photo of a handball", "a ball", "a small ball in the air", 480 px tiles upscaled to 960 | Google weights (Apache-2.0) | - | - | `kaggle/owl_gpu.py`, gold kernel `ml/gold/kaggle/prelabel_gpu.py` (every 2nd frame) | T1 (24 balls): top 1 50 %, top 5 50 %, 10 of 11 boxes >= 0.5 are the ball; T2: 44 % / 66 %, >= 0.3 51 %, no-ball >= 0.5 10 % (optimistic, see T2); gold v1: top 1 46 %, ball in hand 58 % (overview page only, no README row) | in use as pseudo-label teacher and as tracker candidate source (rescoring weight +6.8). Cost: about 210 s per 3-minute segment for 150 frames on a T4 including download (`ml/gpu/owl_pseudo.py`), so up to about 1.4 s per frame on a GPU; far too slow for the product (a 60-minute game at every 2nd frame would be hours). |
 | YOLOX-S "sports ball" (product) | in product before this research | YOLOX-S COCO (Apache-2.0), class 32 | COCO | - | - | `packages/vision/handball_vision/detection.py` | not measured on gold v1 | the product's ball detector today (see section 5) |
 | ball holder classifier | 2026-11-04 (PR #3 `2c4e95f`) | per-player crop classifier | unverified | holder crops (`holder_crops.py`) | not recorded | `train_holder.py` | not recorded | side track, not pursued in the sources since |
@@ -221,6 +223,23 @@ picks the wrong candidate, 5.4 % no detector sees the ball. Before rescoring (RE
 357 misses of 1555): 8.2 % of balls on the net's top peak and 5.6 % among its top 5 but another
 candidate chosen, 2.4 % only OWLv2 has the ball, 6.2 % no detector.
 
+**Spots still on the canvas (product, 2026-11-25, analysis session).** The owner's shot check
+(section 6) showed tracker points on objects at the bench (spare balls, green ball-like items) with
+high confidence; the static-spot rule works in picture pixels and has weight 0 in the no-OWLv2
+rescoring, so objects that move through the picture with a panning camera are never caught.
+`balltrack2` now takes the candidates' canvas positions (`world`, from the camera motion, operated
+cameras only, `ballpossession._canvas_points`): a spot held in more than 30 % of the window's
+frames within 11 px (per 1280) loses its reward. Product CPU setting on the 41 dev shot clips,
+against the owner's judged points: on a known ball 111 -> 115, on a known wrong object 89 -> 74, at
+the bench 22 -> 9 (`ml/integration/ball_world_static.py`, `ml/integration/results/ball_world_static.json`).
+Chosen among five settings on these clips; balls found move by a few points either way across the
+settings (noise), the bench objects drop in all of them. Not measured on gold v1 (no product
+observations there) nor in the GPU setting.
+
+Tried on the same clips and left out: a candidate in the top 15 to 25 % of a person box (a head)
+loses its reward. Points on people 40 -> 34 to 38, but points on a known ball 115 -> 108 to 111
+(a ball held high is there too). No gain.
+
 ## 6. Labelling pipeline lineage
 
 **Test set 2 page** (2026-11-09, `be3b2ec`, `206ec85`, `c91e955`): owner clicks the ball in single
@@ -317,6 +336,23 @@ final test. OWLv2 ran every 4th frame here (every 2nd on gold v1), the rescoring
 on every 2nd. Test-split exposure: while inspecting the file layout, the metadata and the frame-0
 candidate numbers (no image, no tracker output) of one test clip (w01) were printed once; no test
 frame was drawn or scored. Recorded here for completeness; judged not to bias the test.
+
+**Shot check result (read 2026-11-25, analysis session).** The owner had labelled all 574 frames;
+the labels are now in `ml/gold/data/shot_check_dev_labels.json`. Tracker v2 (with OWLv2) on the 546
+frames with a tracker point: **37 % right** (200 ball, 4 partly hidden), 53 % ring on another object,
+9 % a point although no game ball is in the picture. Far below gold v1 (84 %): gold labels favour
+frames a detector found (section 3), these frames are fixed times around shots, and 8 of the 9 dev
+games are in one home hall with a flat camera. By time to the log: 17 to 36 % right from 4 s to 0.5 s
+before the log (the shot itself), 46 to 51 % after. By confidence: 17 % right below 0.2, 65 % at 0.8
+and above; precision 0.53 at recall 0.27 (threshold 0.5), so confidence filters little.
+False points decomposed (Claude looked at the middle frame of all 342 wrong points,
+`ml/gold/data/shot_check_dev_fp_cats.json`): 41 % part of a person (heads, raised hands, shoes,
+referees), 15 % objects at the bench (spare balls and green ball-like items, high confidence, median
+0.77; in one clip on 12 of 14 frames), 3 % spectators, 3 % boards and logos, 6 % unclear, and **32 %
+look like a ball to Claude** although the owner said "ring wrong" (label disagreement or near miss;
+the owner should look at these 111 again before they count as tracker errors). Levers that follow:
+penalise candidates that stay still in world coordinates outside the court (bench objects), and a
+person-part check for low-confidence points. Not measured yet; dev only.
 
 ## 7. Things tried that did not help or were set aside
 

@@ -17,7 +17,7 @@ export default async function EinstiegLayout({ children }: { children: ReactNode
       <header className="border-b-2 border-ink">
         <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-3 px-4 sm:gap-4 md:px-8">
           <p className="m-0 flex min-w-0 items-center gap-1.5 text-[15px] font-bold">
-            <SiteHomeMark className="inline-flex min-h-11 shrink-0 items-center gap-2.5 text-ink no-underline">
+            <SiteHomeMark className="hit inline-flex min-h-11 shrink-0 items-center gap-2.5 text-ink no-underline">
               {/* eslint-disable-next-line @next/next/no-img-element -- a static SVG mark */}
               <img src="/brand/favicon-32.svg" alt="" width={28} height={28} />
               <span className="max-sm:hidden">{t("app.name")}</span>

@@ -96,7 +96,7 @@ export function TeamAssignments({ orgId, teamId }: { orgId: string; teamId: stri
             return (
               <li key={a.id} className="space-y-2 border-b border-foreground/15 py-3.5">
                 <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                  <Link href={targetLink(orgId, a)} className="font-semibold hover:underline hover:underline-offset-4">
+                  <Link href={targetLink(orgId, a)} className="hit font-semibold hover:underline hover:underline-offset-4">
                     {a.title}
                   </Link>
                   <span className="text-sm text-muted">
@@ -127,7 +127,7 @@ export function TeamAssignments({ orgId, teamId }: { orgId: string; teamId: stri
         <form onSubmit={create} className="space-y-3" aria-label={t("new")}>
           <label className="flex flex-col gap-1 text-sm">
             <span className="font-medium">{t("kind")}</span>
-            <select value={kind} onChange={(e) => setKind(e.target.value as Kind)} className="min-h-10 bg-raised ring-1 ring-inset ring-border px-2">
+            <select value={kind} onChange={(e) => setKind(e.target.value as Kind)} className="min-h-11 bg-raised px-2 text-base ring-1 ring-inset ring-border">
               {KINDS.map((k) => (
                 <option key={k} value={k}>
                   {t(`kind_${k}`)}
@@ -137,7 +137,7 @@ export function TeamAssignments({ orgId, teamId }: { orgId: string; teamId: stri
           </label>
           <label className="flex flex-col gap-1 text-sm">
             <span className="font-medium">{t("target")}</span>
-            <select name="target" required className="min-h-10 bg-raised ring-1 ring-inset ring-border px-2">
+            <select name="target" required className="min-h-11 bg-raised px-2 text-base ring-1 ring-inset ring-border">
               {options.map((o) => (
                 <option key={o.id} value={o.id}>
                   {o.label}

@@ -331,7 +331,10 @@ def ball_path_v2(
         for f in range(first, last + 1, step)
     ]
     thin, thin_conf = balltrack2.track_windows(
-        peaks, obs.fps / step, float(obs.motion.frame_size[0])
+        peaks,
+        obs.fps / step,
+        float(obs.motion.frame_size[0]),
+        world=_canvas_points(obs, first, step, peaks),
     )
     if step == 1:
         return first, thin, thin_conf
@@ -350,6 +353,29 @@ def ball_path_v2(
             out[i * step + j] = (a[0] + u * (b[0] - a[0]), a[1] + u * (b[1] - a[1]))
             conf[i * step + j] = low
     return first, out, conf
+
+
+def _canvas_points(
+    obs: Any, first: int, step: int, peaks: list[list[tuple[float, float, float]]]
+) -> list[list[tuple[float, float] | None]] | None:
+    """Canvas positions of the candidates (an operated camera only), for spots that stand still
+    on the canvas while the camera pans: objects at the bench (`balltrack2`, world_static)."""
+    motion = obs.motion
+    if not getattr(motion, "moving", False):
+        return None
+    out: list[list[tuple[float, float] | None]] = []
+    for k, row in enumerate(peaks):
+        h = motion.frame_to_canvas(first + k * step) if row else None
+        if h is None:
+            out.append([None] * len(row))
+            continue
+        m = np.asarray(h, dtype=np.float64)
+        pts: list[tuple[float, float] | None] = []
+        for x, y, _s in row:
+            v = m @ np.array([x, y, 1.0])
+            pts.append((float(v[0] / v[2]), float(v[1] / v[2])) if abs(v[2]) > 1e-9 else None)
+        out.append(pts)
+    return out
 
 
 def _net_step(frames: Sequence[int]) -> int:

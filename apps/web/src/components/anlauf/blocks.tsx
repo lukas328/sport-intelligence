@@ -77,8 +77,8 @@ export function OwnRowMark() {
   return <span aria-hidden data-mark="" className="mr-2 inline-block h-3 w-3.5 -skew-x-12 bg-club align-middle shadow-[inset_0_0_0_1px_var(--club-edge)]" />;
 }
 
-/** Inline text link: ink, underlined. */
-export const linkClass = "font-bold text-ink underline decoration-[1.5px] underline-offset-4";
+/** Inline text link: ink, underlined; a finger finds it (`hit`: a 44 px tap area, nothing moves). */
+export const linkClass = "hit font-bold text-ink underline decoration-[1.5px] underline-offset-4";
 
 /**
  * Tabs as links (second level of a destination, tabs of a match): slanted, a firm rule under the

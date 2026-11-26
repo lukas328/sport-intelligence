@@ -475,7 +475,15 @@ async def start_export(ctx: Ctx, pres_id: uuid.UUID) -> Presentation:
     for vid_id in spot:
         vid = str(vid_id)
         v, cal = spot_videos.get(vid_id), latest.get(vid_id)
-        if v is not None and cal is not None and (v.analysis or {}).get("chunk_ms"):
+        # a moving camera's court refers to the hall image: the export draws no spotlight there
+        # (ADR 020; the player follows the camera with the view files, the export does not yet)
+        meta = (v.analysis or {}) if v is not None else {}
+        if (
+            v is not None
+            and cal is not None
+            and meta.get("chunk_ms")
+            and meta.get("camera") != "moving"
+        ):
             analysis[vid] = {
                 "chunks_prefix": media_prefix(v) + "analysis/",
                 "chunk_ms": v.analysis["chunk_ms"],  # type: ignore[index]

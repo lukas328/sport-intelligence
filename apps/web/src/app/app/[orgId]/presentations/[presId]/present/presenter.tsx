@@ -10,6 +10,7 @@ import { SlideView } from "@/components/presentation/slide-view";
 import { Button } from "@/components/ui/button";
 import type { Shape } from "@/components/video/shapes";
 import { api } from "@/lib/client";
+import { enterFullscreen } from "@/lib/video-touch";
 
 type Command = { action: string; slide?: number; shapes?: Shape[]; sent_at?: string };
 
@@ -102,7 +103,7 @@ export function Presenter({ orgId, presId }: { orgId: string; presId: string }) 
           {t("back")}
         </Link>
         <span className="flex-1 font-semibold">{q.data.title}</span>
-        <Button variant="secondary" onClick={() => void stage.current?.requestFullscreen?.()}>
+        <Button variant="secondary" onClick={() => enterFullscreen(stage.current)}>
           {t("fullscreen")}
         </Button>
         <Button variant="secondary" onClick={() => setPresenterView((v) => !v)} aria-pressed={presenterView}>

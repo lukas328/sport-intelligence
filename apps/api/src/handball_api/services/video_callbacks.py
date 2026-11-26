@@ -12,6 +12,7 @@ from sqlalchemy import func, select
 from handball_api.core.db import set_tenant, system_access
 from handball_api.core.email import try_send
 from handball_api.core.errors import ProblemError
+from handball_api.core.logging import get_logger
 from handball_api.models import Event, Match, Opponent, ProcessingJob, Team, User, VideoAsset
 from handball_api.models.enums import JobStatus, MatchStatus, VideoRole, VideoStatus
 from handball_api.schemas.matches import JobUpdate
@@ -38,6 +39,8 @@ from handball_api.services.video_jobs import (
 )
 
 THREE_THINGS_MIN_GOALS = 3  # fewer goals in the video carry no three things
+
+log = get_logger("handball_api.jobs")
 
 
 async def _tell_staff(ctx: Ctx, match: Match, kind: str, extra: dict[str, Any]) -> None:
@@ -143,6 +146,9 @@ async def apply_job_update(ctx: Ctx, job_id: uuid.UUID, data: JobUpdate) -> Proc
     if data.status in (JobStatus.SUCCEEDED, JobStatus.FAILED):
         job.finished_at = now
         job.error = data.error
+    if data.status == JobStatus.FAILED:
+        # one line per failed job: the alert «job failures» (infra/terraform/azure) counts it
+        log.warning("job_failed", job=str(job.id), kind=job.kind, reason=failure_code(data.error))
     if asset is not None and match is not None:
         if data.status == JobStatus.FAILED:
             await ON_FAILED.get(job.kind, _file_failed)(ctx, job, asset, match, data.error)

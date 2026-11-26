@@ -617,7 +617,7 @@ export function MatchView({ orgId, initial, teamName, staff, canDelete = staff }
           staff (coach rights, like deleting: K18) */}
       {canDelete && teamFeatures && match.kind !== "training" && Date.parse(match.kickoff_at) > Date.now() - 6 * 3600_000 && (
         <details className="group border-y border-foreground/15 py-3" data-testid="match-attendance">
-          <summary className="cursor-pointer list-none font-semibold [&::-webkit-details-marker]:hidden">
+          <summary className="flex min-h-11 cursor-pointer list-none items-center font-semibold [&::-webkit-details-marker]:hidden">
             {t("matches.attendance")}
             <span className="ml-2 text-sm font-normal text-muted group-open:hidden">{t("matches.attendanceHint")}</span>
           </summary>
@@ -965,7 +965,7 @@ function QualityReport({ video }: { video: Video }) {
   const tone = report.overall === "fail" ? "text-error" : "";
   return (
     <details className="group">
-      <summary className="flex cursor-pointer list-none items-center gap-2 text-sm [&::-webkit-details-marker]:hidden">
+      <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 text-sm [&::-webkit-details-marker]:hidden">
         <span className="font-medium">{t("title")}:</span>
         <span className={cn("font-medium", tone)}>{t(`overall_${report.overall}`)}</span>
         <span className="text-xs text-muted">({t("heuristic")})</span>

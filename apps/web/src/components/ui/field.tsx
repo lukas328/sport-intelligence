@@ -1,9 +1,11 @@
 import { forwardRef, useId, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
+// 16 px and a finger high (44 px), like the small buttons: below 16 px iPhone Safari zooms into
+// the page when a field gets the focus. Every class ends with a space: the parts are glued.
 export const control =
-  "block w-full min-h-10 border-0 bg-raised px-3 py-2 text-[0.9375rem] text-foreground ring-1 ring-inset ring-foreground/20" +
-  "placeholder:text-muted/70 transition-shadow hover:ring-muted/40" +
+  "block w-full min-h-11 border-0 bg-raised px-3 py-2 text-base text-foreground ring-1 ring-inset ring-foreground/20 " +
+  "placeholder:text-muted/70 transition-shadow hover:ring-muted/40 " +
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent " +
   "aria-[invalid=true]:ring-error disabled:opacity-60";
 
@@ -91,7 +93,8 @@ export function Checkbox({
   return (
     <div className="flex items-start gap-2">
       <input id={boxId} type="checkbox" className="mt-0.5 size-4 accent-[var(--accent)]" {...props} />
-      <label htmlFor={boxId} className="text-sm">
+      {/* the words are the target (a 44 px tap area), not only the 16 px box */}
+      <label htmlFor={boxId} className="hit text-sm">
         {label}
       </label>
     </div>

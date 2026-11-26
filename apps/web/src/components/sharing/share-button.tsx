@@ -272,7 +272,7 @@ function ReadyLink({ link, kind, info, reused, busy, onRevoke }: { link: Link; k
       {reused && <p className="text-[15px] text-ink-2">{t("already")}</p>}
       <label className="flex flex-col gap-1 text-[0.9375rem] font-semibold">
         {t("linkLabel")}
-        <input readOnly value={url} onFocus={(e) => e.currentTarget.select()} className={cn(control, "font-mono text-xs")} data-testid="share-url" />
+        <input readOnly value={url} onFocus={(e) => e.currentTarget.select()} className={cn(control, "font-mono sm:pointer-fine:text-xs")} data-testid="share-url" />
       </label>
       <label className="flex flex-col gap-1 text-[0.9375rem] font-semibold">
         {t("textLabel")}

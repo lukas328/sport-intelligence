@@ -1,0 +1,2651 @@
+{
+ "note": "Ball test set 2 (gold v2): frames of the 42 test set 2 games outside the gold v1 clip and shot end-test segments, ml/gold/pick_ball_test2.py, seed 20261125. Labels by the owner without detector rings. Frozen once labelling starts: no development, tuning or training on it.",
+ "frames": [
+  {
+   "id": "b000",
+   "game": "AT_Challenge_Lauterach_HandballTirol_2021",
+   "dataset": "l10",
+   "file": "AT_Challenge_Lauterach_HandballTirol_2021_s2.mp4",
+   "fps": 30.0,
+   "frame": 1735,
+   "t_s": 57.833
+  },
+  {
+   "id": "b001",
+   "game": "AT_Challenge_Lauterach_HandballTirol_2021",
+   "dataset": "l10",
+   "file": "AT_Challenge_Lauterach_HandballTirol_2021_s4.mp4",
+   "fps": 30.0,
+   "frame": 1369,
+   "t_s": 45.633
+  },
+  {
+   "id": "b002",
+   "game": "AT_Challenge_Lauterach_HandballTirol_2021",
+   "dataset": "l10",
+   "file": "AT_Challenge_Lauterach_HandballTirol_2021_s2.mp4",
+   "fps": 30.0,
+   "frame": 2810,
+   "t_s": 93.667
+  },
+  {
+   "id": "b003",
+   "game": "AT_Challenge_Lauterach_HandballTirol_2021",
+   "dataset": "l10",
+   "file": "AT_Challenge_Lauterach_HandballTirol_2021_s2.mp4",
+   "fps": 30.0,
+   "frame": 3582,
+   "t_s": 119.4
+  },
+  {
+   "id": "b004",
+   "game": "AT_Challenge_Lauterach_HandballTirol_2021",
+   "dataset": "l10",
+   "file": "AT_Challenge_Lauterach_HandballTirol_2021_s4.mp4",
+   "fps": 30.0,
+   "frame": 2452,
+   "t_s": 81.733
+  },
+  {
+   "id": "b005",
+   "game": "AT_Challenge_Lauterach_HandballTirol_2021",
+   "dataset": "l10",
+   "file": "AT_Challenge_Lauterach_HandballTirol_2021_s2.mp4",
+   "fps": 30.0,
+   "frame": 4637,
+   "t_s": 154.567
+  },
+  {
+   "id": "b006",
+   "game": "AT_Challenge_Lauterach_HandballTirol_2021",
+   "dataset": "l10",
+   "file": "AT_Challenge_Lauterach_HandballTirol_2021_s4.mp4",
+   "fps": 30.0,
+   "frame": 4039,
+   "t_s": 134.633
+  },
+  {
+   "id": "b007",
+   "game": "CH_NLA_BSVBern_WackerThun_2013-09-14",
+   "dataset": "l05",
+   "file": "CH_NLA_BSVBern_WackerThun_2013-09-14_s4.mp4",
+   "fps": 30.0,
+   "frame": 4549,
+   "t_s": 151.633
+  },
+  {
+   "id": "b008",
+   "game": "CH_NLA_BSVBern_WackerThun_2013-09-14",
+   "dataset": "l05",
+   "file": "CH_NLA_BSVBern_WackerThun_2013-09-14_s0.mp4",
+   "fps": 30.0,
+   "frame": 222,
+   "t_s": 7.4
+  },
+  {
+   "id": "b009",
+   "game": "CH_NLA_BSVBern_WackerThun_2013-09-14",
+   "dataset": "l05",
+   "file": "CH_NLA_BSVBern_WackerThun_2013-09-14_s1.mp4",
+   "fps": 30.0,
+   "frame": 4866,
+   "t_s": 162.2
+  },
+  {
+   "id": "b010",
+   "game": "CH_NLA_BSVBern_WackerThun_2013-09-14",
+   "dataset": "l05",
+   "file": "CH_NLA_BSVBern_WackerThun_2013-09-14_s4.mp4",
+   "fps": 30.0,
+   "frame": 3043,
+   "t_s": 101.433
+  },
+  {
+   "id": "b011",
+   "game": "CH_NLA_BSVBern_WackerThun_2013-09-14",
+   "dataset": "l05",
+   "file": "CH_NLA_BSVBern_WackerThun_2013-09-14_s4.mp4",
+   "fps": 30.0,
+   "frame": 520,
+   "t_s": 17.333
+  },
+  {
+   "id": "b012",
+   "game": "CH_NLA_BSVBern_WackerThun_2013-09-14",
+   "dataset": "l05",
+   "file": "CH_NLA_BSVBern_WackerThun_2013-09-14_s1.mp4",
+   "fps": 30.0,
+   "frame": 2362,
+   "t_s": 78.733
+  },
+  {
+   "id": "b013",
+   "game": "CH_NLA_BSVBern_WackerThun_2013-09-14",
+   "dataset": "l05",
+   "file": "CH_NLA_BSVBern_WackerThun_2013-09-14_s1.mp4",
+   "fps": 30.0,
+   "frame": 4158,
+   "t_s": 138.6
+  },
+  {
+   "id": "b014",
+   "game": "CH_NLA_FortitudoGossau_RTVBasel_2018-12-16",
+   "dataset": "l05",
+   "file": "CH_NLA_FortitudoGossau_RTVBasel_2018-12-16_s2.mp4",
+   "fps": 25.0,
+   "frame": 1691,
+   "t_s": 67.64
+  },
+  {
+   "id": "b015",
+   "game": "CH_NLA_FortitudoGossau_RTVBasel_2018-12-16",
+   "dataset": "l05",
+   "file": "CH_NLA_FortitudoGossau_RTVBasel_2018-12-16_s2.mp4",
+   "fps": 25.0,
+   "frame": 3350,
+   "t_s": 134.0
+  },
+  {
+   "id": "b016",
+   "game": "CH_NLA_FortitudoGossau_RTVBasel_2018-12-16",
+   "dataset": "l05",
+   "file": "CH_NLA_FortitudoGossau_RTVBasel_2018-12-16_s2.mp4",
+   "fps": 25.0,
+   "frame": 160,
+   "t_s": 6.4
+  },
+  {
+   "id": "b017",
+   "game": "CH_NLA_FortitudoGossau_RTVBasel_2018-12-16",
+   "dataset": "l05",
+   "file": "CH_NLA_FortitudoGossau_RTVBasel_2018-12-16_s3.mp4",
+   "fps": 25.0,
+   "frame": 1992,
+   "t_s": 79.68
+  },
+  {
+   "id": "b018",
+   "game": "CH_NLA_FortitudoGossau_RTVBasel_2018-12-16",
+   "dataset": "l05",
+   "file": "CH_NLA_FortitudoGossau_RTVBasel_2018-12-16_s2.mp4",
+   "fps": 25.0,
+   "frame": 730,
+   "t_s": 29.2
+  },
+  {
+   "id": "b019",
+   "game": "CH_NLA_FortitudoGossau_RTVBasel_2018-12-16",
+   "dataset": "l05",
+   "file": "CH_NLA_FortitudoGossau_RTVBasel_2018-12-16_s3.mp4",
+   "fps": 25.0,
+   "frame": 4045,
+   "t_s": 161.8
+  },
+  {
+   "id": "b020",
+   "game": "CH_NLA_FortitudoGossau_RTVBasel_2018-12-16",
+   "dataset": "l05",
+   "file": "CH_NLA_FortitudoGossau_RTVBasel_2018-12-16_s3.mp4",
+   "fps": 25.0,
+   "frame": 2880,
+   "t_s": 115.2
+  },
+  {
+   "id": "b021",
+   "game": "CH_NLA_GCAmicitia_KriensLuzern_ca2018",
+   "dataset": "l05",
+   "file": "CH_NLA_GCAmicitia_KriensLuzern_ca2018_s0.mp4",
+   "fps": 25.0,
+   "frame": 1395,
+   "t_s": 55.8
+  },
+  {
+   "id": "b022",
+   "game": "CH_NLA_GCAmicitia_KriensLuzern_ca2018",
+   "dataset": "l05",
+   "file": "CH_NLA_GCAmicitia_KriensLuzern_ca2018_s0.mp4",
+   "fps": 25.0,
+   "frame": 617,
+   "t_s": 24.68
+  },
+  {
+   "id": "b023",
+   "game": "CH_NLA_GCAmicitia_KriensLuzern_ca2018",
+   "dataset": "l05",
+   "file": "CH_NLA_GCAmicitia_KriensLuzern_ca2018_s4.mp4",
+   "fps": 25.0,
+   "frame": 3006,
+   "t_s": 120.24
+  },
+  {
+   "id": "b024",
+   "game": "CH_NLA_GCAmicitia_KriensLuzern_ca2018",
+   "dataset": "l05",
+   "file": "CH_NLA_GCAmicitia_KriensLuzern_ca2018_s4.mp4",
+   "fps": 25.0,
+   "frame": 3720,
+   "t_s": 148.8
+  },
+  {
+   "id": "b025",
+   "game": "CH_NLA_GCAmicitia_KriensLuzern_ca2018",
+   "dataset": "l05",
+   "file": "CH_NLA_GCAmicitia_KriensLuzern_ca2018_s4.mp4",
+   "fps": 25.0,
+   "frame": 884,
+   "t_s": 35.36
+  },
+  {
+   "id": "b026",
+   "game": "CH_NLA_GCAmicitia_KriensLuzern_ca2018",
+   "dataset": "l05",
+   "file": "CH_NLA_GCAmicitia_KriensLuzern_ca2018_s2.mp4",
+   "fps": 25.0,
+   "frame": 4373,
+   "t_s": 174.92
+  },
+  {
+   "id": "b027",
+   "game": "CH_NLA_GCAmicitia_KriensLuzern_ca2018",
+   "dataset": "l05",
+   "file": "CH_NLA_GCAmicitia_KriensLuzern_ca2018_s2.mp4",
+   "fps": 25.0,
+   "frame": 938,
+   "t_s": 37.52
+  },
+  {
+   "id": "b028",
+   "game": "CH_NLA_KriensLuzern_SuhrAarau_ca2018",
+   "dataset": "l06",
+   "file": "CH_NLA_KriensLuzern_SuhrAarau_ca2018_s3.mp4",
+   "fps": 25.0,
+   "frame": 4077,
+   "t_s": 163.08
+  },
+  {
+   "id": "b029",
+   "game": "CH_NLA_KriensLuzern_SuhrAarau_ca2018",
+   "dataset": "l06",
+   "file": "CH_NLA_KriensLuzern_SuhrAarau_ca2018_s1.mp4",
+   "fps": 25.0,
+   "frame": 3114,
+   "t_s": 124.56
+  },
+  {
+   "id": "b030",
+   "game": "CH_NLA_KriensLuzern_SuhrAarau_ca2018",
+   "dataset": "l06",
+   "file": "CH_NLA_KriensLuzern_SuhrAarau_ca2018_s1.mp4",
+   "fps": 25.0,
+   "frame": 396,
+   "t_s": 15.84
+  },
+  {
+   "id": "b031",
+   "game": "CH_NLA_KriensLuzern_SuhrAarau_ca2018",
+   "dataset": "l06",
+   "file": "CH_NLA_KriensLuzern_SuhrAarau_ca2018_s2.mp4",
+   "fps": 25.0,
+   "frame": 575,
+   "t_s": 23.0
+  },
+  {
+   "id": "b032",
+   "game": "CH_NLA_KriensLuzern_SuhrAarau_ca2018",
+   "dataset": "l06",
+   "file": "CH_NLA_KriensLuzern_SuhrAarau_ca2018_s2.mp4",
+   "fps": 25.0,
+   "frame": 3799,
+   "t_s": 151.96
+  },
+  {
+   "id": "b033",
+   "game": "CH_NLA_KriensLuzern_SuhrAarau_ca2018",
+   "dataset": "l06",
+   "file": "CH_NLA_KriensLuzern_SuhrAarau_ca2018_s2.mp4",
+   "fps": 25.0,
+   "frame": 1254,
+   "t_s": 50.16
+  },
+  {
+   "id": "b034",
+   "game": "CH_NLA_KriensLuzern_SuhrAarau_ca2018",
+   "dataset": "l06",
+   "file": "CH_NLA_KriensLuzern_SuhrAarau_ca2018_s2.mp4",
+   "fps": 25.0,
+   "frame": 1900,
+   "t_s": 76.0
+  },
+  {
+   "id": "b035",
+   "game": "CH_NLA_PlayoffF1_WackerThun_Kadetten_2013-05-11",
+   "dataset": "l06",
+   "file": "CH_NLA_PlayoffF1_WackerThun_Kadetten_2013-05-11_s1.mp4",
+   "fps": 25.0,
+   "frame": 1111,
+   "t_s": 44.44
+  },
+  {
+   "id": "b036",
+   "game": "CH_NLA_PlayoffF1_WackerThun_Kadetten_2013-05-11",
+   "dataset": "l06",
+   "file": "CH_NLA_PlayoffF1_WackerThun_Kadetten_2013-05-11_s1.mp4",
+   "fps": 25.0,
+   "frame": 1632,
+   "t_s": 65.28
+  },
+  {
+   "id": "b037",
+   "game": "CH_NLA_PlayoffF1_WackerThun_Kadetten_2013-05-11",
+   "dataset": "l06",
+   "file": "CH_NLA_PlayoffF1_WackerThun_Kadetten_2013-05-11_s2.mp4",
+   "fps": 25.0,
+   "frame": 2037,
+   "t_s": 81.48
+  },
+  {
+   "id": "b038",
+   "game": "CH_NLA_PlayoffF1_WackerThun_Kadetten_2013-05-11",
+   "dataset": "l06",
+   "file": "CH_NLA_PlayoffF1_WackerThun_Kadetten_2013-05-11_s3.mp4",
+   "fps": 25.0,
+   "frame": 2728,
+   "t_s": 109.12
+  },
+  {
+   "id": "b039",
+   "game": "CH_NLA_PlayoffF1_WackerThun_Kadetten_2013-05-11",
+   "dataset": "l06",
+   "file": "CH_NLA_PlayoffF1_WackerThun_Kadetten_2013-05-11_s1.mp4",
+   "fps": 25.0,
+   "frame": 3627,
+   "t_s": 145.08
+  },
+  {
+   "id": "b040",
+   "game": "CH_NLA_PlayoffF1_WackerThun_Kadetten_2013-05-11",
+   "dataset": "l06",
+   "file": "CH_NLA_PlayoffF1_WackerThun_Kadetten_2013-05-11_s3.mp4",
+   "fps": 25.0,
+   "frame": 4351,
+   "t_s": 174.04
+  },
+  {
+   "id": "b041",
+   "game": "CH_NLA_PlayoffF1_WackerThun_Kadetten_2013-05-11",
+   "dataset": "l06",
+   "file": "CH_NLA_PlayoffF1_WackerThun_Kadetten_2013-05-11_s3.mp4",
+   "fps": 25.0,
+   "frame": 1039,
+   "t_s": 41.56
+  },
+  {
+   "id": "b042",
+   "game": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07",
+   "dataset": "l06",
+   "file": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07_s1.mp4",
+   "fps": 25.0,
+   "frame": 2624,
+   "t_s": 104.96
+  },
+  {
+   "id": "b043",
+   "game": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07",
+   "dataset": "l06",
+   "file": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07_s0.mp4",
+   "fps": 25.0,
+   "frame": 97,
+   "t_s": 3.88
+  },
+  {
+   "id": "b044",
+   "game": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07",
+   "dataset": "l06",
+   "file": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07_s2.mp4",
+   "fps": 25.0,
+   "frame": 4057,
+   "t_s": 162.28
+  },
+  {
+   "id": "b045",
+   "game": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07",
+   "dataset": "l06",
+   "file": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07_s0.mp4",
+   "fps": 25.0,
+   "frame": 1155,
+   "t_s": 46.2
+  },
+  {
+   "id": "b046",
+   "game": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07",
+   "dataset": "l06",
+   "file": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07_s0.mp4",
+   "fps": 25.0,
+   "frame": 2724,
+   "t_s": 108.96
+  },
+  {
+   "id": "b047",
+   "game": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07",
+   "dataset": "l06",
+   "file": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07_s0.mp4",
+   "fps": 25.0,
+   "frame": 4343,
+   "t_s": 173.72
+  },
+  {
+   "id": "b048",
+   "game": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07",
+   "dataset": "l06",
+   "file": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07_s2.mp4",
+   "fps": 25.0,
+   "frame": 3463,
+   "t_s": 138.52
+  },
+  {
+   "id": "b049",
+   "game": "CH_NLA_SuhrAarau_KriensLuzern_ca2018",
+   "dataset": "l06",
+   "file": "CH_NLA_SuhrAarau_KriensLuzern_ca2018_s0.mp4",
+   "fps": 25.0,
+   "frame": 2831,
+   "t_s": 113.24
+  },
+  {
+   "id": "b050",
+   "game": "CH_NLA_SuhrAarau_KriensLuzern_ca2018",
+   "dataset": "l06",
+   "file": "CH_NLA_SuhrAarau_KriensLuzern_ca2018_s0.mp4",
+   "fps": 25.0,
+   "frame": 1274,
+   "t_s": 50.96
+  },
+  {
+   "id": "b051",
+   "game": "CH_NLA_SuhrAarau_KriensLuzern_ca2018",
+   "dataset": "l06",
+   "file": "CH_NLA_SuhrAarau_KriensLuzern_ca2018_s2.mp4",
+   "fps": 25.0,
+   "frame": 2577,
+   "t_s": 103.08
+  },
+  {
+   "id": "b052",
+   "game": "CH_NLA_SuhrAarau_KriensLuzern_ca2018",
+   "dataset": "l06",
+   "file": "CH_NLA_SuhrAarau_KriensLuzern_ca2018_s2.mp4",
+   "fps": 25.0,
+   "frame": 3631,
+   "t_s": 145.24
+  },
+  {
+   "id": "b053",
+   "game": "CH_NLA_SuhrAarau_KriensLuzern_ca2018",
+   "dataset": "l06",
+   "file": "CH_NLA_SuhrAarau_KriensLuzern_ca2018_s0.mp4",
+   "fps": 25.0,
+   "frame": 3498,
+   "t_s": 139.92
+  },
+  {
+   "id": "b054",
+   "game": "CH_NLA_SuhrAarau_KriensLuzern_ca2018",
+   "dataset": "l06",
+   "file": "CH_NLA_SuhrAarau_KriensLuzern_ca2018_s3.mp4",
+   "fps": 25.0,
+   "frame": 4256,
+   "t_s": 170.24
+  },
+  {
+   "id": "b055",
+   "game": "CH_NLA_SuhrAarau_KriensLuzern_ca2018",
+   "dataset": "l06",
+   "file": "CH_NLA_SuhrAarau_KriensLuzern_ca2018_s2.mp4",
+   "fps": 25.0,
+   "frame": 1735,
+   "t_s": 69.4
+  },
+  {
+   "id": "b056",
+   "game": "CH_NLB_TVBirsfelden_GSKadetten_ca2025",
+   "dataset": "l07",
+   "file": "CH_NLB_TVBirsfelden_GSKadetten_ca2025_s1.mp4",
+   "fps": 50.0,
+   "frame": 8815,
+   "t_s": 176.3
+  },
+  {
+   "id": "b057",
+   "game": "CH_NLB_TVBirsfelden_GSKadetten_ca2025",
+   "dataset": "l07",
+   "file": "CH_NLB_TVBirsfelden_GSKadetten_ca2025_s1.mp4",
+   "fps": 50.0,
+   "frame": 4760,
+   "t_s": 95.2
+  },
+  {
+   "id": "b058",
+   "game": "CH_NLB_TVBirsfelden_GSKadetten_ca2025",
+   "dataset": "l07",
+   "file": "CH_NLB_TVBirsfelden_GSKadetten_ca2025_s3.mp4",
+   "fps": 50.0,
+   "frame": 2956,
+   "t_s": 59.12
+  },
+  {
+   "id": "b059",
+   "game": "CH_NLB_TVBirsfelden_GSKadetten_ca2025",
+   "dataset": "l07",
+   "file": "CH_NLB_TVBirsfelden_GSKadetten_ca2025_s2.mp4",
+   "fps": 50.0,
+   "frame": 5030,
+   "t_s": 100.6
+  },
+  {
+   "id": "b060",
+   "game": "CH_NLB_TVBirsfelden_GSKadetten_ca2025",
+   "dataset": "l07",
+   "file": "CH_NLB_TVBirsfelden_GSKadetten_ca2025_s2.mp4",
+   "fps": 50.0,
+   "frame": 7501,
+   "t_s": 150.02
+  },
+  {
+   "id": "b061",
+   "game": "CH_NLB_TVBirsfelden_GSKadetten_ca2025",
+   "dataset": "l07",
+   "file": "CH_NLB_TVBirsfelden_GSKadetten_ca2025_s2.mp4",
+   "fps": 50.0,
+   "frame": 3769,
+   "t_s": 75.38
+  },
+  {
+   "id": "b062",
+   "game": "CH_NLB_TVBirsfelden_GSKadetten_ca2025",
+   "dataset": "l07",
+   "file": "CH_NLB_TVBirsfelden_GSKadetten_ca2025_s3.mp4",
+   "fps": 50.0,
+   "frame": 218,
+   "t_s": 4.36
+  },
+  {
+   "id": "b063",
+   "game": "CH_Nati_Schweiz_Rumaenien_2024-01-04",
+   "dataset": "l05",
+   "file": "CH_Nati_Schweiz_Rumaenien_2024-01-04_s4.mp4",
+   "fps": 50.0,
+   "frame": 5436,
+   "t_s": 108.72
+  },
+  {
+   "id": "b064",
+   "game": "CH_Nati_Schweiz_Rumaenien_2024-01-04",
+   "dataset": "l05",
+   "file": "CH_Nati_Schweiz_Rumaenien_2024-01-04_s4.mp4",
+   "fps": 50.0,
+   "frame": 3403,
+   "t_s": 68.06
+  },
+  {
+   "id": "b065",
+   "game": "CH_Nati_Schweiz_Rumaenien_2024-01-04",
+   "dataset": "l05",
+   "file": "CH_Nati_Schweiz_Rumaenien_2024-01-04_s2.mp4",
+   "fps": 50.0,
+   "frame": 380,
+   "t_s": 7.6
+  },
+  {
+   "id": "b066",
+   "game": "CH_Nati_Schweiz_Rumaenien_2024-01-04",
+   "dataset": "l05",
+   "file": "CH_Nati_Schweiz_Rumaenien_2024-01-04_s3.mp4",
+   "fps": 50.0,
+   "frame": 8308,
+   "t_s": 166.16
+  },
+  {
+   "id": "b067",
+   "game": "CH_Nati_Schweiz_Rumaenien_2024-01-04",
+   "dataset": "l05",
+   "file": "CH_Nati_Schweiz_Rumaenien_2024-01-04_s2.mp4",
+   "fps": 50.0,
+   "frame": 3579,
+   "t_s": 71.58
+  },
+  {
+   "id": "b068",
+   "game": "CH_Nati_Schweiz_Rumaenien_2024-01-04",
+   "dataset": "l05",
+   "file": "CH_Nati_Schweiz_Rumaenien_2024-01-04_s3.mp4",
+   "fps": 50.0,
+   "frame": 3200,
+   "t_s": 64.0
+  },
+  {
+   "id": "b069",
+   "game": "CH_Nati_Schweiz_Rumaenien_2024-01-04",
+   "dataset": "l05",
+   "file": "CH_Nati_Schweiz_Rumaenien_2024-01-04_s4.mp4",
+   "fps": 50.0,
+   "frame": 1652,
+   "t_s": 33.04
+  },
+  {
+   "id": "b070",
+   "game": "CH_Nati_Schweiz_Ukraine_2020-01-03",
+   "dataset": "l05",
+   "file": "CH_Nati_Schweiz_Ukraine_2020-01-03_s3.mp4",
+   "fps": 50.0,
+   "frame": 4629,
+   "t_s": 92.58
+  },
+  {
+   "id": "b071",
+   "game": "CH_Nati_Schweiz_Ukraine_2020-01-03",
+   "dataset": "l05",
+   "file": "CH_Nati_Schweiz_Ukraine_2020-01-03_s2.mp4",
+   "fps": 50.0,
+   "frame": 2382,
+   "t_s": 47.64
+  },
+  {
+   "id": "b072",
+   "game": "CH_Nati_Schweiz_Ukraine_2020-01-03",
+   "dataset": "l05",
+   "file": "CH_Nati_Schweiz_Ukraine_2020-01-03_s1.mp4",
+   "fps": 50.0,
+   "frame": 6578,
+   "t_s": 131.56
+  },
+  {
+   "id": "b073",
+   "game": "CH_Nati_Schweiz_Ukraine_2020-01-03",
+   "dataset": "l05",
+   "file": "CH_Nati_Schweiz_Ukraine_2020-01-03_s1.mp4",
+   "fps": 50.0,
+   "frame": 4430,
+   "t_s": 88.6
+  },
+  {
+   "id": "b074",
+   "game": "CH_Nati_Schweiz_Ukraine_2020-01-03",
+   "dataset": "l05",
+   "file": "CH_Nati_Schweiz_Ukraine_2020-01-03_s2.mp4",
+   "fps": 50.0,
+   "frame": 6584,
+   "t_s": 131.68
+  },
+  {
+   "id": "b075",
+   "game": "CH_Nati_Schweiz_Ukraine_2020-01-03",
+   "dataset": "l05",
+   "file": "CH_Nati_Schweiz_Ukraine_2020-01-03_s2.mp4",
+   "fps": 50.0,
+   "frame": 8222,
+   "t_s": 164.44
+  },
+  {
+   "id": "b076",
+   "game": "CH_Nati_Schweiz_Ukraine_2020-01-03",
+   "dataset": "l05",
+   "file": "CH_Nati_Schweiz_Ukraine_2020-01-03_s2.mp4",
+   "fps": 50.0,
+   "frame": 3963,
+   "t_s": 79.26
+  },
+  {
+   "id": "b077",
+   "game": "CH_RAM_Zuerich_Ost_2025-01-11",
+   "dataset": "l08",
+   "file": "CH_RAM_Zuerich_Ost_2025-01-11_s3.mp4",
+   "fps": 30.0,
+   "frame": 4241,
+   "t_s": 141.367
+  },
+  {
+   "id": "b078",
+   "game": "CH_RAM_Zuerich_Ost_2025-01-11",
+   "dataset": "l08",
+   "file": "CH_RAM_Zuerich_Ost_2025-01-11_s0.mp4",
+   "fps": 30.0,
+   "frame": 1783,
+   "t_s": 59.433
+  },
+  {
+   "id": "b079",
+   "game": "CH_RAM_Zuerich_Ost_2025-01-11",
+   "dataset": "l08",
+   "file": "CH_RAM_Zuerich_Ost_2025-01-11_s1.mp4",
+   "fps": 30.0,
+   "frame": 2504,
+   "t_s": 83.467
+  },
+  {
+   "id": "b080",
+   "game": "CH_RAM_Zuerich_Ost_2025-01-11",
+   "dataset": "l08",
+   "file": "CH_RAM_Zuerich_Ost_2025-01-11_s0.mp4",
+   "fps": 30.0,
+   "frame": 4666,
+   "t_s": 155.533
+  },
+  {
+   "id": "b081",
+   "game": "CH_RAM_Zuerich_Ost_2025-01-11",
+   "dataset": "l08",
+   "file": "CH_RAM_Zuerich_Ost_2025-01-11_s3.mp4",
+   "fps": 30.0,
+   "frame": 902,
+   "t_s": 30.067
+  },
+  {
+   "id": "b082",
+   "game": "CH_RAM_Zuerich_Ost_2025-01-11",
+   "dataset": "l08",
+   "file": "CH_RAM_Zuerich_Ost_2025-01-11_s3.mp4",
+   "fps": 30.0,
+   "frame": 1613,
+   "t_s": 53.767
+  },
+  {
+   "id": "b083",
+   "game": "CH_RAM_Zuerich_Ost_2025-01-11",
+   "dataset": "l08",
+   "file": "CH_RAM_Zuerich_Ost_2025-01-11_s0.mp4",
+   "fps": 30.0,
+   "frame": 892,
+   "t_s": 29.733
+  },
+  {
+   "id": "b084",
+   "game": "CH_RegioCup_HalbF_Frauen1_2017-03",
+   "dataset": "l08",
+   "file": "CH_RegioCup_HalbF_Frauen1_2017-03_s4.mp4",
+   "fps": 30.0,
+   "frame": 1698,
+   "t_s": 56.6
+  },
+  {
+   "id": "b085",
+   "game": "CH_RegioCup_HalbF_Frauen1_2017-03",
+   "dataset": "l08",
+   "file": "CH_RegioCup_HalbF_Frauen1_2017-03_s4.mp4",
+   "fps": 30.0,
+   "frame": 4967,
+   "t_s": 165.567
+  },
+  {
+   "id": "b086",
+   "game": "CH_RegioCup_HalbF_Frauen1_2017-03",
+   "dataset": "l08",
+   "file": "CH_RegioCup_HalbF_Frauen1_2017-03_s2.mp4",
+   "fps": 30.0,
+   "frame": 3394,
+   "t_s": 113.133
+  },
+  {
+   "id": "b087",
+   "game": "CH_RegioCup_HalbF_Frauen1_2017-03",
+   "dataset": "l08",
+   "file": "CH_RegioCup_HalbF_Frauen1_2017-03_s4.mp4",
+   "fps": 30.0,
+   "frame": 3251,
+   "t_s": 108.367
+  },
+  {
+   "id": "b088",
+   "game": "CH_RegioCup_HalbF_Frauen1_2017-03",
+   "dataset": "l08",
+   "file": "CH_RegioCup_HalbF_Frauen1_2017-03_s2.mp4",
+   "fps": 30.0,
+   "frame": 5211,
+   "t_s": 173.7
+  },
+  {
+   "id": "b089",
+   "game": "CH_RegioCup_HalbF_Frauen1_2017-03",
+   "dataset": "l08",
+   "file": "CH_RegioCup_HalbF_Frauen1_2017-03_s4.mp4",
+   "fps": 30.0,
+   "frame": 1076,
+   "t_s": 35.867
+  },
+  {
+   "id": "b090",
+   "game": "CH_RegioCup_HalbF_Frauen1_2017-03",
+   "dataset": "l08",
+   "file": "CH_RegioCup_HalbF_Frauen1_2017-03_s2.mp4",
+   "fps": 30.0,
+   "frame": 798,
+   "t_s": 26.6
+  },
+  {
+   "id": "b091",
+   "game": "CH_SGPilatus_Staefa_ca2024",
+   "dataset": "l08",
+   "file": "CH_SGPilatus_Staefa_ca2024_s0.mp4",
+   "fps": 30.0,
+   "frame": 2253,
+   "t_s": 75.1
+  },
+  {
+   "id": "b092",
+   "game": "CH_SGPilatus_Staefa_ca2024",
+   "dataset": "l08",
+   "file": "CH_SGPilatus_Staefa_ca2024_s0.mp4",
+   "fps": 30.0,
+   "frame": 2977,
+   "t_s": 99.233
+  },
+  {
+   "id": "b093",
+   "game": "CH_SGPilatus_Staefa_ca2024",
+   "dataset": "l08",
+   "file": "CH_SGPilatus_Staefa_ca2024_s3.mp4",
+   "fps": 30.0,
+   "frame": 5097,
+   "t_s": 169.9
+  },
+  {
+   "id": "b094",
+   "game": "CH_SGPilatus_Staefa_ca2024",
+   "dataset": "l08",
+   "file": "CH_SGPilatus_Staefa_ca2024_s0.mp4",
+   "fps": 30.0,
+   "frame": 651,
+   "t_s": 21.7
+  },
+  {
+   "id": "b095",
+   "game": "CH_SGPilatus_Staefa_ca2024",
+   "dataset": "l08",
+   "file": "CH_SGPilatus_Staefa_ca2024_s3.mp4",
+   "fps": 30.0,
+   "frame": 3350,
+   "t_s": 111.667
+  },
+  {
+   "id": "b096",
+   "game": "CH_SGPilatus_Staefa_ca2024",
+   "dataset": "l08",
+   "file": "CH_SGPilatus_Staefa_ca2024_s2.mp4",
+   "fps": 30.0,
+   "frame": 1187,
+   "t_s": 39.567
+  },
+  {
+   "id": "b097",
+   "game": "CH_SGPilatus_Staefa_ca2024",
+   "dataset": "l08",
+   "file": "CH_SGPilatus_Staefa_ca2024_s2.mp4",
+   "fps": 30.0,
+   "frame": 2583,
+   "t_s": 86.1
+  },
+  {
+   "id": "b098",
+   "game": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20",
+   "dataset": "l08",
+   "file": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20_s2.mp4",
+   "fps": 50.0,
+   "frame": 4546,
+   "t_s": 90.92
+  },
+  {
+   "id": "b099",
+   "game": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20",
+   "dataset": "l08",
+   "file": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20_s4.mp4",
+   "fps": 50.0,
+   "frame": 7690,
+   "t_s": 153.8
+  },
+  {
+   "id": "b100",
+   "game": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20",
+   "dataset": "l08",
+   "file": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20_s2.mp4",
+   "fps": 50.0,
+   "frame": 6543,
+   "t_s": 130.86
+  },
+  {
+   "id": "b101",
+   "game": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20",
+   "dataset": "l08",
+   "file": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20_s4.mp4",
+   "fps": 50.0,
+   "frame": 1792,
+   "t_s": 35.84
+  },
+  {
+   "id": "b102",
+   "game": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20",
+   "dataset": "l08",
+   "file": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20_s1.mp4",
+   "fps": 50.0,
+   "frame": 2531,
+   "t_s": 50.62
+  },
+  {
+   "id": "b103",
+   "game": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20",
+   "dataset": "l08",
+   "file": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20_s2.mp4",
+   "fps": 50.0,
+   "frame": 1462,
+   "t_s": 29.24
+  },
+  {
+   "id": "b104",
+   "game": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20",
+   "dataset": "l08",
+   "file": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20_s4.mp4",
+   "fps": 50.0,
+   "frame": 4796,
+   "t_s": 95.92
+  },
+  {
+   "id": "b105",
+   "game": "CH_U17E_Final_HSGNordwest_SuhrAarau_ca2017",
+   "dataset": "l08",
+   "file": "CH_U17E_Final_HSGNordwest_SuhrAarau_ca2017_s3.mp4",
+   "fps": 25.0,
+   "frame": 464,
+   "t_s": 18.56
+  },
+  {
+   "id": "b106",
+   "game": "CH_U17E_Final_HSGNordwest_SuhrAarau_ca2017",
+   "dataset": "l08",
+   "file": "CH_U17E_Final_HSGNordwest_SuhrAarau_ca2017_s2.mp4",
+   "fps": 25.0,
+   "frame": 2259,
+   "t_s": 90.36
+  },
+  {
+   "id": "b107",
+   "game": "CH_U17E_Final_HSGNordwest_SuhrAarau_ca2017",
+   "dataset": "l08",
+   "file": "CH_U17E_Final_HSGNordwest_SuhrAarau_ca2017_s1.mp4",
+   "fps": 25.0,
+   "frame": 119,
+   "t_s": 4.76
+  },
+  {
+   "id": "b108",
+   "game": "CH_U17E_Final_HSGNordwest_SuhrAarau_ca2017",
+   "dataset": "l08",
+   "file": "CH_U17E_Final_HSGNordwest_SuhrAarau_ca2017_s1.mp4",
+   "fps": 25.0,
+   "frame": 1667,
+   "t_s": 66.68
+  },
+  {
+   "id": "b109",
+   "game": "CH_U17E_Final_HSGNordwest_SuhrAarau_ca2017",
+   "dataset": "l08",
+   "file": "CH_U17E_Final_HSGNordwest_SuhrAarau_ca2017_s3.mp4",
+   "fps": 25.0,
+   "frame": 1184,
+   "t_s": 47.36
+  },
+  {
+   "id": "b110",
+   "game": "CH_U17E_Final_HSGNordwest_SuhrAarau_ca2017",
+   "dataset": "l08",
+   "file": "CH_U17E_Final_HSGNordwest_SuhrAarau_ca2017_s2.mp4",
+   "fps": 25.0,
+   "frame": 3858,
+   "t_s": 154.32
+  },
+  {
+   "id": "b111",
+   "game": "CH_U17E_Final_HSGNordwest_SuhrAarau_ca2017",
+   "dataset": "l08",
+   "file": "CH_U17E_Final_HSGNordwest_SuhrAarau_ca2017_s2.mp4",
+   "fps": 25.0,
+   "frame": 135,
+   "t_s": 5.4
+  },
+  {
+   "id": "b112",
+   "game": "CH_U17E_Final_Pfadi_HSGNordwest_ca2019",
+   "dataset": "l08",
+   "file": "CH_U17E_Final_Pfadi_HSGNordwest_ca2019_s0.mp4",
+   "fps": 25.0,
+   "frame": 3582,
+   "t_s": 143.28
+  },
+  {
+   "id": "b113",
+   "game": "CH_U17E_Final_Pfadi_HSGNordwest_ca2019",
+   "dataset": "l08",
+   "file": "CH_U17E_Final_Pfadi_HSGNordwest_ca2019_s1.mp4",
+   "fps": 25.0,
+   "frame": 485,
+   "t_s": 19.4
+  },
+  {
+   "id": "b114",
+   "game": "CH_U17E_Final_Pfadi_HSGNordwest_ca2019",
+   "dataset": "l08",
+   "file": "CH_U17E_Final_Pfadi_HSGNordwest_ca2019_s4.mp4",
+   "fps": 25.0,
+   "frame": 1526,
+   "t_s": 61.04
+  },
+  {
+   "id": "b115",
+   "game": "CH_U17E_Final_Pfadi_HSGNordwest_ca2019",
+   "dataset": "l08",
+   "file": "CH_U17E_Final_Pfadi_HSGNordwest_ca2019_s4.mp4",
+   "fps": 25.0,
+   "frame": 416,
+   "t_s": 16.64
+  },
+  {
+   "id": "b116",
+   "game": "CH_U17E_Final_Pfadi_HSGNordwest_ca2019",
+   "dataset": "l08",
+   "file": "CH_U17E_Final_Pfadi_HSGNordwest_ca2019_s1.mp4",
+   "fps": 25.0,
+   "frame": 1019,
+   "t_s": 40.76
+  },
+  {
+   "id": "b117",
+   "game": "CH_U17E_Final_Pfadi_HSGNordwest_ca2019",
+   "dataset": "l08",
+   "file": "CH_U17E_Final_Pfadi_HSGNordwest_ca2019_s1.mp4",
+   "fps": 25.0,
+   "frame": 2083,
+   "t_s": 83.32
+  },
+  {
+   "id": "b118",
+   "game": "CH_U17E_Final_Pfadi_HSGNordwest_ca2019",
+   "dataset": "l08",
+   "file": "CH_U17E_Final_Pfadi_HSGNordwest_ca2019_s0.mp4",
+   "fps": 25.0,
+   "frame": 2137,
+   "t_s": 85.48
+  },
+  {
+   "id": "b119",
+   "game": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10",
+   "dataset": "l09",
+   "file": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10_s0.mp4",
+   "fps": 59.94,
+   "frame": 6649,
+   "t_s": 110.927
+  },
+  {
+   "id": "b120",
+   "game": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10",
+   "dataset": "l09",
+   "file": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10_s2.mp4",
+   "fps": 59.94,
+   "frame": 7032,
+   "t_s": 117.317
+  },
+  {
+   "id": "b121",
+   "game": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10",
+   "dataset": "l09",
+   "file": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10_s3.mp4",
+   "fps": 59.94,
+   "frame": 10201,
+   "t_s": 170.187
+  },
+  {
+   "id": "b122",
+   "game": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10",
+   "dataset": "l09",
+   "file": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10_s2.mp4",
+   "fps": 59.94,
+   "frame": 9409,
+   "t_s": 156.973
+  },
+  {
+   "id": "b123",
+   "game": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10",
+   "dataset": "l09",
+   "file": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10_s0.mp4",
+   "fps": 59.94,
+   "frame": 772,
+   "t_s": 12.88
+  },
+  {
+   "id": "b124",
+   "game": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10",
+   "dataset": "l09",
+   "file": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10_s3.mp4",
+   "fps": 59.94,
+   "frame": 2068,
+   "t_s": 34.501
+  },
+  {
+   "id": "b125",
+   "game": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10",
+   "dataset": "l09",
+   "file": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10_s0.mp4",
+   "fps": 59.94,
+   "frame": 2805,
+   "t_s": 46.797
+  },
+  {
+   "id": "b126",
+   "game": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20",
+   "dataset": "l09",
+   "file": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20_s3.mp4",
+   "fps": 30.0,
+   "frame": 4547,
+   "t_s": 151.567
+  },
+  {
+   "id": "b127",
+   "game": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20",
+   "dataset": "l09",
+   "file": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20_s2.mp4",
+   "fps": 30.0,
+   "frame": 4376,
+   "t_s": 145.867
+  },
+  {
+   "id": "b128",
+   "game": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20",
+   "dataset": "l09",
+   "file": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20_s3.mp4",
+   "fps": 30.0,
+   "frame": 3677,
+   "t_s": 122.567
+  },
+  {
+   "id": "b129",
+   "game": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20",
+   "dataset": "l09",
+   "file": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20_s3.mp4",
+   "fps": 30.0,
+   "frame": 1374,
+   "t_s": 45.8
+  },
+  {
+   "id": "b130",
+   "game": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20",
+   "dataset": "l09",
+   "file": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20_s2.mp4",
+   "fps": 30.0,
+   "frame": 2048,
+   "t_s": 68.267
+  },
+  {
+   "id": "b131",
+   "game": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20",
+   "dataset": "l09",
+   "file": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20_s2.mp4",
+   "fps": 30.0,
+   "frame": 1389,
+   "t_s": 46.3
+  },
+  {
+   "id": "b132",
+   "game": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20",
+   "dataset": "l09",
+   "file": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20_s3.mp4",
+   "fps": 30.0,
+   "frame": 2600,
+   "t_s": 86.667
+  },
+  {
+   "id": "b133",
+   "game": "ES_1Nacional_AnaitasunaB_Trapagaran_2026",
+   "dataset": "l12",
+   "file": "ES_1Nacional_AnaitasunaB_Trapagaran_2026_s1.mp4",
+   "fps": 30.0,
+   "frame": 1453,
+   "t_s": 48.433
+  },
+  {
+   "id": "b134",
+   "game": "ES_1Nacional_AnaitasunaB_Trapagaran_2026",
+   "dataset": "l12",
+   "file": "ES_1Nacional_AnaitasunaB_Trapagaran_2026_s1.mp4",
+   "fps": 30.0,
+   "frame": 4254,
+   "t_s": 141.8
+  },
+  {
+   "id": "b135",
+   "game": "ES_1Nacional_AnaitasunaB_Trapagaran_2026",
+   "dataset": "l12",
+   "file": "ES_1Nacional_AnaitasunaB_Trapagaran_2026_s4.mp4",
+   "fps": 30.0,
+   "frame": 2683,
+   "t_s": 89.433
+  },
+  {
+   "id": "b136",
+   "game": "ES_1Nacional_AnaitasunaB_Trapagaran_2026",
+   "dataset": "l12",
+   "file": "ES_1Nacional_AnaitasunaB_Trapagaran_2026_s2.mp4",
+   "fps": 30.0,
+   "frame": 4191,
+   "t_s": 139.7
+  },
+  {
+   "id": "b137",
+   "game": "ES_1Nacional_AnaitasunaB_Trapagaran_2026",
+   "dataset": "l12",
+   "file": "ES_1Nacional_AnaitasunaB_Trapagaran_2026_s2.mp4",
+   "fps": 30.0,
+   "frame": 3347,
+   "t_s": 111.567
+  },
+  {
+   "id": "b138",
+   "game": "ES_1Nacional_AnaitasunaB_Trapagaran_2026",
+   "dataset": "l12",
+   "file": "ES_1Nacional_AnaitasunaB_Trapagaran_2026_s4.mp4",
+   "fps": 30.0,
+   "frame": 1066,
+   "t_s": 35.533
+  },
+  {
+   "id": "b139",
+   "game": "ES_1Nacional_AnaitasunaB_Trapagaran_2026",
+   "dataset": "l12",
+   "file": "ES_1Nacional_AnaitasunaB_Trapagaran_2026_s4.mp4",
+   "fps": 30.0,
+   "frame": 4996,
+   "t_s": 166.533
+  },
+  {
+   "id": "b140",
+   "game": "ES_1Nacional_Huarte_Erreka_2026",
+   "dataset": "l10",
+   "file": "ES_1Nacional_Huarte_Erreka_2026_s0.mp4",
+   "fps": 30.0,
+   "frame": 1902,
+   "t_s": 63.4
+  },
+  {
+   "id": "b141",
+   "game": "ES_1Nacional_Huarte_Erreka_2026",
+   "dataset": "l10",
+   "file": "ES_1Nacional_Huarte_Erreka_2026_s2.mp4",
+   "fps": 30.0,
+   "frame": 981,
+   "t_s": 32.7
+  },
+  {
+   "id": "b142",
+   "game": "ES_1Nacional_Huarte_Erreka_2026",
+   "dataset": "l10",
+   "file": "ES_1Nacional_Huarte_Erreka_2026_s4.mp4",
+   "fps": 30.0,
+   "frame": 4519,
+   "t_s": 150.633
+  },
+  {
+   "id": "b143",
+   "game": "ES_1Nacional_Huarte_Erreka_2026",
+   "dataset": "l10",
+   "file": "ES_1Nacional_Huarte_Erreka_2026_s0.mp4",
+   "fps": 30.0,
+   "frame": 1140,
+   "t_s": 38.0
+  },
+  {
+   "id": "b144",
+   "game": "ES_1Nacional_Huarte_Erreka_2026",
+   "dataset": "l10",
+   "file": "ES_1Nacional_Huarte_Erreka_2026_s0.mp4",
+   "fps": 30.0,
+   "frame": 4004,
+   "t_s": 133.467
+  },
+  {
+   "id": "b145",
+   "game": "ES_1Nacional_Huarte_Erreka_2026",
+   "dataset": "l10",
+   "file": "ES_1Nacional_Huarte_Erreka_2026_s4.mp4",
+   "fps": 30.0,
+   "frame": 2154,
+   "t_s": 71.8
+  },
+  {
+   "id": "b146",
+   "game": "ES_1Nacional_Huarte_Erreka_2026",
+   "dataset": "l10",
+   "file": "ES_1Nacional_Huarte_Erreka_2026_s2.mp4",
+   "fps": 30.0,
+   "frame": 4528,
+   "t_s": 150.933
+  },
+  {
+   "id": "b147",
+   "game": "ES_1Nacional_PalmaDelRio_2026",
+   "dataset": "l10",
+   "file": "ES_1Nacional_PalmaDelRio_2026_s2.mp4",
+   "fps": 30.0,
+   "frame": 1830,
+   "t_s": 61.0
+  },
+  {
+   "id": "b148",
+   "game": "ES_1Nacional_PalmaDelRio_2026",
+   "dataset": "l10",
+   "file": "ES_1Nacional_PalmaDelRio_2026_s4.mp4",
+   "fps": 30.0,
+   "frame": 1355,
+   "t_s": 45.167
+  },
+  {
+   "id": "b149",
+   "game": "ES_1Nacional_PalmaDelRio_2026",
+   "dataset": "l10",
+   "file": "ES_1Nacional_PalmaDelRio_2026_s2.mp4",
+   "fps": 30.0,
+   "frame": 2722,
+   "t_s": 90.733
+  },
+  {
+   "id": "b150",
+   "game": "ES_1Nacional_PalmaDelRio_2026",
+   "dataset": "l10",
+   "file": "ES_1Nacional_PalmaDelRio_2026_s1.mp4",
+   "fps": 30.0,
+   "frame": 263,
+   "t_s": 8.767
+  },
+  {
+   "id": "b151",
+   "game": "ES_1Nacional_PalmaDelRio_2026",
+   "dataset": "l10",
+   "file": "ES_1Nacional_PalmaDelRio_2026_s1.mp4",
+   "fps": 30.0,
+   "frame": 1570,
+   "t_s": 52.333
+  },
+  {
+   "id": "b152",
+   "game": "ES_1Nacional_PalmaDelRio_2026",
+   "dataset": "l10",
+   "file": "ES_1Nacional_PalmaDelRio_2026_s1.mp4",
+   "fps": 30.0,
+   "frame": 3651,
+   "t_s": 121.7
+  },
+  {
+   "id": "b153",
+   "game": "ES_1Nacional_PalmaDelRio_2026",
+   "dataset": "l10",
+   "file": "ES_1Nacional_PalmaDelRio_2026_s4.mp4",
+   "fps": 30.0,
+   "frame": 2888,
+   "t_s": 96.267
+  },
+  {
+   "id": "b154",
+   "game": "ES_2Nacional_MarniB_Almoradi_2026",
+   "dataset": "l10",
+   "file": "ES_2Nacional_MarniB_Almoradi_2026_s1.mp4",
+   "fps": 60.0,
+   "frame": 2386,
+   "t_s": 39.767
+  },
+  {
+   "id": "b155",
+   "game": "ES_2Nacional_MarniB_Almoradi_2026",
+   "dataset": "l10",
+   "file": "ES_2Nacional_MarniB_Almoradi_2026_s0.mp4",
+   "fps": 60.0,
+   "frame": 7812,
+   "t_s": 130.2
+  },
+  {
+   "id": "b156",
+   "game": "ES_2Nacional_MarniB_Almoradi_2026",
+   "dataset": "l10",
+   "file": "ES_2Nacional_MarniB_Almoradi_2026_s1.mp4",
+   "fps": 60.0,
+   "frame": 4838,
+   "t_s": 80.633
+  },
+  {
+   "id": "b157",
+   "game": "ES_2Nacional_MarniB_Almoradi_2026",
+   "dataset": "l10",
+   "file": "ES_2Nacional_MarniB_Almoradi_2026_s1.mp4",
+   "fps": 60.0,
+   "frame": 822,
+   "t_s": 13.7
+  },
+  {
+   "id": "b158",
+   "game": "ES_2Nacional_MarniB_Almoradi_2026",
+   "dataset": "l10",
+   "file": "ES_2Nacional_MarniB_Almoradi_2026_s2.mp4",
+   "fps": 60.0,
+   "frame": 8838,
+   "t_s": 147.3
+  },
+  {
+   "id": "b159",
+   "game": "ES_2Nacional_MarniB_Almoradi_2026",
+   "dataset": "l10",
+   "file": "ES_2Nacional_MarniB_Almoradi_2026_s2.mp4",
+   "fps": 60.0,
+   "frame": 5560,
+   "t_s": 92.667
+  },
+  {
+   "id": "b160",
+   "game": "ES_2Nacional_MarniB_Almoradi_2026",
+   "dataset": "l10",
+   "file": "ES_2Nacional_MarniB_Almoradi_2026_s0.mp4",
+   "fps": 60.0,
+   "frame": 3269,
+   "t_s": 54.483
+  },
+  {
+   "id": "b161",
+   "game": "ES_HonorPlata_Bordils_Zamora_2018",
+   "dataset": "l12",
+   "file": "ES_HonorPlata_Bordils_Zamora_2018_s1.mp4",
+   "fps": 30.0,
+   "frame": 2869,
+   "t_s": 95.633
+  },
+  {
+   "id": "b162",
+   "game": "ES_HonorPlata_Bordils_Zamora_2018",
+   "dataset": "l12",
+   "file": "ES_HonorPlata_Bordils_Zamora_2018_s4.mp4",
+   "fps": 30.0,
+   "frame": 782,
+   "t_s": 26.067
+  },
+  {
+   "id": "b163",
+   "game": "ES_HonorPlata_Bordils_Zamora_2018",
+   "dataset": "l12",
+   "file": "ES_HonorPlata_Bordils_Zamora_2018_s1.mp4",
+   "fps": 30.0,
+   "frame": 4832,
+   "t_s": 161.067
+  },
+  {
+   "id": "b164",
+   "game": "ES_HonorPlata_Bordils_Zamora_2018",
+   "dataset": "l12",
+   "file": "ES_HonorPlata_Bordils_Zamora_2018_s1.mp4",
+   "fps": 30.0,
+   "frame": 1686,
+   "t_s": 56.2
+  },
+  {
+   "id": "b165",
+   "game": "ES_HonorPlata_Bordils_Zamora_2018",
+   "dataset": "l12",
+   "file": "ES_HonorPlata_Bordils_Zamora_2018_s4.mp4",
+   "fps": 30.0,
+   "frame": 4073,
+   "t_s": 135.767
+  },
+  {
+   "id": "b166",
+   "game": "ES_HonorPlata_Bordils_Zamora_2018",
+   "dataset": "l12",
+   "file": "ES_HonorPlata_Bordils_Zamora_2018_s2.mp4",
+   "fps": 30.0,
+   "frame": 4082,
+   "t_s": 136.067
+  },
+  {
+   "id": "b167",
+   "game": "ES_HonorPlata_Bordils_Zamora_2018",
+   "dataset": "l12",
+   "file": "ES_HonorPlata_Bordils_Zamora_2018_s4.mp4",
+   "fps": 30.0,
+   "frame": 2805,
+   "t_s": 93.5
+  },
+  {
+   "id": "b168",
+   "game": "FI_Karsinta_Dynamo_GrIFK_2015",
+   "dataset": "l12",
+   "file": "FI_Karsinta_Dynamo_GrIFK_2015_s4.mp4",
+   "fps": 23.976,
+   "frame": 1674,
+   "t_s": 69.82
+  },
+  {
+   "id": "b169",
+   "game": "FI_Karsinta_Dynamo_GrIFK_2015",
+   "dataset": "l12",
+   "file": "FI_Karsinta_Dynamo_GrIFK_2015_s4.mp4",
+   "fps": 23.976,
+   "frame": 389,
+   "t_s": 16.225
+  },
+  {
+   "id": "b170",
+   "game": "FI_Karsinta_Dynamo_GrIFK_2015",
+   "dataset": "l12",
+   "file": "FI_Karsinta_Dynamo_GrIFK_2015_s1.mp4",
+   "fps": 23.976,
+   "frame": 1486,
+   "t_s": 61.979
+  },
+  {
+   "id": "b171",
+   "game": "FI_Karsinta_Dynamo_GrIFK_2015",
+   "dataset": "l12",
+   "file": "FI_Karsinta_Dynamo_GrIFK_2015_s1.mp4",
+   "fps": 23.976,
+   "frame": 3512,
+   "t_s": 146.48
+  },
+  {
+   "id": "b172",
+   "game": "FI_Karsinta_Dynamo_GrIFK_2015",
+   "dataset": "l12",
+   "file": "FI_Karsinta_Dynamo_GrIFK_2015_s4.mp4",
+   "fps": 23.976,
+   "frame": 3991,
+   "t_s": 166.458
+  },
+  {
+   "id": "b173",
+   "game": "FI_Karsinta_Dynamo_GrIFK_2015",
+   "dataset": "l12",
+   "file": "FI_Karsinta_Dynamo_GrIFK_2015_s1.mp4",
+   "fps": 23.976,
+   "frame": 602,
+   "t_s": 25.108
+  },
+  {
+   "id": "b174",
+   "game": "FI_Karsinta_Dynamo_GrIFK_2015",
+   "dataset": "l12",
+   "file": "FI_Karsinta_Dynamo_GrIFK_2015_s0.mp4",
+   "fps": 23.976,
+   "frame": 720,
+   "t_s": 30.03
+  },
+  {
+   "id": "b175",
+   "game": "FR_N1_SudMayenne_GrandLibournais_2025",
+   "dataset": "l12",
+   "file": "FR_N1_SudMayenne_GrandLibournais_2025_s1.mp4",
+   "fps": 60.0,
+   "frame": 484,
+   "t_s": 8.067
+  },
+  {
+   "id": "b176",
+   "game": "FR_N1_SudMayenne_GrandLibournais_2025",
+   "dataset": "l12",
+   "file": "FR_N1_SudMayenne_GrandLibournais_2025_s1.mp4",
+   "fps": 60.0,
+   "frame": 2001,
+   "t_s": 33.35
+  },
+  {
+   "id": "b177",
+   "game": "FR_N1_SudMayenne_GrandLibournais_2025",
+   "dataset": "l12",
+   "file": "FR_N1_SudMayenne_GrandLibournais_2025_s2.mp4",
+   "fps": 60.0,
+   "frame": 3338,
+   "t_s": 55.633
+  },
+  {
+   "id": "b178",
+   "game": "FR_N1_SudMayenne_GrandLibournais_2025",
+   "dataset": "l12",
+   "file": "FR_N1_SudMayenne_GrandLibournais_2025_s2.mp4",
+   "fps": 60.0,
+   "frame": 6284,
+   "t_s": 104.733
+  },
+  {
+   "id": "b179",
+   "game": "FR_N1_SudMayenne_GrandLibournais_2025",
+   "dataset": "l12",
+   "file": "FR_N1_SudMayenne_GrandLibournais_2025_s1.mp4",
+   "fps": 60.0,
+   "frame": 8929,
+   "t_s": 148.817
+  },
+  {
+   "id": "b180",
+   "game": "FR_N1_SudMayenne_GrandLibournais_2025",
+   "dataset": "l12",
+   "file": "FR_N1_SudMayenne_GrandLibournais_2025_s1.mp4",
+   "fps": 60.0,
+   "frame": 4548,
+   "t_s": 75.8
+  },
+  {
+   "id": "b181",
+   "game": "FR_N1_SudMayenne_GrandLibournais_2025",
+   "dataset": "l12",
+   "file": "FR_N1_SudMayenne_GrandLibournais_2025_s2.mp4",
+   "fps": 60.0,
+   "frame": 7821,
+   "t_s": 130.35
+  },
+  {
+   "id": "b182",
+   "game": "FR_N3_CPBRennes_SaintMalo_2026",
+   "dataset": "l10",
+   "file": "FR_N3_CPBRennes_SaintMalo_2026_s0.mp4",
+   "fps": 60.0,
+   "frame": 4513,
+   "t_s": 75.217
+  },
+  {
+   "id": "b183",
+   "game": "FR_N3_CPBRennes_SaintMalo_2026",
+   "dataset": "l10",
+   "file": "FR_N3_CPBRennes_SaintMalo_2026_s1.mp4",
+   "fps": 60.0,
+   "frame": 4498,
+   "t_s": 74.967
+  },
+  {
+   "id": "b184",
+   "game": "FR_N3_CPBRennes_SaintMalo_2026",
+   "dataset": "l10",
+   "file": "FR_N3_CPBRennes_SaintMalo_2026_s1.mp4",
+   "fps": 60.0,
+   "frame": 7971,
+   "t_s": 132.85
+  },
+  {
+   "id": "b185",
+   "game": "FR_N3_CPBRennes_SaintMalo_2026",
+   "dataset": "l10",
+   "file": "FR_N3_CPBRennes_SaintMalo_2026_s0.mp4",
+   "fps": 60.0,
+   "frame": 6195,
+   "t_s": 103.25
+  },
+  {
+   "id": "b186",
+   "game": "FR_N3_CPBRennes_SaintMalo_2026",
+   "dataset": "l10",
+   "file": "FR_N3_CPBRennes_SaintMalo_2026_s0.mp4",
+   "fps": 60.0,
+   "frame": 10163,
+   "t_s": 169.383
+  },
+  {
+   "id": "b187",
+   "game": "FR_N3_CPBRennes_SaintMalo_2026",
+   "dataset": "l10",
+   "file": "FR_N3_CPBRennes_SaintMalo_2026_s1.mp4",
+   "fps": 60.0,
+   "frame": 9267,
+   "t_s": 154.45
+  },
+  {
+   "id": "b188",
+   "game": "FR_N3_CPBRennes_SaintMalo_2026",
+   "dataset": "l10",
+   "file": "FR_N3_CPBRennes_SaintMalo_2026_s1.mp4",
+   "fps": 60.0,
+   "frame": 3013,
+   "t_s": 50.217
+  },
+  {
+   "id": "b189",
+   "game": "IT_SerieA2_Flavioni_Salerno_2026",
+   "dataset": "l10",
+   "file": "IT_SerieA2_Flavioni_Salerno_2026_s0.mp4",
+   "fps": 30.0,
+   "frame": 1153,
+   "t_s": 38.433
+  },
+  {
+   "id": "b190",
+   "game": "IT_SerieA2_Flavioni_Salerno_2026",
+   "dataset": "l10",
+   "file": "IT_SerieA2_Flavioni_Salerno_2026_s1.mp4",
+   "fps": 30.0,
+   "frame": 774,
+   "t_s": 25.8
+  },
+  {
+   "id": "b191",
+   "game": "IT_SerieA2_Flavioni_Salerno_2026",
+   "dataset": "l10",
+   "file": "IT_SerieA2_Flavioni_Salerno_2026_s0.mp4",
+   "fps": 30.0,
+   "frame": 4443,
+   "t_s": 148.1
+  },
+  {
+   "id": "b192",
+   "game": "IT_SerieA2_Flavioni_Salerno_2026",
+   "dataset": "l10",
+   "file": "IT_SerieA2_Flavioni_Salerno_2026_s4.mp4",
+   "fps": 30.0,
+   "frame": 2948,
+   "t_s": 98.267
+  },
+  {
+   "id": "b193",
+   "game": "IT_SerieA2_Flavioni_Salerno_2026",
+   "dataset": "l10",
+   "file": "IT_SerieA2_Flavioni_Salerno_2026_s4.mp4",
+   "fps": 30.0,
+   "frame": 5156,
+   "t_s": 171.867
+  },
+  {
+   "id": "b194",
+   "game": "IT_SerieA2_Flavioni_Salerno_2026",
+   "dataset": "l10",
+   "file": "IT_SerieA2_Flavioni_Salerno_2026_s0.mp4",
+   "fps": 30.0,
+   "frame": 3460,
+   "t_s": 115.333
+  },
+  {
+   "id": "b195",
+   "game": "IT_SerieA2_Flavioni_Salerno_2026",
+   "dataset": "l10",
+   "file": "IT_SerieA2_Flavioni_Salerno_2026_s1.mp4",
+   "fps": 30.0,
+   "frame": 5152,
+   "t_s": 171.733
+  },
+  {
+   "id": "b196",
+   "game": "IT_SerieA2_Leno_MedalpTirol_2020",
+   "dataset": "l10",
+   "file": "IT_SerieA2_Leno_MedalpTirol_2020_s0.mp4",
+   "fps": 30.0,
+   "frame": 5259,
+   "t_s": 175.3
+  },
+  {
+   "id": "b197",
+   "game": "IT_SerieA2_Leno_MedalpTirol_2020",
+   "dataset": "l10",
+   "file": "IT_SerieA2_Leno_MedalpTirol_2020_s2.mp4",
+   "fps": 30.0,
+   "frame": 2607,
+   "t_s": 86.9
+  },
+  {
+   "id": "b198",
+   "game": "IT_SerieA2_Leno_MedalpTirol_2020",
+   "dataset": "l10",
+   "file": "IT_SerieA2_Leno_MedalpTirol_2020_s1.mp4",
+   "fps": 30.0,
+   "frame": 3163,
+   "t_s": 105.433
+  },
+  {
+   "id": "b199",
+   "game": "IT_SerieA2_Leno_MedalpTirol_2020",
+   "dataset": "l10",
+   "file": "IT_SerieA2_Leno_MedalpTirol_2020_s0.mp4",
+   "fps": 30.0,
+   "frame": 1416,
+   "t_s": 47.2
+  },
+  {
+   "id": "b200",
+   "game": "IT_SerieA2_Leno_MedalpTirol_2020",
+   "dataset": "l10",
+   "file": "IT_SerieA2_Leno_MedalpTirol_2020_s2.mp4",
+   "fps": 30.0,
+   "frame": 1397,
+   "t_s": 46.567
+  },
+  {
+   "id": "b201",
+   "game": "IT_SerieA2_Leno_MedalpTirol_2020",
+   "dataset": "l10",
+   "file": "IT_SerieA2_Leno_MedalpTirol_2020_s1.mp4",
+   "fps": 30.0,
+   "frame": 1507,
+   "t_s": 50.233
+  },
+  {
+   "id": "b202",
+   "game": "IT_SerieA2_Leno_MedalpTirol_2020",
+   "dataset": "l10",
+   "file": "IT_SerieA2_Leno_MedalpTirol_2020_s0.mp4",
+   "fps": 30.0,
+   "frame": 3969,
+   "t_s": 132.3
+  },
+  {
+   "id": "b203",
+   "game": "IT_SerieA2_Malo_Crenna_2018",
+   "dataset": "l10",
+   "file": "IT_SerieA2_Malo_Crenna_2018_s0.mp4",
+   "fps": 25.0,
+   "frame": 1851,
+   "t_s": 74.04
+  },
+  {
+   "id": "b204",
+   "game": "IT_SerieA2_Malo_Crenna_2018",
+   "dataset": "l10",
+   "file": "IT_SerieA2_Malo_Crenna_2018_s3.mp4",
+   "fps": 25.0,
+   "frame": 4275,
+   "t_s": 171.0
+  },
+  {
+   "id": "b205",
+   "game": "IT_SerieA2_Malo_Crenna_2018",
+   "dataset": "l10",
+   "file": "IT_SerieA2_Malo_Crenna_2018_s2.mp4",
+   "fps": 25.0,
+   "frame": 2260,
+   "t_s": 90.4
+  },
+  {
+   "id": "b206",
+   "game": "IT_SerieA2_Malo_Crenna_2018",
+   "dataset": "l10",
+   "file": "IT_SerieA2_Malo_Crenna_2018_s3.mp4",
+   "fps": 25.0,
+   "frame": 506,
+   "t_s": 20.24
+  },
+  {
+   "id": "b207",
+   "game": "IT_SerieA2_Malo_Crenna_2018",
+   "dataset": "l10",
+   "file": "IT_SerieA2_Malo_Crenna_2018_s2.mp4",
+   "fps": 25.0,
+   "frame": 1252,
+   "t_s": 50.08
+  },
+  {
+   "id": "b208",
+   "game": "IT_SerieA2_Malo_Crenna_2018",
+   "dataset": "l10",
+   "file": "IT_SerieA2_Malo_Crenna_2018_s0.mp4",
+   "fps": 25.0,
+   "frame": 1066,
+   "t_s": 42.64
+  },
+  {
+   "id": "b209",
+   "game": "IT_SerieA2_Malo_Crenna_2018",
+   "dataset": "l10",
+   "file": "IT_SerieA2_Malo_Crenna_2018_s0.mp4",
+   "fps": 25.0,
+   "frame": 3332,
+   "t_s": 133.28
+  },
+  {
+   "id": "b210",
+   "game": "Int_Olympia_Finale_Frankreich_Daenemark_2021",
+   "dataset": "l12",
+   "file": "Int_Olympia_Finale_Frankreich_Daenemark_2021_s0.mp4",
+   "fps": 25.0,
+   "frame": 848,
+   "t_s": 33.92
+  },
+  {
+   "id": "b211",
+   "game": "Int_Olympia_Finale_Frankreich_Daenemark_2021",
+   "dataset": "l12",
+   "file": "Int_Olympia_Finale_Frankreich_Daenemark_2021_s4.mp4",
+   "fps": 25.0,
+   "frame": 4370,
+   "t_s": 174.8
+  },
+  {
+   "id": "b212",
+   "game": "Int_Olympia_Finale_Frankreich_Daenemark_2021",
+   "dataset": "l12",
+   "file": "Int_Olympia_Finale_Frankreich_Daenemark_2021_s0.mp4",
+   "fps": 25.0,
+   "frame": 3837,
+   "t_s": 153.48
+  },
+  {
+   "id": "b213",
+   "game": "Int_Olympia_Finale_Frankreich_Daenemark_2021",
+   "dataset": "l12",
+   "file": "Int_Olympia_Finale_Frankreich_Daenemark_2021_s1.mp4",
+   "fps": 25.0,
+   "frame": 1479,
+   "t_s": 59.16
+  },
+  {
+   "id": "b214",
+   "game": "Int_Olympia_Finale_Frankreich_Daenemark_2021",
+   "dataset": "l12",
+   "file": "Int_Olympia_Finale_Frankreich_Daenemark_2021_s4.mp4",
+   "fps": 25.0,
+   "frame": 721,
+   "t_s": 28.84
+  },
+  {
+   "id": "b215",
+   "game": "Int_Olympia_Finale_Frankreich_Daenemark_2021",
+   "dataset": "l12",
+   "file": "Int_Olympia_Finale_Frankreich_Daenemark_2021_s0.mp4",
+   "fps": 25.0,
+   "frame": 244,
+   "t_s": 9.76
+  },
+  {
+   "id": "b216",
+   "game": "Int_Olympia_Finale_Frankreich_Daenemark_2021",
+   "dataset": "l12",
+   "file": "Int_Olympia_Finale_Frankreich_Daenemark_2021_s0.mp4",
+   "fps": 25.0,
+   "frame": 1825,
+   "t_s": 73.0
+  },
+  {
+   "id": "b217",
+   "game": "NL_1Divisie_BFC2_PSV_2021",
+   "dataset": "l11",
+   "file": "NL_1Divisie_BFC2_PSV_2021_s3.mp4",
+   "fps": 30.0,
+   "frame": 4852,
+   "t_s": 161.733
+  },
+  {
+   "id": "b218",
+   "game": "NL_1Divisie_BFC2_PSV_2021",
+   "dataset": "l11",
+   "file": "NL_1Divisie_BFC2_PSV_2021_s3.mp4",
+   "fps": 30.0,
+   "frame": 655,
+   "t_s": 21.833
+  },
+  {
+   "id": "b219",
+   "game": "NL_1Divisie_BFC2_PSV_2021",
+   "dataset": "l11",
+   "file": "NL_1Divisie_BFC2_PSV_2021_s3.mp4",
+   "fps": 30.0,
+   "frame": 3992,
+   "t_s": 133.067
+  },
+  {
+   "id": "b220",
+   "game": "NL_1Divisie_BFC2_PSV_2021",
+   "dataset": "l11",
+   "file": "NL_1Divisie_BFC2_PSV_2021_s1.mp4",
+   "fps": 30.0,
+   "frame": 118,
+   "t_s": 3.933
+  },
+  {
+   "id": "b221",
+   "game": "NL_1Divisie_BFC2_PSV_2021",
+   "dataset": "l11",
+   "file": "NL_1Divisie_BFC2_PSV_2021_s2.mp4",
+   "fps": 30.0,
+   "frame": 2442,
+   "t_s": 81.4
+  },
+  {
+   "id": "b222",
+   "game": "NL_1Divisie_BFC2_PSV_2021",
+   "dataset": "l11",
+   "file": "NL_1Divisie_BFC2_PSV_2021_s1.mp4",
+   "fps": 30.0,
+   "frame": 1467,
+   "t_s": 48.9
+  },
+  {
+   "id": "b223",
+   "game": "NL_1Divisie_BFC2_PSV_2021",
+   "dataset": "l11",
+   "file": "NL_1Divisie_BFC2_PSV_2021_s2.mp4",
+   "fps": 30.0,
+   "frame": 3630,
+   "t_s": 121.0
+  },
+  {
+   "id": "b224",
+   "game": "NL_1Divisie_JongSEW_Wijhe_2024",
+   "dataset": "l11",
+   "file": "NL_1Divisie_JongSEW_Wijhe_2024_s2.mp4",
+   "fps": 60.0,
+   "frame": 929,
+   "t_s": 15.483
+  },
+  {
+   "id": "b225",
+   "game": "NL_1Divisie_JongSEW_Wijhe_2024",
+   "dataset": "l11",
+   "file": "NL_1Divisie_JongSEW_Wijhe_2024_s4.mp4",
+   "fps": 60.0,
+   "frame": 451,
+   "t_s": 7.517
+  },
+  {
+   "id": "b226",
+   "game": "NL_1Divisie_JongSEW_Wijhe_2024",
+   "dataset": "l11",
+   "file": "NL_1Divisie_JongSEW_Wijhe_2024_s4.mp4",
+   "fps": 60.0,
+   "frame": 3318,
+   "t_s": 55.3
+  },
+  {
+   "id": "b227",
+   "game": "NL_1Divisie_JongSEW_Wijhe_2024",
+   "dataset": "l11",
+   "file": "NL_1Divisie_JongSEW_Wijhe_2024_s2.mp4",
+   "fps": 60.0,
+   "frame": 8961,
+   "t_s": 149.35
+  },
+  {
+   "id": "b228",
+   "game": "NL_1Divisie_JongSEW_Wijhe_2024",
+   "dataset": "l11",
+   "file": "NL_1Divisie_JongSEW_Wijhe_2024_s0.mp4",
+   "fps": 60.0,
+   "frame": 4552,
+   "t_s": 75.867
+  },
+  {
+   "id": "b229",
+   "game": "NL_1Divisie_JongSEW_Wijhe_2024",
+   "dataset": "l11",
+   "file": "NL_1Divisie_JongSEW_Wijhe_2024_s4.mp4",
+   "fps": 60.0,
+   "frame": 7855,
+   "t_s": 130.917
+  },
+  {
+   "id": "b230",
+   "game": "NL_1Divisie_JongSEW_Wijhe_2024",
+   "dataset": "l11",
+   "file": "NL_1Divisie_JongSEW_Wijhe_2024_s2.mp4",
+   "fps": 60.0,
+   "frame": 3211,
+   "t_s": 53.517
+  },
+  {
+   "id": "b231",
+   "game": "NL_2Divisie_SEW2_Tukkers_2019",
+   "dataset": "l11",
+   "file": "NL_2Divisie_SEW2_Tukkers_2019_s3.mp4",
+   "fps": 25.0,
+   "frame": 1059,
+   "t_s": 42.36
+  },
+  {
+   "id": "b232",
+   "game": "NL_2Divisie_SEW2_Tukkers_2019",
+   "dataset": "l11",
+   "file": "NL_2Divisie_SEW2_Tukkers_2019_s1.mp4",
+   "fps": 25.0,
+   "frame": 4113,
+   "t_s": 164.52
+  },
+  {
+   "id": "b233",
+   "game": "NL_2Divisie_SEW2_Tukkers_2019",
+   "dataset": "l11",
+   "file": "NL_2Divisie_SEW2_Tukkers_2019_s0.mp4",
+   "fps": 25.0,
+   "frame": 3417,
+   "t_s": 136.68
+  },
+  {
+   "id": "b234",
+   "game": "NL_2Divisie_SEW2_Tukkers_2019",
+   "dataset": "l11",
+   "file": "NL_2Divisie_SEW2_Tukkers_2019_s1.mp4",
+   "fps": 25.0,
+   "frame": 1721,
+   "t_s": 68.84
+  },
+  {
+   "id": "b235",
+   "game": "NL_2Divisie_SEW2_Tukkers_2019",
+   "dataset": "l11",
+   "file": "NL_2Divisie_SEW2_Tukkers_2019_s0.mp4",
+   "fps": 25.0,
+   "frame": 712,
+   "t_s": 28.48
+  },
+  {
+   "id": "b236",
+   "game": "NL_2Divisie_SEW2_Tukkers_2019",
+   "dataset": "l11",
+   "file": "NL_2Divisie_SEW2_Tukkers_2019_s3.mp4",
+   "fps": 25.0,
+   "frame": 3253,
+   "t_s": 130.12
+  },
+  {
+   "id": "b237",
+   "game": "NL_2Divisie_SEW2_Tukkers_2019",
+   "dataset": "l11",
+   "file": "NL_2Divisie_SEW2_Tukkers_2019_s1.mp4",
+   "fps": 25.0,
+   "frame": 940,
+   "t_s": 37.6
+  },
+  {
+   "id": "b238",
+   "game": "NL_2Divisie_VZV2_SEW2_2019",
+   "dataset": "l12",
+   "file": "NL_2Divisie_VZV2_SEW2_2019_s2.mp4",
+   "fps": 50.0,
+   "frame": 1359,
+   "t_s": 27.18
+  },
+  {
+   "id": "b239",
+   "game": "NL_2Divisie_VZV2_SEW2_2019",
+   "dataset": "l12",
+   "file": "NL_2Divisie_VZV2_SEW2_2019_s1.mp4",
+   "fps": 50.0,
+   "frame": 6071,
+   "t_s": 121.42
+  },
+  {
+   "id": "b240",
+   "game": "NL_2Divisie_VZV2_SEW2_2019",
+   "dataset": "l12",
+   "file": "NL_2Divisie_VZV2_SEW2_2019_s3.mp4",
+   "fps": 50.0,
+   "frame": 3487,
+   "t_s": 69.74
+  },
+  {
+   "id": "b241",
+   "game": "NL_2Divisie_VZV2_SEW2_2019",
+   "dataset": "l12",
+   "file": "NL_2Divisie_VZV2_SEW2_2019_s2.mp4",
+   "fps": 50.0,
+   "frame": 4373,
+   "t_s": 87.46
+  },
+  {
+   "id": "b242",
+   "game": "NL_2Divisie_VZV2_SEW2_2019",
+   "dataset": "l12",
+   "file": "NL_2Divisie_VZV2_SEW2_2019_s3.mp4",
+   "fps": 50.0,
+   "frame": 7384,
+   "t_s": 147.68
+  },
+  {
+   "id": "b243",
+   "game": "NL_2Divisie_VZV2_SEW2_2019",
+   "dataset": "l12",
+   "file": "NL_2Divisie_VZV2_SEW2_2019_s1.mp4",
+   "fps": 50.0,
+   "frame": 4007,
+   "t_s": 80.14
+  },
+  {
+   "id": "b244",
+   "game": "NL_2Divisie_VZV2_SEW2_2019",
+   "dataset": "l12",
+   "file": "NL_2Divisie_VZV2_SEW2_2019_s2.mp4",
+   "fps": 50.0,
+   "frame": 7797,
+   "t_s": 155.94
+  },
+  {
+   "id": "b245",
+   "game": "NL_Frauen_Final_VOC_SEW_2026",
+   "dataset": "l11",
+   "file": "NL_Frauen_Final_VOC_SEW_2026_s1.mp4",
+   "fps": 25.0,
+   "frame": 1519,
+   "t_s": 60.76
+  },
+  {
+   "id": "b246",
+   "game": "NL_Frauen_Final_VOC_SEW_2026",
+   "dataset": "l11",
+   "file": "NL_Frauen_Final_VOC_SEW_2026_s2.mp4",
+   "fps": 25.0,
+   "frame": 2783,
+   "t_s": 111.32
+  },
+  {
+   "id": "b247",
+   "game": "NL_Frauen_Final_VOC_SEW_2026",
+   "dataset": "l11",
+   "file": "NL_Frauen_Final_VOC_SEW_2026_s1.mp4",
+   "fps": 25.0,
+   "frame": 3613,
+   "t_s": 144.52
+  },
+  {
+   "id": "b248",
+   "game": "NL_Frauen_Final_VOC_SEW_2026",
+   "dataset": "l11",
+   "file": "NL_Frauen_Final_VOC_SEW_2026_s0.mp4",
+   "fps": 25.0,
+   "frame": 4146,
+   "t_s": 165.84
+  },
+  {
+   "id": "b249",
+   "game": "NL_Frauen_Final_VOC_SEW_2026",
+   "dataset": "l11",
+   "file": "NL_Frauen_Final_VOC_SEW_2026_s2.mp4",
+   "fps": 25.0,
+   "frame": 1661,
+   "t_s": 66.44
+  },
+  {
+   "id": "b250",
+   "game": "NL_Frauen_Final_VOC_SEW_2026",
+   "dataset": "l11",
+   "file": "NL_Frauen_Final_VOC_SEW_2026_s0.mp4",
+   "fps": 25.0,
+   "frame": 323,
+   "t_s": 12.92
+  },
+  {
+   "id": "b251",
+   "game": "NL_Frauen_Final_VOC_SEW_2026",
+   "dataset": "l11",
+   "file": "NL_Frauen_Final_VOC_SEW_2026_s2.mp4",
+   "fps": 25.0,
+   "frame": 1081,
+   "t_s": 43.24
+  },
+  {
+   "id": "b252",
+   "game": "NO_Frauen_3Div_Sogndal_Askoey_2019",
+   "dataset": "l12",
+   "file": "NO_Frauen_3Div_Sogndal_Askoey_2019_s2.mp4",
+   "fps": 30.0,
+   "frame": 956,
+   "t_s": 31.867
+  },
+  {
+   "id": "b253",
+   "game": "NO_Frauen_3Div_Sogndal_Askoey_2019",
+   "dataset": "l12",
+   "file": "NO_Frauen_3Div_Sogndal_Askoey_2019_s4.mp4",
+   "fps": 30.0,
+   "frame": 4265,
+   "t_s": 142.167
+  },
+  {
+   "id": "b254",
+   "game": "NO_Frauen_3Div_Sogndal_Askoey_2019",
+   "dataset": "l12",
+   "file": "NO_Frauen_3Div_Sogndal_Askoey_2019_s2.mp4",
+   "fps": 30.0,
+   "frame": 4724,
+   "t_s": 157.467
+  },
+  {
+   "id": "b255",
+   "game": "NO_Frauen_3Div_Sogndal_Askoey_2019",
+   "dataset": "l12",
+   "file": "NO_Frauen_3Div_Sogndal_Askoey_2019_s4.mp4",
+   "fps": 30.0,
+   "frame": 853,
+   "t_s": 28.433
+  },
+  {
+   "id": "b256",
+   "game": "NO_Frauen_3Div_Sogndal_Askoey_2019",
+   "dataset": "l12",
+   "file": "NO_Frauen_3Div_Sogndal_Askoey_2019_s4.mp4",
+   "fps": 30.0,
+   "frame": 1554,
+   "t_s": 51.8
+  },
+  {
+   "id": "b257",
+   "game": "NO_Frauen_3Div_Sogndal_Askoey_2019",
+   "dataset": "l12",
+   "file": "NO_Frauen_3Div_Sogndal_Askoey_2019_s2.mp4",
+   "fps": 30.0,
+   "frame": 2347,
+   "t_s": 78.233
+  },
+  {
+   "id": "b258",
+   "game": "NO_Frauen_3Div_Sogndal_Askoey_2019",
+   "dataset": "l12",
+   "file": "NO_Frauen_3Div_Sogndal_Askoey_2019_s4.mp4",
+   "fps": 30.0,
+   "frame": 5092,
+   "t_s": 169.733
+  },
+  {
+   "id": "b259",
+   "game": "PT_Frauen_Madeira_Gaia_2022",
+   "dataset": "l12",
+   "file": "PT_Frauen_Madeira_Gaia_2022_s1.mp4",
+   "fps": 30.0,
+   "frame": 4576,
+   "t_s": 152.533
+  },
+  {
+   "id": "b260",
+   "game": "PT_Frauen_Madeira_Gaia_2022",
+   "dataset": "l12",
+   "file": "PT_Frauen_Madeira_Gaia_2022_s3.mp4",
+   "fps": 30.0,
+   "frame": 1216,
+   "t_s": 40.533
+  },
+  {
+   "id": "b261",
+   "game": "PT_Frauen_Madeira_Gaia_2022",
+   "dataset": "l12",
+   "file": "PT_Frauen_Madeira_Gaia_2022_s2.mp4",
+   "fps": 30.0,
+   "frame": 4716,
+   "t_s": 157.2
+  },
+  {
+   "id": "b262",
+   "game": "PT_Frauen_Madeira_Gaia_2022",
+   "dataset": "l12",
+   "file": "PT_Frauen_Madeira_Gaia_2022_s1.mp4",
+   "fps": 30.0,
+   "frame": 3289,
+   "t_s": 109.633
+  },
+  {
+   "id": "b263",
+   "game": "PT_Frauen_Madeira_Gaia_2022",
+   "dataset": "l12",
+   "file": "PT_Frauen_Madeira_Gaia_2022_s3.mp4",
+   "fps": 30.0,
+   "frame": 2993,
+   "t_s": 99.767
+  },
+  {
+   "id": "b264",
+   "game": "PT_Frauen_Madeira_Gaia_2022",
+   "dataset": "l12",
+   "file": "PT_Frauen_Madeira_Gaia_2022_s3.mp4",
+   "fps": 30.0,
+   "frame": 1938,
+   "t_s": 64.6
+  },
+  {
+   "id": "b265",
+   "game": "PT_Frauen_Madeira_Gaia_2022",
+   "dataset": "l12",
+   "file": "PT_Frauen_Madeira_Gaia_2022_s2.mp4",
+   "fps": 30.0,
+   "frame": 1235,
+   "t_s": 41.167
+  },
+  {
+   "id": "b266",
+   "game": "SE_Allsvenskan_Torslanda_Amo_2018",
+   "dataset": "l12",
+   "file": "SE_Allsvenskan_Torslanda_Amo_2018_s0.mp4",
+   "fps": 25.0,
+   "frame": 4015,
+   "t_s": 160.6
+  },
+  {
+   "id": "b267",
+   "game": "SE_Allsvenskan_Torslanda_Amo_2018",
+   "dataset": "l12",
+   "file": "SE_Allsvenskan_Torslanda_Amo_2018_s2.mp4",
+   "fps": 25.0,
+   "frame": 3312,
+   "t_s": 132.48
+  },
+  {
+   "id": "b268",
+   "game": "SE_Allsvenskan_Torslanda_Amo_2018",
+   "dataset": "l12",
+   "file": "SE_Allsvenskan_Torslanda_Amo_2018_s1.mp4",
+   "fps": 25.0,
+   "frame": 866,
+   "t_s": 34.64
+  },
+  {
+   "id": "b269",
+   "game": "SE_Allsvenskan_Torslanda_Amo_2018",
+   "dataset": "l12",
+   "file": "SE_Allsvenskan_Torslanda_Amo_2018_s1.mp4",
+   "fps": 25.0,
+   "frame": 3146,
+   "t_s": 125.84
+  },
+  {
+   "id": "b270",
+   "game": "SE_Allsvenskan_Torslanda_Amo_2018",
+   "dataset": "l12",
+   "file": "SE_Allsvenskan_Torslanda_Amo_2018_s2.mp4",
+   "fps": 25.0,
+   "frame": 1427,
+   "t_s": 57.08
+  },
+  {
+   "id": "b271",
+   "game": "SE_Allsvenskan_Torslanda_Amo_2018",
+   "dataset": "l12",
+   "file": "SE_Allsvenskan_Torslanda_Amo_2018_s1.mp4",
+   "fps": 25.0,
+   "frame": 4038,
+   "t_s": 161.52
+  },
+  {
+   "id": "b272",
+   "game": "SE_Allsvenskan_Torslanda_Amo_2018",
+   "dataset": "l12",
+   "file": "SE_Allsvenskan_Torslanda_Amo_2018_s0.mp4",
+   "fps": 25.0,
+   "frame": 3391,
+   "t_s": 135.64
+  },
+  {
+   "id": "b273",
+   "game": "SE_Amateur_Sala_Vaesteras_2022",
+   "dataset": "l12",
+   "file": "SE_Amateur_Sala_Vaesteras_2022_s3.mp4",
+   "fps": 30.0,
+   "frame": 544,
+   "t_s": 18.133
+  },
+  {
+   "id": "b274",
+   "game": "SE_Amateur_Sala_Vaesteras_2022",
+   "dataset": "l12",
+   "file": "SE_Amateur_Sala_Vaesteras_2022_s4.mp4",
+   "fps": 30.0,
+   "frame": 4804,
+   "t_s": 160.133
+  },
+  {
+   "id": "b275",
+   "game": "SE_Amateur_Sala_Vaesteras_2022",
+   "dataset": "l12",
+   "file": "SE_Amateur_Sala_Vaesteras_2022_s2.mp4",
+   "fps": 30.0,
+   "frame": 1287,
+   "t_s": 42.9
+  },
+  {
+   "id": "b276",
+   "game": "SE_Amateur_Sala_Vaesteras_2022",
+   "dataset": "l12",
+   "file": "SE_Amateur_Sala_Vaesteras_2022_s2.mp4",
+   "fps": 30.0,
+   "frame": 2471,
+   "t_s": 82.367
+  },
+  {
+   "id": "b277",
+   "game": "SE_Amateur_Sala_Vaesteras_2022",
+   "dataset": "l12",
+   "file": "SE_Amateur_Sala_Vaesteras_2022_s3.mp4",
+   "fps": 30.0,
+   "frame": 2943,
+   "t_s": 98.1
+  },
+  {
+   "id": "b278",
+   "game": "SE_Amateur_Sala_Vaesteras_2022",
+   "dataset": "l12",
+   "file": "SE_Amateur_Sala_Vaesteras_2022_s4.mp4",
+   "fps": 30.0,
+   "frame": 2004,
+   "t_s": 66.8
+  },
+  {
+   "id": "b279",
+   "game": "SE_Amateur_Sala_Vaesteras_2022",
+   "dataset": "l12",
+   "file": "SE_Amateur_Sala_Vaesteras_2022_s2.mp4",
+   "fps": 30.0,
+   "frame": 3687,
+   "t_s": 122.9
+  },
+  {
+   "id": "b280",
+   "game": "SE_Test_Hammarby_Skanela_2026",
+   "dataset": "l12",
+   "file": "SE_Test_Hammarby_Skanela_2026_s2.mp4",
+   "fps": 30.0,
+   "frame": 708,
+   "t_s": 23.6
+  },
+  {
+   "id": "b281",
+   "game": "SE_Test_Hammarby_Skanela_2026",
+   "dataset": "l12",
+   "file": "SE_Test_Hammarby_Skanela_2026_s0.mp4",
+   "fps": 30.0,
+   "frame": 5203,
+   "t_s": 173.433
+  },
+  {
+   "id": "b282",
+   "game": "SE_Test_Hammarby_Skanela_2026",
+   "dataset": "l12",
+   "file": "SE_Test_Hammarby_Skanela_2026_s1.mp4",
+   "fps": 30.0,
+   "frame": 4895,
+   "t_s": 163.167
+  },
+  {
+   "id": "b283",
+   "game": "SE_Test_Hammarby_Skanela_2026",
+   "dataset": "l12",
+   "file": "SE_Test_Hammarby_Skanela_2026_s2.mp4",
+   "fps": 30.0,
+   "frame": 3211,
+   "t_s": 107.033
+  },
+  {
+   "id": "b284",
+   "game": "SE_Test_Hammarby_Skanela_2026",
+   "dataset": "l12",
+   "file": "SE_Test_Hammarby_Skanela_2026_s2.mp4",
+   "fps": 30.0,
+   "frame": 4282,
+   "t_s": 142.733
+  },
+  {
+   "id": "b285",
+   "game": "SE_Test_Hammarby_Skanela_2026",
+   "dataset": "l12",
+   "file": "SE_Test_Hammarby_Skanela_2026_s1.mp4",
+   "fps": 30.0,
+   "frame": 3444,
+   "t_s": 114.8
+  },
+  {
+   "id": "b286",
+   "game": "SE_Test_Hammarby_Skanela_2026",
+   "dataset": "l12",
+   "file": "SE_Test_Hammarby_Skanela_2026_s2.mp4",
+   "fps": 30.0,
+   "frame": 2294,
+   "t_s": 76.467
+  },
+  {
+   "id": "b287",
+   "game": "US_NYCity_NYAC_2019",
+   "dataset": "l13",
+   "file": "US_NYCity_NYAC_2019_s0.mp4",
+   "fps": 59.94,
+   "frame": 7682,
+   "t_s": 128.161
+  },
+  {
+   "id": "b288",
+   "game": "US_NYCity_NYAC_2019",
+   "dataset": "l13",
+   "file": "US_NYCity_NYAC_2019_s0.mp4",
+   "fps": 59.94,
+   "frame": 952,
+   "t_s": 15.883
+  },
+  {
+   "id": "b289",
+   "game": "US_NYCity_NYAC_2019",
+   "dataset": "l13",
+   "file": "US_NYCity_NYAC_2019_s2.mp4",
+   "fps": 59.94,
+   "frame": 10058,
+   "t_s": 167.801
+  },
+  {
+   "id": "b290",
+   "game": "US_NYCity_NYAC_2019",
+   "dataset": "l13",
+   "file": "US_NYCity_NYAC_2019_s0.mp4",
+   "fps": 59.94,
+   "frame": 5620,
+   "t_s": 93.76
+  },
+  {
+   "id": "b291",
+   "game": "US_NYCity_NYAC_2019",
+   "dataset": "l13",
+   "file": "US_NYCity_NYAC_2019_s1.mp4",
+   "fps": 59.94,
+   "frame": 5904,
+   "t_s": 98.498
+  },
+  {
+   "id": "b292",
+   "game": "US_NYCity_NYAC_2019",
+   "dataset": "l13",
+   "file": "US_NYCity_NYAC_2019_s0.mp4",
+   "fps": 59.94,
+   "frame": 10482,
+   "t_s": 174.875
+  },
+  {
+   "id": "b293",
+   "game": "US_NYCity_NYAC_2019",
+   "dataset": "l13",
+   "file": "US_NYCity_NYAC_2019_s2.mp4",
+   "fps": 59.94,
+   "frame": 1987,
+   "t_s": 33.15
+  }
+ ]
+}

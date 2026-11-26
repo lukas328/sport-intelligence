@@ -67,7 +67,7 @@ export function FederationView({ id, initial }: { id: string; initial: Schemas["
         >
           <label className="flex-1">
             <span className="sr-only">{t("email")}</span>
-            <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder={t("email")} className="min-h-10 w-full bg-raised ring-1 ring-inset ring-border px-3" />
+            <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder={t("email")} className="min-h-11 w-full bg-raised px-3 text-base ring-1 ring-inset ring-border" />
           </label>
           <Button type="submit" disabled={invite.isPending}>{t("send")}</Button>
         </form>
@@ -76,7 +76,7 @@ export function FederationView({ id, initial }: { id: string; initial: Schemas["
           <div className="space-y-2" data-testid="federation-invite-link">
             <p className="text-sm">{t("linkOnly", { email: sent.email })}</p>
             <div className="flex flex-wrap gap-2">
-              <input readOnly value={sent.link} onFocus={(e) => e.currentTarget.select()} aria-label={t("linkLabel")} className="min-h-10 min-w-0 flex-1 bg-raised px-3 font-mono text-xs ring-1 ring-inset ring-border" />
+              <input readOnly value={sent.link} onFocus={(e) => e.currentTarget.select()} aria-label={t("linkLabel")} className="min-h-11 min-w-0 flex-1 bg-raised px-3 font-mono text-base ring-1 ring-inset ring-border sm:pointer-fine:text-xs" />
               <Button
                 type="button"
                 variant="secondary"
