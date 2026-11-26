@@ -119,9 +119,15 @@ export function quickQueue(list: CandidateList): ShotCandidate[] {
     .sort((a, b) => a.score - b.score || a.goal_ms - b.goal_ms);
 }
 
-/** The clip of a quick question: from shortly before the shot to its end, looped (3.5 s). */
+/**
+ * The clip of a quick question around the analysis' moment: goal_ms lies mostly 1 to 4 s after
+ * the real shot (analysis #181: median +3.1 s, 10 of 14 later than 1.5 s), so a loop from 1.5 s
+ * before it often began after the shot. It runs from 6 s before to 2 s after (8 s, looped).
+ */
+export const QUICK_CLIP = { beforeMs: 6000, afterMs: 2000 } as const;
+
 export function quickWindow(c: { goal_ms: number }): { start_ms: number; end_ms: number } {
-  return { start_ms: Math.max(0, c.goal_ms - 1500), end_ms: c.goal_ms + 2000 };
+  return { start_ms: Math.max(0, c.goal_ms - QUICK_CLIP.beforeMs), end_ms: c.goal_ms + QUICK_CLIP.afterMs };
 }
 
 /** The review a quick answer sends: «Kein Wurf» rejects, the outcomes go through shotAnswer
