@@ -435,6 +435,41 @@ def test_observe_store_and_track(tmp_path: Path) -> None:
     assert len(dist) > 200
     assert float(np.median(dist)) < 0.6
     assert {"home", "away"} <= {v["label"] for v in res.teams.values()}
+    assert res.extra["kits_learned"] == []  # both team kits entered: nothing learned
+    # no kit entered (an own colour nobody chose, an unknown opponent): the two team colours
+    # are learned from the torsos on court, and the tracks still split into the two teams
+    bare = observe.track(back, calib, {}, hall)
+    assert bare.extra["kits_learned"] == ["away", "home"]
+    assert {"home", "away"} <= {v["label"] for v in bare.teams.values()}
+    one = observe.track(back, calib, {"home": k.home}, hall)
+    assert one.extra["kits_learned"] == ["away"]
+
+
+def test_team_colours_are_learned_from_torso_looks() -> None:
+    from handball_vision.teams import bgr_to_lab, colour_distance, learn_kits
+
+    rng = np.random.default_rng(3)
+    red, yellow, black = (
+        bgr_to_lab((40, 30, 200)),
+        bgr_to_lab((20, 200, 230)),
+        bgr_to_lab((30, 30, 30)),
+    )
+
+    def looks(c: np.ndarray, n: int) -> list[np.ndarray]:
+        return [c + rng.normal(0, 4, 3) for _ in range(n)]
+
+    seen = looks(red, 300) + looks(yellow, 260) + looks(black, 40)  # two teams and the referees
+    out = learn_kits(seen, {})
+    assert set(out) == {"home", "away"}
+    assert colour_distance(out["home"], yellow) < colour_distance(out["home"], red)  # lighter
+    assert colour_distance(out["away"], red) < colour_distance(out["away"], yellow)
+    # one team kit entered: the cluster nearer to it is that team, the other is learned
+    only = learn_kits(seen, {"home": bgr_to_lab((50, 40, 210))})
+    assert set(only) == {"away"} and colour_distance(only["away"], yellow) < 20
+    assert learn_kits(seen, {"home": red, "away": yellow}) == {}
+    # too few looks, or one colour only (no second team in view): nothing learned
+    assert learn_kits(seen[:100], {}) == {}
+    assert learn_kits(looks(red, 400), {}) == {}
 
 
 def test_teams_are_labelled_relative_to_the_match_colours() -> None:
