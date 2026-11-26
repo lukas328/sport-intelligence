@@ -124,7 +124,8 @@ Ursachen, lokal nachgerechnet:
 Auf dem Testclip lief `run_analysis` mit allen Modellen auf CPU: YOLOX, PP-OCR, ReID und Ballnetz
 hrp1. Die Laufzeit lag in derselben Grössenordnung wie auf Staging, über 20x Videolänge, solange
 parallel andere Rechnungen liefen. Die Zahlen dieses Laufs sind wegen der geteilten Kerne nur als
-Bestätigung der Grössenordnung brauchbar, nicht als Messung. Ergebnis siehe Anhang A.
+Bestätigung der Grössenordnung brauchbar, nicht als Messung: 6323 s für 5 Minuten (21x),
+automatische Kalibrierung akzeptiert (Kamera 5.9 m), aber keine Würfe. Details in Anhang A.
 
 ## 4. Alle Stufen
 
@@ -354,4 +355,26 @@ Modellbezogen, nach erwartetem Nutzen:
 
 ## Anhang A: Lokaler Lauf Horgen H1 (5 min)
 
-Siehe Abschnitt 3.3; Ergebnis wird nachgetragen, sobald der Lauf fertig ist.
+Beobachtet am 25.11. auf 4 geteilten CPU-Kernen (parallel liefen andere Rechnungen), Stand des
+Branches vor #119, #121 und #123. Ohne Klickpunkte, ohne Trikotfarben, alle Modelle aktiv. Kein
+Gold für diesen Clip: die Qualität ist nur geschätzt, nicht gemessen.
+
+| Grösse | Wert | Einordnung |
+|---|---|---|
+| Laufzeit | 6323 s für 300 s Video (21x) | ein 60-Minuten-Spiel bräuchte so über 20 h, weit über dem 6-h-Timeout |
+| Kritischer Pfad | Ballnetz-Thread 6240 s belegt (ball_net 4005 s), ReID 1168 s, Detektion 616 s, Nummern 225 s, Kamerabewegung 147 s | hier bremst das Ballnetz, nicht ReID wie in Lauf U: auf CPU sind beide zu teuer |
+| Kalibrierung | automatisch (heuristic), akzeptiert: Kamerahöhe 5.9 m, Blickwinkel 16.6°, goal_score 0.74, floor_fit 0.63 | bei höherer Kamera klappt die Automatik; die zwei Staging-Uploads (3.4 m) scheiterten |
+| Kamera | pan_deg 85.4, zoom_ratio 1.07, keine Schnitte | bediente Kamera, die Pausenregel greift korrekt (eine Pause 230 bis 254 s) |
+| Tracks | 151 roh, 138 nach Zusammenführen, Median 12.9 s | für rund 16 Personen in 5 min: Spieler zerfallen weiter in viele Stücke |
+| Teams | 71 home, 53 away, 10 Schiedsrichter, 3 + 1 Torhüter-Tracks | Torhüter erkannt, also Seiten und Ereignisse vorhanden |
+| Nummern | 8 von 138 Tracks (4 gelesen, 4 über Erscheinung); 1499 von 2420 Kästchen gelesen | OCR liest oft, aber die Abstimmung pro Track gibt selten eine Nummer frei |
+| Ereignisse | 5 Ballbesitzwechsel, 2 Gegenstösse, keine Würfe, keine Tore | ohne Wurf- und Torereignisse bleibt die Statistik leer |
+| Ballbesitz | 7 Phasen; eine Heimphase dauert 72 s (96.4 bis 168.8 s) | unplausibel lang: das Überbrücken von Lücken (Schwäche 6) zeigt sich hier |
+| Ballzeit | away 80.6 s, home 34.6 s bei 245.6 s Spielzeit laut Hallenuhr | knapp die Hälfte der Spielzeit einem Team zugeordnet |
+| Ballabdeckung | gespeichert 2.418 (6048 Punkte / 2501 Detektionsbilder) | richtig wären 6048 / 7502 = 0.81: derselbe Fehler wie in Lauf H, behoben in #121 |
+| Hallenuhr | 13 Ablesungen, 2 Spielintervalle, 0 Tore erkannt | Uhr ja, Tore aus der Anzeige nein |
+| Torkandidaten | 18 (5 bei Rate 1, 9 bei Standardrate 2) | ohne Gold nicht bewertbar; bei der gemessenen Präzision von rund 27 % wären das etwa 2 bis 3 echte Tore |
+
+Fazit: wenn die Kalibrierung gelingt, liefert die Kette Tracks, Teams, Torhüter, Seiten,
+Formationen und Ballbesitz. Würfe fehlen trotzdem ganz, die Ballbesitzphasen sind zu lang, und
+die Laufzeit auf CPU ist für ganze Spiele nicht tragbar. Das bestätigt die Rangfolge in Abschnitt 5.
