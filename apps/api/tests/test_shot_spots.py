@@ -429,3 +429,31 @@ async def test_the_estimate_takes_the_attacked_goal_from_the_ends_of_the_half(
         e for e in (await api.get(f"{base}/events")).json() if e["id"] == r.json()["event_id"]
     )
     assert (ev["x"], ev["y"]) == (36.0, 12.0)
+
+
+async def test_a_goal_marked_before_the_analysis_uses_the_ends_of_that_run(
+    make_api: Callable[[], Api],
+) -> None:
+    """A goal tagged by hand before the second half was analysed is filled when the analysis
+    arrives, at the goal the ends of that same run say (the sides are stored before the fill)."""
+    api = make_api()
+    ids = await setup_club(api)
+    match_id, _, second = await _two_halves(api, ids)
+    org = ids["org"]
+    tagged = await event(
+        api, org, match_id, type="shot", side="own", outcome="goal", t_ms=HALF + 51_000
+    )
+    storage: MemoryStorage = api.app.state.storage
+    run = [(42_500 + 1000 * i, 2, 5.0, 12.0) for i in range(6)]
+    run += [(48_500, 2, 20.0, 12.0), (49_500, 2, 30.0, 12.0), (50_500, 2, 36.0, 12.0)]
+    await storage.put(
+        "artifacts",
+        f"{org}/{match_id}/{second}/analysis/chunk_00001.bin",
+        _rows(run),
+        "application/octet-stream",
+    )
+    sides = [{"from_ms": 0, "home_defends": "left"}]
+    await _analyse(api, second, events={**SECOND, "sides": sides}, chunks=2, chunk_ms=30_000)
+    base = f"/v1/orgs/{org}/matches/{match_id}"
+    ev = next(e for e in (await api.get(f"{base}/events")).json() if e["id"] == tagged["id"])
+    assert (ev["x"], ev["y"]) == (36.0, 12.0)
