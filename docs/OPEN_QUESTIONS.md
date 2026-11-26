@@ -45,10 +45,10 @@ was der Code heute tut.
 4c. 🔴 **Rechtsprüfung der Startgewichte und Datensätze** (`docs/plans/lizenzen-modelle.md`
    Abschnitt 5). Ungeprüft sind: ImageNet-Startgewichte (hrp1, Rollenmodell; nicht hr1/hr-nods), die
    COCO-Bilder hinter YOLOX, die Ball-Labels von TeamTrack (Grundlage von hr-nods) und der
-   FFmpeg-Build im PyAV-Wheel. Dazu fehlt der in ADR 003 versprochene CI-Schutz gegen nicht
-   freigegebene Modelle und `ultralytics`. Empfehlung: ein Termin bei einer Fachperson für alle vier
-   Punkte; den CI-Schutz bauen wir. Ohne Entscheid: nichts davon ist geprüft, im Image laufen nur
-   Apache-2.0-Modelle.
+   FFmpeg-Build im PyAV-Wheel. Der CI-Schutz aus ADR 003 läuft seit 2026-11-26
+   (`infra/model-licences.json`); er führt hrp1 heute als Ausnahme für jede Umgebung (Terraform
+   setzt es auch für `production`, Punkt 4a). Empfehlung: ein Termin bei einer Fachperson für alle
+   vier Punkte. Ohne Entscheid: nichts davon ist geprüft, im Image laufen nur Apache-2.0-Modelle.
 5. 🟡 **Wem gehört ein Team** (Q-AUTH-OWNER). Wie wird geprüft, dass wer ein Team im Einstieg
    speichert, wirklich dazugehört? Empfehlung: im Pilot (a) Übergabe durch den Support, weil die
    Pilotvereine bekannt sind; (b) Bestätigung über die Verbandsadresse erst vor dem breiten Start.
