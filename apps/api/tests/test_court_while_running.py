@@ -168,3 +168,42 @@ async def test_points_marked_after_the_court_stage_replace_the_running_job(
 async def _state(api: Api, org: str, vid: str) -> str:
     a = (await api.get(f"/v1/orgs/{org}/videos/{vid}/analysis")).json()
     return str(a["calibration_state"])
+
+
+async def _court_step(api: Api, org: str, vid: str) -> str | None:
+    rows = (await api.get(f"/v1/orgs/{org}/progress")).json()
+    files = [f for p in rows for f in p["files"] if f["video_id"] == vid]
+    assert len(files) == 1
+    out: str | None = files[0]["court"]
+    return out
+
+
+async def test_the_progress_asks_for_the_court_while_it_helps(
+    make_api: Callable[[], Api],
+) -> None:
+    """The progress (strip, match page) says 'mark' from the hall image to the court stage, then
+    'taken' once the coach marked it for this run; before the hall image and after the court
+    stage began it asks nothing (a court marked then means a second run)."""
+    api = make_api()
+    ids = await setup_club(api)
+    org = ids["org"]
+    vid, job, _ = await _video(api, ids)
+    await _report(api, job, progress=0.05, stage="observe")
+    assert await _court_step(api, org, vid) is None  # no hall image yet
+    await _report(
+        api, job, progress=0.1, stage="observe", view={"camera": "moving", "panorama": PANORAMA}
+    )
+    assert await _court_step(api, org, vid) == "mark"
+    r = await api.post(
+        f"/v1/orgs/{org}/videos/{vid}/calibration/clicks",
+        json={"space": "panorama", "lines": _lines()},
+    )
+    assert r.status_code == 202, r.text
+    assert await _court_step(api, org, vid) == "taken"
+
+    # another video: its court stage begins without a marked court
+    other, job2 = await _running_with_hall(api, ids)
+    assert await _court_step(api, org, other) == "mark"
+    stages = {"observe": {"status": "done"}, "calibration": {"status": "running"}}
+    await _report(api, job2, progress=0.75, stage="calibration", stages=stages)
+    assert await _court_step(api, org, other) is None

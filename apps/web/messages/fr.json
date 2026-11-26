@@ -770,7 +770,12 @@
     "discardTitle": "Annuler aussi l'envoi ?",
     "discardBody": "L'avis a disparu. L'envoi interrompu pour {name} reste prêt pour continuer avec le même fichier. Annuler supprime ce qui est déjà arrivé. Sinon il s'annule de lui-même après 6 heures sans nouvelle partie.",
     "discardKeep": "Non, seulement masquer",
-    "stepShare": "{n} % de cette étape"
+    "stepShare": "{n} % de cette étape",
+    "courtTitle": "Marque le terrain maintenant",
+    "courtText": "L'image de la salle est déjà prête. Si tu marques le terrain pendant l'analyse, elle sera complète en un seul passage : avec les positions et les trajets.",
+    "courtButton": "Marquer le terrain",
+    "courtTaken": "Ton terrain est marqué. L'analyse en cours le reprend.",
+    "stripCourt": "Marquer le terrain"
   },
   "attachments": {
     "title": "Fichiers du match",

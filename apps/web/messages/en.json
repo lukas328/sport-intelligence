@@ -770,7 +770,12 @@
     "discardTitle": "Cancel the upload as well?",
     "discardBody": "The notice is gone. The stopped upload for {name} is kept so you can go on with the same file. Cancelling deletes what has arrived. Otherwise it is given up by itself after 6 hours without new parts.",
     "discardKeep": "No, just hide it",
-    "stepShare": "{n} % of this step"
+    "stepShare": "{n} % of this step",
+    "courtTitle": "Mark the court now",
+    "courtText": "The hall image is ready. Mark the court while the analysis runs and it completes in one pass: with positions and running paths.",
+    "courtButton": "Mark the court",
+    "courtTaken": "Your court is marked. The running analysis takes it.",
+    "stripCourt": "Mark the court"
   },
   "attachments": {
     "title": "Files of the match",
