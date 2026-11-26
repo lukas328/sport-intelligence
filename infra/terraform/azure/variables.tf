@@ -247,15 +247,31 @@ variable "gpu_job_timeout_s" {
   default     = 14400
 }
 
+# Ball nets: hr-nods (hr1 without DeepSport data, ml/ball/kaggle/train_hr_nods_push.py) since
+# 26.11.2026; hr1/hrp1 contained DeepSport (non-commercial). On ball test set 2 hr-nods 68.2 %
+# against hr1, no secured difference (docs/plans/produkt-analyse-integration.md). Another net:
+# set key and SHA-256 here and in gpu_ball_model*; an empty cpu_ball_model switches the net off
+# (YOLOX ball path). The CPU app takes the float file, the GPU job the uint8 one.
+variable "cpu_ball_model" {
+  description = "Ball net of the CPU analysis app (videos up to 12 min): key in the artifacts bucket, empty = off."
+  type        = string
+  default     = "models/ball/ball_hrnods_fp16-11eba692acd9.onnx"
+}
+
+variable "cpu_ball_model_sha256" {
+  type    = string
+  default = "11eba692acd9f772572561a48a8a5c6f276798969f34e91765feeb1bea8f3e95"
+}
+
 variable "gpu_ball_model" {
   description = "Ball net for the GPU job: key in the artifacts bucket (uint8 file, ml/ball/onnx_u8.py)."
   type        = string
-  default     = "models/ball/ball_hrp1_fp16_u8-8efd55d05333.onnx"
+  default     = "models/ball/ball_hrnods_fp16_u8-1bbacb7bca86.onnx"
 }
 
 variable "gpu_ball_model_sha256" {
   type    = string
-  default = "8efd55d0533301889c0b3715bff3fa708a9e4f9be3b2d8162a4c56377a70253f"
+  default = "1bbacb7bca86219be31bba6c7d5696d0fef1458defe12021dd3e319e1ade800d"
 }
 
 variable "gpu_budget_amount" {
