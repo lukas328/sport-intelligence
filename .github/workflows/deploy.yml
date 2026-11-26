@@ -15,6 +15,8 @@
 #   - «teardown» (stack ch, input confirm = the resource group name) deletes the first environment
 #     for good (infra/azure/teardown-ch.sh, docs/plans/staging-umzug-eu.md section 7). Only with the
 #     owner's OK.
+#   - «deploy» stops before the images while analyses are queued or running (infra/azure/busy-check.sh;
+#     force_busy deploys anyway); «plan» only reports them.
 #   - A paused environment (README, «Pause») stays paused: only «resume» ([resume] in the commit
 #     message) starts the database and scales the apps up again; «pause» ([pause]) does the reverse.
 #
@@ -45,6 +47,10 @@ on:
         type: choice
         options: [keep, resume, pause]
         default: keep
+      force_busy:
+        description: "with deploy: deploy even while analyses are queued or running (they are stopped)"
+        type: boolean
+        default: false
       confirm:
         description: "with teardown: the name of the resource group that is deleted (rg-hb-stg)"
         type: string
@@ -508,6 +514,21 @@ jobs:
             grep -E '^(  # |Plan:|No changes)' plan.txt || true
             echo '```'
           } >>"$GITHUB_STEP_SUMMARY"
+
+      - name: Running analyses (deploy only while none runs)
+        if: (steps.mode.outputs.mode == 'deploy' || steps.mode.outputs.mode == 'plan') && env.REFRESH == 'true'
+        env:
+          MODE: ${{ steps.mode.outputs.mode }}
+          FORCE_BUSY: ${{ inputs.force_busy || 'false' }}
+          FW_RULE: gh-busy-${{ github.run_id }}
+        run: bash ../../azure/busy-check.sh
+
+      - name: Remove the busy-check firewall rule
+        if: always() && (steps.mode.outputs.mode == 'deploy' || steps.mode.outputs.mode == 'plan') && env.REFRESH == 'true'
+        run: |
+          pg=$(terraform output -raw postgres_server 2>/dev/null || true)
+          [ -z "$pg" ] || az postgres flexible-server firewall-rule delete -g "$rg" --server-name "$pg" \
+            --name "gh-busy-${{ github.run_id }}" --yes -o none 2>/dev/null || true
 
       - name: Images
         if: steps.mode.outputs.apply == 'true'
