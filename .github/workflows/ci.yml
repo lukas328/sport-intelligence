@@ -158,7 +158,9 @@ jobs:
         with:
           context: .
           file: apps/${{ matrix.app }}/Dockerfile
-          build-args: APT_REFRESH=${{ steps.date.outputs.day }}
+          build-args: |
+            APT_REFRESH=${{ steps.date.outputs.day }}
+            GIT_SHA=${{ github.sha }}
           tags: handball-ai-${{ matrix.app }}:ci
           load: true
           cache-from: type=gha,scope=${{ matrix.app }}
