@@ -471,7 +471,7 @@ def test_extract_audio_whole_video_16k_first_stream_and_silence(tmp_path: Path) 
     )  # fmt: skip
     got = transcode.extract_audio(two, tmp_path / "a.wav", FFMPEG or "ffmpeg", 3.0)
     assert got["silent"] is False
-    assert abs(float(got["seconds"]) - 3.0) < 0.1  # whole clip, no time limit
+    assert abs(got["seconds"] - 3.0) < 0.1  # whole clip, no time limit
     import wave
 
     with wave.open(str(tmp_path / "a.wav"), "rb") as w:
@@ -490,7 +490,7 @@ def test_extract_audio_command_has_no_time_limit(monkeypatch: pytest.MonkeyPatch
     def fake_run(cmd: list[str], **kw: object) -> None:
         seen["cmd"], seen["timeout"] = cmd, kw.get("timeout")
 
-    monkeypatch.setattr(transcode.subprocess, "run", fake_run)
+    monkeypatch.setattr(subprocess, "run", fake_run)
     monkeypatch.setattr(transcode, "audio_summary", lambda p: {"seconds": 0.0, "silent": True})
     transcode.extract_audio(Path("in.mp4"), Path("out.wav"), "ffmpeg", 99 * 60)
     cmd = seen["cmd"]

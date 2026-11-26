@@ -8,6 +8,7 @@ import subprocess
 import tempfile
 from collections.abc import Callable
 from pathlib import Path
+from typing import TypedDict
 
 import numpy as np
 from numpy.typing import NDArray
@@ -196,7 +197,12 @@ AUDIO_FILE = "audio_16k.wav"
 SILENT_PEAK = 8
 
 
-def extract_audio(src: Path, dst: Path, ffmpeg: str, duration_s: float = 0.0) -> dict[str, object]:
+class AudioSummary(TypedDict):
+    seconds: float
+    silent: bool
+
+
+def extract_audio(src: Path, dst: Path, ffmpeg: str, duration_s: float = 0.0) -> AudioSummary:
     """The first audio stream of the whole video as mono 16 kHz WAV; returns its length and
     whether it is silent (a stream without any sound, as the Uznach upload of 26.11.2026: the
     source's own track was digital silence, -inf dB on both channels)."""
@@ -229,7 +235,7 @@ def extract_audio(src: Path, dst: Path, ffmpeg: str, duration_s: float = 0.0) ->
     return audio_summary(dst)
 
 
-def audio_summary(wav: Path) -> dict[str, object]:
+def audio_summary(wav: Path) -> AudioSummary:
     """Length in seconds and «silent» of a mono 16-bit WAV, read in blocks (no full load)."""
     import wave
 
