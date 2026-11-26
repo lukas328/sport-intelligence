@@ -1,0 +1,680 @@
+{
+ "summary": {
+  "break": {
+   "segments": 11,
+   "with_readings": 4,
+   "with_run": 1,
+   "run_share_mean": 0.091
+  },
+  "play": {
+   "segments": 22,
+   "with_readings": 22,
+   "with_run": 22,
+   "run_share_mean": 0.79
+  }
+ },
+ "rows": [
+  {
+   "seg": "CH_Cup_RTVBasel_Kadetten_2024-04-27_s1",
+   "kind": "play",
+   "truth_play": 0.9886363636363636,
+   "readings": 154,
+   "runs": [
+    [
+     0,
+     175160
+    ]
+   ],
+   "run_share": 0.973,
+   "clock_values": [
+    793,
+    1015,
+    1019,
+    1188,
+    1189,
+    1190
+   ]
+  },
+  {
+   "seg": "CH_Cup_RTVBasel_Kadetten_2024-04-27_s2",
+   "kind": "break",
+   "truth_play": 0.0,
+   "readings": 170,
+   "runs": [
+    [
+     0,
+     180000
+    ]
+   ],
+   "run_share": 1.0,
+   "clock_values": [
+    169,
+    170,
+    171,
+    340,
+    341,
+    348
+   ]
+  },
+  {
+   "seg": "CH_Cup_RTVBasel_Kadetten_2024-04-27_s3",
+   "kind": "play",
+   "truth_play": 1.0,
+   "readings": 155,
+   "runs": [
+    [
+     0,
+     180000
+    ]
+   ],
+   "run_share": 1.0,
+   "clock_values": [
+    1653,
+    1713,
+    2819,
+    2997,
+    2998,
+    2999
+   ]
+  },
+  {
+   "seg": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02_s1",
+   "kind": "play",
+   "truth_play": 0.9204545454545454,
+   "readings": 178,
+   "runs": [
+    [
+     0,
+     147000
+    ],
+    [
+     163000,
+     178000
+    ]
+   ],
+   "run_share": 0.9,
+   "clock_values": [
+    954,
+    957,
+    958,
+    1114,
+    1115,
+    1116
+   ]
+  },
+  {
+   "seg": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02_s2",
+   "kind": "break",
+   "truth_play": 0.0,
+   "readings": 13,
+   "runs": [],
+   "run_share": 0.0,
+   "clock_values": [
+    1031,
+    1031
+   ]
+  },
+  {
+   "seg": "CH_Frauen_1Liga_ATVKVBasel_YellowWinterthur2_2024-11-02_s3",
+   "kind": "play",
+   "truth_play": 1.0,
+   "readings": 177,
+   "runs": [
+    [
+     0,
+     180000
+    ]
+   ],
+   "run_share": 1.0,
+   "clock_values": [
+    2306,
+    2310,
+    2311,
+    2483,
+    2484,
+    2486
+   ]
+  },
+  {
+   "seg": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27_s1",
+   "kind": "play",
+   "truth_play": 0.6193181818181818,
+   "readings": 94,
+   "runs": [
+    [
+     0,
+     11000
+    ],
+    [
+     81840,
+     180000
+    ]
+   ],
+   "run_share": 0.606,
+   "clock_values": [
+    1093,
+    1097,
+    1098,
+    1199,
+    1200,
+    1201
+   ]
+  },
+  {
+   "seg": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27_s2",
+   "kind": "break",
+   "truth_play": 0.0,
+   "readings": 123,
+   "runs": [],
+   "run_share": 0.0,
+   "clock_values": [
+    1094,
+    1094
+   ]
+  },
+  {
+   "seg": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27_s3",
+   "kind": "play",
+   "truth_play": 0.8295454545454546,
+   "readings": 140,
+   "runs": [
+    [
+     0,
+     69500
+    ],
+    [
+     70620,
+     180000
+    ]
+   ],
+   "run_share": 0.994,
+   "clock_values": [
+    2828,
+    2833,
+    2834,
+    2987,
+    2988,
+    2989
+   ]
+  },
+  {
+   "seg": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16_s1",
+   "kind": "play",
+   "truth_play": 0.6931818181818182,
+   "readings": 172,
+   "runs": [
+    [
+     23933,
+     124933
+    ],
+    [
+     137933,
+     158933
+    ],
+    [
+     177933,
+     180000
+    ]
+   ],
+   "run_share": 0.689,
+   "clock_values": [
+    1011,
+    1013,
+    1014,
+    1134,
+    1135,
+    1136
+   ]
+  },
+  {
+   "seg": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16_s2",
+   "kind": "break",
+   "truth_play": 0.0,
+   "readings": 0,
+   "runs": [],
+   "run_share": 0.0,
+   "clock_values": []
+  },
+  {
+   "seg": "CH_Frauen_Cup_HSGLeimental_RotweissThun_2024-10-16_s3",
+   "kind": "play",
+   "truth_play": 0.8181818181818182,
+   "readings": 178,
+   "runs": [
+    [
+     0,
+     143000
+    ],
+    [
+     176000,
+     180000
+    ]
+   ],
+   "run_share": 0.817,
+   "clock_values": [
+    2387,
+    2390,
+    2391,
+    2529,
+    2530,
+    2531
+   ]
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03_s1",
+   "kind": "play",
+   "truth_play": 0.4147727272727273,
+   "readings": 173,
+   "runs": [
+    [
+     5000,
+     39000
+    ],
+    [
+     71000,
+     108000
+    ],
+    [
+     176000,
+     180000
+    ]
+   ],
+   "run_share": 0.417,
+   "clock_values": [
+    907,
+    908,
+    909,
+    978,
+    979,
+    980
+   ]
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03_s2",
+   "kind": "break",
+   "truth_play": 0.0,
+   "readings": 1,
+   "runs": [],
+   "run_share": 0.0,
+   "clock_values": [
+    1158,
+    1158
+   ]
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03_s3",
+   "kind": "play",
+   "truth_play": 0.6875,
+   "readings": 171,
+   "runs": [
+    [
+     67000,
+     71000
+    ],
+    [
+     74000,
+     78000
+    ],
+    [
+     104000,
+     134000
+    ],
+    [
+     167000,
+     180000
+    ]
+   ],
+   "run_share": 0.283,
+   "clock_values": [
+    2267,
+    2268,
+    2269,
+    2401,
+    2403,
+    2405
+   ]
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23.f298_s1",
+   "kind": "play",
+   "truth_play": 1.0,
+   "readings": 176,
+   "runs": [
+    [
+     0,
+     177000
+    ]
+   ],
+   "run_share": 0.983,
+   "clock_values": [
+    1299,
+    1304,
+    1305,
+    1474,
+    1475,
+    1476
+   ]
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23.f298_s2",
+   "kind": "break",
+   "truth_play": 0.0,
+   "readings": 0,
+   "runs": [],
+   "run_share": 0.0,
+   "clock_values": []
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23.f298_s3",
+   "kind": "play",
+   "truth_play": 0.8409090909090909,
+   "readings": 172,
+   "runs": [
+    [
+     0,
+     25000
+    ],
+    [
+     55000,
+     180000
+    ]
+   ],
+   "run_share": 0.833,
+   "clock_values": [
+    2536,
+    2541,
+    2542,
+    2683,
+    2684,
+    2685
+   ]
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10_s1",
+   "kind": "play",
+   "truth_play": 0.9375,
+   "readings": 177,
+   "runs": [
+    [
+     14000,
+     180000
+    ]
+   ],
+   "run_share": 0.922,
+   "clock_values": [
+    740,
+    741,
+    742,
+    903,
+    904,
+    905
+   ]
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10_s2",
+   "kind": "break",
+   "truth_play": 0.0,
+   "readings": 0,
+   "runs": [],
+   "run_share": 0.0,
+   "clock_values": []
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10_s3",
+   "kind": "play",
+   "truth_play": 1.0,
+   "readings": 173,
+   "runs": [
+    [
+     0,
+     180000
+    ]
+   ],
+   "run_share": 1.0,
+   "clock_values": [
+    2237,
+    2241,
+    2243,
+    2413,
+    2414,
+    2415
+   ]
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19_s1",
+   "kind": "play",
+   "truth_play": 0.5340909090909091,
+   "readings": 177,
+   "runs": [
+    [
+     0,
+     94000
+    ]
+   ],
+   "run_share": 0.522,
+   "clock_values": [
+    949,
+    954,
+    955,
+    1041,
+    1042,
+    1043
+   ]
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19_s2",
+   "kind": "break",
+   "truth_play": 0.0,
+   "readings": 0,
+   "runs": [],
+   "run_share": 0.0,
+   "clock_values": []
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19_s3",
+   "kind": "play",
+   "truth_play": 0.9659090909090909,
+   "readings": 171,
+   "runs": [
+    [
+     0,
+     39000
+    ],
+    [
+     43000,
+     60000
+    ],
+    [
+     61000,
+     180000
+    ]
+   ],
+   "run_share": 0.972,
+   "clock_values": [
+    2358,
+    2362,
+    2364,
+    2527,
+    2528,
+    2529
+   ]
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02_s1",
+   "kind": "play",
+   "truth_play": 0.9772727272727273,
+   "readings": 174,
+   "runs": [
+    [
+     0,
+     13750
+    ],
+    [
+     15750,
+     171750
+    ]
+   ],
+   "run_share": 0.943,
+   "clock_values": [
+    763,
+    768,
+    772,
+    933,
+    934,
+    935
+   ]
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02_s2",
+   "kind": "break",
+   "truth_play": 0.0,
+   "readings": 0,
+   "runs": [],
+   "run_share": 0.0,
+   "clock_values": []
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02_s3",
+   "kind": "play",
+   "truth_play": 0.75,
+   "readings": 172,
+   "runs": [
+    [
+     19000,
+     84000
+    ],
+    [
+     104000,
+     171000
+    ]
+   ],
+   "run_share": 0.733,
+   "clock_values": [
+    2297,
+    2298,
+    2299,
+    2427,
+    2428,
+    2429
+   ]
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09_s1",
+   "kind": "play",
+   "truth_play": 0.8977272727272727,
+   "readings": 176,
+   "runs": [
+    [
+     21000,
+     180000
+    ]
+   ],
+   "run_share": 0.883,
+   "clock_values": [
+    953,
+    954,
+    955,
+    1109,
+    1110,
+    1111
+   ]
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09_s2",
+   "kind": "break",
+   "truth_play": 0.0,
+   "readings": 0,
+   "runs": [],
+   "run_share": 0.0,
+   "clock_values": []
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09_s3",
+   "kind": "play",
+   "truth_play": 0.48295454545454547,
+   "readings": 173,
+   "runs": [
+    [
+     0,
+     67000
+    ],
+    [
+     161000,
+     180000
+    ]
+   ],
+   "run_share": 0.478,
+   "clock_values": [
+    2353,
+    2358,
+    2359,
+    2436,
+    2437,
+    2438
+   ]
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14_s1",
+   "kind": "play",
+   "truth_play": 0.7897727272727273,
+   "readings": 177,
+   "runs": [
+    [
+     9000,
+     120000
+    ],
+    [
+     153000,
+     180000
+    ]
+   ],
+   "run_share": 0.767,
+   "clock_values": [
+    898,
+    899,
+    900,
+    1034,
+    1035,
+    1036
+   ]
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14_s2",
+   "kind": "break",
+   "truth_play": 0.0,
+   "readings": 0,
+   "runs": [],
+   "run_share": 0.0,
+   "clock_values": []
+  },
+  {
+   "seg": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14_s3",
+   "kind": "play",
+   "truth_play": 0.6818181818181818,
+   "readings": 176,
+   "runs": [
+    [
+     0,
+     49000
+    ],
+    [
+     65000,
+     106000
+    ],
+    [
+     150000,
+     180000
+    ]
+   ],
+   "run_share": 0.667,
+   "clock_values": [
+    2391,
+    2396,
+    2397,
+    2508,
+    2509,
+    2510
+   ]
+  }
+ ]
+}

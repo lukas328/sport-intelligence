@@ -1253,3 +1253,50 @@ Das Audit (`docs/plans/produkt-audit-2026-11.md`) rechnete aus zwei 8-min-Läufe
   11 %), Dateien identisch (gleiche Bildzahl und Grösse). Ein 99-min-Video braucht so etwa 5.1 h
   Umwandlung plus Thumbnails, knapp unter 6 h. Mehr vCPU für den Worker wäre der grössere Hebel;
   Entscheid der Hauptsitzung (26.11.): vorerst nicht, die GPU löst die Analyse-Laufzeit.
+
+### Seiten aus Anwurf-Formationen (Audit Punkt 4, Vorschlag 1, 2026-11-26)
+
+Idee: Ohne Torhüter die Spielrichtung aus den Anwürfen ableiten. Dabei stehen beide Teams in der
+eigenen Hälfte und fast still, wie `events.refine_teams` solche Momente schon sucht; die Labels
+links der Mittellinie sagen dann, wer links verteidigt. Offline geprüft auf drei Staging-Läufen
+aus dem Testbucket (Homographie zurückgerechnet, `ml/integration/staging_offline/`, siehe #147):
+
+| Lauf | Momente streng (≥ 10 Spieler, je ≥ 4 pro Hälfte, Median < 1 m/s) | locker (≥ 8, je ≥ 3, < 1,5 m/s) | Seite wie Torhüter |
+|---|---|---|---|
+| H (8 min) | 1 | 27 Bins | ja (1 von 1) |
+| fbdc76e6 (5 min) | 0 | 0 | - |
+| 56fcc216 (5 min) | 0 | 0 | - |
+
+Ergebnis: Mit schwenkenden Vereinskameras ist eine Anwurf-Formation fast nie ganz im Bild. Die
+Kamera zeigt eine Hälfte, und selten sind genug Spieler auf beiden Seiten getrackt. Als zweite
+Quelle für die Seiten trägt das nicht. Nicht ins Produkt übernommen (eine Übereinstimmung ist
+kein Beleg). Bessere Kandidaten für Seiten ohne Torhüter: die Hallentafel (Seitenwechsel zur
+Halbzeit) zusammen mit einem Hinweis des Trainers, auf welcher Seite er beginnt, oder die
+Angriffsrichtung aus der Bewegung beider Teams über längere Abschnitte.
+
+### Pausen: Vorbedingung der Uhr-Regel auf Dev geprüft (2026-11-26)
+
+Die Regel `clock_breaks` (Lücke von mindestens 2 min zwischen zwei Uhr-Läufen = kein Spiel) setzt
+zweierlei voraus: Das Produkt liest die Hallenuhr in den Halbzeiten, und in der Pause findet es keine
+laufende Uhr. Gemessen mit dem Produkt-Leser (`hallboard.HallBoardReader`, PP-OCRv4 wie im Image,
+gleiche Abstände) auf den 11 Dev-Pausensegmenten und je dem Segment davor und danach,
+`ml/integration/pause_clock_check.py`, Ergebnis `ml/integration/results/pause_clock_check.json`.
+
+| Segmente | mit Ablesungen | mit laufender Uhr | Anteil Lauf (Mittel) |
+|---|---|---|---|
+| in einer Halbzeit (22) | 22 | 22 | 0.79 (Wahrheit 0.81, Median-Abweichung 0.014) |
+| Halbzeitpause (11) | 4 | **1** | 0.09 |
+
+- **In den Halbzeiten:** Die Uhr wird überall gelesen, der Lauf-Anteil trifft die Wahrheit aus dem
+  Spielbericht fast genau. Einzige Ausnahme ist Emmen s3: 0.28 statt 0.69.
+- **In der Pause:** In 10 von 11 Pausen gibt es keinen Lauf. Meist steht die Tafel nicht im Bild;
+  in zwei Pausen steht die Uhr. Dort greift die Regel, sofern die Uhr vor und nach der Pause
+  gelesen wird, und das zeigen die Nachbarsegmente.
+- **Die Ausnahme (RTV Basel gegen Kadetten):** Die Tafel zeigt in der Pause eine aufwärts zählende
+  Pausenuhr (2:49 bis 5:48). `play_intervals` nimmt das als laufende Matchuhr, die Pause gilt dort
+  als Spiel.
+
+Möglicher Zusatz: Ein Lauf, der nach dem Ende der ersten Halbzeit (Uhr bei 30:00) wieder tief
+beginnt und vor einem Lauf ab 30:00 endet, ist eine Pausenuhr. Das ist erst mit einem ganzen Spiel
+prüfbar, weil die Dev-Segmente einzelne 3-min-Stücke sind. Damit ist die Annahme der Messung vom
+25.11. (Uhr-Läufe aus dem Spielbericht genähert) auf Dev für 10 von 11 Spielen bestätigt.
