@@ -42,7 +42,7 @@ Candidates (`pick`): a fixed number per minute of play, not a score threshold (s
 per game): per 3-minute block the best peaks with 8 s non-maximum suppression, none in the first
 and last 2 s. Every candidate carries the lowest rate (1, 2 or 4 per minute) at which it is proposed, so
 the coach can ask for more without a re-run; the clip runs from 10 s before to 4 s after the peak,
-which lies a median 1.5 s after the goal. A weak peak (score below `MIN_DEFAULT_SCORE`) is not in
+which lies a median 5 s after the goal. A weak peak (score below `MIN_DEFAULT_SCORE`) is not in
 the default list: it keeps only the largest rate.
 
 Shot candidates (`shot_score`, `from_observations`'s "shots"): the same channels and selection
@@ -80,7 +80,12 @@ EDGE_S = 2.0
 RATES = (1, 2, 4)  # candidates per minute
 DEFAULT_RATE = 2
 CLIP_BEFORE_S, CLIP_AFTER_S = 10.0, 4.0
-GOAL_OFFSET_S = 1.5  # median peak - goal on the labelled games
+# peak - goal: median 5.25 s (quartiles 3.6 to 6.0) between the candidate peak and the release on
+# 68 dev goals of 13 games (LLM release marks, ml/gold/data/shot_release_dev_llm.json; measured in
+# ml/integration/goal_offset_dev.py). The 1.5 s used before was peak - official log time, which
+# lies a median 3.9 s after the release; goal_ms is the goal itself (the report matching adds
+# SHOT_LOG_DELAY_MS on top)
+GOAL_OFFSET_S = 5.0
 SHOT_RATES = (2, 4, 6)  # shot candidates per minute
 SHOT_DEFAULT_RATE = 4
 SHOT_CLIP_BEFORE_S, SHOT_CLIP_AFTER_S = 8.0, 4.0
