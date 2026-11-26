@@ -150,6 +150,15 @@ def test_ladder_and_hls_command(tmp_path: Path) -> None:
     assert "anullsrc" in silent and "-map 1:a:0" in silent and "-shortest" in silent
     assert "v:0,a:0,name:" in silent
     assert transcode._ts(3725.5) == "01:02:05.500"
+    # the analysis proxy from the same run: a third branch of the split, its own output at the end
+    both = transcode.hls_command(
+        Path("in.mp4"), tmp_path, info(), "ffmpeg", "veryfast", 4, proxy=tmp_path / "p.mp4"
+    )
+    assert "split=3[v0][v1][v2]" in " ".join(both)
+    assert f"[v2]{transcode.PROXY_FILTER}[proxy]" in " ".join(both)
+    tail = both[both.index("[proxy]") - 1 :]
+    assert tail[:3] == ["-map", "[proxy]", "-an"] and tail[-1] == str(tmp_path / "p.mp4")
+    assert "-crf" in tail and "hls" not in tail
 
 
 @pytest.fixture(scope="module")

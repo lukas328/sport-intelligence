@@ -84,20 +84,22 @@ def run_ingest(
         out = work / "out"
         hls = out / "hls"
         hls.mkdir(parents=True)
+        # the HLS ladder and the analysis proxy in one ffmpeg run (one decode of the source)
         transcode.run_with_progress(
             transcode.hls_command(
-                src, hls, info, settings.ffmpeg, settings.x264_preset, settings.hls_segment_s
+                src,
+                hls,
+                info,
+                settings.ffmpeg,
+                settings.x264_preset,
+                settings.hls_segment_s,
+                proxy=out / "proxy.mp4",
             ),
             info.duration_s,
             rep.fraction,
         )
 
-        rep.stage("proxy")
-        transcode.run_with_progress(
-            transcode.proxy_command(src, out / "proxy.mp4", settings.ffmpeg, settings.x264_preset),
-            info.duration_s,
-            rep.fraction,
-        )
+        rep.stage("proxy")  # made above with the ladder; the stage stays for the progress steps
 
         rep.stage("thumbnails")
         transcode.poster(src, out / "poster.jpg", min(info.duration_s * 0.1, 60), settings.ffmpeg)
