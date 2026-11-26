@@ -50,7 +50,7 @@ from handball_vision.identity import split_by_reading_colour as split_by_reading
 from handball_vision.motion import CameraMotion, estimate_motion
 from handball_vision.numbers import Reading
 from handball_vision.physical import physical
-from handball_vision.teams import TeamAssigner, colour_distance, relabel_by_clusters
+from handball_vision.teams import TeamAssigner, colour_distance, covered_share, relabel_by_clusters
 from handball_vision.tracking import CourtTracker, TrackPoint, stitch
 from handball_vision.video_io import U8 as U8
 from handball_vision.video_io import _frames as _frames
@@ -321,10 +321,16 @@ def _track_frames(
         pos = foot_positions(frame_calib, dets) if frame_calib is not None else np.zeros((0, 2))
         labels = [None if np.isnan(f).any() else _confident_label(teams, f) for f in feats]
         step = tracker.step(pos, np.array([d.score for d in dets]), None, labels)
+        cover = covered_share(dets)
         timings["tracking"] += time.perf_counter() - t0
         for tp in step:
             if tp.det_index is not None and not np.isnan(feats[tp.det_index]).any():
-                teams.add_sample(tp.track_id, feats[tp.det_index], tp.frame)
+                teams.add_sample(
+                    tp.track_id,
+                    feats[tp.det_index],
+                    tp.frame,
+                    bool(cover[tp.det_index] < CLEAR_COVER),
+                )
         points += step
         n += 1
         if progress and total and n % 100 == 0:
@@ -366,6 +372,13 @@ def edge_pieces(points: list[TrackPoint], fps: float) -> set[int]:
 
 NEUTRAL_DISTANCE = 15.0  # colour distance to the nearer team kit above which a shirt is no team's
 END_LOOKS = 5  # colour looks at each end of a piece
+# The end colours only from looks where the person stands clear of others: a box covered by
+# another person box by at least `CLEAR_COVER` of its area holds two shirts in its torso crop. Only
+# clear looks among the last (first) `END_WINDOW` looks count, at least `END_MIN_CLEAR` of them,
+# otherwise the end has no team and blocks a long link.
+CLEAR_COVER = 0.15
+END_WINDOW = 15
+END_MIN_CLEAR = 3
 
 
 def shirt_team(colour: NDArray[Any], kits: dict[str, NDArray[Any]]) -> str:
@@ -382,10 +395,12 @@ def piece_ends(
     samples: dict[int, list[NDArray[Any]]],
     frames: dict[int, list[int]],
     kits: dict[str, NDArray[Any]],
+    clear: dict[int, list[bool]] | None = None,
 ) -> dict[int, tuple[str | None, str | None]] | None:
     """The team of each raw piece's shirt at its start and at its end (median of its first and
     last `END_LOOKS` colour looks): a piece can hold a swap of its own, so its whole median says
-    little about the person at the moment it ends. None without both team kits (entered or
+    little about the person at the moment it ends. With `clear` (parallel to `samples`), only
+    looks clear of other people count, see `CLEAR_COVER`. None without both team kits (entered or
     learned); a piece without looks has (None, None)."""
     if "home" not in kits or "away" not in kits:
         return None
@@ -394,10 +409,29 @@ def piece_ends(
         if not looks:
             continue
         order = np.argsort(np.asarray(frames.get(t, list(range(len(looks))))), kind="stable")
-        ordered = [looks[k] for k in order] if len(order) == len(looks) else looks
-        first = np.median(np.stack(ordered[:END_LOOKS]), axis=0)
-        last = np.median(np.stack(ordered[-END_LOOKS:]), axis=0)
-        out[t] = (shirt_team(first, kits), shirt_team(last, kits))
+        if len(order) != len(looks):
+            order = np.arange(len(looks))
+        ordered = [looks[k] for k in order]
+        flags = clear.get(t) if clear is not None else None
+        if flags is None or len(flags) != len(looks):
+            first = np.median(np.stack(ordered[:END_LOOKS]), axis=0)
+            last = np.median(np.stack(ordered[-END_LOOKS:]), axis=0)
+            out[t] = (shirt_team(first, kits), shirt_team(last, kits))
+            continue
+        ok = [bool(flags[k]) for k in order]
+        ends: list[str | None] = []
+        for window in (
+            range(min(END_WINDOW, len(looks))),
+            range(max(0, len(looks) - END_WINDOW), len(looks)),
+        ):
+            clean = [ordered[k] for k in window if ok[k]]
+            clean = clean[:END_LOOKS] if window.start == 0 else clean[-END_LOOKS:]
+            ends.append(
+                shirt_team(np.median(np.stack(clean), axis=0), kits)
+                if len(clean) >= END_MIN_CLEAR
+                else None
+            )
+        out[t] = (ends[0], ends[1])
     return out
 
 
@@ -423,7 +457,7 @@ def _finish(
         # people outside the court are not linked and nobody's shirt number; links over long gaps
         # only between pieces whose shirt at the meeting ends is the same team
         edge = edge_pieces(points, fps)
-        piece_teams = piece_ends(teams.samples, teams.frames, teams.kits)
+        piece_teams = piece_ends(teams.samples, teams.frames, teams.kits, teams.clear)
         points, mapping = stitch(
             points,
             fps,

@@ -178,6 +178,24 @@ def test_long_links_skip_people_outside_the_court_and_the_other_team() -> None:
     assert ends[1] == ("home", "away") and ends[2] == ("none", "none")  # black: neither team
     assert piece_ends(looks, frames, {"home": home}) is None  # one team kit: no condition
 
+    # with clear flags only looks clear of other people count: the last looks of piece 1 were
+    # taken while it overlapped an away player, so its end is home; too few clear looks: unknown
+    clear = {1: [True] * 9 + [False] * 3, 2: [False] * 6}
+    looks_c = {1: [home] * 9 + [away] * 3, 2: looks[2]}
+    ends_c = piece_ends(looks_c, frames, kits, clear)
+    assert ends_c is not None
+    assert ends_c[1] == ("home", "home") and ends_c[2] == (None, None)
+
+
+def test_covered_share_is_the_largest_part_of_a_box_another_box_covers() -> None:
+    from handball_vision.teams import covered_share
+
+    a = Detection(0, 0, 10, 20, 0.9)
+    b = Detection(5, 0, 15, 20, 0.9)  # covers half of a
+    c = Detection(50, 0, 60, 20, 0.9)  # apart
+    share = covered_share([a, b, c])
+    assert share[0] == pytest.approx(0.5) and share[1] == pytest.approx(0.5) and share[2] == 0.0
+
 
 def test_long_links_are_off_by_default() -> None:
     from handball_vision import pipeline
