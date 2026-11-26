@@ -746,6 +746,41 @@ def _torso_colour(
     return np.asarray(np.median(lab, axis=0), dtype=np.float64)
 
 
+def _learned_kits(
+    obs: Observations,
+    calib: Calibration,
+    floor: F64 | None,
+    kits: dict[str, tuple[int, int, int]],
+    every_s: float = 0.5,
+) -> dict[str, tuple[int, int, int]]:
+    """Team colours learned from the torsos on court when fewer than two team kits are entered
+    (`teams.learn_kits`): the tracker needs both to keep the two teams apart in duels."""
+    from handball_vision.teams import bgr_to_lab, lab_to_bgr, learn_kits
+
+    if ("home" in kits and "away" in kits) or len(obs.frames) < 2:
+        return {}
+    motion = obs.motion
+    step = max(1, round(every_s * obs.fps / max(1, obs.frames[1].index - obs.frames[0].index)))
+    looks: list[NDArray[np.float64]] = []
+    for fo in obs.frames[::step]:
+        to_canvas = motion.frame_to_canvas(fo.index)
+        if to_canvas is None:
+            continue
+        frame_calib = Calibration(
+            np.linalg.inv(to_canvas) @ calib.homography,
+            calib.confidence,
+            calib.reprojection_px,
+            calib.source,
+            motion.frame_size,
+        )
+        kept = {id(d) for d in filter_on_court(frame_calib, fo.people)}
+        for d, torso in zip(fo.people, fo.torsos, strict=True):
+            if id(d) in kept and (c := _torso_colour(torso, floor)) is not None:
+                looks.append(c)
+    given = {k: bgr_to_lab(v) for k, v in kits.items() if k in ("home", "away")}
+    return {k: lab_to_bgr(v) for k, v in learn_kits(looks, given).items()}
+
+
 def track(
     obs: Observations,
     calib: Calibration,
@@ -778,6 +813,9 @@ def track(
                 .astype(np.float64)
                 .mean(axis=0)
             )
+    learned_kits = _learned_kits(obs, calib, floor, kits)
+    if learned_kits:
+        kits = {**kits, **learned_kits}
     teams = TeamAssigner(kits, floor_lab=floor)
     step_frames = obs.frames[1].index - obs.frames[0].index if len(obs.frames) > 1 else 1
     tracker = CourtTracker(fps=obs.fps / step_frames)
@@ -866,6 +904,7 @@ def track(
             "motion": {k2: round(v, 3) for k2, v in motion.stats.items()},
             "frames_without_view": n_lost,
             "detect_every": step_frames,
+            "kits_learned": sorted(learned_kits),
         },
         number_reads,
         vectors,

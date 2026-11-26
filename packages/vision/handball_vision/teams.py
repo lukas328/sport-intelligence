@@ -235,6 +235,54 @@ def _feature(lab: NDArray[np.float64] | list[float]) -> NDArray[np.float64]:
     return np.array([0.6 * v[0], v[1], v[2]])
 
 
+LEARN_MIN_LOOKS = 150  # torso looks on court needed to learn the team colours
+LEARN_MIN_SHARE = 0.2  # each team colour holds at least this share of the looks
+
+
+def learn_kits(
+    looks: list[NDArray[np.float64]],
+    kits: dict[str, NDArray[np.float64]],
+) -> dict[str, NDArray[np.float64]]:
+    """The two team colours of this match from single torso looks on court (Lab, OpenCV scale),
+    for the teams whose kit is not entered: three clusters (two teams, a third for referees,
+    goalkeepers and shadows), the two biggest are the teams. With one team kit entered, the
+    cluster nearer to it is that team and the other is the other team; with none, the lighter is
+    home (the same guess as `relabel_by_clusters`). Returns the missing labels only; empty when
+    there are too few looks or the two big clusters are too close or too uneven to be teams.
+
+    Without two team colours the tracker has no team signal at all and swaps players of the two
+    teams in duels (dev clip Horgen H1, no kits: 6 tracks swapped, cut into 38 pieces)."""
+    missing = [k for k in ("home", "away") if k not in kits]
+    if not missing or len(looks) < LEARN_MIN_LOOKS:
+        return {}
+    data = np.stack([_feature(v) for v in looks]).astype(np.float32)
+    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 50, 0.5)
+    cv2.setRNGSeed(7)
+    start = np.zeros((len(data), 1), np.int32)
+    _, lab_idx, _ = cv2.kmeans(data, 3, start, criteria, 5, cv2.KMEANS_PP_CENTERS)
+    idx = np.asarray(lab_idx, dtype=np.int64).ravel()
+    sizes = np.bincount(idx, minlength=3)
+    big = [int(k) for k in np.argsort(-sizes)[:2]]
+    if sizes[big[1]] < LEARN_MIN_SHARE * len(looks):
+        return {}
+    arr = np.stack(looks)
+    centres = [np.median(arr[idx == k], axis=0) for k in big]
+    if float(np.linalg.norm(_feature(centres[0]) - _feature(centres[1]))) < MIN_TEAM_GAP:
+        return {}
+    if len(missing) == 1:
+        known = "away" if missing[0] == "home" else "home"
+        near = min(range(2), key=lambda i: colour_distance(centres[i], kits[known]))
+        return {missing[0]: centres[1 - near]}
+    light = int(np.argmax([c[0] for c in centres]))
+    return {"home": centres[light], "away": centres[1 - light]}
+
+
+def lab_to_bgr(lab: NDArray[np.float64]) -> tuple[int, int, int]:
+    px = np.clip(np.asarray(lab), 0, 255).astype(np.uint8).reshape(1, 1, 3)
+    b, g, r = cv2.cvtColor(px, cv2.COLOR_LAB2BGR)[0, 0]
+    return int(b), int(g), int(r)
+
+
 def team_centres(
     team_out: dict[int, dict[str, Any]], samples: dict[int, list[NDArray[Any]]]
 ) -> dict[str, NDArray[np.float64]]:
