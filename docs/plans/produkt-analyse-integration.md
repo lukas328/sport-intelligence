@@ -1383,3 +1383,38 @@ gelernte Teamfarben (#149), ohne ReID (#146).
 - **Ergebnis:** keine Änderung am Produkt. Der Engpass ist, dass nur etwa ein Viertel der
   Feldspieler-Zeit überhaupt eine Nummer trägt; die Tracks sind zu kurz für genug Lesungen. Nächste
   Hebel liegen beim Tracking (längere Tracks) und beim Kader im Einstieg.
+
+### Track-Länge auf Dev (Audit, 2026-11-26)
+
+Ziel: mehr Feldspieler-Zeit mit Nummer, ohne mehr falsch benannte Zeit. Gemessen wie «Wer ist
+wer» (Labels `ml/gold/data/identity_dev_v1.json`, Horgen H1/H2, nie Endtest), dazu
+Median-Tracklänge und ID-Wechsel (Schnitte, die die Nummernschritte danach finden:
+`split_by_number`, Lesefarbe). Auswertung `ml/eval/track_length_dev.py`.
+
+| Variante | richtig | falsch | benannte Zeit | Median | Tracks | Nummern-Schnitte |
+|---|---|---|---|---|---|---|
+| heute (Puffer 2 s, Verknüpfen bis 4 s) | 10 von 27 | 1 | 24.6 % | 24.8 s | 250 | 19 |
+| Okklusionspuffer 3 s | 13 | 3 | 25.4 % | 23.4 s | 246 | 19 |
+| Okklusionspuffer 4 s | 12 | 3 | 23.2 % | 26.8 s | 246 | 18 |
+| Verknüpfen bis 6 s | 12 | 1 | 26.1 % | 33.1 s | 203 | 21 |
+| Verknüpfen bis 8 s | 11 | 2 | 34.8 % | 38.0 s | 178 | 29 |
+| Verknüpfen bis 8 s, 5 m/s | 11 | 2 | 31.2 % | 36.4 s | 189 | 28 |
+| Nummer als harte Sperre, 4 s | 10 | 1 | 24.6 % | 24.8 s | 248 | 15 (+2 Lesefarbe) |
+| Nummer als Sperre, bis 6 s | 12 | 1 | 26.1 % | 35.0 s | 200 | 16 |
+| Nummer als Sperre, bis 8 s | 10 | 2 | 34.8 % | 40.0 s | 174 | 22 |
+
+- **Okklusionspuffer länger:** verdreifacht die falsch benannten Proben. Verworfen.
+- **Verknüpfen über längere Lücken:** längere Tracks und mehr benannte Zeit, ab 8 s deutlich mehr
+  ID-Wechsel. Die Nummer als harte Sperre (zwei Stücke mit verschiedener gelesener Nummer werden
+  nie verknüpft) senkt die ID-Wechsel bei jeder Lücke.
+- **Sichtprüfung der neuen Verknüpfungen** (Lücke über 4 s, Nummer als Sperre, bis 6 s): von 28
+  Paaren etwa 14 plausibel, etwa 8 klar falsch, meist Zuschauer oder Schiedsrichter am Feldrand an
+  einen Spieler gehängt, 6 unklar. Die Labels sehen das nicht, sie nehmen nur Feldspieler auf.
+  Auch ein Farbvergleich der aufeinandertreffenden Stücke statt der Kettenmediane und Pflicht zur
+  bekannten Farbe bei langen Lücken änderten daran fast nichts (74 -> 71 Verknüpfungen).
+- **Ergebnis:** keine Änderung am Produkt. Die Nummer als Sperre allein (4 s) ist sicher, senkt die
+  ID-Wechsel aber nur von 19 auf 17 und benennt nicht mehr; nicht klar besser. Längere Tracks
+  brauchen ein Identitätssignal, das genauer ist als Ort und Torso-Farbe: ein Erscheinungsmodell
+  mit sauberer Lizenz (eigene Spieler-Crops aus Prüfen, siehe `docs/plans/lizenzen-modelle.md`)
+  oder ein Filter, der Personen am Feldrand vor dem Verknüpfen ausschliesst. Beides ist eine
+  eigene Arbeit; Messung und Sichtprüfung wie hier.

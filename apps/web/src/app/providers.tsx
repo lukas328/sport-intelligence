@@ -2,6 +2,7 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect, useState, type ReactNode } from "react";
+import { ClientErrorReporter } from "@/components/client-error-reporter";
 import { ConfirmProvider } from "@/components/ui/confirm";
 import { FormMessages } from "@/components/ui/form-messages";
 import { rememberSource } from "@/lib/signup-source";
@@ -16,6 +17,7 @@ export function Providers({ children }: { children: ReactNode }) {
     <QueryClientProvider client={client}>
       <ConfirmProvider>
         <FormMessages />
+        <ClientErrorReporter />
         {children}
       </ConfirmProvider>
     </QueryClientProvider>

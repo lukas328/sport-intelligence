@@ -12,7 +12,7 @@ steps:
     env: ["DOCKER_BUILDKIT=1"]
     when: ["-"]
   - id: web
-    build: -t $Registry/hb-web:{{.Values.tag}} -f apps/web/Dockerfile .
+    build: -t $Registry/hb-web:{{.Values.tag}} --build-arg GIT_SHA={{.Values.tag}} -f apps/web/Dockerfile .
     env: ["DOCKER_BUILDKIT=1"]
     when: ["-"]
   - id: gpu-worker

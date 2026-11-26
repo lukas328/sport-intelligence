@@ -130,4 +130,29 @@ test("court from the hall: Passt moves on; shot review: Enter takes the report e
   // Escape leaves the full screen
   await page.keyboard.press("Escape");
   await expect(review).toHaveCount(0);
+
+  // «Würfe schnell prüfen» in Prüfen, on a phone: the open shot as a short clip with four big
+  // answers, through the same review (one truth); a team first, then 1 to 4; undo takes it back
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(page.url().replace(/(\/matches\/[^/?#]+).*$/, "$1/check?shots=1"));
+  const quick = page.getByTestId("shot-quick");
+  await expect(quick.getByTestId("shot-quick-count")).toHaveText("1 von 1");
+  await expect(quick.getByRole("heading", { name: "Wie endete der Wurf?" })).toBeVisible();
+  for (const a of ["goal", "save", "miss", "none"]) await expect(quick.getByTestId(`shot-quick-${a}`)).toBeVisible();
+  // a screen reader hears «Gehalten», not «Gehalten2»: the key is in aria-keyshortcuts
+  for (const name of ["Tor", "Gehalten", "Daneben", "Kein Wurf"]) await expect(quick.getByRole("button", { name, exact: true })).toBeVisible();
+  await page.keyboard.press("2");
+  await expect(quick.getByTestId("shot-quick-error")).toContainText("Wähl zuerst, von welchem Team der Wurf ist.");
+  await quick.getByTestId("shot-quick-side-own").click();
+  // Space on a focused answer presses it (it does not replay the clip); the focus goes on to what
+  // comes next, here the end
+  await quick.getByTestId("shot-quick-save").focus();
+  await page.keyboard.press(" ");
+  await expect(quick.getByTestId("shot-quick-done")).toContainText("Alle Würfe geprüft");
+  await expect(quick.getByRole("heading", { name: "Alle Würfe geprüft" })).toBeFocused();
+  expect(reviews.at(-1)).toEqual({ status: "confirmed", side: "own", outcome: "save" });
+  await quick.getByTestId("shot-quick-undo").click();
+  await expect(quick.getByTestId("shot-quick-count")).toHaveText("1 von 1");
+  expect(reviews.at(-1)).toEqual({ status: null });
+  await expectAccessible(page);
 });

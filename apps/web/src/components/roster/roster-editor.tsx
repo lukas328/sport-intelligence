@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AccountLine, UnlinkedAccounts, useTeamMembers } from "./account-link";
 import { ConsentLinkBox } from "./consent-link";
 import { ConsentOverview } from "./consent-overview";
+import { QuickRoster } from "./quick-roster";
 import { useOptionalShell } from "@/components/shell/context";
 import { StatusEditor, StatusLine } from "./player-status";
 import Link from "next/link";
@@ -12,7 +13,7 @@ import { useTranslations } from "next-intl";
 import { useRef, useState, type FormEvent } from "react";
 import { useEarlyFiles } from "@/lib/early-files";
 import { Button } from "@/components/ui/button";
-import { FileUp, Trash2, UserPlus, Users } from "lucide-react";
+import { FileUp, ListPlus, Trash2, UserPlus, Users } from "lucide-react";
 import { Alert, Card, EmptyState, Skeleton } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { useConfirm } from "@/components/ui/confirm";
@@ -21,6 +22,7 @@ import { Input, Select } from "@/components/ui/field";
 import { api } from "@/lib/client";
 import { errorKey, type ErrorKey } from "@/lib/errors";
 import { useEscape } from "@/lib/use-escape";
+import { numberGaps } from "@/lib/roster-numbers";
 
 type Entry = Schemas["RosterEntryOut"];
 type ImportResult = Schemas["ImportResult"];
@@ -76,6 +78,7 @@ export function RosterEditor({ orgId, teamId, seasonId, canEdit, layout = "page"
   const shell = useOptionalShell();
   const staffView = shell ? shell.mode === "staff" : canEdit;
   const formRef = useRef<HTMLFormElement>(null);
+  const [typed, setTyped] = useState("");
 
   const add = useMutation({
     mutationFn: async (body: Schemas["RosterEntryCreate"]) => {
@@ -88,6 +91,7 @@ export function RosterEditor({ orgId, teamId, seasonId, canEdit, layout = "page"
     },
     onSuccess: (entry) => {
       setError(null);
+      setTyped("");
       setNotice(t("roster.added", { name: `${entry.first_name} ${entry.last_name}` }));
       formRef.current?.reset();
       formRef.current?.querySelector<HTMLInputElement>("input[name=jersey_number]")?.focus();
@@ -126,10 +130,22 @@ export function RosterEditor({ orgId, teamId, seasonId, canEdit, layout = "page"
   }
 
   const entries = roster.data ?? [];
+  // a number typed in the form that another player of the season has: said before saving
+  const holder = typed ? entries.find((e) => e.active !== false && String(e.jersey_number) === typed.trim()) : undefined;
+  const gaps = numberGaps(entries.filter((e) => e.active !== false));
   const inline = layout === "inline" || (!roster.isLoading && entries.length === 0);
   const addForm = (
     <form ref={formRef} onSubmit={onAdd} className="grid grid-cols-1 gap-3 sm:grid-cols-2" aria-label={t("roster.addTitle")}>
-      <Input label={t("roster.number")} name="jersey_number" type="number" min={1} max={99} inputMode="numeric" />
+      <Input
+        label={t("roster.number")}
+        name="jersey_number"
+        type="number"
+        min={1}
+        max={99}
+        inputMode="numeric"
+        onChange={(e) => setTyped(e.target.value)}
+        hint={holder ? t("roster.numberTaken", { n: typed.trim(), name: `${holder.first_name} ${holder.last_name}` }) : t("roster.numberHint")}
+      />
       <Select label={t("roster.position")} name="main_position" defaultValue="">
         <option value="">{t("roster.none")}</option>
         {POSITIONS.map((p) => (
@@ -154,6 +170,15 @@ export function RosterEditor({ orgId, teamId, seasonId, canEdit, layout = "page"
     </form>
   );
   const csv = <CsvImport path={path} onImported={() => void qc.invalidateQueries({ queryKey: key })} />;
+  const quick = (
+    <QuickRoster
+      path={path}
+      onImported={(count) => {
+        setNotice(t("roster.quickDone", { count }));
+        void qc.invalidateQueries({ queryKey: key });
+      }}
+    />
+  );
   return (
     <div className="space-y-6">
       {error && <Alert>{t(`errors.${error}`)}</Alert>}
@@ -191,6 +216,18 @@ export function RosterEditor({ orgId, teamId, seasonId, canEdit, layout = "page"
                 {addForm}
               </Dialog>
               <Dialog
+                title={t("roster.quickTitle")}
+                trigger={
+                  <Button size="sm" variant="secondary" data-testid="quick-roster-open">
+                    <ListPlus aria-hidden />
+                    {t("roster.quickTitle")}
+                  </Button>
+                }
+              >
+                {notice && <Alert kind="success" className="mb-4">{notice}</Alert>}
+                {quick}
+              </Dialog>
+              <Dialog
                 title={t("roster.csvTitle")}
                 trigger={
                   <Button size="sm" variant="secondary">
@@ -219,6 +256,21 @@ export function RosterEditor({ orgId, teamId, seasonId, canEdit, layout = "page"
               <Button variant="ghost" size="sm" className="lg:hidden" aria-pressed={editing} onClick={() => setEditing((v) => !v)}>
                 {editing ? t("roster.editDone") : t("roster.editList")}
               </Button>
+            )}
+            {/* shirt numbers: what lets the analysis name people (audit #160) */}
+            {canEdit && (gaps.without.length > 0 || gaps.duplicates.length > 0) && (
+              <div className="max-w-[62ch] border-l-4 border-attn pl-3" role="status" data-testid="roster-number-gaps">
+                {gaps.without.length > 0 && (
+                  <p className="m-0 text-[15px]" data-testid="roster-without-number">
+                    <span className="font-semibold">{t("roster.hintWithout", { n: gaps.without.length })}</span> {gaps.without.map((p) => `${p.first_name} ${p.last_name}`).join(", ")}
+                  </p>
+                )}
+                {gaps.duplicates.map(([n, list]) => (
+                  <p key={n} className="m-0 mt-1 text-[15px]" data-testid="roster-duplicate-number">
+                    <span className="font-semibold">{t("roster.hintTwice", { n })}</span> {list.map((p) => `${p.first_name} ${p.last_name}`).join(", ")}
+                  </p>
+                ))}
+              </div>
             )}
             {/* for the next unit or match: who is available, and who is out, in one line */}
             {(() => {
@@ -352,6 +404,11 @@ export function RosterEditor({ orgId, teamId, seasonId, canEdit, layout = "page"
 
       {canEdit && inline && (
         <div className="grid gap-6 lg:grid-cols-2">
+          {/* the quickest way first: number and name per line (audit #160) */}
+          <Card className="lg:col-span-2">
+            <h3 className="mb-4 font-semibold">{t("roster.quickTitle")}</h3>
+            {quick}
+          </Card>
           <Card>
             <h3 className="mb-4 font-semibold">{t("roster.addTitle")}</h3>
             {addForm}
@@ -404,7 +461,7 @@ function CsvImport({
     <div className="space-y-4">
       <h3 className="font-semibold">{t("roster.csvTitle")}</h3>
       <p className="text-sm text-muted">{t("roster.csvHint")}</p>
-      <a href={templateHref} download="kader-vorlage.csv" className="inline-block text-sm font-medium text-accent underline decoration-[1.5px] underline-offset-4">
+      <a href={templateHref} download="kader-vorlage.csv" className="hit inline-block text-sm font-medium text-accent underline decoration-[1.5px] underline-offset-4">
         {t("roster.csvTemplate")}
       </a>
       <div className="space-y-1">
