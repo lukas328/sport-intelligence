@@ -271,6 +271,34 @@ er wartet, wie viel er selbst korrigieren muss, und ob er den Zahlen trauen kann
   3. Lücken über 3 s beenden eine Phase.
 - **Aufwand:** M.
 
+- **Gemessen (26.11., Analyse-Sitzung): Entscheid «klar besser» für Ballhalter + Positionsregel:
+  nein.** Zwei Horgen-Testclips (je 609 s, keine Endtest-Spiele), Ballbesitz pro Sekunde aus
+  LLM-Labels: zwei unabhängige Durchgänge (94 % der Sekunden gleich), dritter Blick auf 10
+  strittige Stücke über 2 s, kürzere Wechsel-Unschärfen weggelassen. Eingefroren mit sha256
+  fb1ae31a…. Gewertet werden 1193 Sekunden: 960 mit Team, 233 ohne Ball im Spiel. Regel vorab
+  festgelegt: mindestens 10 Punkte mehr richtig, Block-Bootstrap-CI über 0, nicht mehr als
+  10 Punkte mehr Team-Zuordnung in toten Sekunden.
+
+  | Methode | richtig (Sekunden mit Team) | Abdeckung | Präzision | Team trotz totem Ball |
+  |---|---|---|---|---|
+  | heute (Positionsregel) | 75,7 % | 79,8 % | 94,9 % | 74,2 % |
+  | Ballhalter (3 s nachgetragen) | 58,0 % | 73,2 % | 79,2 % | 57,5 % |
+  | Ballhalter, sonst Position | 74,5 % | 91,2 % | 81,6 % | 93,6 % |
+
+  Kombination minus heute: −1,2 Punkte (CI −7,4 bis +4,8). Die Kombination deckt mehr ab, aber
+  jeder fünfte Halter gehört zum falschen Team (Zweikämpfe, Schiedsrichter nah am Ball,
+  Team-Zuordnung der Spur). Nicht ins Produkt. Was die Messung zeigt:
+  1. Die Positionsregel ist präzise (95 %), wenn sie etwas sagt, braucht aber die Seiten. Ohne
+     Torhüter gibt es keine Phasen (Staging). Der Hebel bleibt A6, die Seiten.
+  2. Beide Regeln vergeben in toten Sekunden (nach Tor, Unterbrechung, Timeout) fast immer ein
+     Team. Punkt 3 des Vorschlags (Lücken über 3 s beenden eine Phase) reicht dafür nicht: es
+     braucht ein Signal für «Ball nicht im Spiel» (Spieluhr der Hallentafel, `no_play`).
+  3. Ohne Seiten wäre der Ballhalter die einzige Quelle: 58 % richtig bei 79 % Präzision. Das ist
+     zu schwach, um Phasen allein darauf zu stützen.
+
+  Skripte und Labels: `ml/integration/possession/`, Ergebnis
+  `ml/integration/results/possession_ballholder.json`.
+
 ### 7. Wurfort unzuverlässig, Torzone fehlt
 
 - **Befund:** Ohne gelesene Nummer nimmt der Wurfort den nächsten Angreifer der letzten 10 s

@@ -1,0 +1,11 @@
+You give a THIRD, independent look at ball possession in short stretches of two handball videos (you are a vision-capable model; use the Read tool on JPEG files). Data labelling for a research evaluation; accuracy matters more than speed.
+
+SCR=/tmp/claude-0/-home-user-sport-intelligence/90b1d550-54f3-5af2-9e4d-128d1f5ace9d/scratchpad/poss
+PY=/home/user/sport-intelligence/.venv/bin/python
+SHEET=/tmp/claude-0/-home-user-sport-intelligence/90b1d550-54f3-5af2-9e4d-128d1f5ace9d/scratchpad/wl/sheet.py
+Videos (1280x720, 25 fps): h1 = /tmp/claude-0/-home-user-sport-intelligence/90b1d550-54f3-5af2-9e4d-128d1f5ace9d/scratchpad/wo/sghorgen-h1-30m00-10min.mp4, h2 = /tmp/claude-0/-home-user-sport-intelligence/90b1d550-54f3-5af2-9e4d-128d1f5ace9d/scratchpad/wo/sghorgen-h2-65m00-10min.mp4. Teams: YELLOW shirts/black shorts vs RED/WHITE shirts; a goalkeeper's ball counts for the goalkeeper's team; referees in black.
+Tool: `$PY $SHEET VIDEO T0 STEP N OUT [COLS] [W] [X0 Y0 X1 Y1]` (frame grid, times labelled in yellow).
+
+Stretches (seconds): $SCR/third_todo.json (clip -> list of [start, end]). For each stretch look from start - 5 to end + 5 (sheets STEP 0.25 or 0.5, refine with 0.2) and decide, for every moment inside [start, end], which team has the ball: "yellow", "red" or "none" (ball not in play: after a goal until the throw-off, out of court until the throw-in, timeout, stoppage; or loose and contested; or not visible). A shot: the shooting team keeps possession until the other team catches or picks up the ball.
+
+Work only in $SCR/workC. Do NOT read $SCR/passA, $SCR/passB, $SCR/workA, $SCR/workB. Write $SCR/passC/third.json: {"h1": [segments], "h2": [segments]}, each segment {"start": float, "end": float, "team": "yellow"|"red"|"none"} covering exactly each stretch [start, end] (several segments per stretch if possession changes inside). Save after every stretch; keep notes in $SCR/workC/notes.txt. Final answer short.
