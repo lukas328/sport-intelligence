@@ -96,7 +96,15 @@ export function courtUnconfirmed(a: CourtSource): boolean {
 }
 
 export interface StepInput {
-  analysis: { status: string; needsCalibration: boolean; unconfirmed: boolean } | null;
+  analysis: {
+    status: string;
+    needsCalibration: boolean;
+    unconfirmed: boolean;
+    /** the hall image of a running analysis is there: the court can be marked now */
+    hallImage?: boolean;
+    /** a marked court is being applied or confirmed */
+    courtTaken?: boolean;
+  } | null;
   kickoff: Record<string, number> | null | undefined;
   periodS: number;
   durationMs: number | null | undefined;
@@ -110,15 +118,17 @@ export interface StepInput {
 export function steps(i: StepInput): Step[] {
   const a = i.analysis;
   const court: Step =
-    !a || a.status === "none" || a.status === "running"
-      ? { id: "court", state: "waiting" }
-      : a.status === "failed"
-        ? { id: "court", state: "open", reason: "failed" }
-        : a.needsCalibration
-          ? { id: "court", state: "open", reason: "mark" }
-          : a.unconfirmed
-            ? { id: "court", state: "open", reason: "check" }
-            : { id: "court", state: "done" };
+    a?.status === "running" && a.hallImage && !a.courtTaken
+      ? { id: "court", state: "open", reason: "mark" } // the hall image is there: mark it now
+      : !a || a.status === "none" || a.status === "running"
+        ? { id: "court", state: "waiting" }
+        : a.status === "failed"
+          ? { id: "court", state: "open", reason: "failed" }
+          : a.needsCalibration
+            ? { id: "court", state: "open", reason: "mark" }
+            : a.unconfirmed
+              ? { id: "court", state: "open", reason: "check" }
+              : { id: "court", state: "done" };
   const missing = kickoffMissing(i.kickoff, i.periodS, i.durationMs);
   const kickoff: Step = missing.length
     ? { id: "kickoff", state: "open", reason: `period${missing[0]}` }

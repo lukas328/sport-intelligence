@@ -579,3 +579,24 @@ def test_court_doubt_accepts_a_court_where_goals_lines_and_floor_agree() -> None
 def test_court_doubt_rejects_courts_that_miss_a_check(change: dict[str, float], why: str) -> None:
     doubt = observe.court_doubt(_court_info(**change))
     assert doubt is not None and why in doubt
+
+
+@pytest.mark.skipif(FFMPEG is None, reason="ffmpeg not installed")
+def test_the_motion_pass_gives_the_motion_observe_would_estimate(tmp_path: Path) -> None:
+    """The hall image is made from a quick motion pass before the observation pass (the coach
+    marks the court meanwhile); the observation pass takes that motion instead of estimating
+    it again, and the result is the same as estimating it there."""
+    video = tmp_path / "pan.mp4"
+    truth = SyntheticMatch(SyntheticConfig(seconds=4, pan=1.0)).write(video)
+    boxes = {
+        g.index: [Detection(*o.bbox, 0.9) for o in g.objects if o.label != "ball"] for g in truth
+    }
+    alone = observe.observe(video, _Oracle(boxes), detect_every=observe_step)
+    motion = observe.motion_pass(video)
+    given = observe.observe(video, _Oracle(boxes), detect_every=observe_step, motion=motion)
+    assert given.motion is motion and "camera_motion" not in given.timings_s
+    assert motion.moving == alone.motion.moving and motion.stats == alone.motion.stats
+    assert len(motion.rotations) == len(alone.motion.rotations)
+    assert [i for i, _ in motion.samples] == [i for i, _ in alone.motion.samples]
+    assert np.array_equal(motion.background(), alone.motion.background())
+    assert len(given.frames) == len(alone.frames) and given.total == alone.total

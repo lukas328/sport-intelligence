@@ -26,7 +26,14 @@ import cv2
 import numpy as np
 import structlog
 
-from handball_jobkit import TRANSFER, JobSettings, Reporter, s3_client, upload_dir
+from handball_jobkit import (
+    TRANSFER,
+    JobSettings,
+    Reporter,
+    clicked_points,
+    s3_client,
+    upload_dir,
+)
 from handball_vision import __version__ as vision_version
 from handball_vision import formation, goalcandidates, hallmatch, scoreboard
 from handball_vision import observe as learned
@@ -57,6 +64,8 @@ log = structlog.get_logger("gpu.analysis")
 
 STAGES = {"download": 0.05, "calibration": 0.1, "tracking": 0.75, "upload": 0.1}
 # with the learned detector the single observation pass dominates (ADR 025)
+# the share of the observe stage the motion pass takes (one decode, no networks)
+MOTION_SHARE = 0.05
 STAGES_LEARNED = {
     "download": 0.03,
     "observe": 0.72,
@@ -386,6 +395,28 @@ def _store_view(s3: Any, bucket: str, prefix: str, work: Path, motion: CameraMot
     cv2.imwrite(str(out / "panorama.jpg"), hall, [cv2.IMWRITE_JPEG_QUALITY, 85])
     motion.save(out / "motion.npz")
     upload_dir(s3, bucket, out, prefix + "analysis/")
+
+
+def view_of(motion: CameraMotion) -> dict[str, Any]:
+    """What the API learns about the hall image: the camera kind and the image size."""
+    hall = motion.background()
+    return {
+        "camera": "moving" if motion.moving else "fixed",
+        "panorama": {"width": int(hall.shape[1]), "height": int(hall.shape[0])},
+    }
+
+
+def _share_view(
+    s3: Any, bucket: str, prefix: str, work: Path, motion: CameraMotion, rep: Reporter
+) -> None:
+    """The hall image early (after the motion pass): stored where the API serves it from and
+    announced, so the coach marks the court while people, numbers and the ball are observed. A
+    failure here only costs the early image; the run goes on."""
+    try:
+        _store_view(s3, bucket, prefix, work, motion)
+        rep.share(view_of(motion))
+    except Exception as exc:
+        log.warning("early_view_failed", error=str(exc))
 
 
 def run_analysis(
@@ -829,11 +860,20 @@ def _run_learned(
                 if reader is None and numbers is not None and fps
                 else None
             )
+            motion = None
+            share = 0.0  # the motion pass's part of the observe stage
+            if settings.motion_first:
+                share = MOTION_SHARE
+                motion = learned.motion_pass(
+                    video, progress=lambda _stage, f: rep.fraction(share * f)
+                )
+                _share_view(s3, settings.s3_bucket_artifacts, prefix, work, motion, rep)
             obs = learned.observe(
                 video,
                 detector,
+                motion=motion,
                 detect_every=max(1, settings.detect_every),
-                progress=lambda _stage, f: rep.fraction(f),
+                progress=lambda _stage, f: rep.fraction(share + (1 - share) * f),
                 on_frame=reader.add if reader else (board.add if board else None),
                 numbers=numbers,
                 number_every=max(1, settings.number_every),
@@ -877,11 +917,16 @@ def _run_learned(
             overlay = _cached_overlay(s3, settings.s3_bucket_artifacts, prefix, work)
             play = _cached_json(s3, settings.s3_bucket_artifacts, prefix, work, "play.json")
         hall = obs.motion.background()
-        view = {
-            "camera": "moving" if obs.motion.moving else "fixed",
-            "panorama": {"width": int(hall.shape[1]), "height": int(hall.shape[0])},
-        }
-        rep.stage("calibration")
+        view = view_of(obs.motion)
+        answer = rep.stage("calibration")
+        marked = None if calibration_points else clicked_points(answer)
+        if marked is not None:
+            # the coach marked the court on the early hall image while this job ran: used now,
+            # no second run
+            calibration_points = list(marked["points"])
+            calibration_space = str(marked.get("space") or "panorama")
+            calibration_frame_ms = int(marked.get("frame_ms") or 0)
+            log.info("court_marked_while_running", job_id=job_id, points=len(calibration_points))
         info: dict[str, Any] = {}
         tried: list[dict[str, Any]] = []
         try:

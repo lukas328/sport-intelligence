@@ -73,6 +73,14 @@ describe("steps", () => {
   it("waits while the analysis runs", () =>
     expect(steps({ ...base, analysis: { status: "running", needsCalibration: false, unconfirmed: false } })[0]!.state).toBe("waiting"));
 
+  it("asks to mark the court while the analysis runs once the hall image is there", () => {
+    const running = { status: "running", needsCalibration: false, unconfirmed: false };
+    expect(steps({ ...base, analysis: { ...running, hallImage: true } })[0]).toEqual({ id: "court", state: "open", reason: "mark" });
+    // marked already: the run takes it, nothing to do but wait
+    expect(steps({ ...base, analysis: { ...running, hallImage: true, courtTaken: true } })[0]!.state).toBe("waiting");
+    expect(steps({ ...base, analysis: { ...running, hallImage: false } })[0]!.state).toBe("waiting");
+  });
+
   it("adds open candidates and open official goals", () => {
     const goals = steps({ ...base, candidatesOpen: 12, officialOpen: 2 })[2]!;
     expect(goals).toEqual({ id: "goals", state: "open", count: 14 });

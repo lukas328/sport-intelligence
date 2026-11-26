@@ -930,6 +930,7 @@
   "analysis": {
     "title": "Positionen",
     "running": "Die Analyse läuft. Positionen erscheinen danach hier.",
+    "runningMark": "Die Analyse läuft. Das Hallenbild ist schon da: markiere jetzt das Spielfeld, dann ist die Analyse gleich mit Feld fertig.",
     "failed": "Die Analyse ist fehlgeschlagen: {error}",
     "none": "Noch keine Analyse.",
     "heuristic": "geschätzt",

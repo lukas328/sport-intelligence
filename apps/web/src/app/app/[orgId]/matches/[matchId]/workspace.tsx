@@ -280,7 +280,13 @@ export function Workspace({
   const reportOpen = hasReport && official.data?.imported ? goalRows(official.data, "open", false, spansFor).length : null;
   const stepList = steps({
     analysis: a
-      ? { status: a.status, needsCalibration: a.needs_calibration === true, unconfirmed: courtUnconfirmed(a) }
+      ? {
+          status: a.status,
+          needsCalibration: a.needs_calibration === true,
+          unconfirmed: courtUnconfirmed(a),
+          hallImage: a.panorama != null,
+          courtTaken: a.calibration_state === "updating" || a.calibration_state === "confirmed",
+        }
       : null,
     kickoff: match.kickoff_ms,
     periodS: match.period_s,
