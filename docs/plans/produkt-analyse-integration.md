@@ -1628,3 +1628,50 @@ des anderen Teams daneben. Darum werden die Rohstücke vor dem Verknüpfen gesch
     benannte Zeit 24.6 -> 23.2 %; mit Kader 13 / 0 / 27.5 % -> 14 / 0 / 26.8 %. Nicht-Feldspieler
     benannt 7 -> 4, als Spieler 22 -> 14 von 72; ATV unverändert wie oben.
 
+### Weniger Fehlalarme bei den Wurf- und Tor-Kandidaten (Audit, 2026-11-26)
+
+Auftrag: Präzision der Kandidaten deutlich hoch bei mindestens 95 % des heutigen Tor-Recalls im
+Fenster. Ohne Prüfen-Antworten (Q-DATA-4 offen), auf den eingefrorenen LLM-Abwurfmarken
+(`ml/gold/data/shot_release_dev_llm.json`), 49 Dev-Segmente aus 13 Spielen, Spiel für Spiel
+ausgelassen, Endtest nicht gelesen. Nicht wiederholt, was #145 und A1 schon zeigten (Kamera,
+Spielerbewegung, Ballpfad tragen nichts über den Wert hinaus).
+
+- **Neue Merkmale ohne Kalibrierung** (`ml/integration/shot_stage2/feats.py`): Fusspunkte aller
+  Personen auf dem Kamera-Zylinder (2 Hz), Team jeder Person aus der Torso-Farbe (gelernte Kits),
+  Spielfeldenden aus der Streuung der Fusspunkte. Pro Kandidat in sechs Fenstern von 10 s vor bis
+  35 s nach dem Peak: Anteil Personen nahe dem angegriffenen Ende und in der Mitte, Abstand zum
+  Ende, Streuung, Abstand der Teams, Teams auf getrennten Hälften (Anwurf-Formation), Spiel kehrt
+  zum anderen Ende (Gegenstoss). Die Seiten aus den Torhütern und die Uhr gibt es auf den
+  Dev-Segmenten nicht (keine Kalibrierung, Bewegung ohne Bilder; Videos nur für 34 von 49
+  Segmenten auffindbar); die Hallentafel bräuchte die Videos.
+- **Auswertung** (`ml/integration/shot_stage2/evaluate.py`): Schwelle pro ausgelassenem Spiel aus
+  den Trainingsspielen, so dass dort 95 % des Fenster-Recalls bleiben. Verglichen mit einer höheren
+  Schwelle auf dem heutigen Wert allein. Ergebnis `ml/integration/results/shot_stage2_dev.json`.
+
+| Wurf-Kandidaten | pro Minute | in ±2 s richtig (Präzision) | sichere Würfe in ±2 s | Fenster-Recall |
+|---|---|---|---|---|
+| heute (Rate 4) | 3.86 | 20.4 % (16.3 bis 25.0) | 74.5 % (62.4 bis 86.4) | 100 % |
+| **Rate 2** (Einstellung gibt es schon) | **1.92** | **39.0 %** (32.1 bis 46.1) | **73.4 %** (62.1 bis 84.3) | 95.7 % |
+| Rate 4, Wert-Schwelle aus Training | 1.88 | 42.4 % | | 94.7 % |
+| Rate 4, logistische Regression | 1.66 | 46.3 % | | 91.5 % |
+
+| Tor-Kandidaten (Standardliste, Rate 2) | pro Minute | Präzision ±2 s | Fenster-Recall |
+|---|---|---|---|
+| heute | 1.76 | 29.3 % | 95.6 % |
+| Wert-Schwelle aus Training | 1.64 | 30.7 % | 89.7 % |
+| logistische Regression mit Merkmalen | 1.40 | 35.0 % | 92.6 % |
+| Gradient Boosting mit Merkmalen | 1.31 | 35.9 % | 85.3 % |
+
+- **Wurf-Kandidaten: der Hebel ist die Rate, kein Modell.** Mit Rate 2 statt 4 halbieren sich die
+  Kandidaten und die Präzision verdoppelt sich; von 94 sicheren Würfen geht einer verloren (ein
+  Fehlwurf: Tore 52/68 und Gehaltene 12/19 gleich, Fehlwürfe 6/7 -> 5/7). Die Merkmale heben die
+  AUC leicht (0.877 -> 0.898), erreichen die 95 % beim Fenster-Recall aber nicht.
+- **Tor-Kandidaten: kleiner Gewinn.** Die logistische Regression hebt die Präzision um 5.4 Punkte
+  (Bootstrap über Spiele 3.3 bis 8.2) bei 20 % weniger Kandidaten; der Fenster-Recall sinkt um 2.9
+  Punkte (−7.4 bis 0). Das erfüllt die 95-%-Grenze im Mittel (92.6 von 95.6), nicht aber sicher,
+  und «deutlich» ist es nicht. Wichtigste Merkmale: Personen in der Mitte vor dem Peak, Kehrt zum
+  anderen Ende danach.
+- **Fixierter Kandidat für die eine Endtest-Messung:** Wurf-Kandidaten mit Rate 2 als Standard
+  (`SHOT_DEFAULT_RATE` 4 -> 2), sonst unverändert. Die Tor-Stufe 2 wird nicht eingebaut; ein
+  echter Gewinn braucht neue Information (Prüfen-Antworten, Pfiff, Hallentafel-Sprung).
+

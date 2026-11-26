@@ -1,0 +1,139 @@
+{
+ "goal_rate2": {
+  "kind": "goal",
+  "cands": 259,
+  "pos": 76,
+  "base": {
+   "window_recall": 0.956,
+   "precision": 0.293,
+   "per_min": 1.76
+  },
+  "score": {
+   "auc": 0.656,
+   "window_recall": 0.897,
+   "precision": 0.307,
+   "per_min": 1.64,
+   "kept": 241
+  },
+  "logreg": {
+   "auc": 0.666,
+   "window_recall": 0.926,
+   "precision": 0.35,
+   "per_min": 1.4,
+   "kept": 206
+  },
+  "gb": {
+   "auc": 0.665,
+   "window_recall": 0.853,
+   "precision": 0.359,
+   "per_min": 1.31,
+   "kept": 192
+  }
+ },
+ "shot_rate2": {
+  "kind": "shot",
+  "cands": 282,
+  "pos": 113,
+  "base": {
+   "window_recall": 0.957,
+   "precision": 0.401,
+   "per_min": 1.92
+  },
+  "score": {
+   "auc": 0.707,
+   "window_recall": 0.904,
+   "precision": 0.441,
+   "per_min": 1.68,
+   "kept": 247
+  },
+  "logreg": {
+   "auc": 0.769,
+   "window_recall": 0.872,
+   "precision": 0.507,
+   "per_min": 1.45,
+   "kept": 213
+  },
+  "gb": {
+   "auc": 0.723,
+   "window_recall": 0.862,
+   "precision": 0.537,
+   "per_min": 1.29,
+   "kept": 190
+  }
+ },
+ "shot_rate4": {
+  "kind": "shot",
+  "cands": 568,
+  "pos": 119,
+  "base": {
+   "window_recall": 1.0,
+   "precision": 0.21,
+   "per_min": 3.86
+  },
+  "score": {
+   "auc": 0.877,
+   "window_recall": 0.947,
+   "precision": 0.424,
+   "per_min": 1.88,
+   "kept": 276
+  },
+  "logreg": {
+   "auc": 0.898,
+   "window_recall": 0.915,
+   "precision": 0.463,
+   "per_min": 1.66,
+   "kept": 244
+  },
+  "gb": {
+   "auc": 0.885,
+   "window_recall": 0.904,
+   "precision": 0.483,
+   "per_min": 1.56,
+   "kept": 230
+  }
+ },
+ "shot_recall_2s_sure_marks": {
+  "rate4": {
+   "recall": 74.5,
+   "ci": [
+    62.4,
+    86.4
+   ],
+   "precision": 20.4,
+   "ci_p": [
+    16.3,
+    25.0
+   ]
+  },
+  "rate2": {
+   "recall": 73.4,
+   "ci": [
+    62.1,
+    84.3
+   ],
+   "precision": 39.0,
+   "ci_p": [
+    32.1,
+    46.1
+   ]
+  }
+ },
+ "goal_logreg_vs_all_bootstrap": {
+  "precision_diff": [
+   0.033,
+   0.054,
+   0.082
+  ],
+  "window_recall_diff": [
+   -0.074,
+   -0.029,
+   0.0
+  ],
+  "kept_share": [
+   0.735,
+   0.798,
+   0.85
+  ]
+ },
+ "note": "Dev only (49 segments, 13 games, LLM release marks ml/gold/data/shot_release_dev_llm.json). Leave one game out; thresholds chosen on the training games to keep >= 95 % of their window recall. End test not read."
+}
