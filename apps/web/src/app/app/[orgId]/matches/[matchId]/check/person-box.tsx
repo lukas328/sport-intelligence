@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { boxOnCanvas, cropView, personBox, positionAt, trackSamples, type Homography, type Sample } from "@/lib/spotlight";
+import { courtToPicture, ViewChunks, type Geometry } from "@/lib/moving-camera";
+import { boxOnCanvas, cropView, personBox, positionAt, trackSamples, type Sample } from "@/lib/spotlight";
 
 const ZOOM = 3.2; // the crop is this many box heights tall
 
@@ -14,16 +15,15 @@ const ZOOM = 3.2; // the crop is this many box heights tall
 export function PersonCrop({
   baseUrl,
   chunkMs,
-  homography,
-  imageSize,
+  geometry,
   track,
   getTime,
   getVideo,
 }: {
   baseUrl: string;
   chunkMs: number;
-  homography: Homography;
-  imageSize: [number, number];
+  /** court -> picture, per frame for a moving camera (lib/moving-camera) */
+  geometry: Geometry;
   track: number;
   getTime: () => number;
   getVideo: () => HTMLVideoElement | null;
@@ -32,6 +32,7 @@ export function PersonCrop({
   const chunks = useRef(new Map<number, Sample[] | "loading">());
   useEffect(() => {
     let raf = 0;
+    const views = geometry.view ? new ViewChunks(geometry.view.baseUrl, chunkMs) : null;
     const draw = () => {
       raf = requestAnimationFrame(draw);
       const c = canvas.current;
@@ -50,7 +51,9 @@ export function PersonCrop({
           .then((buf) => (buf ? chunks.current.set(n, trackSamples(new Float32Array(buf), track)) : chunks.current.delete(n)));
       }
       const pos = hit && hit !== "loading" ? positionAt(hit, t) : null;
-      const box = pos ? personBox(homography, pos.x, pos.y, imageSize) : null;
+      // a moving camera: where it looked at this moment; unknown, the full frame without a box
+      const place = pos ? courtToPicture(geometry, views, t) : null;
+      const box = pos && place ? personBox(place.homography, pos.x, pos.y, place.size) : null;
       const vw = v.videoWidth;
       const vh = v.videoHeight;
       // one scale for both axes, letterboxed: the box stays on the person at every size (L5)
@@ -68,6 +71,6 @@ export function PersonCrop({
     };
     draw();
     return () => cancelAnimationFrame(raf);
-  }, [baseUrl, chunkMs, homography, imageSize, track, getTime, getVideo]);
+  }, [baseUrl, chunkMs, geometry, track, getTime, getVideo]);
   return <canvas ref={canvas} aria-hidden className="pointer-events-none absolute inset-0 size-full bg-black" data-testid="person-box" />;
 }

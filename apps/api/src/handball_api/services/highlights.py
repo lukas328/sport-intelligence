@@ -135,12 +135,16 @@ async def _source(ctx: Ctx, asset: VideoAsset) -> tuple[dict[str, Any], dict[uui
     )
     tracks = (await ctx.db.scalars(select(Track).where(Track.video_asset_id == asset.id))).all()
     analysis = asset.analysis or {}
+    # a moving camera's court refers to the hall image, not to the frame: the reel would put the
+    # ring and the crop in the wrong place, so it renders without them (ADR 020; the player
+    # follows the camera with the view files, the reel worker does not yet)
+    on_frame = cal is not None and analysis.get("camera") != "moving"
     return {
         "proxy_key": asset.proxy_key,
         "chunks_prefix": media_prefix(asset) + "analysis/",
         "chunk_ms": analysis.get("chunk_ms"),
-        "homography": cal.homography if cal else None,
-        "image_size": cal.image_size if cal else None,
+        "homography": cal.homography if on_frame and cal else None,
+        "image_size": cal.image_size if on_frame and cal else None,
         "player_tracks": [t.track_no for t in tracks if t.team and t.team != "referee"],
     }, {t.player_id: t.track_no for t in tracks if t.player_id}
 

@@ -312,6 +312,8 @@ async def _apply_analysis_result(
         for k in (
             "chunks",
             "chunk_ms",
+            "view_chunks",
+            "frame_size",
             "fps",
             "frames",
             "detector",
@@ -567,6 +569,8 @@ async def analysis(ctx: Ctx, asset_id: uuid.UUID) -> dict[str, object]:
         "tracks": list(tracks),
         "chunk_ms": meta.get("chunk_ms"),
         "chunks": meta.get("chunks"),
+        "view_chunks": meta.get("view_chunks"),
+        "frame_size": meta.get("frame_size"),
         "fps": meta.get("fps"),
         "detector": meta.get("detector"),
         "elapsed_s": meta.get("elapsed_s"),
@@ -612,6 +616,21 @@ async def read_track_chunk(ctx: Ctx, asset_id: uuid.UUID, n: int) -> bytes:
     try:
         data, _ = await ctx.storage.get(
             ctx.settings.s3_bucket_artifacts, f"{media_prefix(asset)}analysis/chunk_{n:05d}.bin"
+        )
+    except ObjectNotFoundError as exc:
+        raise ProblemError(404, "not-found", "No such chunk") from exc
+    return data
+
+
+async def read_view_chunk(ctx: Ctx, asset_id: uuid.UUID, n: int) -> bytes:
+    """30 s of where a moving camera looked (hall image -> frame per frame, ADR 020)."""
+    asset = await get_asset(ctx, asset_id)
+    meta = asset.analysis or {}
+    if not isinstance(meta.get("view_chunks"), int) or not 0 <= n < int(meta["view_chunks"]):
+        raise ProblemError(404, "not-found", "No such chunk")
+    try:
+        data, _ = await ctx.storage.get(
+            ctx.settings.s3_bucket_artifacts, f"{media_prefix(asset)}analysis/view_{n:05d}.bin"
         )
     except ObjectNotFoundError as exc:
         raise ProblemError(404, "not-found", "No such chunk") from exc

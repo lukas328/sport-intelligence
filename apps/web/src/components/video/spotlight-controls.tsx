@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox, Select } from "@/components/ui/field";
+import { geometryOf } from "@/lib/moving-camera";
 
 type Analysis = Schemas["AnalysisOut"];
 
@@ -19,14 +20,8 @@ export interface SpotlightState {
 
 export function useSpotlight(analysis: Analysis | null): SpotlightState {
   const [s, setS] = useState({ track: null as number | null, dim: false, trail: true, picking: false });
-  // moving cameras: the stored calibration refers to the panorama, not to each frame (ADR 020)
-  const ready = Boolean(
-    analysis?.status === "ready" &&
-      analysis.calibration &&
-      analysis.camera !== "moving" &&
-      analysis.chunk_ms &&
-      (analysis.chunks ?? 0) > 0,
-  );
+  // a moving camera needs its view files (where it looked, ADR 020): without them, no spotlight
+  const ready = Boolean(analysis?.status === "ready" && geometryOf(analysis, "") && (analysis.chunks ?? 0) > 0);
   return { ready, ...s, set: (patch) => setS((cur) => ({ ...cur, ...patch })) };
 }
 
