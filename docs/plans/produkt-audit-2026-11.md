@@ -406,6 +406,21 @@ er wartet, wie viel er selbst korrigieren muss, und ob er den Zahlen trauen kann
     hatte keine negativen Startwerte. Das ist ein Entwurfsfehler der Analyse-Sitzung, nicht des
     Signals.
 
+  **Nebenbefund Versatz der Tor-Kandidaten:** `goal_ms` minus echtes Tor, jeweils der nächste
+  Kandidat auf den 14 gelabelten Toren:
+  - Werte: −3,2, −2,8, −1,8, +1,0, +2,4, +2,6, +3,1, +3,2, +3,2, +3,8, +4,2, +4,9, +6,0 und
+    +12,0 s (der letzte Wert ist vermutlich kein echter Treffer).
+  - Median +3,15 s, mittlere Hälfte +1,0 bis +4,2 s. 10 von 14 liegen mehr als 1,5 s nach dem
+    Tor.
+  - `GOAL_OFFSET_S = 1,5` («median peak − goal»); gemessen ist Peak − Tor eher 4,5 bis 5 s.
+  - Ein Clip, der 1,5 s vor `goal_ms` beginnt («Würfe schnell prüfen»), startet so meist nach
+    dem Tor. Die Entscheidung über den Versatz liegt bei der Hauptsitzung.
+  - Vorbehalt: zwei Spiele, LLM-Labels.
+
+  **Weitere Spiele mit Ton** gibt es nicht. Die Kaggle-Segmente und `testclips/` sind ohne
+  Tonspur; die Quellen sind YouTube-Downloads (Opus 48 kHz), der Ton wurde beim Schneiden
+  verworfen.
+
   Leimental ist jetzt verbraucht. Eine zweite Runde mit Fenster um `goal_ms` (etwa −8 bis +4 s,
   Pfiffpaar) braucht neue Spiele mit Ton, zum Beispiel nach dem Re-Ingest mit 16 kHz (#180).
   Nebennutzen: das Pfiffpaar könnte die Torzeit eines Kandidaten auf ±1 s schärfen. Skripte und
