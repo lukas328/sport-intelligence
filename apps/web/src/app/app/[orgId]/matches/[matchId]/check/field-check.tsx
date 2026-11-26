@@ -53,6 +53,10 @@ export function FieldCheck({
   const r = 8 * perPx;
   const touch = 22 * perPx;
   const [active, setActive] = useState<number | null>(null);
+  // the corner with the keyboard focus, shown with a ring: CSS :focus-visible does not style an SVG
+  // group in Chrome (audit); a press with the finger or mouse shows no ring
+  const [ring, setRing] = useState<number | null>(null);
+  const pressed = useRef(false);
 
   function at(e: PointerEvent): Pt | null {
     const el = svg.current;
@@ -138,14 +142,19 @@ export function FieldCheck({
                 aria-valuetext={`${Math.round(x)}, ${Math.round(y)}`}
                 aria-valuenow={Math.round(x)}
                 style={{ touchAction: "none" }}
-                className="cursor-grab outline-none focus-visible:[&>circle:last-child]:stroke-ink"
+                className="cursor-grab outline-none"
+                onFocus={() => setRing(pressed.current ? null : i)}
+                onBlur={() => setRing(null)}
                 onPointerDown={(e) => {
+                  pressed.current = true;
+                  window.setTimeout(() => (pressed.current = false), 0);
+                  setRing(null);
                   const p = at(e);
                   if (p) drag.current = { i, from: p, start: corners[i]! };
                   setActive(i);
                   (e.currentTarget as Element).closest("svg")?.setPointerCapture(e.pointerId);
                 }}
-                onKeyDown={(e) => key(i, e)}
+                onKeyDown={(e) => (setRing(i), key(i, e))}
                 data-testid={`corner-${i}`}
               >
                 {/* the touch target is larger than the drawn handle */}
@@ -171,6 +180,14 @@ export function FieldCheck({
                       strokeWidth={2}
                       vectorEffect="non-scaling-stroke"
                     />
+                  </>
+                )}
+                {/* the keyboard focus: a light ring with a dark edge, clear on the dark picture and on a
+                    light floor (audit: a dark edge on the handle was not visible on the video) */}
+                {ring === i && (
+                  <>
+                    <circle cx={x} cy={y} r={r + 7 * perPx} fill="none" stroke="var(--ink)" strokeWidth={7} vectorEffect="non-scaling-stroke" data-testid={`corner-${i}-focus`} />
+                    <circle cx={x} cy={y} r={r + 7 * perPx} fill="none" stroke="var(--paper)" strokeWidth={3} vectorEffect="non-scaling-stroke" />
                   </>
                 )}
                 <circle

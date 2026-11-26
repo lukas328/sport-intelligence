@@ -167,9 +167,14 @@ test("a moved corner: Prüfen waits for the new analysis and asks what is open",
   await expect(page.getByText(/Frage 1 von \d+/)).toBeVisible({ timeout: 30_000 });
   // drag the near left corner a little and take the court
   const corner = page.getByTestId("corner-0");
+  // the keyboard focus on a corner shows a ring (the accessibility audit found none on the video);
+  // a press with the mouse shows none
+  await corner.focus();
+  await expect(page.getByTestId("corner-0-focus")).toBeVisible();
   const box = (await corner.boundingBox())!;
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
   await page.mouse.down();
+  await expect(page.getByTestId("corner-0-focus")).toHaveCount(0);
   await page.mouse.move(box.x + box.width / 2 + 30, box.y + box.height / 2 - 10, { steps: 5 });
   await page.mouse.up();
   await page.getByRole("button", { name: "Passt" }).click();
