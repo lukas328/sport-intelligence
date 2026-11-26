@@ -264,16 +264,20 @@ jobs:
           if [ "$TEST_ALERT" = true ]; then
             ag=$(az monitor action-group list -g "$rg" --query "[?ends_with(name, '-ops')].name | [0]" -o tsv)
             [ -n "$ag" ] || { echo "::error::no action group *-ops in $rg"; exit 1; }
-            args=()
-            # the receivers of the group itself (addresses are not printed)
-            while IFS=$'\t' read -r name addr; do
-              echo "::add-mask::$addr"
-              args+=(--add-action email "$name" "$addr")
-            done < <(az monitor action-group show -g "$rg" -n "$ag" --query "emailReceivers[].[name, emailAddress]" -o tsv)
-            [ ${#args[@]} -gt 0 ] || { echo "::error::action group $ag has no e-mail receiver"; exit 1; }
-            echo "== test e-mail through $ag ($(( ${#args[@]} / 4 )) receiver(s))"
-            az monitor action-group test-notifications create -g "$rg" --action-group "$ag" \
-              --alert-type budget "${args[@]}" --query "{state:state, completed:completedTime}" -o table
+            # the receivers exactly as the group holds them (the CLI's --add-action got «no valid
+            # receivers» on 26.11.); addresses are masked, the API call is the documented
+            # createNotifications at the action group
+            az monitor action-group show -g "$rg" -n "$ag" -o json \
+              | jq '{alertType: "metricstaticthreshold", emailReceivers: [.emailReceivers[] | {name, emailAddress, useCommonAlertSchema}]}' >"$RUNNER_TEMP/test-alert.json"
+            for addr in $(jq -r '.emailReceivers[].emailAddress' "$RUNNER_TEMP/test-alert.json"); do echo "::add-mask::$addr"; done
+            n=$(jq '.emailReceivers | length' "$RUNNER_TEMP/test-alert.json")
+            [ "$n" -gt 0 ] || { echo "::error::action group $ag has no e-mail receiver"; exit 1; }
+            echo "== test e-mail through $ag ($n receiver(s))"
+            id=$(az monitor action-group show -g "$rg" -n "$ag" --query id -o tsv)
+            az rest --method post --url "https://management.azure.com${id}/createNotifications?api-version=2023-01-01" \
+              --body @"$RUNNER_TEMP/test-alert.json" -o none
+            rm -f "$RUNNER_TEMP/test-alert.json"
+            echo "test notification accepted: an e-mail from Azure Monitor should arrive within minutes"
           fi
 
       - name: Analysis diagnosis (read only)
