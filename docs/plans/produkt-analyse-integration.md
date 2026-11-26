@@ -1628,6 +1628,149 @@ des anderen Teams daneben. Darum werden die Rohstücke vor dem Verknüpfen gesch
     benannte Zeit 24.6 -> 23.2 %; mit Kader 13 / 0 / 27.5 % -> 14 / 0 / 26.8 %. Nicht-Feldspieler
     benannt 7 -> 4, als Spieler 22 -> 14 von 72; ATV unverändert wie oben.
 
+### Weniger Fehlalarme bei den Wurf- und Tor-Kandidaten (Audit, 2026-11-26)
+
+Auftrag: Präzision der Kandidaten deutlich hoch bei mindestens 95 % des heutigen Tor-Recalls im
+Fenster. Ohne Prüfen-Antworten (Q-DATA-4 offen), auf den eingefrorenen LLM-Abwurfmarken
+(`ml/gold/data/shot_release_dev_llm.json`), 49 Dev-Segmente aus 13 Spielen, Spiel für Spiel
+ausgelassen, Endtest nicht gelesen. Nicht wiederholt, was #145 und A1 schon zeigten (Kamera,
+Spielerbewegung, Ballpfad tragen nichts über den Wert hinaus).
+
+- **Neue Merkmale ohne Kalibrierung** (`ml/integration/shot_stage2/feats.py`): Fusspunkte aller
+  Personen auf dem Kamera-Zylinder (2 Hz), Team jeder Person aus der Torso-Farbe (gelernte Kits),
+  Spielfeldenden aus der Streuung der Fusspunkte. Pro Kandidat in sechs Fenstern von 10 s vor bis
+  35 s nach dem Peak: Anteil Personen nahe dem angegriffenen Ende und in der Mitte, Abstand zum
+  Ende, Streuung, Abstand der Teams, Teams auf getrennten Hälften (Anwurf-Formation), Spiel kehrt
+  zum anderen Ende (Gegenstoss). Die Seiten aus den Torhütern und die Uhr gibt es auf den
+  Dev-Segmenten nicht (keine Kalibrierung, Bewegung ohne Bilder; Videos nur für 34 von 49
+  Segmenten auffindbar); die Hallentafel bräuchte die Videos.
+- **Auswertung** (`ml/integration/shot_stage2/evaluate.py`): Schwelle pro ausgelassenem Spiel aus
+  den Trainingsspielen, so dass dort 95 % des Fenster-Recalls bleiben. Verglichen mit einer höheren
+  Schwelle auf dem heutigen Wert allein. Ergebnis `ml/integration/results/shot_stage2_dev.json`.
+
+| Wurf-Kandidaten | pro Minute | in ±2 s richtig (Präzision) | sichere Würfe in ±2 s | Fenster-Recall |
+|---|---|---|---|---|
+| heute (Rate 4) | 3.86 | 20.4 % (16.3 bis 25.0) | 74.5 % (62.4 bis 86.4) | 100 % |
+| **Rate 2** (Einstellung gibt es schon) | **1.92** | **39.0 %** (32.1 bis 46.1) | **73.4 %** (62.1 bis 84.3) | 95.7 % |
+| Rate 4, Wert-Schwelle aus Training | 1.88 | 42.4 % | | 94.7 % |
+| Rate 4, logistische Regression | 1.66 | 46.3 % | | 91.5 % |
+
+| Tor-Kandidaten (Standardliste, Rate 2) | pro Minute | Präzision ±2 s | Fenster-Recall |
+|---|---|---|---|
+| heute | 1.76 | 29.3 % | 95.6 % |
+| Wert-Schwelle aus Training | 1.64 | 30.7 % | 89.7 % |
+| logistische Regression mit Merkmalen | 1.40 | 35.0 % | 92.6 % |
+| Gradient Boosting mit Merkmalen | 1.31 | 35.9 % | 85.3 % |
+
+- **Wurf-Kandidaten: der Hebel ist die Rate, kein Modell.** Mit Rate 2 statt 4 halbieren sich die
+  Kandidaten und die Präzision verdoppelt sich; von 94 sicheren Würfen geht einer verloren (ein
+  Fehlwurf: Tore 52/68 und Gehaltene 12/19 gleich, Fehlwürfe 6/7 -> 5/7). Die Merkmale heben die
+  AUC leicht (0.877 -> 0.898), erreichen die 95 % beim Fenster-Recall aber nicht.
+- **Tor-Kandidaten: kleiner Gewinn.** Die logistische Regression hebt die Präzision um 5.4 Punkte
+  (Bootstrap über Spiele 3.3 bis 8.2) bei 20 % weniger Kandidaten; der Fenster-Recall sinkt um 2.9
+  Punkte (−7.4 bis 0). Das erfüllt die 95-%-Grenze im Mittel (92.6 von 95.6), nicht aber sicher,
+  und «deutlich» ist es nicht. Wichtigste Merkmale: Personen in der Mitte vor dem Peak, Kehrt zum
+  anderen Ende danach.
+- **Fixierter Kandidat für die eine Endtest-Messung:** Wurf-Kandidaten mit Rate 2 als Standard
+  (`SHOT_DEFAULT_RATE` 4 -> 2), sonst unverändert. Die Tor-Stufe 2 wird nicht eingebaut; ein
+  echter Gewinn braucht neue Information (Prüfen-Antworten, Pfiff, Hallentafel-Sprung).
+
+### Wurf-Kandidaten mit Rate 2: Entscheidungsregel für die eine Endtest-Messung (vor der Messung, 2026-11-26)
+
+Freigabe der Hauptsitzung für genau eine Endtest-Messung des auf Dev fixierten Kandidaten
+(Abschnitt «Weniger Fehlalarme», PR #191). Geändert wird nur `SHOT_DEFAULT_RATE` 4 -> 2, sonst
+nichts; kein zweiter Versuch.
+
+- **Messung:** `ml/integration/shot_segments_eval.py score` mit Lukas' Marken
+  (`ml/gold/data/shot_endtest_marks.json`) auf den gespeicherten Endtest-Beobachtungen (Kaggle-
+  Kernels des Wurf-Endtests), Kandidaten mit dem heutigen Code neu gerechnet, einmal mit
+  `SHOT_DEFAULT_RATE` 4 und einmal mit 2. Keine Endtest-Spiele in die Warteschlange, keine neuen
+  Beobachtungen.
+- **Regel (festgelegt vor der Messung):** übernehmen, wenn auf dem Endtest
+  1. der Wurf-Fenster-Recall («-3/+8 s: shot recall») um höchstens 2 Prozentpunkte sinkt,
+  2. der Tor-Recall im Fenster («-3/+8 s: goal recall») um höchstens 2 Prozentpunkte sinkt und
+  3. die Präzision der Wurf-Kandidaten («shot cand. precision», ±2 s) steigt.
+  Sonst bleibt Rate 4. Das Ergebnis wird in jedem Fall hier dokumentiert; bei «übernehmen» folgt
+  die Umstellung als eigener kleiner PR.
+
+### «Kein Besitz» aus Anwurf-Formation und leerem Feld: vorab festgelegt (Audit, 2026-11-26)
+
+Auftrag: Das Produkt vergibt in Sekunden ohne Ballbesitz meist ein Team (76.4 % auf den
+eingefrorenen Ballbesitz-Labels, «Stand 26.11.»). Nicht wiederholt, was schon verworfen ist
+(Hallenuhr, Bewegung, `no_play`, Pfiff, Pfiff + Bewegung; `produkt-audit-2026-11.md`). Neu sind
+Signale aus den Seiten (#179) und der Anwurf-Formation. Daten: Horgen H1 und H2 (je 609 s,
+Ballbesitz-Truth `ml/integration/possession/labels/truth.json`, LLM, sha256 fb1ae31a…), Tracks mit
+main gerechnet. Ein Spiel, zwei Halbzeiten: «nach Spiel validieren» geht hier nur als Halbzeit gegen
+Halbzeit; das ist eine Grenze der Messung.
+
+**Vorab festgelegt (vor jedem Vergleich mit den Labels):**
+- **A Anwurf-Formation:** In einer Sekunde stehen mindestens 4 Feldspieler je Team auf dem Feld,
+  und mindestens 80 % der Feldspieler jedes Teams stehen in der eigenen Hälfte (welche Hälfte das
+  Team verteidigt, aus den Seiten des Produkts). Gilt mindestens 3 s in Folge -> tot.
+- **E Ereignis Anwurf:** Die 15 s vor jedem `throw_off`-Ereignis des Produkts sind tot.
+- **L leeres Feld:** Weniger als die Hälfte der im Clip üblichen Feldspieler (Median pro Sekunde)
+  steht auf dem Feld, mindestens 5 s in Folge -> tot (Time-out, Spieler an der Bank).
+- **Hauptregel H = A oder E oder L.** Tote Sekunden bekommen kein Team, sonst gilt die
+  Positionsregel unverändert.
+- **Klarer Gewinn** (wie `dead_eval.py`): richtig über alle Sekunden mindestens 5 Punkte höher als
+  die Positionsregel allein, 95-%-CI (20-s-Block-Bootstrap) über 0, auf den Sekunden mit Team
+  höchstens 2 Punkte schlechter, und in beiden Halbzeiten einzeln besser. Berichtet werden dazu
+  Präzision und Recall «tot» sowie der Anteil der Sekunden ohne Besitz, die ein Team bekommen.
+
+**Ergebnis (nach der Festlegung gemessen, `ml/integration/possession/formation_dead_eval.py`,
+`ml/integration/results/possession_formation_dead.json`): kein klarer Gewinn, nicht ins Produkt.**
+
+| Signal | markiert | Präzision tot | Recall tot | richtig alle Sek. | richtig Team-Sek. | Team in Sek. ohne Besitz |
+|---|---|---|---|---|---|---|
+| Positionsregel allein | | | | 66.2 % | 76.6 % | 76.4 % |
+| A Anwurf-Formation | 0 | | | 66.2 % | 76.6 % | 76.4 % |
+| E 15 s vor `throw_off` | 0 | | | 66.2 % | 76.6 % | 76.4 % |
+| L leeres Feld | 87 | 46 % | 17 % | 67.6 % | 76.2 % | 67.8 % |
+| H = A oder E oder L | 87 | 46 % | 17 % | 67.6 % | 76.2 % | 67.8 % |
+
+- H minus Positionsregel: +1.4 Punkte über alle Sekunden (CI 0 bis +3.7), auf den Team-Sekunden
+  −0.4; H1 +2.9, H2 0. Verfehlt die 5 Punkte und «in beiden Halbzeiten besser».
+- **Warum A und E nichts markieren** (nur aus den Signalen geprüft, ohne Labels):
+  - Das Produkt findet in beiden 10-min-Clips keinen einzigen `throw_off`, obwohl in beiden Tore
+    fallen. Die Anwurf-Erkennung greift auf echten Bildern nicht (auf synthetischen Daten schon).
+  - Die Kamera folgt dem Ball und zeigt selten beide Teams ganz: im Median 4 bis 5 Feldspieler je
+    Team im Bild auf dem Feld; «mindestens 4 je Team und 80 % in der eigenen Hälfte» kommt in 1218 s
+    keine einzige Sekunde vor. Die Formation nach dem Tor ist mit dieser Kamera nicht beobachtbar.
+- Folge: «kein Besitz» bleibt offen. Was es bräuchte, ist ein Signal, das ohne ganzes Feld
+  auskommt: der Torpfiff mit Pfiffpaar (Plan Pfiff, Fenster um `goal_ms` −8 bis +4 s, braucht Spiele
+  mit Ton), erkannte Tore aus Prüfen oder der Hallentafel (dann die Sekunden bis zum Wiederanpfiff),
+  oder ein ruhender Ball in der Spielfeldmitte. Mit nur einem Spiel ist jede weitere Regel hier
+  ohnehin schwach validiert.
+
+### Anwurf-Erkennung auf echten Clips (Audit, 2026-11-26)
+
+Nebenbefund aus «kein Besitz»: Die Anwurf-Erkennung (`events.detect`, `throw_off`) findet auf den
+Horgen-Clips H1 und H2 (je 609 s, mehrere Tore) keinen einzigen Anwurf. Damit fehlen auch die
+Tore, die aus dem Anwurf abgeleitet werden.
+
+- **Ursache** (nur aus den Signalen, Zählung pro 200-ms-Bin, H1 / H2 je etwa 3000 Bins): Die Regel
+  verlangt gleichzeitig mindestens 4 sichtbare Feldspieler je Team, beide Teams ganz in der eigenen
+  Hälfte (je ein Ausreisser erlaubt), einen Spieler höchstens 2.5 m vom Mittelpunkt, Median-Tempo
+  unter 1.5 m/s, mindestens 1 s lang. «Beide Teams mit 4 Sichtbaren ganz in der eigenen Hälfte»
+  kommt nur in 18 / 10 Bins vor, mit Mittelpunkt in 6 / 3, zusammen mit «ruhig» in keinem. Die
+  Kamera folgt dem Ball und zeigt beim Anwurf meist die Mitte mit einem Team (Sichtprüfung der
+  Bilder nach den Toren: Kamera parkt an der Mittellinie, ein Team um den Mittelkreis, das andere
+  ausserhalb des Bildes).
+- **Labels:** Versucht als Bildsicht auf Blättern mit einem Bild pro Sekunde von 3 bis 45 s nach
+  jedem Wurf (21 Würfe der Wurfort-Labels). Der Aufbau an der Mittellinie ist erkennbar, der Moment
+  des Anpfiffs auf dieser Auflösung aber oft nicht sicher; zweifache Labels in der nötigen Güte
+  wären mit diesen Blättern nicht ehrlich gewesen. Keine neue Regel ohne verlässliche Wahrheit.
+- **Umgesetzt (ehrlich statt still):** Ein Video von mindestens 5 min mit Seiten, aber ohne einen
+  einzigen erkannten Anwurf, meldet `missing: ["throw_offs"]` (`events.THROW_OFF_EXPECT_MS`). Die
+  Analyse-Ansicht zeigt dann «Anwürfe wurden in diesem Video nicht erkannt …, darum fehlen auch Tore
+  aus dem Anwurf» (de-CH, en, fr). Beide Horgen-Clips melden es; synthetische Spiele mit Anwürfen
+  und kurze Clips nicht (Test `test_a_long_video_without_any_throw_off_says_so`).
+- **Nächster Schritt für eine Regel, die mit dem Sichtbaren auskommt:** Kamera parkt an der
+  Mittellinie (Schwenk nahe der Mitte des Bereichs, ruhig), Spieler eines Teams sammeln sich nahe
+  der Mittellinie, danach setzt die Bewegung zu einem Tor ein, und das innerhalb von 10 bis 45 s
+  nach einem Tor-Kandidaten. Messen braucht verlässliche Anwurf-Zeiten: Bilder in voller Auflösung
+  um die Tore (0.5 s), oder die Tore aus der Hallentafel bzw. aus Prüfen als Anker.
+
 ### Tore aus dem Spielstand (Hallentafel, Einblendung): vorab festgelegt (Audit, 2026-11-26)
 
 Auftrag (Q-REC-SCOREBOARD): Ein Sprung im Spielstand ist ein Tor. Das Produkt hat die Leser

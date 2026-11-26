@@ -988,6 +988,7 @@
     "duration": "Durée d'analyse {seconds} s",
     "autoSummary": "Détecté automatiquement : {events} événements (engagements, buts déduits de l'engagement) et {possessions} attaques, marqués comme estimations.",
     "autoOverlay": "Lu sur le tableau d'affichage incrusté : {goals, plural, =1 {1 but} other {# buts}} avec le temps de jeu.",
+    "autoNoThrowOffs": "Les engagements n'ont pas été détectés dans cette vidéo (la caméra montre rarement l'alignement en entier), les buts déduits de l'engagement manquent donc aussi.",
     "autoNoGoalkeepers": "Sans gardien·ne·s détecté·e·s, les côtés, attaques et buts ne peuvent pas être déterminés automatiquement.",
     "autoLimits": "Les tirs, arrêts et pertes de balle nécessitent la détection du ballon et viennent de la saisie ou de l'import.",
     "failure_calibration": "Le terrain n'a pas été reconnu.",
