@@ -70,6 +70,8 @@ test("court from the hall: Passt moves on; shot review: Enter takes the report e
   await expect(page.getByText("Spielfeld aus einem früheren Video derselben Halle übernommen (Sporthalle Schilfmatt). Liegen die orangen Linien")).toBeVisible();
   await expect(page.getByTestId("court-preview")).toBeVisible();
   await expect(page.getByTestId("step-court")).toContainText("bitte prüfen");
+  // the workbench's steps after the upload stay accessible (audit of the steps after the upload)
+  await expectAccessible(page);
   await page.getByTestId("court-confirm").click();
   await expect(page.getByTestId("step-kickoff")).toHaveAttribute("aria-selected", "true");
   await expect(page.getByTestId("step-court")).toContainText("bestätigt");

@@ -1302,6 +1302,8 @@
     "title": "Spieler zuordnen",
     "hint": "Personen des eigenen Teams einem Spieler aus dem Team zuordnen. Zuordnungen bleiben bei einer neuen Analyse erhalten.",
     "track": "Person {n}",
+    "trackPlayer": "Spieler für {who}",
+    "trackNumber": "Rückennummer von {who}",
     "none": "nicht zugeordnet",
     "saved": "Zuordnung gespeichert.",
     "auto": "automatisch erkannt",

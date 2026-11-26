@@ -156,6 +156,8 @@ test("match: create, upload with pause and resume, processing, player, comment, 
   // each person as a still from the video; a tap plays them in the workbench's player, which is
   // in view beside the list (above it on a phone), with the ring on them
   await expect.poll(async () => page.locator('[data-testid="person-still"][data-state="shown"]').count(), { timeout: 60_000 }).toBeGreaterThan(0);
+  // one stop per person and a named choice (audit of the steps after the upload)
+  await expectAccessible(page);
   await video.evaluate((v: HTMLVideoElement) => v.pause());
   await page.getByTestId("identity-row").first().getByRole("button").first().click();
   await expect.poll(async () => video.evaluate((v: HTMLVideoElement) => !v.paused), { timeout: 30_000 }).toBe(true);
