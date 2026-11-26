@@ -1493,6 +1493,13 @@ des anderen Teams daneben. Darum werden die Rohstücke vor dem Verknüpfen gesch
   Median sinkt auf Horgen, weil Stücke mit zwei Personen jetzt zwei Tracks sind (gewollt); auf ATV
   steigt er, weil die sauberen Stücke danach besser verknüpft werden. Gemischte Tracks auf ATV 1 ->
   2 von 55 (ein Track, innerhalb des Rauschens). Kriterium erfüllt, **im Produkt an**.
-- Grenze: zwei Spiele, wenige sichtbare Nummern auf ATV (9). Lange Verknüpfungen (`LONG_LINKS`)
-  werden mit dem Schnitt neu geprüft.
+- Grenze: zwei Spiele, wenige sichtbare Nummern auf ATV (9).
+- **Lange Verknüpfungen mit Schnitt neu geprüft** (`LONG_LINKS`, bis 8 s, Feldrand-Filter und
+  Teambedingung aus freien Blicken): Horgen richtig / falsch 13 / 1 (wie ohne), benannte Zeit 23.8 %
+  (ohne 22.0), Nicht-Feldspieler benannt 4 von 72, 83 neue Verknüpfungen über 4 s; ATV s1 aber
+  falsch 1 -> 4 (eine Spielerin mit der 44 wird über eine lange Verknüpfung zur 9), benannte Zeit
+  25.0 % (ohne 17.5), Median 29.7 -> 14.9 s, Sichtprüfung 3 von 17 klar falsch (zweimal Spielerin an
+  Person an der Bank, einmal umgekehrt), 2 unklar. Falsch benannt über beide Spiele 2 -> 5:
+  **Kriterium nicht erfüllt, `LONG_LINKS` bleibt aus** (die Sichtprüfung der 83 Horgen-Verknüpfungen
+  ändert daran nichts und wurde nicht gemacht). Der Schnitt allein bleibt an.
 
