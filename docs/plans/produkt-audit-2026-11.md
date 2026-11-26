@@ -310,6 +310,18 @@ er wartet, wie viel er selbst korrigieren muss, und ob er den Zahlen trauen kann
   ist der billigere Hebel. Ohne diese 4 liegt der heutige Fehler bei rund 3 m. Skripte, Labels:
   `ml/integration/shot_location/`, Ergebnis `ml/integration/results/shot_location_ballpath.json`.
 
+- **Team zur Wurfzeit aus der Ballbesitz-Phase (26.11., dieselben 21 Würfe, LLM-Labels).**
+  `suggest_side` (Team, dessen Phase in den 12 s vor bis 3 s nach `goal_ms` zuletzt endete) mit
+  den echten `goal_ms` der Wurf-Kandidaten (im Median rund 2 s nach dem Abwurf): 13 richtig,
+  4 falsch, 2 ohne Vorschlag (19 Würfe mit Kandidat). Mit der Torzeit Abwurf + 1,5 s: 18 richtig,
+  1 falsch, 2 ohne. Ohne Torhüter-Labels gibt es keine Seiten, ohne Seiten keine Phasen und damit
+  keinen Vorschlag: genau das zeigt Staging (leeres `suggested_side`). Der Hebel sind die Seiten
+  (A6, Torhüter in eigener Trikotfarbe, Seiten aus Anwurf-Formationen), nicht die Regel.
+  Erkundung, nicht validiert: die Phase, die den Moment 2 s vor `goal_ms` abdeckt, träfe hier
+  16 von 19 bei 1 falschen (heute 4 falsche). Gemessen auf denselben Labels, darum erst auf
+  Dev-Würfen prüfen, bevor die Regel für Würfe geändert wird. Skript
+  `ml/integration/shot_location/side_check.py`.
+
 ### 8. Pausen und Spieluhr
 
 - **Befund:** Die Hallentafel liefert auf dem 99-min-Video 21 statt etwa 54 min Spielzeit. Die Tafel
