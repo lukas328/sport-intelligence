@@ -256,6 +256,7 @@ def test_goal_candidates_from_observations() -> None:
     assert out["play_s"] == pytest.approx(360.0) and out["no_play_ms"] == []  # fixed camera
     cands = out["candidates"]
     assert out["warm_up_ms"] == []  # no clock readings: no warm-up known
+    assert out["clock_break_ms"] == []
     assert len(cands) == 24  # 4 per minute of play; at most 2 of them in the default list
     assert len([c for c in cands if c["rate"] <= 2]) <= 12
     assert all(c["score"] >= gc.MIN_DEFAULT_SCORE for c in cands if c["rate"] <= 2)
@@ -286,6 +287,27 @@ def test_warm_up_before_the_first_run_of_the_clock() -> None:
     assert warm[t < 179.9].all() and not warm[t > 180.1].any()
     assert not gc.warm_up(t, None).any()
     assert not gc.warm_up(t, [(90_000, 400_000)]).any()  # throw-off right at the start
+
+
+def test_a_long_gap_between_two_runs_of_the_clock_is_a_break() -> None:
+    t = np.arange(0, 3000, gc.DT)
+    # first half until 1000 s, half-time break, second half from 1700 s; a 60 s stop at 2200 s
+    play = [(100_000, 1_000_000), (1_700_000, 2_200_000), (2_260_000, 2_900_000)]
+    brk = gc.clock_breaks(t, play)
+    assert brk[(t > 1010.1) & (t < 1689.9)].all()
+    assert not brk[(t < 1009.9) | (t > 1690.1)].any()  # the short stop and the edges stay play
+    assert not gc.clock_breaks(t, None).any()
+    assert not gc.clock_breaks(t, [(100_000, 900_000)]).any()  # one run: no gap to judge
+
+
+def test_no_candidates_in_the_half_time_break() -> None:
+    obs = _synthetic_game([100.0, 251.0])
+    out = gc.from_observations(obs, play=[(0, 100_000), (300_000, 360_000)])
+    assert out is not None
+    assert out["clock_break_ms"] == [[110_100, 290_000]]  # grid steps after 110 s
+    assert out["play_s"] == pytest.approx(180.0, abs=0.2)
+    assert not [c for c in out["candidates"] if 110_000 < c["t_ms"] < 290_000]
+    assert not [c for c in out["shots"]["candidates"] if 110_000 < c["t_ms"] < 290_000]
 
 
 def test_weak_candidates_leave_the_default_list() -> None:
@@ -467,7 +489,9 @@ def test_a_fixed_camera_with_a_little_drift_is_not_parked() -> None:
     # the same stillness from a camera that follows the play elsewhere in the video is parked
     drifting.stats = {"pan_deg": 60.0, "zoom_ratio": 1.03}
     assert gc.operated(drifting)
-    assert gc.from_observations(obs)["play_s"] == 0.0
+    parked = gc.from_observations(obs)
+    assert parked is not None
+    assert parked["play_s"] == 0.0
     # without the pan range (older motion files) every moving camera is operated, as before
     drifting.stats = {}
     assert gc.operated(drifting)

@@ -1,0 +1,3083 @@
+{
+"note": "Claude's look at the middle frame of each wrong tracker point (owner state none or gone, 342 points) in shot_check_dev_labels.json, 2026-11-25: P part of a person (head, hand, shoe, jersey, referee), E object at the bench (spare balls, green ball-like items, bottles), C spectator or photographer, A board, logo, line or light, B looks like a ball to Claude (owner said wrong: disagreement or near miss, needs the owner's second look), U unclear.",
+"points": [
+{
+"id": "w10_120",
+"clip": "w10",
+"game": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19",
+"t": -5,
+"conf": 0.544,
+"owner": "gone",
+"cat": "P"
+},
+{
+"id": "w10_180",
+"clip": "w10",
+"game": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19",
+"t": -4,
+"conf": 0.852,
+"owner": "gone",
+"cat": "A"
+},
+{
+"id": "w10_210",
+"clip": "w10",
+"game": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19",
+"t": -3.5,
+"conf": 0.645,
+"owner": "gone",
+"cat": "E"
+},
+{
+"id": "w10_270",
+"clip": "w10",
+"game": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19",
+"t": -2.5,
+"conf": 0.626,
+"owner": "gone",
+"cat": "E"
+},
+{
+"id": "w10_30",
+"clip": "w10",
+"game": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19",
+"t": -6.5,
+"conf": 0.556,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w10_300",
+"clip": "w10",
+"game": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19",
+"t": -2,
+"conf": 0.765,
+"owner": "none",
+"cat": "E"
+},
+{
+"id": "w10_330",
+"clip": "w10",
+"game": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19",
+"t": -1.5,
+"conf": 0.79,
+"owner": "none",
+"cat": "E"
+},
+{
+"id": "w10_390",
+"clip": "w10",
+"game": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19",
+"t": -0.5,
+"conf": 0.582,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w10_450",
+"clip": "w10",
+"game": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19",
+"t": 0.5,
+"conf": 0.225,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w11_120",
+"clip": "w11",
+"game": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19",
+"t": -5,
+"conf": 0.585,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w11_180",
+"clip": "w11",
+"game": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19",
+"t": -4,
+"conf": 0.245,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w11_210",
+"clip": "w11",
+"game": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19",
+"t": -3.5,
+"conf": 0.354,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w11_270",
+"clip": "w11",
+"game": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19",
+"t": -2.5,
+"conf": 0.173,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w11_300",
+"clip": "w11",
+"game": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19",
+"t": -2,
+"conf": 0.664,
+"owner": "none",
+"cat": "U"
+},
+{
+"id": "w11_330",
+"clip": "w11",
+"game": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19",
+"t": -1.5,
+"conf": 0.816,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w11_360",
+"clip": "w11",
+"game": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19",
+"t": -1,
+"conf": 0.588,
+"owner": "none",
+"cat": "E"
+},
+{
+"id": "w11_390",
+"clip": "w11",
+"game": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19",
+"t": -0.5,
+"conf": 0.334,
+"owner": "none",
+"cat": "U"
+},
+{
+"id": "w11_420",
+"clip": "w11",
+"game": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19",
+"t": 0,
+"conf": 0.847,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w11_450",
+"clip": "w11",
+"game": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19",
+"t": 0.5,
+"conf": 0.745,
+"owner": "none",
+"cat": "E"
+},
+{
+"id": "w11_480",
+"clip": "w11",
+"game": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19",
+"t": 1,
+"conf": 0.815,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w11_555",
+"clip": "w11",
+"game": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19",
+"t": 2.25,
+"conf": 0.239,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w12_120",
+"clip": "w12",
+"game": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19",
+"t": -5,
+"conf": 0.06,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w12_180",
+"clip": "w12",
+"game": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19",
+"t": -4,
+"conf": 0.064,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w12_210",
+"clip": "w12",
+"game": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19",
+"t": -3.5,
+"conf": 0.188,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w12_270",
+"clip": "w12",
+"game": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19",
+"t": -2.5,
+"conf": 0.518,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w12_30",
+"clip": "w12",
+"game": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19",
+"t": -6.5,
+"conf": 0.319,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w12_300",
+"clip": "w12",
+"game": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19",
+"t": -2,
+"conf": 0.624,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w12_330",
+"clip": "w12",
+"game": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19",
+"t": -1.5,
+"conf": 0.269,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w12_360",
+"clip": "w12",
+"game": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19",
+"t": -1,
+"conf": 0.477,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w12_390",
+"clip": "w12",
+"game": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19",
+"t": -0.5,
+"conf": 0.599,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w12_480",
+"clip": "w12",
+"game": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19",
+"t": 1,
+"conf": 0.156,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w12_555",
+"clip": "w12",
+"game": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19",
+"t": 2.25,
+"conf": 0.468,
+"owner": "none",
+"cat": "U"
+},
+{
+"id": "w13_180",
+"clip": "w13",
+"game": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19",
+"t": -4,
+"conf": 0.395,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w13_210",
+"clip": "w13",
+"game": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19",
+"t": -3.5,
+"conf": 0.032,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w13_240",
+"clip": "w13",
+"game": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19",
+"t": -3,
+"conf": 0.734,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w13_270",
+"clip": "w13",
+"game": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19",
+"t": -2.5,
+"conf": 0.117,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w13_555",
+"clip": "w13",
+"game": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19",
+"t": 2.25,
+"conf": 0.596,
+"owner": "gone",
+"cat": "E"
+},
+{
+"id": "w14_120",
+"clip": "w14",
+"game": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19",
+"t": -5,
+"conf": 0.2,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w14_180",
+"clip": "w14",
+"game": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19",
+"t": -4,
+"conf": 0.111,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w14_30",
+"clip": "w14",
+"game": "CH_Cup_SGWaedenswilHorgen_RTVBasel_2024-10-19",
+"t": -6.5,
+"conf": 0.16,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w20_100",
+"clip": "w20",
+"game": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27",
+"t": -5,
+"conf": 0.377,
+"owner": "gone",
+"cat": "P"
+},
+{
+"id": "w20_225",
+"clip": "w20",
+"game": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27",
+"t": -2.5,
+"conf": 0.06,
+"owner": "gone",
+"cat": "P"
+},
+{
+"id": "w20_25",
+"clip": "w20",
+"game": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27",
+"t": -6.5,
+"conf": 0.032,
+"owner": "gone",
+"cat": "B"
+},
+{
+"id": "w20_250",
+"clip": "w20",
+"game": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27",
+"t": -2,
+"conf": 0.036,
+"owner": "gone",
+"cat": "P"
+},
+{
+"id": "w20_275",
+"clip": "w20",
+"game": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27",
+"t": -1.5,
+"conf": 0.093,
+"owner": "gone",
+"cat": "P"
+},
+{
+"id": "w20_300",
+"clip": "w20",
+"game": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27",
+"t": -1,
+"conf": 0.212,
+"owner": "gone",
+"cat": "B"
+},
+{
+"id": "w20_350",
+"clip": "w20",
+"game": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27",
+"t": 0,
+"conf": 0.041,
+"owner": "gone",
+"cat": "P"
+},
+{
+"id": "w20_375",
+"clip": "w20",
+"game": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27",
+"t": 0.5,
+"conf": 0.261,
+"owner": "gone",
+"cat": "B"
+},
+{
+"id": "w20_400",
+"clip": "w20",
+"game": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27",
+"t": 1,
+"conf": 0.174,
+"owner": "gone",
+"cat": "P"
+},
+{
+"id": "w20_462",
+"clip": "w20",
+"game": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27",
+"t": 2.25,
+"conf": 0.038,
+"owner": "gone",
+"cat": "P"
+},
+{
+"id": "w21_225",
+"clip": "w21",
+"game": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27",
+"t": -2.5,
+"conf": 0.407,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w21_250",
+"clip": "w21",
+"game": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27",
+"t": -2,
+"conf": 0.312,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w21_325",
+"clip": "w21",
+"game": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27",
+"t": -0.5,
+"conf": 0.478,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w21_400",
+"clip": "w21",
+"game": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27",
+"t": 1,
+"conf": 0.098,
+"owner": "gone",
+"cat": "P"
+},
+{
+"id": "w21_462",
+"clip": "w21",
+"game": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27",
+"t": 2.25,
+"conf": 0.037,
+"owner": "gone",
+"cat": "P"
+},
+{
+"id": "w22_100",
+"clip": "w22",
+"game": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27",
+"t": -5,
+"conf": 0.083,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w22_150",
+"clip": "w22",
+"game": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27",
+"t": -4,
+"conf": 0.235,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w22_225",
+"clip": "w22",
+"game": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27",
+"t": -2.5,
+"conf": 0.295,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w22_250",
+"clip": "w22",
+"game": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27",
+"t": -2,
+"conf": 0.111,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w22_275",
+"clip": "w22",
+"game": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27",
+"t": -1.5,
+"conf": 0.117,
+"owner": "none",
+"cat": "U"
+},
+{
+"id": "w22_325",
+"clip": "w22",
+"game": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27",
+"t": -0.5,
+"conf": 0.232,
+"owner": "none",
+"cat": "U"
+},
+{
+"id": "w22_350",
+"clip": "w22",
+"game": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27",
+"t": 0,
+"conf": 0.417,
+"owner": "none",
+"cat": "U"
+},
+{
+"id": "w22_400",
+"clip": "w22",
+"game": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27",
+"t": 1,
+"conf": 0.151,
+"owner": "gone",
+"cat": "P"
+},
+{
+"id": "w23_200",
+"clip": "w23",
+"game": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27",
+"t": -3,
+"conf": 0.171,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w23_25",
+"clip": "w23",
+"game": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27",
+"t": -6.5,
+"conf": 0.123,
+"owner": "none",
+"cat": "C"
+},
+{
+"id": "w23_375",
+"clip": "w23",
+"game": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27",
+"t": 0.5,
+"conf": 0.023,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w24_150",
+"clip": "w24",
+"game": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27",
+"t": -4,
+"conf": 0.013,
+"owner": "none",
+"cat": "U"
+},
+{
+"id": "w24_175",
+"clip": "w24",
+"game": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27",
+"t": -3.5,
+"conf": 0.183,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w24_200",
+"clip": "w24",
+"game": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27",
+"t": -3,
+"conf": 0.057,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w24_275",
+"clip": "w24",
+"game": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27",
+"t": -1.5,
+"conf": 0.336,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w24_325",
+"clip": "w24",
+"game": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27",
+"t": -0.5,
+"conf": 0.07,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w24_350",
+"clip": "w24",
+"game": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27",
+"t": 0,
+"conf": 0.469,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w24_400",
+"clip": "w24",
+"game": "CH_Frauen_Cup_Bruehl_LKZug_2024-04-27",
+"t": 1,
+"conf": 0.174,
+"owner": "gone",
+"cat": "P"
+},
+{
+"id": "w30_120",
+"clip": "w30",
+"game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+"t": -5,
+"conf": 0.45,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w30_180",
+"clip": "w30",
+"game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+"t": -4,
+"conf": 0.183,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w30_210",
+"clip": "w30",
+"game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+"t": -3.5,
+"conf": 0.707,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w30_240",
+"clip": "w30",
+"game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+"t": -3,
+"conf": 0.472,
+"owner": "none",
+"cat": "E"
+},
+{
+"id": "w30_270",
+"clip": "w30",
+"game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+"t": -2.5,
+"conf": 0.643,
+"owner": "none",
+"cat": "E"
+},
+{
+"id": "w30_330",
+"clip": "w30",
+"game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+"t": -1.5,
+"conf": 0.743,
+"owner": "none",
+"cat": "C"
+},
+{
+"id": "w30_360",
+"clip": "w30",
+"game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+"t": -1,
+"conf": 0.796,
+"owner": "none",
+"cat": "C"
+},
+{
+"id": "w30_390",
+"clip": "w30",
+"game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+"t": -0.5,
+"conf": 0.722,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w30_420",
+"clip": "w30",
+"game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+"t": 0,
+"conf": 0.666,
+"owner": "none",
+"cat": "E"
+},
+{
+"id": "w30_450",
+"clip": "w30",
+"game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+"t": 0.5,
+"conf": 0.524,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w30_480",
+"clip": "w30",
+"game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+"t": 1,
+"conf": 0.718,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w30_555",
+"clip": "w30",
+"game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+"t": 2.25,
+"conf": 0.445,
+"owner": "none",
+"cat": "A"
+},
+{
+"id": "w31_180",
+"clip": "w31",
+"game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+"t": -4,
+"conf": 0.897,
+"owner": "none",
+"cat": "E"
+},
+{
+"id": "w31_210",
+"clip": "w31",
+"game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+"t": -3.5,
+"conf": 0.69,
+"owner": "none",
+"cat": "E"
+},
+{
+"id": "w31_240",
+"clip": "w31",
+"game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+"t": -3,
+"conf": 0.88,
+"owner": "none",
+"cat": "E"
+},
+{
+"id": "w31_270",
+"clip": "w31",
+"game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+"t": -2.5,
+"conf": 0.725,
+"owner": "none",
+"cat": "C"
+},
+{
+"id": "w31_30",
+"clip": "w31",
+"game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+"t": -6.5,
+"conf": 0.845,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w31_330",
+"clip": "w31",
+"game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+"t": -1.5,
+"conf": 0.823,
+"owner": "none",
+"cat": "E"
+},
+{
+"id": "w31_360",
+"clip": "w31",
+"game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+"t": -1,
+"conf": 0.515,
+"owner": "none",
+"cat": "E"
+},
+{
+"id": "w31_390",
+"clip": "w31",
+"game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+"t": -0.5,
+"conf": 0.232,
+"owner": "none",
+"cat": "U"
+},
+{
+"id": "w31_420",
+"clip": "w31",
+"game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+"t": 0,
+"conf": 0.52,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w31_480",
+"clip": "w31",
+"game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+"t": 1,
+"conf": 0.176,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w31_555",
+"clip": "w31",
+"game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+"t": 2.25,
+"conf": 0.739,
+"owner": "none",
+"cat": "C"
+},
+{
+"id": "w32_240",
+"clip": "w32",
+"game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+"t": -3,
+"conf": 0.943,
+"owner": "none",
+"cat": "C"
+},
+{
+"id": "w32_300",
+"clip": "w32",
+"game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+"t": -2,
+"conf": 0.799,
+"owner": "none",
+"cat": "E"
+},
+{
+"id": "w32_330",
+"clip": "w32",
+"game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+"t": -1.5,
+"conf": 0.856,
+"owner": "none",
+"cat": "E"
+},
+{
+"id": "w32_360",
+"clip": "w32",
+"game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+"t": -1,
+"conf": 0.647,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w32_390",
+"clip": "w32",
+"game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+"t": -0.5,
+"conf": 0.128,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w32_480",
+"clip": "w32",
+"game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+"t": 1,
+"conf": 0.563,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w32_555",
+"clip": "w32",
+"game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+"t": 2.25,
+"conf": 0.24,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w33_120",
+"clip": "w33",
+"game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+"t": -5,
+"conf": 0.125,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w33_180",
+"clip": "w33",
+"game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+"t": -4,
+"conf": 0.101,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w33_210",
+"clip": "w33",
+"game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+"t": -3.5,
+"conf": 0.472,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w33_240",
+"clip": "w33",
+"game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+"t": -3,
+"conf": 0.507,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w33_270",
+"clip": "w33",
+"game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+"t": -2.5,
+"conf": 0.383,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w33_300",
+"clip": "w33",
+"game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+"t": -2,
+"conf": 0.106,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w33_330",
+"clip": "w33",
+"game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+"t": -1.5,
+"conf": 0.306,
+"owner": "none",
+"cat": "E"
+},
+{
+"id": "w33_360",
+"clip": "w33",
+"game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+"t": -1,
+"conf": 0.726,
+"owner": "none",
+"cat": "E"
+},
+{
+"id": "w33_390",
+"clip": "w33",
+"game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+"t": -0.5,
+"conf": 0.885,
+"owner": "none",
+"cat": "C"
+},
+{
+"id": "w33_420",
+"clip": "w33",
+"game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+"t": 0,
+"conf": 0.917,
+"owner": "none",
+"cat": "C"
+},
+{
+"id": "w33_450",
+"clip": "w33",
+"game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+"t": 0.5,
+"conf": 0.336,
+"owner": "none",
+"cat": "C"
+},
+{
+"id": "w34_210",
+"clip": "w34",
+"game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+"t": -3.5,
+"conf": 0.018,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w34_240",
+"clip": "w34",
+"game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+"t": -3,
+"conf": 0.126,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w34_270",
+"clip": "w34",
+"game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+"t": -2.5,
+"conf": 0.216,
+"owner": "none",
+"cat": "E"
+},
+{
+"id": "w34_330",
+"clip": "w34",
+"game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+"t": -1.5,
+"conf": 0.358,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w34_360",
+"clip": "w34",
+"game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+"t": -1,
+"conf": 0.256,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w34_390",
+"clip": "w34",
+"game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+"t": -0.5,
+"conf": 0.194,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w34_420",
+"clip": "w34",
+"game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+"t": 0,
+"conf": 0.076,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w34_480",
+"clip": "w34",
+"game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+"t": 1,
+"conf": 0.55,
+"owner": "none",
+"cat": "E"
+},
+{
+"id": "w34_555",
+"clip": "w34",
+"game": "CH_NLB_SGWaedenswilHorgen_Emmen_2023-09-03",
+"t": 2.25,
+"conf": 0.826,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w35_120",
+"clip": "w35",
+"game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
+"t": -5,
+"conf": 0.746,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w35_180",
+"clip": "w35",
+"game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
+"t": -4,
+"conf": 0.522,
+"owner": "none",
+"cat": "U"
+},
+{
+"id": "w35_210",
+"clip": "w35",
+"game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
+"t": -3.5,
+"conf": 0.512,
+"owner": "none",
+"cat": "U"
+},
+{
+"id": "w35_30",
+"clip": "w35",
+"game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
+"t": -6.5,
+"conf": 0.118,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w35_300",
+"clip": "w35",
+"game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
+"t": -2,
+"conf": 0.658,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w35_330",
+"clip": "w35",
+"game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
+"t": -1.5,
+"conf": 0.62,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w35_360",
+"clip": "w35",
+"game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
+"t": -1,
+"conf": 0.86,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w35_390",
+"clip": "w35",
+"game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
+"t": -0.5,
+"conf": 0.665,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w35_420",
+"clip": "w35",
+"game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
+"t": 0,
+"conf": 0.735,
+"owner": "none",
+"cat": "E"
+},
+{
+"id": "w35_450",
+"clip": "w35",
+"game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
+"t": 0.5,
+"conf": 0.577,
+"owner": "none",
+"cat": "E"
+},
+{
+"id": "w35_480",
+"clip": "w35",
+"game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
+"t": 1,
+"conf": 0.798,
+"owner": "none",
+"cat": "E"
+},
+{
+"id": "w35_555",
+"clip": "w35",
+"game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
+"t": 2.25,
+"conf": 0.443,
+"owner": "none",
+"cat": "E"
+},
+{
+"id": "w36_180",
+"clip": "w36",
+"game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
+"t": -4,
+"conf": 0.302,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w36_210",
+"clip": "w36",
+"game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
+"t": -3.5,
+"conf": 0.632,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w36_300",
+"clip": "w36",
+"game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
+"t": -2,
+"conf": 0.811,
+"owner": "none",
+"cat": "E"
+},
+{
+"id": "w36_330",
+"clip": "w36",
+"game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
+"t": -1.5,
+"conf": 0.498,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w37_120",
+"clip": "w37",
+"game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
+"t": -5,
+"conf": 0.433,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w37_210",
+"clip": "w37",
+"game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
+"t": -3.5,
+"conf": 0.83,
+"owner": "none",
+"cat": "E"
+},
+{
+"id": "w37_240",
+"clip": "w37",
+"game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
+"t": -3,
+"conf": 0.516,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w37_270",
+"clip": "w37",
+"game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
+"t": -2.5,
+"conf": 0.322,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w37_30",
+"clip": "w37",
+"game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
+"t": -6.5,
+"conf": 0.636,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w37_300",
+"clip": "w37",
+"game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
+"t": -2,
+"conf": 0.162,
+"owner": "gone",
+"cat": "P"
+},
+{
+"id": "w37_330",
+"clip": "w37",
+"game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
+"t": -1.5,
+"conf": 0.444,
+"owner": "gone",
+"cat": "P"
+},
+{
+"id": "w37_360",
+"clip": "w37",
+"game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
+"t": -1,
+"conf": 0.091,
+"owner": "gone",
+"cat": "B"
+},
+{
+"id": "w37_390",
+"clip": "w37",
+"game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
+"t": -0.5,
+"conf": 0.262,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w37_450",
+"clip": "w37",
+"game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
+"t": 0.5,
+"conf": 0.045,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w37_480",
+"clip": "w37",
+"game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
+"t": 1,
+"conf": 0.06,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w37_555",
+"clip": "w37",
+"game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
+"t": 2.25,
+"conf": 0.056,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w38_120",
+"clip": "w38",
+"game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
+"t": -5,
+"conf": 0.371,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w38_180",
+"clip": "w38",
+"game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
+"t": -4,
+"conf": 0.713,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w38_210",
+"clip": "w38",
+"game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
+"t": -3.5,
+"conf": 0.706,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w38_240",
+"clip": "w38",
+"game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
+"t": -3,
+"conf": 0.341,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w38_270",
+"clip": "w38",
+"game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
+"t": -2.5,
+"conf": 0.677,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w38_300",
+"clip": "w38",
+"game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
+"t": -2,
+"conf": 0.829,
+"owner": "none",
+"cat": "U"
+},
+{
+"id": "w38_330",
+"clip": "w38",
+"game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
+"t": -1.5,
+"conf": 0.105,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w38_450",
+"clip": "w38",
+"game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
+"t": 0.5,
+"conf": 0.777,
+"owner": "gone",
+"cat": "E"
+},
+{
+"id": "w38_555",
+"clip": "w38",
+"game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
+"t": 2.25,
+"conf": 0.727,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w39_210",
+"clip": "w39",
+"game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
+"t": -3.5,
+"conf": 0.095,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w39_240",
+"clip": "w39",
+"game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
+"t": -3,
+"conf": 0.213,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w39_270",
+"clip": "w39",
+"game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
+"t": -2.5,
+"conf": 0.264,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w39_300",
+"clip": "w39",
+"game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
+"t": -2,
+"conf": 0.039,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w39_360",
+"clip": "w39",
+"game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
+"t": -1,
+"conf": 0.659,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w39_390",
+"clip": "w39",
+"game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
+"t": -0.5,
+"conf": 0.719,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w39_420",
+"clip": "w39",
+"game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
+"t": 0,
+"conf": 0.276,
+"owner": "none",
+"cat": "U"
+},
+{
+"id": "w39_480",
+"clip": "w39",
+"game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
+"t": 1,
+"conf": 0.324,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w39_555",
+"clip": "w39",
+"game": "CH_NLB_SGWaedenswilHorgen_FortitudoGossau_2023-09-23",
+"t": 2.25,
+"conf": 0.102,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w40_240",
+"clip": "w40",
+"game": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10",
+"t": -3,
+"conf": 0.081,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w40_270",
+"clip": "w40",
+"game": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10",
+"t": -2.5,
+"conf": 0.403,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w40_300",
+"clip": "w40",
+"game": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10",
+"t": -2,
+"conf": 0.071,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w40_360",
+"clip": "w40",
+"game": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10",
+"t": -1,
+"conf": 0.17,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w40_390",
+"clip": "w40",
+"game": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10",
+"t": -0.5,
+"conf": 0.046,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w40_420",
+"clip": "w40",
+"game": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10",
+"t": 0,
+"conf": 0.747,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w40_450",
+"clip": "w40",
+"game": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10",
+"t": 0.5,
+"conf": 0.104,
+"owner": "none",
+"cat": "U"
+},
+{
+"id": "w41_120",
+"clip": "w41",
+"game": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10",
+"t": -5,
+"conf": 0.261,
+"owner": "none",
+"cat": "A"
+},
+{
+"id": "w41_180",
+"clip": "w41",
+"game": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10",
+"t": -4,
+"conf": 0.243,
+"owner": "none",
+"cat": "A"
+},
+{
+"id": "w41_210",
+"clip": "w41",
+"game": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10",
+"t": -3.5,
+"conf": 0.761,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w41_240",
+"clip": "w41",
+"game": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10",
+"t": -3,
+"conf": 0.544,
+"owner": "none",
+"cat": "A"
+},
+{
+"id": "w41_270",
+"clip": "w41",
+"game": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10",
+"t": -2.5,
+"conf": 0.299,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w41_30",
+"clip": "w41",
+"game": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10",
+"t": -6.5,
+"conf": 0.263,
+"owner": "none",
+"cat": "A"
+},
+{
+"id": "w41_300",
+"clip": "w41",
+"game": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10",
+"t": -2,
+"conf": 0.267,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w41_330",
+"clip": "w41",
+"game": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10",
+"t": -1.5,
+"conf": 0.248,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w41_420",
+"clip": "w41",
+"game": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10",
+"t": 0,
+"conf": 0.323,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w42_210",
+"clip": "w42",
+"game": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10",
+"t": -3.5,
+"conf": 0.455,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w42_240",
+"clip": "w42",
+"game": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10",
+"t": -3,
+"conf": 0.32,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w42_270",
+"clip": "w42",
+"game": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10",
+"t": -2.5,
+"conf": 0.296,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w42_30",
+"clip": "w42",
+"game": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10",
+"t": -6.5,
+"conf": 0.077,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w42_300",
+"clip": "w42",
+"game": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10",
+"t": -2,
+"conf": 0.403,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w42_330",
+"clip": "w42",
+"game": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10",
+"t": -1.5,
+"conf": 0.615,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w42_360",
+"clip": "w42",
+"game": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10",
+"t": -1,
+"conf": 0.68,
+"owner": "gone",
+"cat": "P"
+},
+{
+"id": "w42_390",
+"clip": "w42",
+"game": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10",
+"t": -0.5,
+"conf": 0.589,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w42_420",
+"clip": "w42",
+"game": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10",
+"t": 0,
+"conf": 0.678,
+"owner": "gone",
+"cat": "P"
+},
+{
+"id": "w42_450",
+"clip": "w42",
+"game": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10",
+"t": 0.5,
+"conf": 0.047,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w42_480",
+"clip": "w42",
+"game": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10",
+"t": 1,
+"conf": 0.162,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w43_120",
+"clip": "w43",
+"game": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10",
+"t": -5,
+"conf": 0.362,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w43_210",
+"clip": "w43",
+"game": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10",
+"t": -3.5,
+"conf": 0.104,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w43_240",
+"clip": "w43",
+"game": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10",
+"t": -3,
+"conf": 0.35,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w43_30",
+"clip": "w43",
+"game": "CH_NLB_SGWaedenswilHorgen_HCArbon_2023-12-10",
+"t": -6.5,
+"conf": 0.524,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w44_180",
+"clip": "w44",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": -4,
+"conf": 0.049,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w44_210",
+"clip": "w44",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": -3.5,
+"conf": 0.421,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w44_240",
+"clip": "w44",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": -3,
+"conf": 0.021,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w44_270",
+"clip": "w44",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": -2.5,
+"conf": 0.37,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w44_300",
+"clip": "w44",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": -2,
+"conf": 0.015,
+"owner": "gone",
+"cat": "P"
+},
+{
+"id": "w44_330",
+"clip": "w44",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": -1.5,
+"conf": 0.058,
+"owner": "gone",
+"cat": "P"
+},
+{
+"id": "w44_360",
+"clip": "w44",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": -1,
+"conf": 0.322,
+"owner": "gone",
+"cat": "P"
+},
+{
+"id": "w44_390",
+"clip": "w44",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": -0.5,
+"conf": 0.286,
+"owner": "gone",
+"cat": "P"
+},
+{
+"id": "w44_450",
+"clip": "w44",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": 0.5,
+"conf": 0.543,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w44_555",
+"clip": "w44",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": 2.25,
+"conf": 0.538,
+"owner": "none",
+"cat": "E"
+},
+{
+"id": "w45_120",
+"clip": "w45",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": -5,
+"conf": 0.9,
+"owner": "none",
+"cat": "E"
+},
+{
+"id": "w45_180",
+"clip": "w45",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": -4,
+"conf": 0.89,
+"owner": "gone",
+"cat": "E"
+},
+{
+"id": "w45_210",
+"clip": "w45",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": -3.5,
+"conf": 0.727,
+"owner": "gone",
+"cat": "E"
+},
+{
+"id": "w45_240",
+"clip": "w45",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": -3,
+"conf": 0.901,
+"owner": "gone",
+"cat": "E"
+},
+{
+"id": "w45_270",
+"clip": "w45",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": -2.5,
+"conf": 0.869,
+"owner": "gone",
+"cat": "E"
+},
+{
+"id": "w45_30",
+"clip": "w45",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": -6.5,
+"conf": 0.437,
+"owner": "gone",
+"cat": "E"
+},
+{
+"id": "w45_300",
+"clip": "w45",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": -2,
+"conf": 0.678,
+"owner": "gone",
+"cat": "P"
+},
+{
+"id": "w45_330",
+"clip": "w45",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": -1.5,
+"conf": 0.017,
+"owner": "gone",
+"cat": "E"
+},
+{
+"id": "w45_360",
+"clip": "w45",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": -1,
+"conf": 0.455,
+"owner": "gone",
+"cat": "P"
+},
+{
+"id": "w45_390",
+"clip": "w45",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": -0.5,
+"conf": 0.271,
+"owner": "gone",
+"cat": "E"
+},
+{
+"id": "w45_420",
+"clip": "w45",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": 0,
+"conf": 0.926,
+"owner": "gone",
+"cat": "E"
+},
+{
+"id": "w45_450",
+"clip": "w45",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": 0.5,
+"conf": 0.887,
+"owner": "gone",
+"cat": "E"
+},
+{
+"id": "w45_480",
+"clip": "w45",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": 1,
+"conf": 0.766,
+"owner": "none",
+"cat": "E"
+},
+{
+"id": "w45_555",
+"clip": "w45",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": 2.25,
+"conf": 0.025,
+"owner": "none",
+"cat": "E"
+},
+{
+"id": "w46_120",
+"clip": "w46",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": -5,
+"conf": 0.811,
+"owner": "none",
+"cat": "E"
+},
+{
+"id": "w46_180",
+"clip": "w46",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": -4,
+"conf": 0.909,
+"owner": "gone",
+"cat": "E"
+},
+{
+"id": "w46_210",
+"clip": "w46",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": -3.5,
+"conf": 0.88,
+"owner": "none",
+"cat": "E"
+},
+{
+"id": "w46_240",
+"clip": "w46",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": -3,
+"conf": 0.906,
+"owner": "none",
+"cat": "E"
+},
+{
+"id": "w46_270",
+"clip": "w46",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": -2.5,
+"conf": 0.872,
+"owner": "none",
+"cat": "E"
+},
+{
+"id": "w46_30",
+"clip": "w46",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": -6.5,
+"conf": 0.011,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w46_300",
+"clip": "w46",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": -2,
+"conf": 0.878,
+"owner": "none",
+"cat": "E"
+},
+{
+"id": "w46_360",
+"clip": "w46",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": -1,
+"conf": 0.162,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w46_480",
+"clip": "w46",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": 1,
+"conf": 0.074,
+"owner": "none",
+"cat": "C"
+},
+{
+"id": "w46_555",
+"clip": "w46",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": 2.25,
+"conf": 0.27,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w47_240",
+"clip": "w47",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": -3,
+"conf": 0.116,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w47_270",
+"clip": "w47",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": -2.5,
+"conf": 0.126,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w47_300",
+"clip": "w47",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": -2,
+"conf": 0.503,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w47_330",
+"clip": "w47",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": -1.5,
+"conf": 0.837,
+"owner": "none",
+"cat": "E"
+},
+{
+"id": "w47_360",
+"clip": "w47",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": -1,
+"conf": 0.858,
+"owner": "none",
+"cat": "E"
+},
+{
+"id": "w47_390",
+"clip": "w47",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": -0.5,
+"conf": 0.787,
+"owner": "none",
+"cat": "E"
+},
+{
+"id": "w47_420",
+"clip": "w47",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": 0,
+"conf": 0.538,
+"owner": "none",
+"cat": "U"
+},
+{
+"id": "w47_555",
+"clip": "w47",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": 2.25,
+"conf": 0.62,
+"owner": "none",
+"cat": "E"
+},
+{
+"id": "w48_120",
+"clip": "w48",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": -5,
+"conf": 0.035,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w48_180",
+"clip": "w48",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": -4,
+"conf": 0.075,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w48_210",
+"clip": "w48",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": -3.5,
+"conf": 0.026,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w48_240",
+"clip": "w48",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": -3,
+"conf": 0.058,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w48_270",
+"clip": "w48",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": -2.5,
+"conf": 0.595,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w48_300",
+"clip": "w48",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": -2,
+"conf": 0.908,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w48_330",
+"clip": "w48",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": -1.5,
+"conf": 0.064,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w48_360",
+"clip": "w48",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": -1,
+"conf": 0.074,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w48_390",
+"clip": "w48",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": -0.5,
+"conf": 0.63,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w48_420",
+"clip": "w48",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": 0,
+"conf": 0.789,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w48_450",
+"clip": "w48",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": 0.5,
+"conf": 0.374,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w48_480",
+"clip": "w48",
+"game": "CH_NLB_SGWaedenswilHorgen_HSGBadenEndingen_2023-11-19",
+"t": 1,
+"conf": 0.486,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w49_210",
+"clip": "w49",
+"game": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02",
+"t": -3.5,
+"conf": 0.052,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w49_240",
+"clip": "w49",
+"game": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02",
+"t": -3,
+"conf": 0.276,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w49_270",
+"clip": "w49",
+"game": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02",
+"t": -2.5,
+"conf": 0.311,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w49_30",
+"clip": "w49",
+"game": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02",
+"t": -6.5,
+"conf": 0.534,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w49_300",
+"clip": "w49",
+"game": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02",
+"t": -2,
+"conf": 0.136,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w49_330",
+"clip": "w49",
+"game": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02",
+"t": -1.5,
+"conf": 0.081,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w49_390",
+"clip": "w49",
+"game": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02",
+"t": -0.5,
+"conf": 0.118,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w49_555",
+"clip": "w49",
+"game": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02",
+"t": 2.25,
+"conf": 0.27,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w50_270",
+"clip": "w50",
+"game": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02",
+"t": -2.5,
+"conf": 0.092,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w50_300",
+"clip": "w50",
+"game": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02",
+"t": -2,
+"conf": 0.248,
+"owner": "none",
+"cat": "A"
+},
+{
+"id": "w50_360",
+"clip": "w50",
+"game": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02",
+"t": -1,
+"conf": 0.43,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w50_390",
+"clip": "w50",
+"game": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02",
+"t": -0.5,
+"conf": 0.817,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w50_420",
+"clip": "w50",
+"game": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02",
+"t": 0,
+"conf": 0.559,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w51_120",
+"clip": "w51",
+"game": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02",
+"t": -5,
+"conf": 0.08,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w51_180",
+"clip": "w51",
+"game": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02",
+"t": -4,
+"conf": 0.082,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w51_30",
+"clip": "w51",
+"game": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02",
+"t": -6.5,
+"conf": 0.561,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w51_360",
+"clip": "w51",
+"game": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02",
+"t": -1,
+"conf": 0.143,
+"owner": "gone",
+"cat": "B"
+},
+{
+"id": "w52_120",
+"clip": "w52",
+"game": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02",
+"t": -5,
+"conf": 0.048,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w52_180",
+"clip": "w52",
+"game": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02",
+"t": -4,
+"conf": 0.164,
+"owner": "none",
+"cat": "A"
+},
+{
+"id": "w52_270",
+"clip": "w52",
+"game": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02",
+"t": -2.5,
+"conf": 0.085,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w52_30",
+"clip": "w52",
+"game": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02",
+"t": -6.5,
+"conf": 0.153,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w52_330",
+"clip": "w52",
+"game": "CH_NLB_SGWaedenswilHorgen_Staefa_2023-12-02",
+"t": -1.5,
+"conf": 0.06,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w53_180",
+"clip": "w53",
+"game": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09",
+"t": -4,
+"conf": 0.178,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w53_210",
+"clip": "w53",
+"game": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09",
+"t": -3.5,
+"conf": 0.431,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w53_240",
+"clip": "w53",
+"game": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09",
+"t": -3,
+"conf": 0.217,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w53_270",
+"clip": "w53",
+"game": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09",
+"t": -2.5,
+"conf": 0.195,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w53_300",
+"clip": "w53",
+"game": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09",
+"t": -2,
+"conf": 0.528,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w53_360",
+"clip": "w53",
+"game": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09",
+"t": -1,
+"conf": 0.606,
+"owner": "gone",
+"cat": "B"
+},
+{
+"id": "w54_180",
+"clip": "w54",
+"game": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09",
+"t": -4,
+"conf": 0.284,
+"owner": "none",
+"cat": "U"
+},
+{
+"id": "w54_270",
+"clip": "w54",
+"game": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09",
+"t": -2.5,
+"conf": 0.477,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w54_300",
+"clip": "w54",
+"game": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09",
+"t": -2,
+"conf": 0.369,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w54_330",
+"clip": "w54",
+"game": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09",
+"t": -1.5,
+"conf": 0.17,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w54_360",
+"clip": "w54",
+"game": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09",
+"t": -1,
+"conf": 0.162,
+"owner": "none",
+"cat": "U"
+},
+{
+"id": "w54_390",
+"clip": "w54",
+"game": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09",
+"t": -0.5,
+"conf": 0.248,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w54_420",
+"clip": "w54",
+"game": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09",
+"t": 0,
+"conf": 0.089,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w54_450",
+"clip": "w54",
+"game": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09",
+"t": 0.5,
+"conf": 0.372,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w54_555",
+"clip": "w54",
+"game": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09",
+"t": 2.25,
+"conf": 0.048,
+"owner": "gone",
+"cat": "A"
+},
+{
+"id": "w55_120",
+"clip": "w55",
+"game": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09",
+"t": -5,
+"conf": 0.307,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w55_270",
+"clip": "w55",
+"game": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09",
+"t": -2.5,
+"conf": 0.404,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w55_300",
+"clip": "w55",
+"game": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09",
+"t": -2,
+"conf": 0.426,
+"owner": "gone",
+"cat": "U"
+},
+{
+"id": "w55_330",
+"clip": "w55",
+"game": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09",
+"t": -1.5,
+"conf": 0.317,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w55_390",
+"clip": "w55",
+"game": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09",
+"t": -0.5,
+"conf": 0.059,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w55_420",
+"clip": "w55",
+"game": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09",
+"t": 0,
+"conf": 0.396,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w55_450",
+"clip": "w55",
+"game": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09",
+"t": 0.5,
+"conf": 0.06,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w55_480",
+"clip": "w55",
+"game": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09",
+"t": 1,
+"conf": 0.105,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w56_180",
+"clip": "w56",
+"game": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09",
+"t": -4,
+"conf": 0.117,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w56_210",
+"clip": "w56",
+"game": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09",
+"t": -3.5,
+"conf": 0.236,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w56_240",
+"clip": "w56",
+"game": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09",
+"t": -3,
+"conf": 0.359,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w56_270",
+"clip": "w56",
+"game": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09",
+"t": -2.5,
+"conf": 0.154,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w56_300",
+"clip": "w56",
+"game": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09",
+"t": -2,
+"conf": 0.114,
+"owner": "gone",
+"cat": "U"
+},
+{
+"id": "w56_330",
+"clip": "w56",
+"game": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09",
+"t": -1.5,
+"conf": 0.251,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w56_555",
+"clip": "w56",
+"game": "CH_NLB_SGWaedenswilHorgen_TVBirsfelden_2023-09-09",
+"t": 2.25,
+"conf": 0.046,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w57_240",
+"clip": "w57",
+"game": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14",
+"t": -3,
+"conf": 0.415,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w57_270",
+"clip": "w57",
+"game": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14",
+"t": -2.5,
+"conf": 0.543,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w57_300",
+"clip": "w57",
+"game": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14",
+"t": -2,
+"conf": 0.311,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w57_330",
+"clip": "w57",
+"game": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14",
+"t": -1.5,
+"conf": 0.044,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w57_360",
+"clip": "w57",
+"game": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14",
+"t": -1,
+"conf": 0.053,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w57_390",
+"clip": "w57",
+"game": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14",
+"t": -0.5,
+"conf": 0.131,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w57_420",
+"clip": "w57",
+"game": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14",
+"t": 0,
+"conf": 0.093,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w58_120",
+"clip": "w58",
+"game": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14",
+"t": -5,
+"conf": 0.61,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w58_180",
+"clip": "w58",
+"game": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14",
+"t": -4,
+"conf": 0.686,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w58_210",
+"clip": "w58",
+"game": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14",
+"t": -3.5,
+"conf": 0.226,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w58_240",
+"clip": "w58",
+"game": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14",
+"t": -3,
+"conf": 0.33,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w58_270",
+"clip": "w58",
+"game": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14",
+"t": -2.5,
+"conf": 0.341,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w58_300",
+"clip": "w58",
+"game": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14",
+"t": -2,
+"conf": 0.151,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w58_330",
+"clip": "w58",
+"game": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14",
+"t": -1.5,
+"conf": 0.632,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w58_390",
+"clip": "w58",
+"game": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14",
+"t": -0.5,
+"conf": 0.306,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w58_450",
+"clip": "w58",
+"game": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14",
+"t": 0.5,
+"conf": 0.118,
+"owner": "none",
+"cat": "U"
+},
+{
+"id": "w58_555",
+"clip": "w58",
+"game": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14",
+"t": 2.25,
+"conf": 0.53,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w59_210",
+"clip": "w59",
+"game": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14",
+"t": -3.5,
+"conf": 0.117,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w59_240",
+"clip": "w59",
+"game": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14",
+"t": -3,
+"conf": 0.07,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w59_270",
+"clip": "w59",
+"game": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14",
+"t": -2.5,
+"conf": 0.443,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w59_330",
+"clip": "w59",
+"game": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14",
+"t": -1.5,
+"conf": 0.16,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w59_390",
+"clip": "w59",
+"game": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14",
+"t": -0.5,
+"conf": 0.101,
+"owner": "gone",
+"cat": "B"
+},
+{
+"id": "w59_420",
+"clip": "w59",
+"game": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14",
+"t": 0,
+"conf": 0.4,
+"owner": "gone",
+"cat": "P"
+},
+{
+"id": "w59_450",
+"clip": "w59",
+"game": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14",
+"t": 0.5,
+"conf": 0.078,
+"owner": "gone",
+"cat": "P"
+},
+{
+"id": "w59_480",
+"clip": "w59",
+"game": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14",
+"t": 1,
+"conf": 0.225,
+"owner": "gone",
+"cat": "B"
+},
+{
+"id": "w60_120",
+"clip": "w60",
+"game": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14",
+"t": -5,
+"conf": 0.045,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w60_180",
+"clip": "w60",
+"game": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14",
+"t": -4,
+"conf": 0.26,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w60_210",
+"clip": "w60",
+"game": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14",
+"t": -3.5,
+"conf": 0.068,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w60_240",
+"clip": "w60",
+"game": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14",
+"t": -3,
+"conf": 0.518,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w60_270",
+"clip": "w60",
+"game": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14",
+"t": -2.5,
+"conf": 0.295,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w60_300",
+"clip": "w60",
+"game": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14",
+"t": -2,
+"conf": 0.08,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w60_330",
+"clip": "w60",
+"game": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14",
+"t": -1.5,
+"conf": 0.062,
+"owner": "none",
+"cat": "P"
+},
+{
+"id": "w60_390",
+"clip": "w60",
+"game": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14",
+"t": -0.5,
+"conf": 0.522,
+"owner": "none",
+"cat": "B"
+},
+{
+"id": "w60_420",
+"clip": "w60",
+"game": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14",
+"t": 0,
+"conf": 0.758,
+"owner": "none",
+"cat": "E"
+},
+{
+"id": "w60_450",
+"clip": "w60",
+"game": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14",
+"t": 0.5,
+"conf": 0.504,
+"owner": "none",
+"cat": "E"
+},
+{
+"id": "w60_480",
+"clip": "w60",
+"game": "CH_NLB_SGWaedenswilHorgen_TVMoehlin_2023-10-14",
+"t": 1,
+"conf": 0.346,
+"owner": "none",
+"cat": "P"
+}
+]
+}

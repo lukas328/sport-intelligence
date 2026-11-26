@@ -270,7 +270,7 @@ export function SearchView({ orgId, teamId, teamName, seasonId }: { orgId: strin
                       </Button>
                     )}
                     {playable ? (
-                      <Link href={`/app/${orgId}/matches/${h.match_id}?t=${h.start_ms}`} className="inline-flex min-h-9 items-center gap-1 text-sm font-semibold hover:underline hover:underline-offset-4">
+                      <Link href={`/app/${orgId}/matches/${h.match_id}?t=${h.start_ms}`} className="inline-flex min-h-11 items-center gap-1 text-sm font-semibold hover:underline hover:underline-offset-4">
                         <Play aria-hidden className="size-3 fill-current" />
                         {t("watch")}
                       </Link>

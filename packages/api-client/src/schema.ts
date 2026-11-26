@@ -5174,6 +5174,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org_id}/videos/{video_id}/views/{n}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * View Chunk
+         * @description Moving camera, 30 s: little-endian float32 rows [t_ms, h00 .. h22], the homography hall
+         *     image (panorama) px -> video frame px of that moment, h22 = 1 (ADR 020).
+         */
+        get: operations["view_chunk_v1_orgs__org_id__videos__video_id__views__n__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/public/clubs/{club_id}/teams/{official_id}": {
         parameters: {
             query?: never;
@@ -5465,6 +5486,8 @@ export interface components {
             calibration_info?: {
                 [key: string]: unknown;
             } | null;
+            /** @description where a confirmed court came from when nobody set it on this video: carried over from an earlier video of the same hall; null for a court a person clicked or confirmed on this video, an automatic court and no court */
+            calibration_origin?: components["schemas"]["CalibrationOriginOut"] | null;
             /**
              * Calibration State
              * @description confirmed: set or confirmed by a person (or carried over from such a court with a sure hall match); suggested: the automatic court, a proposal to confirm or to click anew (calibration_suggestion); missing: no court; updating: a clicked court is being applied; undeterminable: the coach said it cannot be set on this video
@@ -5496,6 +5519,11 @@ export interface components {
             formations?: components["schemas"]["FormationSegment"][];
             /** Fps */
             fps: number | null;
+            /**
+             * Frame Size
+             * @description width and height of the frame the view files map into
+             */
+            frame_size?: number[] | null;
             hall?: components["schemas"]["HallOut"] | null;
             /**
              * Needs Calibration
@@ -5510,6 +5538,11 @@ export interface components {
             status: "none" | "running" | "ready" | "failed";
             /** Tracks */
             tracks: components["schemas"]["TrackOut"][];
+            /**
+             * View Chunks
+             * @description moving camera: files of where the camera looked (GET .../views/{n}, hall image -> frame per frame), so overlays follow the picture; none for a fixed camera or an analysis from before
+             */
+            view_chunks?: number | null;
         };
         /** AnnotationCreate */
         AnnotationCreate: {
@@ -5550,6 +5583,11 @@ export interface components {
             contact: {
                 [key: string]: string;
             };
+            /**
+             * Currency
+             * @description CHF for clubs in Switzerland and Liechtenstein, else EUR
+             */
+            currency: string;
             /** Months */
             months: number;
             /** Net Cents */
@@ -5950,6 +5988,39 @@ export interface components {
              * @enum {string}
              */
             space?: "frame" | "panorama";
+        };
+        /**
+         * CalibrationOriginOut
+         * @description A confirmed court carried over from an earlier video of the same hall (calibration_state
+         *     "confirmed"), for the note that says so and offers to click the court anew.
+         */
+        CalibrationOriginOut: {
+            /**
+             * Hall
+             * @description the hall's name, when known
+             */
+            hall?: string | null;
+            /**
+             * Reference Kickoff At
+             * @description kickoff of that match, for the label
+             */
+            reference_kickoff_at?: string | null;
+            /**
+             * Reference Match Id
+             * @description the match of reference_video_id
+             */
+            reference_match_id?: string | null;
+            /**
+             * Reference Video Id
+             * @description the earlier video whose court was carried over
+             */
+            reference_video_id?: string | null;
+            /**
+             * Source
+             * @default hall
+             * @constant
+             */
+            source?: "hall";
         };
         /** CalibrationOut */
         CalibrationOut: {
@@ -7989,6 +8060,12 @@ export interface components {
         InvoiceOut: {
             /** Amount Cents */
             amount_cents: number;
+            /**
+             * Currency
+             * @description CHF or EUR
+             * @default CHF
+             */
+            currency?: string;
             /** Discount Cents */
             discount_cents: number;
             /**
@@ -24001,6 +24078,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TrackOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    view_chunk_v1_orgs__org_id__videos__video_id__views__n__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                video_id: string;
+                n: number;
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/octet-stream": unknown;
                 };
             };
             /** @description Validation Error */

@@ -26,13 +26,17 @@ Channels and scores are normalised over a rolling window of 3 minutes, the segme
 template was learned on, so the camera operator's style and the zoom may change during a game.
 
 No play (`no_play`): an operated camera (`operated`: it turns at least 10 degrees over the video)
-that stands still for 2.5 minutes is parked (half-time, before and after the game), and people bunched together for 40 s do not play (time-outs, the
-huddle around an injured player, a stoppage, the line-ups before the game): the median spread of
+that stands still for 2.5 minutes is parked (half-time, before and after the game), and people
+bunched together for 40 s do not play (time-outs, the huddle around an injured player, a stoppage, the line-ups before the game): the median spread of
 the people on court (`spread`, 10 to 90 % of their x in body heights) below 3.5 body heights,
 against 5 to 7.5 in play. With match clock readings (`from_observations(play=...)`, the
 stretches where the clock runs) the warm-up before the first real run of the clock (`warm_up`)
-is no play as well; later gaps in the clock are not used, the hall scoreboard is often out of the
-picture for minutes. No candidates there, and the quota counts minutes of play only.
+is no play as well, and so is a gap of at least 2 minutes between two runs (`clock_breaks`: the
+half-time break, a long stoppage). Such a gap means the clock stood: a board out of the picture
+while play went on is bridged by `scoreboard.play_intervals` (the clock ran at least half the gap).
+On the dev games the half-time break was play for the camera and people rules (98 % of 11 break
+segments: replays, players shooting on goal). No candidates there, and the quota counts minutes of
+play only.
 
 Candidates (`pick`): a fixed number per minute of play, not a score threshold (score scales vary
 per game): per 3-minute block the best peaks with 8 s non-maximum suppression, none in the first
@@ -56,6 +60,7 @@ import json
 import time
 from dataclasses import dataclass
 from functools import lru_cache
+from itertools import pairwise
 from pathlib import Path
 from typing import Any
 
@@ -89,6 +94,10 @@ MIN_DEFAULT_SCORE = 1.2
 WARMUP_RUN_S = 30.0
 WARMUP_MIN_S = 120.0
 WARMUP_MARGIN_S = 20.0
+# a gap of at least CLOCK_BREAK_S between two runs of the match clock is no play (the half-time
+# break, a long stoppage), less CLOCK_BREAK_MARGIN_S at both ends
+CLOCK_BREAK_S = 120.0
+CLOCK_BREAK_MARGIN_S = 10.0
 # static people (bench, spectators, table): canvas spot occupied in `STATIC_SHARE` of the frames
 STATIC_WIN_S, STATIC_RX, STATIC_RY, STATIC_SHARE = 15.0, 25.0, 15.0, 0.6
 MIN_BOX_PX = 18.0  # reference px
@@ -583,6 +592,20 @@ def warm_up(t: F64, play_ms: list[tuple[int, int]] | None) -> NDArray[np.bool_]:
     return np.asarray(t < first - WARMUP_MARGIN_S)
 
 
+def clock_breaks(t: F64, play_ms: list[tuple[int, int]] | None) -> NDArray[np.bool_]:
+    """Gaps of at least `CLOCK_BREAK_S` between two runs of the match clock, less
+    `CLOCK_BREAK_MARGIN_S` at both ends: the clock stood there (the half-time break, a long
+    stoppage). A board hidden while play went on is not a gap: `scoreboard.play_intervals` bridges
+    it when the clock ran at least half of it. Before the first and after the last run: nothing
+    (the warm-up has its own rule)."""
+    out = np.zeros(len(t), bool)
+    runs = sorted(play_ms or [])
+    for (_, b), (a, _) in pairwise(runs):
+        if (a - b) / 1000 >= CLOCK_BREAK_S:
+            out |= (t > b / 1000 + CLOCK_BREAK_MARGIN_S) & (t < a / 1000 - CLOCK_BREAK_MARGIN_S)
+    return out
+
+
 def demote_weak(found: list[Candidate], rates: tuple[int, ...] = RATES) -> list[Candidate]:
     """Candidates of the default list below `MIN_DEFAULT_SCORE` keep only the largest rate."""
     top = max(rates)
@@ -763,7 +786,7 @@ def from_observations(
 ) -> dict[str, Any] | None:
     """Goal candidates (and shot candidates under "shots") for the analysis payload, or None
     when the video is too short or the detector saw (almost) nobody. `play`: where the match
-    clock runs (ms), for the warm-up."""
+    clock runs (ms), for the warm-up and the breaks between two runs."""
     t0 = time.perf_counter()
     tmpl = tmpl or load_template()
     cam_t, cam_x, pt, px, py, ph, duration = inputs_from_observations(obs)
@@ -771,7 +794,8 @@ def from_observations(
         return None
     s = signals(cam_t, cam_x, pt, px, py, ph, duration)
     warm = warm_up(s["t"], play)
-    idle = no_play(s, operated(obs.motion)) | warm
+    brk = clock_breaks(s["t"], play)
+    idle = no_play(s, operated(obs.motion)) | warm | brk
     found = demote_weak(pick(s["t"], score(s, tmpl), play=~idle))
     return {
         "template": tmpl.version,
@@ -781,6 +805,7 @@ def from_observations(
         "play_s": round(float((~idle).sum()) * DT, 1),
         "no_play_ms": [[round(a * 1000), round(b * 1000)] for a, b in intervals(s["t"], idle)],
         "warm_up_ms": [[round(a * 1000), round(b * 1000)] for a, b in intervals(s["t"], warm)],
+        "clock_break_ms": [[round(a * 1000), round(b * 1000)] for a, b in intervals(s["t"], brk)],
         "clip_s": [-CLIP_BEFORE_S, CLIP_AFTER_S],
         "candidates": [c.to_dict(duration) for c in found],
         "shots": shot_candidates(s, ~idle, duration, tmpl, shots),

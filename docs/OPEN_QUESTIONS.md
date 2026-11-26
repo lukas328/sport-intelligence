@@ -208,6 +208,13 @@ Prüfzeit und drei Dingen (Q-REC-SHOTZONE).
   device cloud.
 
 ## Billing
+- **Q-BILL-EU5 VAT and terms for clubs in the EU. Open (Lukas, legal advice).** Since Europa step 2
+  clubs outside CH and LI pay in EUR (same amount). Their invoices carry no Swiss VAT, only the note
+  «Leistung an einen Empfänger im Ausland, ohne Schweizer Mehrwertsteuer». To settle: reverse charge
+  for clubs with a VAT id, clubs without one (OSS?), mandatory invoice details, an EU version of the
+  terms (§11 Swiss law) and withdrawal. *Until then:* no EU club on a paid plan
+  (docs/plans/europa.md, EU5); EUR checkout also needs `HB_STRIPE_PRICE_TEAM_EUR` and
+  `HB_STRIPE_PRICE_CLUB_EUR`.
 - **Q-BILL-1 Stripe. Open (Lukas), later.** Needs an account, test keys, webhook secret and price ids.
   *Until then:* `billing_enforce` is false, nothing is charged; the settings page says online payment
   is not set up.

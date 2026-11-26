@@ -87,7 +87,7 @@ export function AccountMenu({ compact }: { compact?: boolean }) {
                 <M.Item asChild>
                   <Link
                     href={`${base}/me/security`}
-                    className="inline-flex min-h-9 cursor-pointer items-center bg-ink px-3 text-[14px] font-bold text-ground no-underline outline-none data-[highlighted]:outline-2 data-[highlighted]:outline-offset-2 data-[highlighted]:outline-ink"
+                    className="inline-flex min-h-11 cursor-pointer items-center bg-ink px-3 text-[14px] font-bold text-ground no-underline outline-none data-[highlighted]:outline-2 data-[highlighted]:outline-offset-2 data-[highlighted]:outline-ink"
                     data-testid="menu-two-factor"
                   >
                     {t("twoFactorSetUp")}
@@ -96,7 +96,7 @@ export function AccountMenu({ compact }: { compact?: boolean }) {
                 {!reminder.overdue && (
                   <M.Item
                     onSelect={reminder.later}
-                    className="inline-flex min-h-9 cursor-pointer items-center border-2 border-ink px-3 text-[14px] font-bold outline-none select-none data-[highlighted]:bg-ink data-[highlighted]:text-ground"
+                    className="inline-flex min-h-11 cursor-pointer items-center border-2 border-ink px-3 text-[14px] font-bold outline-none select-none data-[highlighted]:bg-ink data-[highlighted]:text-ground"
                     data-testid="menu-two-factor-later"
                   >
                     {t("twoFactorLaterShort")}
@@ -121,7 +121,7 @@ export function AccountMenu({ compact }: { compact?: boolean }) {
                 }}
                 data-testid={`lang-${l}`}
                 className={cn(
-                  "min-h-9 flex-1 cursor-pointer px-1.5 text-center text-[14px] font-semibold leading-9 outline-none select-none data-[highlighted]:bg-ink data-[highlighted]:text-ground",
+                  "min-h-11 flex-1 cursor-pointer px-1.5 text-center text-[14px] font-semibold leading-[2.75rem] outline-none select-none data-[highlighted]:bg-ink data-[highlighted]:text-ground",
                   l === locale && "font-bold underline decoration-[1.5px] underline-offset-4",
                 )}
               >

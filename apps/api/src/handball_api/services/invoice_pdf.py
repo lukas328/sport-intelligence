@@ -33,6 +33,7 @@ TEXT = {
         "discount": "Rabatt",
         "vat": "MWST {rate} %",
         "no_vat": "Nicht mehrwertsteuerpflichtig.",
+        "vat_abroad": "Leistung an einen Empfänger im Ausland, ohne Schweizer Mehrwertsteuer.",
         "total": "Total",
         "terms": "Zahlbar innert {days} Tagen mit dem Einzahlungsschein unten.",
         "uid": "UID: {uid} MWST",
@@ -49,6 +50,7 @@ TEXT = {
         "discount": "Rabais",
         "vat": "TVA {rate} %",
         "no_vat": "Non assujetti à la TVA.",
+        "vat_abroad": "Prestation à un destinataire à l'étranger, sans TVA suisse.",
         "total": "Total",
         "terms": "Payable dans les {days} jours avec le bulletin de versement ci-dessous.",
         "uid": "IDE : {uid} TVA",
@@ -65,6 +67,7 @@ TEXT = {
         "discount": "Discount",
         "vat": "VAT {rate} %",
         "no_vat": "Not subject to VAT.",
+        "vat_abroad": "Service to a recipient abroad, without Swiss VAT.",
         "total": "Total",
         "terms": "Payable within {days} days with the payment slip below.",
         "uid": "UID: {uid} VAT",
@@ -74,7 +77,12 @@ QR_LANG = {"de-CH": "de", "fr": "fr", "en": "en"}
 
 
 def chf(cents: int) -> str:
+    """An amount with the Swiss thousands separator (1'990.00), for CHF and EUR alike."""
     return f"{cents // 100:,}.{cents % 100:02d}".replace(",", "'")
+
+
+def money(cents: int, currency: str = "CHF") -> str:
+    return f"{currency} {chf(cents)}"
 
 
 def _d(v: date) -> str:
@@ -88,7 +96,8 @@ def qr_bill(creditor: dict[str, str], iban: str, inv: dict[str, Any], lang: str)
         creditor=creditor,
         debtor={k: r[k] for k in ("name", "street", "pcode", "city", "country") if r.get(k)},
         amount=f"{inv['total_cents'] / 100:.2f}",
-        currency="CHF",
+        # the Swiss QR bill takes CHF and EUR (Europa step 2)
+        currency=inv.get("currency", "CHF"),
         reference_number=inv["reference"],
         additional_information=inv["number"],
         language=QR_LANG.get(lang, "de"),
@@ -105,6 +114,7 @@ def render(
     kind: str = "invoice",
 ) -> bytes:
     t = TEXT.get(lang, TEXT["de-CH"])
+    cur = str(inv.get("currency", "CHF"))
     buf = io.BytesIO()
     c = Canvas(buf, pagesize=A4)
     w, h = A4
@@ -150,7 +160,7 @@ def render(
     y -= 6 * mm
     for line in inv["lines"]:
         c.drawString(20 * mm, y, str(line["text"]))
-        c.drawRightString(w - 20 * mm, y, f"CHF {chf(int(line['cents']))}")
+        c.drawRightString(w - 20 * mm, y, money(int(line["cents"]), cur))
         y -= 5 * mm
     rows = [(t["net"], inv["net_cents"])]
     if inv["discount_cents"]:
@@ -165,15 +175,16 @@ def render(
     y -= 2 * mm
     for k, v in rows:
         c.drawString(110 * mm, y, k)
-        c.drawRightString(w - 20 * mm, y, ("-" if v < 0 else "") + f"CHF {chf(abs(v))}")
+        c.drawRightString(w - 20 * mm, y, ("-" if v < 0 else "") + money(abs(v), cur))
         y -= 5 * mm
     c.setFont("Helvetica-Bold", 10.5)
     c.drawString(110 * mm, y, t["total"])
-    c.drawRightString(w - 20 * mm, y, f"CHF {chf(inv['total_cents'])}")
+    c.drawRightString(w - 20 * mm, y, money(inv["total_cents"], cur))
     c.setFont("Helvetica", 9)
     y -= 9 * mm
     if not inv["vat_rate_bp"]:
-        c.drawString(20 * mm, y, t["no_vat"])
+        # registered for Swiss VAT but a recipient abroad (EUR invoice): no Swiss VAT on it
+        c.drawString(20 * mm, y, t["vat_abroad"] if uid and cur != "CHF" else t["no_vat"])
         y -= 5 * mm
     c.drawString(20 * mm, y, t["terms"].format(days=payment_days))
     # payment part: 210 x 105 mm at the bottom of the page

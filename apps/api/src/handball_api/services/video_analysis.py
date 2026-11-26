@@ -4,6 +4,7 @@ the court (calibration) and what the analysis shows."""
 from __future__ import annotations
 
 import uuid
+from datetime import datetime
 from typing import Any
 
 from sqlalchemy import delete, select
@@ -311,6 +312,8 @@ async def _apply_analysis_result(
         for k in (
             "chunks",
             "chunk_ms",
+            "view_chunks",
+            "frame_size",
             "fps",
             "frames",
             "detector",
@@ -452,6 +455,26 @@ async def calibration_state(
     return "suggested"
 
 
+async def _hall_reference(
+    ctx: Ctx, asset: VideoAsset, info: dict[str, Any]
+) -> tuple[uuid.UUID, uuid.UUID, datetime, str | None] | None:
+    """The earlier video a hall court was carried over from (calibration_info
+    reference_video_id), in this organisation: its id, its match, that match's kickoff and
+    venue. One query."""
+    try:
+        ref_id = uuid.UUID(str(info.get("reference_video_id")))
+    except ValueError:
+        return None
+    row = (
+        await ctx.db.execute(
+            select(VideoAsset.id, VideoAsset.match_id, Match.kickoff_at, Match.venue)
+            .join(Match, Match.id == VideoAsset.match_id)
+            .where(VideoAsset.id == ref_id, VideoAsset.organization_id == asset.organization_id)
+        )
+    ).first()
+    return (row[0], row[1], row[2], row[3]) if row is not None else None
+
+
 async def calibration_suggestion(
     ctx: Ctx, asset: VideoAsset, cal: CameraCalibration | None, state: str
 ) -> dict[str, Any] | None:
@@ -471,15 +494,43 @@ async def calibration_suggestion(
     }
     if isinstance(info, dict) and info.get("method") == "hall":
         out["source"] = "hall"
-        try:
-            ref_id = uuid.UUID(str(info.get("reference_video_id")))
-        except ValueError:
-            return out
-        ref = await ctx.db.get(VideoAsset, ref_id)
-        if ref is not None and ref.organization_id == asset.organization_id:
-            out["from_video_id"] = ref.id
-            ref_match = await ctx.db.get(Match, ref.match_id)
-            out["from_kickoff_at"] = ref_match.kickoff_at if ref_match is not None else None
+        ref = await _hall_reference(ctx, asset, info)
+        if ref is not None:
+            out["from_video_id"], _, out["from_kickoff_at"], _ = ref
+    return out
+
+
+async def calibration_origin(
+    ctx: Ctx, asset: VideoAsset, cal: CameraCalibration | None, state: str
+) -> dict[str, Any] | None:
+    """Where a confirmed court came from when nobody set it on this video: carried over from an
+    earlier video of the same hall (source "hall"), so the app can say so and offer to click it
+    anew. None for a court a person clicked or confirmed on this video, an automatic court
+    (a suggestion: calibration_suggestion) and no court."""
+    if state != "confirmed" or cal is None or cal.source == "user_correction":
+        return None
+    info = (asset.analysis or {}).get("calibration_info")
+    if not isinstance(info, dict) or info.get("method") != "hall":
+        return None
+    hall = info.get("hall")
+    out: dict[str, Any] = {
+        "source": "hall",
+        "hall": hall if isinstance(hall, str) and hall.strip() else None,
+        "reference_video_id": None,
+        "reference_match_id": None,
+        "reference_kickoff_at": None,
+    }
+    ref = await _hall_reference(ctx, asset, info)
+    if ref is not None:
+        video_id, match_id, kickoff_at, venue = ref
+        if match_id == asset.match_id:
+            # carried over from another part of this same match: not «from an earlier match»
+            return None
+        out["reference_video_id"] = video_id
+        out["reference_match_id"] = match_id
+        out["reference_kickoff_at"] = kickoff_at
+        if out["hall"] is None and venue and venue.strip():
+            out["hall"] = venue.strip()
     return out
 
 
@@ -518,6 +569,8 @@ async def analysis(ctx: Ctx, asset_id: uuid.UUID) -> dict[str, object]:
         "tracks": list(tracks),
         "chunk_ms": meta.get("chunk_ms"),
         "chunks": meta.get("chunks"),
+        "view_chunks": meta.get("view_chunks"),
+        "frame_size": meta.get("frame_size"),
         "fps": meta.get("fps"),
         "detector": meta.get("detector"),
         "elapsed_s": meta.get("elapsed_s"),
@@ -533,6 +586,7 @@ async def analysis(ctx: Ctx, asset_id: uuid.UUID) -> dict[str, object]:
         "court_clicks": meta.get(LINE_CLICKS) if isinstance(meta.get(LINE_CLICKS), dict) else None,
         "calibration_state": (state := await calibration_state(ctx, asset, cal, job)),
         "calibration_suggestion": await calibration_suggestion(ctx, asset, cal, state),
+        "calibration_origin": await calibration_origin(ctx, asset, cal, state),
         "error_code": failure_code(job.error)
         if job is not None and job.status == "failed"
         else None,
@@ -562,6 +616,21 @@ async def read_track_chunk(ctx: Ctx, asset_id: uuid.UUID, n: int) -> bytes:
     try:
         data, _ = await ctx.storage.get(
             ctx.settings.s3_bucket_artifacts, f"{media_prefix(asset)}analysis/chunk_{n:05d}.bin"
+        )
+    except ObjectNotFoundError as exc:
+        raise ProblemError(404, "not-found", "No such chunk") from exc
+    return data
+
+
+async def read_view_chunk(ctx: Ctx, asset_id: uuid.UUID, n: int) -> bytes:
+    """30 s of where a moving camera looked (hall image -> frame per frame, ADR 020)."""
+    asset = await get_asset(ctx, asset_id)
+    meta = asset.analysis or {}
+    if not isinstance(meta.get("view_chunks"), int) or not 0 <= n < int(meta["view_chunks"]):
+        raise ProblemError(404, "not-found", "No such chunk")
+    try:
+        data, _ = await ctx.storage.get(
+            ctx.settings.s3_bucket_artifacts, f"{media_prefix(asset)}analysis/view_{n:05d}.bin"
         )
     except ObjectNotFoundError as exc:
         raise ProblemError(404, "not-found", "No such chunk") from exc

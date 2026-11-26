@@ -13,6 +13,7 @@ import {
 } from "react";
 import { formatClock, parseThumbVtt, type ThumbCue } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { barFraction, toggleFullscreen } from "@/lib/video-touch";
 import { drawShapes, type Shape } from "./shapes";
 
 export interface Marker {
@@ -254,6 +255,11 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
     return () => cancelAnimationFrame(raf);
   }, [renderOverlay, onTime, win, onWindowEnd, loop]);
 
+  const scrubbing = useRef(false);
+  const scrubTo = (clientX: number, bar: DOMRect) => {
+    const v = videoRef.current;
+    if (v && duration > 0) v.currentTime = barFraction(clientX, bar.left, bar.width) * duration;
+  };
   const seekBy = (s: number) => {
     const v = videoRef.current;
     if (v) v.currentTime = Math.max(0, Math.min(v.duration || Infinity, v.currentTime + s));
@@ -289,7 +295,7 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
       "[": () => setRate(SPEEDS[Math.max(0, i - 1)]!),
       "]": () => setRate(SPEEDS[Math.min(SPEEDS.length - 1, i + 1)]!),
       m: () => setMuted((m) => !m),
-      f: () => void (document.fullscreenElement ? document.exitFullscreen() : boxRef.current?.requestFullscreen()),
+      f: () => toggleFullscreen(boxRef.current, document),
     };
     const action = actions[e.key];
     if (action) {
@@ -357,8 +363,20 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
           bare && "max-sm:hidden",
         )}
       >
+        {/* on a touch screen the bar is a finger high, and a tap anywhere on it jumps there
+            (iPhone Safari only moves a range input by its knob) */}
         <div
-          className="relative h-6 cursor-pointer"
+          className="relative h-11 cursor-pointer touch-pan-y sm:pointer-fine:h-6"
+          onPointerDown={(e) => {
+            if (e.pointerType === "mouse") return;
+            scrubbing.current = true;
+            scrubTo(e.clientX, e.currentTarget.getBoundingClientRect());
+          }}
+          onPointerMove={(e) => {
+            if (e.pointerType !== "mouse" && scrubbing.current) scrubTo(e.clientX, e.currentTarget.getBoundingClientRect());
+          }}
+          onPointerUp={() => (scrubbing.current = false)}
+          onPointerCancel={() => (scrubbing.current = false)}
           onMouseMove={(e) => {
             const r = e.currentTarget.getBoundingClientRect();
             setHover({ x: e.clientX - r.left, t: ((e.clientX - r.left) / r.width) * duration });
@@ -376,7 +394,7 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
             }}
             aria-label={t("seek")}
             aria-valuetext={clock ? clock(time) : formatClock(time)}
-            className="absolute inset-x-0 top-1 w-full accent-[var(--accent)]"
+            className="absolute inset-0 m-0 h-full w-full cursor-pointer accent-[var(--accent)]"
           />
           {win && (
             <div
@@ -457,7 +475,8 @@ export const VideoPlayer = forwardRef<PlayerHandle, Props>(function VideoPlayer(
           </CtlButton>
           <CtlButton
             label={t("fullscreen")}
-            onClick={() => void (document.fullscreenElement ? document.exitFullscreen() : boxRef.current?.requestFullscreen())}
+            // the iPhone has no fullscreen for the frame: there the video itself goes fullscreen
+            onClick={() => toggleFullscreen(boxRef.current, document)}
           >
             <Maximize className="size-4" />
           </CtlButton>
@@ -474,7 +493,7 @@ function CtlButton({ label, onClick, children, className }: { label: string; onC
       aria-label={label}
       title={label}
       onClick={onClick}
-      className={cn("inline-grid min-h-9 min-w-9 place-items-center px-2 hover:bg-white/15 focus-visible:outline-2 focus-visible:outline-white", className)}
+      className={cn("inline-grid min-h-11 min-w-11 place-items-center px-2 hover:bg-white/15 sm:pointer-fine:min-h-9 sm:pointer-fine:min-w-9 focus-visible:outline-2 focus-visible:outline-white", className)}
     >
       <span aria-hidden className="inline-flex items-center gap-0.5">{children}</span>
     </button>
