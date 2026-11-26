@@ -12,6 +12,7 @@ import { personGroups } from "@/lib/check-budget";
 import { roundCandidate } from "@/lib/check-round";
 import { VideoPlayer, type PlayerHandle } from "@/components/video/player";
 import type { Homography } from "@/lib/spotlight";
+import { geometryOf } from "@/lib/moving-camera";
 import { CORNERS, cornersOf, FieldCheck } from "./field-check";
 import { CourtCalibration } from "@/components/analysis/court-calibration";
 import type { Pt } from "@/lib/court-calibration";
@@ -163,10 +164,15 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
     [fetchChecks, qc, match.id],
   );
   const cal0 = analysis.data?.calibration;
-  // a person box needs the homography of the very frame: with a panning camera only the hall
-  // image's is known, so people are asked only with a fixed camera (E05)
+  // a person box needs the homography of the very frame: a fixed camera has it, a panning one
+  // through the analysis' view files (where the camera looked, ADR 020); an older analysis of a
+  // panning camera has none, and its people are not asked (E05)
+  const geometry = useMemo(
+    () => (main ? geometryOf(analysis.data, `/v1/orgs/${orgId}/videos/${main.id}`) : null),
+    [analysis.data, main, orgId],
+  );
   const people = useMemo<Question[]>(() => {
-    if (sides.neutral || !main || cal0?.source !== "user_correction" || !analysis.data?.chunk_ms || analysis.data.camera !== "fixed") return [];
+    if (sides.neutral || !main || cal0?.source !== "user_correction" || !analysis.data?.chunk_ms || !geometry) return [];
     const own = (analysis.data.tracks ?? []).filter((tr) => (tr.team === "home" || tr.team === "home_gk") && !tr.player_id);
     return personGroups(own, PERSON_MIN_MS, PERSON_MAX)
       .filter((g) => !retired.has(`person:${g[0]!.track_no}`))
@@ -174,7 +180,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
         const tr = group[0]!;
         return { kind: "person" as const, tr, group, at: tr.first_ms + Math.min(2000, (tr.last_ms - tr.first_ms) / 2) };
       });
-  }, [analysis.data, cal0, main, retired, sides.neutral]);
+  }, [analysis.data, cal0, geometry, main, retired, sides.neutral]);
   const toQuestions = useCallback(
     (list: Schemas["CheckOut"][]): Question[] =>
       list.flatMap((c): Question[] => {
@@ -769,7 +775,7 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
             ) : current.kind === "field" && main ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={`/v1/orgs/${orgId}/videos/${current.videoId}/panorama`} alt={t("fieldAlt")} className="block w-full outline-[3.5px] outline-attn outline-dashed -outline-offset-8" />
-            ) : current.kind === "person" && media && analysis.data?.calibration ? (
+            ) : current.kind === "person" && media && geometry && analysis.data?.chunk_ms ? (
               <VideoPlayer
                 ref={player}
                 key={current.tr.track_no}
@@ -781,9 +787,8 @@ export function CheckView({ orgId, match }: { orgId: string; match: Match }) {
                   <PersonCrop
                     getVideo={getVideo}
                     baseUrl={`/v1/orgs/${orgId}/videos/${main!.id}/tracks`}
-                    chunkMs={analysis.data.chunk_ms!}
-                    homography={analysis.data.calibration.homography as Homography}
-                    imageSize={analysis.data.calibration.image_size as [number, number]}
+                    chunkMs={analysis.data.chunk_ms}
+                    geometry={geometry}
                     track={current.tr.track_no}
                     getTime={getTime}
                   />
