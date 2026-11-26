@@ -68,7 +68,7 @@ async def test_reels_selection_consent_rendering_and_sharing(make_api: Callable[
         ev, json={"type": "shot", "side": "opponent", "outcome": "goal", "t_ms": 210_000}
     )  # never a highlight
 
-    await upload(api, ids, m["id"], b"v" * 100)
+    video = await upload(api, ids, m["id"], b"v" * 100)
     jobs: MemoryJobQueue = api.app.state.jobs
     await _ingest(api, jobs.jobs[-1][2], jobs.jobs[-1][3]["prefix"])
     await _finish(api, jobs.jobs[-1][2], {"tracks": _tracks(), "detector": "heuristic"})
@@ -82,6 +82,12 @@ async def test_reels_selection_consent_rendering_and_sharing(make_api: Callable[
     listed = (await api.get(f"/v1/orgs/{org}/matches/{m['id']}/highlights")).json()
     assert len(listed) == 3 and listed[0]["consent"]["excluded_players"] == [nina["player_id"]]
     assert {r["status"] for r in listed} == {"queued"}
+    # a second run (court corrected in Prüfen, the next part): same scenes, no second reel
+    retry = await api.post(f"/v1/orgs/{org}/videos/{video['id']}/analysis")
+    assert retry.status_code == 202, retry.text
+    await _finish(api, jobs.jobs[-1][2], {"tracks": _tracks(), "detector": "heuristic"})
+    assert len([j for j in jobs.jobs if j[1] == REEL]) == 3
+    assert len((await api.get(f"/v1/orgs/{org}/matches/{m['id']}/highlights")).json()) == 3
     assert (
         await api.post(
             f"/v1/orgs/{org}/matches/{m['id']}/highlights", json={"player_id": nina["player_id"]}
