@@ -184,4 +184,3 @@ def test_a_long_video_without_any_throw_off_says_so() -> None:
     r2 = detect(pts2, teams2)
     assert [e for e in r2.events if e.type == "throw_off"]
     assert "throw_offs" not in r2.missing
-
