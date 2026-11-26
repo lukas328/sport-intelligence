@@ -50,7 +50,7 @@ from handball_vision.identity import split_by_reading_colour as split_by_reading
 from handball_vision.motion import CameraMotion, estimate_motion
 from handball_vision.numbers import Reading
 from handball_vision.physical import physical
-from handball_vision.teams import TeamAssigner, relabel_by_clusters
+from handball_vision.teams import TeamAssigner, colour_distance, relabel_by_clusters
 from handball_vision.tracking import CourtTracker, TrackPoint, stitch
 from handball_vision.video_io import U8 as U8
 from handball_vision.video_io import _frames as _frames
@@ -332,6 +332,75 @@ def _track_frames(
     return points, n, n_dets, n_lost
 
 
+# Long links (off by default; docs/plans/produkt-analyse-integration.md, «Feldrand-Filter»): with
+# the court-edge filter and the team condition, stitching over gaps up to 8 s instead of 4 s named
+# 29 % of the field players' time instead of 23 % on the dev clips, wrong names unchanged, but
+# about 10 % of the new links were visibly wrong and one more referee sample got a number.
+LONG_LINKS = False
+LONG_LINK_GAP_S = 8.0
+EDGE_MARGIN_M = 0.5  # outside the court lines by more than this
+EDGE_SHARE = 0.5  # share of a piece's positions out there
+EDGE_MIN_S = 1.0  # and for at least this long
+COURT_L, COURT_W = 40.0, 20.0
+
+
+def edge_pieces(points: list[TrackPoint], fps: float) -> set[int]:
+    """Raw track pieces of people standing outside the court (bench, staff, spectators at the
+    line, a referee off the court): at least `EDGE_SHARE` of the positions more than
+    `EDGE_MARGIN_M` outside the 40 x 20 m court, over at least `EDGE_MIN_S`. They are not linked
+    to other pieces and carry no shirt number: on the dev clips Horgen H1/H2 most links over long
+    gaps that joined a non-player to a player had such a piece (bench at y -1 m, behind a corner).
+    Positions come from the court calibration; without it there are no tracks."""
+    by: dict[int, list[TrackPoint]] = defaultdict(list)
+    for p in points:
+        by[p.track_id].append(p)
+    out: set[int] = set()
+    m = EDGE_MARGIN_M
+    for t, pts in by.items():
+        outside = [p.x < -m or p.x > COURT_L + m or p.y < -m or p.y > COURT_W + m for p in pts]
+        span_s = (pts[-1].frame - pts[0].frame) / fps
+        if span_s >= EDGE_MIN_S and sum(outside) >= EDGE_SHARE * len(pts):
+            out.add(t)
+    return out
+
+
+NEUTRAL_DISTANCE = 15.0  # colour distance to the nearer team kit above which a shirt is no team's
+END_LOOKS = 5  # colour looks at each end of a piece
+
+
+def shirt_team(colour: NDArray[Any], kits: dict[str, NDArray[Any]]) -> str:
+    """ "home" or "away" by the nearer team kit, "none" when the shirt is neither team's (more than
+    `NEUTRAL_DISTANCE` from both: referees, staff, goalkeepers; on the dev clips Horgen H1/H2 field
+    players were 1 to 8 away, 2 of 138 above 15, referees and staff 20 of 31 above)."""
+    dh, da = colour_distance(colour, kits["home"]), colour_distance(colour, kits["away"])
+    if min(dh, da) > NEUTRAL_DISTANCE:
+        return "none"
+    return "home" if dh <= da else "away"
+
+
+def piece_ends(
+    samples: dict[int, list[NDArray[Any]]],
+    frames: dict[int, list[int]],
+    kits: dict[str, NDArray[Any]],
+) -> dict[int, tuple[str | None, str | None]] | None:
+    """The team of each raw piece's shirt at its start and at its end (median of its first and
+    last `END_LOOKS` colour looks): a piece can hold a swap of its own, so its whole median says
+    little about the person at the moment it ends. None without both team kits (entered or
+    learned); a piece without looks has (None, None)."""
+    if "home" not in kits or "away" not in kits:
+        return None
+    out: dict[int, tuple[str | None, str | None]] = {}
+    for t, looks in samples.items():
+        if not looks:
+            continue
+        order = np.argsort(np.asarray(frames.get(t, list(range(len(looks))))), kind="stable")
+        ordered = [looks[k] for k in order] if len(order) == len(looks) else looks
+        first = np.median(np.stack(ordered[:END_LOOKS]), axis=0)
+        last = np.median(np.stack(ordered[-END_LOOKS:]), axis=0)
+        out[t] = (shirt_team(first, kits), shirt_team(last, kits))
+    return out
+
+
 def _finish(
     points: list[TrackPoint],
     teams: TeamAssigner,
@@ -350,7 +419,22 @@ def _finish(
     t0 = time.perf_counter()
     colours = {tid: np.median(np.stack(v), axis=0) for tid, v in teams.samples.items() if v}
     raw_tracks = len({p.track_id for p in points})
-    points, mapping = stitch(points, fps, colours=colours)
+    if LONG_LINKS:
+        # people outside the court are not linked and nobody's shirt number; links over long gaps
+        # only between pieces whose shirt at the meeting ends is the same team
+        edge = edge_pieces(points, fps)
+        piece_teams = piece_ends(teams.samples, teams.frames, teams.kits)
+        points, mapping = stitch(
+            points,
+            fps,
+            max_gap_s=LONG_LINK_GAP_S,
+            colours=colours,
+            excluded=edge,
+            piece_teams=piece_teams,
+        )
+        number_reads = {t: rs for t, rs in (number_reads or {}).items() if t not in edge}
+    else:
+        points, mapping = stitch(points, fps, colours=colours)
     framed = all(len(teams.frames.get(t, [])) == len(v) for t, v in teams.samples.items())
     stitched: dict[int, list[NDArray[Any]]] = defaultdict(list)
     stitched_frames: dict[int, list[int]] = defaultdict(list)
