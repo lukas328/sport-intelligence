@@ -1,0 +1,5970 @@
+{
+ "note": "Ball test set 2 (gold v2) labels: LLM labels (two independent Claude subagent passes, different grids, zoom scales and order, no detector hints), NOT the owner's. label ball: both passes saw the game ball (fully or partly) within 12 px, position = mean; no_ball: both sure no game ball in the picture; warmup: both say warm-up or break with several balls; excluded: everything else (unsure, disagreement, hidden). Frozen 2026-11-26 before any model was measured on it; sha256 of this file in ml/ball/LINEAGE.md. Never tune on it.",
+ "labels": [
+  {
+   "id": "b000",
+   "game": "AT_Challenge_Lauterach_HandballTirol_2021",
+   "file": "AT_Challenge_Lauterach_HandballTirol_2021_s2.mp4",
+   "frame": 1735,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "warmup",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "warmup",
+    "x": null,
+    "y": null
+   },
+   "label": "warmup",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b001",
+   "game": "AT_Challenge_Lauterach_HandballTirol_2021",
+   "file": "AT_Challenge_Lauterach_HandballTirol_2021_s4.mp4",
+   "frame": 1369,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "hidden",
+    "x": 265.0,
+    "y": 305.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": 265.0,
+    "y": 305.0
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b002",
+   "game": "AT_Challenge_Lauterach_HandballTirol_2021",
+   "file": "AT_Challenge_Lauterach_HandballTirol_2021_s2.mp4",
+   "frame": 2810,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "warmup",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "warmup",
+    "x": null,
+    "y": null
+   },
+   "label": "warmup",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b003",
+   "game": "AT_Challenge_Lauterach_HandballTirol_2021",
+   "file": "AT_Challenge_Lauterach_HandballTirol_2021_s2.mp4",
+   "frame": 3582,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "warmup",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "warmup",
+    "x": null,
+    "y": null
+   },
+   "label": "warmup",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b004",
+   "game": "AT_Challenge_Lauterach_HandballTirol_2021",
+   "file": "AT_Challenge_Lauterach_HandballTirol_2021_s4.mp4",
+   "frame": 2452,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": 418.0,
+    "y": 305.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b005",
+   "game": "AT_Challenge_Lauterach_HandballTirol_2021",
+   "file": "AT_Challenge_Lauterach_HandballTirol_2021_s2.mp4",
+   "frame": 4637,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "warmup",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "warmup",
+    "x": null,
+    "y": null
+   },
+   "label": "warmup",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b006",
+   "game": "AT_Challenge_Lauterach_HandballTirol_2021",
+   "file": "AT_Challenge_Lauterach_HandballTirol_2021_s4.mp4",
+   "frame": 4039,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b007",
+   "game": "CH_NLA_BSVBern_WackerThun_2013-09-14",
+   "file": "CH_NLA_BSVBern_WackerThun_2013-09-14_s4.mp4",
+   "frame": 4549,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 467.0,
+    "y": 375.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 470.0,
+    "y": 374.0
+   },
+   "label": "ball",
+   "x": 468.5,
+   "y": 374.5,
+   "partly_hidden": false
+  },
+  {
+   "id": "b008",
+   "game": "CH_NLA_BSVBern_WackerThun_2013-09-14",
+   "file": "CH_NLA_BSVBern_WackerThun_2013-09-14_s0.mp4",
+   "frame": 222,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b009",
+   "game": "CH_NLA_BSVBern_WackerThun_2013-09-14",
+   "file": "CH_NLA_BSVBern_WackerThun_2013-09-14_s1.mp4",
+   "frame": 4866,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": 1088.0,
+    "y": 448.0
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b010",
+   "game": "CH_NLA_BSVBern_WackerThun_2013-09-14",
+   "file": "CH_NLA_BSVBern_WackerThun_2013-09-14_s4.mp4",
+   "frame": 3043,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b011",
+   "game": "CH_NLA_BSVBern_WackerThun_2013-09-14",
+   "file": "CH_NLA_BSVBern_WackerThun_2013-09-14_s4.mp4",
+   "frame": 520,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 1099.0,
+    "y": 547.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 1100.0,
+    "y": 548.0
+   },
+   "label": "ball",
+   "x": 1099.5,
+   "y": 547.5,
+   "partly_hidden": false
+  },
+  {
+   "id": "b012",
+   "game": "CH_NLA_BSVBern_WackerThun_2013-09-14",
+   "file": "CH_NLA_BSVBern_WackerThun_2013-09-14_s1.mp4",
+   "frame": 2362,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": 575.0,
+    "y": 350.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b013",
+   "game": "CH_NLA_BSVBern_WackerThun_2013-09-14",
+   "file": "CH_NLA_BSVBern_WackerThun_2013-09-14_s1.mp4",
+   "frame": 4158,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "part",
+    "x": 742.0,
+    "y": 439.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 743.0,
+    "y": 440.0
+   },
+   "label": "ball",
+   "x": 742.5,
+   "y": 439.5,
+   "partly_hidden": true
+  },
+  {
+   "id": "b014",
+   "game": "CH_NLA_FortitudoGossau_RTVBasel_2018-12-16",
+   "file": "CH_NLA_FortitudoGossau_RTVBasel_2018-12-16_s2.mp4",
+   "frame": 1691,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 649.0,
+    "y": 495.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 646.0,
+    "y": 494.0
+   },
+   "label": "ball",
+   "x": 647.5,
+   "y": 494.5,
+   "partly_hidden": false
+  },
+  {
+   "id": "b015",
+   "game": "CH_NLA_FortitudoGossau_RTVBasel_2018-12-16",
+   "file": "CH_NLA_FortitudoGossau_RTVBasel_2018-12-16_s2.mp4",
+   "frame": 3350,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b016",
+   "game": "CH_NLA_FortitudoGossau_RTVBasel_2018-12-16",
+   "file": "CH_NLA_FortitudoGossau_RTVBasel_2018-12-16_s2.mp4",
+   "frame": 160,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b017",
+   "game": "CH_NLA_FortitudoGossau_RTVBasel_2018-12-16",
+   "file": "CH_NLA_FortitudoGossau_RTVBasel_2018-12-16_s3.mp4",
+   "frame": 1992,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b018",
+   "game": "CH_NLA_FortitudoGossau_RTVBasel_2018-12-16",
+   "file": "CH_NLA_FortitudoGossau_RTVBasel_2018-12-16_s2.mp4",
+   "frame": 730,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": 592.0,
+    "y": 178.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": 592.0,
+    "y": 182.0
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b019",
+   "game": "CH_NLA_FortitudoGossau_RTVBasel_2018-12-16",
+   "file": "CH_NLA_FortitudoGossau_RTVBasel_2018-12-16_s3.mp4",
+   "frame": 4045,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 493.0,
+    "y": 553.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 493.0,
+    "y": 553.0
+   },
+   "label": "ball",
+   "x": 493.0,
+   "y": 553.0,
+   "partly_hidden": false
+  },
+  {
+   "id": "b020",
+   "game": "CH_NLA_FortitudoGossau_RTVBasel_2018-12-16",
+   "file": "CH_NLA_FortitudoGossau_RTVBasel_2018-12-16_s3.mp4",
+   "frame": 2880,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": 1025.0,
+    "y": 268.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": 1045.0,
+    "y": 262.0
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b021",
+   "game": "CH_NLA_GCAmicitia_KriensLuzern_ca2018",
+   "file": "CH_NLA_GCAmicitia_KriensLuzern_ca2018_s0.mp4",
+   "frame": 1395,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 785.0,
+    "y": 397.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 786.0,
+    "y": 398.0
+   },
+   "label": "ball",
+   "x": 785.5,
+   "y": 397.5,
+   "partly_hidden": false
+  },
+  {
+   "id": "b022",
+   "game": "CH_NLA_GCAmicitia_KriensLuzern_ca2018",
+   "file": "CH_NLA_GCAmicitia_KriensLuzern_ca2018_s0.mp4",
+   "frame": 617,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 476.0,
+    "y": 228.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 476.0,
+    "y": 228.0
+   },
+   "label": "ball",
+   "x": 476.0,
+   "y": 228.0,
+   "partly_hidden": false
+  },
+  {
+   "id": "b023",
+   "game": "CH_NLA_GCAmicitia_KriensLuzern_ca2018",
+   "file": "CH_NLA_GCAmicitia_KriensLuzern_ca2018_s4.mp4",
+   "frame": 3006,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 723.0,
+    "y": 411.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 723.0,
+    "y": 412.0
+   },
+   "label": "ball",
+   "x": 723.0,
+   "y": 411.5,
+   "partly_hidden": false
+  },
+  {
+   "id": "b024",
+   "game": "CH_NLA_GCAmicitia_KriensLuzern_ca2018",
+   "file": "CH_NLA_GCAmicitia_KriensLuzern_ca2018_s4.mp4",
+   "frame": 3720,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 455.0,
+    "y": 351.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 455.0,
+    "y": 351.0
+   },
+   "label": "ball",
+   "x": 455.0,
+   "y": 351.0,
+   "partly_hidden": false
+  },
+  {
+   "id": "b025",
+   "game": "CH_NLA_GCAmicitia_KriensLuzern_ca2018",
+   "file": "CH_NLA_GCAmicitia_KriensLuzern_ca2018_s4.mp4",
+   "frame": 884,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 315.0,
+    "y": 364.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 314.0,
+    "y": 363.0
+   },
+   "label": "ball",
+   "x": 314.5,
+   "y": 363.5,
+   "partly_hidden": false
+  },
+  {
+   "id": "b026",
+   "game": "CH_NLA_GCAmicitia_KriensLuzern_ca2018",
+   "file": "CH_NLA_GCAmicitia_KriensLuzern_ca2018_s2.mp4",
+   "frame": 4373,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "warmup",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "warmup",
+    "x": null,
+    "y": null
+   },
+   "label": "warmup",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b027",
+   "game": "CH_NLA_GCAmicitia_KriensLuzern_ca2018",
+   "file": "CH_NLA_GCAmicitia_KriensLuzern_ca2018_s2.mp4",
+   "frame": 938,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "warmup",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "warmup",
+    "x": null,
+    "y": null
+   },
+   "label": "warmup",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b028",
+   "game": "CH_NLA_KriensLuzern_SuhrAarau_ca2018",
+   "file": "CH_NLA_KriensLuzern_SuhrAarau_ca2018_s3.mp4",
+   "frame": 4077,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 848.0,
+    "y": 355.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 848.0,
+    "y": 355.0
+   },
+   "label": "ball",
+   "x": 848.0,
+   "y": 355.0,
+   "partly_hidden": false
+  },
+  {
+   "id": "b029",
+   "game": "CH_NLA_KriensLuzern_SuhrAarau_ca2018",
+   "file": "CH_NLA_KriensLuzern_SuhrAarau_ca2018_s1.mp4",
+   "frame": 3114,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 123.0,
+    "y": 371.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 123.0,
+    "y": 371.0
+   },
+   "label": "ball",
+   "x": 123.0,
+   "y": 371.0,
+   "partly_hidden": false
+  },
+  {
+   "id": "b030",
+   "game": "CH_NLA_KriensLuzern_SuhrAarau_ca2018",
+   "file": "CH_NLA_KriensLuzern_SuhrAarau_ca2018_s1.mp4",
+   "frame": 396,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": 105.0,
+    "y": 348.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": 106.0,
+    "y": 343.0
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b031",
+   "game": "CH_NLA_KriensLuzern_SuhrAarau_ca2018",
+   "file": "CH_NLA_KriensLuzern_SuhrAarau_ca2018_s2.mp4",
+   "frame": 575,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "warmup",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "warmup",
+    "x": null,
+    "y": null
+   },
+   "label": "warmup",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b032",
+   "game": "CH_NLA_KriensLuzern_SuhrAarau_ca2018",
+   "file": "CH_NLA_KriensLuzern_SuhrAarau_ca2018_s2.mp4",
+   "frame": 3799,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "warmup",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "warmup",
+    "x": null,
+    "y": null
+   },
+   "label": "warmup",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b033",
+   "game": "CH_NLA_KriensLuzern_SuhrAarau_ca2018",
+   "file": "CH_NLA_KriensLuzern_SuhrAarau_ca2018_s2.mp4",
+   "frame": 1254,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "warmup",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "warmup",
+    "x": null,
+    "y": null
+   },
+   "label": "warmup",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b034",
+   "game": "CH_NLA_KriensLuzern_SuhrAarau_ca2018",
+   "file": "CH_NLA_KriensLuzern_SuhrAarau_ca2018_s2.mp4",
+   "frame": 1900,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "warmup",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "warmup",
+    "x": null,
+    "y": null
+   },
+   "label": "warmup",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b035",
+   "game": "CH_NLA_PlayoffF1_WackerThun_Kadetten_2013-05-11",
+   "file": "CH_NLA_PlayoffF1_WackerThun_Kadetten_2013-05-11_s1.mp4",
+   "frame": 1111,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b036",
+   "game": "CH_NLA_PlayoffF1_WackerThun_Kadetten_2013-05-11",
+   "file": "CH_NLA_PlayoffF1_WackerThun_Kadetten_2013-05-11_s1.mp4",
+   "frame": 1632,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 1071.0,
+    "y": 331.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 1072.0,
+    "y": 334.0
+   },
+   "label": "ball",
+   "x": 1071.5,
+   "y": 332.5,
+   "partly_hidden": false
+  },
+  {
+   "id": "b037",
+   "game": "CH_NLA_PlayoffF1_WackerThun_Kadetten_2013-05-11",
+   "file": "CH_NLA_PlayoffF1_WackerThun_Kadetten_2013-05-11_s2.mp4",
+   "frame": 2037,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "label": "no_ball",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b038",
+   "game": "CH_NLA_PlayoffF1_WackerThun_Kadetten_2013-05-11",
+   "file": "CH_NLA_PlayoffF1_WackerThun_Kadetten_2013-05-11_s3.mp4",
+   "frame": 2728,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 493.0,
+    "y": 389.0
+   },
+   "pass_b": {
+    "state": "part",
+    "x": 497.0,
+    "y": 389.0
+   },
+   "label": "ball",
+   "x": 495.0,
+   "y": 389.0,
+   "partly_hidden": true
+  },
+  {
+   "id": "b039",
+   "game": "CH_NLA_PlayoffF1_WackerThun_Kadetten_2013-05-11",
+   "file": "CH_NLA_PlayoffF1_WackerThun_Kadetten_2013-05-11_s1.mp4",
+   "frame": 3627,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": 548.0,
+    "y": 135.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": 540.0,
+    "y": 122.0
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b040",
+   "game": "CH_NLA_PlayoffF1_WackerThun_Kadetten_2013-05-11",
+   "file": "CH_NLA_PlayoffF1_WackerThun_Kadetten_2013-05-11_s3.mp4",
+   "frame": 4351,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "label": "no_ball",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b041",
+   "game": "CH_NLA_PlayoffF1_WackerThun_Kadetten_2013-05-11",
+   "file": "CH_NLA_PlayoffF1_WackerThun_Kadetten_2013-05-11_s3.mp4",
+   "frame": 1039,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 490.0,
+    "y": 333.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 489.0,
+    "y": 332.0
+   },
+   "label": "ball",
+   "x": 489.5,
+   "y": 332.5,
+   "partly_hidden": false
+  },
+  {
+   "id": "b042",
+   "game": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07",
+   "file": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07_s1.mp4",
+   "frame": 2624,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 873.0,
+    "y": 351.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 874.0,
+    "y": 351.0
+   },
+   "label": "ball",
+   "x": 873.5,
+   "y": 351.0,
+   "partly_hidden": false
+  },
+  {
+   "id": "b043",
+   "game": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07",
+   "file": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07_s0.mp4",
+   "frame": 97,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 341.0,
+    "y": 361.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 342.0,
+    "y": 360.0
+   },
+   "label": "ball",
+   "x": 341.5,
+   "y": 360.5,
+   "partly_hidden": false
+  },
+  {
+   "id": "b044",
+   "game": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07",
+   "file": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07_s2.mp4",
+   "frame": 4057,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "warmup",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b045",
+   "game": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07",
+   "file": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07_s0.mp4",
+   "frame": 1155,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 1046.0,
+    "y": 273.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 1046.0,
+    "y": 273.0
+   },
+   "label": "ball",
+   "x": 1046.0,
+   "y": 273.0,
+   "partly_hidden": false
+  },
+  {
+   "id": "b046",
+   "game": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07",
+   "file": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07_s0.mp4",
+   "frame": 2724,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 710.0,
+    "y": 177.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": 709.0,
+    "y": 179.0
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b047",
+   "game": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07",
+   "file": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07_s0.mp4",
+   "frame": 4343,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 400.0,
+    "y": 390.0
+   },
+   "pass_b": {
+    "state": "part",
+    "x": 374.0,
+    "y": 195.0
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b048",
+   "game": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07",
+   "file": "CH_NLA_RTVBasel_GCAmicitia_2018-09-07_s2.mp4",
+   "frame": 3463,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "warmup",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b049",
+   "game": "CH_NLA_SuhrAarau_KriensLuzern_ca2018",
+   "file": "CH_NLA_SuhrAarau_KriensLuzern_ca2018_s0.mp4",
+   "frame": 2831,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": 1082.0,
+    "y": 464.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b050",
+   "game": "CH_NLA_SuhrAarau_KriensLuzern_ca2018",
+   "file": "CH_NLA_SuhrAarau_KriensLuzern_ca2018_s0.mp4",
+   "frame": 1274,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": 672.0,
+    "y": 440.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": 688.0,
+    "y": 445.0
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b051",
+   "game": "CH_NLA_SuhrAarau_KriensLuzern_ca2018",
+   "file": "CH_NLA_SuhrAarau_KriensLuzern_ca2018_s2.mp4",
+   "frame": 2577,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": 567.0,
+    "y": 471.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b052",
+   "game": "CH_NLA_SuhrAarau_KriensLuzern_ca2018",
+   "file": "CH_NLA_SuhrAarau_KriensLuzern_ca2018_s2.mp4",
+   "frame": 3631,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b053",
+   "game": "CH_NLA_SuhrAarau_KriensLuzern_ca2018",
+   "file": "CH_NLA_SuhrAarau_KriensLuzern_ca2018_s0.mp4",
+   "frame": 3498,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": 545.0,
+    "y": 425.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b054",
+   "game": "CH_NLA_SuhrAarau_KriensLuzern_ca2018",
+   "file": "CH_NLA_SuhrAarau_KriensLuzern_ca2018_s3.mp4",
+   "frame": 4256,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b055",
+   "game": "CH_NLA_SuhrAarau_KriensLuzern_ca2018",
+   "file": "CH_NLA_SuhrAarau_KriensLuzern_ca2018_s2.mp4",
+   "frame": 1735,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b056",
+   "game": "CH_NLB_TVBirsfelden_GSKadetten_ca2025",
+   "file": "CH_NLB_TVBirsfelden_GSKadetten_ca2025_s1.mp4",
+   "frame": 8815,
+   "fps": 50.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": 767.0,
+    "y": 266.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b057",
+   "game": "CH_NLB_TVBirsfelden_GSKadetten_ca2025",
+   "file": "CH_NLB_TVBirsfelden_GSKadetten_ca2025_s1.mp4",
+   "frame": 4760,
+   "fps": 50.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b058",
+   "game": "CH_NLB_TVBirsfelden_GSKadetten_ca2025",
+   "file": "CH_NLB_TVBirsfelden_GSKadetten_ca2025_s3.mp4",
+   "frame": 2956,
+   "fps": 50.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 1052.0,
+    "y": 320.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 1053.0,
+    "y": 318.0
+   },
+   "label": "ball",
+   "x": 1052.5,
+   "y": 319.0,
+   "partly_hidden": false
+  },
+  {
+   "id": "b059",
+   "game": "CH_NLB_TVBirsfelden_GSKadetten_ca2025",
+   "file": "CH_NLB_TVBirsfelden_GSKadetten_ca2025_s2.mp4",
+   "frame": 5030,
+   "fps": 50.0,
+   "pass_a": {
+    "state": "warmup",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "warmup",
+    "x": null,
+    "y": null
+   },
+   "label": "warmup",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b060",
+   "game": "CH_NLB_TVBirsfelden_GSKadetten_ca2025",
+   "file": "CH_NLB_TVBirsfelden_GSKadetten_ca2025_s2.mp4",
+   "frame": 7501,
+   "fps": 50.0,
+   "pass_a": {
+    "state": "warmup",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "warmup",
+    "x": null,
+    "y": null
+   },
+   "label": "warmup",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b061",
+   "game": "CH_NLB_TVBirsfelden_GSKadetten_ca2025",
+   "file": "CH_NLB_TVBirsfelden_GSKadetten_ca2025_s2.mp4",
+   "frame": 3769,
+   "fps": 50.0,
+   "pass_a": {
+    "state": "warmup",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "warmup",
+    "x": null,
+    "y": null
+   },
+   "label": "warmup",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b062",
+   "game": "CH_NLB_TVBirsfelden_GSKadetten_ca2025",
+   "file": "CH_NLB_TVBirsfelden_GSKadetten_ca2025_s3.mp4",
+   "frame": 218,
+   "fps": 50.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 489.0,
+    "y": 340.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 488.0,
+    "y": 339.0
+   },
+   "label": "ball",
+   "x": 488.5,
+   "y": 339.5,
+   "partly_hidden": false
+  },
+  {
+   "id": "b063",
+   "game": "CH_Nati_Schweiz_Rumaenien_2024-01-04",
+   "file": "CH_Nati_Schweiz_Rumaenien_2024-01-04_s4.mp4",
+   "frame": 5436,
+   "fps": 50.0,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "label": "no_ball",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b064",
+   "game": "CH_Nati_Schweiz_Rumaenien_2024-01-04",
+   "file": "CH_Nati_Schweiz_Rumaenien_2024-01-04_s4.mp4",
+   "frame": 3403,
+   "fps": 50.0,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "label": "no_ball",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b065",
+   "game": "CH_Nati_Schweiz_Rumaenien_2024-01-04",
+   "file": "CH_Nati_Schweiz_Rumaenien_2024-01-04_s2.mp4",
+   "frame": 380,
+   "fps": 50.0,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "label": "no_ball",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b066",
+   "game": "CH_Nati_Schweiz_Rumaenien_2024-01-04",
+   "file": "CH_Nati_Schweiz_Rumaenien_2024-01-04_s3.mp4",
+   "frame": 8308,
+   "fps": 50.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": 850.0,
+    "y": 460.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": 850.0,
+    "y": 452.0
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b067",
+   "game": "CH_Nati_Schweiz_Rumaenien_2024-01-04",
+   "file": "CH_Nati_Schweiz_Rumaenien_2024-01-04_s2.mp4",
+   "frame": 3579,
+   "fps": 50.0,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "label": "no_ball",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b068",
+   "game": "CH_Nati_Schweiz_Rumaenien_2024-01-04",
+   "file": "CH_Nati_Schweiz_Rumaenien_2024-01-04_s3.mp4",
+   "frame": 3200,
+   "fps": 50.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 320.0,
+    "y": 355.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 317.0,
+    "y": 355.0
+   },
+   "label": "ball",
+   "x": 318.5,
+   "y": 355.0,
+   "partly_hidden": false
+  },
+  {
+   "id": "b069",
+   "game": "CH_Nati_Schweiz_Rumaenien_2024-01-04",
+   "file": "CH_Nati_Schweiz_Rumaenien_2024-01-04_s4.mp4",
+   "frame": 1652,
+   "fps": 50.0,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "label": "no_ball",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b070",
+   "game": "CH_Nati_Schweiz_Ukraine_2020-01-03",
+   "file": "CH_Nati_Schweiz_Ukraine_2020-01-03_s3.mp4",
+   "frame": 4629,
+   "fps": 50.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b071",
+   "game": "CH_Nati_Schweiz_Ukraine_2020-01-03",
+   "file": "CH_Nati_Schweiz_Ukraine_2020-01-03_s2.mp4",
+   "frame": 2382,
+   "fps": 50.0,
+   "pass_a": {
+    "state": "warmup",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "warmup",
+    "x": null,
+    "y": null
+   },
+   "label": "warmup",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b072",
+   "game": "CH_Nati_Schweiz_Ukraine_2020-01-03",
+   "file": "CH_Nati_Schweiz_Ukraine_2020-01-03_s1.mp4",
+   "frame": 6578,
+   "fps": 50.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": 585.0,
+    "y": 254.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b073",
+   "game": "CH_Nati_Schweiz_Ukraine_2020-01-03",
+   "file": "CH_Nati_Schweiz_Ukraine_2020-01-03_s1.mp4",
+   "frame": 4430,
+   "fps": 50.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 1042.0,
+    "y": 395.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": 971.0,
+    "y": 296.0
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b074",
+   "game": "CH_Nati_Schweiz_Ukraine_2020-01-03",
+   "file": "CH_Nati_Schweiz_Ukraine_2020-01-03_s2.mp4",
+   "frame": 6584,
+   "fps": 50.0,
+   "pass_a": {
+    "state": "warmup",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "warmup",
+    "x": null,
+    "y": null
+   },
+   "label": "warmup",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b075",
+   "game": "CH_Nati_Schweiz_Ukraine_2020-01-03",
+   "file": "CH_Nati_Schweiz_Ukraine_2020-01-03_s2.mp4",
+   "frame": 8222,
+   "fps": 50.0,
+   "pass_a": {
+    "state": "warmup",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "warmup",
+    "x": null,
+    "y": null
+   },
+   "label": "warmup",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b076",
+   "game": "CH_Nati_Schweiz_Ukraine_2020-01-03",
+   "file": "CH_Nati_Schweiz_Ukraine_2020-01-03_s2.mp4",
+   "frame": 3963,
+   "fps": 50.0,
+   "pass_a": {
+    "state": "warmup",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "warmup",
+    "x": null,
+    "y": null
+   },
+   "label": "warmup",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b077",
+   "game": "CH_RAM_Zuerich_Ost_2025-01-11",
+   "file": "CH_RAM_Zuerich_Ost_2025-01-11_s3.mp4",
+   "frame": 4241,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 1106.0,
+    "y": 427.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 1107.0,
+    "y": 428.0
+   },
+   "label": "ball",
+   "x": 1106.5,
+   "y": 427.5,
+   "partly_hidden": false
+  },
+  {
+   "id": "b078",
+   "game": "CH_RAM_Zuerich_Ost_2025-01-11",
+   "file": "CH_RAM_Zuerich_Ost_2025-01-11_s0.mp4",
+   "frame": 1783,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 608.0,
+    "y": 275.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 607.0,
+    "y": 275.0
+   },
+   "label": "ball",
+   "x": 607.5,
+   "y": 275.0,
+   "partly_hidden": false
+  },
+  {
+   "id": "b079",
+   "game": "CH_RAM_Zuerich_Ost_2025-01-11",
+   "file": "CH_RAM_Zuerich_Ost_2025-01-11_s1.mp4",
+   "frame": 2504,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 593.0,
+    "y": 339.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 593.0,
+    "y": 339.0
+   },
+   "label": "ball",
+   "x": 593.0,
+   "y": 339.0,
+   "partly_hidden": false
+  },
+  {
+   "id": "b080",
+   "game": "CH_RAM_Zuerich_Ost_2025-01-11",
+   "file": "CH_RAM_Zuerich_Ost_2025-01-11_s0.mp4",
+   "frame": 4666,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 1078.0,
+    "y": 284.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 1077.0,
+    "y": 284.0
+   },
+   "label": "ball",
+   "x": 1077.5,
+   "y": 284.0,
+   "partly_hidden": false
+  },
+  {
+   "id": "b081",
+   "game": "CH_RAM_Zuerich_Ost_2025-01-11",
+   "file": "CH_RAM_Zuerich_Ost_2025-01-11_s3.mp4",
+   "frame": 902,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 1063.0,
+    "y": 304.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 1065.0,
+    "y": 304.0
+   },
+   "label": "ball",
+   "x": 1064.0,
+   "y": 304.0,
+   "partly_hidden": false
+  },
+  {
+   "id": "b082",
+   "game": "CH_RAM_Zuerich_Ost_2025-01-11",
+   "file": "CH_RAM_Zuerich_Ost_2025-01-11_s3.mp4",
+   "frame": 1613,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 251.0,
+    "y": 144.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 252.0,
+    "y": 147.0
+   },
+   "label": "ball",
+   "x": 251.5,
+   "y": 145.5,
+   "partly_hidden": false
+  },
+  {
+   "id": "b083",
+   "game": "CH_RAM_Zuerich_Ost_2025-01-11",
+   "file": "CH_RAM_Zuerich_Ost_2025-01-11_s0.mp4",
+   "frame": 892,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 401.0,
+    "y": 421.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 401.0,
+    "y": 421.0
+   },
+   "label": "ball",
+   "x": 401.0,
+   "y": 421.0,
+   "partly_hidden": false
+  },
+  {
+   "id": "b084",
+   "game": "CH_RegioCup_HalbF_Frauen1_2017-03",
+   "file": "CH_RegioCup_HalbF_Frauen1_2017-03_s4.mp4",
+   "frame": 1698,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": 62.0,
+    "y": 402.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b085",
+   "game": "CH_RegioCup_HalbF_Frauen1_2017-03",
+   "file": "CH_RegioCup_HalbF_Frauen1_2017-03_s4.mp4",
+   "frame": 4967,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b086",
+   "game": "CH_RegioCup_HalbF_Frauen1_2017-03",
+   "file": "CH_RegioCup_HalbF_Frauen1_2017-03_s2.mp4",
+   "frame": 3394,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": 1085.0,
+    "y": 410.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b087",
+   "game": "CH_RegioCup_HalbF_Frauen1_2017-03",
+   "file": "CH_RegioCup_HalbF_Frauen1_2017-03_s4.mp4",
+   "frame": 3251,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 764.0,
+    "y": 331.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 763.0,
+    "y": 331.0
+   },
+   "label": "ball",
+   "x": 763.5,
+   "y": 331.0,
+   "partly_hidden": false
+  },
+  {
+   "id": "b088",
+   "game": "CH_RegioCup_HalbF_Frauen1_2017-03",
+   "file": "CH_RegioCup_HalbF_Frauen1_2017-03_s2.mp4",
+   "frame": 5211,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 667.0,
+    "y": 330.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 667.0,
+    "y": 330.0
+   },
+   "label": "ball",
+   "x": 667.0,
+   "y": 330.0,
+   "partly_hidden": false
+  },
+  {
+   "id": "b089",
+   "game": "CH_RegioCup_HalbF_Frauen1_2017-03",
+   "file": "CH_RegioCup_HalbF_Frauen1_2017-03_s4.mp4",
+   "frame": 1076,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": 251.0,
+    "y": 356.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b090",
+   "game": "CH_RegioCup_HalbF_Frauen1_2017-03",
+   "file": "CH_RegioCup_HalbF_Frauen1_2017-03_s2.mp4",
+   "frame": 798,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": 645.0,
+    "y": 305.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": 643.0,
+    "y": 305.0
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b091",
+   "game": "CH_SGPilatus_Staefa_ca2024",
+   "file": "CH_SGPilatus_Staefa_ca2024_s0.mp4",
+   "frame": 2253,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b092",
+   "game": "CH_SGPilatus_Staefa_ca2024",
+   "file": "CH_SGPilatus_Staefa_ca2024_s0.mp4",
+   "frame": 2977,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 876.0,
+    "y": 250.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 877.0,
+    "y": 249.0
+   },
+   "label": "ball",
+   "x": 876.5,
+   "y": 249.5,
+   "partly_hidden": false
+  },
+  {
+   "id": "b093",
+   "game": "CH_SGPilatus_Staefa_ca2024",
+   "file": "CH_SGPilatus_Staefa_ca2024_s3.mp4",
+   "frame": 5097,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": 745.0,
+    "y": 310.0
+   },
+   "pass_b": {
+    "state": "hidden",
+    "x": 752.0,
+    "y": 318.0
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b094",
+   "game": "CH_SGPilatus_Staefa_ca2024",
+   "file": "CH_SGPilatus_Staefa_ca2024_s0.mp4",
+   "frame": 651,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 1019.0,
+    "y": 369.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 1019.0,
+    "y": 369.0
+   },
+   "label": "ball",
+   "x": 1019.0,
+   "y": 369.0,
+   "partly_hidden": false
+  },
+  {
+   "id": "b095",
+   "game": "CH_SGPilatus_Staefa_ca2024",
+   "file": "CH_SGPilatus_Staefa_ca2024_s3.mp4",
+   "frame": 3350,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 496.0,
+    "y": 329.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 496.0,
+    "y": 329.0
+   },
+   "label": "ball",
+   "x": 496.0,
+   "y": 329.0,
+   "partly_hidden": false
+  },
+  {
+   "id": "b096",
+   "game": "CH_SGPilatus_Staefa_ca2024",
+   "file": "CH_SGPilatus_Staefa_ca2024_s2.mp4",
+   "frame": 1187,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 339.0,
+    "y": 432.0
+   },
+   "pass_b": {
+    "state": "part",
+    "x": 340.0,
+    "y": 436.0
+   },
+   "label": "ball",
+   "x": 339.5,
+   "y": 434.0,
+   "partly_hidden": true
+  },
+  {
+   "id": "b097",
+   "game": "CH_SGPilatus_Staefa_ca2024",
+   "file": "CH_SGPilatus_Staefa_ca2024_s2.mp4",
+   "frame": 2583,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 1059.0,
+    "y": 406.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 1058.0,
+    "y": 408.0
+   },
+   "label": "ball",
+   "x": 1058.5,
+   "y": 407.0,
+   "partly_hidden": false
+  },
+  {
+   "id": "b098",
+   "game": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20",
+   "file": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20_s2.mp4",
+   "frame": 4546,
+   "fps": 50.0,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "label": "no_ball",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b099",
+   "game": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20",
+   "file": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20_s4.mp4",
+   "frame": 7690,
+   "fps": 50.0,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "label": "no_ball",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b100",
+   "game": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20",
+   "file": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20_s2.mp4",
+   "frame": 6543,
+   "fps": 50.0,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b101",
+   "game": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20",
+   "file": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20_s4.mp4",
+   "frame": 1792,
+   "fps": 50.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b102",
+   "game": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20",
+   "file": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20_s1.mp4",
+   "frame": 2531,
+   "fps": 50.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b103",
+   "game": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20",
+   "file": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20_s2.mp4",
+   "frame": 1462,
+   "fps": 50.0,
+   "pass_a": {
+    "state": "warmup",
+    "x": 380.0,
+    "y": 295.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": 385.0,
+    "y": 292.0
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b104",
+   "game": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20",
+   "file": "CH_Supercup_Kadetten_KriensLuzern_2023-08-20_s4.mp4",
+   "frame": 4796,
+   "fps": 50.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 841.0,
+    "y": 331.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 841.0,
+    "y": 331.0
+   },
+   "label": "ball",
+   "x": 841.0,
+   "y": 331.0,
+   "partly_hidden": false
+  },
+  {
+   "id": "b105",
+   "game": "CH_U17E_Final_HSGNordwest_SuhrAarau_ca2017",
+   "file": "CH_U17E_Final_HSGNordwest_SuhrAarau_ca2017_s3.mp4",
+   "frame": 464,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 470.0,
+    "y": 189.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 472.0,
+    "y": 192.0
+   },
+   "label": "ball",
+   "x": 471.0,
+   "y": 190.5,
+   "partly_hidden": false
+  },
+  {
+   "id": "b106",
+   "game": "CH_U17E_Final_HSGNordwest_SuhrAarau_ca2017",
+   "file": "CH_U17E_Final_HSGNordwest_SuhrAarau_ca2017_s2.mp4",
+   "frame": 2259,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": 287.0,
+    "y": 217.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b107",
+   "game": "CH_U17E_Final_HSGNordwest_SuhrAarau_ca2017",
+   "file": "CH_U17E_Final_HSGNordwest_SuhrAarau_ca2017_s1.mp4",
+   "frame": 119,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b108",
+   "game": "CH_U17E_Final_HSGNordwest_SuhrAarau_ca2017",
+   "file": "CH_U17E_Final_HSGNordwest_SuhrAarau_ca2017_s1.mp4",
+   "frame": 1667,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b109",
+   "game": "CH_U17E_Final_HSGNordwest_SuhrAarau_ca2017",
+   "file": "CH_U17E_Final_HSGNordwest_SuhrAarau_ca2017_s3.mp4",
+   "frame": 1184,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "part",
+    "x": 1189.0,
+    "y": 374.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": 1190.0,
+    "y": 376.0
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b110",
+   "game": "CH_U17E_Final_HSGNordwest_SuhrAarau_ca2017",
+   "file": "CH_U17E_Final_HSGNordwest_SuhrAarau_ca2017_s2.mp4",
+   "frame": 3858,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b111",
+   "game": "CH_U17E_Final_HSGNordwest_SuhrAarau_ca2017",
+   "file": "CH_U17E_Final_HSGNordwest_SuhrAarau_ca2017_s2.mp4",
+   "frame": 135,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "part",
+    "x": 606.0,
+    "y": 325.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b112",
+   "game": "CH_U17E_Final_Pfadi_HSGNordwest_ca2019",
+   "file": "CH_U17E_Final_Pfadi_HSGNordwest_ca2019_s0.mp4",
+   "frame": 3582,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b113",
+   "game": "CH_U17E_Final_Pfadi_HSGNordwest_ca2019",
+   "file": "CH_U17E_Final_Pfadi_HSGNordwest_ca2019_s1.mp4",
+   "frame": 485,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 1184.5,
+    "y": 366.8
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 1184.0,
+    "y": 368.0
+   },
+   "label": "ball",
+   "x": 1184.2,
+   "y": 367.4,
+   "partly_hidden": false
+  },
+  {
+   "id": "b114",
+   "game": "CH_U17E_Final_Pfadi_HSGNordwest_ca2019",
+   "file": "CH_U17E_Final_Pfadi_HSGNordwest_ca2019_s4.mp4",
+   "frame": 1526,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": 568.0,
+    "y": 294.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": 565.0,
+    "y": 310.0
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b115",
+   "game": "CH_U17E_Final_Pfadi_HSGNordwest_ca2019",
+   "file": "CH_U17E_Final_Pfadi_HSGNordwest_ca2019_s4.mp4",
+   "frame": 416,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": 820.0,
+    "y": 504.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b116",
+   "game": "CH_U17E_Final_Pfadi_HSGNordwest_ca2019",
+   "file": "CH_U17E_Final_Pfadi_HSGNordwest_ca2019_s1.mp4",
+   "frame": 1019,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "label": "no_ball",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b117",
+   "game": "CH_U17E_Final_Pfadi_HSGNordwest_ca2019",
+   "file": "CH_U17E_Final_Pfadi_HSGNordwest_ca2019_s1.mp4",
+   "frame": 2083,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "label": "no_ball",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b118",
+   "game": "CH_U17E_Final_Pfadi_HSGNordwest_ca2019",
+   "file": "CH_U17E_Final_Pfadi_HSGNordwest_ca2019_s0.mp4",
+   "frame": 2137,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b119",
+   "game": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10",
+   "file": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10_s0.mp4",
+   "frame": 6649,
+   "fps": 59.94,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b120",
+   "game": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10",
+   "file": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10_s2.mp4",
+   "frame": 7032,
+   "fps": 59.94,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b121",
+   "game": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10",
+   "file": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10_s3.mp4",
+   "frame": 10201,
+   "fps": 59.94,
+   "pass_a": {
+    "state": "ball",
+    "x": 405.5,
+    "y": 238.5
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 405.0,
+    "y": 238.0
+   },
+   "label": "ball",
+   "x": 405.2,
+   "y": 238.2,
+   "partly_hidden": false
+  },
+  {
+   "id": "b122",
+   "game": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10",
+   "file": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10_s2.mp4",
+   "frame": 9409,
+   "fps": 59.94,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b123",
+   "game": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10",
+   "file": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10_s0.mp4",
+   "frame": 772,
+   "fps": 59.94,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b124",
+   "game": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10",
+   "file": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10_s3.mp4",
+   "frame": 2068,
+   "fps": 59.94,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": 1042.0,
+    "y": 258.0
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b125",
+   "game": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10",
+   "file": "DE_Verbandsliga_HSGAhrensdorf_Schlaubetal_2026-10-10_s0.mp4",
+   "frame": 2805,
+   "fps": 59.94,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b126",
+   "game": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20",
+   "file": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20_s3.mp4",
+   "frame": 4547,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b127",
+   "game": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20",
+   "file": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20_s2.mp4",
+   "frame": 4376,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "label": "no_ball",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b128",
+   "game": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20",
+   "file": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20_s3.mp4",
+   "frame": 3677,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": 930.0,
+    "y": 482.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b129",
+   "game": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20",
+   "file": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20_s3.mp4",
+   "frame": 1374,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b130",
+   "game": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20",
+   "file": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20_s2.mp4",
+   "frame": 2048,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "label": "no_ball",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b131",
+   "game": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20",
+   "file": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20_s2.mp4",
+   "frame": 1389,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "label": "no_ball",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b132",
+   "game": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20",
+   "file": "DE_Verbandsliga_Refrath2_TVWahlscheid_2026-09-20_s3.mp4",
+   "frame": 2600,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b133",
+   "game": "ES_1Nacional_AnaitasunaB_Trapagaran_2026",
+   "file": "ES_1Nacional_AnaitasunaB_Trapagaran_2026_s1.mp4",
+   "frame": 1453,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 937.0,
+    "y": 354.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 937.0,
+    "y": 353.0
+   },
+   "label": "ball",
+   "x": 937.0,
+   "y": 353.5,
+   "partly_hidden": false
+  },
+  {
+   "id": "b134",
+   "game": "ES_1Nacional_AnaitasunaB_Trapagaran_2026",
+   "file": "ES_1Nacional_AnaitasunaB_Trapagaran_2026_s1.mp4",
+   "frame": 4254,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": 837.0,
+    "y": 258.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": 836.0,
+    "y": 259.0
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b135",
+   "game": "ES_1Nacional_AnaitasunaB_Trapagaran_2026",
+   "file": "ES_1Nacional_AnaitasunaB_Trapagaran_2026_s4.mp4",
+   "frame": 2683,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": 403.0,
+    "y": 212.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b136",
+   "game": "ES_1Nacional_AnaitasunaB_Trapagaran_2026",
+   "file": "ES_1Nacional_AnaitasunaB_Trapagaran_2026_s2.mp4",
+   "frame": 4191,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 635.0,
+    "y": 460.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 635.0,
+    "y": 459.0
+   },
+   "label": "ball",
+   "x": 635.0,
+   "y": 459.5,
+   "partly_hidden": false
+  },
+  {
+   "id": "b137",
+   "game": "ES_1Nacional_AnaitasunaB_Trapagaran_2026",
+   "file": "ES_1Nacional_AnaitasunaB_Trapagaran_2026_s2.mp4",
+   "frame": 3347,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 1095.0,
+    "y": 326.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 1095.0,
+    "y": 327.0
+   },
+   "label": "ball",
+   "x": 1095.0,
+   "y": 326.5,
+   "partly_hidden": false
+  },
+  {
+   "id": "b138",
+   "game": "ES_1Nacional_AnaitasunaB_Trapagaran_2026",
+   "file": "ES_1Nacional_AnaitasunaB_Trapagaran_2026_s4.mp4",
+   "frame": 1066,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 701.0,
+    "y": 379.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 701.0,
+    "y": 378.0
+   },
+   "label": "ball",
+   "x": 701.0,
+   "y": 378.5,
+   "partly_hidden": false
+  },
+  {
+   "id": "b139",
+   "game": "ES_1Nacional_AnaitasunaB_Trapagaran_2026",
+   "file": "ES_1Nacional_AnaitasunaB_Trapagaran_2026_s4.mp4",
+   "frame": 4996,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 832.5,
+    "y": 277.5
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 832.0,
+    "y": 278.0
+   },
+   "label": "ball",
+   "x": 832.2,
+   "y": 277.8,
+   "partly_hidden": false
+  },
+  {
+   "id": "b140",
+   "game": "ES_1Nacional_Huarte_Erreka_2026",
+   "file": "ES_1Nacional_Huarte_Erreka_2026_s0.mp4",
+   "frame": 1902,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 171.0,
+    "y": 266.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 172.0,
+    "y": 266.0
+   },
+   "label": "ball",
+   "x": 171.5,
+   "y": 266.0,
+   "partly_hidden": false
+  },
+  {
+   "id": "b141",
+   "game": "ES_1Nacional_Huarte_Erreka_2026",
+   "file": "ES_1Nacional_Huarte_Erreka_2026_s2.mp4",
+   "frame": 981,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "label": "no_ball",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b142",
+   "game": "ES_1Nacional_Huarte_Erreka_2026",
+   "file": "ES_1Nacional_Huarte_Erreka_2026_s4.mp4",
+   "frame": 4519,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b143",
+   "game": "ES_1Nacional_Huarte_Erreka_2026",
+   "file": "ES_1Nacional_Huarte_Erreka_2026_s0.mp4",
+   "frame": 1140,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 850.0,
+    "y": 294.5
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 850.0,
+    "y": 295.0
+   },
+   "label": "ball",
+   "x": 850.0,
+   "y": 294.8,
+   "partly_hidden": false
+  },
+  {
+   "id": "b144",
+   "game": "ES_1Nacional_Huarte_Erreka_2026",
+   "file": "ES_1Nacional_Huarte_Erreka_2026_s0.mp4",
+   "frame": 4004,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": 862.0,
+    "y": 328.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b145",
+   "game": "ES_1Nacional_Huarte_Erreka_2026",
+   "file": "ES_1Nacional_Huarte_Erreka_2026_s4.mp4",
+   "frame": 2154,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 1016.0,
+    "y": 215.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b146",
+   "game": "ES_1Nacional_Huarte_Erreka_2026",
+   "file": "ES_1Nacional_Huarte_Erreka_2026_s2.mp4",
+   "frame": 4528,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "label": "no_ball",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b147",
+   "game": "ES_1Nacional_PalmaDelRio_2026",
+   "file": "ES_1Nacional_PalmaDelRio_2026_s2.mp4",
+   "frame": 1830,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": 620.0,
+    "y": 200.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": 606.0,
+    "y": 199.0
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b148",
+   "game": "ES_1Nacional_PalmaDelRio_2026",
+   "file": "ES_1Nacional_PalmaDelRio_2026_s4.mp4",
+   "frame": 1355,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b149",
+   "game": "ES_1Nacional_PalmaDelRio_2026",
+   "file": "ES_1Nacional_PalmaDelRio_2026_s2.mp4",
+   "frame": 2722,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b150",
+   "game": "ES_1Nacional_PalmaDelRio_2026",
+   "file": "ES_1Nacional_PalmaDelRio_2026_s1.mp4",
+   "frame": 263,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": 569.0,
+    "y": 403.0
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b151",
+   "game": "ES_1Nacional_PalmaDelRio_2026",
+   "file": "ES_1Nacional_PalmaDelRio_2026_s1.mp4",
+   "frame": 1570,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b152",
+   "game": "ES_1Nacional_PalmaDelRio_2026",
+   "file": "ES_1Nacional_PalmaDelRio_2026_s1.mp4",
+   "frame": 3651,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b153",
+   "game": "ES_1Nacional_PalmaDelRio_2026",
+   "file": "ES_1Nacional_PalmaDelRio_2026_s4.mp4",
+   "frame": 2888,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b154",
+   "game": "ES_2Nacional_MarniB_Almoradi_2026",
+   "file": "ES_2Nacional_MarniB_Almoradi_2026_s1.mp4",
+   "frame": 2386,
+   "fps": 60.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 309.5,
+    "y": 199.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 309.0,
+    "y": 198.0
+   },
+   "label": "ball",
+   "x": 309.2,
+   "y": 198.5,
+   "partly_hidden": false
+  },
+  {
+   "id": "b155",
+   "game": "ES_2Nacional_MarniB_Almoradi_2026",
+   "file": "ES_2Nacional_MarniB_Almoradi_2026_s0.mp4",
+   "frame": 7812,
+   "fps": 60.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 920.0,
+    "y": 285.5
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 920.0,
+    "y": 286.0
+   },
+   "label": "ball",
+   "x": 920.0,
+   "y": 285.8,
+   "partly_hidden": false
+  },
+  {
+   "id": "b156",
+   "game": "ES_2Nacional_MarniB_Almoradi_2026",
+   "file": "ES_2Nacional_MarniB_Almoradi_2026_s1.mp4",
+   "frame": 4838,
+   "fps": 60.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b157",
+   "game": "ES_2Nacional_MarniB_Almoradi_2026",
+   "file": "ES_2Nacional_MarniB_Almoradi_2026_s1.mp4",
+   "frame": 822,
+   "fps": 60.0,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b158",
+   "game": "ES_2Nacional_MarniB_Almoradi_2026",
+   "file": "ES_2Nacional_MarniB_Almoradi_2026_s2.mp4",
+   "frame": 8838,
+   "fps": 60.0,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "label": "no_ball",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b159",
+   "game": "ES_2Nacional_MarniB_Almoradi_2026",
+   "file": "ES_2Nacional_MarniB_Almoradi_2026_s2.mp4",
+   "frame": 5560,
+   "fps": 60.0,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "label": "no_ball",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b160",
+   "game": "ES_2Nacional_MarniB_Almoradi_2026",
+   "file": "ES_2Nacional_MarniB_Almoradi_2026_s0.mp4",
+   "frame": 3269,
+   "fps": 60.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": 575.0,
+    "y": 435.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": 566.0,
+    "y": 431.0
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b161",
+   "game": "ES_HonorPlata_Bordils_Zamora_2018",
+   "file": "ES_HonorPlata_Bordils_Zamora_2018_s1.mp4",
+   "frame": 2869,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "label": "no_ball",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b162",
+   "game": "ES_HonorPlata_Bordils_Zamora_2018",
+   "file": "ES_HonorPlata_Bordils_Zamora_2018_s4.mp4",
+   "frame": 782,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 446.0,
+    "y": 427.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 447.0,
+    "y": 428.0
+   },
+   "label": "ball",
+   "x": 446.5,
+   "y": 427.5,
+   "partly_hidden": false
+  },
+  {
+   "id": "b163",
+   "game": "ES_HonorPlata_Bordils_Zamora_2018",
+   "file": "ES_HonorPlata_Bordils_Zamora_2018_s1.mp4",
+   "frame": 4832,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": 1062.0,
+    "y": 385.0
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b164",
+   "game": "ES_HonorPlata_Bordils_Zamora_2018",
+   "file": "ES_HonorPlata_Bordils_Zamora_2018_s1.mp4",
+   "frame": 1686,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b165",
+   "game": "ES_HonorPlata_Bordils_Zamora_2018",
+   "file": "ES_HonorPlata_Bordils_Zamora_2018_s4.mp4",
+   "frame": 4073,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b166",
+   "game": "ES_HonorPlata_Bordils_Zamora_2018",
+   "file": "ES_HonorPlata_Bordils_Zamora_2018_s2.mp4",
+   "frame": 4082,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "warmup",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "warmup",
+    "x": null,
+    "y": null
+   },
+   "label": "warmup",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b167",
+   "game": "ES_HonorPlata_Bordils_Zamora_2018",
+   "file": "ES_HonorPlata_Bordils_Zamora_2018_s4.mp4",
+   "frame": 2805,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 1126.0,
+    "y": 434.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 1125.0,
+    "y": 438.0
+   },
+   "label": "ball",
+   "x": 1125.5,
+   "y": 436.0,
+   "partly_hidden": false
+  },
+  {
+   "id": "b168",
+   "game": "FI_Karsinta_Dynamo_GrIFK_2015",
+   "file": "FI_Karsinta_Dynamo_GrIFK_2015_s4.mp4",
+   "frame": 1674,
+   "fps": 23.976,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b169",
+   "game": "FI_Karsinta_Dynamo_GrIFK_2015",
+   "file": "FI_Karsinta_Dynamo_GrIFK_2015_s4.mp4",
+   "frame": 389,
+   "fps": 23.976,
+   "pass_a": {
+    "state": "ball",
+    "x": 350.0,
+    "y": 422.5
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 350.0,
+    "y": 422.0
+   },
+   "label": "ball",
+   "x": 350.0,
+   "y": 422.2,
+   "partly_hidden": false
+  },
+  {
+   "id": "b170",
+   "game": "FI_Karsinta_Dynamo_GrIFK_2015",
+   "file": "FI_Karsinta_Dynamo_GrIFK_2015_s1.mp4",
+   "frame": 1486,
+   "fps": 23.976,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": 1213.0,
+    "y": 188.0
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b171",
+   "game": "FI_Karsinta_Dynamo_GrIFK_2015",
+   "file": "FI_Karsinta_Dynamo_GrIFK_2015_s1.mp4",
+   "frame": 3512,
+   "fps": 23.976,
+   "pass_a": {
+    "state": "part",
+    "x": 223.0,
+    "y": 222.5
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": 223.0,
+    "y": 223.0
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b172",
+   "game": "FI_Karsinta_Dynamo_GrIFK_2015",
+   "file": "FI_Karsinta_Dynamo_GrIFK_2015_s4.mp4",
+   "frame": 3991,
+   "fps": 23.976,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b173",
+   "game": "FI_Karsinta_Dynamo_GrIFK_2015",
+   "file": "FI_Karsinta_Dynamo_GrIFK_2015_s1.mp4",
+   "frame": 602,
+   "fps": 23.976,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b174",
+   "game": "FI_Karsinta_Dynamo_GrIFK_2015",
+   "file": "FI_Karsinta_Dynamo_GrIFK_2015_s0.mp4",
+   "frame": 720,
+   "fps": 23.976,
+   "pass_a": {
+    "state": "ball",
+    "x": 244.0,
+    "y": 274.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 243.0,
+    "y": 273.0
+   },
+   "label": "ball",
+   "x": 243.5,
+   "y": 273.5,
+   "partly_hidden": false
+  },
+  {
+   "id": "b175",
+   "game": "FR_N1_SudMayenne_GrandLibournais_2025",
+   "file": "FR_N1_SudMayenne_GrandLibournais_2025_s1.mp4",
+   "frame": 484,
+   "fps": 60.0,
+   "pass_a": {
+    "state": "part",
+    "x": 723.0,
+    "y": 417.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b176",
+   "game": "FR_N1_SudMayenne_GrandLibournais_2025",
+   "file": "FR_N1_SudMayenne_GrandLibournais_2025_s1.mp4",
+   "frame": 2001,
+   "fps": 60.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": 855.0,
+    "y": 144.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 858.0,
+    "y": 143.0
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b177",
+   "game": "FR_N1_SudMayenne_GrandLibournais_2025",
+   "file": "FR_N1_SudMayenne_GrandLibournais_2025_s2.mp4",
+   "frame": 3338,
+   "fps": 60.0,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b178",
+   "game": "FR_N1_SudMayenne_GrandLibournais_2025",
+   "file": "FR_N1_SudMayenne_GrandLibournais_2025_s2.mp4",
+   "frame": 6284,
+   "fps": 60.0,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b179",
+   "game": "FR_N1_SudMayenne_GrandLibournais_2025",
+   "file": "FR_N1_SudMayenne_GrandLibournais_2025_s1.mp4",
+   "frame": 8929,
+   "fps": 60.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b180",
+   "game": "FR_N1_SudMayenne_GrandLibournais_2025",
+   "file": "FR_N1_SudMayenne_GrandLibournais_2025_s1.mp4",
+   "frame": 4548,
+   "fps": 60.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": 595.0,
+    "y": 305.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b181",
+   "game": "FR_N1_SudMayenne_GrandLibournais_2025",
+   "file": "FR_N1_SudMayenne_GrandLibournais_2025_s2.mp4",
+   "frame": 7821,
+   "fps": 60.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": 121.0,
+    "y": 252.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b182",
+   "game": "FR_N3_CPBRennes_SaintMalo_2026",
+   "file": "FR_N3_CPBRennes_SaintMalo_2026_s0.mp4",
+   "frame": 4513,
+   "fps": 60.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": 575.0,
+    "y": 262.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": 590.0,
+    "y": 250.0
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b183",
+   "game": "FR_N3_CPBRennes_SaintMalo_2026",
+   "file": "FR_N3_CPBRennes_SaintMalo_2026_s1.mp4",
+   "frame": 4498,
+   "fps": 60.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": 490.0,
+    "y": 237.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": 490.0,
+    "y": 237.0
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b184",
+   "game": "FR_N3_CPBRennes_SaintMalo_2026",
+   "file": "FR_N3_CPBRennes_SaintMalo_2026_s1.mp4",
+   "frame": 7971,
+   "fps": 60.0,
+   "pass_a": {
+    "state": "hidden",
+    "x": 790.0,
+    "y": 330.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": 790.0,
+    "y": 330.0
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b185",
+   "game": "FR_N3_CPBRennes_SaintMalo_2026",
+   "file": "FR_N3_CPBRennes_SaintMalo_2026_s0.mp4",
+   "frame": 6195,
+   "fps": 60.0,
+   "pass_a": {
+    "state": "hidden",
+    "x": 465.0,
+    "y": 335.0
+   },
+   "pass_b": {
+    "state": "hidden",
+    "x": 475.0,
+    "y": 325.0
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b186",
+   "game": "FR_N3_CPBRennes_SaintMalo_2026",
+   "file": "FR_N3_CPBRennes_SaintMalo_2026_s0.mp4",
+   "frame": 10163,
+   "fps": 60.0,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b187",
+   "game": "FR_N3_CPBRennes_SaintMalo_2026",
+   "file": "FR_N3_CPBRennes_SaintMalo_2026_s1.mp4",
+   "frame": 9267,
+   "fps": 60.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": 385.0,
+    "y": 312.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b188",
+   "game": "FR_N3_CPBRennes_SaintMalo_2026",
+   "file": "FR_N3_CPBRennes_SaintMalo_2026_s1.mp4",
+   "frame": 3013,
+   "fps": 60.0,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b189",
+   "game": "IT_SerieA2_Flavioni_Salerno_2026",
+   "file": "IT_SerieA2_Flavioni_Salerno_2026_s0.mp4",
+   "frame": 1153,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 951.0,
+    "y": 194.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 952.0,
+    "y": 195.0
+   },
+   "label": "ball",
+   "x": 951.5,
+   "y": 194.5,
+   "partly_hidden": false
+  },
+  {
+   "id": "b190",
+   "game": "IT_SerieA2_Flavioni_Salerno_2026",
+   "file": "IT_SerieA2_Flavioni_Salerno_2026_s1.mp4",
+   "frame": 774,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "part",
+    "x": 506.0,
+    "y": 115.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b191",
+   "game": "IT_SerieA2_Flavioni_Salerno_2026",
+   "file": "IT_SerieA2_Flavioni_Salerno_2026_s0.mp4",
+   "frame": 4443,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 308.0,
+    "y": 248.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 308.0,
+    "y": 248.0
+   },
+   "label": "ball",
+   "x": 308.0,
+   "y": 248.0,
+   "partly_hidden": false
+  },
+  {
+   "id": "b192",
+   "game": "IT_SerieA2_Flavioni_Salerno_2026",
+   "file": "IT_SerieA2_Flavioni_Salerno_2026_s4.mp4",
+   "frame": 2948,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 179.0,
+    "y": 229.0
+   },
+   "pass_b": {
+    "state": "part",
+    "x": 178.0,
+    "y": 230.0
+   },
+   "label": "ball",
+   "x": 178.5,
+   "y": 229.5,
+   "partly_hidden": true
+  },
+  {
+   "id": "b193",
+   "game": "IT_SerieA2_Flavioni_Salerno_2026",
+   "file": "IT_SerieA2_Flavioni_Salerno_2026_s4.mp4",
+   "frame": 5156,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 1151.0,
+    "y": 241.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 1150.0,
+    "y": 242.0
+   },
+   "label": "ball",
+   "x": 1150.5,
+   "y": 241.5,
+   "partly_hidden": false
+  },
+  {
+   "id": "b194",
+   "game": "IT_SerieA2_Flavioni_Salerno_2026",
+   "file": "IT_SerieA2_Flavioni_Salerno_2026_s0.mp4",
+   "frame": 3460,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 809.0,
+    "y": 170.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b195",
+   "game": "IT_SerieA2_Flavioni_Salerno_2026",
+   "file": "IT_SerieA2_Flavioni_Salerno_2026_s1.mp4",
+   "frame": 5152,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 795.0,
+    "y": 163.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b196",
+   "game": "IT_SerieA2_Leno_MedalpTirol_2020",
+   "file": "IT_SerieA2_Leno_MedalpTirol_2020_s0.mp4",
+   "frame": 5259,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": 1185.0,
+    "y": 215.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": 1185.0,
+    "y": 195.0
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b197",
+   "game": "IT_SerieA2_Leno_MedalpTirol_2020",
+   "file": "IT_SerieA2_Leno_MedalpTirol_2020_s2.mp4",
+   "frame": 2607,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": 1195.0,
+    "y": 165.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b198",
+   "game": "IT_SerieA2_Leno_MedalpTirol_2020",
+   "file": "IT_SerieA2_Leno_MedalpTirol_2020_s1.mp4",
+   "frame": 3163,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 421.0,
+    "y": 87.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 421.0,
+    "y": 87.0
+   },
+   "label": "ball",
+   "x": 421.0,
+   "y": 87.0,
+   "partly_hidden": false
+  },
+  {
+   "id": "b199",
+   "game": "IT_SerieA2_Leno_MedalpTirol_2020",
+   "file": "IT_SerieA2_Leno_MedalpTirol_2020_s0.mp4",
+   "frame": 1416,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": 310.0,
+    "y": 150.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": 345.0,
+    "y": 175.0
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b200",
+   "game": "IT_SerieA2_Leno_MedalpTirol_2020",
+   "file": "IT_SerieA2_Leno_MedalpTirol_2020_s2.mp4",
+   "frame": 1397,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": 899.0,
+    "y": 124.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": 897.0,
+    "y": 120.0
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b201",
+   "game": "IT_SerieA2_Leno_MedalpTirol_2020",
+   "file": "IT_SerieA2_Leno_MedalpTirol_2020_s1.mp4",
+   "frame": 1507,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b202",
+   "game": "IT_SerieA2_Leno_MedalpTirol_2020",
+   "file": "IT_SerieA2_Leno_MedalpTirol_2020_s0.mp4",
+   "frame": 3969,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 806.0,
+    "y": 127.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 788.0,
+    "y": 118.0
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b203",
+   "game": "IT_SerieA2_Malo_Crenna_2018",
+   "file": "IT_SerieA2_Malo_Crenna_2018_s0.mp4",
+   "frame": 1851,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 479.0,
+    "y": 294.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 480.0,
+    "y": 294.0
+   },
+   "label": "ball",
+   "x": 479.5,
+   "y": 294.0,
+   "partly_hidden": false
+  },
+  {
+   "id": "b204",
+   "game": "IT_SerieA2_Malo_Crenna_2018",
+   "file": "IT_SerieA2_Malo_Crenna_2018_s3.mp4",
+   "frame": 4275,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 737.0,
+    "y": 93.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 738.0,
+    "y": 93.0
+   },
+   "label": "ball",
+   "x": 737.5,
+   "y": 93.0,
+   "partly_hidden": false
+  },
+  {
+   "id": "b205",
+   "game": "IT_SerieA2_Malo_Crenna_2018",
+   "file": "IT_SerieA2_Malo_Crenna_2018_s2.mp4",
+   "frame": 2260,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b206",
+   "game": "IT_SerieA2_Malo_Crenna_2018",
+   "file": "IT_SerieA2_Malo_Crenna_2018_s3.mp4",
+   "frame": 506,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "label": "no_ball",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b207",
+   "game": "IT_SerieA2_Malo_Crenna_2018",
+   "file": "IT_SerieA2_Malo_Crenna_2018_s2.mp4",
+   "frame": 1252,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b208",
+   "game": "IT_SerieA2_Malo_Crenna_2018",
+   "file": "IT_SerieA2_Malo_Crenna_2018_s0.mp4",
+   "frame": 1066,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "hidden",
+    "x": 700.0,
+    "y": 330.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 742.0,
+    "y": 333.0
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b209",
+   "game": "IT_SerieA2_Malo_Crenna_2018",
+   "file": "IT_SerieA2_Malo_Crenna_2018_s0.mp4",
+   "frame": 3332,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": 1190.0,
+    "y": 260.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b210",
+   "game": "Int_Olympia_Finale_Frankreich_Daenemark_2021",
+   "file": "Int_Olympia_Finale_Frankreich_Daenemark_2021_s0.mp4",
+   "frame": 848,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": 720.0,
+    "y": 345.0
+   },
+   "pass_b": {
+    "state": "hidden",
+    "x": 750.0,
+    "y": 330.0
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b211",
+   "game": "Int_Olympia_Finale_Frankreich_Daenemark_2021",
+   "file": "Int_Olympia_Finale_Frankreich_Daenemark_2021_s4.mp4",
+   "frame": 4370,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b212",
+   "game": "Int_Olympia_Finale_Frankreich_Daenemark_2021",
+   "file": "Int_Olympia_Finale_Frankreich_Daenemark_2021_s0.mp4",
+   "frame": 3837,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "part",
+    "x": 688.0,
+    "y": 415.0
+   },
+   "pass_b": {
+    "state": "part",
+    "x": 578.0,
+    "y": 320.0
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b213",
+   "game": "Int_Olympia_Finale_Frankreich_Daenemark_2021",
+   "file": "Int_Olympia_Finale_Frankreich_Daenemark_2021_s1.mp4",
+   "frame": 1479,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": 675.0,
+    "y": 505.0
+   },
+   "pass_b": {
+    "state": "hidden",
+    "x": 675.0,
+    "y": 515.0
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b214",
+   "game": "Int_Olympia_Finale_Frankreich_Daenemark_2021",
+   "file": "Int_Olympia_Finale_Frankreich_Daenemark_2021_s4.mp4",
+   "frame": 721,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 1025.0,
+    "y": 431.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 1025.0,
+    "y": 431.0
+   },
+   "label": "ball",
+   "x": 1025.0,
+   "y": 431.0,
+   "partly_hidden": false
+  },
+  {
+   "id": "b215",
+   "game": "Int_Olympia_Finale_Frankreich_Daenemark_2021",
+   "file": "Int_Olympia_Finale_Frankreich_Daenemark_2021_s0.mp4",
+   "frame": 244,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": 8.0,
+    "y": 407.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": 288.0,
+    "y": 408.0
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b216",
+   "game": "Int_Olympia_Finale_Frankreich_Daenemark_2021",
+   "file": "Int_Olympia_Finale_Frankreich_Daenemark_2021_s0.mp4",
+   "frame": 1825,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": 812.0,
+    "y": 345.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 814.0,
+    "y": 346.0
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b217",
+   "game": "NL_1Divisie_BFC2_PSV_2021",
+   "file": "NL_1Divisie_BFC2_PSV_2021_s3.mp4",
+   "frame": 4852,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": 755.0,
+    "y": 350.0
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b218",
+   "game": "NL_1Divisie_BFC2_PSV_2021",
+   "file": "NL_1Divisie_BFC2_PSV_2021_s3.mp4",
+   "frame": 655,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": 615.0,
+    "y": 420.0
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b219",
+   "game": "NL_1Divisie_BFC2_PSV_2021",
+   "file": "NL_1Divisie_BFC2_PSV_2021_s3.mp4",
+   "frame": 3992,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "hidden",
+    "x": 385.0,
+    "y": 400.0
+   },
+   "pass_b": {
+    "state": "hidden",
+    "x": 388.0,
+    "y": 405.0
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b220",
+   "game": "NL_1Divisie_BFC2_PSV_2021",
+   "file": "NL_1Divisie_BFC2_PSV_2021_s1.mp4",
+   "frame": 118,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 544.0,
+    "y": 362.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 543.0,
+    "y": 363.0
+   },
+   "label": "ball",
+   "x": 543.5,
+   "y": 362.5,
+   "partly_hidden": false
+  },
+  {
+   "id": "b221",
+   "game": "NL_1Divisie_BFC2_PSV_2021",
+   "file": "NL_1Divisie_BFC2_PSV_2021_s2.mp4",
+   "frame": 2442,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 742.0,
+    "y": 439.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 743.0,
+    "y": 440.0
+   },
+   "label": "ball",
+   "x": 742.5,
+   "y": 439.5,
+   "partly_hidden": false
+  },
+  {
+   "id": "b222",
+   "game": "NL_1Divisie_BFC2_PSV_2021",
+   "file": "NL_1Divisie_BFC2_PSV_2021_s1.mp4",
+   "frame": 1467,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": 1095.0,
+    "y": 430.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b223",
+   "game": "NL_1Divisie_BFC2_PSV_2021",
+   "file": "NL_1Divisie_BFC2_PSV_2021_s2.mp4",
+   "frame": 3630,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": 530.0,
+    "y": 335.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b224",
+   "game": "NL_1Divisie_JongSEW_Wijhe_2024",
+   "file": "NL_1Divisie_JongSEW_Wijhe_2024_s2.mp4",
+   "frame": 929,
+   "fps": 60.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 1189.0,
+    "y": 356.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 1188,
+    "y": 357
+   },
+   "label": "ball",
+   "x": 1188.5,
+   "y": 356.5,
+   "partly_hidden": false
+  },
+  {
+   "id": "b225",
+   "game": "NL_1Divisie_JongSEW_Wijhe_2024",
+   "file": "NL_1Divisie_JongSEW_Wijhe_2024_s4.mp4",
+   "frame": 451,
+   "fps": 60.0,
+   "pass_a": {
+    "state": "hidden",
+    "x": 1055.0,
+    "y": 485.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": 1080,
+    "y": 500
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b226",
+   "game": "NL_1Divisie_JongSEW_Wijhe_2024",
+   "file": "NL_1Divisie_JongSEW_Wijhe_2024_s4.mp4",
+   "frame": 3318,
+   "fps": 60.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 523.0,
+    "y": 274.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 523,
+    "y": 274
+   },
+   "label": "ball",
+   "x": 523.0,
+   "y": 274.0,
+   "partly_hidden": false
+  },
+  {
+   "id": "b227",
+   "game": "NL_1Divisie_JongSEW_Wijhe_2024",
+   "file": "NL_1Divisie_JongSEW_Wijhe_2024_s2.mp4",
+   "frame": 8961,
+   "fps": 60.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 963.0,
+    "y": 493.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 963,
+    "y": 494
+   },
+   "label": "ball",
+   "x": 963.0,
+   "y": 493.5,
+   "partly_hidden": false
+  },
+  {
+   "id": "b228",
+   "game": "NL_1Divisie_JongSEW_Wijhe_2024",
+   "file": "NL_1Divisie_JongSEW_Wijhe_2024_s0.mp4",
+   "frame": 4552,
+   "fps": 60.0,
+   "pass_a": {
+    "state": "warmup",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "warmup",
+    "x": 175,
+    "y": 442
+   },
+   "label": "warmup",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b229",
+   "game": "NL_1Divisie_JongSEW_Wijhe_2024",
+   "file": "NL_1Divisie_JongSEW_Wijhe_2024_s4.mp4",
+   "frame": 7855,
+   "fps": 60.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 147.0,
+    "y": 305.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 147,
+    "y": 307
+   },
+   "label": "ball",
+   "x": 147.0,
+   "y": 306.0,
+   "partly_hidden": false
+  },
+  {
+   "id": "b230",
+   "game": "NL_1Divisie_JongSEW_Wijhe_2024",
+   "file": "NL_1Divisie_JongSEW_Wijhe_2024_s2.mp4",
+   "frame": 3211,
+   "fps": 60.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b231",
+   "game": "NL_2Divisie_SEW2_Tukkers_2019",
+   "file": "NL_2Divisie_SEW2_Tukkers_2019_s3.mp4",
+   "frame": 1059,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "part",
+    "x": 951.0,
+    "y": 451.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 952,
+    "y": 447
+   },
+   "label": "ball",
+   "x": 951.5,
+   "y": 449.0,
+   "partly_hidden": true
+  },
+  {
+   "id": "b232",
+   "game": "NL_2Divisie_SEW2_Tukkers_2019",
+   "file": "NL_2Divisie_SEW2_Tukkers_2019_s1.mp4",
+   "frame": 4113,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": 418.0,
+    "y": 205.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b233",
+   "game": "NL_2Divisie_SEW2_Tukkers_2019",
+   "file": "NL_2Divisie_SEW2_Tukkers_2019_s0.mp4",
+   "frame": 3417,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 617.0,
+    "y": 378.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 617,
+    "y": 379
+   },
+   "label": "ball",
+   "x": 617.0,
+   "y": 378.5,
+   "partly_hidden": false
+  },
+  {
+   "id": "b234",
+   "game": "NL_2Divisie_SEW2_Tukkers_2019",
+   "file": "NL_2Divisie_SEW2_Tukkers_2019_s1.mp4",
+   "frame": 1721,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": 785.0,
+    "y": 335.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": 775,
+    "y": 330
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b235",
+   "game": "NL_2Divisie_SEW2_Tukkers_2019",
+   "file": "NL_2Divisie_SEW2_Tukkers_2019_s0.mp4",
+   "frame": 712,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b236",
+   "game": "NL_2Divisie_SEW2_Tukkers_2019",
+   "file": "NL_2Divisie_SEW2_Tukkers_2019_s3.mp4",
+   "frame": 3253,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "part",
+    "x": 186.0,
+    "y": 324.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 185,
+    "y": 318
+   },
+   "label": "ball",
+   "x": 185.5,
+   "y": 321.0,
+   "partly_hidden": true
+  },
+  {
+   "id": "b237",
+   "game": "NL_2Divisie_SEW2_Tukkers_2019",
+   "file": "NL_2Divisie_SEW2_Tukkers_2019_s1.mp4",
+   "frame": 940,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b238",
+   "game": "NL_2Divisie_VZV2_SEW2_2019",
+   "file": "NL_2Divisie_VZV2_SEW2_2019_s2.mp4",
+   "frame": 1359,
+   "fps": 50.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": 630,
+    "y": 390
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b239",
+   "game": "NL_2Divisie_VZV2_SEW2_2019",
+   "file": "NL_2Divisie_VZV2_SEW2_2019_s1.mp4",
+   "frame": 6071,
+   "fps": 50.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": 1244.0,
+    "y": 434.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": 1243,
+    "y": 432
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b240",
+   "game": "NL_2Divisie_VZV2_SEW2_2019",
+   "file": "NL_2Divisie_VZV2_SEW2_2019_s3.mp4",
+   "frame": 3487,
+   "fps": 50.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 678.0,
+    "y": 338.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b241",
+   "game": "NL_2Divisie_VZV2_SEW2_2019",
+   "file": "NL_2Divisie_VZV2_SEW2_2019_s2.mp4",
+   "frame": 4373,
+   "fps": 50.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": 805.0,
+    "y": 565.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": 810,
+    "y": 567
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b242",
+   "game": "NL_2Divisie_VZV2_SEW2_2019",
+   "file": "NL_2Divisie_VZV2_SEW2_2019_s3.mp4",
+   "frame": 7384,
+   "fps": 50.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b243",
+   "game": "NL_2Divisie_VZV2_SEW2_2019",
+   "file": "NL_2Divisie_VZV2_SEW2_2019_s1.mp4",
+   "frame": 4007,
+   "fps": 50.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 803.0,
+    "y": 348.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 804,
+    "y": 349
+   },
+   "label": "ball",
+   "x": 803.5,
+   "y": 348.5,
+   "partly_hidden": false
+  },
+  {
+   "id": "b244",
+   "game": "NL_2Divisie_VZV2_SEW2_2019",
+   "file": "NL_2Divisie_VZV2_SEW2_2019_s2.mp4",
+   "frame": 7797,
+   "fps": 50.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": 560.0,
+    "y": 390.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b245",
+   "game": "NL_Frauen_Final_VOC_SEW_2026",
+   "file": "NL_Frauen_Final_VOC_SEW_2026_s1.mp4",
+   "frame": 1519,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 1013.0,
+    "y": 390.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 1012,
+    "y": 389
+   },
+   "label": "ball",
+   "x": 1012.5,
+   "y": 389.5,
+   "partly_hidden": false
+  },
+  {
+   "id": "b246",
+   "game": "NL_Frauen_Final_VOC_SEW_2026",
+   "file": "NL_Frauen_Final_VOC_SEW_2026_s2.mp4",
+   "frame": 2783,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b247",
+   "game": "NL_Frauen_Final_VOC_SEW_2026",
+   "file": "NL_Frauen_Final_VOC_SEW_2026_s1.mp4",
+   "frame": 3613,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b248",
+   "game": "NL_Frauen_Final_VOC_SEW_2026",
+   "file": "NL_Frauen_Final_VOC_SEW_2026_s0.mp4",
+   "frame": 4146,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 736.0,
+    "y": 333.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 737,
+    "y": 333
+   },
+   "label": "ball",
+   "x": 736.5,
+   "y": 333.0,
+   "partly_hidden": false
+  },
+  {
+   "id": "b249",
+   "game": "NL_Frauen_Final_VOC_SEW_2026",
+   "file": "NL_Frauen_Final_VOC_SEW_2026_s2.mp4",
+   "frame": 1661,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b250",
+   "game": "NL_Frauen_Final_VOC_SEW_2026",
+   "file": "NL_Frauen_Final_VOC_SEW_2026_s0.mp4",
+   "frame": 323,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "label": "no_ball",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b251",
+   "game": "NL_Frauen_Final_VOC_SEW_2026",
+   "file": "NL_Frauen_Final_VOC_SEW_2026_s2.mp4",
+   "frame": 1081,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b252",
+   "game": "NO_Frauen_3Div_Sogndal_Askoey_2019",
+   "file": "NO_Frauen_3Div_Sogndal_Askoey_2019_s2.mp4",
+   "frame": 956,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "label": "no_ball",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b253",
+   "game": "NO_Frauen_3Div_Sogndal_Askoey_2019",
+   "file": "NO_Frauen_3Div_Sogndal_Askoey_2019_s4.mp4",
+   "frame": 4265,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 447.0,
+    "y": 233.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 447,
+    "y": 235
+   },
+   "label": "ball",
+   "x": 447.0,
+   "y": 234.0,
+   "partly_hidden": false
+  },
+  {
+   "id": "b254",
+   "game": "NO_Frauen_3Div_Sogndal_Askoey_2019",
+   "file": "NO_Frauen_3Div_Sogndal_Askoey_2019_s2.mp4",
+   "frame": 4724,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b255",
+   "game": "NO_Frauen_3Div_Sogndal_Askoey_2019",
+   "file": "NO_Frauen_3Div_Sogndal_Askoey_2019_s4.mp4",
+   "frame": 853,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 1104.0,
+    "y": 291.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 1104,
+    "y": 291
+   },
+   "label": "ball",
+   "x": 1104.0,
+   "y": 291.0,
+   "partly_hidden": false
+  },
+  {
+   "id": "b256",
+   "game": "NO_Frauen_3Div_Sogndal_Askoey_2019",
+   "file": "NO_Frauen_3Div_Sogndal_Askoey_2019_s4.mp4",
+   "frame": 1554,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 621.0,
+    "y": 245.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 622,
+    "y": 246
+   },
+   "label": "ball",
+   "x": 621.5,
+   "y": 245.5,
+   "partly_hidden": false
+  },
+  {
+   "id": "b257",
+   "game": "NO_Frauen_3Div_Sogndal_Askoey_2019",
+   "file": "NO_Frauen_3Div_Sogndal_Askoey_2019_s2.mp4",
+   "frame": 2347,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "label": "no_ball",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b258",
+   "game": "NO_Frauen_3Div_Sogndal_Askoey_2019",
+   "file": "NO_Frauen_3Div_Sogndal_Askoey_2019_s4.mp4",
+   "frame": 5092,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 552.0,
+    "y": 265.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 552,
+    "y": 264
+   },
+   "label": "ball",
+   "x": 552.0,
+   "y": 264.5,
+   "partly_hidden": false
+  },
+  {
+   "id": "b259",
+   "game": "PT_Frauen_Madeira_Gaia_2022",
+   "file": "PT_Frauen_Madeira_Gaia_2022_s1.mp4",
+   "frame": 4576,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b260",
+   "game": "PT_Frauen_Madeira_Gaia_2022",
+   "file": "PT_Frauen_Madeira_Gaia_2022_s3.mp4",
+   "frame": 1216,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b261",
+   "game": "PT_Frauen_Madeira_Gaia_2022",
+   "file": "PT_Frauen_Madeira_Gaia_2022_s2.mp4",
+   "frame": 4716,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b262",
+   "game": "PT_Frauen_Madeira_Gaia_2022",
+   "file": "PT_Frauen_Madeira_Gaia_2022_s1.mp4",
+   "frame": 3289,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "part",
+    "x": 463,
+    "y": 376
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b263",
+   "game": "PT_Frauen_Madeira_Gaia_2022",
+   "file": "PT_Frauen_Madeira_Gaia_2022_s3.mp4",
+   "frame": 2993,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 453.0,
+    "y": 341.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 454,
+    "y": 340
+   },
+   "label": "ball",
+   "x": 453.5,
+   "y": 340.5,
+   "partly_hidden": false
+  },
+  {
+   "id": "b264",
+   "game": "PT_Frauen_Madeira_Gaia_2022",
+   "file": "PT_Frauen_Madeira_Gaia_2022_s3.mp4",
+   "frame": 1938,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": 535.0,
+    "y": 380.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": 515,
+    "y": 385
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b265",
+   "game": "PT_Frauen_Madeira_Gaia_2022",
+   "file": "PT_Frauen_Madeira_Gaia_2022_s2.mp4",
+   "frame": 1235,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b266",
+   "game": "SE_Allsvenskan_Torslanda_Amo_2018",
+   "file": "SE_Allsvenskan_Torslanda_Amo_2018_s0.mp4",
+   "frame": 4015,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": 722.0,
+    "y": 266.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": 740,
+    "y": 250
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b267",
+   "game": "SE_Allsvenskan_Torslanda_Amo_2018",
+   "file": "SE_Allsvenskan_Torslanda_Amo_2018_s2.mp4",
+   "frame": 3312,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "label": "no_ball",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b268",
+   "game": "SE_Allsvenskan_Torslanda_Amo_2018",
+   "file": "SE_Allsvenskan_Torslanda_Amo_2018_s1.mp4",
+   "frame": 866,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b269",
+   "game": "SE_Allsvenskan_Torslanda_Amo_2018",
+   "file": "SE_Allsvenskan_Torslanda_Amo_2018_s1.mp4",
+   "frame": 3146,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 345.0,
+    "y": 484.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 346,
+    "y": 483
+   },
+   "label": "ball",
+   "x": 345.5,
+   "y": 483.5,
+   "partly_hidden": false
+  },
+  {
+   "id": "b270",
+   "game": "SE_Allsvenskan_Torslanda_Amo_2018",
+   "file": "SE_Allsvenskan_Torslanda_Amo_2018_s2.mp4",
+   "frame": 1427,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "label": "no_ball",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b271",
+   "game": "SE_Allsvenskan_Torslanda_Amo_2018",
+   "file": "SE_Allsvenskan_Torslanda_Amo_2018_s1.mp4",
+   "frame": 4038,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 384.0,
+    "y": 291.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": 385,
+    "y": 289
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b272",
+   "game": "SE_Allsvenskan_Torslanda_Amo_2018",
+   "file": "SE_Allsvenskan_Torslanda_Amo_2018_s0.mp4",
+   "frame": 3391,
+   "fps": 25.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 691.0,
+    "y": 301.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 690,
+    "y": 301
+   },
+   "label": "ball",
+   "x": 690.5,
+   "y": 301.0,
+   "partly_hidden": false
+  },
+  {
+   "id": "b273",
+   "game": "SE_Amateur_Sala_Vaesteras_2022",
+   "file": "SE_Amateur_Sala_Vaesteras_2022_s3.mp4",
+   "frame": 544,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 542.0,
+    "y": 381.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 543,
+    "y": 380
+   },
+   "label": "ball",
+   "x": 542.5,
+   "y": 380.5,
+   "partly_hidden": false
+  },
+  {
+   "id": "b274",
+   "game": "SE_Amateur_Sala_Vaesteras_2022",
+   "file": "SE_Amateur_Sala_Vaesteras_2022_s4.mp4",
+   "frame": 4804,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 198.0,
+    "y": 250.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 198,
+    "y": 250
+   },
+   "label": "ball",
+   "x": 198.0,
+   "y": 250.0,
+   "partly_hidden": false
+  },
+  {
+   "id": "b275",
+   "game": "SE_Amateur_Sala_Vaesteras_2022",
+   "file": "SE_Amateur_Sala_Vaesteras_2022_s2.mp4",
+   "frame": 1287,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "label": "no_ball",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b276",
+   "game": "SE_Amateur_Sala_Vaesteras_2022",
+   "file": "SE_Amateur_Sala_Vaesteras_2022_s2.mp4",
+   "frame": 2471,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "label": "no_ball",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b277",
+   "game": "SE_Amateur_Sala_Vaesteras_2022",
+   "file": "SE_Amateur_Sala_Vaesteras_2022_s3.mp4",
+   "frame": 2943,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b278",
+   "game": "SE_Amateur_Sala_Vaesteras_2022",
+   "file": "SE_Amateur_Sala_Vaesteras_2022_s4.mp4",
+   "frame": 2004,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 159.0,
+    "y": 262.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 160,
+    "y": 263
+   },
+   "label": "ball",
+   "x": 159.5,
+   "y": 262.5,
+   "partly_hidden": false
+  },
+  {
+   "id": "b279",
+   "game": "SE_Amateur_Sala_Vaesteras_2022",
+   "file": "SE_Amateur_Sala_Vaesteras_2022_s2.mp4",
+   "frame": 3687,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "label": "no_ball",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b280",
+   "game": "SE_Test_Hammarby_Skanela_2026",
+   "file": "SE_Test_Hammarby_Skanela_2026_s2.mp4",
+   "frame": 708,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": 700,
+    "y": 258
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b281",
+   "game": "SE_Test_Hammarby_Skanela_2026",
+   "file": "SE_Test_Hammarby_Skanela_2026_s0.mp4",
+   "frame": 5203,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "part",
+    "x": 355.0,
+    "y": 252.0
+   },
+   "pass_b": {
+    "state": "part",
+    "x": 356,
+    "y": 253
+   },
+   "label": "ball",
+   "x": 355.5,
+   "y": 252.5,
+   "partly_hidden": true
+  },
+  {
+   "id": "b282",
+   "game": "SE_Test_Hammarby_Skanela_2026",
+   "file": "SE_Test_Hammarby_Skanela_2026_s1.mp4",
+   "frame": 4895,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "label": "no_ball",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b283",
+   "game": "SE_Test_Hammarby_Skanela_2026",
+   "file": "SE_Test_Hammarby_Skanela_2026_s2.mp4",
+   "frame": 3211,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 569.0,
+    "y": 272.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 569,
+    "y": 273
+   },
+   "label": "ball",
+   "x": 569.0,
+   "y": 272.5,
+   "partly_hidden": false
+  },
+  {
+   "id": "b284",
+   "game": "SE_Test_Hammarby_Skanela_2026",
+   "file": "SE_Test_Hammarby_Skanela_2026_s2.mp4",
+   "frame": 4282,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "ball",
+    "x": 476.0,
+    "y": 322.0
+   },
+   "pass_b": {
+    "state": "ball",
+    "x": 477,
+    "y": 322
+   },
+   "label": "ball",
+   "x": 476.5,
+   "y": 322.0,
+   "partly_hidden": false
+  },
+  {
+   "id": "b285",
+   "game": "SE_Test_Hammarby_Skanela_2026",
+   "file": "SE_Test_Hammarby_Skanela_2026_s1.mp4",
+   "frame": 3444,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "label": "no_ball",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b286",
+   "game": "SE_Test_Hammarby_Skanela_2026",
+   "file": "SE_Test_Hammarby_Skanela_2026_s2.mp4",
+   "frame": 2294,
+   "fps": 30.0,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b287",
+   "game": "US_NYCity_NYAC_2019",
+   "file": "US_NYCity_NYAC_2019_s0.mp4",
+   "frame": 7682,
+   "fps": 59.94,
+   "pass_a": {
+    "state": "unsure",
+    "x": 366.0,
+    "y": 299.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b288",
+   "game": "US_NYCity_NYAC_2019",
+   "file": "US_NYCity_NYAC_2019_s0.mp4",
+   "frame": 952,
+   "fps": 59.94,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b289",
+   "game": "US_NYCity_NYAC_2019",
+   "file": "US_NYCity_NYAC_2019_s2.mp4",
+   "frame": 10058,
+   "fps": 59.94,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b290",
+   "game": "US_NYCity_NYAC_2019",
+   "file": "US_NYCity_NYAC_2019_s0.mp4",
+   "frame": 5620,
+   "fps": 59.94,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b291",
+   "game": "US_NYCity_NYAC_2019",
+   "file": "US_NYCity_NYAC_2019_s1.mp4",
+   "frame": 5904,
+   "fps": 59.94,
+   "pass_a": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b292",
+   "game": "US_NYCity_NYAC_2019",
+   "file": "US_NYCity_NYAC_2019_s0.mp4",
+   "frame": 10482,
+   "fps": 59.94,
+   "pass_a": {
+    "state": "unsure",
+    "x": 977.0,
+    "y": 346.0
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": 929,
+    "y": 334
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  },
+  {
+   "id": "b293",
+   "game": "US_NYCity_NYAC_2019",
+   "file": "US_NYCity_NYAC_2019_s2.mp4",
+   "frame": 1987,
+   "fps": 59.94,
+   "pass_a": {
+    "state": "out",
+    "x": null,
+    "y": null
+   },
+   "pass_b": {
+    "state": "unsure",
+    "x": null,
+    "y": null
+   },
+   "label": "excluded",
+   "x": null,
+   "y": null
+  }
+ ]
+}
