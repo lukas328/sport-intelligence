@@ -1300,3 +1300,46 @@ Möglicher Zusatz: Ein Lauf, der nach dem Ende der ersten Halbzeit (Uhr bei 30:0
 beginnt und vor einem Lauf ab 30:00 endet, ist eine Pausenuhr. Das ist erst mit einem ganzen Spiel
 prüfbar, weil die Dev-Segmente einzelne 3-min-Stücke sind. Damit ist die Annahme der Messung vom
 25.11. (Uhr-Läufe aus dem Spielbericht genähert) auf Dev für 10 von 11 Spielen bestätigt.
+
+### Rückennummern-Ausbeute auf Dev (Audit Punkt 5, 2026-11-26)
+
+Gemessen auf den Testclips Horgen H1 und H2 (je 5 min, 1280 x 720, Dev, nie Endtest), ohne
+ReID (wie seit #146 im Produkt), mit gelernten Teamfarben (#149).
+
+- **Labels:** 125 Spielerboxen (alle, auf denen eine der fünf festgelegten Varianten eine Nummer
+  ab 0.6 las, plus 60 zufällige), zweimal von Claude in anderer Reihenfolge beschriftet, nur
+  übereinstimmende behalten: 112, davon 36 mit lesbarer Nummer. Eingefroren vor der Wahl,
+  `ml/gold/data/numbers_dev_v1.json`, Auswertung `ml/eval/numbers_dev.py`.
+- **Pro Crop (Schwelle 0.8):** heute 18 von 36 richtig, 3 falsch (Präzision 0.86).
+  - Nur Erkennung ohne Textdetektor: unbrauchbar (0 richtig).
+  - 5x statt 3x vergrössern: 17 richtig, 2 falsch.
+  - Bester von Grün, Rot und Grau: 23 richtig, 5 falsch; als Rückfall nach Grün: 21 richtig,
+    6 falsch. Die zusätzlichen Fehler sind halb gelesene Zweistellige (43 als 3, 22 als 2) mit
+    0.85 bis 0.93, also nicht über die Schwelle trennbar.
+  - CLAHE: 16 richtig, 2 falsch.
+  - Schwelle 0.7 statt 0.8: 20 richtig, 3 falsch; auf den Tracks keine zusätzliche Nummer
+    (H1 4 -> 4, H2 8 -> 7).
+  - Übernommen: «0» und führende Null sind keine Rückennummer (1 bis 99). 18 richtig, 2 falsch,
+    Präzision 0.90.
+- **Der eigentliche Engpass war das Budget:** auf der CPU las das Produkt nur jedes 6. Bild, und
+  `HB_NUMBER_BUDGET` 0.75 liess auf H1 703 Nummernbilder aus (Lesezeit genau am Deckel: 225 s auf
+  300 s Video). Jedes Detektionsbild ohne Deckel:
+
+| | H1 heute | H1 dicht | H2 heute | H2 dicht |
+|---|---|---|---|---|
+| sichere Lesungen in 5 min | 96 | 394 | 125 | 398 |
+| Tracks mit Nummer | 4 | 7 | 8 | 15 |
+| davon in der Sichtprüfung richtig | 4 | 5 (1 gemischt, 1 nicht prüfbar) | etwa 6 | 9 (6 zweifelhaft) |
+| Nummernzeit | 225 s | 489 s | | |
+| Beobachtung gesamt | 744 s | 835 s (+12 %) | | |
+
+- **Entscheid (Audit-Sitzung, im PR zur Prüfung durch die Hauptsitzung):** CPU-Standard
+  `number_every` 3 (jedes Detektionsbild, wie das GPU-Image) und `number_budget` 1.5. Der Deckel
+  bleibt, ein Spiel kann also nicht unbegrenzt wachsen. Die CPU-App nimmt Videos bis 12 min; ganze
+  Spiele laufen auf dem GPU-Job, der schon dicht liest. Grobe Obergrenze auf Staging (2 vCPU):
+  12 min Video, YOLOX und Kamera etwa 1.7x, Nummern höchstens 1.5x, zusammen etwa 40 min.
+- **Was bleibt:** Die zusätzlichen Tracks mit Nummer sind etwa zu zwei Dritteln richtig. Fehler sind
+  halb gelesene Zweistellige und Tracks, die zwei Spieler enthalten. Nächste Hebel: eine Nummer
+  erst ab Lesungen aus mindestens zwei verschiedenen Sekunden zählen und einstellige Nummern
+  strenger prüfen, wenn das Team eine passende zweistellige trägt (auf diesen Labels nicht genug
+  Fälle, um es zu messen).

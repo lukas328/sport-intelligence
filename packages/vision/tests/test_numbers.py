@@ -263,6 +263,25 @@ def test_reads_a_printed_shirt_number() -> None:
     assert got is not None and got.number == 14 and got.confidence > 0.8
 
 
+def test_zero_and_a_leading_zero_are_no_shirt_number() -> None:
+    """Shirt numbers run from 1 to 99: "0" and "07" are misreads (on the dev labels a folded 21
+    and 27 came out as "0" at 0.85 and 0.88), "7" and "17" are numbers."""
+    reader = object.__new__(NumberReader)
+    reader.calls = 0
+    texts: list[tuple[str, float]] = []
+    reader.detect = lambda img: [np.zeros((4, 2), np.float32)] * len(texts)  # type: ignore[method-assign]
+    reader._crop = lambda img, pts: img  # type: ignore[method-assign]
+    reader.recognise = lambda crops: list(texts)  # type: ignore[method-assign]
+    channel = np.zeros((20, 10), np.uint8)
+    for read, want in (("0", None), ("07", None), ("00", None), ("7", 7), ("17", 17)):
+        texts[:] = [(read, 0.9)]
+        got = reader._read_channel(channel)
+        assert (got.number if got else None) == want, read
+    texts[:] = [("0", 0.95), ("21", 0.85)]  # the zero no longer beats the real number
+    got = reader._read_channel(channel)
+    assert got is not None and got.number == 21
+
+
 def test_stretch_spreads_a_faint_channel() -> None:
     faint = np.full((40, 30), 180, np.uint8)
     faint[10:30, 10:20] = 160  # a mid-grey digit on a light-grey shirt
