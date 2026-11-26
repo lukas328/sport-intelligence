@@ -285,7 +285,7 @@ export function AppShell({
           >
             {/* a short rise on every page change: the new content is clearly new */}
             <div key={path} className="animate-rise">
-              {children}
+              <PageSlot>{children}</PageSlot>
             </div>
           </main>
           {/* the legal pages, slim, above the phone tab bar (LEGAL-01) */}
@@ -343,4 +343,17 @@ export function AppShell({
       </>
     </ShellContext.Provider>
   );
+}
+
+/**
+ * The page under the frame, unwrapped in a component of its own. `children` comes from the server
+ * as a lazy part of the RSC stream; when the browser hydrates before that part has arrived (fast
+ * scripts, the page still streaming), React waits for it and then works on the same element again.
+ * Unwrapped right in the rise `div`, the second pass claimed the `div` a second time while
+ * hydration already stood inside it: error #418 on about one load in six, the page rendered anew
+ * (traced on staging with a hook in React's hydration). A component claims no element, so its
+ * second pass is harmless.
+ */
+function PageSlot({ children }: { children: ReactNode }) {
+  return children;
 }
