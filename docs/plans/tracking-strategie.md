@@ -184,6 +184,7 @@ gemessen. Was nicht darauf einzahlt, wird geparkt oder verworfen. Begründungen 
 | Prio | Was |
 |---|---|
 | 6 | Netze **ohne DeepSport**, in 2 Folds über die Trainings-Clips (auslieferbar, saubere Kandidaten für die Tracker-Bewertung, zusammen ein Ensemble); ein Vergleichslauf mit DeepSport |
+| 6 (Stand 25.11.) | Erster Lauf gestartet: `handball-ml-hr-nods` = hr1 ohne DeepSport (gleiche Daten sonst, Kaggle T4, 9.5 h; `ml/ball/kaggle/train_hr_nods_push.py`). Messung gegen hr1 auf Ball-Testset 2 (`ml/ball/LINEAGE.md` T5), dessen Labels vorher eingefroren werden. Lizenzpunkt in `docs/OPEN_QUESTIONS.md` 4a. |
 | 7 | Tracker-Bewertung auf den Fold-Kandidaten neu lernen; Messung auf Gold v1 und einmal auf dem Wurf-Endtest; Zwischenfazit mit Lukas |
 
 **Später (nur wenn das Zwischenfazit es verlangt):** gezielte Daten aus neuen Hallen und schwierigen
