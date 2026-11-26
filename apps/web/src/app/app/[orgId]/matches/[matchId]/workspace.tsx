@@ -381,6 +381,13 @@ export function Workspace({
     [staff, startDrawing],
   );
 
+  // a person of the people list plays in the main player (in view beside or above the list),
+  // with the spotlight ring on them where the court is known (Lukas: see who it is while naming)
+  const playPerson = (tr: { track_no: number; first_ms: number }) => {
+    if (spot.ready) spot.set({ track: tr.track_no, picking: false });
+    player.current.seek(Math.max(0, tr.first_ms - 500));
+    player.current.play();
+  };
   const seekPaused = (ms: number) => {
     player.current.pause();
     player.current.seek(ms);
@@ -644,7 +651,7 @@ export function Workspace({
           </div>
         )}
         {shown === "players" && staff && a?.status === "ready" && (
-          <IdentityPanel orgId={orgId} match={match} videoId={video.id} tracks={a.tracks} at={gameAt} geometry={spotGeometry} chunkMs={a.chunk_ms ?? null} />
+          <IdentityPanel orgId={orgId} match={match} videoId={video.id} tracks={a.tracks} at={gameAt} geometry={spotGeometry} chunkMs={a.chunk_ms ?? null} onPlay={playPerson} />
         )}
         {shown === "players" && staff && a?.status !== "ready" && <p className="text-sm text-muted">{t("workflow.players_waiting")}</p>}
         {shown === "events" && staff && (
