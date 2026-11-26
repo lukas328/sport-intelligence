@@ -4,8 +4,13 @@ import createNextIntlPlugin from "next-intl/plugin";
 
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
+// which build an error report comes from (lib/client-errors): the build time, or the commit when
+// the build is given one (GIT_SHA); nothing about the build machine
+const BUILD = process.env.GIT_SHA?.slice(0, 12) || new Date().toISOString().slice(0, 16);
+
 const nextConfig: NextConfig = {
   output: "standalone",
+  env: { NEXT_PUBLIC_BUILD: BUILD },
   poweredByHeader: false,
   devIndicators: false,
   reactStrictMode: true,
