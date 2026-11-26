@@ -51,12 +51,12 @@ export function PrivacySection({ orgId, orgName, isAdmin, hasPassword }: { orgId
         <div className="space-y-2">
           <p className="text-sm">{t("exportHint")}</p>
           {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- API download, not a page */}
-          <a href="/v1/me/export" className="inline-flex min-h-9 items-center gap-1.5 bg-raised px-4 text-[0.9375rem] font-medium ring-1 ring-inset ring-border hover:bg-surface" data-testid="export">
+          <a href="/v1/me/export" className="inline-flex min-h-11 items-center gap-1.5 bg-raised px-4 text-[0.9375rem] font-medium ring-1 ring-inset ring-border hover:bg-surface" data-testid="export">
             {t("export")}
           </a>
         </div>
         <details>
-          <summary className="cursor-pointer text-sm font-medium">{t("deleteAccount")}</summary>
+          <summary className="cursor-pointer py-3 text-sm font-medium">{t("deleteAccount")}</summary>
           <form onSubmit={deleteAccount} className="mt-3 max-w-md space-y-3" aria-label={t("deleteAccount")}>
             <p className="text-sm text-muted">{t("accountHint")}</p>
             <Input label={t("email")} name="email" type="email" required autoComplete="off" />
@@ -68,7 +68,7 @@ export function PrivacySection({ orgId, orgName, isAdmin, hasPassword }: { orgId
         </details>
         {isAdmin && (
           <details>
-            <summary className="cursor-pointer text-sm font-medium">{t("deleteClub")}</summary>
+            <summary className="cursor-pointer py-3 text-sm font-medium">{t("deleteClub")}</summary>
             <form onSubmit={deleteClub} className="mt-3 max-w-md space-y-3" aria-label={t("deleteClub")}>
               <p className="text-sm text-muted">{t("clubHint", { name: orgName })}</p>
               <Input label={t("clubName")} name="name" required autoComplete="off" />

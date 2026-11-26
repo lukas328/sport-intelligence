@@ -20,18 +20,18 @@ Die eine Liste für alle Sitzungen. Wer etwas anfängt, schreibt «läuft (Sitzu
 fertig ist, streicht es und trägt das Ergebnis im passenden Plan ein.
 
 **A. Aus der Cloud-Sitzung machbar (Hauptsitzung)**
-1. **Weniger Fragen: bessere Tor-Kandidaten.** *20.11.: Ballpfad als Bestätigung geprüft, hilft nicht (AUC 0.81 mit und ohne Ball, Dev, `produkt-analyse-integration.md` «Ballpfad als Bestätigung»). Offen bleibt die Zeit ohne Spiel; Daten dafür kommen aus `observe_queue`. 23.11.: rund 160 von 860 Segmenten beobachtet; für die Pausen-Messung fehlt der Entscheid Hallentafel in der Warteschlange (empfohlen) oder nur Dev-Spiele mit Uhr aus dem Bericht (`UEBERGABE-2026-11-23.md`).* Präzision heute 29 %, auf Lukas' 99-min-Video 122
+1. **Weniger Fragen: bessere Tor-Kandidaten.** *20.11.: Ballpfad als Bestätigung geprüft, hilft nicht (AUC 0.81 mit und ohne Ball, Dev, `produkt-analyse-integration.md` «Ballpfad als Bestätigung»). Offen bleibt die Zeit ohne Spiel; Daten dafür kommen aus `observe_queue`. 25.11. Pausen Variante 2 gemessen (Dev, 65 Segmente): die Halbzeitpause nennt das Produkt zu 98 % Spiel, Hebel ist «keine laufende Uhr über Minuten = Pause». 23.11.: rund 160 von 860 Segmenten beobachtet; für die Pausen-Messung fehlt der Entscheid Hallentafel in der Warteschlange (empfohlen) oder nur Dev-Spiele mit Uhr aus dem Bericht (`UEBERGABE-2026-11-23.md`).* Präzision heute 29 %, auf Lukas' 99-min-Video 122
    Fragen. Die Regel «Tore aus dem Spielbericht» spart kaum Fragen (Kandidaten nahe Berichtstoren
    waren schon verdeckt). Hebel: Pausen, Einspielen und Nachspiel ohne Fragen (Pausenerkennung ohne
    Hallentafel über die `no_play`-Regel), Tor-Kandidaten mit Ballpfad bestätigen. Braucht für die
    Messung Daten von Kaggle oder Staging.
-2. **Wurfort-Schätzung messen.** Seit A22 werden bestätigte Schätzungen als
+2. **Wurfort-Schätzung messen.** *25.11. (Analyse-Sitzung): kein Staging-Zugang aus der Cloud; dazu werden abgelehnte Schätzungen nicht gespeichert, die Trefferquote ist so nicht rechenbar. Vorschlag `attributes.estimated_zone` (`produkt-analyse-integration.md`, «Wurfzeit auf Dev, Fehlalarme und Pausen» Punkt 5).* Seit A22 werden bestätigte Schätzungen als
    `attributes.confirmed_estimate` gespeichert; daraus die Trefferquote der Schätzung auswerten
    (Staging-Daten), dann entscheiden, wann der Wurfort ganz automatisch sein darf.
 3. **Spieltag neu denken (A21).** Seit Runde 4 aus der App genommen; Konzept mit Lukas: was der
    Trainer am Spielfeldrand wirklich erfasst.
 4. **Go-live-Punkte mit Code** (`GO_LIVE.md`): ~~HLS-Segmente direkt aus R2~~ erledigt 20.11.
-   (`HB_MEDIA_DIRECT`, ADR 002 Nachtrag; Lukas: R2-CORS-Regel prüfen, README Azure Schritt 7); Overlays im Player für bewegte Kameras (ADR 020); Alarme und Proben im
+   (`HB_MEDIA_DIRECT`, ADR 002 Nachtrag; Lukas: R2-CORS-Regel prüfen, README Azure Schritt 7); ~~Overlays im Player für bewegte Kameras~~ erledigt 26.11. (ADR 020 Nachtrag: Kamera-Blick pro Bild, Spotlight und Personen-Fragen auch bei schwenkender Kamera; wirkt ab der nächsten Analyse eines Videos; offen: Reel- und Präsentations-Export lesen den Kamera-Blick noch nicht und zeichnen dort vorerst keinen Ring); Alarme und Proben im
    Monitoring vorbereiten.
 5. **Europa Schritt 2 vorbereiten** (`docs/plans/europa.md`): Währung EUR in Abrechnung und Rechnung
    (heute nur CHF), `de-DE` erst mit dem ersten deutschen Verein.
@@ -39,9 +39,14 @@ fertig ist, streicht es und trägt das Ergebnis im passenden Plan ein.
 **B. Braucht Lukas oder die lokale Sitzung**
 1. Kalibrierung per Klick Ende-zu-Ende auf Staging mit echtem Clip, danach Deploy
    (`docs/plans/kalibrierung.md` Abschnitt 6).
-2. Wurfzeit: Lukas markiert die Abwürfe auf den 41 Dev-Wurfclips; danach Methode auf Dev wählen
-   (`docs/plans/produkt-analyse-integration.md`, «Wurfzeit der Kandidaten»).
-3. Ball: Fehlalarme zerlegen, Testset auf etwa 200 Bälle (Kaggle-Zugang in der Cloud fehlt seit 19.11.).
+2. Wurfzeit: Lukas markiert die Abwürfe der 175 Dev-Würfe auf der Seite «Abwürfe Dev»
+   (https://claude.ai/artifact/X1AUB2nXAkX9eVTV977paz, etwa 45 min); danach Methode auf Dev wählen,
+   Auswertung bereit (`ml/integration/shot_time_dev.py eval`). Vorprüfung gegen die Spielbericht-Zeit:
+   Ballpfad-Anker nicht genauer, Ballpfad senkt die Wurf-Fehlalarme nicht (25.11.).
+3. Ball: Fehlalarme zerlegt (25.11., Lukas' 574 Urteile auf den Dev-Wurfclips ausgewertet: Tracker nur
+   37 % richtig, falsche Punkte vor allem Personenteile und Gegenstände an der Bank;
+   `ml/ball/LINEAGE.md` Abschnitt 6). Offen: Lukas schaut die 111 Punkte nochmals an, die nach Ball
+   aussehen; neues Testset ohne Ringe mit Bildern ohne Ball (Kaggle-Zugang in der Cloud geht wieder).
 4. Echter Handy-Test (iPhone, Android) von Website und App.
 5. Entscheide: Saison-Titel als Geschichte oder «Fakten zuerst» (TXT-08); mehr als drei Muster pro
    Spiel; Launch zur Rückrunde im Januar; die 🔴-Punkte in `docs/OPEN_QUESTIONS.md` (Firma, Recht,

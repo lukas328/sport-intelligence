@@ -170,7 +170,7 @@ export function NumbersView({
               {!all && field.length > shown.length && (
                 <p className="mt-2 text-[15px] text-ink-2">
                   {t("more", { n: field.length - shown.length })}{" "}
-                  <button type="button" onClick={() => setAll(true)} className="cursor-pointer font-bold text-ink underline decoration-[1.5px] underline-offset-4">
+                  <button type="button" onClick={() => setAll(true)} className="hit cursor-pointer font-bold text-ink underline decoration-[1.5px] underline-offset-4">
                     {t("showAll")}
                   </button>
                 </p>

@@ -1,0 +1,214 @@
+<title>Ball-Testset 2</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* One frame per screen, no detector hints: find the ball, click it, or say why there is none. */
+:root {
+  --bg: #eef1f4; --panel: #ffffff; --ink: #17202b; --muted: #5a6675; --line: #d3d9e1;
+  --ball: #e8b100; --ball-ink: #1b1600; --good: #1f8a4c; --warn: #b25d00; --court: #2b6cb0;
+  --display: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+  --body: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f141a; --panel: #18202a; --ink: #e6ebf1; --muted: #9aa6b4; --line: #2a3542;
+    --ball: #f2c230; --good: #4cc27f; --warn: #f0a24a; --court: #6aa6e8; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f141a; --panel: #18202a; --ink: #e6ebf1; --muted: #9aa6b4; --line: #2a3542;
+  --ball: #f2c230; --good: #4cc27f; --warn: #f0a24a; --court: #6aa6e8; color-scheme: dark;
+}
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; margin: 0;
+  padding-block: 14px 24px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 18px; margin-bottom: 12px; max-width: 1320px; }
+h1 { font-family: var(--display); font-weight: 700; font-size: 26px; margin: 0; }
+.progress { font-family: var(--mono); font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.bar { flex: 1 1 160px; height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; align-self: center; min-width: 120px; }
+.bar > i { display: block; height: 100%; width: 0; background: var(--ball); transition: width .3s; }
+.note { font-size: 13px; color: var(--warn); }
+.row { display: grid; grid-template-columns: minmax(0, 1fr) 290px; gap: 12px; align-items: start; max-width: 1320px; }
+@media (max-width: 860px) { .row { grid-template-columns: minmax(0, 1fr); } }
+.scene { position: relative; min-width: 0; }
+.scene canvas.main { display: block; width: 100%; max-width: 100%; height: auto; border-radius: 6px; cursor: crosshair; background: #000; }
+.scene canvas.loupe { position: absolute; width: 180px; height: 180px; border-radius: 50%; border: 2px solid var(--ball);
+  box-shadow: 0 2px 10px rgba(0,0,0,.5); pointer-events: none; display: none; }
+.tag { position: absolute; left: 8px; top: 8px; font-family: var(--mono); font-size: 12px; background: rgba(0,0,0,.6); color: #fff; padding: 2px 6px; border-radius: 3px; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px; display: grid; gap: 10px; }
+.btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+button { font: 600 15px var(--body); padding: 10px 8px; min-height: 42px; border-radius: 6px; border: 1px solid var(--line);
+  background: var(--panel); color: var(--ink); cursor: pointer; }
+button:hover { border-color: var(--muted); }
+button:focus-visible { outline: 3px solid var(--court); outline-offset: 2px; }
+button.wide { grid-column: 1 / -1; }
+kbd { font-family: var(--mono); font-size: 12px; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; }
+.state { font-size: 14px; }
+.chip { font-family: var(--mono); font-size: 12px; padding: 1px 7px; border-radius: 10px; border: 1px solid var(--line); }
+.chip.ball { background: var(--ball); color: var(--ball-ink); border-color: transparent; }
+.help { font-size: 13px; color: var(--muted); line-height: 1.45; margin: 0; padding-left: 18px; }
+.help b { color: var(--ink); }
+.toast { min-height: 20px; font-size: 13px; color: var(--good); }
+@media (prefers-reduced-motion: reduce) { .bar > i { transition: none; } }
+</style>
+
+<header>
+  <h1>Ball-Testset 2</h1>
+  <span class="progress" id="progress">lädt …</span>
+  <div class="bar" aria-hidden="true"><i id="barfill"></i></div>
+</header>
+<p class="note" id="note" hidden></p>
+<div class="row">
+  <div class="scene" id="scene">
+    <canvas class="main" id="cv" width="1280" height="720" role="img" aria-label="Spielszene, den Spielball anklicken"></canvas>
+    <canvas class="loupe" id="loupe" width="180" height="180" aria-hidden="true"></canvas>
+    <span class="tag" id="tag">jetzt</span>
+  </div>
+  <div class="panel">
+    <div class="progress" id="meta"></div>
+    <div class="state" id="state"></div>
+    <div class="btns">
+      <button id="part">Ball teils verdeckt (<kbd>P</kbd>)</button>
+      <button id="hidden">Ball ganz verdeckt (<kbd>V</kbd>)</button>
+      <button id="out">Kein Ball im Bild (<kbd>N</kbd>)</button>
+      <button id="unsure">Unsicher (<kbd>U</kbd>)</button>
+      <button id="prev">← Zurück</button>
+      <button id="next">Weiter → (<kbd>Enter</kbd>)</button>
+    </div>
+    <div class="toast" id="toast" role="status"></div>
+    <ul class="help">
+      <li>Finde den <b>Spielball</b> und klick genau auf seine Mitte (die Lupe hilft). Auch in der Hand oder am Boden.</li>
+      <li>Halte <kbd>A</kbd> oder <kbd>D</kbd> gedrückt für das Bild kurz davor oder danach: so sieht man, was sich bewegt.</li>
+      <li>Ball sichtbar, aber halb hinter Spieler oder Arm: zuerst klicken, dann <kbd>P</kbd>. Ganz verdeckt (man weiss, wo er ist, sieht ihn aber nicht): <kbd>V</kbd>.</li>
+      <li>Ball nicht im Bild (ausserhalb, Wiederholung ohne Ball, Pause): <kbd>N</kbd>. Ersatzbälle am Rand zählen nicht.</li>
+      <li>Es gibt bewusst keine Vorschläge des Programms. Grob 5 Sekunden pro Bild reichen.</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const NAMES = { ball: "Ball", part: "Ball teils verdeckt", hidden: "ganz verdeckt", out: "kein Ball im Bild", unsure: "unsicher" };
+const state = { items: [], idx: 0, labels: {}, db: null, view: "f" };
+const cache = {};
+function img(src) { if (!cache[src]) { const i = new Image(); i.src = src; cache[src] = i; } return cache[src]; }
+const cur = () => state.items[state.idx];
+const num = (it) => it.id.slice(1);
+function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* storage blocked */ } }
+function toast(t) { $("toast").textContent = t; clearTimeout(toast.h); toast.h = setTimeout(() => ($("toast").textContent = ""), 2000); }
+
+function draw() {
+  const it = cur(); if (!it) return;
+    // s/NNN.jpg: the frame on top (w x h), below it the frames just before and after side by side
+  const im = img(`s/${num(it)}.jpg`);
+  const paint = () => {
+    if (cur() !== it) return;
+    const c = $("cv"); c.width = it.w; c.height = it.h;
+    const g = c.getContext("2d");
+    if (state.view === "f") g.drawImage(im, 0, 0, it.w, it.h, 0, 0, it.w, it.h);
+    else { const hw = it.w / 2, hh = im.naturalHeight - it.h; g.drawImage(im, state.view === "p" ? 0 : hw, it.h, hw, hh, 0, 0, it.w, it.h); }
+    const lab = state.labels[it.id];
+    if (lab && lab.x != null && state.view === "f") {
+      g.strokeStyle = "#f2c230"; g.lineWidth = 3; g.beginPath(); g.arc(lab.x, lab.y, 14, 0, 2 * Math.PI);
+      g.moveTo(lab.x - 26, lab.y); g.lineTo(lab.x - 8, lab.y); g.moveTo(lab.x + 8, lab.y); g.lineTo(lab.x + 26, lab.y); g.stroke();
+    }
+  };
+  if (im.complete && im.naturalWidth) paint(); else im.onload = paint;
+  $("tag").textContent = { f: "jetzt", p: "kurz davor", n: "kurz danach" }[state.view];
+}
+function render() {
+  const it = cur(); if (!it) return;
+  draw();
+  const lab = state.labels[it.id];
+  $("meta").textContent = `${state.idx + 1} / ${state.items.length}`;
+  const st = $("state"); st.textContent = "";
+  const chip = document.createElement("span"); chip.className = "chip" + (lab && (lab.state === "ball" || lab.state === "part") ? " ball" : "");
+  chip.textContent = lab ? NAMES[lab.state] : "offen"; st.appendChild(chip);
+  const done = state.items.filter((x) => state.labels[x.id]).length;
+  $("progress").textContent = `${done} von ${state.items.length} Bildern erledigt`;
+  $("barfill").style.width = (done / Math.max(1, state.items.length) * 100) + "%";
+  for (const d of [1, 2]) { const n = state.items[state.idx + d]; if (n) img(`s/${num(n)}.jpg`); }
+  lsSet("bt_idx", String(state.idx));
+}
+function go(i) { state.idx = Math.max(0, Math.min(state.items.length - 1, i)); state.view = "f"; render(); }
+function nextOpen() {
+  for (let d = 1; d <= state.items.length; d++) {
+    const j = (state.idx + d) % state.items.length;
+    if (!state.labels[state.items[j].id]) { go(j); return; }
+  }
+  toast("Alle Bilder erledigt, danke!");
+}
+async function save(body, advance) {
+  const it = cur();
+  state.labels[it.id] = body; render();
+  if (advance) setTimeout(nextOpen, 250);
+  if (!state.db) { toast("Nicht gespeichert: Speicher nicht erreichbar."); return; }
+  try { await state.db.collection("labels").doc(it.id).set(body); }
+  catch (e) { toast("Speichern fehlgeschlagen: " + (e && e.message ? e.message : "unbekannter Fehler")); }
+}
+function mark(st) {
+  const it = cur(), lab = state.labels[it.id];
+  if (st === "part") {
+    if (!lab || lab.x == null) { toast("Zuerst den Ball anklicken, dann P."); return; }
+    save({ ...lab, state: "part", at: Date.now() }, true); return;
+  }
+  save({ id: it.id, game: it.game, state: st, x: null, y: null, at: Date.now() }, true);
+}
+function pos(ev) {
+  const c = $("cv"), r = c.getBoundingClientRect();
+  return { x: (ev.clientX - r.left) * c.width / r.width, y: (ev.clientY - r.top) * c.height / r.height, r };
+}
+$("cv").addEventListener("click", (ev) => {
+  if (state.view !== "f") { state.view = "f"; draw(); return; }
+  const it = cur(), p = pos(ev);
+  save({ id: it.id, game: it.game, state: "ball", x: Math.round(p.x * 10) / 10, y: Math.round(p.y * 10) / 10, at: Date.now() }, false);
+  toast("Ball gesetzt. Enter: weiter, P: teils verdeckt");
+});
+$("cv").addEventListener("pointermove", (ev) => {
+  const L = $("loupe"); if (ev.pointerType === "touch") { L.style.display = "none"; return; }
+  const c = $("cv"), p = pos(ev), Z = 3, n = L.width / Z, g = L.getContext("2d");
+  g.imageSmoothingEnabled = false; g.fillStyle = "#000"; g.fillRect(0, 0, L.width, L.height);
+  g.drawImage(c, p.x - n / 2, p.y - n / 2, n, n, 0, 0, L.width, L.height);
+  g.strokeStyle = "rgba(255,255,255,.8)"; g.lineWidth = 1; g.beginPath();
+  g.moveTo(L.width / 2 - 10, L.height / 2); g.lineTo(L.width / 2 + 10, L.height / 2);
+  g.moveTo(L.width / 2, L.height / 2 - 10); g.lineTo(L.width / 2, L.height / 2 + 10); g.stroke();
+  const lx = ev.clientX - p.r.left, ly = ev.clientY - p.r.top;
+  L.style.left = Math.min(p.r.width - L.offsetWidth, Math.max(0, lx + 24)) + "px";
+  L.style.top = Math.max(0, ly - L.offsetHeight - 24) + "px"; L.style.display = "block";
+});
+$("cv").addEventListener("pointerleave", () => { $("loupe").style.display = "none"; });
+$("part").onclick = () => mark("part"); $("hidden").onclick = () => mark("hidden"); $("out").onclick = () => mark("out");
+$("unsure").onclick = () => mark("unsure"); $("prev").onclick = () => go(state.idx - 1); $("next").onclick = nextOpen;
+document.addEventListener("keydown", (ev) => {
+  if (ev.ctrlKey || ev.metaKey || ev.altKey) return;
+  const k = ev.key.toLowerCase();
+  if (k === "a" && state.view !== "p") { state.view = "p"; draw(); }
+  else if (k === "d" && state.view !== "n") { state.view = "n"; draw(); }
+  else if (k === "p") mark("part"); else if (k === "v") mark("hidden"); else if (k === "n") mark("out"); else if (k === "u") mark("unsure");
+  else if (k === "enter") { ev.preventDefault(); nextOpen(); }
+  else if (k === "arrowleft") go(state.idx - 1); else if (k === "arrowright") go(state.idx + 1);
+});
+document.addEventListener("keyup", (ev) => { const k = ev.key.toLowerCase(); if ((k === "a" || k === "d") && state.view !== "f") { state.view = "f"; draw(); } });
+
+async function start() {
+  try { state.items = await (await fetch("items.json")).json(); }
+  catch (e) { $("progress").textContent = "Liste konnte nicht geladen werden."; return; }
+  const si = parseInt(lsGet("bt_idx"), 10); if (si >= 0 && si < state.items.length) state.idx = si;
+  render();
+  const db = window.claude && window.claude.use ? await window.claude.use("db") : null;
+  if (!db) { const n = $("note"); n.hidden = false; n.textContent = "Speicher nicht verfügbar: bitte bei claude.ai angemeldet öffnen."; return; }
+  state.db = db;
+  const timer = setTimeout(() => { const n = $("note"); n.hidden = false; n.textContent = "Gespeicherte Labels noch nicht erreichbar."; }, 10000);
+  let first = true;
+  db.collection("labels").onSnapshot((snap) => {
+    if (!snap.metadata.fromCache) { clearTimeout(timer); $("note").hidden = true; }
+    state.labels = {};
+    for (const d of snap.docs) state.labels[d.id] = d.data();
+    if (first) { first = false; if (state.labels[cur().id]) { const j = state.items.findIndex((x) => !state.labels[x.id]); if (j >= 0) { go(j); return; } } }
+    render();
+  }, (e) => { clearTimeout(timer); const n = $("note"); n.hidden = false; n.textContent = "Labels konnten nicht geladen werden (" + e.code + ")."; });
+}
+start();
+</script>

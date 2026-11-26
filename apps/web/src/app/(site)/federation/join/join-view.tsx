@@ -36,7 +36,7 @@ export function JoinView({ token, orgs }: { token: string; orgs: { id: string; n
           <>
             <label className="block text-sm">
               <span className="font-medium">{t("club")}</span>
-              <select className="mt-1 block min-h-10 w-full bg-raised ring-1 ring-inset ring-border px-2" value={org} onChange={(e) => setOrg(e.target.value)}>
+              <select className="mt-1 block min-h-11 w-full bg-raised px-2 text-base ring-1 ring-inset ring-border" value={org} onChange={(e) => setOrg(e.target.value)}>
                 {orgs.map((o) => (
                   <option key={o.id} value={o.id}>{o.name}</option>
                 ))}

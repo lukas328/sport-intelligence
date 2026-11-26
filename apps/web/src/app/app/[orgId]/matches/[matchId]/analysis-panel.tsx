@@ -2,7 +2,8 @@
 
 import type { Schemas } from "@handball/api-client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { CourtCalibration, CourtPreview } from "@/components/analysis/court-calibration";
 import { Button } from "@/components/ui/button";
@@ -34,6 +35,7 @@ export function AnalysisPanel({
   onConfirmed?: () => void;
 }) {
   const t = useTranslations("analysis");
+  const format = useFormatter();
   // the court dialog; «Neu markieren» beside the court preview goes straight to the lines
   const [marking, setMarking] = useState<false | "suggest" | "mark">(false);
   const qc = useQueryClient();
@@ -68,6 +70,19 @@ export function AnalysisPanel({
   const hallCheck = canMark && fromHall && unconfirmed && courtState !== "undeterminable";
   const hallConfirmed = fromHall && analysis.calibration?.source === "user_correction";
   const hallSure = !hallConfirmed && courtFromHallSure(analysis);
+  // a confirmed court carried over from an earlier match of the hall: say where it came from,
+  // with the realign button beside it (while the court waits for its check, that check says it)
+  const origin = !hallCheck && analysis.calibration_origin?.source === "hall" ? analysis.calibration_origin : null;
+  const markButton = canMark && !hallCheck && (
+    <Button
+      variant={analysis.needs_calibration ? "primary" : "secondary"}
+      size={analysis.needs_calibration || unconfirmed ? "md" : "sm"}
+      onClick={() => setMarking("suggest")}
+      data-testid="mark-court"
+    >
+      {t(courtState === "undeterminable" ? "courtMarkAnyway" : analysis.needs_calibration ? "markCourt" : unconfirmed ? "checkCourtButton" : "realign")}
+    </Button>
+  );
   return (
     // while the court waits for its check the answer bar is fixed on phones: room for it at the end
     <section className={cn("space-y-3", hallCheck && "max-lg:pb-24")} data-testid="analysis-panel">
@@ -92,6 +107,25 @@ export function AnalysisPanel({
         <p className="text-[0.9375rem]" data-testid="court-state">
           {t(courtState === "undeterminable" ? "courtUndeterminable" : "courtUpdating")}
         </p>
+      ) : analysis.status === "ready" && !analysis.needs_calibration && origin ? (
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2" data-testid="court-origin">
+          <p className="min-w-0 flex-[1_1_16rem] text-[0.9375rem]">
+            {t.rich(origin.hall ? (origin.reference_kickoff_at ? "courtOriginHall" : "courtOriginHallNoDate") : origin.reference_kickoff_at ? "courtOriginNoName" : "courtOriginNoNameNoDate", {
+              hall: origin.hall ?? "",
+              date: origin.reference_kickoff_at ? format.dateTime(new Date(origin.reference_kickoff_at), { day: "numeric", month: "short" }) : "",
+              link: (chunks) =>
+                origin.reference_match_id ? (
+                  <Link href={`/app/${orgId}/matches/${origin.reference_match_id}`} className="underline underline-offset-4">
+                    {chunks}
+                  </Link>
+                ) : (
+                  chunks
+                ),
+            })}
+            {canMark && ` ${t("courtOriginRealign")}`}
+          </p>
+          {markButton}
+        </div>
       ) : analysis.status === "ready" && !analysis.needs_calibration ? (
         <p className="text-[0.9375rem]">
           {fromHall
@@ -122,15 +156,8 @@ export function AnalysisPanel({
             {t("courtRemark")}
           </Button>
         </div>
-      ) : canMark && (
-        <Button
-          variant={analysis.needs_calibration ? "primary" : "secondary"}
-          size={analysis.needs_calibration || unconfirmed ? "md" : "sm"}
-          onClick={() => setMarking("suggest")}
-          data-testid="mark-court"
-        >
-          {t(courtState === "undeterminable" ? "courtMarkAnyway" : analysis.needs_calibration ? "markCourt" : unconfirmed ? "checkCourtButton" : "realign")}
-        </Button>
+      ) : (
+        !origin && markButton
       )}
       {confirmFailed && <Alert className="py-2">{t("courtConfirmError")}</Alert>}
       {marking && <CourtCalibration orgId={orgId} videoId={videoId} analysis={analysis} start={marking} onClose={() => setMarking(false)} />}

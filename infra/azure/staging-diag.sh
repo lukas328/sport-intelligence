@@ -63,7 +63,8 @@ q "SELECT u || ' | ' || a || ' | ' || s || ' | ' || count(*) FROM (SELECT coales
    coalesce(nullif(regexp_replace(application_name, ' [0-9]+$', ''), ''), '-') AS a, coalesce(state, '-') AS s
    FROM pg_stat_activity WHERE backend_type = 'client backend') c GROUP BY u, a, s ORDER BY 1" || true
 if [ -n "${DIAG_ASSET:-}" ]; then
-  where="id = '${DIAG_ASSET//[^0-9a-f-]/}'"
+  # a full id or a unique prefix (docs often name assets by their first 8 characters)
+  where="id::text LIKE '${DIAG_ASSET//[^0-9a-f-]/}%' ORDER BY updated_at DESC LIMIT 1"
 else
   where="analysis IS NOT NULL ORDER BY updated_at DESC LIMIT 1"
 fi
@@ -106,8 +107,15 @@ echo "== the 8 newest processing jobs (any asset)"
 q "SELECT coalesce(jsonb_agg(to_jsonb(r)), '[]'::jsonb) FROM (SELECT id, video_asset_id, kind, status,
    progress, error, created_at, updated_at FROM processing_jobs ORDER BY created_at DESC LIMIT 8) r" \
   | tail -1 | jq . | tee "$OUT/recent_jobs.json"
-asset=$(q "SELECT id FROM video_assets WHERE $where" | tail -1)
-[ -n "$asset" ] || { echo "no asset found"; exit 1; }
+# psql also prints «SET» for the bypass line: without a matching row that was taken as the id
+asset=$(q "SELECT id FROM video_assets WHERE $where" | grep -v '^SET$' | tail -1 || true)
+if [ -z "$asset" ]; then
+  echo "no asset found for: $where; all video assets (newest first):"
+  q "SELECT coalesce(jsonb_agg(to_jsonb(r)), '[]'::jsonb) FROM (SELECT id, match_id, filename, duration_s,
+     status, (analysis IS NOT NULL) AS has_analysis, created_at FROM video_assets ORDER BY created_at DESC) r" \
+    | tail -1 | jq . | tee "$OUT/all_assets.json"
+  exit 1
+fi
 echo "== asset $asset"
 q "SELECT row_to_json(r) FROM (SELECT id, organization_id, match_id, role, status, filename,
    size_bytes, storage_key, duration_s, fps, width, height, created_at, updated_at, error

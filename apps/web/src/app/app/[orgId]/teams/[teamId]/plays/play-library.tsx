@@ -42,7 +42,7 @@ export function PlayLibrary({ orgId, teamId, plays, staff }: { orgId: string; te
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder={t("searchPlaceholder")}
-            className="min-h-10 w-64 bg-raised ring-1 ring-inset ring-border px-3"
+            className="min-h-11 w-64 max-w-full bg-raised px-3 text-base ring-1 ring-inset ring-border"
           />
         </label>
         <div role="group" aria-label={t("category")} className="flex flex-wrap gap-x-4">
@@ -51,7 +51,7 @@ export function PlayLibrary({ orgId, teamId, plays, staff }: { orgId: string; te
               key={c || "all"}
               aria-pressed={cat === c}
               onClick={() => setCat(c)}
-              className={cn("min-h-9 border-b-2 px-1 text-sm font-semibold", cat === c ? "border-foreground text-foreground" : "border-transparent text-muted hover:text-foreground")}
+              className={cn("min-h-11 min-w-11 border-b-2 px-1 text-sm font-semibold", cat === c ? "border-foreground text-foreground" : "border-transparent text-muted hover:text-foreground")}
             >
               {c ? t(`cat_${c}`) : t("all")}
             </button>

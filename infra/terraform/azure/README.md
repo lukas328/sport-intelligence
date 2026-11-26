@@ -251,10 +251,20 @@ Switzerland North has no serverless GPU, so the staging environment moves to Swe
 - `hb-secret-key` and `hb-encryption-key` are written once and never overwritten by Terraform: the
   bootstrap copies the first environment's values, so sessions and encrypted columns stay valid.
 
+Since 25.11.2026 the eu environment is the only one: the first (`rg-hb-stg`, Switzerland North,
+state `staging.tfstate`) was deleted with `mode = teardown` (`infra/azure/teardown-ch.sh`), and
+`stack = eu` is the workflow's default. `stack = ch` only allows `status` and `teardown`.
+
 GitHub Actions: Deploy with `stack = eu`; `mode = bootstrap` the first time (derives
 `staging-eu.tfvars` from `staging.tfvars`, own state `staging-eu.tfstate`, builds vault and
 registry, copies the secrets, then deploys like `deploy`). The T4 quota («Managed Environment
 Consumption T4 GPUs») shows on the environment's Quota page once the environment exists.
+
+## Alerts
+
+`monitoring = true` (default) creates the alerts listed in `infra/monitoring/alerts.md` (section
+«Azure»): health probe of the app domain with the certificate check (only where the domain is bound),
+API errors, failed jobs, out-of-memory kills and database storage, by e-mail to `alert_emails`.
 
 ## Known limits
 

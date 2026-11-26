@@ -100,3 +100,28 @@ def test_merge_candidates() -> None:
     assert (900.0, 50.0, 0.2) in m
     assert (500.0, 300.0, 0.1) in m
     assert len(bt2.merge_candidates([a * 5, b * 5], top=5)) <= 5
+
+
+def test_a_spot_still_on_the_canvas_loses_its_reward() -> None:
+    # the camera pans 4 px per frame: a spare ball at the bench moves through the picture but
+    # stands still on the canvas, with a strong score; the game ball moves on the canvas, weaker
+    n = 150
+    peaks, world = [], []
+    for k in range(n):
+        bx, by = 200 + 3 * k, 300 + 40 * math.sin(k / 9)  # on the canvas
+        peaks.append([(900.0 - 4 * k, 600.0, 0.9), (bx - 4 * k, by, 0.35)])
+        world.append([(900.0, 600.0), (bx, by)])
+
+    def on_spare(out: list[tuple[float, float] | None]) -> int:
+        return sum(
+            1
+            for k, q in enumerate(out)
+            if q is not None and math.hypot(q[0] - (900 - 4 * k), q[1] - 600) < 12
+        )
+
+    plain, _ = bt2.track(peaks, 25.0)
+    assert on_spare(plain) > 100  # without the canvas the spare ball wins
+    out, _ = bt2.track(peaks, 25.0, world=world)
+    assert on_spare(out) == 0
+    assert sum(1 for q in out if q is not None) > 100  # the game ball is followed instead
+    assert bt2.track_windows(peaks, 25.0, world=world) == bt2.track(peaks, 25.0, world=world)

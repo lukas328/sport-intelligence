@@ -70,7 +70,7 @@ export function CameraSwitch({
               step={10}
               defaultValue={active.time_offset_ms}
               key={active.id}
-              className="min-h-9 w-28 bg-raised ring-1 ring-inset ring-border px-2 text-sm"
+              className="min-h-11 w-28 bg-raised px-2 text-base ring-1 ring-inset ring-border"
             />
           </label>
           <Button type="submit" variant="secondary" className="min-h-9 px-2 text-xs">

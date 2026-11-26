@@ -632,7 +632,7 @@ export function ReportView({ orgId, match, stats, onPlay, names }: ViewProps) {
       )}
       {opp.length > 0 && (
         <details>
-          <summary className="cursor-pointer border-t border-foreground/15 pt-3 text-sm font-semibold">{t("opponentPlayers")}</summary>
+          <summary className="cursor-pointer border-t border-foreground/15 py-3 text-sm font-semibold">{t("opponentPlayers")}</summary>
           <div className="mt-2">{table(opp, t("opponentPlayers"))}</div>
         </details>
       )}
@@ -666,14 +666,14 @@ export function ShotsView({ orgId, match, teamName, stats, onPlay, names }: View
       <div className="flex flex-wrap gap-3">
         <div className="flex gap-4" role="group" aria-label={t("filterTeam")}>
           {(["own", "opponent"] as const).map((s) => (
-            <button key={s} aria-pressed={side === s} onClick={() => setSide(s)} className={cn("min-h-9 border-b-2 px-1 text-sm font-semibold", side === s ? "border-foreground text-foreground" : "border-transparent text-muted hover:text-foreground")}>
+            <button key={s} aria-pressed={side === s} onClick={() => setSide(s)} className={cn("min-h-11 min-w-11 border-b-2 px-1 text-sm font-semibold", side === s ? "border-foreground text-foreground" : "border-transparent text-muted hover:text-foreground")}>
               {s === "own" ? teamName : oppName(match)}
             </button>
           ))}
         </div>
         <label className="flex items-center gap-2 text-sm">
           {t("filterOutcome")}
-          <select value={outcome} onChange={(e) => setOutcome(e.target.value)} className="bg-raised ring-1 ring-inset ring-border px-2 py-1">
+          <select value={outcome} onChange={(e) => setOutcome(e.target.value)} className="min-h-11 bg-raised px-2 py-1 text-base ring-1 ring-inset ring-border">
             <option value="">{t("all")}</option>
             {["goal", "save", "miss", "post", "blocked"].map((o) => (
               <option key={o} value={o}>

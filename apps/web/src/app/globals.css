@@ -198,6 +198,21 @@
   }
 }
 
+/* A text link or a small text button stays as it looks, but a finger finds it: its tap area is at
+   least 44 by 44 px, centred on it (an invisible ::before; the layout does not move). */
+@utility hit {
+  position: relative;
+  &::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: max(100%, 2.75rem);
+    height: max(100%, 2.75rem);
+    transform: translate(-50%, -50%);
+  }
+}
+
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;
